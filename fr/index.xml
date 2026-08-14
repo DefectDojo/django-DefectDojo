@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Documentation DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/fr/</link><description>Recent content in Documentation DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>fr</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 14 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/fr/index.xml" rel="self" type="application/rss+xml"/><item><title>À propos des connecteurs</title><link>https://docs.defectdojo.com/fr/connectors/about/</link><pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/connectors/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Remarque : les connecteurs sont une fonctionnalité réservée à DefectDojo Pro.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Connecteurs&lt;/strong&gt; est l&amp;rsquo;espace unique de l&amp;rsquo;interface DefectDojo Pro pour tous les outils avec lesquels DefectDojo communique, dans les deux sens. Il regroupe deux fonctionnalités auparavant configurées séparément :&lt;/p&gt;</description></item><item><title>À propos de DefectDojo</title><link>https://docs.defectdojo.com/fr/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/fr/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc. et les contributeurs open source maintiennent cette documentation pour prendre en charge à la fois l&amp;rsquo;édition Community et l&amp;rsquo;édition Pro de DefectDojo.&lt;/span&gt;&lt;/p&gt;</description></item><item><title>Comparaison des fonctionnalités</title><link>https://docs.defectdojo.com/fr/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/fr/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt; est une plateforme de gestion des vulnérabilités puissante et gratuite, offrant l&amp;rsquo;import de base, la déduplication, des tableaux de bord basiques, un accès API et des fonctionnalités de rapport essentielles — idéale pour les petites équipes ou celles qui souhaitent auto-héberger et étendre l&amp;rsquo;outil à l&amp;rsquo;aide des ressources de la communauté.&lt;/p&gt;</description></item><item><title>🌐 Universal Parser</title><link>https://docs.defectdojo.com/fr/import_data/pro/specialized_import/universal_parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/import_data/pro/specialized_import/universal_parser/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Remarque : Universal Parser n&amp;rsquo;est disponible que dans DefectDojo Pro.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Universal Parser est activé pour chaque instance DefectDojo Pro ; il n&amp;rsquo;y a rien à activer. Consultez notre &lt;a href="https://community.defectdojo.com/universalparser"&gt;présentation d&amp;rsquo;annonce&lt;/a&gt; pour plus d&amp;rsquo;informations.&lt;/p&gt;</description></item><item><title>À propos de la déduplication</title><link>https://docs.defectdojo.com/fr/triage_findings/finding_deduplication/about_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/triage_findings/finding_deduplication/about_deduplication/</guid><description>&lt;p&gt;DefectDojo est conçu pour ingérer des rapports en masse provenant d&amp;rsquo;outils, créant une ou plusieurs Constatations en fonction du contenu du rapport. Lorsque vous utilisez DefectDojo, vous serez très probablement amené à ingérer régulièrement des rapports provenant du même outil, ce qui rend les Constatations en double hautement probables.&lt;/p&gt;</description></item><item><title>À propos de Rules Engine 2.0</title><link>https://docs.defectdojo.com/fr/automation/rules_engine_2/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/automation/rules_engine_2/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Remarque : Rules Engine 2.0 est une fonctionnalité réservée à DefectDojo Pro.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Rules Engine 2.0 est un générateur d&amp;rsquo;automatisation visuel. Au lieu d&amp;rsquo;un filtre associé à une liste plate d&amp;rsquo;actions, une règle est un &lt;strong&gt;graphe&lt;/strong&gt; : un nœud déclencheur qui décide quand la règle se réveille, et un nombre quelconque de nœuds de logique, de Constatations et de sortie reliés entre eux pour indiquer ce qui se passe ensuite.&lt;/p&gt;</description></item><item><title>À propos de Sensei</title><link>https://docs.defectdojo.com/fr/sensei/about_sensei/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/sensei/about_sensei/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Remarque : Sensei est une fonctionnalité réservée à DefectDojo Pro et est actuellement en BÊTA.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sensei&lt;/strong&gt; est la fonctionnalité de &lt;strong&gt;scan-and-fix&lt;/strong&gt; de DefectDojo basée sur l&amp;rsquo;IA pour les dépôts de code source. Connectez un dépôt (via une &lt;strong&gt;GitHub App&lt;/strong&gt;, &lt;strong&gt;GitLab&lt;/strong&gt;, &lt;strong&gt;Bitbucket&lt;/strong&gt; ou &lt;strong&gt;Azure DevOps&lt;/strong&gt;) et Sensei l&amp;rsquo;analyse, importe les résultats sous forme de constatations DefectDojo, puis utilise un grand modèle de langage pour &lt;strong&gt;corriger ces constatations en ouvrant des pull/merge requests&lt;/strong&gt;, le tout sans quitter DefectDojo.&lt;/p&gt;</description></item><item><title>Architecture du système</title><link>https://docs.defectdojo.com/fr/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/open_source/architecture/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dd-architecture.png"
+ width="721"
+ height="511"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="nginx"&gt;NGINX&lt;/h2&gt;
+&lt;p&gt;Le serveur web &lt;a href="https://nginx.org/en/"&gt;NGINX&lt;/a&gt; délivre tout le contenu statique, comme les
+images, les fichiers JavaScript ou les fichiers CSS.&lt;/p&gt;
+&lt;h2 id="uwsgi"&gt;uWSGI&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://uwsgi-docs.readthedocs.io/en/latest/"&gt;uWSGI&lt;/a&gt; est le serveur d&amp;rsquo;application
+qui exécute la plateforme DefectDojo, écrite en Python/Django, afin de servir tout le
+contenu dynamique.&lt;/p&gt;</description></item><item><title>Attribuer la priorité, le risque et les SLA</title><link>https://docs.defectdojo.com/fr/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_finding_priority.png"
+ width="1120"
+ height="632"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;Une gestion efficace des vulnérabilités basée sur le risque nécessite une approche qui prend en compte à la fois le contexte métier et l&amp;rsquo;exploitabilité technique. Grâce à la fonctionnalité Priorité et Risque de DefectDojo Pro, les utilisateurs peuvent trier automatiquement les Constatations selon un contexte pertinent, garantissant que les vulnérabilités à fort impact puissent être traitées en priorité.&lt;/p&gt;</description></item><item><title>Automatisation du Moteur de règles</title><link>https://docs.defectdojo.com/fr/automation/rules_engine/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/automation/rules_engine/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Remarque : le Moteur de règles est une fonctionnalité réservée à DefectDojo Pro.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Le Moteur de règles de DefectDojo vous permet de créer des workflows personnalisés et des actions en masse pour traiter les Constatations et d&amp;rsquo;autres objets. Le Moteur de règles vous permet de créer des actions automatisées qui se déclenchent lorsqu&amp;rsquo;un objet correspond à une Règle.&lt;/p&gt;</description></item></channel></rss>

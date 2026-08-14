@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>自動化 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/automation/api/</link><description>Recent content in 自動化 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/automation/api/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojo API v2</title><link>https://docs.defectdojo.com/ja/automation/api/api-v2-docs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/automation/api/api-v2-docs/</guid><description>&lt;p&gt;DefectDojoのAPIは&lt;a href="http://www.django-rest-framework.org/"&gt;Django Rest
+Framework&lt;/a&gt;を使用して作成されています。各エンドポイントのドキュメントは、各DefectDojoインストール内の
+&lt;a href="https://demo.defectdojo.org/api/v2/oa3/swagger-ui/"&gt;&lt;code&gt;/api/v2/oa3/swagger-ui&lt;/code&gt;&lt;/a&gt;で利用でき、ヘッダーのユーザードロップダウンメニューにあるAPI v2
+Docsリンクを選択することでアクセスできます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/api_v2_1.png"
+ width="2250"
+ height="744"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;このドキュメントは&lt;a href="https://drf-spectacular.readthedocs.io/"&gt;drf-spectacular&lt;/a&gt;を使用して&lt;a href="https://demo.defectdojo.org/api/v2/oa3/swagger-ui/"&gt;&lt;code&gt;/api/v2/oa3/swagger-ui/&lt;/code&gt;&lt;/a&gt;で生成されており、
+インタラクティブに操作できます。API v2 Docsの上部には、OpenAPI v3仕様を生成するリンクがあります。&lt;/p&gt;
+&lt;p&gt;ドキュメントを操作するには、有効なAuthorizationヘッダーの値
+が必要です。&lt;code&gt;/api/key-v2&lt;/code&gt;ビューにアクセスしてAPIキー(&lt;code&gt;Token &amp;lt;api_key&amp;gt;&lt;/code&gt;)を生成し、表示されたヘッダーの値をコピーしてください。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/api_v2_2.png"
+ width="2058"
+ height="800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;各セクションでは、APIを呼び出し、リクエスト
+URL、レスポンスボディ、レスポンスコード、レスポンスヘッダーを確認できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/api_v2_3.png"
+ width="2128"
+ height="1738"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-2"
+&gt;&lt;/p&gt;
+&lt;p&gt;Defect DojoのWeb UIにログインしている場合、認証トークンを指定する必要はありません。&lt;/p&gt;
+&lt;h2 id="authentication"&gt;Authentication&lt;/h2&gt;
+&lt;p&gt;APIはAPIキーによるヘッダー認証を使用します。ヘッダーの形式は次のとおりです: :&lt;/p&gt;</description></item><item><title>言語とコード行数</title><link>https://docs.defectdojo.com/ja/automation/api/languages/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/automation/api/languages/</guid><description>&lt;p&gt;DefectDojoでは、&lt;a href="https://github.com/AlDanial/cloc"&gt;cloc&lt;/a&gt;(Count Lines of Code)ツールのレポートをAPI経由でインポートすることで、製品のプログラミング言語とコード行数の内訳を表示できます。&lt;/p&gt;
+&lt;h2 id="generating-the-cloc-report"&gt;Generating the cloc Report&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;--json&lt;/code&gt;フラグを付けて&lt;code&gt;cloc&lt;/code&gt;をコードベースに対して実行し、正しい形式のJSONファイルを生成します:&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame is-terminal not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cloc --json /path/to/your/project &amp;gt; cloc-report.json&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;h2 id="importing-via-the-api"&gt;Importing via the API&lt;/h2&gt;
+&lt;p&gt;JSONレポートをAPI経由でDefectDojoにアップロードします。インポート時には、製品の既存の言語データはすべて新しいファイルの内容に置き換えられます。&lt;/p&gt;</description></item><item><title>レート制限</title><link>https://docs.defectdojo.com/ja/automation/api/rate_limiting/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/automation/api/rate_limiting/</guid><description>&lt;p&gt;DefectDojoには、ブルートフォース攻撃から保護するためのログインページのレート制限機能が含まれており、&lt;a href="https://django-ratelimit.readthedocs.io/en/stable/index.html"&gt;Django Ratelimit&lt;/a&gt;によって実現されています。&lt;/p&gt;
+&lt;h2 id="configuration"&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;レート制限は以下の設定によって構成されます(これらの適用方法については&lt;a href="https://docs.defectdojo.com/get_started/open_source/configuration/"&gt;Configuration&lt;/a&gt;を参照してください):&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_ENABLED&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_RATE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;5/m&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_BLOCK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_ACCOUNT_LOCKOUT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;h3 id="rate-limit-dd_rate_limiter_rate"&gt;Rate Limit (&lt;code&gt;DD_RATE_LIMITER_RATE&lt;/code&gt;)&lt;/h3&gt;
+&lt;p&gt;リクエストを制限する頻度を設定します。サポートされている単位:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;秒: &lt;code&gt;1s&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;分: &lt;code&gt;5m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;時間: &lt;code&gt;100h&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;日: &lt;code&gt;2400d&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;より詳細な設定オプションについては、&lt;a href="https://django-ratelimit.readthedocs.io/en/stable/rates.html"&gt;Django Ratelimit rates docs&lt;/a&gt;を参照してください。&lt;/p&gt;</description></item><item><title>通知Webhook</title><link>https://docs.defectdojo.com/ja/automation/api/notification_webhooks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/automation/api/notification_webhooks/</guid><description>&lt;p&gt;&lt;strong&gt;これは実験的なオープンソース機能です — 今後のリリースで動作が変更される可能性があります。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Webhookは、特定のイベントが発生するたびに、DefectDojoインスタンスからユーザー定義のサーバーへ送信されるアウトバウンドHTTPリクエストです。&lt;/p&gt;
+&lt;h2 id="setup"&gt;Setup&lt;/h2&gt;
+&lt;p&gt;Webhookエンドポイントは管理者が設定します。Webhookが作成されると、DefectDojoはエンドポイントに到達可能であり、期待されるステータスコードを返すことを確認するために&lt;a href="#ping"&gt;&lt;code&gt;ping&lt;/code&gt;&lt;/a&gt;イベントを送信します。&lt;/p&gt;
+&lt;h2 id="endpoint-state-transitions"&gt;Endpoint State Transitions&lt;/h2&gt;
+&lt;p&gt;DefectDojoは配信の成功状況を監視し、HTTPレスポンスやネットワーク障害に基づいてエンドポイントを一時的または恒久的に無効化します。管理者による手動での再有効化も可能です。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;スタジアム型の状態&lt;/strong&gt;: アクティブ — Webhookを送信できます&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;矩形の状態&lt;/strong&gt;: 非アクティブ — Webhookの配信は失敗し、再試行されません&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;状態遷移のトリガー&lt;/strong&gt;: 対象サーバーからのHTTPレスポンス、celeryの自動処理、または管理者による手動操作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="request-headers"&gt;Request Headers&lt;/h2&gt;
+&lt;p&gt;すべてのWebhookリクエストには、以下のヘッダーが含まれます:&lt;/p&gt;</description></item></channel></rss>

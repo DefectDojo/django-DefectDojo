@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DefectDojoについて on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/get_started/about/</link><description>Recent content in DefectDojoについて on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 02 Feb 2021 20:46:29 +0100</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojoについて</title><link>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc.およびオープンソースコントリビューターは、DefectDojoのCommunity版とPro版の両方をサポートするために本ドキュメントを管理しています。&lt;/span&gt;&lt;/p&gt;
+&lt;h2 id="defectdojoとは"&gt;DefectDojoとは?&lt;/h2&gt;
+&lt;p&gt;DefectDojoは、Developer Security Operations(DevSecOps)プラットフォームです。DefectDojoは、お使いのセキュリティツール群を自動的に集約することでDevSecOpsを効率化し、セキュリティ業務を簡単に整理して、組織のセキュリティ体制を他のステークホルダーに報告できるようにします。&lt;/p&gt;
+&lt;p&gt;セキュリティプロセスの自動化と統合された開発パイプラインはDefectDojoの最終目標ですが、このソフトウェアの中核は、多数のセキュリティツールからのレポートを取り込み、整理し、標準化するためのセキュリティ脆弱性向けバグトラッカーです。&lt;/p&gt;
+&lt;h3 id="defectdojoは何をするのか"&gt;DefectDojoは何をするのか?&lt;/h3&gt;
+&lt;p&gt;DefectDojoには、セキュリティツールの結果を強化・調整するためのスマートな機能が備わっており、以下のようなことが可能です。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;コンテキストに応じてセキュリティの検出事項を追跡・報告する&lt;/li&gt;
+&lt;li&gt;コンテキストに応じてSLAを適用する&lt;/li&gt;
+&lt;li&gt;誤検知、リスク受容、その他のトリアージ判断を処理する&lt;/li&gt;
+&lt;li&gt;DefectDojoの重複排除アルゴリズムを使用して重複を排除する&lt;/li&gt;
+&lt;li&gt;外部のプロジェクト追跡ソフトウェアと連携する。&lt;/li&gt;
+&lt;li&gt;CI/CD連携を使用して、リポジトリや開発ブランチ全体にわたるメトリクス/レポートを提供する。&lt;/li&gt;
+&lt;li&gt;従来型のペネトレーションテスト管理を調整する。&lt;/li&gt;
+&lt;li&gt;脆弱性修正手順のSLAを設定・適用する。&lt;/li&gt;
+&lt;li&gt;セキュリティ脆弱性に対するリスク受容を作成・追跡する。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最終的に、DefectDojoの製品:エンゲージメントモデルにより、開発環境の棚卸しを行い、新しいセキュリティの検出事項を即座にコンテキストの中に位置付けることができます。&lt;/p&gt;</description></item><item><title>機能比較</title><link>https://docs.defectdojo.com/ja/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt;は、コアとなるインポート機能、重複排除、基本的なダッシュボード、APIアクセス、必須のレポート機能を備えた、強力で無料の脆弱性管理プラットフォームです。小規模なチームや、コミュニティリソースを使ってツールを自己ホスティングし拡張したい方に最適です。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;DefectDojo Pro&lt;/strong&gt;は、その基盤の上に、高度なダッシュボードとレポート、ルールエンジンによる自動化とスクリプティング、多数のセキュリティツールへのコネクタ、最適化されたインポートワークフロー、SOCとAppSecの統合サポート、改善されたUI/UX、AI連携、強化されたセキュリティ(SSO/MFA)、プレミアムサポートオプションなど、エンタープライズ志向の機能を追加しています。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature / Capability&lt;/th&gt;
+ &lt;th&gt;DefectDojo Open-Source&lt;/th&gt;
+ &lt;th&gt;DefectDojo Pro&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;コア脆弱性管理&lt;/td&gt;
+ &lt;td&gt;✔️ 500以上のセキュリティツールから検出事項をインポート、追跡、管理&lt;/td&gt;
+ &lt;td&gt;✔️ Open-Sourceのすべての機能をスケールに最適化&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;検出事項の重複排除&lt;/td&gt;
+ &lt;td&gt;✔️ 標準の重複排除&lt;/td&gt;
+ &lt;td&gt;✔️ 高度で設定可能な重複排除&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;REST API&lt;/td&gt;
+ &lt;td&gt;✔️ フルREST API&lt;/td&gt;
+ &lt;td&gt;✔️ フルREST API&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;認証とアクセス制御&lt;/td&gt;
+ &lt;td&gt;✔️ ローカル認証と基本的なRBAC&lt;/td&gt;
+ &lt;td&gt;✔️ SSO(SAML/OAuth)、MFA、高度なRBAC&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ユーザーインターフェース&lt;/td&gt;
+ &lt;td&gt;✔️ Community UI&lt;/td&gt;
+ &lt;td&gt;✔️ パフォーマンスが改善されたモダンなPro UI&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ダッシュボードとレポート&lt;/td&gt;
+ &lt;td&gt;✔️ 基本的なダッシュボードとレポート&lt;/td&gt;
+ &lt;td&gt;✔️ 高度でカスタマイズ可能なダッシュボードと経営層向けレポート&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;自動化とワークフロー&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ ルールエンジンと自動化ワークフロー&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;インポートの拡張機能&lt;/td&gt;
+ &lt;td&gt;❌ 標準インポートのみ&lt;/td&gt;
+ &lt;td&gt;✔️ バックグラウンドインポート、スマートアップロード、ユニバーサルパーサー、CLIアップロード&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ツール連携&lt;/td&gt;
+ &lt;td&gt;❌ 手動/API駆動&lt;/td&gt;
+ &lt;td&gt;✔️ 主要なAppSecおよびクラウドツール向けの組み込み&lt;strong&gt;アップストリームコネクタ&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Jira連携&lt;/td&gt;
+ &lt;td&gt;✔️ 含まれます&lt;/td&gt;
+ &lt;td&gt;✔️ 含まれます&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;プロジェクト管理連携&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ &lt;strong&gt;Jira&lt;/strong&gt;、&lt;strong&gt;Azure DevOps&lt;/strong&gt;、&lt;strong&gt;GitHub&lt;/strong&gt;、&lt;strong&gt;GitLab&lt;/strong&gt;、&lt;strong&gt;ServiceNow&lt;/strong&gt;、&lt;strong&gt;Bitbucket&lt;/strong&gt;、&lt;strong&gt;Shortcut&lt;/strong&gt;、&lt;strong&gt;PagerDuty&lt;/strong&gt;、&lt;strong&gt;Zendesk&lt;/strong&gt;、&lt;strong&gt;ServiceDesk Plus&lt;/strong&gt;、&lt;strong&gt;Freshservice&lt;/strong&gt;への&lt;strong&gt;ダウンストリームコネクタ&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;検出事項の拡張機能&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ 自動KEV、EPSSスコアリング、ランサムウェア追跡&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;SOCとAppSecの統合&lt;/td&gt;
+ &lt;td&gt;❌ AppSecのみに特化&lt;/td&gt;
+ &lt;td&gt;✔️ AppSecとSOCの検出事項を統合&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;AIと次世代機能&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ AI支援ワークフロー、レポート、MCPサポート&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;サポート&lt;/td&gt;
+ &lt;td&gt;コミュニティサポート(GitHub、Slack、フォーラム)&lt;/td&gt;
+ &lt;td&gt;SLA付きの商用サポート&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ホスティングオプション&lt;/td&gt;
+ &lt;td&gt;セルフホスト&lt;/td&gt;
+ &lt;td&gt;セルフホストまたはクラウドホスト&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>❓ よくある質問</title><link>https://docs.defectdojo.com/ja/get_started/about/faq/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/faq/</guid><description>&lt;p&gt;DefectDojoの利用に関するよくある質問を、DefectDojo ProとDefectDojo OSの両方について紹介します。&lt;/p&gt;
+&lt;h2 id="一般的な質問"&gt;一般的な質問&lt;/h2&gt;
+&lt;h3 id="defectdojoでセキュリティテストをどのように整理すればよいですか"&gt;DefectDojoでセキュリティテストをどのように整理すればよいですか?&lt;/h3&gt;
+&lt;p&gt;DefectDojoはあらゆるセキュリティ環境やテスト環境に対応できますが、各組織のセキュリティチームや運用体制はそれぞれ異なるため、万能な使い方というものはありません。&lt;a href="https://docs.defectdojo.com/get_started/common_use_cases/common_use_cases/"&gt;一般的なユースケース&lt;/a&gt;についての詳細な記事では、さまざまな組織がRBACとDefectDojoのデータモデルを自社のニーズに合わせてどのように適用しているかの例を紹介しています。&lt;/p&gt;
+&lt;h3 id="defectdojoでのセキュリティテストにおける推奨ワークフローは何ですか"&gt;DefectDojoでのセキュリティテストにおける推奨ワークフローは何ですか?&lt;/h3&gt;
+&lt;p&gt;DefectDojoは、組織のセキュリティ体制における中心的な信頼できる情報源となることを目的としており、組織の要件に応じてさまざまなニーズに対応できます。例えば次のようなものです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ユーザーが複数のスキャンやツールにまたがる重複した検出事項を特定できるようにし、アラート疲れを最小限に抑えます。&lt;/li&gt;
+&lt;li&gt;脆弱性に対するSLAを適用し、組織が各検出事項を適切な期間内に処理できるようにします。&lt;/li&gt;
+&lt;li&gt;Jira、ServiceNow、その他のプロジェクト追跡ソフトウェアへ&lt;a href="https://docs.defectdojo.com/connectors/issue_tracking/"&gt;チケットを送信&lt;/a&gt;し、開発チームが新たなプロジェクト管理ツールを学ぶことなく、課題の修正を通常のリリースプロセスに組み込めるようにします。&lt;/li&gt;
+&lt;li&gt;自動化された&lt;a href="https://docs.defectdojo.com/import_data/import_scan_files/api_pipeline_modelling/"&gt;CI/CDパイプライン&lt;/a&gt;に統合し、ブランチレベルに至るまでリポジトリからレポートデータを自動的に取り込みます。&lt;/li&gt;
+&lt;li&gt;任意の脆弱性群やソフトウェアのコンテキストについて&lt;a href="https://docs.defectdojo.com/metrics_reports/reports/"&gt;レポート&lt;/a&gt;を作成し、スキャン結果やステータスの更新をステークホルダーに迅速に共有します。&lt;/li&gt;
+&lt;li&gt;受容および緩和のワークフローを確立し、正式なリスク管理の追跡をサポートします。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;DefectDojoは、現在のセキュリティワークフローをサポートし標準化するように設計されています。これらの方法はすべて、チームのプロセスを強化し、現在の運用方法に適応させるために利用できます。&lt;/p&gt;
+&lt;h3 id="defectdojo-proではどのような機能が利用できますか"&gt;DefectDojo Proではどのような機能が利用できますか?&lt;/h3&gt;
+&lt;p&gt;DefectDojo Proは、上記のワークフローをさらに拡張し、以下を追加します。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;エンタープライズレベルのデータ量をナビゲートする際の速度と効率のために設計された&lt;a href="https://docs.defectdojo.com/get_started/about/ui_pro_vs_os/"&gt;改善されたUI&lt;/a&gt;。ダークモードも含まれます。&lt;/li&gt;
+&lt;li&gt;優先度とリスクによって&lt;a href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/"&gt;検出事項を事前にトリアージ&lt;/a&gt;する機能により、チームは最も重大な問題を最初に特定して修正できます。&lt;/li&gt;
+&lt;li&gt;自動化された一括操作をスクリプト化し、検出事項やその他のオブジェクトを処理するカスタムワークフローを構築できる&lt;a href="https://docs.defectdojo.com/automation/rules_engine/about"&gt;ルールエンジン&lt;/a&gt;。プログラミング経験は不要です。&lt;/li&gt;
+&lt;li&gt;アプリやリポジトリのセキュリティ体制を簡単に共有できる&lt;a href="https://docs.defectdojo.com/get_started/about/ui_pro_vs_os/#new-dashboards"&gt;強化されたレポートおよびメトリクス生成機能&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;DefectDojoが重複した検出事項をどのように特定・管理するかを細かく調整できる&lt;a href="https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__deduplication_tuning/"&gt;高度な重複排除設定&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;以下のような、合理化されたインポート機能。
+&lt;ul&gt;
+&lt;li&gt;検出事項をバックグラウンドで処理する、最適化されたアップロード方法。&lt;/li&gt;
+&lt;li&gt;Universal ImporterおよびDefectDojo CLIアプリを使用して&lt;a href="https://docs.defectdojo.com/import_data/pro/specialized_import/external_tools/"&gt;コマンドラインパイプライン&lt;/a&gt;を素早く構築できる機能。DefectDojo Proインスタンスへのデータのインポート、再インポート、エクスポートを簡単に行えます。&lt;/li&gt;
+&lt;li&gt;任意の.jsonまたは.csvレポートを実用的な検出事項のセットに変換する&lt;a href="https://docs.defectdojo.com/import_data/pro/specialized_import/universal_parser/"&gt;ユニバーサルパーサー&lt;/a&gt;。DefectDojo Proが好きな方法でデータを解析します。&lt;/li&gt;
+&lt;li&gt;サポート対象ツールへの即時接続を提供し、新しい検出事項データをインポートする&lt;a href="https://docs.defectdojo.com/connectors/upstream/about/"&gt;コネクタ&lt;/a&gt;。API呼び出しやcronジョブを設定することなく、自動化されたインポートパイプラインを構築できます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="defectdojoはアクセス制御をどのように扱いますか"&gt;DefectDojoはアクセス制御をどのように扱いますか?&lt;/h3&gt;
+&lt;p&gt;DefectDojoは大規模なチームでも利用でき、各チームメンバーに適切なコンテキストを設定し、インフラの特定の部分へのアクセスを制御するために、&lt;a href="https://docs.defectdojo.com/admin/user_management/about_perms_and_roles/"&gt;RBAC(ルールベースアクセス制御)&lt;/a&gt;の設定を強くお勧めします。&lt;/p&gt;</description></item><item><title>☑️ 新規ユーザー向けチェックリスト</title><link>https://docs.defectdojo.com/ja/get_started/about/os__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/os__new_user_checklist/</guid><description>&lt;p&gt;これは、白紙の状態から完全に機能するアプリになるまで、実装を確実に成功させるためのクイックリファレンスです。この記事は、&lt;strong&gt;DefectDojo Community Edition&lt;/strong&gt;が環境にインストールされ、稼働していることを前提としています。&lt;/p&gt;
+&lt;p&gt;DefectDojoの本質は、セキュリティデータをインポートし、整理し、それを知る必要がある人々に提示することです。ここでは、DefectDojo Open-Sourceでこれらを実現する方法を紹介します。&lt;/p&gt;
+&lt;h3 id="defectdojo-open-source"&gt;DefectDojo Open-Source&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Open-Sourceのユーザーは、まず最初の&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/"&gt;Product TypeとProduct&lt;/a&gt;を作成することから始められます。作成後は、UIを使用してそれらのProductのいずれかに&lt;a href="https://docs.defectdojo.com/import_data/import_scan_files/os__import_scan_ui/"&gt;ファイルをインポート&lt;/a&gt;できます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DefectDojoにデータが入ったので、次に&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/"&gt;Product Hierarchy Overview&lt;/a&gt;でProductのレイアウトを拡張することを検討してください。Product Hierarchyはアプリの実用的なインベントリを作成し、データを論理的なカテゴリに分割するのに役立ちます。これらのカテゴリは、アクセス制御ルールの適用や、レポートを適切なチームにセグメント分けするために使用できます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;インポートしたデータを要約するには、&lt;a href="https://docs.defectdojo.com/metrics_reports/reports/using-the-report-builder/#opening-the-report-builder"&gt;Report Builder&lt;/a&gt;を使用してください。レポートは、Product Ownerなどのステークホルダーと検出事項を迅速に共有するために使用できます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;これがDefectDojoの本質です - セキュリティデータをインポートし、整理し、それを知る必要がある人々に提示します。&lt;/p&gt;
+&lt;p&gt;これらの機能はすべて自動化でき、DefectDojoは(本稿執筆時点で)500以上のツールに対応しているため、組織全体のアウトプットに対する実用的なセキュリティインベントリを作成する準備が整っているはずです。&lt;/p&gt;</description></item><item><title>☑️ 新規ユーザー向けチェックリスト</title><link>https://docs.defectdojo.com/ja/get_started/about/pro__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/pro__new_user_checklist/</guid><description>&lt;p&gt;DefectDojoの本質は、セキュリティデータをインポートし、整理し、それを知る必要がある人々に提示することです。以下は、白紙の状態から完全に機能するアプリになるまで、実装を確実に成功させるためのクイックリファレンスです。&lt;/p&gt;
+&lt;h3 id="defectdojoを知る"&gt;DefectDojoを知る&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;まずUIを使用して&lt;a href="https://docs.defectdojo.com/import_data/import_scan_files/pro__import_scan_ui/"&gt;ファイルをインポート&lt;/a&gt;することから始めます。これは通常、データがDefectDojoのモデルにどのように収まるかを確認する最も手っ取り早い方法です。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DefectDojoにデータが入ったので、&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/"&gt;Product Hierarchy Overview&lt;/a&gt;でその整理方法についてさらに学びましょう。Product Hierarchyはアプリの実用的なインベントリを作成し、データを論理的なカテゴリに分割し、アクセス制御ルールを適用し、&lt;a href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/"&gt;Priority and Risk&lt;/a&gt;によって検出事項を並べ替えたり、レポートを適切なチームにセグメント分けしたりするのに役立ちます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;主要なステークホルダーと検出事項のレポートを迅速に共有するために使用できる&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/"&gt;Metrics pages&lt;/a&gt;を確認してください。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;これがDefectDojoの本質です - セキュリティデータをインポートし、整理し、それを知る必要がある人々に提示します。&lt;/p&gt;
+&lt;p&gt;これらの機能はすべて自動化でき、DefectDojoは(本稿執筆時点で)500以上のツールに対応しているため、組織全体のアウトプットに対する実用的なセキュリティインベントリを作成する準備が整っているはずです。&lt;/p&gt;
+&lt;h3 id="proの機能"&gt;Proの機能&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;組織がJira、ServiceNow、AzureDevops、GitHub、GitLabのいずれかを課題管理に使用している場合は、それらの連携に関する&lt;a href="https://docs.defectdojo.com/connectors/issue_tracking/"&gt;ドキュメント&lt;/a&gt;をご覧ください。&lt;/li&gt;
+&lt;li&gt;フィルタ済みのタイルで&lt;a href="https://docs.defectdojo.com/metrics_reports/dashboards/introduction_dashboard/"&gt;main Dashboard&lt;/a&gt;をカスタマイズし、環境を一目で確認できるようにします。&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/connectors/upstream/about/"&gt;Connectors&lt;/a&gt;を使用して、データを迅速にインポートし、チームの既存のセキュリティ環境をミラーリングする方法を学びましょう。&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/navigation/pro__global_search/"&gt;Global Search&lt;/a&gt;を使用して、インスタンス全体から検出事項、アセット、エンゲージメントを素早く見つけましょう。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>🎨 Pro UI変更点</title><link>https://docs.defectdojo.com/ja/get_started/about/ui_pro_vs_os/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/ui_pro_vs_os/</guid><description>&lt;p&gt;2023年後半、DefectDojo, Inc.はDefectDojo Pro向けの新しいUIをリリースしました。これは現在、このエディションのデフォルトUIとなっています。&lt;/p&gt;
+&lt;p&gt;Pro UIは、DefectDojoに以下の強化をもたらします。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Vue.jsを使用したモダンで洗練されたデザイン。&lt;/li&gt;
+&lt;li&gt;特に大規模なデータセットにおける、最適化されたデータ配信と読み込み時間。&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/connectors/upstream/about/"&gt;アップストリームコネクタ&lt;/a&gt;、&lt;a href="https://docs.defectdojo.com/import_data/pro/specialized_import/external_tools/"&gt;Universal Importer&lt;/a&gt;、&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/"&gt;Proメトリクス&lt;/a&gt;ビューなど、新しいPro機能へのアクセス。&lt;/li&gt;
+&lt;li&gt;改善されたUIワークフロー: より優れたフィルタリング、ダッシュボード、ナビゲーション。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="pro-uiへの切り替え"&gt;Pro UIへの切り替え&lt;/h2&gt;
+&lt;p&gt;Pro UIにアクセスするには、右上のユーザーオプションメニューを開いてください。同じメニューから、クラシックUIに戻すこともできます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/beta-classic-uis.png"
+ width="1350"
+ height="873"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="ナビゲーションの変更"&gt;ナビゲーションの変更&lt;/h2&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_ui_overview.png"
+ width="3408"
+ height="1878"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;サイドバー&lt;/strong&gt;は、ダッシュボード、インポート、管理、設定という4つの親カテゴリに再編成されました。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ホームページ、&lt;a href="https://docs.defectdojo.com/metrics_reports/ai/mcp_server_pro/"&gt;AIを活用したネイティブAPI接続機能&lt;/a&gt;、Proメトリクス、カレンダービューは、すべてダッシュボード配下からアクセスできます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;インポート方法はインポートセクションにあります。スキャナーから検出事項を取り込む(アップストリーム)、または課題管理ツールへプッシュする(ダウンストリーム)ための&lt;a href="https://docs.defectdojo.com/connectors/about/"&gt;コネクタ&lt;/a&gt;を設定したり、&lt;a href="https://docs.defectdojo.com/import_data/import_scan_files/pro__import_scan_ui/"&gt;検出事項の追加&lt;/a&gt;フォームを使用して検出事項を追加したり、&lt;a href="https://docs.defectdojo.com/import_data/pro/specialized_import/smart_upload/"&gt;スマートアップロード&lt;/a&gt;を使用してインフラスキャンツールを処理したり、外部ツールである&lt;a href="https://docs.defectdojo.com/import_data/pro/specialized_import/external_tools/"&gt;Universal ImporterおよびDefectDojo CLI&lt;/a&gt;を使用して検出事項および関連オブジェクトのインポート・再インポートのプロセスを効率化したりできます。&lt;/p&gt;</description></item><item><title>オンラインデモ</title><link>https://docs.defectdojo.com/ja/get_started/about/demo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/demo/</guid><description>&lt;p&gt;DefectDojoには2つのオンラインデモが用意されています。どちらもあらかじめデータが読み込まれており、DefectDojoの最新版で完全に動作します。&lt;/p&gt;
+&lt;p&gt;デモサーバーは毎日リセットされ、一般公開されています。デモに機密データを入力しないでください。&lt;/p&gt;
+&lt;h3 id="-defectdojo-proデモ"&gt;🔸 DefectDojo Proデモ&lt;/h3&gt;
+&lt;p&gt;DefectDojo Proは&lt;a href="https://pro.demo.defectdojo.com"&gt;pro.demo.defectdojo.com&lt;/a&gt;でお試しいただけます&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;admin / 1Defectdojo@demo#appsec&lt;/code&gt;でログインしてください。&lt;/p&gt;
+&lt;h3 id="-defectdojo-community版デモ"&gt;🔹 DefectDojo Community版デモ&lt;/h3&gt;
+&lt;p&gt;Community版は&lt;a href="https://demo.defectdojo.org"&gt;demo.defectdojo.org&lt;/a&gt;でお試しいただけます&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;admin / 1Defectdojo@demo#appsec&lt;/code&gt;でログインしてください。&lt;/p&gt;</description></item></channel></rss>

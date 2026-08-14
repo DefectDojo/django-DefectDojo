@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Helps on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/help/</link><description>Recent content in Helps on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><atom:link href="https://docs.defectdojo.com/ja/help/index.xml" rel="self" type="application/rss+xml"/><item><title>用語集</title><link>https://docs.defectdojo.com/ja/help/glossary/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/glossary/</guid><description>&lt;p&gt;以下は、DefectDojoのさまざまな機能を理解するためのシンプルな用語集です。各機能がDefectDojo Pro版、OS版、または両方のどちらに存在・適用されるかも示しています。&lt;/p&gt;
+&lt;h2 id="製品階層両方"&gt;製品階層（両方）&lt;/h2&gt;
+&lt;p&gt;DefectDojo内でセキュリティデータを整理するために使用される構造モデルで、組織 → アセット → エンゲージメント → テスト → 検出事項で構成されます。&lt;/p&gt;
+&lt;h2 id="組織両方"&gt;組織（両方）&lt;/h2&gt;
+&lt;p&gt;DefectDojo Proにおいて、アセットの親オブジェクトとなる最上位の階層オブジェクトです。すべての子アセットにわたるガバナンス、アクセス制御、レポーティングのための共有コンテキストを提供します。&lt;/p&gt;
+&lt;h2 id="アセット両方"&gt;アセット（両方）&lt;/h2&gt;
+&lt;p&gt;組織内でデプロイ可能な、または論理的なシステムエンティティ（アプリケーション、ホスト、環境など）を表すファーストクラスのオブジェクトです。Pro版ではアセットが親子関係やより豊富なビジネスメタデータをサポートしますが、OS版では親子関係をサポートしません。&lt;/p&gt;
+&lt;h3 id="アセット階層pro"&gt;アセット階層（Pro）&lt;/h3&gt;
+&lt;p&gt;アセット間の親子関係モデルであり、コンテキストの継承と検出事項の集約を可能にします。&lt;/p&gt;
+&lt;h2 id="エンゲージメント両方"&gt;エンゲージメント（両方）&lt;/h2&gt;
+&lt;p&gt;テスト期間、パイプライン、または評価コンテキストを表す、範囲が定められたセキュリティ活動です。&lt;/p&gt;</description></item><item><title>営業に問い合わせる</title><link>https://docs.defectdojo.com/ja/help/contact_sales/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/contact_sales/</guid><description>&lt;p&gt;チームがオンプレミスのDefectDojoインストールを必要とする場合は、→ &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="hello",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;hello at defectdojo dot com&lt;/noscript&gt;
+
+ までメールで営業チームにご連絡ください。このトライアル設定プロセスはDefectDojo Cloudユーザーにのみ適用されます。&lt;/p&gt;
+&lt;p&gt;DefectDojoの全プランには無料の2週間トライアルが含まれており、ソフトウェアの評価に利用できます。DefectDojoのトライアルインスタンスはフル機能版であり、トライアル期間終了時にはチームによって即座に有料インスタンスに変換できます。すべてを再設定したり、データを再アップロードしたりする必要はありません。&lt;/p&gt;
+&lt;p&gt;このプロセスの最後に、営業チームと連絡が取れるようになり、請求情報の受領と貴社のトライアルインスタンスの認可についてフォローアップいたします。&lt;/p&gt;
+&lt;h1 id="トライアルのリクエスト"&gt;&lt;strong&gt;トライアルのリクエスト&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;トライアルに申し込むには、&lt;a href="https://defectdojo.com/pricing"&gt;クラウドポータル&lt;/a&gt;でアカウントを作成し、サイドバーの「新規サブスクリプション」メニューオプションをクリックする必要があります。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/request_a_trial_mg.png"
+ width="620"
+ height="638"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="ステップ1ようこそ"&gt;ステップ1：ようこそ&lt;/h2&gt;
+&lt;p&gt;「続行」をクリックしてインスタンスの設定を開始します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/request_a_trial.png"
+ width="968"
+ height="606"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h2 id="ステップ2会社情報の入力とドメインの作成"&gt;ステップ2：会社情報の入力とドメインの作成&lt;/h2&gt;
+&lt;p&gt;DefectDojoで使用する会社の&lt;strong&gt;名前&lt;/strong&gt;と&lt;strong&gt;サーバーラベル&lt;/strong&gt;を入力します。これにより、弊社サーバー上にDefectDojoインスタンス用のカスタムドメインが作成されます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/request_a_trial_2.png"
+ width="942"
+ height="882"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-2"
+&gt;&lt;/p&gt;
+&lt;p&gt;通常、DefectDojoは貴社名に基づいてドメイン名を付けますが、「ドメインにサーバーラベルを使用」を選択すると、DefectDojoは代わりに選択したサーバーラベルに基づいてドメインにラベルを付けます。この方法は、複数のDefectDojoインスタンスを使用する予定がある場合（例えば、本番インスタンスとテストインスタンスなど）に適していることがあります。複数のインスタンスが必要な場合は、営業チーム → &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="hello",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;hello at defectdojo dot com&lt;/noscript&gt;
+
+ までご連絡ください。&lt;/p&gt;</description></item><item><title>サポートに問い合わせる</title><link>https://docs.defectdojo.com/ja/help/contact_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/contact_support/</guid><description>&lt;p&gt;DefectDojoについてお困りですか？サポートを受ける方法をいくつかご紹介します。&lt;/p&gt;
+&lt;h2 id="オープンソースサポート"&gt;オープンソースサポート&lt;/h2&gt;
+&lt;p&gt;オープンソースユーザーは、コミュニティチャンネルを通じてヘルプやアドバイスを受けることができます。&lt;/p&gt;
+&lt;p&gt;オープンソースユーザーにとって、最も早くヘルプを得る方法は&lt;a href="https://owasp.org/slack/invite"&gt;OWASP Slackチャンネル&lt;/a&gt;を利用することです。コミュニティメンバーは**# defectdojoチャンネル**で活発に活動しており、直面している問題の解決を手伝ってくれます。&lt;/p&gt;
+&lt;p&gt;バグを報告するには、&lt;a href="https://github.com/DefectDojo/django-DefectDojo"&gt;GitHub&lt;/a&gt;で課題を作成できます。&lt;/p&gt;
+&lt;p&gt;詳細については、&lt;a href="https://defectdojo.com/open-source"&gt;コミュニティサイト&lt;/a&gt;をご覧ください。&lt;/p&gt;
+&lt;h2 id="defectdojo-proサポート"&gt;DefectDojo Proサポート&lt;/h2&gt;
+&lt;p&gt;DefectDojo Proのサブスクリプションには、初期トライアル期間中およびそれ以降も、DefectDojo, Inc.チームによるフルサポートが含まれます。&lt;/p&gt;
+&lt;h3 id="メール"&gt;メール&lt;/h3&gt;
+&lt;p&gt;顧客/Proユーザーは、&lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="support",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;support at defectdojo dot com&lt;/noscript&gt;
+
+ までいつでも直接チームにメールしてサポートを受けることができます。&lt;/p&gt;</description></item></channel></rss>

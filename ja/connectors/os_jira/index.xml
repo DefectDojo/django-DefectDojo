@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jira on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/connectors/os_jira/</link><description>Recent content in Jira on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/connectors/os_jira/index.xml" rel="self" type="application/rss+xml"/><item><title>Jira</title><link>https://docs.defectdojo.com/ja/connectors/os_jira/os__jira_guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/os_jira/os__jira_guide/</guid><description>&lt;p&gt;DefectDojoのJira連携を使用すると、検出事項のデータを1つ以上のJiraスペースにプッシュできます。これにより、DefectDojoを標準的な開発ワークフローに組み込むことができます。以下はその活用例です。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AppSecチームは、開発者が使用するJiraスペースへ検出事項を選択的にプッシュし、通常の開発作業と並行して問題の修正を適切に優先順位付けできます。このボード上の開発者はDefectDojoにアクセスする必要がなく、すべての作業を1か所にまとめておけます。&lt;/li&gt;
+&lt;li&gt;DefectDojoは、AppSecチームが使用する双方向のJiraスペースにすべての検出事項をプッシュし、問題の検証作業を分担できるようにできます。このボードはDefectDojoと同期状態を保ち、複雑な修正ワークフローを可能にします。&lt;/li&gt;
+&lt;li&gt;DefectDojoは、個別の製品やエンゲージメントから、それぞれ別のJiraスペースへ検出事項を選択的にプッシュし、適切なコンテキストを保つことができます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="jiraのセットアップ"&gt;Jiraのセットアップ&lt;/h1&gt;
+&lt;p&gt;Jiraのセットアップには、以下の手順が必要です。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;システム設定でJira連携を有効にします。有効にするまで、それ以外のJira関連の設定はDefectDojo全体で非表示になります。&lt;/li&gt;
+&lt;li&gt;Jiraインスタンスを接続します。ユーザー名/パスワード、またはAPIトークンのいずれかを使用します。複数のインスタンスをリンクできます。&lt;/li&gt;
+&lt;li&gt;そのJiraインスタンスをDefectDojo内の1つ以上の製品またはエンゲージメントに追加します。&lt;/li&gt;
+&lt;li&gt;双方向同期を使用したい場合は、DefectDojoに更新を送信するJira Webhookを作成します。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="ステップ1-システム設定でjira連携を有効にする"&gt;ステップ1: システム設定でJira連携を有効にする&lt;/h2&gt;
+&lt;p&gt;Jira連携はデフォルトでオフになっており、オフの間はDefectDojoがインターフェース上の他のすべてのJira関連コントロールを非表示にします。これが最初に設定すべき項目であり、有効化するまで以下の手順はいずれも利用できません。&lt;/p&gt;
+&lt;p&gt;連携が無効な間、サイドバーには ⚙️ &lt;strong&gt;Configuration &amp;gt; JIRA&lt;/strong&gt; の項目が表示されないため、Jiraインスタンスを追加する場所がありません。&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>連邦コンプライアンス on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/federal_compliance/</link><description>Recent content in 連邦コンプライアンス on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><atom:link href="https://docs.defectdojo.com/ja/federal_compliance/index.xml" rel="self" type="application/rss+xml"/><item><title>コンプライアンスプロファイル</title><link>https://docs.defectdojo.com/ja/federal_compliance/compliance_profile/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/federal_compliance/compliance_profile/</guid><description>&lt;p&gt;コンプライアンスプロファイルは、Assetをシステムとして登録し、そのシステムが生成するすべての成果物に表示される情報を保持します。システム境界を表すAssetを開き、&lt;strong&gt;Compliance&lt;/strong&gt;タブ、続いて&lt;strong&gt;Profile&lt;/strong&gt;に移動します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/01-compliance-profile.png"
+ width="2880"
+ height="1800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="コンプライアンスプロファイルのフォーム"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="プロファイルのフィールド"&gt;プロファイルのフィールド&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Field&lt;/th&gt;
+ &lt;th&gt;What it does&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Enabled&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;この製品のコンプライアンス追跡を有効にします。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Automatic Sync&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;POA&amp;amp;M項目を検出事項と同期した状態に保ちます。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;POA&amp;amp;M ID Prefix&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;項目の採番方法。必須です。デフォルトでは&lt;code&gt;V-1&lt;/code&gt;、&lt;code&gt;V-2&lt;/code&gt;のように採番されます。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Impact Level&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;LI-SaaS、Low、Moderate、またはHigh。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Cloud Service Provider&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;POA&amp;amp;Mの表紙データに表示されるCSP名。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;System / Offering Name&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;POA&amp;amp;Mの表紙データに表示されるシステム名。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;FedRAMP System Identifier&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;システムの識別子(例: &lt;code&gt;F00000042&lt;/code&gt;)。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Default Point of Contact&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;独自の担当者を持たない項目に適用されるPOC。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Scan Item Policy&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;未解決の項目をすべて含めるか、期限超過のスキャン項目のみを含めるか。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;OSCAL SSP Reference&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;任意項目。設定すると、生成されるOSCAL POA&amp;amp;Mが&lt;code&gt;import-ssp&lt;/code&gt;を通じてこれを参照します。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="スキャン項目ポリシーを選ぶ"&gt;スキャン項目ポリシーを選ぶ&lt;/h3&gt;
+&lt;p&gt;期限超過のみとするのは、FedRAMP ConMonの最低要件です。&lt;strong&gt;Include all open items&lt;/strong&gt;(未解決の項目をすべて含める)はより保守的な選択肢であり、デフォルトの設定です。&lt;/p&gt;</description></item><item><title>POA&amp;M台帳</title><link>https://docs.defectdojo.com/ja/federal_compliance/poam_ledger/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/federal_compliance/poam_ledger/</guid><description>&lt;p&gt;POA&amp;amp;M項目は検出事項から自動的に作成・更新されます。同期はインポートおよび検出事項の変更の直後に実行され、夜間の一括処理で漏れたものを拾い上げます。スキャナーが報告しない弱点については、手動で項目を追加することもできます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/02-poam-items.png"
+ width="2880"
+ height="2070"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="POA&amp;amp;M台帳"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="台帳の規則"&gt;台帳の規則&lt;/h2&gt;
+&lt;p&gt;台帳はFedRAMPの規則に従います。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;安定した採番。&lt;/strong&gt; 各項目はそのシステム内で連番を保持し、番号が再利用されることはありません。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;グループ化された検出事項の集約。&lt;/strong&gt; 多数のホストにまたがる同一のCVEは1つの項目にまとめられ、影響を受ける各資産がその項目に列挙されます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;構成に関する検出事項はCM-6の下に統合できます。&lt;/strong&gt; ベンチマークルールごとに項目が乱立して台帳が埋め尽くされるのを防ぎます。上のスクリーンショットでは、&lt;code&gt;V-4&lt;/code&gt;がその統合された項目です。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;完了した項目は再開されません。&lt;/strong&gt; 同じ弱点が再発した場合、台帳は古い項目を参照する新しい項目を開くため、是正履歴はそのまま保たれます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="項目を編集する"&gt;項目を編集する&lt;/h2&gt;
+&lt;p&gt;各行の鉛筆アイコンから項目を編集できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/03-poam-item-detail.png"
+ width="2880"
+ height="2070"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="POA&amp;amp;M項目の編集"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;ここから、担当者、必要なリソース、是正計画を設定し、逸脱があれば記録します。&lt;/p&gt;
+&lt;h3 id="逸脱"&gt;逸脱&lt;/h3&gt;
+&lt;p&gt;逸脱は、各項目について3つの独立した状態として追跡されます。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Deviation&lt;/th&gt;
+ &lt;th&gt;Values&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;False Positive&lt;/td&gt;
+ &lt;td&gt;No, Pending, or Yes&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Risk Adjustment&lt;/td&gt;
+ &lt;td&gt;No, Pending, or Yes&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Operational Requirement&lt;/td&gt;
+ &lt;td&gt;No, Pending, or Yes&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;いずれも共通の&lt;strong&gt;Deviation Rationale&lt;/strong&gt;を持ちます。リスク調整の場合はさらに、元の評価と並べて&lt;strong&gt;Adjusted Risk Rating&lt;/strong&gt;が記録され、両方とも生成される成果物に表示されます。&lt;/p&gt;</description></item><item><title>ConMonスナップショット</title><link>https://docs.defectdojo.com/ja/federal_compliance/conmon_snapshots/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/federal_compliance/conmon_snapshots/</guid><description>&lt;p&gt;&lt;strong&gt;Snapshots&lt;/strong&gt;タブでは、&lt;strong&gt;Generate Snapshot&lt;/strong&gt;が報告期間の成果物を生成します。スナップショットはその時点で&lt;strong&gt;台帳を凍結&lt;/strong&gt;します。つまり、その後の編集が、すでに生成済みの成果物を変更することはありません。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/04-poam-snapshots.png"
+ width="2880"
+ height="1800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="生成されたConMonスナップショット"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;各行には、期間、ステータス、未解決および期限超過の項目数、完了日時、そして両方の成果物のダウンロードリンクが表示されます。&lt;/p&gt;
+&lt;h2 id="スナップショットが生成するもの"&gt;スナップショットが生成するもの&lt;/h2&gt;
+&lt;p&gt;各スナップショットは2つの成果物を生成します。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;公式の&lt;strong&gt;FedRAMP POA&amp;amp;M Excelワークブック&lt;/strong&gt;(テンプレートバージョン3.0)。未解決、完了、構成の各項目がそれぞれ適切なワークシートに配置されます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;OSCAL plan-of-action-and-milestones&lt;/strong&gt;文書。OSCAL 1.0.4に固定されています — これはFedRAMPの現行の検証ルールが受け付けるバージョンです。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="oscal出力が含む内容"&gt;OSCAL出力が含む内容&lt;/h3&gt;
+&lt;p&gt;OSCAL文書は、FedRAMPツールが参照するフィールド(POA&amp;amp;M ID、影響を受ける統制ID、逸脱の状態、ベンダー依存、KEV追跡)に対して、FedRAMPの拡張名前空間を使用します。&lt;/p&gt;
+&lt;p&gt;各リスクには以下が含まれます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可能性と影響の側面 — 初期値、およびリスク調整が承認された場合の調整後の値。&lt;/li&gt;
+&lt;li&gt;推奨される修正と計画された是正措置を、それぞれ別の対応として。&lt;/li&gt;
+&lt;li&gt;検知と最新のステータスレビューを記録するリスクログ。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;文書は生成時に公式のNISTスキーマに照らして検証されます。&lt;/p&gt;</description></item><item><title>修復期限</title><link>https://docs.defectdojo.com/ja/federal_compliance/remediation_slas/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/federal_compliance/remediation_slas/</guid><description>&lt;p&gt;この機能には、すぐに使える2つのSLA設定が同梱されています。SLA設定からいずれかを製品に割り当てるか、コピーして調整してください。&lt;/p&gt;
+&lt;h2 id="fedramp-rev-5"&gt;FedRAMP Rev 5&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Severity&lt;/th&gt;
+ &lt;th&gt;Due within&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;重大&lt;/td&gt;
+ &lt;td&gt;検出から30日&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;高&lt;/td&gt;
+ &lt;td&gt;検出から30日&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;中程度&lt;/td&gt;
+ &lt;td&gt;90日&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;低&lt;/td&gt;
+ &lt;td&gt;180日&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;期限は厳格に適用されており、CISA KEVカタログに掲載されている検出事項が、そのCISA期限を超えてスケジュールされることはありません。&lt;/p&gt;
+&lt;h2 id="fedramp-vdr"&gt;FedRAMP VDR&lt;/h2&gt;
+&lt;p&gt;同じ基本期間を、悪用可能性と露出状況によってさらに厳格化したものです。&lt;/p&gt;</description></item><item><title>CMMC Level 2 評価</title><link>https://docs.defectdojo.com/ja/federal_compliance/cmmc_assessments/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/federal_compliance/cmmc_assessments/</guid><description>&lt;p&gt;Complianceタブでは、DoD Assessment Methodologyの配点を用いて、NIST 800-171 Rev 2に基づくCMMC Level 2の自己評価を採点できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/05-cmmc-scorecard.png"
+ width="2880"
+ height="1800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="CMMC Level 2評価のスコアカード"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ベータ版: スコアは目安として扱ってください。&lt;/strong&gt; この機能がベータ版である間、同梱の配点および算出されるSPRSスコアは参考情報であり、検証は未実施です。評価の提出や契約上の目的で利用する前に、公式のDoD NIST SP 800-171 Assessment Methodologyと照合してスコアを確認してください。&lt;/p&gt;
+&lt;h2 id="結果を記録する"&gt;結果を記録する&lt;/h2&gt;
+&lt;p&gt;110の要件それぞれについて結果を記録します。&lt;/p&gt;</description></item><item><title>統制カバレッジ</title><link>https://docs.defectdojo.com/ja/federal_compliance/control_coverage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/federal_compliance/control_coverage/</guid><description>&lt;p&gt;統制カバレッジビューは、シンプルな問いに答えます。自分のスキャナーは実際にどの800-53統制をテストしているのか、そして統制ごとの未解決の弱点はどこにあるのか、という問いです。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/07-control-coverage.png"
+ width="2880"
+ height="2664"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="統制カバレッジのヒートマップ"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="マッピングの出所"&gt;マッピングの出所&lt;/h2&gt;
+&lt;p&gt;多くのスキャナーはすでに統制参照を出力しており、DefectDojoはそれらを自動的に統制マッピングへ抽出します。例えば以下のとおりです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Prowler&lt;/strong&gt;は検出事項の参照にNIST 800-53の統制リストを書き込みます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Tenable&lt;/strong&gt;のプラグインは800-53の相互参照を持ちます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;InSpec&lt;/strong&gt;および&lt;strong&gt;MITRE SAF&lt;/strong&gt;のプロファイルは、チェックに&lt;code&gt;nist&lt;/code&gt;識別子でタグ付けします。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;抽出はインポート済みのカタログに基づいて行われるため、カタログが認識しない識別子からマッピングが生成されることはありません。&lt;/p&gt;
+&lt;p&gt;独自の統制参照を持たない検出事項は、コンプライアンスプロファイルのデフォルトスキャン統制に割り当てられます — &lt;a href="../compliance_profile"&gt;コンプライアンスプロファイル&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h3 id="既存の検出事項を遡って処理する"&gt;既存の検出事項を遡って処理する&lt;/h3&gt;
+&lt;p&gt;抽出は検出事項が到着するたびに実行されます。機能が有効化される前にすでにインポートされていた検出事項をマッピングするには、それらを遡って処理します。&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;manage.py extract_control_mappings --product &amp;lt;id&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;1つの製品ではなくすべてのアクティブな検出事項をスキャンするには&lt;code&gt;--all&lt;/code&gt;を使用します。このコマンドは作成したマッピングの数を報告し、手動マッピングと抑制済みマッピングには手を加えません。&lt;/p&gt;
+&lt;h2 id="マッピングを修正する"&gt;マッピングを修正する&lt;/h2&gt;
+&lt;p&gt;手動で作成または修正したマッピングは、常に抽出されたマッピングより優先されます。また、削除したマッピングは削除されたままになり、再インポートしても復活しません。&lt;/p&gt;</description></item></channel></rss>

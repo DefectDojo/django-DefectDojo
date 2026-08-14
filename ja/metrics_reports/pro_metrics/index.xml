@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pro メトリクス on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/</link><description>Recent content in Pro メトリクス on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/index.xml" rel="self" type="application/rss+xml"/><item><title>Pro メトリクス概要</title><link>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__overview/</guid><description>&lt;p&gt;DefectDojo Pro の UI には、現在のセキュリティ体制を可視化するためのさまざまなメトリクスダッシュボードが用意されています。各ダッシュボードにより、組織内のさまざまな階層の関係者が、生データを解釈したり個々の検出事項を確認したりすることなく、的確な意思決定を行えるようになります。これらのダッシュボードには次のものが含まれます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__executive_insights/#main-content"&gt;エグゼクティブインサイト&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__priority_insights/#main-content"&gt;優先度インサイト&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__program_insights/#main-content"&gt;プログラムインサイト&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__remediation_insights/#main-content"&gt;改善インサイト&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__tool_insights/#main-content"&gt;ツールインサイト&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/metrics_image1.png"
+ width="3408"
+ height="1760"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="メトリクス概要"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="メトリクス機能"&gt;メトリクス機能&lt;/h2&gt;
+&lt;p&gt;各ダッシュボードの詳細を説明する前に、すべてのダッシュボードに共通する、確認しておく価値のある点をいくつか紹介します。&lt;/p&gt;
+&lt;h3 id="フィルタリング"&gt;フィルタリング&lt;/h3&gt;
+&lt;p&gt;すべてのメトリクスは、期間、組織、アセット、タグでフィルタリングできます。フィルタを希望どおりに調整した後、それを有効にするには「フィルタを適用」をクリックする必要があります。現在のフィルタ条件でダッシュボード上のすべてのチャート、テーブル、グラフを PDF としてエクスポートしたい場合は、「PDF としてエクスポート」をクリックしてください。&lt;/p&gt;
+&lt;p&gt;フィルタリングの期間は過去1年までに限定されていますが、それ以外にも過去7日、14日、30日、90日、180日の範囲に調整できます。&lt;/p&gt;
+&lt;p&gt;フィルタパラメータは URL に反映されるため、さまざまなフィルタパラメータを持つ複数のページをブックマークできます。これは、素早く参照したい場合や、特定の種類のレポートを継続的に生成したい場合に役立ちます。&lt;/p&gt;</description></item><item><title>Executive Insights</title><link>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__executive_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__executive_insights/</guid><description>&lt;p&gt;&lt;strong&gt;Executive Insights&lt;/strong&gt;メトリクスページでは、組織全体にわたるアプリケーションセキュリティリスクの集約ビューが提供されます。経営層向けに設計されているため、このダッシュボードは個々の検出事項ではなく、組織とアセットに焦点を絞り、傾向と成果を重視します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_1.png"
+ width="1444"
+ height="500"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;Executive Insights内では、ユーザーはフィルターリストから期間、組織、アセット、またはタグを選択でき、これにより隣接するテーブルに該当する検出事項が表示されます。また、以下のさまざまなチャートやグラフの結果も変化します。&lt;/p&gt;
+&lt;p&gt;フィルターが選択されていない場合、テーブルにはすべての組織、アセット、タグのステータスが表示されます。&lt;/p&gt;
+&lt;p&gt;最初のテーブルは、全体的なセキュリティ姿勢の俯瞰的なビューを提供します。組織とアセットそれぞれについても、別々のテーブルが用意されています。&lt;/p&gt;
+&lt;p&gt;各テーブル内の数値は、適用されたフィルターに応じて表示されます。セル内のハイパーリンクされた数値をクリックすると、対応する検出事項テーブルが別のタブで開きます。&lt;/p&gt;</description></item><item><title>ツールインサイト</title><link>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__tool_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__tool_insights/</guid><description>&lt;p&gt;&lt;strong&gt;ツールインサイト&lt;/strong&gt; は、DefectDojo で使用されている各セキュリティツールが報告する検出事項の件数と深刻度に基づいてそのパフォーマンスを追跡し、ツール同士の相対的な有効性を経時的に評価できるようにします。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_5.png"
+ width="1450"
+ height="1030"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="画像"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;具体的には、「ツール別深刻度(検出事項の多い上位10件)」モーダルでは、各ツールが検出した検出事項の深刻度を比較するレーダーチャートが表示されます。&lt;/p&gt;
+&lt;p&gt;「ツール別深刻度(月次)」では、特定のスキャンタイプが特定の日付に検出した検出事項の合計数で並べたテーブルも表示されます。このテーブルの各列も、クリックすることで昇順または降順の表示に切り替えられます。&lt;/p&gt;</description></item><item><title>プログラムインサイト</title><link>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__program_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__program_insights/</guid><description>&lt;p&gt;&lt;strong&gt;プログラムインサイト&lt;/strong&gt; メトリクスページでは、個々の検出事項ではなくプログラム全体のパフォーマンスに焦点を当て、アプリケーションセキュリティプログラム全体の有効性と成熟度を評価します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_3.png"
+ width="1458"
+ height="890"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="画像"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;テスト実施状況の内訳に加え、重複排除機能や再インポート機能がノイズ削減、効率向上、累積的なコスト削減にどのように影響しているかを示し、セキュリティプロセスが意図したとおりに機能していることを確認できます。&lt;/p&gt;</description></item><item><title>改善インサイト</title><link>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__remediation_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__remediation_insights/</guid><description>&lt;p&gt;&lt;strong&gt;改善インサイト&lt;/strong&gt; ダッシュボードは、クローズ実績と改善の説明責任に焦点を当て、SLA 遵守状況、期限超過の検出事項、リスク受容の推移をチャートで示します。検出事項の悪用可能性の判定には EPSS スコアを使用しており、この元となるデータベースは DefectDojo Pro が毎日更新し、各検出事項に適用しています。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_4.png"
+ width="1444"
+ height="1070"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="画像"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;優先度インサイトと同様に、改善インサイトにもクリック可能な4つのモーダルが含まれており、それぞれがそのモーダルが表す全データのテーブルを別タブで開きます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;オープン検出事項の合計数&lt;/li&gt;
+&lt;li&gt;重大および高のオープン検出事項&lt;/li&gt;
+&lt;li&gt;SLA 内で緩和済みの検出事項&lt;/li&gt;
+&lt;li&gt;悪用可能性の高い検出事項&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>優先度インサイト</title><link>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__priority_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/pro_metrics/pro__priority_insights/</guid><description>&lt;p&gt;&lt;strong&gt;優先度インサイト&lt;/strong&gt; メトリクスページには、リスク、深刻度、悪用可能性、またはカスタムスコアリングによって判定された最も重大な検出事項が表示され、どの脆弱性がその時点で最大の脅威となっているかをチームが把握し、対応の優先順位を適切に決められるようにします。&lt;/p&gt;
+&lt;p&gt;さまざまなチャートやグラフに加えて、優先度インサイトにはクリック可能な4つのモーダルが含まれており、それぞれがそのモーダルが表す全データのテーブルを別タブで開きます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;緊急リスク検出事項の合計数&lt;/li&gt;
+&lt;li&gt;対応が必要なリスク検出事項の合計数&lt;/li&gt;
+&lt;li&gt;中リスク検出事項の合計数&lt;/li&gt;
+&lt;li&gt;検出事項の平均優先度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;さらに、AppSec または SOC のいずれかで並べ替えられた優先度付き検出事項の統合テーブルも含まれており、ユーザーはこれをさらにフィルタリングしたり操作したりして、個々の検出事項に関連するデータを表示できます。内容は CSV ファイルまたはクイックレポートとしてエクスポートでき、エクスポート前にさまざまな列を追加することもできます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/metrics_image6.png"
+ width="2704"
+ height="1264"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="優先度インサイトテーブル"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;</description></item></channel></rss>

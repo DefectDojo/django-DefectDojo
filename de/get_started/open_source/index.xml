@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🔹 DefectDojo Community Edition on DefectDojo Documentation</title><link>https://docs.defectdojo.com/de/get_started/open_source/</link><description>Recent content in 🔹 DefectDojo Community Edition on DefectDojo Documentation</description><generator>Hugo</generator><language>de</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/de/get_started/open_source/index.xml" rel="self" type="application/rss+xml"/><item><title>Installation</title><link>https://docs.defectdojo.com/de/get_started/open_source/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/open_source/installation/</guid><description>&lt;h2 id="empfohlene-optionen"&gt;&lt;strong&gt;Empfohlene Optionen&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;h3 id="docker-compose"&gt;Docker Compose&lt;/h3&gt;
+&lt;p&gt;Anleitung siehe &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md"&gt;DOCKER.md&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="saas-mit-support-und-zur-unterstützung-des-projekts"&gt;SaaS (mit Support und zur Unterstützung des Projekts)&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://defectdojo.com/platform"&gt;SaaS-Link&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="varianten-der-docker-images"&gt;&lt;strong&gt;Varianten der Docker-Images&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;p&gt;DefectDojo veröffentlicht Docker-Images in mehreren Varianten:&lt;/p&gt;</description></item><item><title>Systemarchitektur</title><link>https://docs.defectdojo.com/de/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/open_source/architecture/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dd-architecture.png"
+ width="721"
+ height="511"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="nginx"&gt;NGINX&lt;/h2&gt;
+&lt;p&gt;Der Webserver &lt;a href="https://nginx.org/en/"&gt;NGINX&lt;/a&gt; liefert alle statischen Inhalte aus, zum Beispiel
+Bilder, JavaScript-Dateien oder CSS-Dateien.&lt;/p&gt;
+&lt;h2 id="uwsgi"&gt;uWSGI&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://uwsgi-docs.readthedocs.io/en/latest/"&gt;uWSGI&lt;/a&gt; ist der Anwendungsserver,
+der die in Python/Django geschriebene DefectDojo-Plattform ausführt und alle
+dynamischen Inhalte bereitstellt.&lt;/p&gt;</description></item><item><title>Konfiguration</title><link>https://docs.defectdojo.com/de/get_started/open_source/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/open_source/configuration/</guid><description>&lt;h2 id="dojosettingssettingsdistpy"&gt;dojo/settings/settings.dist.py&lt;/h2&gt;
+&lt;p&gt;Die wichtigsten Einstellungen liegen in &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py"&gt;&lt;code&gt;dojo/settings/settings.dist.py&lt;/code&gt;&lt;/a&gt;. Diese Datei eignet sich sehr gut als Referenz dafür, was konfiguriert werden kann, sie sollte jedoch nicht direkt bearbeitet werden, da Änderungen beim Aktualisieren von DefectDojo überschrieben werden. Es gibt mehrere Wege, die Standardeinstellungen zu ändern:&lt;/p&gt;</description></item><item><title>Betrieb in der Produktion</title><link>https://docs.defectdojo.com/de/get_started/open_source/running-in-production/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/open_source/running-in-production/</guid><description>&lt;h2 id="produktiveinsatz-mit-docker-compose"&gt;Produktiveinsatz (mit Docker Compose)&lt;/h2&gt;
+&lt;p&gt;Die Datei docker-compose.yml in diesem Repository ist voll funktionsfähig, um DefectDojo in Ihrer lokalen Umgebung zu evaluieren.&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>専用インポート on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/</link><description>Recent content in 専用インポート on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/import_data/pro/specialized_import/index.xml" rel="self" type="application/rss+xml"/><item><title>🌐 ユニバーサルパーサー</title><link>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/universal_parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/universal_parser/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: ユニバーサルパーサーはDefectDojo Proでのみご利用いただけます。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;ユニバーサルパーサーはすべてのDefectDojo Proインスタンスで有効になっており、特に有効化の操作は必要ありません。詳細については&lt;a href="https://community.defectdojo.com/universalparser"&gt;発表プレゼンテーション&lt;/a&gt;をご覧ください。&lt;/p&gt;
+&lt;h2 id="ユニバーサルパーサーについて"&gt;ユニバーサルパーサーについて&lt;/h2&gt;
+&lt;p&gt;DefectDojoには、セキュリティチームがデータを取り込む際に役立つ、定期的に更新される豊富なパーサーライブラリがあります。しかし、ユーザーが使用しているツールがパーサーでサポートされていなかったり、パーサーとは異なる方法でDefectDojoモデルにデータをインポートしたいと考えたりする場合があります。&lt;/p&gt;
+&lt;p&gt;DefectDojoのユニバーサルパーサーは、サポートされていないレポート形式を使用しているユーザーに、&lt;strong&gt;あらゆるJSON、CSV、またはXMLファイル&lt;/strong&gt;をインポートしてマッピングするための手段を提供するものです。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ユニバーサルパーサーとは:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;内部ツールが生成するレポートなど、コミュニティパーサーが存在しないファイル形式を迅速にサポートする手段&lt;/li&gt;
+&lt;li&gt;コミュニティパーサーが古い場合や、希望する形式で検出事項を構造化しない場合でも、データの取り込みを支援するツール&lt;/li&gt;
+&lt;li&gt;ツールのレポートを「Generic Findings Import」スキャンタイプが想定するCSV/JSON形式に変換するためのカスタムスクリプトに代わる手段&lt;/li&gt;
+&lt;li&gt;コーディング不要、最小限の設定で誰でも簡単に使えるよう設計されたもの&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;ユニバーサルパーサーではないもの:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;オープンソースパーサー、コネクタ、または入念に調整された「Generic Findings Import」レポートの包括的な代替手段&lt;/li&gt;
+&lt;li&gt;検出事項を構造化するための、微妙な分岐ロジックを扱える機能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ユニバーサルパーサーの設定はPro UIでのみ利用可能ですが、旧UIまたはAPI経由であれば、既存のユニバーサルパーサーを使ってスキャンをインポートすることは可能です。&lt;/p&gt;</description></item><item><title>Universal Importer &amp; DefectDojo-CLI</title><link>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/external_tools/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/external_tools/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: 以下の外部ツールはDefectDojo Pro限定の機能です。これらのバイナリは、DefectDojo Proライセンスを持つインスタンスに接続されていない限り動作しません。&lt;/span&gt;&lt;/p&gt;
+&lt;h2 id="外部ツールについて"&gt;外部ツールについて&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;defectdojo-cli&lt;/code&gt;と&lt;code&gt;universal-importer&lt;/code&gt;は、検出事項と関連オブジェクトのインポートおよび再インポートのプロセスを効率化するために設計されたコマンドラインツールであり、DefectDojo APIとのこうしたやり取りを迅速にセットアップしたいユーザーに最適です。&lt;/p&gt;
+&lt;p&gt;DefectDojo-CLIはUniversal Importerと同じ機能を備えていますが、それに加えてDefectDojoから検出事項をJSONまたはCSVにエクスポートする機能も備えています。&lt;/p&gt;
+&lt;h2 id="インストール"&gt;インストール&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;ユーザープロフィールメニューから「External Tools」を探します。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;プラットフォームから、お使いのオペレーティングシステムに適したバイナリをダウンロードします。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/external-tools.png"
+ width="580"
+ height="890"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;ol start="3"&gt;
+&lt;li&gt;ダウンロードしたアーカイブを任意のディレクトリに展開します。必要に応じて、展開したバイナリが含まれるディレクトリをシステムの$PATHに追加すると、繰り返し使用する際に便利です。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Macintoshをお使いの場合、DefectDojo-CLIやUniversal Importerは未確認の開発元によるアプリであるため、実行がブロックされることがあります。Appleによるブロックを解除する方法については、&lt;a href="https://support.apple.com/en-ca/guide/mac-help/mh40616/mac"&gt;Appleサポート&lt;/a&gt;を参照してください。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Windowsをお使いの場合: 「Couldn&amp;rsquo;t download - virus detected」というエラーが表示された場合は、Smartscreenを無効にすると解決することがあります。それでも解決しない場合は、別のブラウザを使用してCloudポータルからツールをダウンロードしてください。&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>インフラストラクチャスキャン / スマートアップロード</title><link>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/smart_upload/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/smart_upload/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: スマートアップロードはDefectDojo Proでのみご利用いただけます。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;スマートアップロードは、&lt;strong&gt;インフラストラクチャスキャンツール&lt;/strong&gt;からのレポートを取り込む専用のインポーターです。対象となるツールは以下の通りです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Nexpose&lt;/li&gt;
+&lt;li&gt;NMap&lt;/li&gt;
+&lt;li&gt;OpenVas&lt;/li&gt;
+&lt;li&gt;Qualys&lt;/li&gt;
+&lt;li&gt;Tenable&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;スマートアップロードの特徴は、スキャンファイル内の検出事項を複数の製品に分割できる点です。これはインフラストラクチャスキャンにおいて重要な機能であり、検出事項がさまざまなチームに関係していたり、暗黙のSLAが異なっていたり、インフラストラクチャ内で発見された場所に応じて別々のレポートに含める必要があったりする場合に役立ちます。&lt;/p&gt;
+&lt;p&gt;スマートアップロードは、スキャンで発見されたエンドポイントに基づいて受信した検出事項を振り分けることでこれを実現します。最初は、これらの検出事項を手動で割り当てるか、未割り当て検出事項一覧から適切な製品へ振り分ける必要があります。ただし、いったん検出事項が製品に割り当てられると、同じエンドポイントまたはホストを共有する以降のすべての検出事項は同じ製品に送られます。&lt;/p&gt;
+&lt;h2 id="スマートアップロードメニューのオプション"&gt;スマートアップロードメニューのオプション&lt;/h2&gt;
+&lt;p&gt;スマートアップロードメニューは、サイドバーの折りたたみ可能なセクションに格納されています。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;検出事項の追加では、DefectDojoのスキャンインポート方法と同様に新しいスキャンファイルをインポートできます&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;未割り当て検出事項には、まだ製品に割り当てられていないスマートアップロードからのすべての検出事項が一覧表示されます。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/smart_upload.png"
+ width="496"
+ height="538"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h3 id="スマートアップロードフォーム"&gt;スマートアップロードフォーム&lt;/h3&gt;
+&lt;p&gt;スマートアップロードのスキャンインポートフォームは、基本的にスキャンインポートフォームと同じです。詳細については、&lt;strong&gt;スキャンインポートフォーム&lt;/strong&gt;に関する説明をご覧ください。&lt;/p&gt;</description></item></channel></rss>

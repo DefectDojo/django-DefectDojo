@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>はじめに on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/import_data/import_intro/</link><description>Recent content in はじめに on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/import_data/import_intro/index.xml" rel="self" type="application/rss+xml"/><item><title>インポート方法の比較</title><link>https://docs.defectdojo.com/ja/import_data/import_intro/comparison/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_intro/comparison/</guid><description>&lt;p&gt;DefectDojo が理解していることの一つは、企業ごとにセキュリティ要件がまったく異なるということです。万能なアプローチというものは存在しません。組織が変化するにつれて柔軟なアプローチを持つことが重要であり、DefectDojo ではその変化に合わせてセキュリティツールを柔軟な方法で連携させることができます。&lt;/p&gt;
+&lt;h2 id="スキャンアップロード方法"&gt;スキャンアップロード方法&lt;/h2&gt;
+&lt;p&gt;DefectDojo がセキュリティツールから脆弱性レポートを受け取ると、そのレポートに含まれる脆弱性に基づいて検出事項が作成されます。DefectDojo は、これらの検出事項を一元管理するリポジトリとして機能し、あなたとあなたのチームがトリアージ、修復、またはその他の対応を行うことができます。&lt;/p&gt;
+&lt;p&gt;DefectDojo が検出事項レポートをアップロードする主な方法は2つあります。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;UI からの直接&lt;strong&gt;インポート&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;API&lt;/strong&gt; エンドポイント経由(自動化されたデータ取り込みが可能): &lt;a href="https://docs.defectdojo.com/automation/api/api-v2-docs/"&gt;API Docs&lt;/a&gt; を参照してください&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="defectdojo-pro-の方法"&gt;DefectDojo Pro の方法&lt;/h4&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo Pro&lt;/span&gt; ユーザーには、レポートとデータを処理するための追加の3つの方法があります。&lt;/p&gt;</description></item><item><title>再インポート</title><link>https://docs.defectdojo.com/ja/import_data/import_intro/reimport/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_intro/reimport/</guid><description>&lt;p&gt;DefectDojo でテストが作成されると(事前に作成する場合でも、スキャンファイルをインポートする場合でも)、そのテストに新しい検出事項データを追加して拡張することができます。&lt;/p&gt;
+&lt;p&gt;例えば、毎日 DefectDojo に新しいレポートを送信するように設計された CI/CD パイプラインがあるとします。パイプラインの「実行」ごとに新しいテストやエンゲージメントを作成するのではなく、&lt;strong&gt;再インポート&lt;/strong&gt;を使用して各レポートを同じテストに流し込むことができます。&lt;/p&gt;
+&lt;h2 id="再インポート-処理の概要"&gt;再インポート: 処理の概要&lt;/h2&gt;
+&lt;p&gt;データを再インポートしても、テスト内の古いデータが置き換えられることはありません。代わりに、受信したスキャンファイルをテスト内の既存のスキャンデータと比較し、以下のような判断を行います。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;最新のファイルに基づくと、どの脆弱性がまだ存在しているか?&lt;/li&gt;
+&lt;li&gt;どの脆弱性が存在しなくなったか?&lt;/li&gt;
+&lt;li&gt;以前に解決されたが、その後再び発生した脆弱性はどれか?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;テストは、&lt;strong&gt;Import History&lt;/strong&gt; を通じて各スキャンバージョンを追跡・区別するため、時間の経過に伴うテスト内の検出事項の変化を確認できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/using_reimport.png"
+ width="1350"
+ height="374"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="再インポートのロジック-作成無視クローズ再オープン"&gt;再インポートのロジック: 作成、無視、クローズ、再オープン&lt;/h2&gt;
+&lt;p&gt;再インポートを使用すると、DefectDojo は受信したスキャンデータを既存のスキャンデータと比較し、以下のようにテスト内の検出事項に変更を適用します。&lt;/p&gt;</description></item></channel></rss>

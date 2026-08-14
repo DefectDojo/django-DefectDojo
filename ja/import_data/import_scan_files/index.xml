@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>データのインポート on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/import_data/import_scan_files/</link><description>Recent content in データのインポート on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/import_data/import_scan_files/index.xml" rel="self" type="application/rss+xml"/><item><title>スキャンインポートフォーム</title><link>https://docs.defectdojo.com/ja/import_data/import_scan_files/os__import_scan_ui/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_scan_files/os__import_scan_ui/</guid><description>&lt;p&gt;製品階層に少なくとも1つの製品タイプ、製品、テスト、エンゲージメントが設定されていれば、DefectDojoにスキャンファイルをインポートして検出事項を作成できます。&lt;/p&gt;
+&lt;p&gt;DefectDojoでは製品階層を簡単に再編成できるため、まだ設定方法がよくわからなくても問題ありません。&lt;/p&gt;
+&lt;p&gt;今のところ、&lt;strong&gt;エンゲージメント&lt;/strong&gt;は複数のツールからのデータを保存できるということを知っておくとよいでしょう。これは、単一のテスト活動の一環として複数のツールを同時に実行している場合に役立ちます。&lt;/p&gt;
+&lt;h2 id="スキャンインポートフォームへのアクセスクラシックui--オープンソース"&gt;スキャンインポートフォームへのアクセス(クラシックUI / オープンソース)&lt;/h2&gt;
+&lt;p&gt;DefectDojo OSでは、このフォームには次の2か所からアクセスできます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;エンゲージメントの「テスト」セクション:
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/import_scan_os.png"
+ width="1548"
+ height="354"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/li&gt;
+&lt;li&gt;製品のナビゲーションバーにある「検出事項」セクション:
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/import_scan_os_2.png"
+ width="1862"
+ height="668"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="スキャンインポートフォームの入力"&gt;スキャンインポートフォームの入力&lt;/h2&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/import_scan_ui.png"
+ width="1098"
+ height="683"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-2"
+&gt;
+スキャンインポートフォームは、エンゲージメントの配下に新しいテストを作成し、そのテストにはスキャンファイルに含まれる各脆弱性に対応する固有の検出事項が含まれます。&lt;/p&gt;
+&lt;p&gt;テストは、スキャンタイプに一致する名前で作成されます。例えば、Tenableのスキャンは「Tenable Scan」という名前になります。&lt;/p&gt;
+&lt;h3 id="フォームオプション"&gt;フォームオプション&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;スキャンファイル:&lt;/strong&gt; 「Choose」ボタンをクリックすると、コンピューター上のファイルを選択してアップロードできます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;スキャン日(任意):&lt;/strong&gt; このインポートで作成されるすべての検出事項に単一のスキャン日を適用したい場合は、このフィールドで日付を選択できます。
+スキャン日を選択しない場合、このレポートから作成される検出事項にはツールが指定した日付が使用されます。各検出事項のSLAはその日付に基づいて計算されます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;スキャンタイプ:&lt;/strong&gt; このデータの作成に使用したツールを選択します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;環境:&lt;/strong&gt; アップロードするデータに対応する環境を選択します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;タグ:&lt;/strong&gt; テストデータをさらに整理するためにタグを使用したい場合は、このフォームからタグを追加できます。作成したいタグの名前を入力し、キーボードのEnterキーを押すとタグの一覧に追加されます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="任意フィールド"&gt;任意フィールド&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;最小深刻度&lt;/strong&gt;: 特定の深刻度レベル以上の検出事項のみを作成したい場合は、ここで最小深刻度レベルを選択できます。このフィールドより深刻度が低い脆弱性はすべて無視されます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;アクティブ&lt;/strong&gt;: 受信するすべての検出事項をアクティブまたは非アクティブのいずれかに設定したい場合は、ここで指定できます。指定しない場合、DefectDojoはツールの脆弱性データを使用して、検出事項がアクティブか非アクティブかを判断します。このオプションは、特定のツールからの検出事項をチームが手動でトリアージ・検証する必要がある場合に関係します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;検証済み&lt;/strong&gt;: アクティブと同様に、新しい検出事項のセットをデフォルトで検証済みまたは未検証に設定できます。これはワークフローの好みによります。例えば、チームが証明されない限り検出事項は検証済みであるとみなすことを好む場合、このフィールドをTrueに設定できます。&lt;/li&gt;
+&lt;li&gt;テストにこれらの詳細を含めたい場合は、&lt;strong&gt;バージョン、ブランチタグ、コミットハッシュ、ビルドID、サービス&lt;/strong&gt;をすべて指定できます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ソースコード管理URI&lt;/strong&gt;も指定できます。このフォームオプションには有効なURIを指定する必要があります。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;グループ化:&lt;/strong&gt; このファイルから検出事項グループを作成したい場合は、ここでグループ化方法を指定できます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="トリアージ情報のないスキャナー-do-not-reactivateフィールド"&gt;トリアージ情報のないスキャナー: 「Do Not Reactivate」フィールド&lt;/h3&gt;
+&lt;p&gt;一部のスキャナー(例: tfsec)は、レポートにトリアージ情報を含めない場合があります。これらのスキャナーは、脆弱性が既にトリアージされているかどうかにかかわらず、コードや依存関係をスキャンして問題にフラグを立て、すべてを返すだけです。&lt;/p&gt;</description></item><item><title>検出事項の追加フォーム</title><link>https://docs.defectdojo.com/ja/import_data/import_scan_files/pro__import_scan_ui/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_scan_files/pro__import_scan_ui/</guid><description>&lt;p&gt;DefectDojo の新規インスタンスをお使いの場合、Import Scan Form はソフトウェアを学び、環境をセットアップするための理にかなった最初のステップです。このフォームから、サポートされているツールのスキャンファイルをアップロードすると、それらの脆弱性を表す検出事項が作成されます。フォームの入力中に、以下のどちらにするかを決めることができます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;これらの検出事項を既存の製品タイプ / 製品 / エンゲージメントの下に保存する &lt;strong&gt;または&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;これらの検出事項を保存するために新しい製品タイプ / 製品 / エンゲージメントを作成する&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;DefectDojo では製品階層を簡単に再編成できるため、まだセットアップ方法がわからなくても心配ありません。&lt;/p&gt;
+&lt;p&gt;さしあたり、&lt;strong&gt;エンゲージメント&lt;/strong&gt;は複数のツールからのデータを保存できることを知っておくとよいでしょう。これは、単一のテスト作業の一環として複数のツールを同時に実行している場合に便利です。&lt;/p&gt;
+&lt;h2 id="import-scan-form-へのアクセス方法pro-ui"&gt;Import Scan Form へのアクセス方法(Pro UI)&lt;/h2&gt;
+&lt;p&gt;Import Scan フォームには複数の場所からアクセスできます。&lt;/p&gt;</description></item><item><title>エンドポイントメタインポーター</title><link>https://docs.defectdojo.com/ja/import_data/import_scan_files/endpoint_meta_importer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_scan_files/endpoint_meta_importer/</guid><description>&lt;p&gt;&lt;strong&gt;エンドポイントメタインポーター&lt;/strong&gt;を使用すると、CSV ファイルを使って大量のエンドポイントに一度にタグやカスタムフィールドを適用できます。これは、フィルタリング、ソート、レポート作成のために柔軟なメタデータをエンドポイントに必要とする、負荷の高いインフラストラクチャスキャンを実行している組織に特に役立ちます。&lt;/p&gt;
+&lt;h2 id="csv-形式"&gt;CSV 形式&lt;/h2&gt;
+&lt;p&gt;CSV ファイルには &lt;code&gt;hostname&lt;/code&gt; 列(必須)に加えて、適用したいタグやカスタムフィールドを表す任意の数の追加列が必要です。追加された各列名がタグ/フィールドのキーとなり、その行の値がタグ/フィールドの値になります。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;例:&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;hostname,team,public_facing
+sheets.google.com,data analytics,yes
+docs.google.com,language processing,yes
+feedback.internal.google.com,human resources,no&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;これにより、以下のメタデータが適用されます。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Endpoint&lt;/th&gt;
+ &lt;th&gt;Tags / Custom Fields&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;sheets.google.com&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;team:data analytics&lt;/code&gt;, &lt;code&gt;public_facing:yes&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;docs.google.com&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;team:language processing&lt;/code&gt;, &lt;code&gt;public_facing:yes&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;feedback.internal.google.com&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;team:human resources&lt;/code&gt;, &lt;code&gt;public_facing:no&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="要件"&gt;要件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;hostname&lt;/code&gt; 列は&lt;strong&gt;必須&lt;/strong&gt;です。この列は、ホストが一致する既存のエンドポイントを検索したり、一致するものがない場合に新しいエンドポイントを作成したりするために使用されます。&lt;/li&gt;
+&lt;li&gt;それ以外のすべての列名は、タグ/カスタムフィールドのキーとして扱われます。&lt;/li&gt;
+&lt;li&gt;値は &lt;code&gt;key:value&lt;/code&gt; 形式で保存されます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="エンドポイントメタインポーターの使用"&gt;エンドポイントメタインポーターの使用&lt;/h2&gt;
+&lt;p&gt;エンドポイントメタインポーターは、製品を表示しているときの &lt;strong&gt;Endpoints&lt;/strong&gt; タブから利用できます。そこに CSV ファイルをアップロードすることで、エンドポイントにメタデータを一括適用できます。&lt;/p&gt;</description></item><item><title/><link>https://docs.defectdojo.com/ja/import_data/import_scan_files/os__create_findings_manually/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_scan_files/os__create_findings_manually/</guid><description/></item><item><title/><link>https://docs.defectdojo.com/ja/import_data/import_scan_files/pro__create_findings_manually/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_scan_files/pro__create_findings_manually/</guid><description/></item><item><title>API からのインポート</title><link>https://docs.defectdojo.com/ja/import_data/import_scan_files/api_pipeline_modelling/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/import_scan_files/api_pipeline_modelling/</guid><description>&lt;p&gt;DefectDojo の API は、新しいスキャンをインスタンスに自動的に取り込む堅牢なパイプラインソリューションを可能にします。このような自動化にはいくつかの形態があります。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;環境を日次でスキャンし、そのスキャン結果を DefectDojo にインポートする日次インポート(当社の&lt;strong&gt;コネクター&lt;/strong&gt;機能に似ています)&lt;/li&gt;
+&lt;li&gt;デプロイ時に新しいコードをスキャンし、その結果をトリガーされたアクションとして DefectDojo にインポートする CI/CD パイプライン&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;これらのパイプラインは、当社の &lt;strong&gt;Import Scan Form&lt;/strong&gt; に近い方法で、スキャンファイルを添付して API の &lt;strong&gt;/reimport&lt;/strong&gt; エンドポイントを直接呼び出すことによって作成できます。&lt;/p&gt;</description></item></channel></rss>

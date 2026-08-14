@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>スタートガイド on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/get_started/</link><description>Recent content in スタートガイド on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/get_started/index.xml" rel="self" type="application/rss+xml"/><item><title>📊 Proの機能一覧</title><link>https://docs.defectdojo.com/ja/get_started/pro/pro_features/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/pro_features/</guid><description>&lt;p&gt;DefectDojo Proが提供する多くの追加機能の一覧と、実際の動作を確認できるドキュメントへのリンクをご紹介します。&lt;/p&gt;
+&lt;h2 id="uxの改善"&gt;UXの改善&lt;/h2&gt;
+&lt;h3 id="pro-ui"&gt;Pro UI&lt;/h3&gt;
+&lt;p&gt;DefectDojoのUIは、DefectDojo Proにおいてより高速で、より機能的に、そして完全にカスタマイズ可能に作り直されており、エンタープライズレベルのデータ量をより快適に扱えるようになっています。ダークモードも搭載しています。&lt;br&gt;
+詳細は&lt;a href="https://docs.defectdojo.com/get_started/about/ui_pro_vs_os/"&gt;Pro UIガイド&lt;/a&gt;をご覧ください。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/enabling_deduplication_within_an_engagement_2.png"
+ width="1600"
+ height="672"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h3 id="グローバル検索"&gt;グローバル検索&lt;/h3&gt;
+&lt;p&gt;検出事項、アセット、エンゲージメントなどを、トップバーの検索ボックスひとつから見つけることができます。DefectDojo Proのグローバル検索は、高速でタイプミスにも強いPostgresの全文検索を使って、あらゆるオブジェクトを横断的に検索します。&lt;/p&gt;
+&lt;p&gt;詳細は&lt;a href="https://docs.defectdojo.com/navigation/pro__global_search/"&gt;グローバル検索ガイド&lt;/a&gt;をご覧ください。&lt;/p&gt;
+&lt;h3 id="アセット組織"&gt;アセット/組織&lt;/h3&gt;
+&lt;p&gt;DefectDojo Proでは、大量のリポジトリやその他のビジネス構造を、より分かりやすく組織的に可視化できます。詳細については&lt;a href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/asset_hierarchy/"&gt;アセット/組織のドキュメント&lt;/a&gt;をご覧ください。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/asset_hierarchy_diagram.png"
+ width="1856"
+ height="807"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h3 id="検出事項の優先度"&gt;検出事項の優先度&lt;/h3&gt;
+&lt;p&gt;DefectDojo Proは、優先度とリスクに基づいて検出事項を事前にトリアージできるため、チームは最も重大な問題を最初に特定して修正できます。
+詳細は&lt;a href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/"&gt;検出事項の優先度ガイド&lt;/a&gt;をご覧ください。&lt;/p&gt;</description></item></channel></rss>

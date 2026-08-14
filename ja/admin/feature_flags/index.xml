@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>機能フラグ on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/admin/feature_flags/</link><description>Recent content in 機能フラグ on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/admin/feature_flags/index.xml" rel="self" type="application/rss+xml"/><item><title>機能フラグ</title><link>https://docs.defectdojo.com/ja/admin/feature_flags/pro__feature_flags/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/feature_flags/pro__feature_flags/</guid><description>&lt;p&gt;機能フラグを使うと、自分のインスタンス上でDefectDojo Proのオプション機能のオン/オフを切り替えることができます。これまではDefectDojoサポートに連絡しなければ有効化できなかった機能を、UIからセルフサービスで有効化できるようになりました。&lt;/p&gt;
+&lt;p&gt;機能フラグページは&lt;strong&gt;スーパーユーザー&lt;/strong&gt;のみに表示されます。グローバルオーナーを含む他のユーザーには表示されません。&lt;/p&gt;
+&lt;h2 id="機能フラグページを開く"&gt;機能フラグページを開く&lt;/h2&gt;
+&lt;p&gt;左サイドバーの&lt;strong&gt;Settings &amp;gt; Feature Flags&lt;/strong&gt;に移動します。&lt;/p&gt;
+&lt;p&gt;このページには、すべてのオプション機能が以下の情報とともに一覧表示されます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Name&lt;/strong&gt;(名前) — 機能名。まだベータ版の場合は&lt;strong&gt;BETA&lt;/strong&gt;タグが付きます&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Description&lt;/strong&gt;(説明) — その機能が何をするか&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Documentation link&lt;/strong&gt;(ドキュメントリンク) — その機能のドキュメントがある場所&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Toggle&lt;/strong&gt;(トグル) — 現在オンになっているかどうか&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;検索ボックスを使うと、機能名や説明で一覧を絞り込めます。&lt;/p&gt;</description></item></channel></rss>

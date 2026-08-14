@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>アセット階層 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/</link><description>Recent content in アセット階層 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>PriorityとRiskおよびSLAの割り当て</title><link>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_finding_priority.png"
+ width="1120"
+ height="632"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;効果的なリスクベースの脆弱性管理には、ビジネスコンテキストと技術的な悪用可能性の両方を考慮したアプローチが必要です。DefectDojo ProのPriorityおよびRisk機能を使用すると、ユーザーは検出事項を意味のあるコンテキストへ自動的に分類し、影響度の高い脆弱性を優先的に対応できるようになります。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Priority&lt;/strong&gt;は、DefectDojoインスタンス内のすべての検出事項に適用される、算出された数値ランクです。特に多数の検出事項や製品のセキュリティニーズを統括する大規模な組織において、脆弱性をコンテキストの中で素早く把握できるようにします。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Risk&lt;/strong&gt;は、検出事項の悪用可能性をより重視した4段階のランク付けシステムです。これはPriorityよりも粒度が低く、より「経営層向け」のバージョンとして位置付けられています。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_risk_example.png"
+ width="1966"
+ height="194"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;PriorityとRiskの値は、他のフィルタと組み合わせて、あらゆるコンテキストで検出事項を比較するために使用できます。例えば以下のような単位です。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;単一の製品、エンゲージメント、またはテスト内&lt;/li&gt;
+&lt;li&gt;DefectDojoの全製品にわたるグローバルな比較&lt;/li&gt;
+&lt;li&gt;特定の少数の製品間での比較&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;検出事項のPriorityとRiskを適用することで、チームは組織内で最も重要な脆弱性に対応しやすくなり、また規制標準への準拠を支援するフレームワークにもなります。&lt;/p&gt;
+&lt;p&gt;PriorityとRiskについて詳しくは、DefectDojo, Inc.の2025年5月のOffice Hoursをご覧ください。&lt;/p&gt;
+&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/4SN0BWWsVm4?si=VYUzEGNeijjhoD22" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;h2 id="priorityとriskの計算方法"&gt;PriorityとRiskの計算方法&lt;/h2&gt;
+&lt;p&gt;Priorityの値の範囲は0から1150です。数値が高いほど、その検出事項のトリアージまたは修復の緊急度が高いことを意味します。&lt;/p&gt;</description></item><item><title>アセット階層</title><link>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/asset_hierarchy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/asset_hierarchy/</guid><description>&lt;p&gt;DefectDojo Proは、データモデルの柔軟性を高めるために、製品/製品タイプのオブジェクトクラスを拡張しています。&lt;/p&gt;
+&lt;h2 id="enabling-the-hierarchy-feature"&gt;Enabling the Hierarchy Feature&lt;/h2&gt;
+&lt;p&gt;以下の2つの要素は別個のものであり、それぞれ異なる方法で制御されます。&lt;/p&gt;
+&lt;h3 id="asset-hierarchy"&gt;Asset Hierarchy&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;アセット階層&lt;/strong&gt;は、アセット間の親子関係を可能にします。この階層は、ナビゲーションの&lt;strong&gt;製品&lt;/strong&gt;タブから表示および管理できます。&lt;/p&gt;
+&lt;p&gt;アセット階層は一般提供されており、クラウド版・オンプレミス版を問わずすべてのインスタンスで有効になっています。特に有効化する操作は不要で、Feature Flagsページにも表示されなくなりました。&lt;/p&gt;
+&lt;h3 id="label-changes-optional"&gt;Label Changes (optional)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;ラベル変更&lt;/strong&gt;は、UI全体で&amp;quot;Product Type&amp;quot;を&amp;quot;Organization&amp;quot;に、&amp;ldquo;Product&amp;quot;を&amp;quot;Asset&amp;quot;に名称変更します。これは階層機能の有効化とは別の手順であり、同時に行うことも、後から行うこともできます。&lt;/p&gt;
+&lt;p&gt;ラベル変更は、3.0以降デフォルトで有効になっています。アプリケーションの異なる部分をカバーする、2つの制御があります:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Pro UI&lt;/strong&gt;(デフォルトのUI): スーパーユーザーが、クラウド版・オンプレミス版の両方のインスタンスで&lt;strong&gt;Settings &amp;gt; Feature Flags&lt;/strong&gt;の&amp;quot;Organization / Asset Relabeling&amp;quot;を切り替えます。新しいラベルは次回のページ読み込み時に表示されます。&lt;a href="https://docs.defectdojo.com/admin/feature_flags/pro__feature_flags/"&gt;Feature Flags&lt;/a&gt;を参照してください。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;クラシックUIのページと生成されるレポート&lt;/strong&gt;: これらのラベルとURLは、DefectDojoの起動時に読み込まれる&lt;code&gt;DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL&lt;/code&gt;デプロイメント設定によって決まります。オンプレミスの場合は、この設定を行いDefectDojoを再起動してください。&lt;a href="https://docs.defectdojo.com/get_started/pro/cloud/"&gt;DefectDojo Pro (Cloud)&lt;/a&gt;の場合は、インスタンスのURLを添えて&lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="support",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;support at defectdojo dot com&lt;/noscript&gt;
+
+ までメールでお問い合わせください。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;どちらもデフォルトで有効になっており、Feature Flagsの値はデプロイメント設定から初期値が設定されているため、どちらか一方を変更しない限り両者は一致します。Pro UIに加えてクラシックUIも使用している場合は、両者を同期させた状態に保ってください。&lt;/p&gt;</description></item><item><title>脅威インテリジェンス</title><link>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/threat_intelligence/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/threat_intelligence/</guid><description>&lt;p&gt;DefectDojo Proは、悪用可能性、既知の悪用事例、脅威アクターの活動といった&lt;strong&gt;専用の脅威インテリジェンス&lt;/strong&gt;で検出事項をエンリッチし、それをPriorityとRiskに反映します。これはEPSSやCISA KEVフラグをはるかに超える情報です。&lt;/p&gt;
+&lt;h2 id="得られるもの"&gt;得られるもの&lt;/h2&gt;
+&lt;p&gt;CVEを持つすべての検出事項は、毎晩、CISA KEV、Metasploit、Exploit-DB、Nucleiテンプレート、および一般公開されているPoC(概念実証)の追跡情報から構築された厳選済みのインテリジェンスフィードと照合されます。悪用の証跡がある場合、その検出事項には&lt;strong&gt;Threat Intelligence&lt;/strong&gt;カードが表示されます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;**悪用成熟度(exploit-maturity)**バッジ — &lt;em&gt;なし → PoC → 武器化済み → 実際に悪用中&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;脅威スコア&lt;/strong&gt;(0〜100)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;証跡へのリンクとなるエビデンスチップ&lt;/strong&gt; — KEVエントリ(掲載日を含む)、ランサムウェアでの使用、Metasploitモジュール、Exploit-DBエントリ、Nucleiテンプレート、一般公開されているPoCリポジトリ&lt;/li&gt;
+&lt;li&gt;その検出事項のpriorityが上昇した&lt;strong&gt;理由&lt;/strong&gt;を説明する平易な一文&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;カードだけでなく、このインテリジェンスはアプリ全体で利用できる情報にもなっています。&lt;/p&gt;</description></item><item><title>製品ヘルスグレード</title><link>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/product_health_grade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/pro_hierarchy/product_health_grade/</guid><description>&lt;p&gt;DefectDojoは、含まれる検出事項の件数に基づいて製品にグレードを算出することができます。グレードはA〜Fでランク付けされます。&lt;/p&gt;
+&lt;p&gt;Product Gradeに影響するのは&lt;strong&gt;アクティブ&lt;/strong&gt;かつ&lt;strong&gt;検証済み&lt;/strong&gt;の検出事項のみである点に注意してください。未検証の検出事項は影響を与えません。&lt;/p&gt;
+&lt;h2 id="product-gradeの計算"&gt;Product Gradeの計算&lt;/h2&gt;
+&lt;p&gt;すべてのProduct Gradeは(検出事項がない状態で)100から始まります。&lt;/p&gt;
+&lt;p&gt;グレードの計算では、まず製品内の検出事項の中で最も高い&lt;strong&gt;深刻度&lt;/strong&gt;レベルを確認し、Product Healthをその基準レベルまで引き下げます。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;検出事項の最も高い深刻度レベル&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;最大グレード&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;重大&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;40&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;高&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;60&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;中&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;80&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;低&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;95&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;その後、追加の検出事項ごとにグレードからさらにポイントが差し引かれます。&lt;/p&gt;</description></item></channel></rss>

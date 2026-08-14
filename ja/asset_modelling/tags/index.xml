@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>タグ on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/asset_modelling/tags/</link><description>Recent content in タグ on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/asset_modelling/tags/index.xml" rel="self" type="application/rss+xml"/><item><title>オブジェクトへのタグ付け</title><link>https://docs.defectdojo.com/ja/asset_modelling/tags/os__tagging_objects/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/tags/os__tagging_objects/</guid><description>&lt;p&gt;タグは、オブジェクトをより小さく扱いやすい単位にフィルタできる形でグループ化するのに最適な方法です。ステータスを示すために使用したり、Organizations、Assets、Engagements、Findingsといったデータモデル全体にわたるカスタムなまとまりを作成したりするために使用できます。&lt;/p&gt;
+&lt;p&gt;DefectDojoでは、タグはファーストクラスの存在として扱われており、データモデルの各階層内で整理を促進する仕組みとして認識されています。&lt;/p&gt;
+&lt;p&gt;以下は、2つのタグを持つ1つのAssetと、それぞれ1つずつタグを持つ4つの検出事項の例です。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/tags-high-level-example.png"
+ width="1920"
+ height="825"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="High level example of usage with tags"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h3 id="タグの形式"&gt;タグの形式&lt;/h3&gt;
+&lt;p&gt;タグは以下のいずれの形式でも指定できます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;スペースなしの文字列(StringWithNoSpaces)&lt;/li&gt;
+&lt;li&gt;ハイフン区切りの文字列(string-with-hyphens)&lt;/li&gt;
+&lt;li&gt;アンダースコア区切りの文字列(string_with_underscores)&lt;/li&gt;
+&lt;li&gt;コロンを含む形式(colons:acceptable)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="タグの管理"&gt;タグの管理&lt;/h2&gt;
+&lt;h3 id="追加と削除"&gt;追加と削除&lt;/h3&gt;
+&lt;p&gt;タグは以下の方法で管理できます。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;新しいオブジェクトの作成または編集&lt;/p&gt;
+&lt;p&gt;UIまたはAPIを通じて新しいオブジェクトを作成または編集する際、そのオブジェクトに設定するタグを指定するためのフィールドがあります。このフィールドはマルチセレクト形式で、オートコンプリート機能も備えているため、既存のタグを簡単に検索・追加できます。前のセクションのスクリーンショットにあるAssetでは、このフィールドは次のように表示されます。&lt;/p&gt;</description></item><item><title>オブジェクトへのタグ付け</title><link>https://docs.defectdojo.com/ja/asset_modelling/tags/pro__tagging_objects-copy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/tags/pro__tagging_objects-copy/</guid><description>&lt;p&gt;タグは、オブジェクトをフィルタリングして、より小さく扱いやすい単位にグループ化するのに理想的です。ステータスを示すためや、データモデル全体にわたって製品タイプ、製品、エンゲージメント、検出事項のカスタムセットを作成するために使用できます。&lt;/p&gt;
+&lt;p&gt;DefectDojoでは、タグはファーストクラスの存在として扱われ、データモデルの各レベルにおける整理を促進する仕組みとして認識されています。&lt;/p&gt;
+&lt;p&gt;以下は、2つのタグを持つ製品と、それぞれ1つのタグを持つ4件の検出事項の例です。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/tags-high-level-example.png"
+ width="1920"
+ height="825"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="High level example of usage with tags"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h3 id="タグの形式"&gt;タグの形式&lt;/h3&gt;
+&lt;p&gt;タグは以下のいずれかの形式でフォーマットできます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;StringWithNoSpaces&lt;/li&gt;
+&lt;li&gt;string-with-hyphens&lt;/li&gt;
+&lt;li&gt;string_with_underscores&lt;/li&gt;
+&lt;li&gt;colons:acceptable&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="タグの管理pro-ui"&gt;タグの管理(Pro UI)&lt;/h2&gt;
+&lt;h3 id="追加と削除"&gt;追加と削除&lt;/h3&gt;
+&lt;p&gt;タグは以下の方法で管理できます。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;新しいオブジェクトの作成または編集&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>

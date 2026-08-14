@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🔹 Édition Community de DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/fr/get_started/open_source/</link><description>Recent content in 🔹 Édition Community de DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>fr</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/fr/get_started/open_source/index.xml" rel="self" type="application/rss+xml"/><item><title>Architecture du système</title><link>https://docs.defectdojo.com/fr/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/open_source/architecture/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dd-architecture.png"
+ width="721"
+ height="511"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="nginx"&gt;NGINX&lt;/h2&gt;
+&lt;p&gt;Le serveur web &lt;a href="https://nginx.org/en/"&gt;NGINX&lt;/a&gt; délivre tout le contenu statique, comme les
+images, les fichiers JavaScript ou les fichiers CSS.&lt;/p&gt;
+&lt;h2 id="uwsgi"&gt;uWSGI&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://uwsgi-docs.readthedocs.io/en/latest/"&gt;uWSGI&lt;/a&gt; est le serveur d&amp;rsquo;application
+qui exécute la plateforme DefectDojo, écrite en Python/Django, afin de servir tout le
+contenu dynamique.&lt;/p&gt;</description></item><item><title>Installation</title><link>https://docs.defectdojo.com/fr/get_started/open_source/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/open_source/installation/</guid><description>&lt;h2 id="options-recommandées"&gt;&lt;strong&gt;Options recommandées&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;h3 id="docker-compose"&gt;Docker Compose&lt;/h3&gt;
+&lt;p&gt;Consultez les instructions dans &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md"&gt;DOCKER.md&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="saas-inclut-le-support-et-soutient-le-projet"&gt;SaaS (inclut le support et soutient le projet)&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://defectdojo.com/platform"&gt;Lien SaaS&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="variantes-d"&gt;&lt;strong&gt;Variantes d&amp;rsquo;image Docker&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;p&gt;DefectDojo publie des images Docker en plusieurs variantes :&lt;/p&gt;</description></item><item><title>Configuration</title><link>https://docs.defectdojo.com/fr/get_started/open_source/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/open_source/configuration/</guid><description>&lt;h2 id="dojosettingssettingsdistpy"&gt;dojo/settings/settings.dist.py&lt;/h2&gt;
+&lt;p&gt;Les principaux paramètres sont stockés dans &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py"&gt;&lt;code&gt;dojo/settings/settings.dist.py&lt;/code&gt;&lt;/a&gt;. Il est utile d&amp;rsquo;utiliser ce fichier comme référence pour ce qui peut être configuré, mais il ne doit pas être modifié directement, car les changements seraient écrasés lors de la mise à jour de DefectDojo. Il existe plusieurs méthodes pour modifier les paramètres par défaut :&lt;/p&gt;</description></item><item><title>Exécution en production</title><link>https://docs.defectdojo.com/fr/get_started/open_source/running-in-production/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/open_source/running-in-production/</guid><description>&lt;h2 id="utilisation-en-production-avec-docker-compose"&gt;Utilisation en production (avec Docker compose)&lt;/h2&gt;
+&lt;p&gt;Le fichier docker-compose.yml de ce dépôt est pleinement fonctionnel pour évaluer DefectDojo dans votre environnement local.&lt;/p&gt;</description></item></channel></rss>

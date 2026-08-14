@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>レポートビルダー on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/metrics_reports/reports/</link><description>Recent content in レポートビルダー on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/metrics_reports/reports/index.xml" rel="self" type="application/rss+xml"/><item><title>レポートビルダー</title><link>https://docs.defectdojo.com/ja/metrics_reports/reports/report-builder/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/reports/report-builder/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: 再利用可能なレポートビルダー（テーマ、ブロック、テンプレート、および保存された生成済みレポート）はDefectDojo Proの機能であり、現在ベータ版です。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Proのレポートビルダーを使用すると、再利用可能な部品から洗練されたレポートを組み立てることができるため、レポートを毎回ゼロから作り直すのではなく、一度部品を作成してあらゆる場所で再利用できます。サイドバーの**📄 レポート機能**エリアからアクセスできます。&lt;/p&gt;
+&lt;h2 id="オープンソース版との比較"&gt;オープンソース版との比較&lt;/h2&gt;
+&lt;p&gt;オープンソース版DefectDojoでは、レポートの作成、実行、出力の取得ができますが、レポートテンプレートの保存や生成したレポートの永続化は&lt;strong&gt;行いません&lt;/strong&gt;。各レポートは一回限りの作業です。&lt;/p&gt;
+&lt;p&gt;DefectDojo Proは、レポート機能を再利用可能な構成要素に変えます。組み合わせたり再利用したりできる&lt;strong&gt;テーマ&lt;/strong&gt;、&lt;strong&gt;ブロック&lt;/strong&gt;、&lt;strong&gt;テンプレート&lt;/strong&gt;を保存でき、実行した各レポートは、後でダウンロードしたり再実行したりできる&lt;strong&gt;生成済みレポート&lt;/strong&gt;として永続化されます。また、Proはワークフロー全体を完全なREST APIとして公開しており、LLM支援による作成もサポートしているため、レポートをプログラムで作成・実行できます。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;💡 Tip:&lt;/strong&gt; オープンソース版DefectDojoを使用している場合は、代わりに&lt;a href="../using-the-report-builder/"&gt;オープンソース版レポートビルダー&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="主要な概念"&gt;主要な概念&lt;/h2&gt;
+&lt;p&gt;レポートビルダーは4つの構成要素からなり、それぞれが&lt;code&gt;/api/v2/&lt;/code&gt;配下のRESTリソースとして利用可能です: &lt;code&gt;report_themes&lt;/code&gt;、&lt;code&gt;report_blocks&lt;/code&gt;、&lt;code&gt;report_templates&lt;/code&gt;、&lt;code&gt;generated_reports&lt;/code&gt;。これらがどのように連携するかを理解することが、効率的にレポートを作成するための鍵となります。&lt;/p&gt;</description></item><item><title>APIによるレポートの自動化</title><link>https://docs.defectdojo.com/ja/metrics_reports/reports/report-builder-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/reports/report-builder-api/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: Report Builder REST API(レポートテーマ、ブロック、テンプレート、生成されたレポート)はDefectDojo Proの機能であり、現在ベータ版です。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Report Builder REST APIを使うと、&lt;a href="../report-builder/"&gt;Report Builder UI&lt;/a&gt;で手作業により組み立てるのと同じテーマ、ブロック、テンプレートを自動化できます。さらに一歩進んで、テンプレートを&lt;strong&gt;実行&lt;/strong&gt;し、完成したPDFまたはHTMLを&lt;strong&gt;ダウンロード&lt;/strong&gt;することも可能です。このガイドでは、認証、フィールドとフィルターの語彙の把握、構成要素の作成、そしてレポートの生成と取得という一連の流れを最初から最後まで説明します。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;簡易な検出事項エクスポートをお探しですか?&lt;/strong&gt; テーマ、ブロック、テンプレートを設定せずに、検出事項の単純な一覧をJSON、HTML、CSV、Excelとして取得したいだけなら、&lt;a href="https://docs.defectdojo.com/automation/api/api-v2-docs/#generating-reports"&gt;Generating Reports&lt;/a&gt;に記載されているよりシンプルな &lt;code&gt;generate_report/&lt;/code&gt; エンドポイントを使用してください。このページで説明するReport Builder APIは、デザインされた複数セクション構成のレポートを構築するためのものです。&lt;/p&gt;</description></item><item><title>LLMを使ったレポート作成</title><link>https://docs.defectdojo.com/ja/metrics_reports/reports/report-builder-llm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/reports/report-builder-llm/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: REST APIとLLMを使用したレポートビルダーの自動化は、DefectDojo Proの機能であり、現在ベータ版です。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Proのレポートビルダー(テーマ、ブロック、テンプレート)は、REST APIによって完全に駆動されます。つまり、作業全体をLLMに任せることができます。自己完結型のプロンプトを1つ、Claude、ChatGPT、その他の高性能なモデルに貼り付けるだけで、テナントのライブOpenAPIスキーマと &lt;code&gt;field_options&lt;/code&gt; を調査し、指定した対象者向けのテーマと再利用可能なブロックライブラリおよびテンプレートを提案し、実行可能なPythonスクリプトを生成した上で、レポートを実行して完成したファイルをダウンロードしてくれます。&lt;/p&gt;
+&lt;p&gt;パターンはシンプルです。ベースURL、APIトークン、そしてレポートの対象者についての簡単な説明を用意するだけです。LLMが調査、設計、作成、検証、実行、ダウンロードを行いますが、テナントに対して何かを構築する前には、必ずあなたの承認を待って一時停止します。&lt;/p&gt;
+&lt;p&gt;本ガイドは&lt;a href="../report-builder-api/"&gt;レポートビルダーAPIガイド&lt;/a&gt;と対になっており、LLMが操作する生のリソースとリクエスト形式について説明しています。LLMが生成した内容を理解したり、手動で調整したりしたい場合は、このリファレンスを開いておいてください。&lt;/p&gt;
+&lt;h2 id="開始する前に"&gt;開始する前に&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;APIトークンを取得する。&lt;/strong&gt; DefectDojo Pro UIで、&lt;strong&gt;ユーザー設定 → API v2キー&lt;/strong&gt; に移動し、トークンをコピーします。次に、生成されたスクリプトがチャットにトークンを表示させることなく読み取れるように、環境変数として設定します。&lt;/li&gt;
+&lt;/ol&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame is-terminal not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;DD_IMPORTER_DOJO_API_TOKEN&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&amp;lt;paste-token-here&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;対象者を決める。&lt;/strong&gt; LLMはレポートの対象者を尋ねます。一般的な選択肢は次のとおりです。&lt;/p&gt;</description></item><item><title>レポートビルダーの使用</title><link>https://docs.defectdojo.com/ja/metrics_reports/reports/using-the-report-builder/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/reports/using-the-report-builder/</guid><description>&lt;p&gt;DefectDojoのレポートビルダーを使用すると、一連のコンテンツウィジェットからカスタムレポートを組み立て、実行し、結果をエクスポートできます（たとえば、PDFに印刷するなど）。カスタムレポートは、社外の関係者と共有したい検出事項やエンドポイントをまとめることができ、ブランディングや定型文を含めることもできます。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; オープンソース版DefectDojoでは、レポートの作成、実行、出力の取得は一回限りの作業です。レポートのレイアウト（テンプレート）と生成されたレポートの出力は、オープンソース版では&lt;strong&gt;保存されません&lt;/strong&gt;。レイアウトを再利用するには、レポートビルダーで再構築する必要があります。再利用可能なテーマ、ブロック、テンプレートを保存し、生成されたレポートの履歴を永続的に保持するには、DefectDojo Proの&lt;a href="../report-builder/"&gt;レポートビルダー&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="レポートビルダーを開く"&gt;レポートビルダーを開く&lt;/h2&gt;
+&lt;p&gt;レポートビルダーは、サイドバーの**📄 レポート**ページから開くことができます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Using_the_Report_Builder.png"
+ width="1600"
+ height="867"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;レポートビルダーのページは2つの列で構成されています。左側の&lt;strong&gt;レポート形式&lt;/strong&gt;列でレポートを設計し、右側の&lt;strong&gt;利用可能なウィジェット&lt;/strong&gt;列のウィジェットを使用します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Using_the_Report_Builder_2.png"
+ width="1600"
+ height="905"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h2 id="ステップ1-レポートオプションを設定する"&gt;ステップ1: レポートオプションを設定する&lt;/h2&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Using_the_Report_Builder_3.png"
+ width="1600"
+ height="874"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-2"
+&gt;&lt;/p&gt;
+&lt;p&gt;レポートオプションセクションでは、次の操作を行うことができます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;レポートの&lt;strong&gt;レポート名&lt;/strong&gt;を設定する&lt;/li&gt;
+&lt;li&gt;ユーザーが作成した&lt;strong&gt;検出事項のメモ&lt;/strong&gt;をレポートに含める&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;検出事項の画像&lt;/strong&gt;をレポートに含める&lt;/li&gt;
+&lt;li&gt;レポートにヘッダー&lt;strong&gt;画像&lt;/strong&gt;をアップロードする&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="レポートのヘッダー画像を選択する"&gt;レポートのヘッダー画像を選択する&lt;/h3&gt;
+&lt;p&gt;レポートの先頭に画像を追加するには、&lt;strong&gt;ファイルを選択&lt;/strong&gt;ボタンをクリックしてDefectDojoに画像をアップロードします。&lt;/p&gt;
+&lt;p&gt;画像は文書に合わせて自動的にサイズ変更され、&lt;strong&gt;レポート名&lt;/strong&gt;のすぐ上に表示されます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Using_the_Report_Builder_4.png"
+ width="1360"
+ height="274"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-3"
+&gt;&lt;/p&gt;
+&lt;h2 id="ステップ2-ウィジェットでコンテンツを追加する"&gt;ステップ2: ウィジェットでコンテンツを追加する&lt;/h2&gt;
+&lt;p&gt;レポートオプションを設定したら、DefectDojoのウィジェットを使用してレポートの設計を開始できます。&lt;/p&gt;</description></item></channel></rss>

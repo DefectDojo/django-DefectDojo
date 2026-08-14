@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>通知 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/admin/notifications/</link><description>Recent content in 通知 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/admin/notifications/index.xml" rel="self" type="application/rss+xml"/><item><title>メール、Slack、Teams通知の設定</title><link>https://docs.defectdojo.com/ja/admin/notifications/email_slack_teams/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/notifications/email_slack_teams/</guid><description>&lt;p&gt;&lt;strong&gt;このプロセスを完了するには、システム設定ページを使用するためのスーパーユーザー権限が必要です。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojoで特定のイベントがトリガーされると、SlackまたはTeamsに通知をプッシュできます。&lt;/p&gt;
+&lt;h2 id="slack通知の設定"&gt;Slack通知の設定&lt;/h2&gt;
+&lt;p&gt;DefectDojoは、2つの異なる方法でSlack通知を投稿できます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;システム全体の通知：単一のSlackチャンネルに送信されます&lt;/li&gt;
+&lt;li&gt;個人通知：特定のユーザーにのみ送信されます&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;DefectDojoから送信されたSlack通知の例を以下に示します。
+​
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Configure_a_Slack_Integration.png"
+ width="1600"
+ height="143"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojoには専用のSlackアプリはありませんが、このガイドに従うことでワークスペース用に簡単に作成できます。システム通知と個人通知の両方を正しく送信するには、Slackアプリが必要です。&lt;/p&gt;
+&lt;h3 id="slackアプリケーションを作成する"&gt;Slackアプリケーションを作成する&lt;/h3&gt;
+&lt;p&gt;DefectDojoとのSlack連携を設定するには、カスタムSlackアプリを作成する必要があります。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Slack Appsページからこのプロセスを開始します: &lt;a href="https://api.slack.com/apps"&gt;https://api.slack.com/apps&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;「&lt;strong&gt;Create New App&lt;/strong&gt;」をクリックします。&lt;/li&gt;
+&lt;li&gt;「&lt;strong&gt;From App Manifest&lt;/strong&gt;」を選択します。&lt;/li&gt;
+&lt;li&gt;メニューからSlackワークスペースを選択します。&lt;/li&gt;
+&lt;li&gt;App Manifestを入力します。Slack連携の実行に必要なすべての権限設定を含む、このJSONファイルをコピー&amp;amp;ペーストできます。
+​&lt;/li&gt;
+&lt;/ol&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;{ 
+ &amp;#34;_metadata&amp;#34;: { 
+ &amp;#34;major_version&amp;#34;: 1, 
+ &amp;#34;minor_version&amp;#34;: 1 
+ }, 
+ &amp;#34;display_information&amp;#34;: { 
+ &amp;#34;name&amp;#34;: &amp;#34;DefectDojo&amp;#34;, 
+ &amp;#34;description&amp;#34;: &amp;#34;Notifications from DefectDojo. See https://docs.defectdojo.com/en/notifications/configure-a-slack-integration/ for configuration steps.&amp;#34;, 
+ &amp;#34;background_color&amp;#34;: &amp;#34;#0000AA&amp;#34; 
+ }, 
+ &amp;#34;features&amp;#34;: { 
+ &amp;#34;bot_user&amp;#34;: { 
+ &amp;#34;display_name&amp;#34;: &amp;#34;DefectDojo Notifications&amp;#34; 
+ } 
+ }, 
+ &amp;#34;oauth_config&amp;#34;: { 
+ &amp;#34;scopes&amp;#34;: { 
+ &amp;#34;bot&amp;#34;: [ 
+ &amp;#34;chat:write&amp;#34;, 
+ &amp;#34;chat:write.customize&amp;#34;, 
+ &amp;#34;chat:write.public&amp;#34;, 
+ &amp;#34;incoming-webhook&amp;#34;, 
+ &amp;#34;users:read&amp;#34;, 
+ &amp;#34;users:read.email&amp;#34; 
+ ] 
+ }, 
+ &amp;#34;redirect_urls&amp;#34;: [ 
+ &amp;#34;https://slack.com/oauth/v2/authorize&amp;#34; 
+ ] 
+ } 
+ }&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;App Summaryを確認し、完了したらCreate Appをクリックします。&lt;strong&gt;Install To Workplace&lt;/strong&gt;ボタンをクリックしてインストールを完了します。&lt;/p&gt;</description></item><item><title>システム全体通知を設定する</title><link>https://docs.defectdojo.com/ja/admin/notifications/configure_system_notifs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/notifications/configure_system_notifs/</guid><description>&lt;p&gt;DefectDojoには2種類の通知があります: &lt;strong&gt;Personal&lt;/strong&gt;(単一のアカウントに送信される)と &lt;strong&gt;System&lt;/strong&gt;(すべてのユーザーに送信される)です。&lt;/p&gt;
+&lt;p&gt;アカウントの個人通知とグローバルなシステム通知の両方は、同じページ(サイドバーの &lt;strong&gt;⚙️Configuration &amp;gt; Notifications&lt;/strong&gt;)から設定できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Configure_System_&amp;amp;_Personal_Notifications.png"
+ width="1048"
+ height="1122"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="システム通知を設定するclassic-ui"&gt;システム通知を設定する(Classic UI)&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;システム全体通知を変更するには、スーパーユーザーアクセスが必要です。&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Notifications ページから開始します(サイドバーの ⚙️ &lt;strong&gt;Configuration &amp;gt; Notifications&lt;/strong&gt;)。&lt;/li&gt;
+&lt;li&gt;Scope ドロップダウンメニューから、編集したい通知のセットを選択できます。&lt;/li&gt;
+&lt;li&gt;System Notifications を選択します。&lt;/li&gt;
+&lt;li&gt;各種類の通知に使用したい通知の配信方法にチェックを入れます。複数選択できます。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Configure_System_&amp;amp;_Personal_Notifications_2.png"
+ width="1600"
+ height="1286"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;</description></item><item><title>個人通知を設定する</title><link>https://docs.defectdojo.com/ja/admin/notifications/configure_personal_notifs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/notifications/configure_personal_notifs/</guid><description>&lt;h2 id="個人通知を設定する"&gt;個人通知を設定する&lt;/h2&gt;
+&lt;p&gt;個人通知はシステム全体通知に加えて送信され、アクセス権を持つすべての製品、製品タイプ、その他のデータタイプに適用されます。個人通知の設定は単一のユーザーにのみ適用され、設定を行っているアカウント自身でのみ設定できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Configure_System_&amp;amp;_Personal_Notifications.png"
+ width="1048"
+ height="1122"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;システム通知はDefectDojoのスーパーユーザーによって設定され、個々のユーザーがオプトアウトすることはできません。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Notifications ページから開始します(サイドバーの ⚙️&lt;strong&gt;Configuration &amp;gt; Notifications&lt;/strong&gt;)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scope&lt;/strong&gt; ドロップダウンメニューから、編集したい通知のセットを選択できます。&lt;/li&gt;
+&lt;li&gt;Personal Notifications を選択します。&lt;/li&gt;
+&lt;li&gt;各種類の通知に使用したい通知方法にチェックを入れます。複数選択できます。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;個人通知はMicrosoft Teams経由では送信できません。Teamsは単一チャンネルへのグローバル通知の投稿のみを許可しているためです。&lt;/p&gt;
+&lt;h3 id="特定の製品について個人通知を受け取る"&gt;特定の製品について個人通知を受け取る&lt;/h3&gt;
+&lt;p&gt;標準の個人通知に加えて、DefectDojoのユーザーは特定の製品でのアクティビティについても通知を受け取ることができます。これは、ユーザーがより注意深く監視する必要がある特定の製品がある場合に役立ちます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Configure_System_&amp;amp;_Personal_Notifications_3.png"
+ width="1600"
+ height="1094"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;この設定は、&lt;strong&gt;Product&lt;/strong&gt; ページ内の &lt;strong&gt;Notifications&lt;/strong&gt; セクションから変更できます。例: &lt;code&gt;your-instance.defectdojo.com/product/{id}&lt;/code&gt;。&lt;/p&gt;</description></item><item><title>通知 &amp; 🔔 アラートについて</title><link>https://docs.defectdojo.com/ja/admin/notifications/about_notifications/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/notifications/about_notifications/</guid><description>&lt;p&gt;DefectDojoは、さまざまな方法で最新情報を提供します。通知は、今後予定されているエンゲージメント、&lt;a href="https://docs.defectdojo.com/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions"&gt;ユーザーメンション&lt;/a&gt;、SLAの期限切れ、その他ソフトウェア内のイベントに対して送信されます。&lt;/p&gt;
+&lt;p&gt;この記事では、システム全体レベルおよび個人レベルの両方における通知の概要を説明します。&lt;/p&gt;
+&lt;h2 id="通知の種類"&gt;通知の種類&lt;/h2&gt;
+&lt;p&gt;DefectDojoは、通知を2つの異なる方法で処理します::&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;システム全体通知&lt;/strong&gt;(System-Wide Notifications)はすべてのユーザーに送信されます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;個人通知(Personal Notifications)は個々のユーザーによって設定され、システム全体通知に加えて受信されます。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;いずれの場合も、&lt;a href="../../user_management/about_perms_and_roles/"&gt;ロールベースアクセス制御&lt;/a&gt; のルールが適用されるため、ユーザーはアクセス権のない製品や製品タイプ(またはそれらに関連するオブジェクト)についてのアクティビティ通知を受け取りません。&lt;/p&gt;
+&lt;h2 id="通知の配信方法"&gt;通知の配信方法&lt;/h2&gt;
+&lt;p&gt;DefectDojoの通知には4つの配信方法があります。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DefectDojoは、DefectDojoインターフェース内に一覧として保存される &lt;strong&gt;🔔 アラート&lt;/strong&gt; を共有できます&lt;/li&gt;
+&lt;li&gt;DefectDojoは、&lt;strong&gt;メール&lt;/strong&gt; アドレスに通知を送信できます&lt;/li&gt;
+&lt;li&gt;DefectDojoは、共有チャンネルまたは個人チャンネルのいずれかで &lt;strong&gt;Slack&lt;/strong&gt; に通知を送信できます&lt;/li&gt;
+&lt;li&gt;DefectDojoは、共有チャンネルで &lt;strong&gt;Microsoft Teams&lt;/strong&gt; にも通知を送信できます&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;通知は複数の送信先に同時に送信できます。&lt;/p&gt;</description></item></channel></rss>

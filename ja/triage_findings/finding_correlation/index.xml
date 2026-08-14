@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>相関 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_correlation/</link><description>Recent content in 相関 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/triage_findings/finding_correlation/index.xml" rel="self" type="application/rss+xml"/><item><title>根本原因相関 (Pro)</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_correlation/pro__root_cause_correlation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_correlation/pro__root_cause_correlation/</guid><description>&lt;p&gt;40個のサービスに取り込まれた脆弱なライブラリは、40件の検出事項を生み出します。そのそれぞれが実在するものであり、それぞれが個別にトリアージされ、それぞれが同じ単一のバージョンアップによって修正されます。&lt;strong&gt;根本原因相関&lt;/strong&gt;はこの関係を明示化します。DefectDojo Proは同じ根本原因を共有する検出事項を、ランク付けされた&lt;strong&gt;根本原因&lt;/strong&gt;のリストにグループ化し、1つの修正とそれが解消するすべてのものを確認できるようにします。&lt;/p&gt;
+&lt;p&gt;相関は&lt;strong&gt;追加的で非破壊的&lt;/strong&gt;です。すべての検出事項は個別に表示され続け、それぞれのステータスを保持し、これまでと全く同じようにトリアージされます。相関は検出事項間のリンク、そのリンクが集約されるクラスタノード、そして各リンクを生成した根拠を追加するだけです。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;相関は重複排除ではありません。&lt;/strong&gt; &lt;a href="https://docs.defectdojo.com/triage_findings/finding_deduplication/"&gt;重複排除&lt;/a&gt;
+は、2件のレポートが&lt;em&gt;同一の&lt;/em&gt;検出事項を記述していると判断し、一方を重複としてマークします。相関は
+同じ原因を共有する&lt;em&gt;異なる&lt;/em&gt;検出事項を関連付けるものであり、何かを重複としてマークすることは決して
+ありません。両者は独立して動作し、どちらも有効にできます。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="根本原因相関の有効化"&gt;根本原因相関の有効化&lt;/h2&gt;
+&lt;p&gt;根本原因相関は&lt;strong&gt;ベータ版&lt;/strong&gt;であり、機能フラグの背後に置かれ、&lt;strong&gt;デフォルトで無効&lt;/strong&gt;になっています。
+スーパーユーザーは、Cloud版とオンプレミス版の両方のインスタンスで&lt;strong&gt;設定 &amp;gt; 機能フラグ&lt;/strong&gt;からこれを
+有効にできます。&lt;a href="https://docs.defectdojo.com/admin/feature_flags/pro__feature_flags/"&gt;機能フラグ&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;p&gt;フラグが無効の間、エンジンは一切の処理を行いません。クラスタは構築されず、リンクも作成されず、
+インポート後に何もディスパッチされません。&lt;/p&gt;
+&lt;p&gt;フラグを有効にした後も、既存の検出事項は次にインポートされるか、バックフィルを実行するまでは、
+遡って相関付けされることは&lt;strong&gt;ありません&lt;/strong&gt;(&lt;a href="#backfilling-existing-findings"&gt;既存の検出事項のバックフィル&lt;/a&gt;を参照)。&lt;/p&gt;
+&lt;h2 id="何が相関付けられるか"&gt;何が相関付けられるか&lt;/h2&gt;
+&lt;p&gt;相関は4つのシグナルに基づいてグループ化します。そのうち3つは&lt;strong&gt;完全一致&lt;/strong&gt;であり、2件の検出事項が
+本当に同じものを指している場合にのみリンクが作成されます。残る1つはヒューリスティックとして
+明示されます。&lt;/p&gt;</description></item></channel></rss>

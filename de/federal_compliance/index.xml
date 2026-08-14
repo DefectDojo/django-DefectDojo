@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Bundes-Compliance on DefectDojo Documentation</title><link>https://docs.defectdojo.com/de/federal_compliance/</link><description>Recent content in Bundes-Compliance on DefectDojo Documentation</description><generator>Hugo</generator><language>de</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><atom:link href="https://docs.defectdojo.com/de/federal_compliance/index.xml" rel="self" type="application/rss+xml"/><item><title>Compliance-Profil</title><link>https://docs.defectdojo.com/de/federal_compliance/compliance_profile/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/federal_compliance/compliance_profile/</guid><description>&lt;p&gt;Das Compliance-Profil erfasst ein Asset als System und enthält die Angaben, die auf jedem daraus erzeugten
+Deliverable erscheinen. Öffnen Sie das Asset, das Ihre Systemgrenze darstellt, gehen Sie zum Tab
+&lt;strong&gt;Compliance&lt;/strong&gt; und dann zu &lt;strong&gt;Profile&lt;/strong&gt;.&lt;/p&gt;</description></item><item><title>Das POA&amp;M-Register</title><link>https://docs.defectdojo.com/de/federal_compliance/poam_ledger/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/federal_compliance/poam_ledger/</guid><description>&lt;p&gt;POA&amp;amp;M-Einträge werden automatisch aus Befunden erstellt und aktualisiert. Die Synchronisierung läuft kurz
+nach Importen und Befundänderungen, und ein nächtlicher Durchlauf erfasst alles, was durchgerutscht ist.
+Sie können Einträge auch manuell hinzufügen, für Schwachstellen, die kein Scanner meldet.&lt;/p&gt;</description></item><item><title>ConMon-Snapshots</title><link>https://docs.defectdojo.com/de/federal_compliance/conmon_snapshots/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/federal_compliance/conmon_snapshots/</guid><description>&lt;p&gt;Auf dem Tab &lt;strong&gt;Snapshots&lt;/strong&gt; erzeugt &lt;strong&gt;Generate Snapshot&lt;/strong&gt; die Deliverables für einen Berichtszeitraum.
+Ein Snapshot &lt;strong&gt;friert das Register&lt;/strong&gt; zu diesem Zeitpunkt ein: spätere Änderungen wirken sich nie auf ein
+bereits erzeugtes Deliverable aus.&lt;/p&gt;</description></item><item><title>Behebungsfristen</title><link>https://docs.defectdojo.com/de/federal_compliance/remediation_slas/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/federal_compliance/remediation_slas/</guid><description>&lt;p&gt;Mit der Funktion werden zwei fertige SLA-Konfigurationen ausgeliefert. Weisen Sie eine davon Ihren Produkten
+über die SLA-Konfigurationseinstellungen zu, oder kopieren Sie eine und passen Sie sie an.&lt;/p&gt;</description></item><item><title>CMMC-Level-2-Assessments</title><link>https://docs.defectdojo.com/de/federal_compliance/cmmc_assessments/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/federal_compliance/cmmc_assessments/</guid><description>&lt;p&gt;Der Compliance-Tab kann eine CMMC-Level-2-Selbstbewertung anhand der Punktgewichte der DoD-Assessment-Methodik
+gegen NIST 800-171 Rev 2 bewerten.&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/05-cmmc-scorecard.png"
+ width="2880"
+ height="1800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="Eine CMMC-Level-2-Bewertungsübersicht"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Beta: Betrachten Sie den Wert als Schätzung.&lt;/strong&gt; Solange sich diese Funktion in der Beta-Phase befindet, sind die
+mitgelieferten Punktgewichte und der daraus resultierende SPRS-Wert unverbindliche Hinweise und noch nicht
+validiert. Prüfen Sie jeden Wert gegen die offizielle DoD-NIST-SP-800-171-Assessment-Methodik, bevor Sie sich
+für eine Assessment-Einreichung oder einen vertraglichen Zweck darauf verlassen.&lt;/p&gt;</description></item><item><title>Kontrollabdeckung</title><link>https://docs.defectdojo.com/de/federal_compliance/control_coverage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/federal_compliance/control_coverage/</guid><description>&lt;p&gt;Die Ansicht zur Kontrollabdeckung beantwortet eine einfache Frage: Welche 800-53-Kontrollen testen meine
+Scanner tatsächlich, und wo liegen die offenen Schwachstellen pro Kontrolle?&lt;/p&gt;</description></item></channel></rss>

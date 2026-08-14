@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DefectDojo-Dokumentation on DefectDojo Documentation</title><link>https://docs.defectdojo.com/de/</link><description>Recent content in DefectDojo-Dokumentation on DefectDojo Documentation</description><generator>Hugo</generator><language>de</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 14 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/de/index.xml" rel="self" type="application/rss+xml"/><item><title>Über Connectors</title><link>https://docs.defectdojo.com/de/connectors/about/</link><pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/connectors/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Hinweis: Connectors sind eine Funktion, die nur in DefectDojo Pro verfügbar ist.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Connectors&lt;/strong&gt; ist die zentrale Anlaufstelle in der DefectDojo Pro-UI für jedes Tool, mit dem DefectDojo in beide Richtungen kommuniziert. Sie vereint zwei Funktionen, die zuvor an getrennten Stellen konfiguriert wurden:&lt;/p&gt;</description></item><item><title>Funktionsvergleich</title><link>https://docs.defectdojo.com/de/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt; ist eine leistungsstarke, kostenlose Plattform für das Schwachstellenmanagement mit Kernfunktionen für Import, Deduplizierung, einfachen Dashboards, API-Zugriff und grundlegendem Reporting — ideal für kleinere Teams oder für alle, die das Tool selbst hosten und mit Community-Ressourcen erweitern möchten.&lt;/p&gt;</description></item><item><title>Über DefectDojo</title><link>https://docs.defectdojo.com/de/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc. und Open-Source-Mitwirkende pflegen diese Dokumentation, um sowohl die Community- als auch die Pro-Edition von DefectDojo zu unterstützen.&lt;/span&gt;&lt;/p&gt;</description></item><item><title>🌐 Universal Parser</title><link>https://docs.defectdojo.com/de/import_data/pro/specialized_import/universal_parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/import_data/pro/specialized_import/universal_parser/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Hinweis: Der Universal Parser ist nur in DefectDojo Pro verfügbar.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Der Universal Parser ist für jede DefectDojo-Pro-Instanz aktiviert; es gibt nichts zu aktivieren. Weitere Informationen finden Sie in unserer &lt;a href="https://community.defectdojo.com/universalparser"&gt;Ankündigungspräsentation&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>Asset-Hierarchie</title><link>https://docs.defectdojo.com/de/asset_modelling/pro_hierarchy/asset_hierarchy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/asset_modelling/pro_hierarchy/asset_hierarchy/</guid><description>&lt;p&gt;DefectDojo Pro erweitert die Objektklassen Produkt/Produkttyp, um mehr Flexibilität im Datenmodell zu bieten.&lt;/p&gt;
+&lt;h2 id="aktivieren-der-hierarchie-funktion"&gt;Aktivieren der Hierarchie-Funktion&lt;/h2&gt;
+&lt;p&gt;Die beiden folgenden Teile sind voneinander unabhängig und werden über unterschiedliche Mechanismen gesteuert.&lt;/p&gt;</description></item><item><title>Asset-Hierarchie: Übersicht</title><link>https://docs.defectdojo.com/de/asset_modelling/os_hierarchy/os__asset_hierarchy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/asset_modelling/os_hierarchy/os__asset_hierarchy/</guid><description>&lt;p&gt;DefectDojo verwendet fünf Hauptdatenklassen zur Organisation Ihrer Arbeit: &lt;strong&gt;Organizations, Assets&lt;/strong&gt;, &lt;strong&gt;Engagements&lt;/strong&gt;, &lt;strong&gt;Tests&lt;/strong&gt; und &lt;strong&gt;Findings&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;DefectDojo ist so konzipiert, dass es sich flexibel an Ihr Team anpasst, anstatt Ihr Team an das Tool anzupassen. Sobald Sie verstehen, wie sich diese Datenklassen zur Organisation Ihrer Arbeit nutzen lassen, können Sie einen robusten, anpassungsfähigen Arbeitsbereich gestalten.&lt;/p&gt;</description></item><item><title>Audit-Logs</title><link>https://docs.defectdojo.com/de/admin/user_management/pro__audit_logging/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/admin/user_management/pro__audit_logging/</guid><description>&lt;p&gt;&lt;strong&gt;Audit-Logs&lt;/strong&gt; bieten eine chronologische Aufzeichnung von Aktionen, die innerhalb von DefectDojo durchgeführt wurden. Sie gewährleisten Verantwortlichkeit und Compliance, indem sie festhalten, welcher Benutzer welche Aktion wann durchgeführt hat.&lt;/p&gt;</description></item><item><title>Audit-Protokolle</title><link>https://docs.defectdojo.com/de/admin/user_management/os__audit_logging/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/admin/user_management/os__audit_logging/</guid><description>&lt;p&gt;Audit-Protokolle für DefectDojo können auf verschiedene Arten aufgerufen werden.&lt;/p&gt;
+&lt;h2 id="einzelne-objektprotokolle"&gt;Einzelne Objektprotokolle&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Jedes DefectDojo-Objekt verfügt über einen zugehörigen Objektverlauf, der über die Benutzeroberfläche aufgerufen werden kann. Diese Verläufe werden für Assets, Engagements, Tests, Befunde und Endpunkte sowie für Risikoakzeptanzen aufgezeichnet.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In der klassischen (Open-Source-)Benutzeroberfläche finden Sie Objektprotokolle unter dem ☰-Hamburger-Menü in der Ansicht eines Objekts.&lt;/p&gt;</description></item><item><title>Authorization Connectors</title><link>https://docs.defectdojo.com/de/admin/sso/pro__authorization_connectors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/admin/sso/pro__authorization_connectors/</guid><description>&lt;p&gt;Authorization Connectors ist eine einzige Seite, die jeden von DefectDojo Pro unterstützten Identitätsanbieter auflistet, mit dem Status, in dem sich jeder befindet, und dem Protokoll, das er verwendet. Bevor es diese Seite gab, hatte jeder Anbieter sein eigenes Einstellungsformular, und es gab keine Möglichkeit zu beantworten, „was ist auf dieser Instanz eingerichtet?&amp;quot;, ohne alle einzeln zu öffnen.&lt;/p&gt;</description></item><item><title>Compliance-Profil</title><link>https://docs.defectdojo.com/de/federal_compliance/compliance_profile/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/federal_compliance/compliance_profile/</guid><description>&lt;p&gt;Das Compliance-Profil erfasst ein Asset als System und enthält die Angaben, die auf jedem daraus erzeugten
+Deliverable erscheinen. Öffnen Sie das Asset, das Ihre Systemgrenze darstellt, gehen Sie zum Tab
+&lt;strong&gt;Compliance&lt;/strong&gt; und dann zu &lt;strong&gt;Profile&lt;/strong&gt;.&lt;/p&gt;</description></item></channel></rss>

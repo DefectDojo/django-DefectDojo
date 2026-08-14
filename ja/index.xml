@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DefectDojo ドキュメント on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/</link><description>Recent content in DefectDojo ドキュメント on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 14 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/index.xml" rel="self" type="application/rss+xml"/><item><title>コネクタについて</title><link>https://docs.defectdojo.com/ja/connectors/about/</link><pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Note: Connectors are a DefectDojo Pro-only feature.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;コネクタ&lt;/strong&gt;は、DefectDojo が双方向でやり取りするすべてのツールのための、DefectDojo Pro UI 上の単一のホームです。これは、これまで別々の場所で設定されていた2つの機能を統合したものです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;アップストリームコネクタ&lt;/strong&gt;(旧称 &lt;strong&gt;API Connectors&lt;/strong&gt;)は、スキャナーやセキュリティツールから検出事項とアセットインベントリを&lt;em&gt;取り込み&lt;/em&gt;ます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ダウンストリームコネクタ&lt;/strong&gt;(旧称 &lt;strong&gt;Integrations&lt;/strong&gt;)は、検出事項を課題管理システムやチケッティングシステムに&lt;em&gt;送信&lt;/em&gt;します。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;DefectDojo をセキュリティデータのハブと考えると、アップストリームコネクタはデータが到着する経路であり、ダウンストリームコネクタは修復作業が出ていく経路です。&lt;/p&gt;</description></item><item><title>DefectDojoについて</title><link>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc.およびオープンソースコントリビューターは、DefectDojoのCommunity版とPro版の両方をサポートするために本ドキュメントを管理しています。&lt;/span&gt;&lt;/p&gt;
+&lt;h2 id="defectdojoとは"&gt;DefectDojoとは?&lt;/h2&gt;
+&lt;p&gt;DefectDojoは、Developer Security Operations(DevSecOps)プラットフォームです。DefectDojoは、お使いのセキュリティツール群を自動的に集約することでDevSecOpsを効率化し、セキュリティ業務を簡単に整理して、組織のセキュリティ体制を他のステークホルダーに報告できるようにします。&lt;/p&gt;
+&lt;p&gt;セキュリティプロセスの自動化と統合された開発パイプラインはDefectDojoの最終目標ですが、このソフトウェアの中核は、多数のセキュリティツールからのレポートを取り込み、整理し、標準化するためのセキュリティ脆弱性向けバグトラッカーです。&lt;/p&gt;
+&lt;h3 id="defectdojoは何をするのか"&gt;DefectDojoは何をするのか?&lt;/h3&gt;
+&lt;p&gt;DefectDojoには、セキュリティツールの結果を強化・調整するためのスマートな機能が備わっており、以下のようなことが可能です。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;コンテキストに応じてセキュリティの検出事項を追跡・報告する&lt;/li&gt;
+&lt;li&gt;コンテキストに応じてSLAを適用する&lt;/li&gt;
+&lt;li&gt;誤検知、リスク受容、その他のトリアージ判断を処理する&lt;/li&gt;
+&lt;li&gt;DefectDojoの重複排除アルゴリズムを使用して重複を排除する&lt;/li&gt;
+&lt;li&gt;外部のプロジェクト追跡ソフトウェアと連携する。&lt;/li&gt;
+&lt;li&gt;CI/CD連携を使用して、リポジトリや開発ブランチ全体にわたるメトリクス/レポートを提供する。&lt;/li&gt;
+&lt;li&gt;従来型のペネトレーションテスト管理を調整する。&lt;/li&gt;
+&lt;li&gt;脆弱性修正手順のSLAを設定・適用する。&lt;/li&gt;
+&lt;li&gt;セキュリティ脆弱性に対するリスク受容を作成・追跡する。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最終的に、DefectDojoの製品:エンゲージメントモデルにより、開発環境の棚卸しを行い、新しいセキュリティの検出事項を即座にコンテキストの中に位置付けることができます。&lt;/p&gt;</description></item><item><title>機能比較</title><link>https://docs.defectdojo.com/ja/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt;は、コアとなるインポート機能、重複排除、基本的なダッシュボード、APIアクセス、必須のレポート機能を備えた、強力で無料の脆弱性管理プラットフォームです。小規模なチームや、コミュニティリソースを使ってツールを自己ホスティングし拡張したい方に最適です。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;DefectDojo Pro&lt;/strong&gt;は、その基盤の上に、高度なダッシュボードとレポート、ルールエンジンによる自動化とスクリプティング、多数のセキュリティツールへのコネクタ、最適化されたインポートワークフロー、SOCとAppSecの統合サポート、改善されたUI/UX、AI連携、強化されたセキュリティ(SSO/MFA)、プレミアムサポートオプションなど、エンタープライズ志向の機能を追加しています。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature / Capability&lt;/th&gt;
+ &lt;th&gt;DefectDojo Open-Source&lt;/th&gt;
+ &lt;th&gt;DefectDojo Pro&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;コア脆弱性管理&lt;/td&gt;
+ &lt;td&gt;✔️ 500以上のセキュリティツールから検出事項をインポート、追跡、管理&lt;/td&gt;
+ &lt;td&gt;✔️ Open-Sourceのすべての機能をスケールに最適化&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;検出事項の重複排除&lt;/td&gt;
+ &lt;td&gt;✔️ 標準の重複排除&lt;/td&gt;
+ &lt;td&gt;✔️ 高度で設定可能な重複排除&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;REST API&lt;/td&gt;
+ &lt;td&gt;✔️ フルREST API&lt;/td&gt;
+ &lt;td&gt;✔️ フルREST API&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;認証とアクセス制御&lt;/td&gt;
+ &lt;td&gt;✔️ ローカル認証と基本的なRBAC&lt;/td&gt;
+ &lt;td&gt;✔️ SSO(SAML/OAuth)、MFA、高度なRBAC&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ユーザーインターフェース&lt;/td&gt;
+ &lt;td&gt;✔️ Community UI&lt;/td&gt;
+ &lt;td&gt;✔️ パフォーマンスが改善されたモダンなPro UI&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ダッシュボードとレポート&lt;/td&gt;
+ &lt;td&gt;✔️ 基本的なダッシュボードとレポート&lt;/td&gt;
+ &lt;td&gt;✔️ 高度でカスタマイズ可能なダッシュボードと経営層向けレポート&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;自動化とワークフロー&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ ルールエンジンと自動化ワークフロー&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;インポートの拡張機能&lt;/td&gt;
+ &lt;td&gt;❌ 標準インポートのみ&lt;/td&gt;
+ &lt;td&gt;✔️ バックグラウンドインポート、スマートアップロード、ユニバーサルパーサー、CLIアップロード&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ツール連携&lt;/td&gt;
+ &lt;td&gt;❌ 手動/API駆動&lt;/td&gt;
+ &lt;td&gt;✔️ 主要なAppSecおよびクラウドツール向けの組み込み&lt;strong&gt;アップストリームコネクタ&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Jira連携&lt;/td&gt;
+ &lt;td&gt;✔️ 含まれます&lt;/td&gt;
+ &lt;td&gt;✔️ 含まれます&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;プロジェクト管理連携&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ &lt;strong&gt;Jira&lt;/strong&gt;、&lt;strong&gt;Azure DevOps&lt;/strong&gt;、&lt;strong&gt;GitHub&lt;/strong&gt;、&lt;strong&gt;GitLab&lt;/strong&gt;、&lt;strong&gt;ServiceNow&lt;/strong&gt;、&lt;strong&gt;Bitbucket&lt;/strong&gt;、&lt;strong&gt;Shortcut&lt;/strong&gt;、&lt;strong&gt;PagerDuty&lt;/strong&gt;、&lt;strong&gt;Zendesk&lt;/strong&gt;、&lt;strong&gt;ServiceDesk Plus&lt;/strong&gt;、&lt;strong&gt;Freshservice&lt;/strong&gt;への&lt;strong&gt;ダウンストリームコネクタ&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;検出事項の拡張機能&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ 自動KEV、EPSSスコアリング、ランサムウェア追跡&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;SOCとAppSecの統合&lt;/td&gt;
+ &lt;td&gt;❌ AppSecのみに特化&lt;/td&gt;
+ &lt;td&gt;✔️ AppSecとSOCの検出事項を統合&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;AIと次世代機能&lt;/td&gt;
+ &lt;td&gt;❌ 含まれません&lt;/td&gt;
+ &lt;td&gt;✔️ AI支援ワークフロー、レポート、MCPサポート&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;サポート&lt;/td&gt;
+ &lt;td&gt;コミュニティサポート(GitHub、Slack、フォーラム)&lt;/td&gt;
+ &lt;td&gt;SLA付きの商用サポート&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ホスティングオプション&lt;/td&gt;
+ &lt;td&gt;セルフホスト&lt;/td&gt;
+ &lt;td&gt;セルフホストまたはクラウドホスト&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>🌐 ユニバーサルパーサー</title><link>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/universal_parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/import_data/pro/specialized_import/universal_parser/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: ユニバーサルパーサーはDefectDojo Proでのみご利用いただけます。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;ユニバーサルパーサーはすべてのDefectDojo Proインスタンスで有効になっており、特に有効化の操作は必要ありません。詳細については&lt;a href="https://community.defectdojo.com/universalparser"&gt;発表プレゼンテーション&lt;/a&gt;をご覧ください。&lt;/p&gt;
+&lt;h2 id="ユニバーサルパーサーについて"&gt;ユニバーサルパーサーについて&lt;/h2&gt;
+&lt;p&gt;DefectDojoには、セキュリティチームがデータを取り込む際に役立つ、定期的に更新される豊富なパーサーライブラリがあります。しかし、ユーザーが使用しているツールがパーサーでサポートされていなかったり、パーサーとは異なる方法でDefectDojoモデルにデータをインポートしたいと考えたりする場合があります。&lt;/p&gt;
+&lt;p&gt;DefectDojoのユニバーサルパーサーは、サポートされていないレポート形式を使用しているユーザーに、&lt;strong&gt;あらゆるJSON、CSV、またはXMLファイル&lt;/strong&gt;をインポートしてマッピングするための手段を提供するものです。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ユニバーサルパーサーとは:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;内部ツールが生成するレポートなど、コミュニティパーサーが存在しないファイル形式を迅速にサポートする手段&lt;/li&gt;
+&lt;li&gt;コミュニティパーサーが古い場合や、希望する形式で検出事項を構造化しない場合でも、データの取り込みを支援するツール&lt;/li&gt;
+&lt;li&gt;ツールのレポートを「Generic Findings Import」スキャンタイプが想定するCSV/JSON形式に変換するためのカスタムスクリプトに代わる手段&lt;/li&gt;
+&lt;li&gt;コーディング不要、最小限の設定で誰でも簡単に使えるよう設計されたもの&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;ユニバーサルパーサーではないもの:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;オープンソースパーサー、コネクタ、または入念に調整された「Generic Findings Import」レポートの包括的な代替手段&lt;/li&gt;
+&lt;li&gt;検出事項を構造化するための、微妙な分岐ロジックを扱える機能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ユニバーサルパーサーの設定はPro UIでのみ利用可能ですが、旧UIまたはAPI経由であれば、既存のユニバーサルパーサーを使ってスキャンをインポートすることは可能です。&lt;/p&gt;</description></item><item><title>Authorization Connectors</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__authorization_connectors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__authorization_connectors/</guid><description>&lt;p&gt;Authorization Connectorsは、DefectDojo Proが対応するすべてのIDプロバイダーと、それぞれの状態、使用しているプロトコルを1つのページにまとめて表示します。これが存在する前は、各プロバイダーはそれぞれ独自の設定フォームに存在しており、すべてを開かない限り「このインスタンスで何が設定されているか」に答える方法がありませんでした。&lt;/p&gt;
+&lt;p&gt;Authorization Connectorsは&lt;strong&gt;DefectDojo Pro&lt;/strong&gt;の機能です。&lt;strong&gt;Connect &amp;gt; Authorization&lt;/strong&gt;にあります。IDプロバイダーの設定を表示・変更できるのは&lt;strong&gt;スーパーユーザー&lt;/strong&gt;のみです。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/admin/sso/images/authorization_connectors.png"
+ width="1800"
+ height="1150"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="Authorization Connectors"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="how-the-page-is-organised"&gt;How the page is organised&lt;/h2&gt;
+&lt;p&gt;プロバイダーは2つのセクションに分かれており、それぞれ見出しの横に件数が表示され、アルファベット順に並んでいます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Configured Providers&lt;/strong&gt;(設定済みプロバイダー) — 現在オンになっているかどうかにかかわらず、このインスタンスで設定済みのプロバイダー&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Available Providers&lt;/strong&gt;(利用可能なプロバイダー) — サポートされているが、まだ設定されていないプロバイダー&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;この区分はあえて&lt;em&gt;enabled&lt;/em&gt;(有効)ではなく&lt;em&gt;configured&lt;/em&gt;(設定済み)を基準にしています。設定した後にオフに切り替えられたプロバイダーはConfigured Providersに残ります。設定した本人がそこを探すはずだからです。状態はタイル上に表示されます。&lt;/p&gt;</description></item><item><title>Cloud Managerの使用</title><link>https://docs.defectdojo.com/ja/get_started/pro/cloud/using-cloud-manager/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/cloud/using-cloud-manager/</guid><description>&lt;p&gt;DefectDojoのCloud Managerにログインすると、アカウント設定を構成し、DefectDojo Cloudのサブスクリプションを管理できます。&lt;/p&gt;
+&lt;h2 id="新規サブスクリプション"&gt;&lt;strong&gt;新規サブスクリプション&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://cloud.defectdojo.com/accounts/onboarding/step_1"&gt;https://cloud.defectdojo.com/accounts/onboarding/step_1&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;このページでは、DefectDojoに新規、または&lt;a href="../additional-cloud-instance/"&gt;追加の&lt;/a&gt;Cloudインスタンスをリクエストできます。&lt;/p&gt;
+&lt;h2 id="サブスクリプションの管理"&gt;&lt;strong&gt;サブスクリプションの管理&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://cloud.defectdojo.com/accounts/manage_subscriptions"&gt;https://cloud.defectdojo.com/accounts/manage_subscriptions&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Subscription Managementページには、現在アクティブなすべてのCloudインスタンスが表示され、各インスタンスのFirewall設定を構成できます。&lt;/p&gt;
+&lt;h3 id="firewall設定の変更"&gt;Firewall設定の変更&lt;/h3&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/using_the_cloud_manager.png"
+ width="1310"
+ height="678"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Edit Subscription&lt;/strong&gt;ページで、追加したいルールのIP Address、Mask、Labelを入力します。複数のFirewallルールが必要な場合は、&lt;strong&gt;Add New Range&lt;/strong&gt;をクリックして新しい空のルールを作成します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/using_the_cloud_manager_2.png"
+ width="718"
+ height="954"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;ここでは、外部サービス(GitHub &amp;amp; Jira Cloud)にファイアウォールを開放することもできます。また、希望する場合はメニューから&lt;strong&gt;Proceed Without Firewall&lt;/strong&gt;を選択して、ファイアウォールを完全に無効化することもできます。&lt;/p&gt;</description></item><item><title>CVSSバージョンのサポート</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_scoring/cvss_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_scoring/cvss_support/</guid><description>&lt;p&gt;DefectDojoは、CVSS 4.0規格を含め、検出事項に対するCVSSメタデータをサポートしています。この
+ページでは、どのCVSSバージョンがエンドツーエンドで保存されるか、どこで入力・閲覧できるか、
+そしてパーサー側のカバレッジについて何を期待すべきかを説明します。&lt;/p&gt;
+&lt;h2 id="defectdojoが保存する内容"&gt;DefectDojoが保存する内容&lt;/h2&gt;
+&lt;p&gt;検出事項は以下のCVSSデータを保持できます。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;バージョン&lt;/th&gt;
+ &lt;th&gt;ベクター保存&lt;/th&gt;
+ &lt;th&gt;スコア保存&lt;/th&gt;
+ &lt;th&gt;UIベクタービルダーと計算機&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;CVSS v4.0&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅ (Pro UI)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;CVSS v3 (v3.0 / v3.1)&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅ (Pro UI)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;CVSS v2&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;検出事項の&lt;strong&gt;深刻度&lt;/strong&gt;フィールドを通じて暗黙的に保存され、個別のv2ベクターフィールドは保存されません&lt;/td&gt;
+ &lt;td&gt;N/A&lt;/td&gt;
+ &lt;td&gt;N/A&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;各検出事項には、基盤となるモデル上に専用の&lt;code&gt;cvssv3&lt;/code&gt;/&lt;code&gt;cvssv3_score&lt;/code&gt;および&lt;code&gt;cvssv4&lt;/code&gt;/
+&lt;code&gt;cvssv4_score&lt;/code&gt;フィールドがあります。これらはUIだけでなくAPI経由でもアクセスできます。&lt;/p&gt;</description></item><item><title>DefectDojo メインダッシュボード</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;ダッシュボードは、DefectDojo を開いたときに最初に表示されるページであることが多いです。チームのパフォーマンスを要約し、脆弱性トラッキング環境の特定領域を監視するための追跡ツールを提供します。&lt;/p&gt;
+&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="画像"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;💡 DefectDojo Pro:&lt;/strong&gt; DefectDojo Pro では、ホームページは完全に&lt;strong&gt;カスタマイズ可能なダッシュボード&lt;/strong&gt;です。以下で説明する固定レイアウトを使用する代わりに、ウィジェットからダッシュボードを組み立て、自分で配置できます。概念と UI の操作方法については &lt;strong&gt;&lt;a href="../custom-dashboards/"&gt;カスタマイズ可能なダッシュボード&lt;/a&gt;&lt;/strong&gt; を参照してください。このページの残りの部分では、オープンソース版のメインダッシュボードについて説明します。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class="version-opensource"&gt;
+&lt;h2 id="ダッシュボードの構成要素"&gt;ダッシュボードの構成要素&lt;/h2&gt;
+&lt;p&gt;オープンソース版ダッシュボードでは、以下の組み込みコンポーネントによってセキュリティ体制の概要を把握できます。&lt;/p&gt;
+&lt;h3 id="サマリーカード"&gt;サマリーカード&lt;/h3&gt;
+&lt;p&gt;ダッシュボードの最上部の行には、アクティビティを一目で確認できる4つのサマリーカードが表示されます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;アクティブなエンゲージメント&lt;/strong&gt; — すべての製品にわたる、現在オープン中のエンゲージメントの合計数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;過去7日間の検出事項&lt;/strong&gt; — 過去1週間に作成された新しい検出事項。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;過去7日間にクローズ&lt;/strong&gt; — 最近解決された検出事項。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;過去7日間に受容&lt;/strong&gt; — 最近リスク受容された検出事項。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;各カードは該当するフィルタ済みリストに直接リンクしているため、ワンクリックで詳細を確認できます。&lt;/p&gt;</description></item><item><title>Downstream Connectors</title><link>https://docs.defectdojo.com/ja/connectors/downstream/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/downstream/about/</guid><description>&lt;p&gt;&lt;strong&gt;提供状況:&lt;/strong&gt; ダウンストリームコネクタは一般提供されており、Cloud・On-Premiseを問わずすべてのDefectDojo Proインスタンスで有効になっています。有効化の操作は不要で、Feature Flagsページにも表示されなくなりました。&lt;/p&gt;
+&lt;p&gt;ダウンストリームコネクタを使うと、検出事項や検出事項グループをチケット管理システムにプッシュし、セキュリティ対応をチームの既存の開発ワークフローに簡単に組み込むことができます。&lt;/p&gt;
+&lt;p&gt;サポートされているダウンストリームコネクタ:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Azure Devops&lt;/li&gt;
+&lt;li&gt;Bitbucket&lt;/li&gt;
+&lt;li&gt;Freshservice&lt;/li&gt;
+&lt;li&gt;GitHub&lt;/li&gt;
+&lt;li&gt;GitLab Boards&lt;/li&gt;
+&lt;li&gt;Jira&lt;/li&gt;
+&lt;li&gt;Linear&lt;/li&gt;
+&lt;li&gt;Opsgenie&lt;/li&gt;
+&lt;li&gt;PagerDuty&lt;/li&gt;
+&lt;li&gt;ServiceDesk Plus&lt;/li&gt;
+&lt;li&gt;ServiceNow&lt;/li&gt;
+&lt;li&gt;ServiceNow SecOps / Vulnerability Response&lt;/li&gt;
+&lt;li&gt;Shortcut&lt;/li&gt;
+&lt;li&gt;Zendesk&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="ダウンストリームコネクタページを開く"&gt;ダウンストリームコネクタページを開く&lt;/h2&gt;
+&lt;p&gt;ダウンストリームコネクタページは、サイドバーの &lt;strong&gt;Import &amp;gt; Connectors &amp;gt; Downstream Connectors&lt;/strong&gt; から見つけることができます。&lt;/p&gt;</description></item><item><title>Jira(レガシー)</title><link>https://docs.defectdojo.com/ja/connectors/downstream/pro__jira_guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/downstream/pro__jira_guide/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;このページはレガシーな Jira 連携について説明しています。&lt;/strong&gt; ここで説明している製品単位の Jira 連携は、&lt;strong&gt;&lt;a href="https://docs.defectdojo.com/connectors/downstream/about/"&gt;Jira ダウンストリームコネクタ&lt;/a&gt;&lt;/strong&gt; に置き換えられました。このコネクタはすべての DefectDojo Pro インスタンスで一般提供されており、検出事項を Jira にプッシュする際の推奨方法です。Pro のサイドバーでは、この理由から &lt;strong&gt;Connect &amp;gt; Jira&lt;/strong&gt; に &lt;code&gt;LEGACY&lt;/code&gt; バッジが表示されます — 詳細は &lt;a href="https://docs.defectdojo.com/navigation/pro__menu_badges/"&gt;メニューバッジ&lt;/a&gt; を参照してください。&lt;/p&gt;</description></item></channel></rss>

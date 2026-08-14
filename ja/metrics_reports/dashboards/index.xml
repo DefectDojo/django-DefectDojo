@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ダッシュボード on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/</link><description>Recent content in ダッシュボード on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/metrics_reports/dashboards/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojo メインダッシュボード</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;ダッシュボードは、DefectDojo を開いたときに最初に表示されるページであることが多いです。チームのパフォーマンスを要約し、脆弱性トラッキング環境の特定領域を監視するための追跡ツールを提供します。&lt;/p&gt;
+&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="画像"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;💡 DefectDojo Pro:&lt;/strong&gt; DefectDojo Pro では、ホームページは完全に&lt;strong&gt;カスタマイズ可能なダッシュボード&lt;/strong&gt;です。以下で説明する固定レイアウトを使用する代わりに、ウィジェットからダッシュボードを組み立て、自分で配置できます。概念と UI の操作方法については &lt;strong&gt;&lt;a href="../custom-dashboards/"&gt;カスタマイズ可能なダッシュボード&lt;/a&gt;&lt;/strong&gt; を参照してください。このページの残りの部分では、オープンソース版のメインダッシュボードについて説明します。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class="version-opensource"&gt;
+&lt;h2 id="ダッシュボードの構成要素"&gt;ダッシュボードの構成要素&lt;/h2&gt;
+&lt;p&gt;オープンソース版ダッシュボードでは、以下の組み込みコンポーネントによってセキュリティ体制の概要を把握できます。&lt;/p&gt;
+&lt;h3 id="サマリーカード"&gt;サマリーカード&lt;/h3&gt;
+&lt;p&gt;ダッシュボードの最上部の行には、アクティビティを一目で確認できる4つのサマリーカードが表示されます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;アクティブなエンゲージメント&lt;/strong&gt; — すべての製品にわたる、現在オープン中のエンゲージメントの合計数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;過去7日間の検出事項&lt;/strong&gt; — 過去1週間に作成された新しい検出事項。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;過去7日間にクローズ&lt;/strong&gt; — 最近解決された検出事項。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;過去7日間に受容&lt;/strong&gt; — 最近リスク受容された検出事項。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;各カードは該当するフィルタ済みリストに直接リンクしているため、ワンクリックで詳細を確認できます。&lt;/p&gt;</description></item><item><title>マイワーク</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/pro__my_work/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/pro__my_work/</guid><description>&lt;p&gt;&lt;strong&gt;マイワーク&lt;/strong&gt;が答える問いはただ一つ、「自分を待っているものは何か」です。これはユーザーごとのビューで、同じページが各人に自分専用のキューを表示します。&lt;/p&gt;
+&lt;p&gt;左サイドバーの &lt;strong&gt;Dashboards &amp;gt; My Work&lt;/strong&gt; から開きます。&lt;/p&gt;
+&lt;h2 id="キュー"&gt;キュー&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;キュー&lt;/th&gt;
+ &lt;th&gt;表示内容&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;自分に割り当て済み&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;自分個人に割り当てられた検出事項です。&lt;strong&gt;Work Assignment&lt;/strong&gt; 機能が有効になっていない限り非表示です。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;自分のチームのキュー&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;自分が所属するグループが所有する検出事項です。所有者はグループ単位のため、これは自分個人ではなくチームの作業です。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;レビュー待ち&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;自分がレビューを依頼され、そのレビューがまだ完了していない検出事項です。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;自分が依頼したレビュー&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;自分が開始したものの、まだ誰も完了していないレビューです。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;自分のリスク受容&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;自分が所有しているものの、まだ誰も対応していないリスク受容です。期限切れのものも、対応されるまで一覧に残ります。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;各キューは完全な検出事項またはリスク受容の一覧であるため、通常のフィルタリング、並べ替え、列の操作がすべて機能し、各タブは自分自身の列レイアウトを記憶します。&lt;/p&gt;</description></item><item><title>カスタマイズ可能なダッシュボード</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/custom-dashboards/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/custom-dashboards/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: カスタマイズ可能なダッシュボード(レイアウト、ウィジェット、ウィジェットカタログ)は DefectDojo Pro の機能です。デフォルトでは無効になっており、スーパーユーザーが Cloud および On-Premise の両方のインスタンスで &lt;strong&gt;Settings &amp;gt; Feature Flags&lt;/strong&gt; から有効にできます。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro のカスタマイズ可能なダッシュボードでは、各ユーザーが&lt;strong&gt;ウィジェット&lt;/strong&gt;(カウント、チャート、リーダーボード、フィード、メモなど)をドラッグ&amp;amp;ドロップグリッド上に配置して、自分だけのホームページを組み立てることができます。全員共通の固定ダッシュボードを使う代わりに、エグゼクティブ概要、トリアージキュー、改善速度ボード、スキャナー有効性ビューなど、自分にとって重要な&lt;strong&gt;レイアウト&lt;/strong&gt;を構築できます。レイアウトは非公開のままにしたり、チーム全体に公開したり、デフォルトのランディングページとして設定したり、任意のレイアウト(自分のものでも共有テンプレートでも)を出発点としてクローンしたりできます。&lt;/p&gt;</description></item><item><title>APIでダッシュボードを自動化する</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/custom-dashboards-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/custom-dashboards-api/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: カスタムダッシュボードREST API（レイアウト、ウィジェットカタログ、ウィジェットデータ）はDefectDojo Proの機能です。デフォルトでは無効になっており、スーパーユーザーがCloudおよびOn-Premiseの両方のインスタンスで&lt;strong&gt;設定 &amp;gt; 機能フラグ&lt;/strong&gt;からカスタムダッシュボードを有効にできます。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;カスタムダッシュボードREST APIを使うと、&lt;a href="../custom-dashboards/"&gt;ダッシュボードUI&lt;/a&gt;で手動で組み立てるのと同じダッシュボードを、すべてコードから構築できます。ウィジェットカタログを調べたり、レイアウトを作成・更新したり、デフォルトを設定したり、レイアウトをチームと共有したり、DefectDojoのフィルタリングを再実装することなくウィジェットのデータをオンデマンドでレンダリングしたりできます。レイアウト機能は、ダッシュボードを構築するAIエージェントのための主要な入口として設計されているため、リクエストの形式は意図的に内省しやすい構造になっています。&lt;/p&gt;
+&lt;p&gt;本ガイドでは、認証、ウィジェットの語彙の発見、レイアウトの作成、そしてその検証とレンダリングという一連のライフサイクル全体を解説します。&lt;/p&gt;
+&lt;h2 id="認証"&gt;認証&lt;/h2&gt;
+&lt;p&gt;すべてのリクエストは、&lt;code&gt;Authorization&lt;/code&gt;ヘッダーに&lt;code&gt;Token&lt;/code&gt;プレフィックス（&lt;code&gt;Bearer&lt;/code&gt;ではありません）を付けて送信する個人用APIトークンで認証します。&lt;/p&gt;
+&lt;p&gt;トークンはDefectDojo ProのUIの&lt;strong&gt;ユーザー設定 → API v2キー&lt;/strong&gt;から取得します。シェルの履歴やコミットされたスクリプトに残らないよう、環境変数として保存してください。&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame is-terminal not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;DD_IMPORTER_DOJO_API_TOKEN&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;YOUR_API_TOKEN&amp;#34;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;すべての呼び出しのベースURLは、インスタンスに&lt;code&gt;/api/v2&lt;/code&gt;を付けたものです。&lt;/p&gt;</description></item><item><title>LLMでダッシュボードを構築する</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/custom-dashboards-llm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/custom-dashboards-llm/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注: REST APIとLLMによるカスタムダッシュボードの自動化はDefectDojo Proの機能です。デフォルトでは無効になっており、スーパーユーザーがCloudおよびOn-Premiseの両方のインスタンスで&lt;strong&gt;設定 &amp;gt; 機能フラグ&lt;/strong&gt;からカスタムダッシュボードを有効にできます。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Proのカスタムダッシュボードは完全にREST APIによって駆動されており、レイアウト機能はAIエージェントを念頭に置いて設計されています。つまり、作業全体をLLMに任せることができます。自己完結型のプロンプトを一つ、Claude、ChatGPT、その他の高性能なモデルに貼り付けて、欲しいダッシュボードを説明するだけで、モデルがテナントのライブウィジェットカタログを調べ、レイアウトを提案し、実行可能なPythonスクリプトを生成し、レイアウトを作成、検証し、必要に応じてデフォルトとして設定します。&lt;/p&gt;
+&lt;p&gt;パターンはシンプルです。ベースURL、APIトークン、そしてダッシュボードが誰のためのものかを簡単に説明するだけです。LLMが発見、設計、作成、検証を行い、テナントに対して何かを構築する前には承認を求めて一旦停止します。&lt;/p&gt;
+&lt;p&gt;本ガイドは、LLMが操作する生のリソースとリクエストの形式を解説した&lt;a href="../custom-dashboards-api/"&gt;ダッシュボードAPIガイド&lt;/a&gt;と対になっています。LLMが生成したものを理解したり、手動で調整したりしたい場合は、そのリファレンスを開いたままにしておいてください。&lt;/p&gt;
+&lt;h2 id="始める前に"&gt;始める前に&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;APIトークンを取得します。&lt;/strong&gt; DefectDojo ProのUIで&lt;strong&gt;ユーザー設定 → API v2キー&lt;/strong&gt;に移動し、トークンをコピーします。次に、生成されたスクリプトがトークンを読み取れるように、チャットにトークンが表示されないよう環境変数として設定します。&lt;/li&gt;
+&lt;/ol&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame is-terminal not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;DD_IMPORTER_DOJO_API_TOKEN&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&amp;lt;paste-token-here&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;機能が有効になっていることを確認します。&lt;/strong&gt; インスタンスで&lt;strong&gt;設定 &amp;gt; 機能フラグ&lt;/strong&gt;からカスタムダッシュボードを有効にしておく必要があります。有効になっていないと、すべてのAPI呼び出しが&lt;code&gt;403&lt;/code&gt;を返します。&lt;/p&gt;</description></item></channel></rss>

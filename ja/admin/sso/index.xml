@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>シングルサインオン on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/admin/sso/</link><description>Recent content in シングルサインオン on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/admin/sso/index.xml" rel="self" type="application/rss+xml"/><item><title>Authorization Connectors</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__authorization_connectors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__authorization_connectors/</guid><description>&lt;p&gt;Authorization Connectorsは、DefectDojo Proが対応するすべてのIDプロバイダーと、それぞれの状態、使用しているプロトコルを1つのページにまとめて表示します。これが存在する前は、各プロバイダーはそれぞれ独自の設定フォームに存在しており、すべてを開かない限り「このインスタンスで何が設定されているか」に答える方法がありませんでした。&lt;/p&gt;
+&lt;p&gt;Authorization Connectorsは&lt;strong&gt;DefectDojo Pro&lt;/strong&gt;の機能です。&lt;strong&gt;Connect &amp;gt; Authorization&lt;/strong&gt;にあります。IDプロバイダーの設定を表示・変更できるのは&lt;strong&gt;スーパーユーザー&lt;/strong&gt;のみです。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/admin/sso/images/authorization_connectors.png"
+ width="1800"
+ height="1150"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="Authorization Connectors"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="how-the-page-is-organised"&gt;How the page is organised&lt;/h2&gt;
+&lt;p&gt;プロバイダーは2つのセクションに分かれており、それぞれ見出しの横に件数が表示され、アルファベット順に並んでいます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Configured Providers&lt;/strong&gt;(設定済みプロバイダー) — 現在オンになっているかどうかにかかわらず、このインスタンスで設定済みのプロバイダー&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Available Providers&lt;/strong&gt;(利用可能なプロバイダー) — サポートされているが、まだ設定されていないプロバイダー&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;この区分はあえて&lt;em&gt;enabled&lt;/em&gt;(有効)ではなく&lt;em&gt;configured&lt;/em&gt;(設定済み)を基準にしています。設定した後にオフに切り替えられたプロバイダーはConfigured Providersに残ります。設定した本人がそこを探すはずだからです。状態はタイル上に表示されます。&lt;/p&gt;</description></item><item><title>SAML の設定</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__saml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__saml/</guid><description>&lt;p&gt;DefectDojo Pro は &lt;strong&gt;Enterprise Settings&lt;/strong&gt; UI 経由での SAML 認証をサポートしています。オープンソース版の DefectDojo には SSO は含まれていません。オープンソース版のアクセス制御については &lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt; を参照してください。&lt;/p&gt;
+&lt;h2 id="acs-url-assertion-consumer-service"&gt;ACS URL (Assertion Consumer Service)&lt;/h2&gt;
+&lt;p&gt;ユーザーが認証された後、SAML レスポンスをどこに POST すればよいかを ID プロバイダーが把握している必要があります。DefectDojo の ACS URL は次のとおりです。&lt;/p&gt;</description></item><item><title>Auth0</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__auth0/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__auth0/</guid><description>&lt;p&gt;DefectDojo ProはAuth0によるログインをサポートしています。オープンソース版のDefectDojoにはSSOは含まれていません。オープンソース版のアクセス制御については&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;DefectDojoを設定する前に、Auth0ダッシュボードで以下の手順を完了してください。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Create a new application: &lt;strong&gt;Applications &amp;gt; Create Application &amp;gt; Single Page Web Application&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Configure the application:&lt;/p&gt;</description></item><item><title>Azure Active Directory</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__azure_ad/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__azure_ad/</guid><description>&lt;p&gt;DefectDojo ProはAzure Active Directory(Azure AD)によるログインをサポートしており、ユーザーグループの自動同期も含まれます。オープンソース版のDefectDojoにはSSOは含まれていません。オープンソース版のアクセス制御については&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;DefectDojoを設定する前に、Azureポータルで以下の手順を完了してください。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Azure Active Directoryで&lt;a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app"&gt;新しいアプリを登録&lt;/a&gt;します。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;登録したアプリから以下の値を控えます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Application (client) ID&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Directory (tenant) ID&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Certificates &amp;amp; Secrets&lt;/strong&gt;で新しい&lt;strong&gt;Client Secret&lt;/strong&gt;を作成し、その値を控えます&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Application ID URI&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Authentication &amp;gt; Redirect URIs&lt;/strong&gt;で、&lt;strong&gt;Web&lt;/strong&gt;タイプのURIを追加します。
+&lt;code&gt;https://your-instance.cloud.defectdojo.com/complete/azuread-tenant-oauth2/&lt;/code&gt;&lt;/p&gt;</description></item><item><title>GitHub Enterprise</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__github_enterprise/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__github_enterprise/</guid><description>&lt;p&gt;DefectDojo ProはGitHub Enterpriseによるログインをサポートしています。オープンソース版のDefectDojoにはSSOは含まれていません。オープンソース版のアクセス制御については&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;DefectDojoを設定する前に、GitHub Enterpriseで以下の手順を完了してください。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;GitHub Enterprise Serverで&lt;a href="https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app"&gt;新しいOAuthアプリを作成&lt;/a&gt;します。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;アプリケーションの名前を選びます(例: &lt;code&gt;DefectDojo&lt;/code&gt;)。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Redirect URI&lt;/strong&gt;を設定します。
+&lt;code&gt;https://your-instance.cloud.defectdojo.com/complete/github-enterprise/&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;アプリから&lt;strong&gt;Client ID&lt;/strong&gt;と&lt;strong&gt;Client Secret&lt;/strong&gt;を控えます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="configuration"&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;DefectDojoで&lt;strong&gt;Enterprise Settings &amp;gt; OAuth Settings&lt;/strong&gt;に移動し、&lt;strong&gt;GitHub Enterprise&lt;/strong&gt;を選択してフォームに入力します。&lt;/p&gt;</description></item><item><title>GitLab</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__gitlab/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__gitlab/</guid><description>&lt;p&gt;DefectDojo ProはGitLabによるログインをサポートしています。オープンソース版のDefectDojoにはSSOは含まれていません。オープンソース版のアクセス制御については&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;DefectDojoを設定する前に、GitLabで以下の手順を完了してください。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;GitLabプロフィールのApplicationsページに移動します。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;GitLab.com: &lt;code&gt;https://gitlab.com/profile/applications&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;セルフホスト: &lt;code&gt;https://your-gitlab-host/profile/applications&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;新しいアプリケーションを作成します。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Name:&lt;/strong&gt; &lt;code&gt;DefectDojo&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Redirect URI:&lt;/strong&gt; &lt;code&gt;https://your-dojo-instance.cloud.defectdojo.com/complete/gitlab/&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;アプリケーションから&lt;strong&gt;Application ID&lt;/strong&gt;と&lt;strong&gt;Secret&lt;/strong&gt;を控えます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="configuration"&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;DefectDojoで&lt;strong&gt;Enterprise Settings &amp;gt; OAuth Settings&lt;/strong&gt;に移動し、&lt;strong&gt;GitLab&lt;/strong&gt;を選択してフォームに入力します。&lt;/p&gt;</description></item><item><title>Google Auth</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__google/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__google/</guid><description>&lt;p&gt;DefectDojo ProはGoogleアカウントによるログインをサポートしています。新規ユーザーは、初回ログイン時にまだ存在しない場合は自動的に作成されます。既存のDefectDojoユーザーは、Googleメールアドレスの&lt;code&gt;@&lt;/code&gt;より前の部分(ユーザー名)によってGoogleアカウントと照合されます。オープンソース版のDefectDojoにはSSOは含まれていません。オープンソース版のアクセス制御については&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;DefectDojoを設定する前に、Google Cloud Consoleで以下の手順を完了してください。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://console.developers.google.com"&gt;Google Developers Console&lt;/a&gt;にサインインします。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Credentials &amp;gt; Create Credentials &amp;gt; OAuth Client ID&lt;/strong&gt;に移動します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/google_1.png"
+ width="1814"
+ height="988"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Web Application&lt;/strong&gt;を選択し、分かりやすい名前(例: &lt;code&gt;DefectDojo&lt;/code&gt;)を付けます。&lt;/p&gt;</description></item><item><title>KeyCloak</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__keycloak/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__keycloak/</guid><description>&lt;p&gt;DefectDojo ProはKeyCloakによるログインをサポートしています。オープンソース版のDefectDojoにはSSOは含まれていません。オープンソース版のアクセス制御については&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;p&gt;このガイドは、KeyCloak Realmがすでに設定済みであることを前提としています。未設定の場合は&lt;a href="https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/realms/create.html"&gt;KeyCloak documentation&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;DefectDojoを設定する前に、KeyCloak Realmで以下の手順を完了してください。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;タイプ&lt;code&gt;openid-connect&lt;/code&gt;で新しいクライアントを追加します。クライアントIDを控えます。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;クライアント設定で以下を行います。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Access Type&lt;/strong&gt;を&lt;code&gt;confidential&lt;/code&gt;に設定します&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Valid Redirect URIs&lt;/strong&gt;にDefectDojoのURL(例: &lt;code&gt;https://yourorganization.cloud.defectdojo.com&lt;/code&gt;または&lt;code&gt;https://your-dojo-host/*&lt;/code&gt;)を追加します&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Web Origins&lt;/strong&gt;に同じURL(または&lt;code&gt;+&lt;/code&gt;)を追加します&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Fine Grained OpenID Connect Configuration&lt;/strong&gt;で以下を設定します。
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;User Info Signed Response Algorithm&lt;/strong&gt;を&lt;code&gt;RS256&lt;/code&gt;に設定&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Request Object Signature Algorithm&lt;/strong&gt;を&lt;code&gt;RS256&lt;/code&gt;に設定&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;設定を保存します。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Scope&lt;/strong&gt;で&lt;strong&gt;Full Scope Allowed&lt;/strong&gt;を&lt;code&gt;off&lt;/code&gt;に設定します。&lt;/p&gt;</description></item><item><title>Okta</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__okta/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__okta/</guid><description>&lt;p&gt;DefectDojo Pro は Okta 経由のログインをサポートしています。オープンソース版の DefectDojo には SSO は含まれていません。オープンソース版のアクセス制御については &lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt; を参照してください。&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;DefectDojo を設定する前に、Okta 側で以下の手順を完了してください。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://www.okta.com/developer/signup/"&gt;Okta&lt;/a&gt; にサインインするか、アカウントを作成します。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Applications&lt;/strong&gt; に移動し、&lt;strong&gt;Add Application&lt;/strong&gt; をクリックします。&lt;/p&gt;</description></item><item><title>OIDC</title><link>https://docs.defectdojo.com/ja/admin/sso/pro__oidc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/sso/pro__oidc/</guid><description>&lt;p&gt;DefectDojo Pro は、汎用の OpenID Connect (OIDC) プロバイダーを介したログインをサポートしています。オープンソース版の DefectDojo には SSO は含まれていません。オープンソース版のアクセス制御については &lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;Authorized Users&lt;/a&gt; を参照してください。&lt;/p&gt;
+&lt;h2 id="configuration"&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;DefectDojo で &lt;strong&gt;Enterprise Settings &amp;gt; OIDC Settings&lt;/strong&gt; に移動します。&lt;/p&gt;</description></item></channel></rss>

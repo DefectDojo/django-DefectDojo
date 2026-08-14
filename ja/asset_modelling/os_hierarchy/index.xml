@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>アセット階層 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/</link><description>Recent content in アセット階層 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>アセット階層: 概要</title><link>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__asset_hierarchy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__asset_hierarchy/</guid><description>&lt;p&gt;DefectDojoは、作業を整理するために5つの主要なデータクラスを使用します: &lt;strong&gt;組織、アセット&lt;/strong&gt;、&lt;strong&gt;エンゲージメント&lt;/strong&gt;、&lt;strong&gt;テスト&lt;/strong&gt;、&lt;strong&gt;検出事項&lt;/strong&gt;です。&lt;/p&gt;
+&lt;p&gt;DefectDojoは、チームをツールに合わせるのではなく、ツールをチームに合わせて柔軟に運用できるように設計されています。これらのデータクラスを使って作業をどのように整理できるかを理解すれば、堅牢で柔軟なワークスペースを設計できるようになります。&lt;/p&gt;
+&lt;h3 id="アセット階層図"&gt;アセット階層図&lt;/h3&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Asset_Hierarchy_Full.png"
+ width="2180"
+ height="1282"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="組織"&gt;&lt;strong&gt;組織&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;DefectDojoでまず設定する必要があるデータのカテゴリは組織です。組織は、特定の方法でアセットを分類することを目的としています。例えば以下のような分類が考えられます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;事業ドメイン別&lt;/li&gt;
+&lt;li&gt;開発チーム別&lt;/li&gt;
+&lt;li&gt;セキュリティチーム別&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Asset_Hierarchy_Overview.png"
+ width="2564"
+ height="1018"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;
+&lt;em&gt;アセットは、それぞれの組織の下にグループ化されてネストされます。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;組織にはロールベースアクセス制御のルールを適用でき、チームメンバーがそのデータ(配下のエンゲージメント、テスト、検出事項データを含むアセット)を閲覧・操作できる範囲を制限できます。ユーザーロールの詳細については、&lt;strong&gt;Introduction To Roles&lt;/strong&gt;の記事を参照してください。&lt;/p&gt;
+&lt;h4 id="組織は何を表すことができますか"&gt;組織は何を表すことができますか?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;特定のソフトウェアプロジェクトに多数の異なるデプロイやバージョンがある場合、プロジェクト全体のスコープをカバーする単一の組織を作成し、各バージョンを個別のアセットとして存在させる方法が有効な場合があります。
+​&lt;/li&gt;
+&lt;li&gt;また、ソフトウェア開発プロセスの各段階を表すために組織を使用することも考えられます。例えば「In Development」用の組織と「In Production」用の組織を分けるといった方法です。
+​&lt;/li&gt;
+&lt;li&gt;最終的には、アセットをどのように整理し、組織に何を表現させたいかはあなた次第です。DefectDojoの階層は、セキュリティチームのニーズに合わせて変更する必要があるかもしれません。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="アセット"&gt;&lt;strong&gt;アセット&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;DefectDojoにおける&lt;strong&gt;アセット&lt;/strong&gt;は、現在テストしているプロジェクト、プログラム、またはアプリケーションを表すことを目的としています。アセットは、その対象に関連するすべてのセキュリティ作業とテスト履歴を保持します。&lt;/p&gt;</description></item><item><title>SLA設定</title><link>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__sla_configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__sla_configuration/</guid><description>&lt;p&gt;DefectDojoの各製品には、独自のサービスレベルアグリーメント(SLA)設定を持たせることができます。これは、検出事項を修復またはその他の方法で管理するために組織に与えられた日数を表します。&lt;/p&gt;
+&lt;p&gt;SLAは、&lt;strong&gt;&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/#findings"&gt;検出事項の深刻度&lt;/a&gt;&lt;/strong&gt;、または(DefectDojo Proの場合)**&lt;a href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/"&gt;検出事項のリスク&lt;/a&gt;**のいずれかに基づいて設定できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/sla_multiple.png"
+ width="1286"
+ height="412"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;SLAは、DefectDojo内で検出事項が作成された日を基準として、検出事項に日数のカウントダウンを適用します。カウントダウン期間内に検出事項がクローズされない場合、その検出事項はSLA違反としてラベル付けされます。&lt;/p&gt;
+&lt;h2 id="slaの操作"&gt;SLAの操作&lt;/h2&gt;
+&lt;p&gt;SLAは、組織の修復ポリシーを表現する手段として使用できます。また、DefectDojoインスタンス内で最も長くアクティブな状態にある、最も重大な検出事項を優先順位付けする手段としても使用できます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;検出事項テーブルをSLA日数でソートまたはフィルタリングできます。&lt;/li&gt;
+&lt;li&gt;SLA違反が発生した際に、関連する製品に割り当てられたDefectDojoユーザーへ&lt;a href="https://docs.defectdojo.com/admin/notifications/about_notifications/"&gt;通知&lt;/a&gt;をトリガーするよう設定できます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DefectDojo Pro&lt;/strong&gt;では、SLAのパフォーマンスは&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/"&gt;Executive InsightsおよびRemediation&lt;/a&gt;メトリクスダッシュボードでも追跡されます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DefectDojo Pro&lt;/strong&gt;では、SLAの遵守状況をカスタム&lt;a href="https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards/"&gt;ダッシュボード&lt;/a&gt;上に表示することもできます。例えば、SLA BurndownウィジェットやフィルタリングされたCountウィジェットを使用します。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="mitigated-within-slaステータス"&gt;Mitigated Within SLAステータス&lt;/h3&gt;
+&lt;p&gt;検出事項がSLAの期限までに正常に緩和された場合、その検出事項にはMitigated Within SLA列に✅の緑色のチェックマークが記録されます。&lt;/p&gt;</description></item><item><title>検出事項をソースコードにリンクする</title><link>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__source-code-repositories/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__source-code-repositories/</guid><description>&lt;p&gt;一部のツール（特にSASTツール）は、脆弱性データに関連するファイル名と行番号を含みます。エンゲージメントでソースコードのリポジトリが指定されている場合、DefectDojoはファイルパスをリンクとして表示し、ユーザーは脆弱性の場所に直接移動できます。&lt;/p&gt;
+&lt;h2 id="エンゲージメントとテストでのリポジトリの設定"&gt;エンゲージメントとテストでのリポジトリの設定&lt;/h2&gt;
+&lt;h3 id="エンゲージメント"&gt;エンゲージメント&lt;/h3&gt;
+&lt;p&gt;エンゲージメントの編集中に、ユーザーは特定のソースコード管理リポジトリのURLを設定できます。&lt;strong&gt;（Pro UIでは、このフィールドは編集エンゲージメント &amp;gt; オプションフィールド &amp;gt; Repo で設定できます）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;インタラクティブエンゲージメントの場合、ブランチを指定するURLである必要があります。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;GitHubの場合 - https://github.com/DefectDojo/django-DefectDojo/tree/dev のような形式
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/source-code-repositories_1.png"
+ width="2105"
+ height="120"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="エンゲージメントの編集（GitHub）"
+ id="h-rh-i-0"
+&gt;&lt;/li&gt;
+&lt;li&gt;GitLabの場合 - https://gitlab.com/gitlab-org/gitlab/-/tree/master のような形式
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/source-code-repositories-gitlab_1.png"
+ width="1089"
+ height="40"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="エンゲージメントの編集（Gitlab）"
+ id="h-rh-i-1"
+&gt;&lt;/li&gt;
+&lt;li&gt;パブリックBitBucketの場合 - （git cloneのURLと同様）
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/source-code-repositories-bitbucket_1.png"
+ width="1084"
+ height="43"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="エンゲージメントの編集（Bitbucket public）"
+ id="h-rh-i-2"
+&gt;&lt;/li&gt;
+&lt;li&gt;スタンドアロン/オンプレミスBitBucketの場合、パブリックなユーザーリポジトリでは https://bb.example.com/scm/some-project/some-repo.git または https://bb.example.com/scm/some-user-name/some-repo.git （git cloneのURLと同様）
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/source-code-repositories-bitbucket-onpremise_1.png"
+ width="1091"
+ height="38"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="エンゲージメントの編集（Bitbucket standalone）"
+ id="h-rh-i-3"
+&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;CI/CDエンゲージメントの場合、コミットハッシュ、ブランチ/タグ、コード行が変わる可能性があるため、リポジトリのURLのみを含める必要があります。&lt;/p&gt;</description></item><item><title>OWASP ASVSベンチマーク</title><link>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/benchmarks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/benchmarks/</guid><description>&lt;p&gt;DefectDojoは、Webアプリケーションの技術的なセキュリティ管理をテストするための基準を提供する&lt;a href="https://owasp.org/www-project-application-security-verification-standard/"&gt;OWASPアプリケーションセキュリティ検証標準（ASVS）&lt;/a&gt;に対して、製品をベンチマークすることをサポートしています。&lt;/p&gt;
+&lt;p&gt;ベンチマークを使用すると、製品が組織の定めたセキュリティ要件をどの程度満たしているかを測定し、その可視性のためにスコアを製品ページに公開できます。&lt;/p&gt;
+&lt;h2 id="ベンチマークへのアクセス"&gt;ベンチマークへのアクセス&lt;/h2&gt;
+&lt;p&gt;ベンチマークは&lt;strong&gt;製品&lt;/strong&gt;ページから利用できます。ベンチマークビューを開くには、製品ページの右上にあるドロップダウンメニューを選択し、メニューの下部にある&lt;strong&gt;OWASP ASVS v.3.1&lt;/strong&gt;を選択します。&lt;/p&gt;
+&lt;h2 id="ベンチマークレベル"&gt;ベンチマークレベル&lt;/h2&gt;
+&lt;p&gt;OWASP ASVSは、検証範囲の3つのレベルを定義しています。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;レベル1&lt;/strong&gt; – すべてのソフトウェアが対象です。最も重大なセキュリティ要件を最も低いコストで検証します。これはDefectDojoのデフォルトレベルです。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;レベル2&lt;/strong&gt; – 機密データを含むアプリケーションが対象です。ほとんどのアプリケーションに適しています。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;レベル3&lt;/strong&gt; – 高額な取引を扱う、または機密性の高い医療・財務・安全データを保存するなど、最も重要なアプリケーションが対象です。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ベンチマークビューの右上にあるドロップダウンを使用して、レベルを切り替えることができます。&lt;/p&gt;
+&lt;h2 id="ベンチマークスコア"&gt;ベンチマークスコア&lt;/h2&gt;
+&lt;p&gt;ベンチマークビューの左側には、選択したASVSレベルにおける製品の現在のスコアが表示されます。&lt;/p&gt;</description></item><item><title>アセットヘルスグレード</title><link>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__asset_health_grade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/os_hierarchy/os__asset_health_grade/</guid><description>&lt;p&gt;DefectDojoは、アセットに含まれる検出事項の量に基づいてアセットのグレードを算出できます。グレードはAからFの範囲でランク付けされます。&lt;/p&gt;
+&lt;p&gt;アセットのグレードに影響するのは、アクティブかつ検証済みの検出事項のみである点に注意してください。未検証の検出事項は影響しません。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;各アセットのヘルスグレード(A - F)は、アセットリスト内でその名前の横に表示されます。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/asset-health-grade.png"
+ width="480"
+ height="363"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="アセットリスト内で各アセットの横に表示されるアセットヘルスグレード"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="アセットグレードの計算"&gt;アセットグレードの計算&lt;/h2&gt;
+&lt;p&gt;すべてのアセットグレードは(検出事項がない状態で)100から始まります。&lt;/p&gt;
+&lt;p&gt;グレードの計算では、まずアセット内の検出事項の中で最も高い&lt;strong&gt;深刻度&lt;/strong&gt;レベルを確認し、アセットのヘルスをベースレベルまで引き下げます。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;検出事項の最高深刻度レベル&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;最大グレード&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;重大&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;40&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;高&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;60&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;中&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;80&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;低&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;95&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;さらに、追加の検出事項ごとにグレードから点数が減点されます。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;追加の検出事項の深刻度レベル&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;減点数&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;重大&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;5&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;高&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;3&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;中&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;2&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;低&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;</description></item></channel></rss>

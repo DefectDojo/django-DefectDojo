@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🔸 DefectDojo Pro（クラウド） on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/get_started/pro/cloud/</link><description>Recent content in 🔸 DefectDojo Pro（クラウド） on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/get_started/pro/cloud/index.xml" rel="self" type="application/rss+xml"/><item><title>Cloud Managerの使用</title><link>https://docs.defectdojo.com/ja/get_started/pro/cloud/using-cloud-manager/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/cloud/using-cloud-manager/</guid><description>&lt;p&gt;DefectDojoのCloud Managerにログインすると、アカウント設定を構成し、DefectDojo Cloudのサブスクリプションを管理できます。&lt;/p&gt;
+&lt;h2 id="新規サブスクリプション"&gt;&lt;strong&gt;新規サブスクリプション&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://cloud.defectdojo.com/accounts/onboarding/step_1"&gt;https://cloud.defectdojo.com/accounts/onboarding/step_1&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;このページでは、DefectDojoに新規、または&lt;a href="../additional-cloud-instance/"&gt;追加の&lt;/a&gt;Cloudインスタンスをリクエストできます。&lt;/p&gt;
+&lt;h2 id="サブスクリプションの管理"&gt;&lt;strong&gt;サブスクリプションの管理&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://cloud.defectdojo.com/accounts/manage_subscriptions"&gt;https://cloud.defectdojo.com/accounts/manage_subscriptions&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Subscription Managementページには、現在アクティブなすべてのCloudインスタンスが表示され、各インスタンスのFirewall設定を構成できます。&lt;/p&gt;
+&lt;h3 id="firewall設定の変更"&gt;Firewall設定の変更&lt;/h3&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/using_the_cloud_manager.png"
+ width="1310"
+ height="678"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Edit Subscription&lt;/strong&gt;ページで、追加したいルールのIP Address、Mask、Labelを入力します。複数のFirewallルールが必要な場合は、&lt;strong&gt;Add New Range&lt;/strong&gt;をクリックして新しい空のルールを作成します。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/using_the_cloud_manager_2.png"
+ width="718"
+ height="954"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;ここでは、外部サービス(GitHub &amp;amp; Jira Cloud)にファイアウォールを開放することもできます。また、希望する場合はメニューから&lt;strong&gt;Proceed Without Firewall&lt;/strong&gt;を選択して、ファイアウォールを完全に無効化することもできます。&lt;/p&gt;</description></item><item><title>接続に関するトラブルシューティング</title><link>https://docs.defectdojo.com/ja/get_started/pro/cloud/connectivity-troubleshooting/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/cloud/connectivity-troubleshooting/</guid><description>&lt;p&gt;DefectDojo インスタンスへのアクセスに問題がある場合は、以下の手順に従って接続を復旧できます。&lt;/p&gt;
+&lt;h2 id="サイトにはアクセスできるがログインできない"&gt;サイトにはアクセスできるが、ログインできない&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;ログインページ（&lt;strong&gt;yourcompanyinstance.cloud.defectdojo.com/login&lt;/strong&gt;）からアカウントのパスワードをリセットできます。手続きを開始するには「I forgot my password」をクリックしてください。&lt;br&gt;
+​&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Connectivity_Troubleshooting.png"
+ width="1600"
+ height="330"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;メールアドレスを入力し、「Reset my password」をクリックします。&lt;br&gt;
+​&lt;/li&gt;
+&lt;li&gt;件名が「&lt;code&gt;Password reset on yourcompanyinstance.cloud.defectdojo.com&lt;/code&gt;」のメールが届きます。このメールには、新しいパスワードを設定するためにクリックできるリンクが含まれています。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Connectivity_Troubleshooting_2.png"
+ width="1884"
+ height="280"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;メールが届かない場合は、迷惑メールフォルダを確認してください。それでも見つからない場合は、チームの DefectDojo 管理者に、あなたのインスタンスにアカウントが登録されているかを確認してもらってください。&lt;/p&gt;
+&lt;h2 id="自社のclouddefectdojoサイトにアクセスできない"&gt;自社のcloud.defectdojoサイトにアクセスできない&lt;/h2&gt;
+&lt;p&gt;自社の cloud.defectdojo サイトがブラウザで読み込まれない、またはタイムアウトする場合、接続を受け入れるために自社のファイアウォールルールを変更する必要がある可能性があります。&lt;/p&gt;</description></item><item><title>追加の Cloud インスタンスをセットアップする</title><link>https://docs.defectdojo.com/ja/get_started/pro/cloud/additional-cloud-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/cloud/additional-cloud-instance/</guid><description>&lt;p&gt;2 つ目の Cloud インスタンスを追加する手順は、最初のインスタンスを追加する場合とほぼ同じです。このガイドは、すでに最初の DefectDojo サーバーをセットアップ済みであり、追加のインスタンスについて営業チームとの合意ができていることを前提としています。&lt;/p&gt;
+&lt;p&gt;追加の Cloud インスタンスをまだ申し込んでいない場合は、進める前に &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="info",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;info at defectdojo dot com&lt;/noscript&gt;
+
+ までご連絡ください。&lt;/p&gt;
+&lt;h2 id="ステップ-1-新規サブスクリプションの手続きを開始する"&gt;ステップ 1: 新規サブスクリプションの手続きを開始する&lt;/h2&gt;
+&lt;p&gt;この手続きは、次のリンクから開始できます。&lt;a href="https://cloud.defectdojo.com/accounts/onboarding/step_1"&gt;https://cloud.defectdojo.com/accounts/onboarding/step_1&lt;/a&gt;。または、Cloud Manager のページ（cloud.defectdojo.com）で 🛒 &lt;strong&gt;New Subscription&lt;/strong&gt; をクリックしても開始できます。&lt;/p&gt;</description></item><item><title>クラウドアーキテクチャ</title><link>https://docs.defectdojo.com/ja/get_started/pro/cloud/cloud-architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/cloud/cloud-architecture/</guid><description>&lt;p&gt;DefectDojo Cloud は、Google Cloud 上の &lt;strong&gt;Google Kubernetes
+Engine（GKE）&lt;/strong&gt; で稼働するマルチテナント SaaS プラットフォームです。このページでは、
+プラットフォームの構成と、顧客環境がどのように分離されているかについて説明します。&lt;/p&gt;
+&lt;p&gt;
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/cloud_architecture_kubernetes.svg"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="DefectDojo Cloud の Kubernetes アーキテクチャ: 顧客のトラフィックは、Google 管理の TLS を使用する Google Cloud Load Balancing を経由してリージョンごとの GKE クラスターに入ります。各顧客は、専用の PostgreSQL データベース、Cloud Storage バケット、Vertex AI プロジェクトを備えた、独自の Kubernetes ネームスペースで実行されます。"
+ id="h-rh-i-0"
+ class="markdown-svg"
+&gt;&lt;/p&gt;</description></item><item><title>エグレスIPアドレス</title><link>https://docs.defectdojo.com/ja/get_started/pro/cloud/egress-ip-addresses/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/cloud/egress-ip-addresses/</guid><description>&lt;p&gt;DefectDojo Cloudがお客様のシステムにアクセスする場合 — Connectorsによるスキャナーの
+API同期、JiraやServiceNowへのIssueのプッシュ、通知Webhookの送信、SMTP経由の
+メール配信など — これらの接続はすべてDefectDojo環境から&lt;strong&gt;アウトバウンドで開始&lt;/strong&gt;
+されます。接続先のシステムがファイアウォールの内側にある場合、これらの接続が
+ブロックされないよう、DefectDojoのアウトバウンド(エグレス)IPアドレスを許可する
+必要があります。&lt;/p&gt;
+&lt;p&gt;このページでは、そのエグレスIPアドレスの確認方法を説明します。&lt;/p&gt;
+&lt;h2 id="エグレスとイングレス"&gt;エグレスとイングレス&lt;/h2&gt;
+&lt;p&gt;この2つは異なるものであり、このページで扱うのは前者のみです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;エグレス(このページ)&lt;/strong&gt; — DefectDojo Cloudが&lt;em&gt;お客様の&lt;/em&gt;外部システムに
+&lt;strong&gt;アクセスする&lt;/strong&gt;際の接続元IPアドレスです。DefectDojoが連携先のシステムに
+到達できるよう、&lt;strong&gt;お客様の&lt;/strong&gt;ファイアウォールでこれらを許可してください。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;イングレス&lt;/strong&gt; — &lt;strong&gt;お客様の&lt;/strong&gt;DefectDojoインスタンスへのアクセスを誰に許可するかを
+制御するルールです。これらはここではなく、Cloud ManagerのFirewall Rulesとして
+管理されます。&lt;a href="../connectivity-troubleshooting/"&gt;Connectivity Troubleshooting&lt;/a&gt;、
+および&lt;a href="../additional-cloud-instance/"&gt;Set up an additional Cloud instance&lt;/a&gt;の
+Firewall Rulesの手順を参照してください。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="マルチテナント環境"&gt;マルチテナント環境&lt;/h2&gt;
+&lt;p&gt;Standard、Pay-as-you-go、Premiumの各インスタンスは、共有のリージョン単位の
+Google Kubernetes Engine(GKE)クラスター上で稼働します。アウトバウンド接続は、
+インスタンスが稼働するリージョン内のノードの外部IPアドレスから発信されます。&lt;/p&gt;</description></item></channel></rss>

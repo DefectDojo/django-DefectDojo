@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>重複排除 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/</link><description>Recent content in 重複排除 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/index.xml" rel="self" type="application/rss+xml"/><item><title>重複排除について</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/about_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/about_deduplication/</guid><description>&lt;p&gt;DefectDojoは、ツールから一括レポートを取り込み、レポートの内容に基づいて1つ以上の検出事項を作成するように設計されています。DefectDojoを使用する際は、同じツールから定期的にレポートを取り込むことがほとんどであるため、重複した検出事項が発生する可能性が非常に高くなります。&lt;/p&gt;
+&lt;p&gt;ここで役立つのが重複排除機能です。これは、重複した検出事項を自動的に管理できるように設定できるスマートな機能です。&lt;/p&gt;
+&lt;h2 id="defectdojoが重複をどのように処理するか"&gt;DefectDojoが重複をどのように処理するか&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;まず、&lt;strong&gt;テスト1.&lt;/strong&gt; をインポートします。レポートには脆弱性が含まれており、これは検出事項Aとして記録されます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;その後、同じ脆弱性を含むテスト2をインポートします。これは検出事項Bとして記録され、検出事項Bは検出事項Aの重複としてマークされます。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;さらにその後、同じ脆弱性を含む&lt;strong&gt;テスト3&lt;/strong&gt;をインポートします。これは検出事項Cとして記録され、検出事項Aの重複としてマークされます。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;このように重複を作成・マークすることで、DefectDojoは「オリジナル」の脆弱性に関するすべての作業がオリジナルの検出事項ページに集約されるようにし、別々のコンテキストが作られたり、対応が必要な複数の独立した脆弱性が存在するかのような印象をチームに与えたりすることを防ぎます。&lt;/p&gt;
+&lt;h3 id="どの検出事項がオリジナルになるか"&gt;どの検出事項がオリジナルになるか&lt;/h3&gt;
+&lt;p&gt;重複排除は、重複チェーンの中で&lt;strong&gt;最初に作成された&lt;/strong&gt;検出事項を常に正規のオリジナルとして扱います。そのため、以前のインポートによる検出事項が、より新しい検出事項の重複に格下げされることはありません。すでに確立されたオリジナルの地位が移ることはありません。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;単一の&lt;/em&gt;レポート内では、スキャナーが検出事項を列挙する順序によって「勝者」が決まるわけではありません。1回のインポートで作成される検出事項は、内容に基づく安定した順序で作成されるため、同じ重複排除キーで衝突する複数の検出事項を含むレポートは、&lt;strong&gt;インポートするたびに同じオリジナル&lt;/strong&gt;を生成します。同じ結果を再スキャンして再インポートしても、チームが対応してきた検出事項が入れ替わることはありません。&lt;/p&gt;
+&lt;p&gt;デフォルトでは、重複排除を適用するには、これらのテストが同じ製品の配下にネストされている必要があります。必要に応じて、重複排除の範囲を単一のエンゲージメントにさらに限定することもできます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/deduplication.png"
+ width="1336"
+ height="679"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="製品レベルおよびエンゲージメントレベルでの重複排除"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;重複した検出事項は、デフォルトで非アクティブに設定されます。これは重複した検出事項自体が非アクティブであるという意味ではありません。むしろ、チームが対応・修正すべきアクティブな検出事項が1つだけになるようにするためのものであり、オリジナルの検出事項が緩和済みになると、重複した検出事項も緩和済みになることを意味します。&lt;/p&gt;
+&lt;h2 id="再インポートにおける重複排除"&gt;再インポートにおける重複排除&lt;/h2&gt;
+&lt;p&gt;重複排除と再インポートは似たプロセスですが、検出事項の一致を識別するために異なるアルゴリズムを使用します。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;テストに再インポートすると、再インポートのプロセスは受信した検出事項を確認し、&lt;strong&gt;ハッシュコードを比較して、一致するものを破棄します&lt;/strong&gt;。これらの一致した検出事項は、検出事項としても重複検出事項としても作成されることはありません。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ただし、再インポートの重複排除後に残った検出事項も、引き続き同一ツール重複排除の対象となります。そのため、同一ツール重複排除の範囲をより狭く設定していると、再インポートのパイプライン内で重複が発生することがあります。&lt;/p&gt;
+&lt;h3 id="例"&gt;例&lt;/h3&gt;
+&lt;p&gt;ここでは、再インポートの重複排除アルゴリズムが同一ツール重複排除アルゴリズムと異なるツールを例に説明します。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Deduplication Algorithm&lt;/th&gt;
+ &lt;th&gt;Hash Code Fields&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;再インポート&lt;/td&gt;
+ &lt;td&gt;タイトル、CWE、深刻度、説明、行番号&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;同一ツール&lt;/td&gt;
+ &lt;td&gt;タイトル、CWE、深刻度、説明&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;DefectDojo内に、ある行番号を持つ検出事項があったとします。環境を再スキャンしたところ、その脆弱性の行番号が変わりました。同じテストに再インポートします。この場合、再インポートと重複排除の際に何が起こるかを説明します。&lt;/p&gt;</description></item><item><title>重複排除の有効化</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro_enabling_product_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro_enabling_product_deduplication/</guid><description>&lt;p&gt;重複排除は、Product全体に対して適用することも、単一のEngagementに絞って適用することもできます。&lt;/p&gt;
+&lt;h2 id="productに対する重複排除"&gt;Productに対する重複排除&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;サイドバーの&lt;strong&gt;Settings &amp;gt; System &amp;gt; ⚙️ System Settings&lt;/strong&gt;からSystem Settingsページに移動します(以前のメニュー構成を使用しているインスタンスでは&lt;strong&gt;Settings &amp;gt; Pro Settings &amp;gt; System Settings&lt;/strong&gt;)。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/enabling_product-level_deduplication.png"
+ width="1600"
+ height="1020"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;&lt;strong&gt;Deduplication and Finding Settings&lt;/strong&gt;カードは、&lt;strong&gt;System Settings&lt;/strong&gt;ページの一番上にあります。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/enabling_product-level_deduplication_2.png"
+ width="1410"
+ height="460"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;</description></item><item><title>類似の検出事項</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/os__similar_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/os__similar_findings/</guid><description>&lt;p&gt;&lt;a href="../about_deduplication"&gt;重複排除&lt;/a&gt;がインポート時に自動的に実行されるのに対し、&lt;strong&gt;類似の検出事項&lt;/strong&gt;は&lt;strong&gt;検出事項の表示&lt;/strong&gt;ページにある手動・対話型のツールです。現在見ている検出事項に似た、同じアセット内の他の検出事項を表示し、それらを手動で重複クラスターにリンクできるようにします。&lt;/p&gt;
+&lt;p&gt;自動的な重複排除では、本来まとめられるべきだと思う検出事項がグループ化されなかった場合や、アセット内に現在の脆弱性と似たものが他にないかを調べたい場合に使用します。&lt;/p&gt;
+&lt;h2 id="使用場所"&gt;使用場所&lt;/h2&gt;
+&lt;p&gt;任意の検出事項を開き、その検出事項の表示ページに移動します。下にスクロールして&lt;strong&gt;類似の検出事項&lt;/strong&gt;パネルを表示します。見出しに表示されている数字は、現在の検出事項の値と一致するアセット内の検出事項の件数です。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/similar_findings_panel.png"
+ width="1184"
+ height="68"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="検出事項の表示ページにある類似の検出事項パネルの見出し"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;このパネルはデフォルトで折りたたまれています。パネルの見出し(または右側のシェブロン/フィルターボタン)をクリックすると展開され、クエリが実行されます。&lt;/p&gt;
+&lt;h2 id="検出事項の照合方法"&gt;検出事項の照合方法&lt;/h2&gt;
+&lt;p&gt;パネルを開くと、DefectDojoは現在の検出事項の値をあらかじめフィルターに入力し、&lt;strong&gt;同じアセット&lt;/strong&gt;内で一致する他の検出事項を検索します。照合の初期値として使用されるフィールドは次のとおりです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;脆弱性ID(例: CVE識別子)&lt;/li&gt;
+&lt;li&gt;CWE&lt;/li&gt;
+&lt;li&gt;ファイルパス&lt;/li&gt;
+&lt;li&gt;行番号&lt;/li&gt;
+&lt;li&gt;Unique ID from tool&lt;/li&gt;
+&lt;li&gt;テストタイプ&lt;/li&gt;
+&lt;li&gt;アセット(およびアセットタイプ)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;現在の検出事項は、常にそれ自身の結果から除外されます。照合の範囲はアセット単位であるため、類似の検出事項がアセットをまたいで結果を返すことはありません。いずれかのエンゲージメントでエンゲージメントレベルの重複排除が有効になっている場合、エンゲージメントの境界をまたぐ一致はリンクできません(下記の&lt;a href="#actions"&gt;アクション&lt;/a&gt;を参照してください)。&lt;/p&gt;
+&lt;p&gt;これは、&lt;code&gt;hash_code&lt;/code&gt;(またはUnique ID from tool)を比較して一致を判定する自動重複排除アルゴリズムとは異なります。類似の検出事項は意図的に広い範囲を対象とすることで、厳密なハッシュ照合では見逃してしまう関連の検出事項を発見できるようにしています。&lt;/p&gt;</description></item><item><title>類似の検出事項</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__similar_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__similar_findings/</guid><description>&lt;p&gt;&lt;a href="../about_deduplication"&gt;重複排除&lt;/a&gt;がインポート時に自動的に実行されるのに対し、&lt;strong&gt;類似の検出事項&lt;/strong&gt;は&lt;strong&gt;View Finding&lt;/strong&gt;ページ上の手動・対話型のツールです。現在表示している検出事項に似た、同じAsset内の他の検出事項を表示し、手動で重複クラスタにリンクできるようにします。&lt;/p&gt;
+&lt;p&gt;自動的な重複排除では、本来まとめられるべきだと思われる検出事項がグループ化されなかった場合や、現在の脆弱性に似た他の検出事項がAsset内にないか調べたい場合に使用します。&lt;/p&gt;
+&lt;h2 id="確認方法"&gt;確認方法&lt;/h2&gt;
+&lt;p&gt;任意の検出事項を開き、&lt;strong&gt;Duplicate &amp;amp; Similar Findings&lt;/strong&gt;カードまでスクロールします。このカードには2つのタブがあります。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Duplicate Findings&lt;/strong&gt; – この検出事項に既に重複としてリンクされている検出事項(自動生成されたクラスタ)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Similar Findings&lt;/strong&gt; – 現在の検出事項の値と一致するものの、まだそのクラスタに含まれていないAsset内の他の検出事項。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Similar Findings&lt;/strong&gt;タブを選択すると、検索が実行されます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_similar_findings.png"
+ width="1440"
+ height="900"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="View FindingページのDuplicate &amp;amp; Similar Findingsカード"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;</description></item><item><title>Deduplication Tuning (Pro)</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__deduplication_tuning/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__deduplication_tuning/</guid><description>&lt;p&gt;Deduplication Tuning は、検出事項の重複排除方法をきめ細かく制御できる DefectDojo Pro の機能で、特定のセキュリティテストワークフローに合わせて重複検出を最適化できます。&lt;/p&gt;
+&lt;h2 id="deduplication-settings"&gt;Deduplication Settings&lt;/h2&gt;
+&lt;p&gt;DefectDojo Pro では、次の場所から Deduplication Tuning にアクセスできます。
+&lt;strong&gt;Settings &amp;gt; Finding Workflow&lt;/strong&gt;(以前のメニュー構成を使用しているインスタンスでは &lt;strong&gt;Settings &amp;gt; Pro Settings &amp;gt; Deduplication Settings&lt;/strong&gt;)&lt;/p&gt;</description></item><item><title>過剰な重複を避ける</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/avoid_excess_duplicates/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/avoid_excess_duplicates/</guid><description>&lt;p&gt;DefectDojoの強みの1つは、データモデルがさまざまなユースケースやアプリケーションに対応できることです。ソフトウェアを使いこなし、ワークフローを最適化する方法を見つけるにつれて、アプローチを変えていくことになるでしょう。&lt;/p&gt;
+&lt;p&gt;デフォルトでは、DefectDojoは作成された重複した検出事項を削除しません。各検出事項は、脆弱性の個別のインスタンスと見なされます。そのため、&lt;strong&gt;重複した検出事項&lt;/strong&gt;は、ワークフローのプロセス変更が必要であることを示すサインになり得ます。&lt;/p&gt;
+&lt;h2 id="重複した検出事項が許容されるのはどのような場合か"&gt;重複した検出事項が許容されるのはどのような場合か&lt;/h2&gt;
+&lt;p&gt;重複した検出事項が必ずしも問題を示しているとは限りません。重複を保持することが望ましいアプローチとなるケースも数多くあります。たとえば:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;チームがインタラクティブエンゲージメントを使用し、それについてレポートを作成している場合。特定の単一のテストに関する個別のレポートを作成したい場合、以前にすでに発見された検出事項の再発があるかどうかを知りたいはずです。&lt;/li&gt;
+&lt;li&gt;コンテキストが分離されているエンゲージメント(たとえば異なるリポジトリを対象としている場合など)がある場合、両方の場所で発生している検出事項にフラグを立てられるようにしたいはずです。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="冗長なインポートの確認"&gt;冗長なインポートの確認&lt;/h2&gt;
+&lt;h2 id="ステップ1-過剰な重複をクリーンアップする"&gt;ステップ1: 過剰な重複をクリーンアップする&lt;/h2&gt;
+&lt;p&gt;幸いなことに、DefectDojoの重複排除設定を使用すると、一定のしきい値を超えた時点で重複を一括削除できます。この機能により、クリーンアップ作業が容易になります。このプロセスについて詳しくは、&lt;strong&gt;検出事項の重複排除&lt;/strong&gt;に関する記事を参照してください &amp;lt;-link will go here.&lt;/p&gt;
+&lt;h3 id="ステップ2-エンゲージメントの冗長性を評価する"&gt;ステップ2: エンゲージメントの冗長性を評価する&lt;/h3&gt;
+&lt;p&gt;重複した検出事項をクリーンアップしたら、それらを含んでいた製品を確認し、明確な原因があるかどうかを調べることをお勧めします。その中に、コンテキストが冗長になっているエンゲージメントが見つかるかもしれません。&lt;/p&gt;
+&lt;h4 id="重複または再利用されているエンゲージメント"&gt;重複または再利用されているエンゲージメント&lt;/h4&gt;
+&lt;p&gt;エンゲージメントは、特定のテストコンテキストのために1つ以上のテストを保存します。そのコンテキストを最終的にどう定義するかはあなた次第ですが、製品内に同じコンテキストを共有すべき複数のエンゲージメントがある場合は、それらを1つのエンゲージメントに統合することを検討してください。
+​&lt;/p&gt;
+&lt;h3 id="エンゲージメントのコンテキストを定義する際に問うべき質問"&gt;エンゲージメントのコンテキストを定義する際に問うべき質問:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;この作業についてレポートを作成したい場合、そのエンゲージメントには必要な関連情報がすべて含まれているか?&lt;/li&gt;
+&lt;li&gt;エンゲージメントは事前に計画的に作成しているか、それともインポートプロセスによって「アドホック」に作成されているか?&lt;/li&gt;
+&lt;li&gt;適切な種類のエンゲージメント - &lt;strong&gt;インタラクティブ&lt;/strong&gt;または&lt;strong&gt;CI/CD&lt;/strong&gt; - を使用しているか?&lt;/li&gt;
+&lt;li&gt;テストが対象としているコードベースのどの部分か: 各リポジトリは個別のコンテキストなのか、それとも複数のリポジトリがテストの共有コンテキストを構成しうるのか?&lt;/li&gt;
+&lt;li&gt;その製品に関わるステークホルダーは誰で、結果をどのように共有するか?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ステップ3-冗長なテストを確認する"&gt;ステップ3: 冗長なテストを確認する&lt;/h3&gt;
+&lt;p&gt;同じテストコンテキストを捉えている別々のテストが作成されていることに気づいた場合、それらのテストを単一の再インポートに統合できる可能性を示すサインかもしれません。&lt;/p&gt;</description></item><item><title>Global Component Deduplication (Pro)</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__global_component_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__global_component_deduplication/</guid><description>&lt;p&gt;Global Component Deduplication は、参照しているコンポーネント名とバージョンに基づいて&lt;strong&gt;すべての Product&lt;/strong&gt; にわたる重複した検出事項を識別する DefectDojo Pro のアルゴリズムです。これは Software Composition Analysis(SCA)ツール向けで、同じ脆弱な依存関係(例えば &lt;code&gt;timespan@2.3.0&lt;/code&gt;)が多数の Product に登場する場合に、DefectDojo にそれらの出現を単一の元の検出事項の重複として扱わせたいときに使用します。&lt;/p&gt;
+&lt;p&gt;他の重複排除アルゴリズムとは異なり、Global Component のマッチングは&lt;strong&gt;単一の Product や Engagement に限定されません&lt;/strong&gt;。Product B にインポートされた検出事項が、たとえ 2 つの Product に関連がなくても、Product A にある古い検出事項の重複としてマークされることがあります。&lt;/p&gt;</description></item><item><title>重複排除のチューニング(オープンソース)</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/os__deduplication_tuning/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/os__deduplication_tuning/</guid><description>&lt;p&gt;DefectDojoのOpen Source版では、設定ファイルと環境変数を使用して重複排除を調整します。&lt;/p&gt;
+&lt;p&gt;関連情報: 環境変数と&lt;code&gt;local_settings.py&lt;/code&gt;によるオーバーライドの詳細については、&lt;a href="https://docs.defectdojo.com/get_started/open_source/configuration/"&gt;オープンソースの設定&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;h2 id="設定可能な項目"&gt;設定可能な項目&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;パーサーごとのアルゴリズム&lt;/strong&gt;: Unique ID From Tool、Hash Code、Unique ID From Tool or Hash Code、Legacy(OS版のみ)のいずれかを選択します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;スキャナーごとのハッシュフィールド&lt;/strong&gt;: 各パーサーでハッシュの計算に使用するフィールドを決定します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;null CWEの許可&lt;/strong&gt;: ハッシュ計算時に、CWEが未設定/ゼロであることを許容するかどうかを制御します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;エンドポイントの考慮&lt;/strong&gt;: エンドポイントがハッシュに含まれていない場合でも、任意でエンドポイントを重複排除に使用できます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;常に含めるフィールド&lt;/strong&gt;: スキャナーごとの設定に関わらず、すべてのハッシュにフィールド(例: &lt;code&gt;service&lt;/code&gt;)を追加します。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="主要な設定項目デフォルト値を表示"&gt;主要な設定項目(デフォルト値を表示)&lt;/h2&gt;
+&lt;p&gt;デフォルト値はすべて&lt;code&gt;dojo/settings/settings.dist.py&lt;/code&gt;で定義されています。環境変数または&lt;code&gt;local_settings.py&lt;/code&gt;で上書きできます。&lt;/p&gt;</description></item><item><title>Global Locations Deduplication (Pro)</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__global_locations_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__global_locations_deduplication/</guid><description>&lt;p&gt;Global Locations Deduplication は、&lt;strong&gt;共有される場所&lt;/strong&gt;――URL、または(Package URL によって識別される)依存関係――のみに基づいて、&lt;strong&gt;すべての Product&lt;/strong&gt; にわたる重複した検出事項を識別する DefectDojo Pro のアルゴリズムです。選択した種類の場所を共有する 2 つの検出事項は、タイトル、深刻度、CWE、脆弱性 ID にかかわらず重複として扱われます。場所そのものが識別子になります。&lt;/p&gt;
+&lt;p&gt;これは &lt;a href="https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__global_component_deduplication/"&gt;Global Component Deduplication&lt;/a&gt; の位置情報を意識した対応版であり、DefectDojo の Locations データモデルに適用されます。Global Component がコンポーネント名とバージョンのみでマッチングするのに対し、Global Locations は同じ依存関係を&lt;strong&gt;完全な Package URL&lt;/strong&gt;でマッチングし、&lt;em&gt;さらに&lt;/em&gt;共有される &lt;strong&gt;URL&lt;/strong&gt; でもマッチングします。そのため、Global Component にはできない、Product をまたいだ DAST/Web の検出事項の重複排除が可能です。&lt;/p&gt;</description></item><item><title>ロケーションドリフトマッチング (Pro)</title><link>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__location_drift_matching/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/finding_deduplication/pro__location_drift_matching/</guid><description>&lt;p&gt;&lt;strong&gt;ロケーションドリフトマッチング&lt;/strong&gt;を使うと、再インポート時に&lt;em&gt;ロケーション&lt;/em&gt;が変化した検出事項を&lt;strong&gt;同一の検出事項&lt;/strong&gt;として認識できます。この機能がない場合、再インポートはロケーションフィールドを含む完全一致のアイデンティティハッシュで検出事項を照合するため、ロケーションが変化するたびに古い検出事項がクローズされ、同一内容の新しい検出事項が作成されてしまいます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;コミットによってコードがシフトし、検出事項の&lt;strong&gt;行番号&lt;/strong&gt;が変わる。&lt;/li&gt;
+&lt;li&gt;リファクタリングによって&lt;strong&gt;ファイルがリネームまたは移動&lt;/strong&gt;される。&lt;/li&gt;
+&lt;li&gt;DASTスキャンの間にWebアプリケーションの&lt;strong&gt;URL、ポート、またはホスト&lt;/strong&gt;が変わる。&lt;/li&gt;
+&lt;li&gt;依存関係の&lt;strong&gt;バージョンアップ&lt;/strong&gt;により、SCAツールが報告する脆弱なパッケージのバージョンが変わる。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;これらはいずれも従来、クローズされた検出事項と「新規」検出事項の両方を生み出していました。元の検出事項が持っていたステータス、メモ、SLAクロック、リスク受容、JIRA連携が失われ、誤った「新規の重大な検出事項」というノイズが発生していたのです。ロケーションドリフトマッチングを有効にすると、検出事項は1件のまま維持されます。ロケーションは最新のスキャンで更新され、履歴は保持されます。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ロケーションドリフトマッチングはDefectDojo Proの機能です。&lt;strong&gt;デフォルトでは無効&lt;/strong&gt;になっており、セキュリティツールごとに有効化します。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="ロケーション追跡の有効化"&gt;ロケーション追跡の有効化&lt;/h2&gt;
+&lt;p&gt;ロケーション追跡はツールごとに以下の場所で設定します。
+&lt;strong&gt;Settings &amp;gt; Finding Workflow &amp;gt; Reimport Deduplication&lt;/strong&gt;(以前のメニュー構成を使用しているインスタンスでは&lt;strong&gt;Settings &amp;gt; Pro Settings &amp;gt; Deduplication Settings &amp;gt; Reimport Deduplication&lt;/strong&gt;)&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🔸 DefectDojo Pro (Cloud) on DefectDojo Documentation</title><link>https://docs.defectdojo.com/fr/get_started/pro/cloud/</link><description>Recent content in 🔸 DefectDojo Pro (Cloud) on DefectDojo Documentation</description><generator>Hugo</generator><language>fr</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/fr/get_started/pro/cloud/index.xml" rel="self" type="application/rss+xml"/><item><title>Utiliser le Cloud Manager</title><link>https://docs.defectdojo.com/fr/get_started/pro/cloud/using-cloud-manager/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/pro/cloud/using-cloud-manager/</guid><description>&lt;p&gt;Se connecter au Cloud Manager de DefectDojo vous permet de configurer les paramètres de votre compte et de gérer votre abonnement à DefectDojo Cloud.&lt;/p&gt;</description></item><item><title>Dépannage de la connectivité</title><link>https://docs.defectdojo.com/fr/get_started/pro/cloud/connectivity-troubleshooting/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/pro/cloud/connectivity-troubleshooting/</guid><description>&lt;p&gt;Si vous avez des difficultés à accéder à votre instance DefectDojo, voici quelques étapes à suivre pour vous reconnecter :&lt;/p&gt;
+&lt;h2 id="jarrive-à-accéder-au-site-mais-je-ne-peux-pas-me-connecter"&gt;J&amp;rsquo;arrive à accéder au site, mais je ne peux pas me connecter&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Vous pouvez réinitialiser le mot de passe de votre compte depuis la page de connexion : &lt;strong&gt;yourcompanyinstance.cloud.defectdojo.com/login&lt;/strong&gt;. Cliquez sur « I forgot my password » pour démarrer le processus.&lt;br&gt;
+​&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Connectivity_Troubleshooting.png"
+ width="1600"
+ height="330"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;</description></item><item><title>Configurer une instance Cloud supplémentaire</title><link>https://docs.defectdojo.com/fr/get_started/pro/cloud/additional-cloud-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/pro/cloud/additional-cloud-instance/</guid><description>&lt;p&gt;Le processus d&amp;rsquo;ajout d&amp;rsquo;une deuxième instance Cloud est plus ou moins le même que celui de l&amp;rsquo;ajout de votre première instance. Ce guide suppose que vous avez déjà configuré votre serveur DefectDojo initial et que vous avez un accord avec notre équipe commerciale pour ajouter une autre instance.&lt;/p&gt;</description></item><item><title>Architecture Cloud</title><link>https://docs.defectdojo.com/fr/get_started/pro/cloud/cloud-architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/pro/cloud/cloud-architecture/</guid><description>&lt;p&gt;DefectDojo Cloud est une plateforme SaaS multi-tenant s&amp;rsquo;exécutant sur &lt;strong&gt;Google Kubernetes
+Engine (GKE)&lt;/strong&gt; dans Google Cloud. Cette page décrit la structure de la plateforme et la manière
+dont les environnements clients sont maintenus séparés.&lt;/p&gt;</description></item><item><title>Adresses IP de sortie</title><link>https://docs.defectdojo.com/fr/get_started/pro/cloud/egress-ip-addresses/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/fr/get_started/pro/cloud/egress-ip-addresses/</guid><description>&lt;p&gt;Lorsque DefectDojo Cloud communique avec vos systèmes — les Connecteurs qui synchronisent l&amp;rsquo;API d&amp;rsquo;un scanner,
+qui poussent des tickets vers Jira ou ServiceNow, qui envoient des webhooks de notification, ou qui
+délivrent des e-mails via SMTP — ces connexions sont &lt;strong&gt;initiées en sortie&lt;/strong&gt; depuis votre environnement
+DefectDojo. Si le système à l&amp;rsquo;autre bout se trouve derrière un pare-feu, vous devrez autoriser les
+adresses IP sortantes (egress) de DefectDojo pour que ces connexions ne soient pas bloquées.&lt;/p&gt;</description></item></channel></rss>

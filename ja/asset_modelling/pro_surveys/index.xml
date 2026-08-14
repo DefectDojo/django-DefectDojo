@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>アンケート on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/asset_modelling/pro_surveys/</link><description>Recent content in アンケート on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/asset_modelling/pro_surveys/index.xml" rel="self" type="application/rss+xml"/><item><title>アンケート</title><link>https://docs.defectdojo.com/ja/asset_modelling/pro_surveys/pro__surveys/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/pro_surveys/pro__surveys/</guid><description>&lt;p&gt;DefectDojoでは、アンケートテンプレートは、開発者、チーム、および社内外のステークホルダーから情報を収集するための、再利用可能な質問のセットです。作業開始前に意見を集めたり、作業が進行する中で個人やチーム間の足並みをそろえたり、作業完了後に振り返り分析を行ったりするために使用できます。&lt;/p&gt;
+&lt;p&gt;DefectDojoでは、アンケートシステムは3つの要素で構成されます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;アンケートテンプレート&lt;/strong&gt;:質問をグループ化して順序付けします。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;アンケートのデプロイ&lt;/strong&gt;:回答を収集するアクティブなインスタンスです。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;回答&lt;/strong&gt;:ユーザーによって送信された回答です。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;アンケートテンプレートを作成しただけでは、自動的に回答を受け付けられるようにはなりません。回答を収集するには、アンケートをデプロイする必要があります。&lt;/p&gt;
+&lt;h2 id="権限"&gt;権限&lt;/h2&gt;
+&lt;p&gt;サイドバーの「アンケート」セクションは、スーパーユーザー権限を持つユーザーにのみ表示され、アンケートテンプレートの作成、質問の作成、アンケートのデプロイができるのはスーパーユーザーのみです。&lt;/p&gt;
+&lt;p&gt;スーパーユーザー権限を持たないユーザーも、自分と共有されたアンケートに回答することはできますが、それらやそれに関連する質問を作成または管理することはできません。&lt;/p&gt;
+&lt;h2 id="アンケートと質問へのアクセス"&gt;アンケートと質問へのアクセス&lt;/h2&gt;
+&lt;p&gt;スーパーユーザー権限を持つユーザーは、サイドバーの&lt;strong&gt;アンケート&lt;/strong&gt;オプションをクリックすることで、アンケートと質問にアクセスできます。サブメニューからは、&lt;strong&gt;すべてのアンケート&lt;/strong&gt;と&lt;strong&gt;すべての質問&lt;/strong&gt;、および新しいアンケートと質問を作成するオプションにアクセスできます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pq_ss1.png"
+ width="3394"
+ height="1750"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h3 id="アンケートへのアクセス"&gt;アンケートへのアクセス&lt;/h3&gt;
+&lt;p&gt;「すべてのアンケート」のビューには、ID、名前、説明、アクティブステータスを含む、すべてのアンケートテンプレートのテーブルが表示されます。このテーブルはキーワードでフィルタリングでき、各列のヘッダーをクリックすることで並べ替えることもできます。&lt;/p&gt;
+&lt;h3 id="質問へのアクセス"&gt;質問へのアクセス&lt;/h3&gt;
+&lt;p&gt;「すべての質問」のビューには、アンケートに追加できる質問のテーブルが表示されます。このテーブルはキーワードでフィルタリングでき、各列のヘッダーをクリックすることで並べ替えることもできます。&lt;/p&gt;
+&lt;h2 id="アンケートテンプレートの管理"&gt;アンケートテンプレートの管理&lt;/h2&gt;
+&lt;h3 id="アンケートテンプレートの作成"&gt;アンケートテンプレートの作成&lt;/h3&gt;
+&lt;p&gt;アンケートテンプレートは、サイドバーの&lt;strong&gt;新しいアンケート&lt;/strong&gt;をクリックするか、「すべてのアンケート」ビューの上部にある&lt;strong&gt;新しいアンケート&lt;/strong&gt;ボタンをクリックすることで作成できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pq_ss2.png"
+ width="2122"
+ height="1092"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;アンケートテンプレートを作成する前に、名前と説明を入力し、ドロップダウンメニューから少なくとも1つの質問を選択する必要があります。&lt;/p&gt;
+&lt;h4 id="既存のアンケートテンプレートへの質問の追加"&gt;既存のアンケートテンプレートへの質問の追加&lt;/h4&gt;
+&lt;p&gt;既存のアンケートテンプレートに質問を追加するには、対象のアンケートの左にある⋮ケバブアイコンをクリックし、&lt;strong&gt;アンケートを編集&lt;/strong&gt;をクリックして、ドロップダウンメニューからアンケートに追加する新しい質問を選択し、&lt;strong&gt;送信&lt;/strong&gt;をクリックします。&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Über DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/de/get_started/about/</link><description>Recent content in Über DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>de</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 02 Feb 2021 20:46:29 +0100</lastBuildDate><atom:link href="https://docs.defectdojo.com/de/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>Funktionsvergleich</title><link>https://docs.defectdojo.com/de/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt; ist eine leistungsstarke, kostenlose Plattform für das Schwachstellenmanagement mit Kernfunktionen für Import, Deduplizierung, einfachen Dashboards, API-Zugriff und grundlegendem Reporting — ideal für kleinere Teams oder für alle, die das Tool selbst hosten und mit Community-Ressourcen erweitern möchten.&lt;/p&gt;</description></item><item><title>Über DefectDojo</title><link>https://docs.defectdojo.com/de/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc. und Open-Source-Mitwirkende pflegen diese Dokumentation, um sowohl die Community- als auch die Pro-Edition von DefectDojo zu unterstützen.&lt;/span&gt;&lt;/p&gt;</description></item><item><title>❓ Häufig gestellte Fragen</title><link>https://docs.defectdojo.com/de/get_started/about/faq/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/faq/</guid><description>&lt;p&gt;Hier finden Sie einige häufig gestellte Fragen zur Arbeit mit DefectDojo – sowohl in DefectDojo Pro als auch in DefectDojo OS.&lt;/p&gt;</description></item><item><title>☑️ Checkliste für neue Benutzer</title><link>https://docs.defectdojo.com/de/get_started/about/os__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/os__new_user_checklist/</guid><description>&lt;p&gt;Hier ist eine kurze Referenz, mit der Sie eine erfolgreiche Implementierung sicherstellen können, von der leeren Fläche bis zu einer voll funktionsfähigen App. Dieser Artikel setzt voraus, dass Sie &lt;strong&gt;DefectDojo Community Edition&lt;/strong&gt; installiert haben und sie in Ihrer Umgebung läuft.&lt;/p&gt;</description></item><item><title>☑️ Checkliste für neue Benutzer</title><link>https://docs.defectdojo.com/de/get_started/about/pro__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/pro__new_user_checklist/</guid><description>&lt;p&gt;Das Wesen von DefectDojo besteht darin, Sicherheitsdaten zu importieren, sie zu organisieren und sie den Personen zu präsentieren, die sie kennen müssen. Hier ist eine kurze Referenz, mit der Sie eine erfolgreiche Implementierung sicherstellen können, von der leeren Fläche bis zu einer voll funktionsfähigen App.&lt;/p&gt;</description></item><item><title>🎨 Änderungen an der Pro-UI</title><link>https://docs.defectdojo.com/de/get_started/about/ui_pro_vs_os/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/ui_pro_vs_os/</guid><description>&lt;p&gt;In late 2023, DefectDojo, Inc. veröffentlichte eine neue Benutzeroberfläche für DefectDojo Pro, die inzwischen die Standardoberfläche dieser Edition ist.&lt;/p&gt;
+&lt;p&gt;Die Pro-UI bringt DefectDojo folgende Verbesserungen:&lt;/p&gt;</description></item><item><title>Online-Demo</title><link>https://docs.defectdojo.com/de/get_started/about/demo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/de/get_started/about/demo/</guid><description>&lt;p&gt;Für DefectDojo stehen zwei Online-Demos bereit. Beide sind mit Daten vorbefüllt, voll funktionsfähig und laufen mit der neuesten Version von DefectDojo.&lt;/p&gt;</description></item></channel></rss>

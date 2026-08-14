@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>コンポーネントとエンドポイント on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/asset_modelling/components/</link><description>Recent content in コンポーネントとエンドポイント on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/asset_modelling/components/index.xml" rel="self" type="application/rss+xml"/><item><title>サービス</title><link>https://docs.defectdojo.com/ja/asset_modelling/components/services/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/components/services/</guid><description>&lt;h2 id="サービスとは"&gt;サービスとは?&lt;/h2&gt;
+&lt;p&gt;サービス(マイクロサービスの略)は、アセット内のオプション機能であり、検出事項がアセットのどこで発生したかについて追加のコンテキストを提供します。これにより、検出事項をアセット全体ではなく、アセットの特定のコンポーネントに絞り込むことができ、複雑なアーキテクチャの環境において明確さとレポートの精度が向上します。&lt;/p&gt;
+&lt;p&gt;サービスは、テストから返される結果をさらに細分化する必要がある場合や、重複排除したくない同一の検出事項がReimportパイプライン内に複数存在すると予想される場合に役立ちます。一部のスキャンツールは、ファイルの場所ごとに個別の検出事項を作成することがあり、検出事項のそれらのインスタンスを別々の検出事項として保持したい場合、サービスはそれらの異なる場所にラベルを付けるための有用な方法となります。&lt;/p&gt;
+&lt;h2 id="proにおけるサービス"&gt;Proにおけるサービス&lt;/h2&gt;
+&lt;p&gt;サービスはPro版でも利用できますが、アセット間で親子関係を確立できる機能によってその役割の多くが置き換えられています。サービスも同じ結果を達成でき、アセットの再構成が現実的でない場合や、アセット階層を変更せずにスキャンレベルの重複排除のスコープ設定が必要な場合には依然として有用ですが、コンテキストが失われます。例えば、ビジネスクリティカリティ、収益、担当者はアセットには関連付けられますが、サービスには関連付けられません。そのため、サービスは主にOS版DefectDojoの文脈で有用です。&lt;/p&gt;
+&lt;h2 id="サービスの指定方法"&gt;サービスの指定方法&lt;/h2&gt;
+&lt;p&gt;サービスを指定するオプションは、インポートスキャンまたは再インポートフォームの「オプションフィールド」ドロップダウンメニュー内で利用できます。以降、重複排除は同じサービス値を共有するテストに限定されます。&lt;/p&gt;
+&lt;p&gt;重要な点として、サービスは大文字と小文字を区別します。最初のインポートのサービスが「Service 1」(大文字のS)として識別され、以前のすべての問題を解決したスキャンを再インポートする際にサービスを「service 1」(小文字のs)として識別した場合、重複排除は意図したサービスに適用されません。&lt;/p&gt;
+&lt;h2 id="サービスはどのように機能するか"&gt;サービスはどのように機能するか?&lt;/h2&gt;
+&lt;p&gt;サービスは、再インポート時にどの以前のテストに重複排除ルールを適用するかを指定できるようにすることで機能します。&lt;/p&gt;
+&lt;p&gt;例えば、あるスキャンをインポートしてサービスを「Service 1」に設定し、次に2つ目のスキャンを再インポートしてサービスを「Service 2」に設定した場合、サービスが異なるため、これら2つのスキャン間で重複排除は適用されません。&lt;/p&gt;
+&lt;p&gt;それ以降の再インポートは、サービスが「Service 1」に設定されている場合にのみ最初のスキャンの以前の結果と重複排除を行い、サービスが「Service 2」に設定されている場合にのみ2つ目のスキャンの以前の結果と重複排除を行います。つまり、再インポートされたスキャンの2つのバージョン間でサービスが異なる場合、スキャン自体が同一であっても、それらは異なる検出事項として扱われます。&lt;/p&gt;
+&lt;p&gt;この例で、再インポート時にサービスがService 1にもService 2にも設定されず、代わりに空白のままにされた場合、重複排除は最初のスキャンにも2番目のスキャンにも適用されず、サービスが設定されていない検出事項のみがクローズされます。&lt;/p&gt;</description></item><item><title>コンポーネント</title><link>https://docs.defectdojo.com/ja/asset_modelling/components/pro__components/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/components/pro__components/</guid><description>&lt;p&gt;DefectDojoにおいて、コンポーネントは、脆弱性を含む可能性のあるサードパーティライブラリ、ソフトウェアコンポーネント、モジュールを表します。&lt;/p&gt;
+&lt;h2 id="コンポーネントビュー"&gt;コンポーネントビュー&lt;/h2&gt;
+&lt;p&gt;DefectDojo Proには、サイドバーからアクセスできるコンポーネント専用のテーブルビューが含まれています。このビューには、各コンポーネントのアクティブな検出事項、重複した検出事項、検出事項の合計数が表示されます。これらの数値には、DefectDojoインスタンス上のすべてのアセットが含まれます。&lt;/p&gt;
+&lt;p&gt;個々のアセットのコンポーネントは、アセットビューで確認できます。&lt;/p&gt;
+&lt;h2 id="コンポーネントテーブル"&gt;コンポーネントテーブル&lt;/h2&gt;
+&lt;p&gt;コンポーネントテーブルには以下の列が表示されます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;コンポーネント&lt;/strong&gt; — スキャンデータから取得されるコンポーネントの名前。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;バージョン&lt;/strong&gt; — スキャンデータから取得されるコンポーネントのバージョン。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;アクティブな検出事項&lt;/strong&gt; — コンポーネントに関連付けられたアクティブな検出事項の数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;重複した検出事項&lt;/strong&gt; — コンポーネントに関連付けられた重複した検出事項の数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;検出事項の合計数&lt;/strong&gt; — コンポーネントに関連付けられたすべての検出事項の合計数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;コンポーネント名、またはアクティブな検出事項、重複した検出事項、検出事項の合計数の値をクリックすると、それぞれのフィールドに対応する検出事項のフィルター済みリストが開きます。&lt;/p&gt;</description></item></channel></rss>

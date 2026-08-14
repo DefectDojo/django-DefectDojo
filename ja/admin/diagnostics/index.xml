@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>診断 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/admin/diagnostics/</link><description>Recent content in 診断 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/admin/diagnostics/index.xml" rel="self" type="application/rss+xml"/><item><title>診断</title><link>https://docs.defectdojo.com/ja/admin/diagnostics/pro__diagnostics/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/diagnostics/pro__diagnostics/</guid><description>&lt;p&gt;診断は、DefectDojoが自身の外部と通信を試みたすべての試行、そして他のシステムがDefectDojoと通信を試みたすべての試行を記録する、単一の台帳です。チケットが作成されなかったとき、スキャンがインポートされなかったとき、あるいはユーザーがサインインできなかったとき、何が起きたのか、いつ起きたのか、どの設定に対してか、そして誰がそれを引き起こしたのかを教えてくれるのがこのページです。&lt;/p&gt;
+&lt;p&gt;Diagnosticsは &lt;strong&gt;DefectDojo Pro&lt;/strong&gt; の機能です。&lt;strong&gt;Connect &amp;gt; Diagnostics&lt;/strong&gt; の下にあります。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/admin/diagnostics/images/diagnostics_errors.png"
+ width="1800"
+ height="1150"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="診断台帳、エラー表示"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="記録される内容"&gt;記録される内容&lt;/h2&gt;
+&lt;p&gt;DefectDojoの外部に到達するすべてのサブシステムについて、試行ごとに1行が記録されます。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;ソース&lt;/th&gt;
+ &lt;th&gt;生成される行の内容&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;コネクタ&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;アップストリームコネクタによるdiscoverおよびsyncの実行&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;ダウンストリームインテグレーター&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;Jira、GitHub、GitLab、ServiceNow、その他のダウンストリームコネクタへのプッシュ&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Jira&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;レガシーJira連携: プッシュ、コメント、プレビュー&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;SSO (OIDC/OAuth2)&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;OAuthプロバイダー経由のサインイン試行&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;SAML&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;SAMLアサーション（署名や属性の失敗を含む）&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;LDAP&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;LDAPバインドおよびルックアップ&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;インポート / 再インポート&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;UI、API、スケジュールのいずれかによるスキャンのアップロード&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;ルールエンジン&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;ルール評価とそれが試みるアクション&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;スケジューリング&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;スケジュール実行（一度も開始されなかったものを含む）&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Sensei&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;リポジトリスキャンおよび修正の実行&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;通知&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;送信通知の配信&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;システム&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;どの製品にも属さないインスタンスレベルの活動&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;行はサブシステムの&lt;em&gt;代わりに&lt;/em&gt;ではなく、サブシステムと&lt;em&gt;並行して&lt;/em&gt;書き込まれます。各アダプターは元のレコードに紐付けられており、意図的にフェイルセーフに設計されています。診断行の書き込みで例外が発生しても、そのエラーは握りつぶされ、元の操作はそのまま続行されます。したがって、診断がプッシュ、インポート、ログインの失敗の原因になることは決してありません。&lt;/p&gt;</description></item></channel></rss>

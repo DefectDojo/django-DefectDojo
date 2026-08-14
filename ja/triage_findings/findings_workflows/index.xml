@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>検出事項 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/</link><description>Recent content in 検出事項 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/triage_findings/findings_workflows/index.xml" rel="self" type="application/rss+xml"/><item><title>検出事項の概要</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/intro_to_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/intro_to_findings/</guid><description>&lt;p&gt;検出事項(Findings)は、DefectDojoがセキュリティツールのレポートおよび修復プロセスを標準化し導くための主要な手段です。脆弱性がSonarQube、Acunetix、あるいはチーム独自のツールのいずれで報告された場合でも、検出事項を使うことですべての脆弱性を同じ方法で管理できます。&lt;/p&gt;
+&lt;h2 id="検出事項とは"&gt;検出事項とは&lt;/h2&gt;
+&lt;p&gt;DefectDojoにおける検出事項は、以下の要素で構成されています。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;報告された該当の脆弱性データ&lt;/li&gt;
+&lt;li&gt;検出事項の「ステータス」。修復状況、リスク受容、その他その脆弱性に関して下された判断を追跡するために使用されます&lt;/li&gt;
+&lt;li&gt;検出事項に関連するその他のメタデータ。例えば、ネットワーク内での検出事項の場所、ツールによる修復方法の提案、関連するCWEやEPSSスコアへのリンクなどが含まれます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;脆弱性データを保存し修復のためのフレームワークを提供することに加えて、DefectDojoは以下の方法でも検出事項を強化します。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;悪用可能性を示す関連EPSSスコアを検出事項に自動的に追加する&lt;/li&gt;
+&lt;li&gt;セキュリティツールの深刻度指標を各検出事項の深刻度スコアに自動的に変換し、製品のSLA設定に応じて検出事項にSLAを付与する&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;全体として、DefectDojoの検出事項は製品階層と連携して機能するよう設計されており、取り組みを標準化し、各製品に一貫した手法を適用します。&lt;/p&gt;
+&lt;h2 id="検出事項ページ"&gt;検出事項ページ&lt;/h2&gt;
+&lt;p&gt;検出事項ページにはさまざまな要素が含まれています。それぞれの要素は、検出事項の作成時に行われるインポート処理によって入力されます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Findings.png"
+ width="1600"
+ height="749"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="画像"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;検出事項のタイトル:&lt;/strong&gt; 通常、検出された脆弱性や問題を識別するための簡潔な説明です。このセクションには、ユーザーが作成したタグが存在する場合、それも表示されます。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;検出事項の概要:&lt;/strong&gt; このセクションには、検出事項に関連する情報を記載した5つのページが含まれます。説明、緩和策、影響、参考情報、メモです。これらのフィールドは、取り込まれた脆弱性データに基づいて自動的に入力される場合もあれば、追加のコンテキストを提供するためにDefectDojoのユーザーが編集する場合もあります。
+​&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;説明&lt;/strong&gt;は、該当する検出事項についてのより詳細な要約と説明です。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;緩和策&lt;/strong&gt;は、システムから検出事項を解消するために提案される対処方法です。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;影響&lt;/strong&gt;は、脆弱性がセキュリティ体制に与える影響を説明します。このページには説明テキストが記載されている場合もあれば、&lt;a href="https://qualysguard.qualys.com/qwebhelp/fo_portal/setup/cvss_vector_strings.htm"&gt;CVSSベクター文字列&lt;/a&gt;が含まれる場合もあります。これは、脆弱性全体の悪用可能性と、悪用された場合に組織へもたらされる結果を簡潔に伝える表記法です。影響は検出事項の深刻度フィールドと密接に関連しています。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;参考情報&lt;/strong&gt;には、この検出事項に関連するリンクやその他の情報が含まれている場合に一覧表示されます。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;メモ&lt;/strong&gt;は、この検出事項に関するその他の関連情報を記録できるページです。メモは「DefectDojo専用」のメタデータであり、インポート時に作成されるものではありません。このフィールドを使って、修復の進捗を追跡したり、検出事項により具体的な詳細を追加したりできます。
+​&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start="3"&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;追加の詳細:&lt;/strong&gt; 該当する場合、このセクションにはこの検出事項に関連するその他の詳細が一覧表示されます。&lt;/p&gt;</description></item><item><title>リスク受容</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/os__risk_acceptance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/os__risk_acceptance/</guid><description>&lt;p&gt;&lt;strong&gt;リスク受容&lt;/strong&gt;は、検出事項に適用できる特別なステータスで、直ちに修復せずに検出事項を承認するという判断を正式に文書化し、運用に反映させるためのものです。&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro とは異なり、OS 版 DefectDojo のリスク受容は独立したオブジェクトではありません。リスク受容はエンゲージメントにのみ紐づいており、そのため、リスク受容が属するエンゲージメント内の検出事項のみを含めることができます。同じ検出事項が3つの異なるエンゲージメントのテストにそれぞれ出現する場合、それらの検出事項をすべて受容するには3つの異なるリスク受容が必要になります。&lt;/p&gt;
+&lt;h3 id="accessing-risk-acceptances"&gt;Accessing Risk Acceptances&lt;/h3&gt;
+&lt;p&gt;リスク受容には、各エンゲージメント内の特定のテストに関連する検出事項が含まれます。そのため、それらの検出事項の元になったテストを含むエンゲージメントからアクセスできます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/OS_RA_image1.png"
+ width="3020"
+ height="1558"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;リスク受容された個々の検出事項の全リストは、サイドバーの&lt;strong&gt;検出事項&lt;/strong&gt;セクション内の&lt;strong&gt;リスク受容済み検出事項&lt;/strong&gt;サブメニューで確認できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/OS_RA_image2.png"
+ width="3408"
+ height="1636"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h2 id="creating-risk-acceptances"&gt;Creating Risk Acceptances&lt;/h2&gt;
+&lt;p&gt;検出事項がリスク受容されると、以下のことが発生します。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;検出事項のステータスは「アクティブ」ではなくなりますが、引き続き検索、レポート作成、監査の対象となります。&lt;/li&gt;
+&lt;li&gt;検出事項のステータスは「リスク受容済み」に変更されます。&lt;/li&gt;
+&lt;li&gt;検出事項はメトリクスに含まれなくなりますが、元になったテスト内には引き続き表示されます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;検出事項をリスク受容する方法は2通りあります。&lt;strong&gt;完全リスク受容&lt;/strong&gt;に手動で追加する方法と、&lt;strong&gt;簡易リスク受容&lt;/strong&gt;ワークフローを使用する方法です。&lt;/p&gt;</description></item><item><title>リスク受容</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__risk_acceptance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__risk_acceptance/</guid><description>&lt;p&gt;&lt;strong&gt;リスク受容(Risk Acceptance)&lt;/strong&gt; は、&lt;strong&gt;Full Risk Acceptance&lt;/strong&gt; オブジェクトまたは &lt;strong&gt;Simple Risk Acceptance&lt;/strong&gt; ワークフローのいずれかを使用して検出事項に適用できる特別なステータスです。リスク受容は、脆弱性のある検出事項を直ちに修復せずに容認するという判断を正式に文書化し、運用できるようにするために使用します。&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro には、リスクマネジメントの意思決定を拡張するための強化されたリスク受容機能が含まれています。主な機能は次のとおりです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;クロスプロダクト リスク受容(Cross-Product Risk Acceptances)&lt;/strong&gt;: 単一のリスク受容を複数の製品にまたがって適用できるため、資産ポートフォリオ全体における同一または類似の検出事項のすべてのインスタンスを、1つのリスク受容オブジェクトにまとめることができます。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;一括リスク受容管理(Bulk Risk Acceptance Management)&lt;/strong&gt;: 特定の脆弱性IDの検出事項をフィルタリング・検索し、それらがどの資産に属しているかに関わらず、すべての結果に一括でリスク受容を適用できます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="リスク受容済みの検出事項へのアクセス"&gt;リスク受容済みの検出事項へのアクセス&lt;/h3&gt;
+&lt;p&gt;サイドバーにはリスク受容用のセクションがあり、そのドロップダウンメニューには次の3つのサブセクションが含まれています。&lt;/p&gt;</description></item><item><title>検出事項ステータスの定義</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/finding_status_definitions/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/finding_status_definitions/</guid><description>&lt;p&gt;DefectDojoで作成された各検出事項には、関連情報を伝えるステータスがあります。ステータスは、チームが問題解決の進捗状況を把握するのに役立ちます。&lt;/p&gt;
+&lt;p&gt;各検出事項のステータスには、コンテキストに応じた意味があり、それはチーム自身で定義する必要があります。これらは私たちの提案ですが、チームでの使い方は異なる場合があります。&lt;/p&gt;
+&lt;p&gt;オープン/クローズは、検出事項の&lt;strong&gt;明示的な&lt;/strong&gt;ステータスタイプではないことに注意してください。クラシックUIの一部の要素(たとえば「すべてのオープンな検出事項」テーブル)では、オープンまたはクローズの検出事項について言及することがありますが、これは以下をまとめて指す総称です。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;「オープンな検出事項」の場合:アクティブおよび/または検証済みの検出事項&lt;/li&gt;
+&lt;li&gt;「クローズした検出事項」の場合:非アクティブ、および/またはリスク受容済み、レビュー中、対象外、誤検知の検出事項&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="オープンな検出事項ステータス"&gt;&lt;strong&gt;オープンな検出事項ステータス&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;検出事項が&lt;strong&gt;アクティブ&lt;/strong&gt;になると、&lt;strong&gt;検証済み&lt;/strong&gt;であるかどうかにかかわらず、&lt;strong&gt;オープン&lt;/strong&gt;な検出事項としてラベル付けされます。&lt;/p&gt;
+&lt;p&gt;オープンな検出事項は、DefectDojoの &lt;strong&gt;検出事項 &amp;gt; オープンな検出事項&lt;/strong&gt; ビューから確認できます。&lt;/p&gt;
+&lt;h3 id="アクティブな検出事項"&gt;&lt;strong&gt;アクティブな検出事項&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;「この検出事項はスキャンツールによって発見されました。」&lt;/p&gt;
+&lt;p&gt;デフォルトでは、DefectDojoで新規作成された検出事項はすべて&lt;strong&gt;アクティブ&lt;/strong&gt;としてラベル付けされます。この場合のアクティブとは、「DefectDojoが過去のインポートで記録していない新しい検出事項である」ことを意味します。過去に緩和済みとなった検出事項が、将来のスキャンで再び検出された場合、その検出事項のステータスは、脆弱性が再発したことを反映して再びオープンになります。&lt;/p&gt;
+&lt;h3 id="検証済みの検出事項"&gt;&lt;strong&gt;検証済みの検出事項&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;「この検出事項は、チームによって存在が確認されました。」&lt;/p&gt;
+&lt;p&gt;ツールが問題を記録したからといって、必ずしもその検出事項にエンジニアリング対応が必要とは限りません。そのため、新規検出事項はデフォルトで&lt;strong&gt;未検証&lt;/strong&gt;ともラベル付けされます。&lt;/p&gt;
+&lt;p&gt;検出事項が実際に存在することを確認できた場合は、&lt;strong&gt;検証済み&lt;/strong&gt;としてマークできます。&lt;/p&gt;
+&lt;p&gt;DefectDojoの特定の機能は、検出事項がアクティブかつ検証済みであることを必要とします。各検出事項を手動で検証する必要がない場合は、&lt;strong&gt;システム設定&lt;/strong&gt; ページ(&lt;strong&gt;クラシックUI:設定 &amp;gt; システム設定&lt;/strong&gt;、&lt;strong&gt;Pro UI:設定 &amp;gt; システム &amp;gt; システム設定&lt;/strong&gt;)から、これらの機能の一部またはすべてについて検証済み要件を無効化できます。&lt;/p&gt;</description></item><item><title>検出事項の編集</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/editing_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/editing_findings/</guid><description>&lt;p&gt;もし検出事項にメモを追加したり、現在の状況に合わせて文言を更新したりしたい場合は、検出事項編集フォームから行うことができます。&lt;/p&gt;
+&lt;h2 id="検出事項編集フォームを開く"&gt;検出事項編集フォームを開く&lt;/h2&gt;
+&lt;p&gt;上部の &lt;strong&gt;⚙️ ギア&lt;/strong&gt; &lt;strong&gt;メニュー&lt;/strong&gt; を開き、&lt;strong&gt;検出事項を編集&lt;/strong&gt; をクリックすることで、検出事項を更新できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Editing_Findings.png"
+ width="1600"
+ height="695"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;これにより &lt;strong&gt;検出事項を編集&lt;/strong&gt; フォームが開き、メタデータの編集、検出事項のステータスの変更、追加情報の入力ができます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Editing_Findings_2.png"
+ width="1460"
+ height="1246"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h3 id="検出事項編集フォーム項目"&gt;検出事項編集フォーム:項目&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;「テスト」は編集できません:&lt;/strong&gt; 検出事項は必ずテストオブジェクトに関連付けられている必要があり、そのコンテキストの外に移動することはできません。ただし、テストを含むエンゲージメントを別の製品に移動することは可能です。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;検出元(Found By)&lt;/strong&gt; は、この検出事項を発見したスキャンツールです。テストに関連付けられたツール以外のスキャンツールを追加することもできます。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;タイトル&lt;/strong&gt; はスキャンレポートから作成されますが、必要に応じてより分かりやすいタイトルに編集できます。重複排除(Deduplication)は一般的に検出事項のタイトルを使って重複を識別するため、タイトルの変更が重複排除に影響する可能性がある点に注意してください。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;日付&lt;/strong&gt; は、検出事項がスキャナーによって発見された日付を表すためのものであり、必ずしも検出事項がDefectDojoにインポートされた日付ではありません。この日付はスキャンレポートから取得されますが、必要であれば(たとえば過去のデータを扱う場合や、発見日をログに記録しないスキャンツールを使用している場合など)より正確な日付に更新できます。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;説明&lt;/strong&gt; は、スキャンツールによって提供された検出事項の説明です。必要に応じて検出事項の説明に情報を追加したり削除したりできます。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;深刻度&lt;/strong&gt; はいくつかの要因に基づいて算出されます。基本的にはツールが報告した深刻度が使用されますが、検出事項の深刻度はEPSSの変化によって影響を受けることがあります。適切なレベルに手動で調整することも可能です。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;タグ&lt;/strong&gt; は、フィルターを使って検出事項を整理するために使用できる汎用のテキストラベルです。特定の検出事項を識別するための略称として使うこともできます。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;アクティブ / 検証済み&lt;/strong&gt; は、ツールが使用する主要な検出事項のステータスです。アクティブな検出事項とは、現在ネットワーク上で有効であり、ツールによって報告された検出事項のことです。検証済みとは、この検出事項がチームメンバーによって存在することが確認されたことを意味します。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SAST / DAST&lt;/strong&gt; は、検出事項が発見されたコンテキストに応じて整理するために使用されるラベルです。通常このラベルは使用されたスキャンツールに基づいて自動的に設定されますが、より正確なレベルに調整することもできます(たとえば、SASTツールとDASTツールの両方によって検出事項が発見された場合など)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="緩和日と緩和実施者の編集"&gt;緩和日と緩和実施者の編集&lt;/h3&gt;
+&lt;p&gt;デフォルトでは、検出事項の &lt;strong&gt;緩和日(Mitigated Date)&lt;/strong&gt; と &lt;strong&gt;緩和実施者(Mitigated By)&lt;/strong&gt; の値は&lt;strong&gt;編集できません&lt;/strong&gt;。これらの項目は検出事項編集フォームおよび検出事項クローズダイアログの両方で非表示になっており、緩和日は検出事項がクローズされた瞬間に自動的に設定されます。同じ理由から、APIを通じてこれらの値を設定または過去の日付に遡って変更しようとする操作は拒否されます。&lt;/p&gt;</description></item><item><title>検出事項を手動で作成する</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/create_findings_manually/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/create_findings_manually/</guid><description>&lt;p&gt;通常、環境内の検出事項のほとんどは、他のセキュリティツールからインポートされます。スキャンツールから作成されたものではない、管理したい脆弱性や作業がある場合は、検出事項を手動で追加することもできます。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;DefectDojo のサイドバーから、&lt;strong&gt;管理 &amp;gt; 検出事項 &amp;gt; 新規検出事項&lt;/strong&gt; をクリックして、新規検出事項のリンクを開きます。
+​
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Creating_Findings_Manually.png"
+ width="492"
+ height="492"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;これにより &lt;strong&gt;新規検出事項&lt;/strong&gt; フォームが開き、検出事項に関する任意の情報を入力できます。この検出事項は、DefectDojo内であらかじめ作成しておいたテストに割り当てる必要があります。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Creating_Findings_Manually_2.png"
+ width="992"
+ height="1372"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;</description></item><item><title>ファイルの添付</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/os__add_files/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/os__add_files/</guid><description>&lt;p&gt;&lt;strong&gt;検出事項&lt;/strong&gt;、&lt;strong&gt;エンゲージメント&lt;/strong&gt;、&lt;strong&gt;テスト&lt;/strong&gt;にファイルを添付して、補足情報を提供できます。たとえば概念実証のスクリーンショット、生のスキャナーレポート、ネットワーク図、結果を裏付けるスプレッドシートなどです。&lt;/p&gt;
+&lt;p&gt;各オブジェクトはそれぞれ独自のファイルセットを持ち、1つのオブジェクトに&lt;strong&gt;最大10個のファイル&lt;/strong&gt;を添付できます。&lt;/p&gt;
+&lt;h2 id="サポートされているファイル形式"&gt;サポートされているファイル形式&lt;/h2&gt;
+&lt;p&gt;デフォルトでは、以下の拡張子が許可されています。&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;.txt .pdf .json .xml .csv .yml .png .jpeg
+.sarif .xlsx .doc .html .js .nessus .zip .fpr&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;管理者は &lt;code&gt;DD_FILE_UPLOAD_TYPES&lt;/code&gt; 環境変数でこのリストを変更できます。リストにない拡張子のファイルをアップロードしようとすると、フォームによって拒否されます。&lt;/p&gt;</description></item><item><title>ファイルの添付</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__add_files/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__add_files/</guid><description>&lt;p&gt;&lt;strong&gt;検出事項&lt;/strong&gt;、&lt;strong&gt;エンゲージメント&lt;/strong&gt;、または&lt;strong&gt;テスト&lt;/strong&gt;にファイルを添付して、補足的なコンテキストを提供できます。例えば、概念実証(PoC)のスクリーンショット、生のスキャナーレポート、
+ネットワーク図、結果を裏付けるスプレッドシートなどです。&lt;/p&gt;
+&lt;p&gt;各オブジェクトはそれぞれ独自のファイルセットを保持し、1つのオブジェクトには&lt;strong&gt;最大10ファイル&lt;/strong&gt;まで添付できます。&lt;/p&gt;
+&lt;h2 id="supported-file-types"&gt;Supported File Types&lt;/h2&gt;
+&lt;p&gt;デフォルトでは、以下の拡張子が受け付けられます。&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;.txt .pdf .json .xml .csv .yml .png .jpeg
+.sarif .xlsx .doc .html .js .nessus .zip .fpr&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;管理者は&lt;code&gt;DD_FILE_UPLOAD_TYPES&lt;/code&gt;環境変数を使用してこのリストを変更できます。
+リストにない拡張子のファイルをアップロードしようとすると拒否されます。&lt;/p&gt;</description></item><item><title>検出事項の一括編集</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__bulk_edit_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__bulk_edit_findings/</guid><description>&lt;p&gt;DefectDojo Pro UI では、検出事項は任意の検出事項リスト — &lt;strong&gt;すべての検出事項&lt;/strong&gt;ページ、またはテスト内の検出事項リスト — から一括編集できます。&lt;/p&gt;
+&lt;h2 id="selecting-findings-for-bulk-edit"&gt;Selecting Findings for Bulk Edit&lt;/h2&gt;
+&lt;p&gt;どの検出事項テーブルでも、検出事項の横にあるチェックボックスを使用して選択します。1つ以上の検出事項を選択すると、以下のコントロールを含む&lt;strong&gt;一括操作バー&lt;/strong&gt;が表示されます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Bulk Edit&lt;/strong&gt; — 選択したすべての検出事項にメタデータの変更、タグ、メモ、レビュー依頼を適用できる単一のフォームを開きます。これがメインとなる統合画面です(詳細は後述)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Risk Acceptance&lt;/strong&gt; — 選択した検出事項を、新規または既存の&lt;strong&gt;完全リスク受容&lt;/strong&gt;に追加します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Finding Group&lt;/strong&gt; — 選択した検出事項を、新規または既存の&lt;strong&gt;検出事項グループ&lt;/strong&gt;に追加、またはグループから削除します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Merge&lt;/strong&gt; — 選択した検出事項を1つの検出事項に統合します。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Delete&lt;/strong&gt; — 選択した検出事項を削除します(確認あり)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;現在の選択に対してアクションを適用できない場合、そのコントロールは無効になります — &lt;a href="#availability-and-skipped-findings"&gt;利用可否とスキップされる検出事項&lt;/a&gt;を参照してください。&lt;/p&gt;</description></item><item><title>ピアレビューと受け持ち</title><link>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__peer_review/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/triage_findings/findings_workflows/pro__peer_review/</guid><description>&lt;p&gt;ピアレビューを使うと、検出事項をクローズする前に誰かに確認してもらうよう依頼できます。DefectDojo Pro UI では、レビューを&lt;strong&gt;受け持つ&lt;/strong&gt;こともでき、複数の人が対象となっている場合でも、誰が引き受けたかを全員が確認できます。&lt;/p&gt;
+&lt;h2 id="requesting-a-review"&gt;Requesting a review&lt;/h2&gt;
+&lt;p&gt;検出事項を開き、検出事項メニューから&lt;strong&gt;Request Review&lt;/strong&gt;を選択します。または、リスト内で複数の検出事項を選択し、&lt;a href="../pro__bulk_edit_findings/"&gt;一括編集ツール&lt;/a&gt;を使用します。&lt;/p&gt;
+&lt;p&gt;名前を指定したユーザーやグループにレビューを依頼することも、&lt;strong&gt;Allow Eligible Reviewers&lt;/strong&gt;にチェックを入れて、そのアセットで対象となる全員に依頼することもできます。&lt;/p&gt;
+&lt;p&gt;レビューを依頼すると、検出事項は&lt;strong&gt;Under Review&lt;/strong&gt;に設定され、レビュアーに通知が送られます。&lt;/p&gt;
+&lt;h2 id="claiming-a-review"&gt;Claiming a review&lt;/h2&gt;
+&lt;p&gt;複数の人にレビューが依頼されている場合、そのうちの誰か1人がそれを引き受けることができます。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;検出事項で、検出事項メニューの&lt;strong&gt;Claim Review&lt;/strong&gt;、またはレビューバナー内のボタンを使用します。&lt;/li&gt;
+&lt;li&gt;検出事項自体に、検出事項リストの&lt;strong&gt;Claimed By&lt;/strong&gt;列として、またその人の&lt;a href="https://docs.defectdojo.com/metrics_reports/dashboards/pro__my_work/"&gt;My Work&lt;/a&gt;キューに、誰がそのレビューを保持しているかが表示されます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;レビューが受け持たれると、以下のようになります。&lt;/p&gt;</description></item></channel></rss>
