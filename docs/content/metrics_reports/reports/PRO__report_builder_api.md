@@ -10,6 +10,8 @@ slug: report-builder-api
 
 The Report Builder REST API lets you automate the same Themes, Blocks, and Templates you assemble by hand in the [Report Builder UI](../report-builder/) — and it goes one step further by letting you **run** a template and **download** the finished PDF or HTML. This guide walks the full lifecycle: authenticate, discover the field and filter vocabulary, create the building blocks, then generate and retrieve a report.
 
+> **Looking for a quick findings export instead?** If you only need a flat list of findings as JSON, HTML, CSV, or Excel — with no themes, blocks, or templates to set up — use the simpler `generate_report/` endpoint documented in [Generating Reports](/automation/api/api-v2-docs/#generating-reports). The Report Builder API described on this page is for building designed, multi\-section reports.
+
 ## Authentication
 
 Every request authenticates with a personal API token sent in the `Authorization` header using the `Token` prefix (not `Bearer`).

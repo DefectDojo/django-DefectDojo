@@ -21,7 +21,7 @@ from django.db.models import Case, IntegerField, Sum, Value, When
 from django.template.defaultfilters import stringfilter
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import conditional_escape, escape
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
@@ -1022,10 +1022,16 @@ def class_name(value):
     return value.__class__.__name__
 
 
+def escape_popover_value(value):
+    """Escape a value for a popover attribute, which the popover parses as HTML again."""
+    # escape() and not conditional_escape(): the latter is a no-op on its own output.
+    return escape(escape(value))
+
+
 @register.filter(needs_autoescape=True)
 def jira_project_tag(product_or_engagement, *, autoescape=True):
     if autoescape:
-        esc = conditional_escape
+        esc = escape_popover_value
     else:
         def esc(x):
             return x
@@ -1083,7 +1089,7 @@ def import_settings_tag(test_import, *, autoescape=True):
         return ""
 
     if autoescape:
-        esc = conditional_escape
+        esc = escape_popover_value
     else:
         def esc(x):
             return x

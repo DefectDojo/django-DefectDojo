@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "3.2.0"
+appVersion: "3.2.100"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.9.44
+version: 1.9.45
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -34,4 +34,4 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "false"
-  artifacthub.io/changes: "- kind: changed\n  description: chore(deps)_ update valkey _ tag from 0.24.1 to v0.24.4 (_/defect_/chart.yaml)\n- kind: changed\n  description: chore(deps)_ update gcr.io/cloudsql__/gce_proxy _ tag from 1.38.1 to v1.38.2 (_/defect_/values.yaml)\n- kind: changed\n  description: Bump DefectDojo to 3.2.0\n"
+  artifacthub.io/changes: "- kind: changed\n  description: Bump DefectDojo to 3.2.100\n"

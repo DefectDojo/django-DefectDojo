@@ -71,7 +71,7 @@ See our [Deduplication Tuning Guide](/triage_findings/finding_deduplication/pro_
 
 ### More Import Options
 
-DefectDojo Pro includes four additional import methods: [Universal Importer](/import_data/pro/specialized_import/external_tools/), [API Connectors](/import_data/pro/connectors/about_connectors/), [Universal Parser](/supported_tools/parsers/universal_parser/), and [Smart Upload](/import_data/pro/specialized_import/smart_upload/).
+DefectDojo Pro includes four additional import methods: [Universal Importer](/import_data/pro/specialized_import/external_tools/), [Upstream Connectors](/connectors/upstream/about/), [Universal Parser](/supported_tools/parsers/universal_parser/), and [Smart Upload](/import_data/pro/specialized_import/smart_upload/).
 
 ![image](images/pro_import_methods.png)
 
@@ -86,15 +86,15 @@ Quickly build a command-line pipeline to import, reimport, and export data to yo
 
 See our [External Tools Guide](/import_data/pro/specialized_import/external_tools/) for more information.
 
-### Connectors
+### Upstream Connectors
 
 DefectDojo can instantly connect to enterprise-level scanning tools to import new Finding data, creating an automated Import pipeline that works out-of-the-box without the need to set up any API calls or cron jobs. 
 
-See our [Connectors Guide](/import_data/pro/connectors/about_connectors/) for more information.
+See our [Upstream Connectors Guide](/connectors/upstream/about/) for more information.
 
 ![image](images/add_edit_connectors_2.png)
 
-Supported tools for Connectors include:
+Supported tools for Upstream Connectors include:
 
 * Anchore
 * AWS Security Hub

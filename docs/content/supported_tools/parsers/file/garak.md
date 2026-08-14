@@ -29,7 +29,7 @@ The parser accepts a `.jsonl` hit log. Each line is one hit record with fields i
 Sample scan data for testing purposes can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/garak).
 
 ### Deduplication
-The "Garak Scan" scan type uses the `hash_code` [deduplication algorithm](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/) with the following fields:
+The "Garak Scan" scan type uses the `hash_code` [deduplication algorithm](/en/working_with_findings/finding_deduplication/about_deduplication/) with the following fields:
 
 - title (the garak probe and its goal)
 - component_name (the scanned model / generator)

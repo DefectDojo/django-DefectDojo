@@ -65,6 +65,20 @@ categories:
       labels:
         - 'dependencies'
         - 'maintenance'
+  # These categories only feed $RESOLVED_VERSION; they render no changelog section.
+  # When nothing matches, the increment falls back to 'patch' (release-drafter's default).
+  - type: 'version-resolver'
+    semver-increment: 'major'
+    when:
+      label: 'major'
+  - type: 'version-resolver'
+    semver-increment: 'minor'
+    when:
+      label: 'minor'
+  - type: 'version-resolver'
+    semver-increment: 'patch'
+    when:
+      label: 'patch'
 exclude-labels:
   - 'skip-changelog'
 
@@ -74,15 +88,3 @@ template: |
 
   ## Changes since $PREVIOUS_TAG
   $CHANGES
-
-version-resolver:
-  major:
-    labels:
-      - 'major'
-  minor:
-    labels:
-      - 'minor'
-  patch:
-    labels:
-      - 'patch'
-  default: patch

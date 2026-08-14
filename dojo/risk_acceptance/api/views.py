@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import FileResponse
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -16,9 +16,12 @@ from dojo.api_v2.views import PrefetchDojoModelViewSet
 from dojo.authorization import api_permissions as permissions
 from dojo.models import NoteHistory, Notes, Risk_Acceptance
 from dojo.notes.helper import notes_prefetch
+from dojo.risk_acceptance import helper as ra_helper
 from dojo.risk_acceptance.api.filters import ApiRiskAcceptanceFilter
 from dojo.risk_acceptance.api.serializer import (
+    RiskAcceptanceExpireSerializer,
     RiskAcceptanceProofSerializer,
+    RiskAcceptanceReinstateSerializer,
     RiskAcceptanceSerializer,
     RiskAcceptanceToNotesSerializer,
 )
@@ -108,9 +111,85 @@ class RiskAcceptanceViewSet(
 
         notes = risk_acceptance.notes.all()
         serialized_notes = RiskAcceptanceToNotesSerializer(
-            {"risk_acceptance_id": risk_acceptance, "notes": notes},
+            {"risk_acceptance_id": risk_acceptance, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        methods=["POST"],
+        request=RiskAcceptanceExpireSerializer,
+        responses={
+            status.HTTP_200_OK: RiskAcceptanceSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Returned if the risk acceptance has already expired",
+            ),
+        },
+    )
+    @action(detail=True, methods=["post"])
+    def expire(self, request, pk=None):
+        """Expire a risk acceptance now, instead of waiting for its expiration date."""
+        risk_acceptance = self.get_object()
+        if risk_acceptance.expiration_date_handled:
+            return Response(
+                {"error": "This risk acceptance has already expired."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        request_serializer = RiskAcceptanceExpireSerializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+
+        ra_helper.expire_now(
+            risk_acceptance,
+            user=request.user,
+            reason=request_serializer.validated_data.get("reason"),
+        )
+
+        risk_acceptance.refresh_from_db()
+        return Response(self.get_serializer(risk_acceptance).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        methods=["POST"],
+        request=RiskAcceptanceReinstateSerializer,
+        responses={
+            status.HTTP_200_OK: RiskAcceptanceSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Returned if the risk acceptance has not expired",
+            ),
+        },
+    )
+    @action(detail=True, methods=["post"])
+    def reinstate(self, request, pk=None):
+        """
+        Reinstate an expired risk acceptance, re-accepting the findings it covers.
+
+        Send `expiration_date` to say how long for. Without one the risk acceptance is
+        reinstated for the number of days in the Risk Acceptance Form Default Days setting.
+        """
+        risk_acceptance = self.get_object()
+        if not risk_acceptance.expiration_date_handled:
+            return Response(
+                {"error": "This risk acceptance has not expired, so it cannot be reinstated."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        request_serializer = RiskAcceptanceReinstateSerializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+
+        # reinstate() keeps a requested date that differs from the one already stored, which is
+        # how the edit form and the serializer hand it a new date too.
+        old_expiration_date = risk_acceptance.expiration_date
+        if requested_expiration_date := request_serializer.validated_data.get("expiration_date"):
+            risk_acceptance.expiration_date = requested_expiration_date
+
+        ra_helper.reinstate(
+            risk_acceptance,
+            old_expiration_date,
+            user=request.user,
+            reason=request_serializer.validated_data.get("reason"),
+        )
+
+        risk_acceptance.refresh_from_db()
+        return Response(self.get_serializer(risk_acceptance).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         methods=["GET"],

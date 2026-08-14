@@ -96,6 +96,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     User,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.test.queries import get_authorized_tests
@@ -657,7 +658,7 @@ class ViewFinding(View):
             "finding": finding,
             "dojo_user": user,
             "user": request.user,
-            "notes": notes,
+            "notes": visible_notes(notes, request.user),
             "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
