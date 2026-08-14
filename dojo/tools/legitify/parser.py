@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -69,7 +68,7 @@ class LegitifyParser:
                     vuln_id_from_tool=policy_info.get("policyName", None),
                     fix_available=fix_available,
                 )
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [LocationData.url(url=url) for url in locations]
                 else:
                     # TODO: Delete this after the move to Locations

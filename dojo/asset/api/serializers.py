@@ -1,7 +1,10 @@
 from rest_framework import serializers
 
 from dojo.api_v2.serializers import ProductMetaSerializer, TagListSerializerField
-from dojo.authorization.serializer_guards import AuthorizedUsersMemberGuardMixin
+from dojo.authorization.serializer_guards import (
+    AuthorizedUsersMemberGuardMixin,
+    ToolConfigurationUseGuardMixin,
+)
 from dojo.models import (
     Dojo_User,
     Product,
@@ -16,7 +19,7 @@ class RelatedAssetField(serializers.PrimaryKeyRelatedField):
         return get_authorized_products("view")
 
 
-class AssetAPIScanConfigurationSerializer(serializers.ModelSerializer):
+class AssetAPIScanConfigurationSerializer(ToolConfigurationUseGuardMixin, serializers.ModelSerializer):
     asset = RelatedAssetField(source="product")
 
     class Meta:

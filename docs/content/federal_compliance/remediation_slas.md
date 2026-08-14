@@ -5,7 +5,7 @@ weight: 4
 audience: pro
 ---
 
-Two ready-made SLA configurations ship with the feature. Assign either to your products from SLA
+Two ready-made SLA configurations ship with the feature. Assign either to your Assets from SLA
 configuration settings, or copy one and adjust it.
 
 ## FedRAMP Rev 5

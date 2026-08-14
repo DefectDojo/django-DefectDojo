@@ -22,10 +22,10 @@ Whenever possible, we recommend creating a new 'DefectDojo Bot' account within y
 
 # **Asset Connectors**
 
-Most Connectors import **findings** from a security tool. **Asset Connectors** work differently: they import your **asset inventory** instead. An Asset Connector enumerates the assets that exist in an external platform (for example, the repositories in a GitLab group) and automatically creates and maintains the matching **Products** (Assets) and **Product Types** (Organizations) in DefectDojo. No findings are imported by an Asset Connector.
+Most Connectors import **findings** from a security tool. **Asset Connectors** work differently: they import your **asset inventory** instead. An Asset Connector enumerates the assets that exist in an external platform (for example, the repositories in a GitLab group) and automatically creates and maintains the matching **Assets** and **Organizations** in DefectDojo. No findings are imported by an Asset Connector.
 
-* **Discover** and **Sync** both reconcile the asset list. New assets appear as `NEW` Records; once mapped (automatically, if auto-mapping is enabled), DefectDojo creates the Product and groups it under a Product Type derived from the tool — for example, the GitLab namespace or the Azure DevOps project.
-* If an asset is later removed upstream (for example, a repository is deleted), its mapped Record is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
+* **Discover** and **Sync** both reconcile the asset list. New assets appear as `NEW` Records; once mapped (automatically, if auto-mapping is enabled), DefectDojo creates the Asset and groups it under an Organization derived from the tool — for example, the GitLab namespace or the Azure DevOps project.
+* If an asset is later removed upstream (for example, a repository is deleted), its mapped Record is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes an Asset.
 
 Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, JSM Assets, and ServiceNow CMDB are Asset Connectors. runZero is primarily an Asset Connector but can optionally import vulnerabilities as findings. All other Connectors listed below import findings.
 
@@ -137,7 +137,7 @@ This connector imports **vulnerability exposures only** — MDR incidents are de
 
 ## **Anchore Enterprise**
 
-The Anchore connector uses a user's API token to pull data from Anchore Enterprise.  Products will be mapped and discovered based on "Applications", which are composed of multiple Images in Anchore - see [Anchore Enterprise Documentation](https://docs.anchore.com/current/docs/sbom_management/application_groups/application_management_anchorectl/) for more information.
+The Anchore connector uses a user's API token to pull data from Anchore Enterprise.  Assets will be mapped and discovered based on "Applications", which are composed of multiple Images in Anchore - see [Anchore Enterprise Documentation](https://docs.anchore.com/current/docs/sbom_management/application_groups/application_management_anchorectl/) for more information.
 
 #### Connector Mappings
 
@@ -221,20 +221,20 @@ Each repository becomes a Record named after the repository, grouped by its Azur
 
 ## **Backstage**
 
-The Backstage connector is an **asset connector**: instead of importing Findings, it pulls your [Backstage](https://backstage.io) Software Catalog into DefectDojo and keeps your Product hierarchy and team ownership in sync with it. It is designed for organizations that maintain their service inventory and org structure in Backstage and want DefectDojo to mirror that structure instead of maintaining it by hand.
+The Backstage connector is an **asset connector**: instead of importing Findings, it pulls your [Backstage](https://backstage.io) Software Catalog into DefectDojo and keeps your Asset hierarchy and team ownership in sync with it. It is designed for organizations that maintain their service inventory and org structure in Backstage and want DefectDojo to mirror that structure instead of maintaining it by hand.
 
 #### What gets mapped
 
 | Backstage | DefectDojo |
 |---|---|
-| **System** | Product Type (Components with no System are grouped under a configurable "Backstage / Uncategorized" Product Type) |
-| **Component** | Product — named from the entity `title` (falling back to `name`), with the catalog description |
-| **Owning Group** (`ownedBy` relation) | A DefectDojo Group linked to the Product (default role: Maintainer, configurable) |
-| **Owner email** (Group profile email, or a User owner's email) | A Product Member, when a DefectDojo user with that email already exists (users are never created) |
-| `metadata.tags`, `spec.type`, `spec.lifecycle`, namespace, domain | Product tags under a `backstage:` prefix |
+| **System** | Organization (Components with no System are grouped under a configurable "Backstage / Uncategorized" Organization) |
+| **Component** | Asset — named from the entity `title` (falling back to `name`), with the catalog description |
+| **Owning Group** (`ownedBy` relation) | A DefectDojo Group linked to the Asset (default role: Maintainer, configurable) |
+| **Owner email** (Group profile email, or a User owner's email) | An Asset Member, when a DefectDojo user with that email already exists (users are never created) |
+| `metadata.tags`, `spec.type`, `spec.lifecycle`, namespace, domain | Asset tags under a `backstage:` prefix |
 | `metadata.annotations` | Stored on the Record (bounded); selected annotations can be promoted to first-class attributes or tags via **Annotation Mappings** |
 
-Records are keyed by the entity's server\-assigned `metadata.uid`, so renames in Backstage update the mapped Product **in place** on the next sync — no duplicates. The Product name always tracks the catalog: to rename a Product managed by this connector, rename the Component in Backstage (a DefectDojo\-side rename, or a custom name given during manual mapping, is reconciled back to the catalog name on the next sync unless it would collide with another Product). Ownership changes move the Product's group assignment. Components that disappear from the catalog (or are flagged with the `backstage.io/orphan` annotation) are marked **MISSING** — DefectDojo never deletes a Product on its own. Domain and Group hierarchy (parent teams) are recorded as tags/metadata only; they do not create extra hierarchy levels.
+Records are keyed by the entity's server\-assigned `metadata.uid`, so renames in Backstage update the mapped Asset **in place** on the next sync — no duplicates. The Asset name always tracks the catalog: to rename an Asset managed by this connector, rename the Component in Backstage (a DefectDojo\-side rename, or a custom name given during manual mapping, is reconciled back to the catalog name on the next sync unless it would collide with another Asset). Ownership changes move the Asset's group assignment. Components that disappear from the catalog (or are flagged with the `backstage.io/orphan` annotation) are marked **MISSING** — DefectDojo never deletes an Asset on its own. Domain and Group hierarchy (parent teams) are recorded as tags/metadata only; they do not create extra hierarchy levels.
 
 #### Prerequisites
 
@@ -265,16 +265,16 @@ Optional fields (leave blank for the defaults):
 * **Component Types** — comma\-separated `spec.type` values (e.g. `service,website`); blank imports every type.
 * **Page Size** — catalog query page size (1\-500, default 250).
 * **TLS Verification** — set to `false` only if Backstage serves a certificate DefectDojo cannot verify (internal CA); not recommended.
-* **Uncategorized Product Type** — the Product Type used for Components with no System (default `Backstage / Uncategorized`).
-* **Owner Group Role** — the role granted to the owning team on mapped Products (default `Maintainer`).
-* **Annotation Mappings** — a JSON object mapping annotation keys to Record attribute names, or to `"tag"` to import an annotation as a Product tag, e.g. `{"github.com/project-slug": "GITHUB_PROJECT", "example.com/tier": "tag"}`.
+* **Uncategorized Organization** — the Organization used for Components with no System (default `Backstage / Uncategorized`).
+* **Owner Group Role** — the role granted to the owning team on mapped Assets (default `Maintainer`).
+* **Annotation Mappings** — a JSON object mapping annotation keys to Record attribute names, or to `"tag"` to import an annotation as an Asset tag, e.g. `{"github.com/project-slug": "GITHUB_PROJECT", "example.com/tier": "tag"}`.
 
-With **Auto\-Map** enabled, a single Discover \+ Sync builds the complete Product Type / Product / ownership structure with no manual steps. With Auto\-Map disabled, discovered Components appear as Records awaiting your mapping decision.
+With **Auto\-Map** enabled, a single Discover \+ Sync builds the complete Organization / Asset / ownership structure with no manual steps. With Auto\-Map disabled, discovered Components appear as Records awaiting your mapping decision.
 
 #### Limitations (v1)
 
 * Backstage **Group membership is not synchronized**: the connector creates/links the owning team as a DefectDojo Group, but populating that group's users is left to your identity provider or admins.
-* Only Components become Products; APIs, Resources, and Domains are not imported as assets (domains surface as tags).
+* Only Components become Assets; APIs, Resources, and Domains are not imported as assets (domains surface as tags).
 * Tags and annotations are normalized and bounded to fit DefectDojo field limits (oversized values are truncated).
 
 **A note on the reverse direction:** displaying DefectDojo findings and grades *inside* Backstage (on entity pages) is a natural follow\-on that would be built as a Backstage frontend plugin consuming the DefectDojo REST API — it is deliberately out of scope for this connector, which only pulls catalog data into DefectDojo.
@@ -693,7 +693,7 @@ A CyCognito **API key**, created under **Settings \> API** in CyCognito. It is s
 
 1. Enter `https://api.platform.cycognito.com` in the **Location** field.
 2. Enter your CyCognito API key in the **API Key** field.
-3. Optionally, set **Product Grouping** to `organization` to create one Record per CyCognito **organization** instead of one per asset. Leave it blank for the default, one Record per asset.
+3. Optionally, set **Asset Grouping** to `organization` to create one Record per CyCognito **organization** instead of one per asset. Leave it blank for the default, one Record per asset.
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Under **organization** grouping, assets that belong to no organization are collected into a Record named **Unattributed Assets**.
@@ -1056,7 +1056,7 @@ Only GitHub.com (including GitHub Enterprise Cloud) is supported. GitHub Enterpr
 1. Enter `https://api.github.com` in the **Location** field.
 2. Enter the personal access token in the **Secret** field.
 
-No organization or repository list needs to be entered — DefectDojo imports every repository the token can see. Each repository becomes a Record named after the repository, grouped by its GitHub **owner** (organization or user). If a repository is later deleted, or the token loses access to it, its mapped Record is flagged `MISSING` on the next Sync rather than removed — DefectDojo never silently deletes a Product.
+No organization or repository list needs to be entered — DefectDojo imports every repository the token can see. Each repository becomes a Record named after the repository, grouped by its GitHub **owner** (organization or user). If a repository is later deleted, or the token loses access to it, its mapped Record is flagged `MISSING` on the next Sync rather than removed — DefectDojo never silently deletes an Asset.
 
 ## **GitHub Advanced Security**
 
@@ -1275,7 +1275,7 @@ A HiddenLayer API **client ID and client secret**, created under **Model Scanner
 3. Enter the client secret in the **Client Secret** field.
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
-HiddenLayer returns model scan results as **SARIF** logs, and DefectDojo maps them the same way it maps an uploaded SARIF report — so these findings behave like SARIF imports elsewhere in the product.
+HiddenLayer returns model scan results as **SARIF** logs, and DefectDojo maps them the same way it maps an uploaded SARIF report — so these findings behave like SARIF imports elsewhere in the Asset.
 
 ## **Holm Security**
 
@@ -1315,7 +1315,7 @@ Each tested asset becomes a Record, carrying that asset's detected vulnerabiliti
 
 The InsightCloudSec connector imports **cloud security posture findings** from Rapid7 InsightCloudSec. DefectDojo creates a Record for each **onboarded cloud account**.
 
-**Please note:** InsightCloudSec (formerly DivvyCloud) is a **distinct Rapid7 product** from InsightVM and InsightAppSec, each of which has its own connector in this list. Make sure you are configuring the one that matches your product.
+**Please note:** InsightCloudSec (formerly DivvyCloud) is a **distinct Rapid7 product** from InsightVM and InsightAppSec, each of which has its own connector in this list. Make sure you are configuring the one that matches your Asset.
 
 #### Prerequisites
 
@@ -1349,7 +1349,7 @@ See the [Intigriti API documentation](https://kb.intigriti.com/en/articles/61178
 
 ## **Intruder**
 
-The Intruder connector uses the [Intruder REST API](https://developers.intruder.io/) to pull your whole account's posture into DefectDojo. Each Intruder **target** is discovered as a Record (Product); each **occurrence** of an issue on a target becomes a Finding.
+The Intruder connector uses the [Intruder REST API](https://developers.intruder.io/) to pull your whole account's posture into DefectDojo. Each Intruder **target** is discovered as a Record (Asset); each **occurrence** of an issue on a target becomes a Finding.
 
 #### Connector Mappings
 
@@ -1432,7 +1432,7 @@ Notes:
 * A filter that matches nothing simply discovers nothing — there is no error. If a Sync unexpectedly finds no repositories, check the connector log for the `repository filter scoped discovery` entry, which reports how many of the total repositories matched.
 * The field can be changed after the connection is created.
 
-**Changing the filter later:** repositories that a newly narrowed filter now excludes are no longer discovered, and their existing Records follow the normal lifecycle for products the tool no longer reports — **mapped** Records are flagged `MISSING` on the next Sync, and unmapped `NEW` Records are removed. Findings already imported into DefectDojo are not deleted; the filter governs discovery only.
+**Changing the filter later:** repositories that a newly narrowed filter now excludes are no longer discovered, and their existing Records follow the normal lifecycle for Assets the tool no longer reports — **mapped** Records are flagged `MISSING` on the next Sync, and unmapped `NEW` Records are removed. Findings already imported into DefectDojo are not deleted; the filter governs discovery only.
 
 #### Artifact-Level Records
 
@@ -1489,7 +1489,7 @@ Each Klocwork project becomes a Record. Only issues Klocwork classes as **action
 
 ## **Kubescape**
 
-The Kubescape connector reads Kubernetes posture (misconfiguration) results produced by the [Kubescape operator](https://kubescape.io/docs/install-operator/) directly from the cluster's Kubernetes API — no ARMO SaaS account is required. It reads the `WorkloadConfigurationScan` objects served by the operator's in-cluster storage aggregated API (`spdx.softwarecomposition.kubescape.io/v1beta1`). Each Kubernetes **namespace** that has posture results is mapped to a Record (Product); each failed control on a workload becomes a Finding.
+The Kubescape connector reads Kubernetes posture (misconfiguration) results produced by the [Kubescape operator](https://kubescape.io/docs/install-operator/) directly from the cluster's Kubernetes API — no ARMO SaaS account is required. It reads the `WorkloadConfigurationScan` objects served by the operator's in-cluster storage aggregated API (`spdx.softwarecomposition.kubescape.io/v1beta1`). Each Kubernetes **namespace** that has posture results is mapped to a Record (Asset); each failed control on a workload becomes a Finding.
 
 #### Prerequisites
 
@@ -1499,8 +1499,8 @@ The Kubescape connector reads Kubernetes posture (misconfiguration) results prod
 #### Connector Mappings
 
 1. Enter the cluster's API server URL (or a friendly cluster identifier) in the **Location** field.
-2. Paste the **kubeconfig** for the target cluster in the `kubeconfig` field. Optionally set `kube_context` to select a context within it, and `cluster_name` to label the discovered Products.
-3. Each namespace with posture results is discovered as a Record; map the ones you want to import to DefectDojo Products.
+2. Paste the **kubeconfig** for the target cluster in the `kubeconfig` field. Optionally set `kube_context` to select a context within it, and `cluster_name` to label the discovered Assets.
+3. Each namespace with posture results is discovered as a Record; map the ones you want to import to DefectDojo Assets.
 
 Findings are derived per failed control: the control name and workload identify the Finding, severity comes from the control's score factor, the control ID becomes the vulnerability ID, and each Finding links to its control reference at `https://hub.armosec.io/docs/`.
 
@@ -1542,7 +1542,7 @@ See the [Lacework API documentation](https://docs.lacework.net/api/v2/docs) for 
 
 The Microsoft Defender connector imports device vulnerability findings from **Microsoft Defender Vulnerability Management (MDVM)** — one finding per device / software version / CVE combination, including severity, CVSS score, exploitability level and recommended security updates. DefectDojo will discover your Defender **device groups** and create a Record for each one; devices that aren't assigned to any device group are collected under a synthetic **Unassigned** group.
 
-**Please note:** this Connector is distinct from the file\-based **"MSDefender Parser"** scan type, which imports manually exported Defender files. Choose one import path per Product to avoid duplicate findings.
+**Please note:** this Connector is distinct from the file\-based **"MSDefender Parser"** scan type, which imports manually exported Defender files. Choose one import path per Asset to avoid duplicate findings.
 
 #### Prerequisites
 
@@ -1571,7 +1571,7 @@ Each Defender device group becomes a Record. Microsoft regenerates the vulnerabi
 
 The Microsoft Defender for Cloud connector imports vulnerability findings from **Microsoft Defender Vulnerability Management (MDVM)** as surfaced by Defender for Cloud — both **server** findings (Azure VM operating\-system and installed\-software CVEs) and **container\-registry** findings (container image CVEs), including severity, CVSS score, the affected package or image, and remediation. DefectDojo discovers the Azure **subscriptions** your service principal can read and creates a Record for each enabled subscription.
 
-**Please note:** this Connector is distinct from the **Microsoft Defender** connector, which imports device findings from the Defender for Endpoint API. Defender for Cloud is an Azure product with a different API surface (Azure Resource Manager / Resource Graph) and permission model (Azure RBAC). Run whichever matches where your findings live — or both, if you use both products.
+**Please note:** this Connector is distinct from the **Microsoft Defender** connector, which imports device findings from the Defender for Endpoint API. Defender for Cloud is an Azure Asset with a different API surface (Azure Resource Manager / Resource Graph) and permission model (Azure RBAC). Run whichever matches where your findings live — or both, if you use both Assets.
 
 #### Prerequisites
 
@@ -1621,7 +1621,7 @@ See the [MobSF REST API documentation](https://mobsf.github.io/docs/#/rest_api) 
 
 ## **NetRise**
 
-The NetRise connector imports **firmware vulnerability findings** from NetRise. DefectDojo enumerates every firmware artifact in your tenant and creates a Record for each **product line** — the vendor and product pair — so a product line accumulates the findings of its artifacts.
+The NetRise connector imports **firmware vulnerability findings** from NetRise. DefectDojo enumerates every firmware artifact in your tenant and creates a Record for each **product line** — the vendor and Asset pair — so a product line accumulates the findings of its artifacts.
 
 #### Prerequisites
 
@@ -1890,9 +1890,39 @@ A Qualys user account with **VMDR API access**, and your subscription's **API se
 1. Enter your Qualys API server URL in the **Location** field (for example `https://qualysapi.qualys.com`).
 2. Enter the Qualys API username in the **Username** field.
 3. Enter the Qualys API password in the **Secret** field.
-4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+4. Optionally, restrict discovery to part of your subscription with **Host Tags** (see below).
+5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each Qualys host becomes a Record. Detections Qualys has marked **Fixed** are excluded, so reimport closes remediated findings.
+
+#### Host Tags (optional)
+
+By default the connector discovers **every** host in your Qualys subscription. On a large estate that produces a Record list far bigger than most teams want. It also makes every Sync download the detections of every host.
+
+The optional **Host Tags** field, under **Import Filters** on the connector form, restricts the connector to hosts carrying the Qualys asset tags you name. The restriction travels to Qualys as part of the request, so out-of-scope hosts are never returned. It applies to **both** the host listing and the detection download. Narrowing the scope therefore cuts Sync time and transfer volume, not just the length of the Record list.
+
+**Syntax:** a comma-separated list of Qualys asset tag **names**, exactly as they appear in the Qualys UI under **Asset Management \> Tags**.
+
+```
+Prod, Business Unit: Finance
+```
+
+The example above discovers every host tagged `Prod` plus every host tagged `Business Unit: Finance`.
+
+Notes:
+
+* Tag names are matched **exactly**, and **wildcards are not supported**. Qualys offers no pattern matching on tag names, so `Prod-*` matches a tag literally named `Prod-*` and nothing else. This differs from the JFrog Xray **Repository Filter** described above, which does accept `*`.
+* A host is discovered if it carries **any** tag in the list, not all of them.
+* Spaces **around** the commas are ignored. Spaces **inside** a tag name are kept, so `Business Unit: Finance` works as written.
+* A tag name that itself contains a comma cannot be used here, because the comma separates entries.
+* The filter is an **allow-list**. There is no exclusion or negation syntax, so you cannot express "everything except X".
+* **Leave it blank to discover every host.** A value that is only spaces or commas is treated as blank.
+* If the tag names match no host, nothing is discovered. Check the spelling against the Qualys UI, and check the visible-host count reported on the connection.
+* The field can be changed after the connection is created.
+
+**Testing the connection** ignores this field on purpose, so it still confirms your username and password even when the tag names are wrong.
+
+**Changing the filter later:** hosts that a newly narrowed filter excludes are no longer discovered. Their existing Records then follow the normal lifecycle for assets the tool stops reporting: **mapped** Records are flagged `MISSING` on the next Sync, and unmapped `NEW` Records are removed. Findings already imported into DefectDojo are not deleted. The filter governs discovery only.
 
 ## **Quay**
 
@@ -1985,7 +2015,7 @@ A Satellite login with the **`view_hosts`** and **`view_content_views`** permiss
 1. Enter your Satellite server URL in the **Location** field — for example `https://satellite.example.com`.
 2. Enter the Satellite username in the **Username** field.
 3. Enter the password in the **Password** field.
-4. Optionally, set **Product Grouping** to choose how hosts are folded into Records: `host-collection`, `lifecycle-environment`, `content-view`, or `host` for one Record per host. Leave it blank for `host-collection`.
+4. Optionally, set **Asset Grouping** to choose how hosts are folded into Records: `host-collection`, `lifecycle-environment`, `content-view`, or `host` for one Record per host. Leave it blank for `host-collection`.
 5. Optionally, set **Skip TLS Verification** to `true` if your Satellite server uses the self\-signed certificate a default Satellite or Foreman install generates for itself. Leave it blank to verify certificates.
 6. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
@@ -1993,7 +2023,7 @@ Hosts that share a grouping value share a Record, and a new host joins the right
 
 ## **runZero**
 
-The runZero connector uses the runZero Export API to sync your whole organization's asset inventory into DefectDojo. It is primarily an **asset** connector: DefectDojo discovers every asset and creates a Record for each, grouped into a Product Type by its runZero **site**. It can optionally also import runZero's vulnerabilities as findings.
+The runZero connector uses the runZero Export API to sync your whole organization's asset inventory into DefectDojo. It is primarily an **asset** connector: DefectDojo discovers every asset and creates a Record for each, grouped into an Organization by its runZero **site**. It can optionally also import runZero's vulnerabilities as findings.
 
 #### Prerequisites
 
@@ -2006,7 +2036,7 @@ You will need an organization **Export Token** from runZero (Account → API), w
 3. Optionally set **Import Vulnerabilities** to `true` to also import runZero vulnerabilities as findings; leave it blank to sync assets only.
 4. Optionally, set a **Minimum Severity** to limit which vulnerability findings are imported (applies only when vulnerabilities are imported).
 
-DefectDojo maps each runZero **asset** to a Record (VEP): the display name comes from the asset's name or address, and its site, type, OS, addresses and tags are attached as attributes; the asset's **site** becomes its Product Type. Assets are synced with a full export that DefectDojo reconciles (adds/removes). When **Import Vulnerabilities** is enabled, each runZero vulnerability becomes a finding on its asset — mapping the severity, CVSS score, CVE, affected service (`protocol://address:port`) endpoint and the remediation.
+DefectDojo maps each runZero **asset** to a Record (VEP): the display name comes from the asset's name or address, and its site, type, OS, addresses and tags are attached as attributes; the asset's **site** becomes its Organization. Assets are synced with a full export that DefectDojo reconciles (adds/removes). When **Import Vulnerabilities** is enabled, each runZero vulnerability becomes a finding on its asset — mapping the severity, CVSS score, CVE, affected service (`protocol://address:port`) endpoint and the remediation.
 
 See the [runZero API documentation](https://help.runzero.com/) for more information.
 
@@ -2086,7 +2116,7 @@ Enter `https://semgrep.dev/api/v1/` in the **Location** field.
 
 1. Enter a valid API key in the **Secret** field. You can find this on the Tokens page:   
 ​  
-"Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens](https://semgrep.dev/orgs/-/settings/tokens))
+"Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens 389 )
 
 See [Semgrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.
 
@@ -2103,7 +2133,7 @@ You will need a ServiceNow instance and an account that can read the CMDB tables
 1. Enter your ServiceNow instance URL in the **Location** field: `https://{your-instance}.service-now.com`.
 2. Select or create a ServiceNow **Tool Configuration** holding the instance credentials (the ServiceNow username and password).
 
-Each Configuration Item becomes a Record named after the CI, grouped by its **CI class** (for example, application, server, or business service). Discovery and Sync reconcile the CI list: new CIs appear as `NEW` Records, and a CI removed from the CMDB is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
+Each Configuration Item becomes a Record named after the CI, grouped by its **CI class** (for example, application, server, or business service). Discovery and Sync reconcile the CI list: new CIs appear as `NEW` Records, and a CI removed from the CMDB is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes an Asset.
 
 ## **Shodan**
 
@@ -2146,7 +2176,7 @@ The Snyk connector uses the Snyk REST API to fetch data.
 
 #### Connector Mappings
 
-1. Enter **[https://api.snyk.io/rest](https://api.snyk.io/v1)** or **[https://api.eu.snyk.io/rest](https://api.eu.snyk.io/v1)** (for a regional EU deployment) in the **Location** field.
+1. Enter **[https://api.snyk.io/rest 394 ** or **[https://api.eu.snyk.io/rest 395 ** (for a regional EU deployment) in the **Location** field.
 2. Enter a valid API key in the **Secret** field. API Tokens are found on a user's **[Account Settings](https://docs.snyk.io/getting-started/how-to-obtain-and-authenticate-with-your-snyk-api-token)** [page](https://docs.snyk.io/getting-started/how-to-obtain-and-authenticate-with-your-snyk-api-token) in Snyk.
 
 See the [Snyk API documentation](https://docs.snyk.io/snyk-api) for more info.
@@ -2221,7 +2251,7 @@ A Sysdig Secure **API token**: in Sysdig Secure, go to **Settings \> Sysdig Secu
 1. Enter your Sysdig region/base URL in the **Location** field.
 2. Enter the API token in the **Secret** field.
 3. Optionally set **Scopes** — a comma\-separated list of `runtime`, `registry`, and/or `pipeline` (leave blank for `runtime`, the deployed\-workload scope).
-4. Optionally set **Runtime Product Grouping** — how runtime results map to products: `cluster`, `namespace`, `workload`, or `image` (leave blank for `namespace`). Registry and pipeline results always group by image repository.
+4. Optionally set **Runtime Asset Grouping** — how runtime results map to Assets: `cluster`, `namespace`, `workload`, or `image` (leave blank for `namespace`). Registry and pipeline results always group by image repository.
 5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each asset grouping becomes a Record. For each scan result the connector imports every vulnerable package as a finding. **Runtime** findings (deployed workloads) are recorded as dynamic findings and tagged with their Kubernetes cluster / namespace / workload / container context; **registry** and **pipeline** findings are recorded as static image\-scan findings. Sysdig's `NEGLIGIBLE` severity maps to Info.
@@ -2241,7 +2271,7 @@ See [Tenable's API Documentation](https://docs.tenable.com/vulnerability-managem
 
 ## **Tenable Web App Scanning**
 
-The Tenable Web App Scanning connector imports **web application (DAST) findings** from Tenable Web App Scanning. It is a separate connector from Tenable (Vulnerability Management): the two products cover different assets and are configured independently, so you can use either or both.
+The Tenable Web App Scanning connector imports **web application (DAST) findings** from Tenable Web App Scanning. It is a separate connector from Tenable (Vulnerability Management): the two Assets cover different assets and are configured independently, so you can use either or both.
 
 DefectDojo creates a Record for each **scanned web application**. Applications are discovered from your Web App Scanning scan configurations; a configuration that has never run does not produce a Record until its first scan completes. When more than one configuration scans the same application, they share a single Record.
 

@@ -2,9 +2,9 @@ import json
 from datetime import datetime
 
 import html2text
-from django.conf import settings
 from django.utils.encoding import force_str
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -42,7 +42,7 @@ class ArachniParser:
             item = self.get_item(node, report_date)
             dupe_key = item.severity + item.title
             if dupe_key in items:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     items[dupe_key].unsaved_locations += item.unsaved_locations
                 else:
                     # TODO: Delete this after the move to Locations
@@ -116,7 +116,7 @@ class ArachniParser:
             cwe=item_node.get("cwe"),
             vuln_id_from_tool=item_node.get("digest"),
         )
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = [LocationData.url(url=url)]
         else:
             # TODO: Delete this after the move to Locations

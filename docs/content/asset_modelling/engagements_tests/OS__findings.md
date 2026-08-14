@@ -8,7 +8,7 @@ Organizations	→ Assets → Engagements → Tests → **FINDINGS**
 
 ## Overview
 
-**Findings** represent the lowest level of the Product Hierarchy where individual vulnerabilities are tracked and managed, and are the main way that DefectDojo standardizes and guides the reporting and remediation process of your security tools. Regardless of whether a vulnerability was reported in SonarQube, Acunetix, or your team’s custom tool, Findings give you the ability to manage each vulnerability in the same way.
+**Findings** represent the lowest level of the Asset Hierarchy where individual vulnerabilities are tracked and managed, and are the main way that DefectDojo standardizes and guides the reporting and remediation process of your security tools. Regardless of whether a vulnerability was reported in SonarQube, Acunetix, or your team’s custom tool, Findings give you the ability to manage each vulnerability in the same way.
 
 Examples of Findings include: 
 - Cookie Not Marked as HttpOnly
@@ -22,7 +22,7 @@ In addition to storing the vulnerability data and providing a remediation framew
 - Automatically adding related EPSS scores to a Finding to describe exploitability
 - Automatically translating a security tool’s severity metric into a Severity score for each Finding, which confers an SLA onto the Finding according to your Asset’s SLA configuration. For more information on SLA configuration, click [here](/asset_modelling/os_hierarchy/os__sla_configuration/#main-content).
 
-Overall, Findings are designed to work with the Product Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
+Overall, Findings are designed to work with the Asset Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
 
 ## Accessing Findings
 
@@ -225,7 +225,7 @@ Finding Groups can be accessed via the sidebar. The submenu provides access to O
 
 Finding Groups can be created either manually or automatically. 
 
-Notably, Finding Groups can only be created from the Findings contained within a single Test. Findings from different Tests, Engagements, or Products cannot be added to the same Finding Group.
+Notably, Finding Groups can only be created from the Findings contained within a single Test. Findings from different Tests, Engagements, or Assets cannot be added to the same Finding Group.
 
 #### Manual Finding Groups 
 

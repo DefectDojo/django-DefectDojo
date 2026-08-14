@@ -150,6 +150,11 @@ class Endpoint(models.Model):
         ]
 
     def __init__(self, *args, **kwargs):
+        # This guard deliberately stays on settings.V3_FEATURE_LOCATIONS, not the
+        # runtime dojo.location.feature accessor. It must stay consistent with the
+        # boot-time route/permission wiring (dojo/urls.py); relaxing it to follow a
+        # stored-flag toggle is a phase-2 item gated on a reverse locations->endpoints
+        # migration existing. See dojo/location/feature.py and pro/features/relabel.py:14-28.
         if settings.V3_FEATURE_LOCATIONS and not getattr(self, "_allow_v3_init", False):
             msg = "Endpoint model is deprecated when V3_FEATURE_LOCATIONS is enabled"
             raise NotImplementedError(msg)

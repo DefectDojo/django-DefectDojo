@@ -4,8 +4,8 @@ import re
 
 import html2text
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -105,7 +105,7 @@ class BurpParser:
             # the type on its own.
             dupe_key = (item.vuln_id_from_tool, item.title)
             if dupe_key in items:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     items[dupe_key].unsaved_locations += item.unsaved_locations
                 else:
                     # TODO: Delete this after the move to Locations
@@ -304,7 +304,7 @@ def get_item(item_node, test):
     )
     finding.unsaved_req_resp = unsaved_req_resp
     # manage endpoint/location
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         finding.unsaved_locations = [LocationData.url(url=url_host)]
     else:
         # TODO: Delete this after the move to Locations

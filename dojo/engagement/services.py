@@ -1,7 +1,6 @@
 # #  engagements
 import logging
 
-from django.conf import settings
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -9,6 +8,7 @@ from django.utils.translation import gettext as _
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.models import Engagement
 from dojo.notifications.helper import create_notification
 from dojo.utils import calculate_grade
@@ -68,7 +68,7 @@ def reassign_engagement_product_endpoints(engagement, old_product, new_product):
     if old_product == new_product:
         return
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         from dojo.location.models import (  # noqa: PLC0415 -- avoid import cycle
             Location,
             LocationFindingReference,

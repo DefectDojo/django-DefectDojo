@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
@@ -217,13 +216,13 @@ class RustyhogParser:
             if scanner == "Choctaw Hog":
                 finding.line = int(vulnerability.get("new_line_num"))
                 finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within git repositories."
-                if settings.V3_FEATURE_LOCATIONS and file_path:
+                if locations_enabled() and file_path:
                     finding.unsaved_locations.append(
                         LocationData.code(file_path=file_path, line=finding.line),
                     )
             elif scanner == "Duroc Hog":
                 finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within directories, files, and archives."
-                if settings.V3_FEATURE_LOCATIONS and file_path:
+                if locations_enabled() and file_path:
                     linenum = vulnerability.get("linenum")
                     linenum = int(linenum) if linenum is not None and str(linenum).isdigit() else None
                     finding.unsaved_locations.append(

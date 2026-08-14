@@ -66,8 +66,8 @@ These Filters are related directly to DefectDojo core functionality.
 These Filters are assigned at the time of issue creation, and cannot be directly modified via Edit Finding.
 
 * Finding Severity (any of Info, Low, Medium, High, Critical)
-* Product
-* Product Type
+* Asset
+* Organization
 * Engagement
 * Engagement Version
 * Test

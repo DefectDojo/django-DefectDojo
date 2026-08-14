@@ -2,9 +2,9 @@ import pathlib
 from datetime import datetime
 
 import cvss
-from django.conf import settings
 from django.core.exceptions import ValidationError
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint
 from dojo.tools.locations import LocationData
 
@@ -168,7 +168,7 @@ def parse_locations_from_hit(hit):
         # If there's no protocol, it will assume the hostname is the protocol.
         asset = f"https://{asset}" if "://" not in asset else asset
         # TODO: Delete this after the move to Locations
-        location = LocationData.url(url=asset) if settings.V3_FEATURE_LOCATIONS else Endpoint.from_uri(asset)
+        location = LocationData.url(url=asset) if locations_enabled() else Endpoint.from_uri(asset)
     except ValidationError:
         location = None
     return [] if not location else [location]

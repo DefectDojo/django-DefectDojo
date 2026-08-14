@@ -9,6 +9,7 @@ from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint_Status, Finding, System_Settings
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
@@ -36,7 +37,7 @@ def get_finding_models_for_deduplication(finding_ids):
     # endpoints m2m hydrates legacy rows and crashes the batch. are_locations_duplicates()
     # reads ref.location.url, which is what the locations prefetch has to reach.
     # TODO: Delete the endpoints branch after the move to Locations
-    location_prefetch = "locations__location__url" if settings.V3_FEATURE_LOCATIONS else "endpoints"
+    location_prefetch = "locations__location__url" if locations_enabled() else "endpoints"
 
     return list(
         Finding.objects.filter(id__in=finding_ids)
@@ -277,7 +278,7 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
         deduplicationLogger.debug("deduplication by endpoint fields is disabled")
         return True
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Use unsaved_locations for unsaved findings (preview mode), saved M2M otherwise
         locs1 = new_finding.locations.all() if new_finding.pk else getattr(new_finding, "unsaved_locations", [])
         locs2 = to_duplicate_finding.locations.all() if to_duplicate_finding.pk else getattr(to_duplicate_finding, "unsaved_locations", [])
@@ -347,7 +348,7 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
             )
         queryset = Finding.objects.filter(scope_q)
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
     else:
         # TODO: Delete this after the move to Locations
@@ -675,7 +676,7 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             flag_locations = False
             flag_line_path = False
 

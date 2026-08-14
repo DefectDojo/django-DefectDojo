@@ -1,8 +1,7 @@
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -93,7 +92,7 @@ def get_item(item_node, test):
     )
 
     file_path = item_node.get("file")
-    if settings.V3_FEATURE_LOCATIONS and file_path:
+    if locations_enabled() and file_path:
         line = item_node.get("line")
         line = int(line) if line is not None and str(line).isdigit() else None
         finding.unsaved_locations.append(

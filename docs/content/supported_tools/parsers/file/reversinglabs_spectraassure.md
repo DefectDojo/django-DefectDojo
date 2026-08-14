@@ -6,7 +6,7 @@ toc_hide: true
 # ReversingLabs Spectra Assure Parser
 
 The Spectra Assure platform is a set of [ReversingLabs](https://www.reversinglabs.com/) solutions primarily designed for software assurance and software supply chain security use-cases.
-Spectra Assure products analyze compiled software packages, their components and third-party dependencies to detect exposures, reduce vulnerabilities, and eliminate threats before reaching production.
+Spectra Assure Assets analyze compiled software packages, their components and third-party dependencies to detect exposures, reduce vulnerabilities, and eliminate threats before reaching production.
 
 Every Spectra Assure analysis (software scan) produces a set of reports and the overall CI status (pass or fail) for the analyzed software package.
 The reports are created in multiple different formats, with different level of detail and scope of information about the analysis results.
@@ -18,7 +18,7 @@ The official documentation describes all [supported report formats](https://docs
 
 The parser accepts only `report.rl.json` files (the Spectra Assure [rl-json report](https://docs.secure.software/concepts/analysis-reports#rl-json)).
 
-You can find instructions for exporting the `rl-json` report in the documentation of the Spectra Assure product you're using.
+You can find instructions for exporting the `rl-json` report in the documentation of the Spectra Assure Asset you're using.
 
 - [Spectra Assure CLI](https://docs.secure.software/cli/commands/report).
 - [Spectra Assure Portal](https://docs.secure.software/api-reference/#tag/Version/operation/getVersionReport).

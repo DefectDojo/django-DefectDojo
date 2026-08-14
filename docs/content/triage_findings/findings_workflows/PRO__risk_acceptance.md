@@ -10,7 +10,7 @@ aliases:
 **Risk Acceptances** are a special status that can be applied to Findings using either **Full Risk Acceptance** objects or the **Simple Risk Acceptance** workflow.  Risk Acceptances are used to formally document and operationalize the decision to acknowledge a vulnerable Finding without immediately remediating it.
 
 DefectDojo Pro includes enhanced Risk Acceptance capabilities to scale risk management decisions, including: 
-- **Cross-Product Risk Acceptances**: A single Risk Acceptance can be applied across multiple products, allowing you to bundle all instances of the same or similar Findings throughout your entire portfolio of Assets into a single Risk Acceptance object. 
+- **Cross-Asset Risk Acceptances**: A single Risk Acceptance can be applied across multiple Assets, allowing you to bundle all instances of the same or similar Findings throughout your entire portfolio of Assets into a single Risk Acceptance object. 
 - **Bulk Risk Acceptance Management**: Filter and search for specific Findings of vulnerability IDs and apply Risk Acceptance to all results simultaneously regardless of the Asset they belong to.
 
 ### Accessing Risk Accepted Findings
@@ -115,7 +115,7 @@ Risk Acceptance visibility is **gated by a distinct minimum permission from Find
 
 ### Minimum role for Risk Acceptance actions
 
-| Action | Minimum role on the parent Asset (Product) |
+| Action | Minimum role on the parent Asset |
 | --- | --- |
 | View a Risk Acceptance | Writer |
 | Add or Edit a Risk Acceptance | Writer |
@@ -466,7 +466,7 @@ Three rules keep this safe to leave switched on:
 - **Only inside its scope.** A Finding outside the scope never matches, however well its
   vulnerability lines up.
 - **Criteria with nothing to match are refused.** A scope with no matchable attribute would mean
-  "every Finding in this product", so the API returns `400` rather than accepting it. An acceptance
+  "every Finding in this Asset", so the API returns `400` rather than accepting it. An acceptance
   with *no* criteria at all is fine and covers exactly what was added to it — which is every Risk
   Acceptance that existed before this feature.
 

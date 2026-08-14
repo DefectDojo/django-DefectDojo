@@ -48,7 +48,7 @@ Rating** alongside the original, and both appear on the generated deliverables.
 
 ### Vendor dependencies
 
-Items can carry a **Vendor Dependency** flag and the **Vendor Product** name, for weaknesses you
+Items can carry a **Vendor Dependency** flag and the **Vendor Asset** name, for weaknesses you
 cannot remediate directly. The date of your last vendor check-in is tracked with the item.
 
 ## KEV tracking
