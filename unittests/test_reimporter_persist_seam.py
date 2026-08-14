@@ -160,6 +160,26 @@ class TestNewFindingPersistSeam(DojoTestCase):
 
         self.assertEqual(cve_set(stock_test), cve_set(buffered_test))
 
+    def test_new_items_holds_real_ids_even_for_a_deferred_write(self):
+        """
+        new_items must report the finding's real id, not a premature read of it.
+
+        process_finding_that_was_not_matched() queues each new finding; persist_new_findings()
+        writes the queued batch and hands the same objects back, written or not depending on
+        persist_new_finding(). A caller that reads finding.id right there -- rather than after
+        the batch's write is guaranteed to have happened -- captures None for a deferred
+        edition. That silently breaks any sync-wide bookkeeping keyed on new_items (for
+        example a chunked importer's seen-id set), which then cannot recognize the finding by
+        id and treats it as never having been reported.
+        """
+        test = self._empty_test("seam-ids-buffered")
+
+        importer = self._reimport(test, BufferingReImporter)
+
+        actual_ids = set(Finding.objects.filter(test=test).values_list("id", flat=True))
+        self.assertNotIn(None, importer.new_items, "a deferred write must not leave None in new_items")
+        self.assertEqual(set(importer.new_items), actual_ids)
+
 
 class TestReimportMatchCandidateOrdering(DojoTestCase):
 

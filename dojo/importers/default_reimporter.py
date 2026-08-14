@@ -24,6 +24,7 @@ from dojo.models import (
     DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
     Development_Environment,
     Finding,
+    Finding_Group,
     Notes,
     Test,
     Test_Import,
@@ -121,7 +122,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ) = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(findings_to_mitigate, **kwargs)
+        #
+        # process_findings() tracks findings_to_mitigate as ids (M1), but
+        # close_old_findings() calls .save() on each one and reads .finding_group --
+        # hydrate real instances for just this batch, chunked, right before use.
+        closed_findings = self.close_old_findings(
+            self._hydrate_findings_for_close_old(findings_to_mitigate),
+            **kwargs,
+        )
+        # actively_closed_matches: findings process_matched_active_finding closed inline
+        # (see its docstring) rather than via close_old_findings() -- disjoint from
+        # closed_findings by construction, since close_old_findings() no-ops on a finding
+        # that is already mitigated by the time it hydrates it.
+        closed_finding_ids = [f.id for f in closed_findings] + self.actively_closed_matches
         # Update the timestamps of the test object by looking at the findings imported
         logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
         # Update the timestamps of the test object by looking at the findings imported
@@ -145,7 +158,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # feature enabled
         test_import_history = self.update_import_history(
             new_findings=new_findings,
-            closed_findings=closed_findings,
+            closed_findings=closed_finding_ids,
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
         )
@@ -155,14 +168,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # so notifications and statistics reflect the deduplicated state.
         self.wait_for_post_processing()
         updated_count = (
-            len(closed_findings) + len(reactivated_findings) + len(new_findings)
+            len(closed_finding_ids) + len(reactivated_findings) + len(new_findings)
         )
         self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,
             findings_reactivated=reactivated_findings,
-            findings_mitigated=closed_findings,
+            findings_mitigated=closed_finding_ids,
             findings_untouched=untouched_findings,
         )
         # Update the test progress to reflect that the import has completed
@@ -173,7 +186,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.test,
             updated_count,
             len(new_findings),
-            len(closed_findings),
+            len(closed_finding_ids),
             len(reactivated_findings),
             len(untouched_findings),
             test_import_history,
@@ -310,23 +323,38 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
+    ) -> tuple[list[int], list[int], set[int], set[int]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         original_findings = self.get_original_findings()
 
         if logger.isEnabledFor(logging.DEBUG):
             # Guarded twice over: rendering .query raises EmptyResultSet for a none() queryset
             # (a legitimate get_original_findings() override), and the original_items render
-            # builds (id, hash) tuples for every finding already in the test — millions on a
-            # large test — even when DEBUG logging is off, because f-strings always evaluate.
+            # used to build (id, hash) tuples for every finding already in the test — millions
+            # on a large test — even when DEBUG logging is off, because f-strings always evaluate.
             with contextlib.suppress(EmptyResultSet):
                 logger.debug(f"original_findings_qyer: {original_findings.query}")
-        self.original_items = list(original_findings)
+        # Ids, not instances (M1): a 25M-finding reimport used to keep every original,
+        # new, reactivated and unchanged Finding *instance* alive in memory for the whole
+        # run, purely so notify_scan_added() and update_import_history() could read a few
+        # scalar fields off them at the very end. self.to_mitigate/untouched below are
+        # plain id-set arithmetic either way; the only consumers that ever needed real
+        # rows (close_old_findings, process_groups_for_all_findings) now requery
+        # deliberately, in bounded chunks, at the point they need them.
+        self.original_items = set(original_findings.values_list("id", flat=True))
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
+            logger.debug(f"original_items: {sorted(self.original_items)}")
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
+        # Findings process_matched_active_finding closed inline (report re-marked a
+        # matched, previously-active finding as mitigated/risk-accepted/false-p/out-of-
+        # scope) rather than via close_old_findings(). Neither reactivated nor unchanged,
+        # so to_mitigate's arithmetic below still includes their ids -- close_old_findings()
+        # correctly no-ops on them (already mitigated by the time it hydrates them), which
+        # means it never reports them as closed either. Tracked here so process_scan() can
+        # still count them for update_import_history()/notify_scan_added().
+        self.actively_closed_matches: list[int] = []
         self.group_names_to_findings_dict = {}
         # New findings queued by process_finding_that_was_not_matched, drained (persisted
         # via persist_new_findings, then post-processed) once per matching batch -- see
@@ -575,14 +603,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding_will_be_grouped: bool,
     ) -> None:
         """
-        Run one now-persisted new finding's post-processing and queue it for dispatch.
+        Queue one now-prepared new finding for post-processing and dispatch.
 
-        `finding` must already have a primary key (persist_new_findings() has run on it).
+        `finding` is NOT guaranteed to have a primary key yet: persist_new_findings() has
+        run on it, but a downstream edition is allowed to override persist_new_finding()
+        to defer the actual write to its own batch boundary (see that method's docstring).
+        new_items is therefore populated later, from new_findings_in_batch, once
+        _flush_post_processing_batch() has flushed any such buffer and every finding in
+        the batch is guaranteed to have a real id -- not here, while it may still be None.
         Shared by _drain_pending_new_findings (the normal per-matching-batch case) and
         _finalize_specific_pending_new_finding (the on-demand case: a later finding in
         this report just matched against this one while it was still pending).
         """
-        self.new_items.append(finding)
         new_findings_in_batch.append(finding)
         finding = self.finding_post_processing(
             finding,
@@ -704,6 +736,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # their original creation; re-running it on no-change reimports
         # would be ~8 wasted queries per batch.
         apply_inherited_tags_for_findings(new_findings_in_batch)
+        # Read here, not when each finding was queued: a downstream edition's
+        # persist_new_finding() may have deferred the actual write to this flush (see
+        # _finalize_pending_new_finding), so this is the first point every finding in
+        # new_findings_in_batch is guaranteed to have a real id.
+        self.new_items.extend(finding.id for finding in new_findings_in_batch)
         new_findings_in_batch.clear()
         batch_findings.clear()
         # Partition the batch by each finding's own push_to_jira flag so one
@@ -730,6 +767,34 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
                 self.record_post_processing_result(result)
+
+    def _hydrate_findings_for_close_old(self, finding_ids: set[int]) -> list[Finding]:
+        """
+        Fetch real Finding instances for close_old_findings() (M1).
+
+        process_findings() tracks the to-mitigate set as ids, not instances, but
+        close_old_findings() mutates and .save()s each one and reads .finding_group --
+        it needs real rows, not a `.only()` slice. Chunked the same way
+        _sync_close_old_finding_status_fields() chunks its own refresh query, so a
+        25M-finding reimport never materializes more than one chunk's worth at a time.
+
+        finding_group is a @cached_property (self.finding_group_set.all().first()),
+        not a real FK, so it is prefetched rather than select_related'd.
+
+        Every id here came from get_original_findings(), scoped to self.test -- so rather
+        than select_related("test__...") copying the parent chain onto each row, each
+        finding shares self.test the same way reimport matching's candidates do (see
+        ProReImporter._reimport_hash_candidate_index's "share self.test" comment): one
+        instance for the whole run instead of one lazy-loaded copy per finding closed.
+        """
+        if not finding_ids:
+            return []
+        findings: list[Finding] = []
+        for chunk in batched(finding_ids, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
+            for finding in Finding.objects.filter(id__in=chunk).prefetch_related("finding_group_set"):
+                finding.test = self.test
+                findings.append(finding)
+        return findings
 
     def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> list[Finding]:
         """
@@ -994,7 +1059,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             and existing_finding.out_of_scope == unsaved_finding.out_of_scope
             and existing_finding.risk_accepted == unsaved_finding.risk_accepted
         ):
-            self.unchanged_items.append(existing_finding)
+            self.unchanged_items.append(existing_finding.id)
             return existing_finding, True
         # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
         # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
@@ -1002,7 +1067,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # We however do not exit the loop as we do want to update the endpoints/locations (in case some
         # endpoints/locations were fixed)
         if existing_finding.risk_accepted and not existing_finding.active:
-            self.unchanged_items.append(existing_finding)
+            self.unchanged_items.append(existing_finding.id)
             return existing_finding, False
         # The finding was not an exact match, so we need to add more details about from the
         # new finding to the existing. Return False here to make process further
@@ -1026,7 +1091,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if unsaved_finding.is_mitigated:
             # The new finding is already mitigated, so nothing to change on the
             # the existing finding
-            self.unchanged_items.append(existing_finding)
+            self.unchanged_items.append(existing_finding.id)
             # Look closer at the mitigation timestamp
             if unsaved_finding.mitigated:
                 logger.debug(f"item mitigated time: {unsaved_finding.mitigated.timestamp()}")
@@ -1113,7 +1178,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         note.save()
         self.location_handler.record_reactivations_for_finding(existing_finding)
         existing_finding.notes.add(note)
-        self.reactivated_items.append(existing_finding)
+        self.reactivated_items.append(existing_finding.id)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
         # be updated in some way
         # Return False here to make sure further processing happens
@@ -1156,6 +1221,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
+                existing_finding.notes.create(
+                    author=self.user,
+                    entry=f"Mitigated by {self.test.test_type} re-upload.",
+                )
+                self.actively_closed_matches.append(existing_finding.id)
 
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
@@ -1171,9 +1241,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
+                existing_finding.notes.create(
+                    author=self.user,
+                    entry=f"Mitigated by {self.test.test_type} re-upload.",
+                )
+                self.actively_closed_matches.append(existing_finding.id)
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
-                self.unchanged_items.append(existing_finding)
+                self.unchanged_items.append(existing_finding.id)
         # Set the component name and version on the existing finding if it is present
         # on the old finding, but not present on the existing finding (do not override)
         component_name = getattr(unsaved_finding, "component_name", None)
@@ -1396,11 +1471,21 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
         if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
-            for finding_group in {
-                    finding.finding_group
-                    for finding in self.reactivated_items + self.unchanged_items
-                    if finding.finding_group is not None and not finding.is_mitigated
-            }:
+            # reactivated_items/unchanged_items are ids (M1), so the group membership this
+            # used to read straight off in-memory instances is resolved in one query instead.
+            # finding_group is the reverse M2M query name (Finding has no finding_group_id
+            # column -- Finding.finding_group is a cached_property over finding_group_set), so
+            # select that relation, not a non-existent *_id field, which raises FieldError.
+            finding_group_ids = (
+                Finding.objects.filter(
+                    id__in=self.reactivated_items + self.unchanged_items,
+                    is_mitigated=False,
+                    finding_group__isnull=False,
+                )
+                .values_list("finding_group", flat=True)
+                .distinct()
+            )
+            for finding_group in Finding_Group.objects.filter(id__in=finding_group_ids):
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
                     jira_services.push(finding_group)

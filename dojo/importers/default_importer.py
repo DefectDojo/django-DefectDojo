@@ -134,12 +134,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         self.save_without_resurrecting(self.test)
         if self.engagement_target_end_updated:
             self.save_without_resurrecting(self.test.engagement)
+        # update_import_history()/notify_scan_added() take ids (M1); this path still
+        # builds new_findings/closed_findings as instances internally, so adapt at
+        # the boundary rather than reshape process_findings()/close_old_findings().
+        new_finding_ids = [f.id for f in new_findings]
+        closed_finding_ids = [f.id for f in closed_findings]
         # Create a test import history object to record the flags sent to the importer
         # This operation will return None if the user does not have the import history
         # feature enabled
         test_import_history = self.update_import_history(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
+            new_findings=new_finding_ids,
+            closed_findings=closed_finding_ids,
         )
         # In 'async_wait' mode, block until background deduplication has finished
         # so notifications and statistics reflect the deduplicated state.
@@ -157,12 +162,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             url=reverse("view_test", args=(self.test.id,)),
             url_api=reverse("test-detail", args=(self.test.id,)),
         )
-        updated_count = len(new_findings) + len(closed_findings)
+        updated_count = len(new_finding_ids) + len(closed_finding_ids)
         self.notify_scan_added(
             self.test,
             updated_count,
-            new_findings=new_findings,
-            findings_mitigated=closed_findings,
+            new_findings=new_finding_ids,
+            findings_mitigated=closed_finding_ids,
         )
         # Update the test progress to reflect that the import has completed
         logger.debug("IMPORT_SCAN: Updating Test progress")
