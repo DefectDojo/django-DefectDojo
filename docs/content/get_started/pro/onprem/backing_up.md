@@ -6,7 +6,7 @@ weight: 12
 audience: pro
 ---
 
-A deployment is more than its database. A backup that captures only the database restores into a system that runs but is missing uploaded files and cannot decrypt the credentials it holds for your other tools. This page covers what to capture, where each piece lives, and how to confirm the result is restorable.
+A deployment is more than its database. A backup that captures only the database restores into a system that runs but is missing uploaded files and cannot decrypt the connection credentials that are stored encrypted. This page covers what to capture, where each piece lives, and how to confirm the result is restorable.
 
 ## The four things to capture
 
@@ -16,7 +16,9 @@ Uploaded files live outside the database. Screenshots, threat models, risk accep
 
 Deployment configuration is what makes the application come back up the same way, including your own customizations and TLS certificates.
 
-The encryption keys are the piece most often missed. The credential encryption key is what makes stored credentials for your connected tools readable. Restore a database without it and those credentials are intact but undecryptable, which means every integration has to be re-entered by hand.
+The encryption keys are the piece most often missed. Connector credentials are encrypted with the secret key, and Tool Configuration credentials with the credential encryption key. Restore a database without the matching key and those credentials are intact but undecryptable, which means the affected integrations have to be re-entered by hand.
+
+Not every integration credential is encrypted. Some are stored as entered, so treat a database backup as carrying secrets in its own right, whether or not you also hold the keys. Protect it accordingly, and rotate the credentials of any integration whose backup you cannot account for.
 
 ## The database
 
@@ -58,7 +60,7 @@ On Compose, capture your `customizations` directory, your `certs` directory, and
 
 On Kubernetes, capture your values files and the contents of the secrets your release references.
 
-In both cases, keep the credential encryption key and the secret key somewhere durable and separate, in a secret manager rather than alongside the backup. Anyone holding both the database and the credential key can read the credentials for every tool you have connected, so they should not travel together.
+In both cases, keep the credential encryption key and the secret key somewhere durable and separate, in a secret manager rather than alongside the backup. Anyone holding both the database and those keys can read every stored credential that is encrypted, so they should not travel together. Keys and backup travelling separately narrows the exposure of a lost backup; it does not eliminate it, because the backup still holds the credentials that are not encrypted.
 
 ## What is not a backup
 
@@ -72,7 +74,7 @@ A backup nobody has restored is an assumption. Test it into a scratch environmen
 
 1. Log in, and confirm your organizations, assets, engagements, tests, and findings are present in the numbers you expect.
 2. Open a finding with an attachment and download it. This is what proves the media restore worked, since the database alone would show the attachment listed but fail to serve it.
-3. Open a configured tool connection and confirm its credentials are intact. This is what proves you restored the credential encryption key correctly, and it is the check most likely to reveal a gap.
+3. Open a configured connector and a configured Tool Configuration, and confirm the credentials on each are intact. Between them these cover both keys, and this is the check most likely to reveal a gap.
 4. Confirm users and groups came across. Authentication settings such as SSO usually need reconfiguring for a different environment, so treat differences there as expected rather than as a failed restore.
 
 Run this drill on a schedule rather than only when you need it. Doing a restore for the first time during an incident is where backup plans usually fail.
