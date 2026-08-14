@@ -36,7 +36,7 @@ Check **Enable Azure AD OAuth** and submit the form. A **Login With Azure AD** b
 
 ## Group Mapping
 
-Group mapping allows DefectDojo to import [User Group](../../user_management/create_user_group/) membership from Azure AD. User Groups in DefectDojo govern product and product type access via [RBAC](../../user_management/set_user_permissions/).
+Group mapping allows DefectDojo to import [User Group](../../user_management/create_user_group/) membership from Azure AD. User Groups in DefectDojo govern Asset and Organization access via [RBAC](../../user_management/set_user_permissions/).
 
 Check **Enable Azure AD OAuth Grouping** to activate this feature. On login, DefectDojo will match the user's Azure AD groups to existing DefectDojo groups. Any groups not found in DefectDojo will be created automatically.
 

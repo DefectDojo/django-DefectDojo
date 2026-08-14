@@ -17,35 +17,35 @@ This article is an overview of how permissions in DefectDojo work.  If you would
 
 DefectDojo manages four different kinds of permissions:
 
-* Users can be assigned as **Members** to **Products or Product Types**. A Product Membership comes with a **Role** which allows your users to view and interact with Data Types (Product Types, Products, Engagements, Tests and Findings) in DefectDojo. Users can have multiple Product or Product Type memberships, with different levels of access.   
+* Users can be assigned as **Members** to **Assets or Organizations**. An Asset Membership comes with a **Role** which allows your users to view and interact with Data Types (Organizations, Assets, Engagements, Tests and Findings) in DefectDojo. Users can have multiple Asset or Organization memberships, with different levels of access.   
 ​
-* Users can also have **Configuration Permissions** assigned, which allow them to access configuration pages in DefectDojo. Configuration Permissions are not related to Products or Product Types, and are not associated with Roles.  
+* Users can also have **Configuration Permissions** assigned, which allow them to access configuration pages in DefectDojo. Configuration Permissions are not related to Assets or Organizations, and are not associated with Roles.  
 ​
-* Users can be assigned **Global Roles**, which give them a standardized level of access to all Products and Product Types.  
+* Users can be assigned **Global Roles**, which give them a standardized level of access to all Assets and Organizations.  
 ​
 * Users can be set up as **Superusers**: administrator level roles which give them control and access to all DefectDojo data and configuration.
 
-Each of these Permission types can also be assigned to **User** **Group**. If you have a large number of users in DefectDojo, such as a dedicated testing team for a particular Product, Groups allow you to set up and maintain permissions quickly.
+Each of these Permission types can also be assigned to **User** **Group**. If you have a large number of users in DefectDojo, such as a dedicated testing team for a particular Asset, Groups allow you to set up and maintain permissions quickly.
 
-## Product/Product Type Membership \& Roles
+## Asset/Organization Membership \& Roles
 
-When users are assigned as members to a Product or Product Type, they also receive a role which controls how they interact with the associated Finding data.
+When users are assigned as members to an Asset or Organization, they also receive a role which controls how they interact with the associated Finding data.
 
 ### Role Summaries
 
-DefectDojo Pro ships five **built-in roles**: Reader, Writer, Maintainer, Owner and API Importer. Any of them can be assigned either globally or within a Product / Product Type.
+DefectDojo Pro ships five **built-in roles**: Reader, Writer, Maintainer, Owner and API Importer. Any of them can be assigned either globally or within an Asset / Organization.
 
 The built-in roles are locked presets. They cannot be edited or deleted, and their permissions are the same on every DefectDojo Pro instance. If none of them fits how your team works, you can build a role that does, by choosing individual permissions or by cloning a built-in role and adjusting it. See [Custom RBAC Roles](../pro__custom_rbac_roles/).
 
-‘Underlying data’ refers to all Products, Engagements, Tests, Findings or Endpoints nested under a Product, or Product Type.
+‘Underlying data’ refers to all Assets, Engagements, Tests, Findings or Endpoints nested under an Asset, or Organization.
 
-* **Reader Users** can view underlying data on any Product or Product Type they are assigned to, and add comments. They cannot edit, add or otherwise modify any of the underlying data, but they can export Reports and add Notes to data.  
+* **Reader Users** can view underlying data on any Asset or Organization they are assigned to, and add comments. They cannot edit, add or otherwise modify any of the underlying data, but they can export Reports and add Notes to data.  
 ​
-* **Writer Users** have all Reader abilities, plus the ability to Add or Edit Engagements, Tests and Findings. They cannot add new Products, and they cannot Delete any underlying data.  
+* **Writer Users** have all Reader abilities, plus the ability to Add or Edit Engagements, Tests and Findings. They cannot add new Assets, and they cannot Delete any underlying data.  
 ​
-* **Maintainer Users** have all Writer abilities, plus the ability to edit Product or Product Types. They can add new Members with Roles to the Product or Product Type, and they can also Delete Engagements, Tests, and Findings.  
+* **Maintainer Users** have all Writer abilities, plus the ability to edit Asset or Organizations. They can add new Members with Roles to the Asset or Organization, and they can also Delete Engagements, Tests, and Findings.  
 ​
-* **Owner Users** have the greatest amount of control over a Product or Product Type. They can designate other Owners, and can also Delete the Products or Product Types they’re assigned to.  
+* **Owner Users** have the greatest amount of control over an Asset or Organization. They can designate other Owners, and can also Delete the Assets or Organizations they’re assigned to.  
 ​
 * **API Importer** **Users** have limited abilities. This Role allows limited API access without exposing the majority of the API endpoints, so is useful for automation or users who are meant to be ‘external’ to DefectDojo. They can view underlying data, Add / Edit Engagements, and Import Scan Data.
 
@@ -53,23 +53,23 @@ For detailed information on the built-in Roles, please see our **[Role Permissio
 
 ### Global Roles
 
-Users with **Global Roles** can view and interact with any Data Type (Product Types, Products, Engagements, Tests and Findings) in DefectDojo depending on their assigned Role.
+Users with **Global Roles** can view and interact with any Data Type (Organizations, Assets, Engagements, Tests and Findings) in DefectDojo depending on their assigned Role.
 
 ### Group Memberships
 
-User Groups can be added as Members of a Product or Product Type. Users who are part of the Group will inherit access to all associated Products or Product Types, and will inherit the Role assigned to the Group.
+User Groups can be added as Members of an Asset or Organization. Users who are part of the Group will inherit access to all associated Assets or Organizations, and will inherit the Role assigned to the Group.
 
 #### Users with multiple roles
 
-* If a User is assigned as a member of a Product, they are not granted any associated Product Type permissions by default.
+* If a User is assigned as a member of an Asset, they are not granted any associated Organization permissions by default.
 
-* If a User ends up with more than one role on the same Product or Product Type (for example one assigned directly and another inherited from a Group), they receive the **combined** permissions of every role they hold there.
+* If a User ends up with more than one role on the same Asset or Organization (for example one assigned directly and another inherited from a Group), they receive the **combined** permissions of every role they hold there.
 
-* A User's Product Role always supersedes their 'default' Product Type Role.  
+* A User's Asset Role always supersedes their 'default' Organization Role.  
 ​
-* A User's Product / Product Type Role always supersedes their Global Role within the underlying Product or Product Type. For example, if a User has a Product Type Role of Reader, but is also assigned as an Owner on a Product nested under that Product Type, they will have additional Owner permissions added for that Product only.   
+* A User's Asset / Organization Role always supersedes their Global Role within the underlying Asset or Organization. For example, if a User has an Organization Role of Reader, but is also assigned as an Owner on an Asset nested under that Organization, they will have additional Owner permissions added for that Asset only.   
 ​
-* Roles cannot take away permissions, they can only add additional ones. For example, If a User has a Product Type Role or Global Role of Owner, assigning them a Reader role on a particular Product will not take away their Owner permissions on that Product.  
+* Roles cannot take away permissions, they can only add additional ones. For example, If a User has an Organization Role or Global Role of Owner, assigning them a Reader role on a particular Asset will not take away their Owner permissions on that Asset.  
 ​
 * Superuser status always supersedes any Roles assigned.
 
@@ -82,7 +82,7 @@ By default, the first account created on a new DefectDojo instance will have Sup
 
 ## Configuration Permissions
 
-Configuration Permissions, although similar, are not related to Products or Roles. They must be assigned separately from Roles. **Regular** **users do not have any Configuration Permissions by default, and assigning these configuration permissions should be done carefully.**
+Configuration Permissions, although similar, are not related to Assets or Roles. They must be assigned separately from Roles. **Regular** **users do not have any Configuration Permissions by default, and assigning these configuration permissions should be done carefully.**
 
 Users can have Configuration Permissions assigned in different ways:
 
@@ -94,7 +94,7 @@ Superusers have all Configuration Permissions, so they do not have a Configurati
 
 ### Group Configuration Permissions
 
-If users are part of a Group, they also have Group Configuration Permissions which control their level of access to a Group’s configuration. Group Permissions do not correspond to the Group’s Product or Product Type membership.
+If users are part of a Group, they also have Group Configuration Permissions which control their level of access to a Group’s configuration. Group Permissions do not correspond to the Group’s Asset or Organization membership.
 
 If users create a new Group, they will be given the Owner role of the new Group by default.
 
@@ -102,7 +102,7 @@ For more information on Configuration Permissions, see our **[Configuration Perm
 
 ## Manage default permissions
 
-When a brand new user is created in DefectDojo — whether manually, via SAML / SSO, or via any social-auth provider — they have **no permissions by default**. They will see zero Product Types, zero Products, and zero Engagements when they first log in. They cannot view or interact with any data until a Superuser grants them access (directly, via a Global Role, via a Product / Product Type membership, or by adding them to a Group).
+When a brand new user is created in DefectDojo — whether manually, via SAML / SSO, or via any social-auth provider — they have **no permissions by default**. They will see zero Organizations, zero Assets, and zero Engagements when they first log in. They cannot view or interact with any data until a Superuser grants them access (directly, via a Global Role, via an Asset / Organization membership, or by adding them to a Group).
 
 If you want every newly provisioned user to receive a baseline level of access automatically — for example, "every new SSO user should be a Reader on a particular group" — you can configure a **Default group** on the System Settings page.
 

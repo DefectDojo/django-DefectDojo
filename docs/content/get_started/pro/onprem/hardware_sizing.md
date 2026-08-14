@@ -8,7 +8,7 @@ audience: pro
 
 Sizing a DefectDojo deployment comes down to two questions. How much data are you holding, and how many people are working in it at once. This page gives starting points for both.
 
-Treat what follows as general guidance rather than a specification. The figures lean deliberately conservative, and they assume a deployment doing everyday triage alongside regular scan imports. Your own numbers will move depending on how you use the product, so read the notes under the table before you provision anything.
+Treat what follows as general guidance rather than a specification. The figures lean deliberately conservative, and they assume a deployment doing everyday triage alongside regular scan imports. Your own numbers will move depending on how you use the Asset, so read the notes under the table before you provision anything.
 
 Specs are given as generic vCPU and memory figures so they apply to any cloud provider or on-premise hardware. The application node guidance assumes Kubernetes. If you run Docker Compose on a single host, use the same totals.
 

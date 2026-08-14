@@ -806,7 +806,7 @@ kubectl -n $NAMESPACE exec deploy/dojopro-django -- python3 /verify_fips.py
 
 Behaviour changes to plan for (password hashing moves to PBKDF2, ChaCha20 is
 dropped from the TLS cipher list) are covered in the FIPS 140-3 Mode page of
-the product documentation.
+the Asset documentation.
 
 ---
 

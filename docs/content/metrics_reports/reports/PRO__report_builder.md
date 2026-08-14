@@ -77,7 +77,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Test type**
 - **Risk acceptance**
 
-> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. You may still encounter the legacy wording in some underlying field and filter names.
+> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Assets** and **Organizations** were formerly **Organizations**. You may still encounter the legacy wording in some underlying field and filter names.
 
 The difference is presentation: a **Tabular** block lays the records out as a table of columns, which is ideal for summaries and inventories, while a **Detail** block renders one record at a time in a long-form layout that is best suited to markdown-rich fields like description, impact, mitigation, and references.
 
@@ -130,7 +130,7 @@ Next, build the content Blocks. The Blocks list shows all of your Blocks across 
 
 ![Blocks list](images/pro_report_blocks_list.png)
 
-To create a data-driven Block, choose its type and configure it. The example below is a **Tabular** Block named for open findings: the Block Type is set to Tabular, a header is supplied, the Model is **Finding**, the selected fields are Severity, Title, Product, Age (Days), and SLA Days Remaining, and the records are ordered by Numerical Severity in descending order. Because filters live on the Block, the **Filter Entries** here scope exactly which records this Block will pull wherever it is used.
+To create a data-driven Block, choose its type and configure it. The example below is a **Tabular** Block named for open findings: the Block Type is set to Tabular, a header is supplied, the Model is **Finding**, the selected fields are Severity, Title, Asset, Age (Days), and SLA Days Remaining, and the records are ordered by Numerical Severity in descending order. Because filters live on the Block, the **Filter Entries** here scope exactly which records this Block will pull wherever it is used.
 
 ![Tabular block configuration](images/pro_report_block_new_tabular.png)
 

@@ -251,7 +251,7 @@ Creates or updates the JIRA issue for the Finding.
 | **Skip Findings That Already Have an Issue** | on | Leaves Findings that already have a JIRA issue alone. |
 | **Update an Existing Issue** | off | Shown when the skip above is off. Pushes Findings that already have an issue, so JIRA is updated. |
 
-The summary, description and priority come from the product's JIRA configuration, not from this node. A ticket a rule creates is therefore identical to one created by push all issues.
+The summary, description and priority come from the Asset's JIRA configuration, not from this node. A ticket a rule creates is therefore identical to one created by push all issues.
 
 ### Create a Downstream Ticket
 
@@ -261,7 +261,7 @@ Creates or updates a ticket through a [Downstream Connector](/connectors/downstr
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Issue Trackers** | `auto` | `auto` uses the issue trackers assigned to the engagement or product. `mapping` targets one specific mapping. |
+| **Issue Trackers** | `auto` | `auto` uses the issue trackers assigned to the engagement or Asset. `mapping` targets one specific mapping. |
 | **Issue Tracker Mapping** | none | Shown for `mapping`. Which mapping to push to. |
 | **Operation** | `create` | `create` a ticket, or `update` the one that exists. An update with no existing ticket creates it. |
 | **Skip Findings That Already Have a Ticket** | on | Leaves Findings that already have a ticket in the target mapping alone. |

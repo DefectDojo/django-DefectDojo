@@ -136,5 +136,5 @@ Some Rules Engine 2.0 nodes use system-wide integration configuration rather tha
 
 * **Send a Slack Message** uses the system Slack token, and falls back to the system Slack channel when the node names none.
 * **Send a Microsoft Teams Message** uses the Microsoft Teams webhook from system settings.
-* **Create a JIRA Issue** uses the product's JIRA configuration for the summary, description and priority.
+* **Create a JIRA Issue** uses the Asset's JIRA configuration for the summary, description and priority.
 * **Raise an In-App Alert** respects each recipient's own **Rules Engine Match** notification setting.

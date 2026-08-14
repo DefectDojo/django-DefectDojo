@@ -175,13 +175,13 @@ Engagements can be linked to a connected Jira Space, allowing Findings within th
 
 ### Engagement Epic Mapping
 
-When **Enable Engagement Epic Mapping** is checked in a Product’s Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo’s Engagement → Findings hierarchy in Jira’s Epic → Issue structure.
+When **Enable Engagement Epic Mapping** is checked in an Asset’s Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo’s Engagement → Findings hierarchy in Jira’s Epic → Issue structure.
 
 For more information on this setting, see **[Enable Engagement Epic Mapping](/connectors/downstream/pro__jira_guide/#enable-engagement-epic-mapping)**.
 
 ### Engagement-Level Jira Settings
 
-By default, Engagements inherit their Jira settings from their parent Asset (Product). However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
+By default, Engagements inherit their Jira settings from their parent Asset. However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
 
 - **Project Key** — route Findings to a different Jira Space
 - **Issue Template** — use a different template for Issues created from this Engagement

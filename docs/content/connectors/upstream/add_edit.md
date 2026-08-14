@@ -28,7 +28,7 @@ You can also edit an existing Connector under the **Configured Connectors** head
 ​
 6. Schedule the Connector's automatic discovery and sync using the **Discovery Configuration** and **Synchronization Configuration** schedules. These can be changed later.  
 ​
-7. Select whether you wish to **Enable Auto\-Mapping**. Enable Auto\-Mapping will create a new Product in DefectDojo to store the data from this connector. Auto\-Mapping can be turned on or off at any time.  
+7. Select whether you wish to **Enable Auto\-Mapping**. Enable Auto\-Mapping will create a new Asset in DefectDojo to store the data from this connector. Auto\-Mapping can be turned on or off at any time.  
 ​
 8. Click **Submit.**
 

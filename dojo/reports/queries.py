@@ -43,6 +43,7 @@ def prefetch_related_endpoints_for_report(endpoints: QuerySet, product=None, use
                     to_attr="_active_annotated_findings",
                 ),
             ),
+            user=user,
         )
     # TODO: Delete this after the move to Locations
     findings_qs = Finding.objects.filter(

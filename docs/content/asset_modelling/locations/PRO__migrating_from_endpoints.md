@@ -16,7 +16,7 @@ For every existing Endpoint, migration will:
 1. **Creates a URL Location** (or re-uses an existing one) using the Endpoint's `protocol`, `userinfo`, `host`, `port`, `path`, `query`, and `fragment` fields. The new URL is automatically attached to a parent `Location` object.
 2. **Carries over tags.** Every tag on the Endpoint is added to the Location's tag set.
 3. **Carries over metadata.** Each `DojoMeta` row attached to the Endpoint is re-pointed at the new Location.
-4. **Creates a `LocationProductReference`** so the URL appears under the correct Asset (Product).
+4. **Creates a `LocationProductReference`** so the URL appears under the correct Asset.
 5. **Creates a `LocationFindingReference` for every `Endpoint_Status`**:
 
    | Endpoint_Status flag | Resulting Location status |
@@ -41,7 +41,7 @@ Once Locations is enabled, the legacy Endpoint API enters a **read-compatibility
 
 ### What still works
 
-- `GET /api/v2/endpoints/` — Returns rows that *look like* Endpoints but are actually projected from Location Product Reference rows joined to URL Locations. The familiar fields (`protocol`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present.
+- `GET /api/v2/endpoints/` — Returns rows that *look like* Endpoints but are actually projected from `LocationProductReference` rows joined to URL Locations. The familiar fields (`protocol`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present.
 - `GET /api/v2/endpoints/{id}/` — Single-Endpoint retrieval works the same way. The `id` is the original Endpoint ID and is preserved through the migration via the Asset Reference mapping.
 - `GET /api/v2/endpoint_status/` and `GET /api/v2/endpoint_status/{id}/` — Returns rows projected from `LocationFindingReference`. The legacy `mitigated`, `false_positive`, `out_of_scope`, and `risk_accepted` boolean fields are reconstructed.
 - Filtering by `protocol`, `host`, `port`, `path`, `query`, `fragment`, `product`, and `tag(s)` continues to work.
