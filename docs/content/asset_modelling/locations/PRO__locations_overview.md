@@ -40,12 +40,12 @@ A **subtype** (URL or Dependency) holds the structured fields specific to that k
 
 ### References
 
-Locations are not directly attached to Products or Findings. Instead, two **Reference** objects link them:
+Locations are not directly attached to Assets or Findings. Instead, two **Reference** objects link them:
 
 - **Asset References** — relationships the Location has to Assets (e.g. `libFoo` is *owned by* Asset 6, *used by* Asset 9). Each reference carries a status (`Active` or `Mitigated`) and an optional **relationship** ("Used By" or "Owned By").
 - **Finding References** — relationships the Location has to Findings. Each reference carries a richer status (`Active`, `Mitigated`, `False Positive`, `Risk Accepted`, `Out of Scope`) plus the auditor and audit time.
 
-This separation is what allows a library to exist on a Product *without* needing a Finding — a missing capability in the old Components model.
+This separation is what allows a library to exist on an Asset *without* needing a Finding — a missing capability in the old Components model.
 
 ### Auto-Association at Import Time
 

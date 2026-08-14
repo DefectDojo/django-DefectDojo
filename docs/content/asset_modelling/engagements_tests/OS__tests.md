@@ -8,7 +8,7 @@ Organizations → Assets → Engagements → **TESTS** → Findings
 
 ## Overview
 
-A Test is a container for one or more scan executions, which are used to discover flaws in a Product. Tests are the final, most granular component of DefectDojo’s product hierarchy, serving as the container for the Findings that result from an execution of a security tool or manual assessment while also adding the context in which any such Findings were found (i.e., which tool reported it, when that tool was last run, etc.).
+A Test is a container for one or more scan executions, which are used to discover flaws in an Asset. Tests are the final, most granular component of DefectDojo’s Asset hierarchy, serving as the container for the Findings that result from an execution of a security tool or manual assessment while also adding the context in which any such Findings were found (i.e., which tool reported it, when that tool was last run, etc.).
 
 Examples of Tests include: 
 - Static Application Security Testing
@@ -73,11 +73,11 @@ This history provides traceability across multiple scan executions within the sa
 
 ### Permissions
 
-Multiple Tests can be stored within a single Engagement, and Engagements are stored within Products. As such, access to a Product automatically grants access to all Tests (and Engagements) within that Product. Tests do not have independent access control lists.
+Multiple Tests can be stored within a single Engagement, and Engagements are stored within Assets. As such, access to an Asset automatically grants access to all Tests (and Engagements) within that Asset. Tests do not have independent access control lists.
 
 ### Accessing Tests 
 
-While Tests exist as an independent object in DefectDojo OS, they do not have a specific section dedicated to them within the UI. As such, each Test is primarily accessible through the Product and/or Engagement that contains it.
+While Tests exist as an independent object in DefectDojo OS, they do not have a specific section dedicated to them within the UI. As such, each Test is primarily accessible through the Asset and/or Engagement that contains it.
 
 ### Test View 
 
@@ -114,12 +114,12 @@ Tests can be automatically created when scan data is imported directly into an E
 
 There are several ways to create a Test in the OS version:
 
-- Select a Product and click “Import Scan Results” from the Findings menu in the navigation bar 
+- Select an Asset and click “Import Scan Results” from the Findings menu in the navigation bar 
     - This will create an ad hoc Engagement to contain the Test
 
 ![image](images/tests_ss5.png)
 
-- Select an Engagement within a Product, click the dropdown menu in the Tests subsection, and click either “Add Tests” or  “Import Scan Results”
+- Select an Engagement within an Asset, click the dropdown menu in the Tests subsection, and click either “Add Tests” or  “Import Scan Results”
     - This will create the ensuing Test directly within the chosen Engagement
 
 ![image](images/tests_ss6.png)

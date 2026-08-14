@@ -38,7 +38,7 @@ The same library can be `owned_by` one Asset and `used_by` several others, which
 
 ## Uploading an SBOM
 
-To populate Dependencies in bulk, upload an SBOM file against a Product. The endpoint is:
+To populate Dependencies in bulk, upload an SBOM file against an Asset. The endpoint is:
 
 ```
 POST /api/v2/sbom-import/
@@ -46,13 +46,13 @@ POST /api/v2/sbom-import/
 
 | Field | Description |
 | --- | --- |
-| `product` | The target Product (Asset) ID |
+| `product` | The target Asset ID |
 | `file` | The SBOM file |
 | `scan_type` | The SBOM format — see supported formats below |
-| `replace_dependencies` *(optional)* | If `true`, stale Product associations not backed by an existing Finding reference are removed. Default: `false` (cumulative) |
+| `replace_dependencies` *(optional)* | If `true`, stale Asset associations not backed by an existing Finding reference are removed. Default: `false` (cumulative) |
 | `version` *(optional)* | The Asset version this SBOM describes, e.g. `5.2.0`. Requires Asset Versions — see [below](#asset-versions-and-bom-snapshots) |
 
-The importer parses the file, extracts `Dependency` records, deduplicates them against existing Locations (creating new ones as needed), and creates Asset References linking each Dependency to the Product. The Pro UI exposes the same upload flow — see the **Upload SBOM** action on a Product's Locations tab.
+The importer parses the file, extracts `Dependency` records, deduplicates them against existing Locations (creating new ones as needed), and creates Asset References linking each Dependency to the Asset. The Pro UI exposes the same upload flow — see the **Upload SBOM** action on an Asset's Locations tab.
 
 ### Supported Formats
 
@@ -67,7 +67,7 @@ SWID Tag format is not yet supported.
 
 By default, repeated uploads are **additive**: dependencies that already exist on the Asset are kept, new ones are added, and nothing is removed. This matches the typical workflow of incremental SBOM updates.
 
-Set `replace_dependencies=true` to prune. When replace mode is on, after a successful import the importer removes Product associations that were not present in the new SBOM **and** are not currently referenced by an active Finding. References tied to active Findings are preserved even in replace mode, so you do not lose vulnerability context just because a new SBOM omits a package.
+Set `replace_dependencies=true` to prune. When replace mode is on, after a successful import the importer removes Asset associations that were not present in the new SBOM **and** are not currently referenced by an active Finding. References tied to active Findings are preserved even in replace mode, so you do not lose vulnerability context just because a new SBOM omits a package.
 
 ## Asset Versions and BOM Snapshots
 
@@ -112,7 +112,7 @@ When a parser ingests a vulnerability tied to a library — for example, an SCA 
 
 1. Looks up an existing Dependency Location by pURL, or creates a new one.
 2. Creates a `LocationFindingReference` linking the Finding to the Dependency with status **Active**.
-3. Creates a `LocationProductReference` so the Dependency also appears on the parent Product, if it isn't already.
+3. Creates a `LocationProductReference` so the Dependency also appears on the parent Asset, if it isn't already.
 
 Because Findings and SBOM uploads share the same underlying Dependency objects, a Finding ingested *before* an SBOM upload will be retroactively visible in the SBOM view, and vice versa.
 
@@ -125,7 +125,7 @@ Because Findings and SBOM uploads share the same underlying Dependency objects, 
 | Create a Dependency manually | `POST /api/v2/dependencies/` |
 | List Dependency Locations | `GET /api/v2/location/?location_type=dependency` |
 | Link a Dependency to a Finding | `POST /api/v2/location_findings/` |
-| Link a Dependency to a Product (with `owned_by` / `used_by`) | `POST /api/v2/location_products/` |
+| Link a Dependency to an Asset (with `owned_by` / `used_by`) | `POST /api/v2/location_products/` |
 | List or create Asset versions | `GET` / `POST /api/v2/asset_versions/` |
 | Record a `found_in` / `fixed_in` claim by hand | `POST /api/v2/finding_version_affects/` |
 
@@ -138,7 +138,7 @@ The two version endpoints follow the same rule as the rest of the Asset surface:
 When Locations is enabled, the navigation exposes:
 
 - **Locations / Dependencies** — Global list of every Dependency across the instance, with pURL filters.
-- **Locations on a Product/Asset** — Per-Asset view that shows both URLs and Dependencies, with the **Upload SBOM** action surfaced on the Dependencies tab.
+- **Locations on an Asset/Asset** — Per-Asset view that shows both URLs and Dependencies, with the **Upload SBOM** action surfaced on the Dependencies tab.
 - **New Dependency** — Form to create a single library by entering its pURL components manually.
 - **Findings detail** — A Finding that touches a library shows its Dependency Locations alongside any URL Locations, so you can see *"this CVE affects `log4j-core@2.14.1` on Asset 6 and Asset 9"* in one place.
 

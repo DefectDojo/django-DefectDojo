@@ -7,7 +7,7 @@ toc_hide: true
 set of checks across three categories — Security, Reliability and Efficiency. It runs against manifests
 with `--audit-path`, so it needs no cluster access, and it also audits a live cluster.
 
-This is the open-source Polaris CLI, not the hosted Fairwinds Insights product.
+This is the open-source Polaris CLI, not the hosted Fairwinds Insights Asset.
 
 ### Only failing checks become findings
 

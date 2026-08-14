@@ -258,7 +258,7 @@ When automated fixes are enabled, findings that meet your criteria are staged as
 - **Exclude findings tagged:** skip findings carrying the tags you list (e.g. `no-fix`).
 - **Automatically remediate candidates:** when enabled, a background check (about every 5 minutes) opens fix pull requests for this repo's staged candidates without waiting for approval, until your fix quota is reached. Leave off to review and approve each candidate yourself.
 
-Under **Advanced options** you can link the repository to an existing product/asset or create a new one, set the organization, and set a minimum severity below which findings are neither reported nor used in the merge gate.
+Under **Advanced options** you can link the repository to an existing Asset/asset or create a new one, set the organization, and set a minimum severity below which findings are neither reported nor used in the merge gate.
 
 ## Onboard
 

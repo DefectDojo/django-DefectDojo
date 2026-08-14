@@ -8,7 +8,7 @@ weight: 1
 
 ## Overview
 
-**Organizations** sit at the very top of DefectDojo’s product hierarchy. Organizations are distinct from the descending objects in the hierarchy—Assets, Engagements, Tests, and Findings—because they are not technical scan targets, but rather serve primarily as organizational abstractions that compartmentalize your security efforts according to: 
+**Organizations** sit at the very top of DefectDojo’s Asset hierarchy. Organizations are distinct from the descending objects in the hierarchy—Assets, Engagements, Tests, and Findings—because they are not technical scan targets, but rather serve primarily as organizational abstractions that compartmentalize your security efforts according to: 
 - Business domain
 - Development team
 - Security team
@@ -41,7 +41,7 @@ Below are some example structures to inform how you designate your objects as ei
     - Asset: Payments API - Staging
     - Asset: Billing Worker
 
-- **Organization**: Software Product A
+- **Organization**: Software Asset A
     - Asset: Web Portal
     - Asset: Mobile Backend
 

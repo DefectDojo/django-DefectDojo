@@ -5,7 +5,7 @@ weight: 1
 
 Below is a simple glossary to help understand DefectDojo's various capabilities, along with an indication of whether each defined feature is present/applicable in the Pro version of DefectDojo, the OS version, or both. 
 
-## Product Hierarchy (Both) 
+## Asset Hierarchy (Both) 
 The structural model used to organize security data within DefectDojo, consisting of Organizations → Assets → Engagements → Tests → Findings.
 ## Organization (Both)
 A top-level hierarchical object that serves as the parent object of Assets in DefectDojo Pro. It provides a shared context for governance, access control, and reporting across all child Assets.
@@ -22,7 +22,7 @@ An optional sub-object used to attribute Findings to a specific component or int
 ## Components (Both)
 A third-party library, software module, or external dependency that is tracked in DefectDojo Pro. Imported Components are derived from scan data and associated with Findings. In the Pro UI, the Component Table aggregates Active, Duplicate, and Total Finding counts per Component and remains populated even when all associated Findings are Mitigated.
 ## Finding (Both)
-The most granular vulnerability object in DefectDojo's Product Hierarchy that represents a discrete security issue.
+The most granular vulnerability object in DefectDojo's Asset Hierarchy that represents a discrete security issue.
 ### Finding Status (Both)
 The current lifecycle state of a Finding (e.g., Active, Verified, Inactive/Mitigated, Under Review, Risk Accepted, False Positive, Out Of Scope). Finding Status determines inclusion in metrics and dashboards.
 ### Finding Priority/Risk (Pro) 
