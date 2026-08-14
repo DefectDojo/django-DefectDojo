@@ -174,28 +174,28 @@ Because Findings inherit risk, priority, and ownership from their parent Asset, 
 
 Importantly, Assets are also the primary determining factor in a Finding’s SLA characteristics. Therefore, the SLA of a Findings depends on the SLA configuration of its parent Asset. More information about SLA configurations can be found [here](/asset_modelling/pro_hierarchy/priority_sla/#working-with-slas).
 
-## Asset Kinds
+## Asset Types
 
-An Asset can declare what kind of thing it is: a repository, a service, a host, a domain, a
-container image, a package, a cloud account, a device, or a branch. The kind is optional —
+An Asset can declare what sort of thing it is: a repository, a service, a host, a domain, a
+container image, a package, a cloud account, a device, or a branch. The type is optional —
 an Asset without one behaves exactly as it always has — and it is descriptive rather than
 functional: it does not change permissions, deduplication, SLAs, or reporting scope. What it
 does is make a long Asset list readable, by giving each Asset an icon and a label that says
 what you are looking at.
 
-The list of kinds is data, not a fixed set. The kinds DefectDojo ships are marked as system
-kinds and cannot be deleted, but their wording and icons can be changed, and you can add your
-own kinds for anything your inventory contains that the shipped list does not cover.
+The list of types is data, not a fixed set. The types DefectDojo ships are marked as system
+types and cannot be deleted, but their wording and icons can be changed, and you can add your
+own types for anything your inventory contains that the shipped list does not cover.
 
-Set an Asset's kind with the **Kind** field on the Asset's add and edit forms; leave it empty to
-leave the Asset unclassified. Once set, the kind appears as a badge with its icon beside the
+Set an Asset's type with the **Type** field on the Asset's add and edit forms; leave it empty to
+leave the Asset unclassified. Once set, the type appears as a badge with its icon beside the
 Asset's name at the top of the Asset page, and as an icon in front of each node's name in the
 **Asset Hierarchy** view — where it tells you at a glance whether you are looking at a
 repository, the service built from it, or the host it runs on. The hierarchy view's field picker
-(the eye control, top left) can also show the kind's label under each node's name.
+(the eye control, top left) can also show the type's label under each node's name.
 
-Kinds are available through the API at `/api/v2/asset_kinds/` (read-only) and as the `kind`
-field on `/api/v2/assets/` and `/api/v2/products/`.
+Asset types are available through the API at `/api/v2/asset_types/` (read-only) and as the
+`asset_type` field on `/api/v2/assets/` and `/api/v2/products/`.
 
 ## Asset Identity: Aliases
 
@@ -246,7 +246,7 @@ again — to stop a Connector claiming an Asset, change its mapping rather than 
 Adding and withdrawing an alias requires edit permission on the Asset.
 
 Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created, and the Asset
-Identity card and the **Kind** field appear only when it is on; existing aliases stay readable
+Identity card and the **Type** field appear only when it is on; existing aliases stay readable
 whether it is on or off.
 
 ## Asset Nesting
