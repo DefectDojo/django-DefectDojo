@@ -174,21 +174,28 @@ Because Findings inherit risk, priority, and ownership from their parent Asset, 
 
 Importantly, Assets are also the primary determining factor in a Finding’s SLA characteristics. Therefore, the SLA of a Findings depends on the SLA configuration of its parent Asset. More information about SLA configurations can be found [here](/asset_modelling/pro_hierarchy/priority_sla/#working-with-slas).
 
-## Asset Kinds
+## Asset Types
 
-An Asset can declare what kind of thing it is: a repository, a service, a host, a domain, a
-container image, a package, a cloud account, a device, or a branch. The kind is optional —
+An Asset can declare what sort of thing it is: a repository, a service, a host, a domain, a
+container image, a package, a cloud account, a device, or a branch. The type is optional —
 an Asset without one behaves exactly as it always has — and it is descriptive rather than
 functional: it does not change permissions, deduplication, SLAs, or reporting scope. What it
 does is make a long Asset list readable, by giving each Asset an icon and a label that says
 what you are looking at.
 
-The list of kinds is data, not a fixed set. The kinds DefectDojo ships are marked as system
-kinds and cannot be deleted, but their wording and icons can be changed, and you can add your
-own kinds for anything your inventory contains that the shipped list does not cover.
+The list of types is data, not a fixed set. The types DefectDojo ships are marked as system
+types and cannot be deleted, but their wording and icons can be changed, and you can add your
+own types for anything your inventory contains that the shipped list does not cover.
 
-Kinds are available on the Asset itself and through the API at `/api/v2/asset_kinds/`
-(read-only) and as the `kind` field on `/api/v2/assets/`.
+Set an Asset's type with the **Type** field on the Asset's add and edit forms; leave it empty to
+leave the Asset unclassified. Once set, the type appears as a badge with its icon beside the
+Asset's name at the top of the Asset page, and as an icon in front of each node's name in the
+**Asset Hierarchy** view — where it tells you at a glance whether you are looking at a
+repository, the service built from it, or the host it runs on. The hierarchy view's field picker
+(the eye control, top left) can also show the type's label under each node's name.
+
+Asset types are available through the API at `/api/v2/asset_types/` (read-only) and as the
+`asset_type` field on `/api/v2/assets/` and `/api/v2/products/`.
 
 ## Asset Identity: Aliases
 
@@ -220,8 +227,27 @@ Connector-issued aliases are written by Connector sync rather than by hand, so t
 writes to a `connector:` namespace. Everything else is yours to declare, through
 `/api/v2/asset_aliases/`.
 
-Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created; existing ones
-stay readable whether it is on or off.
+### Managing aliases from the Asset page
+
+The **Asset Identity** card on the Asset page lists every identifier that resolves to that
+Asset, with its type, its namespace, and where it came from — a Connector's name for the ones
+its sync asserted, or *User* for the ones you added.
+
+Use **Add Identity** to declare one. You pick the namespace first, then the type, because only
+some pairings mean anything: a hostname belongs in `dns`, an image digest in `oci`. The
+namespaces offered are the shared, semantic ones; a Connector's own namespace is not offered,
+because those belong to its sync.
+
+Removing an alias **withdraws** it rather than editing it. Withdrawing one you added means
+sources that knew the Asset by that identifier fall back to matching it by name. Withdrawing
+one a Connector asserted only lasts until that Connector's next sync, which will assert it
+again — to stop a Connector claiming an Asset, change its mapping rather than its aliases.
+
+Adding and withdrawing an alias requires edit permission on the Asset.
+
+Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created, and the Asset
+Identity card and the **Type** field appear only when it is on; existing aliases stay readable
+whether it is on or off.
 
 ## Asset Nesting
 
