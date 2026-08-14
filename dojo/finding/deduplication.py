@@ -11,6 +11,7 @@ from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
+from dojo.location.queries import location_prefetch_lookups
 from dojo.models import Endpoint_Status, Finding, System_Settings
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
@@ -36,19 +37,13 @@ def get_finding_models_for_deduplication(finding_ids):
 
     # are_locations_duplicates reads the new finding's locations (V3) or endpoints (V2)
     # once per candidate pair, so the pair loop N+1s unless the right relation is
-    # prefetched here. The V3 prefetch pulls the reference -> Location -> URL subtype
-    # chain that finding_locations() walks. Prefetching the endpoints m2m under V3 is
-    # not an option either: the Endpoint model is deprecated there and its __init__
-    # raises, so hydrating legacy rows would crash the batch. ("endpoints" is the V2
-    # relation — TODO: delete it after the move to Locations.)
-    location_prefetch = "locations__location__url" if settings.V3_FEATURE_LOCATIONS else "endpoints"
-
+    # prefetched here. location_prefetch_lookups() is the single definition of that relation.
     return list(
         Finding.objects.filter(id__in=finding_ids)
         .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
-            location_prefetch,
+            *location_prefetch_lookups(),
             # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
             Prefetch(
                 "original_finding",
@@ -384,13 +379,10 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
             )
         queryset = Finding.objects.filter(scope_q)
 
-    if settings.V3_FEATURE_LOCATIONS:
-        prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
-    else:
-        # TODO: Delete this after the move to Locations
-        # Base prefetches for both modes
-        prefetch_list = ["endpoints", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
+    prefetch_list = [*location_prefetch_lookups(), vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
+    if not settings.V3_FEATURE_LOCATIONS:
+        # TODO: Delete this after the move to Locations
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
         # is done in Python by EndpointManager.get_non_special_endpoint_statuses().
