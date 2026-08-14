@@ -12,6 +12,11 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## August 2026: v3.2
 
+### August 17, 2026: v3.2.200
+
+Enhancements:
+* **(Qualys)** The Qualys connector now accepts a **Host Tags** filter that scopes discovery to hosts carrying the Qualys asset tags you name. The filter is sent to Qualys, so out-of-scope hosts are never downloaded. It applies to the detection download as well as the host listing, so a narrowed scope also shortens each Sync. Tag names are matched exactly, because Qualys supports no wildcards on tag names. Leave the field blank to keep discovering every host.
+
 ### August 10, 2026: v3.2.100
 
 **NOTE: The classic report engine (Report Builder, Report Templates and Generated Reports) will be removed in 3.3.0 on September 8, 2026.**
