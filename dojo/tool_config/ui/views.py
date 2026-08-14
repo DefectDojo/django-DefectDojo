@@ -10,7 +10,7 @@ from dojo.decorators import deprecated_view
 from dojo.tool_config.factory import create_API
 from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_config.ui.forms import ToolConfigForm
-from dojo.utils import add_breadcrumb, dojo_crypto_encrypt, prepare_for_view
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +57,6 @@ def edit_tool_config(request, ttid):
         tform = ToolConfigForm(request.POST, instance=tool_config)
         if tform.is_valid():
             form_copy = tform.save(commit=False)
-            form_copy.password = dojo_crypto_encrypt(tform.cleaned_data["password"])
-            form_copy.ssh = dojo_crypto_encrypt(tform.cleaned_data["ssh"])
             try:
                 api = create_API(form_copy)
                 if api and hasattr(api, "test_connection"):
@@ -80,8 +78,6 @@ def edit_tool_config(request, ttid):
                                      str(e),
                                      extra_tags="alert-danger")
     else:
-        tool_config.password = prepare_for_view(tool_config.password)
-        tool_config.ssh = prepare_for_view(tool_config.ssh)
         tform = ToolConfigForm(instance=tool_config)
     add_breadcrumb(title="Edit Tool Configuration", top_level=False, request=request)
 
