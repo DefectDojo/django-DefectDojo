@@ -15,7 +15,6 @@ from django.views import View
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
-    user_has_permission,
     user_has_permission_or_403,
 )
 from dojo.forms import (
@@ -99,20 +98,7 @@ def delete_engagement_survey(request, eid, sid):
 def answer_questionnaire(request, eid, sid):
     engagement = get_object_or_404(Engagement, id=eid)
     survey = get_object_or_404(Answered_Survey.objects.filter(engagement=engagement), id=sid)
-    system_settings = System_Settings.objects.all()[0]
-
-    if not system_settings.allow_anonymous_survey_repsonse:
-        auth = user_has_permission(
-            request.user,
-            engagement,
-            "edit")
-        if not auth:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "You must be authorized to answer questionnaire. Otherwise, enable anonymous response in system settings.",
-                extra_tags="alert-danger")
-            raise PermissionDenied
+    user_has_permission_or_403(request.user, engagement, "edit")
 
     questions = get_answered_questions(survey=survey, read_only=False)
 
