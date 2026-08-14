@@ -120,7 +120,43 @@ The icons at the top left of the hierarchy diagram allow you to zoom in and out.
 
 Each Asset is rendered as a single node in this diagram, which can be moved around for display purposes.
 
-Assets are connected together using labelled paths, which represent the kind of relationship each note has to one another.  Currently, `parent` is the only label supported.
+Assets are connected together using labelled paths, which represent the kind of relationship each note has to one another.
+
+Three relationship types ship by default:
+
+| Label | Meaning | Rolls up? |
+| --- | --- | --- |
+| `parent` | The tree relationship you build from the Asset Hierarchy screen. An Asset has at most one parent. | Yes |
+| `contains` | Composition — the source Asset is made up of the target. Unlike `parent`, the same Asset can be contained by several others. | Yes |
+| `derived_from` | Lineage — the source Asset was built from the target, as a container image is built from a base image. | **No** |
+
+"Rolls up" is what decides whether a relationship aggregates upward: it controls both the
+indirect counts described below and the **Include child assets** option on metrics. `derived_from`
+deliberately does not roll up. A base image's Findings are not the derived Asset's own exposure,
+and attributing them to every Asset built from it multiplies the same Finding across your whole
+estate.
+
+### Direct and indirect vulnerabilities
+
+Each node shows two counts:
+
+* **direct** — Findings on that Asset itself.
+* **indirect** — Findings on the Assets below it, reached over relationships that roll up.
+
+So an Asset that contains a library shows the library's Findings as indirect, while an Asset
+built from a base image does **not** show the base image's Findings at all.
+
+A Finding reachable by more than one path is counted once. The counts are always calculated from
+the graph as it currently stands — nothing is stored, so re-parenting an Asset changes them
+immediately, and no Finding is ever copied onto another Asset. Assets you do not have permission
+to view contribute nothing, and show no counts at all rather than a zero.
+
+The same split appears under the Findings count on the Asset page. There, **direct** matches the
+total in that page's Open Finding Severity breakdown: both exclude duplicates, false positives
+and out-of-scope Findings.
+
+Use the 👁️ (eyeball icon) at the top left of the diagram to choose which fields each node
+displays; **Vulnerabilities** controls this pair.
 
 ### Exploring Asset nodes
 
@@ -145,4 +181,5 @@ If your diagram displays an Asset with un-selected Parent Assets, you can click 
   * Giving a user access to an entire Organization will still give that user access to all Assets contained within that Organization (as with Product Types).
   * Giving a user access to a single Asset does not give that user access to any related Parent or Child Assets, nor access to the Organization.
 * There is no limit to the number of Parent/Child relationships that can be created. Theoretically, you could represent a repository's entire directory structure with separate Assets if you wished.
-* Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets.
+* Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets. This is enforced per relationship type and in the database itself, so it holds no matter how the edge was created.
+* Indirect counts are calculated on read and never stored. Attributing a Finding to an Asset that did not report it would multiply that Finding across every Asset below it, so DefectDojo shows the number and leaves the Finding where it was found.
