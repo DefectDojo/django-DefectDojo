@@ -290,6 +290,15 @@ env = environ.FileAwareEnv(
     DD_REQUESTS_TIMEOUT=(int, 30),
     # Dictates if v3 functionality will be enabled (on by default as of 3.0.0; set to False to revert to the legacy Endpoint model)
     DD_V3_FEATURE_LOCATIONS=(bool, True),
+    # API v3 (alpha) list pagination: threshold below which `count` is exact; above it the
+    # response reports the Postgres planner's row estimate (flagged count_exact=false). See §4.3.
+    DD_API_V3_COUNT_CAP=(int, 10000),
+    # API v3 (alpha) ?expand= guard: maximum number of expanded relation nodes across all paths. See §4.6.
+    DD_API_V3_EXPAND_BUDGET=(int, 10),
+    # API v3 (alpha) CSV export row cap: the whole filtered set is streamed as CSV; if the filtered
+    # count exceeds this cap the request is a 400 telling the client to narrow the filter (never a
+    # silent truncation). See §4.15.
+    DD_API_V3_EXPORT_MAX_ROWS=(int, 100000),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
     # Shared cache backend (django.core.cache). When set, Django uses RedisCache
@@ -721,6 +730,28 @@ SHOW_A11Y_REQUIRED_FIELDS_NOTICE = env("DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE")
 # V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
 
+# ------------------------------------------------------------------------------
+# API v3 (alpha)
+# ------------------------------------------------------------------------------
+# The API is mounted at /api/v3/ and stays there through beta and GA (no URL migration). It is an
+# alpha: the contract may change at any time. Alpha status is signaled by the OpenAPI version
+# (API_V3_VERSION), the X-API-Status header, and the docs banner -- not by the URL (D1/§4.1). This
+# is the single source of truth for the prefix and version string -- do not hardcode them anywhere.
+API_V3_URL_PREFIX = "api/v3"
+API_V3_VERSION = "3.0.0-alpha"
+API_V3_STATUS = "alpha"
+# Count/expand tuning (§4.3, §4.6); settings-overridable per the plan.
+API_V3_COUNT_CAP = env("DD_API_V3_COUNT_CAP")
+API_V3_EXPAND_BUDGET = env("DD_API_V3_EXPAND_BUDGET")
+# CSV export row cap (§4.15); settings-overridable per the plan.
+API_V3_EXPORT_MAX_ROWS = env("DD_API_V3_EXPORT_MAX_ROWS")
+# List pagination bounds (§4.3).
+API_V3_PAGE_LIMIT_DEFAULT = 25
+API_V3_PAGE_LIMIT_MAX = 250
+# v3 handles its own auth (token + session); exempt it from the UI login-redirect middleware
+# exactly as /api/v2/ is (so anonymous requests get a 401 problem+json, not a /login redirect).
+LOGIN_EXEMPT_URLS += (rf"^{URL_PREFIX}{API_V3_URL_PREFIX}/",)
+
 
 # ------------------------------------------------------------------------------
 # ADMIN
@@ -1125,6 +1156,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Burp Scan": ["title", "severity", "vuln_id_from_tool"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
+    # Same three fields as "Checkmarx CxFlow SAST" below, and for the same reason: the
+    # detailed mode of this parser sets vuln_id_from_tool (queryId), file_path (sinkFilename)
+    # and line (sinkLineNumber) on every finding, so all three are populated and none of them
+    # carries scan text. Without an entry here the scan type fell through to the legacy field
+    # set, which includes `description` -- so a parser change that reworded a finding moved its
+    # hash_code, which is the fragility this list exists to avoid. The algorithm for this scan
+    # type is unique_id_from_tool, so the change moves the stored hash without changing how
+    # candidates are looked up.
+    "Checkmarx Scan detailed": ["vuln_id_from_tool", "file_path", "line"],
     "Checkmarx OSA": ["vulnerability_ids", "component_name"],
     "Cloudsploit Scan": ["title", "description"],
     "Coverity Scan JSON Report": ["title", "cwe", "line", "file_path", "description"],
@@ -1430,6 +1470,17 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "PyRIT Scan": ["title", "vuln_id_from_tool"],
     "debsecan Scan": ["vulnerability_ids", "component_name"],
     "PMapper Scan": ["vuln_id_from_tool", "component_name"],
+    # Deliberately without "severity", unlike most entries here. The Xeol parser derives
+    # severity from datetime.now() against the component's EOL date, so a stored finding
+    # would change identity on its own as the date passes each band boundary. The product
+    # name in the title plus the component name and version identify the finding; the
+    # description is excluded because it embeds every artifact attribute and moves whenever
+    # the parser's wording does.
+    "Xeol Parser": ["title", "component_name", "component_version"],
+    # Checkmarx One already deduplicates on the vendor id; this makes the STORED hash_code
+    # agree with that instead of falling through to the legacy field set, whose "description"
+    # is what every result family assigns to "title" as well.
+    "Checkmarx One Scan": ["unique_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1629,6 +1680,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Prowler V3": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
+    # NOTE: tests 55 and 66 in dojo_testdata.json use this scan type as the
+    # unique_id_from_tool vehicle for test_deduplication_logic and
+    # test_false_positive_history_logic. Those suites vary title/description/cwe and
+    # assert the hash_code MOVES while the unique id still matches, which only holds
+    # while this scan type has no HASHCODE_FIELDS_PER_SCANNER entry. Giving it one
+    # will fail those suites; repoint the fixture first.
     "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Burp Enterprise Scan": DEDUPE_ALGO_HASH_CODE,
     "Burp Suite DAST Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1877,6 +1934,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "PyRIT Scan": DEDUPE_ALGO_HASH_CODE,
     "debsecan Scan": DEDUPE_ALGO_HASH_CODE,
     "PMapper Scan": DEDUPE_ALGO_HASH_CODE,
+    # Without this entry Xeol falls through to DEDUPE_ALGO_LEGACY, whose reimport candidate
+    # key is (title.lower(), severity). Xeol's severity is a function of the wall clock, so
+    # that key rewrites itself as time passes even though the report never changed.
+    "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
