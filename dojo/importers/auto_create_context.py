@@ -261,7 +261,20 @@ class AutoCreateContextManager:
         product_type = self.get_or_create_product_type(product_type_name=product_type_name)
         # Create the product
         with transaction.atomic():
-            product, _created = Product.objects.select_for_update().get_or_create(name=product_name, prod_type=product_type, description=product_name)
+            # Only `name` is a lookup: it is the column that is actually unique. `prod_type`
+            # and `description` were lookup kwargs historically, so a row a concurrent request
+            # had just committed did not match here, making this attempt a CREATE that then
+            # lost to the unique index -- and get_or_create's recovery get() reuses the same
+            # lookup, so it missed that row too and re-raised. Callers reach this line only
+            # when the name looked free, so the symptom was an IntegrityError whenever two
+            # imports raced through that gap.
+            product, _created = Product.objects.select_for_update().get_or_create(
+                name=product_name,
+                defaults={
+                    "prod_type": product_type,
+                    "description": product_name,
+                },
+            )
 
         return product
 
