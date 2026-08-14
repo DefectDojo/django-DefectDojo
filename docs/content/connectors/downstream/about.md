@@ -38,7 +38,7 @@ A Downstream Connector is configured with three key components:
 
 - **Integration Instance**: This is the primary connection method that DefectDojo will use with a third-party system.  The Instance will include details such as a label, location and credentials to connect with, along with any other information that may be required by the vendor.
 - **Issue Tracker Mapping**: This is where mapping information is stored - defining the details required to connect to a given "project" within the vendor.  These details include the name or ID of the "project", and mappings from DefectDojo Finding severity and status to the corresponding field in the vendor "ticket".  You may have multiple mappings configured if you are trying to push Findings to multiple "project" locations.
-- **Issue Tracker Assignment**: This is where DefectDojo Products and Engagements are assigned to a given Issue Tracker Mapping, with per-Product/Engagement options to to define how a Finding will be pushed to a given vendor system.
+- **Issue Tracker Assignment**: This is where DefectDojo Assets and Engagements are assigned to a given Issue Tracker Mapping, with per-Asset/Engagement options to to define how a Finding will be pushed to a given vendor system.
 
 These components are hierarchical: Each **Instance** has one or more **Mappings**, which then have one or more **Tracker Assignments**.
 
@@ -48,16 +48,16 @@ These components are hierarchical: Each **Instance** has one or more **Mappings*
 
 Once these components are configured, Findings and Finding Groups can be sent to a given Issue Tracker in two ways; manually, or automatically.
 
-- **Manually**: Findings and Finding Groups contained in a Product/Engagement with an assigned **Issue Tracker Mapping** will have an option to "Push to Integrator".  This will then create an Issue in the Issue Tracker with the corresponding Finding/Finding Group information.  Push to Integrator can also be used to update an existing Issue.
+- **Manually**: Findings and Finding Groups contained in an Asset/Engagement with an assigned **Issue Tracker Mapping** will have an option to "Push to Integrator".  This will then create an Issue in the Issue Tracker with the corresponding Finding/Finding Group information.  Push to Integrator can also be used to update an existing Issue.
 
 ### Automatically Push Findings
 
 Findings can also be pushed automatically, with the **Issue Tracker Assignment** dictating how those objects will be pushed.  These are the four options:
 
-- **Only Explicitly Publish Changes to Target**: This option disables any automatic behavior in the assigned Product or Engagement.  The only way to push a Finding or Finding Group will be explicitly, as mentioned above.
-- **Automatically Link New Finding to Target**: When new Findings or Finding Groups are **created** in the assigned Product or Engagement, DefectDojo will automatically push the object to the Issue Tracker.  Once created, these Findings or Findings Groups will not be updated without a manual Push to Integrator action.
-- **Automatically Update Existing Link on Finding Edit**: When Findings or Finding Groups are **updated** in the assigned Product or Engagement, automatically push the object to the Issue Tracker if an existing link has already been created manually.
-- **Automatically Link New and Update Existing Link on Finding Edit**: When Findings or Finding Groups are created **or** updated in the assigned Product or Engagement, automatically push the object to the Issue Tracker.
+- **Only Explicitly Publish Changes to Target**: This option disables any automatic behavior in the assigned Asset or Engagement.  The only way to push a Finding or Finding Group will be explicitly, as mentioned above.
+- **Automatically Link New Finding to Target**: When new Findings or Finding Groups are **created** in the assigned Asset or Engagement, DefectDojo will automatically push the object to the Issue Tracker.  Once created, these Findings or Findings Groups will not be updated without a manual Push to Integrator action.
+- **Automatically Update Existing Link on Finding Edit**: When Findings or Finding Groups are **updated** in the assigned Asset or Engagement, automatically push the object to the Issue Tracker if an existing link has already been created manually.
+- **Automatically Link New and Update Existing Link on Finding Edit**: When Findings or Finding Groups are created **or** updated in the assigned Asset or Engagement, automatically push the object to the Issue Tracker.
 
 #### Push Filters
 
@@ -68,9 +68,9 @@ Each Issue Tracker Assignment can optionally narrow which Findings are pushed **
 
 These filters apply to automatic **creation** only. Updates to a Finding that already has a linked ticket are always sent, so status changes (including closures) continue to propagate. A manual **Push to Integrator** always ignores the filters. Leaving both at their defaults preserves the original behavior of pushing every Finding.
 
-#### Assigning multiple Products
+#### Assigning multiple Assets
 
-An Issue Tracker Assignment targets a single Product or Engagement. To cover several assets, create one Assignment per Product (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
+An Issue Tracker Assignment targets a single Asset or Engagement. To cover several assets, create one Assignment per Asset (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
 
 ## Issue Tracker Ticket Representation
 

@@ -12,6 +12,8 @@ each endpoint is available within each DefectDojo installation at
 [`/api/v2/oa3/swagger-ui`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/) and can be accessed by choosing the API v2
 Docs link on the user drop down menu in the header.
 
+> **Naming:** The UI labels these objects **Assets** and **Organizations**. The API v2 wire surface keeps the original names — an Asset is `product` and an Organization is `product_type`. Endpoint paths, field names and event names are unchanged.
+
 ![image](images/api_v2_1.png)
 
 The documentation is generated using [drf-spectacular](https://drf-spectacular.readthedocs.io/) at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/), and is
@@ -189,7 +191,7 @@ Some of the api wrappers contain quite a bit of logic to ease scanning and impor
 ## Import
 Importing via the API is performed via the [import-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
 
-As described in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
+As described in the [Asset Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside an Asset, inside an Organization.
 
 An import can be performed by specifying the names of these entities in the API request:
 
@@ -208,7 +210,7 @@ An import can be performed by specifying the names of these entities in the API 
 }
 ```
 
-When `auto_create_context` is `True`, the product, engagement, and environment will be created if needed. Make sure your user has sufficient [permissions](/admin/user_management/about_perms_and_roles/) to do this.
+When `auto_create_context` is `True`, the Asset, engagement, and environment will be created if needed. Make sure your user has sufficient [permissions](/admin/user_management/about_perms_and_roles/) to do this.
 
 A classic way of importing a scan is by specifying the ID of the engagement instead:
 
@@ -244,13 +246,13 @@ A reimport can be performed by specifying the names of these entities in the API
 }
 ```
 
-When `auto_create_context` is `True`, the Product Type, Product and Engagement will be created if they do not already exist. Make sure your user has sufficient [permissions](/admin/user_management/about_perms_and_roles/) to create a Product/Product Type.
+When `auto_create_context` is `True`, the Organization, Asset and Engagement will be created if they do not already exist. Make sure your user has sufficient [permissions](/admin/user_management/about_perms_and_roles/) to create an Asset/Organization.
 
 When `do_not_reactivate` is `True`, the importing/reimporting will ignore uploaded active findings and not reactivate previously closed findings, while still creating new findings if there are new ones. You will get a note on the finding to explain that it was not reactivated for that reason.
 
 A reimport will automatically select the latest test inside the provided engagement that satisifes the provided `scan_type` and (optionally) provided `test_title`.
 
-If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Product / Engagement.
+If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Asset / Engagement.
 
 A classic way of reimporting a scan is by specifying the ID of the test instead:
 
@@ -273,10 +275,10 @@ A report is generated with a `POST` request to a `generate_report/` action. The 
 | Endpoint | Scope |
 |---|---|
 | `POST /api/v2/findings/generate_report/` | Every finding you have permission to view |
-| `POST /api/v2/products/{id}/generate_report/` | One product |
+| `POST /api/v2/products/{id}/generate_report/` | One Asset |
 | `POST /api/v2/engagements/{id}/generate_report/` | One engagement |
 | `POST /api/v2/tests/{id}/generate_report/` | One test |
-| `POST /api/v2/product_types/{id}/generate_report/` | One product type |
+| `POST /api/v2/product_types/{id}/generate_report/` | One Organization |
 | `POST /api/v2/endpoints/{id}/generate_report/` | One endpoint |
 
 The Pro object aliases expose the same action: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/`, and `/api/v2/location/{id}/generate_report/`.
@@ -323,7 +325,7 @@ CSV and Excel are returned as file attachments with a `Content-Disposition` head
 
 * The `include_*` options affect the **JSON** and **HTML** reports only. The **CSV** and **Excel** exports always contain the finding rows.
 * Report generation requires **view** permission on the objects involved, and a report only ever contains findings you are authorized to see.
-* **Standard query\-parameter filters are not applied to this action.** Unlike `GET /api/v2/findings/`, the `generate_report/` action does not apply the finding filters, so a request such as `POST /api/v2/findings/generate_report/?severity=High` still reports on every finding you can view. To narrow a report, generate it from a specific product, engagement, or test instead.
+* **Standard query\-parameter filters are not applied to this action.** Unlike `GET /api/v2/findings/`, the `generate_report/` action does not apply the finding filters, so a request such as `POST /api/v2/findings/generate_report/?severity=High` still reports on every finding you can view. To narrow a report, generate it from a specific Asset, engagement, or test instead.
 
 ## Asynchronous Deletion Behavior
 
@@ -349,7 +351,7 @@ For large result sets, use pagination with a page size of 50-250 and add short d
 When importing scan results at scale (e.g., SBOM pipelines with thousands of components), consider the following:
 
 - **Use `background_import=true`** for large payloads. Synchronous imports tie up a uwsgi worker for the duration of the import, which can degrade performance for all users.
-- **Target payload sizes under 1 MB per import** where possible. Split large SBOMs into smaller files per product or component group.
+- **Target payload sizes under 1 MB per import** where possible. Split large SBOMs into smaller files per Asset or component group.
 - **Add delays between consecutive API calls** to avoid worker pool exhaustion, which causes HTTP 502 errors.
 - **Use Reimport** (`/api/v2/reimport-scan/`) for recurring scans to update existing findings rather than creating duplicates.
 

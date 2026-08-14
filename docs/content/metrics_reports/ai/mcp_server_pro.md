@@ -7,9 +7,12 @@ weight: 23
 aliases:
   - /en/ai/mcp_server_pro
 ---
+
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: AI features are a DefectDojo Pro-only feature.</span>
 
 The DefectDojo Model Context Protocol (MCP) Server enables Large Language Models (LLMs) to intelligently interact with DefectDojo's vulnerability management data. Unlike traditional API integrations that simply transfer data, the MCP server provides structured context and semantic meaning that enables AI assistants to perform sophisticated security analysis and generate actionable insights.
+
+> **Naming:** The UI labels these objects **Assets** and **Organizations**. The MCP tool names keep the original names — `get_products` returns Assets and `get_product_types` returns Organizations.
 
 - **Structured Context:** MCP provides semantic meaning to DefectDojo data, not just raw data transfer
 - **Pre-Processed Data:** DefectDojo's normalized, deduplicated data eliminates LLM preprocessing burden
@@ -386,18 +389,18 @@ get_findings({
 
 ---
 
-### 📦 Product & Engagement Tools
+### 📦 Asset & Engagement Tools
 
 <details>
 <summary><h4>get_products</h4></summary>
 
-**Description:** Retrieve all products from DefectDojo. Products represent applications, services, or systems being tested.
+**Description:** Retrieve all Assets from DefectDojo. Assets represent applications, services, or systems being tested.
 
 **Parameters:**
 
 **limit** (Optional)
 - **Default:** 100
-- **Usage:** Maximum number of products to return.
+- **Usage:** Maximum number of Assets to return.
 
 **offset** (Optional)
 - **Default:** 0
@@ -408,7 +411,7 @@ get_findings({
 <details>
 <summary><h4>get_product_types</h4></summary>
 
-**Description:** Retrieve product type categories from DefectDojo. Product types help organize products into logical groupings.
+**Description:** Retrieve Organizations from DefectDojo. Organizations help organize Assets into logical groupings.
 
 **Parameters:** Same as `get_products`
 
@@ -417,7 +420,7 @@ get_findings({
 <details>
 <summary><h4>get_engagements</h4></summary>
 
-**Description:** Retrieve security testing engagements. Engagements represent specific testing activities or time periods for a product.
+**Description:** Retrieve security testing engagements. Engagements represent specific testing activities or time periods for an Asset.
 
 **Parameters:** Same as `get_products`
 
@@ -544,7 +547,7 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 
 - Vulnerability trends over past 90 days
 - Development teams with highest critical/high severity findings
-- Risk exposure by product and product type
+- Risk exposure by Asset and Organization
 - Top 5 CWE categories requiring immediate attention
 - Specific remediation actions with cost-benefit analysis
 - 6-month roadmap for improving security posture
@@ -578,10 +581,10 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 1. `get_findings` - Get total active finding counts
 2. `get_findings` - Critical and High severity analysis
 3. `get_findings` - 90-day trending data
-4. `get_products` - Product vulnerability distribution
+4. `get_products` - Asset vulnerability distribution
 5. `get_engagements` - Recent testing activities
 
-**Generated Output:** Executive-level HTML report with vulnerability trends, risk exposure by product, top CWE categories, specific remediation actions with ROI, and 6-month security roadmap.
+**Generated Output:** Executive-level HTML report with vulnerability trends, risk exposure by Asset, top CWE categories, specific remediation actions with ROI, and 6-month security roadmap.
 
 ---
 
@@ -600,7 +603,7 @@ training programs for each team."
 **What happens behind the scenes:**
 
 1. `get_findings` - All active findings
-2. `get_products` - Link findings to products/teams
+2. `get_products` - Link findings to Assets/teams
 3. `get_groups` - Team organization structure
 4. `get_users` - Individual developer accountability
 
@@ -754,7 +757,7 @@ Your AI assistant automatically links findings to organizational context. Simply
 "Which products have the most critical vulnerabilities and who is responsible for fixing them?"
 ```
 
-**Behind the scenes:** AI links findings → tests → engagements → products → users/groups for complete context
+**Behind the scenes:** AI links findings → tests → engagements → Assets → users/groups for complete context
 
 ### Vulnerability Intelligence Analysis
 
@@ -783,7 +786,7 @@ AI calculates time since discovery and flags findings exceeding SLA thresholds.
 "Which products have the highest vulnerability density and represent the greatest risk?"
 ```
 
-AI calculates findings per product and generates risk scores combining severity and volume.
+AI calculates findings per Asset and generates risk scores combining severity and volume.
 
 ### Report Enhancement Standards
 

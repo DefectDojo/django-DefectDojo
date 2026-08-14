@@ -64,7 +64,7 @@ file export.
 
 ### Prerequisites
 - A DefectDojo API key with appropriate permissions
-- An existing Product and Engagement in DefectDojo to receive findings
+- An existing Asset and Engagement in DefectDojo to receive findings
 
 ### Setup Steps
 
@@ -72,7 +72,7 @@ file export.
 2. Go to **Integrations > New Integration**
 3. Under **Issue Tracking Systems**, select **DefectDojo**
 4. Enter a name for the integration
-5. Enter your DefectDojo URL, API key, Product ID, and Engagement ID
+5. Enter your DefectDojo URL, API key, Asset ID, and Engagement ID
 6. Optionally add tags to help filter imported findings in DefectDojo
 7. Select **Save**
 8. Use **Test Credentials** to confirm the connection is working

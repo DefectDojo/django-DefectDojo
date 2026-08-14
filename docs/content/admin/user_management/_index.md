@@ -19,9 +19,9 @@ DefectDojo's user management surface is different in each edition. Pick the sect
 
 ## DefectDojo Open-Source
 
-Open-source DefectDojo uses the **Authorized Users** model: a user is given access to a Product or a Product Type by being added to that record's Authorized Users list. Superusers and staff can see everything.
+Open-source DefectDojo uses the **Authorized Users** model: a user is given access to an Asset or an Organization by being added to that record's Authorized Users list. Superusers and staff can see everything.
 
-* [Authorized Users](./os__authorized_users/) — how to grant access to Products and Product Types
+* [Authorized Users](./os__authorized_users/) — how to grant access to Assets and Organizations
 
 Authentication on open-source DefectDojo is local username/password plus the password-reset flow.
 

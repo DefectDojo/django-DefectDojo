@@ -574,5 +574,5 @@ Some parsers use MD5 to build deduplication keys. That is a non-security use and
 ## Deployment notes
 
 - **TLS termination.** If TLS terminates at a load balancer in front of DefectDojo, that device is responsible for its own FIPS posture and should be documented separately in your system security plan. The `-fips` nginx image covers TLS terminated by DefectDojo itself.
-- **Database and cache.** PostgreSQL and Redis are separate products. In a FIPS environment, use FIPS-compliant instances — for example a managed database offering a FIPS endpoint — and document them as inherited components.
+- **Database and cache.** PostgreSQL and Redis are separate Assets. In a FIPS environment, use FIPS-compliant instances — for example a managed database offering a FIPS endpoint — and document them as inherited components.
 - **Compliance scope.** DefectDojo is not itself a cryptographic module and holds no certificate of its own. What these images provide is validated cryptography performed by modules that do, running in FIPS-approved mode. Your assessor will want the module names and certificate numbers, which appear in the evidence output above.
