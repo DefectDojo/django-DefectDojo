@@ -223,6 +223,56 @@ writes to a `connector:` namespace. Everything else is yours to declare, through
 Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created; existing ones
 stay readable whether it is on or off.
 
+## Asset Versions
+
+Most Assets ship in versions: releases, tags, image builds. A **version** records one of those
+against the Asset, so an SBOM can describe one release and a Finding can say which releases it
+applies to. Versions are metadata about an Asset, not more Assets — a Finding stays a single row
+however many versions mention it. The model, the per-version bill of materials, and how imports
+record claims are covered in
+[Working with SBOMs](/asset_modelling/locations/pro__working_with_sboms/#asset-versions-and-bom-snapshots).
+This section is about reaching them in the UI.
+
+Versions require `DD_V3_ASSET_VERSIONS` to be enabled: set it on a self-hosted deployment, or
+contact support on Cloud. While it is off, none of the surfaces below are offered. An Asset with
+no versions behaves exactly as it does today.
+
+### The Versions table
+
+Versions appear as an optional table on the Asset page. Add it from **Page Layout → Edit Layout
+→ Add Widget → Data Table**, then choose `Versions` as the record set. Each row shows the
+version, its optional release date, how many BOM snapshots it has, and how many Findings are
+recorded as found in or fixed as of it.
+
+**Add Version** declares one by hand, which is useful for a release you want to record claims
+against before any SBOM has been uploaded for it. Name it the way its producer does — `5.2.0`,
+`2026.08`, a build tag — because that is the string imports match against. The release date is
+optional and is a display hint: DefectDojo does not parse or order version names.
+
+Removing a version removes the snapshots and claims bound to it. The Findings themselves are
+untouched; only the per-version claims about them go.
+
+### Uploading an SBOM for a version
+
+**Import SBOM** on the Asset page takes an optional **Version**. Give it one and the upload is
+recorded as that version's bill of materials; leave it blank and the document's own subject
+version is used, or the upload stays on the unversioned stream if it declares none. A version
+named for the first time here is created then and there, so it does not have to be declared
+first.
+
+### Affected versions on a Finding
+
+A Finding carries **claims** about the versions it applies to — *found in* a version, or *fixed
+as of* one. Imports record these on their own; the **Affected Versions** table shows them and
+lets you record one by hand. Add it to the Finding page the same way: **Page Layout → Edit
+Layout → Add Widget → Data Table**, record set `Affected Versions`.
+
+Each row names the version, whether the claim is Found In or Fixed In, and where it came from —
+an import or a person — so it is clear whether a scanner said it or someone recorded it. Use
+**Record Claim** to add one, and the row action to withdraw one. Claims are added and withdrawn
+rather than edited, and nothing is inferred between them: a Finding found in 5.0.0 and fixed in
+5.2.0 says nothing on its own about 5.1.3.
+
 ## Asset Nesting
 
 DefectDojo supports parent-child relationship between two Assets within the same Organization. This can be configured during Asset creation or in the Asset’s settings. 
