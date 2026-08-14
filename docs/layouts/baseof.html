@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="{{ .Site.LanguageCode | default "en" }}" data-bs-theme="{{ site.Params.doks.colorMode | default "auto" }}">
+{{- /* Per-language lang + RTL direction: the theme hardcodes the site-level
+     language code and emits no dir, so ar/he/fa/ur would render LTR.
+     languageDirection comes from config/_default/languages.toml. */ -}}
+<html lang="{{ .Site.Language.LanguageCode | default .Site.Language.Lang }}" dir="{{ .Site.Language.LanguageDirection | default "ltr" }}" data-bs-theme="{{ site.Params.doks.colorMode | default "auto" }}">
   {{ partial "head/head" . }}
   {{ partial "head/body-class" . }}
   <body class="{{ delimit (.Scratch.Get "class") " " }}"{{ if eq site.Params.doks.scrollSpy true }} data-bs-spy="scroll" data-bs-target="#toc" data-bs-root-margin="0px 0px -60%" data-bs-smooth-scroll="true" tabindex="0"{{ end }}>
