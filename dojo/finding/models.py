@@ -469,7 +469,6 @@ class Finding(BaseModel):
 
             models.Index(fields=["cve"]),
             models.Index(fields=["epss_score"]),
-            models.Index(fields=["epss_percentile"]),
             models.Index(fields=["cwe"]),
             models.Index(fields=["out_of_scope"]),
             models.Index(fields=["false_p"]),
@@ -482,12 +481,10 @@ class Finding(BaseModel):
             models.Index(fields=["hash_code"]),
             models.Index(fields=["unique_id_from_tool"]),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
-            models.Index(fields=["line"]),
             models.Index(fields=["component_name"]),
             models.Index(fields=["duplicate"]),
             models.Index(fields=["is_mitigated"]),
             models.Index(fields=["duplicate_finding", "id"]),
-            models.Index(fields=["known_exploited"]),
             models.Index(fields=["ransomware_used"]),
             models.Index(fields=["kev_date"]),
             models.Index(
@@ -513,11 +510,6 @@ class Finding(BaseModel):
                 fields=["severity"],
                 name="idx_finding_open_active_sev",
                 condition=models.Q(active=True, is_mitigated=False),
-            ),
-            models.Index(
-                fields=["severity", "-numerical_severity"],
-                name="idx_finding_sev_open_unver",
-                condition=models.Q(active=True, verified=False),
             ),
             models.Index(
                 fields=["test", "sla_expiration_date", "date"],
