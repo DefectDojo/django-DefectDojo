@@ -635,9 +635,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # V2 is unaffected -- EndpointManager.persist() opens no transaction -- which is
     # why only the V3 reimport constants absorb it (the import path buffers locations,
     # so its persist() still opens the transaction and keeps the +2 in full).
-    EXPECTED_ZAP_IMPORT_V2 = 293
-    EXPECTED_ZAP_IMPORT_V3 = 318
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 85
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 158
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 186
+    # -1 on both reimport-with-new paths, on top of everything above: DefaultReImporter
+    # now queues a matching batch's new findings in _pending_new_findings and persists/
+    # post-processes them together via _drain_pending_new_findings once the batch's
+    # matching loop finishes, instead of saving each one inline as soon as it fails to
+    # match (see process_finding_that_was_not_matched and _drain_pending_new_findings).
+    # Reimport-no-change is unaffected because it creates no new findings to defer.
+    EXPECTED_ZAP_IMPORT_V2 = 294
+    EXPECTED_ZAP_IMPORT_V3 = 319
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 159
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187
