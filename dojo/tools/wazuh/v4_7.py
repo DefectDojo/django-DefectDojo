@@ -1,7 +1,6 @@
 import hashlib
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -74,7 +73,7 @@ class WazuhV4_7:
                     )
 
                     # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if it exists.
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         if agent_name:
                             find.unsaved_locations = [LocationData.url(host=agent_name)]
                         elif agent_ip:

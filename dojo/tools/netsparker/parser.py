@@ -6,6 +6,7 @@ from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -111,7 +112,7 @@ class NetsparkerParser:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
             finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
             # manage endpoint/location
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(url=url)]
             else:
                 # TODO: Delete this after the move to Locations
@@ -120,7 +121,7 @@ class NetsparkerParser:
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.unsaved_req_resp.extend(finding.unsaved_req_resp)
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.extend(finding.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations

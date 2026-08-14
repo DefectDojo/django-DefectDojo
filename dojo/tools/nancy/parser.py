@@ -2,8 +2,8 @@ import json
 
 from cvss.cvss3 import CVSS3
 from cvss.cvss4 import CVSS4
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -95,7 +95,7 @@ class NancyParser:
                                .split(":")[0].split("-")[1])
                         finding.cwe = int(cwe)
 
-                    if settings.V3_FEATURE_LOCATIONS and vuln.get("Coordinates"):
+                    if locations_enabled() and vuln.get("Coordinates"):
                         finding.unsaved_locations.append(
                             LocationData.dependency(purl=vuln["Coordinates"]),
                         )

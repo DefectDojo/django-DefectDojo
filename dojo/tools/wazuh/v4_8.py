@@ -1,5 +1,4 @@
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -61,7 +60,7 @@ class WazuhV4_8:
             # Create endpoint from agent name
             agent_name = item.get("agent").get("name")
             if agent_name is not None:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations = [LocationData.url(host=agent_name)]
                 else:
                     find.unsaved_endpoints = [Endpoint(host=agent_name)]

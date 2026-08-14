@@ -1,9 +1,9 @@
 
-from django.conf import settings
 from django.db.models import Prefetch, QuerySet
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
+from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationFindingReference
 from dojo.location.queries import annotate_location_counts_and_status
 from dojo.location.status import FindingLocationStatus
@@ -26,7 +26,7 @@ def prefetch_related_findings_for_report(findings: QuerySet) -> QuerySet:
 
 
 def prefetch_related_endpoints_for_report(endpoints: QuerySet, product=None, user=None) -> QuerySet:
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Locations are shared across products, so an authorized Location says
         # nothing about who may see the findings hanging off it.
         return annotate_location_counts_and_status(

@@ -66,6 +66,7 @@ from dojo.github.services import (
     update_external_issue_github,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
@@ -1316,7 +1317,7 @@ class Product_Tab:
     @cached_property
     def _active_endpoints(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return Endpoint.objects.filter(
                 product=self.product,
                 status_endpoint__mitigated=False,
@@ -1336,7 +1337,7 @@ class Product_Tab:
     @cached_property
     def endpoint_hosts_count(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return self._active_endpoints.values("host").distinct().count()
         return self._active_endpoints.values("url__host").distinct().count()
 

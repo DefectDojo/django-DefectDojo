@@ -14,6 +14,7 @@ from dojo.finding.deduplication import (
     get_finding_models_for_deduplication,
     hashcode_values_writer,
 )
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Product
 from dojo.utils import (
     calculate_grade,
@@ -92,7 +93,7 @@ class Command(BaseCommand):
             findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             # Prefetch related objects for synchronous deduplication
             findings = findings.select_related(
                 "test", "test__engagement", "test__engagement__product", "test__test_type",

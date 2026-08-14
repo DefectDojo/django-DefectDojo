@@ -41,6 +41,7 @@ from dojo.jira.forms import (  # noqa: F401 backward compat
     get_jira_issue_template_dir_choices,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.utils import validate_locations_to_add
 from dojo.models import (
@@ -342,7 +343,7 @@ class ImportScanForm(forms.Form):
             self.fields["environment"].initial = environment
         if endpoints:
             self.fields["endpoints"].queryset = endpoints
-        elif not settings.V3_FEATURE_LOCATIONS:
+        elif not locations_enabled():
             # TODO: Delete this after the move to Locations
             self.fields["endpoints"].queryset = Endpoint.objects
         if api_scan_configuration:
@@ -372,7 +373,7 @@ class ImportScanForm(forms.Form):
                 msg = f"API scan configuration must be of tool type {tool_type}"
                 raise forms.ValidationError(msg)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
         else:
             # TODO: Delete this after the move to Locations
@@ -471,7 +472,7 @@ class ReImportScanForm(forms.Form):
             self.fields["tags"].initial = test.tags.all()
         if endpoints:
             self.fields["endpoints"].queryset = endpoints
-        elif not settings.V3_FEATURE_LOCATIONS:
+        elif not locations_enabled():
             # TODO: Delete this after the move to Locations
             self.fields["endpoints"].queryset = Endpoint.objects
         if api_scan_configuration:
