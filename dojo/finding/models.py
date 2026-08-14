@@ -937,8 +937,13 @@ class Finding(BaseModel):
                     deduplicationLogger.debug("get_endpoints before the finding was saved")
                     # convert list of unsaved endpoints to the list of their canonical representation
                     endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
-                    # deduplicate (usually done upon saving finding) and sort endpoints
-                    return "".join(dict.fromkeys(endpoint_str_list))
+                    # deduplicate (usually done upon saving finding) and sort endpoints.
+                    # Sorting is what makes this agree with _get_saved_endpoints below: the
+                    # stored hash_code of an imported finding comes from this branch, so
+                    # without it the scanner's emission order would become part of the
+                    # finding's identity and any later recomputation would produce a
+                    # different hash_code for the same finding.
+                    return "".join(sorted(dict.fromkeys(endpoint_str_list)))
                 # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
                 # In this case, before saving the finding, both static_finding and dynamic_finding are True
                 # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
@@ -985,12 +990,24 @@ class Finding(BaseModel):
         def _get_saved_locations(finding) -> str:
             if finding.id is not None:
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                url_locations = finding.locations.filter(location__location_type=URL.get_location_type())
-                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(url_locations.count()))
-                # convert list of locations to the list of their canonical representation
-                locations = sorted({location_ref.location.get_location_value() for location_ref in url_locations.all()})
-                # sort locations strings
-                return "".join(sorted(locations))
+                url_location_type = URL.get_location_type()
+                # Read the relation with .all() and narrow in Python rather than with .filter():
+                # .filter() on a related manager clones the queryset and drops _result_cache, so it
+                # bypasses the prefetch every caller of the hash paths sets up (the batch dedupe
+                # loader, build_candidate_scope_queryset and manage.py dedupe among them all
+                # prefetch this relation). Narrowing here keeps that prefetch effective;
+                # a finding has few locations, so filtering them in Python costs nothing.
+                # deduplicate and sort the canonical representation of every location. The stored
+                # Location.location_value *is* that canonical representation: it is written from
+                # AbstractLocation.get_location_value() when the Location row is created, so this
+                # matches what _get_unsaved_locations computes below.
+                locations = sorted({
+                    location_ref.location.location_value
+                    for location_ref in finding.locations.all()
+                    if location_ref.location.location_type == url_location_type
+                })
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: %d", len(locations))
+                return "".join(locations)
             return ""
 
         return _get_saved_locations(self) or _get_unsaved_locations(self)
