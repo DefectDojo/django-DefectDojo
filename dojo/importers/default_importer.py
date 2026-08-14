@@ -218,116 +218,124 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 continue
             cleaned_findings.append(sanitized)
 
-        for idx, unsaved_finding in enumerate(cleaned_findings):
-            is_final_finding = idx == len(cleaned_findings) - 1
+        for batch_start in range(0, len(cleaned_findings), batch_max_size):
+            batch_end = min(batch_start + batch_max_size, len(cleaned_findings))
+            is_final_batch = batch_end == len(cleaned_findings)
 
-            # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
-            # Finding.mitigated is DateTimeField and it requires timezone
-            if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
-                unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
-            # Set some explicit fields on the finding
-            unsaved_finding.test = self.test
-            unsaved_finding.reporter = self.user
-            unsaved_finding.last_reviewed_by = self.user
-            unsaved_finding.last_reviewed = self.now
-            logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
-            # indicates an override. Otherwise, do not change the value of unsaved_finding.active
-            if self.active is not None:
-                unsaved_finding.active = self.active
-            # indicates an override. Otherwise, do not change the value of verified
-            if self.verified is not None:
-                unsaved_finding.verified = self.verified
-            # scan_date was provided, override value from parser
-            if self.scan_date_override:
-                unsaved_finding.date = self.scan_date.date()
-            if self.service is not None:
-                unsaved_finding.service = self.service
+            # Prepare this batch's findings (scalar overrides, tag merge, hash_code) before
+            # any of them are persisted, so persist_new_findings() can write the whole batch
+            # in one call instead of one row at a time.
+            prepared_findings = []
+            for unsaved_finding in cleaned_findings[batch_start:batch_end]:
+                # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
+                # Finding.mitigated is DateTimeField and it requires timezone
+                if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
+                    unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
+                # Set some explicit fields on the finding
+                unsaved_finding.test = self.test
+                unsaved_finding.reporter = self.user
+                unsaved_finding.last_reviewed_by = self.user
+                unsaved_finding.last_reviewed = self.now
+                logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
+                # indicates an override. Otherwise, do not change the value of unsaved_finding.active
+                if self.active is not None:
+                    unsaved_finding.active = self.active
+                # indicates an override. Otherwise, do not change the value of verified
+                if self.verified is not None:
+                    unsaved_finding.verified = self.verified
+                # scan_date was provided, override value from parser
+                if self.scan_date_override:
+                    unsaved_finding.date = self.scan_date.date()
+                if self.service is not None:
+                    unsaved_finding.service = self.service
 
-            # Parsers shouldn't use the tags field, and use unsaved_tags instead.
-            # Merge any tags set by parser into unsaved_tags
-            tags_from_parser = unsaved_finding.tags if isinstance(unsaved_finding.tags, list) else []
-            unsaved_tags_from_parser = unsaved_finding.unsaved_tags if isinstance(unsaved_finding.unsaved_tags, list) else []
-            merged_tags = unsaved_tags_from_parser + tags_from_parser
-            if merged_tags:
-                unsaved_finding.unsaved_tags = merged_tags
-            unsaved_finding.tags = None
-            finding = self.process_cve(unsaved_finding)
-            # Calculate hash_code before saving based on unsaved_endpoints/unsaved_locations and unsaved_vulnerability_ids
-            finding.set_hash_code(True)
+                # Parsers shouldn't use the tags field, and use unsaved_tags instead.
+                # Merge any tags set by parser into unsaved_tags
+                tags_from_parser = unsaved_finding.tags if isinstance(unsaved_finding.tags, list) else []
+                unsaved_tags_from_parser = unsaved_finding.unsaved_tags if isinstance(unsaved_finding.unsaved_tags, list) else []
+                merged_tags = unsaved_tags_from_parser + tags_from_parser
+                if merged_tags:
+                    unsaved_finding.unsaved_tags = merged_tags
+                unsaved_finding.tags = None
+                finding = self.process_cve(unsaved_finding)
+                # Calculate hash_code before saving based on unsaved_endpoints/unsaved_locations and unsaved_vulnerability_ids
+                finding.set_hash_code(True)
+                prepared_findings.append(finding)
 
             # postprocessing will be done after processing related fields like locations, vulnerability ids, etc.
-            unsaved_finding.save_no_options()
+            saved_findings = self.persist_new_findings(prepared_findings)
 
-            # Determine how the finding should be grouped
-            finding_will_be_grouped = self.process_finding_groups(
-                finding,
-                group_names_to_findings_dict,
-            )
-            # Process any request/response pairs
-            self.process_request_response_pairs(finding)
-            self.process_locations(finding, self.endpoints_to_add)
-            # Parsers must use unsaved_tags to store tags, so we can clean them.
-            # Accumulate for bulk application after the loop (O(unique_tags) instead of O(N·T)).
-            cleaned_tags = clean_tags(finding.unsaved_tags)
-            if isinstance(cleaned_tags, list):
-                findings_with_parser_tags.append((finding, cleaned_tags))
-            elif isinstance(cleaned_tags, str):
-                findings_with_parser_tags.append((finding, [cleaned_tags]))
-            # Process any files
-            self.process_files(finding)
-            # Process vulnerability IDs
-            finding = self.store_vulnerability_ids(finding)
-            # Categorize this finding as a new one
-            new_findings.append(finding)
-            # all data is already saved on the finding, we only need to trigger post processing in batches
-            logger.debug("process_findings: self.push_to_jira=%s, self.findings_groups_enabled=%s, self.group_by=%s",
-                         self.push_to_jira, self.findings_groups_enabled, self.group_by)
-            push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
-            logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
-            batch_finding_ids.append((finding.id, push_to_jira))
-            batch_findings.append(finding)
+            for saved_finding in saved_findings:
+                finding = saved_finding
+                # Determine how the finding should be grouped
+                finding_will_be_grouped = self.process_finding_groups(
+                    finding,
+                    group_names_to_findings_dict,
+                )
+                # Process any request/response pairs
+                self.process_request_response_pairs(finding)
+                self.process_locations(finding, self.endpoints_to_add)
+                # Parsers must use unsaved_tags to store tags, so we can clean them.
+                # Accumulate for bulk application after the loop (O(unique_tags) instead of O(N·T)).
+                cleaned_tags = clean_tags(finding.unsaved_tags)
+                if isinstance(cleaned_tags, list):
+                    findings_with_parser_tags.append((finding, cleaned_tags))
+                elif isinstance(cleaned_tags, str):
+                    findings_with_parser_tags.append((finding, [cleaned_tags]))
+                # Process any files
+                self.process_files(finding)
+                # Process vulnerability IDs
+                finding = self.store_vulnerability_ids(finding)
+                # Categorize this finding as a new one
+                new_findings.append(finding)
+                # all data is already saved on the finding, we only need to trigger post processing in batches
+                logger.debug("process_findings: self.push_to_jira=%s, self.findings_groups_enabled=%s, self.group_by=%s",
+                             self.push_to_jira, self.findings_groups_enabled, self.group_by)
+                push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
+                logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
+                batch_finding_ids.append((finding.id, push_to_jira))
+                batch_findings.append(finding)
 
-            # If batch is full or we're at the end, persist locations/endpoints and dispatch
-            if len(batch_finding_ids) >= batch_max_size or is_final_finding:
-                self.location_handler.persist()
-                self.flush_vulnerability_ids()
-                self.flush_burp_request_response()
-                # Apply parser-supplied tags for this batch before post-processing starts,
-                # so rules/deduplication tasks see the tags already on the findings.
-                bulk_apply_parser_tags(findings_with_parser_tags)
-                findings_with_parser_tags.clear()
-                # Apply import-time tags before post-processing so rules/deduplication see them.
-                self.apply_import_tags_for_batch(batch_findings)
-                # Apply inherited Product tags to this batch's findings (and
-                # their endpoints/locations) BEFORE post_process_findings_batch
-                # dispatches, so rules/dedup see inherited tags on .tags.
-                apply_inherited_tags_for_findings(batch_findings)
-                batch_findings.clear()
-                # Partition the batch by each finding's own push_to_jira flag so one
-                # finding's grouping state is not applied to the whole batch. Uniform
-                # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
-                finding_ids_by_push: dict[bool, list[int]] = {}
-                for finding_id, finding_push_to_jira in batch_finding_ids:
-                    finding_ids_by_push.setdefault(finding_push_to_jira, []).append(finding_id)
-                batch_finding_ids.clear()
-                for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
-                    logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
-                                 push_to_jira_batch, len(finding_ids_batch), is_final_finding)
-                    result = dojo_dispatch_task(
-                        finding_helper.post_process_findings_batch,
-                        finding_ids_batch,
-                        dedupe_option=True,
-                        rules_option=True,
-                        product_grading_option=True,
-                        issue_updater_option=True,
-                        push_to_jira=push_to_jira_batch,
-                        # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
-                        # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
-                        **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
-                        **self.post_processing_dispatch_kwargs(**kwargs),
-                    )
-                    if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
-                        self.record_post_processing_result(result)
+            # Persist locations/endpoints and dispatch post-processing for this batch
+            self.location_handler.persist()
+            self.flush_vulnerability_ids()
+            self.flush_burp_request_response()
+            # Apply parser-supplied tags for this batch before post-processing starts,
+            # so rules/deduplication tasks see the tags already on the findings.
+            bulk_apply_parser_tags(findings_with_parser_tags)
+            findings_with_parser_tags.clear()
+            # Apply import-time tags before post-processing so rules/deduplication see them.
+            self.apply_import_tags_for_batch(batch_findings)
+            # Apply inherited Product tags to this batch's findings (and
+            # their endpoints/locations) BEFORE post_process_findings_batch
+            # dispatches, so rules/dedup see inherited tags on .tags.
+            apply_inherited_tags_for_findings(batch_findings)
+            batch_findings.clear()
+            # Partition the batch by each finding's own push_to_jira flag so one
+            # finding's grouping state is not applied to the whole batch. Uniform
+            # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
+            finding_ids_by_push: dict[bool, list[int]] = {}
+            for finding_id, finding_push_to_jira in batch_finding_ids:
+                finding_ids_by_push.setdefault(finding_push_to_jira, []).append(finding_id)
+            batch_finding_ids.clear()
+            for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
+                logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
+                             push_to_jira_batch, len(finding_ids_batch), is_final_batch)
+                result = dojo_dispatch_task(
+                    finding_helper.post_process_findings_batch,
+                    finding_ids_batch,
+                    dedupe_option=True,
+                    rules_option=True,
+                    product_grading_option=True,
+                    issue_updater_option=True,
+                    push_to_jira=push_to_jira_batch,
+                    # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                    # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                    **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
+                    **self.post_processing_dispatch_kwargs(**kwargs),
+                )
+                if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+                    self.record_post_processing_result(result)
 
             # No chord: tasks are dispatched immediately above per batch
 

@@ -32,7 +32,7 @@ from .base import ApiV3TestCase
 # Two scan types with genuinely different policies (mirrors the v2 test's per-scanner assertions),
 # plus a made-up scan type absent from both settings dicts for the default-fallback case.
 _HASH_CODE_SCAN = "ZAP Scan"                    # -> hash_code + ["title", "cwe", "severity"]
-_UNIQUE_ID_SCAN = "Checkmarx Scan detailed"     # -> unique_id_from_tool + no hashcode fields (None)
+_UNIQUE_ID_SCAN = "SonarQube Scan detailed"     # -> unique_id_from_tool + no hashcode fields (None)
 _DEFAULT_SCAN = "V3 Nonexistent Custom Scan Type"  # -> legacy (fallback) + None
 
 
