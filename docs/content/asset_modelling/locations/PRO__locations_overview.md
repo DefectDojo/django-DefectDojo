@@ -7,7 +7,7 @@ weight: 1
 
 **Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives — whether that's a URL, a software dependency from an **SBOM**, or, in the future, a **cloud resource ID**, **container image**, or **code repository**.
 
-Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Enabling is one-way and takes effect for new imports right away; your existing endpoint history stays as it is until you run the endpoints-to-locations migration to backfill it. If you also use the Classic UI or depend on the `/api/v2` endpoint routes, keep the `DD_V3_FEATURE_LOCATIONS` deployment setting in sync and restart, since those surfaces are fixed when DefectDojo starts.
+Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Enabling is one-way and takes effect for new imports right away; your existing history stays as it is until you run the [migration suite](/asset_modelling/locations/pro__migrating_from_endpoints/) that appears under the flag (endpoint, dependency, and source-code backfills, then an identity rehash). If you also use the Classic UI or depend on the `/api/v2` endpoint routes, keep the `DD_V3_FEATURE_LOCATIONS` deployment setting in sync and restart, since those surfaces are fixed when DefectDojo starts.
 
 ## Why Replace Endpoints?
 
