@@ -69,7 +69,7 @@ to a chart version that enables ddorch — otherwise the ddorch pod fails with
 <a href=/get_started/pro/onprem/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database>Pre-flight: Orchestrator (ddorch) Database</a>.</p></blockquote><blockquote><p><strong>Organization/Asset relabel default.</strong> <code>dojo.V3EnableOrganizationAssetRelabel</code>
 now defaults to <code>null</code> (auto): it is <strong>enabled for new installs</strong> and <strong>left
 off on upgrades</strong>, so the UI relabel (Organization/Asset replacing
-ProductType/Product) never flips on unexpectedly for an existing release. To
+ProductType/Asset) never flips on unexpectedly for an existing release. To
 opt an upgraded release in, set <code>dojo.V3EnableOrganizationAssetRelabel: true</code>
 explicitly; an explicit <code>true</code>/<code>false</code> always wins over the auto default.</p></blockquote><hr><h2 id=chart-source-oci-registry>Chart Source: OCI Registry<a href=#chart-source-oci-registry class=anchor aria-hidden=true>#</a></h2><p>The chart is published to the DefectDojo GCP Artifact Registry as an OCI
 artifact:</p><div class=expressive-code><figure class="frame not-content"><figcaption class=header><span class=title></span></figcaption><pre tabindex=0><code>oci://us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro-helm-v2/dojopro</code></pre></figure></div><p>Each release is tagged with the chart version (for example <code>2.57.2</code>). The

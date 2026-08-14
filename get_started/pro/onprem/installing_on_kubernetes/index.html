@@ -330,7 +330,7 @@ usually what an assessor wants:</p><div class=expressive-code><figure class="fra
 </span></span><span class=line><span class=cl>kubectl -n <span class=nv>$NAMESPACE</span> <span class=nb>exec</span> deploy/dojopro-django -- openssl list -providers
 </span></span><span class=line><span class=cl>kubectl -n <span class=nv>$NAMESPACE</span> <span class=nb>exec</span> deploy/dojopro-django -- python3 /verify_fips.py</span></span></code></pre></div></figure></div><p>Behaviour changes to plan for (password hashing moves to PBKDF2, ChaCha20 is
 dropped from the TLS cipher list) are covered in the FIPS 140-3 Mode page of
-the product documentation.</p><hr><h2 id=pre-flight-validate-templates>Pre-flight: Validate Templates<a href=#pre-flight-validate-templates class=anchor aria-hidden=true>#</a></h2><p>Before installing, run <code>helm template</code> to render and validate all manifests
+the Asset documentation.</p><hr><h2 id=pre-flight-validate-templates>Pre-flight: Validate Templates<a href=#pre-flight-validate-templates class=anchor aria-hidden=true>#</a></h2><p>Before installing, run <code>helm template</code> to render and validate all manifests
 without touching the cluster. This catches values errors, missing required
 fields, and YAML issues before you commit to <code>helm install</code>:</p><div class=expressive-code><figure class="frame is-terminal not-content"><figcaption class=header><span class=title></span></figcaption><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>helm template dojopro <span class=nv>$CHART</span> <span class=se>\
 </span></span></span><span class=line><span class=cl>  -n <span class=nv>$NAMESPACE</span> <span class=se>\
