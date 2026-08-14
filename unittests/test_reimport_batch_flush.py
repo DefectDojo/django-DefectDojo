@@ -124,9 +124,10 @@ class TestReimportFinalBatchFlush(DojoTestCase):
         # Premise: the parity finding matched instead of being created -- the test only
         # exercises the force_continue tail when exactly one new finding exists.
         self.assertEqual(2, Finding.objects.filter(test=self.test).count())
-        self.assertIn(self.existing, reimporter.unchanged_items)
-        self.assertEqual([fresh], new_items)
+        # new_items/unchanged_items are ids, not instances (M1).
+        self.assertIn(self.existing.id, reimporter.unchanged_items)
         self.assertIsNotNone(fresh.pk)
+        self.assertEqual([fresh.pk], new_items)
 
         # The regression: with the boundary check inside the loop, the force_continue on
         # the final iteration skipped it and this batch was never dispatched at all.
