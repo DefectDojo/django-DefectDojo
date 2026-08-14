@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -100,7 +99,7 @@ class CfnNagParser:
             dynamic_finding=False,
             vuln_id_from_tool=violation_id or None,
         )
-        if settings.V3_FEATURE_LOCATIONS and template:
+        if locations_enabled() and template:
             finding.unsaved_locations.append(
                 LocationData.code(file_path=template, line=line),
             )

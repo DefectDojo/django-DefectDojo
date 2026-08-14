@@ -197,6 +197,11 @@ def require_v3_feature_set():
     def decorator(func):
         @wraps(func)
         def _wrapped_view(request, *args, **kwargs):
+            # This request gate stays on settings.V3_FEATURE_LOCATIONS rather than the
+            # runtime dojo.location.feature accessor: it is meant to guard views whose
+            # routes are mounted at boot from dojo/urls.py, so it must stay consistent
+            # with that boot-time wiring. See dojo/location/feature.py and
+            # pro/features/relabel.py:14-28.
             if not getattr(settings, "V3_FEATURE_LOCATIONS", False):
                 msg = "V3_FEATURE_LOCATIONS must be enabled."
                 raise Http404(msg)

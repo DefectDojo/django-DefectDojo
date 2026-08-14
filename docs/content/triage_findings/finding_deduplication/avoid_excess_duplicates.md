@@ -24,11 +24,11 @@ Fortunately, DefectDojo’s Deduplication settings allow you to mass\-delete dup
 
 ### Step 2: Evaluate your Engagements for redundancies
 
-Once you’ve cleaned up your duplicate Findings, it’s a good practice to look at the Product which contained them to see if there’s a clear culprit. You might find that there are Engagements contained within which have a redundant context.
+Once you’ve cleaned up your duplicate Findings, it’s a good practice to look at the Asset which contained them to see if there’s a clear culprit. You might find that there are Engagements contained within which have a redundant context.
 
 #### Duplicate or Reused Engagements
 
-Engagements store one or more Tests for a particular testing context. That context is ultimately up to you to define for yourself, but if you see a few Engagements within your Product which should share the same context, consider combining them into a single engagement.  
+Engagements store one or more Tests for a particular testing context. That context is ultimately up to you to define for yourself, but if you see a few Engagements within your Asset which should share the same context, consider combining them into a single engagement.  
 ​
 ### Questions to ask when defining Engagement context:
 

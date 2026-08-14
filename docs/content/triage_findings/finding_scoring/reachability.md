@@ -60,7 +60,7 @@ reachability that tools you may already run are producing:
   carry reachability, either as structured data or in their report text. No
   configuration is required beyond importing the report as usual.
 - **Connectors.** A connector that supports reachability sends verdicts for
-  the products it syncs, refreshed on its normal schedule.
+  the Assets it syncs, refreshed on its normal schedule.
 
 Coverage is normally partial, and that is expected. Tools that do not report
 reachability simply leave their Findings at **Unknown**.

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -11,6 +10,7 @@ from rest_framework.response import Response
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
+from dojo.location.feature import locations_enabled
 from dojo.models import (
     FileUpload,
     NoteHistory,
@@ -298,7 +298,7 @@ class TestImportViewSet(
         # TODO: Delete the endpoints branch after the move to Locations
         location_prefetch = (
             "findings_affected__locations__location__url"
-            if settings.V3_FEATURE_LOCATIONS
+            if locations_enabled()
             else "findings_affected__endpoints"
         )
         return get_authorized_test_imports(

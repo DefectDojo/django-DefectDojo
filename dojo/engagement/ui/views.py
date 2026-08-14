@@ -83,6 +83,7 @@ from dojo.forms import (
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.utils import save_locations_to_add
 from dojo.models import (
@@ -804,7 +805,7 @@ class ImportScanResultsView(View):
         # Get the product tab and any additional custom breadcrumbs
         product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = Location.objects.filter(products__product_id=product_tab.product.id)
         else:
             # TODO: Delete this after the move to Locations
@@ -976,7 +977,7 @@ class ImportScanResultsView(View):
         if close_old_findings_product_scope := form.cleaned_data.get("close_old_findings_product_scope", None):
             context["close_old_findings_product_scope"] = close_old_findings_product_scope
             context["close_old_findings"] = True
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             # Save newly added locations
             added_locations = save_locations_to_add(form.endpoints_to_add_list)
             locations_from_form = [location.url for location in form.cleaned_data["endpoints"]]

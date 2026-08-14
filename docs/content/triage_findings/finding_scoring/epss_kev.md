@@ -63,7 +63,7 @@ Because enrichment data is stored once per vulnerability, an import can only app
 
 | At import, the CVE is… | When the Finding shows EPSS/KEV |
 | --- | --- |
-| **Already enriched** — DefectDojo has looked this CVE up before, for any Finding in any Product | **Immediately**, as part of the import. This is the common case: CVEs recur across scans and across teams, so most CVEs on a typical import are already known. |
+| **Already enriched** — DefectDojo has looked this CVE up before, for any Finding in any Asset | **Immediately**, as part of the import. This is the common case: CVEs recur across scans and across teams, so most CVEs on a typical import are already known. |
 | **New to DefectDojo**, and the import brings in only a modest number of new CVEs | **Shortly after the import**, in the background. There is nothing stored to apply yet, so the import requests a lookup for just those CVEs and applies the results when it returns. |
 | **New to DefectDojo**, and the import brings in a very large number of new CVEs — a first import, or a bulk backfill | **On the next daily run**, or on the next [on-demand sync](#running-a-sync-on-demand). Looking up thousands of brand-new CVEs while the import is still running would duplicate the daily run's work, so it is deliberately left to that run. |
 

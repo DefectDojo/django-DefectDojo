@@ -28,6 +28,7 @@ from django.utils.translation import gettext as _
 import dojo.utils
 from dojo import __docs__, __version__
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
 from dojo.utils import calculate_grade, get_file_images, get_full_url, get_system_setting, prepare_for_view
 
@@ -1141,7 +1142,7 @@ def import_settings_tag(test_import, *, autoescape=True):
         esc(s.get("create_finding_groups_for_all_findings", None)),
     )
 
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         # TODO: Delete this after the move to Locations
         endpoints = esc(s.get("endpoints", s.get("endpoint", None)))
         return mark_safe(html % (icon, color, icon, *common_fields, endpoints, *extra_fields))

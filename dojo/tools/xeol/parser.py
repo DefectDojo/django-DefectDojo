@@ -1,8 +1,7 @@
 import json
 from datetime import datetime, timedelta
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -97,7 +96,7 @@ class XeolParser:
             )
 
             artifact_purl = artifact.get("purl")
-            if settings.V3_FEATURE_LOCATIONS and artifact_purl:
+            if locations_enabled() and artifact_purl:
                 license_expression = " OR ".join(artifact.get("licenses", []))
                 finding.unsaved_locations.append(
                     LocationData.dependency(purl=artifact_purl, license_expression=license_expression),

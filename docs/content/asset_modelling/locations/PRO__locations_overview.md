@@ -7,7 +7,7 @@ weight: 1
 
 **Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives — whether that's a URL, a software dependency from an **SBOM**, or, in the future, a **cloud resource ID**, **container image**, or **code repository**.
 
-Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Note that Locations cannot be turned back off once enabled.
+Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Enabling is one-way and takes effect for new imports right away; your existing history stays as it is until you run the [migration suite](/asset_modelling/locations/pro__migrating_from_endpoints/) that appears under the flag (endpoint, dependency, and source-code backfills, then an identity rehash). If you also use the Classic UI or depend on the `/api/v2` endpoint routes, keep the `DD_V3_FEATURE_LOCATIONS` deployment setting in sync and restart, since those surfaces are fixed when DefectDojo starts.
 
 ## Why Replace Endpoints?
 
@@ -40,12 +40,12 @@ A **subtype** (URL or Dependency) holds the structured fields specific to that k
 
 ### References
 
-Locations are not directly attached to Products or Findings. Instead, two **Reference** objects link them:
+Locations are not directly attached to Assets or Findings. Instead, two **Reference** objects link them:
 
 - **Asset References** — relationships the Location has to Assets (e.g. `libFoo` is *owned by* Asset 6, *used by* Asset 9). Each reference carries a status (`Active` or `Mitigated`) and an optional **relationship** ("Used By" or "Owned By").
 - **Finding References** — relationships the Location has to Findings. Each reference carries a richer status (`Active`, `Mitigated`, `False Positive`, `Risk Accepted`, `Out of Scope`) plus the auditor and audit time.
 
-This separation is what allows a library to exist on a Product *without* needing a Finding — a missing capability in the old Components model.
+This separation is what allows a library to exist on an Asset *without* needing a Finding — a missing capability in the old Components model.
 
 ### Auto-Association at Import Time
 
@@ -74,7 +74,7 @@ Existing parsers have been updated to emit Location data when the feature flag i
 
 ## Where to Go Next
 
-- **Enable the feature** — contact [support@defectdojo.com](mailto:support@defectdojo.com) to turn Locations on for your instance.
+- **Enable the feature** — turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
 - **Migrate from Endpoints** — see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
 - **Day-to-day URL workflows** — see [Working with URLs](../pro__working_with_urls).
 - **SBOMs and dependencies** — see [Working with SBOMs](../pro__working_with_sboms).

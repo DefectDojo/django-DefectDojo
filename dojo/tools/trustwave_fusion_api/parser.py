@@ -3,8 +3,8 @@ import json
 from datetime import datetime
 
 from cpe import CPE
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -37,7 +37,7 @@ class TrustwaveFusionAPIParser:
             ).hexdigest()
 
             if item_key in items:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     items[item_key].unsaved_locations.extend(
                         item.unsaved_locations,
                     )
@@ -64,7 +64,7 @@ class TrustwaveFusionAPIParser:
 
 
 def extract_location(finding, location_data):
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Extract optional protocol and port
         protocol = ""
         if (

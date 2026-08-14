@@ -1,0 +1,185 @@
+# Docs UI strings for de.
+# custom keys (dd_* section below) are used by the DefectDojo layouts;
+# theme keys mirror node_modules/@thulite/doks-core/i18n/en.toml for
+# languages the theme does not ship.
+
+[nav_get_started]
+other = "Erste Schritte"
+
+[nav_import_data]
+other = "Daten importieren"
+
+[nav_triage_findings]
+other = "Befunde triagieren"
+
+[nav_model_assets]
+other = "Assets modellieren"
+
+[nav_metrics_reports]
+other = "Metriken & Berichte"
+
+[nav_issue_tracking]
+other = "Issue-Tracking"
+
+[nav_automation]
+other = "Automatisierung"
+
+[nav_admin]
+other = "Administration"
+
+[nav_supported_tools]
+other = "Unterstützte Tools"
+
+[card_get_started_desc]
+other = "Installieren Sie DefectDojo und lernen Sie die Kernkonzepte kennen."
+
+[card_import_data_desc]
+other = "Importieren Sie Scan-Ergebnisse von 500+ Sicherheitstools in DefectDojo."
+
+[card_triage_desc]
+other = "Sicherheitsbefunde verwalten, deduplizieren und priorisieren."
+
+[card_assets_desc]
+other = "Organisieren Sie Produkte, Engagements und Ihre Asset-Hierarchie."
+
+[card_metrics_desc]
+other = "Verfolgen Sie Sicherheitsmetriken mit Dashboards und eigenen Berichten."
+
+[card_issue_tracking_desc]
+other = "Importieren Sie Befunde aus Ihren Tools und leiten Sie sie an Jira, GitHub Issues und andere Tracker weiter."
+
+[card_automation_title]
+other = "Automatisierung & API"
+
+[card_automation_desc]
+other = "Integrieren Sie DefectDojo über die REST API in Ihre CI/CD-Pipeline."
+
+[card_admin_title]
+other = "Administration"
+
+[card_admin_desc]
+other = "Konfigurieren Sie Benutzer, Berechtigungen, Systemeinstellungen und Integrationen."
+
+[card_tools_desc]
+other = "Durchsuchen Sie die vollständige Liste der Security-Scanner und Integrationen."
+
+[cta_community_heading]
+other = "Treten Sie der Dojo-Community bei"
+
+[cta_community_link]
+other = "Community-Seite"
+
+[cta_support_heading]
+other = "Support kontaktieren"
+
+[cta_support_text]
+other = "Brauchen Sie Hilfe? Pro-Benutzer können eine E-Mail an support@defectdojo.com senden"
+
+[cta_trial_link]
+other = "Für eine Testversion registrieren"
+
+[footer_tagline]
+other = "Die Geheimwaffe der Security - AppSec vereinheitlichen & automatisieren. Open-Source-Schwachstellenmanagement & DevSecOps."
+
+[footer_heading_documentation]
+other = "Dokumentation"
+
+[footer_heading_community]
+other = "Community"
+
+[footer_heading_company]
+other = "Unternehmen"
+
+[footer_heading_connect]
+other = "Kontakt"
+
+[footer_link_get_started]
+other = "Erste Schritte"
+
+[footer_link_import_data]
+other = "Daten importieren"
+
+[footer_link_supported_tools]
+other = "Unterstützte Tools"
+
+[footer_link_api]
+other = "API"
+
+[footer_link_community]
+other = "Community"
+
+[footer_link_release_notes]
+other = "Release Notes"
+
+[footer_link_pricing]
+other = "Preise"
+
+[footer_link_trust_center]
+other = "Trust Center"
+
+[footer_link_status]
+other = "Status"
+
+[footer_link_support]
+other = "Support"
+
+[footer_rights]
+other = "Alle Rechte vorbehalten."
+
+[aria_search]
+other = "Website durchsuchen"
+
+[aria_nav_main]
+other = "Hauptnavigationsmenü öffnen"
+
+[aria_nav_section]
+other = "Abschnittsnavigationsmenü öffnen"
+
+[aria_close]
+other = "Schließen"
+
+[aria_toggle_theme]
+other = "Design umschalten"
+
+[aria_version_select]
+other = "Dokumentationsversion auswählen"
+
+[aria_version_toggle]
+other = "Versionsmenü umschalten"
+
+[aria_nav_secondary]
+other = "Sekundäre Navigation"
+
+[aria_nav_tertiary]
+other = "Tertiäre Navigation"
+
+[aria_nav_quaternary]
+other = "Quartäre Navigation"
+
+[aria_breadcrumb]
+other = "Breadcrumb"
+
+[version_opensource]
+other = "Open Source"
+
+[version_pro]
+other = "Pro"
+
+[hero_subtitle]
+other = "Offizielle Dokumentation für die Editionen DefectDojo Pro und Open Source, gepflegt von DefectDojo, Inc. und der Open-Source-Community."
+
+[cta_community_text]
+other = "Entdecken Sie Live-Events und kommende Funktionen und vernetzen Sie sich mit anderen Sicherheitsfachleuten auf {{ .link }}."
+
+[cta_trial_text]
+other = "Bereit für Pro? Fordern Sie {{ .link }} ein Angebot vom Team von DefectDojo, Inc. an."
+
+[cta_trial_link_text]
+other = "hier"
+
+[whats_new]
+other = "Neu in {{ .release }}"
+
+[card_connectors_title]
+other = "Connectors"
+

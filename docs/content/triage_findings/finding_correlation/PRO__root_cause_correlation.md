@@ -148,7 +148,7 @@ you have access to, ranked so the largest, riskiest ones come first.
 | **Fix** | The version that fixes it, when the cluster's members agree on one |
 | **CVEs** | Every CVE seen across the cluster's members (component clusters) |
 | **Active Findings** | How many outstanding Findings this one cause accounts for |
-| **Products** | Blast radius — how many Products are affected |
+| **Assets** | Blast radius — how many Assets are affected |
 | **Risk** | Aggregate risk, summed from the severities of the active members |
 | **Muted** | Whether the cluster has been muted |
 
@@ -156,7 +156,7 @@ CVE causes that a component or resource cause already covers entirely are hidden
 **Show covered CVEs** is on; see
 [When a CVE is already covered by a component](#when-a-cve-is-already-covered-by-a-component).
 
-Selecting a row opens the cluster, listing each member Finding with its severity, Product,
+Selecting a row opens the cluster, listing each member Finding with its severity, Asset,
 domain, **match** type, and the **evidence** that links it. Evidence is recorded per link, so a
 cluster can always explain itself: a component link records the purl it matched on, a CVE link
 records the identifier, an endpoint link records the URL and the CWE. The **Match** column reads
@@ -189,26 +189,26 @@ shared. Links you have rejected do not reappear there.
 
 ### In finding priority
 
-A Root Cause that spans many Products makes each of its member Findings more urgent, because the
+A Root Cause that spans many Assets makes each of its member Findings more urgent, because the
 single fix clears all of them. Priority therefore rises with the **blast radius of the widest
 Root Cause a Finding belongs to**:
 
-- A cluster confined to one Product adds nothing -- there is no "one fix clears many" story.
-- Each additional affected Product adds a little more, up to a cap, so one very wide cluster
+- A cluster confined to one Asset adds nothing -- there is no "one fix clears many" story.
+- Each additional affected Asset adds a little more, up to a cap, so one very wide cluster
   cannot outweigh severity.
 - The widest cluster counts, not the sum of all of them, so a Finding is not pushed up merely for
   carrying many CVE ids.
 - Links you have **rejected** stop counting. A **muted** cluster still counts: muting hides it
   from the ranked list, it does not say the Findings are unrelated.
 
-The weight is tunable per Product as the **Correlation** multiplier in the Prioritization Engine,
+The weight is tunable per Asset as the **Correlation** multiplier in the Prioritization Engine,
 alongside Severity, Exploitability, Endpoints and Reachability. The whole term disappears when the
 feature flag is off, so scores are unchanged on an instance that does not use correlation.
 
 ### On a dashboard
 
 **Top Root Causes** is available as a dashboard widget, listing the highest-ranked clusters with
-their finding counts, affected Products and risk. Add it from the widget picker; it appears there
+their finding counts, affected Assets and risk. Add it from the widget picker; it appears there
 only while the feature is enabled. Its counts are scoped to your access in the same way the page
 is.
 
@@ -240,7 +240,7 @@ version bump moves the Finding to the new cluster and prunes the old one once it
 ### Backfilling existing Findings
 
 To correlate Findings that predate the feature being enabled, run the management command. Omit
-the argument to recompute the whole portfolio, or scope it to a single Product:
+the argument to recompute the whole portfolio, or scope it to a single Asset:
 
 ```bash
 python manage.py recompute_correlations
@@ -280,7 +280,7 @@ simply not enabled.
 ## Interaction with Global Component Deduplication
 
 [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/)
-marks cross-Product SCA Findings as duplicates, and duplicates are not correlated. With both
+marks cross-Asset SCA Findings as duplicates, and duplicates are not correlated. With both
 features on, a Root Cause's member count therefore reflects the surviving originals rather than
 every occurrence. The two also key on different things — Global Component matches on component
 name and version, while correlation uses the full Package URL — so enabling both is supported

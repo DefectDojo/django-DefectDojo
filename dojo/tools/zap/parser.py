@@ -1,9 +1,9 @@
 from urllib.parse import urlparse
 
 from defusedxml import ElementTree
-from django.conf import settings
 from html2text import html2text
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -127,7 +127,7 @@ class ZapParser:
                     # we remove query and fragment because with some configuration
                     # the tool generate them on-the-go and it produces a lot of
                     # fake locations
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         clean_uri = parsed_uri._replace(query="", fragment="").geturl()
                         finding.unsaved_locations.append(LocationData.url(url=clean_uri))
                     else:

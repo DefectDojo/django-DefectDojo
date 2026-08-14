@@ -1,0 +1,246 @@
+# Docs UI strings for ja.
+# custom keys (dd_* section below) are used by the DefectDojo layouts;
+# theme keys mirror node_modules/@thulite/doks-core/i18n/en.toml for
+# languages the theme does not ship.
+
+[404_text]
+other = "お探しのページは存在しないか、移動されました。"
+
+[404_title]
+other = "ページが見つかりません :("
+
+[browse]
+other = "閲覧"
+
+[by]
+other = "著者:"
+
+[chapter_next]
+other = "次へ"
+
+[chapter_previous]
+other = "前へ"
+
+[edit_page]
+other = "このページを編集:"
+
+[get_started]
+other = "サンプルガイド"
+
+[home]
+other = "ホーム"
+
+[in]
+other = "カテゴリ:"
+
+[last_updated]
+other = "最終更新日:"
+
+[minute]
+one = "分"
+other = "分"
+
+[on_this_page]
+other = "このページの内容"
+
+[reading_time]
+other = "推定読了時間"
+
+[search_loading]
+other = "検索インデックスを読み込んでいます…"
+
+[search_no_recent]
+other = "最近の検索履歴はありません"
+
+[search_no_results]
+other = "結果が見つかりません"
+
+[search_placeholder]
+other = "検索"
+
+[search_title]
+other = "検索"
+
+[video_unsupported]
+other = "お使いのブラウザーは埋め込み動画に対応していませんが、ご安心ください。<a href=\"{{ .RelPermalink }}\">動画をダウンロード</a>して、お好きな動画プレーヤーでご覧いただけます。"
+
+[nav_get_started]
+other = "はじめに"
+
+[nav_import_data]
+other = "データのインポート"
+
+[nav_triage_findings]
+other = "検出事項のトリアージ"
+
+[nav_model_assets]
+other = "資産のモデル化"
+
+[nav_metrics_reports]
+other = "メトリクスとレポート"
+
+[nav_issue_tracking]
+other = "課題管理"
+
+[nav_automation]
+other = "自動化"
+
+[nav_admin]
+other = "管理"
+
+[nav_supported_tools]
+other = "対応ツール"
+
+[card_get_started_desc]
+other = "DefectDojo をインストールし、基本概念を学びます。"
+
+[card_import_data_desc]
+other = "500+のセキュリティツールからスキャン結果をDefectDojoにインポートします。"
+
+[card_triage_desc]
+other = "セキュリティ検出事項を管理、重複排除、優先順位付けします。"
+
+[card_assets_desc]
+other = "製品、エンゲージメント、資産階層を整理します。"
+
+[card_metrics_desc]
+other = "ダッシュボードとカスタムレポートでセキュリティメトリクスを追跡します。"
+
+[card_issue_tracking_desc]
+other = "ツールから検出事項をインポートし、Jira、GitHub Issues、その他のトラッカーに送信します。"
+
+[card_automation_title]
+other = "自動化と API"
+
+[card_automation_desc]
+other = "REST API で DefectDojo を CI/CD パイプラインに統合します。"
+
+[card_admin_title]
+other = "システム管理"
+
+[card_admin_desc]
+other = "ユーザー、権限、システム設定、連携を構成します。"
+
+[card_tools_desc]
+other = "セキュリティスキャナーと連携の全一覧を参照します。"
+
+[cta_community_heading]
+other = "Dojo コミュニティに参加する"
+
+[cta_community_link]
+other = "コミュニティページ"
+
+[cta_support_heading]
+other = "サポートに問い合わせる"
+
+[cta_support_text]
+other = "お困りですか？ Pro ユーザーは support@defectdojo.com にメールを送信できます"
+
+[cta_trial_link]
+other = "トライアルに申し込む"
+
+[footer_tagline]
+other = "セキュリティの秘密兵器 - AppSec を統合・自動化。オープンソースの脆弱性管理と DevSecOps。"
+
+[footer_heading_documentation]
+other = "ドキュメント"
+
+[footer_heading_community]
+other = "コミュニティ"
+
+[footer_heading_company]
+other = "会社情報"
+
+[footer_heading_connect]
+other = "つながる"
+
+[footer_link_get_started]
+other = "はじめに"
+
+[footer_link_import_data]
+other = "データのインポート"
+
+[footer_link_supported_tools]
+other = "対応ツール"
+
+[footer_link_api]
+other = "API"
+
+[footer_link_community]
+other = "コミュニティ"
+
+[footer_link_release_notes]
+other = "リリースノート"
+
+[footer_link_pricing]
+other = "料金"
+
+[footer_link_trust_center]
+other = "トラストセンター"
+
+[footer_link_status]
+other = "ステータス"
+
+[footer_link_support]
+other = "サポート"
+
+[footer_rights]
+other = "無断複製・転載を禁じます。"
+
+[aria_search]
+other = "サイト内を検索"
+
+[aria_nav_main]
+other = "メインナビゲーションメニューを開く"
+
+[aria_nav_section]
+other = "セクションナビゲーションメニューを開く"
+
+[aria_close]
+other = "閉じる"
+
+[aria_toggle_theme]
+other = "テーマを切り替える"
+
+[aria_version_select]
+other = "ドキュメントのバージョンを選択"
+
+[aria_version_toggle]
+other = "バージョンメニューを切り替える"
+
+[aria_nav_secondary]
+other = "第2レベルナビゲーション"
+
+[aria_nav_tertiary]
+other = "第3レベルナビゲーション"
+
+[aria_nav_quaternary]
+other = "第4レベルナビゲーション"
+
+[aria_breadcrumb]
+other = "パンくずリスト"
+
+[version_opensource]
+other = "オープンソース"
+
+[version_pro]
+other = "Pro"
+
+[hero_subtitle]
+other = "DefectDojo Pro およびオープンソース版の公式ドキュメントです。DefectDojo, Inc. とオープンソースコミュニティによって管理されています。"
+
+[cta_community_text]
+other = "ライブイベントや今後の機能をご覧いただき、当社の{{ .link }}で他のセキュリティ専門家とつながりましょう。"
+
+[cta_trial_text]
+other = "Pro への移行をご検討ですか。{{ .link }}から DefectDojo, Inc. のチームに見積もりをご依頼ください。"
+
+[cta_trial_link_text]
+other = "こちら"
+
+[whats_new]
+other = "{{ .release }} の新機能"
+
+[card_connectors_title]
+other = "コネクター"
+

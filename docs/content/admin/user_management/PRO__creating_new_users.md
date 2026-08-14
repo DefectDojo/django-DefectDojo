@@ -17,7 +17,7 @@ The admin who creates the account is responsible for delivering the initial cred
    * Set a temporary password.
    * Submit the form.
 
-2. **Assign permissions** as appropriate — Product/Product Type membership, Configuration Permissions, Global Role, or Superuser status. See [Set a User's permissions](../set_user_permissions/) for details. A new user with no assignments will not be able to see any Products or Findings.
+2. **Assign permissions** as appropriate — Asset/Organization membership, Configuration Permissions, Global Role, or Superuser status. See [Set a User's permissions](../set_user_permissions/) for details. A new user with no assignments will not be able to see any Assets or Findings.
 
 3. **Send the credentials to the new user out-of-band** (over email, your team's chat tool, or however you normally share secrets). Include:
    * The DefectDojo instance URL.

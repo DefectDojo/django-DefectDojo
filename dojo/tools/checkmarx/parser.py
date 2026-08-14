@@ -4,8 +4,8 @@ import logging
 
 from dateutil import parser
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import add_language
@@ -235,7 +235,7 @@ class CheckmarxParser:
                 static_finding=True,
                 nb_occurences=1,
             )
-            if settings.V3_FEATURE_LOCATIONS and sinkFilename:
+            if locations_enabled() and sinkFilename:
                 find.unsaved_locations.append(
                     LocationData.code(file_path=sinkFilename),
                 )
@@ -366,7 +366,7 @@ class CheckmarxParser:
                 sast_source_file_path=sourceFilename,
                 vuln_id_from_tool=queryId,
             )
-            if settings.V3_FEATURE_LOCATIONS and sinkFilename:
+            if locations_enabled() and sinkFilename:
                 find.unsaved_locations.append(
                     LocationData.code(
                         file_path=sinkFilename,
@@ -495,7 +495,7 @@ class CheckmarxParser:
                                 last_node = vulnerability["nodes"][-1]
                                 finding.file_path = last_node.get("fileName")
                                 finding.line = last_node.get("line")
-                                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                                if locations_enabled() and finding.file_path:
                                     finding.unsaved_locations.append(
                                         LocationData.code(file_path=finding.file_path, line=finding.line),
                                     )
@@ -575,7 +575,7 @@ class CheckmarxParser:
                             finding.unique_id_from_tool = str(
                                 vulnerability.get("similarityId"),
                             )
-                        if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                        if locations_enabled() and finding.file_path:
                             finding.unsaved_locations.append(
                                 LocationData.code(file_path=finding.file_path, line=finding.line),
                             )

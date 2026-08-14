@@ -79,7 +79,7 @@ The parser expects an array of assessments. All properties are strings and are r
 [{
     "metadata": {
         "event_code": "iam_role_administratoraccess_policy_permissive_trust_relationship",
-        "product": {
+        "Asset": {
             "name": "Prowler",
             "vendor_name": "Prowler",
             "version": "4.2.1"

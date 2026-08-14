@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.forms import HiddenInput
 from django_filters import (
     BooleanFilter,
@@ -17,6 +16,7 @@ from dojo.filters import (
     filter_endpoints_host_base,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.status import ProductLocationStatus
 from dojo.models import Product, Product_Type
 from dojo.product.queries import get_authorized_products
@@ -99,7 +99,7 @@ class ProductFilterHelper(FilterSet):
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         location_status = MultipleChoiceFilter(
             field_name="locations__status",
             choices=ProductLocationStatus.choices,

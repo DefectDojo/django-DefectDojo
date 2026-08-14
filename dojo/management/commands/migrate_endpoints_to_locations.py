@@ -177,6 +177,11 @@ class Command(BaseCommand):
 
     help = "Usage: manage.py migrate_endpoints_to_locations"
 
+    # `progress_callback` is accepted by handle() but not exposed on the parser:
+    # it is a programmatic hook for in-process callers (Pro's migration suite
+    # passes it via call_command) and cannot be supplied on the command line.
+    stealth_options = ("progress_callback",)
+
     def add_arguments(self, parser):
         parser.add_argument(
             "--batch-size",
@@ -481,7 +486,13 @@ class Command(BaseCommand):
                 )
                 try:
                     # Mirrors what BaseModelWithoutTimeMeta.save() would have
-                    # done for this URL, including the flag it keys off.
+                    # done for this URL, including the flag it keys off. This
+                    # backfill command deliberately stays on
+                    # settings.V3_FEATURE_LOCATIONS rather than the runtime
+                    # dojo.location.feature accessor (it runs under
+                    # Endpoint.allow_endpoint_init() and its flag reads are
+                    # migration mechanics, not request-path behaviour). See
+                    # dojo/location/feature.py.
                     if settings.V3_FEATURE_LOCATIONS:
                         url.full_clean(validate_unique=False, validate_constraints=False)
                     else:
@@ -692,6 +703,23 @@ class Command(BaseCommand):
             return f"{m}m {s}s"
         return f"{s}s"
 
+    def _emit_progress(self, processed: int, total: int) -> None:
+        """
+        Publish chunk-level progress to an optional programmatic callback.
+
+        Pro's migration suite passes ``progress_callback`` (a stealth option) so
+        it can persist processed/total for a progress bar and ETA. A callback
+        failure must never abort a multi-hour migration, so it is swallowed with
+        a logged warning. CLI runs pass no callback and are unaffected.
+        """
+        callback = self.progress_callback
+        if callback is None:
+            return
+        try:
+            callback(processed, total)
+        except Exception:
+            logger.warning("progress_callback raised; continuing migration", exc_info=True)
+
     def _log_progress(
         self,
         i: int,
@@ -788,6 +816,8 @@ class Command(BaseCommand):
         self.query_count = bool(options.get("query_count"))
         self.batch_size = int(options["batch_size"])
         self.progress_every = int(options["progress_every"])
+        # Optional programmatic progress hook (see stealth_options). None for CLI runs.
+        self.progress_callback = options.get("progress_callback")
 
         # Per-phase wall-clock accumulators.
         self.timings = dict.fromkeys(PHASES, 0.0)
@@ -872,6 +902,9 @@ class Command(BaseCommand):
                 f"benchmark={'on' if self.benchmark else 'off'}, "
                 f"query-count={'on' if self.query_count else 'off'})",
             ))
+            # Publish the total up front so a consumer can render a bar/ETA before
+            # the first chunk lands.
+            self._emit_progress(0, endpoint_count)
 
             run_t0 = time.time()
             i = 0
@@ -891,6 +924,10 @@ class Command(BaseCommand):
                     # Flush independently of per-endpoint success so a failing
                     # endpoint at a chunk boundary cannot leave the queue growing.
                     self._flush_location_tags()
+
+                    # Programmatic progress at every chunk boundary (independent
+                    # of the throttled stdout line below), for the migration suite.
+                    self._emit_progress(i, endpoint_count)
 
                     # Progress report once at least --progress-every endpoints
                     # have been migrated since the last line.

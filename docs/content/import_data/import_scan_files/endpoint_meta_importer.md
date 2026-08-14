@@ -36,4 +36,4 @@ This would apply the following metadata:
 
 ## Using the Endpoint Meta Importer
 
-The Endpoint Meta Importer is available from the **Endpoints** tab when viewing a Product. Upload your CSV file there to apply the metadata to your endpoints in bulk.
+The Endpoint Meta Importer is available from the **Endpoints** tab when viewing an Asset. Upload your CSV file there to apply the metadata to your endpoints in bulk.

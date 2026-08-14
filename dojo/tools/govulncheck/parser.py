@@ -2,8 +2,7 @@ import json
 import logging
 from itertools import groupby, islice
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -210,7 +209,7 @@ class GovulncheckParser:
                             "description"
                         ] = f"Vulnerable functions: {'; '.join(sorted(vuln_methods))}"
                         finding = Finding(**d)
-                        if settings.V3_FEATURE_LOCATIONS and d["component_name"]:
+                        if locations_enabled() and d["component_name"]:
                             finding.unsaved_locations.append(
                                 LocationData.dependency(purl_type="golang", name=d["component_name"], version=d["component_version"]),
                             )
@@ -296,7 +295,7 @@ class GovulncheckParser:
                         }
 
                         finding = Finding(**d)
-                        if settings.V3_FEATURE_LOCATIONS and component_name:
+                        if locations_enabled() and component_name:
                             finding.unsaved_locations.append(
                                 LocationData.dependency(purl_type="golang", name=component_name, version=affected_version, file_path=path),
                             )
@@ -469,7 +468,7 @@ class GovulncheckParserV2:
                 "unique_id_from_tool": f"{osv_id}:{module}",
             }
             finding = Finding(**d)
-            if settings.V3_FEATURE_LOCATIONS and module:
+            if locations_enabled() and module:
                 finding.unsaved_locations.append(
                     LocationData.dependency(purl_type="golang", name=module, version=version),
                 )

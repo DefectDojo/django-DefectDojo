@@ -8,7 +8,7 @@ weight: 1
 
 ## Overview
 
-**Organizations** sit at the very top of DefectDojo’s product hierarchy. Organizations are distinct from the descending objects in the hierarchy—Assets, Engagements, Tests, and Findings—because they are not technical scan targets, but rather serve primarily as organizational abstractions that compartmentalize your security efforts according to: 
+**Organizations** sit at the very top of DefectDojo’s Asset hierarchy. Organizations are distinct from the descending objects in the hierarchy—Assets, Engagements, Tests, and Findings—because they are not technical scan targets, but rather serve primarily as organizational abstractions that compartmentalize your security efforts according to: 
 - Business domain
 - Development team
 - Security team
@@ -41,7 +41,7 @@ Below are some example structures to inform how you designate your objects as ei
     - Asset: Payments API - Staging
     - Asset: Billing Worker
 
-- **Organization**: Software Product A
+- **Organization**: Software Asset A
     - Asset: Web Portal
     - Asset: Mobile Backend
 
@@ -57,6 +57,91 @@ Additionally, the following is an illustrative guide as to whether a something i
 | Customers | Specific software versions |
 
 As noted, your structure may differ depending on your unique security needs. 
+
+## Organization Types
+
+Organizations carry a **type** that records what kind of boundary they represent:
+
+- **Team** — the people who own or work on the Assets
+- **Business Application** — a business-level application made up of several Assets
+- **Compliance Scope** — a regulated boundary such as PCI or FedRAMP
+- **Portfolio** — a roll-up grouping for executive or portfolio-level reporting
+- **Custom** — anything else (the default)
+
+Types are orthogonal ways of looking at the same inventory: with non-exclusive
+membership enabled (below), one Asset can sit in a Team, a Compliance Scope, and a
+Portfolio at the same time, and each of those Organizations answers a different
+question about it.
+
+The type is set when creating or editing an Organization, is shown as a badge on the
+Organization's view, and is filterable on the API (`org_type` on
+`/api/v2/organizations/`).
+
+### Nesting within a type
+
+Organizations of the **same type** can be nested with a **parent Organization** for
+drill-down navigation and reporting — for example, a "Payments" Portfolio inside a
+"Company" Portfolio. Nesting is deliberately limited:
+
+- A parent must have the same type as its child, and cycles are rejected.
+- Nesting is for reporting and navigation **only** — it does not grant access. A
+  user with a role on a parent Organization does not gain access to its children.
+
+## Non-Exclusive Membership
+
+By default, every Asset belongs to exactly one Organization. Deployments that opt in
+to **non-exclusive membership** can additionally place an Asset in any number of
+further Organizations, so the same Asset can be visible through its Team, its
+Compliance Scope, and its Portfolio without duplicating it.
+
+This behavior is managed by deployment configuration: set
+`DD_V3_ORGANIZATION_NONEXCLUSIVE=True` (self-hosted) or contact support (cloud). It
+is off by default.
+
+### Primary and additional memberships
+
+- Each Asset always has exactly one **primary** membership: the Organization shown
+  on the Asset itself. The primary membership is the access and billing anchor and
+  cannot be removed — change the Asset's Organization to move it.
+- Any further memberships are **additional** and carry a record of where they came
+  from:
+    - **User Pin** — added by hand from the Organization or Asset view
+    - **Connector** — kept in sync from a connector's grouping attributes (for
+      example, the Backstage connector maps a service's **Domain** to a
+      Portfolio-type Organization and its **Owner Group** to a Team-type
+      Organization)
+    - **Rule** — granted by a membership rule ("Assets tagged `pci` belong to the
+      PCI Organization"); when the tag no longer matches, the membership dissolves
+- Automation only ever reconciles memberships it created itself. User pins are never
+  removed by a connector sync or a rule.
+
+### Membership and access
+
+Access follows **every** membership, not just the primary one: a user with a role on
+any of an Asset's Organizations can see the Asset (and its Engagements, Tests, and
+Findings) with the permissions that role grants. Pinning an Asset into an
+Organization therefore extends visibility, which is why creating a pin requires edit
+permission on **both** the Organization and the Asset.
+
+### Managing memberships
+
+- The Organization view gains a **Member Assets** table listing every member with
+  its provenance, plus a **Pin Asset** action.
+- The Organization view's Asset list — and the `organization` filter on the Asset
+  and Finding lists — covers **every** member Asset, whether it lives here or is a
+  member through a pin, rule, or connector. (Filtering by the classic organization
+  field alone still matches only Assets whose home is that Organization.)
+- The Asset view gains an **Organization Memberships** panel listing the Asset's memberships —
+  each Organization with its type and provenance — plus a **Pin to Organization**
+  action.
+- Additional memberships can be removed from either surface. Removing a
+  connector- or rule-created membership works the same way, but the next sync or
+  tag match may recreate it; disable the rule or adjust the connector mapping to
+  make it permanent.
+- On the API, memberships live at `/api/v2/organization_memberships/`
+  (filterable by `product`, `organization`, `origin`, and `is_primary`); the
+  Organization type and parent are readable and writable on
+  `/api/v2/organizations/` as `org_type` and `parent_organization`.
 
 ## Accessing Organizations
 
@@ -76,6 +161,11 @@ An Organization’s view contains a variety of tables and charts to interpret it
 - **Assigned User Groups** 
     - User groups that have been assigned to the Organization for permission control. More information about user groups can be found [here](/admin/user_management/create_user_group/). 
 - **List of Assets within the Organization**
+
+With non-exclusive membership enabled, the view also shows the Organization's type
+badge and parent next to its name, and a **Member Assets** table listing every
+member Asset with the provenance of its membership (see
+[Non-Exclusive Membership](#non-exclusive-membership)).
 
 ## Working with Organizations 
 
