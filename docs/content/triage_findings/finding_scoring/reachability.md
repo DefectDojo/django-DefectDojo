@@ -65,6 +65,10 @@ reachability that tools you may already run are producing:
 Coverage is normally partial, and that is expected. Tools that do not report
 reachability simply leave their Findings at **Unknown**.
 
+Reachability describes the vulnerable code *inside* your application. For whether the
+asset itself can be reached from outside, and whether the code is deployed at all, see
+[Asset Exposure](../asset_exposure/). The two are independent and can be used together.
+
 ## How reachability changes priority
 
 Reachability is one more input to the priority score described in
