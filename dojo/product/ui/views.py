@@ -8,7 +8,6 @@ from functools import partial
 from math import ceil
 
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
@@ -62,6 +61,7 @@ from dojo.forms import (
 )
 from dojo.jira import services as jira_services
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.models import (
     App_Analysis,
@@ -170,7 +170,7 @@ def product(request):
 
     name_words = prods.values_list("name", flat=True)
     prods = annotate_product_findings_count(prods)
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         prods = annotate_product_location_counts(prods)
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
@@ -235,7 +235,7 @@ def prefetch_for_product(prods):
     )
 
     # TODO: Delete this after the move to Locations
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         active_endpoint_qs = Endpoint.objects.filter(
             status_endpoint__mitigated=False,
             status_endpoint__false_positive=False,

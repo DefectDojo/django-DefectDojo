@@ -3,8 +3,7 @@ __author__ = "Aaron Weaver"
 import json
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -347,7 +346,7 @@ class SslLabsParser:
         return list(dupes.values())
 
     def add_location(self, finding, host, port, protocol):
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(
                 LocationData.url(host=host, port=port, protocol=protocol),
             )
@@ -358,7 +357,7 @@ class SslLabsParser:
             )
 
     def add_location_from_request_url(self, finding, request_url):
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(
                 LocationData.url(url=request_url),
             )

@@ -3,8 +3,8 @@ import logging
 
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -209,7 +209,7 @@ class AnchoreGrypeParser:
 
                 dupes[dupe_key].unsaved_tags = finding_tags
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
-                if settings.V3_FEATURE_LOCATIONS and artifact_purl:
+                if locations_enabled() and artifact_purl:
                     dupes[dupe_key].unsaved_locations.append(
                         LocationData.dependency(purl=artifact_purl, file_path=file_path),
                     )

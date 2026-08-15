@@ -3,8 +3,8 @@ import json
 from datetime import UTC, datetime
 
 from dateutil import parser as date_parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -137,7 +137,7 @@ class AWSInspector2Parser:
             finding.component_name = vulnerable_packages[0].get("name")
             finding.component_version = vulnerable_packages[0].get("version")
             finding.file_path = vulnerable_packages[0].get("filePath")
-            if settings.V3_FEATURE_LOCATIONS and finding.component_name:
+            if locations_enabled() and finding.component_name:
                 finding.unsaved_locations.append(
                     LocationData.dependency(
                         name=finding.component_name,
@@ -192,7 +192,7 @@ class AWSInspector2Parser:
         finding.sast_source_file_path = f"{file_path}{file_name}"
         finding.line = start_line
         finding.sast_source_line = start_line
-        if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+        if locations_enabled() and finding.file_path:
             finding.unsaved_locations.append(
                 LocationData.code(file_path=finding.file_path, line=start_line, end_line=end_line),
             )
@@ -301,13 +301,13 @@ class AWSInspector2Parser:
             else:
                 msg = "Incorrect Inspector2 report format"
                 raise TypeError(msg)
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 endpoints.append(LocationData.url(host=endpoint_host))
             else:
                 # TODO: Delete this after the move to Locations
                 endpoints.append(Endpoint(host=endpoint_host))
         finding.impact = "\n".join(impact)
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.extend(endpoints)
         else:
             # TODO: Delete this after the move to Locations

@@ -1,8 +1,7 @@
 import json
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -64,7 +63,7 @@ class GitlabSecretDetectionReportParser:
                     "\n" + vulnerability["raw_source_code_extract"]
                 )
 
-            if settings.V3_FEATURE_LOCATIONS and location.get("file"):
+            if locations_enabled() and location.get("file"):
                 finding.unsaved_locations.append(
                     LocationData.code(
                         file_path=location["file"],

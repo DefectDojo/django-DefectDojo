@@ -1,9 +1,11 @@
+from django.http import QueryDict
 from django.test import override_settings
 
 from dojo.filters import filter_endpoints_host_base
 from dojo.location.models import LocationProductReference
 from dojo.location.status import ProductLocationStatus
 from dojo.models import Product, Product_Type
+from dojo.product.ui.filters import ProductFilter
 from dojo.product.ui.views import annotate_product_location_counts
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
@@ -48,9 +50,40 @@ class ProductListPaginationAnnotationTests(DojoTestCase):
         self.assertNotIn('GROUP BY "dojo_product"', sql)
 
     @override_settings(V3_FEATURE_LOCATIONS=True)
-    def test_endpoint_host_filter_deduplicates_products(self):
+    def test_product_endpoint_host_filter_deduplicates_products(self):
+        product = self._make_product_with_locations()
+
+        data = QueryDict(mutable=True)
+        data["endpoints__host"] = "duplicate.example"
+        prod_filter = ProductFilter(data, queryset=Product.objects.all(), user=self.get_test_admin())
+
+        self.assertEqual(list(prod_filter.qs.filter(id=product.id).values_list("id", flat=True)), [product.id])
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_product_endpoint_id_filter_deduplicates_products(self):
+        product = self._make_product_with_locations()
+        location_id = product.locations.first().location_id
+
+        data = QueryDict(mutable=True)
+        data["endpoints"] = str(location_id)
+        prod_filter = ProductFilter(data, queryset=Product.objects.all(), user=self.get_test_admin())
+
+        self.assertEqual(list(prod_filter.qs.filter(id=product.id).values_list("id", flat=True)), [product.id])
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_product_location_status_filter_deduplicates_products(self):
+        product = self._make_product_with_locations()
+
+        data = QueryDict(mutable=True)
+        data.setlist("location_status", [ProductLocationStatus.Active])
+        prod_filter = ProductFilter(data, queryset=Product.objects.all(), user=self.get_test_admin())
+
+        self.assertEqual(list(prod_filter.qs.filter(id=product.id).values_list("id", flat=True)), [product.id])
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_shared_endpoint_host_helper_does_not_deduplicate_findings_scope(self):
         product = self._make_product_with_locations()
 
         filtered = filter_endpoints_host_base(Product.objects.all(), "endpoints__host", "duplicate.example")
 
-        self.assertEqual(list(filtered.filter(id=product.id).values_list("id", flat=True)), [product.id])
+        self.assertEqual(list(filtered.filter(id=product.id).values_list("id", flat=True)), [product.id, product.id])

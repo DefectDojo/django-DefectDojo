@@ -21,7 +21,7 @@ Open source DefectDojo has a single, built-in [Main Dashboard](../introduction_d
 
 DefectDojo Pro replaces that fixed page with **per-user customizable dashboards**. You choose which widgets appear, how they are filtered, and where they sit on the grid. You can build any number of named layouts, switch between them, share them with your team, and drive the whole system from the [REST API](../custom-dashboards-api/) or an [LLM](../custom-dashboards-llm/).
 
-> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
+> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Assets** and **Organizations** were formerly **Organizations**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
 
 ## Enabling Customizable Dashboards
 

@@ -1,8 +1,7 @@
 import json
 import re
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -91,7 +90,7 @@ class NettackerParser:
             # An event is a host and possibly a port, not a URL, so those are passed as fields.
             # unsaved_locations and unsaved_endpoints are chosen by V3_FEATURE_LOCATIONS, as in
             # the nmap parser.
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(host=target, port=port)]
             else:
                 # TODO: Delete this after the move to Locations

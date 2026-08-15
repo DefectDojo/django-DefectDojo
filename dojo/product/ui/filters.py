@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.forms import HiddenInput
 from django_filters import (
     BooleanFilter,
@@ -17,6 +16,7 @@ from dojo.filters import (
     filter_endpoints_host_base,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.status import ProductLocationStatus
 from dojo.models import Product, Product_Type
 from dojo.product.queries import get_authorized_products
@@ -99,16 +99,20 @@ class ProductFilterHelper(FilterSet):
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         location_status = MultipleChoiceFilter(
             field_name="locations__status",
             choices=ProductLocationStatus.choices,
             help_text="Status of the Location from the Products relationship",
+            method="filter_location_status",
         )
         endpoints__host = CharFilter(
             field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
         )
         endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+
+        def filter_location_status(self, queryset, name, value):
+            return queryset.filter(locations__status__in=value).distinct()
 
         def filter_endpoints_host(self, queryset, name, value):
             return filter_endpoints_host_base(
@@ -117,7 +121,7 @@ class ProductFilterHelper(FilterSet):
                 value,
                 endpoint_id=self.data.get("endpoints"),
                 statuses=self.data.getlist("location_status"),
-            )
+            ).distinct()
 
         def filter_endpoints(self, queryset, name, value):
             return filter_endpoints_base(
@@ -126,7 +130,7 @@ class ProductFilterHelper(FilterSet):
                 value,
                 statuses=self.data.getlist("location_status"),
                 host=self.data.get("endpoints__host"),
-            )
+            ).distinct()
 
     o = OrderingFilter(
         # tuple-mapping retains order

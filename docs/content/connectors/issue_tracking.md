@@ -18,7 +18,7 @@ The DefectDojo issue tracking integrations connect your vulnerability management
 | Pro          | * [Jira](/connectors/downstream/downstream_toolreference/#jira) ([legacy guide](/connectors/downstream/pro__jira_guide/))<br>* [Azure DevOps](/connectors/downstream/downstream_toolreference/#azure-devops-boards)<br>* [Bitbucket](/connectors/downstream/downstream_toolreference/#bitbucket)<br>* [Freshservice](/connectors/downstream/downstream_toolreference/#freshservice)<br>* [GitHub](/connectors/downstream/downstream_toolreference/#github)<br>* [GitLab Boards](/connectors/downstream/downstream_toolreference/#gitlab)<br>* [Linear](/connectors/downstream/downstream_toolreference/#linear)<br>* [PagerDuty](/connectors/downstream/downstream_toolreference/#pagerduty)<br>* [ServiceDesk Plus](/connectors/downstream/downstream_toolreference/#servicedesk-plus)<br>* [ServiceNow](/connectors/downstream/downstream_toolreference/#servicenow)<br>* [Shortcut](/connectors/downstream/downstream_toolreference/#shortcut)<br>* [Zendesk](/connectors/downstream/downstream_toolreference/#zendesk) |
 
 
-When enabled, DefectDojo can create issues automatically, or selectively from Products or Engagement. As Findings are updated in DefectDojo—resolved, mitigated, or reactivated—the corresponding issues can be kept in sync, ensuring both systems reflect the current state of risk.
+When enabled, DefectDojo can create issues automatically, or selectively from Assets or Engagement. As Findings are updated in DefectDojo—resolved, mitigated, or reactivated—the corresponding issues can be kept in sync, ensuring both systems reflect the current state of risk.
 
 ## What Gets Tracked
 

@@ -4,9 +4,9 @@ import io
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
-from django.conf import settings
 
 from dojo.finding.cwe import cwe_number, parse_cwes
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -117,7 +117,7 @@ class GenericCSVParser:
 
             # manage endpoints
             if row.get("Url"):
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [
                         LocationData.url(url=row["Url"]) if "://" in row["Url"] else LocationData.url(url="//" + row["Url"]),
                     ]
@@ -135,7 +135,7 @@ class GenericCSVParser:
             ).hexdigest()
             if key in dupes:
                 find = dupes[key]
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.extend(finding.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations

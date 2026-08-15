@@ -2,10 +2,10 @@ import base64
 import math
 
 import dateutil
-from django.conf import settings
 from django.core.files.base import ContentFile
 
 from dojo.finding.cwe import cwe_number
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
@@ -157,7 +157,7 @@ class GenericJSONParser:
 
             # manage endpoints
             if unsaved_locations:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     for location_item in unsaved_locations:
                         if isinstance(location_item, str):
                             if "://" in location_item:  # is the host full uri?
@@ -181,7 +181,7 @@ class GenericJSONParser:
                         else:
                             endpoint = Endpoint(**endpoint_item)
                         finding.unsaved_endpoints.append(endpoint)
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 component_name = item.get("component_name")
                 component_version = item.get("component_version")
                 file_path = item.get("file_path")

@@ -23,6 +23,7 @@ from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.queries import get_authorized_locations
 from dojo.models import (
@@ -221,7 +222,7 @@ class MetaSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        if settings.V3_FEATURE_LOCATIONS and "endpoint" in data:
+        if locations_enabled() and "endpoint" in data:
             data["location"] = data.pop("endpoint")
         DojoMeta(**data).clean()
         return data
@@ -229,7 +230,7 @@ class MetaSerializer(serializers.ModelSerializer):
     # TODO: Delete this after the move to Locations
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             self.fields["endpoint"] = serializers.PrimaryKeyRelatedField(
                 queryset=Endpoint.objects.all(),
                 required=False,
@@ -267,7 +268,7 @@ class MetaMainSerializer(serializers.Serializer):
     # TODO: Delete this after the move to Locations
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             self.fields["endpoint"] = serializers.PrimaryKeyRelatedField(
                 queryset=Endpoint.objects.all(),
                 required=False,
@@ -524,7 +525,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         # an empty queryset instead of raising on the AnonymousUser instance.
         if user is not None and not user.is_authenticated:
             user = None
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             # TODO: why do we allow only existing endpoints?
             self.fields["endpoint_to_add"] = serializers.PrimaryKeyRelatedField(
                 queryset=get_authorized_endpoints("view", user=user) if user else Endpoint.objects.none(),
@@ -640,7 +641,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         else:
             context["verified"] = None
         if endpoints_to_add := data.get("endpoint_to_add"):
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 # Note: The serializer resolves Location references, but we must pass along to the importer
                 # AbstractLocation objects, hence the .url access.
                 context["endpoints_to_add"] = [endpoints_to_add.url]
@@ -1100,7 +1101,7 @@ class ReportGenerateSerializer(serializers.Serializer):
         # V2-only exception. The lazy import avoids a circular import: endpoint_compat imports this
         # module (and its viewset references ReportGenerateSerializer in @extend_schema at
         # class-definition time).
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             from dojo.location.api.endpoint_compat import (  # noqa: PLC0415
                 V3EndpointCompatibleSerializer,
             )

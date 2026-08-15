@@ -4,9 +4,9 @@ description: "Automatically mark new Findings as false positive when a matching 
 weight: 7
 ---
 
-**False Positive History** saves your team from triaging the same false positive over and over. When it is enabled and a Finding is imported, DefectDojo looks for existing Findings in the same Product that match it, and if any of those are already marked **False Positive**, the incoming Finding is marked False Positive too.
+**False Positive History** saves your team from triaging the same false positive over and over. When it is enabled and a Finding is imported, DefectDojo looks for existing Findings in the same Asset that match it, and if any of those are already marked **False Positive**, the incoming Finding is marked False Positive too.
 
-> **This feature is marked EXPERIMENTAL in the product**, and it **cannot be used at the same time as Deduplication.** Read [When you can use it](#when-you-can-use-it) before turning it on.
+> **This feature is marked EXPERIMENTAL in the Asset**, and it **cannot be used at the same time as Deduplication.** Read [When you can use it](#when-you-can-use-it) before turning it on.
 
 ## What it does
 
@@ -14,13 +14,13 @@ Say a scanner reports a finding your team investigates and marks as a false posi
 
 Findings marked this way are also set to **inactive** and **unverified**, not just False Positive. This is intentional — the finding drops out of your active queue entirely — but it surprises people who expect only the False Positive flag to change.
 
-The rule DefectDojo maintains is: *within a Product, if one Finding is a false positive, all matching Findings are too.*
+The rule DefectDojo maintains is: *within an Asset, if one Finding is a false positive, all matching Findings are too.*
 
 ### Retroactive mode
 
-**Retroactive False Positive History** applies the same rule backwards. When you mark a Finding as a false positive, every other matching **active** Finding in that Product is marked False Positive as well.
+**Retroactive False Positive History** applies the same rule backwards. When you mark a Finding as a false positive, every other matching **active** Finding in that Asset is marked False Positive as well.
 
-This rewrites existing data. There is no preview and no confirmation prompt — the change simply happens across the Product. Turn it on deliberately.
+This rewrites existing data. There is no preview and no confirmation prompt — the change simply happens across the Asset. Turn it on deliberately.
 
 ## When you can use it
 
@@ -37,7 +37,7 @@ Both settings live in **System Settings**, in the deduplication block, and both 
 | **Enable False Positive History** | Turns the feature on for the instance. |
 | **Enable Retroactive False Positive History** | Also applies the rule backwards, as described above. Requires the setting above. |
 
-These are **instance-wide**. There is no per-Product or per-Tool override — enabling this affects every Product on the instance.
+These are **instance-wide**. There is no per-Asset or per-Tool override — enabling this affects every Asset on the instance.
 
 ## What counts as a match
 
@@ -52,7 +52,7 @@ False Positive History decides whether two Findings are "the same" using **the d
 
 So the accuracy of this feature is entirely determined by how well that tool's deduplication is configured. **Tune the tool's algorithm and hash fields before enabling False Positive History** — see [Deduplication Tuning](/triage_findings/finding_deduplication/pro__deduplication_tuning/) (Pro) or [Deduplication Tuning](/triage_findings/finding_deduplication/os__deduplication_tuning/) (Open Source).
 
-Matching is scoped **within a Product**. It never reaches across Products, and never applies instance-wide.
+Matching is scoped **within an Asset**. It never reaches across Assets, and never applies instance-wide.
 
 ### Set-based matching (Pro)
 
@@ -66,7 +66,7 @@ On Open Source, matching uses the hash code alone, so it is broader. Bear that i
 
 This feature marks Findings as false positive without a human looking at them. Its blast radius is set by your deduplication configuration, so a loose configuration is dangerous.
 
-* **A loose match key can silently dismiss unrelated Findings.** The **Legacy** algorithm matches on nothing more than title and severity — so a single false-positive call could mark every same-titled, same-severity Finding in the Product as a false positive, including genuine ones. The same applies to an over-broad set of Hash Code Fields. Tighten the algorithm first.
+* **A loose match key can silently dismiss unrelated Findings.** The **Legacy** algorithm matches on nothing more than title and severity — so a single false-positive call could mark every same-titled, same-severity Finding in the Asset as a false positive, including genuine ones. The same applies to an over-broad set of Hash Code Fields. Tighten the algorithm first.
 * **Retroactive mode rewrites existing Findings** with no preview, no prompt, and no summary of what it changed.
 * **Findings are deactivated and unverified**, not merely flagged.
 * **The bulk update bypasses the usual save-time processing**, so automation that reacts to Findings being updated may not fire for Findings changed this way.

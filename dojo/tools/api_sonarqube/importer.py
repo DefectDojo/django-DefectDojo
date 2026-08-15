@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from lxml import etree
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
 from dojo.tools.locations import LocationData
@@ -243,7 +244,7 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=issue.get("key"),
                 )
-                if settings.V3_FEATURE_LOCATIONS and component_key:
+                if locations_enabled() and component_key:
                     find.unsaved_locations.append(
                         LocationData.code(file_path=component_key, line=line),
                     )
@@ -371,7 +372,7 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
                 )
-                if settings.V3_FEATURE_LOCATIONS and component_key:
+                if locations_enabled() and component_key:
                     find.unsaved_locations.append(
                         LocationData.code(file_path=component_key, line=line),
                     )

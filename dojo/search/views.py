@@ -16,6 +16,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
+from dojo.location.feature import locations_enabled
 from dojo.location.queries import get_authorized_locations, prefetch_for_locations
 from dojo.models import Engagement, Finding, Finding_Template, Product, Test
 from dojo.product.queries import get_authorized_app_analysis, get_authorized_languages, get_authorized_products
@@ -135,7 +136,7 @@ def simple_search(request):
             authorized_tests = get_authorized_tests("view")
             authorized_engagements = get_authorized_engagements("view")
             authorized_products = get_authorized_products("view")
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 authorized_endpoints = get_authorized_locations("view")
             else:
                 # TODO: Delete this after the move to Locations
@@ -311,9 +312,9 @@ def simple_search(request):
 
                 endpoints = authorized_endpoints
                 endpoints = apply_tag_filters(endpoints, operators)
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     endpoints = endpoints.filter(Q(url__host__icontains=keywords_query) | Q(url__path__icontains=keywords_query) | Q(url__protocol__icontains=keywords_query) | Q(url__query__icontains=keywords_query) | Q(url__fragment__icontains=keywords_query))
-                    endpoints = prefetch_for_locations(endpoints)
+                    endpoints = prefetch_for_locations(endpoints, user=request.user)
                 else:
                     endpoints = endpoints.filter(Q(host__icontains=keywords_query) | Q(path__icontains=keywords_query) | Q(protocol__icontains=keywords_query) | Q(query__icontains=keywords_query) | Q(fragment__icontains=keywords_query))
                     endpoints = prefetch_for_endpoints(endpoints)
@@ -542,7 +543,7 @@ def apply_tag_filters(qs, operators, *, skip_relations=False):
 
 def apply_endpoint_filter(qs, operators):
     if "endpoint" in operators:
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             qs = qs.filter(locations__location__url__host__contains=",".join(operators["endpoint"]))
         else:
             qs = qs.filter(endpoints__host__contains=",".join(operators["endpoint"]))

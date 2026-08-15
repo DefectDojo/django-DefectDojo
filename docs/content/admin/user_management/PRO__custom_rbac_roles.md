@@ -207,5 +207,5 @@ Notes:
 * **Permission changes are picked up on the next page load**, not instantly in the current view. Background jobs may take up to 30 seconds, and cached permission data up to 5 minutes, to reflect an edit.
 * **Role dropdowns list up to 250 roles.** Beyond that, some roles will not appear in dropdowns, though they continue to work.
 * **Maintainer and Owner can add Organizations, but the grid does not show it.** For those two roles that grant is stored as a global-scope grant, and the grid reads only object-scope grants, so their **Organization > Add** cell reads as not granted. Cloning either role preserves the grant.
-* **Terminology follows your instance.** These docs use Organization and Asset, the default labels. If your instance has turned Organization / Asset relabeling off, the same rows read Product Type and Product instead.
+* **Terminology follows your instance.** These docs use Organization and Asset, the default labels. If your instance has turned Organization / Asset relabeling off, the same rows read Organization and Asset instead.
 * **The Roles page is read-only for everyone else.** A user who reaches `/settings/roles` directly can see the roles and their permissions but cannot change anything. Permission data is not sensitive, and the server enforces the real boundary on every write.

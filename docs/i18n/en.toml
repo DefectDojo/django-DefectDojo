@@ -1,0 +1,185 @@
+# Docs UI strings for en.
+# custom keys (dd_* section below) are used by the DefectDojo layouts;
+# theme keys mirror node_modules/@thulite/doks-core/i18n/en.toml for
+# languages the theme does not ship.
+
+[nav_get_started]
+other = "Get Started"
+
+[nav_import_data]
+other = "Import Data"
+
+[nav_triage_findings]
+other = "Triage Findings"
+
+[nav_model_assets]
+other = "Model Your Assets"
+
+[nav_metrics_reports]
+other = "Metrics & Reports"
+
+[nav_issue_tracking]
+other = "Issue Tracking"
+
+[nav_automation]
+other = "Automation"
+
+[nav_admin]
+other = "Admin"
+
+[nav_supported_tools]
+other = "Supported Tools"
+
+[card_get_started_desc]
+other = "Install DefectDojo and learn the core concepts."
+
+[card_import_data_desc]
+other = "Import scan results from 500+ security tools into DefectDojo."
+
+[card_triage_desc]
+other = "Manage, deduplicate, and prioritize security findings."
+
+[card_assets_desc]
+other = "Organize products, engagements, and your asset hierarchy."
+
+[card_metrics_desc]
+other = "Track security metrics with dashboards and custom reports."
+
+[card_issue_tracking_desc]
+other = "Import findings from your tools and push them to Jira, GitHub Issues, and other trackers."
+
+[card_automation_title]
+other = "Automation & API"
+
+[card_automation_desc]
+other = "Integrate DefectDojo into your CI/CD pipeline with the REST API."
+
+[card_admin_title]
+other = "Administration"
+
+[card_admin_desc]
+other = "Configure users, permissions, system settings, and integrations."
+
+[card_tools_desc]
+other = "Browse the complete list of security scanners and integrations."
+
+[cta_community_heading]
+other = "Join the Dojo community"
+
+[cta_community_link]
+other = "Community Page"
+
+[cta_support_heading]
+other = "Reach out to Support"
+
+[cta_support_text]
+other = "Need some help? Pro users can send an email to support@defectdojo.com"
+
+[cta_trial_link]
+other = "Sign up for a trial"
+
+[footer_tagline]
+other = "Security's secret weapon - unify & automate AppSec. Open-source vulnerability management & DevSecOps."
+
+[footer_heading_documentation]
+other = "Documentation"
+
+[footer_heading_community]
+other = "Community"
+
+[footer_heading_company]
+other = "Company"
+
+[footer_heading_connect]
+other = "Connect"
+
+[footer_link_get_started]
+other = "Get started"
+
+[footer_link_import_data]
+other = "Import data"
+
+[footer_link_supported_tools]
+other = "Supported tools"
+
+[footer_link_api]
+other = "API"
+
+[footer_link_community]
+other = "Community"
+
+[footer_link_release_notes]
+other = "Release notes"
+
+[footer_link_pricing]
+other = "Pricing"
+
+[footer_link_trust_center]
+other = "Trust Center"
+
+[footer_link_status]
+other = "Status"
+
+[footer_link_support]
+other = "Support"
+
+[footer_rights]
+other = "All rights reserved."
+
+[aria_search]
+other = "Search website"
+
+[aria_nav_main]
+other = "Open main navigation menu"
+
+[aria_nav_section]
+other = "Open section navigation menu"
+
+[aria_close]
+other = "Close"
+
+[aria_toggle_theme]
+other = "Toggle theme"
+
+[aria_version_select]
+other = "Select documentation version"
+
+[aria_version_toggle]
+other = "Toggle version menu"
+
+[aria_nav_secondary]
+other = "Secondary navigation"
+
+[aria_nav_tertiary]
+other = "Tertiary navigation"
+
+[aria_nav_quaternary]
+other = "Quaternary navigation"
+
+[aria_breadcrumb]
+other = "breadcrumb"
+
+[version_opensource]
+other = "Open Source"
+
+[version_pro]
+other = "Pro"
+
+[hero_subtitle]
+other = "Official documentation for DefectDojo Pro and Open-Source editions, maintained by DefectDojo, Inc. and the Open-Source community."
+
+[cta_community_text]
+other = "Check out live events, upcoming features and connect with other security professionals on our {{ .link }}."
+
+[cta_trial_text]
+other = "Ready to go Pro? Request a quote from the DefectDojo, Inc. team {{ .link }}."
+
+[cta_trial_link_text]
+other = "here"
+
+[whats_new]
+other = "What's new in {{ .release }}"
+
+[card_connectors_title]
+other = "Connectors"
+

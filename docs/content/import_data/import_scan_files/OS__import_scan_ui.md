@@ -5,9 +5,9 @@ weight: 1
 audience: opensource
 ---
 
-Once you have your Product Hierarchy set up with at least one Product Type, Product, Test and Engagement, you can import a scan file to DefectDojo and create Findings.
+Once you have your Asset Hierarchy set up with at least one Organization, Asset, Test and Engagement, you can import a scan file to DefectDojo and create Findings.
 
-It’s easy to reorganize your Product Hierarchy in DefectDojo, so it’s ok if you’re not sure how to set things up yet. 
+It’s easy to reorganize your Asset Hierarchy in DefectDojo, so it’s ok if you’re not sure how to set things up yet. 
 
 For now, it’s good to know that **Engagements** can store data from multiple tools, which can be useful if you’re running different tools concurrently as part of a single testing effort.
 
@@ -17,7 +17,7 @@ In DefectDojo OS, you can access this form from two locations:
 
 * The Tests section of an Engagement:
     ![image](images/import_scan_os.png)
-* The Findings section of the navigation bar on a Product:
+* The Findings section of the navigation bar on an Asset:
     ![image](images/import_scan_os_2.png)
 
 ## Completing the Import Scan Form

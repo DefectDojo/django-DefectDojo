@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -104,7 +103,7 @@ class MasscanParser:
             # An open port is a host and a port, not a URL, so those are passed as fields rather
             # than parsed out of a string. unsaved_locations and unsaved_endpoints are chosen by
             # V3_FEATURE_LOCATIONS, as in the nmap parser.
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(host=host, port=port)]
             else:
                 # TODO: Delete this after the move to Locations

@@ -2,8 +2,8 @@ import hashlib
 import json
 
 import hyperlink
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -60,7 +60,7 @@ class WFuzzParser:
                     cwe=200,
                     nb_occurences=1,
                 )
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [
                         LocationData.url(
                             path="/".join(url.path),

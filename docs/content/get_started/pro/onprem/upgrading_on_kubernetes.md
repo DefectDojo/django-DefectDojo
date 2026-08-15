@@ -116,7 +116,7 @@ common cause of failed upgrades.
 > **Organization/Asset relabel default.** `dojo.V3EnableOrganizationAssetRelabel`
 > now defaults to `null` (auto): it is **enabled for new installs** and **left
 > off on upgrades**, so the UI relabel (Organization/Asset replacing
-> ProductType/Product) never flips on unexpectedly for an existing release. To
+> ProductType/Asset) never flips on unexpectedly for an existing release. To
 > opt an upgraded release in, set `dojo.V3EnableOrganizationAssetRelabel: true`
 > explicitly; an explicit `true`/`false` always wins over the auto default.
 

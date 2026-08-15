@@ -42,7 +42,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.core.paginator import Paginator
-from django.db import OperationalError, transaction
+from django.db import IntegrityError, OperationalError, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -57,7 +57,7 @@ from django.utils.translation import gettext as _
 from kombu import Connection
 
 from dojo.celery import app
-from dojo.db_utils import is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.finding.queries import get_authorized_findings
 from dojo.github.services import (
     add_external_issue_github,
@@ -66,6 +66,7 @@ from dojo.github.services import (
     update_external_issue_github,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
@@ -1316,7 +1317,7 @@ class Product_Tab:
     @cached_property
     def _active_endpoints(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return Endpoint.objects.filter(
                 product=self.product,
                 status_endpoint__mitigated=False,
@@ -1336,7 +1337,7 @@ class Product_Tab:
     @cached_property
     def endpoint_hosts_count(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return self._active_endpoints.values("host").distinct().count()
         return self._active_endpoints.values("url__host").distinct().count()
 
@@ -1927,6 +1928,24 @@ ASYNC_DELETE_RETRY_DELAY = 5
 ASYNC_DELETE_MAX_CONFLICT_RETRIES = 3
 
 
+def _is_retryable_delete_conflict(exc):
+    """
+    Whether a delete failure is a lost concurrency race worth retrying.
+
+    Two shapes, both caused by another transaction touching the same rows while the
+    cascade delete runs, and both cleared by re-running the resumable body:
+
+    * a deadlock or serialization failure raised mid-cascade (``OperationalError``); and
+    * a foreign-key violation from an import committing a new child row -- e.g. a
+      ``Test_Import`` for a ``Test`` being deleted -- between the cascade step (which
+      cleared the old children) and the top-level ``obj.delete()`` (``IntegrityError``).
+
+    Any other DB error (a statement timeout, a unique violation, a dropped connection) is
+    not a lost race, so it is surfaced rather than retried.
+    """
+    return is_transient_db_conflict(exc) or is_foreign_key_conflict(exc)
+
+
 @app.task(bind=True)
 def async_delete_task(self, model_label, pk, **kwargs):
     """
@@ -1937,7 +1956,9 @@ def async_delete_task(self, model_label, pk, **kwargs):
     against each other. This retry is the backstop for the conflicts that ordering
     cannot rule out -- a delete overlapping an import, say -- because the aborted
     transaction's work is not wrong, only rolled back, and failing here would leave the
-    object partly deleted.
+    object partly deleted. That overlap has two shapes: a deadlock/serialization failure,
+    and a foreign-key violation when the import commits a new child row referencing a row
+    being deleted (see ``_is_retryable_delete_conflict``); both are retried the same way.
 
     Only applies to background execution: under eager execution Celery re-runs the body
     inline and ignores ``countdown``, which would retry into an unfinished conflicting
@@ -1949,8 +1970,8 @@ def async_delete_task(self, model_label, pk, **kwargs):
     retries = self.request.retries
     try:
         _async_delete_object(model_label, pk, is_retry=retries > 0)
-    except OperationalError as exc:
-        if not is_transient_db_conflict(exc):
+    except (OperationalError, IntegrityError) as exc:
+        if not _is_retryable_delete_conflict(exc):
             raise
         if self.request.is_eager:
             # Verified against celery 5.6.3: under apply() retry re-invokes the body

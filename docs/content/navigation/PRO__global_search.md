@@ -21,8 +21,8 @@ Global search covers these object types:
 | Object type | Notes |
 | --- | --- |
 | **Findings** | |
-| **Assets** | (Products) |
-| **Organizations** | (Product Types) |
+| **Assets** | (Assets) |
+| **Organizations** | (Organizations) |
 | **Engagements** | |
 | **Tests** | |
 | **Endpoints** *or* **Locations** | Whichever your instance uses — instances with [Locations](/asset_modelling/locations/pro__locations_overview/) enabled search Locations; others search Endpoints. |

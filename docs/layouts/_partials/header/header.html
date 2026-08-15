@@ -31,7 +31,7 @@
         {{ $showFlexSearch := .Scratch.Get "showFlexSearch" -}}
         {{ if $showFlexSearch -}}
         <button type="button" id="searchToggleMobile" class="btn btn-link nav-link mx-2 d-lg-none"
-          aria-label="Search website">
+          aria-label="{{ i18n "aria_search" }}">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24"
             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
             stroke-linejoin="round">
@@ -46,7 +46,7 @@
         {{ if site.Params.add_ons.docSearch -}}
         <div id="docsearch" class="d-none" tabindex="-1" aria-disabled="true"></div>
         <button type="button" id="searchToggleMobile" class="btn btn-link nav-link mx-2 d-lg-none"
-          aria-label="Search website">
+          aria-label="{{ i18n "aria_search" }}">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24"
             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
             stroke-linejoin="round">
@@ -61,7 +61,7 @@
         {{ if (in site.Params.doks.sectionNav .Section) -}}
         <button class="btn btn-link d-lg-none" type="button" data-bs-toggle="offcanvas"
           data-bs-target="#offcanvasNavSection" aria-controls="offcanvasNavSection"
-          aria-label="Open section navigation menu">
+          aria-label="{{ i18n "aria_nav_section" }}">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-dots-vertical" width="24"
             height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
             stroke-linejoin="round">
@@ -79,7 +79,7 @@
           <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasNavSectionLabel">{{ .Section | humanize }}</h5>
             <button type="button" class="btn btn-link nav-link p-0 ms-auto" data-bs-dismiss="offcanvas"
-              aria-label="Close">
+              aria-label="{{ i18n "aria_close" }}">
               <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24"
                 viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
                 stroke-linejoin="round">
@@ -91,7 +91,7 @@
           </div>
           <div class="offcanvas-body">
             <aside class="doks-sidebar mt-n3">
-              <nav id="doks-docs-nav" aria-label="Tertiary navigation">
+              <nav id="doks-docs-nav" aria-label="{{ i18n "aria_nav_tertiary" }}">
                 {{ partial "sidebar/section-menu.html" . }}
               </nav>
             </aside>
@@ -101,7 +101,7 @@
 
         <!-- Main navigation button -->
         <button class="btn btn-link nav-link mx-2 order-3 d-lg-none" type="button" data-bs-toggle="offcanvas"
-          data-bs-target="#offcanvasNavMain" aria-controls="offcanvasNavMain" aria-label="Open main navigation menu">
+          data-bs-target="#offcanvasNavMain" aria-controls="offcanvasNavMain" aria-label="{{ i18n "aria_nav_main" }}">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-menu" width="24" height="24"
             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
             stroke-linejoin="round">
@@ -120,7 +120,7 @@
           <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasNavMainLabel">{{ site.Title }}</h5>
             <button type="button" class="btn btn-link nav-link p-0 ms-auto" data-bs-dismiss="offcanvas"
-              aria-label="Close">
+              aria-label="{{ i18n "aria_close" }}">
               <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24"
                 viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
                 stroke-linejoin="round">
@@ -233,7 +233,7 @@
 
             <div class="dropdown mt-1 order-lg-3">
               <button class="btn btn-dropdown dropdown-toggle" id="doks-versions" data-bs-toggle="dropdown"
-                aria-expanded="false" data-bs-display="static" aria-label="Toggle version menu">
+                aria-expanded="false" data-bs-display="static" aria-label="{{ i18n "aria_version_toggle" }}">
                 <span class="d-none">Doks</span> v{{ site.Params.doks.docsVersion }}
                 <span class="dropdown-caret">
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down" width="24"
@@ -270,7 +270,7 @@
               {{ $showFlexSearch := .Scratch.Get "showFlexSearch" -}}
               {{ if $showFlexSearch -}}
               <button type="button" id="searchToggleDesktop"
-                class="btn btn-link nav-link d-none d-lg-flex align-items-center me-2" aria-label="Search website">
+                class="btn btn-link nav-link d-none d-lg-flex align-items-center me-2" aria-label="{{ i18n "aria_search" }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search me-1" width="16"
                   height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                   stroke-linecap="round" stroke-linejoin="round">
@@ -286,7 +286,7 @@
               <!-- DocSearch desktop -->
               {{ if site.Params.add_ons.docSearch -}}
               <button type="button" id="searchToggleDesktop"
-                class="btn btn-link nav-link d-none d-lg-flex align-items-center me-2" aria-label="Search website">
+                class="btn btn-link nav-link d-none d-lg-flex align-items-center me-2" aria-label="{{ i18n "aria_search" }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search me-1" width="16"
                   height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                   stroke-linecap="round" stroke-linejoin="round">
@@ -302,7 +302,7 @@
               <!-- Color mode toggler -->
               {{ if and (eq site.Params.doks.colorMode "auto") site.Params.doks.colorModeToggler -}}
               <button id="buttonColorMode" class="btn btn-link mx-auto nav-link p-0 ms-lg-2 me-lg-1" type="button"
-                aria-label="Toggle theme">
+                aria-label="{{ i18n "aria_toggle_theme" }}">
                 <svg data-bs-theme-value="dark" xmlns="http://www.w3.org/2000/svg"
                   class="icon icon-tabler icon-tabler-moon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
                   stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -374,11 +374,18 @@
           </div>
           <div class="w-100 mt-1">
             <ul class="navbar-nav flex-grow-1">
-              {{ $current := index (split .RelPermalink "/") 1 }}
+              {{- /* Compare section segments with the language prefix stripped from
+                   both sides. Translated menu URLs start with /<lang>/, and so does
+                   RelPermalink, so comparing raw segment 1 would match "de" against
+                   "de" and light up every item as active on every page. */ -}}
+              {{ $langPrefix := printf "/%s" .Site.Language.Lang }}
+              {{ $rel := strings.TrimPrefix $langPrefix .RelPermalink }}
+              {{ $current := index (split $rel "/") 1 }}
               {{ if eq $current "" }}{{ $current = "en" }}{{ end }}
 
               {{ range .Site.Menus.main }}
-              {{ $menuSegment := index (split .URL "/") 1 }}
+              {{ $menuUrl := strings.TrimPrefix $langPrefix .URL }}
+              {{ $menuSegment := index (split $menuUrl "/") 1 }}
               {{ $active := eq $menuSegment $current }}
               {{ if .HasChildren -}}
               <li class="nav-item dropdown">

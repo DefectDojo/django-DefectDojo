@@ -1,7 +1,6 @@
 import inspect
 import sys
 
-from django.conf import settings
 from rest_framework.serializers import ModelSerializer
 
 from dojo.api_v2.prefetch import (
@@ -10,6 +9,7 @@ from dojo.api_v2.prefetch import (
 from dojo.api_v2.prefetch import utils
 from dojo.api_v2.prefetch.authorized_querysets import get_authorized_queryset
 from dojo.location.api.serializers import LocationFindingReferenceSerializer, LocationSerializer
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import FileUpload, Finding
 
@@ -96,7 +96,7 @@ class _Prefetcher:
         :param field_name: the name of the field we're getting a value for
         :return: a tuple of (the value of the field, whether the field is 'many'), or None if no override exists
         """
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             if isinstance(model_instance, Finding) and field_name == "endpoints":
                 return model_instance.locations, True
         return None
