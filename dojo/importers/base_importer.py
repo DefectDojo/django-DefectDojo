@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.db import IntegrityError
+from django.db import DEFAULT_DB_ALIAS, DatabaseError, IntegrityError, connections, transaction
 from django.urls import reverse
 from django.utils.timezone import make_aware
 
@@ -98,6 +98,10 @@ class BaseImporter(ImporterOptions):
         # batches completed within the timeout; False for 'async' (dispatched,
         # not awaited) or when an 'async_wait' join timed out/errored.
         self.deduplication_complete = False
+        # Set by update_timestamps() when it moves the engagement's target end, which is
+        # the only field of the engagement the importer ever changes. The closing
+        # write-back skips the engagement unless this is True -- see process_scan().
+        self.engagement_target_end_updated = False
 
     def post_processing_dispatch_kwargs(self, **kwargs):
         """
@@ -407,9 +411,16 @@ class BaseImporter(ImporterOptions):
         # If the supplied scan date is greater than the current configured
         # target end date on the engagement
         if self.test.engagement.engagement_type == "CI/CD":
-            self.test.engagement.target_end = max_safe(
+            engagement_target_end = max_safe(
                 [self.scan_date.date(), self.test.engagement.target_end],
             )
+            # target_end is the only engagement field the importer touches, so recording
+            # whether it actually moved is enough to tell the closing write-back whether
+            # the engagement needs saving at all. Anything else that starts mutating the
+            # engagement mid-import has to flag itself here too, or it will not be saved.
+            if engagement_target_end != self.test.engagement.target_end:
+                self.test.engagement.target_end = engagement_target_end
+                self.engagement_target_end_updated = True
         # Set the target end date on the test in a similar fashion
         max_test_start_date = max_safe([self.scan_date, self.test.target_end])
         # Quick check to make sure we have a datetime that is timezone aware
@@ -464,10 +475,10 @@ class BaseImporter(ImporterOptions):
 
     def update_import_history(
         self,
-        new_findings: list[Finding] | None = None,
-        closed_findings: list[Finding] | None = None,
-        reactivated_findings: list[Finding] | None = None,
-        untouched_findings: list[Finding] | None = None,
+        new_findings: list[int] | None = None,
+        closed_findings: list[int] | None = None,
+        reactivated_findings: list[int] | None = None,
+        untouched_findings: list[int] | None = None,
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
@@ -530,23 +541,22 @@ class BaseImporter(ImporterOptions):
 
         # In longer running imports it can happen that the async_dupe_delete task removes a finding before the history record is created
         # We filter out these findings here to avoid FK violations (IntegrityError)
-        all_findings = []
+        all_finding_ids = []
         for list_, _ in finding_action_mappings:
-            all_findings.extend(list_)
-        existing_findings = finding_helper.filter_findings_by_existence(all_findings) if all_findings else []
-        existing_ids = {f.id for f in existing_findings}
+            all_finding_ids.extend(list_)
+        existing_ids = finding_helper.filter_finding_ids_by_existence(all_finding_ids) if all_finding_ids else set()
 
         # Collect all import history records using the validated IDs
         import_history_records = []
-        for findings, action in finding_action_mappings:
+        for finding_ids, action in finding_action_mappings:
             import_history_records.extend(
                 Test_Import_Finding_Action(
                     test_import=test_import,
-                    finding_id=finding.id,
+                    finding_id=finding_id,
                     action=action,
                 )
-                for finding in findings
-                if finding.id in existing_ids
+                for finding_id in finding_ids
+                if finding_id in existing_ids
             )
 
         # Bulk create all at once and let Django handle batching internally.
@@ -648,6 +658,20 @@ class BaseImporter(ImporterOptions):
 
         return message
 
+    @staticmethod
+    def _is_vanished_row_error(exception: DatabaseError) -> bool:
+        """
+        Return True when `exception` is Django reporting that a forced UPDATE matched no rows.
+
+        Model.save_base raises a bare DatabaseError for this; every genuine database
+        failure arrives as a subclass (IntegrityError, OperationalError, DataError, ...),
+        so the exact class is the discriminator and the message only a second opinion.
+        Classifying on the exception rather than with a follow-up query matters: a real
+        failure can leave the connection in an aborted transaction, where the query would
+        raise in turn and bury the error that actually needs reporting.
+        """
+        return type(exception) is DatabaseError and "did not affect any rows" in str(exception)
+
     def save_without_resurrecting(self, instance: Engagement | Test) -> None:
         """
         Persist an import target, refusing to re-create it if it was deleted mid-import.
@@ -669,22 +693,40 @@ class BaseImporter(ImporterOptions):
         Neither is a save the importer should be making: the target of the import is gone,
         so the import cannot complete. Fail with a message that says exactly that.
 
-        The row is checked before the write rather than relying on save(force_update=True).
-        A forced update raises from inside the atomic block that Model.save_base opens
-        without a savepoint, which marks the whole surrounding transaction for rollback --
-        the caller's failure handling would then hit TransactionManagementError instead of
-        being able to record why the import failed. Costing one indexed primary-key lookup
-        keeps the transaction usable.
+        force_update=True is what detects it. Django then raises instead of falling back to
+        an INSERT, and it does so from the same statement that would have done the damage,
+        so a delete committing mid-check cannot slip past -- which a separate "does the row
+        still exist" SELECT could not promise, and which costs no query at all rather than
+        one per save.
         """
-        if instance.pk is not None and not type(instance)._base_manager.filter(pk=instance.pk).exists():
+        if instance.pk is None:
+            # An insert, so there is nothing to resurrect, and Django cannot force an
+            # update without a primary key.
+            instance.save()
+            return
+
+        try:
+            instance.save(force_update=True)
+        except DatabaseError as exception:
+            if not self._is_vanished_row_error(exception):
+                raise
+            # The UPDATE itself succeeded -- it simply matched no rows -- so nothing needs
+            # rolling back. Django marks the transaction for rollback regardless, because
+            # Model.save_base wraps the write in mark_for_rollback_on_error, and that flag
+            # would make the caller's failure handling raise TransactionManagementError
+            # instead of recording why the import failed. Clear it so the caller can still
+            # use its connection. No-op outside a transaction, which is where the importer
+            # runs today (no ATOMIC_REQUESTS, no atomic block around process_scan).
+            using = instance._state.db or DEFAULT_DB_ALIAS
+            if connections[using].in_atomic_block:
+                transaction.set_rollback(False, using=using)
             msg = (
                 f"The {instance._meta.verbose_name} this scan was being imported into "
                 f"(id {instance.pk}) was deleted while the scan was being processed, so "
                 f"the import could not be completed. Nothing was imported. Re-run the "
                 f"import against a {instance._meta.verbose_name} that still exists."
             )
-            raise ValidationError(msg)
-        instance.save()
+            raise ValidationError(msg) from exception
 
     def update_test_progress(
         self,
@@ -845,6 +887,20 @@ class BaseImporter(ImporterOptions):
         finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
         # Return the finding if all else is good
         return finding
+
+    def persist_new_findings(self, prepared_findings: list[Finding]) -> list[Finding]:
+        """
+        Persist a batch of new findings that have already been fully prepared
+        (scalar overrides applied, hash_code computed) and have no primary key yet.
+
+        Default: an ordinary per-instance save, in the order given. Exists as an
+        override seam so a downstream edition can swap the write strategy (e.g. a
+        bulk insert) without reimplementing the grouping/tagging/location/
+        vulnerability-id processing that runs on the returned, now-saved findings.
+        """
+        for finding in prepared_findings:
+            finding.save_no_options()
+        return prepared_findings
 
     def process_finding_groups(
         self,
@@ -1034,10 +1090,18 @@ class BaseImporter(ImporterOptions):
         """Accumulate a delete+insert of Finding_CWE rows for a reimported finding when its CWEs changed."""
         new_cwes = set(self.finding_cwe_values(finding))
         # finding_cwe_set is prefetched on reimport candidates (build_candidate_scope_queryset).
-        existing_cwes = {row.cwe for row in finding.finding_cwe_set.all()}
+        # A finding that has not been written yet has no persisted CWEs, and reading the reverse
+        # relation on it raises ("instance needs to have a primary key value before this
+        # relationship can be used"). Treating it as empty is exact rather than a workaround:
+        # there are no rows to compare against, so every parsed CWE is new. This lets an importer
+        # that buffers inserts reconcile a finding's CWEs before flushing the buffer.
+        existing_cwes = {row.cwe for row in finding.finding_cwe_set.all()} if finding.pk else set()
         if existing_cwes == new_cwes:
             return
-        self.pending_cwe_deletes.append(finding.id)
+        # Nothing to delete for a finding with no row yet; appending None would put a NULL in the
+        # filter that flush_vulnerability_ids() builds.
+        if finding.pk:
+            self.pending_cwe_deletes.append(finding.id)
         self.pending_cwes.extend([Finding_CWE(finding=finding, cwe=cwe) for cwe in new_cwes])
 
     def flush_vulnerability_ids(self) -> None:
@@ -1080,7 +1144,12 @@ class BaseImporter(ImporterOptions):
             for unsaved_file in finding.unsaved_files:
                 data = base64.b64decode(unsaved_file.get("data"))
                 title = unsaved_file.get("title", "<No title>")
-                file_upload, _ = FileUpload.objects.get_or_create(title=title)
+                # Always a fresh row. Matching on title alone reused whatever
+                # FileUpload already happened to carry that name — including one
+                # attached to a finding in an unrelated product — and the save()
+                # below then repointed it at this scan's content, so the other
+                # finding silently started serving this file instead of its own.
+                file_upload = FileUpload.objects.create(title=title)
                 file_upload.file.save(title, ContentFile(data))
                 file_upload.save()
                 finding.files.add(file_upload)
@@ -1110,7 +1179,10 @@ class BaseImporter(ImporterOptions):
         )
         # Remove risk acceptance if present (vulnerability is now fixed)
         # risk_unaccept will check if finding.risk_accepted is True before proceeding
-        ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
+        ra_helper.risk_unaccept(
+            self.user, finding, perform_save=False, post_comments=False,
+            source="reimport", reason="the scan no longer reports this finding",
+        )
         self.location_handler.record_mitigations_for_finding(finding, self.user)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
@@ -1128,6 +1200,13 @@ class BaseImporter(ImporterOptions):
         findings_reactivated=None,
         findings_untouched=None,
     ):
+        """
+        new_findings/findings_mitigated/findings_reactivated/findings_untouched are
+        ids, not instances (M1) -- nothing here needs a live Finding until the
+        notification is actually built, and then only a capped, ordered slice of it
+        (a reimport that touches thousands of findings should not template all of
+        them into an email/webhook body).
+        """
         if findings_untouched is None:
             findings_untouched = []
         if findings_reactivated is None:
@@ -1139,48 +1218,55 @@ class BaseImporter(ImporterOptions):
         logger.debug("Scan added notifications")
 
         # When deduplication has finished (synchronous mode, or async_wait after the
-        # join), the in-memory findings still carry their pre-dedup duplicate=False
-        # flag because deduplication runs on separately-fetched instances. Refresh the
-        # flag from the database and split each list into "real" and duplicate findings
-        # so the notification reflects post-dedup reality instead of counting/listing
-        # deduplicated findings as brand new. In plain async mode dedup has not run yet,
-        # so we leave the lists untouched (best-effort, historical behavior).
-        findings_new_duplicate: list[Finding] = []
-        findings_reactivated_duplicate: list[Finding] = []
-        findings_untouched_duplicate: list[Finding] = []
+        # join), the ids collected during matching still reflect pre-dedup reality
+        # because deduplication runs on separately-fetched instances. Split each list
+        # of ids into "real" and duplicate ids from a fresh query so the notification
+        # reflects post-dedup reality instead of counting/listing deduplicated
+        # findings as brand new. In plain async mode dedup has not run yet, so we
+        # leave the lists untouched (best-effort, historical behavior).
+        findings_new_duplicate_ids: list[int] = []
+        findings_reactivated_duplicate_ids: list[int] = []
+        findings_untouched_duplicate_ids: list[int] = []
         if getattr(self, "deduplication_complete", False):
-            all_ids = [f.id for f in (*new_findings, *findings_reactivated, *findings_untouched)]
+            all_ids = [*new_findings, *findings_reactivated, *findings_untouched]
             duplicate_ids = set()
             if all_ids:
                 duplicate_ids = set(
                     Finding.objects.filter(id__in=all_ids, duplicate=True).values_list("id", flat=True),
                 )
 
-            def _split(findings):
-                kept, duplicates = [], []
-                for finding in findings:
-                    if finding.id in duplicate_ids:
-                        # refresh the in-memory flag so any template logic is correct
-                        finding.duplicate = True
-                        duplicates.append(finding)
-                    else:
-                        kept.append(finding)
+            def _split(ids):
+                kept = [i for i in ids if i not in duplicate_ids]
+                duplicates = [i for i in ids if i in duplicate_ids]
                 return kept, duplicates
 
-            new_findings, findings_new_duplicate = _split(new_findings)
-            findings_reactivated, findings_reactivated_duplicate = _split(findings_reactivated)
-            findings_untouched, findings_untouched_duplicate = _split(findings_untouched)
+            new_findings, findings_new_duplicate_ids = _split(new_findings)
+            findings_reactivated, findings_reactivated_duplicate_ids = _split(findings_reactivated)
+            findings_untouched, findings_untouched_duplicate_ids = _split(findings_untouched)
             # Recompute the headline count to exclude findings that turned out to be
             # duplicates of an existing finding (they are not genuinely new activity).
             updated_count = len(new_findings) + len(findings_reactivated) + len(findings_mitigated)
 
-        new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
-        findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
-        findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
-        findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
-        findings_new_duplicate = sorted(findings_new_duplicate, key=lambda x: x.numerical_severity)
-        findings_reactivated_duplicate = sorted(findings_reactivated_duplicate, key=lambda x: x.numerical_severity)
-        findings_untouched_duplicate = sorted(findings_untouched_duplicate, key=lambda x: x.numerical_severity)
+        max_findings = settings.NOTIFICATION_SCAN_ADDED_MAX_FINDINGS
+
+        def _hydrate(ids):
+            # duplicate is re-read fresh here, so unlike the old in-memory instances
+            # there is no separate write-back needed to keep template logic correct.
+            if not ids:
+                return []
+            return list(
+                Finding.objects.filter(id__in=ids)
+                .only("id", "title", "severity", "numerical_severity", "duplicate")
+                .order_by("numerical_severity")[:max_findings],
+            )
+
+        new_findings = _hydrate(new_findings)
+        findings_mitigated = _hydrate(findings_mitigated)
+        findings_reactivated = _hydrate(findings_reactivated)
+        findings_untouched = _hydrate(findings_untouched)
+        findings_new_duplicate = _hydrate(findings_new_duplicate_ids)
+        findings_reactivated_duplicate = _hydrate(findings_reactivated_duplicate_ids)
+        findings_untouched_duplicate = _hydrate(findings_untouched_duplicate_ids)
 
         title = (
             f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"

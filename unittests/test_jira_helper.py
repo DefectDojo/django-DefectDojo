@@ -232,6 +232,9 @@ class JIRAHelperTest(TestCase):
     ):
         finding = Mock(id=1)
         finding.has_jira_issue = True
+        # pre_delete records the finding's groups so post_delete can drop the ones
+        # left empty; this Mock stands in for a finding that belongs to none.
+        finding.finding_group_set.values_list.return_value = []
 
         finding_helper.finding_pre_delete(sender=Mock(), instance=finding)
 
@@ -239,6 +242,7 @@ class JIRAHelperTest(TestCase):
         finding.found_by.clear.assert_called_once_with()
         delete_related_notes.assert_called_once_with(finding)
         delete_related_files.assert_called_once_with(finding)
+        self.assertEqual([], finding._groups_pending_empty_check)
 
 
 class JIRADeleteCascadeTest(DojoTestCase):

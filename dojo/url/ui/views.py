@@ -12,6 +12,7 @@ from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
@@ -117,7 +118,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         messages.add_message(
             request,
             messages.ERROR,
-            "Viewing this object is only available in the Pro UI.",
+            _("Viewing this object is only available in the Pro UI."),
             extra_tags="alert-danger",
         )
         raise Http404
@@ -166,7 +167,12 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         # In endpoint view, show findings and metadata for the specific location.
         all_findings = base_findings.filter(locations__location=location).distinct()
         # Gather metadata for the location as a dictionary of name/value pairs.
-        metadata = dict(location.location_meta.values_list("name", "value"))
+        metadata = dict(
+            DojoMeta.objects.filter(
+                location=location,
+                location_product__in=get_authorized_products(Permissions.Product_View, request.user),
+            ).values_list("name", "value"),
+        )
 
     # Filter active findings for the location or host, ordered by severity
     active_findings = all_findings.filter(locations__status=FindingLocationStatus.Active).order_by("numerical_severity")
@@ -325,14 +331,14 @@ def edit_endpoint(request, location_id):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "That URL already exists.",
+                    _("That URL already exists."),
                     extra_tags="alert-danger",
                 )
             else:
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Endpoint updated successfully.",
+                    _("Endpoint updated successfully."),
                     extra_tags="alert-success",
                 )
             # Redirect to the endpoint view after successful update
@@ -358,7 +364,7 @@ def add_endpoint_to_product(request, product_id):
             # Associate the new endpoint with the selected product
             url.location.associate_with_product(product)
             # Display a success message to the user
-            messages.add_message(request, messages.SUCCESS, "Endpoint added successfully.", extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, _("Endpoint added successfully."), extra_tags="alert-success")
             # Redirect to the endpoint list view for the product
             return HttpResponseRedirect(reverse("endpoint") + f"?product={product_id}")
 
@@ -380,7 +386,7 @@ def add_endpoint_to_finding(request, finding_id):
             # Associate the new endpoint with the selected finding
             url.location.associate_with_finding(finding)
             # Display a success message to the user
-            messages.add_message(request, messages.SUCCESS, "Endpoint added successfully.", extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, _("Endpoint added successfully."), extra_tags="alert-success")
             # Redirect to the endpoint list view for the product
             return HttpResponseRedirect(reverse("endpoint") + f"?product={product.id}")
     product_tab = Product_Tab(product, "Add Endpoint", tab="endpoints")
@@ -398,7 +404,7 @@ def delete_endpoint(request, location_id):
             # Delete the location, which will also cascade delete related findings and product references
             location.delete()
             messages.add_message(
-                request, messages.SUCCESS, "Endpoint and relationships removed.", extra_tags="alert-success",
+                request, messages.SUCCESS, _("Endpoint and relationships removed."), extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("endpoint"))
     # Preview the relationships that will be deleted along with the endpoint.
@@ -423,9 +429,16 @@ def delete_endpoint(request, location_id):
 def manage_meta_data(request, location_id):
     # Retrieve the Location object by ID and filter its associated metadata
     location = _get_location_or_404(request, location_id, "edit")
-    meta_data_query = DojoMeta.objects.filter(location=location)
-    # Map the foreign key for the formset to the location
-    form_mapping = {"location": location}
+    scoped_products = get_authorized_products(Permissions.Product_Edit, request.user)
+    meta_data_query = DojoMeta.objects.filter(location=location, location_product__in=scoped_products)
+    # The route carries no product, so a new entry is attributed to the caller's first
+    # product on this Location. Any of them is theirs to edit.
+    form_mapping = {
+        "location": location,
+        "location_product": Product.objects.filter(
+            locations__location=location, id__in=scoped_products,
+        ).order_by("id").first(),
+    }
     # Initialize the DojoMetaFormSet with the metadata queryset and mapping
     formset = DojoMetaFormSet(queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
     if request.method == "POST":
@@ -433,7 +446,7 @@ def manage_meta_data(request, location_id):
         if formset.is_valid():
             formset.save()
             messages.add_message(
-                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success",
+                request, messages.SUCCESS, _("Metadata updated successfully."), extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_endpoint", args=(location_id,)))
     add_breadcrumb(parent=location, title="Manage Metadata", top_level=False, request=request)
@@ -582,7 +595,7 @@ def endpoint_bulk_update_all(request, product_id=None):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Unable to process bulk update. Required fields were not selected.",
+                _("Unable to process bulk update. Required fields were not selected."),
                 extra_tags="alert-danger",
             )
     return HttpResponseRedirect(reverse("endpoint", args=()))
@@ -602,7 +615,7 @@ def finding_location_bulk_update(request, finding_id):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Selected endpoints have been removed from this finding.",
+                _("Selected endpoints have been removed from this finding."),
                 extra_tags="alert-success",
             )
         # Check that endpoints and statuses are selected before proceeding
@@ -615,7 +628,7 @@ def finding_location_bulk_update(request, finding_id):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Bulk edit of endpoints was successful. Check to make sure it is what you intended.",
+                _("Bulk edit of endpoints was successful. Check to make sure it is what you intended."),
                 extra_tags="alert-success",
             )
         else:
@@ -623,7 +636,7 @@ def finding_location_bulk_update(request, finding_id):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Unable to process bulk update. Required fields were not selected.",
+                _("Unable to process bulk update. Required fields were not selected."),
                 extra_tags="alert-danger",
             )
     return redirect(request, request.POST["return_url"])
@@ -641,7 +654,7 @@ def migrate_endpoints_view(request):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Endpoint migration completed successfully.",
+                _("Endpoint migration completed successfully."),
                 extra_tags="alert-success",
             )
         except Exception as e:

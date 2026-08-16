@@ -1,6 +1,7 @@
 import logging
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dojo.labels import get_labels
 from dojo.models import Dojo_User
@@ -36,7 +37,7 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 class Add_Product_Type_AuthorizedUsersForm(forms.Form):
     users = forms.ModelMultipleChoiceField(
-        queryset=Dojo_User.objects.none(), required=True, label="Users",
+        queryset=Dojo_User.objects.none(), required=True, label=_("Users"),
     )
 
     def __init__(self, *args, product_type=None, **kwargs):

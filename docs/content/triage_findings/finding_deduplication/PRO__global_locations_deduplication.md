@@ -23,7 +23,7 @@ Once the feature is enabled, **Global Locations** becomes available as an option
 
 ## Configuring Global Locations Deduplication
 
-Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout; see [The Settings Menu](/navigation/pro__settings_menu/)).
+Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
 
 When you select **Global Locations**, the Hash Code Fields selector is hidden (it does not apply) and a **Location Types** selector appears instead.
 

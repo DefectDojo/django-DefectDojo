@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -12,7 +13,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters"
-                                    aria-label="Filters"
+                                    aria-label="{% trans 'Filters' %}"
                                     data-toggle="collapse"
                                     data-target="#the-filters"
                                     class="btn btn-primary toggle-filters">
@@ -24,7 +25,7 @@
                                         id="dropdownMenu1"
                                         data-toggle="dropdown"
                                         aria-expanded="true"
-                                        aria-label="Endpoint actions">
+                                        aria-label="{% trans 'Endpoint actions' %}">
                                     <span class="fa-solid fa-screwdriver-wrench"></span>
                                     <span class="caret"></span>
                                 </button>
@@ -55,16 +56,16 @@
                             <button class="btn btn-sm btn-primary"
                                     type="submit"
                                     id="remedy_endpoint"
-                                    title="Mitigate Endpoints">Bulk Mitigate</button>
+                                    title="{% trans 'Mitigate Endpoints' %}">Bulk Mitigate</button>
                         {% endif %}
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"delete" %}
                             <button type="button"
                                     class="btn btn-sm btn-primary"
                                     data-toggle="tooltip"
                                     data-placement="bottom"
-                                    title="Delete Endpoint"
-                                    aria-label="Delete endpoint">
-                                <a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
+                                    title="{% trans 'Delete Endpoint' %}"
+                                    aria-label="{% trans 'Delete endpoint' %}">
+                                <a class="white-color delete-bulk" href="#" alt="{% trans 'Delete Endpoints' %}">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </button>
@@ -78,14 +79,14 @@
                         <tr>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                                 <th class="centered"
-                                    title="Select all visible endpoints."
-                                    aria-label="Select all visible endpoints."
+                                    title="{% trans 'Select all visible endpoints.' %}"
+                                    aria-label="{% trans 'Select all visible endpoints.' %}"
                                     id="bulk_edit"
                                     scope="col">
                                     <form class="inline-form centered" action="#">
-                                        <input aria-label="Select all visible endpoints checkbox"
+                                        <input aria-label="{% trans 'Select all visible endpoints checkbox' %}"
                                                type="checkbox"
-                                               title="Select All"
+                                               title="{% trans 'Select All' %}"
                                                name="select_all"
                                                id="select_all" />
                                     </form>
@@ -123,7 +124,7 @@
                                         <a href="{% url 'view_endpoint' location.id %}" title="{{ location }}">{{ location|url_shortener }}
                                             {% if location.host_validation_failure %}
                                                 <span data-toggle="tooltip"
-                                                      title="Endpoint is broken. Check documentation to look for fix process">&#128681;</span>
+                                                      title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}">&#128681;</span>
                                             {% endif %}
                                         </a>
                                         {% include "dojo/snippets/tags.html" with tags=location.tags.all %}

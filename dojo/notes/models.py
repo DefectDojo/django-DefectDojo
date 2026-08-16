@@ -22,7 +22,7 @@ class Notes(models.Model):
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
     author = models.ForeignKey("dojo.Dojo_User", related_name="editor_notes_set", editable=False, on_delete=models.CASCADE)
-    private = models.BooleanField(default=False)
+    private = models.BooleanField(default=False, help_text="Only you and superusers can see this note. It is also left out of reports and issue-tracker sync.")
     edited = models.BooleanField(default=False)
     editor = models.ForeignKey("dojo.Dojo_User", related_name="author_notes_set", editable=False, null=True, on_delete=models.CASCADE)
     edit_time = models.DateTimeField(null=True, editable=False,

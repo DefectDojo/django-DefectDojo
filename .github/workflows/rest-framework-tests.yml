@@ -68,7 +68,20 @@ jobs:
 
       # phased startup so we can use the exit code from unit test container
       - name: Start Postgres and webhook.endpoint
-        run: docker compose up --no-deps -d postgres webhook.endpoint
+        timeout-minutes: 10
+        # image pulls from Docker Hub time out every so often, so retry before failing the job
+        run: |-
+             RETRY=0
+             until docker compose up --no-deps -d postgres webhook.endpoint
+               do
+               if [[ $RETRY -gt 2 ]]; then
+                 echo "ERROR: could not start Postgres and webhook.endpoint after $RETRY retries"
+                 exit 1
+               fi
+               RETRY=$((RETRY+1))
+               echo "Attempt $RETRY to start Postgres and webhook.endpoint"
+               sleep 15
+             done
 
       - name: Wait for Postgres to accept connections
         run: |

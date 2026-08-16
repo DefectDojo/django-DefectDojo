@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -11,10 +12,10 @@
                     <h3 class="has-filters">
                         {{ name }}
                         <div class="dropdown pull-right">
-                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"add" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true" aria-label="Endpoint actions">
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Endpoint actions' %}">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
@@ -47,13 +48,13 @@
                     {% endif %}
                         {% csrf_token %}
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
-						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Mitigate Endpoints">
+						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="{% trans 'Mitigate Endpoints' %}">
                 Bulk Mitigate
             </button>
                         {% endif %}
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"delete" %}
-						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint" aria-label="Delete endpoint">
-								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
+						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="{% trans 'Delete Endpoint' %}" aria-label="{% trans 'Delete endpoint' %}">
+								<a class="white-color delete-bulk" href="#" alt="{% trans 'Delete Endpoints' %}">
 								<i class="fa-solid fa-trash"></i>
 								</a>
 						</button>
@@ -70,9 +71,9 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
-                            <th class="centered" title="Select all visible endpoints." aria-label="Select all visible endpoints." id="bulk_edit" scope="col">
+                            <th class="centered" title="{% trans 'Select all visible endpoints.' %}" aria-label="{% trans 'Select all visible endpoints.' %}" id="bulk_edit" scope="col">
                                 <form class="inline-form centered" action="#">
-                                    <input aria-label="Select all visible endpoints checkbox" type="checkbox" title="Select All" name="select_all" id="select_all"></input>
+                                    <input aria-label="{% trans 'Select all visible endpoints checkbox' %}" type="checkbox" title="{% trans 'Select All' %}" name="select_all" id="select_all"></input>
                                 </form>
                             </th>
                             {% endif %}
@@ -105,7 +106,7 @@
                                   <td><a href="{% url 'view_endpoint_host' e.id %}" title="{{ e.host }}">{{ e.host|url_shortener }}</a>
                                 {% else %}
                                 <td>
-                                  <a href="{% url 'view_endpoint' e.id %}" title="{{ e }}">{{ e|url_shortener }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                  <a href="{% url 'view_endpoint' e.id %}" title="{{ e }}">{{ e|url_shortener }}{% if e.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>

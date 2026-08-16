@@ -173,6 +173,17 @@ class TestGovulncheckParserV2(DojoTestCase):
             self.assertEqual(17, severities.count("Low"))
             self.assertEqual(26, severities.count("Info"))
 
+            # Pin the description output format: these exact surfaces are part of
+            # the parser's observable contract (users and downstream tooling read
+            # them), so changes to them must be deliberate, not incidental.
+            high = next(f for f in findings if f.severity == "High")
+            self.assertIn("**Reachability:** symbol (High severity)", high.description)
+            self.assertIn("**Traces:**", high.description)
+            low = next(f for f in findings if f.severity == "Low")
+            self.assertIn("**Reachability:** package (Low severity)", low.description)
+            info = next(f for f in findings if f.severity == "Info")
+            self.assertIn("**Reachability:** module (Info severity)", info.description)
+
             # Every finding maps to a vulnerable component.
             self.assertTrue(all(f.component_name for f in findings))
 
