@@ -41,3 +41,10 @@
   [ja.params]
     languageISO = "JA"
     languageTag = "ja"
+
+[pt-br]
+  languageName = "Português (Brasil)"
+  weight = 60
+  [pt-br.params]
+    languageISO = "PT"
+    languageTag = "pt-br"
