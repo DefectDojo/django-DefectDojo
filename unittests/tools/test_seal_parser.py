@@ -34,7 +34,7 @@ class TestSealParser(DojoTestCase):
 
     def test_parse_file_with_many_vulns(self):
         findings = self.parse("many_vulns.csv")
-        self.assertEqual(7, len(findings))
+        self.assertEqual(8, len(findings))
 
         with self.subTest(i=0):
             finding = findings[0]
@@ -64,6 +64,13 @@ class TestSealParser(DojoTestCase):
             finding = findings[6]
             self.assertEqual("github.com/gin-gonic/gin", finding.component_name)
             self.assertIn("1.7.7+sp1", finding.mitigation)
+
+        with self.subTest(i=7):
+            # Sealable, but no sealed version published yet: nothing to update to
+            finding = findings[7]
+            self.assertEqual("requests", finding.component_name)
+            self.assertFalse(finding.fix_available)
+            self.assertEqual("Seal has no sealed version for this package version yet.", finding.mitigation)
 
     def test_parse_file_with_shaded_packages(self):
         findings = self.parse("shaded.csv")

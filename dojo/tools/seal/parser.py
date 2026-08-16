@@ -113,7 +113,8 @@ class SealParser:
             return []
 
         package = f"{package_name} {package_version}".strip()
-        if can_seal and sealed_version:
+        has_fix = can_seal and bool(sealed_version)
+        if has_fix:
             mitigation = SEALED_MITIGATION_TEMPLATE.format(
                 package=package_name, sealed_version=sealed_version,
             )
@@ -142,7 +143,7 @@ class SealParser:
                 component_name=package_name,
                 component_version=package_version,
                 vuln_id_from_tool=vulnerability_id,
-                fix_available=can_seal,
+                fix_available=has_fix,
                 static_finding=True,
                 dynamic_finding=False,
             )
