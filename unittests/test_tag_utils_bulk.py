@@ -551,6 +551,79 @@ class BulkRemoveAllTagsLockOrderTest(TestCase):
         )
 
 
+class FindingDeleteTagLockOrderTest(TestCase):
+
+    # Regression: a single-object DELETE /api/v2/findings/{id}/ (Finding.delete())
+    # decremented tag counts through tagulous's per-object clear(), which issues one
+    # count UPDATE per tag in the manager's own order -- NOT the ascending tag-id order
+    # that bulk_remove_all_tags (#15486) and the add path (#15652) use. Because a count
+    # UPDATE takes a row lock, two concurrent single-finding deletes touching an
+    # overlapping tag set could take those tag-row locks in opposite orders and deadlock
+    # (Postgres 40P01, "while updating tuple ... in relation dojo_tagulous_finding_tags").
+    # Routing the delete through bulk_remove_all_tags gives every caller one shared lock
+    # order, so the cycle cannot form.
+
+    def setUp(self):
+        self.reporter = User.objects.create_user(username="finding-del-lock-user")
+        product_type = Product_Type.objects.create(name="PT-Finding-Del-Lock")
+        product = Product.objects.create(
+            name="Finding Del Lock Product", description="test", prod_type=product_type,
+        )
+        engagement = Engagement.objects.create(
+            name="E-Finding-Del-Lock", product=product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        test_type = Test_Type.objects.create(name="Finding Del Lock Test Type")
+        self.test = Test.objects.create(
+            title="T-Finding-Del-Lock", engagement=engagement, test_type=test_type,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+
+    def test_finding_delete_decrements_tag_counts_in_ascending_tag_id_order(self):
+        """
+        The decrement UPDATEs must be ordered, because their order is the lock order.
+
+        Tags are attached in an order unrelated to their ids so that the manager's own
+        iteration order and "ascending id" cannot coincide by luck.
+        """
+        finding = Finding.objects.create(
+            title="Finding Del Lock", severity="Low", test=self.test, reporter=self.reporter,
+        )
+        finding.tags = ["zeta-tag", "alpha-tag", "mid-tag"]
+        finding.save()
+
+        tag_model = Finding.tags.tag_model
+        our_tag_ids = set(
+            tag_model.objects.filter(
+                name__in=["zeta-tag", "alpha-tag", "mid-tag"],
+            ).values_list("pk", flat=True),
+        )
+        self.assertEqual(len(our_tag_ids), 3, "expected the three tags to exist")
+
+        locked_order = []
+        original_filter = tag_model.objects.filter
+
+        def record_filter(*args, **kwargs):
+            # Only the per-tag count UPDATEs (filter(pk=<tag id>).update(...)) take the
+            # row locks that can deadlock; ignore any other tag-model lookups.
+            if kwargs.get("pk") in our_tag_ids:
+                locked_order.append(kwargs["pk"])
+            return original_filter(*args, **kwargs)
+
+        with patch.object(tag_model.objects, "filter", side_effect=record_filter):
+            finding.delete(product_grading_option=False)
+
+        self.assertEqual(
+            len(locked_order), 3,
+            msg=f"expected one decrement per tag, got {locked_order}",
+        )
+        self.assertEqual(
+            locked_order, sorted(locked_order),
+            msg="tag rows must be locked in ascending id order so concurrent single-finding "
+                f"deletes cannot deadlock; got {locked_order} (tag ids: {sorted(our_tag_ids)})",
+        )
+
+
 class BulkAddTagsToInstancesLockOrderTest(TestCase):
 
     # Regression (import deadlock): bulk_add_tags_to_instances issued the per-tag count

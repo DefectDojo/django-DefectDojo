@@ -735,6 +735,18 @@ class Finding(BaseModel):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
         finding_helper.finding_delete(self, push_to_jira=push_to_jira)
+        # Remove this finding's tags in a deterministic (ascending tag-id) order BEFORE
+        # the cascade. Left to super().delete(), tagulous's per-object clear() decrements
+        # the shared tag-count rows one UPDATE at a time in the manager's own order, so
+        # two concurrent single-finding deletes touching an overlapping tag set can take
+        # those row locks in opposite orders and deadlock (Postgres 40P01, "while updating
+        # tuple ... in relation dojo_tagulous_finding_tags"). bulk_remove_all_tags issues
+        # the same count decrements in ascending tag-id order -- the shared lock order
+        # already used by the bulk cascade delete and the import add path -- so the cycle
+        # cannot form. It also clears the through rows, so the tagulous pre_delete handler
+        # then finds nothing left to decrement (no double counting).
+        from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 -- lazy import, avoids circular dependency
+        bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
         super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
