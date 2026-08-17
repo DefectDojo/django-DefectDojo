@@ -690,7 +690,7 @@ The Priority Insights dashboard can quickly render a list of all SOC or AppSec F
 
 - **(Calendar)** New filters have been added to Calendar view: Unassigned Lead, and Engagement/Test Type.
 - **(Dashboard)** Added Finding Status filter for Dashboard tiles.
-- **(Engagements)** A repository URI can be added to an Engagement via **Edit Engagement > Optional Fields > Repo**.  If this field is set, Findings under that Engagement will automatically generate clickable links to the source code if File Path is set on the Finding.  See [docs](/asset_modelling/OS_hierarchy/OS__source-code-repositories/) for more details.
+- **(Engagements)** A repository URI can be added to an Engagement via **Edit Engagement > Optional Fields > Repo**.  If this field is set, Findings under that Engagement will automatically generate clickable links to the source code if File Path is set on the Finding.  See [docs](/asset_modelling/os_hierarchy/os__source-code-repositories/) for more details.
 - **(Findings)** Added "Jira Issue URL" column to the CSV export of Finding tables.
 - **(Metrics)** Priority Dashboard has been added to Metrics, to display your organization's risk profile at a glance.
 ![image](images/pro_dashboard_priority.png)
