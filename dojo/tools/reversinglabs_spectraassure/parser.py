@@ -3,8 +3,7 @@ import hashlib
 import logging
 from typing import Any
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
@@ -75,7 +74,7 @@ class ReversinglabsSpectraassureParser:
         finding.unsaved_tags = node.tags
         finding.impact = node.impact
 
-        if settings.V3_FEATURE_LOCATIONS and node.component_purl:
+        if locations_enabled() and node.component_purl:
             finding.unsaved_locations.append(
                 LocationData.dependency(purl=node.component_purl),
             )

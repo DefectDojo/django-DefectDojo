@@ -58,10 +58,10 @@ This algorithm can be useful when working with SAST scanners, or situations wher
 Attempts to use the tool's unique ID first, then falls back to the hash code if no unique ID is available. This provides the most flexible deduplication option.
 
 #### Global Component
-Matches findings by component name and version across **all Products** in the instance, rather than within a single Product or Engagement. Intended for SCA tools where the same vulnerable dependency appears in many Products. This algorithm is off by default and must be enabled by DefectDojo Support. See [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) for details.
+Matches findings by component name and version across **all Assets** in the instance, rather than within a single Asset or Engagement. Intended for SCA tools where the same vulnerable dependency appears in many Assets. This algorithm is off by default and must be enabled by DefectDojo Support. See [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) for details.
 
 #### Global Vulnerability ID
-Matches findings by their **vulnerability IDs** (CVE, GHSA, …) across **all Products** in the instance, rather than within a single Product or Engagement. Intended for tools that report the same CVE across many Products. Off by default and enabled by DefectDojo Support.
+Matches findings by their **vulnerability IDs** (CVE, GHSA, …) across **all Assets** in the instance, rather than within a single Asset or Engagement. Intended for tools that report the same CVE across many Assets. Off by default and enabled by DefectDojo Support.
 
 > **Two tools on the same instance-wide algorithm become mutual deduplication candidates.** When two *different* tools are both configured with an instance-wide algorithm (Global Component, or Global Vulnerability ID), their findings share a constant grouping hash, so a finding from either tool is considered for deduplication against the other on that shared dimension (component, or vulnerability ID). This is the intended cross-tool behavior — enable it only when you want those tools to dedupe together.
 

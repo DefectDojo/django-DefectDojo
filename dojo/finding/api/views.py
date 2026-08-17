@@ -60,6 +60,7 @@ from dojo.finding.ui.views import (
     set_finding_as_original_internal,
 )
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.models import (
     BurpRawRequestResponse,
     DojoMeta,
@@ -186,7 +187,7 @@ class FindingViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             findings = get_authorized_findings(
                 "view",
             ).prefetch_related(

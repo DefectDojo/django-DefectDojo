@@ -7,6 +7,7 @@ from django.urls import NoReverseMatch, reverse
 
 from dojo.announcement.os_message import OS_MESSAGE_DISMISSED_KEY, get_os_banner
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.models import System_Settings, UserAnnouncement
 
 
@@ -21,7 +22,7 @@ def globalize_vars(request):
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
         "SHOW_PLG_LINK": True,
         # V3 Feature Flags
-        "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
+        "V3_FEATURE_LOCATIONS": locations_enabled(),
         "SHOW_A11Y_REQUIRED_FIELDS_NOTICE": settings.SHOW_A11Y_REQUIRED_FIELDS_NOTICE,
     }
 

@@ -7,7 +7,7 @@ weight: 5
 Organizations	→ Assets → Engagements → Tests → **FINDINGS**
 
 ## Overview
-**Findings** represent the lowest level of the Product Hierarchy where individual vulnerabilities are tracked and managed and serve as the main way that DefectDojo standardizes and guides the reporting and remediation process of your security tools. Regardless of whether a vulnerability was reported in SonarQube, Acunetix, or your team’s custom tool, Findings give you the ability to manage each vulnerability in the same way.
+**Findings** represent the lowest level of the Asset Hierarchy where individual vulnerabilities are tracked and managed and serve as the main way that DefectDojo standardizes and guides the reporting and remediation process of your security tools. Regardless of whether a vulnerability was reported in SonarQube, Acunetix, or your team’s custom tool, Findings give you the ability to manage each vulnerability in the same way.
 
 Examples of Findings include: 
 - **Cookie Not Marked as HttpOnly**
@@ -21,7 +21,7 @@ In addition to storing the vulnerability data and providing a remediation framew
 - Automatically adding related EPSS scores to a Finding to describe exploitability
 - Automatically translating a security tool’s severity metric into a Severity score for each Finding, which confers an SLA onto the Finding according to your Asset’s SLA configuration. For more information on SLA configuration, click [here](/asset_modelling/pro_hierarchy/priority_sla/#working-with-slas).
 
-Overall, Findings are designed to work with the Product Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
+Overall, Findings are designed to work with the Asset Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
 
 ## Accessing Findings 
 Findings are accessible via the sidebar. The submenu provides access to Active and Mitigated Findings, All Findings (regardless of Open or Closed status), Finding Groups, Finding Templates, and the New Finding workflow. Individual Findings are also accessible from within the Test that contains them. 
@@ -209,7 +209,7 @@ Finding Groups can be accessed via the sidebar. The submenu provides access to O
 ### Creating Finding Groups 
 Finding Groups can be created either manually or automatically. 
 
-Notably, Finding Groups can only be created from the Findings contained within a single Test. Findings from different Tests, Engagements, or Products cannot be added to the same Finding Group.
+Notably, Finding Groups can only be created from the Findings contained within a single Test. Findings from different Tests, Engagements, or Assets cannot be added to the same Finding Group.
 
 #### Manual Finding Groups 
 To manually perform Finding Group actions:
@@ -257,9 +257,14 @@ Finding Templates can be created by clicking the **New Finding Template** button
 The ensuing page provides an overview of the metadata that will be applied to a Finding when a Finding Template is used.
 
 ### Applying Finding Templates
-Finding Templates differ between OS DefectDojo and DefectDojo Pro. In Pro, Finding Templates can’t be applied to preexisting Findings, and they can’t be created based on preexisting Findings. 
+Finding Templates can be applied to preexisting Findings, and created from preexisting Findings, using the gear menu on a Finding:
 
-However, you can manually add a Finding to a Test based on a Finding Template using either the ⋮ kebab menu next to the Test in the parent Engagement’s view, or using the gear menu in the Test’s view. 
+- **Apply Template to Finding** opens a dialog to select a template. For each field you can keep the Finding's current value, replace it with the template's value, or combine both. Applying the template also copies the template's CVSS scores, remediation and technical detail fields, adds the template's endpoints, and records the template's note on the Finding.
+- **Make Finding a Template** creates a new Finding Template from the Finding, copying its details, tags, vulnerability IDs, and endpoints. Each template title must be unique.
+
+Applying a template requires edit access to the Finding plus access to Finding Templates; creating a template from a Finding requires the "add finding template" configuration permission.
+
+You can also manually add a Finding to a Test based on a Finding Template using either the ⋮ kebab menu next to the Test in the parent Engagement's view, or using the gear menu in the Test's view.
 
 ![image](images/profindings_ss3.png)
 

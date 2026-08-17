@@ -6,6 +6,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -287,7 +288,7 @@ class NexposeParser:
 
                 find = self.findings(dupe_key, dupes, vuln)
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     location = LocationData.url(host=host["name"])
                     find.unsaved_locations.append(location)
                 else:
@@ -303,7 +304,7 @@ class NexposeParser:
 
                     find = self.findings(dupe_key, dupes, vuln)
 
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         location = LocationData.url(
                             host=host["name"],
                             port=service["port"],

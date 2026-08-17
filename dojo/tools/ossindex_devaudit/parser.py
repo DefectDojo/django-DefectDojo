@@ -1,8 +1,7 @@
 import json
 from json import JSONDecodeError
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -53,7 +52,7 @@ class OssIndexDevauditParser:
             package_version = package_data["version"]
 
             dep = None
-            if settings.V3_FEATURE_LOCATIONS and package_manager and package_name:
+            if locations_enabled() and package_manager and package_name:
                 package_group = package_data.get("group", "")
                 if package_group == "None":
                     purl_string = f"pkg:{package_manager}/{package_name}/{package_version}"

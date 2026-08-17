@@ -87,13 +87,13 @@ The value must match the attribute name your Identity Provider emits in the asse
 
 If group mapping appears to do nothing — users log in successfully but no groups are created or assigned — see [Troubleshooting → SAML group mapping does nothing](#saml-group-mapping-does-nothing--users-log-in-but-no-groups-are-assigned) below.
 
-If no group with a matching name exists, DefectDojo will automatically create one and assign its members the **Reader** role. Note that this Reader role governs the member's access *to the group itself* — it does not grant any access to underlying Products, Product Types, or other organizational assets. Those permissions are configured separately, and a newly auto-created group still has none of them until a Superuser assigns the group a role on the relevant Products or Product Types.
+If no group with a matching name exists, DefectDojo will automatically create one and assign its members the **Reader** role. Note that this Reader role governs the member's access *to the group itself* — it does not grant any access to underlying Assets, Organizations, or other organizational assets. Those permissions are configured separately, and a newly auto-created group still has none of them until a Superuser assigns the group a role on the relevant Assets or Organizations.
 
 To activate group mapping, check the **Enable Group Mapping** checkbox at the bottom of the form.
 
 ## Default access for SSO-provisioned users
 
-When a new user is created via SAML (or any social-auth provider) and is not added to any group via SAML Group Mapping, they will land on a DefectDojo instance with **no permissions**. They will see zero Product Types, zero Products, and zero Engagements when they log in — the dashboard will appear empty.
+When a new user is created via SAML (or any social-auth provider) and is not added to any group via SAML Group Mapping, they will land on a DefectDojo instance with **no permissions**. They will see zero Organizations, zero Assets, and zero Engagements when they log in — the dashboard will appear empty.
 
 To give every newly provisioned SSO user a sensible baseline, configure a **Default group** + **Default group role** on the System Settings page:
 

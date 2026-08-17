@@ -2,8 +2,8 @@ import contextlib
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -70,7 +70,7 @@ class OpenVASXMLParser:
                 static_finding=False,
                 vuln_id_from_tool=script_id,
             )
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(
                     host=loc_host, port=loc_port, protocol=loc_protocol,
                 )]

@@ -5,8 +5,7 @@ import re
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 
 if TYPE_CHECKING:
@@ -278,7 +277,7 @@ class WhiteHatSentinelParser:
                     unique_id_from_tool=whitehat_vuln["id"],
                 )
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     # TODO: Delete this after the move to Locations
                     # Get Locations from Attack Vectors
                     locations = self._convert_attack_vectors_to_locations(

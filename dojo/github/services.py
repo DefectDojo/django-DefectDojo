@@ -1,11 +1,11 @@
 import logging
 import sys
 
-from django.conf import settings
 from django.template.loader import render_to_string
 from github import Auth, Github
 
 from dojo.github.models import GITHUB_Issue, GITHUB_PKey
+from dojo.location.feature import locations_enabled
 from dojo.models import Engagement, Product
 
 logger = logging.getLogger(__name__)
@@ -161,5 +161,5 @@ def github_body(find):
     template = "issue-trackers/jira_full/jira-description.tpl"
     kwargs = {}
     kwargs["finding"] = find
-    kwargs["V3_FEATURE_LOCATIONS"] = settings.V3_FEATURE_LOCATIONS
+    kwargs["V3_FEATURE_LOCATIONS"] = locations_enabled()
     return render_to_string(template, kwargs)

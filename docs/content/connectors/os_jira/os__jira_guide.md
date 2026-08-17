@@ -10,14 +10,14 @@ DefectDojo's Jira integration can be used to push Finding data to one or more Ji
 
 * The AppSec team can selectively push Findings to a Jira Space used by developers, so that issue remediation can be appropriately prioritized alongside regular development.  Developers on this board don't need to access DefectDojo - they can keep all their work in one place.
 * DefectDojo can push ALL Findings to a bidirectional Jira Space which the AppSec team uses, which allows them to split up issue validation.  This board keeps in sync with DefectDojo and allows for complex remediation workflows.
-* DefectDojo can selectively push Findings from separate Products &/or Engagements to separate Jira Spaces, to keep things in their proper context.
+* DefectDojo can selectively push Findings from separate Assets &/or Engagements to separate Jira Spaces, to keep things in their proper context.
 
 # Setting Up Jira
 
 Setting Up Jira requires the following steps:
 1. Enable the Jira integration in System Settings.  Until you do, the rest of the Jira settings are hidden throughout DefectDojo.
 2. Connect a Jira Instance, either with a username / password or an API token.  Multiple instances can be linked.
-3. Add that Jira Instance to one or more Products or Engagements within DefectDojo.
+3. Add that Jira Instance to one or more Assets or Engagements within DefectDojo.
 4. If you wish to use bidirectional sync, create a Jira Webhook which will send updates to DefectDojo.
 
 ## Step 1: Enable the Jira integration in System Settings
@@ -49,10 +49,10 @@ The secret is part of the webhook URL that Jira posts to (`https://<YOUR DOJO DO
 Enabling **Enable JIRA integration** is what makes the rest of the Jira interface appear.  With it turned on you get:
 
 * the ⚙️ **Configuration \> JIRA** page, where Jira Instances are added and edited
-* the **JIRA** section on the Edit Product (Asset) and Edit Engagement forms, used to link a Product or Engagement to a Jira Space
-* the **Push to Jira** controls on Findings, Finding Groups and bulk edit forms, plus the Jira columns and filters on the Findings, Engagements and Products lists
+* the **JIRA** section on the Edit Asset and Edit Engagement forms, used to link an Asset or Engagement to a Jira Space
+* the **Push to Jira** controls on Findings, Finding Groups and bulk edit forms, plus the Jira columns and filters on the Findings, Engagements and Assets lists
 
-For example, the **JIRA** section only appears at the bottom of the Edit Product form once the integration is enabled:
+For example, the **JIRA** section only appears at the bottom of the Edit Asset form once the integration is enabled:
 
 ![image](images/jira-asset-settings-visible-os.png)
 
@@ -131,7 +131,7 @@ If you leave this field blank, it will default to **Jira\_full.**
 ​
 ![image](images/Connect_DefectDojo_to_Jira_3.png)
 ​
-11. Click **Submit.** DefectDojo will automatically look for appropriate mappings in Jira and add them to the configuration. You are now ready to link this configuration to one or more Products in DefectDojo.
+11. Click **Submit.** DefectDojo will automatically look for appropriate mappings in Jira and add them to the configuration. You are now ready to link this configuration to one or more Assets in DefectDojo.
 
 #### Add Jira Configuration (Standard)
 
@@ -155,27 +155,27 @@ Visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/trans
 
 * **Finding Text** \- if you want to add additional standardized text to each Issue created, you can enter that text here. This is not text that maps to any field in Jira, but additional text that is added to the Issue Description. "**Created by DefectDojo**" for example.
 
-Comments (in Jira) and Notes (in DefectDojo) can be kept in sync. This setting can be enabled once the Jira configuration has been added to a Product, via the **Edit Product** form.
+Comments (in Jira) and Notes (in DefectDojo) can be kept in sync. This setting can be enabled once the Jira configuration has been added to an Asset, via the **Edit Asset** form.
 
-## Step 3: Connect a Product or Engagement to Jira
+## Step 3: Connect an Asset or Engagement to Jira
 
-Each Product or Engagement in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated Jira Space and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
+Each Asset or Engagement in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated Jira Space and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
 
-### Add Jira to a Product or Engagement
+### Add Jira to an Asset or Engagement
 
-In the Classic UI, you can find Jira settings by opening the Edit Product or Edit Engagement form. "**📝 Edit**" button under **Settings** on the page:
+In the Classic UI, you can find Jira settings by opening the Edit Asset or Edit Engagement form. "**📝 Edit**" button under **Settings** on the page:
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product.png)
 
 #### List of Jira settings
 
-Jira settings are located near the bottom of the Product Settings page.
+Jira settings are located near the bottom of the Asset Settings page.
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_2.png)
 
 #### Jira Instance
 
-If you have multiple instances of Jira set up, for separate products or teams within your organization, you can indicate which Jira Space you want DefectDojo to create Issues in. Select a Project from the drop\-down menu.
+If you have multiple instances of Jira set up, for separate Assets or teams within your organization, you can indicate which Jira Space you want DefectDojo to create Issues in. Select a Project from the drop\-down menu.
 
 If this menu doesn't list any Jira instances, confirm that those Projects are connected in your global Jira Configuration for DefectDojo \- yourcompany.defectdojo.com/jira.
 
@@ -195,7 +195,7 @@ Here is an example of a **jira\_full** Issue:
 ​
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_4.png)
 
-* **Jira\_limited:** Issues will only track the DefectDojo link, the Product/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)
+* **Jira\_limited:** Issues will only track the DefectDojo link, the Asset/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)
 
 ​Here is an example of a **jira\_limited** Issue:​
 
@@ -233,13 +233,13 @@ The name of the default assignee in Jira. If left blank, DefectDojo will follow 
 
 Jira integrations can be removed from your instance only if no related Issues have been created.  If Issues have been created, there is no way to completely remove a Jira Instance from DefectDojo.
 
-However, you can disable your Jira integration by disabling it at the Product level. This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
+However, you can disable your Jira integration by disabling it at the Asset level. This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
 
 #### Add Vulnerability Id as a Jira label
 
 This allows you to add the Vulnerability ID data as a Jira Label automatically. Vulnerability IDs are added to Findings from individual security tools \- these may be Common Vulnerabilities and Exposures (CVE) IDs or a different format, specific to the tool reporting the Finding.
 
-#### Enable Engagement Epic Mapping (For Products)
+#### Enable Engagement Epic Mapping (For Assets)
 
 In DefectDojo, Engagements represent a collection of work. Each Engagement contains one or more tests, which contain one or more Findings which need to be mitigated. Epics in Jira work in a similar way, and this checkbox allows you to push Engagements to Jira as Epics.
 
@@ -262,7 +262,7 @@ If enabled, Jira comments will populate on the associated Finding in DefectDojo,
 
 If enabled, any Issue which breaches DefectDojo's Service Level Agreement rules will have comments added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
 
-Service Level Agreements can be configured under **Configuration \> SLA Configuration** in DefectDojo and assigned to each Product.
+Service Level Agreements can be configured under **Configuration \> SLA Configuration** in DefectDojo and assigned to each Asset.
 
 #### Send Risk Acceptance Expiration Notifications As Comment?
 
@@ -270,9 +270,9 @@ If enabled, any Issue where the associated DefectDojo Risk Acceptance expires wi
 
 ### Engagement-Level Jira Settings
 
-Different Engagements within a Product can have different underlying Jira settings as a result. By default, Engagements will '**inherit Jira settings from product'**, meaning that they will share the same Jira settings as the Product they are nested under.
+Different Engagements within an Asset can have different underlying Jira settings as a result. By default, Engagements will '**inherit Jira settings from Asset'**, meaning that they will share the same Jira settings as the Asset they are nested under.
 
-However, you can change an Engagement's **Product Key**, **Issue Template, Custom Fields, Jira Labels, Default Assignee** to be different from the default Product settings
+However, you can change an Engagement's **Asset Key**, **Issue Template, Custom Fields, Jira Labels, Default Assignee** to be different from the default Asset settings
 
 You can access this page from the **Edit Engagement** page: **your\-instance.defectdojo.com/engagement/\[id]/edit**.
 
@@ -395,7 +395,7 @@ The smart values shown above (`{{issue.id}}`, `{{issue.status.statusCategory.key
 
 #### Test 1: Do Findings successfully push to Jira?
 
-In order to test that the Jira integration is working properly, you can add a new blank Finding to the Product associated with Jira in DefectDojo. **Product \> Findings \> Add New Finding.**
+In order to test that the Jira integration is working properly, you can add a new blank Finding to the Asset associated with Jira in DefectDojo. **Asset \> Findings \> Add New Finding.**
 
 Add whatever title severity and description you wish, and then click "Finished". The Finding should appear as an Issue in Jira with all of the relevant metadata.
 
@@ -417,15 +417,15 @@ If this doesn't work correctly, it could be due to a Firewall issue on your Jira
 
 Jira integrations can be removed from your instance only if no related Issues have been created.  If Issues have been created, there is no way to completely remove a Jira Instance from DefectDojo.
 
-However, you can disable your Jira integration by disabling it at the Product level.  From the **Edit Product** form you can uncheck the "Enable Connection With Jira Space" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
+However, you can disable your Jira integration by disabling it at the Asset level.  From the **Edit Asset** form you can uncheck the "Enable Connection With Jira Space" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
 
 # Pushing Findings To Jira
 
 ## Pushing Findings To Jira
-A Product with a JIRA mapping can push Findings to Jira as Issues. This can be managed in two different ways:
+An Asset with a JIRA mapping can push Findings to Jira as Issues. This can be managed in two different ways:
 
 * Findings can be created as Issues manually, per\-Finding.
-* Findings can be pushed automatically if the '**Push All Issues**' setting is enabled on a Product. (This applies only to Findings that are **Active** and **Verified**).
+* Findings can be pushed automatically if the '**Push All Issues**' setting is enabled on an Asset. (This applies only to Findings that are **Active** and **Verified**).
 
 Additionally, you have the option to push Finding Groups to Jira instead of individual Findings. This will create a single Issue which contains many related DefectDojo Findings.
 
@@ -441,7 +441,7 @@ Additionally, you have the option to push Finding Groups to Jira instead of indi
 ​
 ![image](images/Creating_Issues_in_Jira_2.png)
 
-4. Clicking the Arrow again will push all changes made to an issue to Jira, and update the Jira Issue accordingly. If '**Push All Issues**' setting is enabled on the Finding's associated Product, this process will happen automatically.
+4. Clicking the Arrow again will push all changes made to an issue to Jira, and update the Jira Issue accordingly. If '**Push All Issues**' setting is enabled on the Finding's associated Asset, this process will happen automatically.
 
 ### Jira Comments
 
@@ -506,7 +506,7 @@ If you don't already use Custom Fields in Jira, there is no need to follow this 
 2. Determine the Key values for the new Custom Fields (Jira Field Spec Endpoint)
 3. Locate the acceptable data for each Custom Field, using the Key values as a reference (Jira Issue Endpoint)
 4. Create a Field Reference JSON block to track all of the Custom Field Keys and acceptable data (Jira Issue Endpoint)
-5. Store the JSON block in the associated DefectDojo Product, to allow Custom Fields to be created from Jira (DefectDojo UI)
+5. Store the JSON block in the associated DefectDojo Asset, to allow Custom Fields to be created from Jira (DefectDojo UI)
 6. Test your work and ensure that all required data is flowing from Jira properly
 
 #### Step 1: Record the names of your Custom Fields in Jira
@@ -682,16 +682,16 @@ Here is a complete JSON Field Reference, with in\-line comments explaining what 
 }
 ```
 
-#### Step 5 \- Adding the Custom Fields to a DefectDojo Product
+#### Step 5 \- Adding the Custom Fields to a DefectDojo Asset
 
-You can now add these custom fields to the associated DefectDojo Product, in the Custom Fields section. Once again,
+You can now add these custom fields to the associated DefectDojo Asset, in the Custom Fields section. Once again,
 
-* Navigate to Edit Product \- defectdojo.com/product/ID/edit .
+* Navigate to Edit Asset \- defectdojo.com/Asset/ID/edit .
 * Navigate to Custom fields and paste the JSON Field Reference as plain text in the Custom Fields box.
 * Click 'Submit'.
 
 #### Step 6 \- Testing your Jira Custom Fields from a new Finding:
 
-Now, when you create a new Finding in the Jira\-associated Product, Jira will automatically create all of these Custom Fields in Jira according to the JSON block contained within. These Custom Fields will be created with the default ("change\-me\-please", etc.) values.
+Now, when you create a new Finding in the Jira\-associated Asset, Jira will automatically create all of these Custom Fields in Jira according to the JSON block contained within. These Custom Fields will be created with the default ("change\-me\-please", etc.) values.
 
-Within the Product on DefectDojo, navigate to the Findings \> Add New Finding page. Make sure the Finding is both Active and Verified to ensure that it pushes to Jira, and then confirm on the Jira side that the Custom Fields are successfully created without any inconsistencies.
+Within the Asset on DefectDojo, navigate to the Findings \> Add New Finding page. Make sure the Finding is both Active and Verified to ensure that it pushes to Jira, and then confirm on the Jira side that the Custom Fields are successfully created without any inconsistencies.

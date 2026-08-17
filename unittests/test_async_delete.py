@@ -13,13 +13,13 @@ from unittest.mock import patch
 from celery.exceptions import Retry
 from crum import impersonate
 from django.contrib.auth.models import User
-from django.db import OperationalError
+from django.db import IntegrityError, OperationalError
 from django.test import override_settings
 from django.utils import timezone
 from parameterized import parameterized
-from psycopg.errors import DeadlockDetected, QueryCanceled, SerializationFailure
+from psycopg.errors import DeadlockDetected, ForeignKeyViolation, QueryCanceled, SerializationFailure, UniqueViolation
 
-from dojo.db_utils import is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, UserContactInfo
 from dojo.utils import ASYNC_DELETE_MAX_CONFLICT_RETRIES, async_delete, async_delete_task
 
@@ -357,6 +357,142 @@ class TestAsyncDeleteTransientConflictRetry(DojoTestCase):
             is_transient_db_conflict(OperationalError("connection closed")),
             msg="an OperationalError without a SQLSTATE must not be treated as retryable",
         )
+
+    @staticmethod
+    def _wrapped_integrity_error(driver_error_class, message="integrity error"):
+        """
+        Build the IntegrityError shape the cloud reports show.
+
+        Django re-raises the driver error as its own IntegrityError and keeps the
+        psycopg exception -- the one carrying the SQLSTATE -- as ``__cause__``.
+        """
+        cause = driver_error_class(message)
+        exc = IntegrityError(str(cause))
+        exc.__cause__ = cause
+        return exc
+
+    def test_is_foreign_key_conflict(self):
+        """
+        An FK violation (23503) is the delete-vs-import race; other errors are not.
+
+        The two predicates stay separate: a foreign-key violation is only retryable in
+        the delete context, so it must NOT be reported as a generic transient conflict,
+        and a deadlock must NOT be reported as a foreign-key conflict.
+        """
+        fk_exc = self._wrapped_integrity_error(
+            ForeignKeyViolation,
+            'update or delete on table "dojo_test" violates foreign key constraint '
+            '"dojo_test_import_test_id_e8dc3f37_fk_dojo_test_id" on table "dojo_test_import"',
+        )
+        self.assertTrue(
+            is_foreign_key_conflict(fk_exc),
+            msg="a foreign-key violation raised while deleting a referenced row must be retryable",
+        )
+        self.assertFalse(
+            is_transient_db_conflict(fk_exc),
+            msg="a foreign-key violation is not a deadlock/serialization conflict",
+        )
+        deadlock = self._wrapped_db_error(DeadlockDetected)
+        self.assertFalse(
+            is_foreign_key_conflict(deadlock),
+            msg="a deadlock is not a foreign-key conflict",
+        )
+
+    def test_is_foreign_key_conflict_rejects_other_integrity_errors(self):
+        """Control: a unique violation (23505) is a real bug, not the delete-vs-import race."""
+        unique_exc = self._wrapped_integrity_error(UniqueViolation, "duplicate key value")
+        self.assertFalse(
+            is_foreign_key_conflict(unique_exc),
+            msg="only foreign-key violations (23503) are the transient delete race",
+        )
+
+    def test_foreign_key_conflict_is_retried_rather_than_failing(self):
+        """
+        The reported failure: an import committed a new Test_Import row referencing a
+        Test between the cascade step and the top-level delete, so the delete hit an FK
+        violation. On a re-run the cascade step clears the new child and the delete
+        completes, so the task must retry rather than surface the error.
+        """
+        product = self._create_product()
+        exc = self._wrapped_integrity_error(
+            ForeignKeyViolation,
+            'update or delete on table "dojo_test" violates foreign key constraint',
+        )
+
+        with patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+            async_delete_task.push_request(retries=0, is_eager=False)
+            try:
+                with patch(
+                    "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+                ), self.assertRaises(Retry):
+                    async_delete_task("dojo.product", product.pk)
+            finally:
+                async_delete_task.pop_request()
+
+        mock_retry.assert_called_once()
+        countdown = mock_retry.call_args.kwargs["countdown"]
+        self.assertGreater(
+            countdown, 0,
+            msg="the retry must be delayed so the racing import's transaction commits "
+                f"first, got countdown={countdown}",
+        )
+
+    def test_non_fk_integrity_error_is_not_retried(self):
+        """Control: an integrity error that is not the delete-vs-import race fails loudly."""
+        product = self._create_product()
+        exc = self._wrapped_integrity_error(UniqueViolation, "duplicate key value")
+
+        with patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+            async_delete_task.push_request(retries=0, is_eager=False)
+            try:
+                with patch(
+                    "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+                ), self.assertRaises(IntegrityError):
+                    async_delete_task("dojo.product", product.pk)
+            finally:
+                async_delete_task.pop_request()
+
+        mock_retry.assert_not_called()
+
+    @override_settings(ASYNC_OBJECT_DELETE=True)
+    def test_eager_execution_does_not_retry_foreign_key_conflict(self):
+        """Eager callers get the FK violation instead of a retry, as with a deadlock."""
+        product = self._create_product()
+        exc = self._wrapped_integrity_error(
+            ForeignKeyViolation, "violates foreign key constraint",
+        )
+
+        with patch(
+            "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+        ), patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+            result = async_delete_task.apply(args=("dojo.product", product.pk))
+
+        mock_retry.assert_not_called()
+        self.assertTrue(
+            isinstance(result.result, IntegrityError),
+            msg=f"eager execution must surface the FK violation, got {result.result!r}",
+        )
+
+    def test_foreign_key_conflict_surfaces_once_retries_are_exhausted(self):
+        """An FK violation that keeps repeating must be reported rather than retried forever."""
+        product = self._create_product()
+        exc = self._wrapped_integrity_error(
+            ForeignKeyViolation, "violates foreign key constraint",
+        )
+
+        with patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+            async_delete_task.push_request(
+                retries=ASYNC_DELETE_MAX_CONFLICT_RETRIES, is_eager=False,
+            )
+            try:
+                with patch(
+                    "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+                ), self.assertRaises(IntegrityError):
+                    async_delete_task("dojo.product", product.pk)
+            finally:
+                async_delete_task.pop_request()
+
+        mock_retry.assert_not_called()
 
     @parameterized.expand([
         ("deadlock", DeadlockDetected),

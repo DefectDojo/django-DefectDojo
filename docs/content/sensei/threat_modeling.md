@@ -11,21 +11,22 @@ weight: 4
 
 This is Sensei's **pre-code** capability. Where [scan-and-fix](/sensei/about_sensei/) works on a repository that already exists, threat modeling works on the design, before there is code to scan.
 
-> **🔎 BETA:** Threat Modeling is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases. During BETA it is enabled per instance by DefectDojo — contact your DefectDojo representative to have it turned on.
+> **🔎 BETA:** Threat Modeling is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases. It is on by default; a superuser can switch it off, or back on, from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required.
 
 > **📍 Where to find it:** open **Threat Modeling** from the left-hand navigation, directly below Sensei.
 
 ## What you need
 
 - The **Sensei** licensed feature. Threat modeling ships under the same entitlement as scan-and-fix.
+- The **AI Threat Modeling** feature flag, which is on by default. If your instance turned it off, a superuser can turn it back on from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/).
 - A global **Maintainer** or **Owner** role. Users without it do not see the page.
-- A product to attach the threat model to. Instances using V3 naming see products called **assets**; this page says *product* throughout, and the UI follows whichever naming your instance is set to.
+- An Asset to attach the threat model to. Instances using V3 naming see Assets called **assets**; this page says *Asset* throughout, and the UI follows whichever naming your instance is set to.
 
 Nothing is installed and no repository is connected. Threat modeling reads only the design you supply.
 
 ## Generating a threat model
 
-Choose **New threat model**, pick the product, give it a name, and supply the design in whichever form you have it:
+Choose **New threat model**, pick the Asset, give it a name, and supply the design in whichever form you have it:
 
 - **Paste the description** directly, or
 - **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` or `.pdf`. Text extraction from PDF is best-effort; if a PDF is mostly images, paste the text instead.
@@ -80,7 +81,7 @@ A quote that could not be matched against the supplied text is kept but **flagge
 
 ## Pushing requirements into findings
 
-Requirements become actionable through **Push to findings**. Select the requirements you want and DefectDojo creates one finding per requirement, in a dedicated engagement named **Sensei Threat Modeling** on that product, with one test per threat-model version.
+Requirements become actionable through **Push to findings**. Select the requirements you want and DefectDojo creates one finding per requirement, in a dedicated engagement named **Sensei Threat Modeling** on that Asset, with one test per threat-model version.
 
 Each finding carries:
 
@@ -95,7 +96,7 @@ Pushing is **idempotent**. Each requirement owns its finding, so pushing the sam
 
 ## Versions and supersession
 
-Threat models are **versioned per product**. Regenerating from an updated design creates a new version rather than overwriting the old one, so you keep the history of what the design looked like when a decision was made.
+Threat models are **versioned per Asset**. Regenerating from an updated design creates a new version rather than overwriting the old one, so you keep the history of what the design looked like when a decision was made.
 
 When you push a newer version, findings from the previous version that no longer correspond to a current requirement are **mitigated** rather than left open, so the engagement reflects the current design.
 

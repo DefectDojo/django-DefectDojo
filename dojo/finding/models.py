@@ -37,6 +37,16 @@ from dojo.validators import cvss3_validator, cvss4_validator
 if TYPE_CHECKING:
     from dojo.importers.location_manager import UnsavedLocation
 
+
+def locations_enabled() -> bool:
+    # Lazy delegate: finding/models.py is imported during dojo.models population,
+    # before the dojo.location package can be imported without a circular import
+    # (dojo.location.__init__ -> admin -> models -> dojo.models, still partial).
+    from dojo.location.feature import locations_enabled as _impl  # noqa: PLC0415
+
+    return _impl()
+
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 DELETE_JIRA_SYNC_UNSET = object()
@@ -538,7 +548,7 @@ class Finding(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             self.unsaved_locations: list[UnsavedLocation] = []
         else:
             # TODO: Delete this after the move to Locations
@@ -615,7 +625,7 @@ class Finding(BaseModel):
         self.set_hash_code(dedupe_option)
 
         if is_new_finding:
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
                     self.static_finding = True
                     self.dynamic_finding = False
@@ -635,7 +645,7 @@ class Finding(BaseModel):
         # logger.debug('setting static / dynamic in save')
         # need to have an id/pk before we can access locations/endpoints
         elif self.file_path is not None:
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if not self.locations.exists():
                     self.static_finding = True
                     self.dynamic_finding = False
@@ -690,7 +700,7 @@ class Finding(BaseModel):
         # Copy the files
         for files in old_files:
             copy.files.add(files.copy())
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             old_location_refs = self.locations.all()
             for location_ref in old_location_refs:
                 location_ref.copy(copy)
@@ -725,6 +735,18 @@ class Finding(BaseModel):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
         finding_helper.finding_delete(self, push_to_jira=push_to_jira)
+        # Remove this finding's tags in a deterministic (ascending tag-id) order BEFORE
+        # the cascade. Left to super().delete(), tagulous's per-object clear() decrements
+        # the shared tag-count rows one UPDATE at a time in the manager's own order, so
+        # two concurrent single-finding deletes touching an overlapping tag set can take
+        # those row locks in opposite orders and deadlock (Postgres 40P01, "while updating
+        # tuple ... in relation dojo_tagulous_finding_tags"). bulk_remove_all_tags issues
+        # the same count decrements in ascending tag-id order -- the shared lock order
+        # already used by the bulk cascade delete and the import add path -- so the cycle
+        # cannot form. It also clears the through rows, so the tagulous pre_delete handler
+        # then finds nothing left to decrement (no double counting).
+        from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 -- lazy import, avoids circular dependency
+        bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
         super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
@@ -881,7 +903,7 @@ class Finding(BaseModel):
     # Get locations/endpoints to use for hash_code computation
     def get_locations(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             # Get endpoints to use for hash_code computation
             # (This sometimes reports "None")
             def _get_unsaved_endpoints(finding) -> str:

@@ -1,17 +1,17 @@
 ---
 title: "OWASP ASVS Benchmarks"
-description: "Benchmark a Product against the OWASP Application Security Verification Standard"
+description: "Benchmark an Asset against the OWASP Application Security Verification Standard"
 weight: 6
 audience: opensource
 ---
 
-DefectDojo supports benchmarking Products against the [OWASP Application Security Verification Standard (ASVS)](https://owasp.org/www-project-application-security-verification-standard/), which provides a basis for testing web application technical security controls.
+DefectDojo supports benchmarking Assets against the [OWASP Application Security Verification Standard (ASVS)](https://owasp.org/www-project-application-security-verification-standard/), which provides a basis for testing web application technical security controls.
 
-Benchmarks allow you to measure how well a Product meets your organization's defined security requirements, and to publish a score on the Product page for visibility.
+Benchmarks allow you to measure how well an Asset meets your organization's defined security requirements, and to publish a score on the Asset page for visibility.
 
 ## Accessing Benchmarks
 
-Benchmarks are available from the **Product** page. To open the Benchmarks view, select the dropdown menu in the upper-right area of the Product page and choose **OWASP ASVS v.3.1** near the bottom of the menu.
+Benchmarks are available from the **Asset** page. To open the Benchmarks view, select the dropdown menu in the upper-right area of the Asset page and choose **OWASP ASVS v.3.1** near the bottom of the menu.
 
 ## Benchmark Levels
 
@@ -25,13 +25,13 @@ You can switch between levels using the dropdown in the upper-right of the Bench
 
 ## Benchmark Score
 
-The left side of the Benchmarks view displays the current score for your Product at the selected ASVS level:
+The left side of the Benchmarks view displays the current score for your Asset at the selected ASVS level:
 
 - The **desired score** your organization has set as a target
 - The **percentage of benchmarks passed** toward achieving that score
 - The **total number of enabled benchmarks** for the selected level
 
-Enabling the **Publish** checkbox will display the ASVS score directly on the Product page.
+Enabling the **Publish** checkbox will display the ASVS score directly on the Asset page.
 
 ## Managing Benchmark Entries
 

@@ -3,8 +3,8 @@ import re
 
 import html2text
 from defusedxml.ElementTree import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -79,7 +79,7 @@ class MicrofocusWebinspectParser:
                 if "id" in issue.attrib:
                     finding.unique_id_from_tool = issue.attrib.get("id")
                 # manage endpoint/location
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     location = LocationData.url(url=url)
                     finding.unsaved_locations = [location]
                 else:
@@ -94,7 +94,7 @@ class MicrofocusWebinspectParser:
                 # check if dupes are present.
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         # TODO: Delete this after the move to Locations

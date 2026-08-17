@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 
-from dojo.authorization.serializer_guards import AuthorizedUsersMemberGuardMixin
+from dojo.authorization.serializer_guards import (
+    AuthorizedUsersMemberGuardMixin,
+    ToolConfigurationUseGuardMixin,
+)
 from dojo.models import DojoMeta, Product, Product_API_Scan_Configuration
-from dojo.tool_config.queries import get_authorized_tool_configurations
 
 
 class ProductMetaSerializer(serializers.ModelSerializer):
@@ -12,33 +13,10 @@ class ProductMetaSerializer(serializers.ModelSerializer):
         fields = ("name", "value")
 
 
-class ProductAPIScanConfigurationSerializer(serializers.ModelSerializer):
+class ProductAPIScanConfigurationSerializer(ToolConfigurationUseGuardMixin, serializers.ModelSerializer):
     class Meta:
         model = Product_API_Scan_Configuration
         fields = "__all__"
-
-    def validate(self, data):
-        self._validate_tool_configuration_use(data)
-        return data
-
-    def _validate_tool_configuration_use(self, data):
-        """
-        Selecting a ``tool_configuration`` lets an import run authenticated
-        requests with the credential stored on it, so it is gated by the same
-        ``view_tool_configuration`` permission that guards the tool-configuration
-        views -- not just the product permission this endpoint already checks.
-
-        No-ops when the field is absent (replay-safe on PATCH), mirroring
-        dojo.authorization.api_permissions.check_update_permission.
-        """
-        if "tool_configuration" not in data:
-            return
-        tool_configuration = data.get("tool_configuration")
-        request = self.context.get("request")
-        request_user = getattr(request, "user", None)
-        if tool_configuration is not None and not get_authorized_tool_configurations(request_user).filter(pk=tool_configuration.pk).exists():
-            msg = "You do not have permission to use this tool configuration."
-            raise PermissionDenied(msg)
 
 
 class ProductSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):

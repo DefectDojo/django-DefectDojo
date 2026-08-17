@@ -7,6 +7,7 @@ from datetime import datetime
 from dateutil import parser
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -275,7 +276,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
             # Set the initial cve list for new findings
             finding.unsaved_vulnerability_ids = cve_list
         finding.verified = True
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             if report_finding.get("FQDN"):
                 location = LocationData.url(url=report_finding.get("FQDN"))
             elif report_finding.get("DNS"):

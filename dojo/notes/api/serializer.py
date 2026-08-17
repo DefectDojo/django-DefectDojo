@@ -34,7 +34,17 @@ class NoteSerializer(serializers.ModelSerializer):
     note_type = NoteTypeSerializer(read_only=True, many=False)
 
     def update(self, instance, validated_data):
-        instance.entry = validated_data.get("entry")
+        # A partial (PATCH) update may omit "entry" entirely -- e.g. a body that
+        # only carries read-only fields such as note_type. Previously this set
+        # entry to None, blanking the note body, and then built a NoteHistory
+        # with data=None, violating the NOT NULL constraint on
+        # dojo_notehistory.data (HTTP 500). Only record an edit + history
+        # revision when the body actually changes.
+        new_entry = validated_data.get("entry", instance.entry)
+        if "entry" not in validated_data or new_entry == instance.entry:
+            instance.save()
+            return instance
+        instance.entry = new_entry
         instance.edited = True
         instance.editor = self.context["request"].user
         instance.edit_time = timezone.now()

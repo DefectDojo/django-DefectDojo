@@ -15,15 +15,17 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 
-from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.models import Location
+from dojo.location.queries import authorized_finding_references, authorized_product_references
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 
 
-def annotate_host_contents(queryset: QuerySet[Location]) -> QuerySet[Location]:
+def annotate_host_contents(queryset: QuerySet[Location], user=None) -> QuerySet[Location]:
     # Annotate the queryset with counts of findings per host.
     # This aggregates the total and active findings for each host by joining LocationFindingReference.
     finding_host_counts = (
-        LocationFindingReference.objects.prefetch_related("location__url")
+        authorized_finding_references(user)
+        .prefetch_related("location__url")
         .filter(location__url__host=OuterRef("url__host"))
         .values("location__url__host")
         .annotate(
@@ -39,7 +41,8 @@ def annotate_host_contents(queryset: QuerySet[Location]) -> QuerySet[Location]:
     # Annotate the queryset with counts of products per host.
     # This aggregates the total and active products for each host by joining LocationProductReference.
     product_host_counts = (
-        LocationProductReference.objects.prefetch_related("location__url")
+        authorized_product_references(user)
+        .prefetch_related("location__url")
         .filter(location__url__host=OuterRef("url__host"))
         .values("location__url__host")
         .annotate(

@@ -7,7 +7,7 @@ toc_hide: true
 history-scanning tools it looks only at the files you point it at, and its rules are npm packages, so a
 project can add organisation-specific rules alongside the bundled ones. The recommended preset carries
 28 rules covering cloud provider keys, private keys, database connection strings, package registry and
-CI tokens, and API keys for a long list of SaaS products.
+CI tokens, and API keys for a long list of SaaS Assets.
 
 Secretlint's filter rules — the mechanism behind `secretlint-disable` comments — remove a detection from
 the report entirely, so a suppressed secret produces no finding.

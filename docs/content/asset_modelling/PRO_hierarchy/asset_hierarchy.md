@@ -1,6 +1,6 @@
 ---
 title: "Asset Hierarchy"
-description: "DefectDojo Pro - Product Hierarchy Overhaul"
+description: "DefectDojo Pro - Asset Hierarchy Overhaul"
 audience: pro
 weight: 1
 aliases:

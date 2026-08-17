@@ -102,7 +102,7 @@ The table below lists every DefectDojo finding field (output field) you can map 
 | CVSS v3 Vector | | | Common Vulnerability Scoring System version 3 (CVSSv3) vector associated with this flaw. |
 | CVSS v4 Vector | | | Common Vulnerability Scoring System version 4 (CVSSv4) vector associated with this flaw. |
 | Mitigation | | ✅ | Text describing how to best fix the flaw. |
-| Impact | | ✅ | Text describing the impact this flaw has on systems, products, enterprise, etc. |
+| Impact | | ✅ | Text describing the impact this flaw has on systems, Assets, enterprise, etc. |
 | References | | ✅ | The external documentation available for this flaw. |
 | Severity Justification | | ✅ | Text describing why a certain severity was associated with this flaw. |
 | Steps to Reproduce | | ✅ | Text describing the steps that must be followed in order to reproduce the flaw / bug. |
@@ -119,7 +119,7 @@ The table below lists every DefectDojo finding field (output field) you can map 
 | Unique ID From Tool | | | Vulnerability technical ID from the source tool. Allows tracking of unique vulnerabilities. |
 | Vuln ID from Tool | | | Non-unique technical ID from the source tool associated with the vulnerability type. |
 | Tags | | | String tags that help describe this finding. |
-| Endpoints | | | The hosts/URLs within the product that are susceptible to this flaw. |
+| Endpoints | | | The hosts/URLs within the Asset that are susceptible to this flaw. |
 | Vulnerability IDs | | | One or more vulnerability advisory identifiers associated with this finding (most commonly, CVEs). |
 
 > **Note:** In the example above, a `CVE` input field would be mapped to the **Vulnerability IDs** output field — DefectDojo does not have a finding field literally named "CVE".

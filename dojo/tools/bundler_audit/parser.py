@@ -3,8 +3,7 @@ __author__ = "jaguasch"
 import hashlib
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -95,7 +94,7 @@ class BundlerAuditParser:
                 )
                 if advisory_id:
                     find.unsaved_vulnerability_ids = [advisory_id]
-                if settings.V3_FEATURE_LOCATIONS and gem_name:
+                if locations_enabled() and gem_name:
                     find.unsaved_locations.append(
                         LocationData.dependency(purl_type="gem", name=gem_name, version=gem_version),
                     )

@@ -18,7 +18,7 @@ Settings is divided into seven groups, named for what you are trying to do rathe
 
 | Group | What it holds |
 | --- | --- |
-| **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail, Feature Flags |
+| **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | The three Deduplication pages, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
@@ -27,6 +27,8 @@ Settings is divided into seven groups, named for what you are trying to do rathe
 | **License & Support** | License Manager, Version Manager, Contact Support |
 
 You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
+
+**Feature Flags sits above the groups**, directly under All Settings, rather than inside any of them. It is the page administrators open most often, and it reads alongside All Settings: one lists what exists, the other controls what is switched on. It is still filed under System in the All Settings directory.
 
 Two conventions are worth knowing:
 
@@ -45,7 +47,7 @@ If you are used to the previous layout:
 
 | Previously | Now |
 | --- | --- |
-| Settings → *(top level)* → Feature Flags | Settings → System → Feature Flags |
+| Settings → *(top level)* → Feature Flags | Unchanged — still at the top level, below All Settings |
 | Settings → Pro Settings → System Settings | Settings → System → System Settings |
 | Settings → Pro Settings → Appearance | Settings → System → Appearance |
 | Settings → Pro Settings → Banner Settings → Announcement Banner Settings | Settings → System → Announcement Banner |

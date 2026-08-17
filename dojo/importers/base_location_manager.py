@@ -88,16 +88,12 @@ class LocationHandler:
         v3_manager_class: type[BaseLocationManager] | None = None,
         v2_manager_class: type[BaseLocationManager] | None = None,
     ) -> None:
-        from django.conf import settings  # noqa: PLC0415
-
         from dojo.importers.endpoint_manager import EndpointManager  # noqa: PLC0415
         from dojo.importers.location_manager import LocationManager  # noqa: PLC0415
+        from dojo.location.feature import locations_enabled  # noqa: PLC0415
 
         self._product = product
-        if settings.V3_FEATURE_LOCATIONS:
-            cls = v3_manager_class or LocationManager
-        else:
-            cls = v2_manager_class or EndpointManager
+        cls = (v3_manager_class or LocationManager) if locations_enabled() else (v2_manager_class or EndpointManager)
         self._manager: BaseLocationManager = cls(product)
 
     # --- Delegates (one per BaseLocationManager method) ---

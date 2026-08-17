@@ -1625,18 +1625,6 @@ class LocationTest(BaseClass.ListRequestTest, BaseClass.RetrieveRequestTest):
         self.permission_check_class = Location
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    def test_list_object_not_authorized(self):
-        self.setUp_not_authorized()
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-    def test_detail_object_not_authorized(self):
-        self.setUp_not_authorized()
-        current_objects = self.endpoint_model.objects.all()
-        relative_url = self.url + f"{current_objects[0].id}/"
-        response = self.client.get(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
 
 @skip_unless_v3
 class LocationFindingReferenceTest(BaseClass.BaseClassTest):
@@ -3007,6 +2995,51 @@ class NotesTest(BaseClass.BaseClassTest):
         self.update_fields = {"entry": "changed entry"}
         self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    # Regression: PATCH /api/v2/notes/<id>/ without an "entry" (e.g. a body that
+    # only carries read-only fields such as note_type) set entry to None and
+    # inserted a NoteHistory row with data=NULL, hitting the NOT NULL constraint
+    # on dojo_notehistory.data -> HTTP 500. It also silently blanked the note body.
+    @parameterized.expand([
+        # (patch payload, does the note body change?)
+        ({"note_type": None}, False),   # only a read-only field -> empty validated_data
+        ({}, False),                    # empty partial update
+        ({"entry": "changed via patch"}, True),
+    ])
+    def test_partial_update_entry_handling(self, patch_payload, entry_should_change):
+        listing = self.client.get(self.url, format="json").data
+        note_id = listing["results"][0]["id"]
+        detail_url = f"{self.url}{note_id}/"
+        original_entry = Notes.objects.get(id=note_id).entry
+        history_before = Notes.objects.get(id=note_id).history.count()
+
+        response = self.client.patch(detail_url, patch_payload, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        note = Notes.objects.get(id=note_id)
+        # A NoteHistory row is never written with data=NULL, whichever payload.
+        self.assertFalse(
+            note.history.filter(data__isnull=True).exists(),
+            msg="a NoteHistory row was persisted with data=NULL",
+        )
+        if entry_should_change:
+            self.assertEqual(
+                note.entry, "changed via patch",
+                msg=f"expected entry updated, persisted={note.entry!r}",
+            )
+            self.assertEqual(
+                note.history.count(), history_before + 1,
+                msg="an entry change should append exactly one history revision",
+            )
+        else:
+            self.assertEqual(
+                note.entry, original_entry,
+                msg=f"expected entry preserved={original_entry!r}, persisted={note.entry!r}",
+            )
+            self.assertEqual(
+                note.history.count(), history_before,
+                msg="a partial update that leaves the body unchanged must add no history",
+            )
 
 
 @versioned_fixtures
