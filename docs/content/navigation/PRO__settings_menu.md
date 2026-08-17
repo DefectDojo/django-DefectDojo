@@ -14,11 +14,12 @@ Either way, **every settings page keeps the same URL**. Bookmarks, saved links a
 
 ## The reorganized layout
 
-Settings is divided into seven groups, named for what you are trying to do rather than for the part of the system involved.
+Settings is divided into eight groups, named for what you are trying to do rather than for the part of the system involved.
 
 | Group | What it holds |
 | --- | --- |
 | **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail |
+| **UI Defaults** | Form Configuration, Layout Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | The three Deduplication pages, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
@@ -40,6 +41,13 @@ Two conventions are worth knowing:
 The first entry in the section, **All Settings**, opens a directory of every settings page your account can reach, arranged in the same groups as the menu and searchable by name or by what the page does. Searching `deduplication` finds the three deduplication pages *and* System Settings, because System Settings holds deduplication options too.
 
 The last category, **Elsewhere in the app**, lists pages that configure DefectDojo but live in other sidebar sections — the authorization providers, Login and MFA settings, Jira instances, the Upstream and Downstream connectors, and the Universal Parser. Each tile is chipped with the section it belongs to.
+
+## UI Defaults
+
+The **UI Defaults** group collects the settings that control how much of the interface each person can tailor:
+
+- **Form Configuration**: choose which fields the create and edit forms show and require, and whether the Optional Fields panel starts expanded.
+- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, page layouts, and table views. With the switch on, only superusers can create or change dashboards, page layouts, and table views; everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
 
 ## What moved
 
