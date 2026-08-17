@@ -13,6 +13,8 @@ Note that migration is **one-way**. There is no automated rollback path that re-
 
 Enabling Locations only changes behaviour for *new* imports; your existing history is carried forward by a **data-migration suite** that appears under the Locations row on the **Settings > Feature Flags** page once the feature is on. Each item is run on demand by a superuser, shows live progress and an ETA, and is safe to re-run (every step is idempotent).
 
+When a backfill finishes it reports how many source objects it processed and how many distinct **Locations** those objects resolved to. The two numbers differ by design: several source objects can share one Location (many Endpoints normalising to the same URL, or many Findings sharing one component), so the Location count is normally lower than the object count. If any individual object could not be migrated it is skipped rather than aborting the run, and the number skipped is shown alongside the result.
+
 The suite has four items, because a Finding can carry three independent kinds of location:
 
 1. **Endpoints to Locations backfill** — turns existing `Endpoint` rows into **URL Locations** (detailed below).
