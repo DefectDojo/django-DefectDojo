@@ -1,6 +1,8 @@
 ---
 title: "AWS Prowler Scanner"
 toc_hide: true
+aliases:
+  - "/supported_tools/file/aws_prowler/"
 ---
 Prowler file can be imported as a CSV (`-M csv`) or JSON (`-M json`) file.
 
@@ -8,7 +10,7 @@ Prowler file can be imported as a CSV (`-M csv`) or JSON (`-M json`) file.
 Sample AWS Prowler Scanner scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/aws_prowler).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - cwe

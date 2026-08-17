@@ -5,6 +5,8 @@ draft: false
 weight: 2
 exclude_search: false
 audience: opensource
+aliases:
+  - "/asset_modelling/tags/tagging_objects/"
 ---
 
 Tags are ideal for grouping objects in a manner that can be filtered out into smaller, more digestible chunks.  They can be used to denote status, or to create custom sets of Organizations, Assets, Engagements or Findings across the data model.

@@ -55,7 +55,7 @@ DefectDojoで外部サービス（GitHubやJIRAなど）を使用したい場合
 
 ## ステップ6：リクエストの確認と送信
 
-リクエストをもう一度確認するよう促されます。送信後、チームがサポートの支援なしに変更できるのはファイアウォールルールのみです。サポートに連絡するには、[support@defectdojo.com](mailto:support@defectdojo.com) にメールを送るか、[こちらの記事](/en/about_defectdojo/contact_defectdojo_support/)の手順に従ってください。
+リクエストをもう一度確認するよう促されます。送信後、チームがサポートの支援なしに変更できるのはファイアウォールルールのみです。サポートに連絡するには、[support@defectdojo.com](mailto:support@defectdojo.com) にメールを送るか、[こちらの記事](/help/contact_support/)の手順に従ってください。
 
 ![image](images/request_a_trial_6.png)
 

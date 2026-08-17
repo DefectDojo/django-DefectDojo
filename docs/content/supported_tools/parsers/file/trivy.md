@@ -1,6 +1,8 @@
 ---
 title: "Trivy"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/trivy/"
 ---
 JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
 
@@ -25,7 +27,7 @@ If you want to exclude certain status from being imported into Defect Dojo, plea
 Sample Trivy scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/trivy).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

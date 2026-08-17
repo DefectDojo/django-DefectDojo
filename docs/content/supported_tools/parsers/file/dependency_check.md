@@ -1,6 +1,8 @@
 ---
 title: "Dependency Check"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/dependency_check/"
 ---
 OWASP Dependency Check output can be imported in Xml format. This parser ingests the vulnerable dependencies and inherits the suppressions.
 
@@ -27,7 +29,7 @@ DC bundles dependencies under five scenarios:
 Sample Dependency Check scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/dependency_check).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - cwe
