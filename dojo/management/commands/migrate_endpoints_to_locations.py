@@ -177,10 +177,12 @@ class Command(BaseCommand):
 
     help = "Usage: manage.py migrate_endpoints_to_locations"
 
-    # `progress_callback` is accepted by handle() but not exposed on the parser:
-    # it is a programmatic hook for in-process callers (Pro's migration suite
-    # passes it via call_command) and cannot be supplied on the command line.
-    stealth_options = ("progress_callback",)
+    # `progress_callback` and `summary_callback` are accepted by handle() but not
+    # exposed on the parser: they are programmatic hooks for in-process callers (Pro's
+    # migration suite passes them via call_command) and cannot be supplied on the
+    # command line. progress_callback(processed, total) drives a live bar;
+    # summary_callback(dict) reports the final {processed, total, locations, failures}.
+    stealth_options = ("progress_callback", "summary_callback")
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -605,7 +607,9 @@ class Command(BaseCommand):
             product_ref_rows, product_ref_endpoint_ids,
         )
 
-        self._reconcile_product_statuses(list({location.id for _, location in resolved}))
+        chunk_location_ids = {location.id for _, location in resolved}
+        self.migrated_location_ids.update(chunk_location_ids)
+        self._reconcile_product_statuses(list(chunk_location_ids))
 
     def _collect_references(
         self,
@@ -720,6 +724,23 @@ class Command(BaseCommand):
         except Exception:
             logger.warning("progress_callback raised; continuing migration", exc_info=True)
 
+    def _emit_summary(self, summary: dict) -> None:
+        """
+        Publish the final run summary to an optional programmatic callback.
+
+        Pro's migration suite passes ``summary_callback`` (a stealth option) to persist
+        the distinct-location count and the per-endpoint failures. Carried separately
+        from progress because handle() cannot return it: BaseCommand.execute writes any
+        truthy return to stdout and a dict has no ``.endswith``. Swallowed like progress.
+        """
+        callback = self.summary_callback
+        if callback is None:
+            return
+        try:
+            callback(summary)
+        except Exception:
+            logger.warning("summary_callback raised; continuing migration", exc_info=True)
+
     def _log_progress(
         self,
         i: int,
@@ -816,8 +837,9 @@ class Command(BaseCommand):
         self.query_count = bool(options.get("query_count"))
         self.batch_size = int(options["batch_size"])
         self.progress_every = int(options["progress_every"])
-        # Optional programmatic progress hook (see stealth_options). None for CLI runs.
+        # Optional programmatic hooks (see stealth_options). None for CLI runs.
         self.progress_callback = options.get("progress_callback")
+        self.summary_callback = options.get("summary_callback")
 
         # Per-phase wall-clock accumulators.
         self.timings = dict.fromkeys(PHASES, 0.0)
@@ -843,6 +865,10 @@ class Command(BaseCommand):
         # a multi-hour migration. Each entry is (endpoint_id, exception_str).
         self.failed_endpoints: list[tuple[int | None, str]] = []
         self.failed_endpoint_ids: set[int | None] = set()
+
+        # Distinct Location ids this run resolved, so the caller can report how many
+        # Locations the endpoints collapsed onto (many endpoints can share one URL).
+        self.migrated_location_ids: set[int] = set()
 
         if self.query_count:
             connection.force_debug_cursor = True
@@ -974,3 +1000,16 @@ class Command(BaseCommand):
 
         if self.query_count:
             connection.force_debug_cursor = False
+
+        # Summary for programmatic callers (the Pro Locations migration suite). CLI runs
+        # pass no summary_callback and are unaffected. ``locations`` is the distinct-
+        # Location count the endpoints collapsed onto (<= processed); ``failures`` are the
+        # per-endpoint errors isolated during the run so the suite can surface "N skipped".
+        self._emit_summary(
+            {
+                "processed": i,
+                "total": endpoint_count,
+                "locations": len(self.migrated_location_ids),
+                "failures": [{"id": endpoint_id, "error": error} for endpoint_id, error in self.failed_endpoints],
+            },
+        )
