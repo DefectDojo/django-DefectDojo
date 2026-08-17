@@ -37,7 +37,7 @@
                             id="dropdownMenu1"
                             data-toggle="dropdown"
                             aria-expanded="true"
-                            aria-label="Test options"
+                            aria-label="{% trans 'Test options' %}"
                             >
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
@@ -74,7 +74,7 @@
                             </li>
                         {% endif %}
                         <li role="presentation">
-                            <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                            <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2" data-testid="report-link">
                                 <i class="fa-solid fa-file-lines"></i> {% trans "Report" %}
                             </a>
                         </li>
@@ -158,7 +158,7 @@
                     <td>{{ fix_available_count }}</td>
                     <td>{{ test.version }}</td>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
-                        <td class="text-right">{{ test.total_reimport_count }}</td>
+                        <td class="text-end">{{ test.total_reimport_count }}</td>
                     {% endif %}
                     {% if test.api_scan_configuration %}
                         <td>
@@ -203,7 +203,7 @@
                         </i>
                         <div class="dropdown pull-right">
                             <button id="show-filters"
-                                    aria-label="Filters"
+                                    aria-label="{% trans 'Filters' %}"
                                     data-toggle="collapse"
                                     data-target="#import-history-filters"
                                     class="btn btn-primary toggle-filters">
@@ -473,7 +473,7 @@
                                                 <i id="unlink_group_jira_{{ group.id }}"
                                                 data-group-id="{{ group.id }}"
                                                 class="fa-solid fa-trash unlink_group_jira"
-                                                title="Unlink JIRA issue from this group of findings."
+                                                title="{% trans 'Unlink JIRA issue from this group of findings.' %}"
                                                 hx-post="{% url 'finding_group_unlink_jira' group.id %}"
                                                 hx-swap="none"
                                                 hx-on::after-request="window.location.reload()"
@@ -482,7 +482,7 @@
                                                 <i id="push_group_to_jira_{{ group.id }}"
                                                 data-group-id="{{ group.id }}"
                                                 class="fa-solid fa-share-from-square push_group_to_jira"
-                                                title="Update JIRA issue with current data from this group of findings."
+                                                title="{% trans 'Update JIRA issue with current data from this group of findings.' %}"
                                                 hx-post="{% url 'finding_group_push_to_jira' group.id %}"
                                                 hx-swap="none"
                                                 hx-on::after-request="window.location.reload()"
@@ -492,13 +492,13 @@
                                                 <i id="push_group_to_jira_{{ group.id }}"
                                                 data-group-id="{{ group.id }}"
                                                 class="fa-solid fa-share-from-square push_group_to_jira"
-                                                title="Create JIRA issue for this group of findings"
+                                                title="{% trans 'Create JIRA issue for this group of findings' %}"
                                                 hx-post="{% url 'finding_group_push_to_jira' group.id %}"
                                                 hx-swap="none"
                                                 hx-on::after-request="window.location.reload()"
                                                 style="cursor:pointer"></i>
-                                                {% comment %} <a href="{% url 'finding_link_to_jira' group.id %}" title="Link existing JIRA issue to finding.">
-                                                            <i class="fa-solid fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                                                {% comment %} <a href="{% url 'finding_link_to_jira' group.id %}" title="{% trans 'Link existing JIRA issue to finding.' %}">
+                                                            <i class="fa-solid fa-asterisk" title="{% trans 'Link existing JIRA issue to finding.' %}"></i>
                                                 </a> {% endcomment %}
                                             {% endif %}
                                         </td>
@@ -534,7 +534,7 @@
                     <div id="test-pulldown" class="dropdown pull-right">
                         &nbsp;
                         <button id="show-filters"
-                                aria-label="Filters"
+                                aria-label="{% trans 'Filters' %}"
                                 data-toggle="collapse"
                                 data-target="#the-filters"
                                 class="btn btn-primary toggle-filters">
@@ -546,7 +546,7 @@
                                     id="dropdownMenu_test_add"
                                     data-toggle="dropdown"
                                     aria-expanded="true"
-                                    aria-label="Add finding">
+                                    aria-label="{% trans 'Add finding' %}">
                                 <span class="fa-solid fa-plus"></span>
                                 <span class="caret"></span>
                             </button>
@@ -554,12 +554,12 @@
                                 role="menu"
                                 aria-labelledby="dropdownMenu_test_add">
                                 <li role="presentation">
-                                    <a title="Add Finding" href="{% url 'add_findings' test.id %}">
+                                    <a title="{% trans 'Add Finding' %}" href="{% url 'add_findings' test.id %}">
                                         <span class="fa-solid fa-bug"></span> {% trans "New Finding" %}
                                     </a>
                                 </li>
                                 <li role="presentation">
-                                    <a title="Add Finding from Template" href="{% url 'search' test.id %}">
+                                    <a title="{% trans 'Add Finding from Template' %}" href="{% url 'search' test.id %}">
                                         <span class="icon-add-template"></span> {% trans "Finding From Template" %}
                                     </a>
                                 </li>
@@ -573,7 +573,7 @@
                                 id="dropdownMenu1"
                                 data-toggle="dropdown"
                                 aria-expanded="true"
-                                aria-label="Report options">
+                                aria-label="{% trans 'Report options' %}">
                             <span class="fa-solid fa-download"></span>
                             <span class="caret"></span>
                         </button>
@@ -622,15 +622,15 @@
                             <span class="caret"></span>
                         </button>
                     {% endif %}
-                    <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+                    <div class="btn-group me-2" role="group" aria-label="{% trans 'Bulk Actions' %}">
                         {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
                             <button type="button"
                                     id="merge_findings"
                                     class="btn btn-info btn-sm btn-secondary"
                                     data-toggle="tooltip"
                                    
-                                    title="Merge Findings">
-                                <a class="white-color merge" href="#" alt="Merge Findings">
+                                    title="{% trans 'Merge Findings' %}">
+                                <a class="white-color merge" href="#" alt="{% trans 'Merge Findings' %}">
                                     <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
                                 </a>
                             </button>
@@ -640,8 +640,8 @@
                                     class="btn btn-info btn-sm btn-secondary"
                                     data-toggle="tooltip"
                                    
-                                    title="Delete Findings">
-                                <a class="white-color delete-bulk" href="#" alt="Delete Findings">
+                                    title="{% trans 'Delete Findings' %}">
+                                <a class="white-color delete-bulk" href="#" alt="{% trans 'Delete Findings' %}">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </button>
@@ -688,7 +688,7 @@
                                        class="datepicker form-control hasDatepicker"
                                        name="date"
                                        type="date"
-                                       alt="Select the date the Findings were discovered"/>
+                                       alt="{% trans 'Select the date the Findings were discovered' %}"/>
                                 <br />
                                 <label>
                                     <b>{% trans "Planned Remediation Date" %}</b>
@@ -698,7 +698,7 @@
                                     class="datepicker form-control hasDatepicker"
                                     name="planned_remediation_date"
                                     type="date"
-                                    alt="Select the date the Finding will be remediated"/>
+                                    alt="{% trans 'Select the date the Finding will be remediated' %}"/>
                                 <br />
                                 <label style="display: block">
                                     {% trans "Planned Remediation version" %}
@@ -712,8 +712,8 @@
                                     <input id="id_bulk_status"
                                         name="status"
                                         type="checkbox"
-                                        alt="Select to enable"
-                                        title="status_checkbox"/>
+                                        alt="{% trans 'Select to enable' %}"
+                                        title="{% trans 'status_checkbox' %}"/>
                                 </label>
                                 <br />
                                 <label style="font-size: 80%; font-weight: normal; display: block">
@@ -754,7 +754,7 @@
                                     <input id="id_bulk_risk_acceptance"
                                         name="risk_acceptance"
                                         type="checkbox"
-                                        alt="Select to enable"/>
+                                        alt="{% trans 'Select to enable' %}"/>
                                 </label>
                                 <br />
                                 <label style="font-size: 80%; font-weight: normal; display: block">
@@ -774,7 +774,7 @@
                                         <input id="id_bulk_finding_group"
                                             name="finding_group"
                                             type="checkbox"
-                                            alt="Select to enable"/>
+                                            alt="{% trans 'Select to enable' %}"/>
                                     </label>
                                     <br />
                                     <label style="font-size: 80%; font-weight: normal; display: block">
@@ -850,8 +850,8 @@
                                     <input id="id_push_tojira"
                                         name="push_to_jira"
                                         type="checkbox"
-                                        alt="Select to push to JIRA"
-                                        title="Push_To_Jira"/>
+                                        alt="{% trans 'Select to push to JIRA' %}"
+                                        title="{% trans 'Push_To_Jira' %}"/>
                                     <br />
                                 {% endif %}
                                 <label style="display: block">
@@ -876,7 +876,7 @@
                                 <input type="submit"
                                     class="btn btn-sm btn-secondary"
                                     value="Submit"
-                                    title="sub-button"/>
+                                    title="{% trans 'sub-button' %}"/>
                             </form>
                         </li>
                     </ul>
@@ -889,7 +889,7 @@
                         <tr>
                             {% block header %}
                                 {% if test|has_object_permission:"edit" or test|has_object_permission:"delete" %}
-                                    <th class="centered" title="Select all visible findings.">
+                                    <th class="centered" title="{% trans 'Select all visible findings.' %}">
                                         <div class="dropdown">
                                             <button class="btn btn-primary dropdown-toggle"
                                                     type="button"
@@ -897,12 +897,12 @@
                                                     data-toggle="dropdown"
                                                     aria-haspopup="true"
                                                     aria-expanded="true"
-                                                    aria-label="Severity Filter">
+                                                    aria-label="{% trans 'Severity Filter' %}">
                                                 <form class="inline-form" action="#">
                                                     <input type="checkbox"
                                                         name="select_all"
                                                         label="select_all"
-                                                        aria-label="select_all"
+                                                        aria-label="{% trans 'select_all' %}"
                                                         id="select_all"/>
                                                 </form>
                                                 <span class="caret"></span>
@@ -1008,7 +1008,7 @@
                                                     name="select_{{ finding.id }}"
                                                     id="{{ finding.id }}"
                                                     label="select_one"
-                                                    aria-label="select_one"
+                                                    aria-label="{% trans 'select_one' %}"
                                                     class="select_one {{ finding.severity }}"/>
                                             </form>
                                         </td>
@@ -1337,7 +1337,7 @@
                         <a data-toggle="collapse" href="#add_feat_files">
                             <i class="fa-solid fa-chevron-down"></i></a></span>
                         {% if test|has_object_permission:"edit" %}
-                            <a title="Manage Files"
+                            <a title="{% trans 'Manage Files' %}"
                                 name="Manage Files"
                                 class="btn btn-sm btn-primary pull-right"
                                 href="{% url 'manage_files' oid=test.id obj_type='Test' %}">
@@ -1353,7 +1353,7 @@
                                 {% url 'access_file' fid=file.id oid=test.id obj_type='Test' as image_url %}
                                 <a href="{{ image_url }}" target="_blank" download>
                                     {% if file|get_thumbnail %}
-                                        <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
+                                        <img src="{{ image_url }}" alt="{% trans 'thumbnail' %}" style="width:150px">
                                     {% else %}
                                         <span style="font-size: 50px;" class="fa-solid fa-file"></span>
                                     {% endif %}

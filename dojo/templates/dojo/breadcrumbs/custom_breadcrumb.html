@@ -1,5 +1,6 @@
+{% load i18n %}
 {% if custom_breadcrumb %}
-<nav aria-label="breadcrumb">
+<nav aria-label="{% trans 'breadcrumb' %}">
   <ol class="breadcrumb">
 {% for key, value in custom_breadcrumb.items %}
   <li><a href="{{value}}">{{key}}</a></li>

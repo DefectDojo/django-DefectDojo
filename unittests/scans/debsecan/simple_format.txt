@@ -1,0 +1,8 @@
+CVE-2026-13595 bsdutils
+CVE-2026-27456 bsdutils
+CVE-2026-3184 bsdutils
+CVE-2026-53613 bsdutils
+CVE-2026-53615 bsdutils
+CVE-2026-41991 gzip
+CVE-2026-41992 gzip
+CVE-2026-54369 libacl1

@@ -1,10 +1,11 @@
+{% load i18n %}
 {% load display_tags %}
 
 {% if format == "HTML" %}
     {% with images=obj|file_images %}
         <h6>Images</h6>
         {% for pic in images %}
-            <p><img src="{{ host }}{% pic_token pic size %}" style="max-width: 85%" alt="Finding Image"></p>
+            <p><img src="{{ host }}{% pic_token pic size %}" style="max-width: 85%" alt="{% trans 'Finding Image' %}"></p>
         {% empty %}
             <p class="text-center">No images found.</p>
         {% endfor %}
@@ -13,7 +14,7 @@
     {% with images=obj|file_images %}
         <h6>Images</h6>
         {% for pic in images %}
-            <p><img src="{{ pic|inline_image }}" style="max-width: 85%" alt="Finding Image"></p>
+            <p><img src="{{ pic|inline_image }}" style="max-width: 85%" alt="{% trans 'Finding Image' %}"></p>
         {% empty %}
             <p class="text-center">No images found.</p>
         {% endfor %}

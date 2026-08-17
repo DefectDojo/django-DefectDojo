@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-08-09T21:34:18Z",
+  "vulnerabilities": [
+    {
+      "source": {
+        "label": "~call_1 = ret_request.args.get('cmd')",
+        "line_number": 7,
+        "path": "taintapp.py"
+      },
+      "source_trigger_word": "request.args.get(",
+      "sink": {
+        "label": "~call_2 = ret_subprocess.call(cmd, shell=True)",
+        "line_number": 8,
+        "path": "taintapp.py"
+      },
+      "sink_trigger_word": "subprocess.call(",
+      "type": "Vulnerability",
+      "reassignment_nodes": [
+        {
+          "label": "cmd = ~call_1",
+          "line_number": 7,
+          "path": "taintapp.py"
+        }
+      ]
+    }
+  ]
+}

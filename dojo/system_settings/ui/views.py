@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.utils.translation import gettext as _
 from django.views import View
 
 from dojo.system_settings.models import System_Settings
@@ -58,26 +59,26 @@ class SystemSettingsView(View):
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    "Settings cannot be saved: Minimum required password length must be less than maximum required password length.",
+                    _("Settings cannot be saved: Minimum required password length must be less than maximum required password length."),
                     extra_tags="alert-warning")
             elif context["form"].cleaned_data["enable_deduplication"] is True and context["form"].cleaned_data["false_positive_history"] is True:
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    "Settings cannot be saved: Deduplicate findings and False positive history can not be set at the same time.",
+                    _("Settings cannot be saved: Deduplicate findings and False positive history can not be set at the same time."),
                     extra_tags="alert-warning")
             elif context["form"].cleaned_data["retroactive_false_positive_history"] is True and context["form"].cleaned_data["false_positive_history"] is False:
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    "Settings cannot be saved: Retroactive false positive history can not be set without False positive history.",
+                    _("Settings cannot be saved: Retroactive false positive history can not be set without False positive history."),
                     extra_tags="alert-warning")
             else:
                 context["form"].save()
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Settings saved.",
+                    _("Settings saved."),
                     extra_tags="alert-success")
             return request, True
         return request, False

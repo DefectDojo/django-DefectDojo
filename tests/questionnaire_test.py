@@ -22,7 +22,7 @@ class QuestionnaireTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").send_keys("Test Questionnaire")
         driver.find_element(By.ID, "id_description").clear()
         driver.find_element(By.ID, "id_description").send_keys("This is a test questionnaire for E2E testing")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Questionnaire successfully created")
@@ -39,7 +39,7 @@ class QuestionnaireTest(BaseTestCase):
         # We should now be on the edit page (clicking the name goes to edit)
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Edited Test Questionnaire")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Questionnaire successfully updated")

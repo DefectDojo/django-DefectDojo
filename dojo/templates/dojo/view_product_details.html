@@ -18,7 +18,7 @@
           <h3 class="pull-left">{% trans "Description" %}</h3>
           <div class="dropdown pull-right">
             <div class="btn-group">
-              <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true" aria-label="Options">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Options' %}">
                 <span class="fa-solid fa-bars"></span>
                 <span class="caret"></span>
               </button>
@@ -36,7 +36,7 @@
                     </a>
                   </li>
                   <li role="presentation">
-                    <a title="Edit Custom Fields"
+                    <a title="{% trans 'Edit Custom Fields' %}"
                       href="{% url 'edit_meta_data' prod.id %}">
                         <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit Custom Fields" %}
                     </a>
@@ -51,7 +51,7 @@
                   </li>
                 {% endif %}
                 <li role="presentation">
-                    <a title="View API Scan Configurations"
+                    <a title="{% trans 'View API Scan Configurations' %}"
                         href="{% url 'view_api_scan_configurations' prod.id %}">
                         <i class="fa-solid fa-rectangle-list"></i>{% trans "View API Scan Configurations" %}
                     </a>
@@ -122,7 +122,7 @@
 <div class="col-md-12">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-chart-pie me-2" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
     </div>
     <table class="table table-condensed metrics-severity-counts">
       <tbody>
@@ -240,7 +240,7 @@
                 <div class="col-md-6">
                     <span class="float-md-left"><strong>{{benchmark.name}}</strong> ({{ benchmark.level }})</span>
                 </div>
-                <div class="col-md-6 text-right">
+                <div class="col-md-6 text-end">
                     <span class="float-md-right">{{ benchmark.pass|percentage:benchmark.total }} {% trans "complete" %}</span>
                 </div>
             </div>
@@ -281,7 +281,7 @@
                 {% if prod|has_object_permission:"staff_only" %}
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddAuthorizedUsers"
-                            data-toggle="dropdown" aria-expanded="true" aria-label="Add Authorized Users">
+                            data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Add Authorized Users' %}">
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
