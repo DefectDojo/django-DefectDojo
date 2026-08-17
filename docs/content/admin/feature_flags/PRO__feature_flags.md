@@ -118,7 +118,7 @@ Most features are available on both installation types. The exceptions are:
 
 | Feature | Availability | How it is controlled |
 | --- | --- | --- |
-| Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
+| Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Always on for Cloud instances, and not offered on-premise. No longer listed on the Feature Flags page. |
 | Locations | Both | Feature Flags page for the Pro UI and import pipeline; the Classic UI and `/api/v2` route wiring follow the `DD_V3_FEATURE_LOCATIONS` deployment setting. Enabling is self-service and one-way — once on, it cannot be turned back off. See [above](#locations) and [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
 | Organization / Asset Relabeling | Both | Feature Flags page for the Pro UI; the Classic UI, its URLs and generated reports follow the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting. See [above](#organization--asset-relabeling). |
 
@@ -143,10 +143,13 @@ This endpoint is **read-only**. Turning a feature on or off is still done from t
 ## Frequently asked questions
 
 **A feature I want is not in the list.**
-The list shows optional features only. Capabilities that are always on do not appear. If you expected a feature that is missing, confirm your license includes it, then contact [DefectDojo Support](mailto:support@defectdojo.com).
+The list shows optional features only. Capabilities that are always on do not appear. A feature also leaves the list once it becomes standard — it is then on for every instance and there is nothing to switch. If you expected a feature that is missing, confirm your license includes it, then contact [DefectDojo Support](mailto:support@defectdojo.com).
+
+**A feature I had turned off is on again after an upgrade.**
+A feature that becomes standard is turned on everywhere, and the setting you had chosen for it while it was optional is cleared as part of that release — otherwise an instance that had opted out would stay off with no toggle left to change it back. This only happens to features that leave the list; everything still shown keeps your setting. If a standard feature causes you a problem, contact [DefectDojo Support](mailto:support@defectdojo.com), who can turn it off for your instance.
 
 **I turned a feature on but I do not see it.**
 Reload the page — menu entries and routes are evaluated when the page loads, so a newly enabled feature appears on the next load rather than instantly in the current view.
 
 **Will upgrading change my settings?**
-No. Upgrading preserves the features you have turned on and the ones you have turned off.
+For every feature on this page, yes — upgrading preserves the ones you have turned on and the ones you have turned off. The exception is a feature that becomes standard in that release and leaves the page; see the question above.

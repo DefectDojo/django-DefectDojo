@@ -11,13 +11,14 @@ weight: 4
 
 This is Sensei's **pre-code** capability. Where [scan-and-fix](/sensei/about_sensei/) works on a repository that already exists, threat modeling works on the design, before there is code to scan.
 
-> **🔎 BETA:** Threat Modeling is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases. During BETA it is enabled per instance by DefectDojo — contact your DefectDojo representative to have it turned on.
+> **🔎 BETA:** Threat Modeling is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases. It is on by default; a superuser can switch it off, or back on, from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required.
 
 > **📍 Where to find it:** open **Threat Modeling** from the left-hand navigation, directly below Sensei.
 
 ## What you need
 
 - The **Sensei** licensed feature. Threat modeling ships under the same entitlement as scan-and-fix.
+- The **AI Threat Modeling** feature flag, which is on by default. If your instance turned it off, a superuser can turn it back on from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/).
 - A global **Maintainer** or **Owner** role. Users without it do not see the page.
 - An Asset to attach the threat model to. Instances using V3 naming see Assets called **assets**; this page says *Asset* throughout, and the UI follows whichever naming your instance is set to.
 
