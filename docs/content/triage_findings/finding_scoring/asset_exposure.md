@@ -87,6 +87,36 @@ Assets where the checkbox was simply never ticked are left with no override. An 
 checkbox means "nobody has said", not "this asset is isolated", so it is not converted
 into a statement.
 
+## Exposure inherited from where an asset runs
+
+An asset can be reachable without anything having scanned it, simply because of what it is
+deployed onto. A service nobody has scanned, running on a cluster that answers from the
+internet, is reachable.
+
+To record that, link the two assets with a **deploys to** relationship, pointing from the
+deployed asset to the thing it runs on. The Exposure panel then shows a second badge, the
+**effective exposure**, naming the asset the exposure came from. The strongest verdict
+anywhere along the deployment chain wins, so a service deployed onto a cluster in an exposed
+account inherits from the account too.
+
+The asset's own verdict is still shown beside it, and the two are deliberately not merged.
+"Nothing has scanned this asset" and "this asset is reachable because of where it runs" are
+different statements, and collapsing them would read as though a scanner had found the asset
+exposed.
+
+Two limits worth knowing:
+
+- **Inherited exposure does not change priority.** Scoring uses the asset's own exposure. The
+  inherited verdict is shown so you can see the reachability of what you are looking at; it
+  does not silently move scores when somebody edits a relationship elsewhere.
+- **You only inherit from assets you can see.** If the asset it is deployed onto is outside
+  your permissions, it contributes nothing, so the effective exposure you see may be lower
+  than the one somebody with wider access sees.
+
+Only **deploys to** carries exposure. Other relationships do not: an organization that
+contains an exposed asset is not itself reachable, so containment deliberately does not
+propagate.
+
 ## Deployment context
 
 Alongside exposure, each Finding records whether its code is **In production**, **Not in
