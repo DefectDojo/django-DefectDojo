@@ -143,6 +143,13 @@ and what to do about it. The most common causes:
 
 ## Source and support
 
-The plugin is open source at
-[github.com/DefectDojo/agent-skills](https://github.com/DefectDojo/agent-skills).
-Report problems as issues there.
+The source is published at
+[github.com/DefectDojo/agent-skills](https://github.com/DefectDojo/agent-skills)
+so you can read exactly what runs against your vulnerability data before you run
+it. Report problems as issues there.
+
+The plugin is source-available rather than open source: you may install it, use
+it with a DefectDojo Pro instance, and review the source, but not modify or
+redistribute it. See the licence in the repository for the exact terms.
+DefectDojo Community Edition is separate and remains open source under its own
+licence.
