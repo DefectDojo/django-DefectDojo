@@ -3,7 +3,7 @@ title: "Sensei Reference"
 description: "Statuses, row actions, quotas, and troubleshooting"
 draft: false
 audience: pro
-weight: 5
+weight: 6
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature and is currently in BETA.</span>
 
@@ -32,6 +32,8 @@ Auto-fix candidates and fix records move through these states:
 | **PR Open** | A fix pull request is open; the badge links to it. |
 | **Failed** | The fix could not be completed; it stays listed so it doesn't disappear silently. |
 
+A cloud finding fixed *directly* (see [CSPM](/sensei/cloud_posture/#cloud-remediations-ledger)) adds three more, tracked on the hub's **Cloud Remediations** tab: **Applied in Cloud** (the change landed on the live resource — the direct-path analog of *PR Open*), **Revert in Progress**, and **Reverted**.
+
 ## Repository row actions
 
 Each onboarded repository has a row-actions menu on the Sensei hub:
@@ -50,6 +52,7 @@ Sensei is metered against your DefectDojo Pro license, shown as meters at the to
 
 - **Fixes:** remediations applied against your prepaid limit. Approving a candidate or triggering a fix consumes from this quota; when it is exhausted, further fixes are blocked (a warning banner appears) until the limit is raised.
 - **Onboarded Repositories:** repositories onboarded against your repository limit. When it is reached, onboarding new repositories is blocked.
+- **Onboarded Cloud Accounts:** cloud accounts onboarded against your cloud-account limit (`sensei_cloud_account_limit`), shown when CSPM is enabled. When it is reached, onboarding new accounts is blocked. The Fixes quota is **shared** — an AppSec fix and a cloud remediation both spend `sensei_fix_limit` — and the Fixes card breaks its total down by capability. See [CSPM → Quotas](/sensei/cloud_posture/#quotas).
 
 To raise a limit, contact your DefectDojo account team.
 
@@ -91,6 +94,13 @@ GitHub Enterprise Server uses the **same GitHub App** model as github.com; only 
 - **Connection:** because the App-manifest auto-create flow is github.com-only, create the App **manually** on your GHES host and enter its credentials plus the **Enterprise host** via **Set up manually**. See [Connect GitHub Enterprise Server](/sensei/setup_sensei/#connect-github-enterprise-server). DefectDojo derives the API (`/api/v3`) and web origins from the host.
 - **Coexistence:** a github.com App connection and a GHES App connection can be configured on the same instance; each repository resolves to the connection it was onboarded through.
 - **Reachability:** DefectDojo must reach the GHES API host, and GHES must reach DefectDojo's `…/sensei/webhooks` endpoint (internal hosts are fine if both sides can connect).
+
+## Cloud (CSPM) specifics
+
+Cloud accounts are the CSPM analog of onboarded repositories; the full flow is on the [Cloud Security Posture (CSPM)](/sensei/cloud_posture/) page. Two reference points worth calling out:
+
+- **Two credentials, two jobs.** The **scan** credential is read-only (it only reads posture). A **direct fix** ("Fix in Cloud") uses a *separate* **write** credential, supplied per account and never widening the scan credential. A read-only account can be scanned but not directly remediated.
+- **Direct fixes are reversible and drift-checked.** Sensei snapshots the resource's prior state before applying a change and fingerprints it; a **Revert** restores that state but refuses if the resource has drifted out-of-band since the fix. Statuses (**Applied in Cloud** / **Reverted** / **Failed**) live on the hub's **Cloud Remediations** tab.
 
 ## Troubleshooting
 
