@@ -71,6 +71,7 @@ from dojo.forms import (
     TypedNoteForm,
 )
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
 from dojo.location.utils import copy_location_references
@@ -353,7 +354,7 @@ class ListFindings(View, BaseListFindings):
                 # the user may view so the breadcrumb cannot disclose the
                 # existence/URL of one they cannot access (404 for both missing
                 # and unauthorized ids).
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     authorized = get_authorized_locations("view", user=request.user)
                 else:
                     authorized = get_authorized_endpoints("view", user=request.user)
@@ -844,7 +845,7 @@ class EditFinding(View):
             now = timezone.now()
             finding.is_mitigated = True
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 for ref in finding.locations.all():
                     ref.set_status(
                         FindingLocationStatus.Mitigated,
@@ -927,7 +928,7 @@ class EditFinding(View):
             # Save and add new locations; replace=True so deselected endpoints are removed
             associated_locations = finding_helper.add_locations(new_finding, context["form"], replace=True)
             # Remove unrelated endpoints
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 for ref in new_finding.locations.all():
                     if ref.location not in associated_locations:
                         ref.location.disassociate_from_finding(new_finding)
@@ -1373,7 +1374,7 @@ def reopen_finding(request, fid):
     # more than closing here — the finding comes back active, so stale
     # reviewers would show up in reviewer-scoped queues as live work.
     finding.review_requested_by = None
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         for ref in finding.locations.all():
             ref.set_status(FindingLocationStatus.Active, request.user, timezone.now())
     else:
@@ -2359,7 +2360,7 @@ def merge_finding_product(request, pid):
                                 finding_to_merge_into.endpoints.add(
                                     *finding.endpoints.all(),
                                 )
-                            if settings.V3_FEATURE_LOCATIONS:
+                            if locations_enabled():
                                 copy_location_references(finding, finding_to_merge_into)
 
                         # if checked merge the tags

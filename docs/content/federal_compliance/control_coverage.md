@@ -61,7 +61,7 @@ enabled, backfill them:
 manage.py extract_control_mappings --product <id>
 ```
 
-Use `--all` to scan every active finding instead of one product. Both passes — reference
+Use `--all` to scan every active finding instead of one Asset. Both passes — reference
 extraction and the CCI crosswalk — run by default; `--skip-scanner-refs` and `--skip-crosswalk`
 run one without the other. The command reports how many mappings each pass created, and it leaves
 manual and suppressed mappings alone.

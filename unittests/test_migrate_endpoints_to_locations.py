@@ -455,6 +455,38 @@ class MigrateEndpointsToLocationsTest(TestCase):
             ["good-one.example.com", "good-two.example.com"],
         )
 
+    def test_summary_callback_reports_locations_and_failures(self):
+        # The Pro Locations migration suite passes summary_callback to learn the
+        # distinct-Location count (endpoints collapse onto shared URLs) and the
+        # per-endpoint failures, neither of which the (processed, total) progress
+        # hook can carry. Two endpoints share a host (one Location), one is unique
+        # (a second Location), and one is broken (fails, no Location).
+        self._make_endpoint("dup.example.com", [])
+        self._make_endpoint("dup.example.com", [])
+        self._make_endpoint("uniq.example.com", [])
+        broken = self._make_endpoint("broken.example.com", [])
+        Endpoint.objects.filter(pk=broken.pk).update(host="")
+
+        summaries = []
+        with self.assertLogs(
+            "dojo.management.commands.migrate_endpoints_to_locations",
+            level="ERROR",
+        ):
+            call_command(
+                "migrate_endpoints_to_locations",
+                batch_size=10,
+                progress_every=100,
+                summary_callback=summaries.append,
+                stdout=StringIO(),
+            )
+
+        self.assertEqual(len(summaries), 1, msg=f"summary_callback fired {len(summaries)} times")
+        summary = summaries[0]
+        self.assertEqual(summary["processed"], 4, msg=summary)
+        self.assertEqual(summary["total"], 4, msg=summary)
+        self.assertEqual(summary["locations"], 2, msg=f"expected 2 distinct locations: {summary}")
+        self.assertEqual([f["id"] for f in summary["failures"]], [broken.id], msg=summary)
+
     def test_failed_bulk_location_write_falls_back_per_endpoint(self):
         self._make_endpoint("first-bulk.example.com", [])
         self._make_endpoint("second-bulk.example.com", [])

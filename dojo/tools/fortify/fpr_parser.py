@@ -3,8 +3,8 @@ import re
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Test
 from dojo.tools.fortify.fortify_data import DescriptionData, RuleData, SnippetData, VulnerabilityData
 from dojo.tools.locations import LocationData
@@ -143,7 +143,7 @@ class FortifyFPRParser:
             finding.line = int(self.compute_line(vuln_data, snippet))
             finding.unique_id_from_tool = vuln_data.instance_id
 
-            if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+            if locations_enabled() and finding.file_path:
                 end_line = vuln_data.source_location_line_end
                 finding.unsaved_locations.append(
                     LocationData.code(

@@ -6,9 +6,9 @@ import cvss.parser
 import dateutil.parser
 from cpe import CPE
 from cvss.exceptions import CVSSError
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -367,7 +367,7 @@ class BaseEngineParser:
 
     def process_whole_item(self, finding: Finding, item: Any) -> None:
         self.set_severity(finding, item)
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             self.set_locations(finding, item)
         else:
             # TODO: Delete this after the move to Locations
@@ -381,7 +381,7 @@ class BaseEngineParser:
 
     def get_finding_key(self, finding: Finding) -> tuple:
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return (
                 finding.severity,
                 finding.title,

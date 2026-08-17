@@ -4,8 +4,7 @@ from contextlib import suppress
 from datetime import datetime
 from ipaddress import ip_address
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -293,7 +292,7 @@ class FleetVulnerabilitiesParser:
         name = self.host_name(host) or str(host.get("primary_ip") or "").strip()
         if not name or not self.usable_host(name):
             return
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(LocationData.url(host=name))
         else:
             # TODO: Delete this after the move to Locations

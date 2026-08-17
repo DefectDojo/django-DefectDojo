@@ -4,8 +4,8 @@ from datetime import datetime
 import html2text
 from dateutil import parser
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -101,7 +101,7 @@ def issue_r(raw_row, vuln, scan_date):
                 date=scan_date,
             )
             # Create Endpoint/Location
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 location = LocationData.url(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url(host=issue_row["ip_address"])
                 finding.unsaved_locations = [location]
             else:

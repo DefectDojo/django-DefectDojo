@@ -1,9 +1,9 @@
 import logging
 import re
 
-from django.conf import settings
 from lxml import etree, html
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -253,7 +253,7 @@ class BurpSuiteDASTParser:
             )
             # Add the unsaved versions of the other things
             # Endpoints/Locations
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(url=endpoint) for endpoint in endpoints]
             else:
                 # TODO: Delete this after the move to Locations

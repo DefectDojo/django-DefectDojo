@@ -2,8 +2,8 @@ import json
 import logging
 
 from dateutil import parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -215,7 +215,7 @@ class DependencyTrackParser:
         if epss_percentile:
             finding.epss_percentile = epss_percentile
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             if component_purl := dependency_track_finding.get("component", {}).get("purl"):
                 finding.unsaved_locations.append(
                     LocationData.dependency(purl=component_purl),

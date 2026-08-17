@@ -2,7 +2,6 @@ import contextlib
 import logging
 from typing import TypeVar
 
-from django.conf import settings
 from django.db.models import DateTimeField, Manager, Model, QuerySet
 from django.utils.translation import gettext_lazy as _
 
@@ -55,7 +54,12 @@ class BaseModelWithoutTimeMeta(Model):
         """
         # make sure this is evaluated at runtime, not at class definition time which would be the case if we used it in the parameter default value
         if skip_validation is None:
-            skip_validation = not settings.V3_FEATURE_LOCATIONS
+            # Lazy import: base.py is imported while the dojo.location package is
+            # still initializing (dojo.location.models -> BaseModel), so importing
+            # the accessor at module top would be a circular import.
+            from dojo.location.feature import locations_enabled  # noqa: PLC0415
+
+            skip_validation = not locations_enabled()
         # Run the pre save logic, if enabled
         self.pre_save_logic()
         # Call the validations

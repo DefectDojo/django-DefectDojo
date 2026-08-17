@@ -11,7 +11,7 @@ Here are some common issues with the Jira integration, and ways to address them.
 
 ## I can't find any Jira settings in DefectDojo
 
-If there is no Jira menu in the sidebar, no Jira section on the Product / Engagement forms, and no **Push to Jira** option on Findings, the Jira integration is most likely still disabled in System Settings.  DefectDojo hides every Jira control until it is turned on.
+If there is no Jira menu in the sidebar, no Jira section on the Asset / Engagement forms, and no **Push to Jira** option on Findings, the Jira integration is most likely still disabled in System Settings.  DefectDojo hides every Jira control until it is turned on.
 
 Check **Enable Jira Integration** on the System Settings page:
 
@@ -96,7 +96,7 @@ Common reasons issues are not created:
 
 ## Error: Product Misconfigured or no permissions in Jira?
 
-This error message can appear when attempting to add a created Jira configuration to a Product.  DefectDojo will attempt to validate a connection to Jira, and if that connection fails, it will raise this error message.
+This error message can appear when attempting to add a created Jira configuration to an Asset.  DefectDojo will attempt to validate a connection to Jira, and if that connection fails, it will raise this error message.
 
 * Check to see if your Jira credentials are allowed to create issues in the given Jira Space you have selected.
 * The "Project Key" field needs to be a valid Jira Space. Jira issues can use many different Keys within a single Space; the easiest way to confirm your Project Key is to look at the URL for that particular Jira Space: generally this will look like `https://xyz.atlassian.net/jira/core/projects/JTV/board`.  In this case `JTV` is the Space Key.

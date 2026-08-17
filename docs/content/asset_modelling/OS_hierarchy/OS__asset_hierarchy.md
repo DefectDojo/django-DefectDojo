@@ -56,7 +56,7 @@ Like **Organizations**, **Assets** can have Role\-Based Access Control rules app
 
 #### What can an Asset represent?
 
-DefectDojo's concept of an 'Asset' will not necessarily correspond 1:1 to what your organization would refer to as a 'Product'. Software development is complex, and security needs can vary greatly even within the scope of a single piece of software.
+DefectDojo's concept of an 'Asset' will not necessarily correspond 1:1 to what your organization would refer to as an 'Asset'. Software development is complex, and security needs can vary greatly even within the scope of a single piece of software.
 
 The following scenarios are good reasons to consider creating a separate DefectDojo Asset:
 

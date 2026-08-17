@@ -85,13 +85,15 @@ Settings is divided into seven groups, named for what you are trying to do rathe
 
 | Group | What it holds |
 | --- | --- |
-| **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail, Feature Flags |
+| **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | The three Deduplication pages, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
 | **Notifications** | Notification Events, Notification Webhooks |
 | **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal, Firewall Rules, Maintenance Windows |
 | **License & Support** | License Manager, Version Manager, Contact Support |
+
+**Feature Flags sits above the groups**, directly under All Settings, rather than inside any of them. It is the page administrators open most often, and it reads alongside All Settings: one lists what exists, the other controls what is switched on. It is still filed under System in the All Settings directory.
 
 ### All Settings
 
@@ -121,7 +123,7 @@ If you are used to the previous layout:
 | Manage → Rules Engine and Rules Engine 2.0 | Act → Triage Engine |
 | Manage → *(any)* → New *(record)* | The **New** button on the matching list page |
 | Dashboards → Home | Overview → Dashboards *(when Dashboards 2.0 is on)* |
-| Settings → *(top level)* → Feature Flags | Settings → System → Feature Flags |
+| Settings → *(top level)* → Feature Flags | Unchanged — still at the top level, below All Settings |
 | Settings → Pro Settings → System Settings | Settings → System → System Settings |
 | Settings → Pro Settings → Appearance | Settings → System → Appearance |
 | Settings → Pro Settings → Banner Settings → Announcement Banner Settings | Settings → System → Announcement Banner |

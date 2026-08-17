@@ -26,9 +26,9 @@ Follow these steps to set up API importing:
     selecting the related `Tool Type` and `Authentication Type` "API Key". Paste your credentials
     into the proper fields based on the selected parser.
 
-## Product-Level Configuration
+## Asset-Level Configuration
 
-1.  Navigate to `Products -> All Products` and select a product from the list.
+1.  Navigate to `Products -> All Products` and select an Asset from the list.
 
 2.  Click on `Settings` and select `Add API Scan Configuration`
 

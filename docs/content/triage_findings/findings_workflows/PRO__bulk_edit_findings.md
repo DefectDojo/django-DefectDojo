@@ -27,7 +27,7 @@ The **Bulk Edit** button opens one form containing all of the field-level bulk a
 * **Status** — apply one of Active, Verified, False Positive, Out of Scope, Mitigated, or Under Defect Review.
 * **Date** — set the discovery date.
 * **Planned Remediation Date** and **Planned Remediation Version**.
-* **Simple Risk Acceptance** — Accept Risk or Unaccept Risk. Applied only to Findings whose Product has Simple Risk Acceptance enabled; others are skipped.
+* **Simple Risk Acceptance** — Accept Risk or Unaccept Risk. Applied only to Findings whose Asset has Simple Risk Acceptance enabled; others are skipped.
 * **Tags** — add tags to the selected Findings, or use the **Append / Replace** toggle to overwrite each Finding's entire tag set (**Append** adds the tags; **Replace** replaces all existing tags).
 * **Replace Specific Tag** — swap one named tag for another (see below).
 * **Note** — add a note, with an optional note type, to every selected Finding.
@@ -55,7 +55,7 @@ The reviewers you can choose from are the users with edit access to the selected
 The remaining bulk-action buttons open their own dialogs:
 
 * **Risk Acceptance** — create a new **Full Risk Acceptance** to govern the selected Findings, or add them to an existing one.
-* **Finding Group** — create a new **Finding Group**, add the Findings to an existing group, or remove them from their current group. Finding Groups can only be created within a single **Test** — Findings from different Tests, Engagements, or Products cannot share a group.
+* **Finding Group** — create a new **Finding Group**, add the Findings to an existing group, or remove them from their current group. Finding Groups can only be created within a single **Test** — Findings from different Tests, Engagements, or Assets cannot share a group.
 * **Merge** — merge multiple selected Findings (all from the same Asset) into one.
 * **Delete** — delete the selected Findings after confirming in a popup.
 
@@ -69,4 +69,4 @@ Each bulk action is available only when it can apply to your whole selection:
 * **Merge** requires more than one Finding, all editable and from the same Asset.
 * **Delete** requires every selected Finding to be deletable by you.
 
-When an action runs but some Findings can't be updated — for example they aren't editable by you, are already under review, or belong to a Product without Simple Risk Acceptance enabled — DefectDojo applies the change to the rest and shows a **"One or More Findings Skipped"** warning explaining why each was skipped.
+When an action runs but some Findings can't be updated — for example they aren't editable by you, are already under review, or belong to an Asset without Simple Risk Acceptance enabled — DefectDojo applies the change to the rest and shows a **"One or More Findings Skipped"** warning explaining why each was skipped.

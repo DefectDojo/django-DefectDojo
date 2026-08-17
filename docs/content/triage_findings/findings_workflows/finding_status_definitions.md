@@ -41,7 +41,7 @@ Certain DefectDojo functions require Findings to be Active and Verified.  If you
 These Verified Statuses are required for
 
 * Pushing Jira Issues
-* Applying Grading to Products
+* Applying Grading to Assets
 * Calculating Metrics
 
 ## **Closed Finding Statuses**

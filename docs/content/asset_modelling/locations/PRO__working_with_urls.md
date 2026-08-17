@@ -30,7 +30,7 @@ When the Locations feature is enabled, the navigation exposes:
 Common workflows from the Endpoints UI are preserved:
 
 - **Bulk status updates.** Select multiple URL Locations and apply a status (Active, Mitigated, False Positive, Risk Accepted, Out of Scope) to their Finding references in one action.
-- **Adding existing URLs to a Asset.** Use **Add Existing** on a Asset's Locations tab to link URLs already in the system rather than creating duplicates.
+- **Adding existing URLs to an Asset.** Use **Add Existing** on an Asset's Locations tab to link URLs already in the system rather than creating duplicates.
 - **Tags.** Tags applied to a URL Location propagate as inherited tags on the Findings that reference it, the same way Endpoint tags previously did.
 
 ## Status Model
@@ -60,7 +60,7 @@ Use these endpoints in place of the legacy Endpoint API:
 | Update a URL's tags or metadata | `PATCH /api/v2/urls/{id}/` |
 | List all Locations (URLs + Dependencies) | `GET /api/v2/location/?location_type=url` |
 | Link a URL to a Finding | `POST /api/v2/location_findings/` |
-| Link a URL to a Asset | `POST /api/v2/location_Assets/` |
+| Link a URL to an Asset | `POST /api/v2/location_products/` |
 | Update a Finding-link's status | `PATCH /api/v2/location_findings/{id}/` |
 | Remove a Finding-link | `DELETE /api/v2/location_findings/{id}/` |
 

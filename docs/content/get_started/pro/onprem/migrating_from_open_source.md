@@ -175,7 +175,7 @@ Which Pro capabilities are available to your deployment depends on your license 
 Once the application is running against the restored database:
 
 1. Log in to your DefectDojo Pro deployment.
-2. Check that your Assets, Organizations, Engagements, Tests, and Findings are present. Assets and Organizations were called Products and Product Types in open source.
+2. Check that your Assets, Organizations, Engagements, Tests, and Findings are present. Assets and Organizations were called Assets and Organizations in open source.
 3. Download a representative uploaded file from the UI, for example an attachment on a Finding, Test, or Engagement, to confirm the media restore worked.
 4. Check that user accounts and groups are intact. SSO and other authentication settings usually have to be reconfigured for the new deployment.
 5. Report any discrepancies to your DefectDojo contact.

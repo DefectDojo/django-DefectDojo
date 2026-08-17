@@ -2,8 +2,8 @@ import json
 from datetime import datetime
 
 from dateutil.parser import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
@@ -86,7 +86,7 @@ class HorusecParser:
             and data["vulnerabilities"]["line"].isdigit()
         ):
             finding.line = int(data["vulnerabilities"]["line"])
-        if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+        if locations_enabled() and finding.file_path:
             finding.unsaved_locations.append(
                 LocationData.code(file_path=finding.file_path, line=finding.line),
             )

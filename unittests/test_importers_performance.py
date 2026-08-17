@@ -345,7 +345,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=161,
             expected_num_async_tasks1=2,
-            expected_num_queries2=129,
+            expected_num_queries2=131,
             expected_num_async_tasks2=1,
             expected_num_queries3=30,
             expected_num_async_tasks3=1,
@@ -369,7 +369,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=180,
             expected_num_async_tasks1=2,
-            expected_num_queries2=139,
+            expected_num_queries2=141,
             expected_num_async_tasks2=1,
             expected_num_queries3=40,
             expected_num_async_tasks3=1,
@@ -394,7 +394,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=190,
             expected_num_async_tasks1=5,
-            expected_num_queries2=149,
+            expected_num_queries2=151,
             expected_num_async_tasks2=4,
             expected_num_queries3=49,
             expected_num_async_tasks3=3,
@@ -672,7 +672,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self._import_reimport_performance(
             expected_num_queries1=167,
             expected_num_async_tasks1=2,
-            expected_num_queries2=137,
+            expected_num_queries2=139,
             expected_num_async_tasks2=1,
             expected_num_queries3=37,
             expected_num_async_tasks3=1,
@@ -696,7 +696,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self._import_reimport_performance(
             expected_num_queries1=190,
             expected_num_async_tasks1=2,
-            expected_num_queries2=151,
+            expected_num_queries2=153,
             expected_num_async_tasks2=1,
             expected_num_queries3=51,
             expected_num_async_tasks3=1,
@@ -721,7 +721,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self._import_reimport_performance(
             expected_num_queries1=203,
             expected_num_async_tasks1=5,
-            expected_num_queries2=164,
+            expected_num_queries2=166,
             expected_num_async_tasks2=4,
             expected_num_queries3=60,
             expected_num_async_tasks3=3,

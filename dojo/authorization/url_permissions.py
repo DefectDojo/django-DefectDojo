@@ -303,6 +303,10 @@ URL_PERMISSIONS = {
 # a "location_id" kwarg, so the URL-name -> check mapping needs to point
 # at the active route's model + kwarg for the middleware to apply the
 # right per-object check.
+# This mapping is built once at import, alongside the route wiring in dojo/urls.py,
+# so it stays on settings.V3_FEATURE_LOCATIONS rather than the runtime
+# dojo.location.feature accessor -- it must match whichever routes were mounted at
+# boot. See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     URL_PERMISSIONS.update({
         "view_endpoint":           [("object", Location, "view", "location_id")],

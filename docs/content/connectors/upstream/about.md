@@ -27,63 +27,108 @@ But everyone needs a starting point, and that's where Upstream Connectors come i
 
 We currently support Upstream Connectors for the following tools, with more on the way:
 
+* **AccuKnox**
+* **Action1**
 * **Acunetix 360**
-* **Akamai API Security**
-* **Anchore**
-* **AWS Security Hub**
+* **Akamai**
+* **Akto**
+* **Alert Logic**
+* **Anchore Enterprise**
+* **AppCheck**
+* **Aqua Security**
+* **Automox**
 * **Azure DevOps**
 * **Backstage**
+* **Beagle Security**
+* **BigID**
 * **Bitbucket**
 * **Black Duck**
+* **Black Duck Continuous Dynamic**
 * **Bright Security**
 * **Bugcrowd**
-* **BurpSuite**
+* **Burp Suite Enterprise**
+* **Calico Cloud**
 * **Censys**
-* **Checkmarx ONE**
+* **Checkmarx One**
+* **Chef Automate**
+* **CI Fuzz**
 * **Cloudflare**
 * **Cobalt.io**
+* **Codacy**
 * **Contrast**
 * **Coverity**
 * **CrowdStrike Falcon**
+* **CyberArk Certificate Manager**
+* **Cyberwatch**
+* **CyCognito**
+* **Datadog**
 * **Deepfence ThreatMapper**
+* **DeepSource**
 * **Dependency-Track**
+* **Detectify**
 * **Docker Scout**
+* **Dragos**
 * **Edgescan**
+* **Elastic Security**
 * **Endor Labs**
 * **Escape**
 * **Fairwinds Insights**
+* **Finite State**
+* **Fleet**
 * **Fortify**
+* **FOSSA**
 * **GitGuardian**
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
-* **Google Cloud Security Command Center**
+* **Google Artifact Analysis**
+* **Google Cloud SCC**
 * **Group-IB ASM**
 * **HackerOne**
+* **Halo Security**
 * **Harbor**
 * **Have I Been Pwned**
 * **HCL AppScan**
+* **HiddenLayer**
+* **Holm Security**
+* **ImmuniWeb**
+* **InsightCloudSec**
 * **Intigriti**
 * **Intruder**
 * **IriusRisk**
-* **JFrog Xray**
-* **Jira Service Management Assets**
+* **JFrog XRay**
+* **JSM Assets**
+* **Klocwork**
 * **Kubescape**
 * **Lacework / FortiCNAPP**
 * **Mend**
 * **Microsoft Defender**
 * **Microsoft Defender for Cloud**
 * **MobSF**
+* **NetRise**
 * **NeuVector**
+* **Nightfall AI**
+* **NowSecure**
+* **Nozomi Networks**
 * **Nuclei (ProjectDiscovery Cloud)**
 * **OpenVAS / Greenbone**
+* **Orca Security**
+* **Ostorlab**
+* **Parasoft DTP**
+* **Picus Security**
+* **PingCastle**
 * **Probely**
+* **Promptfoo**
 * **Prowler**
 * **Qualys**
 * **Quay**
+* **Qwiet AI**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Red Hat Satellite**
 * **runZero**
+* **Scantist**
+* **Security Hub**
 * **Semgrep**
 * **ServiceNow CMDB**
 * **Shodan**
@@ -91,17 +136,27 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Socket**
 * **SonarQube**
 * **Sonatype IQ**
+* **SOOS**
 * **Sysdig Secure**
-* **Tenable**
+* **Tenable.io**
 * **Tenable Web App Scanning**
+* **TruffleHog**
+* **Trustwave Fusion**
+* **Uptycs**
+* **Vanta**
 * **Veracode**
+* **Vulnerability Manager Plus**
+* **Wallarm**
 * **Wazuh**
+* **WebInspect Enterprise**
 * **Wiz**
 * **YesWeHack**
+* **Zimperium**
+* **Zora**
 
 For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
 
-Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
+Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Asset and Organization hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
 These connections provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 
@@ -134,7 +189,7 @@ That's all, really! And remember, even if you create your Connector the 'easy' w
 
 As long as you have the API key from the tool you're trying to connect, a connector can be added in just a few minutes. Once the connection is working, DefectDojo will **Discover** your tool's environment to see how you're organizing your scan data.
 
-Let's say you have a BurpSuite tool, which is set up to scan five different repositories for vulnerabilities. Your Connector will take note of this organizational structure and set up **Records** to help you translate those separate repositories into DefectDojo's Product / Engagement / Test hierarchy. If you have **'Auto\-Map Records'** enabled, DefectDojo will learn and copy that structure automatically.
+Let's say you have a BurpSuite tool, which is set up to scan five different repositories for vulnerabilities. Your Connector will take note of this organizational structure and set up **Records** to help you translate those separate repositories into DefectDojo's Asset / Engagement / Test hierarchy. If you have **'Auto\-Map Records'** enabled, DefectDojo will learn and copy that structure automatically.
 
 ![image](images/_index.png)
 
@@ -152,7 +207,7 @@ On DefectDojo Pro Cloud, you can ask our team to build a connector for a tool we
 
 1. Go to **Connectors → Upstream Connectors** (for tools that import data *into* DefectDojo). Issue-tracker and other outbound integrations can be requested the same way under **Connectors → Downstream Connectors**.
 2. In the **Available Connectors** section, click **Request a Connector**.
-3. Fill in the request form. The **Tool / Product Name**, the **Tool API Base URL**, the **Authentication Type** and the credentials for that authentication type are all required, because our team needs a reachable address and a working credential to build a connector and confirm it works against your tool. Credentials are stored securely. You can optionally add the vendor website, a link to the tool's API docs, and a note describing your use case.
+3. Fill in the request form. The **Tool / Asset Name**, the **Tool API Base URL**, the **Authentication Type** and the credentials for that authentication type are all required, because our team needs a reachable address and a working credential to build a connector and confirm it works against your tool. Credentials are stored securely. You can optionally add the vendor website, a link to the tool's API docs, and a note describing your use case.
 4. Click **Submit Request**. You'll see a confirmation that your request was received. Our team reviews each request to evaluate building support — submitting a request is not a guarantee that the connector will be built.
 
 Requesting a connector requires **global Maintainer** permissions and is available on **DefectDojo Pro Cloud only** — the option does not appear on self-hosted (on-premise) instances.

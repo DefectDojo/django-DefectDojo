@@ -57,6 +57,27 @@ class EditDojoUserForm(forms.ModelForm):
             self.fields["is_staff"].disabled = True
             self.fields["is_superuser"].disabled = True
 
+    def clean(self):
+        cleaned_data = super().clean()
+        # Only a superuser may change the username or email of an account other
+        # than their own: rewriting a victim's email and triggering a password
+        # reset is an account-takeover vector. Mirrors UserSerializer.validate()
+        # on the API path.
+        current_user = get_current_user()
+        if (
+            current_user is not None
+            and not current_user.is_superuser
+            and self.instance.pk is not None
+            and self.instance.pk != current_user.pk
+        ):
+            for identity_field in ("username", "email"):
+                if identity_field in cleaned_data and cleaned_data[identity_field] != getattr(self.instance, identity_field):
+                    self.add_error(
+                        identity_field,
+                        _("Only superusers are allowed to change the username or email of another user."),
+                    )
+        return cleaned_data
+
 
 class DeleteUserForm(forms.ModelForm):
     id = forms.IntegerField(required=True,

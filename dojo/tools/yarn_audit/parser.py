@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.utils import get_npm_cwe, get_npm_cwes
@@ -83,7 +82,7 @@ class YarnAuditParser:
             items.append(dojo_finding)
             if value is not None:
                 dojo_finding.component_name = value
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     for version in sorted(set(child.get("Tree Versions"))):
                         dojo_finding.unsaved_locations.append(
                             LocationData.dependency(purl_type="npm", name=value, version=str(version)),
@@ -151,7 +150,7 @@ class YarnAuditParser:
             if advisory_cwes != []:
                 dojo_finding.cwe = advisory_cwes[0].strip("CWE-")
                 dojo_finding.unsaved_cwes = advisory_cwes
-            if settings.V3_FEATURE_LOCATIONS and dojo_finding.component_name and dojo_finding.component_version:
+            if locations_enabled() and dojo_finding.component_name and dojo_finding.component_version:
                 dojo_finding.unsaved_locations.append(
                     LocationData.dependency(purl_type="npm", name=dojo_finding.component_name, version=dojo_finding.component_version),
                 )
@@ -230,7 +229,7 @@ class YarnAuditParser:
             dojo_finding.unsaved_vulnerability_ids = []
             for vulnerability_id in item_node["cves"]:
                 dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
-        if settings.V3_FEATURE_LOCATIONS and item_node["module_name"]:
+        if locations_enabled() and item_node["module_name"]:
             dojo_finding.unsaved_locations.append(
                 LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=item_node["findings"][0]["version"], file_path=item_node["findings"][0]["paths"][0]),
             )
