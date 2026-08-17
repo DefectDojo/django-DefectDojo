@@ -2,8 +2,7 @@ import contextlib
 import json
 from urllib.parse import urlparse
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -128,7 +127,7 @@ class DalfoxParser:
         parsed = urlparse(poc_url)
         if not parsed.hostname:
             return
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(LocationData.url(
                 host=parsed.hostname,
                 port=parsed.port,
