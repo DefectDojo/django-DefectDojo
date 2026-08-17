@@ -733,6 +733,9 @@ def delete_general_questionnaire(request, esid):
 
 def answer_empty_survey(request, esid):
     general_survey = get_object_or_404(General_Survey, id=esid)
+    # Same comparison as the sweep in questionnaire(), so the two cannot disagree.
+    if general_survey.expiration < tz.now():
+        raise Http404
     engagement_survey = get_object_or_404(Engagement_Survey, id=general_survey.survey_id)
     engagement, survey = None, None
     settings = System_Settings.objects.all()[0]
