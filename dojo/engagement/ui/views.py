@@ -45,6 +45,7 @@ from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import (
     close_engagement,
+    reassign_engagement_product_endpoints,
     reopen_engagement,
 )
 from dojo.engagement.services import (
@@ -82,6 +83,7 @@ from dojo.forms import (
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.utils import save_locations_to_add
 from dojo.models import (
@@ -100,6 +102,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
 from dojo.product_announcements import (
@@ -291,13 +294,16 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get("status")
-            if form.cleaned_data.get("product") != engagement.product:
+            old_product = engagement.product
+            new_product = form.cleaned_data.get("product")
+            product_changed = new_product != old_product
+            if product_changed:
                 user_has_permission_or_403(
                     request.user,
-                    form.cleaned_data.get("product"),
+                    new_product,
                     "edit",
                 )
-            engagement.product = form.cleaned_data.get("product")
+            engagement.product = new_product
             engagement = form.save(commit=False)
             if (new_status in {"Cancelled", "Completed"}):
                 engagement.active = False
@@ -305,6 +311,10 @@ def edit_engagement(request, eid):
                 engagement.active = True
             engagement.save()
             form.save_m2m()
+            # When the engagement moves to a different product, re-home its findings'
+            # endpoints/locations onto the new product so they no longer reference the old one.
+            if product_changed:
+                reassign_engagement_product_endpoints(engagement, old_product, new_product)
 
             messages.add_message(
                 request,
@@ -498,7 +508,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -579,7 +589,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -795,7 +805,7 @@ class ImportScanResultsView(View):
         # Get the product tab and any additional custom breadcrumbs
         product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = Location.objects.filter(products__product_id=product_tab.product.id)
         else:
             # TODO: Delete this after the move to Locations
@@ -967,7 +977,7 @@ class ImportScanResultsView(View):
         if close_old_findings_product_scope := form.cleaned_data.get("close_old_findings_product_scope", None):
             context["close_old_findings_product_scope"] = close_old_findings_product_scope
             context["close_old_findings"] = True
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             # Save newly added locations
             added_locations = save_locations_to_add(form.endpoints_to_add_list)
             locations_from_form = [location.url for location in form.cleaned_data["endpoints"]]
@@ -1433,7 +1443,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "engagement": eng,
             "product_tab": product_tab,
             "accepted_findings": fpage,
-            "notes": risk_acceptance.notes.all(),
+            "notes": visible_notes(risk_acceptance.notes.all(), request.user),
             "eng": eng,
             "edit_mode": edit_mode,
             "risk_acceptance_form": risk_acceptance_form,

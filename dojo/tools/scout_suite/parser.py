@@ -88,6 +88,17 @@ class ScoutSuiteParser:
         return self.__get_items(data)
 
     def __get_items(self, data):
+        # ``item_data`` and ``pdepth`` are class attributes that ``recursive_print``
+        # accumulates into, and the parser instance is reused for every import in the
+        # process. ``recursive_print`` emits a newline based on ``self.pdepth != depth``,
+        # so without this reset the first finding of a report is rendered against the
+        # depth left behind by whatever was parsed before it: the same file parsed twice
+        # produces different descriptions, and one report's text depends on the previous
+        # one. Reset restores the values a fresh instance would have, so a parse is a
+        # function of its input alone.
+        self.item_data = ""
+        self.pdepth = 0
+
         findings = []
         # get the date of the run
         last_run_date = None

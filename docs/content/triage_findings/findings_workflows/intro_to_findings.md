@@ -18,9 +18,9 @@ Findings in DefectDojo are made up of the following components:
 In addition to storing the vulnerability data and providing a remediation framework, DefectDojo also enhances your Findings in the following ways:
 
 * Automatically adding related EPSS scores to a Finding to describe exploitability
-* Automatically translating a security tool’s severity metric into a Severity score for each Finding, which confers an SLA onto the Finding according to your Product’s SLA Configuration.
+* Automatically translating a security tool’s severity metric into a Severity score for each Finding, which confers an SLA onto the Finding according to your Asset’s SLA Configuration.
 
-Overall, DefectDojo Findings are designed to work with the Product Hierarchy to standardize your efforts, and apply a consistent method to each Product.
+Overall, DefectDojo Findings are designed to work with the Asset Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
 
 ## A Finding Page
 
@@ -50,9 +50,9 @@ The Finding Page contains various components. Each will be populated by the Impo
 
 
 	* **ID:** the ID value of the Finding in DefectDojo
-	* **Severity:** the Severity value of the Finding. Can be Info, Low, Medium, High or Critical. Finding Severities are directly related to the Finding’s calculated SLA, based on the Product the Finding is stored in.
+	* **Severity:** the Severity value of the Finding. Can be Info, Low, Medium, High or Critical. Finding Severities are directly related to the Finding’s calculated SLA, based on the Asset the Finding is stored in.
 	* **Status:** the status of the Finding. Can be either Active or Inactive. In addition to these, Findings can also have a Status of Duplicate, Mitigated, False Positive, Out Of Scope, Risk Accepted or Under Defect Review. These Statuses explain the State of the Finding in more detail.
-	* **Type:** this field describes how the Finding was found, either via a Static (SAST) evaluation of the source code, or through a Dynamic (DAST) evaluation of the Product as it was running. This field is defined by the tool type.
+	* **Type:** this field describes how the Finding was found, either via a Static (SAST) evaluation of the source code, or through a Dynamic (DAST) evaluation of the Asset as it was running. This field is defined by the tool type.
 	* **Location:** this field describes the related File Path to your vulnerability, if relevant.
 	* **Line:** this field describes the line of code containing the vulnerability, if relevant.
 	* **Date Discovered:** this field shows either the date the Finding was imported to DefectDojo, or the date the Finding was discovered by the Tool.
@@ -105,10 +105,10 @@ How you work with Findings in DefectDojo depends on your team’s responsibiliti
 
 ### Discover and Report vulnerabilities
 
-If you’re in charge of security reporting for many different contexts, software Products or teams, DefectDojo can report on those vulnerabilities uncovered. Using the Product Hierarchy, you can organize your Finding data into the appropriate context. For example:
+If you’re in charge of security reporting for many different contexts, software Assets or teams, DefectDojo can report on those vulnerabilities uncovered. Using the Asset Hierarchy, you can organize your Finding data into the appropriate context. For example:
 
-* Each Product in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
-* You can create a report directly from a **Product Type, Product, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Products** can contain multiple Engagements, **Product Types** can contain multiple Products.
+* Each Asset in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
+* You can create a report directly from a **Organization, Asset, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Assets** can contain multiple Engagements, **Organizations** can contain multiple Assets.
 
 For more information on creating a Report, see our guides to **[Custom Reporting](/metrics_reports/reports/)**.
 

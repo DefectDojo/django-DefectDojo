@@ -214,8 +214,7 @@ class PrefetchRBACTest(DojoAPITestCase):
     def test_reader_cannot_prefetch_private_note_from_other_author(self):
         """
         Sub-vector 4e -- a private note written by someone else must not be
-        returned to a non-superuser via prefetch (matches the existing UI
-        behaviour where ``notes.filter(private=False)`` hides them).
+        returned to a non-superuser via prefetch.
         """
         resp = self._client(self.reader_token).get(
             f"/api/v2/findings/{self.finding.pk}/?prefetch=notes",

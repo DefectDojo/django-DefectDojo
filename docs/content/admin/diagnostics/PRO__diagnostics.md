@@ -28,7 +28,7 @@ One row is written per attempt, from every subsystem that reaches outside Defect
 | **Scheduling** | Scheduled runs, including ones that never started |
 | **Sensei** | Repository scans and fix runs |
 | **Notification** | Outbound notification delivery |
-| **System** | Instance-level activity that belongs to no product |
+| **System** | Instance-level activity that belongs to no Asset |
 
 Rows are written *alongside* the subsystem, never in place of it. Each adapter is attached to the origin record and is deliberately fail-safe: if writing a diagnostic row raises, the error is swallowed and the original operation carries on. Diagnostics can therefore never be the reason a push, import, or login fails.
 
@@ -47,7 +47,7 @@ Because rows are keyed on the record that produced them, re-saving an origin rec
 | **Summary** | A one-line outcome, safe to read at a glance |
 | **Trigger** | What set the attempt off: `UI`, `API`, `Scheduled`, `Webhook`, `Automatic`, `Command line`, or `System` |
 | **Triggered by** | The user responsible, or `System` for unattended work |
-| **Asset** | The product the attempt belongs to; empty means instance-level |
+| **Asset** | The Asset the attempt belongs to; empty means instance-level |
 | **Related object** | The finding, engagement, or other record the attempt was about |
 | **Configuration** | Which configuration was used, by its label |
 | **External reference** | The identifier the other system returned, such as a created issue key |
@@ -109,12 +109,12 @@ Diagnostics is tiered, because the summary of a failure is useful to a product o
 
 | | Superuser | Everyone else |
 | --- | --- | --- |
-| Rows for products they are authorized on | Yes | Yes |
-| Instance-level rows (no product) | Yes | No |
+| Rows for Assets they are authorized on | Yes | Yes |
+| Instance-level rows (no Asset) | Yes | No |
 | Summary, source, status, severity, timings, configuration | Yes | Yes |
 | **Reported detail**, **Context**, **Remote IP** | Yes | Withheld, and labelled as withheld |
 
-A non-superuser sees that a detail exists and is being withheld, rather than an empty field that reads like missing data. Instance-level rows — SSO, SAML, LDAP, and other activity that belongs to no product — are superuser-only, since there is no product membership that could grant access to them.
+A non-superuser sees that a detail exists and is being withheld, rather than an empty field that reads like missing data. Instance-level rows — SSO, SAML, LDAP, and other activity that belongs to no Asset — are superuser-only, since there is no Asset membership that could grant access to them.
 
 ## How long records are kept
 
@@ -145,11 +145,11 @@ Useful parameters:
 | `source`, `status`, `severity`, `trigger` | Accept several comma-separated values at once |
 | `failures_only=true` | Failures and timeouts |
 | `unresolved_only=true` | Attempts still queued or running |
-| `product_name` | Filter by product name |
+| `product_name` | Filter by Asset name |
 | `object_model` | Filter by the kind of record the attempt was about |
 | `o=` | Ordering, prefixed with `-` to reverse (`o=-created_at`) |
 
-The same access rules apply: a non-superuser gets product-scoped rows with the restricted fields withheld.
+The same access rules apply: a non-superuser gets Asset-scoped rows with the restricted fields withheld.
 
 ## Working out what went wrong
 
@@ -162,6 +162,6 @@ The same access rules apply: a non-superuser gets product-scoped rows with the r
 ## Related
 
 * [Feature Flags](/admin/feature_flags/pro__feature_flags/) — turning optional Pro features on and off
-* [Connectors](/import_data/pro/connectors/about_connectors/) — pulling findings in
-* [Pro Integrations](/issue_tracking/pro_integration/integrations/) — pushing findings out
+* [Connectors](/connectors/upstream/about/) — pulling findings in
+* [Pro Integrations](/connectors/downstream/about/) — pushing findings out
 * [Single Sign-On](/admin/sso/) — the identity providers whose sign-in attempts appear here

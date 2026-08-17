@@ -62,7 +62,7 @@ class _ChunkRows:
     def __init__(self) -> None:
         self.meta: list[DojoMeta] = []
         self.meta_endpoint_ids: list[int | None] = []
-        self._seen_meta: set[tuple[int, str]] = set()
+        self._seen_meta: set[tuple[int, int | None, str]] = set()
 
         self.finding_refs: list[LocationFindingReference] = []
         self.finding_ref_endpoint_ids: list[int | None] = []
@@ -71,13 +71,22 @@ class _ChunkRows:
         # (location_id, product_id) -> (status, product, location, endpoint_id)
         self._product_refs: dict[tuple[int, int], tuple[str, Product, Location, int | None]] = {}
 
-    def add_meta(self, meta: DojoMeta, location: Location, endpoint_id: int | None) -> None:
-        """Queue a DojoMeta copy, keyed on its unique_together (location, name)."""
-        key = (location.id, meta.name)
+    def add_meta(
+        self,
+        meta: DojoMeta,
+        location: Location,
+        product: Product | None,
+        endpoint_id: int | None,
+    ) -> None:
+        """Queue a DojoMeta copy, keyed on its unique_together (location, location_product, name)."""
+        product_id = getattr(product, "id", None)
+        key = (location.id, product_id, meta.name)
         if key in self._seen_meta:
             return
         self._seen_meta.add(key)
-        self.meta.append(DojoMeta(name=meta.name, value=meta.value, location=location))
+        self.meta.append(
+            DojoMeta(name=meta.name, value=meta.value, location=location, location_product=product),
+        )
         self.meta_endpoint_ids.append(endpoint_id)
 
     def add_finding_ref(self, reference: LocationFindingReference, endpoint_id: int | None) -> None:
@@ -167,6 +176,11 @@ class Command(BaseCommand):
     """
 
     help = "Usage: manage.py migrate_endpoints_to_locations"
+
+    # `progress_callback` is accepted by handle() but not exposed on the parser:
+    # it is a programmatic hook for in-process callers (Pro's migration suite
+    # passes it via call_command) and cannot be supplied on the command line.
+    stealth_options = ("progress_callback",)
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -472,7 +486,13 @@ class Command(BaseCommand):
                 )
                 try:
                     # Mirrors what BaseModelWithoutTimeMeta.save() would have
-                    # done for this URL, including the flag it keys off.
+                    # done for this URL, including the flag it keys off. This
+                    # backfill command deliberately stays on
+                    # settings.V3_FEATURE_LOCATIONS rather than the runtime
+                    # dojo.location.feature accessor (it runs under
+                    # Endpoint.allow_endpoint_init() and its flag reads are
+                    # migration mechanics, not request-path behaviour). See
+                    # dojo/location/feature.py.
                     if settings.V3_FEATURE_LOCATIONS:
                         url.full_clean(validate_unique=False, validate_constraints=False)
                     else:
@@ -541,7 +561,7 @@ class Command(BaseCommand):
                 self._bench_end("tags", t)
 
                 for meta in endpoint.endpoint_meta.all():
-                    rows.add_meta(meta, location, endpoint_id)
+                    rows.add_meta(meta, location, endpoint.product, endpoint_id)
 
                 # Track the endpoint's own product as a contributor for the
                 # post-migration tag inheritance pass (the no-findings branch
@@ -555,7 +575,7 @@ class Command(BaseCommand):
                 logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
                 self._record_endpoint_failure(endpoint_id, exc)
 
-        # DojoMeta: `ignore_conflicts` on unique_together (location, name). A
+        # DojoMeta: `ignore_conflicts` on unique_together (location, location_product, name). A
         # conflict is by definition the row we would otherwise have fetched, so
         # skipping it keeps re-runs no-ops and leaves any post-migration edit to
         # a metadata value alone.
@@ -683,6 +703,23 @@ class Command(BaseCommand):
             return f"{m}m {s}s"
         return f"{s}s"
 
+    def _emit_progress(self, processed: int, total: int) -> None:
+        """
+        Publish chunk-level progress to an optional programmatic callback.
+
+        Pro's migration suite passes ``progress_callback`` (a stealth option) so
+        it can persist processed/total for a progress bar and ETA. A callback
+        failure must never abort a multi-hour migration, so it is swallowed with
+        a logged warning. CLI runs pass no callback and are unaffected.
+        """
+        callback = self.progress_callback
+        if callback is None:
+            return
+        try:
+            callback(processed, total)
+        except Exception:
+            logger.warning("progress_callback raised; continuing migration", exc_info=True)
+
     def _log_progress(
         self,
         i: int,
@@ -779,6 +816,8 @@ class Command(BaseCommand):
         self.query_count = bool(options.get("query_count"))
         self.batch_size = int(options["batch_size"])
         self.progress_every = int(options["progress_every"])
+        # Optional programmatic progress hook (see stealth_options). None for CLI runs.
+        self.progress_callback = options.get("progress_callback")
 
         # Per-phase wall-clock accumulators.
         self.timings = dict.fromkeys(PHASES, 0.0)
@@ -863,6 +902,9 @@ class Command(BaseCommand):
                 f"benchmark={'on' if self.benchmark else 'off'}, "
                 f"query-count={'on' if self.query_count else 'off'})",
             ))
+            # Publish the total up front so a consumer can render a bar/ETA before
+            # the first chunk lands.
+            self._emit_progress(0, endpoint_count)
 
             run_t0 = time.time()
             i = 0
@@ -882,6 +924,10 @@ class Command(BaseCommand):
                     # Flush independently of per-endpoint success so a failing
                     # endpoint at a chunk boundary cannot leave the queue growing.
                     self._flush_location_tags()
+
+                    # Programmatic progress at every chunk boundary (independent
+                    # of the throttled stdout line below), for the migration suite.
+                    self._emit_progress(i, endpoint_count)
 
                     # Progress report once at least --progress-every endpoints
                     # have been migrated since the last line.

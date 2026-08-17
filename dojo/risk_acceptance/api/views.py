@@ -111,7 +111,7 @@ class RiskAcceptanceViewSet(
 
         notes = risk_acceptance.notes.all()
         serialized_notes = RiskAcceptanceToNotesSerializer(
-            {"risk_acceptance_id": risk_acceptance, "notes": notes},
+            {"risk_acceptance_id": risk_acceptance, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 

@@ -8,8 +8,7 @@ parser surfaces those fields as-is.
 
 from pathlib import PurePosixPath
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.xygeni._common import map_severity, parse_cwe
@@ -82,7 +81,7 @@ def _build_finding(occurrences, test):
         vuln_id_from_tool=secret.get("detector"),
     )
 
-    if settings.V3_FEATURE_LOCATIONS and filepath:
+    if locations_enabled() and filepath:
         # One location per line the secret is leaked on; the aggregated Finding
         # above keeps a single scalar line while the locations carry them all.
         for begin_line in lines or [location.get("beginLine")]:

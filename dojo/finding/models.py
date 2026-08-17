@@ -37,6 +37,16 @@ from dojo.validators import cvss3_validator, cvss4_validator
 if TYPE_CHECKING:
     from dojo.importers.location_manager import UnsavedLocation
 
+
+def locations_enabled() -> bool:
+    # Lazy delegate: finding/models.py is imported during dojo.models population,
+    # before the dojo.location package can be imported without a circular import
+    # (dojo.location.__init__ -> admin -> models -> dojo.models, still partial).
+    from dojo.location.feature import locations_enabled as _impl  # noqa: PLC0415
+
+    return _impl()
+
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 DELETE_JIRA_SYNC_UNSET = object()
@@ -538,7 +548,7 @@ class Finding(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             self.unsaved_locations: list[UnsavedLocation] = []
         else:
             # TODO: Delete this after the move to Locations
@@ -615,7 +625,7 @@ class Finding(BaseModel):
         self.set_hash_code(dedupe_option)
 
         if is_new_finding:
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
                     self.static_finding = True
                     self.dynamic_finding = False
@@ -635,7 +645,7 @@ class Finding(BaseModel):
         # logger.debug('setting static / dynamic in save')
         # need to have an id/pk before we can access locations/endpoints
         elif self.file_path is not None:
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if not self.locations.exists():
                     self.static_finding = True
                     self.dynamic_finding = False
@@ -690,7 +700,7 @@ class Finding(BaseModel):
         # Copy the files
         for files in old_files:
             copy.files.add(files.copy())
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             old_location_refs = self.locations.all()
             for location_ref in old_location_refs:
                 location_ref.copy(copy)
@@ -881,7 +891,7 @@ class Finding(BaseModel):
     # Get locations/endpoints to use for hash_code computation
     def get_locations(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             # Get endpoints to use for hash_code computation
             # (This sometimes reports "None")
             def _get_unsaved_endpoints(finding) -> str:

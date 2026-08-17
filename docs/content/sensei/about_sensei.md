@@ -16,6 +16,8 @@ weight: 1
 - **Short-lived credentials:** Sensei runs entirely through a GitHub App and uses short-lived installation tokens. There is nothing to paste and nothing to rotate.
 - **Metered and license-gated:** Sensei is a Pro feature with per-instance quotas for fixes and onboarded repositories.
 
+> **🧠 Before the code exists:** Sensei also generates a threat model, attack paths and security requirements from a feature *design*, with no repository involved — see [Threat Modeling](/sensei/threat_modeling/).
+
 > **🔎 BETA:** Sensei is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases.
 
 > **📍 Where to find it:** open **Sensei** from the left-hand navigation.
@@ -31,7 +33,7 @@ DefectDojo-hosted scanning is the recommended way to run Sensei. Scans run **ins
 3. **Sensei scans the repository** (on demand, or automatically when a pull request is opened) and imports the results into an engagement named after the branch.
 4. **Sensei remediates findings** by generating a fix and opening a pull request against the repository's default branch.
 
-Each onboarded repository is linked to a DefectDojo **asset** (product), so its findings, engagements, and fixes live alongside the rest of your data.
+Each onboarded repository is linked to a DefectDojo **asset** (Asset), so its findings, engagements, and fixes live alongside the rest of your data.
 
 ## The three ways a fix gets started
 
@@ -46,7 +48,7 @@ Sensei can remediate a finding in three ways:
 - A **DefectDojo Pro** license that includes the **Sensei** feature.
 - A connected source-control provider (see [Set up Sensei](/sensei/setup_sensei/)): a **GitHub App** (github.com or Enterprise Server), a **GitLab** project/group access token (gitlab.com or self-managed), a **Bitbucket** connection (Cloud or Server/Data Center — OAuth, API token, or access token), or an **Azure DevOps** Personal Access Token.
 - To **configure** Sensei (connect apps, onboard repositories): a global **Maintainer** or **Owner** role.
-- To **trigger a fix** on a finding: at least **Writer** access to that finding's product.
+- To **trigger a fix** on a finding: at least **Writer** access to that finding's Asset.
 
 ## Quotas
 

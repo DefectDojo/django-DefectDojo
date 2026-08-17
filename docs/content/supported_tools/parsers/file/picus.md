@@ -21,7 +21,7 @@ DefectDojo imports a single scan file at a time and does not unpack archives. If
 
 ## Default Deduplication Hashcode Fields
 
-Picus findings deduplicate using the hashcode algorithm on a single stable [hashcode field](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/), the tool-native action identifier:
+Picus findings deduplicate using the hashcode algorithm on a single stable [hashcode field](/en/working_with_findings/finding_deduplication/about_deduplication/), the tool-native action identifier:
 
 - vuln_id_from_tool (populated from the Picus `actionId`)
 
@@ -67,7 +67,7 @@ Sample Picus scans can be found in the [sample scan data folder](https://github.
 | actionMitreTechnique   | unsaved_tags              | Added as a tag when present                                                             |
 | actionMitreSubtechnique | unsaved_tags             | Added as a tag when present                                                             |
 | attackCategory         | unsaved_tags              | Added as a tag when present                                                             |
-| affectedProducts       | component_name            | The affected product reported by the simulation                                         |
+| affectedProducts       | component_name            | The affected Asset reported by the simulation                                         |
 | threatName             | description               | Included in the structured description table                                            |
 | actionName             | description               | Included in the structured description table                                            |
 | actionDescription      | description               | Included in the structured description table                                            |

@@ -15,7 +15,7 @@ deliverable it produces. Open the Asset that represents your system boundary, go
 
 | Field | What it does |
 | --- | --- |
-| **Enabled** | Turns compliance tracking on for this product. |
+| **Enabled** | Turns compliance tracking on for this Asset. |
 | **Automatic Sync** | Keeps POA&M items in sync with findings. |
 | **POA&M ID Prefix** | Item numbering. Required. Items are numbered `V-1`, `V-2`, and so on by default. |
 | **Impact Level** | LI-SaaS, Low, Moderate, or High. |
@@ -49,7 +49,11 @@ Two profile settings are not on the form and are set through the compliance API:
   *do* carry their own control references are mapped from those instead; see
   [Control Coverage](../control_coverage).
 * **Configuration test types** — the test types whose findings are treated as configuration items,
-  which is what drives CM-6 consolidation in the ledger.
+  which is what drives CM-6 consolidation in the ledger. Adding the **DISA STIG Checklist** test
+  type here rolls a checklist's failed items into the single consolidated CM-6 item rather than
+  filing one POA&M item per rule — see
+  [DISA STIG Checklists](/import_data/pro/specialized_import/stig_checklists/). Whether checklist
+  items are configuration items is a per-system decision, so it is not set for you.
 
 ## Auditability
 

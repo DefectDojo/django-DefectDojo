@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
+from dojo.location.feature import locations_enabled
 from dojo.models import (
     FileUpload,
     NoteHistory,
@@ -180,7 +181,7 @@ class TestsViewSet(
         notes = test.notes.all()
 
         serialized_notes = TestToNotesSerializer(
-            {"test_id": test, "notes": notes},
+            {"test_id": test, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 
@@ -291,12 +292,21 @@ class TestImportViewSet(
     )
 
     def get_queryset(self):
+        # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
+        # endpoints m2m hydrates the legacy rows a migrated finding still carries and 500s the
+        # whole list response. Select the prefetch by the flag, as the finding viewset does.
+        # TODO: Delete the endpoints branch after the move to Locations
+        location_prefetch = (
+            "findings_affected__locations__location__url"
+            if locations_enabled()
+            else "findings_affected__endpoints"
+        )
         return get_authorized_test_imports(
             "view",
         ).prefetch_related(
             "test_import_finding_action_set",
             "findings_affected",
-            "findings_affected__endpoints",
+            location_prefetch,
             "findings_affected__status_finding",
             "findings_affected__finding_meta",
             "findings_affected__jira_issue",

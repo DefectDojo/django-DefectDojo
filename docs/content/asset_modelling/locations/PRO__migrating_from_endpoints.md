@@ -5,18 +5,39 @@ audience: pro
 weight: 3
 ---
 
-When you enable Locations on an existing DefectDojo Pro instance, the data already stored as Endpoints needs to be carried forward into the new Locations model. This page describes migration, what it preserves, and how the legacy Endpoint API behaves once the migration has run.
+When you enable Locations on an existing DefectDojo Pro instance, the data already stored on your Findings needs to be carried forward into the new Locations model. This page describes the migration suite, what each part preserves, and how the legacy Endpoint API behaves once the migration has run.
 
 Note that migration is **one-way**. There is no automated rollback path that re-creates Endpoints from Locations.
 
-## What the Migration Does
+## Running the migration from the Feature Flags page
 
-For every existing Endpoint, migration will:
+Enabling Locations only changes behaviour for *new* imports; your existing history is carried forward by a **data-migration suite** that appears under the Locations row on the **Settings > Feature Flags** page once the feature is on. Each item is run on demand by a superuser, shows live progress and an ETA, and is safe to re-run (every step is idempotent).
+
+The suite has four items, because a Finding can carry three independent kinds of location:
+
+1. **Endpoints to Locations backfill** — turns existing `Endpoint` rows into **URL Locations** (detailed below).
+2. **Components to Dependencies backfill** — turns each Finding's `component_name` / `component_version` into a **Dependency Location**.
+3. **Findings to Code Locations backfill** — turns each Finding's `file_path` / `line` into a **[Source Code Location](/asset_modelling/locations/pro__source_code_locations/)**.
+4. **Identity rehash** — recomputes the deduplication identity for scan types whose identity digest changed when the flag flipped, so future reimports match the migrated Locations instead of closing and re-opening findings.
+
+The three backfills are independent and can run in any order. The **Identity rehash stays locked until all three backfills have completed**, because the identity it recomputes folds in every location type; running it against a half-migrated database would bake an incomplete identity. Only one item runs at a time.
+
+Each backfill is also available as a management command for scripted or air-gapped runs:
+
+```bash
+python manage.py migrate_endpoints_to_locations
+python manage.py migrate_components_to_dependencies
+python manage.py migrate_findings_to_code_locations
+```
+
+## What the Endpoints Backfill Does
+
+For every existing Endpoint, the endpoints backfill will:
 
 1. **Creates a URL Location** (or re-uses an existing one) using the Endpoint's `protocol`, `userinfo`, `host`, `port`, `path`, `query`, and `fragment` fields. The new URL is automatically attached to a parent `Location` object.
 2. **Carries over tags.** Every tag on the Endpoint is added to the Location's tag set.
 3. **Carries over metadata.** Each `DojoMeta` row attached to the Endpoint is re-pointed at the new Location.
-4. **Creates a `LocationProductReference`** so the URL appears under the correct Asset (Product).
+4. **Creates a `LocationProductReference`** so the URL appears under the correct Asset.
 5. **Creates a `LocationFindingReference` for every `Endpoint_Status`**:
 
    | Endpoint_Status flag | Resulting Location status |
@@ -30,10 +51,19 @@ For every existing Endpoint, migration will:
    The mapping is order-sensitive: the *first* matching flag wins. This intentionally collapses the old multi-flag combinations down to the single canonical status that Locations use.
 
 
+## What the Dependency and Code Backfills Do
+
+The other two backfills read scalar fields that already live on your Findings, so they need no scan data you do not already have:
+
+- **Components to Dependencies** builds a **Dependency Location** from each Finding's `component_name` and `component_version`, and links it with a `LocationFindingReference` (and a `LocationProductReference` so it also appears under the Asset). Findings with no component data are skipped. This is in addition to Dependencies created by uploading SBOMs (see [Working with SBOMs](../pro__working_with_sboms)) or re-running scans with parsers that emit dependency data.
+- **Findings to Code Locations** builds a **Source Code Location** from each Finding's `file_path` and `line` (the same coordinate imports synthesize for static findings), and links it the same way. Findings with no `file_path` are skipped.
+
+Both create Locations on their identity hash and upsert their references, so they create nothing new on a re-run.
+
 ## What the Migration Does Not Do
 
-- It does **not** create Dependency Locations. SBOM and library data has never existed as Endpoints, so there is nothing for the migration to convert. To populate Dependencies, upload SBOMs (see [Working with SBOMs](../pro__working_with_sboms)) or re-run scans with parsers that emit dependency data.
 - It does **not** delete the original Endpoint or Endpoint_Status rows. They remain in the database to back the read-only legacy API. They are not used by the new UI or by imports after the feature is enabled.
+- It does **not** modify your Findings. The backfills only *read* the `component_*` and `file_path`/`line` fields; they add Locations and references alongside, leaving the Finding rows untouched.
 
 ## Endpoint API After Migration
 
@@ -41,7 +71,7 @@ Once Locations is enabled, the legacy Endpoint API enters a **read-compatibility
 
 ### What still works
 
-- `GET /api/v2/endpoints/` — Returns rows that *look like* Endpoints but are actually projected from Location Product Reference rows joined to URL Locations. The familiar fields (`protocol`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present.
+- `GET /api/v2/endpoints/` — Returns rows that *look like* Endpoints but are actually projected from `LocationProductReference` rows joined to URL Locations. The familiar fields (`protocol`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present.
 - `GET /api/v2/endpoints/{id}/` — Single-Endpoint retrieval works the same way. The `id` is the original Endpoint ID and is preserved through the migration via the Asset Reference mapping.
 - `GET /api/v2/endpoint_status/` and `GET /api/v2/endpoint_status/{id}/` — Returns rows projected from `LocationFindingReference`. The legacy `mitigated`, `false_positive`, `out_of_scope`, and `risk_accepted` boolean fields are reconstructed.
 - Filtering by `protocol`, `host`, `port`, `path`, `query`, `fragment`, `product`, and `tag(s)` continues to work.

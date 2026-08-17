@@ -4,7 +4,7 @@ toc_hide: true
 ---
 
 [OpenVEX](https://openvex.dev/) is an implementation of the Vulnerability Exploitability eXchange (VEX)
-model: a document in which a software producer states whether their product is *actually* affected by a
+model: a document in which a software producer states whether their Asset is *actually* affected by a
 known vulnerability.
 
 ### ★ VEX is a suppression signal, not a finding source
@@ -30,7 +30,7 @@ matching findings rather than adding to them.
 | anything else | Yes | Active. A status a future spec revision adds must never silently suppress a real vulnerability. |
 
 `affected` is deliberately the one status that produces an active finding: it is the producer stating
-their product **is** exposed, and its `action_statement` is the only actionable instruction VEX carries.
+their Asset **is** exposed, and its `action_statement` is the only actionable instruction VEX carries.
 Suppressing that would lose the most valuable statement in the format.
 
 ### Justifications on `not_affected`
@@ -41,11 +41,11 @@ the DefectDojo field that matches it:
 
 | `justification` | Disposition | Why |
 |---|---|---|
-| `inline_mitigations_already_exist` | `is_mitigated` | A real mitigation exists in the product |
+| `inline_mitigations_already_exist` | `is_mitigated` | A real mitigation exists in the Asset |
 | `vulnerable_code_not_present` | `false_p` | The scanner's match does not correspond to real code |
 | `vulnerable_code_not_in_execute_path` | `false_p` | Present but unreachable |
 | `vulnerable_code_cannot_be_controlled_by_adversary` | `false_p` | Reachable but not exploitable |
-| `component_not_present` | `out_of_scope` | The finding does not apply to this product |
+| `component_not_present` | `out_of_scope` | The finding does not apply to this Asset |
 | *(missing)* | `out_of_scope` | Conservative default; the document is incomplete, and this is noted in the description |
 
 The justification and any `impact_statement` are always recorded in the finding description, so the

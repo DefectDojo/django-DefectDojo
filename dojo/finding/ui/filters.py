@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django import forms
-from django.conf import settings
 from django.db.models import Q
 from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
@@ -47,6 +46,7 @@ from dojo.finding.queries import (
 )
 from dojo.finding_group.queries import get_authorized_finding_groups_for_queryset
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
@@ -109,7 +109,7 @@ class FindingFilterHelper(FilterSet):
     test__engagement__product__lifecycle = MultipleChoiceFilter(
         choices=Product.LIFECYCLE_CHOICES,
         label=labels.ASSET_LIFECYCLE_LABEL)
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         location_status = MultipleChoiceFilter(
             field_name="locations__status",
             choices=FindingLocationStatus.choices,

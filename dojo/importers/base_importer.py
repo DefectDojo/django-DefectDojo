@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.db import IntegrityError
+from django.db import DEFAULT_DB_ALIAS, DatabaseError, IntegrityError, connections, transaction
 from django.urls import reverse
 from django.utils.timezone import make_aware
 
@@ -45,6 +45,10 @@ from dojo.utils import max_safe
 from dojo.vulnerability.manager import VulnerabilityIdManager
 
 logger = logging.getLogger(__name__)
+
+# Number of times update_test_tags() re-runs Test.tags.set() when it loses a race against
+# tagulous' cleanup of unused tag rows (see set_test_tags_safe for the full explanation).
+TEST_TAG_SET_MAX_ATTEMPTS = 3
 
 
 class Parser:
@@ -98,6 +102,10 @@ class BaseImporter(ImporterOptions):
         # batches completed within the timeout; False for 'async' (dispatched,
         # not awaited) or when an 'async_wait' join timed out/errored.
         self.deduplication_complete = False
+        # Set by update_timestamps() when it moves the engagement's target end, which is
+        # the only field of the engagement the importer ever changes. The closing
+        # write-back skips the engagement unless this is True -- see process_scan().
+        self.engagement_target_end_updated = False
 
     def post_processing_dispatch_kwargs(self, **kwargs):
         """
@@ -407,9 +415,16 @@ class BaseImporter(ImporterOptions):
         # If the supplied scan date is greater than the current configured
         # target end date on the engagement
         if self.test.engagement.engagement_type == "CI/CD":
-            self.test.engagement.target_end = max_safe(
+            engagement_target_end = max_safe(
                 [self.scan_date.date(), self.test.engagement.target_end],
             )
+            # target_end is the only engagement field the importer touches, so recording
+            # whether it actually moved is enough to tell the closing write-back whether
+            # the engagement needs saving at all. Anything else that starts mutating the
+            # engagement mid-import has to flag itself here too, or it will not be saved.
+            if engagement_target_end != self.test.engagement.target_end:
+                self.test.engagement.target_end = engagement_target_end
+                self.engagement_target_end_updated = True
         # Set the target end date on the test in a similar fashion
         max_test_start_date = max_safe([self.scan_date, self.test.target_end])
         # Quick check to make sure we have a datetime that is timezone aware
@@ -426,7 +441,44 @@ class BaseImporter(ImporterOptions):
         # Make sure the list is not empty as we do not want to overwrite
         # any existing tags
         if self.tags is not None and len(self.tags) > 0:
-            self.test.tags.set(self.tags)
+            self.set_test_tags_safe()
+
+    def set_test_tags_safe(self):
+        """
+        Set the test's tags, retrying if a concurrent import races tagulous' tag cleanup.
+
+        Tagulous deletes tag rows whose reference count reaches zero. When two imports that
+        share a tag run at the same time, one can delete the ``dojo_tagulous_test_tags`` row
+        that the other's ``dojo_test_tags`` insert references, so the M2M write fails the
+        (deferred) foreign key check at commit with an IntegrityError -- surfacing as
+        ``Key (tagulous_test_tags_id)=(...) is not present in table
+        "dojo_tagulous_test_tags"``. Re-running ``.set()`` re-creates the vanished tag via
+        tagulous get_or_create and re-inserts the row, so a bounded retry clears the race.
+
+        The importer runs with no surrounding atomic block (no ATOMIC_REQUESTS, no atomic
+        around process_scan), so each attempt is wrapped in its own transaction: a losing
+        attempt rolls back cleanly and the next one starts fresh. Setting tags must never
+        fail an import whose findings are already saved, so a write that still fails after
+        every attempt is logged and swallowed -- the same way finding/endpoint tag writes
+        already tolerate this race in add_tags_safe().
+        """
+        test_id = getattr(self.test, "id", None)
+        for attempt in range(1, TEST_TAG_SET_MAX_ATTEMPTS + 1):
+            try:
+                with transaction.atomic():
+                    self.test.tags.set(self.tags)
+            except IntegrityError as e:
+                if attempt < TEST_TAG_SET_MAX_ATTEMPTS:
+                    logger.warning(
+                        "IntegrityError setting tags on test %s (attempt %d/%d), retrying: %s",
+                        test_id, attempt, TEST_TAG_SET_MAX_ATTEMPTS, e,
+                    )
+                    continue
+                logger.error(
+                    "Failed to set tags on test %s after %d attempts; leaving tags unchanged: %s",
+                    test_id, TEST_TAG_SET_MAX_ATTEMPTS, e,
+                )
+            return
 
     def apply_import_tags_for_batch(self, findings: list[Finding]) -> None:
         """
@@ -648,6 +700,20 @@ class BaseImporter(ImporterOptions):
 
         return message
 
+    @staticmethod
+    def _is_vanished_row_error(exception: DatabaseError) -> bool:
+        """
+        Return True when `exception` is Django reporting that a forced UPDATE matched no rows.
+
+        Model.save_base raises a bare DatabaseError for this; every genuine database
+        failure arrives as a subclass (IntegrityError, OperationalError, DataError, ...),
+        so the exact class is the discriminator and the message only a second opinion.
+        Classifying on the exception rather than with a follow-up query matters: a real
+        failure can leave the connection in an aborted transaction, where the query would
+        raise in turn and bury the error that actually needs reporting.
+        """
+        return type(exception) is DatabaseError and "did not affect any rows" in str(exception)
+
     def save_without_resurrecting(self, instance: Engagement | Test) -> None:
         """
         Persist an import target, refusing to re-create it if it was deleted mid-import.
@@ -669,22 +735,40 @@ class BaseImporter(ImporterOptions):
         Neither is a save the importer should be making: the target of the import is gone,
         so the import cannot complete. Fail with a message that says exactly that.
 
-        The row is checked before the write rather than relying on save(force_update=True).
-        A forced update raises from inside the atomic block that Model.save_base opens
-        without a savepoint, which marks the whole surrounding transaction for rollback --
-        the caller's failure handling would then hit TransactionManagementError instead of
-        being able to record why the import failed. Costing one indexed primary-key lookup
-        keeps the transaction usable.
+        force_update=True is what detects it. Django then raises instead of falling back to
+        an INSERT, and it does so from the same statement that would have done the damage,
+        so a delete committing mid-check cannot slip past -- which a separate "does the row
+        still exist" SELECT could not promise, and which costs no query at all rather than
+        one per save.
         """
-        if instance.pk is not None and not type(instance)._base_manager.filter(pk=instance.pk).exists():
+        if instance.pk is None:
+            # An insert, so there is nothing to resurrect, and Django cannot force an
+            # update without a primary key.
+            instance.save()
+            return
+
+        try:
+            instance.save(force_update=True)
+        except DatabaseError as exception:
+            if not self._is_vanished_row_error(exception):
+                raise
+            # The UPDATE itself succeeded -- it simply matched no rows -- so nothing needs
+            # rolling back. Django marks the transaction for rollback regardless, because
+            # Model.save_base wraps the write in mark_for_rollback_on_error, and that flag
+            # would make the caller's failure handling raise TransactionManagementError
+            # instead of recording why the import failed. Clear it so the caller can still
+            # use its connection. No-op outside a transaction, which is where the importer
+            # runs today (no ATOMIC_REQUESTS, no atomic block around process_scan).
+            using = instance._state.db or DEFAULT_DB_ALIAS
+            if connections[using].in_atomic_block:
+                transaction.set_rollback(False, using=using)
             msg = (
                 f"The {instance._meta.verbose_name} this scan was being imported into "
                 f"(id {instance.pk}) was deleted while the scan was being processed, so "
                 f"the import could not be completed. Nothing was imported. Re-run the "
                 f"import against a {instance._meta.verbose_name} that still exists."
             )
-            raise ValidationError(msg)
-        instance.save()
+            raise ValidationError(msg) from exception
 
     def update_test_progress(
         self,

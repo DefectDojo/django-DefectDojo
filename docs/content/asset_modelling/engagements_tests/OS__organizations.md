@@ -44,7 +44,7 @@ Below are some example structures to inform how you designate your objects as ei
     - Asset: Payments API - Staging
     - Asset: Billing Worker
 
-- **Organization**: Software Product A
+- **Organization**: Software Asset A
     - Asset: Web Portal
     - Asset: Mobile Backend
 

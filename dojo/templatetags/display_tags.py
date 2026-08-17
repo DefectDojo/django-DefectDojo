@@ -21,13 +21,14 @@ from django.db.models import Case, IntegerField, Sum, Value, When
 from django.template.defaultfilters import stringfilter
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import conditional_escape, escape
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
 import dojo.utils
 from dojo import __docs__, __version__
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
 from dojo.utils import calculate_grade, get_file_images, get_full_url, get_system_setting, prepare_for_view
 
@@ -1022,10 +1023,16 @@ def class_name(value):
     return value.__class__.__name__
 
 
+def escape_popover_value(value):
+    """Escape a value for a popover attribute, which the popover parses as HTML again."""
+    # escape() and not conditional_escape(): the latter is a no-op on its own output.
+    return escape(escape(value))
+
+
 @register.filter(needs_autoescape=True)
 def jira_project_tag(product_or_engagement, *, autoescape=True):
     if autoescape:
-        esc = conditional_escape
+        esc = escape_popover_value
     else:
         def esc(x):
             return x
@@ -1083,7 +1090,7 @@ def import_settings_tag(test_import, *, autoescape=True):
         return ""
 
     if autoescape:
-        esc = conditional_escape
+        esc = escape_popover_value
     else:
         def esc(x):
             return x
@@ -1135,7 +1142,7 @@ def import_settings_tag(test_import, *, autoescape=True):
         esc(s.get("create_finding_groups_for_all_findings", None)),
     )
 
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         # TODO: Delete this after the move to Locations
         endpoints = esc(s.get("endpoints", s.get("endpoint", None)))
         return mark_safe(html % (icon, color, icon, *common_fields, endpoints, *extra_fields))

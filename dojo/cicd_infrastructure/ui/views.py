@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def cicd_infrastructure(request):
+    user_has_configuration_permission_or_403(request.user, "dojo.view_cicdinfrastructure")
     confs = CICDInfrastructure.objects.all().order_by("name")
     add_breadcrumb(title=_("CI/CD Infrastructure List"), top_level=not len(request.GET), request=request)
     return render(request, "dojo/cicd_infrastructure.html", {"confs": confs})

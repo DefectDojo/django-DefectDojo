@@ -1,9 +1,9 @@
 import re
 
 import dateutil.parser
-from django.conf import settings
 from django.utils import timezone
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -136,7 +136,7 @@ class SonarQubeRESTAPIJSON:
                         line=line,
                         date=date,
                     )
-                    if settings.V3_FEATURE_LOCATIONS and component:
+                    if locations_enabled() and component:
                         item.unsaved_locations.append(
                             LocationData.code(file_path=component, line=line),
                         )
@@ -213,7 +213,7 @@ class SonarQubeRESTAPIJSON:
                         line=line,
                         date=date,
                     )
-                    if settings.V3_FEATURE_LOCATIONS and component:
+                    if locations_enabled() and component:
                         item.unsaved_locations.append(
                             LocationData.code(file_path=component, line=line),
                         )
@@ -266,7 +266,7 @@ class SonarQubeRESTAPIJSON:
                     line=line,
                     date=date,
                 )
-                if settings.V3_FEATURE_LOCATIONS and component:
+                if locations_enabled() and component:
                     item.unsaved_locations.append(
                         LocationData.code(file_path=component, line=line),
                     )

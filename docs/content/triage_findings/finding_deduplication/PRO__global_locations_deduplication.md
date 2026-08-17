@@ -1,15 +1,15 @@
 ---
 title: "Global Locations Deduplication (Pro)"
-description: "Deduplicate Findings by shared location (URL or dependency) across all Products"
+description: "Deduplicate Findings by shared location (URL or dependency) across all Assets"
 weight: 6
 audience: pro
 ---
 
-Global Locations Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Products** based purely on a **shared location**: a URL, or a dependency (identified by its Package URL). Two Findings that share a location of a selected type are treated as duplicates regardless of their title, severity, CWE, or vulnerability IDs — the location alone is the identity.
+Global Locations Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Assets** based purely on a **shared location**: a URL, or a dependency (identified by its Package URL). Two Findings that share a location of a selected type are treated as duplicates regardless of their title, severity, CWE, or vulnerability IDs — the location alone is the identity.
 
-It is the location-aware counterpart to [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/), applied to the DefectDojo Locations data model. Where Global Component matches only on a component name and version, Global Locations matches on the same dependency **by full Package URL** *and* on shared **URLs** — so it can deduplicate DAST/web Findings across Products, which Global Component cannot.
+It is the location-aware counterpart to [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/), applied to the DefectDojo Locations data model. Where Global Component matches only on a component name and version, Global Locations matches on the same dependency **by full Package URL** *and* on shared **URLs** — so it can deduplicate DAST/web Findings across Assets, which Global Component cannot.
 
-Unlike the scoped algorithms, Global Locations matching is **not scoped to a single Product or Engagement**. A Finding imported into Product B can be marked as a duplicate of an older Finding in Product A, even if the two Products are unrelated.
+Unlike the scoped algorithms, Global Locations matching is **not scoped to a single Asset or Engagement**. A Finding imported into Asset B can be marked as a duplicate of an older Finding in Asset A, even if the two Assets are unrelated.
 
 ## Requirements
 
@@ -38,7 +38,7 @@ At least one type must be selected; both are selected by default. A tool configu
 
 ### Same-Tool
 
-Use Same-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings from a single tool across multiple Products by shared location.
+Use Same-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings from a single tool across multiple Assets by shared location.
 
 1. Open the **Same Tool Deduplication** tab.
 2. Select the tool from the **Security Tool** dropdown.
@@ -48,7 +48,7 @@ Use Same-Tool Deduplication with the Global Locations algorithm when you want to
 
 ### Cross-Tool
 
-Use Cross-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings that share a location across **different** tools and Products.
+Use Cross-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings that share a location across **different** tools and Assets.
 
 Cross-tool matching reads the importing tool's location-type selection, so configure Global Locations on **each** tool that should participate, with matching Location Types.
 
@@ -70,7 +70,7 @@ Same-Tool matching stays within a single tool (test type). Cross-Tool matching c
 
 Assume Global Locations (both location types) is enabled on a DAST tool (Same Tool) and, for the cross-tool row, on a second DAST tool:
 
-| Step | Import | Into Product | Result |
+| Step | Import | Into Asset | Result |
 | --- | --- | --- | --- |
 | 1 | DAST Finding at `https://shared.example.com/login` | Application 0 | 1 active Finding created |
 | 2 | Same URL, **different** vulnerability (title + severity) | Application 1 | 1 Finding created, marked as duplicate of the Application 0 Finding (location alone matches) |
@@ -82,7 +82,7 @@ Each duplicate Finding shows its original at the bottom of the Finding page in t
 
 ## Global Component vs. Global Locations
 
-Both are global (cross-Product) algorithms that ignore the Engagement scope and match on a single identity rather than the hash fields. Choose based on what identifies a duplicate for your tool:
+Both are global (cross-Asset) algorithms that ignore the Engagement scope and match on a single identity rather than the hash fields. Choose based on what identifies a duplicate for your tool:
 
 | | Global Component | Global Locations |
 | --- | --- | --- |
@@ -95,11 +95,11 @@ Both are global (cross-Product) algorithms that ignore the Engagement scope and 
 
 For a new instance using the Locations data model, Global Locations is the more precise successor to Global Component: it keys dependencies on the exact Package URL and additionally deduplicates URL-based Findings. Global Component remains available and unchanged for tools where component name + version is the identity you want.
 
-## Cross-Product Visibility
+## Cross-Asset Visibility
 
-Because Global Locations matching crosses Product boundaries, the original Finding in a duplicate chain may live in a Product that the user viewing the duplicate does not have permission to access.
+Because Global Locations matching crosses Asset boundaries, the original Finding in a duplicate chain may live in an Asset that the user viewing the duplicate does not have permission to access.
 
-In that case, the Finding is visible and labelled as a duplicate, but the user will not be able to open or navigate to the original. Consider this before enabling Global Locations on tools whose Findings are sensitive to Product-level access controls.
+In that case, the Finding is visible and labelled as a duplicate, but the user will not be able to open or navigate to the original. Consider this before enabling Global Locations on tools whose Findings are sensitive to Asset-level access controls.
 
 ## Reverting
 

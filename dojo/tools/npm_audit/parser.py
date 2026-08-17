@@ -2,8 +2,7 @@ import json
 import logging
 import re
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.utils import get_npm_cwe, get_npm_cwes
@@ -154,7 +153,7 @@ def get_item(item_node, test):
         for vulnerability_id in item_node["cves"]:
             dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 
-    if settings.V3_FEATURE_LOCATIONS and item_node["module_name"] and component_version:
+    if locations_enabled() and item_node["module_name"] and component_version:
         dojo_finding.unsaved_locations.append(
             LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=component_version, file_path=filepath),
         )

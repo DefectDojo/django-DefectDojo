@@ -10,15 +10,15 @@ of. Vendors including Red Hat, SUSE, Cisco and Siemens publish their advisories 
 Supported: **CSAF 2.0 JSON**. CSAF 1.x used the older CVRF schema and is rejected with a clear message
 rather than mis-parsed.
 
-### One finding per vulnerability *and* product
+### One finding per vulnerability *and* Asset
 
-A single CSAF advisory routinely covers many products in different states — one patched, another still
+A single CSAF advisory routinely covers many Assets in different states — one patched, another still
 exposed, a third explicitly unaffected. The parser therefore emits one finding per
-(vulnerability, product) pair, so each product's actual status is preserved.
+(vulnerability, Asset) pair, so each Asset's actual status is preserved.
 
-### ★ `known_not_affected` products are imported inactive
+### ★ `known_not_affected` Assets are imported inactive
 
-`product_status.known_not_affected` is the vendor explicitly stating a product is **not** exposed.
+`product_status.known_not_affected` is the vendor explicitly stating an Asset is **not** exposed.
 Importing that as an active finding would turn the vendor's "you are fine" into work, the same mistake a
 mishandled VEX statement makes. Those findings are imported inactive and flagged as false positives,
 with the status recorded in the description.
@@ -31,17 +31,17 @@ with the status recorded in the description.
 | `under_investigation` | Yes | Active, `verified=False` |
 | anything else | Yes | Active — a bucket a future revision adds must never silently suppress a real exposure |
 
-### Product tree resolution
+### Asset tree resolution
 
-A CSAF product id is never defined in one place. The parser indexes all three mechanisms:
+A CSAF Asset id is never defined in one place. The parser indexes all three mechanisms:
 
 * `full_product_names[]` — a flat `{product_id, name}` list.
 * `branches[]` — an arbitrarily deep tree. The **version lives on a `product_version` branch**, not in
   the leaf, so the tree is walked and the nearest enclosing version is carried down. Where the leaf name
   repeats the version ("Generic App 1.0.0"), it is stripped so `component_name` is just "Generic App" —
-  otherwise the same product would deduplicate differently depending on which shape the advisory used.
-* `relationships[]` — a synthesised product ("library as a component of app") whose own
-  `full_product_name` defines a **new** product id.
+  otherwise the same Asset would deduplicate differently depending on which shape the advisory used.
+* `relationships[]` — a synthesised Asset ("library as a component of app") whose own
+  `full_product_name` defines a **new** Asset id.
 
 ### Field mapping
 
@@ -51,13 +51,13 @@ A CSAF product id is never defined in one place. The parser indexes all three me
 | `scores[].cvss_v3.baseSeverity` | `severity` |
 | `scores[].cvss_v3.baseScore` / `vectorString` | `cvssv3_score` / `cvssv3` |
 | `cwe.id` | `cwe` |
-| `remediations[]` filtered to the product | `mitigation` (category, details, url, restart_required) |
+| `remediations[]` filtered to the Asset | `mitigation` (category, details, url, restart_required) |
 | `notes[]` of category description/summary/details | `description` |
 | `references[]` | `references` |
 | `document.tracking.current_release_date` | `date` |
 
-`scores[]` entries are scoped to a product list, so the same CVE can be scored differently per product;
-each finding gets its own product's score. An advisory with **no** score at all becomes **Medium**, not
+`scores[]` entries are scoped to an Asset list, so the same CVE can be scored differently per Asset;
+each finding gets its own Asset's score. An advisory with **no** score at all becomes **Medium**, not
 Info — a published vendor advisory is not informational, and Info would hide it behind a
 minimum-severity setting.
 

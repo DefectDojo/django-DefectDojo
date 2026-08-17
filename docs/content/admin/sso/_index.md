@@ -52,6 +52,10 @@ DefectDojo Pro supports SAML and the following OAuth providers. Each guide walks
 * **[SAML](/admin/sso/pro__saml/)**
 * **[LDAP](/admin/sso/pro__ldap/)**
 
+## Provisioning users from your directory (DefectDojo Pro)
+
+The providers above decide who may sign in. **[SCIM Provisioning](/admin/sso/pro__scim/)** keeps the account list itself in step with your directory, so users are created when they join, updated when their details change, and deactivated (along with their API tokens) when they leave.
+
 SSO configuration in DefectDojo Pro can only be performed by a **Superuser**.
 
 **DefectDojo Pro users:** Add the IP addresses of your SAML or SSO services to the Firewall whitelist before setting up SSO. See [Firewall Rules](/get_started/pro/cloud/using-cloud-manager/#changing-your-firewall-settings) for more information.

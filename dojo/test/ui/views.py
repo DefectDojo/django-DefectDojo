@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from functools import reduce
 
 import pghistory
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
@@ -41,6 +40,7 @@ from dojo.forms import (
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
@@ -54,6 +54,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.product_announcements import (
     ErrorPageProductAnnouncement,
@@ -163,7 +164,7 @@ class ViewTest(View):
             "product_tab": product_tab,
             "title_words": get_words_for_field(Finding, "title"),
             "component_words": get_words_for_field(Finding, "component_name"),
-            "notes": notes,
+            "notes": visible_notes(notes, request.user),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
             "files": test.files.all(),
@@ -882,7 +883,7 @@ class ReImportScanResultsView(View):
         product_tab = Product_Tab(test.engagement.product, title=_("Re-upload a %s") % scan_type, tab="engagements")
         product_tab.setEngagement(test.engagement)
         # Get the import form with some initial data in place
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = Location.objects.filter(products__product__id=product_tab.product.id)
         else:
             # TODO: Delete this after the move to Locations

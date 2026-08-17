@@ -4,10 +4,12 @@ from operator import attrgetter
 
 import hyperlink
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint_Status, Finding, System_Settings
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
@@ -31,12 +33,18 @@ def get_finding_models_for_deduplication(finding_ids):
         logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
+    # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
+    # endpoints m2m hydrates legacy rows and crashes the batch. are_locations_duplicates()
+    # reads ref.location.url, which is what the locations prefetch has to reach.
+    # TODO: Delete the endpoints branch after the move to Locations
+    location_prefetch = "locations__location__url" if locations_enabled() else "endpoints"
+
     return list(
         Finding.objects.filter(id__in=finding_ids)
         .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
-            "endpoints",
+            location_prefetch,
             # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
             Prefetch(
                 "original_finding",
@@ -270,7 +278,7 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
         deduplicationLogger.debug("deduplication by endpoint fields is disabled")
         return True
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Use unsaved_locations for unsaved findings (preview mode), saved M2M otherwise
         locs1 = new_finding.locations.all() if new_finding.pk else getattr(new_finding, "unsaved_locations", [])
         locs2 = to_duplicate_finding.locations.all() if to_duplicate_finding.pk else getattr(to_duplicate_finding, "unsaved_locations", [])
@@ -340,7 +348,7 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
             )
         queryset = Finding.objects.filter(scope_q)
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
     else:
         # TODO: Delete this after the move to Locations
@@ -668,7 +676,7 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             flag_locations = False
             flag_line_path = False
 
@@ -754,15 +762,61 @@ def _flush_duplicate_changes(modified_new_findings):
     Bulk-updates all modified new findings in one round-trip instead of one
     save() call per finding.  Uses bulk_update to bypass Django signals.
 
-    Returns the list of modified findings so callers can perform any follow-up
-    processing (e.g. triggering prioritization) on the affected findings.
+    Originals are matched near the start of a batch and written at the end of it, so
+    one can be deleted in between -- the excess-duplicate delete task runs on its own
+    schedule. The duplicate_finding FK is DEFERRABLE INITIALLY DEFERRED, so such a link
+    is only rejected at COMMIT, which rolls back the whole batch: every other finding
+    in it loses its deduplication too, and the post-processing task fails. Links whose
+    original no longer exists are therefore dropped here, immediately before the write
+    and in the same transaction, leaving those findings exactly as they were for the
+    next import to match again.
+
+    Returns the list of findings actually written so callers perform follow-up
+    processing (e.g. triggering prioritization) only on findings that were persisted.
     """
-    if modified_new_findings:
-        Finding.objects.bulk_update(
-            modified_new_findings,
-            ["duplicate", "active", "verified", "duplicate_finding"],
-        )
-    return modified_new_findings
+    if not modified_new_findings:
+        return modified_new_findings
+
+    with transaction.atomic():
+        findings_to_write = _drop_links_to_deleted_originals(modified_new_findings)
+        if findings_to_write:
+            Finding.objects.bulk_update(
+                findings_to_write,
+                ["duplicate", "active", "verified", "duplicate_finding"],
+            )
+    return findings_to_write
+
+
+def _drop_links_to_deleted_originals(modified_new_findings):
+    """Return the subset of ``modified_new_findings`` whose duplicate_finding still exists."""
+    referenced_original_ids = {
+        finding.duplicate_finding_id
+        for finding in modified_new_findings
+        if finding.duplicate_finding_id
+    }
+    if not referenced_original_ids:
+        return modified_new_findings
+
+    live_original_ids = set(
+        Finding.objects.filter(id__in=referenced_original_ids).values_list("id", flat=True),
+    )
+    deleted_original_ids = referenced_original_ids - live_original_ids
+    if not deleted_original_ids:
+        return modified_new_findings
+
+    findings_to_write = [
+        finding
+        for finding in modified_new_findings
+        if finding.duplicate_finding_id not in deleted_original_ids
+    ]
+    deduplicationLogger.warning(
+        "dedupe: dropping %d duplicate link(s) to %d original(s) deleted while the batch "
+        "was being processed; %d finding(s) still written",
+        len(modified_new_findings) - len(findings_to_write),
+        len(deleted_original_ids),
+        len(findings_to_write),
+    )
+    return findings_to_write
 
 
 # ---------------------------------------------------------------------------

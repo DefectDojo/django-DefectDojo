@@ -133,7 +133,7 @@ Engagements are closed by selecting **Close Engagement** within the Engagement�
 
 Closing an Engagement does not change the status of the Findings within any of the Engagement’s Tests. Findings remain open, mitigated, or risk accepted according to their own lifecycle, and remain accessible for viewing and reporting.
 
-If the Engagement is linked to a Jira Epic (see **[Jira Integration: Enable Engagement Epic Mapping](/issue_tracking/jira/pro__jira_guide/#enable-engagement-epic-mapping)**), closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic in your connected Jira Space.
+If the Engagement is linked to a Jira Epic (see **[Jira Integration: Enable Engagement Epic Mapping](/connectors/downstream/pro__jira_guide/#enable-engagement-epic-mapping)**), closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic in your connected Jira Space.
 
 ### Reopen Engagements 
 
@@ -171,17 +171,17 @@ For auditing purposes, it is recommended to close any completed Engagements, rat
 
 ## Jira Integration
 
-Engagements can be linked to a connected Jira Space, allowing Findings within the Engagement to be pushed to Jira as Issues. For a complete guide to setting up Jira, see **[Connecting DefectDojo to Jira](/issue_tracking/jira/pro__jira_guide/)**.
+Engagements can be linked to a connected Jira Space, allowing Findings within the Engagement to be pushed to Jira as Issues. For a complete guide to setting up Jira, see **[Connecting DefectDojo to Jira](/connectors/downstream/pro__jira_guide/)**.
 
 ### Engagement Epic Mapping
 
-When **Enable Engagement Epic Mapping** is checked in a Product’s Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo’s Engagement → Findings hierarchy in Jira’s Epic → Issue structure.
+When **Enable Engagement Epic Mapping** is checked in an Asset’s Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo’s Engagement → Findings hierarchy in Jira’s Epic → Issue structure.
 
-For more information on this setting, see **[Enable Engagement Epic Mapping](/issue_tracking/jira/pro__jira_guide/#enable-engagement-epic-mapping)**.
+For more information on this setting, see **[Enable Engagement Epic Mapping](/connectors/downstream/pro__jira_guide/#enable-engagement-epic-mapping)**.
 
 ### Engagement-Level Jira Settings
 
-By default, Engagements inherit their Jira settings from their parent Asset (Product). However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
+By default, Engagements inherit their Jira settings from their parent Asset. However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
 
 - **Project Key** — route Findings to a different Jira Space
 - **Issue Template** — use a different template for Issues created from this Engagement
@@ -189,4 +189,4 @@ By default, Engagements inherit their Jira settings from their parent Asset (Pro
 - **Jira Labels** — tag Issues with Engagement-specific labels
 - **Default Assignee** — assign Issues to a different team member
 
-These settings are accessible from the **Edit Engagement** page. For more details, see **[Engagement-Level Jira Settings](/issue_tracking/jira/pro__jira_guide/#engagement-level-jira-settings)**.
+These settings are accessible from the **Edit Engagement** page. For more details, see **[Engagement-Level Jira Settings](/connectors/downstream/pro__jira_guide/#engagement-level-jira-settings)**.

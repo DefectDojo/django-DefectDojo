@@ -1,5 +1,4 @@
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -41,7 +40,7 @@ class DeepfenceThreatmapperSecret:
                 dynamic_finding=True,
                 test=test,
             )
-            if settings.V3_FEATURE_LOCATIONS and Filename:
+            if locations_enabled() and Filename:
                 finding.unsaved_locations.append(
                     LocationData.code(file_path=Filename, line=None),
                 )
@@ -78,7 +77,7 @@ class DeepfenceThreatmapperSecret:
                 dynamic_finding=True,
                 test=test,
             )
-            if settings.V3_FEATURE_LOCATIONS and Filename:
+            if locations_enabled() and Filename:
                 finding.unsaved_locations.append(
                     LocationData.code(file_path=Filename, line=None),
                 )

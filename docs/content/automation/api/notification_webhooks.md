@@ -11,6 +11,8 @@ aliases:
 
 Webhooks are outbound HTTP requests sent from your DefectDojo instance to a user-defined server whenever specific events occur. 
 
+> **Naming:** The UI labels these objects **Assets** and **Organizations**. The API v2 wire surface keeps the original names — an Asset is `product` and an Organization is `product_type`. Endpoint paths, field names and event names are unchanged.
+
 ## Setup
 
 Webhook endpoints are configured by admins. When a webhook is created, DefectDojo sends a [`ping`](#ping) event to verify the endpoint is reachable and returning the expected status code.
@@ -37,7 +39,7 @@ X-DefectDojo-Instance: <base_url_of_dd_instance>
 
 ### product_type_added
 
-Fired when a new Product Type is created.
+Fired when a new Organization is created.
 
 **Header:**
 ```yaml
@@ -73,7 +75,7 @@ X-DefectDojo-Event: product_type_added
 
 ### product_added
 
-Fired when a new Product is created.
+Fired when a new Asset is created.
 
 **Header:**
 ```yaml

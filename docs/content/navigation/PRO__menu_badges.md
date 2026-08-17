@@ -36,7 +36,7 @@ Both badges are links, because a tooltip closes the moment your pointer leaves i
 
 **`LEGACY`**
 
-* **Connect > Jira** — the original per-product Jira integration, superseded by the downstream connector for Jira. See [Pro Integrations](/issue_tracking/pro_integration/integrations/).
+* **Connect > Jira** — the original per-Asset Jira integration, superseded by the downstream connector for Jira. See [Pro Integrations](/connectors/downstream/about/).
 
 **`DEPRECATED`**
 

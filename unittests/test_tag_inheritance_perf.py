@@ -601,12 +601,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # FindingVulnerabilityReference bulk writes remain (batched, not per-finding). Removing the
     # legacy Vulnerability_Id dual-write drops the reimport counts by its delete+bulk_insert:
     # -12 reimport-no-change, -6 reimport-with-new. Import counts are unchanged.
-    # +3 on every path from save_without_resurrecting(): the importer confirms its
-    # test and engagement rows still exist before writing them back, instead of
-    # letting Model.save() fall back to an INSERT that re-creates a row deleted
-    # mid-import. One primary-key lookup per guarded save (test, engagement, and
-    # the closing update_test_progress), so the cost is constant rather than
-    # per-finding — which is why the delta is +3 on import and reimport alike.
+    # save_without_resurrecting() no longer costs a query. It used to confirm the row
+    # still existed with its own SELECT before writing it back (+3, one per guarded
+    # save); it now passes force_update=True and lets Django refuse the INSERT
+    # fallback, which detects the same vanished row from the UPDATE itself. On top of
+    # that the engagement is only written back when update_timestamps() actually moved
+    # its target end, which happens for CI/CD engagements only — these baselines use
+    # an Interactive engagement, so its save disappears along with the SELECT its
+    # pre_save receiver issued and the indexing its post_save triggered. Net -8 (v2)
+    # and -9 (v3) on every path, constant rather than per-finding.
     # +2 on the paths that buffer child rows: the batch flush confirms the buffered
     # findings still exist before inserting their vulnerability id references, CWE rows
     # and request/response rows, instead of letting a finding deleted mid-batch turn the
@@ -616,9 +619,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # for the reference and CWE buffers it shares, then flush_burp_request_response()
     # resolves its own for the request/response rows the ZAP parser attaches. The
     # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
-    EXPECTED_ZAP_IMPORT_V2 = 301
-    EXPECTED_ZAP_IMPORT_V3 = 325
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 94
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 195
+    # +2 on the V3 paths only: the batch deduplication loader now prefetches
+    # locations__location__url instead of the deprecated endpoints m2m, whose
+    # Endpoint.__init__ raises under V3. The locations lookup traverses two more
+    # relations than the single-join endpoints prefetch it replaces, so it costs two
+    # extra queries per load. The V2 counts are untouched because that branch still
+    # prefetches endpoints.
+    EXPECTED_ZAP_IMPORT_V2 = 293
+    EXPECTED_ZAP_IMPORT_V3 = 318
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 158
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 188

@@ -7,7 +7,7 @@ weight: 3
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature and is currently in BETA.</span>
 
-Once a repository is onboarded, Sensei surfaces directly on your findings and on the Sensei hub. This page covers scanning a repository, triaging auto-fix candidates, and remediating individual findings. You need at least **Writer** access to a finding's product to trigger a fix.
+Once a repository is onboarded, Sensei surfaces directly on your findings and on the Sensei hub. This page covers scanning a repository, triaging auto-fix candidates, and remediating individual findings. You need at least **Writer** access to a finding's Asset to trigger a fix.
 
 ## Finding your way around the Sensei hub
 
@@ -35,8 +35,8 @@ Onboarded repositories add a **Sensei** column to the findings table. Each findi
 
 The button has two states:
 
-- **Fix:** the finding's product is onboarded to Sensei. Clicking it starts a remediation.
-- **Configure Product:** the finding's product is **not** onboarded yet. Clicking it takes you to Sensei to onboard a repository for that product; once onboarded, the button becomes **Fix**.
+- **Fix:** the finding's Asset is onboarded to Sensei. Clicking it starts a remediation.
+- **Configure Asset:** the finding's Asset is **not** onboarded yet. Clicking it takes you to Sensei to onboard a repository for that Asset; once onboarded, the button becomes **Fix**.
 
 ## Fix a single finding
 

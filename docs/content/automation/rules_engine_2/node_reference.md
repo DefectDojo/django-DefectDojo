@@ -174,6 +174,24 @@ Simple risk accepts the Finding, or adds it to a risk acceptance record.
 | **How** | `simple` | `simple` sets simple risk acceptance on the Finding. `acceptance` adds it to a risk acceptance record. |
 | **Accepted** | on | Shown for `simple`. Turn off to un-accept the risk. |
 | **Risk Acceptance** | none | Shown for `acceptance`. Which risk acceptance to add these Findings to. |
+| **Accept Without Review Up To** | No limit | The most severe Finding this rule may accept on its own. Anything more severe is **not** accepted. |
+
+#### Limiting what a rule may accept on its own
+
+A rule that can accept risk can accept a Critical, and by default nothing says otherwise. *Accept
+Without Review Up To* draws that line.
+
+Findings over the limit are not dropped — the rule matched them for a reason. With
+[Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled they
+are put into a Risk Acceptance **awaiting review**, named for the rule that asked and carrying why,
+so a person decides. They stay active and counted the whole time. With that feature off there is no
+review state to use, so they are simply left alone — never accepted, which is the point of the
+limit. A rule preview creates nothing, as with every other action.
+
+Two behaviours worth knowing: a severity the rule cannot recognise counts as *over* the limit (if it
+cannot be ranked it cannot be called safe), while a *limit* that cannot be recognised is ignored
+rather than blocking everything, because a rule that silently stops working is harder to notice than
+one that keeps going.
 
 ### Set Mitigation Policy
 
@@ -233,17 +251,17 @@ Creates or updates the JIRA issue for the Finding.
 | **Skip Findings That Already Have an Issue** | on | Leaves Findings that already have a JIRA issue alone. |
 | **Update an Existing Issue** | off | Shown when the skip above is off. Pushes Findings that already have an issue, so JIRA is updated. |
 
-The summary, description and priority come from the product's JIRA configuration, not from this node. A ticket a rule creates is therefore identical to one created by push all issues.
+The summary, description and priority come from the Asset's JIRA configuration, not from this node. A ticket a rule creates is therefore identical to one created by push all issues.
 
 ### Create a Downstream Ticket
 
 `ticket.downstream`
 
-Creates or updates a ticket through a [Downstream Connector](/issue_tracking/pro_integration/integrations/).
+Creates or updates a ticket through a [Downstream Connector](/connectors/downstream/about/).
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Issue Trackers** | `auto` | `auto` uses the issue trackers assigned to the engagement or product. `mapping` targets one specific mapping. |
+| **Issue Trackers** | `auto` | `auto` uses the issue trackers assigned to the engagement or Asset. `mapping` targets one specific mapping. |
 | **Issue Tracker Mapping** | none | Shown for `mapping`. Which mapping to push to. |
 | **Operation** | `create` | `create` a ticket, or `update` the one that exists. An update with no existing ticket creates it. |
 | **Skip Findings That Already Have a Ticket** | on | Leaves Findings that already have a ticket in the target mapping alone. |
@@ -254,11 +272,12 @@ The rule replaces the assignment's automatic push settings: severity and active-
 
 `notify.slack`
 
-Posts to a Slack channel using the system Slack token from **System Settings**.
+Posts to a Slack channel over a Messaging Connector. The connection carries the bot token; the instance-wide Slack settings under **System Settings** are not used and are not a fallback.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Channel** | empty | For example `#appsec`. Empty uses the channel from system settings. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. How many Findings the message lists before it says how many more there were. |
@@ -267,10 +286,12 @@ Posts to a Slack channel using the system Slack token from **System Settings**.
 
 `notify.msteams`
 
-Posts a card to the Microsoft Teams webhook configured in **System Settings**.
+Posts a card over a Messaging Connector. The connection carries the Power Automate workflow URL; the instance-wide Teams webhook under **System Settings** is not used and is not a fallback.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one card about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. |
@@ -279,11 +300,13 @@ Posts a card to the Microsoft Teams webhook configured in **System Settings**.
 
 `notify.email`
 
-Emails a fixed list of addresses.
+Emails a fixed list of addresses over a Messaging Connector. The recipients are the connection's destination.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **To** | none | One or more addresses, comma separated. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
+
 | **Subject** | `[DefectDojo] {{ctx.count}} finding(s) from rule {{ctx.rule_name}}` | Rendered once per message. |
 | **Body** | an HTML body containing `{{ctx.findings_html}}` | HTML. `{{ctx.findings_html}}` renders the Finding list. |
 | **One Message per Finding** | off | Off sends one email about the batch. |
@@ -332,8 +355,8 @@ Generates a report from a template, scoped to the Findings that reached this nod
 | **Report Template** | none | Which template to generate from. Required. |
 | **Format** | `pdf` | `pdf` or `html`. |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. |
-| **Announce the Report** | `none` | `none`, `email` or `slack`. Sends the download link once the report is generated. |
-| **Announce To** | empty | Shown when announcing. A Slack channel, or comma separated email addresses. Slack falls back to system settings. |
+| **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. |
+| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
 | **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.

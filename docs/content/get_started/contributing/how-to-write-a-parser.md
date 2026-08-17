@@ -254,7 +254,7 @@ Do not do something like this:
 
 ## Deduplication algorithm
 
-By default a new parser uses the 'legacy' deduplication algorithm documented at https://docs.defectdojo.com/open_source/archived_docs/usage/features/#deduplication
+By default a new parser uses the 'legacy' deduplication algorithm documented in [About Deduplication](/triage_findings/finding_deduplication/about_deduplication/)
 
 Please use a pre-defined deduplication algorithm where applicable. When using the `unique_id_from_tool` or `vuln_id_from_tool` fields in the hash code configuration, it's important that these are uqniue for the finding and constant over time across subsequent scans. If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
 The values must be coming from the report directly and must not be something that is calculated by the parser internally.
@@ -385,4 +385,4 @@ Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] w
 * A link to the relevant unit tests folder so that users can quickly navigate there from Documentation.
 * A link to the scanner itself - (e.g. GitHub or vendor link)
 
-Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md)
+Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md 77 

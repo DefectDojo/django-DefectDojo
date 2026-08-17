@@ -21,7 +21,7 @@ There are two main ways that DefectDojo can upload Finding reports.
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users have an additional three methods to handle reports and data:
 
 * Via **Universal Importer** or **DefectDojo CLI**, command line tools which leverage the DefectDojo API: See [Universal Importer & DefectDojo-CLI guides](/import_data/pro/specialized_import/external_tools/)
-* Via **Connectors** for certain tools, an ‘out of the box’ data integration: See [Connectors Guide](/import_data/pro/connectors/about_connectors/)
+* Via **Connectors** for certain tools, an ‘out of the box’ data integration: See [Connectors Guide](/connectors/upstream/about/)
 * Via **Smart Upload** for certain tools, an importer designed to handle infrastructure scans: See [Smart Upload Guide](/import_data/pro/specialized_import/smart_upload/)
 
 ### Comparing Upload Methods
@@ -31,9 +31,9 @@ There are two main ways that DefectDojo can upload Finding reports.
 | **Supported Scan Types** | All: see [Supported Tools](/supported_tools/) | All: see [Supported Tools](/supported_tools/) | Akamai API Security, Anchore, AWS Security Hub, BurpSuite, Checkmarx ONE, Dependency-Track, IriusRisk, JFrog Xray, Probely, Semgrep, SonarQube, Snyk, Tenable, Wiz | Nexpose, NMap, OpenVas, Qualys, Tenable |
 | **Automation?** | Available via API: `/reimport` `/import` endpoints | Triggered from [CLI Tools](/import_data/pro/specialized_import/external_tools/) or external code | Connectors is an inherently automated feature | Available via API: `/smart_upload_import` endpoint |
 
-### Product Hierarchy and organization
+### Asset Hierarchy and organization
 
-Each of these methods can create Product Hierarchy on the spot. Product Hierarchy refers to DefectDojo’s Product Types, Products, Engagements or Tests: objects in DefectDojo which help organize your data into relevant context.
+Each of these methods can create Asset Hierarchy on the spot. Asset Hierarchy refers to DefectDojo’s Organizations, Assets, Engagements or Tests: objects in DefectDojo which help organize your data into relevant context.
 
-* **Vulnerability data can be imported into an existing Product Hierarchy**. Product Types, Products, Engagements and Tests can all be created in advance, and then data can be imported to that location in DefectDojo.
-* **The contextual Product Hierarchy can be created at the time of Import.** When importing a report, you can create a new Product Type, Product, Engagement and/or Test. This is handled by DefectDojo through the ‘auto-create context’ option.  In DefectDojo OS, this option can only be accessed through the API.  UI imports in DefectDojo OS will require Product Hierarchy to be created first.
+* **Vulnerability data can be imported into an existing Asset Hierarchy**. Organizations, Assets, Engagements and Tests can all be created in advance, and then data can be imported to that location in DefectDojo.
+* **The contextual Asset Hierarchy can be created at the time of Import.** When importing a report, you can create a new Organization, Asset, Engagement and/or Test. This is handled by DefectDojo through the ‘auto-create context’ option.  In DefectDojo OS, this option can only be accessed through the API.  UI imports in DefectDojo OS will require Asset Hierarchy to be created first.

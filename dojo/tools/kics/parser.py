@@ -1,8 +1,7 @@
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -85,7 +84,7 @@ class KICSParser:
                         nb_occurences=1,
                         references=query_url,
                     )
-                    if settings.V3_FEATURE_LOCATIONS and file_name:
+                    if locations_enabled() and file_name:
                         finding.unsaved_locations.append(
                             LocationData.code(file_path=file_name, line=line_number),
                         )

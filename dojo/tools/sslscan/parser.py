@@ -2,8 +2,8 @@ import hashlib
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -89,7 +89,7 @@ class SslscanParser:
                         dupes[dupe_key] = finding
 
                         if host:
-                            if settings.V3_FEATURE_LOCATIONS:
+                            if locations_enabled():
                                 location = LocationData.url(url=host) if "://" in host else LocationData.url(host=host, port=port)
                                 finding.unsaved_locations.append(location)
                             else:
