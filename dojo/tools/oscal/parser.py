@@ -17,6 +17,7 @@ SEVERITY_MAPPING = {
 
 
 class OscalParser:
+
     """
     NIST OSCAL 1.2.3 (Open Security Controls Assessment Language) Assessment Results Parser.
 
@@ -36,15 +37,34 @@ class OscalParser:
             "findings mapped to NIST SP 800-53 Rev. 5 controls."
         )
 
+    _FAILED_TOKENS = {"fail", "unsatisfied", "non-compliant", "failed"}
+
+    def _is_failed(self, raw_status, props):
+        """
+        Determine whether a finding-target's status indicates a failure.
+
+        The OSCAL 1.2.3 schema defines ``finding.target.status`` as a
+        required *object* -- ``{"state": "satisfied"|"not-satisfied",
+        "reason": "pass"|"fail"|"other"}`` -- not a plain string. Some
+        looser or hand-authored OSCAL-shaped documents may still emit a
+        bare string there, so both shapes are handled; if ``target.status``
+        is absent entirely, this falls back to the finding-level
+        ``status`` property.
+        """
+        if isinstance(raw_status, dict):
+            state = str(raw_status.get("state", "")).lower()
+            reason = str(raw_status.get("reason", "")).lower()
+            return state == "not-satisfied" or reason in self._FAILED_TOKENS
+        if isinstance(raw_status, str):
+            return raw_status.lower() in self._FAILED_TOKENS
+        return str(props.get("status", "fail")).lower() in self._FAILED_TOKENS
+
     def get_findings(self, file, test):
         if file is None:
             return []
 
         try:
-            if isinstance(file, (str, bytes)):
-                content = json.loads(file)
-            else:
-                content = json.load(file)
+            content = json.loads(file) if isinstance(file, (str, bytes)) else json.load(file)
         except Exception:
             logger.warning("Invalid JSON file passed to OSCAL parser")
             return []
@@ -91,8 +111,8 @@ class OscalParser:
                 # Extract status & target
                 target = oscal_finding.get("target", {})
                 target_id = target.get("target-id", "") if isinstance(target, dict) else ""
-                target_status = target.get("status", "") if isinstance(target, dict) else props.get("status", "fail")
-                is_failed = target_status.lower() in ("fail", "unsatisfied", "non-compliant", "failed")
+                raw_status = target.get("status") if isinstance(target, dict) else None
+                is_failed = self._is_failed(raw_status, props)
 
                 # Link related observations
                 related_obs_text = []

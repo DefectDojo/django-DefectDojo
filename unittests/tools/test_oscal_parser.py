@@ -1,7 +1,7 @@
 import json
 import sys
-from types import ModuleType
 import unittest
+from types import ModuleType
 from unittest.mock import MagicMock
 
 # Mock dojo dependencies for standalone testing
@@ -43,7 +43,7 @@ class TestOscalParser(unittest.TestCase):
                                 "uuid": "obs-001",
                                 "title": "Check s3_bucket_public_access_block",
                                 "description": "S3 bucket has public access block disabled",
-                            }
+                            },
                         ],
                         "findings": [
                             {
@@ -55,18 +55,18 @@ class TestOscalParser(unittest.TestCase):
                                     "status": "fail",
                                 },
                                 "related-observations": [
-                                    {"observation-uuid": "obs-001"}
+                                    {"observation-uuid": "obs-001"},
                                 ],
                                 "props": [
                                     {"name": "severity", "value": "high"},
                                     {"name": "control_id", "value": "AC-3"},
                                     {"name": "check_id", "value": "s3_bucket_public_access_block"},
                                 ],
-                            }
+                            },
                         ],
-                    }
+                    },
                 ],
-            }
+            },
         }
 
         findings = self.parser.get_findings(json.dumps(sample_oscal), self.test)
@@ -100,11 +100,11 @@ class TestOscalParser(unittest.TestCase):
                                     {"name": "severity", "value": "low"},
                                     {"name": "control_id", "value": "IA-2"},
                                 ],
-                            }
+                            },
                         ],
-                    }
-                ]
-            }
+                    },
+                ],
+            },
         }
 
         findings = self.parser.get_findings(json.dumps(sample_oscal), self.test)
@@ -122,6 +122,97 @@ class TestOscalParser(unittest.TestCase):
     def test_oscal_scan_types(self):
         scan_types = self.parser.get_scan_types()
         self.assertIn("NIST OSCAL Assessment Results", scan_types)
+
+    # ---- Regression: the OSCAL 1.2.3 schema defines finding.target.status
+    # as a required *object* ({"state": ..., "reason": ...}), not a plain
+    # string. A real, schema-valid document (e.g. from a fixed OSCAL
+    # exporter) previously crashed this parser with
+    # AttributeError: 'dict' object has no attribute 'lower', because
+    # target_status.lower() assumed a string. Both shapes must work.
+
+    def test_oscal_object_shaped_status_not_satisfied_is_active(self):
+        sample_oscal = {
+            "assessment-results": {
+                "results": [
+                    {
+                        "uuid": "res-1",
+                        "findings": [
+                            {
+                                "uuid": "find-obj-001",
+                                "title": "Non-compliant check: s3_bucket_default_encryption",
+                                "description": "not encrypted",
+                                "target": {
+                                    "type": "objective-id",
+                                    "target-id": "s3_bucket_default_encryption",
+                                    "status": {"state": "not-satisfied", "reason": "fail"},
+                                },
+                                "props": [{"name": "severity", "value": "high"}],
+                            },
+                        ],
+                    },
+                ],
+            },
+        }
+
+        findings = self.parser.get_findings(json.dumps(sample_oscal), self.test)
+        self.assertEqual(len(findings), 1)
+        finding = findings[0]
+        self.assertTrue(finding.active)
+        self.assertFalse(finding.is_mitigated)
+
+    def test_oscal_object_shaped_status_satisfied_is_mitigated(self):
+        sample_oscal = {
+            "assessment-results": {
+                "results": [
+                    {
+                        "uuid": "res-1",
+                        "findings": [
+                            {
+                                "uuid": "find-obj-002",
+                                "title": "Compliant check",
+                                "description": "encrypted",
+                                "target": {
+                                    "type": "objective-id",
+                                    "target-id": "s3_bucket_default_encryption",
+                                    "status": {"state": "satisfied", "reason": "pass"},
+                                },
+                                "props": [{"name": "severity", "value": "low"}],
+                            },
+                        ],
+                    },
+                ],
+            },
+        }
+
+        findings = self.parser.get_findings(json.dumps(sample_oscal), self.test)
+        self.assertEqual(len(findings), 1)
+        finding = findings[0]
+        self.assertFalse(finding.active)
+        self.assertTrue(finding.is_mitigated)
+
+    def test_oscal_missing_target_status_falls_back_to_props(self):
+        sample_oscal = {
+            "assessment-results": {
+                "results": [
+                    {
+                        "uuid": "res-1",
+                        "findings": [
+                            {
+                                "uuid": "find-003",
+                                "title": "No target.status at all",
+                                "description": "d",
+                                "target": {"target-id": "x"},
+                                "props": [{"name": "status", "value": "fail"}],
+                            },
+                        ],
+                    },
+                ],
+            },
+        }
+
+        findings = self.parser.get_findings(json.dumps(sample_oscal), self.test)
+        self.assertEqual(len(findings), 1)
+        self.assertTrue(findings[0].active)
 
 
 if __name__ == "__main__":
