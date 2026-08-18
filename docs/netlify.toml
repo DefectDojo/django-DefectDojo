@@ -31,6 +31,36 @@
   autoLaunch = false
 
 # Redirects and rewrites — https://docs.netlify.com/routing/redirects/#syntax-for-the-netlify-configuration-file
+#
+# Retired URLs are normally handled with Hugo `aliases:` in the target page's
+# front matter. These four cannot be:
+#
+#   - The SSO pages differ from their live URL only by case, and Hugo lowercases
+#     alias output, so an alias would collide with the page's own path.
+#   - /admin/ and /triage_findings/ are section list pages with no _index.md, so
+#     there is no front matter to carry an alias.
+
+[[redirects]]
+  from = "/admin/sso/PRO__auth0/"
+  to = "/admin/sso/pro__auth0/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/admin/sso/PRO__google/"
+  to = "/admin/sso/pro__google/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/customize_dojo/"
+  to = "/admin/"
+  status = 301
+
+[[redirects]]
+  from = "/en/working_with_findings/"
+  to = "/triage_findings/"
+  status = 301
 
 # Custom headers — https://docs.netlify.com/routing/headers/#syntax-for-the-netlify-configuration-file
 [[headers]]

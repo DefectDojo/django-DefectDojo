@@ -65,6 +65,11 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 - **Clone** — copy any layout (one of yours, or a shared template) into your own space as a fresh, independent starting point. Cloning gives the copy its own widgets, so editing the clone never touches the original.
 - **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout. Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
+- **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults).
+
+### Restricting customization
+
+An administrator can enable **Restrict Layout Customization** (Settings, then UI Defaults, then Layout Defaults) to limit dashboard changes to superusers. Everyone else is shown the global default dashboard, or the built-in starter dashboard when none is designated, with no toolbar options to create, switch, edit, or manage layouts. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
 
 ## Building a dashboard in the UI
 

@@ -1,6 +1,8 @@
 ---
 title: "SonarQube API Import"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/api/sonarqube/"
 ---
 > **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
 >

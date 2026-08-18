@@ -3,7 +3,7 @@ title: "Threat Modeling"
 description: "Generate a threat model, attack paths and security requirements from a feature design, before the code exists"
 draft: false
 audience: pro
-weight: 4
+weight: 5
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Threat Modeling is a DefectDojo Pro-only feature and is currently in BETA.</span>
 

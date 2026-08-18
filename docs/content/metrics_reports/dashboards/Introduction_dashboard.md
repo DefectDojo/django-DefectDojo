@@ -4,6 +4,7 @@ description: "Working with the front page of DefectDojo"
 weight: 1
 audience: opensource
 aliases:
+  - "/en/customize_dojo/dashboards/introduction_dashboard/"
   - /en/customize_dojo/dashboards/Introduction_dashboard
   - /en/customize_dojo/dashboards/pro_dashboards
 ---

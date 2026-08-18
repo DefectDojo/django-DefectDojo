@@ -43,3 +43,12 @@ Column visibility, column order, column widths, page size, filters, and sort ord
 To switch between preferences, pick one from the list in the preferences menu. Selecting **Default** returns the table to its built-in columns and widths without deleting any of your saved preferences.
 
 Shared preferences created by other users appear under the **Shared Preferences** tab of the menu. You can load or set a shared preference as your default, but only its creator can change or delete it.
+
+## Global defaults and restricted customization
+
+An administrator can pin everyone to a shared table view instead of letting each person keep their own.
+
+- **Set as Global Default**: on a shared preference, the preferences menu offers **Set as Global Default** to users who can share preferences. The designated preference becomes the one every user is shown for that table while customization is restricted. You can also choose it on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults), which offers a dropdown of the shared preferences for each table.
+- **Restrict Layout Customization**: a system setting (Settings, then UI Defaults, then Layout Defaults) that, when enabled, limits table customization to superusers. Everyone else is shown the designated global default for each table, or the table's built-in columns when none is designated, and the **Views** and **Columns** buttons are hidden. Sorting, filtering, and searching still work.
+
+Personal preferences saved before the setting was enabled are not deleted. They are ignored while it is on, and they reappear if an administrator turns it back off.

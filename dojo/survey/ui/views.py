@@ -15,6 +15,7 @@ from django.views import View
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
+    user_has_configuration_permission_or_403,
     user_has_permission,
     user_has_permission_or_403,
 )
@@ -349,7 +350,8 @@ def create_questionnaire(request):
                 messages.SUCCESS,
                 "Questionnaire successfully created, you may now add questions.",
                 extra_tags="alert-success")
-            if "add_questions" in request.POST:
+            if "add_questions" in request.POST and user_has_configuration_permission(
+                    request.user, "dojo.change_engagement_survey"):
                 return HttpResponseRedirect(reverse("edit_questionnaire_questions", args=(survey.id,)))
             return HttpResponseRedirect(reverse("questionnaire"))
         messages.add_message(
@@ -366,12 +368,9 @@ def create_questionnaire(request):
     })
 
 
-# complex permission check inside the function
 def edit_questionnaire_questions(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
-    if not user_has_configuration_permission(request.user, "dojo.add_engagement_survey") and \
-            not user_has_configuration_permission(request.user, "dojo.change_engagement_survey"):
-        raise PermissionDenied
+    user_has_configuration_permission_or_403(request.user, "dojo.change_engagement_survey")
 
     answered_surveys = Answered_Survey.objects.filter(survey=survey)
     reverted = False
@@ -733,6 +732,9 @@ def delete_general_questionnaire(request, esid):
 
 def answer_empty_survey(request, esid):
     general_survey = get_object_or_404(General_Survey, id=esid)
+    # Same comparison as the sweep in questionnaire(), so the two cannot disagree.
+    if general_survey.expiration < tz.now():
+        raise Http404
     engagement_survey = get_object_or_404(Engagement_Survey, id=general_survey.survey_id)
     engagement, survey = None, None
     settings = System_Settings.objects.all()[0]

@@ -548,3 +548,81 @@ class MigrateEndpointsToLocationsTest(TestCase):
             [tag.name for tag in location.inherited_tags.all()],
             ["product-inherited"],
         )
+
+    def test_cancel_callback_stops_between_chunks(self):
+        # Three endpoints, one per chunk. The probe asks to cancel at the first
+        # chunk boundary, so the run stops with processed < total and the summary
+        # reports it as cancelled rather than completed. What committed before the
+        # cancel is persisted.
+        self._make_endpoint_with_status("first.example.com", active=True)
+        self._make_endpoint_with_status("second.example.com", active=True)
+        self._make_endpoint_with_status("third.example.com", active=True)
+
+        calls = []
+
+        def cancel():
+            calls.append(1)
+            return True  # cancel at the first boundary
+
+        summaries = []
+        self._run(batch_size=1, cancel_callback=cancel, summary_callback=summaries.append)
+
+        self.assertEqual(len(summaries), 1)
+        summary = summaries[0]
+        self.assertTrue(summary["cancelled"])
+        self.assertEqual(summary["total"], 3)
+        self.assertEqual(summary["processed"], 1)
+        # Only the chunk that committed before the cancel is persisted.
+        self.assertEqual(URL.objects.count(), 1)
+        self.assertEqual(LocationFindingReference.objects.count(), 1)
+
+    def test_rerun_after_cancel_converges(self):
+        for host in ("a.example.com", "b.example.com", "c.example.com"):
+            self._make_endpoint_with_status(host, active=True)
+
+        first = []
+        self._run(batch_size=1, cancel_callback=lambda: True, summary_callback=first.append)
+        self.assertTrue(first[0]["cancelled"])
+        self.assertEqual(first[0]["processed"], 1)
+        self.assertEqual(URL.objects.count(), 1)
+
+        # Re-running with no cancel finishes the migration and creates no
+        # duplicate rows for the chunk that already migrated.
+        second = []
+        self._run(summary_callback=second.append)
+        self.assertFalse(second[0]["cancelled"])
+        self.assertEqual(second[0]["processed"], 3)
+        self.assertEqual(URL.objects.count(), 3)
+        self.assertEqual(LocationFindingReference.objects.count(), 3)
+
+    def test_cancel_callback_that_raises_does_not_abort(self):
+        # A probe that raises (e.g. a transient DB error) must not stop the run:
+        # discarding a multi-hour migration over a failed flag check is worse than
+        # finishing it. The exception is logged and the run completes normally.
+        self._make_endpoint_with_status("resilient.example.com", active=True)
+
+        def boom():
+            msg = "db blip while checking cancel flag"
+            raise RuntimeError(msg)
+
+        summaries = []
+        with self.assertLogs(
+            "dojo.management.commands.migrate_endpoints_to_locations",
+            level="WARNING",
+        ):
+            self._run(batch_size=1, cancel_callback=boom, summary_callback=summaries.append)
+
+        self.assertFalse(summaries[0]["cancelled"])
+        self.assertEqual(summaries[0]["processed"], 1)
+        self.assertEqual(URL.objects.count(), 1)
+
+    def test_no_cancel_callback_reports_not_cancelled(self):
+        # The CLI path passes no cancel_callback and behaves exactly as before,
+        # reporting cancelled=False so the suite lands the run on "completed".
+        self._make_endpoint_with_status("plain-run.example.com", active=True)
+
+        summaries = []
+        self._run(summary_callback=summaries.append)
+
+        self.assertFalse(summaries[0]["cancelled"])
+        self.assertEqual(summaries[0]["processed"], 1)

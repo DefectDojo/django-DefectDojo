@@ -41,6 +41,12 @@
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {
+            // base.html turns every <select> into a bootstrap-select; swap this
+            // one for select2 so multi-selection shows as removable pills
+            $('#id_regulations').selectpicker('destroy').select2({
+                placeholder: 'Select applicable regulations',
+                width: '70%'
+            });
             $("textarea").each(function (index, elem) {
                 if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");

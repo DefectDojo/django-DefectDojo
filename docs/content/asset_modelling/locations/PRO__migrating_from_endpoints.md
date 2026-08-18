@@ -9,11 +9,15 @@ When you enable Locations on an existing DefectDojo Pro instance, the data alrea
 
 Note that migration is **one-way**. There is no automated rollback path that re-creates Endpoints from Locations.
 
+> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations and are scheduled for **removal in 3.4.0**. Until then the Endpoints UI and the read-only Endpoint API stay available, and the **DEPRECATED** badges shown on the Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables link here. Enable Locations and run the migration below before 3.4.0.
+
 ## Running the migration from the Feature Flags page
 
 Enabling Locations only changes behaviour for *new* imports; your existing history is carried forward by a **data-migration suite** that appears under the Locations row on the **Settings > Feature Flags** page once the feature is on. Each item is run on demand by a superuser, shows live progress and an ETA, and is safe to re-run (every step is idempotent).
 
 When a backfill finishes it reports how many source objects it processed and how many distinct **Locations** those objects resolved to. The two numbers differ by design: several source objects can share one Location (many Endpoints normalising to the same URL, or many Findings sharing one component), so the Location count is normally lower than the object count. If any individual object could not be migrated it is skipped rather than aborting the run, and the number skipped is shown alongside the result.
+
+A running item shows a **Cancel** button. Cancelling stops the run at the next batch boundary, so it is not instant: the current batch finishes and commits first. A cancelled run keeps everything it had already migrated, is reported as **Cancelled** with its partial counts, and because every step is idempotent, running the same item again resumes from where it stopped and converges on the same result as an uninterrupted run. Cancel is also the recovery path when a run's worker is lost: a run that stops reporting progress is marked failed on its own so the item becomes runnable again, and forcing a cancel releases a run that is otherwise wedged.
 
 The suite has four items, because a Finding can carry three independent kinds of location:
 

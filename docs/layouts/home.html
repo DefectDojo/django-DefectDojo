@@ -1,19 +1,24 @@
 {{ define "main" }}
 {{ $url := "https://api.github.com/repos/DefectDojo/django-DefectDojo/releases/latest" }}
-{{ $resource := resources.GetRemote $url }}
 {{ $releaseName := "" }}
-{{ if $resource }}
-  {{ $release := $resource | transform.Unmarshal | default dict }}
-  {{ if $release.name }}
-    {{ $releaseName = $release.name }}
+{{/* Best-effort: the release chip depends on an unauthenticated GitHub API
+     call, which is rate-limited (403 Forbidden) on shared CI runners.
+     Wrap the fetch in `try` so a failed request degrades to "no chip"
+     instead of failing the whole build (Resource.Err was removed in
+     Hugo v0.141.0 in favor of the `try` keyword). */}}
+{{ with try (resources.GetRemote $url) }}
+  {{ with .Err }}
+    {{ warnf "Release notes fetch failed from %s: %s" $url . }}
+  {{ else with .Value }}
+    {{ $release := . | transform.Unmarshal | default dict }}
+    {{ with $release.name }}
+      {{ $releaseName = . }}
+    {{ else }}
+      {{ warnf "Could not parse release name from %s (not valid JSON or missing field)" $url }}
+    {{ end }}
   {{ else }}
-    {{ printf "⚠️ Could not parse release name (not valid JSON or missing field)\n" | warnf }}
-    {{ printf "Media Type: %s\n" $resource.MediaType | warnf }}
-    {{ $contentPreview := substr $resource.Content 0 500 }}
-    {{ printf "Content Preview (first 500 chars):\n%s\n" $contentPreview | warnf }}
+    {{ warnf "Release notes fetch returned no resource from %s" $url }}
   {{ end }}
-{{ else }}
-  {{ printf "❌ Release Notes Fetch failed from: %s\n" $url | warnf }}
 {{ end }}
 <section class="hero-section">
   <div class="container">

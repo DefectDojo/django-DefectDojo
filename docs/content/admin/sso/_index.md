@@ -16,6 +16,7 @@ seo:
 exclude_search: true
 pro-feature: true
 aliases:
+  - "/en/customize_dojo/user_management/configure_sso/"
   - /admin/user_management/configure_sso/
   - /admin/sso/os__saml/
   - /admin/sso/os__auth0/
