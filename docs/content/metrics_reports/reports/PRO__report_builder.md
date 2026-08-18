@@ -57,7 +57,7 @@ A **Block** is a reusable unit of content. You build a Block once, configure wha
 | **Stock** | Non-data content such as a cover page, a table of contents, a page break, an image, or a text block. |
 | **Tabular** | A table of records drawn from a single entity. |
 | **Detail** | A per-record layout, best for long-form fields that render as markdown (for example, description, impact, mitigation, and references). |
-| **Chart** | Visual charts. *Coming soon* — this block type is defined in the data model but is not yet available in the API or UI. |
+| **Chart** | A single chart, chosen from the same catalog of charts used on the Insights dashboards. |
 
 A **Stock** block is configured by choosing one of five stock types, along with a title, subtitle, text content, or image as appropriate:
 
@@ -77,9 +77,39 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Test type**
 - **Risk acceptance**
 
-> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Assets** and **Organizations** were formerly **Organizations**. You may still encounter the legacy wording in some underlying field and filter names.
+> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. You may still encounter the legacy wording in some underlying field and filter names.
 
 The difference is presentation: a **Tabular** block lays the records out as a table of columns, which is ideal for summaries and inventories, while a **Detail** block renders one record at a time in a long-form layout that is best suited to markdown-rich fields like description, impact, mitigation, and references.
+
+A **Chart** block draws one chart from the catalog below — the same charts the Insights dashboards use, so a figure in a report matches the figure your team already reads on screen. You choose the chart, and the chart decides what it can be filtered by:
+
+- Charts of findings expose the **Finding** filter, and the filter narrows the findings the chart counts.
+- Charts of assets expose the **Asset** filter, and the filter selects assets, scoping the chart to the findings belonging to them.
+- Portfolio-wide charts take no filter, because they summarize the whole instance by design.
+
+| Chart | What it shows |
+|-------|---------------|
+| Active Findings by Severity | Open findings over time, split by severity |
+| Active, Mitigated, and Risk Accepted Findings | Finding status mix over time |
+| Average Finding Age by Severity | Mean age in days of the findings currently open, per severity |
+| Average Finding Age by Risk | The same, grouped by risk category |
+| Average Time to Remediation | Mean days from discovery to mitigation, over time |
+| Findings Fixed Over Time | Count of findings mitigated in each period |
+| Tests Performed Over Time | Count of tests recorded in each period |
+| Average Risk Over Time | Mean risk score across open findings, over time |
+| Total Findings by Risk Category | Open findings split across the four risk categories |
+| Finding Priority Distribution | Open findings bucketed by priority score |
+| Open Findings Over Time | Running total of open findings |
+| Noise Reduction by Category | Ingested findings split into actionable, duplicate, false positive, and reimport automation |
+| Noise Reduction / Hours Saved Over Time | The same categories per period, with estimated hours saved |
+| Findings Past SLA by Asset | Findings past their SLA, sized per asset |
+| Findings Past SLA by Organization | The same, grouped by organization |
+| Severity of Findings Past SLA by Asset | Past-SLA findings per asset, broken out by severity |
+| Assets Tested Over Time | Count of distinct assets tested in each period |
+
+Charts appear in Block and Template previews and in the reports you generate, in both HTML and PDF output. Reports created through the [API](../report-builder-api/), and reports delivered automatically by a rule, include their charts as well.
+
+> **💡 Tip:** A Chart block carries its filters like any other Block, so the same chart filtered two ways is two Blocks. Duplicate the Block and adjust the copy rather than editing one shared Block.
 
 > **💡 Tip:** Filters live on the Block, not on the Template. A Block carries its own filters with it, so reusing a Block reuses its filters identically everywhere it appears. If you need the same content but with a different filter, duplicate the Block and adjust the copy.
 
