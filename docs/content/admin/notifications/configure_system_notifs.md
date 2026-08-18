@@ -2,6 +2,7 @@
 title: "Set System-Wide Notifications"
 description: "How to configure Personal & System notifications"
 aliases:
+  - "/en/notifications/configure_system_notifs/"
   - /en/customize_dojo/notifications/configure_system_notifs
 ---
 DefectDojo has two different kinds of notifications: **Personal** (sent to a single account) and **System** (which are sent to all users).

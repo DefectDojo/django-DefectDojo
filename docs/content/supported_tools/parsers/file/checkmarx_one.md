@@ -1,6 +1,8 @@
 ---
 title: "Checkmarx One Scan"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/checkmarx_one/"
 ---
 Import JSON Checkmarx One scanner reports
 
@@ -150,7 +152,7 @@ Sample Checkmarx One scans can be found [here](https://github.com/DefectDojo/dja
 - [Checkmarx One Documentation](https://checkmarx.com/resource/documents/en/34965-68516-checkmarx-one-documentation-portal.html)
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - vulnerability ids
 - component name

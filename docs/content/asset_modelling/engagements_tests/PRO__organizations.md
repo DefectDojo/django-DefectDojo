@@ -3,6 +3,8 @@ title: "Organizations"
 description: "Understanding Organizations in DefectDojo Pro"
 audience: pro
 weight: 1
+aliases:
+  - "/asset_modelling/hierarchy/pro__assets_organizations/"
 ---
 **ORGANIZATIONS** → Assets → Engagements → Tests → Findings
 
