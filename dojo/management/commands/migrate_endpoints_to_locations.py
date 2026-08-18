@@ -177,12 +177,14 @@ class Command(BaseCommand):
 
     help = "Usage: manage.py migrate_endpoints_to_locations"
 
-    # `progress_callback` and `summary_callback` are accepted by handle() but not
-    # exposed on the parser: they are programmatic hooks for in-process callers (Pro's
-    # migration suite passes them via call_command) and cannot be supplied on the
-    # command line. progress_callback(processed, total) drives a live bar;
-    # summary_callback(dict) reports the final {processed, total, locations, failures}.
-    stealth_options = ("progress_callback", "summary_callback")
+    # `progress_callback`, `summary_callback` and `cancel_callback` are accepted by
+    # handle() but not exposed on the parser: they are programmatic hooks for in-process
+    # callers (Pro's migration suite passes them via call_command) and cannot be supplied
+    # on the command line. progress_callback(processed, total) drives a live bar;
+    # summary_callback(dict) reports the final {processed, total, locations, failures,
+    # cancelled}; cancel_callback() -> bool is polled at each chunk boundary and, when it
+    # returns True, stops the run cleanly between chunks (see _should_cancel).
+    stealth_options = ("progress_callback", "summary_callback", "cancel_callback")
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -741,6 +743,28 @@ class Command(BaseCommand):
         except Exception:
             logger.warning("summary_callback raised; continuing migration", exc_info=True)
 
+    def _should_cancel(self) -> bool:
+        """
+        Ask an optional cancel probe whether the run should stop.
+
+        Pro's migration suite passes ``cancel_callback`` (a stealth option) that returns
+        True once a superuser has requested cancellation. Polled at each chunk boundary,
+        where the DB is already in a consistent, resumable state.
+
+        Unlike progress/summary, a raising probe is treated as "do not cancel" rather than
+        propagated: a transient DB error while checking the flag must not throw away hours
+        of migration work. A probe that can never succeed is handled out of band by the
+        suite's stale-run recovery (force cancel). CLI runs pass no callback and never stop.
+        """
+        callback = self.cancel_callback
+        if callback is None:
+            return False
+        try:
+            return bool(callback())
+        except Exception:
+            logger.warning("cancel_callback raised; continuing migration", exc_info=True)
+            return False
+
     def _log_progress(
         self,
         i: int,
@@ -840,6 +864,9 @@ class Command(BaseCommand):
         # Optional programmatic hooks (see stealth_options). None for CLI runs.
         self.progress_callback = options.get("progress_callback")
         self.summary_callback = options.get("summary_callback")
+        self.cancel_callback = options.get("cancel_callback")
+        # Set when the cancel probe asks us to stop, so the summary can report it.
+        self.cancelled = False
 
         # Per-phase wall-clock accumulators.
         self.timings = dict.fromkeys(PHASES, 0.0)
@@ -955,6 +982,19 @@ class Command(BaseCommand):
                     # of the throttled stdout line below), for the migration suite.
                     self._emit_progress(i, endpoint_count)
 
+                    # Cancellation checkpoint. Chunks are separately committed and the
+                    # tag queue was just flushed, so stopping here leaves a consistent,
+                    # resumable state that a later run converges from (the class is
+                    # idempotent by design). Break rather than return: the tag
+                    # inheritance pass below still needs to run for what we migrated.
+                    if self._should_cancel():
+                        self.cancelled = True
+                        self.stdout.write(self.style.WARNING(
+                            f"Cancellation requested; stopping after {i:,}/{endpoint_count:,} "
+                            f"endpoints at a chunk boundary. Re-run to finish.",
+                        ))
+                        break
+
                     # Progress report once at least --progress-every endpoints
                     # have been migrated since the last line.
                     if i - last_reported >= self.progress_every or i >= endpoint_count:
@@ -972,8 +1012,9 @@ class Command(BaseCommand):
 
             elapsed = time.time() - run_t0
             successful = i - len(self.failed_endpoints)
+            lead = "Stopped early." if self.cancelled else "Done."
             self.stdout.write(self.style.SUCCESS(
-                f"Done. Migrated {successful:,}/{i:,} endpoints in {self._fmt_duration(elapsed)} "
+                f"{lead} Migrated {successful:,}/{i:,} endpoints in {self._fmt_duration(elapsed)} "
                 f"({(i / elapsed if elapsed else 0):.2f} endpoints/sec).",
             ))
             if self.failed_endpoints:
@@ -1004,12 +1045,15 @@ class Command(BaseCommand):
         # Summary for programmatic callers (the Pro Locations migration suite). CLI runs
         # pass no summary_callback and are unaffected. ``locations`` is the distinct-
         # Location count the endpoints collapsed onto (<= processed); ``failures`` are the
-        # per-endpoint errors isolated during the run so the suite can surface "N skipped".
+        # per-endpoint errors isolated during the run so the suite can surface "N skipped";
+        # ``cancelled`` tells the suite the run stopped early (processed < total) rather
+        # than finishing, so it can land the run on "cancelled" instead of "completed".
         self._emit_summary(
             {
                 "processed": i,
                 "total": endpoint_count,
                 "locations": len(self.migrated_location_ids),
                 "failures": [{"id": endpoint_id, "error": error} for endpoint_id, error in self.failed_endpoints],
+                "cancelled": self.cancelled,
             },
         )
