@@ -338,6 +338,7 @@ class TestFindingVulnerabilityIdsAPI(DojoAPITestCase):
 
 
 class TestPostProcessFindingsBatchDeadlockRetry(DojoTestCase):
+
     """
     post_process_findings_batch runs the batch dedup / false-positive-history writes that
     update dojo_finding rows. Two of these tasks racing on overlapping rows (concurrent
