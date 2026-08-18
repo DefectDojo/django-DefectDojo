@@ -1,9 +1,9 @@
 import json
 from datetime import datetime
 
-from django.conf import settings
 from html2text import html2text
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -80,7 +80,7 @@ class RapplexParser:
                     finding.unsaved_request = req
                     finding.unsaved_response = res
 
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         finding.unsaved_locations = [LocationData.url(url=url)]
                     else:
                         # TODO: Delete this after the move to Locations

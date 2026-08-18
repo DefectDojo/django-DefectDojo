@@ -1,0 +1,161 @@
+{
+  "md5": "14d9f1a92dd984d6040cc41ed06e273e",
+  "apk_filename": "14d9f1a92dd984d6040cc41ed06e273e.apk",
+  "size_bytes": 166917,
+  "threat_level": "High Risk",
+  "total_score": 4,
+  "crimes": [
+    {
+      "rule": "sendLocation_SMS.json",
+      "crime": "Send Location via SMS",
+      "label": [
+        "location",
+        "collection"
+      ],
+      "score": 4,
+      "weight": 4.0,
+      "confidence": "100%",
+      "permissions": [
+        "android.permission.SEND_SMS",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "native_api": [
+        {
+          "class": "Landroid/telephony/TelephonyManager;",
+          "method": "getCellLocation",
+          "descriptor": "()Landroid/telephony/CellLocation;"
+        },
+        {
+          "class": "Landroid/telephony/SmsManager;",
+          "method": "sendTextMessage",
+          "descriptor": "(Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Landroid/app/PendingIntent; Landroid/app/PendingIntent;)V"
+        }
+      ],
+      "combination": [
+        {
+          "class": "Landroid/telephony/TelephonyManager",
+          "method": "getCellLocation",
+          "descriptor": "()Landroid/telephony/CellLocation;"
+        },
+        {
+          "class": "Landroid/telephony/SmsManager",
+          "method": "sendTextMessage",
+          "descriptor": "(Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Landroid/app/PendingIntent; Landroid/app/PendingIntent;)V"
+        }
+      ],
+      "sequence": [
+        {
+          "Lcom/google/progress/AndroidClientService$2; run ()V": {
+            "first": [
+              "invoke-virtual",
+              "v5",
+              "Lcom/google/progress/Locate;->getLocation()Ljava/lang/String;"
+            ],
+            "first_hex": "6e 10 2f 02 05 00",
+            "second": [
+              "invoke-virtual",
+              "v3",
+              "v0",
+              "v4",
+              "Lcom/google/progress/SMSHelper;->sendSms(Ljava/lang/String; Ljava/lang/String;)I"
+            ],
+            "second_hex": "6e 30 3e 02 03 04"
+          }
+        },
+        {
+          "Lcom/google/progress/AndroidClientService; sendMessage ()V": {
+            "first": [
+              "invoke-virtual",
+              "v6",
+              "Lcom/google/progress/Locate;->getLocation()Ljava/lang/String;"
+            ],
+            "first_hex": "6e 10 2f 02 06 00",
+            "second": [
+              "invoke-virtual",
+              "v4",
+              "v6",
+              "v7",
+              "Lcom/google/progress/SMSHelper;->sendSms(Ljava/lang/String; Ljava/lang/String;)I"
+            ],
+            "second_hex": "6e 30 3e 02 64 07"
+          }
+        },
+        {
+          "Lcom/google/progress/AndroidClientService; doByte ([B)V": {
+            "first": [
+              "invoke-virtual/range",
+              "v35",
+              "Lcom/google/progress/Locate;->getLocation()Ljava/lang/String;"
+            ],
+            "first_hex": "74 01 2f 02 23 00",
+            "second": [
+              "invoke-virtual",
+              "v0",
+              "v1",
+              "v2",
+              "Lcom/google/progress/SMSHelper;->sendSms(Ljava/lang/String; Ljava/lang/String;)I"
+            ],
+            "second_hex": "6e 30 3e 02 10 02"
+          }
+        }
+      ],
+      "register": [
+        {
+          "Lcom/google/progress/AndroidClientService$2; run ()V": {
+            "first": [
+              "invoke-virtual",
+              "v5",
+              "Lcom/google/progress/Locate;->getLocation()Ljava/lang/String;"
+            ],
+            "first_hex": "6e 10 2f 02 05 00",
+            "second": [
+              "invoke-virtual",
+              "v3",
+              "v0",
+              "v4",
+              "Lcom/google/progress/SMSHelper;->sendSms(Ljava/lang/String; Ljava/lang/String;)I"
+            ],
+            "second_hex": "6e 30 3e 02 03 04"
+          }
+        },
+        {
+          "Lcom/google/progress/AndroidClientService; sendMessage ()V": {
+            "first": [
+              "invoke-virtual",
+              "v6",
+              "Lcom/google/progress/Locate;->getLocation()Ljava/lang/String;"
+            ],
+            "first_hex": "6e 10 2f 02 06 00",
+            "second": [
+              "invoke-virtual",
+              "v4",
+              "v6",
+              "v7",
+              "Lcom/google/progress/SMSHelper;->sendSms(Ljava/lang/String; Ljava/lang/String;)I"
+            ],
+            "second_hex": "6e 30 3e 02 64 07"
+          }
+        },
+        {
+          "Lcom/google/progress/AndroidClientService; doByte ([B)V": {
+            "first": [
+              "invoke-virtual/range",
+              "v35",
+              "Lcom/google/progress/Locate;->getLocation()Ljava/lang/String;"
+            ],
+            "first_hex": "74 01 2f 02 23 00",
+            "second": [
+              "invoke-virtual",
+              "v0",
+              "v1",
+              "v2",
+              "Lcom/google/progress/SMSHelper;->sendSms(Ljava/lang/String; Ljava/lang/String;)I"
+            ],
+            "second_hex": "6e 30 3e 02 10 02"
+          }
+        }
+      ]
+    }
+  ]
+}

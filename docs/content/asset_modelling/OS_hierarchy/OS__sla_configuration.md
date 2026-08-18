@@ -1,12 +1,12 @@
 ---
 title: "SLA Configuration"
-description: "Configure Service Level Agreements for different Products"
+description: "Configure Service Level Agreements for different Assets"
 weight: 2
 audience: opensource
 aliases:
   - /en/working_with_findings/sla_configuration
 ---
-Each Product in DefectDojo can have its own Service Level Agreement (SLA) configuration, which represents the days your organization has to remediate or otherwise manage a Finding.
+Each Asset in DefectDojo can have its own Service Level Agreement (SLA) configuration, which represents the days your organization has to remediate or otherwise manage a Finding.
 
 SLA can be set based on either **[Finding Severity](/asset_modelling/os_hierarchy/product_hierarchy/#findings)** or **[Finding Risk](/asset_modelling/pro_hierarchy/priority_sla/)** (in DefectDojo Pro).
 
@@ -19,7 +19,7 @@ SLAs apply a countdown of days to a Finding based on the day that the Finding wa
 You can use SLAs as a way to represent your organizations remediation policies.  You can also use them as a way to prioritize the longest-active, most critical Findings in your DefectDojo instance.  
 
 * You can sort or filter Finding tables by SLA days.
-* SLA violations can be configured to trigger [Notifications](/admin/notifications/about_notifications/) to DefectDojo users assigned to the related Product.
+* SLA violations can be configured to trigger [Notifications](/admin/notifications/about_notifications/) to DefectDojo users assigned to the related Asset.
 * In **DefectDojo Pro**, SLA performance is also tracked on the [Executive Insights and Remediation](/metrics_reports/pro_metrics/pro__overview/) Metrics Dashboards.
 * SLA compliance can also be surfaced on a custom [dashboard](/metrics_reports/dashboards/custom-dashboards/) in **DefectDojo Pro** — for example with an SLA Burndown or a filtered Count widget.
 
@@ -59,20 +59,20 @@ When editing an SLA, you can choose whether that SLA will use **Severity** or **
 
 From here, you can set the number of days allowed for each **Severity** or **Risk** level.  You can also selectively enforce SLAs; by unchecking the **Enforce ___ Finding Days** you can ignore SLA calculation for those levels of Severity or Risk.
 
-## Apply an SLA Configuration to a Product (Pro)
+## Apply an SLA Configuration to an Asset (Pro)
 
-Newly created Products in DefectDojo will always apply the **Default SLA Configuration**, which can be set to different values if you wish.
+Newly created Assets in DefectDojo will always apply the **Default SLA Configuration**, which can be set to different values if you wish.
 
-If you have SLA configurations, you can choose which of these is applied to your Product from the **Edit Product** form.  
+If you have SLA configurations, you can choose which of these is applied to your Asset from the **Edit Asset** form.  
 
 ![image](images/pro_sla_product.png)
 
 ### SLA Recalculation
 
-Once a new SLA has been selected for a Product, all of the associated Findings' SLAs will need to be recalculated by DefectDojo.  While this process is running, a Product's SLA cannot be changed.
+Once a new SLA has been selected for an Asset, all of the associated Findings' SLAs will need to be recalculated by DefectDojo.  While this process is running, an Asset's SLA cannot be changed.
 
 ## Notes on SLAs
 
 * SLAs can be optionally restarted once a [Risk Accepted](/triage_findings/findings_workflows/os__risk_acceptance/) Finding reactivates.  This is set when creating the Risk Acceptance by setting the **Restart SLA Expired** field.
 * Reimporting a Finding does not restart the SLA - SLAs are always calculated from when a Finding was first detected unless **Restart SLA on Finding Reactivation** is enabled.
-* Risk Acceptance expiry or reactivation of a Closed Finding are the only ways to reset or recalculate an SLA for a Finding once it is created (without changing the Product's SLA configuration).
+* Risk Acceptance expiry or reactivation of a Closed Finding are the only ways to reset or recalculate an SLA for a Finding once it is created (without changing the Asset's SLA configuration).

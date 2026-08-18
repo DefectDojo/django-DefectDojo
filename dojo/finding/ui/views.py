@@ -71,6 +71,7 @@ from dojo.forms import (
     TypedNoteForm,
 )
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
 from dojo.location.utils import copy_location_references
@@ -96,6 +97,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     User,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.test.queries import get_authorized_tests
@@ -352,7 +354,7 @@ class ListFindings(View, BaseListFindings):
                 # the user may view so the breadcrumb cannot disclose the
                 # existence/URL of one they cannot access (404 for both missing
                 # and unauthorized ids).
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     authorized = get_authorized_locations("view", user=request.user)
                 else:
                     authorized = get_authorized_endpoints("view", user=request.user)
@@ -639,7 +641,7 @@ class ViewFinding(View):
             process_tag_notifications(request, new_note, url, title)
             # Add a message to the request
             messages.add_message(
-                request, messages.SUCCESS, "Note saved.", extra_tags="alert-success",
+                request, messages.SUCCESS, _("Note saved."), extra_tags="alert-success",
             )
 
             return request, True
@@ -657,7 +659,7 @@ class ViewFinding(View):
             "finding": finding,
             "dojo_user": user,
             "user": request.user,
-            "notes": notes,
+            "notes": visible_notes(notes, request.user),
             "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
@@ -843,7 +845,7 @@ class EditFinding(View):
             now = timezone.now()
             finding.is_mitigated = True
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 for ref in finding.locations.all():
                     ref.set_status(
                         FindingLocationStatus.Mitigated,
@@ -926,7 +928,7 @@ class EditFinding(View):
             # Save and add new locations; replace=True so deselected endpoints are removed
             associated_locations = finding_helper.add_locations(new_finding, context["form"], replace=True)
             # Remove unrelated endpoints
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 for ref in new_finding.locations.all():
                     if ref.location not in associated_locations:
                         ref.location.disassociate_from_finding(new_finding)
@@ -947,7 +949,7 @@ class EditFinding(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding saved successfully.",
+                _("Finding saved successfully."),
                 extra_tags="alert-success",
             )
 
@@ -1097,7 +1099,7 @@ class DeleteFinding(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding deleted successfully.",
+                _("Finding deleted successfully."),
                 extra_tags="alert-success",
             )
 
@@ -1122,7 +1124,7 @@ class DeleteFinding(View):
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to delete finding, please try again.",
+            _("Unable to delete finding, please try again."),
             extra_tags="alert-danger",
         )
 
@@ -1165,7 +1167,7 @@ def close_finding(request, fid):
         )
 
         if form.is_valid():
-            messages.add_message(request, messages.SUCCESS, "Note Saved.", extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, _("Note Saved."), extra_tags="alert-success")
 
             if len(missing_note_types) <= 1:
                 finding_helper.close_finding(
@@ -1184,7 +1186,7 @@ def close_finding(request, fid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Finding closed.",
+                    _("Finding closed."),
                     extra_tags="alert-success",
                 )
 
@@ -1221,7 +1223,7 @@ def verify_finding(request, fid):
         messages.add_message(
             request,
             messages.INFO,
-            "Finding already verified.",
+            _("Finding already verified."),
             extra_tags="alert-info",
         )
         return redirect_to_return_url_or_else(
@@ -1244,7 +1246,7 @@ def verify_finding(request, fid):
         messages.add_message(
             request,
             messages.SUCCESS,
-            "Finding verified.",
+            _("Finding verified."),
             extra_tags="alert-success",
         )
 
@@ -1334,7 +1336,7 @@ def defect_finding_review(request, fid):
                 jira_services.push(finding.finding_group)
 
             messages.add_message(
-                request, messages.SUCCESS, "Defect Reviewed", extra_tags="alert-success",
+                request, messages.SUCCESS, _("Defect Reviewed"), extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_test", args=(finding.test.id,)))
 
@@ -1372,7 +1374,7 @@ def reopen_finding(request, fid):
     # more than closing here — the finding comes back active, so stale
     # reviewers would show up in reviewer-scoped queues as live work.
     finding.review_requested_by = None
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         for ref in finding.locations.all():
             ref.set_status(FindingLocationStatus.Active, request.user, timezone.now())
     else:
@@ -1394,7 +1396,7 @@ def reopen_finding(request, fid):
     reopen_external_issue(finding.id, "re-opened by defectdojo", "github")
 
     messages.add_message(
-        request, messages.SUCCESS, "Finding Reopened.", extra_tags="alert-success",
+        request, messages.SUCCESS, _("Finding Reopened."), extra_tags="alert-success",
     )
 
     # Note: this notification has not be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
@@ -1429,7 +1431,7 @@ def copy_finding(request, fid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding Copied successfully.",
+                _("Finding Copied successfully."),
                 extra_tags="alert-success",
             )
             create_notification(
@@ -1449,7 +1451,7 @@ def copy_finding(request, fid):
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to copy finding, please try again.",
+            _("Unable to copy finding, please try again."),
             extra_tags="alert-danger",
         )
 
@@ -1482,7 +1484,7 @@ def remediation_date(request, fid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding Planned Remediation Date saved.",
+                _("Finding Planned Remediation Date saved."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
@@ -1524,7 +1526,7 @@ def simple_risk_accept(request, fid):
     ra_helper.simple_risk_accept(request.user, finding)
 
     messages.add_message(
-        request, messages.WARNING, "Finding risk accepted.", extra_tags="alert-success",
+        request, messages.WARNING, _("Finding risk accepted."), extra_tags="alert-success",
     )
 
     return redirect_to_return_url_or_else(
@@ -1540,7 +1542,7 @@ def risk_unaccept(request, fid):
     messages.add_message(
         request,
         messages.WARNING,
-        "Finding risk unaccepted.",
+        _("Finding risk unaccepted."),
         extra_tags="alert-success",
     )
 
@@ -1622,7 +1624,7 @@ def request_finding_review(request, fid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding marked for review and reviewers notified.",
+                _("Finding marked for review and reviewers notified."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
@@ -1698,7 +1700,7 @@ def clear_finding_review(request, fid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding review has been updated successfully.",
+                _("Finding review has been updated successfully."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
@@ -1727,7 +1729,7 @@ def mktemplate(request, fid):
         messages.add_message(
             request,
             messages.ERROR,
-            "A finding template with that title already exists.",
+            _("A finding template with that title already exists."),
             extra_tags="alert-danger",
         )
     else:
@@ -1983,7 +1985,7 @@ def apply_template_to_finding(request, fid, tid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "There appears to be errors on the form, please correct below.",
+                _("There appears to be errors on the form, please correct below."),
                 extra_tags="alert-danger",
             )
             product_tab = Product_Tab(
@@ -2143,14 +2145,14 @@ def add_template(request):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Template created successfully.",
+                _("Template created successfully."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("templates"))
         messages.add_message(
             request,
             messages.ERROR,
-            "Template form has error, please revise and try again.",
+            _("Template form has error, please revise and try again."),
             extra_tags="alert-danger",
         )
     add_breadcrumb(title="Add Template", top_level=False, request=request)
@@ -2197,14 +2199,14 @@ def edit_template(request, tid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Template updated successfully.",
+                _("Template updated successfully."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("templates"))
         messages.add_message(
             request,
             messages.ERROR,
-            "Template form has error, please revise and try again.",
+            _("Template form has error, please revise and try again."),
             extra_tags="alert-danger",
         )
 
@@ -2229,14 +2231,14 @@ def delete_template(request, tid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding Template deleted successfully.",
+                _("Finding Template deleted successfully."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("templates"))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to delete Template, please revise and try again.",
+            _("Unable to delete Template, please revise and try again."),
             extra_tags="alert-danger",
         )
         return None
@@ -2358,7 +2360,7 @@ def merge_finding_product(request, pid):
                                 finding_to_merge_into.endpoints.add(
                                     *finding.endpoints.all(),
                                 )
-                            if settings.V3_FEATURE_LOCATIONS:
+                            if locations_enabled():
                                 copy_location_references(finding, finding_to_merge_into)
 
                         # if checked merge the tags
@@ -2435,7 +2437,7 @@ def merge_finding_product(request, pid):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Findings merged",
+                        _("Findings merged"),
                         extra_tags="alert-success",
                     )
                     return HttpResponseRedirect(
@@ -2444,14 +2446,14 @@ def merge_finding_product(request, pid):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Unable to merge findings. Findings to merge contained in finding to merge into.",
+                    _("Unable to merge findings. Findings to merge contained in finding to merge into."),
                     extra_tags="alert-danger",
                 )
             else:
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Unable to merge findings. Required fields were not selected.",
+                    _("Unable to merge findings. Required fields were not selected."),
                     extra_tags="alert-danger",
                 )
 
@@ -3035,7 +3037,7 @@ def finding_bulk_update_all(request, pid=None):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Unable to process bulk update. Required fields were not selected.",
+                _("Unable to process bulk update. Required fields were not selected."),
                 extra_tags="alert-danger",
             )
 
@@ -3156,7 +3158,7 @@ def reset_finding_duplicate_status(request, duplicate_id):
         messages.add_message(
             request,
             messages.ERROR,
-            "Can't reset duplicate status of a finding that is not a duplicate",
+            _("Can't reset duplicate status of a finding that is not a duplicate"),
             extra_tags="alert-danger",
         )
         return redirect_to_return_url_or_else(
@@ -3260,7 +3262,7 @@ def unlink_jira(request, fid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Link to JIRA issue succesfully deleted",
+                _("Link to JIRA issue succesfully deleted"),
                 extra_tags="alert-success",
             )
 
@@ -3270,14 +3272,14 @@ def unlink_jira(request, fid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Link to JIRA could not be deleted, see alerts for details",
+                _("Link to JIRA could not be deleted, see alerts for details"),
                 extra_tags="alert-danger",
             )
 
             return HttpResponse(status=500)
     else:
         messages.add_message(
-            request, messages.ERROR, "Link to JIRA not found", extra_tags="alert-danger",
+            request, messages.ERROR, _("Link to JIRA not found"), extra_tags="alert-danger",
         )
         return HttpResponse(status=400)
 
@@ -3308,7 +3310,7 @@ def push_to_jira(request, fid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Push to JIRA failed, check alerts on the top right for errors",
+                _("Push to JIRA failed, check alerts on the top right for errors"),
                 extra_tags="alert-danger",
             )
 
@@ -3316,7 +3318,7 @@ def push_to_jira(request, fid):
     except Exception:
         logger.exception("Error pushing to JIRA")
         messages.add_message(
-            request, messages.ERROR, "Error pushing to JIRA", extra_tags="alert-danger",
+            request, messages.ERROR, _("Error pushing to JIRA"), extra_tags="alert-danger",
         )
         return HttpResponse(status=500)
 

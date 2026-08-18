@@ -20,9 +20,15 @@ This is where Deduplication comes in, a Smart feature which you can set up to au
 
 By creating and marking Duplicates in this way, DefectDojo ensures that all the work for the ‘original’ vulnerability is centralized on the original Finding page, without creating separate contexts, or giving your team the impression that there are multiple separate vulnerabilities which need to be addressed.
 
-By default, these Tests would need to be nested under the same Product for Deduplication to be applied. If you wish, you can further limit the Deduplication scope to a single Engagement.
+### Which Finding becomes the original
 
-![Deduplication on product and engagement level](images/deduplication.png)
+Deduplication always treats the **earliest-created** Finding in a duplicate chain as the canonical original, so a Finding from an earlier import is never demoted to a duplicate of a newer one — an original that is already established does not change hands.
+
+Within a *single* report, the order the scanner happens to list its findings in does not decide the winner. Findings from one import are created in a stable, content-derived order, so a report that contains several findings colliding on the same deduplication key produces the **same original every time it is imported**. Re-scanning and re-importing the same results will not shuffle which Finding your team has been working on.
+
+By default, these Tests would need to be nested under the same Asset for Deduplication to be applied. If you wish, you can further limit the Deduplication scope to a single Engagement.
+
+![Deduplication on Asset and engagement level](images/deduplication.png)
 
 Duplicate Findings are set as Inactive by default. This does not mean the Duplicate Finding itself is Inactive. Rather, this is so that your team only has a single active Finding to work on and remediate, with the implication being that once the original Finding is Mitigated, the Duplicates will also be Mitigated.
 
@@ -52,7 +58,7 @@ Reimport can completely discard Findings before they are recorded, so Reimport D
 
 ## When are duplicates appropriate?
 
-Duplicates are useful when you’re dealing with shared, but discrete Testing contexts. For example, if your Product is uploading Test results for two different repositories, which need to be compared, it’s useful to know which vulnerabilities are shared across those repositories.
+Duplicates are useful when you’re dealing with shared, but discrete Testing contexts. For example, if your Asset is uploading Test results for two different repositories, which need to be compared, it’s useful to know which vulnerabilities are shared across those repositories.
 
 However, if DefectDojo is creating excess duplicates, this can also be a sign that you need to adjust your pipelines or import processes. 
 
@@ -64,12 +70,18 @@ However, if DefectDojo is creating excess duplicates, this can also be a sign th
 
 ## Overview
 
-DefectDojo supports four deduplication algorithms that can be selected per parser (test type):
+DefectDojo Open Source supports four deduplication algorithms that can be selected per parser (test type):
 
 - **Unique ID From Tool**: Uses the scanner-provided unique identifier.
 - **Hash Code**: Uses a configured set of fields to compute a hash.
 - **Unique ID From Tool or Hash Code**: Prefer the tool’s unique ID; fall back to hash when no matching unique ID is found.
 - **Legacy**: Historical algorithm with multiple conditions; only available in the Open Source version.
+
+**DefectDojo Pro adds more.** Two additional algorithms match across **all Assets** in the instance rather than within a single Asset or Engagement — **Global Component** (by component name and version) and **Global Vulnerability ID** (by CVE, GHSA, …). Both are off by default and enabled by DefectDojo Support. Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
+
+### An alternative to Deduplication: False Positive History
+
+Instances that deliberately do **not** deduplicate can instead use [False Positive History](/triage_findings/finding_deduplication/false_positive_history/), which automatically marks an incoming Finding as a false positive when a matching Finding in the same Asset was already triaged that way. It is **mutually exclusive with Deduplication** — DefectDojo does not allow both to be enabled — and it is still marked experimental.
 
 ## How endpoints are assessed per algorithm
 
@@ -113,12 +125,12 @@ The endpoints also have to match for the findings to be considered duplicates, s
 For import and reimport you can control how deduplication post-processing is dispatched and whether the API response waits for it. Set it per user on the profile page (**Deduplication execution mode**), or override it per request with the `deduplication_execution_mode` field on the import/reimport endpoints (the request value takes precedence over the profile).
 
 - `async` (default): deduplication and the rest of post-processing run in the background and the response returns immediately. Historical behavior; the response is produced before findings are deduplicated.
-- `async_wait`: post-processing is still dispatched to the background, but the request waits for deduplication to finish before responding. The `scan_added` notification and the statistics in the response then reflect the deduplicated state (findings that turned out to be duplicates are no longer counted/listed as new). JIRA push, product grading and other non-deduplication tasks remain asynchronous and are not awaited. The wait is bounded by `DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT` (default `60` seconds); if no worker picks up the work in time, the request responds anyway rather than hanging.
+- `async_wait`: post-processing is still dispatched to the background, but the request waits for deduplication to finish before responding. The `scan_added` notification and the statistics in the response then reflect the deduplicated state (findings that turned out to be duplicates are no longer counted/listed as new). JIRA push, Asset grading and other non-deduplication tasks remain asynchronous and are not awaited. The wait is bounded by `DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT` (default `60` seconds); if no worker picks up the work in time, the request responds anyway rather than hanging.
 - `sync`: import deduplication runs inline in the web request.
 
 The import/reimport response includes a `deduplication_complete` boolean indicating whether deduplication had finished by the time the response was produced (`true` for `sync` and for a completed `async_wait`, `false` for `async`).
 
-This is independent of the global `block_execution` profile flag, which forces **all** of a user's asynchronous tasks (notifications, JIRA push, product grading, deduplication, ...) to the foreground. When no execution mode is set, `block_execution=True` falls back to `sync`.
+This is independent of the global `block_execution` profile flag, which forces **all** of a user's asynchronous tasks (notifications, JIRA push, Asset grading, deduplication, ...) to the foreground. When no execution mode is set, `block_execution=True` falls back to `sync`.
 
 ## Service field and its impact
 
@@ -157,8 +169,8 @@ Sometimes, Deduplication does not work as expected.  Here are some examples of w
 | Reimport closes an old Finding and creates a new one when only the line number changed | Reimport matching uses unstable fields (for example, line number) | <strong>Reimport Deduplication</strong> (prefer stable IDs or stable hash fields) |
 | Multiple Findings are created in the same Test that you believe should be duplicates | Deduplication matching is not configured for that tool or scope | <strong>Same Tool Deduplication</strong> (and consider “Delete Deduplicate Findings” behavior) |
 | Duplicates are created across different tools | Cross-tool matching is disabled or too strict | <strong>Cross Tool Deduplication (Pro only)</strong> (hash-based matching) |
-| The same SCA dependency imported into multiple Products creates separate Findings instead of duplicates | Deduplication is scoped per Product by default | <strong>Global Component Deduplication (Pro only)</strong> ([enable for your SCA tools](/triage_findings/finding_deduplication/pro__global_component_deduplication/)), or, under the Locations data model, <strong>Global Locations Deduplication (Pro only)</strong> ([match on shared location](/triage_findings/finding_deduplication/pro__global_locations_deduplication/)) |
-| The same URL / web Finding imported into multiple Products creates separate Findings instead of duplicates | Deduplication is scoped per Product by default, and Global Component matches only components | <strong>Global Locations Deduplication (Pro only)</strong> ([match DAST/URL Findings across Products](/triage_findings/finding_deduplication/pro__global_locations_deduplication/)) |
+| The same SCA dependency imported into multiple Assets creates separate Findings instead of duplicates | Deduplication is scoped per Asset by default | <strong>Global Component Deduplication (Pro only)</strong> ([enable for your SCA tools](/triage_findings/finding_deduplication/pro__global_component_deduplication/)), or, under the Locations data model, <strong>Global Locations Deduplication (Pro only)</strong> ([match on shared location](/triage_findings/finding_deduplication/pro__global_locations_deduplication/)) |
+| The same URL / web Finding imported into multiple Assets creates separate Findings instead of duplicates | Deduplication is scoped per Asset by default, and Global Component matches only components | <strong>Global Locations Deduplication (Pro only)</strong> ([match DAST/URL Findings across Assets](/triage_findings/finding_deduplication/pro__global_locations_deduplication/)) |
 | Excess duplicates of the same Finding are being created, across Tests | Asset Hierarchy is not set up correctly | [Consider Reimport for continual testing](/triage_findings/finding_deduplication/avoid_excess_duplicates/) |
 
 When automatic deduplication misses Findings that you believe belong together, you can link them by hand from the View Finding page. See Similar Findings for how to discover related Findings and mark them as duplicates manually ([Open Source](/triage_findings/finding_deduplication/os__similar_findings/) | [Pro](/triage_findings/finding_deduplication/pro__similar_findings/)).

@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load display_tags %}
 {% load authorization_tags %}
 {% load static %}
@@ -24,13 +25,13 @@
                                     {% for endpoint in endpoints %}
                                         <tr>
                                             {% if V3_FEATURE_LOCATIONS %}
-                                                <td style="word-break: break-word">{{ endpoint.location }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
+                                                <td style="word-break: break-word">{{ endpoint.location }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</td>
                                                 <td>{{ endpoint.status }}</td>
                                                 <td>{{ endpoint.created|date }}</td>
                                                 <td>{{ endpoint.audit_time|date}}</td>
                                             {% else %}
                                                 {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
-                                                <td style="word-break: break-word">{{ endpoint }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
+                                                <td style="word-break: break-word">{{ endpoint }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</td>
                                                 <td>{{ endpoint.status }}</td>
                                                 <td>{{ endpoint.date|date }}</td>
                                                 <td>{{ endpoint.last_modified|date}}</td>
@@ -70,13 +71,13 @@
                                     {% for endpoint in endpoints %}
                                         <tr>
                                             {% if V3_FEATURE_LOCATIONS %}
-                                                <td style="word-break: break-word">{{ endpoint.location }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
+                                                <td style="word-break: break-word">{{ endpoint.location }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</td>
                                                 <td>{{ endpoint.status }}</td>
                                                 <td>{{ endpoint.auditor }}</td>
                                                 <td>{{ endpoint.audit_time|date }}</td>
                                             {% else %}
                                                 {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
-                                                <td style="word-break: break-word">{{ endpoint }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
+                                                <td style="word-break: break-word">{{ endpoint }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</td>
                                                 <td>{{ endpoint.status }}</td>
                                                 <td>{{ endpoint.mitigated_by }}</td>
                                                 <td>{{ endpoint.mitigated_time|date }}</td>
@@ -156,7 +157,7 @@
                         <table id="vuln_endpoints" class="table-striped table table-hover">
                             <thead>
                                 {% if finding|has_object_permission:"edit" %}
-                                    <th class="" title="Select all vulnerable endpoints." style="width: 10%;">
+                                    <th class="" title="{% trans 'Select all vulnerable endpoints.' %}" style="width: 10%;">
                                         <form class="inline-form" action="#">
                                             <input type="checkbox" label="select_all_vulnerable" name="select_all_vulnerable" id="select_all_vulnerable"/>
                                         </form>
@@ -181,7 +182,7 @@
                                         {% endif %}
                                         {% if V3_FEATURE_LOCATIONS %}
                                             <td>
-                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.location }}" title="{{ endpoint.location }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.location|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.location }}" title="{{ endpoint.location }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.location|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
                                                 {% include "dojo/snippets/tags.html" with tags=endpoint.location.tags.all %}
                                             </td>
                                             <td>{{ endpoint.status }}</td>
@@ -190,7 +191,7 @@
                                         {% else %}
                                             {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
                                             <td>
-                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.endpoint }}" title="{{ endpoint.endpoint }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.endpoint|url_shortener }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.endpoint }}" title="{{ endpoint.endpoint }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.endpoint|url_shortener }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
                                                 {% include "dojo/snippets/tags.html" with tags=endpoint.endpoint.tags.all %}
                                             </td>
                                             <td>{{ endpoint.status }}</td>
@@ -221,7 +222,7 @@
                         <table id="remd_endpoints" class="table-striped table table-hover">
                             <thead>
                                 {% if finding|has_object_permission:"edit" %}
-                                    <th class="" title="Select all mitigated endpoints." style="width: 10%;">
+                                    <th class="" title="{% trans 'Select all mitigated endpoints.' %}" style="width: 10%;">
                                         <form class="inline-form" action="#">
                                             <input type="checkbox" label="select_all_mitigated" name="select_all_mitigated" id="select_all_mitigated"/>
                                         </form>
@@ -252,7 +253,7 @@
                                         {% endif %}
                                         {% if V3_FEATURE_LOCATIONS %}
                                             <td>
-                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.location }}" title="{{ endpoint.location }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.location|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.location }}" title="{{ endpoint.location }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.location|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
                                                 {% include "dojo/snippets/tags.html" with tags=endpoint.location.tags.all %}
                                             </td>
                                             <td>{{ endpoint.get_status_display }}</td>
@@ -261,7 +262,7 @@
                                         {% else %}
                                             {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
                                             <td>
-                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.endpoint }}" title="{{ endpoint.endpoint }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.endpoint|url_shortener }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.endpoint }}" title="{{ endpoint.endpoint }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.endpoint|url_shortener }}{% if endpoint.endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
                                                 {% include "dojo/snippets/tags.html" with tags=endpoint.endpoint.tags.all %}
                                             </td>
                                             <td>{{ endpoint.status }}</td>

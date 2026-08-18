@@ -241,6 +241,10 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
             },
         },
         # TODO: Delete this after the move to Locations
+        # This permission table is built once at import to match the /api/v2 routes
+        # mounted at boot, so it stays on settings.V3_FEATURE_LOCATIONS rather than the
+        # runtime dojo.location.feature accessor. See dojo/location/feature.py and
+        # pro/features/relabel.py:14-28.
         "endpoint": {
             "model": Endpoint if not settings.V3_FEATURE_LOCATIONS else Location,
             "permissions": {
@@ -432,9 +436,16 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        # The fourth argument is the POST permission, and it has to be given: without it
+        # check_object_permission passes None down to user_has_permission for every POST. This
+        # codebase happens to answer False to an unmapped permission, so it degrades to a 403 --
+        # but an authorization layer that treats "no permission named" as unimplemented raises
+        # instead, turning that into a 500. It went unnoticed because this viewset had no POST
+        # actions until expire and reinstate were added.
         return check_object_permission(
             request,
             obj,
+            "edit",
             "edit",
             "edit",
             "edit",

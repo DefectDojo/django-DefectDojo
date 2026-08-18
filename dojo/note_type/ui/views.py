@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.filters import NoteTypesFilter
 from dojo.note_type.models import Note_Type
@@ -39,7 +40,7 @@ def edit_note_type(request, ntid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Note type updated successfully.",
+                _("Note type updated successfully."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("note_type"))
@@ -63,7 +64,7 @@ def disable_note_type(request, ntid):
         messages.add_message(
             request,
             messages.SUCCESS,
-            "Note type Disabled successfully.",
+            _("Note type Disabled successfully."),
             extra_tags="alert-success",
         )
         return HttpResponseRedirect(reverse("note_type"))
@@ -87,7 +88,7 @@ def enable_note_type(request, ntid):
         messages.add_message(
             request,
             messages.SUCCESS,
-            "Note type Enabled successfully.",
+            _("Note type Enabled successfully."),
             extra_tags="alert-success",
         )
         return HttpResponseRedirect(reverse("note_type"))
@@ -108,7 +109,7 @@ def add_note_type(request):
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Note Type added successfully.",
+                                 _("Note Type added successfully."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("note_type"))
     add_breadcrumb(title="Add Note Type", top_level=False, request=request)

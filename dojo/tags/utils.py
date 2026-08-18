@@ -85,11 +85,11 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
             elif field.remote_field.model == tag_model:
                 target_field_name = field_name
 
+    # Query 1: ensure every tag exists, resolving each to its row up front.
+    resolved_tags = []
     for single_tag_name in tag_names:
         if not single_tag_name:
             continue
-
-        # Query 1: ensure the tag exists once per tag
         if tag_field.tag_options.case_sensitive:
             tag, _ = tag_model.objects.get_or_create(
                 name=single_tag_name,
@@ -100,7 +100,17 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
                 name__iexact=single_tag_name,
                 defaults={"name": single_tag_name, "protected": False},
             )
+        resolved_tags.append(tag)
 
+    # Apply the tags in ascending tag-id order. Each tag's batch loop issues a count
+    # UPDATE that locks that tag's row (dojo_tagulous_<model>_tags); inside an import
+    # the surrounding transaction holds that lock until commit. Two concurrent callers
+    # adding an overlapping set of tags would otherwise lock those rows in the order
+    # the tags were supplied and could take them in opposite orders, deadlocking
+    # (Postgres 40P01). Sorting by tag id makes the lock sequence identical for every
+    # caller so the cycle cannot form -- the same reasoning as bulk_remove_all_tags
+    # (see #15486), applied to the add path.
+    for tag in sorted(resolved_tags, key=lambda resolved_tag: resolved_tag.pk):
         # Process in batches to manage memory
         for i in range(0, len(instances), batch_size):
             batch_instances = instances[i:i + batch_size]
@@ -496,11 +506,18 @@ def bulk_remove_all_tags(model_class, instance_ids_qs):
         if not source_field_name or not target_field_name:
             continue
 
-        # Get affected tag IDs and their counts before deletion
+        # Get affected tag IDs and their counts before deletion.
+        # order_by(tag id) is load-bearing, not cosmetic: the loop below locks one tag
+        # row per UPDATE, and two callers removing tags from an overlapping tag set
+        # would otherwise take those row locks in unrelated orders and deadlock
+        # (Postgres 40P01). Sorting makes the lock sequence identical for every caller,
+        # so the cycle cannot form. It also pins the GROUP BY to this one column, which
+        # a model's default Meta.ordering would otherwise silently widen.
         affected_tags = (
             through_model.objects.filter(**{f"{source_field_name}__in": instance_ids_qs})
             .values(target_field_name)
             .annotate(num=models.Count("id"))
+            .order_by(target_field_name)
         )
 
         # Decrement tag counts. Tag counts are not used in DefectDojo but we

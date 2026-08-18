@@ -28,7 +28,7 @@ The page lists the features you can choose to adopt. Two kinds of feature are ab
 
 **Always on.** Once a feature reaches general availability it is on for every instance and stops being listed, because there is no longer a decision to make:
 
-* **Downstream Connections** — see [Pro Integrations](/issue_tracking/pro_integration/integrations/)
+* **Downstream Connectors** — see [Downstream Connectors](/connectors/downstream/about/)
 * **Universal Parser** — see [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
 * **Asset Hierarchy** — see [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
 * **Appearance** and **Feature Flags** — the two Settings pages of the same name
@@ -62,6 +62,16 @@ The stored toggle was seeded from that deployment setting, so the two agree unti
 
 The feature carries a **Restart Recommended** tag on the Feature Flags page for this reason: the naming used outside the Pro UI is fixed when the process starts. Relabeling is cosmetic either way. Database models, field names, and API endpoints are unchanged, so existing automation keeps working. See [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/).
 
+### Locations
+
+**Locations** replaces the legacy Endpoints model: with it on, imports create Location records and the UI and API surface Locations; with it off, imports create Endpoints. It is off by default and is enabled from this page like any other feature, but a few things are worth knowing:
+
+* The **Pro UI** and the **import pipeline** follow this toggle. After you enable Locations, new imports create Locations and the Locations pages appear on your next page load, without a restart.
+* The **Classic UI** pages and the `/api/v2` endpoint/location route wiring are decided from the `DD_V3_FEATURE_LOCATIONS` deployment setting when DefectDojo starts. This toggle does not change them, and restarting does not make it change them. If you use the Classic UI or depend on the `/api/v2` endpoint routes, set `DD_V3_FEATURE_LOCATIONS` to match and restart so every surface agrees. The stored toggle is seeded from that deployment setting on upgrade, so an instance that already ran with `DD_V3_FEATURE_LOCATIONS=True` comes up with the toggle already on (and locked), and the database owns the value from then on.
+* Enabling existing history is not automatic. Your existing data stays as it is until you run the **data-migration suite** that appears under this row once Locations is on: three backfills (endpoints, dependencies, and source-code locations) followed by an identity rehash that unlocks once all three finish. Each is superuser-run, shows progress, and is safe to re-run. See [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/).
+
+Enabling Locations is **self-service and one-way**: once it is on, the toggle locks (shown as **Cannot Be Disabled**), because turning it back off would require reversing the endpoint-to-location data migration, which is not yet supported. The feature carries a **Restart Recommended** tag for the Classic UI / API reason above.
+
 ## When a toggle is locked
 
 A feature you cannot change is shown with a lock badge explaining why:
@@ -88,7 +98,7 @@ Cloud instances also have access to features that are not offered on-premise. Se
 
 On [DefectDojo Pro (On-Premise)](/get_started/pro/onprem/), most features work exactly as they do on Cloud: open **Settings > Feature Flags** and toggle them.
 
-A small number of features are read from your deployment configuration instead. They change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them, for example `DD_V3_FEATURE_LOCATIONS` for [Locations](/asset_modelling/locations/pro__locations_overview/).
+A small number of features are read from your deployment configuration instead. They change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them.
 
 Because these features require a restart, and some of them cannot be reversed once enabled, check the feature's own documentation before changing one. Several are best enabled with help from [DefectDojo Support](mailto:support@defectdojo.com).
 
@@ -108,19 +118,38 @@ Most features are available on both installation types. The exceptions are:
 
 | Feature | Availability | How it is controlled |
 | --- | --- | --- |
-| Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
-| Locations | Both | Feature Flags page. Note that Locations cannot be turned back off once it is enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
-| Organization / Asset Relabeling | Both | Deployment configuration: `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`. |
+| Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Always on for Cloud instances, and not offered on-premise. No longer listed on the Feature Flags page. |
+| Locations | Both | Feature Flags page for the Pro UI and import pipeline; the Classic UI and `/api/v2` route wiring follow the `DD_V3_FEATURE_LOCATIONS` deployment setting. Enabling is self-service and one-way — once on, it cannot be turned back off. See [above](#locations) and [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
+| Organization / Asset Relabeling | Both | Feature Flags page for the Pro UI; the Classic UI, its URLs and generated reports follow the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting. See [above](#organization--asset-relabeling). |
 
 Every other optional feature is toggled directly on the Feature Flags page on both Cloud and On-Premise instances.
+
+## Reading feature flags outside the UI
+
+You do not have to open the Feature Flags page to find out which features are enabled — flag state can also be read programmatically, which is useful when automation needs to check that a capability is available before depending on it.
+
+```
+GET /api/v2/defectdojo_information/feature_flags/
+```
+
+This returns a JSON array with one object per feature flag. Alongside the flag's `key`, `title` and `description`, each object reports the values automation usually wants: `effective` (whether the feature is actually on for this instance), `default`, `application_value` (the instance's own setting, or `null` if unset), `editable`, and `locked_reason` where a flag cannot be changed. Flags retired from the product are omitted.
+
+Any **authenticated** user can read it — no superuser role is required. For the exact response schema on your version, see your instance's interactive API documentation at `/api/v2/oa3/swagger-ui/`, which is generated from the running build. See also the [API v2 documentation](/automation/api/api-v2-docs/).
+
+The same read-only listing is also published on the instance's `/api/mcp/` surface, at `/api/mcp/defectdojo_information/feature_flags/`.
+
+This endpoint is **read-only**. Turning a feature on or off is still done from the Feature Flags page, or — for the deployment-configured features noted above — in your deployment settings.
 
 ## Frequently asked questions
 
 **A feature I want is not in the list.**
-The list shows optional features only. Capabilities that are always on do not appear. If you expected a feature that is missing, confirm your license includes it, then contact [DefectDojo Support](mailto:support@defectdojo.com).
+The list shows optional features only. Capabilities that are always on do not appear. A feature also leaves the list once it becomes standard — it is then on for every instance and there is nothing to switch. If you expected a feature that is missing, confirm your license includes it, then contact [DefectDojo Support](mailto:support@defectdojo.com).
+
+**A feature I had turned off is on again after an upgrade.**
+A feature that becomes standard is turned on everywhere, and the setting you had chosen for it while it was optional is cleared as part of that release — otherwise an instance that had opted out would stay off with no toggle left to change it back. This only happens to features that leave the list; everything still shown keeps your setting. If a standard feature causes you a problem, contact [DefectDojo Support](mailto:support@defectdojo.com), who can turn it off for your instance.
 
 **I turned a feature on but I do not see it.**
 Reload the page — menu entries and routes are evaluated when the page loads, so a newly enabled feature appears on the next load rather than instantly in the current view.
 
 **Will upgrading change my settings?**
-No. Upgrading preserves the features you have turned on and the ones you have turned off.
+For every feature on this page, yes — upgrading preserves the ones you have turned on and the ones you have turned off. The exception is a feature that becomes standard in that release and leaves the page; see the question above.

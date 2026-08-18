@@ -1,7 +1,6 @@
 """Parse Xygeni SAST reports into DefectDojo Findings."""
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.xygeni._common import map_severity, parse_cwes
@@ -56,7 +55,7 @@ def _build_finding(vuln, test):
 
     _apply_code_flow_fields(finding, vuln.get("codeFlows") or [])
 
-    if settings.V3_FEATURE_LOCATIONS and file_path:
+    if locations_enabled() and file_path:
         finding.unsaved_locations.append(
             LocationData.code(
                 file_path=file_path,

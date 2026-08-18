@@ -455,6 +455,38 @@ class MigrateEndpointsToLocationsTest(TestCase):
             ["good-one.example.com", "good-two.example.com"],
         )
 
+    def test_summary_callback_reports_locations_and_failures(self):
+        # The Pro Locations migration suite passes summary_callback to learn the
+        # distinct-Location count (endpoints collapse onto shared URLs) and the
+        # per-endpoint failures, neither of which the (processed, total) progress
+        # hook can carry. Two endpoints share a host (one Location), one is unique
+        # (a second Location), and one is broken (fails, no Location).
+        self._make_endpoint("dup.example.com", [])
+        self._make_endpoint("dup.example.com", [])
+        self._make_endpoint("uniq.example.com", [])
+        broken = self._make_endpoint("broken.example.com", [])
+        Endpoint.objects.filter(pk=broken.pk).update(host="")
+
+        summaries = []
+        with self.assertLogs(
+            "dojo.management.commands.migrate_endpoints_to_locations",
+            level="ERROR",
+        ):
+            call_command(
+                "migrate_endpoints_to_locations",
+                batch_size=10,
+                progress_every=100,
+                summary_callback=summaries.append,
+                stdout=StringIO(),
+            )
+
+        self.assertEqual(len(summaries), 1, msg=f"summary_callback fired {len(summaries)} times")
+        summary = summaries[0]
+        self.assertEqual(summary["processed"], 4, msg=summary)
+        self.assertEqual(summary["total"], 4, msg=summary)
+        self.assertEqual(summary["locations"], 2, msg=f"expected 2 distinct locations: {summary}")
+        self.assertEqual([f["id"] for f in summary["failures"]], [broken.id], msg=summary)
+
     def test_failed_bulk_location_write_falls_back_per_endpoint(self):
         self._make_endpoint("first-bulk.example.com", [])
         self._make_endpoint("second-bulk.example.com", [])
@@ -497,7 +529,7 @@ class MigrateEndpointsToLocationsTest(TestCase):
     def test_inheritance_signal_is_suppressed_during_the_main_loop(self):
         # The per-Location post_save inheritance signal issues an OR-joined
         # query whose cost grows with LocationFindingReference, so the hot loop
-        # must not fire it; `_run_tag_inheritance` applies inheritance in bulk
+        # must not fire it; `_run_tag_inheritance_for_chunk` applies inheritance in bulk
         # once the reference rows exist.
         self.product.tags.add("product-inherited")
         self.product.enable_product_tag_inheritance = True
@@ -515,4 +547,98 @@ class MigrateEndpointsToLocationsTest(TestCase):
         self.assertEqual(
             [tag.name for tag in location.inherited_tags.all()],
             ["product-inherited"],
+        )
+
+    def test_start_after_id_resumes_from_the_cursor(self):
+        first = self._make_endpoint("resume-first.example.com", ["a"])
+        second = self._make_endpoint("resume-second.example.com", ["b"])
+
+        stdout = self._run(start_after_id=first.id)
+
+        # Only the endpoint after the cursor migrated.
+        self.assertIn("Starting migration of 1", stdout)
+        self.assertFalse(URL.objects.filter(host="resume-first.example.com").exists())
+        self.assertTrue(URL.objects.filter(host="resume-second.example.com").exists())
+        self.assertIn(f"resuming after endpoint id {first.id}", stdout)
+
+        # A follow-up full run converges: the skipped endpoint migrates,
+        # the already-migrated one is reused.
+        self._run()
+        self.assertTrue(URL.objects.filter(host="resume-first.example.com").exists())
+        self.assertEqual(URL.objects.filter(host="resume-second.example.com").count(), 1)
+        self.assertEqual(second.id > first.id, True)
+
+    def test_progress_line_reports_resume_cursor(self):
+        endpoints = [
+            self._make_endpoint(f"cursor-{i}.example.com", []) for i in range(3)
+        ]
+
+        stdout = self._run(progress_every=1, batch_size=1)
+
+        last = max(endpoint.id for endpoint in endpoints)
+        self.assertIn(f"resume: --start-after-id {last}", stdout)
+
+    def test_inheritance_converges_for_location_shared_across_chunks(self):
+        # One URL shared by two endpoints in DIFFERENT products, forced into
+        # different chunks (batch_size=1). The per-chunk inheritance pass must
+        # still produce the union of both products' tags on the shared
+        # location, because the helper recomputes the full product set from
+        # the committed reference rows each time it runs.
+        self.product.tags.add("tag-product-one")
+        self.product.enable_product_tag_inheritance = True
+        self.product.save(update_fields=["enable_product_tag_inheritance"])
+
+        other_product = Product.objects.create(
+            name="Endpoint migration product two",
+            description="Test product two",
+            prod_type=self.product.prod_type,
+            enable_product_tag_inheritance=True,
+        )
+        other_product.tags.add("tag-product-two")
+
+        self._make_endpoint_with_status("shared-inherit.example.com", active=True)
+
+        other_engagement = Engagement.objects.create(
+            name="Endpoint migration engagement two",
+            product=other_product,
+            target_start=timezone.now().date(),
+            target_end=timezone.now().date(),
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="Endpoint migration test type")
+        other_test = Test.objects.create(
+            engagement=other_engagement,
+            test_type=test_type,
+            scan_type="Endpoint migration scan",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        other_finding = Finding.objects.create(
+            title="Finding in product two",
+            test=other_test,
+            severity="High",
+            numerical_severity="S1",
+            description="Test finding",
+            active=True,
+            verified=False,
+            reporter=self.reporter,
+        )
+        with Endpoint.allow_endpoint_init():
+            other_endpoint = Endpoint.objects.create(
+                protocol="https",
+                host="shared-inherit.example.com",
+                product=other_product,
+            )
+        Endpoint_Status.objects.create(
+            endpoint=other_endpoint,
+            finding=other_finding,
+            date=datetime.date(2024, 5, 17),
+            mitigated=False,
+        )
+
+        self._run(batch_size=1)
+
+        location = self._location_for("shared-inherit.example.com")
+        self.assertEqual(
+            sorted(tag.name for tag in location.inherited_tags.all()),
+            ["tag-product-one", "tag-product-two"],
         )

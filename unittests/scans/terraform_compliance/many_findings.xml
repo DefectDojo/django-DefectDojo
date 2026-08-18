@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites time="0.011">
+  <testsuite name="Postgres server hardening" failures="3" errors="0" skipped="0" tests="4" time="0.011">
+    <testcase classname="Postgres server hardening" name="Postgres servers must not use a public network" time="0.000">
+      <failure type="Failure" message="And its value must be false"><![CDATA[Given I have azurerm_postgresql_server defined
+Then it must contain public_network_access_enabled
+And its value must be false
+
+Failure: public_network_access_enabled property in azurerm_postgresql_server.example resource does not match with ^false$ case insensitive regex. It is set to True.]]></failure>
+    </testcase>
+    <testcase classname="Postgres server hardening" name="Postgres servers must enforce a minimum TLS version" time="0.000">
+      <failure type="Failure" message="And its value must be TLS1_2"><![CDATA[Given I have azurerm_postgresql_server defined
+Then it must contain ssl_minimal_tls_version_enforced
+And its value must be TLS1_2
+
+Failure: ssl_minimal_tls_version_enforced property in azurerm_postgresql_server.example resource does not match with ^TLS1_2$ case insensitive regex. It is set to TLSEnforcementDisabled.]]></failure>
+    </testcase>
+    <testcase classname="Postgres server hardening" name="Postgres servers must have geo redundant backups" time="0.000">
+      <failure type="Failure" message="And its value must be true"><![CDATA[Given I have azurerm_postgresql_server defined
+Then it must contain geo_redundant_backup_enabled
+And its value must be true
+
+Failure: geo_redundant_backup_enabled property in azurerm_postgresql_server.example resource does not match with ^true$ case insensitive regex. It is set to False.]]></failure>
+    </testcase>
+    <testcase classname="Postgres server hardening" name="Postgres servers must enforce SSL" time="0.000"/>
+  </testsuite>
+</testsuites>

@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load humanize %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -27,8 +28,8 @@
           <div class="pull-right">
             <form method="post" action="{% url 'delete_note' note.id destination object.id %}">
                 {% csrf_token %}
-                <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
-                <button type="submit" aria-label="Delete Note" class="btn-delete">
+                <input type="hidden" aria-label="{% trans 'id' %}" name="id" value="{{note.id}}" id="id_id" />
+                <button type="submit" aria-label="{% trans 'Delete Note' %}" class="btn-delete">
                   <i class="fa-solid fa-trash"></i>
                 </button>
             </form>
@@ -38,8 +39,8 @@
           <div class="pull-right">
             <form method="get" action="{% url 'edit_note' note.id destination object.id %}">
                 {% csrf_token %}
-                <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
-                <button type="submit" aria-label="Edit Note" class="btn-edit">
+                <input type="hidden" aria-label="{% trans 'id' %}" name="id" value="{{note.id}}" id="id_id" />
+                <button type="submit" aria-label="{% trans 'Edit Note' %}" class="btn-edit">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
             </form>
@@ -49,8 +50,8 @@
           <div class="pull-right">
             <form method="get" action="{% url 'note_history' note.id destination object.id %}">
                 {% csrf_token %}
-                <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
-                <button type="submit" aria-label="history" class="btn-history">
+                <input type="hidden" aria-label="{% trans 'id' %}" name="id" value="{{note.id}}" id="id_id" />
+                <button type="submit" aria-label="{% trans 'history' %}" class="btn-history">
                   <i class="fa-solid fa-clock-rotate-left"></i>
                 </button>
             </form>
@@ -69,7 +70,7 @@
           {% endif %}
           {% if note.private %}
             <div class="row-sm-2">
-              <span class="text-muted">(will not appear in report)</span>
+              <span class="text-muted">(private to you)</span>
             </div>
           {% endif %}
       </div>

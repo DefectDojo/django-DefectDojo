@@ -85,6 +85,45 @@ You'll see a hierarchical representation of the unique fields we detected based 
 
 Input field names don't have to match the names of output fields, and your scan file may not have an equivalent to all DefectDojo output fields.
 
+### Mappable finding fields
+
+The table below lists every DefectDojo finding field (output field) you can map an input field to. Your scan file won't necessarily have an equivalent for all of them — map only what's present.
+
+* **Required** — this output field must have at least one input field mapped before you can save the parser.
+* **Accepts multiple inputs** — this output field can be populated from more than one input field. When you map several, each value is presented under a header named for its input field (see [Multi-select fields](#multi-select-fields)).
+
+| Output field | Required | Accepts multiple inputs | Description |
+|---|:---:|:---:|---|
+| Title | ✅ | | A short description of the flaw. |
+| Severity | ✅ | | The severity level of this flaw (Critical, High, Medium, Low, Info). Defaults to "Info" if unknown. |
+| Description | ✅ | ✅ | Longer, more descriptive information about the flaw. |
+| Date | | | The date the flaw was discovered. |
+| CWE | | | The CWE number associated with this flaw. |
+| CVSS v3 Vector | | | Common Vulnerability Scoring System version 3 (CVSSv3) vector associated with this flaw. |
+| CVSS v4 Vector | | | Common Vulnerability Scoring System version 4 (CVSSv4) vector associated with this flaw. |
+| Mitigation | | ✅ | Text describing how to best fix the flaw. |
+| Impact | | ✅ | Text describing the impact this flaw has on systems, Assets, enterprise, etc. |
+| References | | ✅ | The external documentation available for this flaw. |
+| Severity Justification | | ✅ | Text describing why a certain severity was associated with this flaw. |
+| Steps to Reproduce | | ✅ | Text describing the steps that must be followed in order to reproduce the flaw / bug. |
+| Component Name | | | Name of the affected component (library name, part of a system, ...). |
+| Component Version | | | Version of the affected component. |
+| File Path | | | Identified file(s) containing the flaw. |
+| Line Number | | | Source line number of the attack vector. |
+| Active | | | Denotes if this flaw is active or not. Defaults to true. |
+| Verified | | | Denotes if this flaw has been manually verified by the tester. Defaults to false. |
+| False Positive | | | Denotes if this flaw has been deemed a false positive by the tester. Defaults to false. |
+| Duplicate | | | Denotes if this flaw is a duplicate of other flaws reported. Defaults to false. |
+| EPSS Score | | | EPSS score for the CVE — how likely it is the vulnerability will be exploited in the next 30 days. Value must be between 0.0 and 1.0. |
+| EPSS Percentile | | | EPSS percentile for the CVE — how many CVEs are scored at or below this one. Value must be between 0.0 and 1.0. |
+| Unique ID From Tool | | | Vulnerability technical ID from the source tool. Allows tracking of unique vulnerabilities. |
+| Vuln ID from Tool | | | Non-unique technical ID from the source tool associated with the vulnerability type. |
+| Tags | | | String tags that help describe this finding. |
+| Endpoints | | | The hosts/URLs within the Asset that are susceptible to this flaw. |
+| Vulnerability IDs | | | One or more vulnerability advisory identifiers associated with this finding (most commonly, CVEs). |
+
+> **Note:** In the example above, a `CVE` input field would be mapped to the **Vulnerability IDs** output field — DefectDojo does not have a finding field literally named "CVE".
+
 ### Required fields
 The following output fields require an input field mapping:
 
@@ -168,13 +207,16 @@ What you can do from the UI:
 
 * **Deactivate** a parser to hide it from the "Scan Type" drop-down on import. Open **Import → Universal Parser** in the sidebar to see all of your Universal Parsers, and toggle "Active" off. (Alternatively, you can edit the underlying Test_Type and uncheck "active".) Deactivated parsers no longer appear as a Scan Type option on the **Add Findings** page, but existing Tests that were imported with this parser are unaffected and continue to work.
 * **Reactivate** a parser from the same screen by toggling "Active" back on.
+* **Edit the field mappings** from the same screen — see [Editing a Universal Parser's field mappings](#editing-a-universal-parsers-field-mappings) below.
 * **Edit the Test_Type fields** described in the section above (active/inactive, static/dynamic, deduplication hash codes).
 
 Deleting a parser configuration is still not possible, because Universal Parser configurations are tied to Test_Type records that existing Findings, Tests and import history reference. If you need one permanently removed (for example, because it contains sensitive field names), contact [DefectDojo Support](mailto:support@defectdojo.com).
 
 ## Editing a Universal Parser's field mappings
 
-Field mappings can be changed after a parser has been created, through the API. Each edit is recorded as a numbered revision, so you can see what changed, when, and who changed it.
+Field mappings can be changed after a parser has been created, from the UI or through the API. Each edit is recorded as a numbered revision, so you can see what changed, when, and who changed it.
+
+Editing mappings requires the **Universal Parser Edit** permission. Viewing a parser only requires Universal Parser View, so a user who can see your parsers cannot necessarily change how they read a file.
 
 Some mapping edits are riskier than others, and DefectDojo classifies each edit before applying it:
 
@@ -183,9 +225,25 @@ Some mapping edits are riskier than others, and DefectDojo classifies each edit 
 
 Which fields count as identity-relevant depends on your own deduplication settings for that scan type, not on a fixed list, so it follows any change you make under **Enterprise Settings**.
 
+### Editing from the UI
+
+Open **Import → Universal Parser** in the sidebar, then choose **Edit Field Mappings** from the menu on the parser's row.
+
+The first step asks you to upload a scan file. This is not the file the parser was created with — nothing is kept from that one. It is a current sample of the kind of report this parser reads, and it is what the available fields are read from, so the mapping choices have something to point at.
+
+Your saved mappings are pre-selected against that sample, and the screen tells you if any of them could not be found in it. That normally means the file you uploaded has a different shape from the one the parser was built for. Mappings that could not be found are **not** pre-selected and will be dropped if you save, so either upload a closer sample or re-select them by hand.
+
+The second step is the same field-mapping screen used when creating a parser. The third shows you what your change would do before it is applied:
+
+* whether the edit is presentation-only or identity-relevant;
+* which fields are changing, split into those that reach identity and those that do not;
+* how many findings currently exist under this parser's scan type.
+
+If the edit is identity-relevant you have to tick a box confirming you understand it opens a transition window. A presentation-only edit does not ask, so the confirmation stays meaningful.
+
 ### Checking an edit before you make it
 
-`POST` your proposed mappings to the `impact` endpoint to see how they will be classified, without applying anything:
+The UI does this for you in its third step. Through the API, `POST` your proposed mappings to the `impact` endpoint to see how they will be classified, without applying anything:
 
 ```
 POST /api/vue/universal_parser/{id}/impact/
@@ -222,7 +280,9 @@ Each revision records the full mapping set in force at that point, which fields 
 
 ### Changing mappings through the Django admin
 
-Editing a `FieldMapping` directly in the Django admin bypasses all of the above: no revision is recorded, no version is bumped, and no transition window opens, so findings imported before that change become unreachable from findings imported after it. Use the API instead.
+Editing a `FieldMapping` directly in the Django admin bypasses all of the above: no revision is recorded, no version is bumped, and no transition window opens, so findings imported before that change become unreachable from findings imported after it. Use the UI or the API instead.
+
+If it has already happened, the impact step says so: it reports that this parser's mappings were changed once without being recorded, and warns that findings imported before that change have no previous generation to be matched from — which a later edit cannot recover.
 
 ### Rolling forward to a new parser
 

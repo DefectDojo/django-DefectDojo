@@ -5,8 +5,7 @@ from datetime import UTC, datetime
 from ipaddress import ip_address
 from urllib.parse import urlparse
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -200,7 +199,7 @@ class CodacyParser:
         if not host or not self.usable_host(host):
             return
         path = parsed.path.lstrip("/")
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(LocationData.url(
                 host=host, protocol=parsed.scheme or None, port=port, path=path,
             ))

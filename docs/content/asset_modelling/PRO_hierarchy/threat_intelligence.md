@@ -51,7 +51,7 @@ exploit evidence acts as a floor on the EPSS scale.
 
 The finding's external score is the **greater** of its EPSS-derived value and the highest
 evidence floor above — so intelligence only ever *raises* a score, never lowers it, and a
-finding whose EPSS already exceeds the floor is unaffected. The familiar per-product-type
+finding whose EPSS already exceeds the floor is unaffected. The familiar per-Organization
 **external-score scalar** in your Prioritization Engine settings scales this contribution
 exactly as it always scaled EPSS/KEV.
 
@@ -66,7 +66,7 @@ under Low.
 So there is a second, categorical rule. When threat intelligence reports **active
 exploitation in the wild**, the finding's Priority is raised to at least the level of a
 configured Risk band, regardless of what the weighted calculation alone produced. It ships
-set to **Needs Action**; each product type can raise it to Urgent, lower it, or clear it to
+set to **Needs Action**; each Organization can raise it to Urgent, lower it, or clear it to
 switch the floor off, in Prioritization Engine settings under *Actively-Exploited Risk
 Floor*.
 

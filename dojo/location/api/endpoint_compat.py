@@ -31,7 +31,11 @@ from dojo.api_v2.views import report_generate
 from dojo.authorization.api_permissions import check_object_permission
 from dojo.filters import CharFieldFilterANDExpression, CharFieldInFilter, OrderingFilter
 from dojo.location.models import LocationFindingReference, LocationProductReference
-from dojo.location.queries import get_authorized_location_finding_reference, get_authorized_location_product_reference
+from dojo.location.queries import (
+    authorized_finding_references,
+    get_authorized_location_finding_reference,
+    get_authorized_location_product_reference,
+)
 from dojo.location.status import FindingLocationStatus
 from dojo.query_utils import build_count_subquery
 from dojo.url.models import URL
@@ -149,7 +153,7 @@ class V3EndpointCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin, view
     def get_queryset(self):
         """Get authorized URLs using Endpoint authorization logic."""
         active_finding_subquery = build_count_subquery(
-            LocationFindingReference.objects.filter(
+            authorized_finding_references(self.request.user).filter(
                 location=OuterRef("location"),
                 status=FindingLocationStatus.Active,
             ),

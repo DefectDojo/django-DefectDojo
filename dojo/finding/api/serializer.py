@@ -26,6 +26,7 @@ from dojo.finding.helper import (
 from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
 from dojo.jira.api.serializers import JIRAIssueSerializer
+from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationFindingReference
 from dojo.location.queries import get_authorized_location_finding_reference
 from dojo.models import (
@@ -340,7 +341,14 @@ class VulnerabilityIdsField(serializers.Field):
                 if "vulnerability_id" not in item:
                     msg = 'Each vulnerability id object requires a "vulnerability_id" key.'
                     raise serializers.ValidationError(msg)
-                parsed.append(item["vulnerability_id"])
+                value = item["vulnerability_id"]
+                if not isinstance(value, str):
+                    # Everything downstream (save_vulnerability_ids -> the entity store, and the
+                    # cve mirror) assumes strings, so a non-string here has to be a 400 rather
+                    # than an AttributeError 500 further down.
+                    msg = 'Each "vulnerability_id" value must be a string.'
+                    raise serializers.ValidationError(msg)
+                parsed.append(value)
             elif isinstance(item, str):
                 parsed.append(item)
             else:
@@ -387,6 +395,14 @@ class FindingSerializer(serializers.ModelSerializer):
     sla_days_remaining = serializers.IntegerField(read_only=True, allow_null=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField(allow_null=True)
+    # Flat convenience field: the finding's test type name (e.g. "Cloud Posture
+    # Scan"), without requiring related_fields=true. API consumers that route on
+    # the scanner/tool that produced a finding (the Sensei engine keys IaC
+    # remediation on test_type_name) read this directly. A dotted-source CharField
+    # rather than a method: it is the same read, and allow_null makes DRF return
+    # None if any hop is missing. No extra query — FindingViewSet.get_queryset
+    # already prefetches test__test_type.
+    test_type_name = serializers.CharField(source="test.test_type.name", read_only=True, allow_null=True)
     # for backwards compatibility
     jira_creation = serializers.SerializerMethodField(read_only=True, allow_null=True)
     jira_change = serializers.SerializerMethodField(read_only=True, allow_null=True)
@@ -435,7 +451,7 @@ class FindingSerializer(serializers.ModelSerializer):
         # an empty queryset instead of raising on the AnonymousUser instance.
         if user is not None and not user.is_authenticated:
             user = None
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
                 many=True, required=False,
                 queryset=get_authorized_endpoints("view", user=user) if user else Endpoint.objects.none(),
@@ -544,7 +560,7 @@ class FindingSerializer(serializers.ModelSerializer):
             instance.found_by.clear()
 
         locations = None
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             locations = validated_data.pop("locations", None)
 
         instance = super().update(
@@ -559,7 +575,7 @@ class FindingSerializer(serializers.ModelSerializer):
             instance.unsaved_cwes = cwe_extras
             save_cwes(instance)
 
-        if settings.V3_FEATURE_LOCATIONS and locations is not None:
+        if locations_enabled() and locations is not None:
             for location_ref in instance.locations.all():
                 location_ref.location.disassociate_from_finding(instance)
             for location_ref in locations:

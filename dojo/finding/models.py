@@ -37,6 +37,16 @@ from dojo.validators import cvss3_validator, cvss4_validator
 if TYPE_CHECKING:
     from dojo.importers.location_manager import UnsavedLocation
 
+
+def locations_enabled() -> bool:
+    # Lazy delegate: finding/models.py is imported during dojo.models population,
+    # before the dojo.location package can be imported without a circular import
+    # (dojo.location.__init__ -> admin -> models -> dojo.models, still partial).
+    from dojo.location.feature import locations_enabled as _impl  # noqa: PLC0415
+
+    return _impl()
+
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 DELETE_JIRA_SYNC_UNSET = object()
@@ -469,7 +479,6 @@ class Finding(BaseModel):
 
             models.Index(fields=["cve"]),
             models.Index(fields=["epss_score"]),
-            models.Index(fields=["epss_percentile"]),
             models.Index(fields=["cwe"]),
             models.Index(fields=["out_of_scope"]),
             models.Index(fields=["false_p"]),
@@ -482,12 +491,10 @@ class Finding(BaseModel):
             models.Index(fields=["hash_code"]),
             models.Index(fields=["unique_id_from_tool"]),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
-            models.Index(fields=["line"]),
             models.Index(fields=["component_name"]),
             models.Index(fields=["duplicate"]),
             models.Index(fields=["is_mitigated"]),
             models.Index(fields=["duplicate_finding", "id"]),
-            models.Index(fields=["known_exploited"]),
             models.Index(fields=["ransomware_used"]),
             models.Index(fields=["kev_date"]),
             models.Index(
@@ -515,11 +522,6 @@ class Finding(BaseModel):
                 condition=models.Q(active=True, is_mitigated=False),
             ),
             models.Index(
-                fields=["severity", "-numerical_severity"],
-                name="idx_finding_sev_open_unver",
-                condition=models.Q(active=True, verified=False),
-            ),
-            models.Index(
                 fields=["test", "sla_expiration_date", "date"],
                 name="idx_finding_sla_breach_cov",
                 include=["id"],
@@ -538,7 +540,7 @@ class Finding(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             self.unsaved_locations: list[UnsavedLocation] = []
         else:
             # TODO: Delete this after the move to Locations
@@ -647,7 +649,7 @@ class Finding(BaseModel):
             # the parser attached, both of which are in memory -- no row required. The
             # equivalent branch for an *existing* finding queries self.locations/endpoints
             # and so stays in save().
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
                     self.static_finding = True
                     self.dynamic_finding = False
@@ -683,7 +685,7 @@ class Finding(BaseModel):
         # logger.debug('setting static / dynamic in save')
         # need to have an id/pk before we can access locations/endpoints
         elif self.file_path is not None:
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if not self.locations.exists():
                     self.static_finding = True
                     self.dynamic_finding = False
@@ -738,7 +740,7 @@ class Finding(BaseModel):
         # Copy the files
         for files in old_files:
             copy.files.add(files.copy())
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             old_location_refs = self.locations.all()
             for location_ref in old_location_refs:
                 location_ref.copy(copy)
@@ -773,6 +775,18 @@ class Finding(BaseModel):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
         finding_helper.finding_delete(self, push_to_jira=push_to_jira)
+        # Remove this finding's tags in a deterministic (ascending tag-id) order BEFORE
+        # the cascade. Left to super().delete(), tagulous's per-object clear() decrements
+        # the shared tag-count rows one UPDATE at a time in the manager's own order, so
+        # two concurrent single-finding deletes touching an overlapping tag set can take
+        # those row locks in opposite orders and deadlock (Postgres 40P01, "while updating
+        # tuple ... in relation dojo_tagulous_finding_tags"). bulk_remove_all_tags issues
+        # the same count decrements in ascending tag-id order -- the shared lock order
+        # already used by the bulk cascade delete and the import add path -- so the cycle
+        # cannot form. It also clears the through rows, so the tagulous pre_delete handler
+        # then finds nothing left to decrement (no double counting).
+        from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 -- lazy import, avoids circular dependency
+        bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
         super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
@@ -929,7 +943,7 @@ class Finding(BaseModel):
     # Get locations/endpoints to use for hash_code computation
     def get_locations(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             # Get endpoints to use for hash_code computation
             # (This sometimes reports "None")
             def _get_unsaved_endpoints(finding) -> str:
@@ -937,8 +951,13 @@ class Finding(BaseModel):
                     deduplicationLogger.debug("get_endpoints before the finding was saved")
                     # convert list of unsaved endpoints to the list of their canonical representation
                     endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
-                    # deduplicate (usually done upon saving finding) and sort endpoints
-                    return "".join(dict.fromkeys(endpoint_str_list))
+                    # deduplicate (usually done upon saving finding) and sort endpoints.
+                    # Sorting is what makes this agree with _get_saved_endpoints below: the
+                    # stored hash_code of an imported finding comes from this branch, so
+                    # without it the scanner's emission order would become part of the
+                    # finding's identity and any later recomputation would produce a
+                    # different hash_code for the same finding.
+                    return "".join(sorted(dict.fromkeys(endpoint_str_list)))
                 # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
                 # In this case, before saving the finding, both static_finding and dynamic_finding are True
                 # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
@@ -964,7 +983,7 @@ class Finding(BaseModel):
                     LocationManager,
                 )
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
+                unsaved_locations = LocationManager.cleaned_unsaved_locations(finding)
                 # Only URL locations feed the "endpoints" hash ingredient — the
                 # saved path below filters to URL references, and hashing other
                 # location types here would make a finding's hash change between
@@ -985,12 +1004,24 @@ class Finding(BaseModel):
         def _get_saved_locations(finding) -> str:
             if finding.id is not None:
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                url_locations = finding.locations.filter(location__location_type=URL.get_location_type())
-                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(url_locations.count()))
-                # convert list of locations to the list of their canonical representation
-                locations = sorted({location_ref.location.get_location_value() for location_ref in url_locations.all()})
-                # sort locations strings
-                return "".join(sorted(locations))
+                url_location_type = URL.get_location_type()
+                # Read the relation with .all() and narrow in Python rather than with .filter():
+                # .filter() on a related manager clones the queryset and drops _result_cache, so it
+                # bypasses the prefetch every caller of the hash paths sets up (the batch dedupe
+                # loader, build_candidate_scope_queryset and manage.py dedupe among them all
+                # prefetch this relation). Narrowing here keeps that prefetch effective;
+                # a finding has few locations, so filtering them in Python costs nothing.
+                # deduplicate and sort the canonical representation of every location. The stored
+                # Location.location_value *is* that canonical representation: it is written from
+                # AbstractLocation.get_location_value() when the Location row is created, so this
+                # matches what _get_unsaved_locations computes below.
+                locations = sorted({
+                    location_ref.location.location_value
+                    for location_ref in finding.locations.all()
+                    if location_ref.location.location_type == url_location_type
+                })
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: %d", len(locations))
+                return "".join(locations)
             return ""
 
         return _get_saved_locations(self) or _get_unsaved_locations(self)

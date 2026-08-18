@@ -62,7 +62,7 @@ Start with `--dry-run` on the full set to see what you are in for, then convert 
 
 The filter vocabulary is shared between both engines, so a scope converts without translation. That is deliberate: it is the same filter set, with one implementation.
 
-Converted graphs are validated the same way a hand-built graph is, including per-node configuration and the allowed values of every dropdown. A rule holding a severity or risk value that the product has since moved on from is caught at conversion rather than at run time.
+Converted graphs are validated the same way a hand-built graph is, including per-node configuration and the allowed values of every dropdown. A rule holding a severity or risk value that the Asset has since moved on from is caught at conversion rather than at run time.
 
 ## What does not carry over
 

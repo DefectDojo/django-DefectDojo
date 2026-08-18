@@ -20,7 +20,7 @@ Version 2 comes with a number of improvements:
 
 ### Deduplication Algorithm
 Default Deduplication Hashcode Fields:
-By default, DefectDojo Parser V2 identifies duplicate findings using the following [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo Parser V2 identifies duplicate findings using the following [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

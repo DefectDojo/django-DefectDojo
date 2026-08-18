@@ -1,0 +1,30 @@
+{
+  "apiVersion": "kubeeye.kubesphere.io/v1alpha2",
+  "kind": "InspectResult",
+  "metadata": {
+    "name": "sample-inspect-task-single"
+  },
+  "spec": {
+    "inspectCluster": {
+      "name": "default"
+    },
+    "sysctlResult": [
+      {
+        "name": "net.ipv4.conf.all.rp_filter",
+        "assert": true,
+        "level": "danger",
+        "nodeName": "worker-1",
+        "value": "0"
+      }
+    ]
+  },
+  "status": {
+    "complete": true,
+    "duration": "31s",
+    "taskStartTime": "2026-08-10T09:00:00Z",
+    "taskEndTime": "2026-08-10T09:00:31Z",
+    "level": {
+      "danger": 1
+    }
+  }
+}

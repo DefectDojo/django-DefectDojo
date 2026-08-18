@@ -4,7 +4,7 @@ toc_hide: true
 ---
 
 CxFlow is a Spring Boot application written by Checkmarx that enables initiations of scans and result orchestration.
-CxFlow support interactive with various Checkmarx product.
+CxFlow support interactive with various Checkmarx Asset.
 This parser support JSON format export by bug tracker.
 
 ```
@@ -22,7 +22,7 @@ cx-flow:
 Sample Checkmarx CxFlow SAST scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/checkmarx_cxflow_sast).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - vuln id from tool
 - file path

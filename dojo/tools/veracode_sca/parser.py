@@ -8,6 +8,7 @@ from dateutil import parser
 from django.conf import settings
 from django.utils import timezone
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -116,7 +117,7 @@ class VeracodeScaParser:
             if vuln_id:
                 finding.unsaved_vulnerability_ids = [vuln_id]
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 lib_id = library.get("id", "")
                 if ":" in lib_id:
                     lib_type, rest = lib_id.split(":", 1)
@@ -237,7 +238,7 @@ class VeracodeScaParser:
             if cvss_score:
                 finding.cvssv3_score = cvss_score
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 pkg_manager = row.get("Package manager", "").lower()
                 purl_type = VERACODE_TYPE_TO_PURL.get(pkg_manager)
                 name = "/".join([row.get("Coordinate 1", ""), row.get("Coordinate 2", "")]).lower()

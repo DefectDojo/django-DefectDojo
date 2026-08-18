@@ -6,6 +6,7 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from dojo.finding.queries import get_authorized_findings
 from dojo.models import Finding, Risk_Acceptance
@@ -16,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 class EditRiskAcceptanceForm(forms.ModelForm):
     # unfortunately django forces us to repeat many things here. choices, default, required etc.
-    recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label="Security Recommendation")
+    recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label=_("Security Recommendation"))
     decision = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect)
 
-    path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}))
+    path = forms.FileField(label=_("Proof"), required=False, widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}))
     expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={"class": "datepicker"}))
 
     class Meta:
@@ -52,7 +53,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         help_text=("Active, verified findings listed, please select to add findings."))
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
-                            label="Notes")
+                            label=_("Notes"))
 
     class Meta:
         model = Risk_Acceptance
@@ -60,7 +61,9 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        expiration_delta_days = get_system_setting("risk_acceptance_form_default_days")
+        import dojo.risk_acceptance.helper as ra_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        expiration_delta_days = ra_helper.expiration_days()
         logger.debug("expiration_delta_days: %i", expiration_delta_days)
         if expiration_delta_days > 0:
             expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
@@ -73,8 +76,12 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
 
 
 class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
-    path = forms.FileField(label="Proof", required=True, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
+    # same accept list and same clean_path validation as adding the proof in the first place:
+    # replacing it used to accept any extension, since it validated nothing
+    path = forms.FileField(label=_("Proof"), required=True, widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}))
 
     class Meta:
         model = Risk_Acceptance
         fields = ["path"]
+
+    clean_path = EditRiskAcceptanceForm.clean_path

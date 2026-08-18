@@ -23,12 +23,33 @@ jobs:
           # Do not reorder files across groups without that history in mind;
           # appending a NEW file to the last group (or its own group) is safe.
           # tests/zap.py stays disabled, as it was in the per-file matrix.
-          # group 01
-          "tests/finding_test.py tests/report_builder_test.py tests/notes_test.py tests/regulations_test.py tests/product_type_test.py tests/product_test.py",
+          # Group sizes are balanced against MEASURED per-file test time, not
+          # file count. Two files dominate the suite -- finding_test.py at 4.8
+          # minutes and dedupe_test.py at 4.5 -- against roughly 4.2 minutes of
+          # fixed per-job cost (image load, stack boot, initializer, teardown).
+          # Six files per group put both dominators in six-file groups that took
+          # 12.2 and 12.8 minutes while every other group finished in 5-6, and
+          # the slowest group is the whole phase's wall clock. So each of those
+          # two groups is split, isolating its dominator. Splitting preserves the
+          # contiguity invariant above: both halves remain contiguous slices.
+          #
+          # Measured per file (merge-queue run 31024574933, minutes):
+          #   finding 4.8 | product 1.6 | notes 0.7 | report_builder 0.6 | product_type 0.2 | regulations 0.1
+          #   dedupe 4.5 | close_old_findings_dedupe 1.6 | close_old_findings 1.1 | file 0.7 | announcement_banner 0.6 | search 0.1
+          #
+          # Rebalance again from data, not intuition: read per-file times out of
+          # a job log by diffing the "Running: <file>" and "Success: <file>"
+          # timestamps the entrypoint prints.
+          # group 01a -- finding_test alone; it is 60% of its old group
+          "tests/finding_test.py",
+          # group 01b
+          "tests/report_builder_test.py tests/notes_test.py tests/regulations_test.py tests/product_type_test.py tests/product_test.py",
           # group 02
           "tests/engagement_test.py tests/environment_test.py tests/test_test.py tests/user_test.py tests/product_member_test.py tests/product_type_member_test.py",
-          # group 03
-          "tests/search_test.py tests/file_test.py tests/dedupe_test.py tests/announcement_banner_test.py tests/close_old_findings_dedupe_test.py tests/close_old_findings_test.py",
+          # group 03a -- carries dedupe_test, the other dominator
+          "tests/search_test.py tests/file_test.py tests/dedupe_test.py",
+          # group 03b
+          "tests/announcement_banner_test.py tests/close_old_findings_dedupe_test.py tests/close_old_findings_test.py",
           # group 04
           "tests/false_positive_history_test.py tests/check_various_pages.py tests/notifications_test.py tests/note_type_test.py tests/sla_configuration_test.py tests/dashboard_test.py",
           # group 05
@@ -115,7 +136,20 @@ jobs:
           NGINX_VERSION: alpine
 
       - name: Start Dojo
-        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey webhook.endpoint
+        timeout-minutes: 10
+        # image pulls from Docker Hub time out every so often, so retry before failing the job
+        run: |-
+             RETRY=0
+             until docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey webhook.endpoint
+               do
+               if [[ $RETRY -gt 2 ]]; then
+                 echo "ERROR: could not start Dojo after $RETRY retries"
+                 exit 1
+               fi
+               RETRY=$((RETRY+1))
+               echo "Attempt $RETRY to start Dojo"
+               sleep 15
+             done
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: alpine

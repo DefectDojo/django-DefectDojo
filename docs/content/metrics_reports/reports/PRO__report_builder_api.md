@@ -10,6 +10,8 @@ slug: report-builder-api
 
 The Report Builder REST API lets you automate the same Themes, Blocks, and Templates you assemble by hand in the [Report Builder UI](../report-builder/) — and it goes one step further by letting you **run** a template and **download** the finished PDF or HTML. This guide walks the full lifecycle: authenticate, discover the field and filter vocabulary, create the building blocks, then generate and retrieve a report.
 
+> **Looking for a quick findings export instead?** If you only need a flat list of findings as JSON, HTML, CSV, or Excel — with no themes, blocks, or templates to set up — use the simpler `generate_report/` endpoint documented in [Generating Reports](/automation/api/api-v2-docs/#generating-reports). The Report Builder API described on this page is for building designed, multi\-section reports.
+
 ## Authentication
 
 Every request authenticates with a personal API token sent in the `Authorization` header using the `Token` prefix (not `Bearer`).
@@ -112,9 +114,9 @@ curl -s \
   > schema.json
 ```
 
-Then read the GET parameters for the entity you are filtering. For findings, look at `paths` → `/api/v2/findings/` → `get` → `parameters`. The analogous endpoints are `/api/v2/assets/` for **assets** (formerly Products), `/api/v2/organizations/` for **organizations** (formerly Product Types), `/api/v2/engagements/`, `/api/v2/tests/`, `/api/v2/test_types/`, and `/api/v2/risk_acceptance/`. Each parameter `name` is a valid filter `field`.
+Then read the GET parameters for the entity you are filtering. For findings, look at `paths` → `/api/v2/findings/` → `get` → `parameters`. The analogous endpoints are `/api/v2/assets/` for **assets** (formerly Assets), `/api/v2/organizations/` for **organizations** (formerly Organizations), `/api/v2/engagements/`, `/api/v2/tests/`, `/api/v2/test_types/`, and `/api/v2/risk_acceptance/`. Each parameter `name` is a valid filter `field`.
 
-> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The underlying filter field paths on findings still use the legacy `product` wording (for example, `test__engagement__product`), even though the entities are now Assets and Organizations.
+> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Assets** and **Organizations** were formerly **Organizations**. The underlying filter field paths on findings still use the legacy `product` wording (for example, `test__engagement__product`), even though the entities are now Assets and Organizations.
 
 > **🔑 Important:** The server **silently drops** any `filter_entry` whose `field` is not a real GET parameter for that model. No error is raised — the filter simply does not exist on the saved block. Always GET the block back after creating it and compare the returned `filter_entries` to what you sent.
 
@@ -142,15 +144,15 @@ The tables below list verified, high-value filters. All values are sent as **sin
 | `tag` | `"DR"` | A single tag |
 | `tags` | `"kev,pci"` | Any-of (matches any listed tag) |
 | `tags__and` | `"kev,pci"` | All-of (must match every listed tag) |
-| `test__engagement__product` | `"42"` | Asset ID (Assets were formerly Products) |
-| `test__engagement__product__prod_type` | `"3"` | Organization ID (formerly Product Type) |
+| `test__engagement__product` | `"42"` | Asset ID (Assets were formerly Assets) |
+| `test__engagement__product__prod_type` | `"3"` | Organization ID (formerly Organization) |
 | `cve` | `"CVE-2024-12345"` | |
 | `cwe` | `"79"` | |
 | `date_after` | `"2025-12-31"` | |
 | `date_before` | `"2025-12-31"` | |
 | `planned_remediation_date_before` | `"2025-12-31"` | |
 
-**Asset filters** (Assets were formerly called Products; these are the parameters on `/api/v2/assets/`)
+**Asset filters** (Assets were formerly called Assets; these are the parameters on `/api/v2/assets/`)
 
 | Field | Example value | Notes |
 |-------|---------------|-------|

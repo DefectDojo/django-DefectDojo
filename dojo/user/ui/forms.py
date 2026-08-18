@@ -28,7 +28,7 @@ class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
         required=settings.REQUIRE_PASSWORD_ON_USER,
         validators=[validate_password],
-        help_text="")
+        help_text=_(""))
 
     class Meta:
         model = Dojo_User
@@ -57,6 +57,27 @@ class EditDojoUserForm(forms.ModelForm):
             self.fields["is_staff"].disabled = True
             self.fields["is_superuser"].disabled = True
 
+    def clean(self):
+        cleaned_data = super().clean()
+        # Only a superuser may change the username or email of an account other
+        # than their own: rewriting a victim's email and triggering a password
+        # reset is an account-takeover vector. Mirrors UserSerializer.validate()
+        # on the API path.
+        current_user = get_current_user()
+        if (
+            current_user is not None
+            and not current_user.is_superuser
+            and self.instance.pk is not None
+            and self.instance.pk != current_user.pk
+        ):
+            for identity_field in ("username", "email"):
+                if identity_field in cleaned_data and cleaned_data[identity_field] != getattr(self.instance, identity_field):
+                    self.add_error(
+                        identity_field,
+                        _("Only superusers are allowed to change the username or email of another user."),
+                    )
+        return cleaned_data
+
 
 class DeleteUserForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -68,6 +89,12 @@ class DeleteUserForm(forms.ModelForm):
 
 
 class UserContactInfoForm(forms.ModelForm):
+    language = forms.ChoiceField(
+        required=False,
+        choices=[("", _("Use instance default")), *settings.LANGUAGES],
+        label=_("Language"),
+        help_text=_("Preferred language for the DefectDojo UI."),
+    )
     reset_api_token = forms.BooleanField(
         required=False,
         label=_("Reset API token"),
@@ -94,6 +121,12 @@ class UserContactInfoForm(forms.ModelForm):
             self.fields["password_last_reset"].disabled = True
         if "token_last_reset" in self.fields:
             self.fields["token_last_reset"].disabled = True
+        # token_expiry is a security control, not a preference: this form is reachable by any user
+        # for their own profile, and Meta.exclude only drops "user"/"slack_user_id", so leaving it
+        # enabled would let a user clear or extend their own token expiry. Setting it is reserved
+        # for superusers via /api/v2/user_contact_infos/.
+        if "token_expiry" in self.fields:
+            self.fields["token_expiry"].disabled = True
         # Do not expose force password reset if the current user does not have a password to reset
         if user is not None:
             if not user.has_usable_password():

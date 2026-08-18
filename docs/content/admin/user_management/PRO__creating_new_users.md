@@ -17,7 +17,7 @@ The admin who creates the account is responsible for delivering the initial cred
    * Set a temporary password.
    * Submit the form.
 
-2. **Assign permissions** as appropriate — Product/Product Type membership, Configuration Permissions, Global Role, or Superuser status. See [Set a User's permissions](../set_user_permissions/) for details. A new user with no assignments will not be able to see any Products or Findings.
+2. **Assign permissions** as appropriate — Asset/Organization membership, Configuration Permissions, Global Role, or Superuser status. See [Set a User's permissions](../set_user_permissions/) for details. A new user with no assignments will not be able to see any Assets or Findings.
 
 3. **Send the credentials to the new user out-of-band** (over email, your team's chat tool, or however you normally share secrets). Include:
    * The DefectDojo instance URL.
@@ -37,4 +37,6 @@ If your instance is configured with [SSO](../configure_sso/), the workflow is di
 
 ## Recovering from a lost MFA token
 
-If a user loses access to their MFA device, see the [MFA recovery section](/get_started/pro/cloud/connectivity-troubleshooting/#ive-lost-access-to-my-mfa-codes) of the connectivity troubleshooting guide. There is currently no way to remove MFA from an account without an MFA code — the workaround is to create a new account for the user and re-grant the same permissions.
+If a user loses access to their MFA device, they can log in with one of the recovery codes issued when they enrolled. If those are gone too, an administrator with server access can clear MFA from the account with `python manage.py remove_mfa --username <username>`, after which the user logs in with their password and enrolls again — their permissions and history are preserved, so there is no need to create a replacement account.
+
+See [Multi-Factor Authentication](../pro__mfa/#recovering-a-user-who-has-lost-their-mfa-device) for the full recovery options, and note that access to the **Cloud Manager** itself is a separate matter — see the [connectivity troubleshooting guide](/get_started/pro/cloud/connectivity-troubleshooting/#ive-lost-access-to-my-mfa-codes).

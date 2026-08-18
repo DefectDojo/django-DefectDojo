@@ -3,8 +3,8 @@ import re
 
 import dateutil
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
 from dojo.tools.locations import LocationData
@@ -53,7 +53,7 @@ class CycloneDXXMLParser:
                     "license": component_license,
                 }
             # Collect product-level dependency locations for all components
-            if settings.V3_FEATURE_LOCATIONS and component_purl:
+            if locations_enabled() and component_purl:
                 test.unsaved_metadata.append(
                     LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
                 )
@@ -198,7 +198,7 @@ class CycloneDXXMLParser:
             vulnerability_ids.append(vuln_id)
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
-        if settings.V3_FEATURE_LOCATIONS and component_purl:
+        if locations_enabled() and component_purl:
             finding.unsaved_locations.append(
                 LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
             )
@@ -331,7 +331,7 @@ class CycloneDXXMLParser:
                         )
                         if detail:
                             finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
-            if settings.V3_FEATURE_LOCATIONS and component_purl:
+            if locations_enabled() and component_purl:
                 finding.unsaved_locations.append(
                     LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
                 )

@@ -86,7 +86,7 @@ from dojo.tool_type.ui.urls import urlpatterns as tool_type_urls
 from dojo.url.api.urls import add_url_urls
 from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.user.api.urls import add_user_urls
-from dojo.user.api.views import UserProfileView
+from dojo.user.api.views import RevokeApiTokenView, UserProfileView
 from dojo.user.ui.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
@@ -144,7 +144,12 @@ v2_api = add_tool_config_urls(v2_api)
 v2_api = add_tool_product_urls(v2_api)
 v2_api = add_tool_type_urls(v2_api)
 v2_api = add_user_urls(v2_api)
-# Add the location routes
+# Add the location routes.
+# Module-level route wiring: evaluated once at URLConf build time, so it stays on
+# settings.V3_FEATURE_LOCATIONS rather than the runtime dojo.location.feature
+# accessor. A stored-flag toggle cannot re-mount /api/v2 routes without a restart;
+# the Pro Feature Flag documents that this wiring is fixed at boot.
+# See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Locations
     v2_api = add_locations_urls(v2_api)
@@ -191,6 +196,9 @@ ur += component_urls
 ur += regulations
 ur += announcement_urls
 
+# Module-level Classic UI route wiring: fixed at URLConf build time on
+# settings.V3_FEATURE_LOCATIONS (a stored-flag toggle cannot re-mount these
+# without a restart). See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Location
     ur += url_patterns
@@ -202,6 +210,7 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/api-tokens/revoke/$".format(get_system_setting("url_prefix")), RevokeApiTokenView.as_view(), name="api-token-revoke"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
@@ -215,6 +224,26 @@ if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH
                 name="api-token-auth",
             ),
         ]
+
+# API v3 (alpha) -- mounted conditionally on V3_FEATURE_LOCATIONS (D5/§4.1). With the flag off the
+# whole /api/v3/ tree is absent. The prefix and version live in settings (single source).
+if getattr(settings, "V3_FEATURE_LOCATIONS", False):
+    from dojo.api_v3.api import api_v3
+    from dojo.api_v3.reference_docs import scalar_reference
+
+    api_v2_urls += [
+        # Scalar reference (CDN + SRI, §12) must be registered BEFORE the NinjaAPI catch-all
+        # prefix so /reference is not swallowed by the API's 404 handling.
+        re_path(
+            r"^{}{}/reference$".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            scalar_reference,
+            name="api_v3_reference",
+        ),
+        re_path(
+            r"^{}{}/".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            api_v3.urls,
+        ),
+    ]
 
 urlpatterns = []
 

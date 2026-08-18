@@ -1,15 +1,15 @@
 ---
 title: "Global Component Deduplication (Pro)"
-description: "Deduplicate Software Composition Analysis Findings by component name and version across all Products"
+description: "Deduplicate Software Composition Analysis Findings by component name and version across all Assets"
 weight: 5
 audience: pro
 ---
 
-Global Component Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Products** based on the component name and version they reference. It is intended for Software Composition Analysis (SCA) tools, where the same vulnerable dependency (for example, `timespan@2.3.0`) may appear in many Products, and you want DefectDojo to treat those occurrences as duplicates of a single original Finding.
+Global Component Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Assets** based on the component name and version they reference. It is intended for Software Composition Analysis (SCA) tools, where the same vulnerable dependency (for example, `timespan@2.3.0`) may appear in many Assets, and you want DefectDojo to treat those occurrences as duplicates of a single original Finding.
 
-Unlike the other deduplication algorithms, Global Component matching is **not scoped to a single Product or Engagement**. A Finding imported into Product B can be marked as a duplicate of an older Finding in Product A, even if the two Products are unrelated.
+Unlike the other deduplication algorithms, Global Component matching is **not scoped to a single Asset or Engagement**. A Finding imported into Asset B can be marked as a duplicate of an older Finding in Asset A, even if the two Assets are unrelated.
 
-> **Global Component vs. Global Locations:** Global Component matches only on component name and version. If your instance uses the Locations data model, [Global Locations Deduplication](/triage_findings/finding_deduplication/pro__global_locations_deduplication/) is the more precise successor — it keys dependencies on the full Package URL and additionally deduplicates URL/DAST Findings across Products. See that page's comparison table for which to choose.
+> **Global Component vs. Global Locations:** Global Component matches only on component name and version. If your instance uses the Locations data model, [Global Locations Deduplication](/triage_findings/finding_deduplication/pro__global_locations_deduplication/) is the more precise successor — it keys dependencies on the full Package URL and additionally deduplicates URL/DAST Findings across Assets. See that page's comparison table for which to choose.
 
 ## Enabling the Global Component Algorithm
 
@@ -19,11 +19,11 @@ Once the feature is enabled, **Global Component** will become available as an op
 
 ## Configuring Global Component Deduplication
 
-Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout; see [The Settings Menu](/navigation/pro__settings_menu/)).
+Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
 
 ### Same-Tool
 
-Use Same-Tool Deduplication with the Global Component algorithm when you want to deduplicate findings from a single SCA tool across multiple Products.
+Use Same-Tool Deduplication with the Global Component algorithm when you want to deduplicate findings from a single SCA tool across multiple Assets.
 
 1. Open the **Same Tool Deduplication** tab.
 2. Select the SCA tool from the **Security Tool** dropdown (for example, `Dependency Track Finding Packaging Format (FPF) Export`).
@@ -34,7 +34,7 @@ Hash Code Fields are not used by this algorithm and are hidden when it is select
 
 ### Cross-Tool
 
-Use Cross-Tool Deduplication with the Global Component algorithm when you want to deduplicate findings of the same component across different SCA tools and Products.
+Use Cross-Tool Deduplication with the Global Component algorithm when you want to deduplicate findings of the same component across different SCA tools and Assets.
 
 Cross-tool matching requires Global Component to be configured on **each** tool that should participate.
 
@@ -46,7 +46,7 @@ Cross-tool matching requires Global Component to be configured on **each** tool 
 A new Finding is marked as a duplicate of an existing Finding when:
 
 - The component name and component version match exactly, **and**
-- An older Finding with the same component name and version exists anywhere in the DefectDojo instance — in any Product or Engagement.
+- An older Finding with the same component name and version exists anywhere in the DefectDojo instance — in any Asset or Engagement.
 
 Component version matching is exact. A Finding for `timespan@2.3.0` will **not** deduplicate against one for `timespan@2.3.1`.
 
@@ -56,7 +56,7 @@ The Engagement-scoped deduplication setting is ignored for this algorithm; match
 
 Assume Global Component is enabled on `Dependency Track Finding Packaging Format (FPF) Export` (Same Tool) and on a Generic Findings Import tool (Cross Tool):
 
-| Step | Import | Into Product | Result |
+| Step | Import | Into Asset | Result |
 | --- | --- | --- | --- |
 | 1 | Dependency Track scan for `timespan@2.3.0` | Application 0 | 1 active Finding created |
 | 2 | Same Dependency Track scan | Application 1 | 1 Finding created, marked as duplicate of the Application 0 Finding |
@@ -65,11 +65,11 @@ Assume Global Component is enabled on `Dependency Track Finding Packaging Format
 
 Each duplicate Finding shows its original at the bottom of the Finding page in the duplicate chain.
 
-## Cross-Product Visibility
+## Cross-Asset Visibility
 
-Because Global Component matching crosses Product boundaries, the original Finding in a duplicate chain may live in a Product that the user viewing the duplicate does not have permission to access.
+Because Global Component matching crosses Asset boundaries, the original Finding in a duplicate chain may live in an Asset that the user viewing the duplicate does not have permission to access.
 
-In that case, the Finding is visible and labelled as a duplicate, but the user will not be able to open or navigate to the original. Consider this before enabling Global Component on tools whose Findings are sensitive to Product-level access controls.
+In that case, the Finding is visible and labelled as a duplicate, but the user will not be able to open or navigate to the original. Consider this before enabling Global Component on tools whose Findings are sensitive to Asset-level access controls.
 
 ## Reverting
 

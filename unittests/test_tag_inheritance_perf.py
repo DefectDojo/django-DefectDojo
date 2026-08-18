@@ -601,12 +601,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # FindingVulnerabilityReference bulk writes remain (batched, not per-finding). Removing the
     # legacy Vulnerability_Id dual-write drops the reimport counts by its delete+bulk_insert:
     # -12 reimport-no-change, -6 reimport-with-new. Import counts are unchanged.
-    # +3 on every path from save_without_resurrecting(): the importer confirms its
-    # test and engagement rows still exist before writing them back, instead of
-    # letting Model.save() fall back to an INSERT that re-creates a row deleted
-    # mid-import. One primary-key lookup per guarded save (test, engagement, and
-    # the closing update_test_progress), so the cost is constant rather than
-    # per-finding — which is why the delta is +3 on import and reimport alike.
+    # save_without_resurrecting() no longer costs a query. It used to confirm the row
+    # still existed with its own SELECT before writing it back (+3, one per guarded
+    # save); it now passes force_update=True and lets Django refuse the INSERT
+    # fallback, which detects the same vanished row from the UPDATE itself. On top of
+    # that the engagement is only written back when update_timestamps() actually moved
+    # its target end, which happens for CI/CD engagements only — these baselines use
+    # an Interactive engagement, so its save disappears along with the SELECT its
+    # pre_save receiver issued and the indexing its post_save triggered. Net -8 (v2)
+    # and -9 (v3) on every path, constant rather than per-finding.
     # +2 on the paths that buffer child rows: the batch flush confirms the buffered
     # findings still exist before inserting their vulnerability id references, CWE rows
     # and request/response rows, instead of letting a finding deleted mid-batch turn the
@@ -616,6 +619,13 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # for the reference and CWE buffers it shares, then flush_burp_request_response()
     # resolves its own for the request/response rows the ZAP parser attaches. The
     # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
+    # +2 on the V3 paths only: the dedupe loader (get_finding_models_for_deduplication)
+    # prefetches the locations__location__url chain (3 queries) instead of the
+    # deprecated endpoints m2m (1 query), whose Endpoint.__init__ raises under V3. That
+    # cost is per post-processing batch — one loader call per import — and is what
+    # removes the per-candidate-pair location queries in are_locations_duplicates, so it
+    # doesn't scale with findings. The V2 counts are untouched because that branch still
+    # prefetches endpoints.
     # -2 on the V3 reimport paths: LocationManager.persist() used to open
     # transaction.atomic() even with nothing buffered, and inside the test's outer
     # atomic block that empty transaction is a SAVEPOINT/RELEASE pair. Both steps
@@ -623,10 +633,17 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # before opening it. A reimport calls persist() at the batch boundary and again
     # from close_old_findings; the one with nothing to write is the pair that goes.
     # V2 is unaffected -- EndpointManager.persist() opens no transaction -- which is
-    # why only the V3 constants move.
-    EXPECTED_ZAP_IMPORT_V2 = 301
-    EXPECTED_ZAP_IMPORT_V3 = 325
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 92
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 193
+    # why only the V3 reimport constants absorb it (the import path buffers locations,
+    # so its persist() still opens the transaction and keeps the +2 in full).
+    # -1 on both reimport-with-new paths, on top of everything above: DefaultReImporter
+    # now queues a matching batch's new findings in _pending_new_findings and persists/
+    # post-processes them together via _drain_pending_new_findings once the batch's
+    # matching loop finishes, instead of saving each one inline as soon as it fails to
+    # match (see process_finding_that_was_not_matched and _drain_pending_new_findings).
+    # Reimport-no-change is unaffected because it creates no new findings to defer.
+    EXPECTED_ZAP_IMPORT_V2 = 294
+    EXPECTED_ZAP_IMPORT_V3 = 319
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 159
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187

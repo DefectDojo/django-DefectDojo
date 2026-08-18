@@ -18,14 +18,14 @@ The [status](https://trivy.dev/latest/docs/configuration/filtering/) field in Tr
 | end_of_life          | True   | True     | False     | no different from affected as Defect Dojo doesn't have a flag to capture will_not_fix by OS/Package Vendor; we can't set active to False as the user needs to (temporarily) risk accept
 
 The status field contains the status as assigned by the OS/Package vendor such as Red Hat, Debian, etc.
-It is recommended to assess the appropriate action in your Product's context.
+It is recommended to assess the appropriate action in your Asset's context.
 If you want to exclude certain status from being imported into Defect Dojo, please [filter them in the export from Trivy](https://trivy.dev/latest/docs/configuration/filtering/)
 
 ### Sample Scan Data
 Sample Trivy scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/trivy).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

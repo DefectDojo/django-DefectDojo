@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
     {{ block.super }}
     <form class="" action="{%  url 'configure_banner' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input aria-label="Update" class="btn btn-primary" name="update" type="submit" value="Submit"/>
+                <input aria-label="{% trans 'Update' %}" class="btn btn-primary" name="update" type="submit" value="Submit"/>
             </div>
         </div>
     </form>

@@ -125,12 +125,14 @@ class UserContactInfo(models.Model):
     )
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
     token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
+    token_expiry = models.DateTimeField(null=True, blank=True, help_text=_("Explicit expiry for this user's API token. Overrides the instance-wide default from DD_API_TOKEN_DEFAULT_EXPIRY_DAYS. Leave empty to use that default. Once the effective expiry has passed the token is rejected at authentication."))
     password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
     # Extensible per-user UI state: dismissed banners, "seen"/"don't show again"
     # flags, and similar small ephemeral preferences. Store new flags of this kind
     # as keys here instead of adding a dedicated column per flag (avoids a migration
     # and a schema column for every minor toggle). Not for queryable/behavioral data.
     user_state_details = models.JSONField(default=dict, blank=True, editable=False, help_text=_("Extensible per-user UI state (dismissed banners, 'don't show again' flags, ...)."))
+    language = models.CharField(max_length=12, blank=True, default="", verbose_name=_("Language"), help_text=_("Preferred language for the DefectDojo UI. Leave blank to use the instance default."))
 
 
 class Contact(models.Model):

@@ -4,8 +4,7 @@ from contextlib import suppress
 from datetime import UTC, datetime
 from ipaddress import ip_address
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -279,7 +278,7 @@ class WallarmParser:
         path = str(row.get("path") or "")
         path = path.lstrip("/") if path.startswith("/") else ""
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(LocationData.url(host=host, path=path))
         else:
             # TODO: Delete this after the move to Locations

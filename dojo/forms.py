@@ -41,6 +41,7 @@ from dojo.jira.forms import (  # noqa: F401 backward compat
     get_jira_issue_template_dir_choices,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.utils import validate_locations_to_add
 from dojo.models import (
@@ -253,45 +254,45 @@ class ImportScanForm(forms.Form):
     active_verified_choices = [("not_specified", "Not specified (default)"),
                                ("force_to_true", "Force to True"),
                                ("force_to_false", "Force to False")]
-    test_title = forms.CharField(max_length=255, required=False, label="Test Title",
-                                 help_text="Optional title for the Test to be created. If empty, the scan type is used.")
+    test_title = forms.CharField(max_length=255, required=False, label=_("Test Title"),
+                                 help_text=_("Optional title for the Test to be created. If empty, the scan type is used."))
     scan_date = forms.DateTimeField(
         required=False,
-        label="Scan Completion Date",
-        help_text="Scan completion date will be used on all findings.",
+        label=_("Scan Completion Date"),
+        help_text=_("Scan completion date will be used on all findings."),
         widget=forms.TextInput(attrs={"class": "datepicker"}))
-    minimum_severity = forms.ChoiceField(help_text="Minimum severity level to be imported",
+    minimum_severity = forms.ChoiceField(help_text=_("Minimum severity level to be imported"),
                                          required=True,
                                          choices=SEVERITY_CHOICES)
     active = forms.ChoiceField(required=True, choices=active_verified_choices,
-                               help_text="Force findings to be active/inactive, or default to the original tool")
+                               help_text=_("Force findings to be active/inactive, or default to the original tool"))
     verified = forms.ChoiceField(required=True, choices=active_verified_choices,
-                               help_text="Force findings to be verified/not verified, or default to the original tool")
+                               help_text=_("Force findings to be verified/not verified, or default to the original tool"))
 
     # help_do_not_reactivate = 'Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs.'
     # do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
     scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by("name"))
-    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label="Systems / Endpoints")
-    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label=_("Systems / Endpoints"))
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label=_("Endpoints to add"),
                                        help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                                  "Each must be valid.",
                                        widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
-    version = forms.CharField(max_length=100, required=False, help_text="Version that was scanned.")
-    branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
-    commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
-    build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label="API Scan Configuration")
+    version = forms.CharField(max_length=100, required=False, help_text=_("Version that was scanned."))
+    branch_tag = forms.CharField(max_length=100, required=False, help_text=_("Branch or Tag that was scanned."))
+    commit_hash = forms.CharField(max_length=100, required=False, help_text=_("Commit that was scanned."))
+    build_id = forms.CharField(max_length=100, required=False, help_text=_("ID of the build that was scanned."))
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label=_("API Scan Configuration"))
     service = forms.CharField(max_length=200, required=False,
         help_text="A service is a self-contained piece of functionality within a Product. "
                   "This is an optional field which is used in deduplication and closing of old findings when set.")
-    source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
+    source_code_management_uri = forms.URLField(max_length=600, required=False, help_text=_("Resource link to source code"))
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(
         widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}),
-        label="Choose report file",
+        label=_("Choose report file"),
         allow_empty_file=True,
         required=False,
         validators=[ImporterFileExtensionValidator()],
@@ -304,7 +305,7 @@ class ImportScanForm(forms.Form):
                                                         "If service has been set, only the findings for this service will be closed; "
                                                         "if no service is set, only findings without a service will be closed. "
                                                         "This affects findings within the same engagement by default.",
-                                            label="Close old findings",
+                                            label=_("Close old findings"),
                                             required=False,
                                             initial=False)
     close_old_findings_product_scope = forms.BooleanField(help_text=labels.ASSET_FINDINGS_CLOSE_HELP,
@@ -312,14 +313,14 @@ class ImportScanForm(forms.Form):
                                             required=False,
                                             initial=False)
     apply_tags_to_findings = forms.BooleanField(
-        help_text="If set to True, the tags will be applied to the findings",
-        label="Apply Tags to Findings",
+        help_text=_("If set to True, the tags will be applied to the findings"),
+        label=_("Apply Tags to Findings"),
         required=False,
         initial=False,
     )
     apply_tags_to_endpoints = forms.BooleanField(
-        help_text="If set to True, the tags will be applied to the endpoints",
-        label="Apply Tags to Endpoints",
+        help_text=_("If set to True, the tags will be applied to the endpoints"),
+        label=_("Apply Tags to Endpoints"),
         required=False,
         initial=False,
     )
@@ -334,15 +335,15 @@ class ImportScanForm(forms.Form):
         # a query (which triggers Django's "database access during app
         # initialization" warning when the module is imported at startup).
         if is_finding_groups_enabled():
-            self.fields["group_by"] = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text="Choose an option to automatically group new findings by the chosen option.")
-            self.fields["create_finding_groups_for_all_findings"] = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
+            self.fields["group_by"] = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text=_("Choose an option to automatically group new findings by the chosen option."))
+            self.fields["create_finding_groups_for_all_findings"] = forms.BooleanField(help_text=_("If unchecked, finding groups will only be created when there is more than one grouped finding"), required=False, initial=True)
         self.fields["active"].initial = self.active_verified_choices[0]
         self.fields["verified"].initial = self.active_verified_choices[0]
         if environment:
             self.fields["environment"].initial = environment
         if endpoints:
             self.fields["endpoints"].queryset = endpoints
-        elif not settings.V3_FEATURE_LOCATIONS:
+        elif not locations_enabled():
             # TODO: Delete this after the move to Locations
             self.fields["endpoints"].queryset = Endpoint.objects
         if api_scan_configuration:
@@ -372,7 +373,7 @@ class ImportScanForm(forms.Form):
                 msg = f"API scan configuration must be of tool type {tool_type}"
                 raise forms.ValidationError(msg)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
         else:
             # TODO: Delete this after the move to Locations
@@ -406,47 +407,47 @@ class ReImportScanForm(forms.Form):
                                ("force_to_false", "Force to False")]
     scan_date = forms.DateTimeField(
         required=False,
-        label="Scan Completion Date",
-        help_text="Scan completion date will be used on all findings.",
+        label=_("Scan Completion Date"),
+        help_text=_("Scan completion date will be used on all findings."),
         widget=forms.TextInput(attrs={"class": "datepicker"}))
-    minimum_severity = forms.ChoiceField(help_text="Minimum severity level to be imported",
+    minimum_severity = forms.ChoiceField(help_text=_("Minimum severity level to be imported"),
                                          required=True,
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.ChoiceField(required=True, choices=active_verified_choices,
-                               help_text="Force findings to be active/inactive, or default to the original tool")
+                               help_text=_("Force findings to be active/inactive, or default to the original tool"))
     verified = forms.ChoiceField(required=True, choices=active_verified_choices,
-                             help_text="Force findings to be verified/not verified, or default to the original tool")
+                             help_text=_("Force findings to be verified/not verified, or default to the original tool"))
 
     help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
     do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label="Systems / Endpoints")
+    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label=_("Systems / Endpoints"))
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(
         widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}),
-        label="Choose report file",
+        label=_("Choose report file"),
         allow_empty_file=True,
         required=False,
         validators=[ImporterFileExtensionValidator()],
     )
-    close_old_findings = forms.BooleanField(help_text="Select if old findings in the same test that are no longer present in the report get closed as mitigated when importing.",
+    close_old_findings = forms.BooleanField(help_text=_("Select if old findings in the same test that are no longer present in the report get closed as mitigated when importing."),
                                             required=False, initial=True)
-    version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
-    branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
-    commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
-    build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label="API Scan Configuration")
-    service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
-    source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
+    version = forms.CharField(max_length=100, required=False, help_text=_("Version that will be set on existing Test object. Leave empty to leave existing value in place."))
+    branch_tag = forms.CharField(max_length=100, required=False, help_text=_("Branch or Tag that was scanned."))
+    commit_hash = forms.CharField(max_length=100, required=False, help_text=_("Commit that was scanned."))
+    build_id = forms.CharField(max_length=100, required=False, help_text=_("ID of the build that was scanned."))
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label=_("API Scan Configuration"))
+    service = forms.CharField(max_length=200, required=False, help_text=_("A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set."))
+    source_code_management_uri = forms.URLField(max_length=600, required=False, help_text=_("Resource link to source code"))
     apply_tags_to_findings = forms.BooleanField(
-        help_text="If set to True, the tags will be applied to the findings",
-        label="Apply Tags to Findings",
+        help_text=_("If set to True, the tags will be applied to the findings"),
+        label=_("Apply Tags to Findings"),
         required=False,
         initial=False,
     )
     apply_tags_to_endpoints = forms.BooleanField(
-        help_text="If set to True, the tags will be applied to the endpoints",
-        label="Apply Tags to Endpoints",
+        help_text=_("If set to True, the tags will be applied to the endpoints"),
+        label=_("Apply Tags to Endpoints"),
         required=False,
         initial=False,
     )
@@ -461,8 +462,8 @@ class ReImportScanForm(forms.Form):
         # a query (which triggers Django's "database access during app
         # initialization" warning when the module is imported at startup).
         if is_finding_groups_enabled():
-            self.fields["group_by"] = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text="Choose an option to automatically group new findings by the chosen option")
-            self.fields["create_finding_groups_for_all_findings"] = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
+            self.fields["group_by"] = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text=_("Choose an option to automatically group new findings by the chosen option"))
+            self.fields["create_finding_groups_for_all_findings"] = forms.BooleanField(help_text=_("If unchecked, finding groups will only be created when there is more than one grouped finding"), required=False, initial=True)
         self.fields["active"].initial = self.active_verified_choices[0]
         self.fields["verified"].initial = self.active_verified_choices[0]
         self.scan_type = None
@@ -471,7 +472,7 @@ class ReImportScanForm(forms.Form):
             self.fields["tags"].initial = test.tags.all()
         if endpoints:
             self.fields["endpoints"].queryset = endpoints
-        elif not settings.V3_FEATURE_LOCATIONS:
+        elif not locations_enabled():
             # TODO: Delete this after the move to Locations
             self.fields["endpoints"].queryset = Endpoint.objects
         if api_scan_configuration:
@@ -530,7 +531,7 @@ class DoneForm(forms.Form):
 class UploadThreatForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".jpg,.png,.pdf"}),
-        label="Select Threat Model")
+        label=_("Select Threat Model"))
 
     def clean(self):
         if (file := self.cleaned_data.get("file", None)) is not None:
@@ -666,7 +667,7 @@ class WeeklyMetricsForm(forms.Form):
 
 class SimpleMetricsForm(forms.Form):
     date = forms.DateField(
-        label="",
+        label=_(""),
         widget=MonthYearWidget())
 
 
@@ -675,25 +676,25 @@ class SimpleSearchForm(forms.Form):
 
 
 class DateRangeMetrics(forms.Form):
-    start_date = forms.DateField(required=True, label="To",
+    start_date = forms.DateField(required=True, label=_("To"),
                                  widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     end_date = forms.DateField(required=True,
-                               label="From",
+                               label=_("From"),
                                widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
 
 
 class MetricsFilterForm(forms.Form):
     start_date = forms.DateField(required=False,
-                                 label="To",
+                                 label=_("To"),
                                  widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     end_date = forms.DateField(required=False,
-                               label="From",
+                               label=_("From"),
                                widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     finding_status = forms.MultipleChoiceField(
         required=False,
         widget=forms.CheckboxSelectMultiple,
         choices=FINDING_STATUS,
-        label="Status")
+        label=_("Status"))
     severity = forms.MultipleChoiceField(required=False,
                                          choices=(("Low", "Low"),
                                                   ("Medium", "Medium"),
@@ -719,11 +720,11 @@ class ChangePasswordForm(forms.Form):
     new_password = forms.CharField(widget=forms.PasswordInput,
         required=True,
         validators=[validate_password],
-        help_text="")
+        help_text=_(""))
     confirm_password = forms.CharField(widget=forms.PasswordInput,
         required=True,
         validators=[validate_password],
-        help_text="Password must match the new password entered above.")
+        help_text=_("Password must match the new password entered above."))
 
     def __init__(self, *args, **kwargs):
         self.user = None
