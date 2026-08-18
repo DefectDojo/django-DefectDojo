@@ -37,8 +37,9 @@ from dojo.forms import (
     ConfigurationPermissionsForm,
 )
 from dojo.labels import get_labels
+from dojo.middleware import set_language_cookie
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
-from dojo.user.authentication import reset_token_for_user
+from dojo.user.authentication import reset_token_for_user, token_expires_at
 from dojo.user.ui.filters import UserFilter
 from dojo.user.ui.forms import (
     AddDojoUserForm,
@@ -108,11 +109,16 @@ def api_v2_key(request):
             api_key = Token.objects.create(user=request.user)
     add_breadcrumb(title=_("API Key"), top_level=True, request=request)
 
+    # Show the effective expiry (explicit override, else the instance-wide default measured from
+    # the token's creation), so the page never claims a token is permanent when it is not.
+    token_expiry = token_expires_at(api_key) if isinstance(api_key, Token) else None
+
     return render(request, "dojo/api_v2_key.html",
                   {"name": _("API v2 Key"),
                    "metric": False,
                    "user": request.user,
                    "key": api_key,
+                   "token_expiry": token_expiry,
                    "form": form,
                    })
 
@@ -226,12 +232,14 @@ def view_profile(request):
                                  messages.SUCCESS,
                                  _("Profile updated successfully."),
                                  extra_tags="alert-success")
-            # Redirect so the response renders against a fresh request — this
-            # ensures UIPreferenceLoader and the UI-toggle banner read the
-            # just-saved usercontactinfo (e.g. ui_use_tailwind) instead of any
-            # state cached on the POST request. Also prevents form
-            # resubmission on refresh.
-            return HttpResponseRedirect(reverse("view_profile"))
+            # Redirect so the response renders against a fresh request, reading
+            # the just-saved usercontactinfo instead of any state cached on the
+            # POST request. Also prevents form resubmission on refresh.
+            response = HttpResponseRedirect(reverse("view_profile"))
+            # Reflect a language change immediately on this device by refreshing
+            # the cookie LocaleMiddleware reads; other devices pick the preference
+            # up from UserContactInfo on their next browser session.
+            return set_language_cookie(response, contact.language)
     add_breadcrumb(title=_("User Profile - %(user_full_name)s") % {"user_full_name": user.get_full_name()}, top_level=True, request=request)
     return render(request, "dojo/profile.html", {
         "user": user,

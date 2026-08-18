@@ -23,7 +23,7 @@ class IBMAppScanTest(BaseTestCase):
         driver.find_element(By.ID, "products_wrapper")
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # "Click" the Finding Drop down
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Findings").click()
+        self.open_product_tab(driver, "findings")
         # "Click" the New Endpoint
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         # Select scan type

@@ -1,0 +1,17 @@
+{
+  "data": {
+    "scan": {
+      "id": 4001,
+      "assetType": "ANDROID_STORE",
+      "riskRating": "SECURE",
+      "packageName": "com.example.genericapp",
+      "version": "3.2.0",
+      "progress": "DONE",
+      "createdTime": "2024-06-01T10:00:00Z",
+      "vulnerabilities": {
+        "pageInfo": {"hasNext": false, "numPages": 1},
+        "vulnerabilities": []
+      }
+    }
+  }
+}

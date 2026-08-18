@@ -479,7 +479,6 @@ class Finding(BaseModel):
 
             models.Index(fields=["cve"]),
             models.Index(fields=["epss_score"]),
-            models.Index(fields=["epss_percentile"]),
             models.Index(fields=["cwe"]),
             models.Index(fields=["out_of_scope"]),
             models.Index(fields=["false_p"]),
@@ -492,12 +491,10 @@ class Finding(BaseModel):
             models.Index(fields=["hash_code"]),
             models.Index(fields=["unique_id_from_tool"]),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
-            models.Index(fields=["line"]),
             models.Index(fields=["component_name"]),
             models.Index(fields=["duplicate"]),
             models.Index(fields=["is_mitigated"]),
             models.Index(fields=["duplicate_finding", "id"]),
-            models.Index(fields=["known_exploited"]),
             models.Index(fields=["ransomware_used"]),
             models.Index(fields=["kev_date"]),
             models.Index(
@@ -523,11 +520,6 @@ class Finding(BaseModel):
                 fields=["severity"],
                 name="idx_finding_open_active_sev",
                 condition=models.Q(active=True, is_mitigated=False),
-            ),
-            models.Index(
-                fields=["severity", "-numerical_severity"],
-                name="idx_finding_sev_open_unver",
-                condition=models.Q(active=True, verified=False),
             ),
             models.Index(
                 fields=["test", "sla_expiration_date", "date"],
@@ -565,21 +557,49 @@ class Finding(BaseModel):
     def __str__(self):
         return self.title
 
-    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
-        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
+    @classmethod
+    def persisted_title(cls, title: str | None) -> str:
+        """
+        Return a title in the exact form a persisted finding carries.
 
-        is_new_finding = self.pk is None
+        The single source of truth for the title transform. Anything that needs to know
+        what a title *will* look like once stored -- notably a hash computed before the
+        row is written, which must match the hash computed after -- calls this instead of
+        repeating the transform.
 
-        # if not isinstance(self.date, (datetime, date)):
-        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
+        Note that ``titlecase()`` is not merely a case change: it also normalizes
+        whitespace, collapsing consecutive newlines and turning tabs into spaces. A
+        reimplementation that truncated but did not titlecase therefore diverged for any
+        multi-line title, which is a bug that has already been paid for once.
+        """
+        return titlecase((title or "")[:cls._meta.get_field("title").max_length])
 
-        if not user:
-            from dojo.utils import get_current_user  # noqa: PLC0415 -- lazy import, avoids circular dependency
-            user = get_current_user()
+    def derive_persisted_fields(self, *, dedupe_option: bool = True, is_new_finding: bool = False) -> None:
+        """
+        Normalize and derive the fields that must hold for any persisted finding.
+
+        This is the transform ``save()`` applies to a finding's own columns before the row
+        is written: title casing/truncation, blank-component normalization, the date
+        default, numerical severity, CVSS vector parsing, and the same-tool hash. It reads
+        configuration but performs no writes, touches no relations, and dispatches nothing,
+        so it is safe to call on an unsaved instance and on many instances in a loop.
+
+        It exists as a separate method so that batched writers -- anything using
+        ``bulk_create``/``bulk_update``, which bypass ``save()`` and its signals entirely --
+        can produce rows identical to the ones ``save()`` produces, by calling this rather
+        than reimplementing it. A second copy of this logic is not a hypothetical risk: Pro's
+        reimport hashing previously re-derived only the title truncation, and the missing
+        ``titlecase()`` (which also collapses whitespace) made the pre-save lookup hash and
+        the stored hash diverge for any multi-line title, so those findings were closed and
+        recreated on every single reimport.
+
+        Anything requiring a primary key -- ``found_by``, location/endpoint queries, SLA
+        expiry, status bookkeeping, post-save dispatch -- deliberately stays in ``save()``,
+        because a batched writer needs a genuinely different (set-based) implementation of
+        those rather than a shared one.
+        """
         # Title Casing
-        self.title = titlecase(self.title[:511])
+        self.title = Finding.persisted_title(self.title)
         # Normalize blank component fields to NULL so that findings without a component
         # group together. An empty string is treated as a distinct value from NULL by the
         # database, which would otherwise produce a separate "None" component group (SC-13073).
@@ -625,6 +645,10 @@ class Finding(BaseModel):
         self.set_hash_code(dedupe_option)
 
         if is_new_finding:
+            # A new finding's static/dynamic flags come from file_path plus the locations
+            # the parser attached, both of which are in memory -- no row required. The
+            # equivalent branch for an *existing* finding queries self.locations/endpoints
+            # and so stays in save().
             if locations_enabled():
                 if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
                     self.static_finding = True
@@ -638,6 +662,22 @@ class Finding(BaseModel):
             elif (self.file_path is not None):
                 self.static_finding = True
 
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        is_new_finding = self.pk is None
+
+        # if not isinstance(self.date, (datetime, date)):
+        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
+
+        if not user:
+            from dojo.utils import get_current_user  # noqa: PLC0415 -- lazy import, avoids circular dependency
+            user = get_current_user()
+        self.derive_persisted_fields(dedupe_option=dedupe_option, is_new_finding=is_new_finding)
+
+        if is_new_finding:
             # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
             # so we call it manually
             finding_helper.update_finding_status(self, user, changed_fields={"id": (None, None)})
@@ -911,8 +951,13 @@ class Finding(BaseModel):
                     deduplicationLogger.debug("get_endpoints before the finding was saved")
                     # convert list of unsaved endpoints to the list of their canonical representation
                     endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
-                    # deduplicate (usually done upon saving finding) and sort endpoints
-                    return "".join(dict.fromkeys(endpoint_str_list))
+                    # deduplicate (usually done upon saving finding) and sort endpoints.
+                    # Sorting is what makes this agree with _get_saved_endpoints below: the
+                    # stored hash_code of an imported finding comes from this branch, so
+                    # without it the scanner's emission order would become part of the
+                    # finding's identity and any later recomputation would produce a
+                    # different hash_code for the same finding.
+                    return "".join(sorted(dict.fromkeys(endpoint_str_list)))
                 # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
                 # In this case, before saving the finding, both static_finding and dynamic_finding are True
                 # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
@@ -938,7 +983,7 @@ class Finding(BaseModel):
                     LocationManager,
                 )
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
+                unsaved_locations = LocationManager.cleaned_unsaved_locations(finding)
                 # Only URL locations feed the "endpoints" hash ingredient — the
                 # saved path below filters to URL references, and hashing other
                 # location types here would make a finding's hash change between
@@ -959,12 +1004,24 @@ class Finding(BaseModel):
         def _get_saved_locations(finding) -> str:
             if finding.id is not None:
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                url_locations = finding.locations.filter(location__location_type=URL.get_location_type())
-                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(url_locations.count()))
-                # convert list of locations to the list of their canonical representation
-                locations = sorted({location_ref.location.get_location_value() for location_ref in url_locations.all()})
-                # sort locations strings
-                return "".join(sorted(locations))
+                url_location_type = URL.get_location_type()
+                # Read the relation with .all() and narrow in Python rather than with .filter():
+                # .filter() on a related manager clones the queryset and drops _result_cache, so it
+                # bypasses the prefetch every caller of the hash paths sets up (the batch dedupe
+                # loader, build_candidate_scope_queryset and manage.py dedupe among them all
+                # prefetch this relation). Narrowing here keeps that prefetch effective;
+                # a finding has few locations, so filtering them in Python costs nothing.
+                # deduplicate and sort the canonical representation of every location. The stored
+                # Location.location_value *is* that canonical representation: it is written from
+                # AbstractLocation.get_location_value() when the Location row is created, so this
+                # matches what _get_unsaved_locations computes below.
+                locations = sorted({
+                    location_ref.location.location_value
+                    for location_ref in finding.locations.all()
+                    if location_ref.location.location_type == url_location_type
+                })
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: %d", len(locations))
+                return "".join(locations)
             return ""
 
         return _get_saved_locations(self) or _get_unsaved_locations(self)

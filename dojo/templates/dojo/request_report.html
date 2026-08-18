@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load filter_tags %}
+{% load i18n %}
 {% load humanize %}
 {% load display_tags %}
 {% block content %}
@@ -21,7 +22,7 @@
                         {% endif %}
                         Report
                         <div class="dropdown pull-right">
-                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         </div>
 
                     </h3>

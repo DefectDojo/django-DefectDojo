@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites time="0.005">
+  <testsuite name="Postgres server baseline" failures="0" errors="0" skipped="0" tests="1" time="0.005">
+    <testcase classname="Postgres server baseline" name="Postgres servers must enforce SSL" time="0.000"/>
+  </testsuite>
+</testsuites>

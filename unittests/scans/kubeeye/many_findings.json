@@ -1,0 +1,133 @@
+{
+  "apiVersion": "kubeeye.kubesphere.io/v1alpha2",
+  "kind": "InspectResult",
+  "metadata": {
+    "name": "sample-inspect-task-nodeinfo"
+  },
+  "spec": {
+    "inspectCluster": {
+      "name": "default"
+    },
+    "inspectRuleTotal": {
+      "nodeInfo": 2,
+      "fileChange": 1,
+      "sysctl": 2,
+      "command": 1,
+      "component": 1,
+      "serviceConnect": 1,
+      "prometheus": 1
+    },
+    "nodeInfo": [
+      {
+        "name": "check root disk usage",
+        "assert": true,
+        "level": "danger",
+        "nodeName": "worker-1",
+        "value": "92%",
+        "mount": "/",
+        "type": "disk"
+      },
+      {
+        "name": "check inode usage",
+        "assert": false,
+        "level": "",
+        "nodeName": "worker-1",
+        "value": "11%",
+        "mount": "/",
+        "type": "inode"
+      },
+      {
+        "name": "check memory usage",
+        "assert": true,
+        "level": "warning",
+        "nodeName": "worker-2",
+        "value": "81%",
+        "type": "memory"
+      }
+    ],
+    "fileChangeResult": [
+      {
+        "name": "kubelet config drift",
+        "assert": true,
+        "level": "warning",
+        "nodeName": "worker-1",
+        "path": "/etc/kubernetes/kubelet.conf",
+        "issues": [
+          "-  readOnlyPort: 0",
+          "+  readOnlyPort: 10255"
+        ]
+      }
+    ],
+    "sysctlResult": [
+      {
+        "name": "net.ipv4.conf.all.rp_filter",
+        "assert": true,
+        "level": "danger",
+        "nodeName": "worker-1",
+        "value": "0"
+      },
+      {
+        "name": "net.ipv4.ip_forward",
+        "assert": false,
+        "level": "",
+        "nodeName": "worker-1",
+        "value": "1"
+      }
+    ],
+    "systemdResult": [
+      {
+        "name": "kubelet.service",
+        "assert": true,
+        "level": "warning",
+        "nodeName": "worker-2",
+        "value": "activating"
+      }
+    ],
+    "commandResult": [
+      {
+        "name": "kernel version supported",
+        "assert": true,
+        "level": "ignore",
+        "nodeName": "worker-2",
+        "command": "uname -r",
+        "value": "5.4.0-91-generic"
+      }
+    ],
+    "componentResult": [
+      {
+        "name": "kube-scheduler",
+        "assert": true,
+        "level": "danger"
+      }
+    ],
+    "serviceConnectResult": [
+      {
+        "name": "cluster dns reachable",
+        "assert": true,
+        "level": "danger",
+        "namespace": "kube-system",
+        "endpoint": "10.96.0.10:53"
+      }
+    ],
+    "prometheusResult": [
+      {
+        "name": "KubeAPIErrorBudgetBurn",
+        "assert": true,
+        "level": "warning",
+        "rule": "KubeAPIErrorBudgetBurn",
+        "result": "0.0412"
+      }
+    ]
+  },
+  "status": {
+    "complete": true,
+    "duration": "31s",
+    "taskStartTime": "2026-08-10T09:00:00Z",
+    "taskEndTime": "2026-08-10T09:00:31Z",
+    "level": {
+      "danger": 4,
+      "warning": 4,
+      "ignore": 1
+    }
+  }
+}

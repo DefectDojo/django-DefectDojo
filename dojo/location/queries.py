@@ -22,12 +22,35 @@ except ImportError:
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.product.queries import get_authorized_products
 from dojo.query_utils import build_count_subquery
 
 logger = logging.getLogger(__name__)
+
+
+def location_prefetch_lookups(prefix: str = "") -> list[str]:
+    """
+    Prefetch lookups for the location relation that the hash and deduplication paths read
+    through ``Finding.get_locations()``, for the location model actually in use.
+
+    Endpoint rows are not deleted by the move to Locations, and ``Endpoint.__init__`` raises
+    ``NotImplementedError`` once ``V3_FEATURE_LOCATIONS`` is on (see
+    ``Endpoint.allow_endpoint_init``). So prefetching the endpoint relation under V3 hydrates
+    the deprecated model for every surviving row and kills the caller -- on a migrated
+    instance, not on a fresh one, which is why it is easy to miss. Under V3 ``get_locations()``
+    reads URL locations and never touches endpoints, so the endpoint prefetch is dead weight
+    there in any case.
+
+    :param prefix: relation path to the Finding, e.g. ``"finding__"`` when paging a model that
+        reaches the finding through a relation.
+    """
+    if locations_enabled():
+        return [f"{prefix}locations__location__url"]
+    # TODO: Delete this after the move to Locations
+    return [f"{prefix}endpoints"]
 
 
 def get_authorized_locations(permission, queryset=None, user=None):

@@ -107,29 +107,6 @@ class Engagement(BaseModel):
             GinIndex(fields=["name"], opclasses=["gin_trgm_ops"], name="dojo_engagement_name_trgm"),
         ]
 
-    def pre_save_logic(self):
-        """
-        Fall back to the declared default when the status is empty.
-
-        `status` is nullable and carries a default, but it is not `blank=True`, so the
-        `full_clean()` the base model runs on every save rejects both `None` and `""` with
-        "This field cannot be blank." Rows with an empty status exist all the same -- writes
-        made before the base model validated, and DefectDojo's own sample data -- and could
-        then never be saved again.
-
-        That took down imports: the importer's closing write-back saves the test's engagement
-        on every run, and the only engagement field an import ever sets is `target_end` (CI/CD
-        engagements). A scan therefore failed, and imported nothing, over a field it had not
-        touched.
-
-        An empty value is not one of ENGAGEMENT_STATUS_CHOICES, so there is nothing to
-        preserve. Applying the default here -- before the validation step, and regardless of
-        whether validation is enabled -- lets the save proceed and heals the row on its next
-        write, instead of leaving a row that no code path can save.
-        """
-        if not self.status:
-            self.status = self._meta.get_field("status").default
-
     def __str__(self):
         return "Engagement {}: {} ({})".format(self.id if id else 0, self.name or "",
                                         self.target_start.strftime(
@@ -137,6 +114,27 @@ class Engagement(BaseModel):
 
     def get_absolute_url(self):
         return reverse("view_engagement", args=[str(self.id)])
+
+    def pre_save_logic(self) -> None:
+        """
+        Fill in an empty `status` / `engagement_type` from the field's own default.
+
+        Both columns are nullable, but neither offers an empty choice and both declare a
+        default, so an empty value carries no meaning the rest of the codebase can read --
+        filters, reports and the UI all assume one of the listed choices. Django counts
+        None among a field's empty values, so a row storing NULL in either column failed
+        its own validation ("This field cannot be blank.") on every save, which made rows
+        written before these defaults existed permanently unsavable: every (re)import
+        writes its engagement back at the end of a run, so one such row turned every scan
+        ingest into that engagement into a hard failure.
+
+        Normalizing here rather than widening the fields to `blank=True` keeps a value
+        outside the choice list from becoming valid, and lets each affected row heal the
+        next time anything saves it.
+        """
+        for field_name in ("status", "engagement_type"):
+            if not getattr(self, field_name):
+                setattr(self, field_name, self._meta.get_field(field_name).get_default())
 
     def copy(self):
         from dojo.models import Test, copy_model_util  # noqa: PLC0415 -- lazy import, avoids circular dependency
