@@ -13,6 +13,8 @@ aliases:
 * **Location** \- 通常、ネットワーク内のツールの URL を指すフィールド
 * **Secret** \- 通常は API キー
 
+多くのツールは固定の API ホストを 1 つだけ公開します。その場合、コネクタを追加した時点で DefectDojo が **Location** を自動入力するため、このページから URL をコピーする必要はありません。入力済みの値はそのまま使用してください。セルフホスト環境や別リージョンなど、お使いのインスタンスが異なるホストを使う場合にのみ変更してください。
+
 ツールによっては、**Location** と **Secret** 以外にも追加の API 関連フィールドが必要になる場合があります。また、DefectDojo からの Connector 接続を受け入れるために、ツール側での設定変更が必要になることもあります。
 
 ![image](images/connectors_tool_reference.png)
@@ -273,7 +275,7 @@ Bright アプリの **User settings → API keys** で作成した Bright の**A
 
 #### Connector Mappings
 
-1. **Location** フィールドを空欄のままにすると `https://app.brightsec.com` が使用されます。または Bright のホストを明示的に入力してください。
+1. **Location** フィールドには `https://app.brightsec.com` が自動入力されます。この値をそのまま使用するか、Bright のホストを明示的に入力してください。
 2. **Secret** フィールドに Bright の API キーを入力します。
 3. 必要に応じて、インポートする検出事項を制限するために **Minimum Severity** を設定します。
 
@@ -550,7 +552,7 @@ Escapeの**APIキー**が必要です。これはEscapeアプリの**Settings �
 
 #### Connector Mappings
 
-1. **Location**フィールドを空欄のままにすると`https://public.escape.tech/v2`が使用されます。あるいは、EscapeのAPIホストを明示的に入力することもできます。
+1. **Location**フィールドには`https://public.escape.tech/v2`が自動入力されます。この値をそのまま使用するか、EscapeのAPIホストを明示的に入力してください。
 2. **Secret**フィールドにEscapeのAPIキーを入力します。
 3. 必要に応じて、インポートする検出事項を制限するために**Minimum Severity**を設定します。
 
@@ -568,7 +570,7 @@ Fairwinds Insightsの**organization**名と**APIトークン**が必要です。
 
 #### Connector Mappings
 
-1. **Location**フィールドを空欄のままにすると`https://insights.fairwinds.com`が使用されます。あるいは、Insightsのホストを明示的に入力することもできます。
+1. **Location**フィールドには`https://insights.fairwinds.com`が自動入力されます。この値をそのまま使用するか、Insightsのホストを明示的に入力してください。
 2. Insightsの**Organization**名（ダッシュボードのURLに表示されるスラッグ）を入力します。
 3. **Secret**フィールドにInsightsのAPIトークンを入力します。
 4. 必要に応じて、インポートする検出事項を制限するために**Minimum Severity**を設定します。
@@ -1348,7 +1350,7 @@ Socket の **API トークン**（Socket ダッシュボードの **Settings →
 
 #### Connector Mappings
 
-1. **Location** フィールドを空欄のままにすると `https://api.socket.dev/v0` が使用されます。明示的に入力することもできます。
+1. **Location** フィールドには `https://api.socket.dev/v0` が自動入力されます。この値をそのまま使用するか、明示的に入力してください。
 2. **Secret** フィールドに Socket API トークンを入力します。
 3. 必要に応じて、**Minimum Severity** を設定してインポートする検出事項を絞り込みます。
 

@@ -14,6 +14,8 @@ Beim Einrichten eines Connectors für ein unterstütztes Tool müssen Sie Defect
 * **Location** \-ein Feld, das im Allgemeinen auf die URL Ihres Tools in Ihrem Netzwerk verweist,
 * **Secret** \- in der Regel ein API-Schlüssel.
 
+Viele Tools stellen genau einen festen API\-Host bereit. Für diese füllt DefectDojo das Feld **Location** beim Anlegen des Connectors automatisch aus. Sie müssen die URL also nicht von dieser Seite kopieren. Behalten Sie den vorgegebenen Wert. Ändern Sie ihn nur, wenn Ihre Instanz einen anderen Host verwendet, zum Beispiel eine selbst gehostete Installation oder eine andere Region.
+
 Manche Tools benötigen über **Location** und **Secret** hinaus weitere API-bezogene Felder. Möglicherweise müssen Sie auch auf der Seite des Tools Änderungen vornehmen, um einen eingehenden Connector von DefectDojo zu ermöglichen.
 
 ![image](images/connectors_tool_reference.png)
@@ -274,7 +276,7 @@ Sie benötigen einen Bright-**API-Schlüssel**, der in der Bright-App unter **Us
 
 #### Connector-Zuordnungen
 
-1. Lassen Sie das Feld **Location** leer, um `https://app.brightsec.com` zu verwenden, oder geben Sie Ihren Bright-Host explizit an.
+1. Behalten Sie den vorgegebenen Wert im Feld **Location**, `https://app.brightsec.com`, oder geben Sie Ihren Bright-Host explizit an.
 2. Geben Sie den Bright-API-Schlüssel in das Feld **Secret** ein.
 3. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden.
 
@@ -551,7 +553,7 @@ Sie benötigen einen Escape-**API-Schlüssel**, der in der Escape-App unter **Se
 
 #### Connector-Zuordnungen
 
-1. Lassen Sie das Feld **Location** leer, um `https://public.escape.tech/v2` zu verwenden, oder geben Sie Ihren Escape-API-Host explizit an.
+1. Behalten Sie den vorgegebenen Wert im Feld **Location**, `https://public.escape.tech/v2`, oder geben Sie Ihren Escape-API-Host explizit an.
 2. Geben Sie den Escape-API-Schlüssel in das Feld **Secret** ein.
 3. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden.
 
@@ -569,7 +571,7 @@ Sie benötigen einen Fairwinds-Insights-**Organisationsnamen** und ein **API-Tok
 
 #### Connector-Zuordnungen
 
-1. Lassen Sie das Feld **Location** leer, um `https://insights.fairwinds.com` zu verwenden, oder geben Sie Ihren Insights-Host explizit an.
+1. Behalten Sie den vorgegebenen Wert im Feld **Location**, `https://insights.fairwinds.com`, oder geben Sie Ihren Insights-Host explizit an.
 2. Geben Sie Ihren Insights-**Organization**-Namen ein (den Slug, der in Ihrer Dashboard-URL angezeigt wird).
 3. Geben Sie das Insights-API-Token in das Feld **Secret** ein.
 4. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden.
@@ -1349,7 +1351,7 @@ Sie benötigen ein Socket-**API-Token** — ein Organisations-Token, das im Sock
 
 #### Connector-Zuordnungen
 
-1. Lassen Sie das Feld **Location** leer, um `https://api.socket.dev/v0` zu verwenden, oder geben Sie es explizit an.
+1. Behalten Sie den vorgegebenen Wert im Feld **Location**, `https://api.socket.dev/v0`, oder geben Sie es explizit an.
 2. Geben Sie das Socket-API-Token in das Feld **Secret** ein.
 3. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden.
 

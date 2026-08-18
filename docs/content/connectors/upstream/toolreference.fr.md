@@ -14,6 +14,8 @@ Lors de la configuration d'un Connecteur pour un outil pris en charge, vous deve
 * **Location** \- un champ qui fait généralement référence à l'URL de votre outil sur votre réseau,
 * **Secret** \- généralement une clé API.
 
+De nombreux outils exposent un seul hôte d'API fixe. Pour ceux\-là, DefectDojo remplit le champ **Location** lorsque vous ajoutez le connecteur, vous n'avez donc pas à copier l'URL depuis cette page. Conservez la valeur proposée. Ne la modifiez que si votre instance utilise un autre hôte, par exemple une installation auto\-hébergée ou une autre région.
+
 Certains outils nécessiteront des champs supplémentaires liés à l'API, en plus de **Location** et **Secret**. Ils peuvent également nécessiter que vous effectuiez des modifications de leur côté pour prendre en charge un Connecteur entrant depuis DefectDojo.
 
 ![image](images/connectors_tool_reference.png)
@@ -274,7 +276,7 @@ Vous aurez besoin d'une **clé API** Bright, créée dans l'application Bright s
 
 #### Mappages du Connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://app.brightsec.com`, ou saisissez explicitement votre hôte Bright.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://app.brightsec.com`, ou saisissez explicitement votre hôte Bright.
 2. Saisissez la clé API Bright dans le champ **Secret**.
 3. Facultativement, définissez une **Minimum Severity** pour limiter les constatations importées.
 
@@ -551,7 +553,7 @@ Vous aurez besoin d'une **API key** Escape, créée dans l'application Escape so
 
 #### Mappages du connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://public.escape.tech/v2`, ou saisissez explicitement l'hôte de votre API Escape.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://public.escape.tech/v2`, ou saisissez explicitement l'hôte de votre API Escape.
 2. Saisissez la clé d'API Escape dans le champ **Secret**.
 3. Facultativement, définissez une **Minimum Severity** pour limiter les constatations importées.
 
@@ -569,7 +571,7 @@ Vous aurez besoin d'un nom d'**organisation** Fairwinds Insights et d'un **jeton
 
 #### Mappages du connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://insights.fairwinds.com`, ou saisissez explicitement l'hôte de votre instance Insights.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://insights.fairwinds.com`, ou saisissez explicitement l'hôte de votre instance Insights.
 2. Saisissez votre nom d'**Organization** Insights (le slug affiché dans l'URL de votre tableau de bord).
 3. Saisissez le jeton d'API Insights dans le champ **Secret**.
 4. Facultativement, définissez une **Minimum Severity** pour limiter les constatations importées.
@@ -1349,7 +1351,7 @@ Vous aurez besoin d'un **jeton API** Socket — un jeton d'organisation créé d
 
 #### Mappages du connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://api.socket.dev/v0`, ou saisissez-le explicitement.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://api.socket.dev/v0`, ou saisissez-le explicitement.
 2. Saisissez le jeton API Socket dans le champ **Secret**.
 3. Optionnellement, définissez une **Minimum Severity** pour limiter les constatations importées.
 
