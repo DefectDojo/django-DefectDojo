@@ -4,6 +4,7 @@ import logging
 
 from dateutil import parser
 from packaging.version import InvalidVersion, Version
+
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
