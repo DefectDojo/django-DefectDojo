@@ -52,7 +52,7 @@ Sensei is metered against your DefectDojo Pro license, shown as meters at the to
 
 - **Fixes:** remediations applied against your prepaid limit. Approving a candidate or triggering a fix consumes from this quota; when it is exhausted, further fixes are blocked (a warning banner appears) until the limit is raised.
 - **Onboarded Repositories:** repositories onboarded against your repository limit. When it is reached, onboarding new repositories is blocked.
-- **Onboarded Cloud Accounts:** cloud accounts onboarded against your cloud-account limit (`sensei_cloud_account_limit`), shown when CSPM is enabled. When it is reached, onboarding new accounts is blocked. The Fixes quota is **shared** — an AppSec fix and a cloud remediation both spend `sensei_fix_limit` — and the Fixes card breaks its total down by capability. See [CSPM → Quotas](/sensei/cloud_posture/#quotas).
+- **Onboarded Cloud Accounts:** cloud accounts onboarded against your cloud-account limit (`sensei_cloud_account_limit`), shown when Sensei is licensed (CSPM has no feature flag of its own). When it is reached, onboarding new accounts is blocked. The Fixes quota is **shared** — an AppSec fix and a cloud remediation both spend `sensei_fix_limit` — and the Fixes card breaks its total down by capability. See [CSPM → Quotas](/sensei/cloud_posture/#quotas).
 
 To raise a limit, contact your DefectDojo account team.
 
