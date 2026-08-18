@@ -5,11 +5,17 @@ from unittest.mock import patch
 
 from crum import impersonate
 from django.contrib.auth.models import User
+from django.db import OperationalError
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
+from dojo.finding.helper import (
+    POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES,
+    post_process_findings_batch,
+    save_vulnerability_ids,
+    save_vulnerability_ids_template,
+)
 from dojo.models import Finding, Finding_Template, Test
 from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, versioned_fixtures
 
@@ -329,3 +335,99 @@ class TestFindingVulnerabilityIdsAPI(DojoAPITestCase):
         # CVE is not in the response, so get it fromt the database
         # current behaviour is that the cve is taken from the first vulnerability_id...
         self.assertEqual("RHSA-000000", Finding.objects.get(id=finding_id).cve)
+
+
+class TestPostProcessFindingsBatchDeadlockRetry(DojoTestCase):
+    """
+    post_process_findings_batch runs the batch dedup / false-positive-history writes that
+    update dojo_finding rows. Two of these tasks racing on overlapping rows (concurrent
+    imports or connector syncs into the same product) can deadlock -- Postgres aborts one
+    with SQLSTATE 40P01. The aborted batch is only rolled back, not wrong, so it must be
+    retried rather than surfaced as a failed task. These tests exercise that retry with a
+    simulated deadlock so they need no real concurrency.
+    """
+
+    def _transient_conflict(self):
+        # Mimic how psycopg surfaces a deadlock: Django re-raises the driver error as its
+        # own OperationalError and keeps the driver exception -- the one carrying the
+        # SQLSTATE -- as __cause__. is_transient_db_conflict inspects both.
+        cause = Exception("deadlock detected")
+        cause.sqlstate = "40P01"  # deadlock_detected
+        exc = OperationalError("deadlock detected")
+        exc.__cause__ = cause
+        return exc
+
+    def _dedup_enabled_settings(self):
+        return mock.Mock(
+            enable_deduplication=True,
+            false_positive_history=False,
+            enable_product_grade=False,
+        )
+
+    @patch("dojo.finding.helper.sleep", return_value=None)
+    @patch("dojo.finding.helper.dedupe_batch_of_findings")
+    @patch("dojo.finding.helper.get_finding_models_for_deduplication")
+    @patch("dojo.finding.helper.System_Settings")
+    def test_retries_batch_dedupe_on_transient_deadlock(self, mock_ss, mock_get, mock_dedupe, mock_sleep):
+        mock_ss.objects.get.return_value = self._dedup_enabled_settings()
+        mock_get.return_value = [mock.Mock(id=1)]
+        # First two attempts deadlock, the third succeeds.
+        mock_dedupe.side_effect = [self._transient_conflict(), self._transient_conflict(), None]
+
+        # Must NOT raise: the batch retries until dedupe succeeds.
+        post_process_findings_batch(
+            [1],
+            dedupe_option=True,
+            issue_updater_option=False,
+            product_grading_option=False,
+            push_to_jira=False,
+        )
+
+        self.assertEqual(mock_dedupe.call_count, 3)
+        # Findings are reloaded on each attempt so a retry acts on freshly committed state.
+        self.assertEqual(mock_get.call_count, 3)
+
+    @patch("dojo.finding.helper.sleep", return_value=None)
+    @patch("dojo.finding.helper.dedupe_batch_of_findings")
+    @patch("dojo.finding.helper.get_finding_models_for_deduplication")
+    @patch("dojo.finding.helper.System_Settings")
+    def test_reraises_after_exhausting_retries(self, mock_ss, mock_get, mock_dedupe, mock_sleep):
+        mock_ss.objects.get.return_value = self._dedup_enabled_settings()
+        mock_get.return_value = [mock.Mock(id=1)]
+        # Every attempt deadlocks -> the conflict must surface after retries are exhausted.
+        mock_dedupe.side_effect = self._transient_conflict()
+
+        with self.assertRaises(OperationalError):
+            post_process_findings_batch(
+                [1],
+                dedupe_option=True,
+                issue_updater_option=False,
+                product_grading_option=False,
+                push_to_jira=False,
+            )
+
+        # Initial try + POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES retries.
+        self.assertEqual(mock_dedupe.call_count, POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES + 1)
+
+    @patch("dojo.finding.helper.sleep", return_value=None)
+    @patch("dojo.finding.helper.dedupe_batch_of_findings")
+    @patch("dojo.finding.helper.get_finding_models_for_deduplication")
+    @patch("dojo.finding.helper.System_Settings")
+    def test_non_transient_operational_error_not_retried(self, mock_ss, mock_get, mock_dedupe, mock_sleep):
+        mock_ss.objects.get.return_value = self._dedup_enabled_settings()
+        mock_get.return_value = [mock.Mock(id=1)]
+        # A non-deadlock OperationalError (no transient SQLSTATE) is a genuine failure and
+        # must propagate immediately, without wasting retries.
+        mock_dedupe.side_effect = OperationalError("statement timeout")
+
+        with self.assertRaises(OperationalError):
+            post_process_findings_batch(
+                [1],
+                dedupe_option=True,
+                issue_updater_option=False,
+                product_grading_option=False,
+                push_to_jira=False,
+            )
+
+        self.assertEqual(mock_dedupe.call_count, 1)
+        mock_sleep.assert_not_called()
