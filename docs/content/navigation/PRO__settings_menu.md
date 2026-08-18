@@ -87,3 +87,5 @@ The group that was named after your license package — **Pro Settings** on a Pr
 New installations start with it on. Existing installations start with it off, so an upgrade never rearranges the menu under a team mid-flight — turn it on when your administrators are ready.
 
 While it is off, the **All Settings** page is unavailable and its URL returns Not Found.
+
+> **Menu 2.0 becomes the standard in the 3.3.0 release (September 8, 2026).** That release removes the classic sidebar and this toggle, so every instance moves to Menu 2.0. An instance still on the classic layout switches automatically on upgrade; turn Menu 2.0 on beforehand if you would rather move on your own schedule. In the patch releases leading up to 3.3.0, a banner in the app reminds anyone still on the classic layout.
