@@ -7,10 +7,7 @@ aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. Which layout you see depends on when your instance was created:
-
-- **New installations** open on the reorganized layout described below.
-- **Existing installations** keep the previous layout until an administrator turns on **Menu 2.0** (see [Switching layouts](#switching-layouts)).
+The DefectDojo Pro sidebar groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
 
 Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
 
@@ -172,7 +169,7 @@ The Calendar toggle used to be **Enable Calendar** in System Settings. It moved 
 
 **Menu 2.0** on the [Feature Flags](/admin/feature_flags/pro__feature_flags/) page controls which layout is active. Turning it on or off reshapes the sidebar immediately; no restart is needed and nothing else about your instance changes.
 
-New installations start with it on. Existing installations start with it off, so an upgrade never rearranges the menu under a team mid-flight. Turn it on when your administrators are ready.
+Menu 2.0 is on by default everywhere as of DefectDojo Pro 3.2.200. An instance that turned it off earlier keeps that choice through upgrades, and the toggle stays available if your team prefers the previous layout.
 
 While it is off, the **All Settings** page is unavailable and its URL returns Not Found.
 
