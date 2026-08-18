@@ -13,6 +13,11 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## August 2026: v3.2
 
+### August 24, 2026: v3.2.300
+
+Enhancements:
+* **(Locations)** The data-migration suite on the Feature Flags page can now be cancelled while a backfill is running. Cancelling stops the run at the next batch boundary and keeps everything migrated so far, so re-running the item resumes and converges on the same result. A run whose worker is lost is now detected and marked failed on its own, so a stuck suite becomes runnable again instead of blocking every item.
+
 ### August 17, 2026: v3.2.200
 
 Enhancements:

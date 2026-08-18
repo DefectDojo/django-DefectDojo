@@ -17,6 +17,8 @@ Enabling Locations only changes behaviour for *new* imports; your existing histo
 
 When a backfill finishes it reports how many source objects it processed and how many distinct **Locations** those objects resolved to. The two numbers differ by design: several source objects can share one Location (many Endpoints normalising to the same URL, or many Findings sharing one component), so the Location count is normally lower than the object count. If any individual object could not be migrated it is skipped rather than aborting the run, and the number skipped is shown alongside the result.
 
+A running item shows a **Cancel** button. Cancelling stops the run at the next batch boundary, so it is not instant: the current batch finishes and commits first. A cancelled run keeps everything it had already migrated, is reported as **Cancelled** with its partial counts, and because every step is idempotent, running the same item again resumes from where it stopped and converges on the same result as an uninterrupted run. Cancel is also the recovery path when a run's worker is lost: a run that stops reporting progress is marked failed on its own so the item becomes runnable again, and forcing a cancel releases a run that is otherwise wedged.
+
 The suite has four items, because a Finding can carry three independent kinds of location:
 
 1. **Endpoints to Locations backfill** — turns existing `Endpoint` rows into **URL Locations** (detailed below).
