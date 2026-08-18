@@ -5,6 +5,7 @@ weight: 5
 chapter: true
 audience: opensource
 aliases:
+  - "/open_source/contributing/"
   - /en/open_source/contributing
 ---
 

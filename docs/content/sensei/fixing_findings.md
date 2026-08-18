@@ -9,6 +9,16 @@ weight: 3
 
 Once a repository is onboarded, Sensei surfaces directly on your findings and on the Sensei hub. This page covers scanning a repository, triaging auto-fix candidates, and remediating individual findings. You need at least **Writer** access to a finding's Asset to trigger a fix.
 
+## Finding your way around the Sensei hub
+
+The hub's toggle selects which **view** you are looking at:
+
+- **Repositories** — the repositories onboarded to Sensei, with their status and row actions.
+- **Auto-fix Candidates** — findings staged for approval.
+- **Scan Activity** — the ledger of every scan and fix run.
+
+If an administrator enabled in-repo CI scanning, the Repositories view also offers a **Scanning** choice between **DefectDojo-hosted** and **In-repo CI**. This selects where scans run for the repositories listed; it is not a separate view, so auto-fix candidates and scan activity always cover every onboarded repository regardless of where its scans run. With CI mode off (the default) there is nothing to choose and the control is not shown.
+
 ## Scan a repository
 
 Scans import findings into an engagement named after the branch. You can trigger a scan on demand from the Sensei hub: open a repository's row actions and choose **Scan now**.
@@ -34,11 +44,22 @@ Clicking **Fix** (on the findings table or in a finding's detail header) opens t
 
 ![Fix with Sensei dialog](images/fix_with_sensei_dialog.png)
 
-Sensei generates a remediation and opens a pull request. The finding's fix status is shown as a badge that moves through *in progress* → *PR open* (or *failed*). Once the pull request is open, the badge links straight to it.
+Sensei generates a remediation and opens a pull request. The finding's fix status is shown as a badge that moves through *in progress* → *PR open* → *PR merged* (or *failed*). Once the pull request is open, the badge links straight to it.
 
 ![Finding detail with fix status badge](images/finding_detail_fix.png)
 
 > **💡 One fix, one PR:** each approved fix consumes one fix from your quota and opens one pull request. Review and merge the PR in GitHub as you would any other.
+
+### A fix does not close the finding on its own
+
+The pull request changes your code; it does not change what is running. So the finding **stays open** after Sensei fixes it, and the badge says which step is still outstanding:
+
+- **PR open** — the change is waiting to be reviewed and merged.
+- **PR merged** — merged, but not yet deployed.
+
+What closes the finding is the next scan that sees the fix in place. For code scanning that is the next scan of the branch you merged into. For findings that come from a cloud account, it is the next scan *after the infrastructure change is applied* — the scanner reads the account, not your repository, so merging Terraform does not change what it reports.
+
+While a fix is outstanding, the same finding may keep being reported by each new scan. Sensei recognises those as the same underlying issue and will not stage another candidate or open a second pull request for it, so a slow review or deploy does not consume extra fixes.
 
 ## Auto-fix candidate triage
 

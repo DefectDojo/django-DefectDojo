@@ -3,7 +3,8 @@ title: "DefectDojo Pro Changelog"
 description: "DefectDojo Changelog"
 exclude_search: true
 aliases:
- - /changelog/pro_changelog/
+  - "/en/changelog/changelog/"
+  - "/changelog/pro_changelog/"
 ---
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
@@ -12,10 +13,49 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## August 2026: v3.2
 
+### August 24, 2026: v3.2.300
+
+Enhancements:
+* **(Locations)** The data-migration suite on the Feature Flags page can now be cancelled while a backfill is running. Cancelling stops the run at the next batch boundary and keeps everything migrated so far, so re-running the item resumes and converges on the same result. A run whose worker is lost is now detected and marked failed on its own, so a stuck suite becomes runnable again instead of blocking every item.
+
 ### August 17, 2026: v3.2.200
+
+New features:
+* **(CSPM)** Added Cloud Security Posture Management: connect AWS, Azure, and GCP cloud accounts, run posture scans against them, and apply reversible direct remediation to the misconfigurations that are found.
+* **(Asset Exposure)** Added asset exposure reporting from Wiz, Shodan, and Censys, and from CrowdStrike Spotlight (which reports only the exposure it can prove).
+* **(Connectors)** Registered the Aikido Security, Jit, and Cycode connectors.
+* **(Finding Templates)** You can now apply a finding template to a Finding, and turn a Finding into a template, directly from the Vue UI.
+* **(Form Configuration)** Added admin-controlled Form Configuration for the Vue create and edit forms, so an administrator can decide which fields appear.
+* **(Locations)** Added a DB-backed Locations toggle, with a data-migration suite to move existing data over.
+* **(Assets)** You can now export the asset and organization inventory as CSV.
+* **(Reporting)** Quick Export now names its output from the current context, and you can apply a report template to an export.
+* **(Findings)** Added a filterable Review Claimant column to the findings list.
+* **(Rules Engine)** Rules Engine permissions now split into View / Add / Edit / Delete for finer RBAC.
+* **(Feature Flags)** Promoted nine feature flags off the menu, turned five more on by default, and moved Feature Flags out of System into its own settings location.
+* **(Layouts)** Layout customization can now be restricted to admin-designated defaults.
 
 Enhancements:
 * **(Qualys)** The Qualys connector now accepts a **Host Tags** filter that scopes discovery to hosts carrying the Qualys asset tags you name. The filter is sent to Qualys, so out-of-scope hosts are never downloaded. It applies to the detection download as well as the host listing, so a narrowed scope also shortens each Sync. Tag names are matched exactly, because Qualys supports no wildcards on tag names. Leave the field blank to keep discovering every host.
+* **(JFrog)** The JFrog connector now surfaces a pending status.
+* **(Jira)** The Jira connector now accepts service accounts.
+* **(Findings)** The count of Findings a tool submitted is now recorded before deduplication runs.
+* **(API)** The finding serializer now exposes a flat `test_type_name` field.
+* **(MCP)** Finding and asset Location retrieval is now consolidated into single REST calls.
+
+Bug fixes:
+* **(Authorization)** Location data, DojoMeta visibility, and the `/api/v2/location/` endpoint are now scoped to the requesting user's products and RBAC rather than superusers only; every routed connector endpoint is named in the permission allow-list; the user edit form authorization was hardened; Tool Configuration credentials are kept out of the edit form; and the private-note visibility rule is now applied in the note UI views.
+* **(Export)** Spreadsheet formulas can no longer execute out of an exported file (CSV/formula injection).
+* **(SSO)** SAML2 routes now answer 404 when SAML is disabled.
+* **(Findings)** The Priority filter and override inputs now accept decimal values.
+* **(Assets)** A PATCH without a `parent` field no longer orphans the asset, and auto-creating the same asset name concurrently no longer returns a 500.
+* **(Importers)** Bulk finding deletes, tag-count updates, and async cascade deletes now retry on transient DB conflicts and are ordered so concurrent imports and deletes cannot deadlock.
+* **(Connectors)** The Action1 connector tolerates non-numeric sentinels in quoted numeric fields, and the Microsoft Defender connector retries a transient 5xx/429 on a single export page instead of failing the whole export.
+* **(Parsers)** Fixed a Trivy Scan crash from an uninitialized `resource_name`, and reset Scout Suite parser state so a report parses to the same findings twice.
+* **(Notes)** A partial note PATCH now keeps the note body and no longer writes a null NoteHistory entry.
+* **(Reporting)** Reports no longer fetch unrenderable columns, report cells are now bounded, and a block's Order By is applied through the filterset.
+* **(Tables & UI)** Clipped table cell text now wraps, the empty band below short pages is gone, the viewport row cap no longer oscillates and stalls a table, and the severity bar chart is positioned correctly in the open findings chart.
+* **(Page Grid)** A widget's Title and Icon now follow its Records choice.
+* **(Jira)** Fixed the Jira migration.
 
 ### August 10, 2026: v3.2.100
 
@@ -366,7 +406,7 @@ Additional features:
 ### Mar 5, 2026: v2.56.0
 
 * **(API)** Restricted Note Types are now accessible via the API.
-* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
+* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/connectors/upstream/toolreference/) for configuration instructions.
 * **(SAML)** SAML settings now support optional group attributes, allowing configurations that don't provide group mappings to work without errors.
 * **(SMTP)** Fixed an issue where DefectDojo would attempt SMTP authentication even when no credentials were configured, which could cause email delivery failures.
 * **(Universal Parser)** The Universal Parser now falls back to `clevercsv` for non-standard or malformed CSV files, improving compatibility with edge-case scanner outputs.
@@ -689,7 +729,7 @@ The Priority Insights dashboard can quickly render a list of all SOC or AppSec F
 
 - **(Calendar)** New filters have been added to Calendar view: Unassigned Lead, and Engagement/Test Type.
 - **(Dashboard)** Added Finding Status filter for Dashboard tiles.
-- **(Engagements)** A repository URI can be added to an Engagement via **Edit Engagement > Optional Fields > Repo**.  If this field is set, Findings under that Engagement will automatically generate clickable links to the source code if File Path is set on the Finding.  See [docs](/en/working_with_findings/organizing_engagements_tests/source-code-repositories/) for more details.
+- **(Engagements)** A repository URI can be added to an Engagement via **Edit Engagement > Optional Fields > Repo**.  If this field is set, Findings under that Engagement will automatically generate clickable links to the source code if File Path is set on the Finding.  See [docs](/asset_modelling/os_hierarchy/os__source-code-repositories/) for more details.
 - **(Findings)** Added "Jira Issue URL" column to the CSV export of Finding tables.
 - **(Metrics)** Priority Dashboard has been added to Metrics, to display your organization's risk profile at a glance.
 ![image](images/pro_dashboard_priority.png)
@@ -732,7 +772,7 @@ Hotfix release - no significant feature changes.
 
 #### Apr 14, 2025: v2.45.1
 
-- **(Connectors)** Added a Connector for Wiz: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
+- **(Connectors)** Added a Connector for Wiz: see [tools reference](/connectors/upstream/toolreference/) for configuration instructions.
 
 #### Apr 7, 2025: v2.45.0
 
@@ -744,7 +784,7 @@ Hotfix release - no significant feature changes.
 
 #### Mar 31, 2025: v2.44.4
 
-- **(Pro UI)** Group and Configuration permissions can now be assigned quickly from a User page.  For more information, see [DefectDojo Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/).
+- **(Pro UI)** Group and Configuration permissions can now be assigned quickly from a User page.  For more information, see [DefectDojo Pro Permissions](/admin/user_management/pro_permissions_overhaul/).
 
 #### Mar 24, 2025: v2.44.3
 
@@ -752,7 +792,7 @@ Hotfix release - no significant feature changes.
 
 #### Mar 17, 2025: v2.44.2
 
-- **(Pro UI)** Added a new method to quickly assign permissions to Products or Product Types.  See our [Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/) for more details.
+- **(Pro UI)** Added a new method to quickly assign permissions to Products or Product Types.  See our [Pro Permissions](/admin/user_management/pro_permissions_overhaul/) for more details.
 
 ![image](images/pro_permissions_2.png)
 

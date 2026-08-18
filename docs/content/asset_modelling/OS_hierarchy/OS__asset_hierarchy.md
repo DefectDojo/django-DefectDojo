@@ -4,6 +4,7 @@ description: "Understand Organizations, Assets, Engagements, Tests and Findings"
 weight: 1
 audience: opensource
 aliases:
+  - "/asset_modelling/hierarchy/product_hierarchy/"
   - /en/working_with_findings/organizing_engagements_tests/product_hierarchy
   - /asset_modelling/os_hierarchy/product_hierarchy/
   - /en/asset_modelling/os_hierarchy/product_hierarchy/

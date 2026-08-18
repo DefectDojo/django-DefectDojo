@@ -9,6 +9,18 @@ on:
       - bugfix
       - release/**
       - hotfix/**
+    # Skip the heavy suite for docs-only pull requests. paths-ignore only skips a
+    # PR whose changes are ENTIRELY under docs/ -- touch any code alongside the
+    # docs and the full matrix runs, so this never under-tests real changes.
+    #
+    # This filter deliberately lives on pull_request only. The merge_group trigger
+    # below stays unfiltered because GitHub ignores paths/paths-ignore for
+    # merge_group events: a docs-only PR is still built and tested in full when it
+    # reaches the queue, and `Unit Tests Complete` is still produced there -- so
+    # the required check never hangs pending. (Same merge_group + required-check
+    # reasoning is documented in ruff.yml.)
+    paths-ignore:
+      - 'docs/**'
   # Run the suite against the speculative merge commit a merge queue builds, which
   # is the only thing that tests what will actually land: two pull requests can
   # each be green on their own and broken in combination, and nothing before this

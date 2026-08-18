@@ -6,6 +6,10 @@ sidebar:
     collapsed: true
 weight: -900000000
 aliases:
+  - "/changelog/os_upgrading/upgrading_guide/"
+  - "/en/open_source/upgrading/upgrading_guide"
+  - "/en/open_source/upgrading/upgrading_guide/"
+  - "/releases/os_upgrading/2.52/upgrading_guide"
   - /en/open_source/upgrading/
 ---
 

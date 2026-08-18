@@ -4,6 +4,19 @@ description: "Send HTTP webhook notifications to an external server on DefectDoj
 weight: 8
 audience: opensource
 aliases:
+  - "/en/open_source/notification_webhooks/"
+  - "/en/open_source/notification_webhooks/engagement_added/"
+  - "/en/open_source/notification_webhooks/ping/"
+  - "/en/open_source/notification_webhooks/scan_added/"
+  - "/open_source/notification_webhooks/"
+  - "/open_source/notification_webhooks/engagement_added/"
+  - "/open_source/notification_webhooks/how_to/"
+  - "/open_source/notification_webhooks/ping/"
+  - "/open_source/notification_webhooks/product_added"
+  - "/open_source/notification_webhooks/product_added/"
+  - "/open_source/notification_webhooks/scan_added/"
+  - "/open_source/notification_webhooks/test_added"
+  - "/open_source/notification_webhooks/test_added/"
   - /en/open_source/notification_webhooks/how_to
 ---
 

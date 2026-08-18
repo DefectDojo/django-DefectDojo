@@ -1,6 +1,8 @@
 ---
 title: "Bugcrowd API"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/api/bugcrowd/"
 ---
 > **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
 >

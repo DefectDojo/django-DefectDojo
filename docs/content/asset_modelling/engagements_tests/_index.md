@@ -5,4 +5,6 @@ draft: false
 type: docs
 weight: 1
 exclude_search: true
+aliases:
+  - "/en/working_with_findings/organizing_engagements_tests/"
 ---
