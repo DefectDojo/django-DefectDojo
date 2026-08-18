@@ -17,7 +17,6 @@ SEVERITY_MAPPING = {
 
 
 class OscalParser:
-
     """
     NIST OSCAL 1.2.3 (Open Security Controls Assessment Language) Assessment Results Parser.
 
