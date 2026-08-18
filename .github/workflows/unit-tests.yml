@@ -9,18 +9,13 @@ on:
       - bugfix
       - release/**
       - hotfix/**
-    # Skip the heavy suite for docs-only pull requests. paths-ignore only skips a
-    # PR whose changes are ENTIRELY under docs/ -- touch any code alongside the
-    # docs and the full matrix runs, so this never under-tests real changes.
-    #
-    # This filter deliberately lives on pull_request only. The merge_group trigger
-    # below stays unfiltered because GitHub ignores paths/paths-ignore for
-    # merge_group events: a docs-only PR is still built and tested in full when it
-    # reaches the queue, and `Unit Tests Complete` is still produced there -- so
-    # the required check never hangs pending. (Same merge_group + required-check
-    # reasoning is documented in ruff.yml.)
-    paths-ignore:
-      - 'docs/**'
+    # No paths/paths-ignore here, ever. `Unit Tests Complete` below is a required
+    # check on bugfix, and a required check whose workflow never triggers sits as
+    # "Expected -- waiting for status to be reported" forever. A PR must pass its
+    # required checks BEFORE it can enter the merge queue, so a trigger-level
+    # docs/** filter left docs-only PRs unqueueable for anyone without ruleset
+    # bypass. Docs-only PRs skip the heavy jobs via the `changes` job instead,
+    # which keeps the gate context reporting on every PR.
   # Run the suite against the speculative merge commit a merge queue builds, which
   # is the only thing that tests what will actually land: two pull requests can
   # each be green on their own and broken in combination, and nothing before this
@@ -52,8 +47,39 @@ jobs:
     uses: ./.github/workflows/ruff.yml
     secrets: inherit
 
+  # Detect a docs-only pull request so the heavy jobs below can skip themselves
+  # while `Unit Tests Complete` still reports. Only the pull_request event is
+  # inspected: on merge_group and workflow_dispatch the step is skipped, the
+  # output stays empty, and every `!= 'true'` guard runs the full suite -- the
+  # queue always tests the complete matrix on the speculative merge commit.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.filter.outputs.docs_only }}
+    steps:
+      - name: Detect a docs-only pull request
+        id: filter
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Fail open: if the file listing errors, docs_only stays false and the
+        # full suite runs. This step must never fail the job -- a red `changes`
+        # job would skip the heavy chain and fail the gate for every PR.
+        run: |
+          docs_only=false
+          if files=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files" --paginate --jq '.[].filename'); then
+            if [ -n "${files}" ] && ! echo "${files}" | grep -qv '^docs/'; then
+              docs_only=true
+            fi
+          fi
+          echo "docs_only=${docs_only}" >> "${GITHUB_OUTPUT}"
+
   build-docker-containers:
-    needs: ruff
+    needs: [ ruff, changes ]
+    # Docs-only PRs skip the whole heavy chain (the test-* jobs skip with this
+    # job via their needs). The gate below only accepts a skipped dependency
+    # when docs_only is true, so this can never silently under-test code.
+    if: needs.changes.outputs.docs_only != 'true'
     strategy:
         matrix:
           # Two tiers, one workflow. Pull requests build amd64 only; the merge
@@ -63,9 +89,10 @@ jobs:
           # the queue tests the exact commit that would land, where it costs one
           # queue ejection instead of a bad merge.
           #
-          # Tiering must shrink MATRICES, never skip whole jobs: the
-          # unit-tests-complete gate requires every job in its `needs` to report
-          # success, and a skipped job reports skipped. Same jobs, fewer cells.
+          # Tiering shrinks MATRICES, it does not skip jobs: the
+          # unit-tests-complete gate treats a skipped dependency as a failure
+          # (except on a docs-only PR, the one skip it explicitly allows).
+          # Same jobs, fewer cells.
           platform: ${{ github.event_name == 'pull_request' && fromJSON('["linux/amd64"]') || fromJSON('["linux/amd64", "linux/arm64"]') }}
         fail-fast: false
     uses: ./.github/workflows/build-docker-images-for-testing.yml
@@ -129,6 +156,7 @@ jobs:
     # instead of failing it.
     if: always()
     needs:
+      - changes
       - ruff
       - build-docker-containers
       - test-performance
@@ -138,17 +166,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Verify every job succeeded
-        # A skipped or cancelled dependency is not a pass. Checking explicitly
-        # rather than relying on this job's own conclusion, because a job whose
-        # needs were skipped can otherwise report success by omission.
+        # A skipped or cancelled dependency is not a pass, with one exception:
+        # on a docs-only pull request the heavy jobs skip by design, and this
+        # gate must still report success or the PR can never enter the merge
+        # queue (a required check that never reports blocks queue entry).
+        # Checking explicitly rather than relying on this job's own conclusion,
+        # because a job whose needs were skipped can otherwise report success
+        # by omission.
         run: |
+          docs_only="${{ needs.changes.outputs.docs_only }}"
           results="${{ join(needs.*.result, ' ') }}"
-          echo "dependency results: ${results}"
+          echo "dependency results: ${results} (docs_only: ${docs_only})"
           for result in ${results}; do
-            if [ "${result}" != "success" ]; then
-              echo "::error::At least one job did not succeed (${results})"
-              exit 1
+            if [ "${result}" = "success" ]; then
+              continue
             fi
+            if [ "${result}" = "skipped" ] && [ "${docs_only}" = "true" ]; then
+              continue
+            fi
+            echo "::error::At least one job did not succeed (${results})"
+            exit 1
           done
           echo "All jobs succeeded."
 
