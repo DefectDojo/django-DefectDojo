@@ -9,6 +9,13 @@ jobs:
   setting_minikube_cluster:
     name: Kubernetes Deployment
     runs-on: ubuntu-latest
+    # Hard ceiling for the whole job. Without it a hang in any step falls through
+    # to GitHub's 360-minute (6-hour) default, which is how this job has run for
+    # hours. The individual steps below are timed, but the two slowest-to-stall
+    # ones -- minikube bring-up and the download-artifact/helm-dependency steps --
+    # were not, so this cap is the backstop that covers every step regardless.
+    # A healthy run finishes in well under 20 minutes; 30 leaves headroom.
+    timeout-minutes: 30
 
     strategy:
       matrix:
@@ -25,6 +32,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Minikube
+        timeout-minutes: 10
         uses: manusa/actions-setup-minikube@b65276017fdec6f1e6498129fb740e34e260dc55 # v2.18.0
         with:
           minikube version: 'v1.38.1' # renovate: datasource=github-releases depName=kubernetes/minikube
@@ -55,6 +63,7 @@ jobs:
              docker images
 
       - name: Configure HELM repos
+        timeout-minutes: 5
         run: |-
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
