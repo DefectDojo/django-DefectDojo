@@ -173,6 +173,8 @@ Menu 2.0 is on by default everywhere as of DefectDojo Pro 3.2.200. An instance t
 
 While it is off, the **All Settings** page is unavailable and its URL returns Not Found.
 
+> **Menu 2.0 becomes the standard in the 3.3.0 release (September 8, 2026).** That release removes the classic sidebar and this toggle, so every instance moves to Menu 2.0. An instance still on the classic layout switches automatically on upgrade; turn Menu 2.0 on beforehand if you would rather move on your own schedule. In the patch releases leading up to 3.3.0, a banner in the app reminds anyone still on the classic layout.
+
 ## Related
 
 * [Menu Badges](/navigation/pro__menu_badges/): what the `NEW`, `BETA`, `SOON`, `LEGACY` and `DEPRECATED` tags mean
