@@ -23,7 +23,7 @@ Sensei has two capabilities that share one hub. **AppSec** scans and fixes sourc
 ## Requirements
 
 - A **DefectDojo Pro** license that includes the **Sensei** feature, with a **cloud-account quota** (`sensei_cloud_account_limit`).
-- The **Cloud Posture** feature flag enabled, and the **Locations** feature enabled — a cloud finding is identified by the cloud *resource* it concerns rather than a file and line, and Locations is what records that. Without Locations, cloud onboarding is not offered (see [Troubleshooting](#troubleshooting)).
+- The **Locations** feature enabled — a cloud finding is identified by the cloud *resource* it concerns rather than a file and line, and Locations is what records that. Without Locations, cloud onboarding is not offered (see [Troubleshooting](#troubleshooting)). CSPM itself needs no feature flag: it is part of Sensei, so the Sensei license unlocks it.
 - A **read-only scan credential** for each provider (details below).
 - To **onboard** accounts and **manage connections**: a global **Maintainer** or **Owner** role. To **run a direct fix or revert one**: at least **Writer** access to the finding's Asset — a direct fix mutates live cloud state, so it is an edit of the finding.
 
@@ -128,7 +128,7 @@ CSPM meters against two quotas, both shown as cards at the top of the hub:
 
 ## Troubleshooting
 
-- **Cloud onboarding is not offered / the CSPM capability is missing.** CSPM requires both the **Cloud Posture** feature flag and the **Locations** feature. A cloud finding has no identity without a resource location, so with Locations off, onboarding is refused. Ask a DefectDojo administrator to enable them.
+- **Cloud onboarding is not offered.** CSPM requires the **Locations** feature. A cloud finding has no identity without a resource location, so with Locations off, onboarding is refused (the CSPM capability itself still appears). Enable Locations on the **Settings > Feature Flags** page — the Sensei hub links there from the prompt — then onboard a cloud account.
 - **"No cloud-account quota is available."** Your license carries no `sensei_cloud_account_limit`, or it is used up. Contact your DefectDojo administrator to raise it.
 - **The fix button shows "Fix" or "Configure Asset" on a cloud finding, not "Fix in Cloud."** The finding is not directly remediable — either the account has no write credential / remediation is not enabled, or the finding's check has no v1 direct action. It can still be fixed by an IaC pull request.
 - **A revert failed with a drift error.** The live resource changed out-of-band since the fix was applied, so the recorded prior state no longer matches. Reconcile the resource manually; Sensei refuses to overwrite an unexpected state.
