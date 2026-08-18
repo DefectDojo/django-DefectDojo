@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -70,7 +69,7 @@ class WizcliParsers:
                     )
                     findings.append(finding)
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     lib_name_raw = library.get("name")
                     lib_version_raw = library.get("version")
                     lib_path_raw = library.get("path", "")
@@ -113,7 +112,7 @@ class WizcliParsers:
                     mitigation=None,
                     test=test,
                 )
-                if settings.V3_FEATURE_LOCATIONS and file_name:
+                if locations_enabled() and file_name:
                     finding.unsaved_locations.append(
                         LocationData.code(
                             file_path=file_name,
@@ -167,7 +166,7 @@ class WizcliParsers:
                             mitigation=None,
                             test=test,
                         )
-                        if settings.V3_FEATURE_LOCATIONS and file_name:
+                        if locations_enabled() and file_name:
                             finding.unsaved_locations.append(
                                 LocationData.code(
                                     file_path=file_name,

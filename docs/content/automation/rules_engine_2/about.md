@@ -71,7 +71,7 @@ Conditions and message templates are written against the paths in that structure
 
 ### Owner
 
-Every rule runs **as its owner**. It sees exactly the Findings that user can see, through the same authorization used everywhere else in the product. Two consequences are worth knowing:
+Every rule runs **as its owner**. It sees exactly the Findings that user can see, through the same authorization used everywhere else in the Asset. Two consequences are worth knowing:
 
 * Narrowing a rule owner's access narrows the rule.
 * A rule whose owner's account is deleted has no owner, so it matches nothing at all and does nothing. Assign a new owner, or use **Take Ownership** from the rule list, to bring it back.

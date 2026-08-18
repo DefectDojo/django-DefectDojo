@@ -23,14 +23,14 @@ If you need to access an API token for a script or another integration, you can 
 
 ### General API Considerations
 
-* Although our OpenAPI documentation is detailed regarding the parameters that can be used with each endpoint, it assumes that the reader has a solid understanding of DefectDojo’s key concepts. (Product Hierarchy, Findings, Deduplication, etc).
+* Although our OpenAPI documentation is detailed regarding the parameters that can be used with each endpoint, it assumes that the reader has a solid understanding of DefectDojo’s key concepts. (Asset Hierarchy, Findings, Deduplication, etc).
 * Users who want a working import integration but are less familiar with DefectDojo as a whole should consider our **Universal Importer**.
 * DefectDojo’s API can sometimes create unintended data objects, particularly if ‘Auto\-Create Context’ is used on the **/import** or **/reimport** endpoint.
 * Fortunately, it is very difficult to accidentally delete data using the API. Most objects can only be removed using a dedicated **DELETE** call to the relevant endpoint.
 
 ### Specific notes on /import and /reimport endpoints
 
-The **/reimport** endpoint can be used for both an initial Import, or a “Reimport” which extends a Test with additional Findings. You do not need to first create a Test with **/import** before you can use the **/reimport** endpoint. As long as ‘Auto Create Context’ is enabled, the /reimport endpoint can create a new Test, Engagement, Product or Product Type. In almost all cases, you can use the **/reimport** endpoint exclusively when adding data via API.
+The **/reimport** endpoint can be used for both an initial Import, or a “Reimport” which extends a Test with additional Findings. You do not need to first create a Test with **/import** before you can use the **/reimport** endpoint. As long as ‘Auto Create Context’ is enabled, the /reimport endpoint can create a new Test, Engagement, Asset or Organization. In almost all cases, you can use the **/reimport** endpoint exclusively when adding data via API.
 
 However, the **/import** endpoint can instead be used for a pipeline where you always want to store each scan result in a discrete Test object, rather than using **/reimport** to handle the diff within a single Test object. Either option is acceptable, and the endpoint you choose depends on your reporting structure, or whether you need to inspect an isolated run of a Pipeline.
 

@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
     from django.db.models import Model
 
-from django.conf import settings
 from django.db.models import Q
 from tagulous.models.managers import FakeTagRelatedManager
 
@@ -21,6 +20,7 @@ from tagulous.models.managers import FakeTagRelatedManager
 # (signals registration, importers, the per-model ``inherit_tags()`` shim
 # in ``dojo.models``), the full model layer is initialised.
 from dojo.celery import app
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.tags.utils import bulk_add_tag_mapping, bulk_remove_tags_from_instances
@@ -189,7 +189,7 @@ def propagate_tags_on_product_sync(product):
         Finding.objects.filter(test__engagement__product=product).values_list("pk", flat=True),
         target_tag_names=inherited_tag_names,
     )
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         logger.debug("Propagating tags from %s to all locations", product)
         # Locations can be linked to multiple products, so the inherited target
         # is the union of every related product's tags. Materialize the full
@@ -282,7 +282,7 @@ def apply_inherited_tags_for_findings(findings):
         finding_ids,
         target_tag_names=inherited_tag_names,
     )
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         locations_by_pk = {
             loc.pk: loc
             for loc in Location.objects.filter(

@@ -27,7 +27,7 @@ with it. This parser therefore behaves exactly like the CycloneDX parser:
 
 * **Packages become component inventory**, recorded as dependency locations on the test (PURL, name,
   version, checksums, license expression). They do **not** become findings. An installed package is not
-  a weakness, and creating one finding per package would fill a product with rows nobody can remediate.
+  a weakness, and creating one finding per package would fill an Asset with rows nobody can remediate.
 * **Findings are created only from a genuine weakness signal**: an external reference in the `SECURITY`
   category whose reference type is advisory-shaped (`advisory`, `fix`, `url`, `swid`) **and** whose
   locator or comment names a vulnerability identifier (`CVE-…` or `GHSA-…`).

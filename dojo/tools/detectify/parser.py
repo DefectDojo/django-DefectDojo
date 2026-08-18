@@ -4,8 +4,7 @@ from contextlib import suppress
 from datetime import datetime
 from urllib.parse import urlparse
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -309,7 +308,7 @@ class DetectifyParser:
                 return
             data = {"host": parsed.hostname, "protocol": parsed.scheme or None, "port": parsed.port}
             path = parsed.path or None
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations.append(LocationData.url(path=path, **data))
             else:
                 # TODO: Delete this after the move to Locations

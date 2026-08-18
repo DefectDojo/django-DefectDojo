@@ -11,6 +11,7 @@ from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
+from dojo.location.feature import locations_enabled
 from dojo.location.queries import location_prefetch_lookups
 from dojo.models import Endpoint_Status, Finding, System_Settings
 from dojo.vulnerability.queries import vulnerability_id_prefetch
@@ -311,7 +312,7 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
         deduplicationLogger.debug("deduplication by endpoint fields is disabled")
         return True
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Use unsaved_locations for unsaved findings (preview mode), saved M2M otherwise
         list1 = finding_locations(new_finding.locations.all()) if new_finding.pk else unsaved_url_locations(new_finding)
         list2 = finding_locations(to_duplicate_finding.locations.all()) if to_duplicate_finding.pk else unsaved_url_locations(to_duplicate_finding)
@@ -381,7 +382,7 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
 
     prefetch_list = [*location_prefetch_lookups(), vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         # TODO: Delete this after the move to Locations
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
@@ -704,7 +705,7 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             flag_locations = False
             flag_line_path = False
 

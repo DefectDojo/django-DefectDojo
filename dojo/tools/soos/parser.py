@@ -5,8 +5,7 @@ from datetime import date as _date
 from ipaddress import ip_address
 from urllib.parse import urlparse
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -261,7 +260,7 @@ class SoosParser:
                 # import. The URL is still in the description either way.
                 return
             path = (parsed.path or "").lstrip("/")
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations.append(LocationData.url(
                     host=host, protocol=parsed.scheme or None, port=parsed.port,
                     path=path, query=parsed.query,

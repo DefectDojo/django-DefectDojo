@@ -19,7 +19,7 @@ This will open the **Edit Finding** form, where you can edit the metadata, chang
 
 ### Edit Finding Form: Fields
 
-* **"Test" cannot be edited:** Findings always have to be associated with a Test object, and cannot be moved out of that context. However, the Engagement containing a Test can be moved to another Product.  
+* **"Test" cannot be edited:** Findings always have to be associated with a Test object, and cannot be moved out of that context. However, the Engagement containing a Test can be moved to another Asset.  
 ​
 * **Found By** is the scan tool which discovered this Finding. Note that you can add additional scan tools beyond the tool associated with the Test.  
 ​
@@ -72,7 +72,7 @@ Through the Bulk Update Actions menu, you can apply the following changes to any
 * Update the **Severity**
 * Apply a new **Finding Status**
 * Change the Discovery or Planned Remediation Date of the Findings
-* Add a **Simple Risk Acceptance,** if the option is enabled at the Product level
+* Add a **Simple Risk Acceptance,** if the option is enabled at the Asset level
 * Apply **Tags** or **Notes** to all of the selected Findings.
 
 ![image](images/Bulk_Editing_Findings_2.png)
@@ -87,7 +87,7 @@ This page allows you to add a **Full Risk Acceptance** to the selected Findings.
 
 This page allows you to create a new Finding Group from the Selected Findings, or add them to an existing Finding Group.
 
-However, Finding Groups can only be created within an individual **Test** \- Findings from different Tests, Engagements or Products cannot be added to the same Finding Group.
+However, Finding Groups can only be created within an individual **Test** \- Findings from different Tests, Engagements or Assets cannot be added to the same Finding Group.
 
 ![image](images/Bulk_Editing_Findings_4.png)
 

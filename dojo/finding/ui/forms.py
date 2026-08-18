@@ -1,6 +1,5 @@
 import tagulous
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -10,6 +9,7 @@ from dojo.endpoint.utils import validate_endpoints_to_add
 from dojo.finding.cwe import cwe_number, parse_cwes
 from dojo.finding.queries import get_authorized_findings
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.utils import validate_locations_to_add
 from dojo.models import (
@@ -265,7 +265,7 @@ class AddFindingForm(CweFormMixin, forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if settings.V3_FEATURE_LOCATIONS and product:
+        if locations_enabled() and product:
             self.fields["endpoints"].queryset = Location.objects.filter(products__product=product)
         # TODO: Delete this after the move to Locations
         elif product:
@@ -294,7 +294,7 @@ class AddFindingForm(CweFormMixin, forms.ModelForm):
             msg = "Active findings cannot be risk accepted."
             raise forms.ValidationError(msg)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
         else:
             # TODO: Delete this after the move to Locations
@@ -373,7 +373,7 @@ class AdHocFindingForm(CweFormMixin, forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if settings.V3_FEATURE_LOCATIONS and product:
+        if locations_enabled() and product:
             self.fields["endpoints"].queryset = Location.objects.filter(products__product=product)
         # TODO: Delete this after the move to Locations
         elif product:
@@ -399,7 +399,7 @@ class AdHocFindingForm(CweFormMixin, forms.ModelForm):
             msg = "False positive findings cannot be verified."
             raise forms.ValidationError(msg)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
         else:
             # TODO: Delete this after the move to Locations
@@ -468,7 +468,7 @@ class PromoteFindingForm(CweFormMixin, forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if settings.V3_FEATURE_LOCATIONS and product:
+        if locations_enabled() and product:
             self.fields["endpoints"].queryset = Location.objects.filter(products__product=product)
         # TODO: Delete this after the move to Locations
         elif product:
@@ -484,7 +484,7 @@ class PromoteFindingForm(CweFormMixin, forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
         else:
             # TODO: Delete this after the move to Locations
@@ -574,7 +574,7 @@ class FindingForm(CweFormMixin, forms.ModelForm):
         if self.instance and self.instance.pk:
             self.fields["cwes"].initial = "\n".join(self.instance.cwes)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             self.fields["endpoints"].queryset = Location.objects.filter(products__product=self.instance.test.engagement.product)
             if self.instance and self.instance.pk:
                 self.fields["endpoints"].initial = Location.objects.filter(findings__finding=self.instance)
@@ -641,7 +641,7 @@ class FindingForm(CweFormMixin, forms.ModelForm):
             msg = "Active findings cannot be risk accepted."
             raise forms.ValidationError(msg)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
         else:
             # TODO: Delete this after the move to Locations

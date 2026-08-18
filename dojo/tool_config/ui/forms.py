@@ -7,12 +7,23 @@ from dojo.tool_type.models import Tool_Type
 
 
 class ToolConfigForm(forms.ModelForm):
+    # Stored values are never sent back to the browser. A blank submission means
+    # "unchanged", which dojo.tool_config.ui.views applies on save.
+    CREDENTIAL_FIELDS = ("password", "ssh", "api_key")
+
     tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label=_("Tool Type"))
+    password = forms.CharField(widget=forms.PasswordInput, required=False, max_length=900)
     ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label=_("SSH Key"))
+    api_key = forms.CharField(widget=forms.PasswordInput, required=False, max_length=900, label=_("API Key"))
 
     class Meta:
         model = Tool_Configuration
         exclude = ["product"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.CREDENTIAL_FIELDS:
+            self.initial[field] = ""
 
     def clean(self):
         form_data = self.cleaned_data

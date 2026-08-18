@@ -158,6 +158,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
                 ),
                 user=request.user,
             ),
+            user=request.user,
         )
         # Gather all findings related to any of the locations for this host.
         all_findings = base_findings.filter(
@@ -273,7 +274,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
         view_name += " Hosts"
         locations = URLFilter(
             request.GET,
-            queryset=annotate_host_contents(locations.order_by("url__host").distinct("url__host")),
+            queryset=annotate_host_contents(locations.order_by("url__host").distinct("url__host"), user=request.user),
             user=request.user,
         )
         location_count = locations.qs.count()
@@ -281,7 +282,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     else:
         # Endpoint view: show all endpoints with overall status annotation
         view_name += " Endpoints"
-        locations = URLFilter(request.GET, queryset=annotate_location_counts_and_status(locations), user=request.user)
+        locations = URLFilter(request.GET, queryset=annotate_location_counts_and_status(locations, user=request.user), user=request.user)
         # Count total and mitigated endpoints after filtering
         location_count = locations.qs.count()
         mitigated_location_count = locations.qs.filter(overall_status=ProductLocationStatus.Mitigated).count()

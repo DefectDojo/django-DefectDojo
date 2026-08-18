@@ -1,8 +1,7 @@
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -98,7 +97,7 @@ class TruffleHogParser:
                     nb_occurences=1,
                 )
 
-                if settings.V3_FEATURE_LOCATIONS and file:
+                if locations_enabled() and file:
                     finding.unsaved_locations.append(
                         # line is None: the scalar 0 above is a fake value for deduplication only
                         LocationData.code(file_path=file),
@@ -204,7 +203,7 @@ class TruffleHogParser:
                     verified=verified,
                     nb_occurences=1,
                 )
-                if settings.V3_FEATURE_LOCATIONS and file:
+                if locations_enabled() and file:
                     finding.unsaved_locations.append(
                         LocationData.code(file_path=file, line=line_number or None),
                     )

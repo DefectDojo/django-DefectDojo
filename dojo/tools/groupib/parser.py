@@ -5,8 +5,7 @@ from datetime import date as _date
 from ipaddress import ip_address
 from urllib.parse import urlparse
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -249,7 +248,7 @@ class GroupibParser:
             finding.component_name = asset
             return
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(
                 LocationData.url(host=host, port=port, protocol=protocol),
             )

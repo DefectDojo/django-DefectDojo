@@ -43,8 +43,8 @@ attributed to the user who triggered it.
 | Object                         | Create | Update | Delete | Notes                                          |
 | ------------------------------ | :----: | :----: | :----: | ---------------------------------------------- |
 | User                           |   ✅   |   ✅   |   ✅   | `password` excluded from snapshots             |
-| Product Type                   |   ✅   |   ✅   |   ✅   |                                                |
-| Product                        |   ✅   |   ✅   |   ✅   |                                                |
+| Organization                   |   ✅   |   ✅   |   ✅   |                                                |
+| Asset                        |   ✅   |   ✅   |   ✅   |                                                |
 | Engagement                     |   ✅   |   ✅   |   ✅   |                                                |
 | Test                           |   ✅   |   ✅   |   ✅   |                                                |
 | Finding                        |   ✅   |   ✅   |   ✅   |                                                |
@@ -63,7 +63,7 @@ attributed to the user who triggered it.
 | Finding → Reviewers                | ✅  |   ✅   |
 | Finding → Tags                     | ✅  |   ✅   |
 | Finding → Inherited Tags           | ✅  |   ✅   |
-| Product → Tags                     | ✅  |   ✅   |
+| Asset → Tags                     | ✅  |   ✅   |
 | Engagement → Tags                  | ✅  |   ✅   |
 | Engagement → Inherited Tags        | ✅  |   ✅   |
 | Test → Tags                        | ✅  |   ✅   |
@@ -72,7 +72,7 @@ attributed to the user who triggered it.
 | Endpoint → Inherited Tags          | ✅  |   ✅   |
 | Finding Template → Tags            | ✅  |   ✅   |
 | App Analysis (Technology) → Tags   | ✅  |   ✅   |
-| Objects/Product → Tags             | ✅  |   ✅   |
+| Objects/Asset → Tags             | ✅  |   ✅   |
 
 ## Pro — tracked actions
 
@@ -102,10 +102,10 @@ attributed to the user who triggered it.
 | Role                          |   ✅   |   ✅   |   ✅   |
 | Group Membership              |   ✅   |   ✅   |   ✅   |
 | Global Role                   |   ✅   |   ✅   |   ✅   |
-| Product Group Assignment      |   ✅   |   ✅   |   ✅   |
-| Product Type Group Assignment |   ✅   |   ✅   |   ✅   |
-| Product Member                |   ✅   |   ✅   |   ✅   |
-| Product Type Member           |   ✅   |   ✅   |   ✅   |
+| Asset Group Assignment      |   ✅   |   ✅   |   ✅   |
+| Organization Group Assignment |   ✅   |   ✅   |   ✅   |
+| Asset Member                |   ✅   |   ✅   |   ✅   |
+| Organization Member           |   ✅   |   ✅   |   ✅   |
 
 ### Pro — relationship (add / remove) events
 

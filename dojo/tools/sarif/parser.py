@@ -4,9 +4,9 @@ import re
 import textwrap
 
 import dateutil.parser
-from django.conf import settings
 from django.utils.translation import gettext as _
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
@@ -218,7 +218,7 @@ class SarifParser:
                 references=get_references(rule),
             )
 
-            if settings.V3_FEATURE_LOCATIONS and file_path:
+            if locations_enabled() and file_path:
                 end_line = None
                 if location and "physicalLocation" in location:
                     end_line = location["physicalLocation"].get("region", {}).get("endLine")

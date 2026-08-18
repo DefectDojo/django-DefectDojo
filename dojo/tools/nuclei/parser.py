@@ -5,8 +5,8 @@ from urllib.parse import urlparse
 
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -87,7 +87,7 @@ class NucleiParser:
 
             location = None
             if matched:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     location = LocationData.url(url=matched) if "://" in matched else LocationData.url(url="//" + matched)
                     finding.unsaved_locations = [location]
                 else:
@@ -154,7 +154,7 @@ class NucleiParser:
                 host,
             )
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 dupe_host = (urlparse(matched).hostname or "") if matched else ""
             else:
                 # TODO: Delete this after the move to Locations
@@ -170,7 +170,7 @@ class NucleiParser:
                 logger.debug("dupe_key %s exists.", dupe_key)
                 finding = dupes[dupe_key]
                 if location:
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         if location not in finding.unsaved_locations:
                             finding.unsaved_locations.append(location)
                             logger.debug("Appended location %s", location)

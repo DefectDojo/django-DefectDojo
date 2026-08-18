@@ -174,6 +174,24 @@ Simple risk accepts the Finding, or adds it to a risk acceptance record.
 | **How** | `simple` | `simple` sets simple risk acceptance on the Finding. `acceptance` adds it to a risk acceptance record. |
 | **Accepted** | on | Shown for `simple`. Turn off to un-accept the risk. |
 | **Risk Acceptance** | none | Shown for `acceptance`. Which risk acceptance to add these Findings to. |
+| **Accept Without Review Up To** | No limit | The most severe Finding this rule may accept on its own. Anything more severe is **not** accepted. |
+
+#### Limiting what a rule may accept on its own
+
+A rule that can accept risk can accept a Critical, and by default nothing says otherwise. *Accept
+Without Review Up To* draws that line.
+
+Findings over the limit are not dropped — the rule matched them for a reason. With
+[Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled they
+are put into a Risk Acceptance **awaiting review**, named for the rule that asked and carrying why,
+so a person decides. They stay active and counted the whole time. With that feature off there is no
+review state to use, so they are simply left alone — never accepted, which is the point of the
+limit. A rule preview creates nothing, as with every other action.
+
+Two behaviours worth knowing: a severity the rule cannot recognise counts as *over* the limit (if it
+cannot be ranked it cannot be called safe), while a *limit* that cannot be recognised is ignored
+rather than blocking everything, because a rule that silently stops working is harder to notice than
+one that keeps going.
 
 ### Set Mitigation Policy
 
@@ -233,7 +251,7 @@ Creates or updates the JIRA issue for the Finding.
 | **Skip Findings That Already Have an Issue** | on | Leaves Findings that already have a JIRA issue alone. |
 | **Update an Existing Issue** | off | Shown when the skip above is off. Pushes Findings that already have an issue, so JIRA is updated. |
 
-The summary, description and priority come from the product's JIRA configuration, not from this node. A ticket a rule creates is therefore identical to one created by push all issues.
+The summary, description and priority come from the Asset's JIRA configuration, not from this node. A ticket a rule creates is therefore identical to one created by push all issues.
 
 ### Create a Downstream Ticket
 
@@ -243,7 +261,7 @@ Creates or updates a ticket through a [Downstream Connector](/connectors/downstr
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Issue Trackers** | `auto` | `auto` uses the issue trackers assigned to the engagement or product. `mapping` targets one specific mapping. |
+| **Issue Trackers** | `auto` | `auto` uses the issue trackers assigned to the engagement or Asset. `mapping` targets one specific mapping. |
 | **Issue Tracker Mapping** | none | Shown for `mapping`. Which mapping to push to. |
 | **Operation** | `create` | `create` a ticket, or `update` the one that exists. An update with no existing ticket creates it. |
 | **Skip Findings That Already Have a Ticket** | on | Leaves Findings that already have a ticket in the target mapping alone. |

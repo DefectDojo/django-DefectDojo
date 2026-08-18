@@ -46,6 +46,10 @@ from dojo.vulnerability.manager import VulnerabilityIdManager
 
 logger = logging.getLogger(__name__)
 
+# Number of times update_test_tags() re-runs Test.tags.set() when it loses a race against
+# tagulous' cleanup of unused tag rows (see set_test_tags_safe for the full explanation).
+TEST_TAG_SET_MAX_ATTEMPTS = 3
+
 
 class Parser:
 
@@ -437,7 +441,44 @@ class BaseImporter(ImporterOptions):
         # Make sure the list is not empty as we do not want to overwrite
         # any existing tags
         if self.tags is not None and len(self.tags) > 0:
-            self.test.tags.set(self.tags)
+            self.set_test_tags_safe()
+
+    def set_test_tags_safe(self):
+        """
+        Set the test's tags, retrying if a concurrent import races tagulous' tag cleanup.
+
+        Tagulous deletes tag rows whose reference count reaches zero. When two imports that
+        share a tag run at the same time, one can delete the ``dojo_tagulous_test_tags`` row
+        that the other's ``dojo_test_tags`` insert references, so the M2M write fails the
+        (deferred) foreign key check at commit with an IntegrityError -- surfacing as
+        ``Key (tagulous_test_tags_id)=(...) is not present in table
+        "dojo_tagulous_test_tags"``. Re-running ``.set()`` re-creates the vanished tag via
+        tagulous get_or_create and re-inserts the row, so a bounded retry clears the race.
+
+        The importer runs with no surrounding atomic block (no ATOMIC_REQUESTS, no atomic
+        around process_scan), so each attempt is wrapped in its own transaction: a losing
+        attempt rolls back cleanly and the next one starts fresh. Setting tags must never
+        fail an import whose findings are already saved, so a write that still fails after
+        every attempt is logged and swallowed -- the same way finding/endpoint tag writes
+        already tolerate this race in add_tags_safe().
+        """
+        test_id = getattr(self.test, "id", None)
+        for attempt in range(1, TEST_TAG_SET_MAX_ATTEMPTS + 1):
+            try:
+                with transaction.atomic():
+                    self.test.tags.set(self.tags)
+            except IntegrityError as e:
+                if attempt < TEST_TAG_SET_MAX_ATTEMPTS:
+                    logger.warning(
+                        "IntegrityError setting tags on test %s (attempt %d/%d), retrying: %s",
+                        test_id, attempt, TEST_TAG_SET_MAX_ATTEMPTS, e,
+                    )
+                    continue
+                logger.error(
+                    "Failed to set tags on test %s after %d attempts; leaving tags unchanged: %s",
+                    test_id, TEST_TAG_SET_MAX_ATTEMPTS, e,
+                )
+            return
 
     def apply_import_tags_for_batch(self, findings: list[Finding]) -> None:
         """

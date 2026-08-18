@@ -67,7 +67,7 @@ Sample Picus scans can be found in the [sample scan data folder](https://github.
 | actionMitreTechnique   | unsaved_tags              | Added as a tag when present                                                             |
 | actionMitreSubtechnique | unsaved_tags             | Added as a tag when present                                                             |
 | attackCategory         | unsaved_tags              | Added as a tag when present                                                             |
-| affectedProducts       | component_name            | The affected product reported by the simulation                                         |
+| affectedProducts       | component_name            | The affected Asset reported by the simulation                                         |
 | threatName             | description               | Included in the structured description table                                            |
 | actionName             | description               | Included in the structured description table                                            |
 | actionDescription      | description               | Included in the structured description table                                            |

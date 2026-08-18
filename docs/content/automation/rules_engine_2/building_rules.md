@@ -98,6 +98,29 @@ ctx.rule_name
 
 A path that does not resolve produces no value rather than an error.
 
+### Conditioning on an exception
+
+With [Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled,
+a rule can condition on what an acceptance is *doing*, not just on the `Risk Accepted` flag:
+
+```
+finding.has_pending_exception          somebody asked, nobody has answered
+finding.risk_acceptance_state          proposed / under_review / approved / rejected / active / expired
+finding.risk_acceptance_expiration_date
+finding.risk_acceptance_days_to_expiry negative once the date has passed
+finding.risk_acceptance_is_global
+```
+
+What that makes possible, for example: chase requests nobody has answered
+(`has_pending_exception eq true`), or warn an owner a week before an exception lapses
+(`risk_acceptance_days_to_expiry lte 7`). Because days-to-expiry goes negative rather than stopping
+at zero, "expired three days ago" is expressible too.
+
+With **Risk Acceptances 2.0** off these read empty — `false` for the boolean, nothing for the rest —
+so a rule written against them matches nothing rather than acting on a lifecycle the install does
+not use. Where a Finding is covered by more than one Risk Acceptance, they describe the earliest one
+it was accepted under.
+
 ### Available fields
 
 Each item carries a fixed set of Finding fields. This list is a contract, so it changes only deliberately.

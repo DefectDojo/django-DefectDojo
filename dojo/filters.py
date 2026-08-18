@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import six
 import tagulous
 from django.apps import apps
-from django.conf import settings
 from django.db.models import Count, Exists, Min, OuterRef, Q
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
@@ -39,6 +38,7 @@ from dojo.finding.helper import (
     WAS_ACCEPTED_FINDINGS_QUERY,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.models import (
     SEVERITY_CHOICES,
     App_Analysis,
@@ -1033,7 +1033,7 @@ class ApiDojoMetaFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             self.filters["endpoint"] = NumberFilter(field_name="endpoint", lookup_expr="exact")
 
     class Meta:

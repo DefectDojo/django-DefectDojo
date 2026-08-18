@@ -4,8 +4,7 @@ from contextlib import suppress
 from datetime import datetime
 from ipaddress import ip_address
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -328,7 +327,7 @@ class IntruderParser:
             with suppress(ValueError):
                 port = int(raw_port)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(LocationData.url(host=host, port=port))
         else:
             # TODO: Delete this after the move to Locations

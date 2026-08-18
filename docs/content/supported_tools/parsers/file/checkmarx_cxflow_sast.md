@@ -4,7 +4,7 @@ toc_hide: true
 ---
 
 CxFlow is a Spring Boot application written by Checkmarx that enables initiations of scans and result orchestration.
-CxFlow support interactive with various Checkmarx product.
+CxFlow support interactive with various Checkmarx Asset.
 This parser support JSON format export by bug tracker.
 
 ```

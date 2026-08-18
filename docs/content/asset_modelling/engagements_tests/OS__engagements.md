@@ -8,7 +8,7 @@ Organizations → Assets → **ENGAGEMENTS** → Tests → Findings
 
 ## Overview 
 
-In DefectDojo’s product hierarchy, Engagements are time- or pipeline-bound containers that represent groups of related Tests within a specific Product. If you have a planned testing effort scheduled, whether on a routine or one-time basis, an Engagement offers you a place to store all of the related results.
+In DefectDojo’s Asset hierarchy, Engagements are time- or pipeline-bound containers that represent groups of related Tests within a specific Asset. If you have a planned testing effort scheduled, whether on a routine or one-time basis, an Engagement offers you a place to store all of the related results.
 
 Examples of Engagements include: 
 - One-off penetration tests
@@ -54,25 +54,25 @@ As the containers that organize testing activity, Engagements can store or track
 
 ## Accessing Engagements 
 
-Engagements are accessible via the sidebar. The submenu provides access to Active Engagements and All Engagements, as well as the option to view Engagements as organized by Product, Test types, and Environments. 
+Engagements are accessible via the sidebar. The submenu provides access to Active Engagements and All Engagements, as well as the option to view Engagements as organized by Asset, Test types, and Environments. 
 
 ![image](images/engagement_ss17.png)
 
-Alternatively, Engagements within a particular Product can be accessed from the submenu of the Engagements option in the top bar.
+Alternatively, Engagements within a particular Asset can be accessed from the submenu of the Engagements option in the top bar.
 
 ![image](images/engagement_ss18.png)
 
 ### Permissions 
 
-Engagements sit below Products and above Tests in the object hierarchy. As such, access to a Product automatically grants access to all Engagements within that Product. Engagements do not have independent access control lists.
+Engagements sit below Assets and above Tests in the object hierarchy. As such, access to an Asset automatically grants access to all Engagements within that Asset. Engagements do not have independent access control lists.
 
 ## Working with Engagements
 
 ### Create Engagements 
 
-There are multiple approaches to creating an Engagement. Each approach requires that you first create a Product to contain it. 
+There are multiple approaches to creating an Engagement. Each approach requires that you first create an Asset to contain it. 
 
-Once you’ve created a Product, you can add a new Interactive or CI/CD Engagement in the Engagements section of the Product’s navigation bar.
+Once you’ve created an Asset, you can add a new Interactive or CI/CD Engagement in the Engagements section of the Asset’s navigation bar.
 
 ![image](images/engagement_ss4.png)
 
@@ -81,7 +81,7 @@ Every Engagement must have the following fields defined:
 - A unique name 
 - Target start and end dates 
     - This will determine the Engagement’s appearance in the Calendar section
-- Product
+- Asset
 - Status 
 
 #### Engagement Statuses
@@ -106,13 +106,13 @@ Engagements can be edited by clicking the **Edit** button within the Engagement�
 
 ### Copy Engagements 
 
-You can easily duplicate Engagements by navigating to the list of Engagements within a Product and clicking the **Copy** button from within the ⋮ kebab menu next to the Engagement to be copied. This will create an exact copy of the original Engagement within the parent Product, including the metadata, Tests, and Findings within it.
+You can easily duplicate Engagements by navigating to the list of Engagements within an Asset and clicking the **Copy** button from within the ⋮ kebab menu next to the Engagement to be copied. This will create an exact copy of the original Engagement within the parent Asset, including the metadata, Tests, and Findings within it.
 
 ![image](images/engagement_ss19.png)
 
 ### Close Engagements 
 
-Engagements can be closed by navigating to the list of Engagements within a Product and clicking “Close” from within the ⋮ kebab menu of the chosen Engagement. 
+Engagements can be closed by navigating to the list of Engagements within an Asset and clicking “Close” from within the ⋮ kebab menu of the chosen Engagement. 
 
 ![image](images/engagement_ss20.png)
 
@@ -120,7 +120,7 @@ Once closed, the Engagement’s status will be changed to “Completed.” Never
 
 Closing an Engagement does not change the status of the Findings within any of the Engagement’s Tests. Findings remain open, mitigated, or risk accepted according to their own lifecycle, and remain accessible for viewing and reporting.
 
-If the Engagement is linked to a Jira Epic (see **[Jira Integration: Enable Engagement Epic Mapping](/connectors/os_jira/os__jira_guide/#enable-engagement-epic-mapping-for-products)**), closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic in your connected Jira Space.
+If the Engagement is linked to a Jira Epic (see **[Jira Integration: Enable Engagement Epic Mapping](/connectors/os_jira/os__jira_guide/#enable-engagement-epic-mapping-for-assets)**), closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic in your connected Jira Space.
 
 ### Reopen Engagements 
 
@@ -164,13 +164,13 @@ Engagements can be linked to a connected Jira Space, allowing Findings within th
 
 ### Engagement Epic Mapping
 
-When **Enable Engagement Epic Mapping** is checked in a Product's Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo's Engagement → Findings hierarchy in Jira's Epic → Issue structure.
+When **Enable Engagement Epic Mapping** is checked in an Asset's Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo's Engagement → Findings hierarchy in Jira's Epic → Issue structure.
 
-For more information on this setting, see **[Enable Engagement Epic Mapping](/connectors/os_jira/os__jira_guide/#enable-engagement-epic-mapping-for-products)**.
+For more information on this setting, see **[Enable Engagement Epic Mapping](/connectors/os_jira/os__jira_guide/#enable-engagement-epic-mapping-for-assets)**.
 
 ### Engagement-Level Jira Settings
 
-By default, Engagements inherit their Jira settings from their parent Product. However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
+By default, Engagements inherit their Jira settings from their parent Asset. However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
 
 - **Project Key** — route Findings to a different Jira Space
 - **Issue Template** — use a different template for Issues created from this Engagement

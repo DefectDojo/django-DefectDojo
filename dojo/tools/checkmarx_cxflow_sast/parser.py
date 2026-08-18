@@ -3,8 +3,8 @@ import logging
 from dataclasses import dataclass
 
 import dateutil.parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -140,7 +140,7 @@ class CheckmarxCXFlowSastParser:
                         verified=self.is_verify(detail.state),
                         active=self.is_active(detail.state),
                     )
-                    if settings.V3_FEATURE_LOCATIONS and filename:
+                    if locations_enabled() and filename:
                         finding.unsaved_locations.append(
                             LocationData.code(
                                 file_path=filename,

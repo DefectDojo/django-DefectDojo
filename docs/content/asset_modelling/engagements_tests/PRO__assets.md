@@ -110,6 +110,16 @@ All ensuing fields that can be edited are also available when the Asset is being
 
 ![image](images/assets_ss2.png)
 
+### Export the Asset Inventory
+
+The All Assets list can be exported from the dropdown menu in the top-right corner, as CSV, Excel or JSON. The All Organizations list exports the same way.
+
+The export contains the Assets the list is currently showing, so any filter or search you have applied narrows what you get. You choose which columns to include and the order they appear in, and you can name the file before it downloads.
+
+Alongside the identifying fields, the export carries the metadata that drives prioritization — business criticality, user records, revenue, external audience, internet accessible — together with platform, lifecycle, origin and the parent Asset. That makes an export a practical way to review the inventory in a spreadsheet, and to fill in the business context that only your team knows before bringing it back into DefectDojo.
+
+Values are written so a spreadsheet displays them rather than evaluating them. A cell that begins with `=`, `+`, `-` or `@` is treated as a formula by Excel, LibreOffice and Google Sheets, so DefectDojo prefixes such a value with an apostrophe when it writes the file. Numbers are left alone, so a revenue column still adds up.
+
 ### Delete Assets
 
 Deleting an Asset can be performed by selecting **Delete Asset** from the Asset’s settings. This action can’t be undone. Assets can’t be closed and reopened later. 

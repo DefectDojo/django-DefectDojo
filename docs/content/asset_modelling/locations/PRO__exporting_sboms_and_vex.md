@@ -9,6 +9,20 @@ DefectDojo Pro can serialize an Asset's current dependency inventory back out as
 
 Both endpoints require **V3 Locations** to be enabled, and respect Asset-level permissions: an Asset the requesting user cannot view returns a 404.
 
+## Exporting from the Asset page
+
+The Asset page carries an **Export** panel offering the same data without going through the API, in one of three shapes:
+
+| Export type | What the document contains |
+| --- | --- |
+| **SBOM** | The component inventory only. |
+| **VEX** | The vulnerability analysis only — a standalone document describing the exploitability of this Asset's findings. |
+| **SBOM with vulnerabilities (VDR)** | Both — the inventory with an embedded `vulnerabilities` block carrying the VEX analysis. |
+
+Each choice names the format and specification version it produces, for example *SBOM — component inventory only (CycloneDX 1.6)*. Those labels are read from the server as the panel renders rather than written into the page, so they describe the document you will actually receive: when the exporters adopt a newer specification, the labels follow rather than going stale.
+
+The Asset page and the API endpoints below emit the same specification version, so a document exported from either path is interchangeable with the other.
+
 ## Exporting an SBOM
 
 ```

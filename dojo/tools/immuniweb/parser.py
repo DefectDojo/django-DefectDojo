@@ -5,8 +5,8 @@ from datetime import datetime
 
 import dateutil
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -92,7 +92,7 @@ class ImmuniwebParser:
                 if vulnerability_id:
                     finding.unsaved_vulnerability_ids = [vulnerability_id]
                 # manage endpoint/location
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [LocationData.url(url=url)]
                 else:
                     # TODO: Delete this after the move to Locations
@@ -157,7 +157,7 @@ class ImmuniwebParser:
                 )
                 finding.unsaved_tags = [tag] if tag else None
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     locations = []
                     if item.get("link", None):
                         locations.append(LocationData.url(url=item["link"]) if "://" in item["link"] else LocationData.url(url="https://" + item["link"]))
