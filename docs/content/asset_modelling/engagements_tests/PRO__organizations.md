@@ -145,6 +145,60 @@ permission on **both** the Organization and the Asset.
   Organization type and parent are readable and writable on
   `/api/v2/organizations/` as `org_type` and `parent_organization`.
 
+## Roles Scoped to an Organization Type
+
+Roles are normally granted one Organization at a time. Deployments that opt in can
+also grant a role against an **Organization type**, so it applies to every
+Organization of that type at once — "this user is a Reader on every Compliance
+Scope". The grant is not a list of Organizations that gets expanded once; it is
+evaluated live, so an Organization created next month is covered the moment it is
+given that type, with nothing to backfill.
+
+This is useful wherever the audience is defined by the *kind* of boundary rather
+than by a fixed list: compliance auditors who must see every regulated scope,
+platform teams who need read access across every Team Organization, or
+executives reporting over every Portfolio.
+
+This behavior is managed by deployment configuration: set
+`DD_V3_ORGANIZATION_TYPE_ROLES=True` (self-hosted) or contact support (cloud). It is
+off by default, and while it is off a grant has no effect on access.
+
+### What a type-scoped grant does
+
+A type-scoped grant behaves in every respect as though the grantee held that role on
+each Organization of that type individually:
+
+- It grants access to those Organizations and to the Assets in them, with exactly the
+  permissions the role carries — a type-scoped Reader grant is still only a Reader.
+  Scoping widens *which* Organizations a role reaches, never what the role can do.
+- It follows the same union-of-grants rule described under
+  [Membership and access](#membership-and-access): with non-exclusive membership
+  enabled, it also reaches Assets that are members of a covered Organization through
+  a pin, rule, or connector, not only Assets whose home it is.
+- It is additive, like every other grant in DefectDojo. Access can only be widened by
+  a grant, never withdrawn by one, so a type-scoped grant can never reduce access
+  somebody already had.
+- It ignores [nesting](#nesting-within-a-type), which remains reporting-only. A grant
+  covers Organizations *of the type*, not the children of any one of them.
+
+An Organization is reached by a grant only while it actually carries that type.
+Re-typing an Organization moves it out of one grant's scope and into another's, which
+is worth knowing before re-typing a live Organization.
+
+### Managing type-scoped grants
+
+Because a type-scoped grant reaches Organizations that do not exist yet, it cannot be
+delegated through permissions on any single Organization. **Only superusers and global
+owners can view or manage these grants**, on the API at
+`/api/v2/organization_type_roles/` (filterable by `org_type`, `user`, `group`, and
+`role`). A grant names either a user or a group — a group grant applies to the group's
+members — and each grantee holds at most one role per type.
+
+Grants are created and revoked rather than edited: to change the role or the type,
+revoke the grant and create the replacement, which keeps the audit trail honest about
+what access existed when. Grants remain readable and revocable even if the feature is
+later switched off, so a deployment can always inspect and clean up what it created.
+
 ## Accessing Organizations
 
 Organizations are accessible via the sidebar. The submenu provides access to All Organizations as well as the option to create a new Organization.
