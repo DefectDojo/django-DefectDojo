@@ -1,0 +1,21 @@
+# DefectDojo vulnerability disclosure information (RFC 9116)
+# https://www.rfc-editor.org/rfc/rfc9116
+
+# Report security issues through the DefectDojo HackerOne disclosure program
+Contact: https://hackerone.com/defectdojo/reports/new
+
+# Coordinated disclosure policy and process
+Policy: https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/SECURITY.md
+
+Preferred-Languages: en
+
+Canonical: https://defectdojo.com/.well-known/security.txt
+Canonical: https://www.defectdojo.com/.well-known/security.txt
+Canonical: https://docs.defectdojo.com/.well-known/security.txt
+
+# NOTE: RFC 9116 requires the Expires field; this file must be refreshed
+# annually. Before the date below passes, bump Expires ~1 year ahead in BOTH
+# copies of this file:
+#   - HubSpot File Manager copy served at defectdojo.com (theme repo: well-known/)
+#   - docs/static/.well-known/security.txt in django-DefectDojo (docs site)
+Expires: 2027-08-01T00:00:00Z
