@@ -134,12 +134,29 @@ Each item carries a fixed set of Finding fields. This list is a contract, so it 
 | Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
 | Location | `file_path`, `line`, `component_name`, `component_version`, `service` |
 | Classification | `cwe`, `vulnerability_ids`, `tags` |
+| Exploit evidence | `exploit_maturity`, `kev_due_date`, `vex_state` |
+| Reachability | `reachability`, `reachability_confidence` |
 
-Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`), `product_type` (`id`, `name`), and `ctx`.
+Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`, `internet_accessible`, `business_criticality`, `exposure`), `product_type` (`id`, `name`), and `ctx`.
 
 Dates are ISO-8601 strings. That is deliberate: it means `gt` and `lt` order them correctly as text, so `2026-07-28` is correctly greater than `2026-01-01`.
 
 `priority`, `risk` and `risk_score` come from Pro's prioritization. A Finding that has not been scored yet carries no value for them.
+
+### Conditioning on exploitability and exposure
+
+Four of the fields above answer "is this actually exploitable, and can it be reached", which is what most remediation-priority rules are really asking.
+
+- `exploit_maturity` is a number: `0` none, `10` proof of concept, `20` weaponized, `30` observed being exploited in the wild. Greater-than comparisons work the way you would expect, so `exploit_maturity gte 20` means "weaponized or worse".
+- `kev_due_date` is CISA's own deadline for a vulnerability in the Known Exploited Vulnerabilities catalog, and is empty for anything not listed.
+- `vex_state` is the CycloneDX analysis verdict, when a VEX document has been imported: `exploitable`, `not_affected`, `in_triage`, `false_positive`, `resolved`, `resolved_with_pedigree`.
+- `reachability` is whether the vulnerable code can be reached *inside* the application: `reachable_runtime`, `reachable_static`, `potentially_reachable`, `unreachable`, `unknown`. `reachability_confidence` is a number from 0.0 to 1.0.
+
+Exposure is a separate question, and it lives on the asset rather than the Finding: `product.exposure` is whether the asset can be reached from *outside*, as `exposed_public`, `exposed_limited`, `reachable_private`, `internal_only` or `unknown`. `reachable_private` means an internal path exists but no internet one.
+
+`product.internet_accessible` is the older manual checkbox on the asset. Both are offered because they can disagree: the checkbox is what somebody ticked, while `exposure` is computed from the evidence connectors collect, and prefers an explicit override when one is set. A rule that means "reachable from the internet" usually wants `exposure`, falling back to the checkbox on an instance with no exposure evidence.
+
+These fields are populated by Pro's threat intelligence, reachability and asset-exposure features. Where a feature is off, its fields read empty (`reachability` reads `unknown`), so a rule written against them matches nothing rather than matching on half-populated data.
 
 ### Conditions
 
