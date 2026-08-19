@@ -122,7 +122,7 @@ The table below lists every DefectDojo finding field (output field) you can map 
 | Endpoints | | | The hosts/URLs within the product that are susceptible to this flaw. |
 | Vulnerability IDs | | | One or more vulnerability advisory identifiers associated with this finding (most commonly, CVEs). |
 | Reachability | | | The tool's verdict on whether the vulnerable code can be reached. Accepted values: `reachable_runtime`, `reachable_static`, `potentially_reachable`, `unreachable`. Unrecognized values are ignored. |
-| Asset exposure | | | The tool's verdict on whether the **asset** this flaw lives on can be reached from outside. Accepted values: `exposed_public`, `exposed_limited`, `reachable_private`. Unrecognized values are ignored. See [Asset exposure](../../../triage_findings/finding_scoring/asset_exposure/). |
+| Asset exposure | | | The tool's verdict on whether the **asset** this flaw lives on can be reached from outside. Accepted values: `exposed_public`, `exposed_limited`, `reachable_private`. Unrecognized values are ignored. See [Asset exposure](/triage_findings/finding_scoring/asset_exposure/). |
 
 > **Note:** In the example above, a `CVE` input field would be mapped to the **Vulnerability IDs** output field — DefectDojo does not have a finding field literally named "CVE".
 
