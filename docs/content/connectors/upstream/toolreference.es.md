@@ -14,6 +14,8 @@ Al configurar un Conector para una herramienta compatible, deberá proporcionar 
 * **Location** \-un campo que generalmente hace referencia a la URL de su herramienta dentro de su red,
 * **Secret** \- generalmente, una clave de API.
 
+Muchas herramientas usan un único host de API fijo. Para esas, DefectDojo completa el campo **Location** cuando agrega el Conector, así que no necesita copiar la URL de esta página. Conserve el valor que aparece. Cámbielo solo si su instancia usa otro host, por ejemplo una instalación autoalojada o una región distinta.
+
 Algunas herramientas requerirán campos adicionales relacionados con la API además de **Location** y **Secret**. También pueden requerir que realice cambios de su lado para admitir un Conector entrante desde DefectDojo.
 
 ![imagen](images/connectors_tool_reference.png)
@@ -274,7 +276,7 @@ Necesitará una **API key** de Bright, creada en la aplicación Bright en **User
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://app.brightsec.com`, o ingrese explícitamente su host de Bright.
+1. Conserve el valor ya rellenado en **Location**, `https://app.brightsec.com`, o ingrese explícitamente su host de Bright.
 2. Ingrese la API key de Bright en el campo **Secret**.
 3. Opcionalmente, configure una **Minimum Severity** para limitar qué hallazgos se importan.
 
@@ -551,7 +553,7 @@ Necesitará una **API key** de Escape, creada en la aplicación de Escape en **S
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://public.escape.tech/v2`, o introduzca explícitamente el host de la API de Escape.
+1. Conserve el valor ya rellenado en **Location**, `https://public.escape.tech/v2`, o introduzca explícitamente el host de la API de Escape.
 2. Introduzca la clave de API de Escape en el campo **Secret**.
 3. De forma opcional, defina una **Minimum Severity** para limitar qué hallazgos se importan.
 
@@ -569,7 +571,7 @@ Necesitará un nombre de **organización** de Fairwinds Insights y un **API toke
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://insights.fairwinds.com`, o introduzca explícitamente el host de Insights.
+1. Conserve el valor ya rellenado en **Location**, `https://insights.fairwinds.com`, o introduzca explícitamente el host de Insights.
 2. Introduzca el nombre de **Organization** de Insights (el slug que aparece en la URL de su panel).
 3. Introduzca el token de API de Insights en el campo **Secret**.
 4. De forma opcional, defina una **Minimum Severity** para limitar qué hallazgos se importan.
@@ -1349,7 +1351,7 @@ Necesitará un **token de API** de Socket — un token de organización creado e
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://api.socket.dev/v0`, o introdúzcalo explícitamente.
+1. Conserve el valor ya rellenado en **Location**, `https://api.socket.dev/v0`, o introdúzcalo explícitamente.
 2. Introduzca el token de API de Socket en el campo **Secret**.
 3. Opcionalmente, establezca una **Minimum Severity** para limitar qué hallazgos se importan.
 

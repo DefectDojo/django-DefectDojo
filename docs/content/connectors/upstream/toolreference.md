@@ -14,6 +14,8 @@ When setting up a Connector for a supported tool, you'll need to give DefectDojo
 
 Some tools will require additional API\-related fields beyond **Location** and **Secret**. They may also require you to make changes on their side to accommodate an incoming Connector from DefectDojo.
 
+Many tools serve one fixed API host. For those, DefectDojo fills in **Location** for you when you add the Connector, so you do not have to copy the URL out of this page. Keep the value you are given. Change it only if your instance uses a different host, such as a self\-hosted deployment or a different region.
+
 ![image](images/connectors_tool_reference.png)
 
 Each tool has a different API configuration, and this guide is intended to help you set up the tool's API so that DefectDojo can connect.
@@ -399,7 +401,7 @@ You will need a Bright **API key**, created in the Bright app under **User setti
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://app.brightsec.com`, or enter your Bright host explicitly.
+1. Keep the pre-filled **Location**, `https://app.brightsec.com`, or enter your Bright host explicitly.
 2. Enter the Bright API key in the **Secret** field.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
@@ -905,7 +907,7 @@ You will need an Escape **API key**, created in the Escape app under **Settings 
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://public.escape.tech/v2`, or enter your Escape API host explicitly.
+1. Keep the pre-filled **Location**, `https://public.escape.tech/v2`, or enter your Escape API host explicitly.
 2. Enter the Escape API key in the **Secret** field.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
@@ -923,7 +925,7 @@ You will need a Fairwinds Insights **organization** name and an **API token**. C
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://insights.fairwinds.com`, or enter your Insights host explicitly.
+1. Keep the pre-filled **Location**, `https://insights.fairwinds.com`, or enter your Insights host explicitly.
 2. Enter your Insights **Organization** name (the slug shown in your dashboard URL).
 3. Enter the Insights API token in the **Secret** field.
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
@@ -2191,7 +2193,7 @@ You will need a Socket **API token** — an organization token created in the So
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://api.socket.dev/v0`, or enter it explicitly.
+1. Keep the pre-filled **Location**, `https://api.socket.dev/v0`, or enter it explicitly.
 2. Enter the Socket API token in the **Secret** field.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
