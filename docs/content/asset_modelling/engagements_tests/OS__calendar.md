@@ -1,6 +1,6 @@
 ---
 title: "Calendar"
-description: "How to use the Calendar in DefectDojo Pro"
+description: "How to use the Calendar in DefectDojo OS"
 audience: opensource
 weight: 9
 ---
