@@ -125,6 +125,13 @@ Findings) with the permissions that role grants. Pinning an Asset into an
 Organization therefore extends visibility, which is why creating a pin requires edit
 permission on **both** the Organization and the Asset.
 
+**Notifications follow the same rule.** Notifications about an Asset — and about its
+Engagements, Tests, and Findings — reach the members of every Organization the Asset
+belongs to, not only its primary one, subject as always to each user's own
+notification preferences. So pinning an Asset into a Compliance Scope Organization
+also makes that scope's members an audience for its findings, and removing the
+membership removes them again.
+
 ### Managing memberships
 
 - The Organization view gains a **Member Assets** table listing every member with
