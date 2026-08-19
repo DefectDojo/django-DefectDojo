@@ -31,6 +31,30 @@ Each entry on the Operations Page's table is a record of an operation event, wit
 * **Trigger** describes how the event was triggered \- was it a **Scheduled** operation which ran automatically, or a **Manual** operation which was triggered by a DefectDojo user?
 * The **Start \& End Time** of each operation is recorded here, along with the **Duration**.
 
+## When a Connector runs but imports nothing
+
+An operation that succeeds is not the same as an operation that found something. If the account
+you connected cannot see any data in the tool, Discover completes normally and finds nothing to
+create, so the Connector reports success while importing no Findings.
+
+The **Upstream Connectors** page flags this on the Connector's tile:
+
+![image](images/connector_visibility_warning.png)
+
+* **Connected, but nothing is visible** means the last operation succeeded and the tool reported
+  no data at all for these credentials. This almost always means the account is missing a grant
+  in the tool rather than in DefectDojo. Hover the warning to see what to grant for that
+  specific tool.
+* **All *n* records are missing from the tool** means the Connector previously saw data and no
+  longer does. Records that disappear from the tool are kept and marked **Missing** rather than
+  deleted, so your mappings survive. Common causes are a revoked permission, a rotated
+  credential with a narrower scope, or projects deleted in the tool.
+
+Both warnings clear on their own. Once the tool reports the data again, the next Discover
+restores the records to **Good**, your existing mappings are reused, and Sync resumes importing.
+You do not need to recreate the Connector. To check a fix immediately rather than waiting for the
+next scheduled run, use [Run Discover Manually](#run-discover-manually).
+
 ## Discover Operations
 
 The first step a DefectDojo Connector needs to take is to **Discover** your tool's environment to see how you're organizing your scan data.
