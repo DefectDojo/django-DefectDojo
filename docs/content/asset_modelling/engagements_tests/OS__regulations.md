@@ -62,7 +62,7 @@ The Regulations dropdown lists all active Regulations in your instance. Select a
 
 ![image](images/osregulations_ss2.png)
 
-Once submitted, any applicable Regulations will appear within the Regulations subsection of the **Asset Overview** table in the Asset's view. 
+Once submitted, any applicable Regulations will appear within the Regulations table in the Asset's view. 
 
 ![image](images/osregulations_ss3.png)
 
