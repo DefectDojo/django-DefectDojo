@@ -1,5 +1,5 @@
 ---
-title: "Root Cause Correlation (Pro)"
+title: "Root Cause Correlation"
 description: "Group Findings that share a root cause -- the same vulnerable component, CVE, infrastructure resource, or weakness at a URL -- so one fix can be traced to every Finding it resolves"
 weight: 1
 audience: pro

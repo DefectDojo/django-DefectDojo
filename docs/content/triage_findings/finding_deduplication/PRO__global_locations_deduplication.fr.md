@@ -1,5 +1,5 @@
 ---
-title: Déduplication des emplacements globaux (Pro)
+title: Déduplication des emplacements globaux
 description: Dédupliquez les constatations par emplacement partagé (URL ou dépendance)
   sur tous les Produits
 weight: 6

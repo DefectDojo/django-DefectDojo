@@ -1,5 +1,5 @@
 ---
-title: Root-Ursachen-Korrelation (Pro)
+title: Root-Ursachen-Korrelation
 description: Gruppieren Sie Befunde, die eine gemeinsame Ursache teilen -- dieselbe
   verwundbare Komponente, CVE, Infrastrukturressource oder Schwachstelle an einer
   URL --, sodass sich eine Behebung auf jeden Befund zurückverfolgen lässt, den sie

@@ -1,5 +1,5 @@
 ---
-title: Login für SSO-Benutzer wieder aktivieren (Open Source)
+title: Login für SSO-Benutzer wieder aktivieren
 description: Vergeben Sie über SSO bereitgestellten Benutzern ein lokales Passwort,
   nachdem Sie zu Open Source gewechselt sind, wo SSO eine reine Pro-Funktion ist
 audience: opensource

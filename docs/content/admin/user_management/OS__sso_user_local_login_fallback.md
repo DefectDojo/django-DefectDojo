@@ -1,5 +1,5 @@
 ---
-title: "Re-enabling login for SSO users (Open Source)"
+title: "Re-enabling login for SSO users"
 description: "Give SSO-provisioned users a local password after moving to Open Source, where SSO is a Pro-only feature"
 audience: opensource
 weight: 2
