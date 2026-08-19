@@ -1,14 +1,19 @@
 from django.urls import reverse
+from django.utils import timezone
 
 from dojo.authorization.roles_permissions import Roles
-from dojo.location.models import Location, LocationProductReference
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     Dojo_User,
+    Engagement,
+    Finding,
     Product,
     Product_Member,
     Product_Type,
     Role,
+    Test,
+    Test_Type,
     User,
 )
 from dojo.url.models import URL
@@ -89,3 +94,120 @@ class LocationEndpointViewCrossProductAuthzTest(DojoTestCase):
         )
         self.assertEqual(self.DENIED_STATUS, response.status_code)
         self.assertTrue(Location.objects.filter(pk=self.location_b.id).exists())
+
+
+@skip_unless_v3
+class SharedLocationDeleteScopingTest(DojoTestCase):
+
+    """
+    A Location row is deduplicated on its value, so several products share one row.
+
+    Deleting the row takes every product's references with it. Recording a URL another
+    product already recorded attaches the caller's product to that existing row, which
+    is enough to pass the row-level authorization check. Removing an endpoint must
+    therefore drop only the caller's own references and keep a row anything else uses.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        prod_type, _ = Product_Type.objects.get_or_create(name="LOC-Del PT")
+        writer_role = Role.objects.get(id=Roles.Writer)
+
+        cls.product_a = Product.objects.create(name="LOC-Del Product A", description="A", prod_type=prod_type)
+        cls.product_b = Product.objects.create(name="LOC-Del Product B", description="B", prod_type=prod_type)
+
+        cls.alice = User.objects.create_user(
+            username="loc_del_alice",
+            password="not-a-real-secret",  # noqa: S106 - test fixture user
+        )
+        Product_Member.objects.create(user=cls.alice, product=cls.product_a, role=writer_role)
+        cls.product_a.authorized_users.add(Dojo_User.objects.get(pk=cls.alice.pk))
+
+        engagement = Engagement.objects.create(
+            product=cls.product_b, name="LOC-Del eng",
+            target_start=timezone.now().date(), target_end=timezone.now().date(),
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="LOC-Del scan")
+        test = Test.objects.create(
+            engagement=engagement, test_type=test_type,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        cls.finding_b = Finding.objects.create(
+            test=test, title="LOC-Del Product B finding", severity="High",
+            numerical_severity="S1", active=True, verified=False,
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.alice)
+        # Product B records the URL first, with a finding on it.
+        self.shared = URL.create_location_from_value("https://shared.example.test/secret").location
+        LocationProductReference.objects.create(
+            location=self.shared, product=self.product_b, status=ProductLocationStatus.Active,
+        )
+        self.shared.associate_with_finding(self.finding_b, audit_time=timezone.now())
+        # A row only Product A uses, to prove a legitimate delete still works.
+        self.own = URL.create_location_from_value("https://own.example.test/ok").location
+        LocationProductReference.objects.create(
+            location=self.own, product=self.product_a, status=ProductLocationStatus.Active,
+        )
+
+    def _graft(self):
+        """Record Product B's URL against Product A, which reuses Product B's row."""
+        response = self.client.post(
+            reverse("add_endpoint_to_product", kwargs={"product_id": self.product_a.id}),
+            {"protocol": "https", "host": "shared.example.test", "path": "secret"},
+        )
+        self.assertIn(response.status_code, (200, 302))
+        self.assertTrue(
+            LocationProductReference.objects.filter(location=self.shared, product=self.product_a).exists(),
+        )
+
+    def _assert_product_b_intact(self):
+        self.assertTrue(Location.objects.filter(pk=self.shared.id).exists())
+        self.assertTrue(
+            LocationProductReference.objects.filter(location=self.shared, product=self.product_b).exists(),
+        )
+        self.assertTrue(
+            LocationFindingReference.objects.filter(location=self.shared, finding=self.finding_b).exists(),
+        )
+
+    def test_bulk_delete_keeps_the_other_products_shared_row(self):
+        self._graft()
+        response = self.client.post(
+            reverse("endpoints_bulk_all"),
+            {"endpoints_to_update": [self.shared.id], "delete_bulk_endpoints": "1"},
+        )
+        self.assertIn(response.status_code, (200, 302))
+        self._assert_product_b_intact()
+        self.assertFalse(
+            LocationProductReference.objects.filter(location=self.shared, product=self.product_a).exists(),
+        )
+
+    def test_single_delete_keeps_the_other_products_shared_row(self):
+        self._graft()
+        response = self.client.post(
+            reverse("delete_endpoint", kwargs={"location_id": self.shared.id}),
+            {"id": self.shared.id},
+        )
+        self.assertIn(response.status_code, (200, 302))
+        self._assert_product_b_intact()
+        self.assertFalse(
+            LocationProductReference.objects.filter(location=self.shared, product=self.product_a).exists(),
+        )
+
+    def test_bulk_delete_still_removes_a_row_only_the_caller_uses(self):
+        response = self.client.post(
+            reverse("endpoints_bulk_all"),
+            {"endpoints_to_update": [self.own.id], "delete_bulk_endpoints": "1"},
+        )
+        self.assertIn(response.status_code, (200, 302))
+        self.assertFalse(Location.objects.filter(pk=self.own.id).exists())
+
+    def test_single_delete_still_removes_a_row_only_the_caller_uses(self):
+        response = self.client.post(
+            reverse("delete_endpoint", kwargs={"location_id": self.own.id}),
+            {"id": self.own.id},
+        )
+        self.assertIn(response.status_code, (200, 302))
+        self.assertFalse(Location.objects.filter(pk=self.own.id).exists())

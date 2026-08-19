@@ -22,7 +22,12 @@ from dojo.forms import (
     DojoMetaFormSet,
     ImportEndpointMetaForm,
 )
-from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.models import (
+    Location,
+    LocationFindingReference,
+    LocationProductReference,
+    delete_locations_for_products,
+)
 from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
@@ -401,8 +406,10 @@ def delete_endpoint(request, location_id):
     if request.method == "POST":
         form = DeleteEndpointForm(request.POST, instance=location)
         if form.is_valid():
-            # Delete the location, which will also cascade delete related findings and product references
-            location.delete()
+            delete_locations_for_products(
+                Location.objects.filter(id=location.id),
+                get_authorized_products(Permissions.Location_Delete, request.user),
+            )
             messages.add_message(
                 request, messages.SUCCESS, "Endpoint and relationships removed.", extra_tags="alert-success",
             )
@@ -528,8 +535,11 @@ def endpoint_bulk_update_all(request, product_id=None):
             locations = get_authorized_locations("delete", locations, request.user)
             skipped_location_count = total_location_count - locations.count()
             deleted_location_count = locations.count()
-            # This will also delete related finding and product location references via cascade
-            locations.delete()
+            if product_id is not None:
+                delete_products = Product.objects.filter(id=product_id)
+            else:
+                delete_products = get_authorized_products(Permissions.Location_Delete, request.user)
+            delete_locations_for_products(locations, delete_products)
             # Notify user if any locations were skipped due to lack of authorization
             if skipped_location_count > 0:
                 add_error_message_to_response(

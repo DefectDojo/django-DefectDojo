@@ -12,11 +12,13 @@ from django.db.models import (
     RESTRICT,
     CharField,
     DateTimeField,
+    Exists,
     ForeignKey,
     Index,
     JSONField,
     Model,
     OneToOneField,
+    OuterRef,
     Q,
     QuerySet,
     TextChoices,
@@ -36,7 +38,7 @@ from dojo.location.manager import (
     LocationQueryset,
 )
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import Dojo_User, Finding, Product, copy_model_util
+from dojo.models import Dojo_User, DojoMeta, Finding, Product, copy_model_util
 from dojo.tools.locations import LocationAssociationData
 
 if TYPE_CHECKING:
@@ -587,3 +589,39 @@ class LocationProductReference(BaseModel, ReferenceDataMixin):
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
         return f"{self.location} - Product: {self.product} ({self.status})"
+
+
+def delete_locations_for_products(locations: QuerySet[Location], products) -> None:
+    """
+    Remove ``locations`` from ``products``, keeping rows that anything else still references.
+
+    A Location is deduplicated on its value alone, so several products share one row and
+    deleting the row would cascade away the other products' references. Drop only the
+    references owned by ``products``, then delete the rows that nothing points at any more.
+    """
+    # Materialize before deleting anything: callers pass a queryset filtered through the
+    # reference rows below, so it would re-evaluate to empty part-way through.
+    location_ids = list(locations.values_list("id", flat=True))
+    if not location_ids:
+        return
+
+    with transaction.atomic():
+        LocationFindingReference.objects.filter(
+            location_id__in=location_ids,
+            finding__test__engagement__product__in=products,
+        ).delete()
+        LocationProductReference.objects.filter(
+            location_id__in=location_ids,
+            product__in=products,
+        ).delete()
+        DojoMeta.objects.filter(
+            location_id__in=location_ids,
+            location_product__in=products,
+        ).delete()
+
+        unreferenced = Location.objects.filter(id__in=location_ids).exclude(
+            Exists(LocationProductReference.objects.filter(location=OuterRef("pk"))),
+        ).exclude(
+            Exists(LocationFindingReference.objects.filter(location=OuterRef("pk"))),
+        )
+        Location.objects.filter(id__in=list(unreferenced.values_list("id", flat=True))).delete()
