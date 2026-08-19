@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime
 
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
@@ -59,6 +60,8 @@ class AnchoreGrypeParser:
                 vuln_fix_versions = vulnerability["fix"].get("versions")
             vuln_cvss = vulnerability.get("cvss")
             vuln_epss = vulnerability.get("epss")
+            vuln_known_exploited = vulnerability.get("knownExploited")
+            finding_kev_date = None
 
             rel_datasource = None
             rel_urls = None
@@ -176,6 +179,9 @@ class AnchoreGrypeParser:
                 if finding_epss_score is None and rel_vuln_id:
                     finding_epss_score, finding_epss_percentile = self.get_epss_values(vuln_id, vuln_epss)
 
+            if vuln_known_exploited and vulnerability_ids:
+                finding_kev_date = self.get_kev_date(vuln_id, vuln_known_exploited, vulnerability_ids)
+
             if self.mode == "detailed":
                 dupe_key = f"{vuln_id}|{artifact_name}|{artifact_version}|{file_path}"
             else:
@@ -202,6 +208,8 @@ class AnchoreGrypeParser:
                     file_path=file_path,
                     fix_available=fix_available,
                     fix_version=fix_version,
+                    kev_date=finding_kev_date,
+                    known_exploited=bool(finding_kev_date),
                 )
 
                 if self.mode == "detailed":
@@ -252,6 +260,22 @@ class AnchoreGrypeParser:
                     return epss_score, epss_percentile
         logger.debug("epss not found for vuln_id: %s in epss_list: %s", vuln_id, epss_list)
         return None, None
+
+    def get_kev_date(self, vuln_id, known_exploited_list, vulnerability_ids):
+        if not isinstance(known_exploited_list, list):
+            return None
+
+        for known_exploited_data in known_exploited_list:
+            known_exploited_cve = known_exploited_data.get("cve")
+            if known_exploited_cve in vulnerability_ids:
+                kev_date_str = known_exploited_data.get("dateAdded")
+                if kev_date_str:
+                    try:
+                        return datetime.strptime(kev_date_str, "%Y-%m-%d").date()
+                    except (TypeError, ValueError):
+                        logger.debug("kev_date_str is not a valid date: %s", kev_date_str)
+        logger.debug("kev_date not found for vuln_id: %s", vuln_id)
+        return None
 
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
         vulnerability_ids = []
