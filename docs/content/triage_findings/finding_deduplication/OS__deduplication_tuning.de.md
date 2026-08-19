@@ -1,5 +1,5 @@
 ---
-title: Deduplizierungs-Tuning (Open Source)
+title: Deduplizierungs-Tuning
 description: 'Deduplizierung in DefectDojo Open Source konfigurieren: Algorithmen,
   Hash-Felder, Endpunkte und Service'
 weight: 5
