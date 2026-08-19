@@ -14,7 +14,7 @@ Unless stated otherwise, a node takes one input, produces one output called `out
 
 ## Triggers
 
-Every graph has exactly one trigger, and only a trigger can start a run. All three produce Finding items and all three take a **Scope** that narrows which Findings they produce. See [Building Rules](../building_rules/) for how scope works.
+Every graph has exactly one trigger, and only a trigger can start a run. Three of them produce Finding items and take a **Scope** that narrows which Findings they produce — see [Building Rules](../building_rules/) for how scope works. **On a Missing Scan** is the exception: it reports assets rather than Findings, and is described below.
 
 ### On Finding Event
 
@@ -48,6 +48,43 @@ Sweeps every Finding in scope when you press **Run** on the rule.
 | Setting | Default | Notes |
 |---------|---------|-------|
 | **Scope** | empty | Which Findings this rule considers. |
+
+### On a Missing Scan
+
+`trigger.scan_absence`
+
+Runs on a schedule and reports assets whose expected scan has **not** arrived. This is the only trigger that fires on something *not* happening, which is why it is also the only one that does not take a scope: a scan that never arrived produces no Finding to filter.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Expected within (days)** | `3` | An asset whose latest import of the scan type is older than this is reported. FedRAMP Class C cadences: 3 days for machine-based resources, 14 for resources likely to drift, 30 otherwise. |
+| **Scan types** | empty | Scan types to expect, as a list of names. Empty checks every scan type the asset has already received. |
+| **Assets** | empty | Asset ids to check. Empty checks every asset. |
+
+**Name the scan types you expect.** Left empty, the node checks only the types an asset has already imported — which catches a scanner that stopped, but cannot catch one that was never wired up, because there is nothing to infer it from. Naming them explicitly catches both.
+
+It emits **one item per asset and scan type**, not per Finding. An asset importing SAST daily and DAST never is failing its DAST cadence, and reporting per-asset would hide that behind the healthy scanner. An asset and scan type that has *never* imported is reported too, and sorts above any dated breach.
+
+### What a missing-scan item looks like
+
+These items have no Finding, so `finding.*` paths are all empty. The asset and the expected scan type are carried in their usual places, which means message templates written for Findings keep working:
+
+```
+product.name          the asset the scan was expected for
+test.scan_type        the scan type that did not arrive
+```
+
+The absence specifics are on `ctx`:
+
+```
+ctx.scan_type                 the scan type that did not arrive
+ctx.last_import               when it last arrived, or empty if it never has
+ctx.days_overdue              days past the expected interval, 0 when never imported
+ctx.expected_interval_days    the interval that was expected
+ctx.never_imported            true when this asset has never received this scan type
+```
+
+Wire these into **Egress** nodes — a Slack message, an email, a JIRA issue, a batched digest. Wiring them into a **Findings** node is harmless but pointless: there is no Finding to change, so the node does nothing.
 
 ## Logic
 

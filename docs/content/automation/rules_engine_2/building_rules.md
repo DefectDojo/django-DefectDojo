@@ -10,9 +10,30 @@ aliases:
 
 A rule is built on a canvas. You drag nodes out of a palette, wire them together, and configure each one in a side panel. This page covers the parts of that process that are the same whichever nodes you use. The nodes themselves are in the [Node Reference](../node_reference/).
 
+## Starting a rule
+
+From **Rules Engine 2.0 > All Rules** there are two ways to begin.
+
+**From Template** opens a gallery of rules that ship with DefectDojo, grouped into packs. Each card
+says what the rule is for, which nodes its graph contains, and what you have to configure before it
+does anything — a scheduled rule with no schedule never runs at all, so that last part matters.
+Adopting one creates a rule of your own and drops you into the editor on it.
+
+An adopted rule arrives **disabled and in simulate mode**, exactly like any new rule. Nothing runs
+and nothing is sent until you have set its scope, finished its setup steps, and enabled it. That is
+deliberate: several templates raise tickets and send messages, and the first run of one across an
+unfiltered set of Assets is not something you want to discover after the fact.
+
+Templates are starting points, not links. Editing an adopted rule does not affect the template, and
+adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
+gets pointed at two different sets of Assets. The second one is named with a suffix.
+
+**New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
+rule, because both create one.
+
 ## The editor
 
-Open **Rules Engine 2.0 > All Rules** and choose **New Rule**, or open an existing rule to edit it.
+Open a rule to edit it, or start one of the two ways above.
 
 The palette is grouped into four categories, which is also the order items flow through a typical graph:
 
