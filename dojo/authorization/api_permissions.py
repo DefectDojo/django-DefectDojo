@@ -120,6 +120,15 @@ def check_object_permission(
     if request.method == "DELETE":
         return user_has_permission(request.user, obj, delete_permission)
     if request.method == "POST":
+        # ``post_permission`` is optional because most permission classes guard
+        # a viewset with no detail-route POST action, so they have no
+        # object-level POST to authorize (plain ``create`` never calls
+        # get_object(), so it never reaches here). A class that *does* have one
+        # must name the permission explicitly: deny rather than pass None down
+        # to user_has_permission, where it resolves to Action.Deny and would
+        # otherwise depend on that mapping staying fail-closed.
+        if post_permission is None:
+            return False
         return user_has_permission(request.user, obj, post_permission)
     return False
 
@@ -436,12 +445,13 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
-        # The fourth argument is the POST permission, and it has to be given: without it
-        # check_object_permission passes None down to user_has_permission for every POST. This
-        # codebase happens to answer False to an unmapped permission, so it degrades to a 403 --
-        # but an authorization layer that treats "no permission named" as unimplemented raises
-        # instead, turning that into a 500. It went unnoticed because this viewset had no POST
-        # actions until expire and reinstate were added.
+        # The fourth argument is the POST permission, and it has to be given: expire and
+        # reinstate are detail-route POST actions that do not set their own
+        # permission_classes, so they authorize through here. Without it
+        # check_object_permission denies every POST outright (it used to pass None down to
+        # user_has_permission, which resolved to the most permissive action -- see
+        # permission_to_action -- and silently authorized those two actions as a plain
+        # View). Name the permission rather than relying on either default.
         return check_object_permission(
             request,
             obj,

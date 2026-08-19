@@ -85,9 +85,12 @@ def user_has_permission(user: Dojo_User, obj: Model, permission) -> bool:
       1. anonymous → deny
       2. superuser → allow
       3. action → mapped from Permissions / string / Action via permission_to_action
-      4. SuperuserOnly action → deny (already handled superuser above)
-      5. StaffOnly / Delete → require is_staff
-      6. View / Edit / Add / Import → is_staff bypasses unconditionally,
+      4. Deny action → deny (permission_to_action could not resolve the intent;
+         see its docstring. Superusers are already through at step 2, matching
+         the rest of the model, so this only gates non-superusers.)
+      5. SuperuserOnly action → deny (already handled superuser above)
+      6. StaffOnly / Delete → require is_staff
+      7. View / Edit / Add / Import → is_staff bypasses unconditionally,
          otherwise check membership in the obj.authorized_users chain
          (climbing Product_Type ← Product ← Engagement ← Test ← Finding).
          This matches the pre-Auth-V2 (pre-2020) behavior where is_staff
@@ -105,6 +108,9 @@ def user_has_permission(user: Dojo_User, obj: Model, permission) -> bool:
 
     action = permission_to_action(permission)
 
+    if action == Action.Deny:
+        return False
+
     if action == Action.SuperuserOnly:
         return False
 
@@ -120,6 +126,12 @@ def _user_authorized_for(user: Dojo_User, obj: Model, action: Action) -> bool:
     grants ``action`` on ``obj``.
     """
     if obj is None:
+        return False
+
+    # Belt and braces: user_has_permission already rejects Action.Deny before
+    # calling in, but this function recurses up the hierarchy and is reachable
+    # from the Pro shadow, so it must not treat an unresolved intent as access.
+    if action == Action.Deny:
         return False
 
     if isinstance(obj, Product_Type):
@@ -199,7 +211,7 @@ def user_has_global_permission(user: Dojo_User, permission) -> bool:
     if permission == "add" and user_has_configuration_permission(user, "dojo.add_product_type"):
         return True
 
-    if action == Action.SuperuserOnly:
+    if action in {Action.Deny, Action.SuperuserOnly}:
         return False
     return bool(user.is_staff)
 

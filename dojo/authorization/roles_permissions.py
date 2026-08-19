@@ -18,6 +18,10 @@ class Action(StrEnum):
       * StaffOnly     — administrative actions like member management or
                         configuration changes
       * SuperuserOnly — system-wide changes that legacy never delegated
+      * Deny          — the intent could not be determined at all; see
+                        ``permission_to_action``. Not a permission any caller
+                        asks for, it is what an unrecognised permission maps
+                        to so that the authorization layer fails closed.
 
     The role hierarchy (Reader / Writer / Maintainer / Owner) does not exist
     in this model; per-product distinctions collapse to membership.
@@ -30,6 +34,7 @@ class Action(StrEnum):
     Import = "import"
     StaffOnly = "staff_only"
     SuperuserOnly = "superuser_only"
+    Deny = "deny"
 
 
 class Roles(IntEnum):
@@ -367,7 +372,23 @@ def permission_to_action(permission):
         return Action.Delete
     if name.endswith(("_Add_Product", "_Add")):
         return Action.Add
-    if "_Manage_" in name or name.endswith("_Add_Owner"):
+    if "_Manage_" in name or name.endswith(("_Manage", "_Add_Owner")):
         return Action.StaffOnly
 
-    return Action.View
+    # Nothing matched, so the caller's intent is unknown: deny.
+    #
+    # This used to return Action.View, which made every unrecognised input --
+    # None, "", a typo'd permission name, an object that is not a Permissions
+    # member -- resolve to the *most permissive* action in the model. Two ways
+    # that bites:
+    #
+    #   * check_object_permission() leaves post_permission=None unless a
+    #     permission class sets it, so a POST to a detail route on such a class
+    #     authorized as a plain View.
+    #   * a future permission whose name does not follow <Noun>_<Verb> (say
+    #     "Product_Manage") silently downgraded from administrative to View.
+    #
+    # Failing closed turns both into a 403 instead of an unintended grant. A
+    # legitimate permission that lands here is a bug in this mapping, and a
+    # denied request is the safe way to surface it.
+    return Action.Deny

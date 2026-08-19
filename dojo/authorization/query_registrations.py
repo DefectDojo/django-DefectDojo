@@ -16,7 +16,7 @@ from crum import get_current_user
 from django.db.models import Q
 
 from dojo.authorization.query_filters import register_auth_filter
-from dojo.authorization.roles_permissions import permission_to_action
+from dojo.authorization.roles_permissions import Action, permission_to_action
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import (
     App_Analysis,
@@ -59,6 +59,12 @@ def _is_unrestricted(user, action):
         return False
     if user.is_superuser:
         return True
+    # An intent permission_to_action could not resolve must not hand anyone the
+    # unfiltered queryset -- not even staff. Callers fall through to the
+    # membership filter, and _filter_by_authorized_products short-circuits to
+    # none() outright. See permission_to_action for why Deny exists.
+    if action == Action.Deny:
+        return False
     return bool(user.is_staff)
 
 
@@ -124,6 +130,8 @@ def _filter_by_authorized_products(queryset, product_path, permission, user=None
     if user is None or getattr(user, "is_anonymous", False):
         return queryset.none()
     action = permission_to_action(permission)
+    if action == Action.Deny:
+        return queryset.none()
     if _is_unrestricted(user, action):
         return queryset
     return queryset.filter(**{f"{product_path}__id__in": _authorized_product_ids(user)})
