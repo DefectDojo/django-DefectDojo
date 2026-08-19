@@ -66,7 +66,7 @@ Verwaltete Integrationen, die Befunde und Befundgruppen aus DefectDojo in Issue-
 ## Universal Parser (Pro)
 Eine generalisierte Parsing-Engine, die vom Universal Importer verwendet wird, um eingehende Scandaten zu interpretieren. Sie wendet für nicht unterstützte Formate eine einheitliche Normalisierungs- und Deduplizierungslogik an.
 ## Smart Upload (Pro)
-Ein intelligenter Erfassungsworkflow, der automatisch bestimmt, wie Scan-Ergebnisse Assets oder Engagements zugeordnet werden sollen, wodurch die manuelle Konfiguration beim Import reduziert wird.
+Ein intelligenter Erfassungsworkflow, der automatisch bestimmt, wie Scan-Ergebnisse Assets oder Engagements zugeordnet werden sollen, wodurch die manuelle Konfiguration beim Import reduziert wird. Wenn ein gescannter Host zu mehr als einem Asset gehört, wird in jedem passenden Asset eine Kopie des Findings erstellt.
 ## Executive Insights (Pro)
 Business-orientierte Analysen auf hoher Ebene, die für Führungskräfte konzipiert sind und sich auf Trends, Risikoexposition und den Gesamtzustand des Programms konzentrieren statt auf einzelne Befunde.
 ## Priority Insights (Pro)
