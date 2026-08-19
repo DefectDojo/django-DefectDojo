@@ -2,7 +2,7 @@
 title: "Cases and SLA"
 description: "Group matches into work items, and track the triage obligation on them"
 draft: false
-weight: 7
+weight: 8
 pro-feature: true
 ---
 

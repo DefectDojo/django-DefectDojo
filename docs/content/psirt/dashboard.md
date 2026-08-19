@@ -2,7 +2,7 @@
 title: "PSIRT dashboard"
 description: "A shared dashboard template that answers \"am I affected?\" first"
 draft: false
-weight: 9
+weight: 10
 pro-feature: true
 ---
 
