@@ -1,5 +1,5 @@
 ---
-title: Riattivare l'accesso per gli utenti SSO (Open Source)
+title: Riattivare l'accesso per gli utenti SSO
 description: Assegna una password locale agli utenti creati tramite SSO dopo il passaggio
   a Open Source, dove SSO è una funzionalità disponibile solo in Pro
 audience: opensource

@@ -1,5 +1,5 @@
 ---
-title: Ottimizzazione della Deduplicazione (Open Source)
+title: Ottimizzazione della Deduplicazione
 description: 'Configura la deduplicazione in DefectDojo Open Source: algoritmi, campi
   hash, endpoint e servizio'
 weight: 5
