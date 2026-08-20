@@ -183,7 +183,7 @@ class FindingViewSet(
             push_to_jira = get_request_boolean(request, "push_to_jira")
         except DRFValidationError as error:
             raise DRFValidationError({"push_to_jira": error.detail}) from error
-        instance.delete(push_to_jira=push_to_jira)
+        finding_helper.delete_finding_with_conflict_retry(instance, push_to_jira=push_to_jira)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
