@@ -66,7 +66,7 @@ Managed integrations that push Findings and Finding Groups out of DefectDojo int
 ## Universal Parser (Pro)
 A generalized parsing engine used by the Universal Importer to interpret incoming scan data. It applies consistent normalization and deduplication logic across unsupported formats.
 ## Smart Upload (Pro)
-An intelligent ingestion workflow that automatically determines how scan results should be mapped to Assets or Engagements, reducing manual configuration during import.
+An intelligent ingestion workflow that automatically determines how scan results should be mapped to Assets or Engagements, reducing manual configuration during import. When a scanned Host belongs to more than one Asset, a copy of the Finding is created in each matching Asset.
 ## Executive Insights (Pro)
 High-level, business-oriented analytics designed for leadership audiences, focusing on trends, exposure, and program health rather than individual Findings.
 ## Priority Insights (Pro)
