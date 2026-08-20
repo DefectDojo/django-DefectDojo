@@ -2,7 +2,12 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.roles_permissions import Roles
-from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.models import (
+    Location,
+    LocationFindingReference,
+    LocationProductReference,
+    delete_locations_for_products,
+)
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     Dojo_User,
@@ -135,6 +140,7 @@ class SharedLocationDeleteScopingTest(DojoTestCase):
         cls.finding_b = Finding.objects.create(
             test=test, title="LOC-Del Product B finding", severity="High",
             numerical_severity="S1", active=True, verified=False,
+            reporter=cls.alice,
         )
 
     def setUp(self):
@@ -184,13 +190,17 @@ class SharedLocationDeleteScopingTest(DojoTestCase):
             LocationProductReference.objects.filter(location=self.shared, product=self.product_a).exists(),
         )
 
-    def test_single_delete_keeps_the_other_products_shared_row(self):
+    # The single-endpoint delete view is not reachable with a scoped user under legacy
+    # authorization: user_has_permission maps Location_Delete to Action.Delete, which is
+    # staff-only, and a staff user is unrestricted so every product is in scope. The two
+    # tests below therefore call the helper both views share, with the product scope the
+    # views hand it.
+    def test_scoped_delete_keeps_the_other_products_shared_row(self):
         self._graft()
-        response = self.client.post(
-            reverse("delete_endpoint", kwargs={"location_id": self.shared.id}),
-            {"id": self.shared.id},
+        delete_locations_for_products(
+            Location.objects.filter(id=self.shared.id),
+            Product.objects.filter(id=self.product_a.id),
         )
-        self.assertIn(response.status_code, (200, 302))
         self._assert_product_b_intact()
         self.assertFalse(
             LocationProductReference.objects.filter(location=self.shared, product=self.product_a).exists(),
@@ -204,10 +214,9 @@ class SharedLocationDeleteScopingTest(DojoTestCase):
         self.assertIn(response.status_code, (200, 302))
         self.assertFalse(Location.objects.filter(pk=self.own.id).exists())
 
-    def test_single_delete_still_removes_a_row_only_the_caller_uses(self):
-        response = self.client.post(
-            reverse("delete_endpoint", kwargs={"location_id": self.own.id}),
-            {"id": self.own.id},
+    def test_scoped_delete_still_removes_a_row_only_the_caller_uses(self):
+        delete_locations_for_products(
+            Location.objects.filter(id=self.own.id),
+            Product.objects.filter(id=self.product_a.id),
         )
-        self.assertIn(response.status_code, (200, 302))
         self.assertFalse(Location.objects.filter(pk=self.own.id).exists())
