@@ -2,7 +2,7 @@
 title: Intégration de suivi des tickets
 description: Synchronisez les constatations DefectDojo avec votre système de suivi
   des tickets pour simplifier la remédiation et la responsabilisation.
-weight: 5
+weight: 6
 aliases:
 - /fr/issue_tracking/
 - /fr/issue_tracking/intro/
@@ -16,7 +16,7 @@ Les intégrations de suivi des tickets de DefectDojo relient vos flux de gestion
 | Edition      | Supported Issue Tracking Integrations |
 |--------------|---------------------------------------|
 | Édition Community  | * [Jira](/connectors/os_jira/os__jira_guide/)                          |
-| Pro          | * [Jira](/connectors/downstream/downstream_toolreference/#jira) ([guide historique](/connectors/downstream/pro__jira_guide/))<br>* [Azure DevOps](/connectors/downstream/downstream_toolreference/#azure-devops-boards)<br>* [Bitbucket](/connectors/downstream/downstream_toolreference/#bitbucket)<br>* [Freshservice](/connectors/downstream/downstream_toolreference/#freshservice)<br>* [GitHub](/connectors/downstream/downstream_toolreference/#github)<br>* [GitLab Boards](/connectors/downstream/downstream_toolreference/#gitlab)<br>* [Linear](/connectors/downstream/downstream_toolreference/#linear)<br>* [PagerDuty](/connectors/downstream/downstream_toolreference/#pagerduty)<br>* [ServiceDesk Plus](/connectors/downstream/downstream_toolreference/#servicedesk-plus)<br>* [ServiceNow](/connectors/downstream/downstream_toolreference/#servicenow)<br>* [Shortcut](/connectors/downstream/downstream_toolreference/#shortcut)<br>* [Zendesk](/connectors/downstream/downstream_toolreference/#zendesk) |
+| Pro          | * [Jira](/connectors/toolreference/jira/) ([guide historique](/connectors/downstream/pro__jira_guide/))<br>* [Azure DevOps](/connectors/toolreference/azure_devops_boards/)<br>* [Bitbucket](/connectors/toolreference/bitbucket/#downstream-connector)<br>* [Freshservice](/connectors/toolreference/freshservice/)<br>* [GitHub](/connectors/toolreference/github/#downstream-connector)<br>* [GitLab Boards](/connectors/toolreference/gitlab/#downstream-connector)<br>* [Linear](/connectors/toolreference/linear/)<br>* [PagerDuty](/connectors/toolreference/pagerduty/)<br>* [ServiceDesk Plus](/connectors/toolreference/servicedesk_plus/)<br>* [ServiceNow](/connectors/toolreference/servicenow/)<br>* [Shortcut](/connectors/toolreference/shortcut/)<br>* [Zendesk](/connectors/toolreference/zendesk/) |
 
 
 Une fois activée, DefectDojo peut créer des tickets automatiquement, ou de façon sélective à partir des Produits ou des Engagements. Lorsque des Constatations sont mises à jour dans DefectDojo—résolues, atténuées ou réactivées—les tickets correspondants peuvent être synchronisés, garantissant que les deux systèmes reflètent l'état actuel du risque.

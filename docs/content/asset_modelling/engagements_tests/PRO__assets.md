@@ -178,7 +178,7 @@ This means that the same vulnerability may receive a different Priority or Risk 
 
 ### Jira / Downstream Connector Relationships
 
-Assets can be mapped directly to [Jira](/connectors/downstream/pro__jira_guide/#main-content) or [Integrators](/connectors/downstream/downstream_toolreference/#main-content) instances (e.g. GitHub, GitLab, ServiceNow, etc.), which push the Asset’s Findings outward into external ticketing/work-management systems.
+Assets can be mapped directly to [Jira](/connectors/downstream/pro__jira_guide/#main-content) or [Integrators](/connectors/toolreference/downstream/#main-content) instances (e.g. GitHub, GitLab, ServiceNow, etc.), which push the Asset’s Findings outward into external ticketing/work-management systems.
 
 Because Findings inherit risk, priority, and ownership from their parent Asset, the Asset effectively determines the remediation context that flows into Jira tickets and Downstream Connector workflows.
 
