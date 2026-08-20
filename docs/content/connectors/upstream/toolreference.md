@@ -2118,7 +2118,7 @@ Enter `https://semgrep.dev/api/v1/` in the **Location** field.
 
 1. Enter a valid API key in the **Secret** field. You can find this on the Tokens page:   
 ​  
-"Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens 389 )
+"Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens](https://semgrep.dev/orgs/-/settings/tokens))
 
 See [Semgrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.
 
@@ -2178,7 +2178,7 @@ The Snyk connector uses the Snyk REST API to fetch data.
 
 #### Connector Mappings
 
-1. Enter **[https://api.snyk.io/rest 394 ** or **[https://api.eu.snyk.io/rest 395 ** (for a regional EU deployment) in the **Location** field.
+1. Enter **[https://api.snyk.io/rest](https://api.snyk.io/v1)** or **[https://api.eu.snyk.io/rest](https://api.eu.snyk.io/v1)** (for a regional EU deployment) in the **Location** field.
 2. Enter a valid API key in the **Secret** field. API Tokens are found on a user's **[Account Settings](https://docs.snyk.io/getting-started/how-to-obtain-and-authenticate-with-your-snyk-api-token)** [page](https://docs.snyk.io/getting-started/how-to-obtain-and-authenticate-with-your-snyk-api-token) in Snyk.
 
 See the [Snyk API documentation](https://docs.snyk.io/snyk-api) for more info.
