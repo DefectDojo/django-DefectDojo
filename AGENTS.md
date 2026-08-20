@@ -89,6 +89,26 @@ unmilestoned.
 moves which release it ships in, so re-run the query for the new base and `gh pr edit
 --milestone` to match.
 
+## Skills
+
+Repo-scoped skills live under `.claude/skills/<name>/SKILL.md` (each with helper scripts
+alongside). Invoke the matching one when the task fits:
+
+- **`defectdojo-dev`** — the primary dev/test loop: bring the local Docker stack up on
+  `localhost:8080`, reproduce a bug on the target branch before fixing it, write behavioral
+  unit tests, drive the UI with the Playwright MCP, and fetch an API token to exercise the
+  REST API. The same review lenses (scalability, performance, memory, DB resourcing, query
+  design, security, DRF serializer exposure) let it double as an inbound PR reviewer, with a
+  dedicated checklist for infra/Helm/deployment PRs. Helpers: `get-api-token.sh`,
+  `run-tests.sh`. Use when developing/testing a change, reproducing or fixing a bug, writing
+  a regression test, or reviewing any PR (app, API, or Helm chart).
+- **`defectdojo-parser`** — author and review scan-report parsers (`dojo/tools/<name>/parser.py`)
+  to the project's real conventions: factory contract, dedup registration in
+  `settings.dist.py`, `defusedxml`/utf-8/`Endpoint.from_uri` rules, the 0/1/many test set with
+  attribute-level assertions, sample-file sanitization/size discipline, and the
+  `unittests/test_parsers.py` meta-test. Helper: `new-parser-checklist.sh`. Use when writing a
+  new parser, adding a scan type, or reviewing a parser PR.
+
 ## Project Overview
 
 DefectDojo is a Django application (`dojo` app) for vulnerability management. The codebase is undergoing a modular reorganization to move from monolithic files toward self-contained domain modules.

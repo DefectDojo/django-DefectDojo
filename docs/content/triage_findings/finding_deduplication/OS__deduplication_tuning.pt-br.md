@@ -1,5 +1,5 @@
 ---
-title: Ajuste de Deduplicação (Open Source)
+title: Ajuste de Deduplicação
 description: 'Configure a deduplicação no DefectDojo Open Source: algoritmos, campos
   de hash, endpoints e serviço'
 weight: 5

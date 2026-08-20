@@ -1,5 +1,5 @@
 ---
-title: Location Drift Matching (Pro)
+title: Location Drift Matching
 description: 'Tieni traccia dei riscontri man mano che le loro posizioni cambiano
   tra un reimport e l''altro: spostamenti di riga, rinomine di file, spostamenti di
   URL e aggiornamenti di versione delle dipendenze non chiudono più i riscontri per

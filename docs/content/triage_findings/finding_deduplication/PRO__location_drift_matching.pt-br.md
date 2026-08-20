@@ -1,5 +1,5 @@
 ---
-title: Correspondência por Deriva de Localização (Pro)
+title: Correspondência por Deriva de Localização
 description: Acompanhe achados enquanto suas localizações mudam entre reimportações
   — mudanças de linha, renomeações de arquivo, movimentações de URL e atualizações
   de versão de dependência não fecham mais e recriam achados
