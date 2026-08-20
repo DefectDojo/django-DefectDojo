@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>关联 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_correlation/</link><description>Recent content in 关联 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/triage_findings/finding_correlation/index.xml" rel="self" type="application/rss+xml"/><item><title>根本原因关联（专业版）</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_correlation/pro__root_cause_correlation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_correlation/pro__root_cause_correlation/</guid><description>&lt;p&gt;一个被引入四十个服务的易受攻击库会产生四十个发现项。每一个都是真实的，每一个都被单独分类处理，而且每一个都可以通过同一次版本升级来修复。&lt;strong&gt;根本原因
+关联&lt;/strong&gt;功能将这种关系明确呈现出来：DefectDojo Pro 会将共享根本原因的发现项分组，形成一个按优先级排序的&lt;strong&gt;根本原因&lt;/strong&gt;
+列表，让您能够看到那一次修复以及它所清除的所有内容。&lt;/p&gt;
+&lt;p&gt;关联是&lt;strong&gt;增量式且非破坏性&lt;/strong&gt;的。每个发现项都会保持独立可见，保留自身的状态，并且分类处理方式与以往完全相同。关联只会在发现项
+之间添加链接，添加这些链接汇总而成的聚类节点，以及生成每条链接的证据。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关联不是去重。&lt;/strong&gt; &lt;a href="https://docs.defectdojo.com/triage_findings/finding_deduplication/"&gt;去重&lt;/a&gt;
+会判定两份报告描述的是&lt;em&gt;同一个&lt;/em&gt;发现项，并将其中一个标记为重复项。关联则是将碰巧共享同一原因的&lt;em&gt;不同&lt;/em&gt;发现项
+关联起来，绝不会将任何内容标记为重复项。两者相互独立运行，可以同时启用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="启用根本原因关联"&gt;启用根本原因关联&lt;/h2&gt;
+&lt;p&gt;根本原因关联目前处于&lt;strong&gt;测试版&lt;/strong&gt;阶段，由功能开关控制，且&lt;strong&gt;默认关闭&lt;/strong&gt;。
+超级用户可以在 Cloud 和本地部署实例上通过&lt;strong&gt;设置 &amp;gt; 功能开关&lt;/strong&gt;将其启用。请参见
+&lt;a href="https://docs.defectdojo.com/admin/feature_flags/pro__feature_flags/"&gt;功能开关&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;该开关关闭时，引擎完全不会执行任何操作：不会构建任何聚类，不会创建任何链接，
+导入后也不会分派任何任务。&lt;/p&gt;
+&lt;p&gt;启用该开关后，现有发现项&lt;strong&gt;不会&lt;/strong&gt;被追溯关联，除非它们下次被导入，或者您运行一次回填操作（请参见
+&lt;a href="#backfilling-existing-findings"&gt;回填现有发现项&lt;/a&gt;）。&lt;/p&gt;</description></item></channel></rss>

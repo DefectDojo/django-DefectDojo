@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Gerarchia degli Asset on DefectDojo Documentation</title><link>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/</link><description>Recent content in Gerarchia degli Asset on DefectDojo Documentation</description><generator>Hugo</generator><language>it</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>Assegnare Priorità, Rischio e SLA</title><link>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_finding_priority.png"
+ width="1120"
+ height="632"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;Un approccio efficace alla gestione del rischio basata sulle vulnerabilità richiede di considerare sia il contesto di business sia la sfruttabilità tecnica. Utilizzando la funzionalità Priorità e Rischio di DefectDojo Pro, gli utenti possono ordinare automaticamente i Riscontri in un contesto significativo, garantendo che le vulnerabilità ad alto impatto possano essere affrontate per prime.&lt;/p&gt;</description></item><item><title>Gerarchia degli Asset</title><link>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/asset_hierarchy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/asset_hierarchy/</guid><description>&lt;p&gt;DefectDojo Pro sta estendendo le classi di oggetti Prodotto/Product Type per fornire maggiore flessibilità al modello dei dati.&lt;/p&gt;
+&lt;h2 id="abilitare-la-funzionalità-di-gerarchia"&gt;Abilitare la funzionalità di gerarchia&lt;/h2&gt;
+&lt;p&gt;I due elementi seguenti sono separati e sono controllati con mezzi diversi.&lt;/p&gt;</description></item><item><title>Threat Intelligence</title><link>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/threat_intelligence/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/threat_intelligence/</guid><description>&lt;p&gt;DefectDojo Pro arricchisce i tuoi riscontri con &lt;strong&gt;Threat Intelligence dedicata&lt;/strong&gt; — disponibilità di
+exploit, sfruttamento noto e attività di threat actor — e la integra nel calcolo di Priorità
+e Rischio. Questo va ben oltre EPSS e il flag CISA KEV.&lt;/p&gt;</description></item><item><title>Grado di Salute del Prodotto</title><link>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/product_health_grade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/asset_modelling/pro_hierarchy/product_health_grade/</guid><description>&lt;p&gt;DefectDojo può calcolare un grado per i tuoi Prodotti in base alla quantità di Riscontri contenuti. I gradi vanno da A - F.&lt;/p&gt;</description></item></channel></rss>

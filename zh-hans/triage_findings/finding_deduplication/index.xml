@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>去重 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/</link><description>Recent content in 去重 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/index.xml" rel="self" type="application/rss+xml"/><item><title>关于去重</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/about_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/about_deduplication/</guid><description>&lt;p&gt;DefectDojo 旨在批量导入来自各类工具的报告，并根据报告内容创建一个或多个发现项。在使用 DefectDojo 时，您很可能会定期导入来自同一工具的报告，这意味着重复发现项的出现是很常见的。&lt;/p&gt;
+&lt;p&gt;这正是去重功能发挥作用的地方，这是一项智能功能，您可以通过设置来自动管理重复的发现项。&lt;/p&gt;
+&lt;h2 id="defectdojo-如何处理重复项"&gt;DefectDojo 如何处理重复项&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;首先，您导入&lt;strong&gt;测试 1&lt;/strong&gt;。您的报告中包含一个漏洞，该漏洞被记录为发现项 A。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;随后，您导入测试 2，其中包含相同的漏洞。该漏洞将被记录为发现项 B，且发现项 B 会被标记为发现项 A 的重复项。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;之后，您又导入了&lt;strong&gt;测试 3&lt;/strong&gt;，其中同样包含该漏洞。该漏洞将被记录为发现项 C，并被标记为发现项 A 的重复项。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;通过以这种方式创建并标记重复项，DefectDojo 确保针对“原始”漏洞的所有处理工作都集中在原始发现项页面上，既不会产生独立的上下文，也不会让团队误以为存在多个需要分别处理的漏洞。&lt;/p&gt;</description></item><item><title>启用去重</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro_enabling_product_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro_enabling_product_deduplication/</guid><description>&lt;p&gt;去重功能可应用于整个产品-范围，也可以更精细地限定到单个测试活动。&lt;/p&gt;
+&lt;h2 id="产品级去重"&gt;产品级去重&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;导航到系统设置页面：侧边栏中的 &lt;strong&gt;Settings &amp;gt; System &amp;gt; ⚙️ System Settings&lt;/strong&gt;（在仍使用旧版菜单布局的实例中为 &lt;strong&gt;Settings &amp;gt; Pro Settings &amp;gt; System Settings&lt;/strong&gt;）。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/enabling_product-level_deduplication.png"
+ width="1600"
+ height="1020"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;**去重与发现项设置（Deduplication and Finding Settings）&lt;strong&gt;卡片位于&lt;/strong&gt;系统设置（System Settings）**页面的顶部。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/enabling_product-level_deduplication_2.png"
+ width="1410"
+ height="460"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;</description></item><item><title>相似发现项</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/os__similar_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/os__similar_findings/</guid><description>&lt;p&gt;虽然&lt;a href="../about_deduplication"&gt;去重&lt;/a&gt;会在导入时自动运行，但&lt;strong&gt;相似发现项&lt;/strong&gt;是位于&lt;strong&gt;查看发现项&lt;/strong&gt;页面上的一个手动交互式工具。它会显示同一资产中与您正在查看的发现项相似的其他发现项，并允许您手动将它们链接为一个重复项集群。&lt;/p&gt;
+&lt;p&gt;当自动去重未能将您认为应属于同一组的发现项分组在一起时，或当您想探索资产中还有哪些内容与当前漏洞相似时，可以使用此工具。&lt;/p&gt;
+&lt;h2 id="where-to-find-it"&gt;Where to find it&lt;/h2&gt;
+&lt;p&gt;打开任意发现项即可进入其查看发现项页面。向下滚动至&lt;strong&gt;相似发现项&lt;/strong&gt;面板。标题中的数字表示该资产中与当前发现项的值相匹配的发现项数量。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/similar_findings_panel.png"
+ width="1184"
+ height="68"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="查看发现项页面上的相似发现项面板标题"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;该面板默认是折叠的。点击面板标题（或右侧的箭头/筛选按钮）即可展开面板并运行查询。&lt;/p&gt;
+&lt;h2 id="how-findings-are-matched"&gt;How Findings are matched&lt;/h2&gt;
+&lt;p&gt;打开面板时，DefectDojo 会使用当前发现项的值预填筛选条件，并在&lt;strong&gt;同一资产&lt;/strong&gt;中搜索其他匹配的发现项。用于初始匹配的字段包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;漏洞 ID（例如 CVE 标识符）&lt;/li&gt;
+&lt;li&gt;CWE&lt;/li&gt;
+&lt;li&gt;文件路径&lt;/li&gt;
+&lt;li&gt;行号&lt;/li&gt;
+&lt;li&gt;工具唯一 ID&lt;/li&gt;
+&lt;li&gt;测试类型&lt;/li&gt;
+&lt;li&gt;资产（及资产类型）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当前发现项始终会从其自身的匹配结果中排除。匹配范围限定在资产内，因此相似发现项不会跨资产进行匹配。如果任一测试活动启用了测试活动级别的去重，则跨越测试活动边界的匹配项将无法被链接（参见下方的&lt;a href="#actions"&gt;操作&lt;/a&gt;）。&lt;/p&gt;</description></item><item><title>相似发现项</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__similar_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__similar_findings/</guid><description>&lt;p&gt;虽然&lt;a href="../about_deduplication"&gt;去重&lt;/a&gt;会在导入时自动运行，但**相似发现项（Similar Findings）&lt;strong&gt;是&lt;/strong&gt;发现项详情（View Finding）**页面上的一个手动交互工具。它会显示同一资产中与您正在查看的发现项相似的其他发现项，并允许您手动将它们关联为一个重复项集群。&lt;/p&gt;
+&lt;p&gt;当自动去重未能将您认为应属于同一组的发现项归为一组时，或者当您想探索资产中还有哪些内容与当前漏洞相似时，可以使用此工具。&lt;/p&gt;
+&lt;h2 id="在哪里找到它"&gt;在哪里找到它&lt;/h2&gt;
+&lt;p&gt;打开任意一个发现项，滚动到**重复项与相似发现项（Duplicate &amp;amp; Similar Findings）**卡片。它有两个标签页：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;重复发现项（Duplicate Findings）&lt;/strong&gt; – 已经与该发现项关联为重复项的发现项（即自动生成的集群）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;相似发现项（Similar Findings）&lt;/strong&gt; – 资产中与当前发现项的值匹配、但尚未加入其集群的其他发现项。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;选择&lt;strong&gt;相似发现项&lt;/strong&gt;标签页以运行查询。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_similar_findings.png"
+ width="1440"
+ height="900"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="发现项详情页面上的重复项与相似发现项卡片"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="发现项的匹配方式"&gt;发现项的匹配方式&lt;/h2&gt;
+&lt;p&gt;DefectDojo 会在&lt;strong&gt;同一资产&lt;/strong&gt;中搜索与当前发现项相似的发现项，依据的是漏洞 ID（例如 CVE 标识符）、CWE、文件路径、行号和工具唯一 ID 等值。当前发现项始终会从其自身的结果中被排除，且匹配永远不会跨资产进行。&lt;/p&gt;</description></item><item><title>避免产生过多重复项</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/avoid_excess_duplicates/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/avoid_excess_duplicates/</guid><description>&lt;p&gt;DefectDojo 的优势之一在于其数据模型能够适应许多不同的使用场景和应用方式。随着您逐渐掌握该软件并发现优化工作流程的方法，您的使用方式也可能随之改变。&lt;/p&gt;
+&lt;p&gt;默认情况下，DefectDojo 不会删除任何已创建的重复发现项。每个发现项都被视为一个独立的漏洞实例。因此在这种情况下，&lt;strong&gt;重复发现项&lt;/strong&gt;的出现可能表明您的工作流程需要进行调整。&lt;/p&gt;
+&lt;h2 id="什么时候可以接受重复发现项"&gt;什么时候可以接受重复发现项？&lt;/h2&gt;
+&lt;p&gt;重复发现项并不总是意味着存在问题。在许多情况下，保留重复项才是更合适的做法。例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果您的团队使用并报告交互式测试活动。如果您想专门针对单个测试创建一份独立的报告，就会需要知道其中是否出现了此前已经发现过的发现项。&lt;/li&gt;
+&lt;li&gt;如果您的测试活动在上下文上彼此独立（例如，因为它们覆盖不同的代码仓库），您会希望能够标记出在两处都出现的发现项。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="检查冗余的导入"&gt;检查冗余的导入&lt;/h2&gt;
+&lt;h2 id="第-1-步清理过多的重复项"&gt;第 1 步：清理过多的重复项&lt;/h2&gt;
+&lt;p&gt;幸运的是，DefectDojo 的去重设置允许您在超过一定阈值后批量删除重复项。此功能让清理过程变得更加简便。要了解更多相关信息，请参阅我们关于&lt;strong&gt;发现项去重&lt;/strong&gt;的文章 &amp;lt;-此处将插入链接。&lt;/p&gt;
+&lt;h3 id="第-2-步评估您的测试活动是否存在冗余"&gt;第 2 步：评估您的测试活动是否存在冗余&lt;/h3&gt;
+&lt;p&gt;清理完重复发现项后，最好回头查看包含这些发现项的产品，看看是否能找到明显的原因。您可能会发现产品中包含的某些测试活动之间存在冗余的上下文。&lt;/p&gt;
+&lt;h4 id="重复或被重复使用的测试活动"&gt;重复或被重复使用的测试活动&lt;/h4&gt;
+&lt;p&gt;测试活动为特定的测试上下文存储一个或多个测试。该上下文最终由您自行定义，但如果您发现产品中有几个测试活动本应共享同一上下文，请考虑将它们合并为单个测试活动。
+​&lt;/p&gt;</description></item><item><title>去重调优（专业版）</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__deduplication_tuning/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__deduplication_tuning/</guid><description>&lt;p&gt;去重调优是 DefectDojo Pro 的一项功能，可让您对发现项的去重方式进行精细控制，从而针对您特定的安全测试工作流程优化重复检测。&lt;/p&gt;
+&lt;h2 id="去重设置"&gt;去重设置&lt;/h2&gt;
+&lt;p&gt;在 DefectDojo Pro 中，您可以通过以下路径访问去重调优功能：
+&lt;strong&gt;设置 &amp;gt; 发现项工作流程&lt;/strong&gt;（在仍使用旧版菜单布局的实例上为 &lt;strong&gt;设置 &amp;gt; Pro 设置 &amp;gt; 去重设置&lt;/strong&gt;）&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/deduplication_tuning.png"
+ width="1243"
+ height="418"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;去重设置页面提供三个关键配置区域：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;同工具去重&lt;/li&gt;
+&lt;li&gt;跨工具去重&lt;/li&gt;
+&lt;li&gt;重新导入去重&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="同工具去重"&gt;同工具去重&lt;/h2&gt;
+&lt;p&gt;同工具去重默认对所有安全工具解析器启用。这可确保使用同一工具进行连续扫描所产生的发现项能够被正确去重。&lt;/p&gt;</description></item><item><title>去重调优（开源版）</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/os__deduplication_tuning/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/os__deduplication_tuning/</guid><description>&lt;p&gt;DefectDojo 开源版使用配置文件和环境变量来调整去重设置。&lt;/p&gt;
+&lt;p&gt;另请参阅：&lt;a href="https://docs.defectdojo.com/get_started/open_source/configuration/"&gt;开源版配置&lt;/a&gt;，了解环境变量和 &lt;code&gt;local_settings.py&lt;/code&gt; 覆盖设置的详细信息。&lt;/p&gt;
+&lt;h2 id="what-you-can-configure"&gt;What you can configure&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;按解析器设置算法&lt;/strong&gt;：可选择工具唯一 ID、哈希代码、工具唯一 ID 或哈希代码，或传统算法（仅限开源版）中的一种。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;按扫描器设置哈希字段&lt;/strong&gt;：决定每个解析器中哪些字段参与哈希计算。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;允许空 CWE&lt;/strong&gt;：控制在哈希计算时是否接受缺失/为零的 CWE。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;端点纳入考量&lt;/strong&gt;：当端点未包含在哈希中时，可选择将端点用于去重。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;始终包含的字段&lt;/strong&gt;：无论每个扫描器的设置如何，都会将字段（例如 &lt;code&gt;service&lt;/code&gt;）添加到所有哈希中。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="key-settings-defaults-shown"&gt;Key settings (defaults shown)&lt;/h2&gt;
+&lt;p&gt;所有默认值均在 &lt;code&gt;dojo/settings/settings.dist.py&lt;/code&gt; 中定义，可通过环境变量或 &lt;code&gt;local_settings.py&lt;/code&gt; 进行覆盖。&lt;/p&gt;</description></item><item><title>全局组件去重（专业版）</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__global_component_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__global_component_deduplication/</guid><description>&lt;p&gt;全局组件去重是 DefectDojo Pro 的一种算法，它根据发现项所引用的组件名称和版本，在&lt;strong&gt;所有产品&lt;/strong&gt;范围内识别重复的发现项。它适用于软件成分分析（SCA）工具场景：同一个存在漏洞的依赖项（例如 &lt;code&gt;timespan@2.3.0&lt;/code&gt;）可能出现在多个产品中，而您希望 DefectDojo 将这些出现情况都视为同一个原始发现项的重复项。&lt;/p&gt;
+&lt;p&gt;与其他去重算法不同，全局组件匹配&lt;strong&gt;并不局限于单个产品或测试活动范围内&lt;/strong&gt;。导入到产品 B 中的发现项可以被标记为产品 A 中某个较早发现项的重复项，即使这两个产品彼此无关。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;全局组件 与 全局位置的对比：&lt;/strong&gt; 全局组件仅根据组件名称和版本进行匹配。如果您的实例使用了位置（Locations）数据模型，&lt;a href="https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__global_locations_deduplication/"&gt;全局位置去重&lt;/a&gt;是更精确的后继方案——它以完整的 Package URL 作为依赖项的键，并且还能在各产品之间对 URL/DAST 发现项进行去重。请参阅该页面的对比表以确定应选择哪种方案。&lt;/p&gt;</description></item><item><title>全局位置去重（专业版）</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__global_locations_deduplication/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__global_locations_deduplication/</guid><description>&lt;p&gt;全局位置去重是 DefectDojo Pro 的一种算法，它纯粹根据&lt;strong&gt;共享位置&lt;/strong&gt;——URL，或依赖项（以其 Package URL 标识）——在&lt;strong&gt;所有产品&lt;/strong&gt;范围内识别重复的发现项。只要两个发现项共享某个已选类型的位置，无论其标题、严重程度、CWE 或漏洞 ID 是否相同，都会被视为重复项——位置本身就是身份标识。&lt;/p&gt;
+&lt;p&gt;它是&lt;a href="https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__global_component_deduplication/"&gt;全局组件去重&lt;/a&gt;在位置感知层面的对应方案，作用于 DefectDojo 的位置数据模型。全局组件仅根据组件名称和版本进行匹配，而全局位置则&lt;strong&gt;通过完整的 Package URL&lt;/strong&gt;匹配同一依赖项，&lt;em&gt;并且&lt;/em&gt;根据共享的 &lt;strong&gt;URL&lt;/strong&gt; 进行匹配——因此它能够在各产品之间对 DAST/Web 发现项进行去重，这是全局组件无法做到的。&lt;/p&gt;
+&lt;p&gt;与作用域受限的算法不同，全局位置匹配&lt;strong&gt;并不局限于单个产品或测试活动范围内&lt;/strong&gt;。导入到产品 B 中的发现项可以被标记为产品 A 中某个较早发现项的重复项，即使这两个产品彼此无关。&lt;/p&gt;</description></item><item><title>位置漂移匹配（专业版）</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__location_drift_matching/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_deduplication/pro__location_drift_matching/</guid><description>&lt;p&gt;&lt;strong&gt;位置漂移匹配（Location Drift Matching）&lt;strong&gt;让重新导入能够将&lt;em&gt;位置&lt;/em&gt;发生变化的发现项识别为&lt;/strong&gt;同一个发现项&lt;/strong&gt;。如果没有此功能，重新导入会通过包含位置字段的精确身份哈希来匹配发现项——因此任何位置变动都会关闭旧的发现项并创建一个完全相同的新发现项：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;提交代码后发现项的&lt;strong&gt;行号&lt;/strong&gt;发生了变化。&lt;/li&gt;
+&lt;li&gt;重构导致文件被&lt;strong&gt;重命名或移动&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;Web 应用程序的 &lt;strong&gt;URL、端口或主机&lt;/strong&gt;在两次 DAST 扫描之间发生了变化。&lt;/li&gt;
+&lt;li&gt;依赖项的&lt;strong&gt;版本升级&lt;/strong&gt;改变了 SCA 工具报告的存在漏洞的软件包版本。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;以往，上述每种情况都会产生一个已关闭的发现项加上一个&amp;quot;新&amp;quot;发现项——原发现项上的状态、备注、SLA 时钟、风险接受和 JIRA 关联信息随之丢失，并产生虚假的&amp;quot;新的严重发现项&amp;quot;噪音。启用位置漂移匹配后，同一个发现项会被原地维护：其位置会根据最新扫描更新，历史记录也会得以保留。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;位置漂移匹配是 DefectDojo Pro 的功能。该功能默认&lt;strong&gt;关闭&lt;/strong&gt;，需要按安全工具逐个启用。&lt;/p&gt;</description></item></channel></rss>

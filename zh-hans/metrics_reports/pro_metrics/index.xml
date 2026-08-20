@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pro 指标 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/</link><description>Recent content in Pro 指标 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/index.xml" rel="self" type="application/rss+xml"/><item><title>Pro 指标概览</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__overview/</guid><description>&lt;p&gt;DefectDojo Pro 界面提供多种指标仪表板，帮助您可视化当前的安全态势。每个仪表板都能让组织内不同层级的相关方在无需解读原始数据或逐条查看发现项的情况下做出明智决策。这些仪表板包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__executive_insights/#main-content"&gt;高管洞察&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__priority_insights/#main-content"&gt;优先级洞察&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__program_insights/#main-content"&gt;项目洞察&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__remediation_insights/#main-content"&gt;修复洞察&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__tool_insights/#main-content"&gt;工具洞察&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/metrics_image1.png"
+ width="3408"
+ height="1760"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="指标概览"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="指标功能"&gt;指标功能&lt;/h2&gt;
+&lt;p&gt;在详细介绍每个具体仪表板之前，有必要先了解一下所有仪表板的一些共通之处。&lt;/p&gt;
+&lt;h3 id="筛选"&gt;筛选&lt;/h3&gt;
+&lt;p&gt;所有指标都可以按时间范围、组织、资产和标签进行筛选。按需调整筛选条件后，必须点击“应用筛选”（Apply Filter）才能使筛选生效。如果您希望将仪表板上当前筛选状态下的所有图表、表格导出为 PDF，请点击“导出为 PDF”（Export as PDF）。&lt;/p&gt;
+&lt;p&gt;筛选的时间范围最长为过去一年，但也可以调整为过去 7 天、14 天、30 天、90 天或 180 天。&lt;/p&gt;</description></item><item><title>高管洞察</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__executive_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__executive_insights/</guid><description>&lt;p&gt;&lt;strong&gt;高管洞察(Executive Insights)&lt;/strong&gt; 指标页面提供了整个组织应用程序安全风险的汇总视图。由于该仪表板是为供高管层查阅而设计的,因此它仅关注组织和资产,侧重于呈现趋势和结果,而非单个发现项。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_1.png"
+ width="1444"
+ height="500"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;在高管洞察中,用户可以从筛选列表中选择时间范围、组织、资产或标签,系统会据此在相邻的表格中填充相应的发现项。这也会改变下方各类图表中显示的结果。&lt;/p&gt;
+&lt;p&gt;如果未选择任何筛选条件,该表格将显示所有组织、资产和标签的状态。&lt;/p&gt;
+&lt;p&gt;第一个表格提供了整体安全态势的鸟瞰视图。此外还有两个单独的表格,分别对应您的组织和资产。&lt;/p&gt;
+&lt;p&gt;各表格中的数字会根据所应用的筛选条件而变化。点击某个单元格内带超链接的数字,会在新标签页中打开对应的发现项表格。&lt;/p&gt;</description></item><item><title>工具洞察</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__tool_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__tool_insights/</guid><description>&lt;p&gt;&lt;strong&gt;工具洞察&lt;/strong&gt;根据每个安全工具在 DefectDojo 中报告的发现项数量及严重程度，跟踪该工具的表现，帮助评估各工具随时间推移的相对成效。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_5.png"
+ width="1450"
+ height="1030"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;具体而言，“按工具划分的严重程度（发现项最多的前 10 个工具）”弹出窗口会提供一张雷达图，比较各工具发现的发现项的严重程度。&lt;/p&gt;
+&lt;p&gt;“按工具划分的月度严重程度”还会提供一张表格，按特定扫描类型在特定日期发现的发现项总数排列。该表格的每一列同样可以切换为升序或降序显示。&lt;/p&gt;</description></item><item><title>项目洞察</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__program_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__program_insights/</guid><description>&lt;p&gt;&lt;strong&gt;项目洞察&lt;/strong&gt;指标页面评估整个应用安全项目的成效与成熟度，关注的是项目层面的整体表现，而非单个发现项。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_3.png"
+ width="1458"
+ height="890"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;该页面包含测试工作量的细分，以及去重和重新导入功能如何影响噪音降低、效率提升和累计成本节约，从而确保安全流程按预期运行。&lt;/p&gt;</description></item><item><title>修复洞察</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__remediation_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__remediation_insights/</guid><description>&lt;p&gt;&lt;strong&gt;修复洞察&lt;/strong&gt;仪表板关注结项表现和修复问责情况，以图表形式展示 SLA 达成率、逾期发现项和风险接受情况随时间的变化。它依赖 EPSS 评分来判定发现项的可利用性，DefectDojo Pro 会每天更新该评分数据库，并将其应用到您的每个发现项上。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboards_4.png"
+ width="1444"
+ height="1070"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;与优先级洞察类似，修复洞察同样包含四个可点击的弹出窗口，点击后会在新标签页中打开一张表格，展示这四个弹出窗口所代表的全部数据：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;未结发现项总数&lt;/li&gt;
+&lt;li&gt;严重和高级别未结发现项&lt;/li&gt;
+&lt;li&gt;SLA 内已缓解&lt;/li&gt;
+&lt;li&gt;高可利用性发现项&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>优先级洞察</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__priority_insights/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/pro_metrics/pro__priority_insights/</guid><description>&lt;p&gt;&lt;strong&gt;优先级洞察&lt;/strong&gt;指标页面展示根据风险、严重程度、可利用性或自定义评分确定的最关键发现项，帮助团队了解在任何时刻哪些漏洞构成的威胁最大，从而有针对性地集中精力应对。&lt;/p&gt;
+&lt;p&gt;除了各种图表之外，优先级洞察还包含四个可点击的弹出窗口，点击后会在新标签页中打开一张表格，展示这四个弹出窗口所代表的全部数据：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;紧急风险发现项总数&lt;/li&gt;
+&lt;li&gt;需处理风险发现项总数&lt;/li&gt;
+&lt;li&gt;中等风险发现项总数&lt;/li&gt;
+&lt;li&gt;发现项平均优先级&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;该页面还内置了一张按 AppSec 或 SOC 排列的优先级发现项表格，用户可以进一步筛选、交互并查看与各个发现项相关的数据。表格内容可以导出为 CSV 文件或快速报告，导出前还可以添加其他多种列。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/metrics_image6.png"
+ width="2704"
+ height="1264"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="优先级洞察表格"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;</description></item></channel></rss>

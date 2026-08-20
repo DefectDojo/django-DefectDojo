@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>单点登录 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/</link><description>Recent content in 单点登录 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/admin/sso/index.xml" rel="self" type="application/rss+xml"/><item><title>SAML 配置</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__saml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__saml/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 &lt;strong&gt;Enterprise Settings&lt;/strong&gt; 界面进行 SAML 身份验证。开源版 DefectDojo 不包含单点登录（SSO）功能——有关开源版的访问控制，请参阅&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="acs-url-assertion-consumer-service"&gt;ACS URL (Assertion Consumer Service)&lt;/h2&gt;
+&lt;p&gt;您的身份提供程序需要知道在用户完成身份验证后应将 SAML 响应 POST 到哪里。DefectDojo 的 ACS URL 为：&lt;/p&gt;</description></item><item><title>授权连接器</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__authorization_connectors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__authorization_connectors/</guid><description>&lt;p&gt;授权连接器(Authorization Connectors)是一个页面,列出了 DefectDojo Pro 支持的每一个身份提供商、各自当前所处的状态,以及所使用的协议。在该页面出现之前,每个提供商都有各自独立的设置表单,无法在不逐一打开的情况下回答“这个实例上都配置了什么”这个问题。&lt;/p&gt;
+&lt;p&gt;授权连接器是 &lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 功能。可在&lt;strong&gt;连接 &amp;gt; 授权&lt;/strong&gt;下找到该页面。只有&lt;strong&gt;超级用户&lt;/strong&gt;才能查看或更改身份提供商配置。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/admin/sso/images/authorization_connectors.png"
+ width="1800"
+ height="1150"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="Authorization Connectors"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="页面结构"&gt;页面结构&lt;/h2&gt;
+&lt;p&gt;提供商被分为两个部分,每个部分按字母顺序列出,标题旁标有数量:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;已配置的提供商&lt;/strong&gt;——已在本实例上设置好的提供商,无论其当前是否处于开启状态。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可用的提供商&lt;/strong&gt;——受支持但尚未配置的提供商。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这里刻意按“是否已配置”而非“是否已启用”来划分。一个曾被配置、随后又被关闭的提供商仍会留在“已配置的提供商”中,因为设置它的人会在那里查找它。其状态则显示在卡片上。&lt;/p&gt;
+&lt;p&gt;每张卡片显示:&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;图标和名称&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;提供商名称,不含协议&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;协议标签&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;SAML 2.0&lt;/code&gt;、&lt;code&gt;OAuth 2.0&lt;/code&gt;、&lt;code&gt;OpenID Connect&lt;/code&gt; 或 &lt;code&gt;LDAP&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;状态标签&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;Enabled&lt;/code&gt;、&lt;code&gt;Disabled&lt;/code&gt; 或 &lt;code&gt;Not configured&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;&lt;code&gt;BETA&lt;/code&gt; 标签&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;出现在仍处于测试阶段的提供商上&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;操作&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;已配置的提供商显示&lt;strong&gt;管理配置&lt;/strong&gt;,可用的提供商显示&lt;strong&gt;配置&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;两个部分都设有搜索框,可按提供商名称和协议匹配,因此搜索 &lt;code&gt;oauth&lt;/code&gt; 会将页面缩小到仅显示 OAuth 类提供商。&lt;/p&gt;</description></item><item><title>Auth0</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__auth0/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__auth0/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 Auth0 登录。开源版 DefectDojo 不包含 SSO——开源版的访问控制请参见&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;p&gt;在配置 DefectDojo 之前,请先在您的 Auth0 控制台中完成以下步骤:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;创建新应用:&lt;strong&gt;Applications &amp;gt; Create Application &amp;gt; Single Page Web Application&lt;/strong&gt;。&lt;/p&gt;</description></item><item><title>Azure Active Directory</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__azure_ad/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__azure_ad/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 Azure Active Directory(Azure AD)登录,包括自动的用户组同步。开源版 DefectDojo 不包含 SSO——开源版的访问控制请参见&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;p&gt;在配置 DefectDojo 之前,请先在 Azure 门户中完成以下步骤:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;在 Azure Active Directory 中&lt;a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app"&gt;注册一个新应用&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>GitHub Enterprise</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__github_enterprise/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__github_enterprise/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 GitHub Enterprise 登录。开源版 DefectDojo 不包含 SSO——开源版的访问控制请参见&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;p&gt;在配置 DefectDojo 之前,请先在 GitHub Enterprise 中完成以下步骤:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;在您的 GitHub Enterprise Server 中&lt;a href="https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app"&gt;创建一个新的 OAuth 应用&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>GitLab</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__gitlab/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__gitlab/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 GitLab 登录。开源版 DefectDojo 不包含 SSO——开源版的访问控制请参见&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;p&gt;在配置 DefectDojo 之前,请先在 GitLab 中完成以下步骤:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;前往您 GitLab 个人资料的应用页面:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;GitLab.com:&lt;code&gt;https://gitlab.com/profile/applications&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;自托管:&lt;code&gt;https://your-gitlab-host/profile/applications&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;创建一个新应用:&lt;/p&gt;</description></item><item><title>Google 身份验证</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__google/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__google/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 Google 账户登录。首次登录时,如果新用户尚不存在,会自动创建。现有的 DefectDojo 用户会通过用户名(即 Google 邮箱中 &lt;code&gt;@&lt;/code&gt; 之前的部分)与 Google 账户进行匹配。开源版 DefectDojo 不包含 SSO——开源版的访问控制请参见&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;p&gt;在配置 DefectDojo 之前,请先在 Google Cloud Console 中完成以下步骤:&lt;/p&gt;</description></item><item><title>KeyCloak</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__keycloak/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__keycloak/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 KeyCloak 登录。开源版 DefectDojo 不包含 SSO——开源版的访问控制请参见&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;本指南假定您已经配置好了一个 KeyCloak Realm。如果尚未配置,请参见 &lt;a href="https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/realms/create.html"&gt;KeyCloak 文档&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;p&gt;在配置 DefectDojo 之前,请先在您的 KeyCloak realm 中完成以下步骤:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;添加一个类型为 &lt;code&gt;openid-connect&lt;/code&gt; 的新客户端。记录该客户端 ID。&lt;/p&gt;</description></item><item><title>Okta</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__okta/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__okta/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 Okta 登录。开源版 DefectDojo 不包含单点登录（SSO）功能——有关开源版的访问控制，请参阅&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;p&gt;在配置 DefectDojo 之前，请先在 Okta 中完成以下步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;前往 &lt;a href="https://www.okta.com/developer/signup/"&gt;Okta&lt;/a&gt; 登录或创建账户。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;进入 &lt;strong&gt;Applications&lt;/strong&gt;，点击 &lt;strong&gt;Add Application&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/okta_1.png"
+ width="1802"
+ height="1122"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;选择 &lt;strong&gt;Web Applications&lt;/strong&gt;。&lt;/p&gt;</description></item><item><title>OIDC</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__oidc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__oidc/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过通用 OpenID Connect (OIDC) 提供程序登录。开源版 DefectDojo 不包含单点登录（SSO）功能——有关开源版的访问控制，请参阅&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="配置"&gt;配置&lt;/h2&gt;
+&lt;p&gt;在 DefectDojo 中，进入 &lt;strong&gt;Enterprise Settings &amp;gt; OIDC Settings&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/oidc_pro.png"
+ width="448"
+ height="506"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;填写表单：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Endpoint&lt;/strong&gt; —— 您的 OIDC 提供程序的基础 URL。请勿包含 &lt;code&gt;/.well-known/openid-configuration&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Client ID&lt;/strong&gt; —— 您的 OIDC 客户端 ID。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Client Secret&lt;/strong&gt; —— 您的 OIDC 客户端密钥。&lt;/li&gt;
+&lt;li&gt;可选配置 &lt;strong&gt;Claim Mapping&lt;/strong&gt; 和 &lt;strong&gt;Group Mapping&lt;/strong&gt; —— 参见下文。&lt;/li&gt;
+&lt;li&gt;勾选 &lt;strong&gt;Enable OIDC&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;提交表单后，DefectDojo 登录页面上会出现一个 &lt;strong&gt;Log In With OIDC&lt;/strong&gt; 按钮。&lt;/p&gt;</description></item></channel></rss>

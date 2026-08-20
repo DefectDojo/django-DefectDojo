@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>功能标志 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/admin/feature_flags/</link><description>Recent content in 功能标志 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/admin/feature_flags/index.xml" rel="self" type="application/rss+xml"/><item><title>功能标志</title><link>https://docs.defectdojo.com/zh-hans/admin/feature_flags/pro__feature_flags/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/feature_flags/pro__feature_flags/</guid><description>&lt;p&gt;功能标志(Feature Flags)让您可以在自己的实例上打开或关闭可选的 DefectDojo Pro 功能——以前只能通过联系 DefectDojo 支持才能启用的功能,现在可以在 UI 中自助完成。&lt;/p&gt;
+&lt;p&gt;功能标志页面仅对&lt;strong&gt;超级用户&lt;/strong&gt;可见。其他用户(包括全局所有者)看不到该页面。&lt;/p&gt;
+&lt;h2 id="打开功能标志页面"&gt;打开功能标志页面&lt;/h2&gt;
+&lt;p&gt;在左侧边栏中前往&lt;strong&gt;设置 &amp;gt; 功能标志&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;该页面列出了每一项可选功能,包含:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;名称&lt;/strong&gt;——功能名称,若仍处于测试阶段则带有 &lt;strong&gt;BETA&lt;/strong&gt; 标签&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;说明&lt;/strong&gt;——该功能的作用&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;文档链接&lt;/strong&gt;——该功能对应文档所在位置&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;开关&lt;/strong&gt;——该功能当前是否处于开启状态&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;使用搜索框可按功能名称或说明筛选列表。&lt;/p&gt;</description></item></channel></rss>

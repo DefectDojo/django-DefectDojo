@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Helps on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/help/</link><description>Recent content in Helps on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><atom:link href="https://docs.defectdojo.com/zh-hans/help/index.xml" rel="self" type="application/rss+xml"/><item><title>术语表</title><link>https://docs.defectdojo.com/zh-hans/help/glossary/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/help/glossary/</guid><description>&lt;p&gt;以下是一份简易术语表,用以帮助理解 DefectDojo 的各项功能,并标注每个功能是存在于 DefectDojo 的 Pro 版本、开源版本,还是两者皆有。&lt;/p&gt;
+&lt;h2 id="产品层级结构两者皆有"&gt;产品层级结构(两者皆有)&lt;/h2&gt;
+&lt;p&gt;DefectDojo 中用于组织安全数据的结构模型,由组织(Organizations)→ 资产(Assets)→ 测试活动(Engagements)→ 测试(Tests)→ 发现项(Findings)组成。&lt;/p&gt;
+&lt;h2 id="组织两者皆有"&gt;组织(两者皆有)&lt;/h2&gt;
+&lt;p&gt;一种顶级层级对象,在 DefectDojo Pro 中作为资产的父对象。它为所有子资产提供统一的治理、访问控制和报告上下文。&lt;/p&gt;
+&lt;h2 id="资产两者皆有"&gt;资产(两者皆有)&lt;/h2&gt;
+&lt;p&gt;一种一级对象,代表组织内可部署或逻辑上的系统实体(例如应用程序、主机、环境)。在 Pro 版本中,资产支持父子关系并具备更丰富的业务元数据;而在开源版本中,资产不支持父子关系。&lt;/p&gt;</description></item><item><title>联系销售</title><link>https://docs.defectdojo.com/zh-hans/help/contact_sales/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/help/contact_sales/</guid><description>&lt;p&gt;如果您的团队需要本地部署(on-premise)的 DefectDojo,请通过邮件 → &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="hello",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;hello at defectdojo dot com&lt;/noscript&gt;
+
+ 联系我们的销售团队。此试用申请流程仅适用于 DefectDojo Cloud 用户。&lt;/p&gt;
+&lt;p&gt;DefectDojo 的所有套餐均包含 2 周的免费试用期,您可以借此评估我们的软件。DefectDojo 试用实例功能齐全,我们的团队可以在试用结束时立即将其转换为付费实例;无需重新搭建环境,也无需重新上传任何数据。&lt;/p&gt;
+&lt;p&gt;在此流程结束时,我们会安排您与销售团队对接,他们会跟进获取您的账单信息,并为您公司的试用实例完成授权。&lt;/p&gt;
+&lt;h1 id="申请试用"&gt;&lt;strong&gt;申请试用&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;要注册试用,您需要在我们的 &lt;a href="https://defectdojo.com/pricing"&gt;Cloud Portal&lt;/a&gt; 上创建一个账户,然后从侧边栏点击 New Subscription 菜单选项。&lt;/p&gt;</description></item><item><title>联系支持</title><link>https://docs.defectdojo.com/zh-hans/help/contact_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/help/contact_support/</guid><description>&lt;p&gt;需要 DefectDojo 方面的帮助吗?以下是几种获取帮助的方式。&lt;/p&gt;
+&lt;h2 id="开源版支持"&gt;开源版支持&lt;/h2&gt;
+&lt;p&gt;开源版用户可以通过我们的社区渠道获得帮助和建议。&lt;/p&gt;
+&lt;p&gt;对于开源版用户,获取帮助最快捷的方式是通过 &lt;a href="https://owasp.org/slack/invite"&gt;OWASP Slack Channel&lt;/a&gt;。我们的社区成员活跃在 &lt;strong&gt;# defectdojo channel&lt;/strong&gt; 频道中,可以帮助您解决遇到的问题。&lt;/p&gt;
+&lt;p&gt;如需报告错误,可以在我们的 &lt;a href="https://github.com/DefectDojo/django-DefectDojo"&gt;GitHub&lt;/a&gt; 上提交 issue。&lt;/p&gt;
+&lt;p&gt;更多信息请参阅我们的 &lt;a href="https://defectdojo.com/open-source"&gt;Community Site&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="defectdojo-pro-支持"&gt;DefectDojo Pro 支持&lt;/h2&gt;
+&lt;p&gt;DefectDojo Pro 订阅在初始试用期及之后均可获得 DefectDojo, Inc. 团队的全面支持。&lt;/p&gt;</description></item></channel></rss>

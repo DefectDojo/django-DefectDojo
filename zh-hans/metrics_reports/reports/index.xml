@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>报告构建器 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/</link><description>Recent content in 报告构建器 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/metrics_reports/reports/index.xml" rel="self" type="application/rss+xml"/><item><title>报告生成器</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/report-builder/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/report-builder/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：可复用报告生成器（主题、块、模板以及已保存的生成报告）是 DefectDojo Pro 的功能，目前处于测试阶段。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro 报告生成器允许您使用可复用的组件来编写精美的报告，这样您只需构建一次组件即可在任何地方重复使用，而无需每次都从头开始构建报告。您可以通过侧边栏中的**📄 报告**区域访问它。&lt;/p&gt;
+&lt;h2 id="与开源版的比较"&gt;与开源版的比较&lt;/h2&gt;
+&lt;p&gt;开源版 DefectDojo 可以构建报告、运行报告并让您获取输出，但它&lt;strong&gt;不会&lt;/strong&gt;保存报告模板，也不会持久化保存您生成的报告。每份报告都是一次性的操作。&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro 将报告功能转变为可复用的构建模块。您可以保存&lt;strong&gt;主题&lt;/strong&gt;、&lt;strong&gt;块&lt;/strong&gt;和&lt;strong&gt;模板&lt;/strong&gt;，随意混合搭配、重复使用；您运行的每份报告都会作为&lt;strong&gt;生成报告&lt;/strong&gt;持久化保存，供您日后下载或重新运行。Pro 版还通过完整的 REST API 公开整个工作流程，并支持 LLM 辅助创作，因此报告可以通过编程方式构建和运行。&lt;/p&gt;</description></item><item><title>使用 API 实现报告自动化</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/report-builder-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/report-builder-api/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意:Report Builder REST API(报告主题、区块、模板和生成的报告)是 DefectDojo Pro 的功能,当前处于测试版(beta)阶段。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;报告构建器 REST API 可以让您自动化处理与在&lt;a href="../report-builder/"&gt;报告构建器 UI&lt;/a&gt;中手动组装时相同的主题、区块和模板 —— 而且它更进一步,让您可以&lt;strong&gt;运行&lt;/strong&gt;模板并&lt;strong&gt;下载&lt;/strong&gt;生成的 PDF 或 HTML 文件。本指南将带您走完完整的生命周期:进行身份验证、发现字段和过滤器的相关术语、创建各个构建模块,然后生成并获取报告。&lt;/p&gt;</description></item><item><title>使用 LLM 构建报告</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/report-builder-llm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/report-builder-llm/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：通过 REST API 和 LLM 自动化报告构建器是 DefectDojo Pro 的功能，目前处于测试阶段。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro 的报告构建器（主题、内容块和模板）完全由 REST API 驱动。这意味着您可以把整个任务交给 LLM 来完成：将一段自包含的提示词粘贴到 Claude、ChatGPT 或其他任何有能力的模型中，它会查询您租户的实时 OpenAPI 架构和 &lt;code&gt;field_options&lt;/code&gt;，为您指定的受众提出一套主题以及可复用的内容块库和模板，生成一个可运行的 Python 脚本，然后运行报告并下载生成的文件。&lt;/p&gt;</description></item><item><title>使用报告生成器</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/using-the-report-builder/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/reports/using-the-report-builder/</guid><description>&lt;p&gt;DefectDojo 的报告生成器允许您使用一组内容小组件组装自定义报告、运行报告，并导出结果（例如打印为 PDF）。自定义报告可以汇总您希望与外部受众共享的发现项或端点，还可以包含品牌标识和样板文字。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt; 在开源版 DefectDojo 中，构建报告、运行报告并获取其输出是一次性的操作。报告布局（模板）和生成的报告输出&lt;strong&gt;不会被保存&lt;/strong&gt;在开源版中。若要重复使用某个布局，您需要在报告生成器中重新构建它。若要保存可重复使用的主题、块和模板，并保留生成报告的持久历史记录，请参阅 DefectDojo Pro 的&lt;a href="../report-builder/"&gt;报告生成器&lt;/a&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="打开报告生成器"&gt;打开报告生成器&lt;/h2&gt;
+&lt;p&gt;报告生成器可以通过侧边栏中的**📄 报告**页面打开。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Using_the_Report_Builder.png"
+ width="1600"
+ height="867"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;报告生成器页面分为两栏。左侧的&lt;strong&gt;报告格式&lt;/strong&gt;栏用于设计报告，您可以使用右侧&lt;strong&gt;可用小组件&lt;/strong&gt;栏中的小组件。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Using_the_Report_Builder_2.png"
+ width="1600"
+ height="905"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h2 id="第-1-步设置报告选项"&gt;第 1 步：设置报告选项&lt;/h2&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Using_the_Report_Builder_3.png"
+ width="1600"
+ height="874"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-2"
+&gt;&lt;/p&gt;
+&lt;p&gt;在报告选项部分，您可以执行以下操作：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为报告设置&lt;strong&gt;报告名称&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;在报告中包含用户创建的&lt;strong&gt;发现项备注&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;在报告中包含&lt;strong&gt;发现项图片&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;为报告上传页眉&lt;strong&gt;图片&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="为报告选择页眉图片"&gt;为报告选择页眉图片&lt;/h3&gt;
+&lt;p&gt;要在报告顶部添加图片，请点击&lt;strong&gt;选择文件&lt;/strong&gt;按钮，将图片上传到 DefectDojo。&lt;/p&gt;</description></item></channel></rss>

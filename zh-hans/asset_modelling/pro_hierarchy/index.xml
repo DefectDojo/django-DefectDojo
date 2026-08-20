@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>资产层级结构 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/</link><description>Recent content in 资产层级结构 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>分配优先级、风险和 SLA</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_finding_priority.png"
+ width="1120"
+ height="632"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;有效的风险优先漏洞管理需要一种同时考虑业务背景和技术可利用性的方法。借助 DefectDojo Pro 的优先级与风险功能,用户可以自动将发现项归入有意义的上下文中,确保优先处理高影响的漏洞。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优先级&lt;/strong&gt;是应用于您 DefectDojo 实例中所有发现项的一个计算数值排名。它能帮助您快速在上下文中理解漏洞,尤其是在需要监管大量发现项和/或产品安全需求的大型组织中。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;风险&lt;/strong&gt;是一个 4 级排名体系,在更大程度上考虑了发现项的可利用性。它旨在成为优先级的一个精细度较低、更偏&amp;quot;高管层面&amp;quot;的版本。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_risk_example.png"
+ width="1966"
+ height="194"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;优先级和风险值可以与其他过滤器结合使用,在任何上下文中比较发现项,例如:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在单个产品、测试活动或测试内&lt;/li&gt;
+&lt;li&gt;在 DefectDojo 所有产品的全局范围内&lt;/li&gt;
+&lt;li&gt;在几个特定产品之间&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;应用发现项优先级和风险有助于您的团队响应组织中最相关的漏洞,同时也提供了一个框架,帮助您符合监管标准的合规要求。&lt;/p&gt;
+&lt;p&gt;详细了解 DefectDojo, Inc. 2025 年 5 月的答疑时间中关于优先级和风险的内容:&lt;/p&gt;</description></item><item><title>资产层级结构</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/asset_hierarchy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/asset_hierarchy/</guid><description>&lt;p&gt;DefectDojo Pro 正在扩展产品/产品类型（Product/Product Type）对象类，以便为数据模型提供更强的灵活性。&lt;/p&gt;
+&lt;h2 id="enabling-the-hierarchy-feature"&gt;Enabling the Hierarchy Feature&lt;/h2&gt;
+&lt;p&gt;以下两部分功能相互独立，通过不同的方式进行控制。&lt;/p&gt;
+&lt;h3 id="asset-hierarchy"&gt;Asset Hierarchy&lt;/h3&gt;
+&lt;p&gt;**资产层级结构（Asset Hierarchy）&lt;strong&gt;支持在资产（Asset）之间建立父子关系。该层级结构可以从导航栏中的&lt;/strong&gt;产品（Product）**选项卡查看和管理。&lt;/p&gt;
+&lt;p&gt;资产层级结构已正式发布（GA），在云端和本地部署的每个实例上均默认开启。无需进行任何启用操作，该功能也不再列在功能开关（Feature Flags）页面中。&lt;/p&gt;
+&lt;h3 id="label-changes-optional"&gt;Label Changes (optional)&lt;/h3&gt;
+&lt;p&gt;**标签更改（Label Changes）**会在整个 UI 中将“产品类型（Product Type）”重命名为“组织（Organization）”，将“产品（Product）”重命名为“资产（Asset）”。这是与启用层级结构相独立的一个步骤，可以同时进行，也可以稍后再做。&lt;/p&gt;</description></item><item><title>威胁情报</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/threat_intelligence/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/threat_intelligence/</guid><description>&lt;p&gt;DefectDojo Pro 通过&lt;strong&gt;专用威胁情报&lt;/strong&gt;——利用可用性、已知利用情况以及威胁行为者活动——来丰富您的发现项,并将其纳入优先级与风险的计算中。这远远超出了 EPSS 和 CISA KEV 标记所能提供的信息。&lt;/p&gt;
+&lt;h2 id="您将获得什么"&gt;您将获得什么&lt;/h2&gt;
+&lt;p&gt;每个带有 CVE 的发现项都会在每晚与一个精心整理的情报源进行匹配,该情报源整合自 CISA KEV、Metasploit、Exploit-DB、Nuclei 模板以及公开的概念验证(PoC)跟踪数据。当存在利用证据时,该发现项会显示一张&lt;strong&gt;威胁情报&lt;/strong&gt;卡片:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一个&lt;strong&gt;利用成熟度&lt;/strong&gt;徽章——&lt;em&gt;无 → PoC → 武器化 → 野外活跃利用&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;一个&lt;strong&gt;威胁评分&lt;/strong&gt;(0-100)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可链接到原始凭证的证据标签&lt;/strong&gt;——KEV 条目(附带其登记日期)、用于勒索软件、Metasploit 模块、Exploit-DB 条目、Nuclei 模板,以及公开的概念验证代码仓库&lt;/li&gt;
+&lt;li&gt;一行通俗易懂的说明,解释该发现项的优先级为&lt;strong&gt;何&lt;/strong&gt;上升&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除了该卡片之外,这些情报还会作用于整个应用程序的多个界面:&lt;/p&gt;</description></item><item><title>产品健康评级</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/product_health_grade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/product_health_grade/</guid><description>&lt;p&gt;DefectDojo 可以根据产品中包含的发现项数量为您的产品计算评级。评级从 A 到 F 排列。&lt;/p&gt;
+&lt;p&gt;请注意,只有活动且已验证的发现项才会计入产品评级——未验证的发现项不会产生影响。&lt;/p&gt;
+&lt;h2 id="产品评级计算"&gt;产品评级计算&lt;/h2&gt;
+&lt;p&gt;每个产品评级的起始分数为 100(在没有发现项的情况下)。&lt;/p&gt;
+&lt;p&gt;评级计算首先查看产品中发现项的最高严重程度,并将产品健康度降低至一个基准水平。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;发现项的最高严重程度&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;最高评级&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;严重&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;40&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;高&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;60&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;中&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;80&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;低&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;95&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;随后,每增加一个发现项都会从评级中扣除相应的分数:&lt;/p&gt;</description></item></channel></rss>

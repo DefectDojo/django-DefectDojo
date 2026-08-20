@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>联邦合规 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/federal_compliance/</link><description>Recent content in 联邦合规 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><atom:link href="https://docs.defectdojo.com/zh-hans/federal_compliance/index.xml" rel="self" type="application/rss+xml"/><item><title>合规档案</title><link>https://docs.defectdojo.com/zh-hans/federal_compliance/compliance_profile/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/federal_compliance/compliance_profile/</guid><description>&lt;p&gt;合规档案（Compliance Profile）将某个资产注册为一个系统，并保存出现在其生成的每份交付物中的基本信息。请打开代表您系统边界的资产，进入 &lt;strong&gt;Compliance&lt;/strong&gt; 标签页，然后选择 &lt;strong&gt;Profile&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/01-compliance-profile.png"
+ width="2880"
+ height="1800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="合规档案表单"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="档案字段"&gt;档案字段&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;字段&lt;/th&gt;
+ &lt;th&gt;作用&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Enabled&lt;/strong&gt;（启用）&lt;/td&gt;
+ &lt;td&gt;为该产品开启合规跟踪。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Automatic Sync&lt;/strong&gt;（自动同步）&lt;/td&gt;
+ &lt;td&gt;使 POA&amp;amp;M 条目与发现项保持同步。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;POA&amp;amp;M ID Prefix&lt;/strong&gt;（POA&amp;amp;M ID 前缀）&lt;/td&gt;
+ &lt;td&gt;条目编号。必填。条目默认按 &lt;code&gt;V-1&lt;/code&gt;、&lt;code&gt;V-2&lt;/code&gt; 等方式编号。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Impact Level&lt;/strong&gt;（影响级别）&lt;/td&gt;
+ &lt;td&gt;LI-SaaS、Low、Moderate 或 High。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Cloud Service Provider&lt;/strong&gt;（云服务提供商）&lt;/td&gt;
+ &lt;td&gt;CSP 名称，将按此显示在 POA&amp;amp;M 封面信息中。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;System / Offering Name&lt;/strong&gt;（系统 / 产品名称）&lt;/td&gt;
+ &lt;td&gt;系统名称，将按此显示在 POA&amp;amp;M 封面信息中。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;FedRAMP System Identifier&lt;/strong&gt;（FedRAMP 系统标识符）&lt;/td&gt;
+ &lt;td&gt;您系统的标识符，例如 &lt;code&gt;F00000042&lt;/code&gt;。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Default Point of Contact&lt;/strong&gt;（默认联系人）&lt;/td&gt;
+ &lt;td&gt;应用于未指定自身联系人的条目。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Scan Item Policy&lt;/strong&gt;（扫描条目策略）&lt;/td&gt;
+ &lt;td&gt;可选择包含所有未结条目，或仅包含已逾期的扫描条目。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;OSCAL SSP Reference&lt;/strong&gt;（OSCAL SSP 引用）&lt;/td&gt;
+ &lt;td&gt;可选。设置后，生成的 OSCAL POA&amp;amp;M 会通过 &lt;code&gt;import-ssp&lt;/code&gt; 引用该地址。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="选择扫描条目策略"&gt;选择扫描条目策略&lt;/h3&gt;
+&lt;p&gt;仅逾期是 FedRAMP ConMon 的最低要求。&lt;strong&gt;Include all open items&lt;/strong&gt;（包含所有未结条目）是更保守的选择，也是默认设置。&lt;/p&gt;</description></item><item><title>POA&amp;M 台账</title><link>https://docs.defectdojo.com/zh-hans/federal_compliance/poam_ledger/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/federal_compliance/poam_ledger/</guid><description>&lt;p&gt;POA&amp;amp;M 条目会根据发现项自动创建和更新。同步会在导入和发现项变更后不久运行，每晚还会执行一次扫尾任务，捕获遗漏的内容。对于没有任何扫描器报告的弱点，您也可以手动添加条目。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/02-poam-items.png"
+ width="2880"
+ height="2070"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="POA&amp;amp;M 台账"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="台账约定"&gt;台账约定&lt;/h2&gt;
+&lt;p&gt;该台账遵循 FedRAMP 的约定：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;编号稳定。&lt;/strong&gt; 每个条目在其所属系统内都保留一个序号，且编号永不重复使用。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;同类发现项合并。&lt;/strong&gt; 同一个 CVE 出现在多台主机上时会合并为一个条目，其中列出每个受影响的资产。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;配置类发现项可以合并到 CM-6 下&lt;/strong&gt;，而不是让台账中充斥着按每条基准规则各生成一个条目的情况。在上方截图中，&lt;code&gt;V-4&lt;/code&gt; 就是这样一个合并后的条目。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;已结条目不会重新打开。&lt;/strong&gt; 如果同一弱点再次出现，台账会打开一个引用旧条目的新条目，从而保持您的整改历史完整无缺。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="编辑条目"&gt;编辑条目&lt;/h2&gt;
+&lt;p&gt;点击任意一行上的铅笔图标，即可打开该条目进行编辑。&lt;/p&gt;</description></item><item><title>ConMon 快照</title><link>https://docs.defectdojo.com/zh-hans/federal_compliance/conmon_snapshots/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/federal_compliance/conmon_snapshots/</guid><description>&lt;p&gt;在 &lt;strong&gt;Snapshots&lt;/strong&gt;（快照）标签页中，&lt;strong&gt;Generate Snapshot&lt;/strong&gt;（生成快照）会为某个报告周期生成交付物。快照会在生成的那一刻&lt;strong&gt;冻结台账&lt;/strong&gt;：之后的任何编辑都不会改变您已经生成的交付物。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/04-poam-snapshots.png"
+ width="2880"
+ height="1800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="已生成的 ConMon 快照"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;每一行显示对应的周期、状态、未结和逾期条目数量、完成时间，以及两份产物的下载链接。&lt;/p&gt;
+&lt;h2 id="快照生成的内容"&gt;快照生成的内容&lt;/h2&gt;
+&lt;p&gt;每份快照都会生成两个产物：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;官方的 &lt;strong&gt;FedRAMP POA&amp;amp;M Excel 工作簿&lt;/strong&gt;（模板版本 3.0），其中未结、已结和配置条目分别位于相应的工作表中。&lt;/li&gt;
+&lt;li&gt;一份 **OSCAL 行动计划与里程碑（plan-of-action-and-milestones）**文档，固定使用 OSCAL 1.0.4 版本——这是 FedRAMP 现行验证规则所接受的版本。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="oscal-输出包含的内容"&gt;OSCAL 输出包含的内容&lt;/h3&gt;
+&lt;p&gt;该 OSCAL 文档针对 FedRAMP 工具所需查找的字段，使用了 FedRAMP 的扩展命名空间，包括 POA&amp;amp;M ID、受影响的控制项 ID、偏差状态、供应商依赖情况，以及 KEV 跟踪。&lt;/p&gt;</description></item><item><title>整改截止日期</title><link>https://docs.defectdojo.com/zh-hans/federal_compliance/remediation_slas/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/federal_compliance/remediation_slas/</guid><description>&lt;p&gt;该功能自带两套现成的 SLA 配置。您可以在 SLA 配置设置中将其中任意一套分配给您的产品,也可以复制一套后再进行调整。&lt;/p&gt;
+&lt;h2 id="fedramp-rev-5"&gt;FedRAMP Rev 5&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;严重程度&lt;/th&gt;
+ &lt;th&gt;截止时间&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;严重&lt;/td&gt;
+ &lt;td&gt;发现后 30 天内&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;高&lt;/td&gt;
+ &lt;td&gt;发现后 30 天内&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;中等&lt;/td&gt;
+ &lt;td&gt;90 天&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;低&lt;/td&gt;
+ &lt;td&gt;180 天&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;截止日期是强制执行的,列入 CISA KEV 目录的发现项,其排期永远不会晚于其 CISA 截止日期。&lt;/p&gt;</description></item><item><title>CMMC 二级评估</title><link>https://docs.defectdojo.com/zh-hans/federal_compliance/cmmc_assessments/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/federal_compliance/cmmc_assessments/</guid><description>&lt;p&gt;Compliance 标签页可以使用 DoD 评估方法论的分值权重，依据 NIST 800-171 Rev 2 对 CMMC 二级自评估进行评分。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/05-cmmc-scorecard.png"
+ width="2880"
+ height="1800"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="CMMC 二级评估记分卡"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;测试版：请将评分视为估算值。&lt;/strong&gt; 在此功能处于测试版期间，内置的分值权重及由此得出的 SPRS 评分仅供参考，尚待验证。在将任何评分用于评估提交或合同用途之前，请先对照官方的 DoD NIST SP 800-171 评估方法论进行确认。&lt;/p&gt;</description></item><item><title>控制覆盖情况</title><link>https://docs.defectdojo.com/zh-hans/federal_compliance/control_coverage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/federal_compliance/control_coverage/</guid><description>&lt;p&gt;控制覆盖情况视图回答了一个简单的问题：我的扫描器实际测试了哪些 800-53 控制项，各控制项下又存在哪些未解决的弱点？&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/federal_compliance/images/07-control-coverage.png"
+ width="2880"
+ height="2664"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="控制覆盖情况热力图"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="映射的来源"&gt;映射的来源&lt;/h2&gt;
+&lt;p&gt;许多扫描器本身就会输出控制引用，DefectDojo 会自动将其提取为控制映射。其中包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Prowler&lt;/strong&gt; 会将 NIST 800-53 控制项列表写入发现项引用中。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Tenable&lt;/strong&gt; 插件携带 800-53 交叉引用。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;InSpec&lt;/strong&gt; 和 &lt;strong&gt;MITRE SAF&lt;/strong&gt; 配置文件会用 &lt;code&gt;nist&lt;/code&gt; 标识符标记其检查项。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;提取过程以已导入的目录为依据，因此目录无法识别的标识符不会产生任何映射。&lt;/p&gt;</description></item></channel></rss>

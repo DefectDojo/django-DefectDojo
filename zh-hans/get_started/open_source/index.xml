@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🔹 DefectDojo 社区版 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/get_started/open_source/</link><description>Recent content in 🔹 DefectDojo 社区版 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/get_started/open_source/index.xml" rel="self" type="application/rss+xml"/><item><title>安装</title><link>https://docs.defectdojo.com/zh-hans/get_started/open_source/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/open_source/installation/</guid><description>&lt;h2 id="推荐选项"&gt;&lt;strong&gt;推荐选项&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;h3 id="docker-compose"&gt;Docker Compose&lt;/h3&gt;
+&lt;p&gt;请参阅 &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md"&gt;DOCKER.md&lt;/a&gt; 中的说明&lt;/p&gt;
+&lt;h3 id="saas包含支持并有助于项目发展"&gt;SaaS（包含支持并有助于项目发展）&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://defectdojo.com/platform"&gt;SaaS 链接&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="docker-镜像变体"&gt;&lt;strong&gt;Docker 镜像变体&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;p&gt;DefectDojo 发布多种变体的 Docker 镜像：&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;/th&gt;
+ &lt;th&gt;AMD64&lt;/th&gt;
+ &lt;th&gt;ARM64&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Debian&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;✅ 受支持&lt;/td&gt;
+ &lt;td&gt;⚠️ 已进行单元测试&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Alpine&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;⚠️ 社区维护&lt;/td&gt;
+ &lt;td&gt;⚠️ 社区维护&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;AMD64 上的 Debian&lt;/strong&gt; 是官方支持并经过测试的配置。所有 CI 测试（单元测试、集成测试和性能测试）都针对此组合运行。&lt;/p&gt;</description></item><item><title>系统架构</title><link>https://docs.defectdojo.com/zh-hans/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/open_source/architecture/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dd-architecture.png"
+ width="721"
+ height="511"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="nginx"&gt;NGINX&lt;/h2&gt;
+&lt;p&gt;Web 服务器 &lt;a href="https://nginx.org/en/"&gt;NGINX&lt;/a&gt; 负责提供所有静态内容，例如
+图片、JavaScript 文件或 CSS 文件。&lt;/p&gt;
+&lt;h2 id="uwsgi"&gt;uWSGI&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://uwsgi-docs.readthedocs.io/en/latest/"&gt;uWSGI&lt;/a&gt; 是运行 DefectDojo 平台的应用服务器，
+该平台使用 Python/Django 编写，用于提供所有
+动态内容。&lt;/p&gt;
+&lt;h2 id="消息代理"&gt;消息代理&lt;/h2&gt;
+&lt;p&gt;应用服务器将任务发送到&lt;a href="https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.html"&gt;消息代理&lt;/a&gt;
+以进行异步执行。目前，在 docker compose 部署中仅支持将 &lt;a href="https://valkey.io/"&gt;Valkey&lt;/a&gt; 作为代理。
+Helm chart 仍然支持使用 &lt;a href="https://github.com/redis/redis"&gt;Redis&lt;/a&gt; 作为代理，但很快将迁移到 Valkey。&lt;/p&gt;</description></item><item><title>配置</title><link>https://docs.defectdojo.com/zh-hans/get_started/open_source/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/open_source/configuration/</guid><description>&lt;h2 id="dojosettingssettingsdistpy"&gt;dojo/settings/settings.dist.py&lt;/h2&gt;
+&lt;p&gt;主要设置存储在 &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py"&gt;&lt;code&gt;dojo/settings/settings.dist.py&lt;/code&gt;&lt;/a&gt; 中。这个文件非常适合作为参考，了解可以配置哪些内容，但不应直接编辑它，因为在更新 DefectDojo 时，所做的更改会被覆盖。有以下几种方法可以更改默认设置：&lt;/p&gt;
+&lt;h3 id="环境变量"&gt;环境变量&lt;/h3&gt;
+&lt;p&gt;大多数参数都可以通过环境变量设置。&lt;/p&gt;
+&lt;p&gt;当您通过 &lt;strong&gt;Docker Compose&lt;/strong&gt; 部署 DefectDojo 时，可以在 &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/docker-compose.yml"&gt;&lt;code&gt;docker-compose.yml&lt;/code&gt;&lt;/a&gt; 中设置环境变量。请注意，您需要为三个服务分别设置变量：&lt;code&gt;uwsgi&lt;/code&gt;、&lt;code&gt;celerybeat&lt;/code&gt; 和 &lt;code&gt;celeryworker&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;当您在 &lt;strong&gt;Kubernetes&lt;/strong&gt; 集群中部署 DefectDojo 时，可以在 &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/helm/defectdojo/values.yaml"&gt;&lt;code&gt;helm/defectdojo/values.yaml&lt;/code&gt;&lt;/a&gt; 中以 &lt;code&gt;extraConfigs&lt;/code&gt; 和 &lt;code&gt;extraSecrets&lt;/code&gt; 的形式设置环境变量。&lt;/p&gt;</description></item><item><title>在生产环境中运行</title><link>https://docs.defectdojo.com/zh-hans/get_started/open_source/running-in-production/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/open_source/running-in-production/</guid><description>&lt;h2 id="生产环境使用配合-docker-compose"&gt;生产环境使用（配合 Docker compose）&lt;/h2&gt;
+&lt;p&gt;该代码库中的 docker-compose.yml 文件功能完整，可用于在本地环境中评估 DefectDojo。&lt;/p&gt;
+&lt;p&gt;尽管 Docker Compose 是在生产环境中部署容器化 DefectDojo 的受支持安装方法之一，但在未先根据您的具体情况进行自定义之前，docker-compose.yml 文件并不适合直接用于生产环境。&lt;/p&gt;
+&lt;p&gt;有关如何使用 Docker Compose 运行 DefectDojo 的更多信息，请参阅&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md"&gt;使用 Docker Compose 运行&lt;/a&gt;。&lt;/p&gt;</description></item></channel></rss>

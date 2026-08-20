@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>贡献 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/get_started/contributing/</link><description>Recent content in 贡献 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><atom:link href="https://docs.defectdojo.com/zh-hans/get_started/contributing/index.xml" rel="self" type="application/rss+xml"/><item><title>贡献解析器</title><link>https://docs.defectdojo.com/zh-hans/get_started/contributing/how-to-write-a-parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/contributing/how-to-write-a-parser/</guid><description>&lt;p&gt;所有命令均假设您位于 django-DefectDojo 克隆仓库的根目录下。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;您已经 fork 了 https://github.com/DefectDojo/django-DefectDojo 并克隆到本地。&lt;/li&gt;
+&lt;li&gt;检出（checkout）&lt;code&gt;dev&lt;/code&gt; 分支，并确保已同步到最新更改。&lt;/li&gt;
+&lt;li&gt;建议您为开发创建一个专用分支，例如 &lt;code&gt;git checkout -b parser-name&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;使用 docker compose 部署方式最为简便，因为它具备 uWSGI 的热重载能力。
+将您的环境设置为使用 dev 环境：&lt;/p&gt;</description></item><item><title>解析器文档模板</title><link>https://docs.defectdojo.com/zh-hans/get_started/contributing/parser-documentation-template/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/contributing/parser-documentation-template/</guid><description>&lt;p&gt;本模板用于记录新解析器或现有解析器的文档。欢迎补充任何有助于其他安全从业者的额外信息。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;复制此 .md 文件，并将其添加到 GitHub 仓库中的 &lt;code&gt;/docs/content/supported_tools/file&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;更新标题，使其与您新建或现有解析器的名称一致。&lt;/li&gt;
+&lt;li&gt;填写下方列出的所有部分。请删除各部分中出现的说明文字或示例内容。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="文件类型"&gt;文件类型&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;请注明您的解析器接受的所有文件类型（例如 CSV、JSON、XML）。&lt;/em&gt;
+&lt;em&gt;请说明如何从相关安全工具创建或导出可接受的文件格式。&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="文件格式-中的字段总数"&gt;[文件格式] 中的字段总数&lt;/h3&gt;
+&lt;p&gt;数据字段总数： &lt;em&gt;安全工具导出文件中包含的字段总数。&lt;/em&gt;
+已解析的数据字段数： &lt;em&gt;已解析到 DefectDojo 发现项中的字段总数。&lt;/em&gt;
+未解析的数据字段数： &lt;em&gt;未解析到 DefectDojo 发现项中的字段总数。&lt;/em&gt;&lt;/p&gt;</description></item><item><title>开源分支与发布流程</title><link>https://docs.defectdojo.com/zh-hans/get_started/contributing/branching-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/contributing/branching-model/</guid><description>&lt;h2 id="常规发布"&gt;常规发布&lt;/h2&gt;
+&lt;p&gt;DefectDojo 团队致力于保持以下发布节奏：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;次要版本（Minor）：每月至少一次，于每月的第一个星期一发布。&lt;/li&gt;
+&lt;li&gt;补丁/缺陷修复（Patch/Bugfix）：每周一发布。&lt;/li&gt;
+&lt;li&gt;安全发布（Security）：根据严重程度，在常规节奏之外发布。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;GitHub Actions 是权威依据。发布流程是半自动化的。常规发布的步骤如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;从 &lt;code&gt;dev&lt;/code&gt; 或 &lt;code&gt;bugfix&lt;/code&gt; 创建发布分支，并准备一个针对 &lt;code&gt;master&lt;/code&gt; 的 PR（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-pr.yml"&gt;详情&lt;/a&gt;）
+&amp;ndash;&amp;gt; 维护者验证并手动合并该 PR&lt;/li&gt;
+&lt;li&gt;打标签、发布草稿版本并构建/推送 Docker 镜像（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-tag-docker.yml"&gt;详情&lt;/a&gt;）
+&amp;ndash;&amp;gt; 维护者整理 release-drafter 生成的发布说明并发布该版本&lt;/li&gt;
+&lt;li&gt;创建一个将 &lt;code&gt;master&lt;/code&gt; 合并回 &lt;code&gt;dev&lt;/code&gt; 和 &lt;code&gt;bugfix&lt;/code&gt; 的 PR，以重新对齐各分支（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-master-into-dev.yml"&gt;详情&lt;/a&gt;）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="安全发布"&gt;安全发布&lt;/h2&gt;
+&lt;p&gt;与安全问题相关的 PR 通过&lt;a href="https://github.com/DefectDojo/django-DefectDojo/security/advisories"&gt;安全公告&lt;/a&gt;完成，该机制可让团队私下处理代码，而不会过早披露漏洞。&lt;/p&gt;</description></item><item><title>编辑文档</title><link>https://docs.defectdojo.com/zh-hans/get_started/contributing/documentation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/contributing/documentation/</guid><description>&lt;p&gt;本文档使用 &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt; 构建，并使用 &lt;a href="https://getdoks.org/"&gt;Doks&lt;/a&gt; 主题的一个变体。&lt;/p&gt;
+&lt;p&gt;网站的静态文件通过 GitHub Actions 构建，并发布到 gh-pages 分支。&lt;/p&gt;
+&lt;h2 id="如何运行本地预览"&gt;如何运行本地预览&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="https://gohugo.io/getting-started/installing/"&gt;安装 Hugo&lt;/a&gt;。请确保安装的是支持 Sass/SCSS 的扩展版（extended version）。请注意，&lt;a href="https://github.com/gohugoio/hugo/releases"&gt;Hugo GitHub&lt;/a&gt; 上提供了多种 Linux 软件包&lt;/li&gt;
+&lt;li&gt;使用 Node.js 安装所需主题：执行 &lt;code&gt;cd docs&lt;/code&gt;，然后运行 &lt;code&gt;npm install&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;要运行文档本地服务器，执行 &lt;code&gt;cd docs&lt;/code&gt; 切换到 docs 文件夹，然后运行 &lt;code&gt;npm run dev&lt;/code&gt; 启动 Hugo 开发服务器。系统支持热重载——服务器运行期间，页面会随更改自动更新。&lt;/li&gt;
+&lt;li&gt;访问 &lt;a href="http://localhost:1313"&gt;http://localhost:1313&lt;/a&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="贡献指南"&gt;贡献指南&lt;/h2&gt;
+&lt;p&gt;现阶段，我们的文档主要由 DefectDojo Pro 团队维护，但我们仍然欢迎社区为文档做出贡献。&lt;/p&gt;</description></item></channel></rss>

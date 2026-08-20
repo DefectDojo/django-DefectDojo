@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Informazioni su DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/it/get_started/about/</link><description>Recent content in Informazioni su DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>it</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 02 Feb 2021 20:46:29 +0100</lastBuildDate><atom:link href="https://docs.defectdojo.com/it/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>Confronto delle funzionalità</title><link>https://docs.defectdojo.com/it/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/it/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt; è una piattaforma di gestione delle vulnerabilità potente e gratuita, con importazione di base, deduplicazione, dashboard essenziali, accesso API e funzionalità di reportistica di base — ideale per team più piccoli o per chi desidera l&amp;rsquo;auto-hosting ed estendere lo strumento utilizzando le risorse della community.&lt;/p&gt;</description></item><item><title>Informazioni su DefectDojo</title><link>https://docs.defectdojo.com/it/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/it/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc. e i contributori open-source mantengono questa documentazione per supportare sia l&amp;rsquo;edizione Community che l&amp;rsquo;edizione Pro di DefectDojo.&lt;/span&gt;&lt;/p&gt;</description></item><item><title>❓ Domande frequenti</title><link>https://docs.defectdojo.com/it/get_started/about/faq/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/get_started/about/faq/</guid><description>&lt;p&gt;Ecco alcune domande frequenti su come lavorare con DefectDojo, sia in DefectDojo Pro che in DefectDojo OS.&lt;/p&gt;
+&lt;h2 id="domande-generali"&gt;Domande generali&lt;/h2&gt;
+&lt;h3 id="come-dovrei-organizzare-i-miei-test-di-sicurezza-in-defectdojo"&gt;Come dovrei organizzare i miei test di sicurezza in DefectDojo?&lt;/h3&gt;
+&lt;p&gt;Sebbene DefectDojo possa supportare qualsiasi ambiente di sicurezza o di test, il team di sicurezza e le operazioni di ciascuna organizzazione sono diversi, quindi non esiste un approccio universale al suo utilizzo. Abbiamo un articolo molto dettagliato sui &lt;a href="https://docs.defectdojo.com/get_started/common_use_cases/common_use_cases/"&gt;casi d&amp;rsquo;uso comuni&lt;/a&gt; che riporta esempi di come diverse organizzazioni applicano il RBAC e il modello dei dati di DefectDojo per soddisfare le proprie esigenze.&lt;/p&gt;</description></item><item><title>☑️ Lista di controllo per i nuovi utenti</title><link>https://docs.defectdojo.com/it/get_started/about/os__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/get_started/about/os__new_user_checklist/</guid><description>&lt;p&gt;Ecco un riferimento rapido che puoi utilizzare per garantire un&amp;rsquo;implementazione di successo, da una tela bianca a un&amp;rsquo;app pienamente funzionante. Questo articolo presuppone che tu abbia &lt;strong&gt;DefectDojo Community Edition&lt;/strong&gt; installato e funzionante nel tuo ambiente.&lt;/p&gt;</description></item><item><title>☑️ Lista di controllo per i nuovi utenti</title><link>https://docs.defectdojo.com/it/get_started/about/pro__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/get_started/about/pro__new_user_checklist/</guid><description>&lt;p&gt;L&amp;rsquo;essenza di DefectDojo consiste nell&amp;rsquo;importare i dati di sicurezza, organizzarli e presentarli alle persone che hanno bisogno di conoscerli. Ecco un riferimento rapido che puoi utilizzare per garantire un&amp;rsquo;implementazione di successo, da una tela bianca a un&amp;rsquo;app pienamente funzionante.&lt;/p&gt;</description></item><item><title>🎨 Modifiche alla UI Pro</title><link>https://docs.defectdojo.com/it/get_started/about/ui_pro_vs_os/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/get_started/about/ui_pro_vs_os/</guid><description>&lt;p&gt;In late 2023, DefectDojo, Inc. ha rilasciato una nuova UI per DefectDojo Pro, che è ora la UI predefinita per questa edizione.&lt;/p&gt;</description></item><item><title>Demo online</title><link>https://docs.defectdojo.com/it/get_started/about/demo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/it/get_started/about/demo/</guid><description>&lt;p&gt;Sono disponibili due demo online per DefectDojo. Entrambe sono precaricate con dati e pienamente funzionanti, eseguendo l&amp;rsquo;ultima versione di DefectDojo.&lt;/p&gt;</description></item></channel></rss>

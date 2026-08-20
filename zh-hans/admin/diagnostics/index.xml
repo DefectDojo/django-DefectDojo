@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>诊断 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/admin/diagnostics/</link><description>Recent content in 诊断 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/admin/diagnostics/index.xml" rel="self" type="application/rss+xml"/><item><title>诊断</title><link>https://docs.defectdojo.com/zh-hans/admin/diagnostics/pro__diagnostics/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/diagnostics/pro__diagnostics/</guid><description>&lt;p&gt;诊断（Diagnostics）是一份统一台账，记录了 DefectDojo 与外部系统通信的每一次尝试，也记录了其他系统与它通信的尝试。当工单一直没有出现、扫描始终未导入，或用户无法登录时，这个页面会告诉你发生了什么、发生在何时、涉及哪项配置，以及是谁触发的。&lt;/p&gt;
+&lt;p&gt;诊断是 &lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 功能。可在 &lt;strong&gt;Connect &amp;gt; Diagnostics&lt;/strong&gt; 下找到它。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/admin/diagnostics/images/diagnostics_errors.png"
+ width="1800"
+ height="1150"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="诊断台账，错误视图"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="记录了哪些内容"&gt;记录了哪些内容&lt;/h2&gt;
+&lt;p&gt;每次尝试都会写入一行记录，涵盖所有会与 DefectDojo 外部通信的子系统：&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;来源&lt;/th&gt;
+ &lt;th&gt;产生记录的场景&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;连接器（Connector）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;上游连接器的发现和同步运行&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;下游集成器（Downstream integrator）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;推送到 Jira、GitHub、GitLab、ServiceNow 及其他下游连接器&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Jira&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;旧版 Jira 集成：推送、评论和预览&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;SSO（OIDC/OAuth2）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;通过 OAuth 提供商进行的登录尝试&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;SAML&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;SAML 断言，包括签名和属性失败&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;LDAP&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;LDAP 绑定和查找&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;导入 / 重新导入（Import / Reimport）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;扫描上传，无论通过 UI、API 还是计划任务&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;规则引擎（Rules engine）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;规则评估及其尝试执行的操作&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;计划任务（Scheduling）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;计划运行，包括从未启动的运行&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Sensei&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;代码仓库扫描和修复运行&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;通知（Notification）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;出站通知投递&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;系统（System）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;不属于任何产品的实例级活动&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;记录是与子系统&lt;em&gt;并行&lt;/em&gt;写入的，绝不会取代子系统本身。每个适配器都挂接在源记录上，并被刻意设计为故障安全（fail-safe）：如果写入诊断记录时出错，该错误会被吞掉，原始操作会继续进行。因此，诊断功能永远不会成为推送、导入或登录失败的原因。&lt;/p&gt;</description></item></channel></rss>

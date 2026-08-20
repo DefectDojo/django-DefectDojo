@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🪄 AI 功能 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/ai/</link><description>Recent content in 🪄 AI 功能 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/metrics_reports/ai/index.xml" rel="self" type="application/rss+xml"/><item><title>MCP 服务器</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/ai/mcp_server_pro/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/ai/mcp_server_pro/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：AI 功能仅在 DefectDojo Pro 中提供。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo 模型上下文协议（MCP）服务器使大语言模型（LLM）能够智能地与 DefectDojo 的漏洞管理数据交互。与仅仅传输数据的传统 API 集成不同，MCP 服务器提供结构化的上下文和语义信息，使 AI 助手能够执行复杂的安全分析并生成可操作的洞察。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;结构化上下文：&lt;/strong&gt; MCP 为 DefectDojo 数据赋予语义，而不只是传输原始数据&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;预处理数据：&lt;/strong&gt; DefectDojo 经过标准化、去重的数据消除了 LLM 的预处理负担&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;业务智能集成：&lt;/strong&gt; 将技术性漏洞数据与业务背景相结合&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可用于高层汇报的分析：&lt;/strong&gt; 生成适合从技术团队到高层管理者各层级使用的报告&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;10 倍复合价值：&lt;/strong&gt; AI 增强分析所提供的价值呈指数级超过人工查询&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;🔑 重要提示：&lt;/strong&gt; MCP 服务器端点位于 &lt;code&gt;/mcp&lt;/code&gt;，但所有函数调用均使用 DefectDojo 的基础 URL。这种分离确保了对漏洞数据的安全、结构化访问。&lt;/p&gt;</description></item></channel></rss>

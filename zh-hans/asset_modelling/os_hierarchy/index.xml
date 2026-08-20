@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>资产层级结构 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/</link><description>Recent content in 资产层级结构 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>资产层级结构：概览</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__asset_hierarchy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__asset_hierarchy/</guid><description>&lt;p&gt;DefectDojo 使用五个主要的数据类来组织您的工作：&lt;strong&gt;组织、资产&lt;/strong&gt;、&lt;strong&gt;测试活动&lt;/strong&gt;、&lt;strong&gt;测试&lt;/strong&gt;和&lt;strong&gt;发现项&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;DefectDojo 的设计目的是灵活地适应您的团队，而不是让您的团队去迁就工具。一旦您了解了如何使用这些数据类来组织工作，就能够设计出一个健壮、可适应的工作空间。&lt;/p&gt;
+&lt;h3 id="资产层级关系图"&gt;资产层级关系图&lt;/h3&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Asset_Hierarchy_Full.png"
+ width="2180"
+ height="1282"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="组织"&gt;&lt;strong&gt;组织&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;您需要在 DefectDojo 中设置的第一类数据是组织。组织旨在以特定方式对资产进行分类。这可以是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;按业务领域&lt;/li&gt;
+&lt;li&gt;按开发团队&lt;/li&gt;
+&lt;li&gt;按安全团队&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Asset_Hierarchy_Overview.png"
+ width="2564"
+ height="1018"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;
+&lt;em&gt;资产按其所属组织进行分组并嵌套在其下。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;组织可以应用基于角色的访问控制规则，从而限制团队成员查看和操作其数据的能力（包括其下属资产中的测试活动、测试和发现项数据）。有关用户角色的更多信息，请参阅我们的&lt;strong&gt;角色介绍&lt;/strong&gt;一文。&lt;/p&gt;
+&lt;h4 id="组织可以代表什么"&gt;组织可以代表什么？&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;如果某个软件项目有许多不同的部署或版本，那么创建一个涵盖整个项目范围的组织，并让每个版本作为单独的资产存在，可能是值得的。
+​&lt;/li&gt;
+&lt;li&gt;您也可以考虑使用组织来代表软件开发流程中的各个阶段：一个组织代表“开发中”，一个组织代表“生产中”，依此类推。
+​&lt;/li&gt;
+&lt;li&gt;归根结底，如何组织您的资产、以及您希望组织代表什么，完全取决于您自己的决定。您的 DefectDojo 层级结构可能需要根据安全团队的需求进行调整。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="资产"&gt;&lt;strong&gt;资产&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;DefectDojo 中的&lt;strong&gt;资产&lt;/strong&gt;旨在代表您当前正在测试的任何项目、程序或应用程序。资产承载着与其底层目标相关的所有安全工作和测试历史。&lt;/p&gt;</description></item><item><title>SLA 配置</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__sla_configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__sla_configuration/</guid><description>&lt;p&gt;DefectDojo 中的每个产品都可以拥有自己的服务级别协议（SLA）配置，该配置表示您的组织修复或以其他方式管理某个发现项所拥有的天数。&lt;/p&gt;
+&lt;p&gt;SLA 可以基于**&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/#findings"&gt;发现项严重程度&lt;/a&gt;&lt;strong&gt;或&lt;/strong&gt;&lt;a href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/"&gt;发现项风险&lt;/a&gt;**（在 DefectDojo Pro 中）来设置。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/sla_multiple.png"
+ width="1286"
+ height="412"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;SLA 会根据发现项在 DefectDojo 中创建的日期，为其应用天数倒计时。如果发现项未能在倒计时内关闭，该发现项将被标记为违反 SLA。&lt;/p&gt;
+&lt;h2 id="使用-sla"&gt;使用 SLA&lt;/h2&gt;
+&lt;p&gt;您可以使用 SLA 来体现您组织的修复策略。您也可以使用它们来对 DefectDojo 实例中活动时间最长、最严重的发现项进行优先排序。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;您可以按 SLA 天数对发现项表格进行排序或筛选。&lt;/li&gt;
+&lt;li&gt;可以将 SLA 违规配置为向分配到相关产品的 DefectDojo 用户触发&lt;a href="https://docs.defectdojo.com/admin/notifications/about_notifications/"&gt;通知&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;在 &lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 中，SLA 表现还会在&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/"&gt;高管洞察与修复&lt;/a&gt;指标仪表板中进行跟踪。&lt;/li&gt;
+&lt;li&gt;在 &lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 中，SLA 合规情况也可以在自定义&lt;a href="https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards/"&gt;仪表板&lt;/a&gt;中呈现——例如通过 SLA 燃尽图或经过筛选的计数小组件。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="在-sla-内已缓解状态"&gt;“在 SLA 内已缓解”状态&lt;/h3&gt;
+&lt;p&gt;如果发现项在 SLA 截止日期前成功缓解，该发现项会在“在 SLA 内已缓解”列中记录一个 ✅ 绿色对勾。&lt;/p&gt;</description></item><item><title>将发现项链接到源代码</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__source-code-repositories/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__source-code-repositories/</guid><description>&lt;p&gt;某些工具(尤其是 SAST 工具)会在漏洞数据中包含相关的文件名和行号。如果在测试活动(Engagement)中指定了源代码的代码仓库,DefectDojo 会将文件路径显示为链接,用户可以直接跳转到该漏洞所在的位置。&lt;/p&gt;
+&lt;h2 id="在测试活动和测试中设置代码仓库"&gt;在测试活动和测试中设置代码仓库&lt;/h2&gt;
+&lt;h3 id="测试活动engagement"&gt;测试活动(Engagement)&lt;/h3&gt;
+&lt;p&gt;在编辑测试活动时,用户可以设置特定源代码管理(SCM)仓库的 URL。&lt;strong&gt;(在 Pro UI 中,可在 Edit Engagement &amp;gt; Optional Fields &amp;gt; Repo 下设置此字段。)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;对于交互式测试活动(Interactive Engagement),该 URL 需要指定分支:&lt;/p&gt;</description></item><item><title>OWASP ASVS 基准测试</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/benchmarks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/benchmarks/</guid><description>&lt;p&gt;DefectDojo 支持根据 &lt;a href="https://owasp.org/www-project-application-security-verification-standard/"&gt;OWASP 应用程序安全验证标准(ASVS)&lt;/a&gt; 对产品(Product)进行基准评估,该标准为测试 Web 应用程序的技术安全控制提供了依据。&lt;/p&gt;
+&lt;p&gt;基准测试可以帮助您衡量产品在多大程度上满足了组织所定义的安全要求,并可以在产品页面上发布得分以便查看。&lt;/p&gt;
+&lt;h2 id="访问基准测试"&gt;访问基准测试&lt;/h2&gt;
+&lt;p&gt;可以在&lt;strong&gt;产品&lt;/strong&gt;页面访问基准测试。要打开基准测试视图,请在产品页面右上角选择下拉菜单,并在菜单底部附近选择 &lt;strong&gt;OWASP ASVS v.3.1&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id="基准测试级别"&gt;基准测试级别&lt;/h2&gt;
+&lt;p&gt;OWASP ASVS 定义了三个验证覆盖级别:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;一级(Level 1)&lt;/strong&gt; – 适用于所有软件。以最低的验证成本覆盖最关键的安全要求。这是 DefectDojo 中的默认级别。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;二级(Level 2)&lt;/strong&gt; – 适用于包含敏感数据的应用程序。适用于大多数应用程序。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;三级(Level 3)&lt;/strong&gt; – 适用于最关键的应用程序,例如执行高价值交易或存储敏感医疗、金融或安全数据的应用程序。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;您可以使用基准测试视图右上角的下拉菜单在不同级别之间切换。&lt;/p&gt;</description></item><item><title>资产健康等级</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__asset_health_grade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/os_hierarchy/os__asset_health_grade/</guid><description>&lt;p&gt;DefectDojo 可以根据资产中所包含的发现项数量，为您的资产计算等级。等级从 A 到 F 排列。&lt;/p&gt;
+&lt;p&gt;请注意，只有活动且已验证的发现项才会影响资产等级——未验证的发现项不会产生影响。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;每个资产的健康等级（A 至 F）会显示在资产列表中其名称旁边。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/asset-health-grade.png"
+ width="480"
+ height="363"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="资产列表中每个资产旁显示的资产健康等级"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="资产等级计算"&gt;资产等级计算&lt;/h2&gt;
+&lt;p&gt;每个资产等级的起始值为 100（在没有发现项的情况下）。&lt;/p&gt;
+&lt;p&gt;等级计算首先查看资产中发现项的最高&lt;strong&gt;严重程度&lt;/strong&gt;级别，并将资产健康度降低到一个基础水平。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;发现项的最高严重程度级别&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;最高等级&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;严重&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;40&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;高&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;60&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;中&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;80&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;低&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;95&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;之后，每增加一个发现项，都会从等级中扣除相应的分数：&lt;/p&gt;</description></item></channel></rss>

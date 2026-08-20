@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🔸 DefectDojo Pro（Cloud） on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/</link><description>Recent content in 🔸 DefectDojo Pro（Cloud） on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Cloud Manager</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/using-cloud-manager/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/using-cloud-manager/</guid><description>&lt;p&gt;登录 DefectDojo 的 Cloud Manager 可让您配置账户设置并管理您的 DefectDojo Cloud 订阅。&lt;/p&gt;
+&lt;h2 id="新建订阅"&gt;&lt;strong&gt;新建订阅&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://cloud.defectdojo.com/accounts/onboarding/step_1"&gt;https://cloud.defectdojo.com/accounts/onboarding/step_1&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;此页面可让您向 DefectDojo 申请新的（或&lt;a href="../additional-cloud-instance/"&gt;额外的&lt;/a&gt;）Cloud 实例。&lt;/p&gt;
+&lt;h2 id="管理订阅"&gt;&lt;strong&gt;管理订阅&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://cloud.defectdojo.com/accounts/manage_subscriptions"&gt;https://cloud.defectdojo.com/accounts/manage_subscriptions&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;订阅管理页面显示您当前所有处于活动状态的 Cloud 实例，并可让您为每个实例配置防火墙设置。&lt;/p&gt;</description></item><item><title>连接故障排查</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/connectivity-troubleshooting/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/connectivity-troubleshooting/</guid><description>&lt;p&gt;如果您在访问 DefectDojo 实例时遇到困难，可以按照以下步骤重新建立连接：&lt;/p&gt;
+&lt;h2 id="我可以访问网站但无法登录"&gt;我可以访问网站，但无法登录&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;您可以在登录页面重置账户密码：&lt;strong&gt;yourcompanyinstance.cloud.defectdojo.com/login&lt;/strong&gt;。点击“忘记密码”即可开始重置流程。&lt;br&gt;
+​&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Connectivity_Troubleshooting.png"
+ width="1600"
+ height="330"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;输入您的电子邮件地址，然后点击“重置我的密码”。&lt;br&gt;
+​&lt;/li&gt;
+&lt;li&gt;您应该会收到一封主题为“&lt;code&gt;Password reset on yourcompanyinstance.cloud.defectdojo.com&lt;/code&gt;”的电子邮件。该邮件中包含一个链接，点击后即可设置新密码。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Connectivity_Troubleshooting_2.png"
+ width="1884"
+ height="280"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;p&gt;如果您没有收到邮件，请检查您的垃圾邮件文件夹。如果仍未收到，请让您团队的 DefectDojo 管理员确认您的账户已在实例中注册。&lt;/p&gt;
+&lt;h2 id="我无法访问我公司的-clouddefectdojo-网站"&gt;我无法访问我公司的 cloud.defectdojo 网站&lt;/h2&gt;
+&lt;p&gt;如果您公司的 cloud.defectdojo 网站在浏览器中无法加载，或出现超时，您的公司可能需要更改防火墙规则，以便接受您的连接。&lt;/p&gt;</description></item><item><title>设置额外的 Cloud 实例</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/additional-cloud-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/additional-cloud-instance/</guid><description>&lt;p&gt;添加第二个 Cloud 实例的流程，与添加您的第一个实例大致相同。本指南假定您已经完成了初始 DefectDojo 服务器的搭建，并已与我们的销售团队就添加另一个实例达成协议。&lt;/p&gt;
+&lt;p&gt;如果您尚未申请额外的 Cloud 实例，请在继续操作之前联系 &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="info",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;info at defectdojo dot com&lt;/noscript&gt;
+
+ 。&lt;/p&gt;
+&lt;h2 id="第-1-步打开新建订阅流程"&gt;第 1 步：打开新建订阅流程&lt;/h2&gt;
+&lt;p&gt;您可以通过以下链接开始此流程：&lt;a href="https://cloud.defectdojo.com/accounts/onboarding/step_1"&gt;https://cloud.defectdojo.com/accounts/onboarding/step_1&lt;/a&gt;，也可以在 Cloud Manager 页面（cloud.defectdojo.com）中点击 🛒 &lt;strong&gt;新建订阅&lt;/strong&gt;。&lt;/p&gt;</description></item><item><title>Cloud 架构</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/cloud-architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/cloud-architecture/</guid><description>&lt;p&gt;DefectDojo Cloud 是一个运行在 Google Cloud 上的多租户 SaaS 平台，基于
+**Google Kubernetes Engine（GKE）**构建。本页介绍该平台的架构方式，以及
+客户环境是如何相互隔离的。&lt;/p&gt;
+&lt;p&gt;
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/cloud_architecture_kubernetes.svg"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="DefectDojo Cloud Kubernetes 架构示意图：客户流量通过启用 Google 托管 TLS 的 Google Cloud Load Balancing 进入区域级 GKE 集群；每个客户都运行在各自独立的 Kubernetes 命名空间中，拥有专属的 PostgreSQL 数据库、Cloud Storage 存储桶和 Vertex AI 项目。"
+ id="h-rh-i-0"
+ class="markdown-svg"
+&gt;&lt;/p&gt;</description></item><item><title>出站 IP 地址</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/egress-ip-addresses/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/egress-ip-addresses/</guid><description>&lt;p&gt;当 DefectDojo Cloud 与您的系统进行通信时——例如连接器（Connectors）同步扫描器的
+API、将问题推送到 Jira 或 ServiceNow、发送通知 Webhook，或通过 SMTP 发送电子
+邮件——这些连接都是从您的 DefectDojo 环境&lt;strong&gt;主动发起的出站连接&lt;/strong&gt;。如果对端系统
+位于防火墙之后，您需要允许 DefectDojo 的出站（egress）IP 地址，以免这些连接
+被阻断。&lt;/p&gt;
+&lt;p&gt;本页说明如何查找这些出站 IP 地址。&lt;/p&gt;</description></item></channel></rss>

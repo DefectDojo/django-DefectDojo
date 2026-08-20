@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>上游连接器 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/connectors/upstream/</link><description>Recent content in 上游连接器 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Thu, 07 Sep 2023 16:06:50 +0200</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/connectors/upstream/index.xml" rel="self" type="application/rss+xml"/><item><title>上游连接器</title><link>https://docs.defectdojo.com/zh-hans/connectors/upstream/about/</link><pubDate>Thu, 07 Sep 2023 16:06:50 +0200</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/upstream/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：上游连接器（Upstream Connectors）是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo 允许用户构建复杂的 API 集成，并让用户完全掌控其漏洞数据的组织方式。&lt;/p&gt;
+&lt;p&gt;但每个人都需要一个起点，这正是上游连接器（Upstream Connectors）发挥作用的地方。上游连接器（此前称为 &lt;strong&gt;API Connectors&lt;/strong&gt;）旨在让您的安全工具尽快接入并将数据导入 DefectDojo。&lt;/p&gt;
+&lt;p&gt;我们目前为以下工具提供上游连接器支持，并将持续增加：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Acunetix 360&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Akamai API Security&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Anchore&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AWS Security Hub&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Azure DevOps&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Backstage&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Bitbucket&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Black Duck&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Bright Security&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Bugcrowd&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;BurpSuite&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Censys&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Checkmarx ONE&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cloudflare&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cobalt.io&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Contrast&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Coverity&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CrowdStrike Falcon&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Deepfence ThreatMapper&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Dependency-Track&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Docker Scout&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Edgescan&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Endor Labs&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Escape&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Fairwinds Insights&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Fortify&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GitGuardian&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GitHub&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GitHub Advanced Security&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GitLab&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Google Cloud Security Command Center&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Group-IB ASM&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HackerOne&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Harbor&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Have I Been Pwned&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HCL AppScan&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Intigriti&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Intruder&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;IriusRisk&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;JFrog Xray&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Jira Service Management Assets&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kubescape&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Lacework / FortiCNAPP&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Mend&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Microsoft Defender&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Microsoft Defender for Cloud&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MobSF&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NeuVector&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Nuclei (ProjectDiscovery Cloud)&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;OpenVAS / Greenbone&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Probely&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Prowler&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Qualys&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Quay&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Rapid7 InsightAppSec&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Rapid7 InsightVM&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;runZero&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Semgrep&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ServiceNow CMDB&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Shodan&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Snyk&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Socket&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SonarQube&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Sonatype IQ&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Sysdig Secure&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Tenable&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Tenable Web App Scanning&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Veracode&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Wazuh&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Wiz&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;YesWeHack&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;有关每种工具的具体设置步骤，请参见&lt;a href="../toolreference/"&gt;工具专属连接器设置&lt;/a&gt;参考文档。&lt;/p&gt;</description></item><item><title>管理操作</title><link>https://docs.defectdojo.com/zh-hans/connectors/upstream/manage_operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/upstream/manage_operations/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：上游连接器（Upstream Connectors）是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;上游连接器设置完成后，会定期运行两种操作：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;**发现（Discover）**会了解所连接工具的结构，并在 DefectDojo 中为任何未映射的数据创建记录；&lt;/li&gt;
+&lt;li&gt;**同步（Sync）**会根据您的映射，从该工具导入新的发现项。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这两种操作都在连接器的操作页面上进行管理。该表格还会记录这些操作的历史运行情况，方便您确认连接器保持最新状态。&lt;/p&gt;
+&lt;p&gt;要访问某个连接器的操作页面，请打开您要处理的连接器的 &lt;strong&gt;Manage Records &amp;amp; Operations&lt;/strong&gt;，然后切换到 &lt;strong&gt;&amp;lt;/&amp;gt; Operations From (tool)&lt;/strong&gt; 标签页。&lt;/p&gt;</description></item><item><title>管理记录</title><link>https://docs.defectdojo.com/zh-hans/connectors/upstream/manage_records/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/upstream/manage_records/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意:上游连接器是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;首次运行 Discover(发现)操作后,您应该会在 &lt;strong&gt;Manage Records and Operations&lt;/strong&gt; 页面上看到已映射或未映射记录的列表。&lt;/p&gt;
+&lt;h2 id="什么是记录"&gt;什么是记录?&lt;/h2&gt;
+&lt;p&gt;记录(Record)是 DefectDojo &lt;strong&gt;产品&lt;/strong&gt;与**供应商对等产品(Vendor-Equivalent-Product)**之间的一种关联。您可以通过记录列表来控制数据在您的工具与 DefectDojo 之间的流动方式。&lt;/p&gt;</description></item><item><title>上游连接器工具参考</title><link>https://docs.defectdojo.com/zh-hans/connectors/upstream/toolreference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/upstream/toolreference/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：上游连接器是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;在为受支持的工具设置连接器时，您需要向 DefectDojo 提供与该工具 API 相关的特定信息。基本上，您需要：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;位置&lt;/strong&gt; ——该字段通常是指此工具在您网络中的 URL，&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;密钥&lt;/strong&gt; ——通常是一个 API 密钥。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;部分工具除&lt;strong&gt;位置&lt;/strong&gt;和&lt;strong&gt;密钥&lt;/strong&gt;外，还需要提供额外的 API 相关字段，也可能要求您在其系统一侧进行相应设置，以便接受来自 DefectDojo 的连接器接入。&lt;/p&gt;</description></item><item><title>添加或编辑上游连接器</title><link>https://docs.defectdojo.com/zh-hans/connectors/upstream/add_edit/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/upstream/add_edit/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：上游连接器（Upstream Connectors）是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;无论您要连接哪种工具，添加和配置上游连接器的流程都是相似的。不过，某些工具可能需要您创建 API 密钥或完成额外的步骤。&lt;/p&gt;
+&lt;p&gt;在开始此流程之前，我们建议先查阅&lt;a href="../toolreference/"&gt;工具专属参考文档&lt;/a&gt;，找到您要连接的工具所对应的 API 资源。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;如果尚未操作，请先在 DefectDojo 中&lt;strong&gt;切换到 Pro UI&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在左侧菜单中，打开 &lt;strong&gt;Import&lt;/strong&gt; 标题下嵌套的 &lt;strong&gt;Connectors&lt;/strong&gt; 分组，点击 &lt;strong&gt;Upstream Connectors&lt;/strong&gt;。
+​
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/add_edit_connectors.png"
+ width="1564"
+ height="1136"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;</description></item></channel></rss>

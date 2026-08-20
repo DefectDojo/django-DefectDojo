@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DefectDojo 文档 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/</link><description>Recent content in DefectDojo 文档 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 14 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/index.xml" rel="self" type="application/rss+xml"/><item><title>关于连接器</title><link>https://docs.defectdojo.com/zh-hans/connectors/about/</link><pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：连接器是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;连接器（Connectors）&lt;/strong&gt; 是 DefectDojo Pro UI 中的统一入口，用于管理 DefectDojo 与之通信的所有工具（无论数据流向哪个方向）。它合并了此前在不同位置分别配置的两项功能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;上游连接器（Upstream Connectors）&lt;/strong&gt;（原名 &lt;strong&gt;API Connectors&lt;/strong&gt;）从您的扫描器和安全工具中拉取发现项和资产清单。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;下游连接器（Downstream Connectors）&lt;/strong&gt;（原名 &lt;strong&gt;Integrations&lt;/strong&gt;）将发现项推送到您的问题跟踪系统和工单系统。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果将 DefectDojo 视为您安全数据的枢纽，那么上游连接器就是数据流入的方式，下游连接器则是修复工作流出的方式。&lt;/p&gt;</description></item><item><title>功能对比</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo 开源版&lt;/strong&gt;是一个强大的免费漏洞管理平台，具备核心导入、去重、基础仪表板、API 访问和基本报告功能——非常适合较小的团队，或希望自行托管并借助社区资源扩展该工具的用户。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 在此基础上进一步构建了面向企业的功能，例如高级仪表板与报告、通过规则引擎实现的自动化与脚本编写、与众多安全工具对接的连接器、优化的导入工作流、统一的 SOC 与 AppSec 支持、改进的 UI/UX、AI 集成、增强的安全性（SSO/MFA）以及高级支持选项。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature / Capability&lt;/th&gt;
+ &lt;th&gt;DefectDojo Open-Source&lt;/th&gt;
+ &lt;th&gt;DefectDojo Pro&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;核心漏洞管理&lt;/td&gt;
+ &lt;td&gt;✔️ 从 500 多种安全工具导入、跟踪并管理发现项&lt;/td&gt;
+ &lt;td&gt;✔️ 涵盖开源版全部功能，并针对规模化场景进行了优化&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;发现项去重&lt;/td&gt;
+ &lt;td&gt;✔️ 标准去重&lt;/td&gt;
+ &lt;td&gt;✔️ 高级、可配置的去重&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;REST API&lt;/td&gt;
+ &lt;td&gt;✔️ 完整 REST API&lt;/td&gt;
+ &lt;td&gt;✔️ 完整 REST API&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;身份验证与访问控制&lt;/td&gt;
+ &lt;td&gt;✔️ 本地身份验证与基础 RBAC&lt;/td&gt;
+ &lt;td&gt;✔️ SSO（SAML/OAuth）、MFA、高级 RBAC&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;用户界面&lt;/td&gt;
+ &lt;td&gt;✔️ 社区版 UI&lt;/td&gt;
+ &lt;td&gt;✔️ 现代化 Pro UI，性能有所提升&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;仪表板与报告&lt;/td&gt;
+ &lt;td&gt;✔️ 基础仪表板与报告&lt;/td&gt;
+ &lt;td&gt;✔️ 高级、可自定义的仪表板与高管报告&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;自动化与工作流&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ 规则引擎与自动化工作流&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;导入增强&lt;/td&gt;
+ &lt;td&gt;❌ 仅支持标准导入&lt;/td&gt;
+ &lt;td&gt;✔️ 后台导入、智能上传、通用解析器、CLI 上传&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;工具集成&lt;/td&gt;
+ &lt;td&gt;❌ 手动/基于 API&lt;/td&gt;
+ &lt;td&gt;✔️ 内置&lt;strong&gt;上游连接器&lt;/strong&gt;，对接主流 AppSec 与云工具&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Jira 集成&lt;/td&gt;
+ &lt;td&gt;✔️ 已包含&lt;/td&gt;
+ &lt;td&gt;✔️ 已包含&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;项目管理集成&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ &lt;strong&gt;下游连接器&lt;/strong&gt;，对接 &lt;strong&gt;Jira&lt;/strong&gt;、&lt;strong&gt;Azure DevOps&lt;/strong&gt;、&lt;strong&gt;GitHub&lt;/strong&gt;、&lt;strong&gt;GitLab&lt;/strong&gt;、&lt;strong&gt;ServiceNow&lt;/strong&gt;、&lt;strong&gt;Bitbucket&lt;/strong&gt;、&lt;strong&gt;Shortcut&lt;/strong&gt;、&lt;strong&gt;PagerDuty&lt;/strong&gt;、&lt;strong&gt;Zendesk&lt;/strong&gt;、&lt;strong&gt;ServiceDesk Plus&lt;/strong&gt; 和 &lt;strong&gt;Freshservice&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;发现项增强&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ 自动 KEV、EPSS 评分与勒索软件跟踪&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;SOC 与 AppSec 统一&lt;/td&gt;
+ &lt;td&gt;❌ 仅面向 AppSec&lt;/td&gt;
+ &lt;td&gt;✔️ 统一的 AppSec 与 SOC 发现项&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;AI 与下一代功能&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ AI 辅助工作流、报告与 MCP 支持&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;支持&lt;/td&gt;
+ &lt;td&gt;社区支持（GitHub、Slack、论坛）&lt;/td&gt;
+ &lt;td&gt;具有 SLA 保障的商业支持&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;托管选项&lt;/td&gt;
+ &lt;td&gt;自行托管&lt;/td&gt;
+ &lt;td&gt;自行托管或云托管&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>关于 DefectDojo</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc. 及开源贡献者共同维护本文档，以支持 DefectDojo 的社区版和 Pro 版。&lt;/span&gt;&lt;/p&gt;
+&lt;h2 id="什么是-defectdojo"&gt;什么是 DefectDojo？&lt;/h2&gt;
+&lt;p&gt;DefectDojo 是一个开发者安全运营（DevSecOps）平台。DefectDojo 通过充当您整套安全工具的自动聚合器来简化 DevSecOps 流程，让您可以轻松组织安全工作，并向其他利益相关者报告组织的安全态势。&lt;/p&gt;
+&lt;p&gt;尽管安全流程自动化和集成开发流水线是 DefectDojo 的最终目标，但从本质上说，本软件是一个面向安全漏洞的缺陷跟踪系统，用于摄取、组织并标准化来自众多安全工具的报告。&lt;/p&gt;</description></item><item><title>🌐 通用解析器</title><link>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/universal_parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/universal_parser/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：通用解析器仅在 DefectDojo Pro 中提供。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;通用解析器在每个 DefectDojo Pro 实例中都已启用；无需进行任何操作即可使用。有关更多信息，请参阅我们的&lt;a href="https://community.defectdojo.com/universalparser"&gt;发布演示&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="关于通用解析器"&gt;关于通用解析器&lt;/h2&gt;
+&lt;p&gt;DefectDojo 拥有一个庞大且定期更新的解析器库，用于帮助安全团队摄取数据。但是，有时用户使用的工具并不受这些解析器支持，或者他们可能希望以不同于现有解析器的方式将数据导入 DefectDojo 模型。&lt;/p&gt;
+&lt;p&gt;DefectDojo 的通用解析器旨在为使用不受支持的报告类型的用户提供一条前进之路，以导入和映射&lt;strong&gt;任何 JSON、CSV 或 XML 文件&lt;/strong&gt;。&lt;/p&gt;</description></item><item><title>CVSS 版本支持</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/finding_scoring/cvss_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/finding_scoring/cvss_support/</guid><description>&lt;p&gt;DefectDojo 支持在发现项上使用 CVSS 元数据，包括 CVSS 4.0 标准。本页介绍哪些 CVSS 版本会被端到端存储、您可以在何处录入或查看它们，以及解析器方面的覆盖情况。&lt;/p&gt;
+&lt;h2 id="defectdojo-存储的内容"&gt;DefectDojo 存储的内容&lt;/h2&gt;
+&lt;p&gt;发现项可以携带以下 CVSS 数据：&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;版本&lt;/th&gt;
+ &lt;th&gt;是否存储向量&lt;/th&gt;
+ &lt;th&gt;是否存储分数&lt;/th&gt;
+ &lt;th&gt;UI 向量构建器与计算器&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;CVSS v4.0&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅（专业版 UI）&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;CVSS v3（v3.0 / v3.1）&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅&lt;/td&gt;
+ &lt;td&gt;✅（专业版 UI）&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;CVSS v2&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;通过发现项的&lt;strong&gt;严重程度&lt;/strong&gt;字段隐式存储；不存储单独的 v2 向量字段&lt;/td&gt;
+ &lt;td&gt;不适用&lt;/td&gt;
+ &lt;td&gt;不适用&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;每个发现项在底层模型上都有专门的 &lt;code&gt;cvssv3&lt;/code&gt; / &lt;code&gt;cvssv3_score&lt;/code&gt; 以及 &lt;code&gt;cvssv4&lt;/code&gt; / &lt;code&gt;cvssv4_score&lt;/code&gt; 字段。这些字段既可以通过 API 访问，也可以通过 UI 访问。&lt;/p&gt;</description></item><item><title>DefectDojo 主仪表板</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;仪表板很可能是您打开 DefectDojo 时看到的第一个页面。它汇总了您团队的整体表现，并提供跟踪工具，用于监控您的漏洞跟踪环境中的特定领域。&lt;/p&gt;
+&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;💡 DefectDojo Pro：&lt;/strong&gt; 在 DefectDojo Pro 中，首页是一个完全&lt;strong&gt;可自定义的仪表板&lt;/strong&gt;——您可以通过小组件自行构建并排列布局，而不是使用下文所述的固定布局。有关概念说明和界面演示，请参阅**&lt;a href="../custom-dashboards/"&gt;可自定义仪表板&lt;/a&gt;**。本页其余部分介绍的是开源版的主仪表板。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class="version-opensource"&gt;
+&lt;h2 id="仪表板组件"&gt;仪表板组件&lt;/h2&gt;
+&lt;p&gt;开源版仪表板通过以下内置组件，为您提供安全态势的高层级概览：&lt;/p&gt;
+&lt;h3 id="摘要卡片"&gt;摘要卡片&lt;/h3&gt;
+&lt;p&gt;仪表板顶部一行显示四张摘要卡片，让您一目了然地了解活动概况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;活动测试活动&lt;/strong&gt; — 所有产品中当前处于开放状态的测试活动总数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;过去 7 天发现项&lt;/strong&gt; — 过去一周内新创建的发现项。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;过去 7 天已结项&lt;/strong&gt; — 近期已解决的发现项。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;过去 7 天已接受&lt;/strong&gt; — 近期风险已接受的发现项。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;每张卡片都直接链接到相应的筛选列表，您可以一键深入查看详情。&lt;/p&gt;</description></item><item><title>Jira（旧版）</title><link>https://docs.defectdojo.com/zh-hans/connectors/downstream/pro__jira_guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/downstream/pro__jira_guide/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本页介绍的是旧版 Jira 集成。&lt;/strong&gt; 这里所述的按产品配置的 Jira 集成已被 &lt;strong&gt;&lt;a href="https://docs.defectdojo.com/connectors/downstream/about/"&gt;Jira 下游连接器&lt;/a&gt;&lt;/strong&gt; 取代；该连接器目前已在每个 DefectDojo Pro 实例上全面提供，是将发现项推送到 Jira 的推荐方式。因此，在 Pro 侧边栏中，&lt;strong&gt;Connect &amp;gt; Jira&lt;/strong&gt; 带有 &lt;code&gt;LEGACY&lt;/code&gt; 徽章——详见&lt;a href="https://docs.defectdojo.com/navigation/pro__menu_badges/"&gt;菜单徽章&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>SAML 配置</title><link>https://docs.defectdojo.com/zh-hans/admin/sso/pro__saml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/admin/sso/pro__saml/</guid><description>&lt;p&gt;DefectDojo Pro 支持通过 &lt;strong&gt;Enterprise Settings&lt;/strong&gt; 界面进行 SAML 身份验证。开源版 DefectDojo 不包含单点登录（SSO）功能——有关开源版的访问控制，请参阅&lt;a href="https://docs.defectdojo.com/admin/user_management/os__authorized_users/"&gt;已授权用户&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="acs-url-assertion-consumer-service"&gt;ACS URL (Assertion Consumer Service)&lt;/h2&gt;
+&lt;p&gt;您的身份提供程序需要知道在用户完成身份验证后应将 SAML 响应 POST 到哪里。DefectDojo 的 ACS URL 为：&lt;/p&gt;</description></item><item><title>Sensei</title><link>https://docs.defectdojo.com/zh-hans/sensei/os__sensei/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/sensei/os__sensei/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：Sensei 仅是 DefectDojo Pro 版专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sensei&lt;/strong&gt; 是 DefectDojo 面向源代码代码库、由 AI 驱动的&lt;strong&gt;扫描并修复&lt;/strong&gt;功能，仅在 &lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 中提供，并不属于开源版的一部分。&lt;/p&gt;
+&lt;p&gt;借助 Sensei，DefectDojo Pro 可以：&lt;/p&gt;</description></item><item><title>安装</title><link>https://docs.defectdojo.com/zh-hans/get_started/open_source/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/open_source/installation/</guid><description>&lt;h2 id="推荐选项"&gt;&lt;strong&gt;推荐选项&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;h3 id="docker-compose"&gt;Docker Compose&lt;/h3&gt;
+&lt;p&gt;请参阅 &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md"&gt;DOCKER.md&lt;/a&gt; 中的说明&lt;/p&gt;
+&lt;h3 id="saas包含支持并有助于项目发展"&gt;SaaS（包含支持并有助于项目发展）&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://defectdojo.com/platform"&gt;SaaS 链接&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="docker-镜像变体"&gt;&lt;strong&gt;Docker 镜像变体&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;p&gt;DefectDojo 发布多种变体的 Docker 镜像：&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;/th&gt;
+ &lt;th&gt;AMD64&lt;/th&gt;
+ &lt;th&gt;ARM64&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Debian&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;✅ 受支持&lt;/td&gt;
+ &lt;td&gt;⚠️ 已进行单元测试&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;Alpine&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;⚠️ 社区维护&lt;/td&gt;
+ &lt;td&gt;⚠️ 社区维护&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;AMD64 上的 Debian&lt;/strong&gt; 是官方支持并经过测试的配置。所有 CI 测试（单元测试、集成测试和性能测试）都针对此组合运行。&lt;/p&gt;</description></item></channel></rss>

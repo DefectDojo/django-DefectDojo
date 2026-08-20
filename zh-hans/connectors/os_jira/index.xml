@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jira on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/connectors/os_jira/</link><description>Recent content in Jira on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/connectors/os_jira/index.xml" rel="self" type="application/rss+xml"/><item><title>Jira</title><link>https://docs.defectdojo.com/zh-hans/connectors/os_jira/os__jira_guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/os_jira/os__jira_guide/</guid><description>&lt;p&gt;DefectDojo 的 Jira 集成可用于将发现项数据推送到一个或多个 Jira 空间。通过这种方式，您可以将 DefectDojo 集成到标准的开发工作流程中。以下是几个使用示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AppSec 团队可以有选择地将发现项推送到开发人员使用的 Jira 空间，使问题修复能够与常规开发工作一起获得合理的优先级排序。使用该看板的开发人员无需访问 DefectDojo，就可以把所有工作集中在一个地方。&lt;/li&gt;
+&lt;li&gt;DefectDojo 可以将所有发现项推送到 AppSec 团队使用的双向同步 Jira 空间，从而让团队可以分工进行问题验证。该看板会与 DefectDojo 保持同步，并支持复杂的修复工作流程。&lt;/li&gt;
+&lt;li&gt;DefectDojo 还可以有选择地将不同产品和（或）测试活动中的发现项推送到不同的 Jira 空间，使各项内容保持在恰当的上下文中。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="设置-jira"&gt;设置 Jira&lt;/h1&gt;
+&lt;p&gt;设置 Jira 需要执行以下步骤：&lt;/p&gt;</description></item></channel></rss>

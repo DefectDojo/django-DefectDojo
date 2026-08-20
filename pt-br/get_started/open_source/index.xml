@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>🔹 Edição Community do DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/pt-br/get_started/open_source/</link><description>Recent content in 🔹 Edição Community do DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>pt-br</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/pt-br/get_started/open_source/index.xml" rel="self" type="application/rss+xml"/><item><title>Arquitetura do sistema</title><link>https://docs.defectdojo.com/pt-br/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/get_started/open_source/architecture/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dd-architecture.png"
+ width="721"
+ height="511"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="nginx"&gt;NGINX&lt;/h2&gt;
+&lt;p&gt;O servidor web &lt;a href="https://nginx.org/en/"&gt;NGINX&lt;/a&gt; entrega todo o conteúdo estático, por exemplo,
+imagens, arquivos JavaScript ou arquivos CSS.&lt;/p&gt;
+&lt;h2 id="uwsgi"&gt;uWSGI&lt;/h2&gt;
+&lt;p&gt;O &lt;a href="https://uwsgi-docs.readthedocs.io/en/latest/"&gt;uWSGI&lt;/a&gt; é o servidor de aplicação
+que executa a plataforma DefectDojo, escrita em Python/Django, para servir todo o
+conteúdo dinâmico.&lt;/p&gt;</description></item><item><title>Instalação</title><link>https://docs.defectdojo.com/pt-br/get_started/open_source/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/get_started/open_source/installation/</guid><description>&lt;h2 id="opções-recomendadas"&gt;&lt;strong&gt;Opções recomendadas&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;h3 id="docker-compose"&gt;Docker Compose&lt;/h3&gt;
+&lt;p&gt;Veja as instruções em &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md"&gt;DOCKER.md&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="saas-inclui-suporte-e-apoia-o-projeto"&gt;SaaS (inclui suporte e apoia o projeto)&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://defectdojo.com/platform"&gt;Link do SaaS&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="variantes-de-imagem-docker"&gt;&lt;strong&gt;Variantes de imagem Docker&lt;/strong&gt;&lt;/h2&gt;
+&lt;hr&gt;
+&lt;p&gt;O DefectDojo publica imagens Docker em múltiplas variantes:&lt;/p&gt;</description></item><item><title>Configuração</title><link>https://docs.defectdojo.com/pt-br/get_started/open_source/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/get_started/open_source/configuration/</guid><description>&lt;h2 id="dojosettingssettingsdistpy"&gt;dojo/settings/settings.dist.py&lt;/h2&gt;
+&lt;p&gt;As configurações principais são armazenadas em &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py"&gt;&lt;code&gt;dojo/settings/settings.dist.py&lt;/code&gt;&lt;/a&gt;. É ótimo usar este arquivo como referência para o que pode ser configurado, mas ele não deve ser editado diretamente, pois as alterações serão sobrescritas ao atualizar o DefectDojo. Existem vários métodos para alterar as configurações padrão:&lt;/p&gt;</description></item><item><title>Executando em produção</title><link>https://docs.defectdojo.com/pt-br/get_started/open_source/running-in-production/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/get_started/open_source/running-in-production/</guid><description>&lt;h2 id="uso-em-produção-com-docker-compose"&gt;Uso em produção (com Docker compose)&lt;/h2&gt;
+&lt;p&gt;O arquivo docker-compose.yml neste repositório é totalmente funcional para avaliar o DefectDojo no seu ambiente local.&lt;/p&gt;</description></item></channel></rss>

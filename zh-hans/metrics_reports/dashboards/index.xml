@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>仪表板 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/</link><description>Recent content in 仪表板 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojo 主仪表板</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;仪表板很可能是您打开 DefectDojo 时看到的第一个页面。它汇总了您团队的整体表现，并提供跟踪工具，用于监控您的漏洞跟踪环境中的特定领域。&lt;/p&gt;
+&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="图片"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;💡 DefectDojo Pro：&lt;/strong&gt; 在 DefectDojo Pro 中，首页是一个完全&lt;strong&gt;可自定义的仪表板&lt;/strong&gt;——您可以通过小组件自行构建并排列布局，而不是使用下文所述的固定布局。有关概念说明和界面演示，请参阅**&lt;a href="../custom-dashboards/"&gt;可自定义仪表板&lt;/a&gt;**。本页其余部分介绍的是开源版的主仪表板。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class="version-opensource"&gt;
+&lt;h2 id="仪表板组件"&gt;仪表板组件&lt;/h2&gt;
+&lt;p&gt;开源版仪表板通过以下内置组件，为您提供安全态势的高层级概览：&lt;/p&gt;
+&lt;h3 id="摘要卡片"&gt;摘要卡片&lt;/h3&gt;
+&lt;p&gt;仪表板顶部一行显示四张摘要卡片，让您一目了然地了解活动概况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;活动测试活动&lt;/strong&gt; — 所有产品中当前处于开放状态的测试活动总数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;过去 7 天发现项&lt;/strong&gt; — 过去一周内新创建的发现项。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;过去 7 天已结项&lt;/strong&gt; — 近期已解决的发现项。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;过去 7 天已接受&lt;/strong&gt; — 近期风险已接受的发现项。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;每张卡片都直接链接到相应的筛选列表，您可以一键深入查看详情。&lt;/p&gt;</description></item><item><title>我的工作</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/pro__my_work/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/pro__my_work/</guid><description>&lt;p&gt;&lt;strong&gt;我的工作&lt;/strong&gt;只回答一个问题：有什么在等着我处理？这是一个按用户划分的视图——同一个页面会向每个人展示各自的队列。&lt;/p&gt;
+&lt;p&gt;在左侧边栏中通过 &lt;strong&gt;仪表板 &amp;gt; 我的工作&lt;/strong&gt; 打开该页面。&lt;/p&gt;
+&lt;h2 id="队列"&gt;队列&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;队列&lt;/th&gt;
+ &lt;th&gt;显示内容&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;分配给我&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;个人被分配的发现项。仅在启用&lt;strong&gt;工作分配&lt;/strong&gt;功能时显示，否则隐藏。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;我的团队队列&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;由您所属的组拥有的发现项。所有者是组级别的，因此这里显示的是您团队的工作，而非专属于您个人的工作。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;等待我审核&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;系统请求您审核、且审核仍处于开放状态的发现项。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;我发起的审核&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;您发起、但尚未有人处理完成的审核。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;strong&gt;我的风险接受&lt;/strong&gt;&lt;/td&gt;
+ &lt;td&gt;由您拥有、且尚未有人处理的风险接受。已过期的项目会持续列出，直到被处理为止。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;每个队列都是完整的发现项或风险接受列表，因此常规的筛选、排序和列控制均可正常使用，且每个标签页都会记住自己的列布局。&lt;/p&gt;</description></item><item><title>可自定义仪表板</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/custom-dashboards/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/custom-dashboards/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：可自定义仪表板（布局、小组件和小组件目录）是 DefectDojo Pro 的功能。此功能默认关闭——超级用户可以在云端和本地部署实例中通过&lt;strong&gt;设置 &amp;gt; 功能开关&lt;/strong&gt;将其开启。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro 的可自定义仪表板允许每位用户通过拖放网格，用&lt;strong&gt;小组件&lt;/strong&gt;——计数、图表、排行榜、动态和备注——组装出属于自己的首页。您无需使用面向所有人的单一固定仪表板，而是可以构建对您真正重要的&lt;strong&gt;布局&lt;/strong&gt;：高管概览、分诊队列、修复速度看板、扫描器成效视图等等。您可以将布局保持私有，也可以发布给整个团队，将某个布局设为默认着陆页，或者以任意布局（无论是您自己的还是共享模板）为起点进行克隆。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_dashboard_v2_default.png"
+ width="1600"
+ height="873"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="DefectDojo Pro 可自定义仪表板——默认仪表板布局。"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="与开源版的对比"&gt;与开源版的对比&lt;/h2&gt;
+&lt;p&gt;开源版 DefectDojo 只有一个内置的&lt;a href="../introduction_dashboard/"&gt;主仪表板&lt;/a&gt;，包含一组固定的摘要卡片和图表，超级用户可以选择显示或隐藏。所有用户看到的都是相同的内容。&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro 用&lt;strong&gt;按用户自定义的仪表板&lt;/strong&gt;取代了这个固定页面。您可以选择显示哪些小组件、如何筛选它们，以及它们在网格中的位置。您可以构建任意数量的命名布局，在它们之间切换，与团队共享，并通过 &lt;a href="../custom-dashboards-api/"&gt;REST API&lt;/a&gt; 或 &lt;a href="../custom-dashboards-llm/"&gt;LLM&lt;/a&gt; 驱动整个系统。&lt;/p&gt;</description></item><item><title>通过 API 自动化仪表板</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/custom-dashboards-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/custom-dashboards-api/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：可自定义仪表板 REST API（布局、小组件目录和小组件数据）是 DefectDojo Pro 功能。该功能默认处于关闭状态——超级用户可以在云端和本地部署实例上通过 &lt;strong&gt;设置 &amp;gt; 功能开关&lt;/strong&gt; 启用可自定义仪表板。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;可自定义仪表板 REST API 让您完全通过代码构建与在 &lt;a href="../custom-dashboards/"&gt;仪表板界面&lt;/a&gt; 中手动组装相同的仪表板。您可以发现小组件目录、创建和更新布局、设置默认布局、与团队共享布局，甚至按需渲染小组件的数据，而无需重新实现 DefectDojo 的筛选逻辑。布局接口的设计初衷是作为 AI 智能体构建仪表板的主要入口，因此请求结构特意做到了可自省。&lt;/p&gt;</description></item><item><title>使用 LLM 构建仪表板</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/custom-dashboards-llm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/custom-dashboards-llm/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：通过 REST API 与 LLM 自动化可自定义仪表板是 DefectDojo Pro 功能。该功能默认处于关闭状态——超级用户可以在云端和本地部署实例上通过 &lt;strong&gt;设置 &amp;gt; 功能开关&lt;/strong&gt; 启用可自定义仪表板。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro 的可自定义仪表板完全由 REST API 驱动——布局接口在设计时就充分考虑了 AI 智能体的使用场景。这意味着您可以将整个任务交给 LLM 来完成：将一段自包含的提示词粘贴给 Claude、ChatGPT 或其他任何有能力的模型，描述您想要的仪表板，它就会查询您租户的实时小组件目录、提出布局方案、生成可运行的 Python 脚本、创建布局、进行验证，并可选择将其设为默认布局。&lt;/p&gt;</description></item></channel></rss>

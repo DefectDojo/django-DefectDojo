@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>导入数据 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/</link><description>Recent content in 导入数据 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/index.xml" rel="self" type="application/rss+xml"/><item><title>导入扫描表单</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/os__import_scan_ui/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/os__import_scan_ui/</guid><description>&lt;p&gt;一旦您的产品层级结构中至少设置了一个产品类型、产品、测试和测试活动，您就可以将扫描文件导入 DefectDojo 并创建发现项。&lt;/p&gt;
+&lt;p&gt;在 DefectDojo 中重新组织产品层级结构很容易，所以如果您现在还不确定该如何设置也没关系。&lt;/p&gt;
+&lt;p&gt;目前，您需要了解的是&lt;strong&gt;测试活动&lt;/strong&gt;可以存储来自多个工具的数据，如果您在一次测试工作中同时运行多种不同的工具，这会很有用。&lt;/p&gt;
+&lt;h2 id="访问导入扫描表单经典-ui--开源版"&gt;访问导入扫描表单（经典 UI / 开源版）&lt;/h2&gt;
+&lt;p&gt;在 DefectDojo OS 中，您可以从以下两个位置访问此表单：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;测试活动的测试部分：
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/import_scan_os.png"
+ width="1548"
+ height="354"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/li&gt;
+&lt;li&gt;产品导航栏的发现项部分：
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/import_scan_os_2.png"
+ width="1862"
+ height="668"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="填写导入扫描表单"&gt;填写导入扫描表单&lt;/h2&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/import_scan_ui.png"
+ width="1098"
+ height="683"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-2"
+&gt;
+导入扫描表单会在某个测试活动下创建一个新的测试，其中将包含扫描文件中每个漏洞对应的唯一发现项。&lt;/p&gt;</description></item><item><title>添加发现项表单</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/pro__import_scan_ui/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/pro__import_scan_ui/</guid><description>&lt;p&gt;如果您使用的是全新的 DefectDojo 实例，导入扫描表单是学习该软件并搭建环境的合理的第一步。通过此表单，您可以上传受支持工具生成的扫描文件，系统会据此创建代表这些漏洞的发现项。在填写表单时，您可以决定：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将这些发现项存储在现有的产品类型 / 产品 / 测试活动下，&lt;strong&gt;或&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;创建新的产品类型 / 产品 / 测试活动来存储这些发现项&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在 DefectDojo 中重新组织产品层级结构非常容易，所以即使您现在还不确定该如何设置也没关系。&lt;/p&gt;
+&lt;p&gt;现在您只需了解，&lt;strong&gt;测试活动&lt;/strong&gt;可以存储来自多个工具的数据，如果您在一次测试工作中同时运行多个不同的工具，这会很有用。&lt;/p&gt;
+&lt;h2 id="访问导入扫描表单pro-界面"&gt;访问导入扫描表单（Pro 界面）&lt;/h2&gt;
+&lt;p&gt;导入扫描表单可通过多个位置访问：&lt;/p&gt;</description></item><item><title>端点元数据导入器</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/endpoint_meta_importer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/endpoint_meta_importer/</guid><description>&lt;p&gt;&lt;strong&gt;端点元数据导入器&lt;/strong&gt;允许您使用 CSV 文件一次性为大量端点应用标签和自定义字段。这对于运行大规模基础设施扫描的组织尤其有用，因为这些端点需要灵活的元数据以便进行过滤、排序和报告。&lt;/p&gt;
+&lt;h2 id="csv-格式"&gt;CSV 格式&lt;/h2&gt;
+&lt;p&gt;CSV 文件必须包含一个 &lt;code&gt;hostname&lt;/code&gt; 列（必填），此外还可以有任意数量的附加列，代表您想要应用的标签或自定义字段。每个附加列的列名将成为标签/字段的键，其行值将成为标签/字段的值。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;示例：&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;hostname,team,public_facing
+sheets.google.com,data analytics,yes
+docs.google.com,language processing,yes
+feedback.internal.google.com,human resources,no&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;这将应用以下元数据：&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Endpoint&lt;/th&gt;
+ &lt;th&gt;Tags / Custom Fields&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;sheets.google.com&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;team:data analytics&lt;/code&gt;, &lt;code&gt;public_facing:yes&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;docs.google.com&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;team:language processing&lt;/code&gt;, &lt;code&gt;public_facing:yes&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;feedback.internal.google.com&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;team:human resources&lt;/code&gt;, &lt;code&gt;public_facing:no&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="要求"&gt;要求&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;hostname&lt;/code&gt; 列为&lt;strong&gt;必填项&lt;/strong&gt;。系统会用它来查找主机名匹配的现有端点，若未找到匹配项则创建新端点。&lt;/li&gt;
+&lt;li&gt;其他所有列名都会被视为标签/自定义字段的键。&lt;/li&gt;
+&lt;li&gt;值以 &lt;code&gt;key:value&lt;/code&gt; 格式存储。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用端点元数据导入器"&gt;使用端点元数据导入器&lt;/h2&gt;
+&lt;p&gt;在查看某个产品时，端点元数据导入器可从 &lt;strong&gt;端点&lt;/strong&gt; 选项卡访问。在此处上传您的 CSV 文件，即可批量为端点应用元数据。&lt;/p&gt;</description></item><item><title/><link>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/os__create_findings_manually/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/os__create_findings_manually/</guid><description/></item><item><title/><link>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/pro__create_findings_manually/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/pro__create_findings_manually/</guid><description/></item><item><title>通过 API 导入</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/api_pipeline_modelling/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_scan_files/api_pipeline_modelling/</guid><description>&lt;p&gt;DefectDojo 的 API 支持构建健壮的流水线解决方案，能够自动将新的扫描结果摄取到您的实例中。此类自动化通常有以下几种形式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每日导入：每天扫描您的环境，然后将扫描结果导入 DefectDojo（类似于我们的&lt;strong&gt;连接器&lt;/strong&gt;功能）&lt;/li&gt;
+&lt;li&gt;CI/CD 流水线：在新代码部署时对其进行扫描，并将结果作为触发操作导入 DefectDojo&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些流水线可以通过直接调用我们的 API &lt;strong&gt;/reimport&lt;/strong&gt; 端点并附加扫描文件来创建，其方式与我们的&lt;strong&gt;导入扫描表单&lt;/strong&gt;非常相似。&lt;/p&gt;
+&lt;h2 id="defectdojo-的-api"&gt;DefectDojo 的 API&lt;/h2&gt;
+&lt;p&gt;DefectDojo 的 API 使用 OpenAPI 框架在应用内提供文档。您可以从右上角的用户菜单中的 &lt;strong&gt;“API v2 OpenAPI3”&lt;/strong&gt; 选项访问此文档。&lt;/p&gt;</description></item></channel></rss>

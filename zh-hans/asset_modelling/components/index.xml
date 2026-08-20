@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>组件与端点 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/components/</link><description>Recent content in 组件与端点 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/asset_modelling/components/index.xml" rel="self" type="application/rss+xml"/><item><title>服务</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/components/services/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/components/services/</guid><description>&lt;h2 id="什么是服务"&gt;什么是服务?&lt;/h2&gt;
+&lt;p&gt;服务(微服务的简称)是资产内的一个可选功能,用于为发现项在资产内的来源提供额外的上下文信息。它们有助于将发现项定位到资产的某个特定组成部分,而不是整个资产,从而在架构复杂的环境中提供更清晰的定位和更精确的报告。&lt;/p&gt;
+&lt;p&gt;当您需要对来自某次测试的结果进行进一步细分,或者预计在重新导入流程中会出现多个不希望去重的相同发现项实例时,服务会非常有用。某些扫描工具可能会为每个文件位置创建单独的发现项,如果您希望将这些发现项实例保留为独立的发现项,服务可以是标注这些不同位置的有效方式。&lt;/p&gt;
+&lt;h2 id="pro-版中的服务"&gt;Pro 版中的服务&lt;/h2&gt;
+&lt;p&gt;服务在 Pro 版本中可用,但在很大程度上已被资产之间建立父子关系的能力所取代。服务可以达到相同的效果,并且在重构资产不可行,或者需要在不改变资产层级结构的情况下限定扫描级别的去重范围时,仍然可能有用,但它们会丢失上下文信息。例如,业务关键性、营收和人员信息可以归属于资产,但不能归属于服务。因此,服务主要在开源版 DefectDojo 中有用。&lt;/p&gt;
+&lt;h2 id="如何指定服务"&gt;如何指定服务?&lt;/h2&gt;
+&lt;p&gt;在导入扫描或重新导入表单的可选字段下拉菜单中,可以指定服务选项。此后,去重将限定在具有相同服务值的测试范围内。&lt;/p&gt;
+&lt;p&gt;需要注意的是,服务是区分大小写的。如果初始导入的服务被标识为“Service 1”(大写 S),而您重新导入了一个已解决所有先前问题的扫描,并将服务标识为“service 1”(小写 s),那么去重将不会应用于预期的服务。&lt;/p&gt;
+&lt;h2 id="服务如何运作"&gt;服务如何运作?&lt;/h2&gt;
+&lt;p&gt;服务的作用方式是允许您指定重新导入时哪些先前的测试将适用去重规则。&lt;/p&gt;
+&lt;p&gt;例如,如果您导入一次扫描并将服务设置为“Service 1”,然后重新导入第二次扫描并将服务设置为“Service 2”,由于服务不同,这两次扫描之间将不会进行去重。&lt;/p&gt;</description></item><item><title>组件</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/components/pro__components/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/components/pro__components/</guid><description>&lt;p&gt;在 DefectDojo 中,组件代表可能存在漏洞的第三方库、软件组件和模块。&lt;/p&gt;
+&lt;h2 id="组件视图"&gt;组件视图&lt;/h2&gt;
+&lt;p&gt;DefectDojo Pro 在侧边栏中提供了专门的组件表格视图。该视图显示每个组件的活动发现项、重复发现项和发现项总数。这些数字涵盖 DefectDojo 实例上的所有资产。&lt;/p&gt;
+&lt;p&gt;单个资产的组件可以在资产视图中查看。&lt;/p&gt;
+&lt;h2 id="组件表"&gt;组件表&lt;/h2&gt;
+&lt;p&gt;组件表显示以下列:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;组件(Component)&lt;/strong&gt; — 组件的名称,从扫描数据中填充。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;版本(Version)&lt;/strong&gt; — 组件版本,从扫描数据中填充。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;活动发现项(Active Findings)&lt;/strong&gt; — 与该组件关联的活动发现项数量。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;重复发现项(Duplicate Findings)&lt;/strong&gt; — 与该组件关联的重复发现项数量。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;发现项总数(Total Findings)&lt;/strong&gt; — 与该组件关联的所有发现项总数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;点击组件名称,或点击活动发现项、重复发现项、发现项总数对应的数值,将打开该字段相应的已筛选发现项列表。&lt;/p&gt;</description></item></channel></rss>

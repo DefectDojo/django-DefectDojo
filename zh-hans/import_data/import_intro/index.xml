@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>简介 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_intro/</link><description>Recent content in 简介 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/import_data/import_intro/index.xml" rel="self" type="application/rss+xml"/><item><title>导入方式对比</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_intro/comparison/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_intro/comparison/</guid><description>&lt;p&gt;DefectDojo 深知，每家公司的安全需求都截然不同，不存在放之四海而皆准的方法。随着组织的变化，采取灵活的方式至关重要，而 DefectDojo 允许您以灵活的方式连接安全工具，以适应这些变化。&lt;/p&gt;
+&lt;h2 id="扫描上传方式"&gt;扫描上传方式&lt;/h2&gt;
+&lt;p&gt;当 DefectDojo 从安全工具接收到漏洞报告时，会根据该报告中包含的漏洞创建发现项。DefectDojo 充当这些发现项的中央存储库，您和您的团队可以在此对其进行分类、修复或以其他方式处理。&lt;/p&gt;
+&lt;p&gt;DefectDojo 主要有两种上传发现项报告的方式。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;通过界面直接&lt;strong&gt;导入&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;通过 &lt;strong&gt;API&lt;/strong&gt; 端点（支持自动化数据摄取）：参见 &lt;a href="https://docs.defectdojo.com/automation/api/api-v2-docs/"&gt;API 文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="defectdojo-pro-方式"&gt;DefectDojo Pro 方式&lt;/h4&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo Pro&lt;/span&gt; 用户还有另外三种处理报告和数据的方式：&lt;/p&gt;</description></item><item><title>重新导入</title><link>https://docs.defectdojo.com/zh-hans/import_data/import_intro/reimport/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/import_intro/reimport/</guid><description>&lt;p&gt;在 DefectDojo 中创建测试后（无论是提前创建的，还是通过导入扫描文件创建的），都可以为该测试补充新的发现项数据。&lt;/p&gt;
+&lt;p&gt;例如，假设您有一条 CI/CD 流水线，设计为每天向 DefectDojo 发送一份新报告。与其为流水线的每次“运行”都创建一个新的测试或测试活动，您可以使用&lt;strong&gt;重新导入&lt;/strong&gt;功能，让每份报告都汇入同一个测试。&lt;/p&gt;
+&lt;h2 id="重新导入处理流程概述"&gt;重新导入：处理流程概述&lt;/h2&gt;
+&lt;p&gt;重新导入数据不会替换测试中的任何旧数据，而是会将传入的扫描文件与测试中现有的扫描数据进行比较，从而做出明智的决策：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;根据最新文件，哪些漏洞仍然存在？&lt;/li&gt;
+&lt;li&gt;哪些漏洞已不再存在？&lt;/li&gt;
+&lt;li&gt;哪些漏洞此前已解决，但后来又重新出现？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;测试会通过&lt;strong&gt;导入历史记录&lt;/strong&gt;跟踪并区分每个扫描版本，方便您随时间查看测试中发现项的变化。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/using_reimport.png"
+ width="1350"
+ height="374"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="重新导入逻辑创建忽略关闭或重新打开"&gt;重新导入逻辑：创建、忽略、关闭或重新打开&lt;/h2&gt;
+&lt;p&gt;使用重新导入功能时，DefectDojo 会将传入的扫描数据与现有的扫描数据进行比较，然后按以下方式对测试中的发现项应用变更：&lt;/p&gt;
+&lt;h3 id="创建发现项"&gt;创建发现项&lt;/h3&gt;
+&lt;p&gt;任何未包含在先前导入中的漏洞都会自动作为新的发现项添加到测试中。&lt;/p&gt;
+&lt;h3 id="忽略已存在的发现项"&gt;忽略已存在的发现项&lt;/h3&gt;
+&lt;p&gt;如果任何传入的发现项与已存在的发现项匹配，传入的发现项会被丢弃，而不会被记录为重复项。这些发现项已经被记录过 - 无需再添加新的发现项对象。测试页面会将这些发现项显示为&lt;strong&gt;保持不变&lt;/strong&gt;。&lt;/p&gt;</description></item></channel></rss>

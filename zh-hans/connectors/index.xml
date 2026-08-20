@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>连接器 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/connectors/</link><description>Recent content in 连接器 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 14 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/connectors/index.xml" rel="self" type="application/rss+xml"/><item><title>关于连接器</title><link>https://docs.defectdojo.com/zh-hans/connectors/about/</link><pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：连接器是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;连接器（Connectors）&lt;/strong&gt; 是 DefectDojo Pro UI 中的统一入口，用于管理 DefectDojo 与之通信的所有工具（无论数据流向哪个方向）。它合并了此前在不同位置分别配置的两项功能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;上游连接器（Upstream Connectors）&lt;/strong&gt;（原名 &lt;strong&gt;API Connectors&lt;/strong&gt;）从您的扫描器和安全工具中拉取发现项和资产清单。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;下游连接器（Downstream Connectors）&lt;/strong&gt;（原名 &lt;strong&gt;Integrations&lt;/strong&gt;）将发现项推送到您的问题跟踪系统和工单系统。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果将 DefectDojo 视为您安全数据的枢纽，那么上游连接器就是数据流入的方式，下游连接器则是修复工作流出的方式。&lt;/p&gt;</description></item><item><title>问题跟踪集成</title><link>https://docs.defectdojo.com/zh-hans/connectors/issue_tracking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/connectors/issue_tracking/</guid><description>&lt;h2 id="概述"&gt;概述&lt;/h2&gt;
+&lt;p&gt;DefectDojo 的问题跟踪集成将您的漏洞管理工作流与现有的问题跟踪系统连接起来。通过根据安全发现项自动创建和更新问题工单，DefectDojo 帮助确保漏洞在开发和运维团队已经使用的工具中保持可见、有专人负责并得到处理。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Edition&lt;/th&gt;
+ &lt;th&gt;Supported Issue Tracking Integrations&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Community Edition&lt;/td&gt;
+ &lt;td&gt;* &lt;a href="https://docs.defectdojo.com/connectors/os_jira/os__jira_guide/"&gt;Jira&lt;/a&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Pro&lt;/td&gt;
+ &lt;td&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#jira"&gt;Jira&lt;/a&gt;（&lt;a href="https://docs.defectdojo.com/connectors/downstream/pro__jira_guide/"&gt;旧版指南&lt;/a&gt;）&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#azure-devops-boards"&gt;Azure DevOps&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#bitbucket"&gt;Bitbucket&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#freshservice"&gt;Freshservice&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#github"&gt;GitHub&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#gitlab"&gt;GitLab Boards&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#linear"&gt;Linear&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#pagerduty"&gt;PagerDuty&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#servicedesk-plus"&gt;ServiceDesk Plus&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#servicenow"&gt;ServiceNow&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#shortcut"&gt;Shortcut&lt;/a&gt;&lt;br&gt;* &lt;a href="https://docs.defectdojo.com/connectors/downstream/downstream_toolreference/#zendesk"&gt;Zendesk&lt;/a&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;启用后，DefectDojo 可以自动创建问题工单，也可以选择性地从产品或测试活动中创建。当 DefectDojo 中的发现项被更新——解决、缓解或重新激活——时，对应的问题工单也可以保持同步，确保两个系统都反映当前的风险状态。&lt;/p&gt;</description></item></channel></rss>

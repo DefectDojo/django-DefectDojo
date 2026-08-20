@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>关于 DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/</link><description>Recent content in 关于 DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 02 Feb 2021 20:46:29 +0100</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>功能对比</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo 开源版&lt;/strong&gt;是一个强大的免费漏洞管理平台，具备核心导入、去重、基础仪表板、API 访问和基本报告功能——非常适合较小的团队，或希望自行托管并借助社区资源扩展该工具的用户。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 在此基础上进一步构建了面向企业的功能，例如高级仪表板与报告、通过规则引擎实现的自动化与脚本编写、与众多安全工具对接的连接器、优化的导入工作流、统一的 SOC 与 AppSec 支持、改进的 UI/UX、AI 集成、增强的安全性（SSO/MFA）以及高级支持选项。&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature / Capability&lt;/th&gt;
+ &lt;th&gt;DefectDojo Open-Source&lt;/th&gt;
+ &lt;th&gt;DefectDojo Pro&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;核心漏洞管理&lt;/td&gt;
+ &lt;td&gt;✔️ 从 500 多种安全工具导入、跟踪并管理发现项&lt;/td&gt;
+ &lt;td&gt;✔️ 涵盖开源版全部功能，并针对规模化场景进行了优化&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;发现项去重&lt;/td&gt;
+ &lt;td&gt;✔️ 标准去重&lt;/td&gt;
+ &lt;td&gt;✔️ 高级、可配置的去重&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;REST API&lt;/td&gt;
+ &lt;td&gt;✔️ 完整 REST API&lt;/td&gt;
+ &lt;td&gt;✔️ 完整 REST API&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;身份验证与访问控制&lt;/td&gt;
+ &lt;td&gt;✔️ 本地身份验证与基础 RBAC&lt;/td&gt;
+ &lt;td&gt;✔️ SSO（SAML/OAuth）、MFA、高级 RBAC&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;用户界面&lt;/td&gt;
+ &lt;td&gt;✔️ 社区版 UI&lt;/td&gt;
+ &lt;td&gt;✔️ 现代化 Pro UI，性能有所提升&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;仪表板与报告&lt;/td&gt;
+ &lt;td&gt;✔️ 基础仪表板与报告&lt;/td&gt;
+ &lt;td&gt;✔️ 高级、可自定义的仪表板与高管报告&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;自动化与工作流&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ 规则引擎与自动化工作流&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;导入增强&lt;/td&gt;
+ &lt;td&gt;❌ 仅支持标准导入&lt;/td&gt;
+ &lt;td&gt;✔️ 后台导入、智能上传、通用解析器、CLI 上传&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;工具集成&lt;/td&gt;
+ &lt;td&gt;❌ 手动/基于 API&lt;/td&gt;
+ &lt;td&gt;✔️ 内置&lt;strong&gt;上游连接器&lt;/strong&gt;，对接主流 AppSec 与云工具&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Jira 集成&lt;/td&gt;
+ &lt;td&gt;✔️ 已包含&lt;/td&gt;
+ &lt;td&gt;✔️ 已包含&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;项目管理集成&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ &lt;strong&gt;下游连接器&lt;/strong&gt;，对接 &lt;strong&gt;Jira&lt;/strong&gt;、&lt;strong&gt;Azure DevOps&lt;/strong&gt;、&lt;strong&gt;GitHub&lt;/strong&gt;、&lt;strong&gt;GitLab&lt;/strong&gt;、&lt;strong&gt;ServiceNow&lt;/strong&gt;、&lt;strong&gt;Bitbucket&lt;/strong&gt;、&lt;strong&gt;Shortcut&lt;/strong&gt;、&lt;strong&gt;PagerDuty&lt;/strong&gt;、&lt;strong&gt;Zendesk&lt;/strong&gt;、&lt;strong&gt;ServiceDesk Plus&lt;/strong&gt; 和 &lt;strong&gt;Freshservice&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;发现项增强&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ 自动 KEV、EPSS 评分与勒索软件跟踪&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;SOC 与 AppSec 统一&lt;/td&gt;
+ &lt;td&gt;❌ 仅面向 AppSec&lt;/td&gt;
+ &lt;td&gt;✔️ 统一的 AppSec 与 SOC 发现项&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;AI 与下一代功能&lt;/td&gt;
+ &lt;td&gt;❌ 不包含&lt;/td&gt;
+ &lt;td&gt;✔️ AI 辅助工作流、报告与 MCP 支持&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;支持&lt;/td&gt;
+ &lt;td&gt;社区支持（GitHub、Slack、论坛）&lt;/td&gt;
+ &lt;td&gt;具有 SLA 保障的商业支持&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;托管选项&lt;/td&gt;
+ &lt;td&gt;自行托管&lt;/td&gt;
+ &lt;td&gt;自行托管或云托管&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>关于 DefectDojo</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo, Inc. 及开源贡献者共同维护本文档，以支持 DefectDojo 的社区版和 Pro 版。&lt;/span&gt;&lt;/p&gt;
+&lt;h2 id="什么是-defectdojo"&gt;什么是 DefectDojo？&lt;/h2&gt;
+&lt;p&gt;DefectDojo 是一个开发者安全运营（DevSecOps）平台。DefectDojo 通过充当您整套安全工具的自动聚合器来简化 DevSecOps 流程，让您可以轻松组织安全工作，并向其他利益相关者报告组织的安全态势。&lt;/p&gt;
+&lt;p&gt;尽管安全流程自动化和集成开发流水线是 DefectDojo 的最终目标，但从本质上说，本软件是一个面向安全漏洞的缺陷跟踪系统，用于摄取、组织并标准化来自众多安全工具的报告。&lt;/p&gt;</description></item><item><title>❓ 常见问题</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/faq/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/faq/</guid><description>&lt;p&gt;以下是关于使用 DefectDojo 的一些常见问题——涵盖 DefectDojo Pro 和 DefectDojo OS。&lt;/p&gt;
+&lt;h2 id="常见问题"&gt;常见问题&lt;/h2&gt;
+&lt;h3 id="我应该如何在-defectdojo-中组织我的安全测试"&gt;我应该如何在 DefectDojo 中组织我的安全测试？&lt;/h3&gt;
+&lt;p&gt;虽然 DefectDojo 可以支持任何安全或测试环境，但每个安全团队和运营方式各不相同，因此没有放之四海而皆准的使用方法。我们有一篇非常详细的文章介绍了&lt;a href="https://docs.defectdojo.com/get_started/common_use_cases/common_use_cases/"&gt;常见用例&lt;/a&gt;，其中包含不同组织如何应用 RBAC 和 DefectDojo 数据模型来满足自身需求的示例。&lt;/p&gt;
+&lt;h3 id="defectdojo-中安全测试的推荐工作流是什么"&gt;DefectDojo 中安全测试的推荐工作流是什么？&lt;/h3&gt;
+&lt;p&gt;DefectDojo 旨在成为您组织安全态势的核心真实来源，并可以根据您组织的需求满足不同的需要，例如：&lt;/p&gt;</description></item><item><title>☑️ 新用户核对清单</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/os__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/os__new_user_checklist/</guid><description>&lt;p&gt;以下是一份快速参考指南，可帮助您从零开始成功实施，直至拥有一个功能齐全的应用。本文假设您已在您的环境中安装并运行了 &lt;strong&gt;DefectDojo 社区版（Community Edition）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;DefectDojo 的核心理念是导入安全数据、对其进行组织，并将其呈现给需要了解这些信息的人员。以下是在 DefectDojo 开源版中实现这些目标的方法：&lt;/p&gt;
+&lt;h3 id="defectdojo-开源版"&gt;DefectDojo 开源版&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;开源版用户可以先创建首个&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/"&gt;产品类型和产品&lt;/a&gt;。创建完成后，即可通过 UI 将&lt;a href="https://docs.defectdojo.com/import_data/import_scan_files/os__import_scan_ui/"&gt;文件导入&lt;/a&gt;到其中一个产品中。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;现在您已经在 DefectDojo 中拥有数据，可以考虑扩展您的产品布局——参见&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/"&gt;产品层级概述&lt;/a&gt;。产品层级会为您的应用创建一个可用的清单，帮助您将数据划分为逻辑分类。这些分类可用于应用访问控制规则，或将报告细分给正确的团队。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;使用&lt;a href="https://docs.defectdojo.com/metrics_reports/reports/using-the-report-builder/#opening-the-report-builder"&gt;报告构建器&lt;/a&gt;来汇总您已导入的数据。报告可用于快速与产品负责人等相关方共享发现项（Findings）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这就是 DefectDojo 的核心理念——导入安全数据、组织数据，并将其呈现给需要了解的人员。&lt;/p&gt;</description></item><item><title>☑️ 新用户核对清单</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/pro__new_user_checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/pro__new_user_checklist/</guid><description>&lt;p&gt;DefectDojo 的核心理念是导入安全数据、对其进行组织，并将其呈现给需要了解的人员。以下是一份快速参考指南，可帮助您从零开始成功实施，直至拥有一个功能齐全的应用。&lt;/p&gt;
+&lt;h3 id="探索-defectdojo"&gt;探索 DefectDojo&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;首先通过 UI &lt;a href="https://docs.defectdojo.com/import_data/import_scan_files/pro__import_scan_ui/"&gt;导入一个文件&lt;/a&gt;。这通常是了解您的数据如何契合 DefectDojo 模型的最快方式。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;现在您已经在 DefectDojo 中拥有数据，请通过&lt;a href="https://docs.defectdojo.com/asset_modelling/os_hierarchy/product_hierarchy/"&gt;产品层级概述&lt;/a&gt;进一步了解如何组织这些数据。产品层级会为您的应用创建一个可用的清单，帮助您将数据划分为逻辑分类、应用访问控制规则、按&lt;a href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/"&gt;优先级和风险&lt;/a&gt;对发现项排序，或将报告细分给正确的团队。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;查看您的&lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/"&gt;指标页面&lt;/a&gt;，可用于快速与关键相关方共享发现项报告。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这就是 DefectDojo 的核心理念——导入安全数据、组织数据，并将其呈现给需要了解的人员。&lt;/p&gt;
+&lt;p&gt;所有这些功能都可以实现自动化，并且由于 DefectDojo 能够处理超过 500 种工具（截至本文写作时），您应该完全能够为整个组织的产出创建一份可用的安全清单。&lt;/p&gt;</description></item><item><title>🎨 Pro UI 变更</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/ui_pro_vs_os/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/ui_pro_vs_os/</guid><description>&lt;p&gt;2023 年末，DefectDojo, Inc. 为 DefectDojo Pro 发布了全新的 UI，该 UI 现已成为该版本的默认 UI。&lt;/p&gt;
+&lt;p&gt;Pro UI 为 DefectDojo 带来了以下增强：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 Vue.js 打造的现代简洁设计。&lt;/li&gt;
+&lt;li&gt;优化的数据传输和加载时间，尤其是在处理大型数据集时。&lt;/li&gt;
+&lt;li&gt;可访问新的 Pro 功能，包括&lt;a href="https://docs.defectdojo.com/connectors/upstream/about/"&gt;上游连接器&lt;/a&gt;、&lt;a href="https://docs.defectdojo.com/import_data/pro/specialized_import/external_tools/"&gt;Universal Importer&lt;/a&gt; 以及 &lt;a href="https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/"&gt;Pro 指标&lt;/a&gt;视图。&lt;/li&gt;
+&lt;li&gt;改进的 UI 工作流：更好的筛选、仪表板和导航。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="切换到-pro-ui"&gt;切换到 Pro UI&lt;/h2&gt;
+&lt;p&gt;要访问 Pro UI，请从右上角打开您的用户选项菜单。您也可以通过同一菜单切换回经典 UI。&lt;/p&gt;</description></item><item><title>在线演示</title><link>https://docs.defectdojo.com/zh-hans/get_started/about/demo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/about/demo/</guid><description>&lt;p&gt;DefectDojo 提供两个在线演示环境。两者均预加载了数据并可完整使用，运行的是最新版本的 DefectDojo。&lt;/p&gt;
+&lt;p&gt;演示服务器每天重置一次，并且是公开访问的；请勿在演示环境中放入敏感数据。&lt;/p&gt;
+&lt;h3 id="-defectdojo-pro-演示"&gt;🔸 DefectDojo Pro 演示&lt;/h3&gt;
+&lt;p&gt;您可以在 &lt;a href="https://pro.demo.defectdojo.com"&gt;pro.demo.defectdojo.com&lt;/a&gt; 上试用 DefectDojo Pro&lt;/p&gt;
+&lt;p&gt;使用 &lt;code&gt;admin / 1Defectdojo@demo#appsec&lt;/code&gt; 登录。&lt;/p&gt;
+&lt;h3 id="-defectdojo-社区版演示"&gt;🔹 DefectDojo 社区版演示&lt;/h3&gt;
+&lt;p&gt;您可以在 &lt;a href="https://demo.defectdojo.org"&gt;demo.defectdojo.org&lt;/a&gt; 上试用我们的社区版&lt;/p&gt;</description></item></channel></rss>

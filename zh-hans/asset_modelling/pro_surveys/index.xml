@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>问卷调查 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_surveys/</link><description>Recent content in 问卷调查 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/asset_modelling/pro_surveys/index.xml" rel="self" type="application/rss+xml"/><item><title>问卷调查</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_surveys/pro__surveys/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_surveys/pro__surveys/</guid><description>&lt;p&gt;在 DefectDojo 中,问卷模板是一组可重复使用的问题集合,用于从开发人员、团队以及内部和外部利益相关方那里收集信息。它们可用于在工作开始前收集意见、确保各团队和个人在工作推进过程中保持一致,并在工作完成后进行复盘分析。&lt;/p&gt;
+&lt;p&gt;在 DefectDojo 中,问卷调查系统由三个部分组成:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;问卷模板&lt;/strong&gt;,用于对问题进行分组和排序。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;问卷部署&lt;/strong&gt;,即用于收集回复的活动实例。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;回复&lt;/strong&gt;,即用户提交的答案。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;创建问卷模板并不会自动使其可供填写回复。要收集回复,必须先部署该问卷模板。&lt;/p&gt;
+&lt;h2 id="权限"&gt;权限&lt;/h2&gt;
+&lt;p&gt;侧边栏中的“问卷调查”部分仅对具有超级用户身份的用户可见,只有超级用户才能创建问卷模板、创建问题以及部署问卷。&lt;/p&gt;
+&lt;p&gt;不具备超级用户身份的用户仍可以填写与他们共享的问卷,但无法创建或管理这些问卷及其相关问题。&lt;/p&gt;
+&lt;h2 id="访问问卷调查和问题"&gt;访问问卷调查和问题&lt;/h2&gt;
+&lt;p&gt;具有超级用户身份的用户可以通过点击侧边栏中的 &lt;strong&gt;问卷调查(Surveys)&lt;/strong&gt; 选项来访问问卷调查和问题。子菜单提供了访问 &lt;strong&gt;所有问卷(All Surveys)&lt;/strong&gt; 和 &lt;strong&gt;所有问题(All Questions)&lt;/strong&gt; 的入口,以及创建新问卷和新问题的选项。&lt;/p&gt;</description></item></channel></rss>

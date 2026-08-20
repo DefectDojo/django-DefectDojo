@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>发现项 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/</link><description>Recent content in 发现项 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/index.xml" rel="self" type="application/rss+xml"/><item><title>发现项简介</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/intro_to_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/intro_to_findings/</guid><description>&lt;p&gt;发现项是 DefectDojo 用来规范和指导安全工具报告与修复流程的主要方式。无论漏洞是由 SonarQube、Acunetix 还是您团队自定义的工具报告的，发现项都能让您以同样的方式管理每一个漏洞。&lt;/p&gt;
+&lt;h2 id="what-are-findings"&gt;What are Findings?&lt;/h2&gt;
+&lt;p&gt;DefectDojo 中的发现项由以下几个部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所报告的相关漏洞数据&lt;/li&gt;
+&lt;li&gt;发现项的“状态”，用于跟踪修复、风险接受或围绕该漏洞做出的其他决定&lt;/li&gt;
+&lt;li&gt;与发现项相关的其他元数据。例如，可能包括发现项在您网络中的位置、工具给出的修复建议，或与之关联的 CWE 或 EPSS 分数的链接。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除了存储漏洞数据并提供修复框架外，DefectDojo 还通过以下方式增强您的发现项：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自动为发现项添加相关的 EPSS 分数，以说明其可利用性&lt;/li&gt;
+&lt;li&gt;自动将安全工具的严重程度指标转换为每个发现项的严重程度分数，并根据您产品的 SLA 配置为该发现项赋予相应的 SLA。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;总体而言，DefectDojo 发现项的设计旨在与产品层级结构配合使用，以规范您的工作，并对每个产品应用一致的方法。&lt;/p&gt;</description></item><item><title>编辑发现项</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/editing_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/editing_findings/</guid><description>&lt;p&gt;如果您想为发现项添加备注,或更新其描述文字以更贴合当前情况,可以通过“编辑发现项”表单来完成。&lt;/p&gt;
+&lt;h2 id="打开编辑发现项表单"&gt;打开编辑发现项表单&lt;/h2&gt;
+&lt;p&gt;您可以通过打开顶部的**⚙️ 齿轮菜单&lt;strong&gt;并点击&lt;/strong&gt;编辑发现项**来更新某个发现项。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Editing_Findings.png"
+ width="1600"
+ height="695"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;这将打开&lt;strong&gt;编辑发现项&lt;/strong&gt;表单,您可以在其中编辑元数据、更改发现项的状态并添加其他信息。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Editing_Findings_2.png"
+ width="1460"
+ height="1246"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h3 id="编辑发现项表单字段"&gt;编辑发现项表单:字段&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;“测试”不可编辑:&lt;/strong&gt; 发现项必须始终与某个测试对象关联,无法脱离该上下文。不过,包含某个测试的测试活动可以被移动到另一个产品中。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;发现工具&lt;/strong&gt;是发现此发现项的扫描工具。请注意,除了与该测试关联的工具外,您还可以添加其他扫描工具。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;标题&lt;/strong&gt;是根据扫描报告生成的,但如有需要,您可以编辑该标题使其更具意义。请注意,这可能会影响去重,因为去重通常使用发现项的标题来识别重复项。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;日期&lt;/strong&gt;用于表示扫描工具发现该发现项的日期 - 不一定是该发现项被导入 DefectDojo 的日期。此日期取自扫描报告,但如有需要,您可以更新此日期使其更准确(例如,在处理历史数据,或使用不记录发现日期的扫描工具时)。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;描述&lt;/strong&gt;是扫描工具提供的发现项描述。如有需要,您可以在发现项描述中添加或删除信息。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;严重程度&lt;/strong&gt;基于多个因素计算得出。在基础层面上,这将是工具报告的严重程度,但发现项的严重程度可能会受到 EPSS 变化的影响。您也可以手动将发现项的严重程度调整为合适的级别。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;标签&lt;/strong&gt;是通用的文本标签,您可以用它们通过筛选器来组织发现项 - 也可以简单地用作识别特定发现项的简写方式。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;活动 / 已验证&lt;/strong&gt;是工具使用的主要发现项状态。活动发现项是指当前在您的网络中仍然存在、并已由工具报告的发现项。已验证表示该发现项已由团队成员确认存在。
+​&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SAST / DAST&lt;/strong&gt; 是用于根据发现项被发现的上下文来组织发现项的标签。通常,该标签会根据所使用的扫描工具自动填充,但您可以将其调整为更准确的级别(例如,如果该发现项同时被 SAST 和 DAST 工具发现)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="编辑已缓解日期和缓解人"&gt;编辑“已缓解日期”和“缓解人”&lt;/h3&gt;
+&lt;p&gt;默认情况下,发现项的&lt;strong&gt;已缓解日期&lt;/strong&gt;和&lt;strong&gt;缓解人&lt;/strong&gt;值&lt;strong&gt;不可编辑&lt;/strong&gt;。这两个字段在“编辑发现项”表单和“关闭发现项”对话框中均被隐藏,且已缓解日期始终会在发现项被关闭的那一刻自动设置。出于同样的原因,尝试通过 API 设置或将这些值改为更早的日期也会被拒绝。&lt;/p&gt;</description></item><item><title>发现项状态定义</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/finding_status_definitions/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/finding_status_definitions/</guid><description>&lt;p&gt;DefectDojo 中创建的每个发现项都有一个状态,用于传达相关信息。状态有助于您的团队跟踪问题解决的进度。&lt;/p&gt;
+&lt;p&gt;每种发现项状态的含义都与具体场景相关,需要由您自己的团队来定义。以下是我们的建议,但您团队的实际用法可能会有所不同。&lt;/p&gt;
+&lt;p&gt;请注意,“开放/关闭”并不是发现项&lt;strong&gt;明确&lt;/strong&gt;的状态类型。经典界面的某些部分(例如“所有开放发现项”表格)可能会提及开放或关闭的发现项:这只是一个统称,用于指代&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于“开放发现项”而言,指活动和/或已验证的发现项&lt;/li&gt;
+&lt;li&gt;对于“关闭发现项”而言,指非活动和/或风险已接受、审核中、超出范围、误报的发现项&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="开放发现项状态"&gt;&lt;strong&gt;开放发现项状态&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;一旦某个发现项处于&lt;strong&gt;活动&lt;/strong&gt;状态,无论其是否已被&lt;strong&gt;验证&lt;/strong&gt;,都会被标记为&lt;strong&gt;开放&lt;/strong&gt;发现项。&lt;/p&gt;
+&lt;p&gt;开放发现项可以在 DefectDojo 的&lt;strong&gt;发现项 &amp;gt; 开放发现项&lt;/strong&gt;视图中查看。&lt;/p&gt;
+&lt;h3 id="活动发现项"&gt;&lt;strong&gt;活动发现项&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;“该发现项已被扫描工具发现。”&lt;/p&gt;
+&lt;p&gt;默认情况下,DefectDojo 中新创建的任何发现项都会被标记为&lt;strong&gt;活动&lt;/strong&gt;。此处的“活动”是指“这是一个新的发现项,DefectDojo 在以往的导入中尚未记录过”。如果某个发现项此前已被缓解,但之后在扫描中再次出现,该发现项的状态将重新开放,以反映该漏洞已经复现。&lt;/p&gt;
+&lt;h3 id="已验证发现项"&gt;&lt;strong&gt;已验证发现项&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;“该发现项已由我们的团队确认存在。”&lt;/p&gt;</description></item><item><title>风险接受</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/os__risk_acceptance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/os__risk_acceptance/</guid><description>&lt;p&gt;&lt;strong&gt;风险接受&lt;/strong&gt;是一种可以应用于发现项的特殊状态,用于正式记录并落实“确认发现项但不立即修复”的决定。&lt;/p&gt;
+&lt;p&gt;与 DefectDojo Pro 不同,OS 版 DefectDojo 中的风险接受不是独立对象,而是仅与测试活动相关联。因此,它们只能包含所属测试活动中的发现项。如果同一个发现项在 3 个不同测试活动的测试中各出现一次,则需要 3 个不同的风险接受才能完全接受这些发现项。&lt;/p&gt;
+&lt;h3 id="访问风险接受"&gt;访问风险接受&lt;/h3&gt;
+&lt;p&gt;风险接受包含的是各测试活动内特定测试的发现项。因此,可以从包含这些发现项所属测试的测试活动中访问它们。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/OS_RA_image1.png"
+ width="3020"
+ height="1558"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;所有单独被风险接受的发现项的完整列表,可在侧边栏“&lt;strong&gt;发现项&lt;/strong&gt;”部分下的“&lt;strong&gt;已风险接受的发现项&lt;/strong&gt;”子菜单中查看。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/OS_RA_image2.png"
+ width="3408"
+ height="1636"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;h2 id="创建风险接受"&gt;创建风险接受&lt;/h2&gt;
+&lt;p&gt;当某个发现项被风险接受后,将发生以下情况:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;该发现项的状态将不再是“活动”,但仍可查询、可生成报告、可审计。&lt;/li&gt;
+&lt;li&gt;该发现项的状态将变更为“风险已接受”。&lt;/li&gt;
+&lt;li&gt;该发现项将不再计入统计指标,但仍会出现在其原始所属的测试中。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;发现项可以通过以下两种方式之一被风险接受:手动添加到&lt;strong&gt;完整风险接受&lt;/strong&gt;中,或使用&lt;strong&gt;简单风险接受&lt;/strong&gt;工作流程。&lt;/p&gt;</description></item><item><title>风险接受</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/pro__risk_acceptance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/pro__risk_acceptance/</guid><description>&lt;p&gt;&lt;strong&gt;风险接受&lt;/strong&gt;是一种特殊状态,可以通过&lt;strong&gt;完整风险接受&lt;/strong&gt;对象或&lt;strong&gt;简单风险接受&lt;/strong&gt;工作流应用于发现项。风险接受用于正式记录并落实这样一项决策:确认某个存在漏洞的发现项,但不立即进行修复。&lt;/p&gt;
+&lt;p&gt;DefectDojo Pro 包含增强的风险接受功能,以便大规模处理风险管理决策,包括:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;跨产品风险接受&lt;/strong&gt;:单个风险接受可以应用于多个产品,让您能够将整个资产组合中所有相同或相似发现项的实例合并到一个风险接受对象中。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;批量风险接受管理&lt;/strong&gt;:按漏洞 ID 筛选和搜索特定发现项,并对所有结果一次性应用风险接受,无论它们属于哪个资产。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="访问已风险接受的发现项"&gt;访问已风险接受的发现项&lt;/h3&gt;
+&lt;p&gt;侧边栏中有一个风险接受相关的部分,其下拉菜单包含三个子部分:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;已风险接受的发现项&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;该部分包含一张表格,列出所有已被风险接受的发现项,无论是作为完整风险接受对象的一部分,还是通过简单风险接受工作流被接受。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;所有风险接受&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;该部分包含一张表格,按时间顺序列出所有完整风险接受对象。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;新建风险接受&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;在侧边栏中点击此选项将启动创建完整风险接受对象的工作流。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/RA_image1.png"
+ width="1200"
+ height="607"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="Risk acceptance sidebar"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="创建风险接受"&gt;创建风险接受&lt;/h2&gt;
+&lt;p&gt;当某个发现项被风险接受时,将发生以下情况:&lt;/p&gt;</description></item><item><title>手动创建发现项</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/create_findings_manually/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/create_findings_manually/</guid><description>&lt;p&gt;通常,您环境中的大多数发现项都是从其他安全工具导入的。如果需要,您也可以手动添加发现项条目,用于管理并非由扫描工具创建的漏洞或工作项。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;在 DefectDojo 侧边栏中,点击&lt;strong&gt;管理 &amp;gt; 发现项 &amp;gt; 新建发现项&lt;/strong&gt;打开“新建发现项”链接。&lt;br&gt;
+​
+
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Creating_Findings_Manually.png"
+ width="492"
+ height="492"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;这将打开&lt;strong&gt;新建发现项&lt;/strong&gt;表单,您可以在其中填写与该发现项相关的任何信息。您需要将此发现项分配给 DefectDojo 中先前创建的一个测试。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Creating_Findings_Manually_2.png"
+ width="992"
+ height="1372"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;</description></item><item><title>附加文件</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/os__add_files/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/os__add_files/</guid><description>&lt;p&gt;您可以为&lt;strong&gt;发现项&lt;/strong&gt;、&lt;strong&gt;测试活动&lt;/strong&gt;或&lt;strong&gt;测试&lt;/strong&gt;附加文件以提供支持性背景信息——例如概念验证截图、原始扫描器报告、网络拓扑图,或用于佐证结果的电子表格。&lt;/p&gt;
+&lt;p&gt;每个对象都保留自己独立的一组文件,单个对象最多可以附加&lt;strong&gt;10 个文件&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id="支持的文件类型"&gt;支持的文件类型&lt;/h2&gt;
+&lt;p&gt;默认情况下,系统接受以下扩展名:&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;.txt .pdf .json .xml .csv .yml .png .jpeg
+.sarif .xlsx .doc .html .js .nessus .zip .fpr&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;管理员可以通过 &lt;code&gt;DD_FILE_UPLOAD_TYPES&lt;/code&gt; 环境变量修改此列表。上传扩展名不在列表中的文件会被表单拒绝。&lt;/p&gt;</description></item><item><title>附加文件</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/pro__add_files/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/pro__add_files/</guid><description>&lt;p&gt;您可以为&lt;strong&gt;发现项&lt;/strong&gt;、&lt;strong&gt;测试活动&lt;/strong&gt;或&lt;strong&gt;测试&lt;/strong&gt;附加文件,以提供
+支持性背景信息——例如概念验证截图、原始扫描器报告、
+网络拓扑图,或用于佐证结果的电子表格。&lt;/p&gt;
+&lt;p&gt;每个对象都保存有自己的一组文件,单个对象最多可附加&lt;strong&gt;10 个文件&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id="支持的文件类型"&gt;支持的文件类型&lt;/h2&gt;
+&lt;p&gt;默认情况下,系统接受以下扩展名:&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;pre tabindex="0"&gt;&lt;code&gt;.txt .pdf .json .xml .csv .yml .png .jpeg
+.sarif .xlsx .doc .html .js .nessus .zip .fpr&lt;/code&gt;&lt;/pre&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;p&gt;管理员可以通过 &lt;code&gt;DD_FILE_UPLOAD_TYPES&lt;/code&gt; 环境变量更改此列表。
+上传扩展名不在列表中的文件将被拒绝。&lt;/p&gt;</description></item><item><title>批量编辑发现项</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/pro__bulk_edit_findings/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/pro__bulk_edit_findings/</guid><description>&lt;p&gt;在 DefectDojo Pro 用户界面中,可以从任何发现项列表——&lt;strong&gt;所有发现项&lt;/strong&gt;页面,或测试内的发现项列表——批量编辑发现项。&lt;/p&gt;
+&lt;h2 id="选择要批量编辑的发现项"&gt;选择要批量编辑的发现项&lt;/h2&gt;
+&lt;p&gt;在任何发现项表格中,使用发现项旁边的复选框来选择它们。选择一个或多个发现项后,会显示一个&lt;strong&gt;批量操作栏&lt;/strong&gt;,包含以下控件:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;批量编辑&lt;/strong&gt;——打开一个统一的表单,您可以在其中为每个选中的发现项应用元数据更改、标签、备注和评审请求。这是主要的综合操作入口(详见下文)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;风险接受&lt;/strong&gt;——将选中的发现项添加到新的或现有的&lt;strong&gt;完整风险接受&lt;/strong&gt;中。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;发现项组&lt;/strong&gt;——将选中的发现项添加到新的或现有的&lt;strong&gt;发现项组&lt;/strong&gt;中,或将其从所在的组中移除。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;合并&lt;/strong&gt;——将选中的发现项合并为一个发现项。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;删除&lt;/strong&gt;——删除选中的发现项(需要确认)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当某项操作无法应用于当前所选内容时,相应的控件将被禁用——参见&lt;a href="#availability-and-skipped-findings"&gt;可用性与被跳过的发现项&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="批量编辑"&gt;批量编辑&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;批量编辑&lt;/strong&gt;按钮会打开一个表单,其中包含所有字段级的批量操作。仅设置您想要更改的字段,其余保持不变,然后点击&lt;strong&gt;更新选中的发现项&lt;/strong&gt;以应用更改。可用的操作包括:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;严重程度&lt;/strong&gt;——设置严重程度(严重、高、中、低或信息)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;状态&lt;/strong&gt;——应用以下状态之一:活动、已验证、误报、超出范围、已缓解或缺陷评审中。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;日期&lt;/strong&gt;——设置发现日期。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;计划修复日期&lt;/strong&gt;和&lt;strong&gt;计划修复版本&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;简单风险接受&lt;/strong&gt;——接受风险或取消接受风险。仅适用于所属产品已启用简单风险接受的发现项;其他发现项将被跳过。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;标签&lt;/strong&gt;——为选中的发现项添加标签,或使用&lt;strong&gt;追加/替换&lt;/strong&gt;切换开关来覆盖每个发现项的整套标签(&lt;strong&gt;追加&lt;/strong&gt;会添加标签;&lt;strong&gt;替换&lt;/strong&gt;会替换所有现有标签)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;替换特定标签&lt;/strong&gt;——将一个指定标签替换为另一个(详见下文)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;备注&lt;/strong&gt;——为每个选中的发现项添加一条备注,并可选择备注类型。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;评审&lt;/strong&gt;——对选中的发现项发起或清除评审(详见下文)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;推送到 Jira&lt;/strong&gt;——将选中的发现项加入队列以推送到 Jira。仅在启用了 Jira 集成时显示。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;推送到连接器&lt;/strong&gt;——将选中的发现项分发到您配置的连接器。仅在启用该功能时显示。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="替换特定标签"&gt;替换特定标签&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;替换特定标签&lt;/strong&gt;执行的是一种有针对性、非破坏性的标签替换。请在&lt;strong&gt;要替换的现有标签&lt;/strong&gt;中输入待替换的标签,在&lt;strong&gt;新标签&lt;/strong&gt;中输入替换后的标签。对于每个实际带有旧标签的选中发现项,DefectDojo 会移除该标签并添加新标签——其他所有标签都会保留,而没有旧标签的发现项则不受影响。&lt;/p&gt;</description></item><item><title>导出发现项</title><link>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/exporting/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/triage_findings/findings_workflows/exporting/</guid><description>&lt;p&gt;显示发现项列表或测试活动列表的页面,在右上角的下拉菜单中提供 CSV 和 Excel 导出选项。&lt;/p&gt;
+&lt;h2 id="导出发现项"&gt;导出发现项&lt;/h2&gt;
+&lt;p&gt;在任意发现项列表页面中,打开右上角的下拉菜单,即可将可见的发现项导出为 CSV 或 Excel 文件。&lt;/p&gt;
+&lt;h2 id="导出测试活动"&gt;导出测试活动&lt;/h2&gt;
+&lt;p&gt;在测试活动列表页面中,同样可以使用该下拉菜单将测试活动列表导出为 CSV 或 Excel 文件。&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>专项导入 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/</link><description>Recent content in 专项导入 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/index.xml" rel="self" type="application/rss+xml"/><item><title>🌐 通用解析器</title><link>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/universal_parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/universal_parser/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：通用解析器仅在 DefectDojo Pro 中提供。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;通用解析器在每个 DefectDojo Pro 实例中都已启用；无需进行任何操作即可使用。有关更多信息，请参阅我们的&lt;a href="https://community.defectdojo.com/universalparser"&gt;发布演示&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="关于通用解析器"&gt;关于通用解析器&lt;/h2&gt;
+&lt;p&gt;DefectDojo 拥有一个庞大且定期更新的解析器库，用于帮助安全团队摄取数据。但是，有时用户使用的工具并不受这些解析器支持，或者他们可能希望以不同于现有解析器的方式将数据导入 DefectDojo 模型。&lt;/p&gt;
+&lt;p&gt;DefectDojo 的通用解析器旨在为使用不受支持的报告类型的用户提供一条前进之路，以导入和映射&lt;strong&gt;任何 JSON、CSV 或 XML 文件&lt;/strong&gt;。&lt;/p&gt;</description></item><item><title>Universal Importer 与 DefectDojo-CLI</title><link>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/external_tools/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/external_tools/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：以下外部工具仅为 DefectDojo Pro 功能。除非连接到具有 DefectDojo Pro 许可证的实例，否则这些二进制文件将无法运行。&lt;/span&gt;&lt;/p&gt;
+&lt;h2 id="关于外部工具"&gt;关于外部工具&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;defectdojo-cli&lt;/code&gt; 和 &lt;code&gt;universal-importer&lt;/code&gt; 是命令行工具，旨在简化发现项及相关对象的导入和重新导入流程，非常适合希望快速设置与 DefectDojo API 交互的用户。&lt;/p&gt;
+&lt;p&gt;DefectDojo-CLI 具有与 Universal Importer 相同的功能，此外还可以将发现项从 DefectDojo 导出为 JSON 或 CSV 格式。&lt;/p&gt;</description></item><item><title>基础设施扫描 / 智能上传</title><link>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/smart_upload/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/import_data/pro/specialized_import/smart_upload/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：智能上传仅在 DefectDojo Pro 中提供。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;智能上传是一种专门的导入器，用于摄取来自&lt;strong&gt;基础设施扫描工具&lt;/strong&gt;的报告，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Nexpose&lt;/li&gt;
+&lt;li&gt;NMap&lt;/li&gt;
+&lt;li&gt;OpenVas&lt;/li&gt;
+&lt;li&gt;Qualys&lt;/li&gt;
+&lt;li&gt;Tenable&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;智能上传的独特之处在于，它可以将扫描文件中的发现项拆分到不同的产品中。这在基础设施扫描场景中很有意义，因为这些发现项可能适用于许多不同的团队、具有不同的隐性 SLA，或者由于在基础设施中被发现的位置不同而需要包含在不同的报告中。&lt;/p&gt;
+&lt;p&gt;智能上传通过根据扫描中发现的端点对传入的发现项进行分类来处理这一问题。起初，这些发现项需要手动分配，或从未分配发现项列表中导向正确的产品。但是，一旦某个发现项被分配到某个产品，所有共享同一端点或主机的后续发现项都会被发送到同一个产品。&lt;/p&gt;
+&lt;h2 id="智能上传菜单选项"&gt;智能上传菜单选项&lt;/h2&gt;
+&lt;p&gt;智能上传菜单存储在侧边栏的一个可折叠部分中。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;添加发现项允许您导入新的扫描文件，类似于 DefectDojo 的导入扫描方法&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;未分配发现项列出了所有尚未分配到产品的智能上传发现项。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/smart_upload.png"
+ width="496"
+ height="538"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;</description></item></channel></rss>

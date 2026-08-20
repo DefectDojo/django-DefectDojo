@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Documentação do DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/pt-br/</link><description>Recent content in Documentação do DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>pt-br</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 14 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/pt-br/index.xml" rel="self" type="application/rss+xml"/><item><title>Sobre os Conectores</title><link>https://docs.defectdojo.com/pt-br/connectors/about/</link><pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/connectors/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Observação: Conectores são um recurso exclusivo do DefectDojo Pro.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Conectores&lt;/strong&gt; é o local único na interface do DefectDojo Pro para todas as ferramentas com as quais o DefectDojo se comunica, em ambas as direções. Ele reúne dois recursos que antes eram configurados em locais separados:&lt;/p&gt;</description></item><item><title>Comparação de recursos</title><link>https://docs.defectdojo.com/pt-br/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/pt-br/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt; é uma plataforma de gerenciamento de vulnerabilidades poderosa e gratuita, com importação essencial, deduplicação, painéis básicos, acesso à API e relatórios essenciais — ideal para equipes menores ou para quem deseja hospedar e estender a ferramenta usando recursos da comunidade.&lt;/p&gt;</description></item><item><title>Sobre o DefectDojo</title><link>https://docs.defectdojo.com/pt-br/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/pt-br/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dashboard.png"
+ width="1920"
+ height="1256"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;A DefectDojo, Inc. e colaboradores open-source mantêm esta documentação para dar suporte às edições Community e Pro do DefectDojo.&lt;/span&gt;&lt;/p&gt;</description></item><item><title>🌐 Universal Parser</title><link>https://docs.defectdojo.com/pt-br/import_data/pro/specialized_import/universal_parser/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/import_data/pro/specialized_import/universal_parser/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Nota: o Universal Parser está disponível apenas no DefectDojo Pro.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;O Universal Parser está ativo em todas as instâncias do DefectDojo Pro; não há nada que precise ser habilitado. Consulte nossa &lt;a href="https://community.defectdojo.com/universalparser"&gt;apresentação de lançamento&lt;/a&gt; para mais informações.&lt;/p&gt;</description></item><item><title>Arquitetura do sistema</title><link>https://docs.defectdojo.com/pt-br/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/get_started/open_source/architecture/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/dd-architecture.png"
+ width="721"
+ height="511"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="nginx"&gt;NGINX&lt;/h2&gt;
+&lt;p&gt;O servidor web &lt;a href="https://nginx.org/en/"&gt;NGINX&lt;/a&gt; entrega todo o conteúdo estático, por exemplo,
+imagens, arquivos JavaScript ou arquivos CSS.&lt;/p&gt;
+&lt;h2 id="uwsgi"&gt;uWSGI&lt;/h2&gt;
+&lt;p&gt;O &lt;a href="https://uwsgi-docs.readthedocs.io/en/latest/"&gt;uWSGI&lt;/a&gt; é o servidor de aplicação
+que executa a plataforma DefectDojo, escrita em Python/Django, para servir todo o
+conteúdo dinâmico.&lt;/p&gt;</description></item><item><title>Atribuir Prioridade, Risco e SLAs</title><link>https://docs.defectdojo.com/pt-br/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_finding_priority.png"
+ width="1120"
+ height="632"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;Um gerenciamento eficaz de vulnerabilidades baseado em risco requer uma abordagem que considere tanto o contexto de negócio quanto a explorabilidade técnica. Usando o recurso de Prioridade e Risco do DefectDojo Pro, os usuários podem organizar automaticamente os Achados em um contexto significativo, garantindo que as vulnerabilidades de alto impacto sejam tratadas primeiro.&lt;/p&gt;</description></item><item><title>Authorization Connectors</title><link>https://docs.defectdojo.com/pt-br/admin/sso/pro__authorization_connectors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/admin/sso/pro__authorization_connectors/</guid><description>&lt;p&gt;Authorization Connectors é uma única página que lista todos os provedores de identidade compatíveis com
+o DefectDojo Pro, o estado em que cada um se encontra e qual protocolo utiliza. Antes de essa página existir,
+cada provedor tinha seu próprio formulário de configurações, e não havia como responder &amp;ldquo;o que está
+configurado nesta instância?&amp;rdquo; sem abrir todos eles.&lt;/p&gt;</description></item><item><title>Automação do Rules Engine</title><link>https://docs.defectdojo.com/pt-br/automation/rules_engine/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/automation/rules_engine/about/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;Observação: o Rules Engine é um recurso exclusivo do DefectDojo Pro.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;O Rules Engine do DefectDojo permite construir workflows personalizados e ações em massa para tratar Findings e outros objetos. O Rules Engine permite construir ações automatizadas que são disparadas quando um objeto corresponde a uma Regra.&lt;/p&gt;</description></item><item><title>Comparação de Métodos de Importação</title><link>https://docs.defectdojo.com/pt-br/import_data/import_intro/comparison/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/import_data/import_intro/comparison/</guid><description>&lt;p&gt;Uma das coisas que entendemos aqui no DefectDojo é que as necessidades de segurança de cada empresa são completamente diferentes. Não existe uma abordagem única que sirva para todos. À medida que sua organização muda, ter uma abordagem flexível é fundamental, e o DefectDojo permite que você conecte suas ferramentas de segurança de forma flexível para acompanhar essas mudanças.&lt;/p&gt;</description></item><item><title>Componentes</title><link>https://docs.defectdojo.com/pt-br/asset_modelling/components/pro__components/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/pt-br/asset_modelling/components/pro__components/</guid><description>&lt;p&gt;No DefectDojo, os Componentes representam bibliotecas de terceiros, componentes de software e módulos que potencialmente possuem vulnerabilidades.&lt;/p&gt;
+&lt;h2 id="visualizações-de-componentes"&gt;Visualizações de Componentes&lt;/h2&gt;
+&lt;p&gt;O DefectDojo Pro inclui uma visualização de tabela dedicada para Componentes, que pode ser encontrada na barra lateral. Essa visualização mostra os Achados Ativos, os Achados Duplicados e o Total de Achados para cada Componente. Esses números incluem todos os Ativos na instância do DefectDojo.&lt;/p&gt;</description></item></channel></rss>

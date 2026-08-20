@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>自动化 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/automation/api/</link><description>Recent content in 自动化 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/automation/api/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojo API v2</title><link>https://docs.defectdojo.com/zh-hans/automation/api/api-v2-docs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/automation/api/api-v2-docs/</guid><description>&lt;p&gt;DefectDojo 的 API 使用 &lt;a href="http://www.django-rest-framework.org/"&gt;Django Rest
+Framework&lt;/a&gt; 构建。每个端点的文档
+在每个 DefectDojo 安装实例中都可以通过
+&lt;a href="https://demo.defectdojo.org/api/v2/oa3/swagger-ui/"&gt;&lt;code&gt;/api/v2/oa3/swagger-ui&lt;/code&gt;&lt;/a&gt; 获取，也可以通过页眉中用户下拉菜单里的 API v2
+Docs 链接访问。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/api_v2_1.png"
+ width="2250"
+ height="744"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;该文档使用 &lt;a href="https://drf-spectacular.readthedocs.io/"&gt;drf-spectacular&lt;/a&gt; 在 &lt;a href="https://demo.defectdojo.org/api/v2/oa3/swagger-ui/"&gt;&lt;code&gt;/api/v2/oa3/swagger-ui/&lt;/code&gt;&lt;/a&gt; 生成，并且
+是可交互的。在 API v2 文档顶部有一个链接，可用于生成 OpenAPI v3 规范。&lt;/p&gt;</description></item><item><title>语言与代码行数</title><link>https://docs.defectdojo.com/zh-hans/automation/api/languages/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/automation/api/languages/</guid><description>&lt;p&gt;DefectDojo 可以显示某个产品的编程语言构成和代码行数明细，这些数据通过 API 导入 &lt;a href="https://github.com/AlDanial/cloc"&gt;cloc&lt;/a&gt;（Count Lines of Code）工具生成的报告来填充。&lt;/p&gt;
+&lt;h2 id="generating-the-cloc-report"&gt;Generating the cloc Report&lt;/h2&gt;
+&lt;p&gt;对您的代码库运行 &lt;code&gt;cloc&lt;/code&gt;，并使用 &lt;code&gt;--json&lt;/code&gt; 标志以生成格式正确的 JSON 文件：&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame is-terminal not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cloc --json /path/to/your/project &amp;gt; cloc-report.json&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;h2 id="importing-via-the-api"&gt;Importing via the API&lt;/h2&gt;
+&lt;p&gt;通过 API 将该 JSON 报告上传到 DefectDojo。导入时，该产品现有的所有语言数据都会被新文件的内容替换。&lt;/p&gt;</description></item><item><title>速率限制</title><link>https://docs.defectdojo.com/zh-hans/automation/api/rate_limiting/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/automation/api/rate_limiting/</guid><description>&lt;p&gt;DefectDojo 内置了登录页面速率限制功能，以防范暴力破解攻击，该功能由 &lt;a href="https://django-ratelimit.readthedocs.io/en/stable/index.html"&gt;Django Ratelimit&lt;/a&gt; 提供支持。&lt;/p&gt;
+&lt;h2 id="configuration"&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;速率限制通过以下设置进行配置（有关如何应用这些设置，请参阅&lt;a href="https://docs.defectdojo.com/get_started/open_source/configuration/"&gt;配置&lt;/a&gt;）：&lt;/p&gt;
+
+
+
+&lt;div class="expressive-code"&gt;
+ &lt;figure class="frame not-content"&gt;
+ &lt;figcaption class="header"&gt;
+ &lt;span class="title"&gt;&lt;/span&gt;
+ &lt;/figcaption&gt;
+ &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_ENABLED&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_RATE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;5/m&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_BLOCK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;DD_RATE_LIMITER_ACCOUNT_LOCKOUT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ &lt;/figure&gt;
+&lt;/div&gt;
+&lt;h3 id="rate-limit-dd_rate_limiter_rate"&gt;Rate Limit (&lt;code&gt;DD_RATE_LIMITER_RATE&lt;/code&gt;)&lt;/h3&gt;
+&lt;p&gt;设置限制请求频率的方式。支持的单位有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;秒：&lt;code&gt;1s&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;分钟：&lt;code&gt;5m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;小时：&lt;code&gt;100h&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;天：&lt;code&gt;2400d&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;有关更多配置选项，请参阅 &lt;a href="https://django-ratelimit.readthedocs.io/en/stable/rates.html"&gt;Django Ratelimit rates 文档&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>通知 Webhook</title><link>https://docs.defectdojo.com/zh-hans/automation/api/notification_webhooks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/automation/api/notification_webhooks/</guid><description>&lt;p&gt;&lt;strong&gt;这是一项实验性的开源功能 — 其行为可能会在未来版本中发生变化。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Webhook 是在特定事件发生时，从您的 DefectDojo 实例发送到用户自定义服务器的出站 HTTP 请求。&lt;/p&gt;
+&lt;h2 id="setup"&gt;Setup&lt;/h2&gt;
+&lt;p&gt;Webhook 端点由管理员配置。创建 webhook 时，DefectDojo 会发送一个 &lt;a href="#ping"&gt;&lt;code&gt;ping&lt;/code&gt;&lt;/a&gt; 事件，以验证该端点是否可访问，并返回预期的状态码。&lt;/p&gt;
+&lt;h2 id="endpoint-state-transitions"&gt;Endpoint State Transitions&lt;/h2&gt;
+&lt;p&gt;DefectDojo 会监控投递成功情况，并根据 HTTP 响应或网络故障暂时或永久禁用某个端点。管理员也可以手动重新启用该端点。&lt;/p&gt;</description></item></channel></rss>

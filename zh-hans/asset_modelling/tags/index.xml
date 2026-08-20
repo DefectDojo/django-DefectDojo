@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>标签 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/tags/</link><description>Recent content in 标签 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/asset_modelling/tags/index.xml" rel="self" type="application/rss+xml"/><item><title>为对象打标签</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/tags/pro__tagging_objects-copy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/tags/pro__tagging_objects-copy/</guid><description>&lt;p&gt;标签非常适合以可筛选的方式对对象进行分组,将其拆分为更小、更易于理解的片段。它们可用于标注状态,也可用于在整个数据模型中创建产品类型、产品、测试活动或发现项的自定义集合。&lt;/p&gt;
+&lt;p&gt;在 DefectDojo 中,标签是一等公民,被视为数据模型每个层级中组织管理的推动者。&lt;/p&gt;
+&lt;p&gt;以下示例展示了一个具有两个标签的产品,以及四个各带一个标签的发现项:&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/tags-high-level-example.png"
+ width="1920"
+ height="825"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="标签用法的高层示例"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h3 id="标签格式"&gt;标签格式&lt;/h3&gt;
+&lt;p&gt;标签可以采用以下任意一种格式:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;StringWithNoSpaces(无空格字符串)&lt;/li&gt;
+&lt;li&gt;string-with-hyphens(带连字符的字符串)&lt;/li&gt;
+&lt;li&gt;string_with_underscores(带下划线的字符串)&lt;/li&gt;
+&lt;li&gt;colons:acceptable(可包含冒号)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="标签管理pro-界面"&gt;标签管理(Pro 界面)&lt;/h2&gt;
+&lt;h3 id="添加和移除"&gt;添加和移除&lt;/h3&gt;
+&lt;p&gt;标签可以通过以下方式进行管理:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;创建或编辑新对象&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当通过界面或 API 创建或编辑新对象时,会有一个字段用于指定要为该对象设置的标签。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/tags_product.png"
+ width="1342"
+ height="1022"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="标签"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;在导入/重新导入发现项时&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>为对象添加标签</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/tags/os__tagging_objects/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/tags/os__tagging_objects/</guid><description>&lt;p&gt;标签非常适合以一种可筛选、可拆分为更小、更易理解的方式对对象进行分组。您可以使用标签来表示状态,或者跨数据模型创建自定义的组织、资产、测试活动或发现项集合。&lt;/p&gt;
+&lt;p&gt;在 DefectDojo 中,标签是一等对象,被视为数据模型每一层级组织方式的促成因素。&lt;/p&gt;
+&lt;p&gt;以下示例展示了一个带有两个标签的资产,以及四个各自带有一个标签的发现项:&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/tags-high-level-example.png"
+ width="1920"
+ height="825"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="High level example of usage with tags"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h3 id="标签格式"&gt;标签格式&lt;/h3&gt;
+&lt;p&gt;标签可以采用以下任意一种格式:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;StringWithNoSpaces&lt;/li&gt;
+&lt;li&gt;string-with-hyphens&lt;/li&gt;
+&lt;li&gt;string_with_underscores&lt;/li&gt;
+&lt;li&gt;colons:acceptable&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="标签管理"&gt;标签管理&lt;/h2&gt;
+&lt;h3 id="添加与删除"&gt;添加与删除&lt;/h3&gt;
+&lt;p&gt;标签可以通过以下几种方式进行管理:&lt;/p&gt;</description></item></channel></rss>
