@@ -1,5 +1,5 @@
 ---
-title: Global Component Deduplication (Pro)
+title: Global Component Deduplication
 description: コンポーネント名とバージョンに基づき、すべての Product にわたって Software Composition Analysis の検出事項を重複排除します
 weight: 5
 audience: pro

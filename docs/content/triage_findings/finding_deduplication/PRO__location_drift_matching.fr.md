@@ -1,5 +1,5 @@
 ---
-title: Correspondance de dérive d'emplacement (Pro)
+title: Correspondance de dérive d'emplacement
 description: 'Suivez les constatations à mesure que leur emplacement change lors des
   réimportations : les changements de ligne, les renommages de fichiers, les déplacements
   d''URL et les mises à jour de version de dépendance ne ferment et ne recréent plus

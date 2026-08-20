@@ -1,5 +1,5 @@
 ---
-title: Deduplicación de ubicaciones globales (Pro)
+title: Deduplicación de ubicaciones globales
 description: Deduplique Hallazgos por ubicación compartida (URL o dependencia) en
   todos los Productos
 weight: 6
