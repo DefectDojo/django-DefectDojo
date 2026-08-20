@@ -38,7 +38,7 @@ This method performs the following from the `django-DefectDojo/docs` directory:
 2. Install all packages in CI mode to only install from `package-lock.json`: `npm ci`
 3. Run Hugo to build the site in the way the CI job does, but in development environment to point at `localhost` for integrity checks : `npm run build -- --environment development`
 4. Change directory to the new `public` directory to run the site locally: `cd public`
-5. Run a light weight webserver to server the files, and [access the site at http://localhost:8080](http://localhost:8080): `python3 -m http.server 8080`
+5. Run a light weight webserver to serve the files, and [access the site at http://localhost:8080](http://localhost:8080): `python3 -m http.server 8080`
 6. After killing the webserver process, navigate back to the `django-DefectDojo/docs` directory: `cd ../`
 
 ### Execution List

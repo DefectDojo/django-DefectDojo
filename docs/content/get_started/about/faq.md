@@ -131,4 +131,4 @@ DefectDojo Pro users also have access to [executive-level Metrics dashboards](/g
 
 In both Pro and Open-Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.
 
-DefectDojo Pro adds support for [Additional Project Tracking Integrations](/connectors/issue_tracking/)**: ServiceNow, Azure DevOps, GitHub and GitLab.
+DefectDojo Pro adds support for **[Additional Project Tracking Integrations](/connectors/issue_tracking/)**: ServiceNow, Azure DevOps, GitHub and GitLab.

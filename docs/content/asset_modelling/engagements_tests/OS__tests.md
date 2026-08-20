@@ -91,7 +91,7 @@ The following settings are available within each Test view:
 - **Edit Test**
     - Permits the editing of Test data, such as title, schedule, environment, and other various details. 
 - **Copy Test**
-    - Duplicates a Test, along with all associated metadata and Findings, and allow it to be attributed to a different Engagement. 
+    - Duplicates a Test, along with all associated metadata and Findings, and allows it to be attributed to a different Engagement. 
 - **Re-Upload Scan**
     - Initiates the reimport process. More information on Reimporting is contained later in this article.
 - **Add Notes**

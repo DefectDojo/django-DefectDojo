@@ -91,7 +91,7 @@ See the following example of adding a tag "test_only_tag" to the Test object and
 
 ![Example of inherited tags](images/tags-inherit-exmaple.png)
 
-When updates are made to the tag list on an Asset, the same changes are made to all objects within the Asset asynchronously. The duration of this task directly correlates to the number the objects contained within a finding.
+When updates are made to the tag list on an Asset, the same changes are made to all objects within the Asset asynchronously. The duration of this task directly correlates to the number of objects contained within a finding.
 
 **Open-Source:** If Tag changes are not observed within a reasonable time period, consult the celery worker logs to identify where any problems might have arisen.
 
