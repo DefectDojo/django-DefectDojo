@@ -1,4 +1,4 @@
-@import "@fontsource-variable/work-sans";
+@import "@fontsource-variable/inter";
 @import "tailwindcss";
 @plugin "@tailwindcss/forms";
 
@@ -10,31 +10,40 @@
    DefectDojo Design Tokens
    ============================================================ */
 @theme {
-  /* Primary palette — Fuji Blue (DefectDojo brand) */
-  --color-dd-primary-50:  #e8f3fb;
-  --color-dd-primary-100: #C6DDF2;
-  --color-dd-primary-200: #82B0D9;
-  --color-dd-primary-300: #5094CC;
-  --color-dd-primary-400: #2E87C6;
-  --color-dd-primary-500: #1779C5;
-  --color-dd-primary-600: #1467AD;
-  --color-dd-primary-700: #204D87;
-  --color-dd-primary-800: #0F3C6E;
-  --color-dd-primary-900: #003864;
+  /* Primary palette — Dystopian Orange (Brand Guidelines v1.0, Aug 2026).
+     The guide's primary pairing is Dystopian Orange with Midnight, so the
+     interactive steps (50-700) ramp through the oranges and the chrome
+     steps (800/900, sidebar + logo bar surfaces) are Midnight 1 and
+     Deep Midnight. */
+  --color-dd-primary-50:  #fff0e9;
+  --color-dd-primary-100: #ffd9c7;
+  --color-dd-primary-200: #ffb494;
+  --color-dd-primary-300: #ff9265;
+  --color-dd-primary-400: #ff7c49;
+  --color-dd-primary-500: #ff6b35;
+  --color-dd-primary-600: #e05a24;
+  --color-dd-primary-700: #cc3a00;
+  --color-dd-primary-800: #003038;
+  --color-dd-primary-900: #001215;
 
-  /* Accent — Torii Orange (CTA highlights, badges) */
-  --color-dd-accent: #F2561D;
-  --color-dd-accent-light: #F2D49B;
-  --color-dd-accent-hover: #F2762E;
-  --color-dd-accent-dark: #C1230D;
+  /* Accent — Dystopian/Electric Orange (CTA highlights, badges) */
+  --color-dd-accent: #ff6b35;
+  --color-dd-accent-light: #e9d8a6;
+  --color-dd-accent-hover: #cc3a00;
+  --color-dd-accent-dark: #cc3a00;
+
+  /* Digital-only brand accents (links, secondary tones) */
+  --color-dd-link: #234d93;
+  --color-dd-daybreak: #94d2bd;
+  --color-dd-dusk: #005f73;
 
   /* Surface / neutral tokens — Dojo Black palette */
   --color-surface:     #ffffff;
   --color-surface-2:   #f7f8f9;
   --color-surface-3:   #f0f1f3;
   --color-border:      #DCDCDC;
-  --color-text:        #191919;
-  --color-text-muted:  #666666;
+  --color-text:        #25282a;
+  --color-text-muted:  #5c6a6e;
 
   /* Severity colors */
   --color-severity-critical: #dc2626;
@@ -44,7 +53,7 @@
   --color-severity-info: #6b7280;
 
   /* Dashboard stat card accent colors */
-  --color-panel-blue: #1779C5;
+  --color-panel-blue: #005f73;
   --color-panel-green: #16a34a;
   --color-panel-yellow: #ca8a04;
   --color-panel-red: #dc2626;
@@ -53,8 +62,8 @@
   --color-badge-count: #dc2626;
   --color-badge-count-zero: #16a34a;
 
-  /* Font stack — Work Sans (DefectDojo brand) */
-  --font-sans: "Work Sans Variable", "Work Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Font stack — Inter (DefectDojo brand) */
+  --font-sans: "Inter Variable", "Inter", "Proxima Nova", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ============================================================
@@ -1065,8 +1074,8 @@
   flex-shrink: 0;
 }
 .checkbox input[type="checkbox"]:checked {
-  background-color: #1779C5;
-  border-color: #1779C5;
+  background-color: #ff6b35;
+  border-color: #ff6b35;
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -1076,8 +1085,8 @@
   border-radius: 100%;
 }
 .radio input[type="radio"]:checked {
-  background-color: #1779C5;
-  border-color: #1779C5;
+  background-color: #ff6b35;
+  border-color: #ff6b35;
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -1085,7 +1094,7 @@
 }
 .checkbox input[type="checkbox"]:focus,
 .radio input[type="radio"]:focus {
-  outline: 2px solid #1779C5;
+  outline: 2px solid #ff6b35;
   outline-offset: 2px;
 }
 
@@ -1144,7 +1153,7 @@
   z-index: 9999;
   pointer-events: none;
   /* Reset Font Awesome inheritance so text renders as normal text */
-  font-family: "Work Sans Variable", "Work Sans", system-ui, -apple-system, sans-serif;
+  font-family: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
   font-weight: 400;
   font-style: normal;
   text-transform: none;
@@ -1193,8 +1202,8 @@
 .dropdown-menu > li > a:focus,
 .dropdown-menu > a:hover,
 .dropdown-menu > a:focus {
-  background-color: #e8f3fb;  /* dd-primary-50 */
-  color: #204D87;  /* dd-primary-700 */
+  background-color: #fff0e9;  /* dd-primary-50 */
+  color: #cc3a00;  /* dd-primary-700 */
 }
 .dropdown-menu .divider,
 .dropdown-menu li[role="separator"] {
