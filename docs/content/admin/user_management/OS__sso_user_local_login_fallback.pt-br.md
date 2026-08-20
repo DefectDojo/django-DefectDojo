@@ -1,5 +1,5 @@
 ---
-title: Reativando o login para usuários de SSO (Open Source)
+title: Reativando o login para usuários de SSO
 description: Defina uma senha local para usuários provisionados via SSO após migrar
   para o Open Source, onde o SSO é um recurso exclusivo do Pro
 audience: opensource

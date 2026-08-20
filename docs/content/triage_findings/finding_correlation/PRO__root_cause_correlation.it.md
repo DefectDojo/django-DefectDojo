@@ -1,5 +1,5 @@
 ---
-title: Correlazione delle cause radice (Pro)
+title: Correlazione delle cause radice
 description: Raggruppa i Riscontri che condividono una causa radice — lo stesso componente
   vulnerabile, la stessa CVE, la stessa risorsa infrastrutturale o la stessa debolezza
   a un URL — in modo che una singola correzione possa essere ricondotta a ogni Riscontro
