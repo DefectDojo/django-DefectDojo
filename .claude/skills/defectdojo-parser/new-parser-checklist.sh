@@ -24,7 +24,7 @@ DIR="$1"
 # Repo root: this script lives at .claude/skills/defectdojo-parser/.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-cd "$REPO_ROOT"
+cd "$REPO_ROOT" || { echo "ERROR: cannot cd to repo root $REPO_ROOT" >&2; exit 1; }
 
 # Docs category + name mirror test_parsers.py: an "api_" prefix maps to the api/
 # docs folder with the prefix stripped; everything else is a file parser.
@@ -47,14 +47,23 @@ pass()  { printf '  \033[32mOK\033[0m   %s\n' "$1"; }
 bad()   { printf '  \033[31mMISS\033[0m %s\n' "$1"; fail=1; }
 warn()  { printf '  \033[33mWARN\033[0m %s\n' "$1"; }
 
+# check_path <-f|-d> <path> <ok-label> <miss-label>
+check_path() {
+  if test "$1" "$2"; then pass "$3"; else bad "$4"; fi
+}
+# check_grep <pattern> <file> <ok-label> <miss-label>
+check_grep() {
+  if grep -q "$1" "$2"; then pass "$3"; else bad "$4"; fi
+}
+
 echo "Checking parser '${DIR}' (docs category: ${CATEGORY}) in ${REPO_ROOT}"
 echo
 echo "Required files:"
-[[ -f "$INIT_PY"   ]] && pass "$INIT_PY"   || bad "$INIT_PY"
-[[ -f "$PARSER_PY" ]] && pass "$PARSER_PY" || bad "$PARSER_PY"
-[[ -f "$TEST_PY"   ]] && pass "$TEST_PY"   || bad "$TEST_PY"
-[[ -d "$SCANS_DIR" ]] && pass "$SCANS_DIR/" || bad "$SCANS_DIR/ (sample scans directory)"
-[[ -f "$DOC_MD"    ]] && pass "$DOC_MD"    || bad "$DOC_MD"
+check_path -f "$INIT_PY"   "$INIT_PY"   "$INIT_PY"
+check_path -f "$PARSER_PY" "$PARSER_PY" "$PARSER_PY"
+check_path -f "$TEST_PY"   "$TEST_PY"   "$TEST_PY"
+check_path -d "$SCANS_DIR" "$SCANS_DIR/" "$SCANS_DIR/ (sample scans directory)"
+check_path -f "$DOC_MD"    "$DOC_MD"    "$DOC_MD"
 
 echo
 echo "Sample scan files (recommended: no_vuln / one_vuln / many_vulns):"
@@ -82,13 +91,13 @@ fi
 echo
 echo "Docs front-matter:"
 if [[ -f "$DOC_MD" ]]; then
-  grep -q "title:" "$DOC_MD"        && pass "contains 'title:'"        || bad "docs missing 'title:'"
-  grep -q "toc_hide: true" "$DOC_MD" && pass "contains 'toc_hide: true'" || bad "docs missing 'toc_hide: true'"
+  check_grep "title:" "$DOC_MD" "contains 'title:'" "docs missing 'title:'"
+  check_grep "toc_hide: true" "$DOC_MD" "contains 'toc_hide: true'" "docs missing 'toc_hide: true'"
   if [[ "$CATEGORY" == "file" ]]; then
-    grep -q "### Sample Scan Data" "$DOC_MD" \
-      && pass "contains '### Sample Scan Data'" || bad "docs missing '### Sample Scan Data'"
-    grep -q "https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans" "$DOC_MD" \
-      && pass "contains scans-dir link" || bad "docs missing unittests/scans link"
+    check_grep "### Sample Scan Data" "$DOC_MD" \
+      "contains '### Sample Scan Data'" "docs missing '### Sample Scan Data'"
+    check_grep "https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans" "$DOC_MD" \
+      "contains scans-dir link" "docs missing unittests/scans link"
   fi
 fi
 
@@ -106,8 +115,11 @@ if [[ -f "$PARSER_PY" ]]; then
   else
     pass "no unencoded .read()"
   fi
-  grep -q "class .*Parser" "$PARSER_PY" && pass "defines a *Parser class" \
-    || warn "no '*Parser' class found — check the factory naming convention"
+  if grep -q "class .*Parser" "$PARSER_PY"; then
+    pass "defines a *Parser class"
+  else
+    warn "no '*Parser' class found — check the factory naming convention"
+  fi
 fi
 
 echo
