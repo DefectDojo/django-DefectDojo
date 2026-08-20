@@ -1,5 +1,5 @@
 ---
-title: Deduplication Tuning (Pro)
+title: Deduplication Tuning
 description: Configura il modo in cui DefectDojo identifica e gestisce i riscontri
   duplicati
 weight: 4

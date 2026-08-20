@@ -1,5 +1,5 @@
 ---
-title: Global Component Deduplication (Pro)
+title: Global Component Deduplication
 description: Deduplique achados de Software Composition Analysis (SCA) por nome e
   versão do componente em todos os Produtos
 weight: 5

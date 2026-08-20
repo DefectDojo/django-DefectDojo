@@ -1,5 +1,5 @@
 ---
-title: Correlação de Causa Raiz (Pro)
+title: Correlação de Causa Raiz
 description: Agrupe Achados que compartilham uma causa raiz -- o mesmo componente
   vulnerável, CVE, recurso de infraestrutura ou fraqueza em uma URL -- para que uma
   única correção possa ser rastreada até cada Achado que ela resolve
