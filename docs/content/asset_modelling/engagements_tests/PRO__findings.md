@@ -156,7 +156,7 @@ The ⋮ kebab menu next to Findings contains the following functions:
 - **Add Risk Acceptance**: Initiates the Risk Acceptance process. More information can be found [here](/triage_findings/findings_workflows/pro__risk_acceptance/).
 - **Add File**: Initiates the process to add a file to the Finding (see the section below).
 - **Add Note**: Initiates the process to add a note to the Finding. 
-- **Add Custom Field**: Initiates a pop-up that allows you to add and define a custom field to apply to the Finding. 
+- **Add Custom Field**: Adds a free-form metadata field to the Finding. With the typed [Custom Fields](/asset_modelling/pro__custom_fields/) feature enabled, this becomes **Custom Fields** and opens the typed editor, where you fill in a value for each field an administrator has defined for Findings. 
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
 - **Push to Integrator**: Pushes the Finding to any integrated third-party issue trackers.
 - **Delete Finding**: Deletes the selected Finding. 
