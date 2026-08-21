@@ -425,7 +425,7 @@ Additional features:
 ### Mar 5, 2026: v2.56.0
 
 * **(API)** Restricted Note Types are now accessible via the API.
-* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/connectors/upstream/toolreference/) for configuration instructions.
+* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/connectors/toolreference/upstream/) for configuration instructions.
 * **(SAML)** SAML settings now support optional group attributes, allowing configurations that don't provide group mappings to work without errors.
 * **(SMTP)** Fixed an issue where DefectDojo would attempt SMTP authentication even when no credentials were configured, which could cause email delivery failures.
 * **(Universal Parser)** The Universal Parser now falls back to `clevercsv` for non-standard or malformed CSV files, improving compatibility with edge-case scanner outputs.
@@ -791,7 +791,7 @@ Hotfix release - no significant feature changes.
 
 #### Apr 14, 2025: v2.45.1
 
-- **(Connectors)** Added a Connector for Wiz: see [tools reference](/connectors/upstream/toolreference/) for configuration instructions.
+- **(Connectors)** Added a Connector for Wiz: see [tools reference](/connectors/toolreference/upstream/) for configuration instructions.
 
 #### Apr 7, 2025: v2.45.0
 

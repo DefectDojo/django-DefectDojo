@@ -10,7 +10,7 @@ aliases:
 
 Das Vorgehen zum Hinzufügen und Konfigurieren eines Upstream-Connectors ist unabhängig vom Tool, das Sie verbinden möchten, ähnlich. Bei bestimmten Tools müssen Sie jedoch möglicherweise API-Schlüssel erstellen oder zusätzliche Schritte durchführen.
 
-Bevor Sie beginnen, empfehlen wir Ihnen, unsere [tool-spezifische Referenz](../toolreference/) zu Rate zu ziehen, um die API-Ressourcen für das Tool zu finden, das Sie verbinden möchten.
+Bevor Sie beginnen, empfehlen wir Ihnen, unsere [tool-spezifische Referenz](../../toolreference/upstream/) zu Rate zu ziehen, um die API-Ressourcen für das Tool zu finden, das Sie verbinden möchten.
 
 1. Falls noch nicht geschehen, wechseln Sie zunächst in DefectDojo **zur Pro UI**.
 2. Öffnen Sie im Menü auf der linken Seite die Gruppe **Connectors** unter der Überschrift **Import** und klicken Sie auf **Upstream Connectors**.
@@ -23,7 +23,7 @@ Sie können auch einen bestehenden Connector unter der Überschrift **Configured
 ​
 ![image](images/add_edit_connectors_2.png)
 
-4. Sie benötigen eine erreichbare **Location URL** für das Tool sowie einen API-**Secret**-Schlüssel. Wo sich der API-Schlüssel befindet, hängt vom jeweiligen Tool ab, das Sie konfigurieren möchten. Weitere Details finden Sie in unserer [tool-spezifischen Referenz](../toolreference/).
+4. Sie benötigen eine erreichbare **Location URL** für das Tool sowie einen API-**Secret**-Schlüssel. Wo sich der API-Schlüssel befindet, hängt vom jeweiligen Tool ab, das Sie konfigurieren möchten. Weitere Details finden Sie in unserer [tool-spezifischen Referenz](../../toolreference/upstream/).
 ​
 5. Vergeben Sie ein **Label** für diese Verbindung, damit Sie sie in DefectDojo leichter identifizieren können.
 ​

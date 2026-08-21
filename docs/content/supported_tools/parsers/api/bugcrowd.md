@@ -8,7 +8,7 @@ aliases:
 >
 > The **Bugcrowd API Import** pull parser, and the **Tool Configuration** setup described below, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
 >
-> **Migrate to:** the [Bugcrowd connector](/connectors/upstream/toolreference/#bugcrowd) (DefectDojo Pro), or import a Bugcrowd report as a [file](../../file/bugcrowd) — file import is not affected by this deprecation.
+> **Migrate to:** the [Bugcrowd connector](/connectors/toolreference/bugcrowd/) (DefectDojo Pro), or import a Bugcrowd report as a [file](../../file/bugcrowd) — file import is not affected by this deprecation.
 
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
 

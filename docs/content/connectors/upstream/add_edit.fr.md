@@ -10,7 +10,7 @@ aliases:
 
 Le processus d'ajout et de configuration d'un Connecteur en amont est similaire, quel que soit l'outil que vous essayez de connecter. Cependant, certains outils peuvent nécessiter la création de clés API ou des étapes supplémentaires.
 
-Avant de commencer ce processus, nous vous recommandons de consulter notre [Référence spécifique à chaque outil](../toolreference/) pour trouver les ressources API de l'outil que vous essayez de connecter.
+Avant de commencer ce processus, nous vous recommandons de consulter notre [Référence spécifique à chaque outil](../../toolreference/upstream/) pour trouver les ressources API de l'outil que vous essayez de connecter.
 
 1. Si ce n'est pas déjà fait, commencez par **passer à la Pro UI** dans DefectDojo.
 2. Dans le menu de gauche, ouvrez le groupe **Connecteurs** imbriqué sous l'en-tête **Import**, puis cliquez sur **Connecteurs en amont**.
@@ -23,7 +23,7 @@ Vous pouvez également modifier un connecteur existant sous l'en-tête **Connect
 ​
 ![image](images/add_edit_connectors_2.png)
 
-4. Vous aurez besoin d'une **Location URL** accessible pour l'outil, ainsi que d'une clé API **Secret**. L'emplacement de la clé API dépendra de l'outil que vous essayez de configurer.  Consultez notre [Référence spécifique à chaque outil](../toolreference/) pour plus de détails.  
+4. Vous aurez besoin d'une **Location URL** accessible pour l'outil, ainsi que d'une clé API **Secret**. L'emplacement de la clé API dépendra de l'outil que vous essayez de configurer.  Consultez notre [Référence spécifique à chaque outil](../../toolreference/upstream/) pour plus de détails.  
 ​
 
 5. Définissez un **Label** pour cette connexion afin de pouvoir l'identifier facilement dans DefectDojo.  

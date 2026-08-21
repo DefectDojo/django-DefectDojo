@@ -10,7 +10,7 @@ aliases:
 
 El proceso para agregar y configurar un Conector ascendente es similar, sin importar la herramienta que intente conectar. Sin embargo, algunas herramientas pueden requerir que cree claves de API o complete pasos adicionales.
 
-Antes de comenzar este proceso, le recomendamos consultar nuestra [Referencia específica por herramienta](../toolreference/) para encontrar los recursos de API de la herramienta que intenta conectar.
+Antes de comenzar este proceso, le recomendamos consultar nuestra [Referencia específica por herramienta](../../toolreference/upstream/) para encontrar los recursos de API de la herramienta que intenta conectar.
 
 1. Si aún no lo ha hecho, comience **cambiando a la interfaz Pro** en DefectDojo.
 2. En el menú del lado izquierdo, abra el grupo **Conectores** anidado bajo el encabezado **Importar**, y haga clic en **Conectores ascendentes**.
@@ -23,7 +23,7 @@ También puede editar un Conector existente en el encabezado **Conectores config
 ​
 ![image](images/add_edit_connectors_2.png)
 
-4. Necesitará una **URL de ubicación** accesible para la herramienta, junto con una clave **Secret** de API. La ubicación de la clave de API dependerá de la herramienta que esté intentando configurar. Consulte nuestra [Referencia específica por herramienta](../toolreference/) para más detalles.
+4. Necesitará una **URL de ubicación** accesible para la herramienta, junto con una clave **Secret** de API. La ubicación de la clave de API dependerá de la herramienta que esté intentando configurar. Consulte nuestra [Referencia específica por herramienta](../../toolreference/upstream/) para más detalles.
 ​
 5. Establezca una **Etiqueta** para esta conexión que le ayude a identificarla en DefectDojo.
 ​
