@@ -1,5 +1,5 @@
 ---
-title: Réglage de la déduplication (Open Source)
+title: Réglage de la déduplication
 description: 'Configurer la déduplication dans DefectDojo Open Source : algorithmes,
   champs de hachage, points de terminaison et service'
 weight: 5
