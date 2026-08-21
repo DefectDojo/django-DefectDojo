@@ -58,6 +58,8 @@ Optional Asset metadata includes:
 
 This metadata improves filtering, reporting, and prioritization across your security program, but most importantly, Assets also contain all of the Engagements, Tests, and Findings related to the testing efforts surrounding that Asset. All Findings from Tests ultimately roll up to the Asset level, enabling long-term tracking, trend analysis, and reporting.
 
+Beyond these built-in fields, an administrator can define typed **Custom Fields** for Assets, which you fill in on the Asset's page and can turn on as opt-in columns on the All Assets table. See [Custom Fields](/asset_modelling/pro__custom_fields/).
+
 ## Accessing Assets 
 
 Assets are accessible via the sidebar. The submenu provides access to the [Asset Hierarchy](/asset_modelling/engagements_tests/pro__assets/#asset-nesting) and All Assets, as well as the option to create a new Asset.
