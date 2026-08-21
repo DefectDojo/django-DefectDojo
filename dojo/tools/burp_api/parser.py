@@ -2,13 +2,11 @@ import base64
 import json
 import logging
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
-
 
 DESCRIPTION_TEMPLATE = """**{title}**
 **Serial Number**: {serial_number}
@@ -81,8 +79,8 @@ class BurpApiParser:
                 # manage endpoints/locations
                 if "origin" in issue and "path" in issue:
                     url = issue.get("origin") + issue.get("path")
-                    if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [URL.from_value(url)]
+                    if locations_enabled():
+                        finding.unsaved_locations = [LocationData.url(url=url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint.from_uri(url)]

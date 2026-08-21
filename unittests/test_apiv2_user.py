@@ -1,9 +1,13 @@
+from django.contrib.auth.models import Permission
+from django.core.cache import cache
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
-from dojo.models import Global_Role, Role, User, UserContactInfo
+from dojo.authorization.models import Global_Role, Role
+from dojo.models import User, UserContactInfo
 from unittests.dojo_test_case import versioned_fixtures
 
 
@@ -55,6 +59,22 @@ class UserTest(APITestCase):
         }, format="json")
         self.assertEqual(r.status_code, 400, r.content[:1000])
         self.assertIn("Password must contain at least 1 digit, 0-9.", r.content.decode("utf-8"))
+
+    @override_settings(RATE_LIMITER_ENABLED=True, RATE_LIMITER_BLOCK=True, RATE_LIMITER_RATE="3/m")
+    def test_api_token_auth_is_rate_limited(self):
+        # Posted as JSON, like API clients do: that leaves request.POST empty.
+        cache.clear()
+        anon = APIClient()
+        url = reverse("api-token-auth")
+        creds = {"username": "ratelimit-probe", "password": "not-the-real-password"}
+
+        reached_auth_view = 0
+        for _ in range(8):
+            r = anon.post(url, creds, format="json")
+            if b"non_field_errors" in r.content:
+                reached_auth_view += 1
+
+        self.assertEqual(reached_auth_view, 3, "api-token-auth should honor the configured rate limit")
 
     def test_user_change_password(self):
         # some user
@@ -200,8 +220,252 @@ class UserTest(APITestCase):
         r = nonpriv_client.post(url)
         self.assertEqual(r.status_code, 403, r.content[:1000])
 
-    def test_user_reset_api_token_allows_global_owner(self):
-        # Create a global-owner user (not superuser)
+    def test_non_superuser_cannot_set_is_staff_via_api(self):
+        """
+        A delegated user-manager (auth.change_user) must not be able to
+        flip is_staff on themselves or anyone else — is_staff is a
+        superuser-only flag under the legacy OS auth model, and granting
+        it via API would let a non-superuser pivot into Django admin /
+        full RBAC bypass.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-mgr",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-user-mgr")
+        mgr.user_permissions.add(
+            Permission.objects.get(codename="change_user"),
+            Permission.objects.get(codename="add_user"),
+        )
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-user-mgr",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        # Self-escalation: setting is_staff on own account must be rejected.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertIn(
+            "Only superusers are allowed to add or edit staff users.",
+            r.content.decode("utf-8"),
+        )
+        mgr.refresh_from_db()
+        self.assertFalse(mgr.is_staff)
+
+        # Target-escalation: setting is_staff on another user must be rejected.
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-target",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        target_id = r.json()["id"]
+
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), target_id), {
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        target = User.objects.get(id=target_id)
+        self.assertFalse(target.is_staff)
+
+        # Create-time escalation must also be rejected.
+        r = mgr_client.post(reverse("user-list"), {
+            "username": "api-user-staff-on-create",
+            "email": "admin@dojo.com",
+            "password": password,
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertFalse(User.objects.filter(username="api-user-staff-on-create").exists())
+
+    def test_non_superuser_can_patch_self_without_touching_is_staff(self):
+        """
+        Negative control for the is_staff guard: a delegated user-manager
+        can still PATCH non-privileged fields on their own account; the
+        new check only fires when is_staff actually changes.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-mgr2",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-user-mgr2")
+        mgr.user_permissions.add(Permission.objects.get(codename="change_user"))
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-user-mgr2",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "first_name": "Renamed",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+    def test_superuser_can_set_is_staff_via_api(self):
+        """Positive control: a superuser is still allowed to toggle is_staff."""
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-promotable",
+            "email": "admin@dojo.com",
+            "password": "testTEST1234!@#$",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        user_id = r.json()["id"]
+
+        r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertTrue(User.objects.get(id=user_id).is_staff)
+
+    def test_non_superuser_cannot_grant_configuration_permissions_via_api(self):
+        """
+        Only superusers may assign configuration permissions. A non-superuser,
+        even one holding the delegated change_user permission, must not be able
+        to grant configuration permissions to their own account or to another
+        user, whether on update or at create time. Configuration permissions
+        are privilege-bearing (managing users, groups, tool configurations, and
+        so on), so assigning them is a superuser-only action.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-mgr",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-cfgperm-mgr")
+        # Delegated user-manager: may change and create users, nothing more.
+        mgr.user_permissions.add(
+            Permission.objects.get(codename="change_user"),
+            Permission.objects.get(codename="add_user"),
+        )
+        delete_user = Permission.objects.get(codename="delete_user")
+        add_group = Permission.objects.get(codename="add_group")
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-cfgperm-mgr",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        # Self-escalation: granting themselves additional configuration
+        # permissions must be rejected.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "configuration_permissions": [delete_user.id, add_group.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertIn(
+            "Only superusers are allowed to change configuration permissions.",
+            r.content.decode("utf-8"),
+        )
+        self.assertFalse(User.objects.get(id=mgr.id).has_perm("auth.delete_user"))
+        self.assertFalse(User.objects.get(id=mgr.id).has_perm("auth.add_group"))
+
+        # Target-escalation: granting configuration permissions to another user
+        # must be rejected.
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-target",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        target_id = r.json()["id"]
+
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), target_id), {
+            "configuration_permissions": [delete_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertFalse(User.objects.get(id=target_id).has_perm("auth.delete_user"))
+
+        # Create-time escalation must also be rejected.
+        r = mgr_client.post(reverse("user-list"), {
+            "username": "api-cfgperm-on-create",
+            "email": "admin@dojo.com",
+            "password": password,
+            "configuration_permissions": [delete_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertFalse(User.objects.filter(username="api-cfgperm-on-create").exists())
+
+    def test_non_superuser_can_resend_unchanged_configuration_permissions(self):
+        """
+        Negative control: the guard only fires when configuration permissions
+        actually change, so a delegated user-manager can still PATCH their own
+        account (including re-sending the configuration permissions they already
+        hold) without being blocked.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-mgr2",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-cfgperm-mgr2")
+        change_user = Permission.objects.get(codename="change_user")
+        mgr.user_permissions.add(change_user)
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-cfgperm-mgr2",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        # Re-sending the same configuration permission the user already holds is
+        # a no-op and must be allowed.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "configuration_permissions": [change_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+        # Editing an unrelated field is likewise unaffected.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "first_name": "Renamed",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+    def test_superuser_can_set_configuration_permissions_via_api(self):
+        """Positive control: a superuser may still assign configuration permissions."""
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-grantable",
+            "email": "admin@dojo.com",
+            "password": "testTEST1234!@#$",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        user_id = r.json()["id"]
+        delete_user = Permission.objects.get(codename="delete_user")
+
+        r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
+            "configuration_permissions": [delete_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertTrue(User.objects.get(id=user_id).has_perm("auth.delete_user"))
+
+    def test_user_reset_api_token_denies_global_owner_legacy(self):
+        """
+        Legacy: Global_Role(role=Owner) is inert. Resetting another
+        user's API token requires is_superuser; a global-owner who isn't
+        a superuser is treated like any non-privileged user.
+        """
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-global-owner",
@@ -239,4 +503,4 @@ class UserTest(APITestCase):
 
         url = "{}{}/reset_api_token/".format(reverse("user-list"), target_id)
         r = go_client.post(url)
-        self.assertEqual(r.status_code, 204, r.content[:1000])
+        self.assertEqual(r.status_code, 403, r.content[:1000])

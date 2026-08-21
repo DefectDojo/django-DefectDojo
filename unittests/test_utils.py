@@ -1,31 +1,29 @@
+import binascii
 import logging
+import os
 from contextlib import contextmanager
 from unittest.mock import Mock, patch
 
 from django.conf import settings
 
-from dojo.authorization.roles_permissions import Roles
 from dojo.location.models import Location
 from dojo.models import (
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
     IMPORT_REACTIVATED_FINDING,
     IMPORT_UNTOUCHED_FINDING,
-    Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Engagement,
     Notifications,
     Product,
     Product_Type,
-    Role,
-    System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
 )
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view, user_post_save
+from dojo.notifications.signals import create_default_notifications
+from dojo.utils import dojo_crypto_encrypt, encrypt, get_db_key, prepare_for_save, prepare_for_view
 
 from .dojo_test_case import DojoTestCase
 
@@ -53,133 +51,78 @@ LOCATIONS = Location.objects.all()
 class TestUtils(DojoTestCase):
     def test_encryption(self):
         test_input = "Hello World!"
-        encrypt = dojo_crypto_encrypt(test_input)
-        test_output = prepare_for_view(encrypt)
+        encrypted = dojo_crypto_encrypt(test_input)
+        test_output = prepare_for_view(encrypted)
         self.assertEqual(test_input, test_output)
 
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_without_template(self, mock_notifications, mock_member, mock_settings):
+    def test_encryption_uses_aes2_format(self):
+        # New values must be written with the modern AES-256-GCM ("AES.2") scheme.
+        encrypted = dojo_crypto_encrypt("some secret")
+        self.assertTrue(encrypted.startswith("AES.2:"))
+
+    def test_encryption_roundtrip_variants(self):
+        # GCM has no block-size constraint, so cover empty, unicode, and long
+        # (multi-block) inputs to be sure padding-free encryption round-trips.
+        for value in ["", "ascii-secret", "ünïcödé-pä$$wörd", "x" * 500]:
+            with self.subTest(value=value):
+                self.assertEqual(value, prepare_for_view(dojo_crypto_encrypt(value)))
+
+    def test_decrypt_legacy_aes1_value(self):
+        # Values stored by the legacy AES-256-OFB ("AES.1") scheme must still
+        # decrypt unchanged so existing database secrets are never stranded.
+        plaintext = "legacy-secret"
+        key = get_db_key()
+        iv = os.urandom(16)
+        legacy_value = prepare_for_save(iv, encrypt(key, iv, plaintext.encode("utf-8")))
+        self.assertTrue(legacy_value.startswith("AES.1:"))
+        self.assertEqual(plaintext, prepare_for_view(legacy_value))
+
+    def test_decrypt_tampered_or_garbage_returns_empty(self):
+        # A tampered AES.2 ciphertext (auth tag mismatch) and unparseable input
+        # must degrade to "" rather than raising.
+        encrypted = dojo_crypto_encrypt("tamper-me")
+        scheme, nonce_hex, ct_hex = encrypted.split(":")
+        ct = bytearray(binascii.a2b_hex(ct_hex))
+        ct[0] ^= 0xFF  # flip a byte to break the GCM auth tag
+        tampered = ":".join([scheme, nonce_hex, binascii.b2a_hex(bytes(ct)).decode("utf-8")])
+        self.assertEqual("", prepare_for_view(tampered))
+        self.assertEqual("", prepare_for_view("AES.2:zzzz:zzzz"))
+
+    @patch("dojo.notifications.signals.Notifications")
+    def test_create_default_notifications_without_template(self, mock_notifications):
         user = Dojo_User()
         user.id = 1
 
-        group = Dojo_Group()
-        group.id = 1
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-
         save_mock_notifications = Mock(return_value=Notifications())
         mock_notifications.return_value = save_mock_notifications
-        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
+        mock_notifications.DoesNotExist = Notifications.DoesNotExist
+        mock_notifications.objects.get.side_effect = Notifications.DoesNotExist
 
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_called_with(group=group, user=user, role=role)
-        save_mock_member.save.assert_called_once()
+        create_default_notifications(None, user, created=True)
 
         mock_notifications.assert_called_with(user=user)
         save_mock_notifications.save.assert_called_once()
 
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_with_template(self, mock_notifications, mock_member, mock_settings):
+    @patch("dojo.notifications.signals.Notifications")
+    def test_create_default_notifications_with_template(self, mock_notifications):
         user = Dojo_User()
         user.id = 1
 
-        group = Dojo_Group()
-        group.id = 1
-
         template = Mock(Notifications(template=False, user=user))
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-
         mock_notifications.objects.get.return_value = template
 
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_called_with(group=group, user=user, role=role)
-        save_mock_member.save.assert_called_once()
+        create_default_notifications(None, user, created=True)
 
         mock_notifications.objects.get.assert_called_with(template=True)
         template.save.assert_called_once()
 
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_email_pattern_matches(self, mock_notifications, mock_member, mock_settings):
-        user = Dojo_User()
-        user.id = 1
-        user.email = "john.doe@example.com"
-
-        group = Dojo_Group()
-        group.id = 1
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-        system_settings_group.default_group_email_pattern = ".*@example.com"
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-        save_mock_notifications = Mock(return_value=Notifications())
-        mock_notifications.return_value = save_mock_notifications
-        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
-
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_called_with(group=group, user=user, role=role)
-        save_mock_member.save.assert_called_once()
-
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_email_pattern_does_not_match(self, mock_notifications, mock_member, mock_settings):
-        user = Dojo_User()
-        user.id = 1
-        user.email = "john.doe@partner.example.com"
-
-        group = Dojo_Group()
-        group.id = 1
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-        system_settings_group.default_group_email_pattern = ".*@example.com"
-        save_mock_notifications = Mock(return_value=Notifications())
-        mock_notifications.return_value = save_mock_notifications
-        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_not_called()
-        save_mock_member.save.assert_not_called()
+    # The ``default_group`` / ``default_group_role`` /
+    # ``default_group_email_pattern`` knobs were relocated from
+    # ``dojo.System_Settings`` onto ``pro.EnhancedSystemSettings``, and the
+    # auto-assignment-to-default-group lifecycle that consumed them now
+    # lives in ``pro.authorization.signals.user_post_save_default_group``.
+    # OS-only deployments don't auto-assign new users to a group; the
+    # equivalent Pro tests live in ``dojo-pro/unit_tests/authorization/``.
 
 
 class assertNumOfModelsCreated:

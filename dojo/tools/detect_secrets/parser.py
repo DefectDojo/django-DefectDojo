@@ -3,7 +3,9 @@ import json
 
 import dateutil.parser
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class DetectSecretsParser:
@@ -61,5 +63,9 @@ class DetectSecretsParser:
                         false_p="is_secret" in item
                         and item["is_secret"] is False,
                     )
+                    if locations_enabled() and file:
+                        finding.unsaved_locations.append(
+                            LocationData.code(file_path=file, line=line),
+                        )
                     dupes[dupe_key] = finding
         return list(dupes.values())

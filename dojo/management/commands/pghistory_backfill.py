@@ -46,7 +46,6 @@ class Command(BaseCommand):
         excluded_fields_map = {
             "Dojo_User": ["password"],
             "Product": ["updated"],  # This is the key change
-            "Cred_User": ["password"],
             "Notification_Webhooks": ["header_name", "header_value"],
         }
         return excluded_fields_map.get(model_name, [])
@@ -154,7 +153,7 @@ class Command(BaseCommand):
         tracked_models = [
             "Dojo_User", "Endpoint", "Engagement", "Finding", "Finding_Group",
             "Product_Type", "Product", "Test", "Risk_Acceptance",
-            "Finding_Template", "Cred_User", "Notification_Webhooks",
+            "Finding_Template", "Notification_Webhooks",
             "FindingReviewers",  # M2M through table for Finding.reviewers
             # Tag through tables (tagulous auto-generated)
             "FindingTags",

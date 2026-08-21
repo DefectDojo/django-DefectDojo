@@ -1,6 +1,6 @@
 import logging
 
-from crum import get_current_user
+from django.db import transaction
 from django.db.models import (
     Case,
     CharField,
@@ -17,155 +17,107 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 
-from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
+try:
+    from dojo.authorization.query_filters import get_auth_filter
+except ImportError:
+    def get_auth_filter(key): return None
+
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import (
-    Finding,
-    Product_Group,
-    Product_Member,
-    Product_Type_Group,
-    Product_Type_Member,
-)
+from dojo.product.queries import get_authorized_products
 from dojo.query_utils import build_count_subquery
 
 logger = logging.getLogger(__name__)
 
 
 def get_authorized_locations(permission, queryset=None, user=None):
-
-    if user is None:
-        user = get_current_user()
-
-    if user is None:
-        return Location.objects.none()
-
-    locations = Location.objects.all().order_by("id") if queryset is None else queryset
-
-    if user.is_superuser:
-        return locations
-
-    if user_has_global_permission(user, permission):
-        return locations
-
-    roles = get_roles_for_permission(permission)
-    authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("products__product__prod_type_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("products__product_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("products__product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
-    authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("products__product_id"),
-        group__users=user,
-        role__in=roles)
-    locations = locations.annotate(
-        product__prod_type__member=Exists(authorized_product_type_roles),
-        product__member=Exists(authorized_product_roles),
-        product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        product__authorized_group=Exists(authorized_product_groups))
-    return locations.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True)
-        | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+    impl = get_auth_filter("location.get_authorized_locations")
+    if impl:
+        return impl(permission, queryset=queryset, user=user)
+    return Location.objects.all().order_by("id") if queryset is None else queryset
 
 
 def get_authorized_location_finding_reference(permission, queryset=None, user=None):
-
-    if user is None:
-        user = get_current_user()
-
-    if user is None:
-        return LocationFindingReference.objects.none()
-
-    location_finding_reference = LocationFindingReference.objects.all().order_by("id") if queryset is None else queryset
-
-    if user.is_superuser:
-        return location_finding_reference
-
-    if user_has_global_permission(user, permission):
-        return location_finding_reference
-
-    roles = get_roles_for_permission(permission)
-    authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("location__products__product__prod_type_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("location__products__product_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("location__products__product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
-    authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("location__products__product_id"),
-        group__users=user,
-        role__in=roles)
-    location_finding_reference = location_finding_reference.annotate(
-        location__product__prod_type__member=Exists(authorized_product_type_roles),
-        location__product__member=Exists(authorized_product_roles),
-        location__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        location__product__authorized_group=Exists(authorized_product_groups))
-    return location_finding_reference.filter(
-        Q(location__product__prod_type__member=True) | Q(location__product__member=True)
-        | Q(location__product__prod_type__authorized_group=True) | Q(location__product__authorized_group=True))
+    impl = get_auth_filter("location.get_authorized_location_finding_reference")
+    if impl:
+        return impl(permission, queryset=queryset, user=user)
+    return LocationFindingReference.objects.all().order_by("id") if queryset is None else queryset
 
 
 def get_authorized_location_product_reference(permission, queryset=None, user=None):
-
-    if user is None:
-        user = get_current_user()
-
-    if user is None:
-        return LocationProductReference.objects.none()
-
-    location_product_reference = LocationProductReference.objects.all().order_by("id") if queryset is None else queryset
-
-    if user.is_superuser:
-        return location_product_reference
-
-    if user_has_global_permission(user, permission):
-        return location_product_reference
-
-    roles = get_roles_for_permission(permission)
-    authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("product__prod_type_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("product_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
-    authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("product_id"),
-        group__users=user,
-        role__in=roles)
-    location_product_reference = location_product_reference.annotate(
-        location__product__prod_type__member=Exists(authorized_product_type_roles),
-        location__product__member=Exists(authorized_product_roles),
-        location__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        location__product__authorized_group=Exists(authorized_product_groups))
-    return location_product_reference.filter(
-        Q(location__product__prod_type__member=True) | Q(location__product__member=True)
-        | Q(location__product__prod_type__authorized_group=True) | Q(location__product__authorized_group=True))
+    impl = get_auth_filter("location.get_authorized_location_product_reference")
+    if impl:
+        return impl(permission, queryset=queryset, user=user)
+    return LocationProductReference.objects.all().order_by("id") if queryset is None else queryset
 
 
-def annotate_location_counts_and_status(locations):
+def authorized_finding_references(user=None):
+    """
+    Finding references the user may see, as a base for per-Location counts.
+
+    A Location is deduplicated across every product that references it, so counting
+    all of its references reports on products the user is not authorized for.
+    """
+    return LocationFindingReference.objects.filter(
+        finding__in=get_authorized_findings(Permissions.Finding_View, user=user),
+    )
+
+
+def authorized_product_references(user=None):
+    """Product references the user may see, as a base for per-Location counts."""
+    return LocationProductReference.objects.filter(
+        product__in=get_authorized_products(Permissions.Product_View, user),
+    )
+
+
+def remove_location_references(locations, products):
+    """
+    Drop ``products``' references to ``locations``, then delete any Location left
+    with none.
+
+    A Location is deduplicated across every product that records the same value, so
+    deleting the row itself removes it from products the caller has no rights over.
+    The reference is the per-product object, so it is what a delete acts on.
+    """
+    location_ids = list(locations.values_list("id", flat=True))
+    if not location_ids:
+        return 0
+    with transaction.atomic():
+        LocationFindingReference.objects.filter(
+            location_id__in=location_ids,
+            finding__test__engagement__product__in=products,
+        ).delete()
+        removed = LocationProductReference.objects.filter(
+            location_id__in=location_ids,
+            product__in=products,
+        ).delete()[0]
+        Location.objects.filter(
+            id__in=location_ids,
+            products__isnull=True,
+            findings__isnull=True,
+        ).delete()
+    return removed
+
+
+def locations_shared_outside(locations, products):
+    """Locations in ``locations`` that something outside ``products`` also references."""
+    foreign_products = LocationProductReference.objects.filter(
+        location=OuterRef("pk"),
+    ).exclude(product__in=products)
+    foreign_findings = LocationFindingReference.objects.filter(
+        location=OuterRef("pk"),
+    ).exclude(finding__test__engagement__product__in=products)
+    return locations.filter(Exists(foreign_products) | Exists(foreign_findings))
+
+
+def annotate_location_counts_and_status(locations, user=None):
     # Annotate the queryset with counts of findings
     # This aggregates the total and active findings by joining LocationFindingReference.
     finding_counts = (
-        LocationFindingReference.objects.prefetch_related("location")
+        authorized_finding_references(user)
+        .prefetch_related("location")
         .filter(location=OuterRef("id"))
         .values("location")
         .annotate(
@@ -181,7 +133,8 @@ def annotate_location_counts_and_status(locations):
     # Annotate the queryset with counts of products
     # This aggregates the total and active products by joining LocationProductReference.
     product_counts = (
-        LocationProductReference.objects.prefetch_related("location")
+        authorized_product_references(user)
+        .prefetch_related("location")
         .filter(location=OuterRef("id"))
         .values("location")
         .annotate(
@@ -212,12 +165,18 @@ def annotate_location_counts_and_status(locations):
     )
 
 
-def prefetch_for_locations(locations):
+def prefetch_for_locations(locations, user=None):
     if isinstance(locations, QuerySet):
         locations = locations.prefetch_related("tags")
+        # Finding.locations is the reverse accessor for LocationFindingReference, so
+        # the count has to go through the reference rather than compare its id to a
+        # Location id.
         active_finding_subquery = build_count_subquery(
-            Finding.objects.filter(locations=OuterRef("pk"), active=True),
-            group_field="locations",
+            authorized_finding_references(user).filter(
+                location=OuterRef("pk"),
+                status=FindingLocationStatus.Active,
+            ),
+            group_field="location",
         )
         locations = locations.annotate(active_finding_count=Coalesce(active_finding_subquery, Value(0)))
     else:

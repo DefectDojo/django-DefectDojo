@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import hashlib
 import ipaddress
 from contextlib import suppress
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 from urllib.parse import unquote_plus, urlsplit
 
 import idna
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinLengthValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, transaction
 from django.db.models import (
     BooleanField,
@@ -33,6 +33,9 @@ from dojo.url.validators import (
     validate_user_info,
 )
 
+if TYPE_CHECKING:
+    from dojo.tools.locations import LocationData
+
 
 @dataclass(frozen=True)
 class ParsedUrl:
@@ -50,7 +53,7 @@ class HyperlinkParser:
     def from_text(self, value):
         try:
             return HyperlinkURL.from_text(value).normalize()
-        except URLParseError as e:
+        except (URLParseError, ValueError) as e:
             raise ValidationError(str(e))
 
     def parse(self, value: str) -> ParsedUrl:
@@ -181,15 +184,6 @@ class URL(AbstractLocation):
         blank=False,
         help_text="Dictates whether the endpoint was found to have host validation issues during creation",
     )
-    hash = CharField(
-        null=False,
-        blank=False,
-        max_length=64,
-        editable=False,
-        unique=True,
-        validators=[MinLengthValidator(64)],
-        help_text="The hash of the URL for uniqueness",
-    )
 
     objects = URLManager().from_queryset(URLQueryset)()
 
@@ -199,7 +193,7 @@ class URL(AbstractLocation):
 
         verbose_name = "Locations - URL"
         verbose_name_plural = "Locations - URLs"
-        indexes = (Index(fields=["host", "hash"]),)
+        indexes = (Index(fields=["host", "identity_hash"]),)
 
     def manual_str(self):
         value = ""
@@ -231,12 +225,6 @@ class URL(AbstractLocation):
             return URL.URL_PARSING_CLASS().unparse(self)
         return self.manual_str()
 
-    def __hash__(self) -> int:
-        return hash(str(self))
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, URL) and str(self) == str(other)
-
     @classmethod
     def get_location_type(cls) -> str:
         return cls.LOCATION_TYPE
@@ -258,7 +246,6 @@ class URL(AbstractLocation):
         self.clean_path()
         self.clean_query()
         self.clean_fragment()
-        self.set_db_hash()
         super().clean(*args, **kwargs)
 
     def clean_protocol(self) -> None:
@@ -319,19 +306,16 @@ class URL(AbstractLocation):
         else:
             self.query = self.replace_null_bytes(self.query.strip().removeprefix("?"))
 
-    def set_db_hash(self):
-        self.hash = hashlib.blake2b(str(self).encode(), digest_size=32).hexdigest()
-
     def replace_null_bytes(self, value: str) -> str:
         return value.replace("\x00", "%00")
 
-    @staticmethod
-    def get_or_create_from_object(url: URL) -> URL:
+    @classmethod
+    def get_or_create_from_object(cls, url: URL) -> URL:
         url.clean()
         with transaction.atomic():
             try:
                 return URL.objects.get_or_create(
-                    hash=url.hash,
+                    identity_hash=url.identity_hash,
                     defaults={
                         "protocol": url.protocol,
                         "user_info": url.user_info,
@@ -344,7 +328,7 @@ class URL(AbstractLocation):
                     },
                 )[0]
             except IntegrityError:
-                return URL.objects.get(hash=url.hash)
+                return URL.objects.get(identity_hash=url.identity_hash)
 
     @staticmethod
     def get_or_create_from_values(
@@ -356,7 +340,20 @@ class URL(AbstractLocation):
         query=None,
         fragment=None,
     ) -> URL:
-        url = URL(
+        url = URL.from_parts(protocol, user_info, host, port, path, query, fragment)
+        return URL.get_or_create_from_object(url)
+
+    @staticmethod
+    def from_parts(
+        protocol=None,
+        user_info=None,
+        host=None,
+        port=None,
+        path=None,
+        query=None,
+        fragment=None,
+    ) -> URL:
+        return URL(
             protocol=protocol,
             user_info=user_info,
             host=host,
@@ -365,7 +362,6 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
-        return URL.get_or_create_from_object(url)
 
     @staticmethod
     def create_location_from_value(value: str) -> URL:
@@ -385,7 +381,7 @@ class URL(AbstractLocation):
         fragment = parsed_url.fragment.removeprefix("#")[:2048]
 
         # Create the initial object, assuming no exceptions are thrown
-        url = URL(
+        return URL.from_parts(
             protocol=parsed_url.protocol,
             user_info=parsed_url.user_info,
             host=parsed_url.host,
@@ -394,5 +390,16 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
-        url.clean()
-        return url
+
+    @classmethod
+    def _from_location_data_impl(cls, location_data: LocationData) -> URL:
+        url_string = location_data.data.get("url")
+        return URL.from_value(url_string) if url_string else URL.from_parts(
+            protocol=location_data.data.get("protocol"),
+            user_info=location_data.data.get("user_info"),
+            host=location_data.data.get("host"),
+            port=location_data.data.get("port"),
+            path=location_data.data.get("path"),
+            query=location_data.data.get("query"),
+            fragment=location_data.data.get("fragment"),
+        )

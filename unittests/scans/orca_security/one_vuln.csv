@@ -1,0 +1,2 @@
+OrcaScore,Title,Category,Inventory,Inventory.Name,CloudAccount,CloudAccount.Name,Source,Status,CreatedAt,LastSeen,Labels
+5.1,Unused role with policy found,IAM misconfigurations,1,TestRole_abc123,1,test-account,TestRole_abc123,open,2025-01-15T10:30:00+00:00,2025-02-01T12:00:00+00:00,"[""CSPM"",""source: Orca Scan""]"

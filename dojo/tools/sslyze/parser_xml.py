@@ -2,13 +2,12 @@ import hashlib
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 __author__ = "dr3dd589"
-
-from dojo.url.models import URL
 
 # TODO: discuss this list as maintenance subject
 WEAK_CIPHER_LIST = [
@@ -155,9 +154,9 @@ class SSLyzeXMLParser:
                         dupes[dupe_key] = finding
 
                         if host is not None:
-                            if settings.V3_FEATURE_LOCATIONS:
+                            if locations_enabled():
                                 finding.unsaved_locations.append(
-                                    URL(
+                                    LocationData.url(
                                         host=host, port=port, protocol=protocol,
                                     ),
                                 )

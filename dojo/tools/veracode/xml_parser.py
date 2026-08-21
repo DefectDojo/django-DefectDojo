@@ -5,8 +5,9 @@ from datetime import datetime
 from defusedxml import ElementTree
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
@@ -247,6 +248,15 @@ class VeracodeXMLParser:
         if isinstance(sast_source_obj, str):
             finding.sast_source_object = sast_source_obj or None
 
+        if locations_enabled() and finding.file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(
+                    file_path=finding.file_path,
+                    line=finding.line,
+                    source_object=sast_source_obj if isinstance(sast_source_obj, str) else "",
+                ),
+            )
+
         finding.unsaved_tags = ["sast"]
 
         return finding
@@ -262,8 +272,8 @@ class VeracodeXMLParser:
         finding.dynamic_finding = True
 
         url_host = xml_node.attrib.get("url")
-        if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations = [URL.from_value(url_host)]
+        if locations_enabled():
+            finding.unsaved_locations = [LocationData.url(url=url_host)]
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
@@ -279,6 +289,11 @@ class VeracodeXMLParser:
         if cweSearch:
             return int(cweSearch.group(1))
         return None
+
+    @staticmethod
+    def _get_cwes(val):
+        # Match all CWEs found in the value.
+        return [int(match) for match in re.findall(r"CWE-(\d+)", val, re.IGNORECASE)]
 
     @classmethod
     def __xml_sca_flaw_to_finding(
@@ -296,6 +311,9 @@ class VeracodeXMLParser:
         finding.severity = cls.__xml_flaw_to_severity(xml_node)
         finding.unsaved_vulnerability_ids = [xml_node.attrib["cve_id"]]
         finding.cwe = cls._get_cwe(xml_node.attrib["cwe_id"])
+        cwes = cls._get_cwes(xml_node.attrib["cwe_id"])
+        if cwes:
+            finding.unsaved_cwes = cwes
         finding.title = f"Vulnerable component: {library}:{version}"
         finding.component_name = library
         finding.component_version = version

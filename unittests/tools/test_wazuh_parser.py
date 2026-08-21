@@ -65,3 +65,19 @@ class TestWazuhParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
                 self.assertEqual("Info", finding.severity)
+
+    def test_parse_v4_8_many_findings_with_location(self):
+        with (get_unit_tests_scans_path("wazuh") / "v4-8_many_findings.json").open(encoding="utf-8") as testfile:
+            parser = WazuhParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[0]
+            self.assertEqual(10, len(findings))
+            self.validate_locations(findings)
+            self.assertEqual("CVE-2025-27558 affects (version: 6.8.0-60.63)", findings[0].title)
+            self.assertEqual("Critical", findings[0].severity)
+            self.assertEqual(9.1, findings[0].cvssv3_score)
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("myhost0", location.host)
+            self.assertEqual("linux-image-6.8.0-60-generic", finding.component_name)
+            self.assertEqual("6.8.0-60.63", finding.component_version)
+            self.assertEqual("2025-06-30", finding.date)

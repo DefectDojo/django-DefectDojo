@@ -3,10 +3,10 @@ import io
 import sys
 
 from dateutil import parser as date_parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class QualysHackerGuardianParser:
@@ -111,8 +111,8 @@ class QualysHackerGuardianParser:
                 active=True,
                 nb_occurences=1,
             )
-            if settings.V3_FEATURE_LOCATIONS:
-                location = URL.from_value(self.get_endpoint(row))
+            if locations_enabled():
+                location = LocationData.url(url=self.get_endpoint(row))
                 finding.unsaved_locations = [location]
             else:
                 # TODO: Delete this after the move to Locations
@@ -122,7 +122,7 @@ class QualysHackerGuardianParser:
             dupe_key = finding.unique_id_from_tool
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     if location not in finding.unsaved_locations:
                         finding.unsaved_locations.append(location)
                 # TODO: Delete this after the move to Locations

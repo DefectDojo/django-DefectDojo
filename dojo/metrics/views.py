@@ -19,8 +19,6 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
-from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
 from dojo.labels import get_labels
 from dojo.metrics.utils import (
@@ -36,6 +34,7 @@ from dojo.metrics.utils import (
 from dojo.models import Dojo_User, Finding, Product_Type, Risk_Acceptance
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.user.ui.filters import UserFilter
 from dojo.utils import (
     add_breadcrumb,
     count_findings,
@@ -63,7 +62,7 @@ generic metrics method
 def critical_product_metrics(request, mtype):
     template = "dojo/metrics.html"
     page_name = str(labels.ASSET_METRICS_CRITICAL_LABEL)
-    critical_products = get_authorized_product_types(Permissions.Product_Type_View)
+    critical_products = get_authorized_product_types("view")
     critical_products = critical_products.filter(critical_product=True)
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, template, {
@@ -92,7 +91,7 @@ def metrics(request, mtype):
     elif "test__engagement__product__prod_type" in request.GET:
         prod_type = Product_Type.objects.filter(id__in=request.GET.getlist("test__engagement__product__prod_type", []))
     else:
-        prod_type = get_authorized_product_types(Permissions.Product_Type_View)
+        prod_type = get_authorized_product_types("view")
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
     prod_type = prod_type.prefetch_related("prod_type")
 
@@ -179,7 +178,7 @@ def simple_metrics(request):
     # for each product type find each product with open findings and
     # count the S0, S1, S2 and S3
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
-    product_types = get_authorized_product_types(Permissions.Product_Type_View)
+    product_types = get_authorized_product_types("view")
     product_types = product_types.prefetch_related("prod_type")
     for pt in product_types:
         total_critical = []
@@ -277,7 +276,7 @@ def product_type_counts(request):
         form = ProductTypeCountsForm(request.GET)
         if form.is_valid():
             pt = form.cleaned_data["product_type"]
-            user_has_permission_or_403(request.user, pt, Permissions.Product_Type_View)
+            user_has_permission_or_403(request.user, pt, "view")
             month = int(form.cleaned_data["month"])
             year = int(form.cleaned_data["year"])
             first_of_month = first_of_month.replace(month=month, year=year)
@@ -479,7 +478,7 @@ def product_tag_counts(request):
     if request.method == "GET" and "month" in request.GET and "year" in request.GET and "product_tag" in request.GET:
         form = ProductTagCountsForm(request.GET)
         if form.is_valid():
-            prods = get_authorized_products(Permissions.Product_View)
+            prods = get_authorized_products("view")
 
             pt = form.cleaned_data["product_tag"]
             month = int(form.cleaned_data["month"])
@@ -778,7 +777,7 @@ def view_engineer(request, eid):
 
     # --------------
     # Product tables
-    products = list(get_authorized_products(Permissions.Product_Type_View).only("id", "name"))
+    products = list(get_authorized_products("view").only("id", "name"))
     update, total_update = _product_stats(products)
 
     # ----------------------------------
@@ -916,7 +915,10 @@ def _augment_series_with_accepted(series: list[list], ras_qs, *, period: str, tz
         )
 
         for row in accepted:
-            bucket[sev_idx[row["severity"]]] += row["cnt"]
+            sev = row["severity"]
+            if sev not in sev_idx:
+                continue
+            bucket[sev_idx[sev]] += row["cnt"]
 
         bucket[5] = sum(bucket[1:])
 

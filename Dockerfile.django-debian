@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.11-slim-trixie@sha256:51e1a0a317fdb6e170dc791bbeae63fac5272c82f43958ef74a34e170c6f8b18 AS base
+FROM python:3.14.6-slim-trixie@sha256:cea0e6040540fb2b965b6e7fb5ffa00871e632eef63719f0ea54bca189ce14a6 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -43,18 +43,27 @@ RUN \
   apt-get -y upgrade && \
   # ugly fix to install postgresql-client without errors
   mkdir -p /usr/share/man/man1 /usr/share/man/man7 && \
+  # ca-certificates + curl are needed to fetch the PostgreSQL APT (PGDG) signing key
+  apt-get -y install --no-install-recommends ca-certificates curl && \
+  # Debian trixie only ships postgresql-client-17, but the bundled PostgreSQL
+  # server is 18. pg_dump refuses to dump a server newer than itself, which
+  # breaks `manage.py dbbackup`, so pull the matching v18 client from PGDG.
+  install -d /usr/share/postgresql-common/pgdg && \
+  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc && \
+  echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+  apt-get -y update && \
   apt-get -y install --no-install-recommends \
-    # libopenjp2-7 libjpeg62 libtiff are required by the pillow package
+    # libopenjp2-7 libjpeg62 are required by the pillow package
     libopenjp2-7 \
     libjpeg62 \
-    libtiff6 \
     dnsutils \
     xmlsec1 \
     git \
     uuid-runtime \
     libpq-dev \
-    # only required for the dbshell (used by the initializer job)
-    postgresql-client \
+    # only required for the dbshell (used by the initializer job) and dbbackup;
+    # must match the server major version (18) for pg_dump to work
+    postgresql-client-18 \
     # libcurl4-openssl-dev is required for installing pycurl python package
     libcurl4-openssl-dev \
     && \
@@ -68,7 +77,8 @@ RUN \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt
+  -r ./requirements.txt && \
+  apt-get -y purge --auto-remove git
 
 COPY \
   docker/entrypoint-celery-beat.sh \
@@ -81,7 +91,7 @@ COPY \
   docker/reach_broker.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py ./
+COPY manage.py ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer

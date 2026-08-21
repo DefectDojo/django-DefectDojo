@@ -1,10 +1,10 @@
 import json
 
-from django.conf import settings
 from django.utils.dateparse import parse_datetime
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class StackHawkScanMetadata:
@@ -78,8 +78,8 @@ class StackHawkParser:
                 + self.__hyperlink(path["pathURL"])
                 + "\n"
             )
-            if settings.V3_FEATURE_LOCATIONS:
-                location = URL.from_value(host + path["path"])
+            if locations_enabled():
+                location = LocationData.url(url=host + path["path"])
             else:
                 # TODO: Delete this after the move to Locations
                 location = Endpoint.from_uri(host + path["path"])
@@ -111,7 +111,7 @@ class StackHawkParser:
             risk_accepted=are_all_endpoints_risk_accepted,
         )
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.extend(locations)
         else:
             # TODO: Delete this after the move to Locations

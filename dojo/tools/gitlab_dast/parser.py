@@ -2,10 +2,9 @@ import hashlib
 import json
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class GitlabDastParser:
@@ -41,7 +40,7 @@ class GitlabDastParser:
             ).hexdigest()
 
             if item_key in items:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     items[item_key].unsaved_locations.extend(
                         item.unsaved_locations,
                     )
@@ -112,10 +111,14 @@ class GitlabDastParser:
             vuln.get("name", finding.unique_id_from_tool)
         )
         # cwe
-        for identifier in vuln["identifiers"]:
-            if identifier["type"].lower() == "cwe":
-                finding.cwe = int(identifier["value"])
-                break
+        unsaved_cwes = [
+            int(identifier["value"])
+            for identifier in vuln["identifiers"]
+            if identifier["type"].lower() == "cwe"
+        ]
+        if unsaved_cwes:
+            finding.cwe = unsaved_cwes[0]
+            finding.unsaved_cwes = unsaved_cwes
 
         # references
         if vuln["links"]:
@@ -131,8 +134,8 @@ class GitlabDastParser:
         location = vuln.get("location", {})
         if "hostname" in location and "path" in location:
             url_str = f"{location['hostname']}{location['path']}"
-            if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [URL.from_value(url_str)]
+            if locations_enabled():
+                finding.unsaved_locations = [LocationData.url(url=url_str)]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]

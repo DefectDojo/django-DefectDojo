@@ -1,7 +1,9 @@
 import hashlib
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class TerrascanParser:
@@ -69,5 +71,9 @@ class TerrascanParser:
                     vuln_id_from_tool=rule_id,
                     nb_occurences=1,
                 )
+                if locations_enabled() and file:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=file, line=line),
+                    )
                 dupes[dupe_key] = finding
         return list(dupes.values())

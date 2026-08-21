@@ -10,9 +10,13 @@ from selenium.common.exceptions import NoAlertPresentException, NoSuchElementExc
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
 
 # import time
+logging.basicConfig(
+    level=os.environ.get("LOG_LEVEL", "WARNING"),
+    format="%(levelname)s %(name)s: %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -125,7 +129,7 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element(By.ID, "id_password").send_keys(
             os.environ["DD_ADMIN_PASSWORD"],
         )
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
 
         self.assertFalse(
             self.is_element_by_css_selector_present(
@@ -141,7 +145,7 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element(By.ID, "id_username").send_keys("propersahm")
         driver.find_element(By.ID, "id_password").clear()
         driver.find_element(By.ID, "id_password").send_keys("Def3ctD0jo&")
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
 
         self.assertFalse(
             self.is_element_by_css_selector_present(
@@ -350,6 +354,24 @@ class BaseTestCase(unittest.TestCase):
     def disable_block_execution(self):
         self.set_block_execution(block_execution=False)
 
+    def set_deduplication_execution_mode(self, mode="async"):
+        # Set the admin user's (ourselves) deduplication_execution_mode profile
+        # field. "async_wait" makes import/reimport block until background
+        # deduplication has finished before returning.
+        logger.info("setting deduplication execution mode to: %s", mode)
+        driver = self.driver
+        driver.get(self.base_url + "profile")
+        select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
+        if select.first_selected_option.get_attribute("value") != mode:
+            select.select_by_value(mode)
+            # save settings
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            # check it persisted after reload
+            driver.get(self.base_url + "profile")
+            select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
+            self.assertEqual(select.first_selected_option.get_attribute("value"), mode)
+        return driver
+
     def enable_deduplication(self):
         return self.enable_system_setting("id_enable_deduplication")
 
@@ -403,7 +425,7 @@ class BaseTestCase(unittest.TestCase):
             The addition of the trigger exception is due to the Report Builder tests.
             The addition of the innerHTML exception is due to the test for quick reports in finding_test.py
             """
-            accepted_javascript_messages = r"(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)|Uncaught TypeError: Cannot read properties of null \(reading \'innerHTML\'\)"
+            accepted_javascript_messages = r"(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)|Uncaught TypeError: Cannot read properties of null \(reading \'innerHTML\'\)|Cross-Origin-Opener-Policy header has been ignored"
 
             if entry["level"] == "SEVERE":
                 # TODO: actually this seems to be the previous url
@@ -420,12 +442,12 @@ class BaseTestCase(unittest.TestCase):
                     + self.driver.current_url,
                 )
                 if self.accept_javascript_errors:
-                    logger.warning(
+                    logger.debug(
                         "skipping SEVERE javascript error because accept_javascript_errors is True!",
                     )
                 elif re.search(accepted_javascript_messages, entry["message"]):
-                    logger.warning(
-                        "skipping javascript errors related to known issues images, see https://github.com/DefectDojo/django-DefectDojo/blob/master/tests/base_test_class.py#L324",
+                    logger.debug(
+                        "skipping javascript errors related to known issues, see https://github.com/DefectDojo/django-DefectDojo/blob/master/tests/base_test_class.py#L324",
                     )
                 else:
                     self.assertNotEqual(entry["level"], "SEVERE")

@@ -3,7 +3,9 @@ from datetime import datetime
 
 from dateutil.parser import parse
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
 
 
@@ -84,4 +86,8 @@ class HorusecParser:
             and data["vulnerabilities"]["line"].isdigit()
         ):
             finding.line = int(data["vulnerabilities"]["line"])
+        if locations_enabled() and finding.file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(file_path=finding.file_path, line=finding.line),
+            )
         return finding

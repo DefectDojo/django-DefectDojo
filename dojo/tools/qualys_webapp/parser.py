@@ -4,10 +4,10 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 try:
     from django.conf.settings import QUALYS_WAS_WEAKNESS_IS_VULN
@@ -83,9 +83,9 @@ def attach_unique_extras(
         except BaseException:  # there's no port attached to address
             host = parsedUrl.netloc
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(
-                URL(
+                LocationData.url(
                     host=truncate_str(host, 500),
                     port=port,
                     path=truncate_str(path, 500),
@@ -140,8 +140,8 @@ def attach_extras(locations, requests, responses, finding, date, qid, test):
         finding.date = date
 
     for location in locations:
-        if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations.append(URL.from_value(location))
+        if locations_enabled():
+            finding.unsaved_locations.append(LocationData.url(url=location))
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints.append(Endpoint.from_uri(location))

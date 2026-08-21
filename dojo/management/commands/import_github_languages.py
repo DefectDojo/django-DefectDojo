@@ -40,16 +40,12 @@ class Command(BaseCommand):
             color = element.get("color", None)
 
             if color is not None:
-                try:
-                    language_type, created = Language_Type.objects.get_or_create(language=name)
-                except Language_Type.MultipleObjectsReturned:
-                    logger.warning("Language_Type %s exists multiple times", name)
-                    continue
+                language_type, created = Language_Type.objects.get_or_create(language=name)
 
                 if created:
                     new_language_types += 1
 
-                language_type.color = element.get("color", 0)
+                language_type.color = color
                 language_type.save()
 
         logger.info("Finished importing languages from GitHub, added %s Language_Types", new_language_types)

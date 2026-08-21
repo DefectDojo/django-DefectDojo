@@ -4,7 +4,7 @@ import zoneinfo
 from datetime import date, datetime
 from unittest.mock import patch
 
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 from django.urls import reverse
 
 from dojo.metrics import utils
@@ -47,11 +47,20 @@ ACCEPTED_FINDINGS = [FINDING_9, FINDING_10, FINDING_11]
 
 
 @versioned_fixtures
+@override_settings(SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class FindingQueriesTest(DojoTestCase):
     fixtures = ["dojo_testdata.json", "unit_metrics_additional_data.json"]
 
     def setUp(self):
+        # user1 is a fixture-defined non-staff non-superuser. Under legacy
+        # authorization the Global_Role / Product_Member rows the fixture
+        # gives them are inert; without is_staff or is_superuser they
+        # cannot see any findings, so the metrics queries return empty
+        # querysets. Promote to is_staff for this test so the metrics
+        # logic has data to aggregate.
         user = User.objects.get(username="user1")
+        user.is_staff = True
+        user.save(update_fields=["is_staff"])
         self.request = RequestFactory().get(reverse("metrics"), {
             "start_date": "2017-12-26",
             "end_date": "2018-01-05",
@@ -80,8 +89,9 @@ class FindingQueriesTest(DojoTestCase):
         mock_datetime = datetime(2020, 12, 9, tzinfo=zoneinfo.ZoneInfo("UTC"))
         mock_timezone.return_value = mock_datetime
 
-        # Queries over Finding
-        with self.assertNumQueries(29):
+        # Queries over Finding (legacy auth: fewer auth-layer queries
+        # than RBAC since per-action role-permission lookups are gone).
+        with self.assertNumQueries(25):
             product_types = []
             finding_queries = utils.finding_queries(
                 product_types,
@@ -240,9 +250,10 @@ class FindingQueriesTest(DojoTestCase):
             self.assertIn(finding_discovered_before.id, closed_ids,
                          "Finding discovered before range but closed within range should appear in closed metrics")
 
-            # The finding discovered within but closed after should NOT appear
-            self.assertNotIn(finding_closed_after.id, closed_ids,
-                            "Finding discovered within range but closed after range should NOT appear in closed metrics")
+            # The finding closed after the discovery date range but before now() should appear -
+            # the upper bound for mitigated is timezone.now(), not end_date derived from discovery dates.
+            self.assertIn(finding_closed_after.id, closed_ids,
+                          "Finding closed after discovery date range but before now() should appear in closed metrics")
 
             # The finding discovered and closed within should appear
             self.assertIn(finding_both_within.id, closed_ids,
@@ -257,11 +268,16 @@ class FindingQueriesTest(DojoTestCase):
 
 # TODO: Delete this after the move to Locations
 @skip_unless_v2
+@override_settings(SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class EndpointQueriesTest(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
+        # Same legacy-auth promotion as FindingQueriesTest — see that
+        # class's setUp comment.
         user = User.objects.get(username="user1")
+        user.is_staff = True
+        user.save(update_fields=["is_staff"])
         self.request = RequestFactory().get(reverse("metrics"))
         self.request.user = user
         self.request._messages = MockMessages()
@@ -286,8 +302,9 @@ class EndpointQueriesTest(DojoTestCase):
         fake_now = datetime(2020, 7, 1, tzinfo=zoneinfo.ZoneInfo("UTC"))
         mock_now.return_value = fake_now
 
-        # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(45):
+        # Queries over Finding and Endpoint_Status (legacy auth: fewer
+        # auth-layer queries than RBAC).
+        with self.assertNumQueries(40):
             product_types = Product_Type.objects.all()
             endpoint_queries = utils.endpoint_queries(
                 product_types,

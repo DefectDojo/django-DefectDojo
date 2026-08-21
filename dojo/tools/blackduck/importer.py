@@ -7,6 +7,8 @@ from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
+from dojo.tools.utils import safe_open_zip
+
 from .model import BlackduckFinding
 
 
@@ -48,7 +50,7 @@ class BlackduckImporter(Importer):
         files = {}
         security_issues = {}
 
-        with zipfile.ZipFile(report) as zipf:
+        with safe_open_zip(report) as zipf:
             for full_file_name in zipf.namelist():
                 file_name = full_file_name.split("/")[-1]
                 # Backwards compatibility, newer versions of Blackduck have a source file rather

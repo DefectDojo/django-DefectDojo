@@ -1,10 +1,10 @@
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class HCLAppScanParser:
@@ -125,8 +125,8 @@ class HCLAppScanParser:
                 )
                 findings.append(prepared_finding)
                 try:
-                    if settings.V3_FEATURE_LOCATIONS:
-                        prepared_finding.unsaved_locations = [URL(host=host, port=port)]
+                    if locations_enabled():
+                        prepared_finding.unsaved_locations = [LocationData.url(host=host, port=port)]
                     else:
                         # TODO: Delete this after the move to Locations
                         prepared_finding.unsaved_endpoints = [Endpoint(host=host, port=port)]

@@ -1,13 +1,14 @@
 import hashlib
 import json
 import logging
+from urllib.parse import urlparse
 
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -84,9 +85,10 @@ class NucleiParser:
                 else:
                     finding.references = info.get("reference")
 
+            location = None
             if matched:
-                if settings.V3_FEATURE_LOCATIONS:
-                    location = URL.from_value(matched) if "://" in matched else URL.from_value("//" + matched)
+                if locations_enabled():
+                    location = LocationData.url(url=matched) if "://" in matched else LocationData.url(url="//" + matched)
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations
@@ -101,7 +103,8 @@ class NucleiParser:
                 if (
                     classification.get("cwe-id")
                 ):
-                    cwe = classification["cwe-id"][0]
+                    cwe_ids = classification["cwe-id"]
+                    cwe = cwe_ids[0]
                     try:
                         finding.cwe = int(cwe[4:])
                     except ValueError:
@@ -109,6 +112,8 @@ class NucleiParser:
                         ignore CWE if non-int
                         several older templates such as https://github.com/projectdiscovery/nuclei-templates/blob/6636c0d2dd540645cc3472822beb4b3819ff8322/http/cves/2004/CVE-2004-0519.yaml#L21
                         """
+                    if cwe_ids:
+                        finding.unsaved_cwes = cwe_ids
                 if classification.get("cvss-metrics"):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
                         classification["cvss-metrics"],
@@ -149,8 +154,14 @@ class NucleiParser:
                 host,
             )
 
+            if locations_enabled():
+                dupe_host = (urlparse(matched).hostname or "") if matched else ""
+            else:
+                # TODO: Delete this after the move to Locations
+                dupe_host = str(location.host) if location else ""
+
             dupe_key = hashlib.sha256(
-                (template_id + item_type + matcher + str(location.host)).encode(
+                (template_id + item_type + matcher + dupe_host).encode(
                     "utf-8",
                 ),
             ).hexdigest()
@@ -158,14 +169,15 @@ class NucleiParser:
             if dupe_key in dupes:
                 logger.debug("dupe_key %s exists.", dupe_key)
                 finding = dupes[dupe_key]
-                if settings.V3_FEATURE_LOCATIONS:
-                    if location not in finding.unsaved_locations:
-                        finding.unsaved_locations.append(location)
-                        logger.debug("Appended location %s", location)
-                # TODO: Delete this after the move to Locations
-                elif location not in finding.unsaved_endpoints:
-                    finding.unsaved_endpoints.append(location)
-                    logger.debug("Appended endpoint %s", location)
+                if location:
+                    if locations_enabled():
+                        if location not in finding.unsaved_locations:
+                            finding.unsaved_locations.append(location)
+                            logger.debug("Appended location %s", location)
+                    # TODO: Delete this after the move to Locations
+                    elif location not in finding.unsaved_endpoints:
+                        finding.unsaved_endpoints.append(location)
+                        logger.debug("Appended endpoint %s", location)
                 finding.nb_occurences += 1
             else:
                 dupes[dupe_key] = finding

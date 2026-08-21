@@ -2,13 +2,17 @@ import logging
 import re
 import textwrap
 
+import bleach
 import html2text
+import markdown
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from lxml import etree
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
+from dojo.tools.locations import LocationData
 
 from .api_client import SonarQubeAPI
 
@@ -16,6 +20,44 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiImporter:
+    ALLOWED_RULE_DESCRIPTION_TAGS = [
+        "a",
+        "b",
+        "blockquote",
+        "br",
+        "code",
+        "em",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "i",
+        "li",
+        "ol",
+        "p",
+        "pre",
+        "strong",
+        "table",
+        "tbody",
+        "td",
+        "th",
+        "thead",
+        "tr",
+        "ul",
+    ]
+    ALLOWED_RULE_DESCRIPTION_ATTRIBUTES = {
+        "a": [
+            "href",
+            "title",
+        ],
+    }
+    ALLOWED_RULE_DESCRIPTION_PROTOCOLS = [
+        "http",
+        "https",
+        "mailto",
+    ]
 
     """
     This class imports from SonarQube (SQ) all open/confirmed SQ issues related to the project related to the test as
@@ -153,16 +195,18 @@ class SonarQubeApiImporter:
                 except KeyError:
                     sonarqube_permalink = "No permalink \n"
 
-                # custom (user defined) SQ rules may not have 'htmlDesc'
-                if "htmlDesc" in rule:
+                rule_details = self.get_rule_details(rule)
+                if rule_details:
                     description = self.clean_rule_description_html(
-                        rule["htmlDesc"],
+                        rule_details,
                     )
-                    cwe = self.clean_cwe(rule["htmlDesc"])
-                    references = sonarqube_permalink + self.get_references(rule["htmlDesc"])
+                    cwes = self.clean_cwes(rule_details)
+                    cwe = cwes[0] if cwes else None
+                    references = sonarqube_permalink + self.get_references(rule_details)
                 else:
                     description = ""
                     cwe = None
+                    cwes = []
                     references = sonarqube_permalink
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
@@ -200,6 +244,12 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=issue.get("key"),
                 )
+                if locations_enabled() and component_key:
+                    find.unsaved_locations.append(
+                        LocationData.code(file_path=component_key, line=line),
+                    )
+                if cwes:
+                    find.unsaved_cwes = cwes
                 items.append(find)
 
         except Exception as e:
@@ -281,7 +331,8 @@ class SonarQubeApiImporter:
                         "vulnerabilityDescription", "No description provided.",
                     ),
                 )
-                cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
+                cwes = self.clean_cwes(rule.get("fixRecommendations", ""))
+                cwe = cwes[0] if cwes else None
                 try:
                     sonarqube_permalink = f"[Hotspot permalink]({sonarUrl}security_hotspots?id={hotspot['project']}&hotspots={hotspot['key']}) \n"
                 except KeyError:
@@ -321,6 +372,12 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
                 )
+                if locations_enabled() and component_key:
+                    find.unsaved_locations.append(
+                        LocationData.code(file_path=component_key, line=line),
+                    )
+                if cwes:
+                    find.unsaved_cwes = cwes
                 items.append(find)
 
         except Exception as e:
@@ -338,8 +395,10 @@ class SonarQubeApiImporter:
 
     @staticmethod
     def clean_rule_description_html(raw_html):
+        if not raw_html:
+            return ""
         search = re.search(
-            r"^(.*?)(?:(<h2>See</h2>)|(<b>References</b>))",
+            r"^(.*?)(?:(<h2>See</h2>)|(<h2>References</h2>)|(<b>References</b>))",
             raw_html,
             re.DOTALL,
         )
@@ -350,11 +409,46 @@ class SonarQubeApiImporter:
         return h.handle(raw_html)
 
     @staticmethod
-    def clean_cwe(raw_html):
-        search = re.search(r"CWE-(\d+)", raw_html)
-        if search:
-            return int(search.group(1))
-        return None
+    def clean_cwes(raw_html):
+        # A single SonarQube rule can reference multiple CWEs (e.g. in the "See" section).
+        seen = set()
+        cwes = []
+        for match in re.findall(r"CWE-(\d+)", raw_html):
+            cwe = int(match)
+            if cwe not in seen:
+                seen.add(cwe)
+                cwes.append(cwe)
+        return cwes
+
+    @staticmethod
+    def get_rule_details(rule):
+        if html_desc := rule.get("htmlDesc"):
+            return SonarQubeApiImporter.sanitize_rule_details(html_desc)
+        if not (md_desc := rule.get("mdDesc")):
+            return ""
+        # SonarQube 2025.x can return markdown-only rule descriptions, including
+        # inline HTML that should still be treated as markdown content.
+        return SonarQubeApiImporter.sanitize_rule_details(
+            markdown.markdown(md_desc, extensions=["extra"]),
+        )
+
+    @staticmethod
+    def sanitize_rule_details(description):
+        if not description:
+            return ""
+        sanitized_description = re.sub(
+            r"<(script|style)\b[^>]*>.*?</\1>",
+            "",
+            description,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        return bleach.clean(
+            sanitized_description,
+            tags=SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_TAGS,
+            attributes=SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_ATTRIBUTES,
+            protocols=SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_PROTOCOLS,
+            strip=True,
+        )
 
     @staticmethod
     def convert_sonar_severity(sonar_severity):
@@ -382,6 +476,8 @@ class SonarQubeApiImporter:
 
     @staticmethod
     def get_references(vuln_details):
+        if not vuln_details:
+            return ""
         parser = etree.HTMLParser()
         details = etree.fromstring(vuln_details, parser)
 

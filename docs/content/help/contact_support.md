@@ -21,7 +21,7 @@ See our [Community Site](https://defectdojo.com/open-source) for more informatio
 
 ## DefectDojo Pro Support
 
-DefectDojo Pro subscriptions come with full support from the DefectDojo Inc. team during the initial trial period and beyond.
+DefectDojo Pro subscriptions come with full support from the DefectDojo, Inc. team during the initial trial period and beyond.
 
 ### Email
 

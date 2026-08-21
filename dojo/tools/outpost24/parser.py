@@ -1,10 +1,10 @@
 import logging
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,9 @@ class Outpost24Parser:
                     logger.debug("General port given. Assigning 0 as default.")
                     port = 0
                 # manage endpoint/location
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [
-                        URL(protocol=protocol, host=host, port=port),
+                        LocationData.url(protocol=protocol, host=host, port=port),
                     ]
                 else:
                     # TODO: Delete this after the move to Locations

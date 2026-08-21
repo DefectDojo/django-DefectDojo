@@ -5,6 +5,7 @@ draft: false
 weight: 4
 audience: opensource
 aliases:
+  - "/open_source/installation/running-in-production/"
   - /en/open_source/installation/running-in-production
 ---
 ## Production Use (with Docker compose)
@@ -33,7 +34,7 @@ With a separate database, the minimum recommendations to run DefectDojo are:
 ### Security
 Verify the `nginx` configuration and other run-time aspects such as security headers to comply with your compliance requirements.
 Change the AES256 encryption key `&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw` in `docker-compose.yml` to something unique for your instance.
-This encryption key is used to encrypt API keys and other credentials stored in Defect Dojo to connect to external tools such as SonarQube. A key can be generated in various ways for example using a password manager or `openssl`:
+This encryption key is used to encrypt Tool Configuration credentials, for example the SonarQube credentials. It does not cover every credential DefectDojo stores, so treat the database and its backups as carrying secrets in their own right rather than relying on this key alone. A key can be generated in various ways for example using a password manager or `openssl`:
 
 ```
      openssl rand -base64 32

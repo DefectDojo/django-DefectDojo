@@ -1,14 +1,18 @@
 ---
-title: "MCP Server (Pro)"
+title: "MCP Server"
 description: "DefectDojo's MCP Server allows you to use LLMs with DefectDojo Pro"
 draft: false
-weight: 2
+audience: pro
+weight: 23
 aliases:
   - /en/ai/mcp_server_pro
 ---
+
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: AI features are a DefectDojo Pro-only feature.</span>
 
 The DefectDojo Model Context Protocol (MCP) Server enables Large Language Models (LLMs) to intelligently interact with DefectDojo's vulnerability management data. Unlike traditional API integrations that simply transfer data, the MCP server provides structured context and semantic meaning that enables AI assistants to perform sophisticated security analysis and generate actionable insights.
+
+> **Naming:** The UI labels these objects **Assets** and **Organizations**. The MCP tool names keep the original names — `get_products` returns Assets and `get_product_types` returns Organizations.
 
 - **Structured Context:** MCP provides semantic meaning to DefectDojo data, not just raw data transfer
 - **Pre-Processed Data:** DefectDojo's normalized, deduplicated data eliminates LLM preprocessing burden
@@ -70,6 +74,11 @@ All methods use these core parameters:
 | **Authentication** | `Authorization: Token [YOUR_API_TOKEN]` | ⚠️ Use "Token" prefix, not "Bearer" |
 
 ## Quick Start Guides by AI Provider
+
+> **💡 Using Claude Code?** Do not configure it by hand. The
+> [Claude Code Plugin](../claude_code_plugin/) wires up this MCP server for you
+> in two commands, and adds the write operations these read-only tools do not
+> cover, such as changing finding status and importing scans.
 
 <details>
 <summary><h3>🖥️ Claude Desktop (Method 1: Configuration File)</h3></summary>
@@ -301,7 +310,7 @@ Once connected, you can explore:
 
 ## Available Tools Reference
 
-The DefectDojo MCP Server provides 12 tools for accessing and analyzing vulnerability data. Each tool includes intelligent parameter handling and returns structured data optimized for LLM analysis.
+The DefectDojo MCP Server provides 14 tools for accessing and analyzing vulnerability data. Each tool includes intelligent parameter handling and returns structured data optimized for LLM analysis.
 
 > **💡 Parameter Note:** All tools accept an optional `token` parameter. If not provided in individual calls, the LLM will use the token from the connection configuration.
 
@@ -383,20 +392,79 @@ get_findings({
 
 </details>
 
+<details>
+<summary><h4>finding_summary</h4></summary>
+
+**Description:** Retrieve aggregate finding metrics in a single call, rather than fetching findings and counting them. Returns counts by severity, average priority and risk score, average finding age, and the most common CWEs.
+
+**Parameters:**
+
+**product_id** (Optional)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** Scope the summary to a single product.
+
+**engagement_id** (Optional)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** Scope the summary to a single engagement.
+
+**date** (Optional)
+- **Type:** Array with single string value
+- **Values:** `0 - Any date`, `1 - Today`, `2 - Past 7 days`, `3 - Past 30 days`, `4 - Past 90 days`, `5 - Current month`, `6 - Current year`, `7 - Past year`
+- **Example:** `["3 - Past 30 days"]`
+- **Usage:** Restrict the summary to findings discovered in the period.
+
+> **💡 Best Practice:** Use this instead of `get_findings` whenever the question is "how many" or "what is the spread". One summary call replaces paging through findings and counting them, and the counts stay correct beyond the 100-record page limit.
+
+**Example Query:**
+
+**User asks:** "Give me a severity breakdown for the payments product over the last quarter"
+
+**LLM calls:**
+```
+finding_summary({
+  product_id: 42,
+  date: ["4 - Past 90 days"]
+})
+```
+
+</details>
+
+<details>
+<summary><h4>risk_summary</h4></summary>
+
+**Description:** Retrieve the aggregate risk posture for a single product, including average priority, risk score, active finding counts, and business criticality.
+
+**Parameters:**
+
+**product_id** (Required)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** The product to summarize.
+
+**Example Query:**
+
+**User asks:** "How risky is the payments API right now?"
+
+**LLM calls:** `risk_summary({ product_id: 42 })`
+
+</details>
+
 ---
 
-### 📦 Product & Engagement Tools
+### 📦 Asset & Engagement Tools
 
 <details>
 <summary><h4>get_products</h4></summary>
 
-**Description:** Retrieve all products from DefectDojo. Products represent applications, services, or systems being tested.
+**Description:** Retrieve all Assets from DefectDojo. Assets represent applications, services, or systems being tested.
 
 **Parameters:**
 
 **limit** (Optional)
 - **Default:** 100
-- **Usage:** Maximum number of products to return.
+- **Usage:** Maximum number of Assets to return.
 
 **offset** (Optional)
 - **Default:** 0
@@ -407,7 +475,7 @@ get_findings({
 <details>
 <summary><h4>get_product_types</h4></summary>
 
-**Description:** Retrieve product type categories from DefectDojo. Product types help organize products into logical groupings.
+**Description:** Retrieve Organizations from DefectDojo. Organizations help organize Assets into logical groupings.
 
 **Parameters:** Same as `get_products`
 
@@ -416,7 +484,7 @@ get_findings({
 <details>
 <summary><h4>get_engagements</h4></summary>
 
-**Description:** Retrieve security testing engagements. Engagements represent specific testing activities or time periods for a product.
+**Description:** Retrieve security testing engagements. Engagements represent specific testing activities or time periods for an Asset.
 
 **Parameters:** Same as `get_products`
 
@@ -543,7 +611,7 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 
 - Vulnerability trends over past 90 days
 - Development teams with highest critical/high severity findings
-- Risk exposure by product and product type
+- Risk exposure by Asset and Organization
 - Top 5 CWE categories requiring immediate attention
 - Specific remediation actions with cost-benefit analysis
 - 6-month roadmap for improving security posture
@@ -577,10 +645,10 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 1. `get_findings` - Get total active finding counts
 2. `get_findings` - Critical and High severity analysis
 3. `get_findings` - 90-day trending data
-4. `get_products` - Product vulnerability distribution
+4. `get_products` - Asset vulnerability distribution
 5. `get_engagements` - Recent testing activities
 
-**Generated Output:** Executive-level HTML report with vulnerability trends, risk exposure by product, top CWE categories, specific remediation actions with ROI, and 6-month security roadmap.
+**Generated Output:** Executive-level HTML report with vulnerability trends, risk exposure by Asset, top CWE categories, specific remediation actions with ROI, and 6-month security roadmap.
 
 ---
 
@@ -599,7 +667,7 @@ training programs for each team."
 **What happens behind the scenes:**
 
 1. `get_findings` - All active findings
-2. `get_products` - Link findings to products/teams
+2. `get_products` - Link findings to Assets/teams
 3. `get_groups` - Team organization structure
 4. `get_users` - Individual developer accountability
 
@@ -753,7 +821,7 @@ Your AI assistant automatically links findings to organizational context. Simply
 "Which products have the most critical vulnerabilities and who is responsible for fixing them?"
 ```
 
-**Behind the scenes:** AI links findings → tests → engagements → products → users/groups for complete context
+**Behind the scenes:** AI links findings → tests → engagements → Assets → users/groups for complete context
 
 ### Vulnerability Intelligence Analysis
 
@@ -782,7 +850,7 @@ AI calculates time since discovery and flags findings exceeding SLA thresholds.
 "Which products have the highest vulnerability density and represent the greatest risk?"
 ```
 
-AI calculates findings per product and generates risk scores combining severity and volume.
+AI calculates findings per Asset and generates risk scores combining severity and volume.
 
 ### Report Enhancement Standards
 

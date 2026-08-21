@@ -4,17 +4,41 @@ import io
 import re
 
 from dateutil.parser import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
+
+
+class _MutableLocationParts:
+
+    """Mutable container for building location data incrementally before creating a frozen LocationData."""
+
+    def __init__(self):
+        self.host = ""
+        self.port = None
+        self.protocol = ""
+
+    def __str__(self):
+        parts = []
+        if self.protocol:
+            parts.append(f"{self.protocol}://")
+        if self.host:
+            parts.append(self.host)
+        if self.port:
+            parts.append(f":{self.port}")
+        return "".join(parts)
+
+    def to_location_data(self):
+        return LocationData.url(host=self.host, port=self.port, protocol=self.protocol)
 
 
 def get_location(finding: Finding):
+    """Get the mutable location object for building up location data incrementally."""
     # TODO: Delete this after the move to Locations
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         return finding.unsaved_endpoints[0]
-    return finding.unsaved_locations[0]
+    return finding._location_builder
 
 
 class ColumnMappingStrategy:
@@ -297,8 +321,8 @@ class OpenVASCSVParser:
         for row_number, row in enumerate(reader):
             finding = Finding(test=test)
             finding.unsaved_vulnerability_ids = []
-            if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [URL()]
+            if locations_enabled():
+                finding._location_builder = _MutableLocationParts()
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint()]
@@ -322,6 +346,8 @@ class OpenVASCSVParser:
                     finding.title = ""
                 if finding.description is None:
                     finding.description = ""
+                if locations_enabled():
+                    finding.unsaved_locations.append(finding._location_builder.to_location_data())
                 key = hashlib.sha256(
                     (
                         str(get_location(finding))

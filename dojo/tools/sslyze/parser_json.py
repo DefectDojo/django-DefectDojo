@@ -1,9 +1,8 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 # TODO: discuss this list as maintenance subject
 # Recommended cipher suites according to German BSI as of 2020
@@ -592,7 +591,7 @@ def get_finding(
     if vulnerability_id:
         finding.unsaved_vulnerability_ids = [vulnerability_id]
     if location is not None:
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations.append(location)
         else:
             # TODO: Delete this after the move to Locations
@@ -603,10 +602,16 @@ def get_finding(
 def get_url(location):
     url = "unknown host"
     if location is not None:
-        if location.host is not None:
-            url = location.host
-        if location.port is not None:
-            url = url + ":" + str(location.port)
+        if locations_enabled():
+            host = location.data.get("host") if location.data else None
+            port = location.data.get("port") if location.data else None
+        else:
+            host = location.host
+            port = location.port
+        if host is not None:
+            url = host
+        if port is not None:
+            url = url + ":" + str(port)
     return url
 
 
@@ -631,7 +636,7 @@ def get_location(node):
 
     if hostname is not None:
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return Endpoint(host=hostname, port=port)
-        return URL(host=hostname, port=port)
+        return LocationData.url(host=hostname, port=port)
     return None

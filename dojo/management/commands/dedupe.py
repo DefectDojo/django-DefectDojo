@@ -1,3 +1,4 @@
+import argparse
 import logging
 
 import pghistory
@@ -11,13 +12,16 @@ from dojo.finding.deduplication import (
     do_dedupe_finding_task,
     do_dedupe_finding_task_internal,
     get_finding_models_for_deduplication,
+    hashcode_values_writer,
 )
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Product
 from dojo.utils import (
     calculate_grade,
     get_system_setting,
     mass_model_updater,
 )
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -53,7 +57,7 @@ class Command(BaseCommand):
         parser.add_argument("--dedupe_sync", action="store_true", help="Run dedupe in the foreground, default false")
         parser.add_argument(
             "--dedupe_batch_mode",
-            action="store_true",
+            action=argparse.BooleanOptionalAction,
             default=True,
             help="Deduplicate in batches (similar to import), works with both sync and async modes (default: True)",
         )
@@ -89,12 +93,16 @@ class Command(BaseCommand):
             findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             # Prefetch related objects for synchronous deduplication
             findings = findings.select_related(
                 "test", "test__engagement", "test__engagement__product", "test__test_type",
             ).prefetch_related(
                 "locations",
+                # vulnerability id store feeds hash_code computation for parsers whose
+                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
+                # a per-finding query in get_vulnerability_ids().
+                vulnerability_id_prefetch(),
                 Prefetch(
                     "original_finding",
                     queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
@@ -107,6 +115,10 @@ class Command(BaseCommand):
                 "test", "test__engagement", "test__engagement__product", "test__test_type",
             ).prefetch_related(
                 "endpoints",
+                # vulnerability id store feeds hash_code computation for parsers whose
+                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
+                # a per-finding query in get_vulnerability_ids().
+                vulnerability_id_prefetch(),
                 Prefetch(
                     "original_finding",
                     queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
@@ -117,7 +129,8 @@ class Command(BaseCommand):
         if not dedupe_only:
             logger.info("######## Start Updating Hashcodes (foreground) ########")
 
-            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ")
+            hash_code_writer = hashcode_values_writer if settings.MASS_HASH_CODE_USE_SQL_WRITER else None
+            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ", writer=hash_code_writer)
 
             logger.info("######## Done Updating Hashcodes########")
 
@@ -130,12 +143,13 @@ class Command(BaseCommand):
                 elif dedupe_sync:
                     mass_model_updater(Finding, findings, do_dedupe_finding_task_internal, fields=None, order="desc", page_size=100, log_prefix="deduplicating ")
                 else:
-                    # async tasks only need the id
+                    # async tasks only need the id; clear select/prefetch_related to avoid
+                    # FieldError when combining only("id") with select_related traversal
                     from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
                     mass_model_updater(
                         Finding,
-                        findings.only("id"),
+                        findings.select_related(None).prefetch_related(None).only("id"),
                         lambda f: dojo_dispatch_task(do_dedupe_finding_task, f.id),
                         fields=None,
                         order="desc",
@@ -169,7 +183,11 @@ class Command(BaseCommand):
         logger.info(f"Processing {total_findings} findings in batches of max {batch_max_size} per test ({mode_str})")
 
         # Group findings by test_id to process them in batches per test
-        test_ids = findings_queryset.values_list("test_id", flat=True).distinct()
+        # Use order_by("test_id") to override the Finding model's default ordering
+        # (numerical_severity, date, title, ...). Without this, Django includes those
+        # ordering columns in the SELECT for DISTINCT, making test_ids non-unique and
+        # causing the same test to be processed multiple times.
+        test_ids = findings_queryset.order_by("test_id").values_list("test_id", flat=True).distinct()
         total_tests = len(test_ids)
         total_processed = 0
 

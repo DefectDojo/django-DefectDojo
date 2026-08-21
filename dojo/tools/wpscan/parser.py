@@ -2,10 +2,9 @@ import datetime
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class WpscanParser:
@@ -152,8 +151,8 @@ class WpscanParser:
                     interesting_finding.get("confidence"),
                 ),
             )
-            if settings.V3_FEATURE_LOCATIONS:
-                location = URL.from_value(interesting_finding["url"])
+            if locations_enabled():
+                location = LocationData.url(url=interesting_finding["url"])
                 finding.unsaved_locations = [location]
             else:
                 # TODO: Delete this after the move to Locations

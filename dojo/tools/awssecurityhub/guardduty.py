@@ -1,9 +1,8 @@
 import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 SEVERITY_MAP = {
     "INFORMATIONAL": "Info",
@@ -62,8 +61,8 @@ class GuardDuty:
             component_name = resource.get("Type")
             if component_name in {"AwsEcrContainerImage", "AwsEc2Instance"}:
                 host_value = f"{component_name}_{resource.get('Id')}".replace(":", "_").replace("/", "_")
-                if settings.V3_FEATURE_LOCATIONS:
-                    locations.append(URL(host=host_value))
+                if locations_enabled():
+                    locations.append(LocationData.url(host=host_value))
                 else:
                     # TODO: Delete this after the move to Locations
                     locations.append(Endpoint(host=host_value))
@@ -104,7 +103,7 @@ class GuardDuty:
             dynamic_finding=False,
             component_name=component_name,
         )
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             result.unsaved_locations = locations
         else:
             # TODO: Delete this after the move to Locations

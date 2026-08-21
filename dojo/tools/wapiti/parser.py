@@ -3,10 +3,10 @@ import logging
 import re
 
 from defusedxml.ElementTree import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -54,15 +54,21 @@ class WapitiParser:
             mitigation = vulnerability.findtext("solution")
             # manage references
             cwe = None
+            cwes = []
             references = []
             for reference in vulnerability.findall("references/reference"):
                 reference_title = reference.findtext("title")
                 if reference_title.startswith("CWE"):
-                    cwe = self.get_cwe(reference_title)
+                    ref_cwe = self.get_cwe(reference_title)
+                    if ref_cwe is not None:
+                        cwes.append(ref_cwe)
                 references.append(
                     f"* [{reference_title}]({reference.findtext('url')})",
                 )
             references = "\n".join(references)
+            # first CWE stays the primary; all are collected in cwes
+            if cwes:
+                cwe = cwes[0]
 
             for entry in vulnerability.findall("entries/entry"):
                 title = category + ": " + entry.findtext("info")
@@ -82,9 +88,11 @@ class WapitiParser:
                 )
                 if cwe:
                     finding.cwe = cwe
+                if cwes:
+                    finding.unsaved_cwes = cwes
 
-                if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations = [URL.from_value(url)]
+                if locations_enabled():
+                    finding.unsaved_locations = [LocationData.url(url=url)]
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -100,7 +108,7 @@ class WapitiParser:
                 # check if dupes are present.
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         # TODO: Delete this after the move to Locations

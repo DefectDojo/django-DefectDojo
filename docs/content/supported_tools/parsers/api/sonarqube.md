@@ -1,7 +1,15 @@
 ---
 title: "SonarQube API Import"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/api/sonarqube/"
 ---
+> **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
+>
+> The **SonarQube API Import** pull parser, and the **Tool Configuration** setup described below, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
+>
+> **Migrate to:** the [SonarQube connector](/connectors/upstream/toolreference/#sonarqube) (DefectDojo Pro), or import a SonarQube report as a [file](../../file/sonarqube) — file import is not affected by this deprecation.
+
 All parsers that use API pull have common basic configuration steps, but with different values. Please, [read these steps](../) first.
 
 ## Tool Configuration
@@ -17,7 +25,7 @@ SonarCloud, you must also specify the Organization ID in the "Extras" field (e.g
 separate the items in the "Extras" field by a vertical bar (e.g. 
 `BUG,VULNERABILITY,CODE_SMELL|OrgID=sonarcloud-organzation-ID`)
 
-## Product-Level Configuration
+## Asset-Level Configuration
 
 In `Add API Scan Configuration`
 -   `Service key 1` must
@@ -25,17 +33,34 @@ In `Add API Scan Configuration`
     selecting the value from the url
     `https://<sonarqube_host>/dashboard?id=key`.
     When you do not provide a SonarQube project key, DefectDojo will
-    use the name of the Product as the project key in SonarQube. If you would like to
+    use the name of the Asset as the project key in SonarQube. If you would like to
     import findings from multiple projects, you can specify multiple keys as
     separated `API Scan Configuration` in the `Product` settings.
 -   If using SonarCloud, the organization ID can be used from step 1, but it
     can be overridden by supplying a different organization ID in the `Service key 2` input field.
 
+## Disabling Hotspot Imports
+
+By default, the SonarQube API Import includes both security issues and security hotspots. To import only security issues and exclude hotspots, set the following environment variable on your DefectDojo instance:
+
+```
+DD_SONARQUBE_API_PARSER_HOTSPOTS=False
+```
+
+For on-premise installations using the dojo-compose-cli:
+
+```bash
+dojo-compose-cli environment add --key DD_SONARQUBE_API_PARSER_HOTSPOTS --value "False"
+dojo-compose-cli app stop && dojo-compose-cli app start
+```
+
+Note that this setting is instance-wide and affects all SonarQube API imports. There is currently no per-tool-configuration or per-import toggle for hotspots. If you need hotspots for some projects but not others, you will need to build a custom middleware to filter results before importing.
+
 ## Multiple SonarQube API Configurations
 
 In the import or re-import dialog, you can select which `API Scan
 Configuration` shall be used. If you do not choose
-any, DefectDojo will use the `API Scan Configuration` of the Product if there is
+any, DefectDojo will use the `API Scan Configuration` of the Asset if there is
 only one defined or the SonarQube `Tool Configuration` if there is only one.
 
 ## Multi-Branch Scanning

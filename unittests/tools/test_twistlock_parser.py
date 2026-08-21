@@ -188,3 +188,23 @@ class TestTwistlockParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
+
+    def test_parse_file_with_package_name_fixture(self):
+        testfile = (get_unit_tests_scans_path("twistlock") / "packagename.json").open(encoding="utf-8")
+        parser = TwistlockParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+
+        self.assertEqual(1, len(findings))
+
+        finding = findings[0]
+        self.assertEqual("CVE-2025-48913: org.apache.cxf_cxf-core - 3.5.11", finding.title)
+        self.assertEqual("Critical", finding.severity)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2025-48913", finding.unsaved_vulnerability_ids[0])
+        self.assertEqual("org.apache.cxf_cxf-core", finding.component_name)
+        self.assertEqual("3.5.11", finding.component_version)
+        self.assertEqual("2026-03-18", finding.date)
+        self.assertIn("Image ID:", finding.impact)
+        self.assertIn("Distribution:", finding.impact)
+        self.assertEqual("/opt/vendor/component-kit/libs/cxf-core-3.5.11.jar", finding.file_path)

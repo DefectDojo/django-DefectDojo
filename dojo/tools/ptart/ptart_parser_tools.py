@@ -2,11 +2,11 @@ import pathlib
 from datetime import datetime
 
 import cvss
-from django.conf import settings
 from django.core.exceptions import ValidationError
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 ATTACHMENT_ERROR = "Attachment data not found"
 SCREENSHOT_ERROR = "Screenshot data not found"
@@ -168,7 +168,7 @@ def parse_locations_from_hit(hit):
         # If there's no protocol, it will assume the hostname is the protocol.
         asset = f"https://{asset}" if "://" not in asset else asset
         # TODO: Delete this after the move to Locations
-        location = URL.from_value(asset) if settings.V3_FEATURE_LOCATIONS else Endpoint.from_uri(asset)
+        location = LocationData.url(url=asset) if locations_enabled() else Endpoint.from_uri(asset)
     except ValidationError:
         location = None
     return [] if not location else [location]
@@ -207,9 +207,24 @@ def parse_cwe_from_hit(hit):
     if "cwes" not in hit or not hit["cwes"]:
         return None
     cwes = hit["cwes"]
+    if not (isinstance(cwes, list) and len(cwes) > 0):
+        return None
     # Grab the last CWE in the list, as it's sorted in numerical order,
     # and the last element is generally the most specific.
-    return parse_cwe_id_from_cwe(cwes.pop()) if cwes and isinstance(cwes, list) and len(cwes) > 0 else None
+    return parse_cwe_id_from_cwe(cwes[-1])
+
+
+def parse_cwes_from_hit(hit):
+    # Return the full list of CWE ids for the hit (empties dropped),
+    # preserving order. The primary CWE remains the last element (see
+    # parse_cwe_from_hit).
+    if "cwes" not in hit or not hit["cwes"]:
+        return []
+    cwes = hit["cwes"]
+    if not isinstance(cwes, list):
+        return []
+    parsed = [parse_cwe_id_from_cwe(cwe) for cwe in cwes]
+    return [cwe_id for cwe_id in parsed if cwe_id is not None]
 
 
 def parse_cwe_id_from_cwe(cwe):

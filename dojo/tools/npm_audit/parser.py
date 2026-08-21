@@ -2,8 +2,10 @@ import json
 import logging
 import re
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
-from dojo.tools.utils import get_npm_cwe
+from dojo.tools.locations import LocationData
+from dojo.tools.utils import get_npm_cwe, get_npm_cwes
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +100,7 @@ def get_item(item_node, test):
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
     cwe = get_npm_cwe(item_node)
+    cwes = get_npm_cwes(item_node)
     try:
         filepath = censor_path_hashes(item_node["findings"][0]["paths"][0])
     except IndexError:
@@ -142,9 +145,17 @@ def get_item(item_node, test):
         dynamic_finding=False,
     )
 
+    if cwes:
+        dojo_finding.unsaved_cwes = cwes
+
     if len(item_node["cves"]) > 0:
         dojo_finding.unsaved_vulnerability_ids = []
         for vulnerability_id in item_node["cves"]:
             dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
+
+    if locations_enabled() and item_node["module_name"] and component_version:
+        dojo_finding.unsaved_locations.append(
+            LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=component_version, file_path=filepath),
+        )
 
     return dojo_finding

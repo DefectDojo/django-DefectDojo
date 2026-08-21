@@ -1,5 +1,5 @@
 from dojo.models import Product, Product_Type
-from dojo.product_type.views import prefetch_for_product_type
+from dojo.product_type.ui.views import prefetch_for_product_type
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 

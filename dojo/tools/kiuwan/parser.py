@@ -2,7 +2,9 @@ import csv
 import hashlib
 import io
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 __author__ = "dr3dd589"
 
@@ -107,6 +109,13 @@ class KiuwanParser:
             if cwe := row.get("CWE"):
                 if cwe.isdigit():
                     finding.cwe = int(cwe)
+
+            if locations_enabled() and finding.file_path:
+                line = findingdict["line_number"]
+                line = int(line) if line is not None and str(line).isdigit() else None
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=finding.file_path, line=line, snippet=row["Line text"]),
+                )
 
             if finding is not None:
                 if finding.title is None:

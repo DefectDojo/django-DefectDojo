@@ -1,0 +1,91 @@
+---
+title: "Fixing Findings with Sensei"
+description: "Scan, triage auto-fix candidates, and open fix pull requests"
+draft: false
+audience: pro
+weight: 3
+---
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature and is currently in BETA.</span>
+
+Once a repository is onboarded, Sensei surfaces directly on your findings and on the Sensei hub. This page covers scanning a repository, triaging auto-fix candidates, and remediating individual findings. You need at least **Writer** access to a finding's Asset to trigger a fix.
+
+## Finding your way around the Sensei hub
+
+The hub's toggle selects which **view** you are looking at:
+
+- **Repositories** — the repositories onboarded to Sensei, with their status and row actions.
+- **Auto-fix Candidates** — findings staged for approval.
+- **Scan Activity** — the ledger of every scan and fix run.
+
+If an administrator enabled in-repo CI scanning, the Repositories view also offers a **Scanning** choice between **DefectDojo-hosted** and **In-repo CI**. This selects where scans run for the repositories listed; it is not a separate view, so auto-fix candidates and scan activity always cover every onboarded repository regardless of where its scans run. With CI mode off (the default) there is nothing to choose and the control is not shown.
+
+## Scan a repository
+
+Scans import findings into an engagement named after the branch. You can trigger a scan on demand from the Sensei hub: open a repository's row actions and choose **Scan now**.
+
+![Scan with Sensei dialog](images/scan_dialog.png)
+
+Pick the branch to scan (it defaults to the repository's default branch) and choose **Start scan**. In DefectDojo-hosted mode, scans also run automatically when a pull request is opened.
+
+## The Sensei column on findings
+
+Onboarded repositories add a **Sensei** column to the findings table. Each finding shows a **Fix** button (or its current fix status), so you can remediate without leaving your triage view.
+
+![Sensei column on the findings table](images/findings_sensei_column.png)
+
+The button has two states:
+
+- **Fix:** the finding's Asset is onboarded to Sensei. Clicking it starts a remediation.
+- **Configure Asset:** the finding's Asset is **not** onboarded yet. Clicking it takes you to Sensei to onboard a repository for that Asset; once onboarded, the button becomes **Fix**.
+
+## Fix a single finding
+
+Clicking **Fix** (on the findings table or in a finding's detail header) opens the **Fix with Sensei** dialog. Choose the base branch the fix pull request should target, then click **Fix**.
+
+![Fix with Sensei dialog](images/fix_with_sensei_dialog.png)
+
+Sensei generates a remediation and opens a pull request. The finding's fix status is shown as a badge that moves through *in progress* → *PR open* → *PR merged* (or *failed*). Once the pull request is open, the badge links straight to it.
+
+![Finding detail with fix status badge](images/finding_detail_fix.png)
+
+> **💡 One fix, one PR:** each approved fix consumes one fix from your quota and opens one pull request. Review and merge the PR in GitHub as you would any other.
+
+### A fix does not close the finding on its own
+
+The pull request changes your code; it does not change what is running. So the finding **stays open** after Sensei fixes it, and the badge says which step is still outstanding:
+
+- **PR open** — the change is waiting to be reviewed and merged.
+- **PR merged** — merged, but not yet deployed.
+
+What closes the finding is the next scan that sees the fix in place. For code scanning that is the next scan of the branch you merged into. For findings that come from a cloud account, it is the next scan *after the infrastructure change is applied* — the scanner reads the account, not your repository, so merging Terraform does not change what it reports.
+
+While a fix is outstanding, the same finding may keep being reported by each new scan. Sensei recognises those as the same underlying issue and will not stage another candidate or open a second pull request for it, so a slow review or deploy does not consume extra fixes.
+
+## Auto-fix candidate triage
+
+When a repository has automated fixes enabled, each scan stages matching findings as **candidates** on the **Auto-fix Candidates** tab of the Sensei hub. This is Sensei's preview-first model: findings are staged, but **nothing runs (no LLM cost) until you approve**. Approving opens fix pull requests and consumes fixes.
+
+![Auto-fix candidate triage](images/auto_fix_candidates.png)
+
+Each candidate shows the finding, its status, severity, risk, priority, target repository, and PR branch. To remediate:
+
+- **Approve one:** click **Approve** on a row to open the branch picker and start that fix.
+- **Approve several:** select multiple rows and use the bulk approve action.
+
+Approved findings stay listed as **In Progress** (or **Failed**) until their pull request is attached, so an in-flight or failed fix never disappears before it produces a PR.
+
+> **🔎 Hands-off remediation:** if you enabled *Automatically remediate candidates* on the repository, a background check opens fix PRs for staged candidates automatically, up to your fix quota, without manual approval.
+
+## Track scans and impact
+
+Two places on the Sensei hub help you follow what Sensei has done:
+
+- **Scan Activity:** a ledger of every scan and fix run, with its mode (Branch Scan, PR Scan, Fix (Finding)), trigger (Manual, Webhook, Auto Remediated), status, execution time, and links to the engagement or the pull request it produced.
+
+  ![Scan Activity ledger](images/scan_activity.png)
+
+- **Fix Impact:** a summary of fixes applied, with the assets fixed most often, at the top of the hub.
+
+  ![Fix Impact panel](images/fix_impact.png)
+
+Use the **Scan now**, **Scan history**, **Configure**, and **Re-stage candidates** row actions to manage each onboarded repository over time (see [Reference](/sensei/sensei_reference/#repository-row-actions)).

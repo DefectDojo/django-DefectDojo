@@ -35,7 +35,13 @@ class URLForm(forms.ModelForm):
         url = super().save(commit=False)
         if commit:
             url = super().save(commit=True) if update_only else URL.get_or_create_from_object(url)
-            url.location.tags.set(self.cleaned_data["tags"])
+            # Replacing the shared tag set is only safe on an edit of a Location no other
+            # product references. The add path cannot tell: the reference it creates does not
+            # exist yet at this point.
+            if update_only and url.location.products.count() <= 1:
+                url.location.tags.set(self.cleaned_data["tags"])
+            else:
+                url.location.tags.add(*self.cleaned_data["tags"])
         return url
 
 

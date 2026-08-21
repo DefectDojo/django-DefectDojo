@@ -9,6 +9,7 @@ from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
     cleanup_openvas_text,
     deduplicate,
+    finalize_location,
     get_location,
     is_valid_severity,
     postprocess_finding,
@@ -37,6 +38,7 @@ def get_findings_from_csv(file, test) -> list[Finding]:
         for column_value, column_name in zip(row, column_names, strict=False):
             parser.process_column(column_name, column_value, finding, aux_info)
 
+        finalize_location(finding)
         postprocess_finding(finding, aux_info)
         deduplicate(dupes, finding)
 

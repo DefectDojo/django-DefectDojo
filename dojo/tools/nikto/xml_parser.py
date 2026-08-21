@@ -3,11 +3,11 @@ import logging
 import re
 
 from defusedxml import ElementTree
-from django.conf import settings
 from django.core.exceptions import ValidationError
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +63,8 @@ class NiktoXMLParser:
             # endpoint/location
             try:
                 ip = item.findtext("iplink")
-                if settings.V3_FEATURE_LOCATIONS:
-                    location = URL.from_value(ip)
+                if locations_enabled():
+                    location = LocationData.url(url=ip)
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations
@@ -76,7 +76,7 @@ class NiktoXMLParser:
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.description += "\n-----\n" + finding.description
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.extend(finding.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations

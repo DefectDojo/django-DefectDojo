@@ -2,7 +2,9 @@ from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class HCLASoCSASTParser:
@@ -146,6 +148,10 @@ class HCLASoCSASTParser:
                     dynamic_finding=False,
                     static_finding=True,
                 )
+                if locations_enabled() and location:
+                    prepared_finding.unsaved_locations.append(
+                        LocationData.code(file_path=location, line=line),
+                    )
                 findings.append(prepared_finding)
             return findings
         return findings

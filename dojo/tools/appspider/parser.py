@@ -1,9 +1,9 @@
 import html2text
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class AppSpiderParser:
@@ -72,8 +72,8 @@ class AppSpiderParser:
 
                 find.unsaved_req_resp.append({"req": req, "resp": resp})
 
-            if settings.V3_FEATURE_LOCATIONS:
-                find.unsaved_locations.append(URL.from_value(vuln_url))
+            if locations_enabled():
+                find.unsaved_locations.append(LocationData.url(url=vuln_url))
             else:
                 # TODO: Delete this after the move to Locations
                 find.unsaved_endpoints.append(Endpoint.from_uri(vuln_url))
@@ -81,7 +81,7 @@ class AppSpiderParser:
             if dupe_key in dupes:
                 orig_finding = dupes[dupe_key]
                 orig_finding.unsaved_request.extend(find.unsaved_req_resp)
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     orig_finding.unsaved_locations.extend(find.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations

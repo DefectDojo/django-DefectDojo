@@ -4,10 +4,10 @@ import datetime
 import re
 
 from defusedxml.ElementTree import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class PingCastleParser:
@@ -79,11 +79,11 @@ class PingCastleParser:
             if cves:
                 finding.unsaved_vulnerability_ids = cves
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if self._is_dc_specific_risk(risk_id, model, rationale):
                     finding.unsaved_locations.extend(dc_locations)
                 elif domain_fqdn:
-                    finding.unsaved_locations.append(URL(host=domain_fqdn))
+                    finding.unsaved_locations.append(LocationData.url(host=domain_fqdn))
             # TODO: Delete this after the move to Locations
             elif self._is_dc_specific_risk(risk_id, model, rationale):
                 finding.unsaved_endpoints.extend(dc_locations)
@@ -100,7 +100,7 @@ class PingCastleParser:
             if dupe_key in dupes:
                 existing = dupes[dupe_key]
                 existing.description += "\n\n-----\n\n" + finding.description
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     existing.unsaved_locations.extend(finding.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -164,10 +164,10 @@ class PingCastleParser:
                     "function": rpc.attrib.get("Function", ""),
                 })
             dc_infos.append(dc_info)
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 if name:
-                    locations.append(URL(host=name))
-                locations.extend(URL(host=ip) for ip in ips)
+                    locations.append(LocationData.url(host=name))
+                locations.extend(LocationData.url(host=ip) for ip in ips)
             else:
                 # TODO: Delete this after the move to Locations
                 if name:

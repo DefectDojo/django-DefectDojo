@@ -8,10 +8,10 @@ aliases:
 ---
 If you have a brand new DefectDojo instance, the Import Scan Form is a logical first step to learn the software and set up your environment. From this form, you upload a scan file from a supported tool, which will create Findings to represent those vulnerabilities. While filling out the form, you can decide whether to:
 
-* Store these Findings under an existing Product Type / Product / Engagement **or**
-* Create a new Product Type / Product / Engagement to store these Findings
+* Store these Findings under an existing Organization / Asset / Engagement **or**
+* Create a new Organization / Asset / Engagement to store these Findings
 
-It’s easy to reorganize your Product Hierarchy in DefectDojo, so it’s ok if you’re not sure how to set things up yet. 
+It’s easy to reorganize your Asset Hierarchy in DefectDojo, so it’s ok if you’re not sure how to set things up yet. 
 
 For now, it’s good to know that **Engagements** can store data from multiple tools, which can be useful if you’re running different tools concurrently as part of a single testing effort.
 
@@ -20,8 +20,8 @@ For now, it’s good to know that **Engagements** can store data from multiple t
 The Import Scan form can be accessed from multiple locations:
 
 1. Via the **Import > Add Findings** menu option on the sidebar
-2. From a **Product’s** **‘⋮’ (horizontal dots) Menu**, from a **Products Table**
-3. From the **⚙️Gear Menu** on a **Product Page**
+2. From a **Asset’s** **‘⋮’ (horizontal dots) Menu**, from a **Assets Table**
+3. From the **⚙️Gear Menu** on a **Asset Page**
 
 ## Completing the Import Scan Form
 
@@ -35,7 +35,7 @@ The Test will be created with a name that matches the Scan Type: e.g. a Tenable 
 * **Scan Date (optional):** if you want to select a single Scan Date to be applied to all Findings that result from this import, you can select the date in this field.   
 If you do not select a Scan Date, Findings created from this report will use the date specified by the tool. SLAs for each Finding will be calculated based on their date.
 * **Scan Type:** select the tool used to create this data.
-* **Product Type / Product / Engagement Name:** select the Product Type, Product, and Engagement Name which you want to create a new Test under. You can also create a new Product Type, Product and/or Engagement at this time if you wish to, by entering the names of the objects that you want to create.
+* **Organization / Asset / Engagement Name:** select the Organization, Asset, and Engagement Name which you want to create a new Test under. You can also create a new Organization, Asset and/or Engagement at this time if you wish to, by entering the names of the objects that you want to create.
 * **Environment:** select an Environment that corresponds to the data you’re uploading.
 * **Tags:** if you want to use tags to further organize your Test data, you can add Tags using this form. Type in the name of the tag you want to create, and press Enter on your keyboard to add it to the list of tags.
 * **Process Findings Asynchronously**: this field is enabled by default, but it can be disabled if you wish. See explanation below.
@@ -61,6 +61,25 @@ To open Optional Fields, click the button labelled **"Optional Fields +"** above
 * **Version, Branch Tag, Commit Hash, Build ID, Service** can all be specified if you want to include these details in the Test.
 * **Source Code Management URI** can also be specified. This form option must be a valid URI.
 * **Group By:** if you want to create Finding Groups out of this File, you can specify the grouping method here.
+
+### Close Old Findings
+
+When importing a scan, you can automatically close Findings from previous scans that are no longer present in the new report. Enable this by checking the **Close Old Findings** checkbox in the UI or setting `close_old_findings: true` in the API.
+
+#### Scope: Engagement vs. Asset
+
+By default, `close_old_findings` closes Findings of the same scan type within the **same Engagement**. DefectDojo Pro adds a second option — **Close Old Findings Within This Asset** — which widens the scope to all Findings of the same scan type across the **entire Asset**, regardless of which Engagement they belong to.
+
+| Option | UI checkbox | API parameter | Scope |
+|---|---|---|---|
+| Close old findings (engagement scope) | **Close Old Findings** | `close_old_findings: true` | Same Engagement |
+| Close old findings (Asset scope) | **Close Old Findings Within This Asset** | `close_old_findings_product_scope: true` | Entire Asset |
+
+`close_old_findings_product_scope` requires `close_old_findings` to also be enabled. Setting `close_old_findings_product_scope` without `close_old_findings` has no effect.
+
+> **Note:** `close_old_findings_product_scope` only applies to the Import (`/import-scan`) endpoint. It has no effect on the Reimport (`/reimport-scan`) endpoint, where the scope is always limited to the current Test.
+
+The `service` field is also respected: only Findings with an identical `service` value (or no `service` value, if none was specified at import time) will be considered for closure.
 
 ### Triage-less scanners: Do Not Reactivate field
 

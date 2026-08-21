@@ -1,6 +1,8 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class RubocopParser:
@@ -62,5 +64,9 @@ class RubocopParser:
                     static_finding=True,
                     dynamic_finding=False,
                 )
+                if locations_enabled() and path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=path, line=line),
+                    )
                 findings.append(finding)
         return findings

@@ -1,7 +1,9 @@
 import json
 import math
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class PhpSecurityAuditV2Parser:
@@ -61,6 +63,11 @@ class PhpSecurityAuditV2Parser:
                             static_finding=True,
                             dynamic_finding=False,
                         )
+
+                        if locations_enabled() and filepath:
+                            find.unsaved_locations.append(
+                                LocationData.code(file_path=filepath, line=issue["line"]),
+                            )
 
                         dupes[dupe_key] = find
                         findingdetail = ""

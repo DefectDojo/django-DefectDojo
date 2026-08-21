@@ -1,6 +1,8 @@
 ---
 title: 'Generic Findings Import'
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/generic/"
 ---
 
 Generic Findings Import can be used to import any report in CSV or JSON format.
@@ -31,6 +33,7 @@ Generic Findings Import can be used to import any report in CSV or JSON format.
 - known_exploited: Indicator if the finding is listed in Known Exploited List. Must be TRUE, or FALSE
 - ransomware_used: Indicator if the finding is used in Ransomware. Must be TRUE, or FALSE
 - fix_available: Indicator if fix available for the finding. Must be TRUE, or FALSE
+- fix_version: Version where fix is available. String value.
 - kev_date: Date the finding was added to Known Exploited Vulnerabilities list in mm/dd/yyyy format or ISO format.
 
 The CSV expects a header row with the names of the attributes.
@@ -47,6 +50,7 @@ The list of supported fields in JSON format:
 - date: Date
 - cwe: Int
 - cve: String
+- vulnerability_ids: List of Strings
 - epss_score: Float
 - epss_percentile: Float
 - cvssv3: String
@@ -66,7 +70,7 @@ The list of supported fields in JSON format:
 - under_review: Bool
 - is_mitigated: Bool
 - thread_id: String
-- mitigated: Bool
+- mitigated: Date
 - numerical_severity: Int
 - param: String
 - payload: String
@@ -94,6 +98,11 @@ The list of supported fields in JSON format:
 - known_exploited: Bool
 - ransomware_used: Bool
 - fix_available: Bool
+- fix_version: String
+
+A numeric field may be given as a number or as a quoted number. A value that holds no
+number at all, such as a `"N/A"` placeholder for a line number the tool could not
+determine, is ignored and the field keeps its default.
 
 ### Example JSON
 
@@ -114,9 +123,11 @@ The list of supported fields in JSON format:
             "known_exploited": true,
             "ransomware_used": true,
             "fix_available": true,
+            "fix_version": "0.0.00",
             "kev_date": "2024-05-01",
             "file_path": "src/first.cpp",
             "line": 13,
+            "vulnerability_ids": ["GHSA-5mrr-rgp6-x4gr", "OSV-2021-1234"],
             "endpoints": [
                 {
                     "host": "exemple.com"
@@ -223,13 +234,15 @@ Example:
 }
 ```
 
+The resulting Test Type name is derived from the `type` field: when `type` is omitted (or equals the scan type) the Test Type is `Generic Findings Import`; when `type` is provided it becomes `{type} Scan (Generic Findings Import)` (for the example above, `My custom Test type Scan (Generic Findings Import)`). A `type` that already ends with the `(Generic Findings Import)` suffix is used verbatim, so the suffix is never doubled.
+
 ### Sample Scan Data
 
 Sample Generic Findings Import scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/generic).
 
 ### Default Deduplication Hashcode Fields
 
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - cwe

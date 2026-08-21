@@ -7,7 +7,7 @@ chapter: true
 aliases:
   - /en/about_defectdojo/examples_of_use
 ---
-This article is based on DefectDojo Inc's February 2025 Office Hours: "Tackling Common Use Cases".
+This article is based on DefectDojo, Inc.'s February 2025 Office Hours: "Tackling Common Use Cases".
 <iframe width="560" height="315" src="https://www.youtube.com/embed/44vv-KspHBs?si=ilRBlfo-wvX5DPVg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Examples of Use Cases
@@ -30,34 +30,34 @@ The key concerns for BigCorp are:
 BigCorp handles security data from many sources:
 
 - CI/CD jobs that run SAST, SCA and Secret scanning tools automatically
-- Third-party Pen testing for certain Products
-- PCI compliance auditing for certain Products
+- Third-party Pen testing for certain Assets
+- PCI compliance auditing for certain Assets
 
 Each of these report categories can be handled by a separate Engagement, with a separate Test for each kind of scan in DefectDojo.
 
 ![image](images/example_product_hierarchy_bigcorp.png)
 
-- If a Product has a CI/CD pipeline, all of the results from that pipeline can be continually imported into a single open-ended Engagement. Each tool used will create a separate Test within the CI/CD Engagement, which can be continuously updated with new data.  
-(See our guide to [Reimport](/import_data/import_intro/import_vs_reimport/))
+- If an Asset has a CI/CD pipeline, all of the results from that pipeline can be continually imported into a single open-ended Engagement. Each tool used will create a separate Test within the CI/CD Engagement, which can be continuously updated with new data.  
+(See our guide to [Reimport](/import_data/import_intro/reimport/))
 - Each Pen Test effort can have a separate Engagement created to contain all of the results: e.g. "Q1 Pen Test 2024," "Q2 Pen Test 2024," etc.
 - BigCorp will likely want to run their own mock PCI audit so that they're prepared for the real thing. The results of those audits can also be stored as a separate Engagement.
 
 #### RBAC Model
 
-- Each BISO has Reader access assigned for each business unit (Product Type) that they're in charge of.
-- Each Product Owner has Writer access for the Product that they're in charge of.  Within their Product, Product Owners can interact with DefectDojo by keeping notes, setting up [CI/CD pipelines](/import_data/import_scan_files/api_pipeline_modelling/), creating Risk Acceptances and using other features.
-- Developers at BigCorp have no access to DefectDojo at all, and they don't need it. The Product Owner can push Jira tickets directly from DefectDojo which contain all of the relevant vulnerability information.  The developers are already using Jira, so they don't have to track remediation any differently than a different development task.
+- Each BISO has Reader access assigned for each business unit (Organization) that they're in charge of.
+- Each Asset Owner has Writer access for the Asset that they're in charge of.  Within their Asset, Asset Owners can interact with DefectDojo by keeping notes, setting up [CI/CD pipelines](/import_data/import_scan_files/api_pipeline_modelling/), creating Risk Acceptances and using other features.
+- Developers at BigCorp have no access to DefectDojo at all, and they don't need it. The Asset Owner can push Jira tickets directly from DefectDojo which contain all of the relevant vulnerability information.  The developers are already using Jira, so they don't have to track remediation any differently than a different development task.
 
 ### Embedded Systems: Version-Controlled Reporting
 
-Cyber Robotics is a company that sells manufacturing hardware that comes with embedded software systems.  They have a Chief Product Officer (CPO) that oversees both their product and cybersecurity as a whole.
+Cyber Robotics is a company that sells manufacturing hardware that comes with embedded software systems.  They have a Chief Product Officer (CPO) that oversees both their Asset and cybersecurity as a whole.
 
 Though they have less diverse security information to manage than BigCorp, it's still essential for them to properly contextualize their security information so that they can proactively respond to any significant Findings.
 
 Key concerns for Cyber Robotics:
 
-- They have a limited product line but **many** versions of each product that they need to properly catalog.
-- Maintenance for their products is complex and costs are high, so unnecessary work needs to be avoided.
+- They have a limited product line but **many** versions of each Asset that they need to properly catalog.
+- Maintenance for their Assets is complex and costs are high, so unnecessary work needs to be avoided.
 
 #### Testing Model
 
@@ -70,22 +70,22 @@ Cyber Robotics has a standardized testing process for all of their embedded syst
 
 However, because each version of their software is isolated, they’ll inevitably have a lot of data to organize, much of which is only useful in a single context (i.e., the particular version of the software they’re running).
 
-Cyber Robotics can solve this problem by using Product Types to represent a single product line, and individual Products for each separate version.  This will allow them to drill down to determine which Products are associated with a single vulnerability.
+Cyber Robotics can solve this problem by using Organizations to represent a single product line, and individual Assets for each separate version.  This will allow them to drill down to determine which Assets are associated with a single vulnerability.
 
 ![image](images/example_product_hierarchy_robotics.png)
 
-Assigning software versions to Products, rather than Engagements, allows Cyber Robotics to limit access to a particular software version, if necessary.  Field technicians and Support staff can be granted access to a single version of the software without having to give them access to the entire product line.
+Assigning software versions to Assets, rather than Engagements, allows Cyber Robotics to limit access to a particular software version, if necessary.  Field technicians and Support staff can be granted access to a single version of the software without having to give them access to the entire product line.
 
 #### RBAC Model
 
 The AppSec team here has Global Roles assigned that govern their level of interaction.
 
 - The CPO has Global Reader access to DefectDojo, as with the CISO in BigCorp.
-- Individual Product Owners have Global Reader access to any Product in DefectDojo, as well as Writer access to the Product that they own.
+- Individual Asset Owners have Global Reader access to any Asset in DefectDojo, as well as Writer access to the Asset that they own.
 
 On the Support side:
 
-- Support personnel are temporarily granted Reader access to specific Products that they're assigned to maintain, but they do not have access to all DefectDojo data.
+- Support personnel are temporarily granted Reader access to specific Assets that they're assigned to maintain, but they do not have access to all DefectDojo data.
 
 ### Dynamic IT environments and microservices: Cloud Services company
 
@@ -100,25 +100,25 @@ Key Concerns for Kate's Cloud Service:
 
 #### Tagging Shared Services
 
-Because Kate's model contains many shared services that can impact other Products, the team [Tags](/asset_modelling/tags/tagging_objects/) their Products to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be filtered across Products and reported to the relevant teams.  Each of these shared services are in a single Product Type that separates them from the main cloud offerings.
+Because Kate's model contains many shared services that can impact other Assets, the team [Tags](/asset_modelling/tags/os__tagging_objects/) their Assets to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be filtered across Assets and reported to the relevant teams.  Each of these shared services are in a single Organization that separates them from the main cloud offerings.
 
 ![image](images/example_product_hierarchy_microservices.png)
 
 Because the company is rapidly growing and tech leads are changing frequently, Kate can use Tags to track which tech lead is currently responsible for each cloud product, avoiding the need for constant manual updates to their DefectDojo system. These tech lead associations are tracked by a service that’s external to DefectDojo and can govern the import pipelines or call the DefectDojo API.
 
-For more information on Tagging, see our guide to [Tags](/asset_modelling/tags/tagging_objects/).
+For more information on Tagging, see our guide to [Tags](/asset_modelling/tags/os__tagging_objects/).
 
 #### RBAC Model
 
 On the Security/Compliance side:
 
-- The Product Security Team that owns DefectDojo has admin access to the entire system.
+- The Asset Security Team that owns DefectDojo has admin access to the entire system.
 - Analysts working for the VP of Cloud are granted read-only access across the system, allowing them to generate the necessary reports and metrics for the VP to assess the security of various cloud offerings.
 
 On the development side:
 
-- Tech Leads for each specific cloud product (e.g., compute, storage, shared services) have **Maintainer access** to their assigned Product in order to triage the security results related to their specific cloud product offering. They can review Findings and take action within their Product and can also reorganize their Finding data significantly.
-- Developers working on specific Products are given **Writer Access** to the Product they're working on, enabling them to comment on Findings, request Peer Reviews, and create Risk Acceptances.
+- Tech Leads for each specific cloud product (e.g., compute, storage, shared services) have **Maintainer access** to their assigned Asset in order to triage the security results related to their specific cloud product offering. They can review Findings and take action within their Asset and can also reorganize their Finding data significantly.
+- Developers working on specific Assets are given **Writer Access** to the Asset they're working on, enabling them to comment on Findings, request Peer Reviews, and create Risk Acceptances.
 
 ### Onboarding New Acquisitions: SaaSy Software
 
@@ -127,18 +127,18 @@ SaaSy software is a rapidly growing firm which frequently acquires other softwar
 Key Concerns for SaaSy Software:
 
 - Avoiding public security issues while maintaining compliance programs (such as SOC2).
-- Ability to confidently onboard tools and processes from new products.
+- Ability to confidently onboard tools and processes from new Assets.
 - Ability to report and categorize vulnerabilities on both in-production and in-development branches.
 
 #### Testing Model
 
 Testing at SaaSy is focused on broad strokes rather than standardized tool use, since each acquisition comes with their own tools and processes for AppSec.  SaaSy needs to perform both internal assessments (CI/CD, DAST, container scans, and threat modeling) and external assessments (Third party pen tests, compliance audits).
 
-To assist with onboarding new applications, SaaSy software has a standard approach to their data model: each time SaaSy onboards a new application, they create a new Product Type for that app, and create sub-products for the repositories that make it up (Front-End, Backend API, etc).
+To assist with onboarding new applications, SaaSy software has a standard approach to their data model: each time SaaSy onboards a new application, they create a new Organization for that app, and create sub-Assets for the repositories that make it up (Front-End, Backend API, etc).
 
 ![image](images/example_product_hierarchy_saas.png)
 
-Each of these Products is further subdivided into Engagements, one for the main branch and one for each branch of development.  Tests within these Engagements are used to categorize the testing efforts.  Development branches have separate Tests which store the results of CI/CD and SCA scans.  The Main branch has those as well, but also adds Tests which store Manual Code Review and Threat Model reports.
+Each of these Assets is further subdivided into Engagements, one for the main branch and one for each branch of development.  Tests within these Engagements are used to categorize the testing efforts.  Development branches have separate Tests which store the results of CI/CD and SCA scans.  The Main branch has those as well, but also adds Tests which store Manual Code Review and Threat Model reports.
 
 All of these Tests are open-ended and can be updated on a regular basis using Reimport.  [Deduplication](/triage_findings/finding_deduplication/about_deduplication/) is only handled at the Engagement level, which prevents Findings in one Code branch from closing Findings in another.
 
@@ -153,5 +153,5 @@ On the Security/Compliance side:
 
 On the development side:
 
-- Each Product Owner has Writer access to the Product they own in DefectDojo, which allows them to write Risk Acceptances and view metrics for the Product.
-- Developers have read-only access to each Product they work on.  They can Request Peer Reviews on Findings or issues they are trying to remediate.
+- Each Asset Owner has Writer access to the Asset they own in DefectDojo, which allows them to write Risk Acceptances and view metrics for the Asset.
+- Developers have read-only access to each Asset they work on.  They can Request Peer Reviews on Findings or issues they are trying to remediate.

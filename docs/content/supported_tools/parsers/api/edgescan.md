@@ -2,6 +2,12 @@
 title: "Edgescan"
 toc_hide: true
 ---
+> **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
+>
+> The **Edgescan** API pull path described below, and the **Tool Configuration** it depends on, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
+>
+> **Migrate to:** the [Edgescan connector](/connectors/upstream/toolreference/#edgescan) (DefectDojo Pro), or import Edgescan results as a [JSON file](../../file/edgescan) — file import is not affected by this deprecation.
+
 Import Edgescan vulnerabilities by API or [JSON file](../../file/edgescan).
 
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
@@ -14,12 +20,12 @@ All parsers which using API have common basic configuration step but with differ
 - Paste your Edgescan API key in the `API Key` field.
 - Click on the `Submit` button.
 
-**Step 2: Add and configure a product**
+**Step 2: Add and configure an Asset**
 
 - Select the hamburger menu icon from the left hand side of the page.
 - Click on the `All Products` option and then `+ Add Product`.
 - Fill in the fields presented.
-- Once the product is added, click on the `Settings` option then `Add API Scan Configuration`.
+- Once the Asset is added, click on the `Settings` option then `Add API Scan Configuration`.
 - Select the previously added Edgescan `Tool Configuration`. 
 - Provide the edgescan asset ID(s) that you wish to import the findings for in the field `Service key 1`. 
     - Note that multiple asset IDs should be comma separated with no spacing.
@@ -28,7 +34,7 @@ All parsers which using API have common basic configuration step but with differ
 **Step 3: Importing scan results**
 
 - After the previous steps are complete, you can import the findings by selecting the `Findings` option
-on the product's page and then `Import Scan Results`.
+on the Asset's page and then `Import Scan Results`.
 - Once you are presented with a series of fields, select `Edgescan Scan` as the scan type. 
     - If you have more than one asset configured, you must also select which Edgescan `API Scan Configuration` to use.
 - Click on the `Import` button.

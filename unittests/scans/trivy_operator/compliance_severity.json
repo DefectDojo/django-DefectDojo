@@ -1,0 +1,78 @@
+{
+    "apiVersion": "aquasecurity.github.io/v1alpha1",
+    "kind": "ClusterComplianceReport",
+    "metadata": {
+        "creationTimestamp": "2024-03-05T10:38:15Z",
+        "generation": 1,
+        "labels": {
+            "app.kubernetes.io/instance": "trivy-operator",
+            "app.kubernetes.io/managed-by": "kubectl",
+            "app.kubernetes.io/name": "trivy-operator",
+            "app.kubernetes.io/version": "0.18.5"
+        },
+        "name": "cis",
+        "resourceVersion": "1649372",
+        "uid": "test-compliance-severity"
+    },
+    "spec": {
+        "compliance": {
+            "controls": [],
+            "description": "Test Compliance Severity",
+            "id": "test",
+            "title": "Test Compliance Severity Report",
+            "version": "1.0"
+        },
+        "cron": "0 */6 * * *",
+        "reportType": "all"
+    },
+    "status": {
+        "detailReport": {
+            "description": "Test report for compliance severity logic",
+            "id": "test",
+            "relatedResources": [],
+            "results": [
+                {
+                    "checks": [
+                        {
+                            "category": "Kubernetes Security Check",
+                            "checkID": "AVD-KSV-0001",
+                            "description": "Check with its own severity",
+                            "messages": [
+                                "Test message 1"
+                            ],
+                            "remediation": "Fix it",
+                            "severity": "MEDIUM",
+                            "success": false,
+                            "target": "/test-target-1",
+                            "title": "Check with severity"
+                        },
+                        {
+                            "category": "Kubernetes Security Check",
+                            "checkID": "AVD-KSV-0002",
+                            "description": "Check without severity",
+                            "messages": [
+                                "Test message 2"
+                            ],
+                            "remediation": "Fix it too",
+                            "severity": "",
+                            "success": false,
+                            "target": "/test-target-2",
+                            "title": "Check without severity"
+                        }
+                    ],
+                    "description": "Test result",
+                    "id": "1.1.1",
+                    "name": "Test result name",
+                    "severity": "HIGH"
+                }
+            ],
+            "title": "Test Compliance Severity Report",
+            "version": "1.0"
+        },
+        "summary": {
+            "failCount": 2,
+            "passCount": 0
+        },
+        "updateTimestamp": "2024-03-05T10:38:15Z"
+    }
+}

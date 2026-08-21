@@ -1,0 +1,14 @@
+[
+  {
+    "Title": "Unused role with policy found",
+    "Labels": ["CSPM", "source: Orca Scan"],
+    "CreatedAt": "2025-01-15T10:30:00+00:00",
+    "Status": "open",
+    "Category": "IAM misconfigurations",
+    "OrcaScore": 5.1,
+    "Source": "TestRole_abc123",
+    "LastSeen": "2025-02-01T12:00:00+00:00",
+    "CloudAccount": {"Name": "test-account"},
+    "Inventory": {"Name": "TestRole_abc123"}
+  }
+]

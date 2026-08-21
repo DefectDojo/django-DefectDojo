@@ -11,18 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@75d2e84710de30f6ff7268e08f310b60ef14033f # v3.0.0
+        uses: peaceiris/actions-hugo@2752ce1d29631191ea3f27c23495fa06139a5b78 # v3.2.1
         with:
-          hugo-version: '0.153.4' # renovate: datasource=github-releases depName=gohugoio/hugo
+          hugo-version: '0.153.4'
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '24.13.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
+          node-version: '24.18.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
       - name: Cache dependencies
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -30,13 +30,62 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Check front matter titles for (Pro) / (Open Source)
+        # Page titles must not hardcode the edition — that's what the
+        # `audience` front matter field is for.
+        run: |
+          set -euo pipefail
+          if grep -rEn --include='*.md' '^title:.*\((Pro|Open Source)\)' docs/content/; then
+            echo >&2
+            echo 'Found front matter titles hardcoding "(Pro)" or "(Open Source)".' >&2
+            echo 'Remove the suffix from the title and use the "audience" front matter field instead.' >&2
+            exit 1
+          fi
 
       - name: Test the build process
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && npm ci && hugo --minify --gc --config config/production/hugo.toml
+
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
+        with:
+          # --remap makes lychee resolve absolute docs.defectdojo.com URLs against
+          # the freshly built site, so absURL-rendered links (e.g. nav menu items)
+          # are verified as 404s instead of being skipped as remote URLs.
+          args: >-
+            --offline --no-progress
+            --root-dir ${{ github.workspace }}/docs/public
+            --remap "https://docs.defectdojo.com file://${{ github.workspace }}/docs/public"
+            './docs/public/**/*.html'
+          fail: true
+
+      - name: Check in-app docs help links
+        # Find every file under dojo/ that hardcodes a docs.defectdojo.com URL
+        # (templates, settings, etc.) and check those links against the freshly
+        # built site. --remap turns the absolute docs URLs into local file lookups;
+        # --exclude '%7[BD]' drops URL-encoded Django template tags ({% ... %})
+        # so only real external docs URLs are checked. lychee is on $PATH from
+        # the previous lychee-action step.
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(grep -rl 'docs\.defectdojo\.com' dojo/ \
+            --include='*.html' --include='*.py' --include='*.tpl')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No files reference docs.defectdojo.com — pattern is stale." >&2
+            exit 1
+          fi
+          printf 'Checking in-app docs links in:\n'
+          printf '  %s\n' "${files[@]}"
+          lychee --offline --no-progress \
+            --root-dir "${GITHUB_WORKSPACE}/docs/public" \
+            --remap "https://docs.defectdojo.com file://${GITHUB_WORKSPACE}/docs/public" \
+            --exclude '%7[BD]' \
+            "${files[@]}"
+

@@ -1,0 +1,45 @@
+﻿Vulnerability,CVSS Score,Severity,Deployment Name,Asset Name,IP Address,Protocol/Port,First Seen,Last Scanned,Asset Type,Customer Account,CVE,Service,VPC/Network,Category,Asset Key,Description,Evidence,Operating System,Resolution,Vulnerability ID,Vulnerability Span ID,Vulnerability Key,Age (days),CISA Known Exploited,Published Date
+CVE-2021-44228 - Apache Log4j Remote Code Execution,10.0,Critical,Production,app-server-01.example.com,192.0.2.20,TCP/8080,12/10/21 14:00,5/27/26 6:37,host,AcmeCorp,CVE-2021-44228,http,prod-vpc-east,agent,/dc/host/BBBB2222-3333-4444-5555-666666666666/vulnerability/bbbbbbbbbbbbbbbbbbbb,"Apache Log4j2 2.0-beta9 through 2.15.0 (excluding security releases 2.12.2, 2.12.3, and 2.3.1) JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.
+
+Known as Log4Shell.","Patch Scanning - oval:org.secpod.oval:def:99999002
+Refs: KB-LOG4J-RCE. Definition: log4j-core JAR detected with version 2.14.1 on classpath.",cpe:2.3:o:ubuntu:ubuntu_linux:22.04:*:*:*:*:*:*:*,"Upgrade Apache Log4j2 to version 2.17.1 or later.
+
+For Java 8: Log4j 2.17.1
+For Java 7: Log4j 2.12.4
+For Java 6: Log4j 2.3.2",22222222222222222222222222222222,BBBBBBBB-CCCC-DDDD-EEEE-FFFFFFFFFFFF,/dc/host/BBBB2222-3333-4444-5555-666666666666/vulnerability/2b3c4d5e6f7a8b9c0d1e,1630,Yes,12/10/21
+CVE-2014-0160 - OpenSSL Heartbleed Information Disclosure,7.5,High,Staging,tls-gateway.example.com,"198.51.100.30, fe80::250:56ff:fe96:b97",TCP/443,4/8/14 0:00,5/27/26 19:57,host,AcmeCorp,CVE-2014-0160,https,stage-vpc-west,agent,/dc/host/CCCC3333-4444-5555-6666-777777777777/vulnerability/cccccccccccccccccccc,"The (1) TLS and (2) DTLS implementations in OpenSSL 1.0.1 before 1.0.1g do not properly handle Heartbeat Extension packets, which allows remote attackers to obtain sensitive information from process memory via crafted packets that trigger a buffer over-read, as demonstrated by reading private keys, related to d1_both.c and t1_lib.c, aka the Heartbleed bug.","Patch Scanning - oval:org.secpod.oval:def:99999003
+Refs: KB-OPENSSL-HEART. Definition: OpenSSL 1.0.1 through 1.0.1f detected. Specifics: openssl version 1.0.1c is installed.",cpe:2.3:o:ubuntu:ubuntu_linux:14.04:*:*:*:*:*:*:*,"Upgrade OpenSSL to version 1.0.1g or later.
+
+Ubuntu: apt-get install --only-upgrade openssl libssl1.0.0
+RHEL: yum update openssl",33333333333333333333333333333333,CCCCCCCC-DDDD-EEEE-FFFF-000000000000,/dc/host/CCCC3333-4444-5555-6666-777777777777/vulnerability/3c4d5e6f7a8b9c0d1e2f,4432,Yes,4/7/14
+TCP Timestamp Response,2.6,Low,Production,edge-router.example.com,203.0.113.40,TCP/0,1/2/26 9:15,5/27/26 1:18,host,AcmeCorp,,Non-Attributable,prod-vpc-east,network,/dc/host/DDDD4444-5555-6666-7777-888888888888/vulnerability/dddddddddddddddddddd,The remote host implements TCP timestamps and therefore allows to compute the uptime.,Network Scan probe. Packet: tcp timestamp option present in SYN-ACK.,,"Disable TCP timestamps if not required:
+
+Linux: sysctl -w net.ipv4.tcp_timestamps=0
+Windows: netsh int tcp set global timestamps=disabled",44444444444444444444444444444444,DDDDDDDD-EEEE-FFFF-0000-111111111111,/dc/host/DDDD4444-5555-6666-7777-888888888888/vulnerability/4d5e6f7a8b9c0d1e2f30,146,No,1/1/97
+Web Server - Version Disclosure in HTTP Server Header,0,Info,Production,static-cdn.example.com,192.0.2.50,TCP/80,9/9/24 0:50,5/27/26 6:37,host,AcmeCorp,,http,prod-vpc-east,agent,/dc/host/EEEE5555-6666-7777-8888-999999999999/vulnerability/eeeeeeeeeeeeeeeeeeee,The remote web server discloses its version number in the HTTP Server response header. This may aid an attacker in fingerprinting the system.,"Server: nginx/1.18.0
+
+Observed on GET /",,"Configure the web server to suppress the Server header:
+
+nginx: server_tokens off;
+Apache: ServerTokens Prod / ServerSignature Off",55555555555555555555555555555555,EEEEEEEE-FFFF-0000-1111-222222222222,/dc/host/EEEE5555-6666-7777-8888-999999999999/vulnerability/5e6f7a8b9c0d1e2f3041,260,No,6/9/21
+"CVE-2023-23397 - Microsoft Outlook Elevation of Privilege Vulnerability - Critical zero-click NTLM credential disclosure exploited in the wild by state-sponsored actors targeting government, transportation, energy, and military organizations across Europe and reportedly used in attacks attributed to APT28 / Fancy Bear, where a crafted email with a PidLidReminderFileParameter extended MAPI property triggers an outbound SMB authentication attempt to an attacker-controlled UNC path even when the recipient never opens the message, allowing the attacker to capture the victim's Net-NTLMv2 hash for offline cracking or pass-the-hash relay attacks against domain resources, included in CISA's Known Exploited Vulnerabilities catalog with patch deadline March 2023 and remediated by KB5002375 / KB5002376 plus mitigations blocking outbound SMB",9.8,Critical,Production,mail-relay.example.com,192.0.2.60,TCP/0,3/14/23 8:00,5/27/26 19:57,host,AcmeCorp,CVE-2023-23397,Non-Attributable,prod-vpc-east,agent,/dc/host/FFFF6666-7777-8888-9999-AAAAAAAAAAAA/vulnerability/ffffffffffffffffffff,"Microsoft Outlook Elevation of Privilege Vulnerability. An attacker who successfully exploited this vulnerability could access a user's Net-NTLMv2 hash which could be used as a basis of an NTLM Relay attack against another service to authenticate as the user.
+
+No user interaction is required.","Patch Scanning - oval:org.secpod.oval:def:99999004
+Refs: KB5002375, KB5002376. Definition: Microsoft Outlook 2013/2016/2019/365 detected with vulnerable build.",cpe:2.3:o:microsoft:windows_server_2019:-:*:standard:*:*:*:*:*,"Apply Microsoft Security Updates:
+
+Outlook 2013 SP1: KB5002375
+Outlook 2016: KB5002376
+Outlook 2019/365: install latest updates via Click-to-Run
+
+Mitigation: block outbound SMB (TCP 445) at perimeter; add users to Protected Users group.",66666666666666666666666666666666,FFFFFFFF-0000-1111-2222-333333333333,/dc/host/FFFF6666-7777-8888-9999-AAAAAAAAAAAA/vulnerability/6f7a8b9c0d1e2f304152,805,Yes,3/14/23
+CVE-2024-3094 - XZ Utils Malicious Code Insertion,7.8,High,Staging,build-host.example.com,"198.51.100.70, 2001:db8::1:70",TCP/22,3/29/24 12:00,5/27/26 6:37,host,AcmeCorp,CVE-2024-3094,ssh,stage-vpc-west,agent,/dc/host/AAAA7777-8888-9999-AAAA-BBBBBBBBBBBB/vulnerability/aaaa1111aaaa1111aaaa,"Malicious code was discovered in the upstream tarballs of xz, starting with version 5.6.0. Through a series of complex obfuscations, the liblzma build process extracts a prebuilt object file from a disguised test file existing in the source code, which is then used to modify specific functions in the liblzma code. This results in a modified liblzma library that can be used by any software linked against this library, intercepting and modifying the data interaction with this library.",Package Scanning. Detected: xz-utils 5.6.0-0.2 / xz-utils 5.6.1-1 installed via apt repository before March 28 2024 mitigations.,cpe:2.3:o:ubuntu:ubuntu_linux:24.04:*:*:*:*:*:*:*,"Downgrade or upgrade xz-utils:
+
+- Downgrade to 5.4.x: apt-get install xz-utils=5.4.5-0.3
+- Upgrade to 5.6.2+ once distribution patches are available
+- Reboot is recommended after replacement",77777777777777777777777777777777,AAAA1111-BBBB-2222-CCCC-DDDDDDDDDDDD,/dc/host/AAAA7777-8888-9999-AAAA-BBBBBBBBBBBB/vulnerability/7a8b9c0d1e2f30415263,60,No,3/29/24
+SSH Weak Key Exchange Algorithms Enabled,,Medium,Staging,jumpbox.example.com,2001:db8::1:80,TCP/22,11/4/25 3:30,5/27/26 1:18,host,AcmeCorp,,ssh,stage-vpc-west,agent,/dc/host/BBBB8888-9999-AAAA-BBBB-CCCCCCCCCCCC/vulnerability/bbbb2222bbbb2222bbbb,"The remote SSH server supports key exchange algorithms considered weak (diffie-hellman-group1-sha1, diffie-hellman-group14-sha1).","SSH banner probe: SSH-2.0-OpenSSH_7.4
+Negotiated kex algorithms include diffie-hellman-group1-sha1.",cpe:2.3:o:redhat:enterprise_linux:7.9:*:*:*:*:*:*:*,"Disable weak KEX algorithms in /etc/ssh/sshd_config:
+
+KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512
+
+Then restart: systemctl restart sshd",88888888888888888888888888888888,BBBB2222-CCCC-3333-DDDD-EEEEEEEEEEEE,/dc/host/BBBB8888-9999-AAAA-BBBB-CCCCCCCCCCCC/vulnerability/8b9c0d1e2f3041526374,204,No,1/15/15

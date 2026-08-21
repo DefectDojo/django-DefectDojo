@@ -2,7 +2,9 @@ import json
 import logging
 from datetime import datetime
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,12 @@ class CheckmarxOsaParser:
             msg = "Invalid format: bad structure"
             raise ValueError(msg)
         libraries_dict = self.get_libraries(tree)
+
+        if locations_enabled():
+            for library in libraries_dict.values():
+                if dep := self.dependency_info(library):
+                    test.unsaved_metadata.append(dep)
+
         vulnerabilities = self.get_vunlerabilities(tree)
         items = []
         for item in vulnerabilities:
@@ -87,8 +95,20 @@ class CheckmarxOsaParser:
             )
             if vulnerability_id != "NC":
                 finding_item.unsaved_vulnerability_ids = [vulnerability_id]
+
+            if locations_enabled() and (dep := self.dependency_info(library)):
+                finding_item.unsaved_locations.append(dep)
+
             items.append(finding_item)
         return items
+
+    def dependency_info(self, library):
+        lib_name = library.get("name", "")
+        lib_version = library.get("version")
+        if lib_name and ":" in lib_name:
+            parts = lib_name.split(":", 1)
+            return LocationData.dependency(purl_type="maven", namespace=parts[0], name=parts[1], version=lib_version)
+        return None
 
     def get_libraries(self, tree):
         libraries_dict = {}

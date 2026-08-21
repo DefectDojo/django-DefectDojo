@@ -1,3 +1,41 @@
+// DefectDojo Brand Colors
+$dd-fuji-blue:    #1779C5;
+$dd-fuji-hue-01:  #C6DDF2;
+$dd-fuji-hue-02:  #82B0D9;
+$dd-fuji-hue-03:  #204D87;
+$dd-fuji-hue-04:  #003864;
+
+$dd-torii-orange:   #F2561D;
+$dd-torii-hue-01:   #F2D49B;
+$dd-torii-hue-02:   #F2762E;
+$dd-torii-hue-03:   #C1230D;
+$dd-torii-hue-04:   #890000;
+
+$dd-dojo-black:   #191919;
+$dd-dojo-hue-01:  #DCDCDC;
+$dd-dojo-hue-02:  #B3B3B3;
+$dd-dojo-hue-03:  #666666;
+$dd-dojo-hue-04:  #333333;
+
+// Navy surfaces shared with trust.defectdojo.com (brand bookends)
+$dd-navy:    #0a1628;
+$dd-navy-2:  #0e2440;
+
+// Cool neutrals for the reading canvas
+$dd-ink:     #17222f;
+$dd-muted:   #5a6b80;
+$dd-border:  #e3e9f1;
+
+// Bootstrap variable overrides
+$primary:   $dd-fuji-blue;
+$secondary: $dd-fuji-hue-04;
+
+$border-radius:     0.5rem;
+$border-radius-sm:  0.375rem;
+$border-radius-lg:  0.75rem;
+$border-radius-xl:  1rem;
+
+// Typography
 $font-family-sans-serif:
     "Worksans",
     system-ui,
@@ -13,3 +51,19 @@ $font-family-sans-serif:
     "Segoe UI Emoji",
     "Segoe UI Symbol",
     "Noto Color Emoji";
+
+$font-weight-light:    300;
+$font-weight-normal:   400;
+$font-weight-medium:   500;
+$font-weight-semibold: 600;
+
+// Body
+$body-color: $dd-ink;
+
+// Links
+$link-color:       #0f5e9e;
+$link-hover-color: $dd-fuji-blue;
+
+// Headings
+$headings-font-weight: 600;
+$headings-color:       null; // resolved per-theme via CSS custom properties

@@ -6,8 +6,28 @@ from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
+
+
+def _parse_date(date_str):
+    """Parse a Netsparker/Invicti date string into a date object."""
+    if not date_str:
+        return None
+    try:
+        if "UTC" in date_str:
+            return datetime.datetime.strptime(
+                date_str.split(" ")[0], "%d/%m/%Y",
+            ).date()
+        return datetime.datetime.strptime(
+            date_str, "%d/%m/%Y %H:%M %p",
+        ).date()
+    except ValueError:
+        try:
+            return date_parser.parse(date_str).date()
+        except (ValueError, date_parser.ParserError):
+            return None
 
 
 class NetsparkerParser:
@@ -27,29 +47,18 @@ class NetsparkerParser:
         except Exception:
             data = json.loads(tree)
         dupes = {}
-        try:
-            if "UTC" in data["Generated"]:
-                scan_date = datetime.datetime.strptime(
-                    data["Generated"].split(" ")[0], "%d/%m/%Y",
-                ).date()
-            else:
-                scan_date = datetime.datetime.strptime(
-                    data["Generated"], "%d/%m/%Y %H:%M %p",
-                ).date()
-        except ValueError:
-            try:
-                scan_date = date_parser.parse(data["Generated"])
-            except date_parser.ParserError:
-                scan_date = None
+        scan_date = _parse_date(data.get("Generated"))
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = html2text.html2text(item.get("Description", ""))
-            if "Cwe" in item["Classification"]:
+            unsaved_cwes = []
+            if item["Classification"].get("Cwe"):
                 try:
                     cwe = int(item["Classification"]["Cwe"].split(",")[0])
                 except Exception:
                     cwe = None
+                unsaved_cwes = [value.strip() for value in item["Classification"]["Cwe"].split(",") if value.strip()]
             else:
                 cwe = None
             sev = item["Severity"]
@@ -62,6 +71,7 @@ class NetsparkerParser:
             dupe_key = title
             request = item["HttpRequest"].get("Content", None)
             response = item["HttpResponse"].get("Content", None)
+            finding_date = (_parse_date(item.get("FirstSeenDate")) or scan_date) if settings.USE_FIRST_SEEN else scan_date
 
             finding = Finding(
                 title=title,
@@ -70,11 +80,13 @@ class NetsparkerParser:
                 severity=sev.title(),
                 mitigation=mitigation,
                 impact=impact,
-                date=scan_date,
+                date=finding_date,
                 references=references,
                 cwe=cwe,
                 static_finding=True,
             )
+            if unsaved_cwes:
+                finding.unsaved_cwes = unsaved_cwes
             state = item.get("State", None)
             if state == "FalsePositive":
                 finding.active = False
@@ -100,8 +112,8 @@ class NetsparkerParser:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
             finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
             # manage endpoint/location
-            if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [URL.from_value(url)]
+            if locations_enabled():
+                finding.unsaved_locations = [LocationData.url(url=url)]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -109,7 +121,7 @@ class NetsparkerParser:
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.unsaved_req_resp.extend(finding.unsaved_req_resp)
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.extend(finding.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations

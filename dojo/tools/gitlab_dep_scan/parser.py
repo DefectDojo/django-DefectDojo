@@ -1,6 +1,8 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GitlabDepScanParser:
@@ -102,12 +104,14 @@ class GitlabDepScanParser:
             mitigation = vuln["solution"]
 
         cwe = None
+        unsaved_cwes = []
         vulnerability_id = None
         references = ""
         if "identifiers" in vuln:
             for identifier in vuln["identifiers"]:
                 if identifier["type"].lower() == "cwe":
                     cwe = identifier["value"]
+                    unsaved_cwes.append(identifier["value"])
                 elif identifier["type"].lower() == "cve":
                     vulnerability_id = identifier["value"]
                 else:
@@ -117,6 +121,9 @@ class GitlabDepScanParser:
                     if "url" in identifier:
                         references += f"URL: {identifier['url']}\n"
                     references += "\n"
+
+        if unsaved_cwes:
+            cwe = unsaved_cwes[0]
 
         finding = Finding(
             title=f"{vulnerability_id}: {title}"
@@ -137,7 +144,15 @@ class GitlabDepScanParser:
             dynamic_finding=False,
         )
 
+        if unsaved_cwes:
+            finding.unsaved_cwes = unsaved_cwes
+
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+        if locations_enabled() and component_name and component_version:
+            finding.unsaved_locations.append(
+                LocationData.dependency(name=component_name, version=component_version, file_path=file_path),
+            )
 
         return finding

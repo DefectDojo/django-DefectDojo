@@ -2,12 +2,12 @@ import hashlib
 import re
 
 from defusedxml.ElementTree import parse
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class OpenscapParser:
@@ -100,14 +100,14 @@ class OpenscapParser:
                 if vulnerability_ids:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
                 # manage endpoint/location
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = []
                     for ip in ips:
                         try:
                             validate_ipv46_address(ip)
-                            location = URL(host=ip)
+                            location = LocationData.url(host=ip)
                         except ValidationError:
-                            location = URL.from_value(ip) if "://" in ip else URL.from_value("//" + ip)
+                            location = LocationData.url(url=ip) if "://" in ip else LocationData.url(url="//" + ip)
                         finding.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -127,7 +127,7 @@ class OpenscapParser:
                     find = dupes[dupe_key]
                     if finding.references:
                         find.references = finding.references
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         # TODO: Delete this after the move to Locations

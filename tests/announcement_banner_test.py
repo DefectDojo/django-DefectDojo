@@ -41,7 +41,7 @@ class AnnouncementBannerTest(BaseTestCase):
     def test_create_announcement(self):
         driver = self.driver
         driver.get(self.base_url)
-        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
+        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner:not([data-source])"))
 
         text = "Big important announcement, definitely pay attention!"
         self.enable_announcement(text, dismissable=False, style=self.type)
@@ -56,7 +56,7 @@ class AnnouncementBannerTest(BaseTestCase):
     def test_create_dismissable_announcement(self):
         driver = self.driver
         driver.get(self.base_url)
-        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
+        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner:not([data-source])"))
 
         text = "Big important announcement, definitely pay don't dismiss this one."
         self.enable_announcement(text, dismissable=True, style=self.type)
@@ -77,7 +77,7 @@ class AnnouncementBannerTest(BaseTestCase):
     def test_dismissing_announcement_does_not_dismiss_for_others(self):
         driver = self.driver
         driver.get(self.base_url)
-        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
+        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner:not([data-source])"))
 
         text = "Everyone sees this, right?"
         self.enable_announcement(text, dismissable=True, style=self.type)
@@ -103,7 +103,7 @@ class AnnouncementBannerTest(BaseTestCase):
     def test_announcement_ui_disabled_when_set(self):
         driver = self.driver
         driver.get(self.base_url)
-        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
+        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner:not([data-source])"))
 
         text = "The most important announcement of the year."
         self.enable_announcement(text, dismissable=False, style=self.type)
@@ -121,7 +121,7 @@ class AnnouncementBannerTest(BaseTestCase):
     def test_announcement_empty_after_removal(self):
         driver = self.driver
         driver.get(self.base_url)
-        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
+        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner:not([data-source])"))
 
         text = "Surely no-one would delete this announcement quickly"
         self.enable_announcement(text, dismissable=False, style=self.type)
@@ -139,7 +139,7 @@ class AnnouncementBannerTest(BaseTestCase):
     def test_html_announcement(self):
         driver = self.driver
         driver.get(self.base_url)
-        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
+        self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner:not([data-source])"))
 
         text = "Links in announcements? <a href='https://github.com/DefectDojo/django-DefectDojo' style='color: #224477;' target='_blank'>you bet!</a>"
         self.enable_announcement(text, dismissable=False, style=self.type)

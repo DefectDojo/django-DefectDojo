@@ -1,4 +1,23 @@
+from pathlib import Path
+
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+
+WIZCLI_MANIFEST_TO_PURL = {
+    "go.mod": "golang", "go.sum": "golang",
+    "package.json": "npm", "package-lock.json": "npm", "yarn.lock": "npm", "pnpm-lock.yaml": "npm",
+    "requirements.txt": "pypi", "Pipfile.lock": "pypi", "poetry.lock": "pypi",
+    "pom.xml": "maven", "build.gradle": "maven", "build.gradle.kts": "maven",
+    "Gemfile": "gem", "Gemfile.lock": "gem",
+    "Cargo.toml": "cargo", "Cargo.lock": "cargo",
+    "composer.json": "composer", "composer.lock": "composer",
+    "packages.config": "nuget",
+    "pubspec.yaml": "pub", "pubspec.lock": "pub",
+    "mix.lock": "hex",
+    "Podfile": "cocoapods", "Podfile.lock": "cocoapods",
+    "Package.swift": "swift",
+}
 
 
 class WizcliParsers:
@@ -49,6 +68,17 @@ class WizcliParsers:
                         test=test,
                     )
                     findings.append(finding)
+
+                if locations_enabled():
+                    lib_name_raw = library.get("name")
+                    lib_version_raw = library.get("version")
+                    lib_path_raw = library.get("path", "")
+                    if lib_name_raw and lib_path_raw:
+                        manifest = Path(lib_path_raw).name
+                        if purl_type := WIZCLI_MANIFEST_TO_PURL.get(manifest):
+                            test.unsaved_metadata.append(
+                                LocationData.dependency(purl_type=purl_type, name=lib_name_raw, version=lib_version_raw),
+                            )
         return findings
 
     @staticmethod
@@ -82,6 +112,13 @@ class WizcliParsers:
                     mitigation=None,
                     test=test,
                 )
+                if locations_enabled() and file_name:
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=file_name,
+                            line=line_number if isinstance(line_number, int) else None,
+                        ),
+                    )
                 findings.append(finding)
         return findings
 
@@ -129,6 +166,13 @@ class WizcliParsers:
                             mitigation=None,
                             test=test,
                         )
+                        if locations_enabled() and file_name:
+                            finding.unsaved_locations.append(
+                                LocationData.code(
+                                    file_path=file_name,
+                                    line=line_number if isinstance(line_number, int) else None,
+                                ),
+                            )
                         findings.append(finding)
         return findings
 

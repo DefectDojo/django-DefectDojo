@@ -1,13 +1,11 @@
 import csv
 import datetime
-import hashlib
 import io
 import sys
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class ContrastParser:
@@ -59,8 +57,8 @@ class ContrastParser:
                 nb_occurences=1,
             )
             if uri := row.get("Request URI"):
-                if settings.V3_FEATURE_LOCATIONS:
-                    location = URL(
+                if locations_enabled():
+                    location = LocationData.url(
                         host="0.0.0.0",  # noqa: S104
                         path=uri,
                         protocol=row.get("Request Protocol"),
@@ -89,9 +87,7 @@ class ContrastParser:
                     },
                 )
 
-            dupe_key = hashlib.sha256(
-                f"{finding.vuln_id_from_tool}".encode(),
-            ).digest()
+            dupe_key = finding.unique_id_from_tool
 
             if dupe_key in dupes:
                 dupes[dupe_key].description = (
@@ -99,7 +95,7 @@ class ContrastParser:
                     + "\n-----\n"
                     + finding.description
                 )
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     dupes[dupe_key].unsaved_locations.extend(
                         finding.unsaved_locations,
                     )

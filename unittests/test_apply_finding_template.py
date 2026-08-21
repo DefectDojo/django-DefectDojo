@@ -9,23 +9,26 @@ from django.http import Http404
 from django.test.client import RequestFactory
 from django.utils import timezone
 
-from dojo.finding import views
+from dojo.authorization.models import (
+    Product_Member,
+    Role,
+)
 from dojo.finding.helper import save_endpoints_template, save_vulnerability_ids_template
+from dojo.finding.ui import views
 from dojo.models import (
+    Dojo_User,
     Engagement,
     Finding,
     Finding_Template,
+    FindingVulnerabilityReference,
     Notes,
     Product,
-    Product_Member,
     Product_Type,
-    Role,
     System_Settings,
     Test,
     Test_Type,
-    Vulnerability_Id,
 )
-from dojo.test import views as test_views
+from dojo.test.ui import views as test_views
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
@@ -105,9 +108,14 @@ class FindingTemplateTestUtil:
 
     @staticmethod
     def create_user_with_role(product, role_name, *, is_staff=False):
-        """Create a user with a specific role on a product"""
+        """
+        Create a user with a specific role on a product. Under the
+        legacy authorization model the role is informational only —
+        callers needing actual access must add the user to
+        product.authorized_users.
+        """
         user_count = User.objects.count()
-        user = User()
+        user = Dojo_User()
         user.is_staff = is_staff
         user.is_superuser = False
         user.username = f"TestUser{role_name}{user_count}"
@@ -217,13 +225,18 @@ class TestApplyFindingTemplate(DojoTestCase):
                                     "impact": "template impact"},
                                    )
 
-    def test_reader_role_cannot_apply_template(self):
-        """Test that a Reader role user (read-only) cannot apply template"""
-        reader_user = FindingTemplateTestUtil.create_user_with_role(
-            self.finding.test.engagement.product, "Reader", is_staff=False,
-        )
+    def test_product_member_without_global_edit_cannot_apply_template(self):
+        """
+        A user authorized on the target finding's product but without global
+        template access must not apply a template: applying reads the template's
+        content, and templates are a global, cross-product store. This matches
+        the gate already on find_template_to_apply and the /template list view.
+        """
+        product = self.finding.test.engagement.product
+        member = FindingTemplateTestUtil.create_user_with_role(product, "Writer", is_staff=False)
+        product.authorized_users.add(member)
         request = FindingTemplateTestUtil.create_post_request(
-            reader_user, self.apply_template_url,
+            member, self.apply_template_url,
             data={"title": "Finding for Testing Apply Template functionality",
                   "cwe": "89",
                   "severity": "High",
@@ -231,16 +244,20 @@ class TestApplyFindingTemplate(DojoTestCase):
                   "mitigation": "template mitigation",
                   "impact": "template impact"},
         )
-        with impersonate(reader_user), self.assertRaises(PermissionDenied):
+        with impersonate(member), self.assertRaises(PermissionDenied):
             views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
 
-    def test_writer_role_can_apply_template(self):
-        """Test that a Writer role user (non-staff) can apply template"""
-        writer_user = FindingTemplateTestUtil.create_user_with_role(
-            self.finding.test.engagement.product, "Writer", is_staff=False,
-        )
+    def test_non_member_cannot_apply_template(self):
+        """
+        Legacy: a user with no authorized_users membership and no staff
+        flag is denied — covers the case test_reader_role_cannot_apply_template
+        used to assert under RBAC.
+        """
+        product = self.finding.test.engagement.product
+        outsider = FindingTemplateTestUtil.create_user_with_role(product, "Reader", is_staff=False)
+        # Deliberately NOT added to product.authorized_users.
         request = FindingTemplateTestUtil.create_post_request(
-            writer_user, self.apply_template_url,
+            outsider, self.apply_template_url,
             data={"title": "Finding for Testing Apply Template functionality",
                   "cwe": "89",
                   "severity": "High",
@@ -248,10 +265,8 @@ class TestApplyFindingTemplate(DojoTestCase):
                   "mitigation": "template mitigation",
                   "impact": "template impact"},
         )
-        with impersonate(writer_user):
-            result = views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
-            self.assertEqual(302, result.status_code)
-            self.assertEqual(f"/finding/{self.finding.id}", result.url)
+        with impersonate(outsider), self.assertRaises(PermissionDenied):
+            views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
 
     def test_apply_template_to_finding_with_illegal_finding_fails(self):
         with self.assertRaises(Http404):
@@ -378,7 +393,7 @@ class TestMkTemplate(DojoTestCase):
 
     def make_request(self, user, finding_id):
         rf = RequestFactory()
-        request = rf.get(f"/finding/{finding_id}/mktemplate")
+        request = rf.post(f"/finding/{finding_id}/mktemplate")
         request.user = user
         request.session = {}
         messages = FallbackStorage(request)
@@ -563,7 +578,7 @@ class TestAddFindingFromTemplate(DojoTestCase):
         self.assertEqual(finding.component_version, "1.0.0")
 
         # Verify vulnerability IDs were copied
-        vulnerability_ids = [vid.vulnerability_id for vid in Vulnerability_Id.objects.filter(finding=finding)]
+        vulnerability_ids = [ref.vulnerability.vulnerability_id for ref in FindingVulnerabilityReference.objects.filter(finding=finding)]
         self.assertIn("CVE-2023-1234", vulnerability_ids)
         self.assertIn("CVE-2023-5678", vulnerability_ids)
 
@@ -603,3 +618,75 @@ class TestAddFindingFromTemplate(DojoTestCase):
         self.assertIsNotNone(self.template.last_used)
         if original_last_used:
             self.assertGreaterEqual(self.template.last_used, original_last_used)
+
+
+@versioned_fixtures
+class TestFindingTemplateCrossTenantReadAuthz(DojoTestCase):
+
+    """
+    Regression for the report: a user who can edit a finding in one product must
+    not read arbitrary Finding_Template content through the views that take a
+    template id directly. find_template_to_apply and the /template list already
+    require global template access; choose_finding_template_options,
+    apply_template_to_finding and add_finding_from_template must match it, so the
+    permission checked is on the same object whose data is returned.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    SECRET = "TENANT_B_SECRET_TEMPLATE_BODY"
+
+    def setUp(self):
+        super().setUp()
+        System_Settings().save()
+        pt_a, _ = Product_Type.objects.get_or_create(name="TPLR-A PT")
+        tt, _ = Test_Type.objects.get_or_create(name="TPLR Scan")
+
+        prod_a = Product.objects.create(name="TPLR Product A", description="A", prod_type=pt_a)
+        eng_a = Engagement.objects.create(name="TPLR Eng A", product=prod_a, target_start=timezone.now(), target_end=timezone.now())
+        self.test_a = Test.objects.create(engagement=eng_a, test_type=tt, target_start=timezone.now(), target_end=timezone.now())
+        self.own_finding = Finding.objects.create(
+            test=self.test_a, title="TPLR own finding A", description="benign",
+            severity="Low", numerical_severity="S3", active=True,
+        )
+
+        self.template = Finding_Template.objects.create(
+            title="TPLR confidential template", cwe=89, severity="Critical",
+            description=self.SECRET, mitigation=self.SECRET, impact=self.SECRET,
+        )
+
+        # Attacker: non-staff, non-superuser, Writer on product A only, no global role.
+        self.attacker = FindingTemplateTestUtil.create_user_with_role(prod_a, "Writer", is_staff=False)
+        prod_a.authorized_users.add(Dojo_User.objects.get(pk=self.attacker.pk))
+
+    def test_choose_finding_template_options_denied(self):
+        request = FindingTemplateTestUtil.create_get_request(
+            self.attacker, f"finding/{self.template.id}/{self.own_finding.id}/choose_finding_template_options")
+        with impersonate(self.attacker), self.assertRaises(PermissionDenied):
+            views.choose_finding_template_options(request, tid=self.template.id, fid=self.own_finding.id)
+
+    def test_apply_template_to_finding_denied(self):
+        request = FindingTemplateTestUtil.create_post_request(
+            self.attacker, f"finding/{self.own_finding.id}/{self.template.id}/apply_template_to_finding",
+            data={"title": "x", "cwe": "89", "severity": "Low",
+                  "description": "x", "mitigation": "x", "impact": "x"})
+        with impersonate(self.attacker), self.assertRaises(PermissionDenied):
+            views.apply_template_to_finding(request, fid=self.own_finding.id, tid=self.template.id)
+        # The template content must not have been copied onto the attacker's finding.
+        self.own_finding.refresh_from_db()
+        self.assertNotIn(self.SECRET, self.own_finding.description)
+
+    def test_add_finding_from_template_denied(self):
+        request = FindingTemplateTestUtil.create_get_request(
+            self.attacker, f"/test/{self.test_a.id}/add_findings/{self.template.id}")
+        with impersonate(self.attacker), self.assertRaises(PermissionDenied):
+            test_views.add_finding_from_template(request, tid=self.test_a.id, fid=self.template.id)
+
+    def test_staff_with_global_edit_still_reads_template(self):
+        # The legitimate path keeps working for a user who holds global template access.
+        staff = FindingTemplateTestUtil.create_user(is_staff=True)
+        request = FindingTemplateTestUtil.create_get_request(
+            staff, f"finding/{self.template.id}/{self.own_finding.id}/choose_finding_template_options")
+        with impersonate(staff):
+            result = views.choose_finding_template_options(request, tid=self.template.id, fid=self.own_finding.id)
+        self.assertEqual(200, result.status_code)

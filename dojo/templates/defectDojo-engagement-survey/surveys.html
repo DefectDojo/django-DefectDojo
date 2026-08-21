@@ -34,13 +34,13 @@
                                     <i class="fa-solid fa-pen-to-square"></i> Edit Responses</a>
                                 </li>
                                 {% endif %}
-                                {% if survey.engagement|has_object_permission:"Engagement_Edit" %}
+                                {% if survey.engagement|has_object_permission:"edit" %}
                                 <li role="presentation"
                                     ><a class="" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">
                                         <i class="fa-solid fa-plus"></i> Assign User</a>
                                 </li>
                                 {% endif %}
-                                {% if survey.engagement|has_object_permission:"Engagement_Edit" %}
+                                {% if survey.engagement|has_object_permission:"edit" %}
                                 <li role="presentation">
                                     <a class="" href="/empty_questionnaire/{{ survey.id }}/existing_engagement">
                                         <i class="fa-solid fa-link"></i> Link to a Different Engagement
@@ -48,12 +48,11 @@
                                 </li>
                                 {% endif %}
                                 <li>
-                                    <a class="" data-toggle="modal"
-                                    data-target="#shareQuestionnaireModal"
-                                    data-whatever="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
+                                    <a class="" href="#"
+                                    onclick="openShareModal('/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer'); return false;">
                                     <i class="fa-solid fa-share"></i> Share Questionnaire</a>
                                 </li>
-                                {% if survey.engagement|has_object_permission:"Engagement_Edit" %}
+                                {% if survey.engagement|has_object_permission:"edit" %}
                                 <li class="divider"></li>
                                 <li role="presentation">
                                     <a class="text-danger" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/delete">

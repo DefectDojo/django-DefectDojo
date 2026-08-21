@@ -992,21 +992,10 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <!-- Flot Charts JavaScript -->
-    <script src="{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
+    <!-- Chart.js (moment.js loaded in base.html) -->
+    <script src="{% static "chart.js/dist/chart.umd.js" %}"></script>
+    <script src="{% static "chartjs-adapter-moment/dist/chartjs-adapter-moment.js" %}"></script>
     {% include "dojo/filter_js_snippet.html" %}
-    {% if punchcard %}
-        <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
-        <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
-        <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
-    {% endif %}
-    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
@@ -1030,11 +1019,11 @@
                 if (!$this.hasClass('panel-collapsed')) {
                     $this.parents('.panel').find('.panel-body').slideUp();
                     $this.addClass('panel-collapsed');
-                    $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                    $this.find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
                 } else {
                     $this.parents('.panel').find('.panel-body').slideDown();
                     $this.removeClass('panel-collapsed');
-                    $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+                    $this.find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
                 }
             });
 

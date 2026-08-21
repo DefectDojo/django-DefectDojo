@@ -6,7 +6,7 @@
 {% block content %}
     {{ block.super }}
     <h3> {{ name }} {% if to_edit %}- {{ to_edit.username }}{% endif %}</h3>
-    <form class="form-horizontal" method="post">{% csrf_token %}
+    <form class="" method="post">{% csrf_token %}
         <fieldset>
             <legend>{% trans "Default Information" %}</legend>
             {% include "dojo/form_fields.html" with form=form %}
@@ -14,10 +14,6 @@
         <fieldset>
             <legend>{% trans "Additional Contact Information" %}</legend>
             {% include "dojo/form_fields.html" with form=contact_form %}
-        </fieldset>
-        <fieldset>
-            <legend>{% trans "Global Role" %}</legend>
-            {% include "dojo/form_fields.html" with form=global_role_form %}
         </fieldset>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

@@ -1,0 +1,232 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.1"
+  },
+  "ReportID": "019c8e79-cf0f-75cc-8c6e-b806652074c5",
+  "CreatedAt": "2026-02-24T07:07:53.487381Z",
+  "ArtifactName": "lib/catalina.jar",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Packages": [
+        {
+          "Name": "org.apache.tomcat:tomcat-catalina",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.tomcat/tomcat-catalina@9.0.109",
+            "UID": "ac2f42ab8f82e098"
+          },
+          "Version": "9.0.109",
+          "FilePath": "catalina.jar",
+          "AnalyzedBy": "jar"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-66614",
+          "VendorIDs": [
+            "GHSA-fpj8-gq4v-p354"
+          ],
+          "PkgName": "org.apache.tomcat:tomcat-catalina",
+          "PkgPath": "catalina.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.apache.tomcat/tomcat-catalina@9.0.109",
+            "UID": "ac2f42ab8f82e098"
+          },
+          "InstalledVersion": "9.0.109",
+          "FixedVersion": "11.0.14, 10.1.49, 9.0.112",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-66614",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:e57258930e76fa6f68fd091192d82af0c355c745b9e1472000db245e96a5191c",
+          "Title": "tomcat: Client certificate verification bypass due to virtual host mapping",
+          "Description": "Improper Input Validation vulnerability.\n\nThis issue affects Apache Tomcat: from 11.0.0-M1 through 11.0.14, from 10.1.0-M1 through 10.1.49, from 9.0.0-M1 through 9.0.112.\n\nThe following versions were EOL at the time the CVE was created but are \nknown to be affected: 8.5.0 through 8.5.100. Older EOL versions are not affected.\nTomcat did not validate that the host name provided via the SNI \nextension was the same as the host name provided in the HTTP host header \nfield. If Tomcat was configured with more than one virtual host and the \nTLS configuration for one of those hosts did not require client \ncertificate authentication but another one did, it was possible for a \nclient to bypass the client certificate authentication by sending \ndifferent host names in the SNI extension and the HTTP host header field.\n\n\n\nThe vulnerability only applies if client certificate authentication is \nonly enforced at the Connector. It does not apply if client certificate \nauthentication is enforced at the web application.\n\n\nUsers are recommended to upgrade to version 11.0.15 or later, 10.1.50 or later or 9.0.113 or later, which fix the issue.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-20"
+          ],
+          "VendorSeverity": {
+            "ghsa": 2,
+            "redhat": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 6.3
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-66614",
+            "https://github.com/apache/tomcat",
+            "https://github.com/apache/tomcat/commit/152c14885d45f5e0a8b59bd9f93c289cfe20ce30",
+            "https://github.com/apache/tomcat/commit/258a591b61f8cf5c22109e21e5a2a38b63454fd2",
+            "https://github.com/apache/tomcat/commit/5053fa82a1b2b52756810601227984a8b71888a4",
+            "https://github.com/apache/tomcat/commit/9276b5e783c8cd5b3fe2bb716306b65004bdd940",
+            "https://github.com/apache/tomcat/commit/972f9a5e2a07674d92610c478aac1b205d60724e",
+            "https://github.com/apache/tomcat/commit/a4aa74232e826028cd2f7ba0445caf8a8b52c509",
+            "https://lists.apache.org/thread/vw6lxtlh2qbqwpb61wd3sv1flm2nttw7",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-66614",
+            "https://tomcat.apache.org/security-10.html",
+            "https://tomcat.apache.org/security-11.html",
+            "https://tomcat.apache.org/security-9.html",
+            "https://www.cve.org/CVERecord?id=CVE-2025-66614"
+          ],
+          "PublishedDate": "2026-02-17T19:21:55.31Z",
+          "LastModifiedDate": "2026-02-18T17:51:53.51Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61795",
+          "VendorIDs": [
+            "GHSA-hgrr-935x-pq79"
+          ],
+          "PkgName": "org.apache.tomcat:tomcat-catalina",
+          "PkgPath": "catalina.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.apache.tomcat/tomcat-catalina@9.0.109",
+            "UID": "ac2f42ab8f82e098"
+          },
+          "InstalledVersion": "9.0.109",
+          "FixedVersion": "11.0.12, 10.1.47, 9.0.110",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61795",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:8aa49887a18f888c17b62dc43050457a0c3ce2e2e7a12b5cec90a53fdbfd975d",
+          "Title": "tomcat: org.apache.tomcat/tomcat-catalina: Apache Tomcat: Denial of service",
+          "Description": "Improper Resource Shutdown or Release vulnerability in Apache Tomcat.\n\nIf an error occurred (including exceeding limits) during the processing of a multipart upload, temporary copies of the uploaded parts written to disc were not cleaned up immediately but left for the garbage collection process to delete. Depending on JVM settings, application memory usage and application load, it was possible that space for the temporary copies of uploaded parts would be filled faster than GC cleared it, leading to a DoS.\n\n\n\nThis issue affects Apache Tomcat: from 11.0.0-M1 through 11.0.11, from 10.1.0-M1 through 10.1.46, from 9.0.0.M1 through 9.0.109.\n\nThe following versions were EOL at the time the CVE was created but are \nknown to be affected: 8.5.0 though 8.5.100. Other, older, EOL versions may also be affected.\nUsers are recommended to upgrade to version 11.0.12 or later, 10.1.47 or later or 9.0.110 or later which fixes the issue.",
+          "Severity": "LOW",
+          "CweIDs": [
+            "CWE-404"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 2,
+            "bitnami": 2,
+            "ghsa": 1,
+            "oracle-oval": 3,
+            "redhat": 2,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 5.3
+            },
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:U",
+              "V40Score": 2.3
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/27/6",
+            "https://access.redhat.com/errata/RHSA-2025:23050",
+            "https://access.redhat.com/security/cve/CVE-2025-61795",
+            "https://bugzilla.redhat.com/2362782",
+            "https://bugzilla.redhat.com/2406588",
+            "https://bugzilla.redhat.com/2406591",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2362782",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2406588",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2406591",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-31651",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-55752",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61795",
+            "https://errata.almalinux.org/10/ALSA-2025-23050.html",
+            "https://errata.rockylinux.org/RLSA-2025:23050",
+            "https://github.com/apache/tomcat",
+            "https://github.com/apache/tomcat/commit/1cdf5f730ede75a0759492f179ac21ca4ff68e06",
+            "https://github.com/apache/tomcat/commit/af6e9181620304c0d818121c29c074e1330610d0",
+            "https://github.com/apache/tomcat/commit/afa422bd7ca1eef0f507259c682fd876494d9c3b",
+            "https://linux.oracle.com/cve/CVE-2025-61795.html",
+            "https://linux.oracle.com/errata/ELSA-2025-23050.html",
+            "https://lists.apache.org/thread/wm9mx8brmx9g4zpywm06ryrtvd3160pp",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61795",
+            "https://tomcat.apache.org/security-10.html#Fixed_in_Apache_Tomcat_10.1.47",
+            "https://tomcat.apache.org/security-11.html#Fixed_in_Apache_Tomcat_11.0.12",
+            "https://tomcat.apache.org/security-9.html#Fixed_in_Apache_Tomcat_9.0.110",
+            "https://www.cve.org/CVERecord?id=CVE-2025-61795"
+          ],
+          "PublishedDate": "2025-10-27T18:15:44.2Z",
+          "LastModifiedDate": "2025-11-14T16:53:33.3Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24733",
+          "VendorIDs": [
+            "GHSA-qq5r-98hh-rxc9"
+          ],
+          "PkgName": "org.apache.tomcat:tomcat-catalina",
+          "PkgPath": "catalina.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.apache.tomcat/tomcat-catalina@9.0.109",
+            "UID": "ac2f42ab8f82e098"
+          },
+          "InstalledVersion": "9.0.109",
+          "FixedVersion": "11.0.14, 10.1.49, 9.0.112",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24733",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:84e870b1cb52f3774ad444746a88d2ead3586eacbc8b90b16c87e950314549ee",
+          "Title": "tomcat: security constraint bypass with HTTP/0.9",
+          "Description": "Improper Input Validation vulnerability in Apache Tomcat.\n\n\nTomcat did not limit HTTP/0.9 requests to the GET method. If a security \nconstraint was configured to allow HEAD requests to a URI but deny GET \nrequests, the user could bypass that constraint on GET requests by \nsending a (specification invalid) HEAD request using HTTP/0.9.\n\n\nThis issue affects Apache Tomcat: from 11.0.0-M1 through 11.0.14, from 10.1.0-M1 through 10.1.49, from 9.0.0.M1 through 9.0.112.\n\n\nOlder, EOL versions are also affected.\n\nUsers are recommended to upgrade to version 11.0.15 or later, 10.1.50 or later or 9.0.113 or later, which fixes the issue.",
+          "Severity": "LOW",
+          "CweIDs": [
+            "CWE-20"
+          ],
+          "VendorSeverity": {
+            "ghsa": 1,
+            "redhat": 1
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:U",
+              "V40Score": 2.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-24733",
+            "https://github.com/apache/tomcat",
+            "https://github.com/apache/tomcat/commit/2e2fa23f2635bbb819759576a2f2f5e64ecf7c5f",
+            "https://github.com/apache/tomcat/commit/6c73d74ff281260d74c836370ff6b82f1da8048b",
+            "https://github.com/apache/tomcat/commit/711b465cf22684a1acf0cb43501cdbbce9b6c5f4",
+            "https://lists.apache.org/thread/6xk3t65qpn1myp618krtfotbjn1qt90f",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24733",
+            "https://tomcat.apache.org/security-10.html",
+            "https://tomcat.apache.org/security-11.html",
+            "https://tomcat.apache.org/security-9.html",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24733"
+          ],
+          "PublishedDate": "2026-02-17T19:21:56.82Z",
+          "LastModifiedDate": "2026-02-18T17:51:53.51Z"
+        }
+      ]
+    }
+  ]
+}

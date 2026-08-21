@@ -6,7 +6,7 @@
     <h4>{{ finding.title }}</h4>
       <p>Please provide the date the Finding will be remediated in the environment it was discovered.</p>
 
-    <form class="form-horizontal" action="{% url 'remediation_date' finding.id %}" method="post">
+    <form class="" action="{% url 'remediation_date' finding.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">

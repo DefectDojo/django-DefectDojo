@@ -1,6 +1,8 @@
 ---
 title: "Nexpose XML 2.0 (Rapid7)"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/nexpose/"
 ---
 
 # Nexpose XML 2.0 (Rapid7) Parser Documentation
@@ -110,7 +112,7 @@ Sample Nexpose XML 2.0 (Rapid7) scans can be found in the [unit test example sca
 - [Nexpose Documentation](https://docs.rapid7.com/nexpose/)
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

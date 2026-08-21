@@ -2,6 +2,7 @@
 title: "Set System-Wide Notifications"
 description: "How to configure Personal & System notifications"
 aliases:
+  - "/en/notifications/configure_system_notifs/"
   - /en/customize_dojo/notifications/configure_system_notifs
 ---
 DefectDojo has two different kinds of notifications: **Personal** (sent to a single account) and **System** (which are sent to all users).
@@ -34,7 +35,7 @@ System notifications will be sent to:
 - any DefectDojo users with accounts and appropriate RBAC permissions
 - the System-wide Slack or Teams account.
 
-As with any notification in DefectDojo, System Notifications will only be sent to users that have access to the relevant data.  So even if Product Notifications are set up System-Wide, users will only receive notifications for the Products that they have access to view.
+As with any notification in DefectDojo, System Notifications will only be sent to users that have access to the relevant data.  So even if Asset Notifications are set up System-Wide, users will only receive notifications for the Assets that they have access to view.
 
 This restriction does not apply to System Notifications that are sent to a specific Email or Slack channel.
 

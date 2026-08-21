@@ -1,7 +1,18 @@
 from typing import TYPE_CHECKING
 
+from dojo.location.feature import locations_enabled
+from dojo.tools.locations import LocationData
+
 if TYPE_CHECKING:
     import datetime
+
+
+SYSDIG_TYPE_TO_PURL = {
+    "apk": "apk", "deb": "deb", "rpm": "rpm",
+    "npm": "npm", "python": "pypi", "java": "maven",
+    "go": "golang", "gem": "gem", "nuget": "nuget",
+    "composer": "composer", "cargo": "cargo",
+}
 
 
 class SysdigData:
@@ -59,3 +70,16 @@ class SysdigData:
         self.cloud_provider_account_id: str = ""
         self.cloud_provider_region: str = ""
         self.epss_score: float = None
+
+
+def add_package_info(finding, package_name, package_type, package_version, package_path):
+    if locations_enabled() and package_name and package_type:
+        purl_type = SYSDIG_TYPE_TO_PURL.get(package_type.lower())
+        finding.unsaved_locations.append(
+            LocationData.dependency(
+                purl_type=purl_type,
+                name=package_name,
+                version=package_version,
+                file_path=package_path,
+            ),
+        )

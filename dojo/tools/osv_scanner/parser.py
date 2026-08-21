@@ -1,6 +1,16 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+
+OSV_ECOSYSTEM_TO_PURL = {
+    "npm": "npm", "pypi": "pypi", "go": "golang", "maven": "maven",
+    "crates.io": "cargo", "rubygems": "gem", "nuget": "nuget",
+    "packagist": "composer", "hex": "hex", "pub": "pub",
+    "cocoapods": "cocoapods", "swifturl": "swift",
+    "alpine": "apk", "debian": "deb",
+}
 
 
 class OSVScannerParser:
@@ -79,6 +89,7 @@ class OSVScannerParser:
                     vulnerabilitydetails = vulnerability.get("details", "")
                     vulnerabilitypackagepurl = ""
                     cwe = None
+                    unsaved_cwes = []
                     mitigations_by_type = {}  # Dictionary to store corrected versions by type
 
                     # Make sure we have an affected section to work with
@@ -89,6 +100,7 @@ class OSVScannerParser:
                                 vulnerabilitypackagepurl = vulnerabilitypackage.get("purl", "")
                             # Extract the CWE
                             if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:
+                                unsaved_cwes = [entry["cweId"] for entry in cwe if entry.get("cweId")]
                                 cwe = cwe[0]["cweId"]
                             # Extraction of corrected versions by type
                             ranges = affected[0].get("ranges", [])
@@ -146,5 +158,17 @@ class OSVScannerParser:
 
                     if vulnerabilityid:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
+                    if unsaved_cwes:
+                        finding.unsaved_cwes = unsaved_cwes
+                    if locations_enabled() and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                        finding.unsaved_locations.append(dep)
                     findings.append(finding)
+                if locations_enabled() and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                    test.unsaved_metadata.append(dep)
         return findings
+
+    def get_dependency_info(self, pacakge_ecosystem, package_name, package_version):
+        if purl_type := OSV_ECOSYSTEM_TO_PURL.get(pacakge_ecosystem.lower()):
+            purl_string = f"pkg:/{purl_type}/{package_name}/{package_version}"
+            return LocationData.dependency(purl=purl_string)
+        return None

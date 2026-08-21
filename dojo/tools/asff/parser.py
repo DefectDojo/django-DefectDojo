@@ -1,11 +1,11 @@
 import json
 
 import dateutil
-from django.conf import settings
 from netaddr import IPAddress
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 SEVERITY_MAPPING = {
     "INFORMATIONAL": "Info",  # No issue was found.
@@ -106,9 +106,9 @@ class AsffParser:
                         # flipped to exclude "global" addresses.
                         #
                         # Ref: https://netaddr.readthedocs.io/en/latest/api.html#netaddr.IPAddress.is_global
-                        if settings.V3_FEATURE_LOCATIONS:
+                        if locations_enabled():
                             finding.unsaved_locations.extend(
-                                URL(host=ip) for ip in details.get("IpV4Addresses", [])
+                                LocationData.url(host=ip) for ip in details.get("IpV4Addresses", [])
                                 if not IPAddress(ip).is_global()
                             )
                         else:

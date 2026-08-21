@@ -4,7 +4,6 @@ import unittest
 from base_test_class import BaseTestCase
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
 
 
 class UserTest(BaseTestCase):
@@ -71,8 +70,10 @@ class UserTest(BaseTestCase):
         # Email Address
         driver.find_element(By.ID, "id_email").clear()
         driver.find_element(By.ID, "id_email").send_keys("permissionTest@defectdojo.local")
-        # Select the role 'Reader'
-        Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Writer")
+        # Grant elevated (Writer-equivalent) permissions: legacy auth uses is_staff
+        staff_checkbox = driver.find_element(By.ID, "id_is_staff")
+        if not staff_checkbox.is_selected():
+            staff_checkbox.click()
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Query the site to determine if the user has been created

@@ -5,13 +5,12 @@ import re
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
 
 if TYPE_CHECKING:
     from dojo.location.models import AbstractLocation
+from dojo.tools.locations import LocationData
 
 
 class WhiteHatSentinelParser:
@@ -202,7 +201,7 @@ class WhiteHatSentinelParser:
             attack_vectors: The list of Attack Vector dictionaries
         Returns: A list of Defect Dojo URLs
         """
-        return [URL.from_value(attack_vector["request"]["url"]) for attack_vector in attack_vectors]
+        return [LocationData.url(url=attack_vector["request"]["url"]) for attack_vector in attack_vectors]
 
     def _convert_whitehat_sentinel_vulns_to_dojo_finding(
         self, whitehat_sentinel_vulns: list[dict], test: str,
@@ -278,7 +277,7 @@ class WhiteHatSentinelParser:
                     unique_id_from_tool=whitehat_vuln["id"],
                 )
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     # TODO: Delete this after the move to Locations
                     # Get Locations from Attack Vectors
                     locations = self._convert_attack_vectors_to_locations(

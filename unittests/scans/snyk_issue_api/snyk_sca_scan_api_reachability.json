@@ -1,0 +1,284 @@
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "self": "/rest/orgs/11111111111-2222-3333333-4444/issues?version=2024-10-15&limit=100",
+    "first": "/rest/orgs/11111111111-2222-3333333-4444/issues?limit=100&version=2024-10-15",
+    "last": "/rest/orgs/11111111111-2222-3333333-4444/issues?ending_before=end&limit=100&version=2024-10-15",
+    "prev": "/rest/orgs/11111111111-2222-3333333-4444/issues?ending_before="
+  },
+  "data": [
+    {
+      "id": "0a4f2f6a-13b8-4a3c-9d2e-7f1a2b3c4d5e",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-502",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": false,
+            "is_upgradeable": true,
+            "reachability": "reachable",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "pyyaml",
+                  "package_version": "5.3.1"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "critical",
+        "ignored": false,
+        "key": "SNYK-PYTHON-PYYAML-590151",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-PYYAML-590151",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147502Z"
+          }
+        ],
+        "status": "open",
+        "title": "Arbitrary Code Execution",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-19T09:01:03.316Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "3de2b524-eae7-4f3f-ba5f-1a07e1df44c2",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "92867a20-30b8-44fd-a59f-da71d59b58f1",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2/projects/92867a20-30b8-44fd-a59f-da71d59b58f1"
+          }
+        }
+      }
+    },
+    {
+      "id": "1b5e3a7b-24c9-4b4d-8e3f-8a2b3c4d5e6f",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-400",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": false,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": false,
+            "is_upgradeable": true,
+            "reachability": "package",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "pillow",
+                  "package_version": "9.5.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "high",
+        "ignored": false,
+        "key": "SNYK-PYTHON-PILLOW-6219986",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-PILLOW-6219986",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147502Z"
+          }
+        ],
+        "status": "open",
+        "title": "Denial of Service (DoS)",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-19T09:01:03.316Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "3de2b524-eae7-4f3f-ba5f-1a07e1df44c2",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "92867a20-30b8-44fd-a59f-da71d59b58f1",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2/projects/92867a20-30b8-44fd-a59f-da71d59b58f1"
+          }
+        }
+      }
+    },
+    {
+      "id": "2c6f4b8c-35da-4c5e-9f4a-9b3c4d5e6f7a",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-94",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": false,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": true,
+            "is_upgradeable": false,
+            "reachability": "no-path-found",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "setuptools",
+                  "package_version": "40.5.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "medium",
+        "ignored": false,
+        "key": "SNYK-PYTHON-SETUPTOOLS-7448483",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-SETUPTOOLS-7448483",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147502Z"
+          }
+        ],
+        "status": "open",
+        "title": "Improper Control of Generation of Code ('Code Injection')",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-19T09:01:03.316Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "3de2b524-eae7-4f3f-ba5f-1a07e1df44c2",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "92867a20-30b8-44fd-a59f-da71d59b58f1",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2/projects/92867a20-30b8-44fd-a59f-da71d59b58f1"
+          }
+        }
+      }
+    },
+    {
+      "id": "3d7a5c9d-46eb-4d00-a000-000000000004",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-502",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": false,
+            "is_upgradeable": true,
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "pyyaml",
+                  "package_version": "5.3.1"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "critical",
+        "ignored": false,
+        "key": "3d7a5c9d-46eb-4d00-a000-000000000004",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-PYYAML-590151",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147502Z"
+          }
+        ],
+        "status": "open",
+        "title": "No reachability reported",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-19T09:01:03.316Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "3de2b524-eae7-4f3f-ba5f-1a07e1df44c2",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "92867a20-30b8-44fd-a59f-da71d59b58f1",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2/projects/92867a20-30b8-44fd-a59f-da71d59b58f1"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -5,13 +5,13 @@ import textwrap
 from datetime import datetime
 
 import dateutil.parser
-from django.conf import settings
 from django.core.exceptions import ValidationError
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.tools.api_bugcrowd.importer import BugcrowdApiImporter
+from dojo.tools.locations import LocationData
 from dojo.url.models import URL
-
-from .importer import BugcrowdApiImporter
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
@@ -131,22 +131,11 @@ class ApiBugcrowdParser:
                 finding.severity = "Info"
 
             if bug_location:
-                try:
-                    bug_location.clean()
-                    try:
-                        if settings.V3_FEATURE_LOCATIONS:
-                            finding.unsaved_locations = [bug_location]
-                        else:
-                            # TODO: Delete this after the move to Locations
-                            finding.unsaved_endpoints = [bug_location]
-                    except Exception as e:
-                        logger.error(
-                            "%s bug url from bugcrowd failed to parse to location, error= %s", bug_location, e,
-                        )
-                except ValidationError:
-                    logger.error(
-                        f"Broken Bugcrowd location {bug_location.host} was skipped.",
-                    )
+                if locations_enabled():
+                    finding.unsaved_locations = [bug_location]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [bug_location]
 
             findings.append(finding)
 
@@ -172,12 +161,19 @@ class ApiBugcrowdParser:
 
         try:
             # TODO: Delete this after the move to Locations
-            if not settings.V3_FEATURE_LOCATIONS:
-                return Endpoint.from_uri(bug_url)
-            return URL.from_value(bug_url)
-        except ValueError:
+            if not locations_enabled():
+                endpoint = Endpoint.from_uri(bug_url)
+                endpoint.clean()
+                return endpoint
+            location_data = LocationData.url(url=bug_url)
+            URL.from_location_data(location_data).clean()
+        except (ValidationError, ValueError):
             # We don't want to fail the whole import just for 1 error in the bug_url
             logger.error("Error parsing bugcrowd bug_url : %s", bug_url)
+        else:
+            return location_data
+
+        return None
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""

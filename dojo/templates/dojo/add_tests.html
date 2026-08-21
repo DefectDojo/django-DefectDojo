@@ -1,12 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block add_styles %}
-    {{ block.super }}
-.chosen-container {
-    width: 70% !important;
-}
-{% endblock %}
 
 {% block content %}
     {{ block.super }}
@@ -15,7 +9,7 @@
     <p>
         <a href="https://docs.defectdojo.com/en/connecting_your_tools/import_scan_files/import_scan_ui/">Documentation</a>
     </p>
-    <form class="form-horizontal" action="{% url 'add_tests' eid%}" method="post">{% csrf_token %}
+    <form class="" action="{% url 'add_tests' eid%}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         {% include "dojo/form_fields.html" with form=cred_form %}
         <div class="form-group">

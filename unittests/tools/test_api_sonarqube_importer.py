@@ -28,6 +28,11 @@ def dummy_rule_wo_html_desc(self, *args, **kwargs):
         return json.load(json_file)
 
 
+def dummy_rule_md_desc_only(self, *args, **kwargs):
+    with (get_unit_tests_scans_path("api_sonarqube") / "rule_md_desc_only.json").open(encoding="utf-8") as json_file:
+        return json.load(json_file)
+
+
 def dummy_no_hotspot(self, *args, **kwargs):
     with (get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "no_vuln.json").open(encoding="utf-8") as json_file:
         return json.load(json_file)
@@ -291,6 +296,85 @@ class TestSonarqubeImporterExternalRule(DojoTestCase):
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(242, finding.line)
         self.assertEqual("internal.dummy.project:src/main/javascript/TranslateDirective.ts", finding.file_path)
+
+
+class TestSonarqubeImporterMarkdownRuleDescription(DojoTestCase):
+    fixtures = [
+        "unit_sonarqube_toolType.json",
+        "unit_sonarqube_toolConfig1.json",
+        "unit_sonarqube_toolConfig2.json",
+        "unit_sonarqube_product.json",
+        "unit_sonarqube_sqcNoKey.json",
+        "unit_sonarqube_sqcWithKey.json",
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name="product")
+        engagement = Engagement(product=product)
+        self.test = Test(
+            engagement=engagement,
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last(),
+        )
+
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule_md_desc_only)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(2, len(findings))
+        finding = findings[0]
+        self.assertEqual(563, finding.cwe)
+        self.assertIn(
+            "A dead store happens when a local variable is assigned a value",
+            finding.description,
+        )
+        self.assertIn(
+            "[MITRE, CWE-563](http://cwe.mitre.org/data/definitions/563.html)",
+            finding.references,
+        )
+
+
+class TestSonarqubeImporterRuleDetailsSanitization(DojoTestCase):
+    def test_get_rule_details_sanitizes_markdown_html(self):
+        rule_details = SonarQubeApiImporter.get_rule_details(
+            {
+                "mdDesc": (
+                    "# Heading\n\n"
+                    "<script>alert('boom')</script>\n\n"
+                    "[safe](https://example.com)\n\n"
+                    '<a href="javascript:alert(1)">unsafe</a>'
+                ),
+            },
+        )
+
+        self.assertIn("<h1>Heading</h1>", rule_details)
+        self.assertIn('<a href="https://example.com">safe</a>', rule_details)
+        self.assertIn("<a>unsafe</a>", rule_details)
+        self.assertNotIn("<script", rule_details)
+        self.assertNotIn("alert('boom')", rule_details)
+        self.assertNotIn("javascript:", rule_details)
+
+    def test_get_rule_details_sanitizes_html_desc(self):
+        rule_details = SonarQubeApiImporter.get_rule_details(
+            {
+                "htmlDesc": (
+                    "<h2>References</h2>"
+                    '<p><a href="https://owasp.org">OWASP</a></p>'
+                    "<style>body { display: none; }</style>"
+                    '<p><a href="javascript:alert(\'boom\')">unsafe</a></p>'
+                ),
+            },
+        )
+
+        self.assertIn("<h2>References</h2>", rule_details)
+        self.assertIn('<a href="https://owasp.org">OWASP</a>', rule_details)
+        self.assertIn("<a>unsafe</a>", rule_details)
+        self.assertNotIn("<style", rule_details)
+        self.assertNotIn("display: none", rule_details)
+        self.assertNotIn("javascript:", rule_details)
 
 
 class TestSonarqubeImporterTwoIssuesNoHotspots(DojoTestCase):

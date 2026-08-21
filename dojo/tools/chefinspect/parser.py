@@ -15,7 +15,7 @@ class ChefInspectParser:
 
     def convert_score(self, raw_value):
         val = float(raw_value)
-        if val == 0.0:
+        if val == 0:
             return "Info"
         if val < 0.4:
             return "Low"

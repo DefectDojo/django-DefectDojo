@@ -1,10 +1,10 @@
 import json
 
 from cvss import parser as cvss_parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 from .importer import EdgescanImporter
 
@@ -48,7 +48,15 @@ class ApiEdgescanParser:
         finding.title = vulnerability["name"]
         finding.date = vulnerability["date_opened"][:10]
         if vulnerability["cwes"]:
-            finding.cwe = int(vulnerability["cwes"][0][4:])
+            cwes = []
+            for cwe in vulnerability["cwes"]:
+                try:
+                    cwes.append(int(cwe[4:]))
+                except (ValueError, TypeError):
+                    continue
+            if cwes:
+                finding.cwe = cwes[0]
+                finding.unsaved_cwes = cwes
         if vulnerability["cves"]:
             finding.unsaved_vulnerability_ids = vulnerability["cves"]
         if vulnerability["cvss_version"] == 3:
@@ -67,11 +75,11 @@ class ApiEdgescanParser:
             finding.unsaved_tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = [
-                URL.from_value(vulnerability["location"])
+                LocationData.url(url=vulnerability["location"])
                 if "://" in vulnerability["location"]
-                else URL.from_value("//" + vulnerability["location"]),
+                else LocationData.url(url="//" + vulnerability["location"]),
             ]
         else:
             # TODO: Delete this after the move to Locations

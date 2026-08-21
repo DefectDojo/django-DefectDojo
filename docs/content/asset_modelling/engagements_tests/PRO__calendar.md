@@ -2,7 +2,7 @@
 title: "Calendar"
 description: "How to use the Calendar in DefectDojo Pro"
 audience: pro
-weight: 2
+weight: 9
 ---
 
 DefectDojo features a built-in Calendar so you can track all prior and active Engagements and Tests within your organization. Any time a User creates a new Engagement or Test and establishes the start and end dates, a corresponding entry will automatically be added to the Calendar. 
@@ -29,7 +29,7 @@ Importantly, Calendar will only present Engagements and Tests to which the User 
 
 The monthly calendar will preview five entries on each day. Additional entries occurring on that day will be hidden from view unless the **"+ [X] events"** is clicked within the cell of any particular date. Once clicked, the calendar will shift from a monthly view to a daily view.
 
-Clicking on an  for a Test or Engagement will open a pop-up modal with additional information on that entry, including: 
+Clicking on an entry for a Test or Engagement will open a pop-up modal with additional information on that entry, including: 
 - Start and End Date 
 - Test or Engagement Type 
 - Lead 
@@ -46,7 +46,7 @@ In the daily view, all currently active Engagements and Tests will appear chrono
 
 If set within the applicable Engagement/Test, the title of each entry in the daily calendar will include the following:
 - Status 
-- Product
+- Asset
 - Engagement
 - Test
 - Assignee 
@@ -57,6 +57,6 @@ The arrows on the left and right side of each entry indicate whether that partic
 
 For example, a Test that was made on the same day on which it’s being viewed will not have arrows on the left because that Test didn’t exist the day before. Conversely, a Test that ends on the same day on which it’s being viewed will not have arrows on the right because the entry won’t exist on the following day.
 
-For example, as the final Engagement in the screenshot below (**In Progress** Example Product A ▶ **Sample Engagement** (Unassigned)) is being viewed on the day it was created, and the Target End Date was set for the following day, no arrows are present on either the left or right side.
+For example, as the final Engagement in the screenshot below (**In Progress** Example Asset A ▶ **Sample Engagement** (Unassigned)) is being viewed on the day it was created, and the Target End Date was set for the following day, no arrows are present on either the left or right side.
 
 ![image](images/calendar2.png)

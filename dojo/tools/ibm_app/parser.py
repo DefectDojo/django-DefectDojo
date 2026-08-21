@@ -2,10 +2,10 @@ import hashlib
 import logging
 
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -119,8 +119,8 @@ class IbmAppParser:
                         # As most of the actions of any vuln scanner depends on
                         # urls
                         if url:
-                            if settings.V3_FEATURE_LOCATIONS:
-                                finding.unsaved_locations.append(URL.from_value(url))
+                            if locations_enabled():
+                                finding.unsaved_locations.append(LocationData.url(url=url))
                             else:
                                 # TODO: Delete this after the move to Locations
                                 finding.unsaved_endpoints.append(Endpoint.from_uri(url))

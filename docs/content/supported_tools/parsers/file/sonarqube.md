@@ -1,6 +1,8 @@
 ---
 title: "SonarQube"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/sonarqube/"
 ---
 # SonarQube Scan
 There are two ways to retrieve findings from SonarQube. You can either use the [soprasteria package](https://github.com/soprasteria/sonar-report) or the SonarQube REST API directly. 
@@ -42,7 +44,7 @@ Version: \>= 1.1.0.
 Recommend version for both format \>= 3.1.2
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - cwe
 - severity

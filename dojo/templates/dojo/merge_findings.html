@@ -7,15 +7,6 @@
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
-{% block add_styles %}
-    {{ block.super }}
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <h3> Merge Findings</h3>
@@ -23,7 +14,7 @@
         <p>
         </p>
 
-        <form id="add_finding" class="form-horizontal" method="post">
+        <form id="add_finding" class="" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">

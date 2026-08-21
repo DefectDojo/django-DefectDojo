@@ -6,11 +6,11 @@ weight: 2
 ---
 
 The DefectDojo Pro UI has various Metrics dashboards to help visualize your current security posture. Each dashboard allows stakeholders at different levels of the organization to make informed decisions without needing to interpret raw data or navigate individual Findings. These dashboards include:
-* [Executive Insights](#executive-insights)
-* [Priority Insights](#priority-insights)
-* [Program Insights](#program-insights)
-* [Remediation Insights](#remediation-insights)
-* [Tool Insights](#tool-insights)
+* [Executive Insights](/metrics_reports/pro_metrics/pro__executive_insights/#main-content)
+* [Priority Insights](/metrics_reports/pro_metrics/pro__priority_insights/#main-content)
+* [Program Insights](/metrics_reports/pro_metrics/pro__program_insights/#main-content)
+* [Remediation Insights](/metrics_reports/pro_metrics/pro__remediation_insights/#main-content)
+* [Tool Insights](/metrics_reports/pro_metrics/pro__tool_insights/#main-content)
 
 ![Metrics overview](images/metrics_image1.png)
 

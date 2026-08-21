@@ -1,7 +1,9 @@
 import json
 from datetime import datetime
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GitlabSecretDetectionReportParser:
@@ -59,6 +61,15 @@ class GitlabSecretDetectionReportParser:
             if "raw_source_code_extract" in vulnerability:
                 finding.description += (
                     "\n" + vulnerability["raw_source_code_extract"]
+                )
+
+            if locations_enabled() and location.get("file"):
+                finding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=location["file"],
+                        line=int(location["start_line"]) if "start_line" in location else None,
+                        snippet=vulnerability.get("raw_source_code_extract", ""),
+                    ),
                 )
 
             findings.append(finding)

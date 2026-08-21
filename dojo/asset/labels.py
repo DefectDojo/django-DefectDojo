@@ -68,6 +68,8 @@ class AssetLabelsKeys:
     ASSET_FILTERS_CSV_TAGS_NOT_HELP = "asset.filters.csv_tags_not_help"
     ASSET_FILTERS_CSV_LIFECYCLES_LABEL = "asset.filters.csv_lifecycles_label"
     ASSET_FILTERS_TAGS_ASSET_LABEL = "asset.filters.tags_asset_label"
+    ASSET_FILTERS_TAGS_ASSET_AND_LABEL = "asset.filters.tags_asset_and_label"
+    ASSET_FILTERS_TAGS_ASSET_AND_HELP = "asset.filters.tags_asset_and_help"
     ASSET_FILTERS_TAG_ASSET_LABEL = "asset.filters.tag_asset_label"
     ASSET_FILTERS_TAG_ASSET_HELP = "asset.filters.tag_asset_help"
     ASSET_FILTERS_NOT_TAGS_ASSET_LABEL = "asset.filters.not_tags_asset_label"
@@ -175,6 +177,8 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
         AssetLabelsKeys.ASSET_FILTERS_CSV_TAGS_NOT_HELP: _("Comma separated list of exact tags not present on Asset"),
         AssetLabelsKeys.ASSET_FILTERS_CSV_LIFECYCLES_LABEL: _("Comma separated list of exact Asset lifecycles"),
         AssetLabelsKeys.ASSET_FILTERS_TAGS_ASSET_LABEL: _("Asset Tags"),
+        AssetLabelsKeys.ASSET_FILTERS_TAGS_ASSET_AND_LABEL: _("Asset Tags (AND)"),
+        AssetLabelsKeys.ASSET_FILTERS_TAGS_ASSET_AND_HELP: _("Filter Findings by the selected Asset tags (AND logic)"),
         AssetLabelsKeys.ASSET_FILTERS_TAG_ASSET_LABEL: _("Asset Tag"),
         AssetLabelsKeys.ASSET_FILTERS_TAG_ASSET_HELP: _("Search for tags on an Asset that are an exact match"),
         AssetLabelsKeys.ASSET_FILTERS_NOT_TAGS_ASSET_LABEL: _("Not Asset Tags"),
@@ -281,6 +285,8 @@ else:
         AssetLabelsKeys.ASSET_FILTERS_CSV_TAGS_NOT_HELP: _("Comma separated list of exact tags not present on Product"),
         AssetLabelsKeys.ASSET_FILTERS_CSV_LIFECYCLES_LABEL: _("Comma separated list of exact Product lifecycles"),
         AssetLabelsKeys.ASSET_FILTERS_TAGS_ASSET_LABEL: _("Product Tags"),
+        AssetLabelsKeys.ASSET_FILTERS_TAGS_ASSET_AND_LABEL: _("Product Tags (AND)"),
+        AssetLabelsKeys.ASSET_FILTERS_TAGS_ASSET_AND_HELP: _("Filter Findings by the selected Product tags (AND logic)"),
         AssetLabelsKeys.ASSET_FILTERS_TAG_ASSET_LABEL: _("Product Tag"),
         AssetLabelsKeys.ASSET_FILTERS_TAG_ASSET_HELP: _("Search for tags on an Product that are an exact match"),
         AssetLabelsKeys.ASSET_FILTERS_NOT_TAGS_ASSET_LABEL: _("Not Product Tags"),

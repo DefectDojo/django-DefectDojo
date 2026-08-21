@@ -3,11 +3,11 @@ import re
 
 from cvss import CVSS3
 from defusedxml import ElementTree
-from django.conf import settings
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding, Test
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -304,14 +304,14 @@ class TenableXMLParser:
                     # Update existing vulnerability IDs
                     if vulnerability_id is not None:
                         find.unsaved_vulnerability_ids.append(vulnerability_id)
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         # Create a new url object
                         if fqdn is not None and "://" in fqdn:
-                            location = URL.from_value(fqdn)
+                            location = LocationData.url(url=fqdn)
                         elif protocol == "general":
-                            location = URL(host=fqdn or ip)
+                            location = LocationData.url(host=fqdn or ip)
                         else:
-                            location = URL(
+                            location = LocationData.url(
                                 protocol=protocol,
                                 host=fqdn or ip,
                                 port=port,

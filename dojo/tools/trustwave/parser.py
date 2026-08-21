@@ -2,10 +2,9 @@ import csv
 import hashlib
 import io
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class TrustwaveParser:
@@ -45,8 +44,8 @@ class TrustwaveParser:
                 host = row.get("IP")
             port = int(row.get("Port", "") or "0") or ""
             protocol = row.get("Protocol", "")
-            if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [URL(host=host, port=port, protocol=protocol)]
+            if locations_enabled():
+                finding.unsaved_locations = [LocationData.url(host=host, port=port, protocol=protocol)]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint(host=host, port=port, protocol=protocol)]

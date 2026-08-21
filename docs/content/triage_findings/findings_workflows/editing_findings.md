@@ -19,7 +19,7 @@ This will open the **Edit Finding** form, where you can edit the metadata, chang
 
 ### Edit Finding Form: Fields
 
-* **"Test" cannot be edited:** Findings always have to be associated with a Test object, and cannot be moved out of that context. However, the Engagement containing a Test can be moved to another Product.  
+* **"Test" cannot be edited:** Findings always have to be associated with a Test object, and cannot be moved out of that context. However, the Engagement containing a Test can be moved to another Asset.  
 ​
 * **Found By** is the scan tool which discovered this Finding. Note that you can add additional scan tools beyond the tool associated with the Test.  
 ​
@@ -36,6 +36,17 @@ This will open the **Edit Finding** form, where you can edit the metadata, chang
 * **Active / Verified** are the primary Finding statuses used by a tool. Active Findings are Findings that are currently active in your network and have been reported by a tool. Verified means that this Finding has been confirmed to exist by a team member.  
 ​
 * **SAST / DAST** are labels used to organize your Findings into the context they were discovered in. Generally, this label is populated based on the scanning tool used, but you can adjust this to a more accurate level (for example, if the Finding was found by both a SAST and a DAST tool).
+
+### Editing the Mitigated Date and Mitigated By
+
+By default, a Finding's **Mitigated Date** and **Mitigated By** values are **not editable**. These fields are hidden from both the Edit Finding form and the Close Finding dialog, and the Mitigated Date is always set automatically to the moment the Finding is closed. Attempting to set or backdate these values through the API is rejected for the same reason.
+
+Editing can be turned on with the `DD_EDITABLE_MITIGATED_DATA` server setting. When it is enabled, the **Mitigated Date** and **Mitigated By** fields appear in the Edit Finding form and the Close Finding dialog, and can also be set through the API — but only for users with **superuser** status. In other words, editing requires *both* the setting to be enabled *and* the acting user to be a superuser.
+
+* **Why it's off by default:** allowing a mitigation to be backdated can misrepresent SLA compliance — a Finding that was actually remediated *outside* its SLA window could be recorded as though it had been mitigated *within* SLA. Enabling the setting is forward-looking only; it does **not** change the Mitigated Date or age of any existing Findings.
+* **Everything stays auditable:** every change to a Finding, including edits to the Mitigated Date and Mitigated By, is captured in the Finding's history log — who made the change, when, and the previous and new values.
+* **Applying the setting:** `DD_EDITABLE_MITIGATED_DATA` is a server-level environment variable (see [Configuration](/get_started/open_source/configuration/)). Changing it requires a service restart to take effect.
+* **DefectDojo Cloud / Pro:** this setting cannot be changed from the UI. Contact DefectDojo Support to have it enabled for your instance.
 
 ## Bulk Edit Findings
 
@@ -61,7 +72,7 @@ Through the Bulk Update Actions menu, you can apply the following changes to any
 * Update the **Severity**
 * Apply a new **Finding Status**
 * Change the Discovery or Planned Remediation Date of the Findings
-* Add a **Simple Risk Acceptance,** if the option is enabled at the Product level
+* Add a **Simple Risk Acceptance,** if the option is enabled at the Asset level
 * Apply **Tags** or **Notes** to all of the selected Findings.
 
 ![image](images/Bulk_Editing_Findings_2.png)
@@ -76,7 +87,7 @@ This page allows you to add a **Full Risk Acceptance** to the selected Findings.
 
 This page allows you to create a new Finding Group from the Selected Findings, or add them to an existing Finding Group.
 
-However, Finding Groups can only be created within an individual **Test** \- Findings from different Tests, Engagements or Products cannot be added to the same Finding Group.
+However, Finding Groups can only be created within an individual **Test** \- Findings from different Tests, Engagements or Assets cannot be added to the same Finding Group.
 
 ![image](images/Bulk_Editing_Findings_4.png)
 

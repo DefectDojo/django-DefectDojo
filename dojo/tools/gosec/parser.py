@@ -1,6 +1,8 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GosecParser:
@@ -26,6 +28,7 @@ class GosecParser:
             references = ""
             findingdetail = ""
             title = ""
+            cwe_id = None
             filename = item.get("file")
             line = item.get("line")
             scanner_confidence = item.get("confidence")
@@ -40,11 +43,22 @@ class GosecParser:
             findingdetail += "```{}```".format(item["code"])
 
             sev = item["severity"]
-            # Best attempt at ongoing documentation provided by gosec, based on
-            # rule id
-            references = "https://securego.io/docs/rules/{}.html".format(
-                item["rule_id"],
-            ).lower()
+
+            # Extract CWE information if available
+            cwe_data = item.get("cwe", {})
+            if cwe_data:
+                cwe_id_str = cwe_data.get("id")
+                if cwe_id_str:
+                    cwe_id = int(cwe_id_str) if cwe_id_str.isdigit() else None
+                cwe_url = cwe_data.get("url")
+                if cwe_url:
+                    references = cwe_url
+
+            # If no CWE URL, fall back to gosec rule documentation
+            if not references:
+                references = "https://securego.io/docs/rules/{}.html".format(
+                    item["rule_id"],
+                ).lower()
 
             if scanner_confidence:
                 # Assign integer value to confidence.
@@ -76,9 +90,19 @@ class GosecParser:
                     references=references,
                     file_path=filename,
                     line=line,
+                    cwe=cwe_id,
                     scanner_confidence=scanner_confidence,
                     static_finding=True,
                 )
+
+                if locations_enabled() and filename:
+                    find.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=filename,
+                            line=line,
+                            snippet=item["code"],
+                        ),
+                    )
 
                 dupes[dupe_key] = find
 

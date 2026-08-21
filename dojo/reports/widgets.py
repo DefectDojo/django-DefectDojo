@@ -11,19 +11,18 @@ from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from dojo.filters import (
-    EndpointFilter,
-    EndpointFilterWithoutObjectLookups,
+from dojo.endpoint.ui.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
+from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.forms import CustomReportOptionsForm
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
-from dojo.settings import settings
+from dojo.reports.ui.forms import CustomReportOptionsForm
 from dojo.url.filters import URLFilter
 from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
@@ -356,7 +355,8 @@ class EndpointList(Widget):
     def get_html(self):
         html = render_to_string("dojo/custom_html_report_endpoint_list.html",
                                 {"title": self.title,
-                                 "endpoints": prefetch_related_endpoints_for_report(self.endpoints.qs),
+                                 "endpoints": prefetch_related_endpoints_for_report(
+                                     self.endpoints.qs, user=getattr(self.request, "user", None)),
                                  "include_finding_notes": self.finding_notes,
                                  "include_finding_images": self.finding_images,
                                  "host": self.host,
@@ -370,7 +370,7 @@ class EndpointList(Widget):
                                  "request": self.request,
                                  "title": self.title,
                                  "extra_help": self.extra_help,
-                                 "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
+                                 "V3_FEATURE_LOCATIONS": locations_enabled(),
                                  })
         return mark_safe(html)
 
@@ -396,7 +396,7 @@ def report_widget_factory(
 
         if list(widget.keys())[0] == "endpoint-list":
             d = convert_to_querydict(widget.get(list(widget.keys())[0]))
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
                 endpoints = URLFilter(d, queryset=endpoints, user=request.user)
             else:

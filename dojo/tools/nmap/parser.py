@@ -3,10 +3,10 @@ import datetime
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class NmapParser:
@@ -64,28 +64,26 @@ class NmapParser:
 
             for port_element in host.findall("ports/port"):
                 protocol = port_element.attrib["protocol"]
-                if settings.V3_FEATURE_LOCATIONS:
-                    location = URL(
-                        host=fqdn or ip, protocol=protocol,
+                port = int(port_element.attrib["portid"]) if (
+                    "portid" in port_element.attrib
+                    and port_element.attrib["portid"].isdigit()
+                ) else None
+                if locations_enabled():
+                    location = LocationData.url(
+                        host=fqdn or ip, protocol=protocol, port=port,
                     )
                 else:
                     # TODO: Delete this after the move to Locations
                     location = Endpoint(
-                        host=fqdn or ip, protocol=protocol,
+                        host=fqdn or ip, protocol=protocol, port=port,
                     )
-
-                if (
-                    "portid" in port_element.attrib
-                    and port_element.attrib["portid"].isdigit()
-                ):
-                    location.port = int(port_element.attrib["portid"])
 
                 # filter on open ports
                 if port_element.find("state").attrib.get("state") != "open":
                     continue
-                title = f"Open port: {location.port}/{location.protocol}"
+                title = f"Open port: {port}/{protocol}"
                 description = host_info
-                description += f"**Port/Protocol:** {location.port}/{location.protocol}\n"
+                description += f"**Port/Protocol:** {port}/{protocol}\n"
 
                 service_info = "\n\n"
                 if port_element.find("service") is not None:
@@ -123,7 +121,7 @@ class NmapParser:
                     )
 
                 severity = "Info"
-                dupe_key = "nmap:" + str(location.port)
+                dupe_key = "nmap:" + str(port)
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     if description is not None:
@@ -142,7 +140,7 @@ class NmapParser:
                     if report_date:
                         find.date = report_date
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -159,7 +157,7 @@ class NmapParser:
         Critical 	9.0-10.0
         """
         val = float(raw_value)
-        if val == 0.0:
+        if val == 0:
             return "Info"
         if val < 4.0:
             return "Low"
@@ -208,7 +206,7 @@ class NmapParser:
                     vuln_id_from_tool=vuln_id,
                     nb_occurences=1,
                 )
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations
@@ -231,7 +229,7 @@ class NmapParser:
                         find.description += (
                             "\n-----\n\n" + finding.description
                         )  # fives '-' produces an horizontal line
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         # TODO: Delete this after the move to Locations

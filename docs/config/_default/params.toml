@@ -51,20 +51,21 @@ mainSections = ["docs"]
     "get_started",
     "releases",
     "import_data",
+    "connectors",
     "triage_findings",
     "metrics_reports",
     "admin",
     "automation",
     "asset_modelling",
-    "issue_tracking"] # ["docs"] (default) or list of sections (e.g. ["docs", "guides"])
+    "sensei"] # ["docs"] (default) or list of sections (e.g. ["docs", "guides"])
 
-  toTopButton = false # false (default) or true
-  breadcrumbTrail = false # false (default) or true
+  toTopButton = true # scroll-to-top button
+  breadcrumbTrail = true # breadcrumb navigation on doc pages
   headlineHash = true # true (default) or false
   scrollSpy = true # true (default) or false
 
   # Multilingual
-  multilingualMode = false # false (default) or true
+  multilingualMode = true # language switcher in the header
   showMissingLanguages = true # whether or not to show untranslated languages in the language menu; true (default) or false
 
   # Versioning

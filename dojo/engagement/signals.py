@@ -7,19 +7,30 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.file_uploads.helper import delete_related_files
 from dojo.models import Engagement, Product
 from dojo.notes.helper import delete_related_notes
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import async_create_notification, create_notification
 from dojo.pghistory_models import DojoEvents
 
 
 @receiver(post_save, sender=Engagement)
 def engagement_post_save(sender, instance, created, **kwargs):
+    # raw=True is set by loaddata; skip dispatch so fixture loading doesn't require a live broker.
+    if kwargs.get("raw"):
+        return
     if created:
         title = _('Engagement created for "%(product)s": %(name)s') % {"product": instance.product, "name": instance.name}
-        create_notification(event="engagement_added", title=title, engagement=instance, product=instance.product,
-                            url=reverse("view_engagement", args=(instance.id,)), url_api=reverse("engagement-detail", args=(instance.id,)))
+        dojo_dispatch_task(
+            async_create_notification,
+            event="engagement_added",
+            title=title,
+            engagement_id=instance.id,
+            product_id=instance.product_id,
+            url=reverse("view_engagement", args=(instance.id,)),
+            url_api=reverse("engagement-detail", args=(instance.id,)),
+        )
 
 
 @receiver(pre_save, sender=Engagement)

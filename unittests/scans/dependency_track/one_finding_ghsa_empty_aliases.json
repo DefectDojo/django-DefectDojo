@@ -1,0 +1,43 @@
+{
+  "version": "1.3",
+  "meta": {
+    "application": "Dependency-Track",
+    "version": "4.11.0",
+    "timestamp": "2026-04-23T10:24:15Z",
+    "baseUrl": "http://dtrack.example.org"
+  },
+  "project": {
+    "uuid": "b758afce-558b-4967-92ad-5618d8ec605b",
+    "name": "Example",
+    "version": "1.0"
+  },
+  "findings": [
+    {
+      "component": {
+        "latestVersion": "14.0.0",
+        "scope": "REQUIRED",
+        "name": "uuid",
+        "project": "b758afce-558b-4967-92ad-5618d8ec605b",
+        "purl": "pkg:npm/uuid@8.3.2",
+        "uuid": "febfdec4-1e5e-4c27-ab3d-b8e22cddf316",
+        "version": "8.3.2"
+      },
+      "attribution": {
+        "analyzerIdentity": "INTERNAL_ANALYZER",
+        "attributedOn": "2026-04-23 10:24:15.586"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "source": "GITHUB",
+        "vulnId": "GHSA-w5hq-g745-h8pq",
+        "aliases": [],
+        "cweId": 787,
+        "description": "uuid v3/v5/v6 accept external output buffers but do not reject out-of-range writes."
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "b758afce-558b-4967-92ad-5618d8ec605b:febfdec4-1e5e-4c27-ab3d-b8e22cddf316:ghsa-w5hq-g745-h8pq"
+    }
+  ]
+}

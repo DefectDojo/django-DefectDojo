@@ -4,10 +4,11 @@ import io
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
-from django.conf import settings
 
+from dojo.finding.cwe import cwe_number, parse_cwes
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class GenericCSVParser:
@@ -71,6 +72,14 @@ class GenericCSVParser:
             # manage CWE
             if "CweId" in row:
                 finding.cwe = int(row["CweId"])
+            # manage multiple CWEs (comma/space separated column), keeping the
+            # primary on finding.cwe; the full set is persisted via unsaved_cwes.
+            if row.get("CweIds"):
+                cwes = parse_cwes(row["CweIds"])
+                if cwes:
+                    if not finding.cwe:
+                        finding.cwe = cwe_number(cwes[0])
+                    finding.unsaved_cwes = cwes
 
             if "epss_score" in row:
                 finding.epss_score = float(row["epss_score"])
@@ -103,11 +112,14 @@ class GenericCSVParser:
             if "fix_available" in row:
                 finding.fix_available = bool(row["fix_available"])
 
+            if "fix_version" in row:
+                finding.fix_version = row["fix_version"]
+
             # manage endpoints
             if row.get("Url"):
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [
-                        URL.from_value(row["Url"]) if "://" in row["Url"] else URL.from_value("//" + row["Url"]),
+                        LocationData.url(url=row["Url"]) if "://" in row["Url"] else LocationData.url(url="//" + row["Url"]),
                     ]
                 else:
                     # TODO: Delete this after the move to Locations
@@ -123,7 +135,7 @@ class GenericCSVParser:
             ).hexdigest()
             if key in dupes:
                 find = dupes[key]
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.extend(finding.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -136,6 +148,11 @@ class GenericCSVParser:
                     find.unsaved_vulnerability_ids = (
                         finding.unsaved_vulnerability_ids
                     )
+                if finding.unsaved_cwes:
+                    if find.unsaved_cwes:
+                        find.unsaved_cwes.extend(finding.unsaved_cwes)
+                    else:
+                        find.unsaved_cwes = finding.unsaved_cwes
                 find.nb_occurences += 1
             else:
                 dupes[key] = finding

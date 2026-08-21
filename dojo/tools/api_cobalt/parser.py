@@ -2,10 +2,9 @@ import json
 import textwrap
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 from .importer import CobaltApiImporter
 
@@ -94,7 +93,7 @@ class ApiCobaltParser:
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool,
             )
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = self.convert_locations(affected_targets)
             else:
                 # TODO: Delete this after the move to Locations
@@ -148,7 +147,7 @@ class ApiCobaltParser:
         """Convert Cobalt affected_targets into DefectDojo locations"""
         locations = []
         for affected_target in affected_targets:
-            location = URL.from_value(affected_target)
+            location = LocationData.url(url=affected_target)
             locations.append(location)
         return locations
 

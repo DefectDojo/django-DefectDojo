@@ -1,9 +1,13 @@
 import logging
+from unittest.mock import patch
 
 from crum import impersonate
+from django.db import connection
 from django.test.utils import override_settings
 
+from dojo.finding import helper as finding_helper
 from dojo.finding.deduplication import set_duplicate
+from dojo.finding.helper import removeLoop
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, System_Settings, User, copy_model_util
 from dojo.tasks import _async_dupe_delete_impl  # noqa: PLC2701
@@ -378,7 +382,7 @@ class TestDuplicationLoops(DojoTestCase):
     # Test that Delete Duplicate Findings & Maximum Duplicate is correctly deleting olding finding first based off of finding date value
     def test_delete_duplicate_order(self):
         # Turn on delete duplicates and set the maximum dedupe value to 1
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.delete_duplicates = True
         system_settings.max_dupes = 1
         system_settings.save()
@@ -406,6 +410,158 @@ class TestDuplicationLoops(DojoTestCase):
         # Finding A should now only have 1 duplicate in its set
         self.finding_a.refresh_from_db()
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
+
+    def test_delete_duplicate_excess_with_chained_reference(self):
+        """
+        A surviving finding that points at an excess duplicate (a chained duplicate, from past
+        bugs or high parallel load) must not be left dangling. The duplicate_finding self-FK is
+        ON DELETE DO_NOTHING, so without re-pointing the survivor first the delete leaves a
+        reference to a deleted row. Django defers FK checks to COMMIT, so in production that
+        surfaces as an IntegrityError that rolls the chunk back and makes the periodic task
+        retry the same finding forever; inside a TestCase transaction it surfaces as the
+        dangling reference and failed constraint check asserted below.
+        """
+        system_settings = System_Settings.objects.get(no_cache=True)
+        system_settings.delete_duplicates = True
+        system_settings.max_dupes = 1
+        system_settings.save()
+
+        self.finding_b.date = "2024-01-01"
+        self.finding_c.date = "2023-01-01"
+        set_duplicate(self.finding_b, self.finding_a)
+        set_duplicate(self.finding_c, self.finding_a)
+
+        # A fourth finding chained onto the excess duplicate C. set_duplicate would
+        # normalize the chain to the root, so wire the pathological state directly,
+        # the way it exists in the wild.
+        finding_x = copy_model_util(Finding.objects.get(id=4), exclude_fields=["duplicate_finding"])
+        finding_x.title = "X: " + finding_x.title
+        finding_x.hash_code = None
+        finding_x.duplicate = True
+        finding_x.duplicate_finding = self.finding_c
+        finding_x.save()
+
+        try:
+            _async_dupe_delete_impl()
+
+            self.assertFalse(
+                Finding.objects.filter(id=self.finding_c.id).exists(),
+                "The excess duplicate (Finding C) should have been deleted despite the chained reference.",
+            )
+            self.assertFalse(
+                Finding.objects.filter(duplicate_finding_id=self.finding_c.id).exists(),
+                "No finding may still reference the deleted duplicate.",
+            )
+            # The check Postgres would run at COMMIT in production, where a leftover
+            # reference is the IntegrityError that wedges the periodic task.
+            connection.check_constraints()
+            self.assertTrue(
+                Finding.objects.filter(id=self.finding_b.id).exists(),
+                "The newest duplicate (Finding B) should still exist.",
+            )
+
+            finding_x.refresh_from_db()
+            self.assertEqual(
+                finding_x.duplicate_finding_id,
+                self.finding_a.id,
+                "The chained survivor should be re-pointed at the cluster's surviving root.",
+            )
+            self.assertTrue(finding_x.duplicate, "The chained survivor stays a duplicate, now of the root.")
+        finally:
+            if finding_x.id and Finding.objects.filter(id=finding_x.id).exists():
+                finding_x.delete()
+
+    def test_delete_duplicate_order_same_date_tiebreak_by_id(self):
+        """When duplicate findings share the same date, excess deletes use id as tie-break (oldest id first)."""
+        system_settings = System_Settings.objects.get(no_cache=True)
+        system_settings.delete_duplicates = True
+        system_settings.max_dupes = 1
+        system_settings.save()
+
+        same_date = "2024-06-01"
+        self.finding_b.date = same_date
+        self.finding_c.date = same_date
+        self.finding_b.save()
+        self.finding_c.save()
+
+        set_duplicate(self.finding_b, self.finding_a)
+        set_duplicate(self.finding_c, self.finding_a)
+
+        self.finding_b.refresh_from_db()
+        self.finding_c.refresh_from_db()
+        self.assertLess(
+            self.finding_b.id,
+            self.finding_c.id,
+            "Fixture setup should give finding_b a lower id than finding_c for this tie-break.",
+        )
+
+        _async_dupe_delete_impl()
+
+        self.assertFalse(
+            Finding.objects.filter(id=self.finding_b.id).exists(),
+            "The duplicate with lower id should be deleted when dates are identical.",
+        )
+        self.assertTrue(
+            Finding.objects.filter(id=self.finding_c.id).exists(),
+            "The duplicate with higher id should remain when dates are identical.",
+        )
+        self.finding_a.refresh_from_db()
+        self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
+
+    def test_remove_loop_skips_a_finding_that_no_longer_exists(self):
+        """
+        Every call to removeLoop passes an id read earlier, so the row can be gone by the time
+        it runs: fix_loop_duplicates streams candidate ids through a cursor, and its callers run
+        while other workers delete findings. Fetching that id with get() turned the race into a
+        Finding.DoesNotExist that killed the whole caller -- observed aborting an async delete
+        task before it had prepared any duplicate cluster. A vanished row has no loop left to
+        repair, so removeLoop must skip it and return.
+        """
+        stale_id = self.finding_b.id
+        self.finding_b.delete()
+        self.assertIsNone(self.finding_b.id)
+
+        # Must not raise; there is nothing to repair and nothing to report.
+        self.assertIsNone(removeLoop(stale_id, 50))
+
+    def test_fix_loop_duplicates_survives_a_finding_deleted_mid_run(self):
+        """
+        The reported path end to end: a candidate id is deleted after fix_loop_duplicates has
+        streamed it but before removeLoop reaches it. The run must carry on and still repair the
+        loops whose findings are still there, instead of dying on the first stale id.
+        """
+        # Two independent self-loops. Candidates are streamed newest id first, so finding_c is
+        # repaired first and finding_b -- deleted while that happens -- is reached second.
+        for finding in (self.finding_b, self.finding_c):
+            finding.duplicate = True
+            finding.duplicate_finding = finding
+            super(Finding, finding).save(skip_validation=True)
+        self.assertLess(self.finding_b.id, self.finding_c.id)
+
+        doomed_id = self.finding_b.id
+        real_remove_loop = finding_helper.removeLoop
+        calls = []
+
+        def remove_loop_with_concurrent_delete(finding_id, counter):
+            if not calls:
+                # Stands in for the concurrent worker: the row goes away between the id being
+                # streamed and removeLoop being called with it.
+                Finding.objects.filter(id=doomed_id).delete()
+            calls.append(finding_id)
+            return real_remove_loop(finding_id, counter)
+
+        with patch.object(finding_helper, "removeLoop", side_effect=remove_loop_with_concurrent_delete):
+            loop_count = fix_loop_duplicates()
+        # Deleted by queryset above, so the instance still carries its old pk; clear it so
+        # tearDown does not try to delete the row a second time.
+        self.finding_b.id = None
+
+        self.assertIn(doomed_id, calls, "the deleted finding's id is still reached by the run")
+        self.assertEqual(loop_count, 0)
+
+        self.finding_c.refresh_from_db()
+        self.assertIsNone(self.finding_c.duplicate_finding, "the surviving self-loop is still repaired")
+        self.assertFalse(self.finding_c.duplicate)
 
     def test_delete_all_engagements(self):
         # make sure there is no exception when deleting all engagements

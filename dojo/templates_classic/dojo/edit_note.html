@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+    {{ block.super }}
+    <h3>{% trans "Edit Note" %}</h3><br />
+    <form class="form-horizontal" action="{% url 'edit_note' note.id page objid %}" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input aria-label="Edit Note" class="btn btn-primary" name="edit_note" type="submit" value="{% trans "Save" %}"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

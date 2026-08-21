@@ -2,7 +2,9 @@ import hashlib
 import json
 from typing import NamedTuple
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class OrtParser:
@@ -133,6 +135,7 @@ def find_package_by_id(packages, pkg_id):
 
 
 def find_license_id(licenses, license_id):
+    lic_id = ""
     for lic in licenses:
         if lic["_id"] == license_id:
             lic_id = lic["id"]
@@ -150,7 +153,7 @@ how to fix : {model.rule_violation['how_to_fix']}"""
 
     severity = get_severity(model.rule_violation)
 
-    return Finding(
+    finding = Finding(
         title=model.rule_violation["rule"],
         test=test,
         references=model.rule_violation["message"],
@@ -159,11 +162,19 @@ how to fix : {model.rule_violation['how_to_fix']}"""
         static_finding=True,
     )
 
+    if locations_enabled() and model.pkg:
+        if purl := model.pkg.get("purl"):
+            finding.unsaved_locations.append(
+                LocationData.dependency(purl=purl),
+            )
+
+    return finding
+
 
 class RuleViolationModel(NamedTuple):
     pkg: dict
     license_id: str
-    projects: []
+    projects: list
     rule_violation: dict
 
 

@@ -3,10 +3,10 @@ import logging
 import re
 
 import html2text
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +53,12 @@ class BurpGraphQLParser:
                 nb_occurences=1,
             )
 
+            cwes = issue.get("CWEs")
+            if cwes:
+                find.unsaved_cwes = cwes
+
             find.unsaved_req_resp = issue.get("Evidence")
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 find.unsaved_locations = issue.get("Locations")
             else:
                 # TODO: Delete this after the move to Locations
@@ -99,8 +103,8 @@ class BurpGraphQLParser:
             )
 
         url = issue["origin"] + issue["path"]
-        if settings.V3_FEATURE_LOCATIONS:
-            finding["Locations"].append(URL.from_value(url))
+        if locations_enabled():
+            finding["Locations"].append(LocationData.url(url=url))
         else:
             # TODO: Delete this after the move to Locations
             finding["Locations"].append(Endpoint.from_uri(url))
@@ -151,8 +155,8 @@ class BurpGraphQLParser:
             finding["Severity"] = "Info"
 
         url = issue["origin"] + issue["path"]
-        if settings.V3_FEATURE_LOCATIONS:
-            finding["Locations"] = [URL.from_value(url)]
+        if locations_enabled():
+            finding["Locations"] = [LocationData.url(url=url)]
         else:
             # TODO: Delete this after the move to Locations
             finding["Locations"] = [Endpoint.from_uri(url)]
@@ -173,11 +177,13 @@ class BurpGraphQLParser:
             finding["References"] += html2text.html2text(
                 issue["issue_type"].get("vulnerability_classifications_html"),
             )
-            finding["CWE"] = self.get_cwe(
+            finding["CWEs"] = self.get_cwes(
                 issue["issue_type"].get("vulnerability_classifications_html"),
             )
+            finding["CWE"] = finding["CWEs"][0] if finding["CWEs"] else 0
         else:
             finding["CWE"] = 0
+            finding["CWEs"] = []
 
         return finding
 
@@ -229,9 +235,6 @@ class BurpGraphQLParser:
 
         return req_resp_list
 
-    def get_cwe(self, cwe_html):
-        # Match only the first CWE!
-        cweSearch = re.search(r"CWE-([0-9]*)", cwe_html, re.IGNORECASE)
-        if cweSearch:
-            return cweSearch.group(1)
-        return 0
+    def get_cwes(self, cwe_html):
+        # Collect all CWEs; the first is used as the primary cwe.
+        return [int(match) for match in re.findall(r"CWE-([0-9]+)", cwe_html, re.IGNORECASE)]

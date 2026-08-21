@@ -1,7 +1,9 @@
 import csv
 import io
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class SolarAppscreenerParser:
@@ -54,6 +56,11 @@ class SolarAppscreenerParser:
                     finding.line = 0
 
             finding.sast_source_line = finding.line
+
+            if locations_enabled() and finding.file_path:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=finding.file_path, line=finding.line or None),
+                )
 
             if finding is not None:
                 if finding.title is None:

@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from dojo.authorization.models import Global_Role, Role
 from dojo.models import Dojo_User, User, UserContactInfo
 from dojo.user.authentication import reset_token_for_user
 from unittests.dojo_test_case import versioned_fixtures
@@ -48,7 +49,7 @@ class TestUserUITimestamps(TestCase):
         user.save()
 
         self.client.force_login(user)
-        with patch("dojo.user.views.now", return_value=fixed):
+        with patch("dojo.user.ui.views.now", return_value=fixed):
             resp = self.client.post(
                 reverse("change_password"),
                 data={
@@ -73,7 +74,7 @@ class TestUserUITimestamps(TestCase):
         token = default_token_generator.make_token(user)
         url = reverse("password_reset_confirm", kwargs={"uidb64": uidb64, "token": token})
 
-        with patch("dojo.user.views.now", return_value=fixed):
+        with patch("dojo.user.ui.views.now", return_value=fixed):
             # Django's PasswordResetConfirmView typically requires a GET to the tokenized URL,
             # which sets a session token and redirects to the "set-password" URL.
             resp_get = self.client.get(url)
@@ -92,3 +93,40 @@ class TestUserUITimestamps(TestCase):
         self.assertEqual(resp.status_code, 302)
         uci = UserContactInfo.objects.get(user=user)
         self.assertEqual(uci.password_last_reset, fixed)
+
+    def test_user_list_page_renders(self):
+        # Regression: /user previously called select_related("global_role"),
+        # but Global_Role.user uses related_name="+" under legacy
+        # authorization, so Dojo_User has no `global_role` reverse accessor.
+        # The select_related raised FieldError and 500'd the page.
+        admin = Dojo_User.objects.get(username="admin")
+        self.client.force_login(admin)
+        resp = self.client.get(reverse("users"))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_profile_save_does_not_duplicate_global_role(self):
+        # Regression: /profile POST previously did
+        #   global_role = user.global_role if hasattr(user, "global_role") else None
+        # Under legacy authorization Global_Role.user uses related_name="+"
+        # so the hasattr always returned False, the form bound to a fresh
+        # Global_Role with no PK, and global_role.save() INSERTed a second
+        # row that violated the unique(user_id) constraint and 500'd. The
+        # forward-FK lookup must find the existing row and UPDATE it.
+        admin = Dojo_User.objects.get(username="admin")
+        # Seed an existing Global_Role row for this user (mirrors a Pro
+        # snapshot or a stale legacy backfill).
+        owner_role = Role.objects.filter(name="Owner").first()
+        Global_Role.objects.update_or_create(user=admin, defaults={"role": owner_role})
+
+        self.client.force_login(admin)
+        resp = self.client.post(reverse("view_profile"), data={
+            "username": admin.username,
+            "first_name": admin.first_name,
+            "last_name": admin.last_name,
+            "email": admin.email,
+            "role": owner_role.id if owner_role else "",
+        })
+        # Must not 500. Either the form bounces back (200) or saves (302).
+        self.assertIn(resp.status_code, (200, 302))
+        # And there must still be exactly one Global_Role row for admin.
+        self.assertEqual(Global_Role.objects.filter(user=admin).count(), 1)

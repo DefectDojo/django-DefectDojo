@@ -1,0 +1,48 @@
+{
+    "apiVersion": "aquasecurity.github.io/v1alpha1",
+    "kind": "ConfigAuditReport",
+    "metadata": {
+        "annotations": {
+            "trivy-operator.aquasecurity.github.io/report-ttl": "24h0m0s"
+        },
+        "creationTimestamp": "2023-03-23T16:22:54Z",
+        "generation": 1,
+        "labels": {
+            "plugin-config-hash": "659b7b9c46",
+            "resource-spec-hash": "fc85b485f",
+            "trivy-operator.resource.kind": "ReplicaSet",
+            "trivy-operator.resource.name": "test-deployment-12345",
+            "trivy-operator.resource.namespace": "default"
+        },
+        "name": "replicaset-test-deployment-12345",
+        "namespace": "default",
+        "resourceVersion": "1268",
+        "uid": "test-missing-checkid"
+    },
+    "report": {
+        "checks": [
+            {
+                "category": "Kubernetes Security Check",
+                "description": "A check without a checkID field",
+                "messages": [
+                    "Container 'test' of ReplicaSet 'test-deployment-12345' has an issue"
+                ],
+                "severity": "MEDIUM",
+                "success": false,
+                "title": "Missing checkID test"
+            }
+        ],
+        "scanner": {
+            "name": "Trivy",
+            "vendor": "Aqua Security",
+            "version": "dev"
+        },
+        "summary": {
+            "criticalCount": 0,
+            "highCount": 0,
+            "lowCount": 0,
+            "mediumCount": 1
+        },
+        "updateTimestamp": "2023-03-23T16:22:54Z"
+    }
+}

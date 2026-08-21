@@ -4,8 +4,10 @@ import re
 import dateutil
 from defusedxml import ElementTree
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+from dojo.tools.locations import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,12 +40,23 @@ class CycloneDXXMLParser:
         ):
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
+            component_purl = component.findtext(f"{namespace}purl")
+            component_hashes = self._parse_component_hashes_xml(component, namespace)
+            component_license = Cyclonedxhelper.extract_license_expression_xml(component, namespace)
             # save a ref
             if "bom-ref" in component.attrib:
                 bom_refs[component.attrib["bom-ref"]] = {
                     "name": component_name,
                     "version": component_version,
+                    "purl": component_purl,
+                    "hashes": component_hashes,
+                    "license": component_license,
                 }
+            # Collect product-level dependency locations for all components
+            if locations_enabled() and component_purl:
+                test.unsaved_metadata.append(
+                    LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
+                )
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(
                 "v:vulnerabilities/v:vulnerability", namespaces=ns,
@@ -55,6 +68,9 @@ class CycloneDXXMLParser:
                     report_date=report_date,
                     component_name=component_name,
                     component_version=component_version,
+                    component_purl=component_purl,
+                    component_hashes=component_hashes,
+                    component_license=component_license,
                 )
                 findings.append(finding_vuln)
         # manage adhoc vulnerabilities
@@ -81,6 +97,20 @@ class CycloneDXXMLParser:
         m = re.match(r"\{.*\}", element.tag)
         return m.group(0) if m else ""
 
+    def _parse_component_hashes_xml(self, component, namespace):
+        """
+        Extract hashes from an XML component element.
+
+        Returns dict mapping lowercase algorithm name to list of hash values, empty if none are found.
+        """
+        hashes = {}
+        for hash_elem in component.findall(f"{namespace}hashes/{namespace}hash"):
+            alg = hash_elem.attrib.get("alg", "").lower()
+            content = hash_elem.text or ""
+            if alg and content:
+                hashes.setdefault(alg, []).append(content)
+        return hashes
+
     def manage_vulnerability_legacy(
         self,
         vulnerability,
@@ -89,6 +119,9 @@ class CycloneDXXMLParser:
         report_date,
         component_name=None,
         component_version=None,
+        component_purl=None,
+        component_hashes=None,
+        component_license="",
     ):
         ref = vulnerability.attrib["ref"]
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
@@ -111,6 +144,9 @@ class CycloneDXXMLParser:
             bom = bom_refs[ref]
             component_name = bom["name"]
             component_version = bom["version"]
+            component_purl = bom.get("purl")
+            component_hashes = bom.get("hashes")
+            component_license = bom.get("license", "")
 
         severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
@@ -153,19 +189,19 @@ class CycloneDXXMLParser:
                         finding.severity = cvssv3.severities()[0]
         # if there is some CWE
         cwes = self.get_cwes(vulnerability, "v", ns)
-        if len(cwes) > 1:
-            # TODO: support more than one CWE
-            LOGGER.debug(
-                "more than one CWE for a finding %s. NOT supported by parser API", cwes,
-            )
         if len(cwes) > 0:
             finding.cwe = cwes[0]
+            finding.unsaved_cwes = cwes
         vulnerability_ids = []
         # set id as first vulnerability id
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
+        if locations_enabled() and component_purl:
+            finding.unsaved_locations.append(
+                LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
+            )
         return finding
 
     def get_cwes(self, node, prefix, namespaces):
@@ -234,6 +270,9 @@ class CycloneDXXMLParser:
             component_name, component_version = Cyclonedxhelper()._get_component(
                 bom_refs, ref.text,
             )
+            component_purl = bom_refs.get(ref.text, {}).get("purl") if ref is not None else None
+            component_hashes = bom_refs.get(ref.text, {}).get("hashes") if ref is not None else {}
+            component_license = bom_refs.get(ref.text, {}).get("license", "") if ref is not None else ""
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
@@ -272,13 +311,9 @@ class CycloneDXXMLParser:
             cwes = self.get_cwes(vulnerability, "v", ns)
             if not cwes:
                 cwes = self.get_cwes(vulnerability, "b", ns)
-            if len(cwes) > 1:
-                # TODO: support more than one CWE
-                LOGGER.debug(
-                    "more than one CWE for a finding %s. NOT supported by parser API", cwes,
-                )
             if len(cwes) > 0:
                 finding.cwe = cwes[0]
+                finding.unsaved_cwes = cwes
             # Check for mitigation
             analysis = vulnerability.findall("b:analysis", namespaces=ns)
             if analysis and len(analysis) == 1:
@@ -296,5 +331,9 @@ class CycloneDXXMLParser:
                         )
                         if detail:
                             finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
+            if locations_enabled() and component_purl:
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
+                )
             findings.append(finding)
         return findings

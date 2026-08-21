@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load navigation_tags %}
 {% load authorization_tags %}
 {% load display_tags %}
@@ -14,7 +15,7 @@
                         {{ labels.ORG_LABEL }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "Product_Type_Add"|has_global_permission %}
+                            {% if "add"|has_global_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true" aria-label="{{ labels.ORG_LABEL }} options">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -33,7 +34,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if ptl.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if ptl.form|has_active_filters %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=ptl.form %}
                 </div>
             </div>
@@ -62,20 +63,20 @@
                             <tr>
                                 <td>
                                     <ul>
-                                        <li class="dropdown" style="list-style:none;position:absolute">
+                                        <li class="dropdown" style="list-style:none">
                                             <a href="#" aria-label="Organization options menu" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuProductType">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuProductType">
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'view_product_type' pt.id %}" role="menuitem">
                                                     <i class="fa-solid fa-rectangle-list"></i> {% trans "View" %}</a>
                                                 </li>
-                                                {% if pt|has_object_permission:"Product_Type_Edit" %}
+                                                {% if pt|has_object_permission:"edit" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_product_type' pt.id %}" role="menuitem">
                                                     <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                                                 </li>
                                                 {% endif %}
-                                                {% if pt|has_object_permission:"Product_Type_Add_Product" %}
+                                                {% if pt|has_object_permission:"add" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'add_product_to_product_type' pt.id %}" role="menuitem">
                                                         <i class="fa-solid fa-plus"></i>
@@ -94,7 +95,7 @@
                                                         {{ labels.ORG_REPORT_LABEL }}
                                                     </a>
                                                 </li>
-                                                {% if pt|has_object_permission:"Product_Type_Delete" %}
+                                                {% if pt|has_object_permission:"delete" %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_product_type' pt.id %}" role="menuitem">

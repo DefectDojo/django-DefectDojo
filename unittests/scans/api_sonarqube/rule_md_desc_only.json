@@ -1,0 +1,32 @@
+{
+    "key": "typescript:S1854",
+    "repo": "typescript",
+    "name": "Dead stores should be removed",
+    "createdAt": "2018-01-17T10:11:21-0500",
+    "mdDesc": "A dead store happens when a local variable is assigned a value that is not read by any subsequent instruction. Calculating or retrieving a value only to then overwrite it or throw it away, could indicate a serious error in the code. Even if it's not an error, it is at best a waste of resources. Therefore all calculated values should be used.\n\n## Noncompliant Code Example\n\ni = a + b; // Noncompliant; calculation result not used before value is overwritten\ni = compute();\n\n## Compliant Solution\n\ni = a + b;\ni += compute();\n\n## Exceptions\n\nThis rule ignores initializations to -1, 0, 1, `null`, `true`, `false`, `\"\"`, `[]` and `{}`.\n\n## See\n\n- [MITRE, CWE-563](http://cwe.mitre.org/data/definitions/563.html) - Assignment to Variable without Use ('Unused Variable')\n- [CERT, MSC13-C.](https://www.securecoding.cert.org/confluence/x/QYA5) - Detect and remove unused values\n- [CERT, MSC56-J.](https://www.securecoding.cert.org/confluence/x/uQCSBg) - Detect and remove superfluous code and values\n",
+    "severity": "MAJOR",
+    "status": "READY",
+    "isTemplate": false,
+    "tags": [],
+    "sysTags": [
+        "cert",
+        "cwe",
+        "unused"
+    ],
+    "lang": "ts",
+    "langName": "TypeScript",
+    "params": [],
+    "defaultDebtRemFnType": "CONSTANT_ISSUE",
+    "defaultDebtRemFnOffset": "15min",
+    "debtOverloaded": false,
+    "debtRemFnType": "CONSTANT_ISSUE",
+    "debtRemFnOffset": "15min",
+    "defaultRemFnType": "CONSTANT_ISSUE",
+    "defaultRemFnBaseEffort": "15min",
+    "remFnType": "CONSTANT_ISSUE",
+    "remFnBaseEffort": "15min",
+    "remFnOverloaded": false,
+    "scope": "MAIN",
+    "isExternal": false,
+    "type": "CODE_SMELL"
+}

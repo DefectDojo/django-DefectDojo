@@ -18,7 +18,7 @@
                                     class="btn btn-primary toggle-filters">
                                 <i class="fa-solid fa-filter"></i> <i class="caret"></i>
                             </button>
-                            {% if product_tab and product_tab.product|has_object_permission:"Location_Add" %}
+                            {% if product_tab and product_tab.product|has_object_permission:"add" %}
                                 <button class="btn btn-primary dropdown-toggle"
                                         type="button"
                                         id="dropdownMenu1"
@@ -51,13 +51,13 @@
                           method="post"
                           id="bulk_change_form">
                         {% csrf_token %}
-                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Edit" %}
+                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                             <button class="btn btn-sm btn-primary"
                                     type="submit"
                                     id="remedy_endpoint"
                                     title="Mitigate Endpoints">Bulk Mitigate</button>
                         {% endif %}
-                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Delete" %}
+                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"delete" %}
                             <button type="button"
                                     class="btn btn-sm btn-primary"
                                     data-toggle="tooltip"
@@ -76,7 +76,7 @@
                     <table id="endpoints"
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
-                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Edit" %}
+                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                                 <th class="centered"
                                     title="Select all visible endpoints."
                                     aria-label="Select all visible endpoints."
@@ -97,12 +97,12 @@
                                 <th>Endpoint</th>
                             {% endif %}
                             {% if not product_tab %}<th class="text-center" nowrap="nowrap">Active (Total) Products</th>{% endif %}
-                            <th class="text-center" nowrap="nowrap">Active (Total) Findings</th>
+                            <th class="text-center" nowrap="nowrap">{% dojo_sort request 'Active (Total) Findings' 'active_findings' field='ordering' %}</th>
                             <th class="text-center" nowrap="nowrap">Overall Status</th>
                         </tr>
                         {% for location in locations %}
                             <tr>
-                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Edit" %}
+                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                                     <td class="centered">
                                         <form action="#">
                                             <input type="checkbox"

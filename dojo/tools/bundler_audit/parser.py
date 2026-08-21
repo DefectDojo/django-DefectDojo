@@ -3,7 +3,9 @@ __author__ = "jaguasch"
 import hashlib
 from datetime import datetime
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class BundlerAuditParser:
@@ -28,7 +30,17 @@ class BundlerAuditParser:
         for warning in warnings:
             if not warning.startswith("Name"):
                 continue
+            # Every field below is optional in bundler-audit output. Reset them
+            # per warning so an absent field cannot inherit the previous
+            # advisory's value, and so the first warning cannot reference an
+            # unassigned local.
+            gem_name = None
+            gem_version = None
             advisory_id = None
+            advisory_title = None
+            advisory_url = None
+            advisory_solution = None
+            sev = None
             gem_report_fields = warning.split("\n")
             for field in gem_report_fields:
                 if field.startswith("Name"):
@@ -51,25 +63,32 @@ class BundlerAuditParser:
                 elif field.startswith("Solution"):
                     advisory_solution = field.replace("Solution: ", "")
 
-            title = (
-                "Gem "
-                + gem_name
-                + ": "
-                + advisory_title
-                + " ["
-                + advisory_id
-                + "]"
-            )
+            # bundler-audit reports an unrated advisory as "Unknown"; treat an
+            # absent Criticality line the same way.
+            if sev is None:
+                sev = "Medium"
+
+            title = "Gem " + gem_name
+            if advisory_title:
+                title += ": " + advisory_title
+            if advisory_id:
+                title += " [" + advisory_id + "]"
             findingdetail = (
                 "Gem **" + gem_name + "** has known security issues:\n"
             )
             findingdetail += "**Name**: " + gem_name + "\n"
-            findingdetail += "**Version**: " + gem_version + "\n"
-            findingdetail += "**Advisory**: " + advisory_id + "\n"
+            if gem_version:
+                findingdetail += "**Version**: " + gem_version + "\n"
+            if advisory_id:
+                findingdetail += "**Advisory**: " + advisory_id + "\n"
             mitigation = advisory_solution
             references = advisory_url
             fingerprint = (
-                "bundler-audit" + gem_name + gem_version + advisory_id + sev
+                "bundler-audit"
+                + gem_name
+                + (gem_version or "")
+                + (advisory_id or "")
+                + sev
             )
             dupe_key = hashlib.md5(fingerprint.encode("utf-8"), usedforsecurity=False).hexdigest()
             if dupe_key in dupes:
@@ -92,6 +111,10 @@ class BundlerAuditParser:
                 )
                 if advisory_id:
                     find.unsaved_vulnerability_ids = [advisory_id]
+                if locations_enabled() and gem_name:
+                    find.unsaved_locations.append(
+                        LocationData.dependency(purl_type="gem", name=gem_name, version=gem_version),
+                    )
 
                 dupes[dupe_key] = find
 

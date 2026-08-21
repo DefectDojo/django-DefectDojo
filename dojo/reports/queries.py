@@ -1,8 +1,9 @@
 
-from django.conf import settings
 from django.db.models import Prefetch, QuerySet
 
-from dojo.finding.queries import prefetch_for_findings
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
+from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationFindingReference
 from dojo.location.queries import annotate_location_counts_and_status
 from dojo.location.status import FindingLocationStatus
@@ -24,38 +25,45 @@ def prefetch_related_findings_for_report(findings: QuerySet) -> QuerySet:
     )
 
 
-def prefetch_related_endpoints_for_report(endpoints: QuerySet) -> QuerySet:
-    if settings.V3_FEATURE_LOCATIONS:
+def prefetch_related_endpoints_for_report(endpoints: QuerySet, product=None, user=None) -> QuerySet:
+    if locations_enabled():
+        # Locations are shared across products, so an authorized Location says
+        # nothing about who may see the findings hanging off it.
         return annotate_location_counts_and_status(
             endpoints.prefetch_related(
                 "tags",
                 Prefetch(
                     "findings",
-                    queryset=LocationFindingReference.objects.filter(status=FindingLocationStatus.Active)
+                    queryset=LocationFindingReference.objects.filter(
+                        status=FindingLocationStatus.Active,
+                        finding__in=get_authorized_findings(Permissions.Finding_View, user=user),
+                    )
                     .prefetch_related("finding")
                     .order_by("finding__numerical_severity"),
                     to_attr="_active_annotated_findings",
                 ),
             ),
+            user=user,
         )
     # TODO: Delete this after the move to Locations
+    findings_qs = Finding.objects.filter(
+        active=True,
+        out_of_scope=False,
+        mitigated__isnull=True,
+        false_p=False,
+        duplicate=False,
+        status_finding__false_positive=False,
+        status_finding__out_of_scope=False,
+        status_finding__risk_accepted=False,
+    )
+    if product is not None:
+        findings_qs = findings_qs.filter(test__engagement__product=product)
     return endpoints.prefetch_related(
         "product",
         "tags",
         Prefetch(
             "findings",
-            queryset=prefetch_for_findings(
-                Finding.objects.filter(
-                    active=True,
-                    out_of_scope=False,
-                    mitigated__isnull=True,
-                    false_p=False,
-                    duplicate=False,
-                    status_finding__false_positive=False,
-                    status_finding__out_of_scope=False,
-                    status_finding__risk_accepted=False,
-                ).order_by("numerical_severity"),
-            ),
+            queryset=prefetch_for_findings(findings_qs.order_by("numerical_severity")),
             to_attr="active_annotated_findings",
         ),
     )

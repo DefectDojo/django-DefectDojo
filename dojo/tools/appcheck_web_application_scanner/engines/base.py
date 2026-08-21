@@ -6,11 +6,11 @@ import cvss.parser
 import dateutil.parser
 from cpe import CPE
 from cvss.exceptions import CVSSError
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 #######
 # Helpers/Utils
@@ -269,8 +269,11 @@ class BaseEngineParser:
     #####
     # For parsing endpoints
     #####
+    def get_url(self, item: dict[str, Any]) -> str | None:
+        return item.get("url") or None
+
     def get_host(self, item: dict[str, Any]) -> str:
-        return item.get("url") or item.get("host") or item.get("ipv4_address") or None
+        return item.get("host") or item.get("ipv4_address") or None
 
     def parse_port(self, item: Any) -> int | None:
         try:
@@ -284,17 +287,16 @@ class BaseEngineParser:
     def get_port(self, item: dict[str, Any]) -> int | None:
         return self.parse_port(item.get("port"))
 
-    def construct_location(self, host: str, port: int | None) -> URL:
-        url = URL.from_value(host)
-        if url.host:
-            if port:
-                url.port = port
-        else:
-            url = URL(host=host, port=port, path="")
-        return url
+    def construct_location(self, host: str, port: int | None) -> LocationData:
+        return LocationData.url(
+            host=host,
+            port=port,
+        )
 
-    def parse_locations(self, item: dict[str, Any]) -> list[URL]:
+    def parse_locations(self, item: dict[str, Any]) -> list[LocationData]:
         # Location requires a host
+        if url := self.get_url(item):
+            return [LocationData.url(url=url)]
         if host := self.get_host(item):
             port = self.get_port(item)
             return [self.construct_location(host, port)]
@@ -317,7 +319,8 @@ class BaseEngineParser:
     # TODO: Delete this after the move to Locations
     def parse_endpoints(self, item: dict[str, Any]) -> list[Endpoint]:
         # Endpoint requires a host
-        if host := self.get_host(item):
+        host = self.get_url(item) or self.get_host(item)
+        if host:
             port = self.get_port(item)
             return [self.construct_endpoint(host, port)]
         return []
@@ -364,7 +367,7 @@ class BaseEngineParser:
 
     def process_whole_item(self, finding: Finding, item: Any) -> None:
         self.set_severity(finding, item)
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             self.set_locations(finding, item)
         else:
             # TODO: Delete this after the move to Locations
@@ -378,7 +381,7 @@ class BaseEngineParser:
 
     def get_finding_key(self, finding: Finding) -> tuple:
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return (
                 finding.severity,
                 finding.title,
@@ -388,7 +391,10 @@ class BaseEngineParser:
         return (
             finding.severity,
             finding.title,
-            tuple(sorted([(location.host, location.port) for location in finding.unsaved_locations])),
+            tuple(sorted([
+                (location.data.get("url"), None) if location.data.get("url") else (location.data.get("host"), location.data.get("port"))
+                for location in finding.unsaved_locations
+            ])),
             self.SCANNING_ENGINE,
         )
 

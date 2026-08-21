@@ -22,6 +22,10 @@ class TestTrivyParser(DojoTestCase):
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 93)
+            # Legacy reports have no "Class" field; tags must not contain None
+            # or the import pipeline crashes in clean_tags (TypeError)
+            for finding in findings:
+                self.assertNotIn(None, finding.unsaved_tags)
             finding = findings[0]
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
@@ -302,6 +306,26 @@ Number  Content
                 self.assertEqual(False, finding.out_of_scope)
                 self.assertEqual(False, finding.is_mitigated)
 
+            with self.subTest("multiple_cwes"):
+                # CVE-2018-1000876 reports CweIDs ["CWE-190", "CWE-787"].
+                # primary cwe is the first entry; the full list is persisted via unsaved_cwes
+                finding = findings[3]
+                self.assertEqual("CVE-2018-1000876 binutils 2.31.1-16", finding.title)
+                self.assertEqual(190, finding.cwe)
+                self.assertEqual([190, 787], finding.unsaved_cwes)
+
+            with self.subTest("single_cwe"):
+                # CVE-2018-12697 reports a single CweID; unsaved_cwes mirrors it
+                finding = findings[4]
+                self.assertEqual(476, finding.cwe)
+                self.assertEqual([476], finding.unsaved_cwes)
+
+            with self.subTest("no_cwe"):
+                # findings without CweIDs leave unsaved_cwes unset
+                finding = findings[2]
+                self.assertEqual(0, finding.cwe)
+                self.assertIsNone(finding.unsaved_cwes)
+
     def test_cvss_severity_sources(self):
         """Testing with two findings - one where SeveritySource matches the CVSS entry, and one that does not"""
         with sample_path("cvss_severity_source.json").open(encoding="utf-8") as test_file:
@@ -345,3 +369,15 @@ Number  Content
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
             self.assertEqual("Low", findings[0].severity)
+
+    def test_cvssv4_severity_sources(self):
+        """Testing with three findings with CVSSv4 scores"""
+        with sample_path("cvssv4_severity_source.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 3)
+            with self.subTest("CVSSv4 finding"):
+                finding = findings[0]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N", finding.cvssv4)
+                self.assertEqual(6.3, finding.cvssv4_score)

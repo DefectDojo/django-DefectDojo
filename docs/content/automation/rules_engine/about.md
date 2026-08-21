@@ -12,19 +12,36 @@ DefectDojo's Rules Engine allows you to build custom workflows and bulk actions 
 
 Rules Engine can only be accessed through the [Pro UI](/get_started/about/ui_pro_vs_os/).
 
+**Looking for the graph editor?** [Rules Engine 2.0](/automation/rules_engine_2/about/) builds automation as visual node graphs, and adds branching, outbound actions such as tickets and messages, per-run traces and a delivery ledger. Both engines run side by side, and existing rules can be [converted across](/automation/rules_engine_2/converting_from_rules_engine/).
+
+## Enabling Rules Engine
+
+Rules Engine is in Beta and is off by default. A superuser can turn it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+
 Currently, Rules can only be created for Findings, however more object types will be supported in the future.
 
-Rules always need to be manually triggered from the **All Rules** page.  When a rule is triggered, it will be applied to all existing Findings that match the filter conditions set.
+Rules can be triggered manually from the **All Rules** page, or scheduled to run automatically on a recurring schedule.  When a rule is triggered, it will be applied to all existing Findings that match the filter conditions set.
 
 ## Possible Rule Actions
 Each Rule can apply one or more of these changes to a Finding when it is triggered successfully (i.e. matches the set Filter conditions).
 
-* Modify or append one or more informational fields on a Finding, including Title, Description, Severity, CVSSv3 Vector, Active, Verified, Risk Accepted, False Positive, Mitigated
-* Set a User to Review a Finding
-* Assign a Group as Owners for a Finding
-* Add Tags to a Finding
-* Add a Note to a Finding
-* Create an Alert in DefectDojo with custom text
+### Field Modifications
+* **Set a field** on a Finding, including Title, Description, Severity, CVSSv3 Vector, Active, Verified, Risk Accepted, False Positive, Mitigated
+* **Append or Prepend text** to a Finding's Title or Description
+* **Set Priority** — override the calculated Priority value on a Finding (overrides automatic priority calculation)
+* **Set Risk** — override the calculated Risk level on a Finding (overrides automatic risk calculation)
+* **Add, Subtract, Multiply, or Divide** the Priority value on a Finding by a given number
+
+### Assignments & Ownership
+* **Set a User to Review** a Finding
+* **Assign a Group as Owners** for a Finding
+* **Set a Mitigation Policy** on a Finding — assigns a pre-configured Mitigation Policy to the Finding
+* **Add to Risk Acceptance** — adds a Finding to an existing Risk Acceptance record (sets risk_accepted=True, active=False, and handles Jira integration and endpoint statuses)
+
+### Tags, Notes & Alerts
+* **Add Tags** to a Finding
+* **Add a Note** to a Finding
+* **Create an Alert** in DefectDojo with custom text
 
 ### Filter conditions
 Rules are automatically triggered when a Finding meets specific Filter conditions. For more information on Filters that can be used to create Rule Actions, see the [Filter Index](/navigation/pro__filter_index) page.
@@ -44,11 +61,11 @@ You will see an All Findings table.  Using the All Findings Table, set the Filte
 
 The table will preview the list of existing Findings that you have filtered.
 
-For example, in this screenshot we are filtering for all Findings that are in 'Product One'.  Once we apply this filter (by clicking outside of the Filters menu), it will be added to our list of applicable Filters.
+For example, in this screenshot we are filtering for all Findings that are in 'Asset One'.  Once we apply this filter (by clicking outside of the Filters menu), it will be added to our list of applicable Filters.
 
 ![image](images/rules_engine_3.png)
 
-In the screenshot above, all Findings that are in the Product 'Product One' will have actions taken on them.
+In the screenshot above, all Findings that are in the Asset 'Asset One' will have actions taken on them.
 
 Once you have a set of Filters that you want to apply, Click the Next Button.
 

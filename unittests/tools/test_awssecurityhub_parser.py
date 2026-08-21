@@ -50,6 +50,62 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             self.validate_locations(findings)
 
+    def test_multiple_resource_ids_are_sorted(self):
+        # A finding carrying several Resources is the only case that can expose an
+        # unordered join: a set of 0 or 1 elements has just one possible ordering.
+        # description feeds compute_hash_code_legacy(), so the order has to be stable.
+        with sample_path("config_multiple_resources.json").open(encoding="utf-8") as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(2, len(findings))
+            self.validate_locations(findings)
+
+            self.assertEqual(
+                "**Resource IDs:** "
+                "arn:aws:ec2:us-east-1:012345678912:security-group/sg-0aaa1111cccc2222b, "
+                "arn:aws:ec2:us-east-1:012345678912:security-group/sg-0fff2222bbbb1111a, "
+                "arn:aws:ec2:us-east-1:012345678912:vpc/vpc-0bbb3333dddd4444c",
+                self._resource_id_line(findings[0]),
+            )
+            self.assertEqual(
+                "**Resource IDs:** "
+                "arn:aws:s3:::alpha-artifacts-bucket, arn:aws:s3:::zeta-reports-bucket",
+                self._resource_id_line(findings[1]),
+            )
+
+    def test_multiple_resource_ids_do_not_follow_document_order(self):
+        # Guards the assertions above against a fix that merely drops set() and takes
+        # the report's own order: in this sample the two differ.
+        with sample_path("config_multiple_resources.json").open(encoding="utf-8") as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            for finding in findings:
+                arns = self._resource_id_line(finding).removeprefix("**Resource IDs:** ").split(", ")
+                self.assertEqual(sorted(arns), arns)
+            self.assertTrue(
+                self._resource_id_line(findings[1]).index("alpha-artifacts")
+                < self._resource_id_line(findings[1]).index("zeta-reports"),
+            )
+
+    def test_get_tests_description_is_sorted(self):
+        # Same unordered join in the Test description. Not hashed, but it reshuffled
+        # in the UI on every import.
+        with sample_path("config_multiple_resources.json").open(encoding="utf-8") as test_file:
+            tests = AwsSecurityHubParser().get_tests("AWS Security Hub Scan", test_file)
+            self.assertEqual(1, len(tests))
+            self.assertEqual(
+                "**AWS Accounts:** 001122334455, 012345678912\n"
+                "**Finding Origins:** Config, Security Hub\n",
+                tests[0].description,
+            )
+
+    @staticmethod
+    def _resource_id_line(finding):
+        return next(
+            line for line in finding.description.splitlines()
+            if line.startswith("**Resource IDs:**")
+        )
+
     def test_unique_id(self):
         with sample_path("config_one_finding.json").open(encoding="utf-8") as test_file:
             parser = AwsSecurityHubParser()
@@ -72,6 +128,10 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2022-3643", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("- Update kernel-4.14.301\n\t- yum update kernel\n", finding.mitigation)
+            # Verify CVSS v3 extraction via parse_cvss_data helper
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+            self.assertIn("CVSS v3 vector:", finding.severity_justification)
+            self.assertIn("AWS severity: CRITICAL", finding.severity_justification)
             location = self.get_unsaved_locations(finding)[0]
             self.assertEqual("AwsEc2Instance_arn_aws_ec2_us-east-1_XXXXXXXXXXXX_i-11111111111111111".lower(), location.host.lower())
 
@@ -97,6 +157,8 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertIn("GHSA-p98r-538v-jgw5", finding.title)
             self.assertSetEqual({"CVE-2023-34256", "GHSA-p98r-538v-jgw5"}, set(finding.unsaved_vulnerability_ids))
             self.assertEqual("https://github.com/bottlerocket-os/bottlerocket/security/advisories/GHSA-p98r-538v-jgw5", finding.references)
+            # Verify backward compatibility: no CVSS data in this fixture
+            self.assertIsNone(finding.cvssv3)
             location = self.get_unsaved_locations(finding)[0]
             self.assertEqual("AwsEc2Instance_arn_aws_ec2_eu-central-1_012345678912_instance_i-07c11cc535d830123".lower(), location.host.lower())
 
@@ -115,6 +177,8 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertIn("repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.impact)
             self.assertIn("Repository: repo-os", finding.impact)
             self.assertEqual(0.0014, finding.epss_score)
+            # Verify CVSS v3 extraction from the ECR fixture
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H", finding.cvssv3)
             location = self.get_unsaved_locations(finding)[0]
             self.assertEqual("AwsEcrContainerImage_arn_aws_ecr_eu-central-1_123456789012_repository_repo-os_sha256_af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74".lower(), location.host.lower())
 

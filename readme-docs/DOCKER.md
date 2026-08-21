@@ -15,6 +15,8 @@ Docker images for `linux/amd64` are published to https://hub.docker.com/u/defect
 
 *  Docker version
     *  Installing with docker compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker compose.
+*  BuildKit
+    *  The Dockerfiles require [BuildKit](https://docs.docker.com/build/buildkit/), which is enabled by default since Docker 23.0. If you are on an older version, enable it with `DOCKER_BUILDKIT=1` before building.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
@@ -352,6 +354,20 @@ Check the logs with:
 ```
 docker compose logs -f integration-tests
 ```
+
+### Running a single integration test from dev mode
+
+If your dev stack is already running (`docker/setEnv.sh dev && docker compose up`), you can run a single integration test without switching environments.
+The dev override includes an `integration-tests` service behind a Docker Compose profile, so it won't start during normal `docker compose up`.
+
+Make sure the dev containers are up and healthy before running the test:
+
+```
+./run-integration-test-dev.sh tests/finding_test.py
+```
+
+This spins up the integration test runner container against your running dev stack and tears it down when done.
+Note that test data is created in your dev database — the integration tests attempt to clean up after themselves.
 
 # Checking Docker versions
 

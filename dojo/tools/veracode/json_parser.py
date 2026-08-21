@@ -5,8 +5,9 @@ from cvss import CVSS3
 from dateutil import parser
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class VeracodeJSONParser:
@@ -175,6 +176,16 @@ class VeracodeJSONParser:
         if module := finding_details.get("module"):
             finding.description += f"**Module**: {module}\n"
 
+        if locations_enabled() and (file_path := finding_details.get("file_path")):
+            function_object = finding_details.get("procedure")
+            finding.unsaved_locations.append(
+                LocationData.code(
+                    file_path=file_path,
+                    line=finding_details.get("file_line_number") or None,
+                    source_object=function_object if isinstance(function_object, str) else "",
+                ),
+            )
+
         return finding
 
     def add_dynamic_details(self, finding, finding_details, backup_title=None) -> Finding:
@@ -189,12 +200,12 @@ class VeracodeJSONParser:
         elif backup_title:
             finding.title = backup_title
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             # Add the url to the finding
             if url := finding_details.get("url"):
                 # Create the Location object from the url
                 finding.unsaved_locations.append(
-                    URL.from_value(url),
+                    LocationData.url(url=url),
                 )
             else:
                 # build it from the other attributes
@@ -203,7 +214,7 @@ class VeracodeJSONParser:
                 path = finding_details.get("path")
                 # Create the Location object from all the pieces
                 finding.unsaved_locations.append(
-                    URL(
+                    LocationData.url(
                         host=host,
                         port=port,
                         path=path,

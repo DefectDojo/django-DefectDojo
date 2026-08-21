@@ -1,16 +1,20 @@
 ---
 title: "Share permissions: User Groups"
-description: "Share and maintain permissions for many users"
+description: "Share and maintain permissions for many users in DefectDojo Pro"
 weight: 3
+audience: pro
 aliases:
   - /en/customize_dojo/user_management/create_user_group
 ---
+
+> **DefectDojo Pro feature.** User Groups and the underlying RBAC system are part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
+
 If you have a significant number of DefectDojo users, you may want to create one or more **Groups**, in order to set the same Role\-Based Access Control (RBAC) rules for many users simultaneously. Only Superusers can create User Groups.
 
 Groups can work in multiple ways:
 
-* Set one, or many different Product or Product Type level Roles for all Group Members, allowing specific control over which Products or Product Types can be accessed and edited by the Group.
-* Set a Global Role for all Group Members, giving them visibility and access to all Product or Product Types.
+* Set one, or many different Asset or Organization level Roles for all Group Members, allowing specific control over which Assets or Organizations can be accessed and edited by the Group.
+* Set a Global Role for all Group Members, giving them visibility and access to all Asset or Organizations.
 * Set Configuration Permissions for a Group, allowing them to change specific functionality around DefectDojo.
 
 For more information on Roles, please refer to our **Introduction To Roles** article.
@@ -23,14 +27,14 @@ From the sidebar, navigate to 👤**Users \> Groups** to see a list of all activ
 From here, you can create, delete or view your individual Group pages.
 
 For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users, the Pro UI's All Groups has a few additional options.
-* You can filter this table by Group Name, Description, E-mail Address, Global Role, as well as the total number of Users, Product Types, and Products associated with the Group.
+* You can filter this table by Group Name, Description, E-mail Address, Global Role, as well as the total number of Users, Organizations, and Assets associated with the Group.
 * You can also adjust a Group's Permissions or other settings by clicking the "⋮" button next to the Group you wish to edit.
 
 ![image](images/all_groups_pro.png)
 
 ## Viewing A Group
 
-Viewing a group displays all Group information, such as ID, name, description, global role, etc. The Group Members, Product Types, and Products associated with the group are also displayed. Additionally, configuration permissions tied to a Group can be updated directly from the “View Group” page.
+Viewing a group displays all Group information, such as ID, name, description, global role, etc. The Group Members, Organizations, and Assets associated with the group are also displayed. Additionally, configuration permissions tied to a Group can be updated directly from the “View Group” page.
 
 For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users, the Pro UI's Group View allows you to assign Configuration Permission adjustments in a slightly different way.
 
@@ -61,13 +65,13 @@ The account that initially creates a Group will have an Owner Role for the Group
 
 ### Set an email address to receive reports
 
-The Weekly Digest is a report on all Group-assigned Products / Product Types. To have a weekly Digest sent out, enter the destination email address you wish to use on the Create / Edit Group form.  Group members will still receive notifications as usual.
+The Weekly Digest is a report on all Group-assigned Assets / Organizations. To have a weekly Digest sent out, enter the destination email address you wish to use on the Create / Edit Group form.  Group members will still receive notifications as usual.
 
 ### Viewing a Group Page
 
 Once you have created a Group, you can access it by selecting it in the menu listed under **Users \> Groups.**
 
-The Group Page can be customized with a **Description**.It features a list of all **Group Members,** as well as the assigned **Products, Product Types**, and the associated **Role** associated with each of these**.**
+The Group Page can be customized with a **Description**.It features a list of all **Group Members,** as well as the assigned **Assets, Organizations**, and the associated **Role** associated with each of these**.**
 
 You can also see the Group’s **Configuration Permissions** listed here.
 
@@ -79,7 +83,7 @@ In order to view or edit a Group’s Membership, a User must have the appropriat
 
 ### **Add a User to a Group**
 
-User Groups can have as many Users assigned as you wish. All Users in a Group will be given the associated Role on each Product or Product Type listed, but Users may also have Individual Roles which supersede the Group role.
+User Groups can have as many Users assigned as you wish. All Users in a Group will be given the associated Role on each Asset or Organization listed, but Users may also have Individual Roles which supersede the Group role.
 
 1. From the Group page, select **\+ Add Users** from the **☰** button at the edge of the **Members** heading.  
 ​
@@ -99,7 +103,7 @@ Note that adding a member to a Group will not allow them access to their own Gro
 
 **📝 Edit** will take you to the Edit Member screen, where you can change this user's Role (from Reader, Maintainer or Owner to a different choice).  
 
-**🗑️ Delete** removes a User's Membership altogether. It will not remove any contributions or changes the User has made to the Product or Product Type.
+**🗑️ Delete** removes a User's Membership altogether. It will not remove any contributions or changes the User has made to the Asset or Organization.
 
 ![image](images/Create_a_User_Group_for_shared_permissions_6.png) 
 
@@ -107,23 +111,23 @@ Note that adding a member to a Group will not allow them access to their own Gro
 
 Group Permissions are managed from the individual Group page, which you can select from the list in the **Users \> Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
 
-Note that only Superusers can edit a Group’s permissions (Product / Product Type, or Configuration).  
+Note that only Superusers can edit a Group’s permissions (Asset / Organization, or Configuration).  
 ​
-### **Add Product Roles or Product Type Roles for a Group**
+### **Add Asset Roles or Organization Roles for a Group**
 
-You can register as many Product Roles or Product Type Roles as you wish in each Group.
+You can register as many Asset Roles or Organization Roles as you wish in each Group.
 
-1. From the Group page, select **\+ Add Product Types**, or \+ **Add Product** from the relevant heading (Product Type Groups or Product Groups).  
+1. From the Group page, select **\+ Add Organizations**, or \+ **Add Asset** from the relevant heading (Organization Groups or Asset Groups).  
 ​
 ![image](images/Create_a_User_Group_for_shared_permissions_7.png)
 
-2. This will take you to a **Register New Products / Product Types** Page, where you can select a Product or Product Type to add from the drop\-down menu.
+2. This will take you to a **Register New Assets / Organizations** Page, where you can select an Asset or Organization to add from the drop\-down menu.
 
 ![image](images/Create_a_User_Group_for_shared_permissions_8.png)
 
-3. Select the Role that you want all Group members to have regarding this particular Product or Product Type.
+3. Select the Role that you want all Group members to have regarding this particular Asset or Organization.
 
-Groups cannot be assigned to Products or Product Types without a Role. If you're not sure which Role you want a Group to have, Reader is a good 'default' option. This will keep your Product state secure until you make your final decision about the Group Role.
+Groups cannot be assigned to Assets or Organizations without a Role. If you're not sure which Role you want a Group to have, Reader is a good 'default' option. This will keep your Asset state secure until you make your final decision about the Group Role.
 
 ### **Assign Configuration Permissions to a Group**
 

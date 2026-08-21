@@ -1,0 +1,21 @@
+{% comment %}
+Reusable empty state component.
+
+Usage:
+  {% include "dojo/snippets/empty_state.html" with icon="magnifying-glass" title="No findings" message="There are no findings matching your criteria." action_url="/findings" action_text="View all findings" %}
+
+Parameters:
+  icon         — FontAwesome icon name (without "fa-" prefix), e.g. "magnifying-glass"
+  title        — Heading text
+  message      — Description text (optional)
+  action_url   — URL for the CTA button (optional)
+  action_text  — Label for the CTA button (optional, requires action_url)
+{% endcomment %}
+<div class="empty-state">
+    <i class="fa-solid fa-{{ icon|default:'circle-info' }} empty-state-icon"></i>
+    <h3>{{ title|default:"Nothing here yet" }}</h3>
+    {% if message %}<p>{{ message }}</p>{% endif %}
+    {% if action_url %}
+        <a href="{{ action_url }}" class="btn btn-primary btn-sm">{{ action_text|default:"Get started" }}</a>
+    {% endif %}
+</div>

@@ -1,5 +1,5 @@
 ---
-title: "🌐 Universal Parser (Pro)"
+title: "🌐 Universal Parser"
 description: ""
 draft: "false"
 weight: 1
@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Universal Parser is only available in DefectDojo Pro.</span>
 
-The Universal Parser is currently in Beta.  See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
+The Universal Parser is on for every DefectDojo Pro instance; there is nothing to enable. See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
 
 ## About Universal Parser
 DefectDojo has a large, regularly updated library of parsers to help security teams ingest data.  However, sometimes users have a tool that's unsupported by the parsers, or they may want to import data into the DefectDojo model differently from the way the parser does.
@@ -84,6 +84,45 @@ If you've uploaded a scan file in JSON format that looks like this:
 You'll see a hierarchical representation of the unique fields we detected based on the structure of the input file, with icons indicating the type of each field (if we can determine this). You can then select the "title" input field in the drop-down menu that populates the "Title" output field, the "description" input field can go with the "Description" output field, and so on. 
 
 Input field names don't have to match the names of output fields, and your scan file may not have an equivalent to all DefectDojo output fields.
+
+### Mappable finding fields
+
+The table below lists every DefectDojo finding field (output field) you can map an input field to. Your scan file won't necessarily have an equivalent for all of them — map only what's present.
+
+* **Required** — this output field must have at least one input field mapped before you can save the parser.
+* **Accepts multiple inputs** — this output field can be populated from more than one input field. When you map several, each value is presented under a header named for its input field (see [Multi-select fields](#multi-select-fields)).
+
+| Output field | Required | Accepts multiple inputs | Description |
+|---|:---:|:---:|---|
+| Title | ✅ | | A short description of the flaw. |
+| Severity | ✅ | | The severity level of this flaw (Critical, High, Medium, Low, Info). Defaults to "Info" if unknown. |
+| Description | ✅ | ✅ | Longer, more descriptive information about the flaw. |
+| Date | | | The date the flaw was discovered. |
+| CWE | | | The CWE number associated with this flaw. |
+| CVSS v3 Vector | | | Common Vulnerability Scoring System version 3 (CVSSv3) vector associated with this flaw. |
+| CVSS v4 Vector | | | Common Vulnerability Scoring System version 4 (CVSSv4) vector associated with this flaw. |
+| Mitigation | | ✅ | Text describing how to best fix the flaw. |
+| Impact | | ✅ | Text describing the impact this flaw has on systems, Assets, enterprise, etc. |
+| References | | ✅ | The external documentation available for this flaw. |
+| Severity Justification | | ✅ | Text describing why a certain severity was associated with this flaw. |
+| Steps to Reproduce | | ✅ | Text describing the steps that must be followed in order to reproduce the flaw / bug. |
+| Component Name | | | Name of the affected component (library name, part of a system, ...). |
+| Component Version | | | Version of the affected component. |
+| File Path | | | Identified file(s) containing the flaw. |
+| Line Number | | | Source line number of the attack vector. |
+| Active | | | Denotes if this flaw is active or not. Defaults to true. |
+| Verified | | | Denotes if this flaw has been manually verified by the tester. Defaults to false. |
+| False Positive | | | Denotes if this flaw has been deemed a false positive by the tester. Defaults to false. |
+| Duplicate | | | Denotes if this flaw is a duplicate of other flaws reported. Defaults to false. |
+| EPSS Score | | | EPSS score for the CVE — how likely it is the vulnerability will be exploited in the next 30 days. Value must be between 0.0 and 1.0. |
+| EPSS Percentile | | | EPSS percentile for the CVE — how many CVEs are scored at or below this one. Value must be between 0.0 and 1.0. |
+| Unique ID From Tool | | | Vulnerability technical ID from the source tool. Allows tracking of unique vulnerabilities. |
+| Vuln ID from Tool | | | Non-unique technical ID from the source tool associated with the vulnerability type. |
+| Tags | | | String tags that help describe this finding. |
+| Endpoints | | | The hosts/URLs within the Asset that are susceptible to this flaw. |
+| Vulnerability IDs | | | One or more vulnerability advisory identifiers associated with this finding (most commonly, CVEs). |
+
+> **Note:** In the example above, a `CVE` input field would be mapped to the **Vulnerability IDs** output field — DefectDojo does not have a finding field literally named "CVE".
 
 ### Required fields
 The following output fields require an input field mapping:
@@ -161,3 +200,34 @@ You can edit the Test_Type associated with your Universal Parser to change:
 * Whether it is "active" or not. If not, it will not appear as an option in the "Scan Type" drop-down on the "Add Findings" page
 * Whether its findings should be marked "static" or "dynamic"
 * You can tweak the same-tool and cross-tool deduplication hash codes, as well as the reimport hash codes, for your Universal Parser under "Enterprise Settings". By default, only same-tool deduplication and reimport hash codes are populated, with the required values Title, Severity, and Description.
+
+## Lifecycle: create, deactivate, reactivate
+
+A Universal Parser's lifecycle is **create-only**, with no in-UI edit or delete. Once a parser has been created, the field-mapping configuration cannot be modified, and the parser itself cannot be removed from the UI — this is by design, because Universal Parser configurations are tied to Test_Type records that may be referenced by existing Findings, Tests, and import history.
+
+What you **can** do from the UI:
+
+* **Deactivate** a parser to hide it from the "Scan Type" drop-down on import. Open **Import → Universal Parser** in the sidebar to see all of your Universal Parsers, and toggle "Active" off. (Alternatively, you can edit the underlying Test_Type and uncheck "active".) Deactivated parsers no longer appear as a Scan Type option on the **Add Findings** page, but existing Tests that were imported with this parser are unaffected and continue to work.
+* **Reactivate** a parser from the same screen by toggling "Active" back on.
+* **Edit the Test_Type fields** described in the section above (active/inactive, static/dynamic, deduplication hash codes).
+
+### Recommended workflow when a scanner's report format changes
+
+Because the field-mapping configuration is locked once a parser is created, the standard workflow for handling a format change in the underlying scanner is to **roll forward to a new parser** rather than try to edit the old one:
+
+1. **Create a new Universal Parser** using a sample of the new report format (see Step 1). Give it a distinct name — e.g. append `v2` or a date to the original name.
+2. **Switch new imports** in your CI/CD pipeline or UI workflow to use the new parser's scan type.
+3. **Deactivate the old parser** once you've confirmed the new one is producing the findings you expect. Tests already imported under the old parser remain in DefectDojo and can still be triaged; only new imports route to the new parser.
+
+If you need a parser configuration permanently removed (for example, because it contains sensitive field names), contact [DefectDojo Support](mailto:support@defectdojo.com).
+
+## A note about severity mapping
+
+The Universal Parser does **not** have a configurable severity-mapping field. Severity is mapped automatically with these rules:
+
+* Any case variation of a DefectDojo severity is accepted — `CRITICAL`, `Critical`, `cRiTiCaL`, `critical` all map to **Critical**. The same applies to `High`, `Medium`, `Low`, and `Info`.
+* Any value that does **not** match one of DefectDojo's five severities is mapped to **Info**.
+
+This behavior is the same for all parsers in DefectDojo (built-in parsers, Connectors, and Universal Parsers).
+
+If a scanner you're trying to ingest uses severity labels that don't line up with DefectDojo's (e.g. "warning", "note", or numeric CVSS scores), the Universal Parser will map all of those non-matching values to Info. If you need a different mapping, the best workaround today is to **transform the severity values upstream** — for example, in your CI pipeline before uploading — so the values DefectDojo receives are already one of the five DefectDojo severity names.

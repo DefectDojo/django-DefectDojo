@@ -1,15 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block add_styles %}
-    {{ block.super }}
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block add_css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
@@ -26,7 +17,7 @@
             Select the findings that apply to this acceptance. These findings will be automatically deactivated.
         </p>
         <br/>
-        <form id="add_risk_acceptance" enctype="multipart/form-data" class="form-horizontal" method="post">
+        <form id="add_risk_acceptance" enctype="multipart/form-data" class="" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">

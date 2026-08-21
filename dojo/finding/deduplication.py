@@ -4,11 +4,14 @@ from operator import attrgetter
 
 import hyperlink
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
-from dojo.models import Finding, System_Settings
+from dojo.location.feature import locations_enabled
+from dojo.models import Endpoint_Status, Finding, System_Settings
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -30,11 +33,18 @@ def get_finding_models_for_deduplication(finding_ids):
         logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
+    # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
+    # endpoints m2m hydrates legacy rows and crashes the batch. are_locations_duplicates()
+    # reads ref.location.url, which is what the locations prefetch has to reach.
+    # TODO: Delete the endpoints branch after the move to Locations
+    location_prefetch = "locations__location__url" if locations_enabled() else "endpoints"
+
     return list(
         Finding.objects.filter(id__in=finding_ids)
+        .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
-            "endpoints",
+            location_prefetch,
             # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
             Prefetch(
                 "original_finding",
@@ -112,7 +122,37 @@ def deduplicate_uid_or_hash_code(new_finding):
     _dedupe_batch_uid_or_hash([new_finding])
 
 
-def set_duplicate(new_finding, existing_finding):
+def set_duplicate(new_finding, existing_finding, *, save=True):
+    """
+    Mark new_finding as a duplicate of existing_finding.
+
+    Sets duplicate=True, active=False, verified=False, and duplicate_finding=existing_finding
+    on new_finding, then flattens any transitive duplicates: if any findings already point to
+    new_finding as their original, they are re-pointed directly to existing_finding (so the
+    duplicate chain never has more than one level of indirection).
+
+    The test_type of new_finding is added to existing_finding.found_by if not already present.
+
+    Args:
+        new_finding:      The finding to mark as a duplicate.
+        existing_finding: The original finding that new_finding is a duplicate of.
+                          Must not itself be a duplicate.
+        save:             When True (default), each modified finding and existing_finding are
+                          saved to the database immediately via super().save(skip_validation=True).
+                          Pass save=False in batch contexts to defer persistence; the caller is
+                          then responsible for bulk-saving the returned list and existing_finding.
+
+    Returns:
+        A list of all Finding instances whose fields were modified by this call, including
+        new_finding itself and any transitively re-pointed findings.  The caller must persist
+        these when save=False.
+
+    Raises:
+        Exception: if existing_finding is itself a duplicate, if new_finding == existing_finding,
+                   if marking would reopen a mitigated finding via a duplicate chain, or if
+                   new_finding is already a duplicate and existing_finding is mitigated.
+
+    """
     deduplicationLogger.debug(f"new_finding.status(): {new_finding.id} {new_finding.status()}")
     deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
@@ -135,6 +175,8 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
 
+    all_modified = [new_finding]
+
     # Make sure transitive duplication is flattened
     # if A -> B and B is made a duplicate of C here, afterwards:
     # A -> C and B -> C should be true
@@ -143,7 +185,7 @@ def set_duplicate(new_finding, existing_finding):
     # order_by here to prevent bypassing the prefetch cache.
     for find in new_finding.original_finding.all():
         new_finding.original_finding.remove(find)
-        set_duplicate(find, existing_finding)
+        all_modified.extend(set_duplicate(find, existing_finding, save=save))
     # Only add test type to found_by if it is not already present.
     # This is efficient because `found_by` is prefetched for candidates via `build_dedupe_scope_queryset()`.
     test_type = getattr(getattr(new_finding, "test", None), "test_type", None)
@@ -152,10 +194,14 @@ def set_duplicate(new_finding, existing_finding):
 
     # existing_finding.found_by.add(new_finding.test.test_type)
 
-    logger.debug("saving new finding: %d", new_finding.id)
-    super(Finding, new_finding).save(skip_validation=True)
-    logger.debug("saving existing finding: %d", existing_finding.id)
-    super(Finding, existing_finding).save(skip_validation=True)
+    if save:
+        for f in all_modified:
+            logger.debug("saving new finding: %d", f.id)
+            super(Finding, f).save(skip_validation=True)
+        logger.debug("saving existing finding: %d", existing_finding.id)
+        super(Finding, existing_finding).save(skip_validation=True)
+
+    return all_modified
 
 
 def is_duplicate_reopen(new_finding, existing_finding) -> bool:
@@ -180,14 +226,17 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return False
 
 
-def get_endpoints_as_url(finding):
-    # Fix for https://github.com/DefectDojo/django-DefectDojo/issues/10215
-    # When endpoints lack a protocol (scheme), str(e) returns a string like "10.20.197.218:6379"
-    # without the "//" prefix. hyperlink.parse() then misinterprets the hostname as the scheme.
-    # We replicate the behavior from dojo/endpoint/utils.py line 265: prepend "//" if "://" is missing
-    # to ensure hyperlink.parse() correctly identifies host, port, and path components.
+def get_endpoints_as_url(endpoints):
+    """
+    Convert a list of Endpoint objects to parsed hyperlink URLs.
+
+    Fix for https://github.com/DefectDojo/django-DefectDojo/issues/10215
+    When endpoints lack a protocol (scheme), str(e) returns a string like "10.20.197.218:6379"
+    without the "//" prefix. hyperlink.parse() then misinterprets the hostname as the scheme.
+    We prepend "//" if "://" is missing to ensure correct parsing.
+    """
     urls = []
-    for e in finding.endpoints.all():
+    for e in endpoints:
         endpoint_str = str(e)
         if "://" not in endpoint_str:
             endpoint_str = "//" + endpoint_str
@@ -205,8 +254,9 @@ def are_urls_equal(url1, url2, fields):
     return True
 
 
-def finding_locations(finding):
-    return [ref.location.url for ref in finding.locations.all()]
+def finding_locations(location_refs):
+    """Extract URLs from a list of location references."""
+    return [ref.location.url for ref in location_refs]
 
 
 def are_location_urls_equal(url1, url2, fields):
@@ -228,9 +278,12 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
         deduplicationLogger.debug("deduplication by endpoint fields is disabled")
         return True
 
-    if settings.V3_FEATURE_LOCATIONS:
-        list1 = finding_locations(new_finding)
-        list2 = finding_locations(to_duplicate_finding)
+    if locations_enabled():
+        # Use unsaved_locations for unsaved findings (preview mode), saved M2M otherwise
+        locs1 = new_finding.locations.all() if new_finding.pk else getattr(new_finding, "unsaved_locations", [])
+        locs2 = to_duplicate_finding.locations.all() if to_duplicate_finding.pk else getattr(to_duplicate_finding, "unsaved_locations", [])
+        list1 = finding_locations(locs1)
+        list2 = finding_locations(locs2)
 
         deduplicationLogger.debug(
             f"Starting deduplication by location fields for finding {new_finding.id} with locations {list1} and finding {to_duplicate_finding.id} with locations {list2}",
@@ -247,8 +300,11 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
         deduplicationLogger.debug(f"locations are not duplicates: {new_finding.id} and {to_duplicate_finding.id}")
         return False
     # TODO: Delete this after the move to Locations
-    list1 = get_endpoints_as_url(new_finding)
-    list2 = get_endpoints_as_url(to_duplicate_finding)
+    # Use unsaved_endpoints for unsaved findings (preview mode), saved M2M otherwise
+    eps1 = new_finding.endpoints.all() if new_finding.pk else getattr(new_finding, "unsaved_endpoints", [])
+    eps2 = to_duplicate_finding.endpoints.all() if to_duplicate_finding.pk else getattr(to_duplicate_finding, "unsaved_endpoints", [])
+    list1 = get_endpoints_as_url(eps1)
+    list2 = get_endpoints_as_url(eps2)
 
     deduplicationLogger.debug(
         f"Starting deduplication by endpoint fields for finding {new_finding.id} with urls {list1} and finding {to_duplicate_finding.id} with urls {list2}",
@@ -292,18 +348,31 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
             )
         queryset = Finding.objects.filter(scope_q)
 
-    # Base prefetches for both modes
-    prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
+    if locations_enabled():
+        prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
+    else:
+        # TODO: Delete this after the move to Locations
+        # Base prefetches for both modes
+        prefetch_list = ["endpoints", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
-    # Additional prefetches for reimport mode
-    if mode == "reimport":
-        prefetch_list.extend([
-            "status_finding",
-            "status_finding__endpoint",
-        ])
+        # Prefetch all endpoint statuses with their endpoint for reimport mode.
+        # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
+        # is done in Python by EndpointManager.get_non_special_endpoint_statuses().
+        # We avoid using to_attr here because findings created during the same reimport
+        # batch (via add_new_finding_to_candidates) are never loaded through this queryset
+        # and would lack the to_attr, causing an AttributeError.
+        # See: https://github.com/DefectDojo/django-DefectDojo/pull/14569
+        if mode == "reimport":
+            prefetch_list.append(
+                Prefetch(
+                    "status_finding",
+                    queryset=Endpoint_Status.objects.select_related("endpoint"),
+                ),
+            )
 
     return (
         queryset
+        .defer(*Finding.DEDUPLICATION_DEFERRED_FIELDS)
         .select_related("test", "test__engagement", "test__test_type")
         .prefetch_related(*prefetch_list)
     )
@@ -484,8 +553,47 @@ def find_candidates_for_reimport_legacy(test, findings, service=None):
     return existing_by_key
 
 
+def deduplication_ordering_key(finding):
+    """
+    Stable, content-derived sort key used by the reimporter to decide the order
+    findings from one report are created (and therefore get their ids) in.
+
+    Deduplication itself always picks the lowest-id finding as the canonical
+    "original". Because the reimporter sorts a report's findings by this key
+    BEFORE saving them, "lowest id" among findings created by one reimport
+    equals "canonical by content", so the winner among findings that collide
+    on the deduplication key is reproducible across re-scans regardless of the
+    order the scanner exports its findings in. Findings from earlier imports
+    always have smaller ids, so an already-established original never flips.
+
+    id is the final tiebreak and is only reached when two findings are
+    identical across every content field in the key (in which case the choice
+    is immaterial because the findings are interchangeable).
+
+    All fields referenced here are part of ``Finding.DEDUPLICATION_FIELDS``, so
+    building this key never triggers extra database queries during dedupe.
+    """
+    return (
+        finding.hash_code or "",
+        finding.unique_id_from_tool or "",
+        finding.file_path or "",
+        finding.line if finding.line is not None else -1,
+        finding.title or "",
+        finding.id or 0,
+    )
+
+
 def _is_candidate_older(new_finding, candidate):
-    # Ensure the newer finding is marked as duplicate of the older finding
+    # Unsaved findings (e.g. preview mode) have no PK — all DB candidates are older by definition
+    if new_finding.pk is None:
+        return True
+    # Ensure the newer finding is marked as duplicate of the older finding.
+    # This comparison must stay a pure id comparison: it is evaluated
+    # independently from concurrent dedupe batches (and from the `dedupe`
+    # management command over pre-existing findings), so it has to be globally
+    # antisymmetric — for any pair, exactly one side may see the other as
+    # "older". Content-stable winner selection is achieved by the reimporter
+    # creating a report's findings in deduplication_ordering_key order instead.
     is_older = candidate.id < new_finding.id
     if not is_older:
         deduplicationLogger.debug(f"candidate is newer than or equal to new finding: {new_finding.id} and candidate {candidate.id}")
@@ -568,7 +676,7 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             flag_locations = False
             flag_line_path = False
 
@@ -647,50 +755,228 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
                 yield candidate
 
 
-def _dedupe_batch_hash_code(findings):
+def _flush_duplicate_changes(modified_new_findings):
+    """
+    Persist duplicate field changes collected during a batch deduplication run.
+
+    Bulk-updates all modified new findings in one round-trip instead of one
+    save() call per finding.  Uses bulk_update to bypass Django signals.
+
+    Originals are matched near the start of a batch and written at the end of it, so
+    one can be deleted in between -- the excess-duplicate delete task runs on its own
+    schedule. The duplicate_finding FK is DEFERRABLE INITIALLY DEFERRED, so such a link
+    is only rejected at COMMIT, which rolls back the whole batch: every other finding
+    in it loses its deduplication too, and the post-processing task fails. Links whose
+    original no longer exists are therefore dropped here, immediately before the write
+    and in the same transaction, leaving those findings exactly as they were for the
+    next import to match again.
+
+    Returns the list of findings actually written so callers perform follow-up
+    processing (e.g. triggering prioritization) only on findings that were persisted.
+    """
+    if not modified_new_findings:
+        return modified_new_findings
+
+    with transaction.atomic():
+        findings_to_write = _drop_links_to_deleted_originals(modified_new_findings)
+        if findings_to_write:
+            Finding.objects.bulk_update(
+                findings_to_write,
+                ["duplicate", "active", "verified", "duplicate_finding"],
+            )
+    return findings_to_write
+
+
+def _drop_links_to_deleted_originals(modified_new_findings):
+    """Return the subset of ``modified_new_findings`` whose duplicate_finding still exists."""
+    referenced_original_ids = {
+        finding.duplicate_finding_id
+        for finding in modified_new_findings
+        if finding.duplicate_finding_id
+    }
+    if not referenced_original_ids:
+        return modified_new_findings
+
+    live_original_ids = set(
+        Finding.objects.filter(id__in=referenced_original_ids).values_list("id", flat=True),
+    )
+    deleted_original_ids = referenced_original_ids - live_original_ids
+    if not deleted_original_ids:
+        return modified_new_findings
+
+    findings_to_write = [
+        finding
+        for finding in modified_new_findings
+        if finding.duplicate_finding_id not in deleted_original_ids
+    ]
+    deduplicationLogger.warning(
+        "dedupe: dropping %d duplicate link(s) to %d original(s) deleted while the batch "
+        "was being processed; %d finding(s) still written",
+        len(modified_new_findings) - len(findings_to_write),
+        len(deleted_original_ids),
+        len(findings_to_write),
+    )
+    return findings_to_write
+
+
+# ---------------------------------------------------------------------------
+# Match-only functions (read-only, no DB writes)
+# These return [(new_finding, matched_candidate), ...] without persisting.
+# Used by both the regular dedup pipeline and the Pro import/reimport preview engine.
+# ---------------------------------------------------------------------------
+
+
+def match_batch_hash_code(findings):
+    """Find dedup matches by hash_code without persisting. Returns [(finding, candidate), ...]."""
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_hash = find_candidates_for_deduplication_hash(test, findings)
     if not candidates_by_hash:
-        return
+        return []
+    matches = []
+    for new_finding in findings:
+        for match in get_matches_from_hash_candidates(new_finding, candidates_by_hash):
+            matches.append((new_finding, match))
+            break
+    return matches
+
+
+def match_batch_unique_id(findings):
+    """Find dedup matches by unique_id_from_tool without persisting. Returns [(finding, candidate), ...]."""
+    if not findings:
+        return []
+    test = findings[0].test
+    candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings)
+    if not candidates_by_uid:
+        return []
+    matches = []
+    for new_finding in findings:
+        for match in get_matches_from_unique_id_candidates(new_finding, candidates_by_uid):
+            matches.append((new_finding, match))
+            break
+    return matches
+
+
+def match_batch_uid_or_hash(findings):
+    """Find dedup matches by uid or hash_code without persisting. Returns [(finding, candidate), ...]."""
+    if not findings:
+        return []
+    test = findings[0].test
+    candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings)
+    if not (candidates_by_uid or existing_by_hash):
+        return []
+    matches = []
+    for new_finding in findings:
+        if new_finding.duplicate:
+            continue
+        for match in get_matches_from_uid_or_hash_candidates(new_finding, candidates_by_uid, existing_by_hash):
+            matches.append((new_finding, match))
+            break
+    return matches
+
+
+def match_batch_legacy(findings):
+    """Find dedup matches by legacy algorithm without persisting. Returns [(finding, candidate), ...]."""
+    if not findings:
+        return []
+    test = findings[0].test
+    candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings)
+    if not (candidates_by_title or candidates_by_cwe):
+        return []
+    matches = []
+    for new_finding in findings:
+        for match in get_matches_from_legacy_candidates(new_finding, candidates_by_title, candidates_by_cwe):
+            matches.append((new_finding, match))
+            break
+    return matches
+
+
+def match_batch_of_findings(findings):
+    """
+    Batch match findings against existing candidates without persisting.
+
+    Returns list of (new_finding, matched_candidate) tuples.
+    Works with both saved and unsaved findings.
+    """
+    if not findings:
+        return []
+    enabled = System_Settings.objects.get().enable_deduplication
+    if not enabled:
+        return []
+    # Only sort by id for saved findings; unsaved findings have no id
+    if findings[0].pk is not None:
+        findings = sorted(findings, key=attrgetter("id"))
+    test = findings[0].test
+    dedup_alg = test.deduplication_algorithm
+    if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
+        return match_batch_hash_code(findings)
+    if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+        return match_batch_unique_id(findings)
+    if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+        return match_batch_uid_or_hash(findings)
+    return match_batch_legacy(findings)
+
+
+# ---------------------------------------------------------------------------
+# Batch dedup functions (match + persist)
+# These call the match-only functions above and then persist the results.
+# ---------------------------------------------------------------------------
+
+
+def _dedupe_batch_hash_code(findings):
+    # NOTE: These functions intentionally interleave matching and set_duplicate()
+    # rather than calling the match_batch_*() functions above. This is because
+    # set_duplicate() modifies finding.duplicate in-memory, which affects the
+    # duplicate check in subsequent loop iterations (especially for uid_or_hash).
+    if not findings:
+        return []
+    test = findings[0].test
+    candidates_by_hash = find_candidates_for_deduplication_hash(test, findings)
+    if not candidates_by_hash:
+        return []
+    modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_HASH_CODE")
         for match in get_matches_from_hash_candidates(new_finding, candidates_by_hash):
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_unique_id(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings)
     if not candidates_by_uid:
-        return
+        return []
+    modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL")
         for match in get_matches_from_unique_id_candidates(new_finding, candidates_by_uid):
             deduplicationLogger.debug(f"Trying to deduplicate finding {new_finding.id} against candidate {match.id}")
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
                 deduplicationLogger.debug(f"Successfully deduplicated finding {new_finding.id} against candidate {match.id}")
                 break
             except Exception as e:
                 deduplicationLogger.debug(f"Exception when deduplicating finding {new_finding.id} against candidate {match.id}: {e!s}")
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_uid_or_hash(findings):
     if not findings:
-        return
+        return []
 
     test = findings[0].test
     candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings)
     if not (candidates_by_uid or existing_by_hash):
-        return
+        return []
+    modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE")
         if new_finding.duplicate:
@@ -698,27 +984,30 @@ def _dedupe_batch_uid_or_hash(findings):
 
         for match in get_matches_from_uid_or_hash_candidates(new_finding, candidates_by_uid, existing_by_hash):
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_legacy(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings)
     if not (candidates_by_title or candidates_by_cwe):
-        return
+        return []
+    modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_LEGACY")
         for match in get_matches_from_legacy_candidates(new_finding, candidates_by_title, candidates_by_cwe):
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def dedupe_batch_of_findings(findings, *args, **kwargs):
@@ -731,7 +1020,7 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
 
     if not findings:
         logger.debug("dedupe_batch_of_findings called with no findings")
-        return None
+        return []
 
     enabled = System_Settings.objects.get().enable_deduplication
 
@@ -744,16 +1033,324 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
 
         if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_HASH_CODE - {len(findings)} findings")
-            _dedupe_batch_hash_code(findings)
-        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            return _dedupe_batch_hash_code(findings)
+        if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL - {len(findings)} findings")
-            _dedupe_batch_unique_id(findings)
-        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            return _dedupe_batch_unique_id(findings)
+        if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE - {len(findings)} findings")
-            _dedupe_batch_uid_or_hash(findings)
+            return _dedupe_batch_uid_or_hash(findings)
+        logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
+        return _dedupe_batch_legacy(findings)
+    deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
+    return []
+
+
+# ---------------------------------------------------------------------------
+# False-positive history helpers
+# ---------------------------------------------------------------------------
+
+
+def _fp_candidates_qs(scope_filter, dedup_alg, findings, exclude_ids=None):
+    """
+    Build and return a lazy QuerySet of existing findings that could be FP matches
+    for the given list of findings under the specified algorithm and scope.
+
+    Single source of truth for the algorithm dispatch, shared between
+    match_finding_to_existing_findings (returns the QS directly for chaining) and
+    _fetch_fp_candidates_for_batch (evaluates it into a keyed dict).
+
+    For the legacy algorithm, exclude_ids is intentionally ignored — this matches
+    the original match_finding_to_existing_findings behaviour.
+    """
+    if dedup_alg == "hash_code":
+        hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None)}
+        if not hash_codes:
+            return Finding.objects.none()
+        qs = Finding.objects.filter(**scope_filter, hash_code__in=hash_codes).exclude(hash_code=None)
+        if exclude_ids:
+            qs = qs.exclude(id__in=exclude_ids)
+        return qs.order_by("id")
+
+    if dedup_alg == "unique_id_from_tool":
+        uids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None)}
+        if not uids:
+            return Finding.objects.none()
+        qs = Finding.objects.filter(**scope_filter, unique_id_from_tool__in=uids).exclude(unique_id_from_tool=None)
+        if exclude_ids:
+            qs = qs.exclude(id__in=exclude_ids)
+        return qs.order_by("id")
+
+    if dedup_alg == "unique_id_from_tool_or_hash_code":
+        hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None)}
+        uids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None)}
+        if not hash_codes and not uids:
+            return Finding.objects.none()
+        cond = Q()
+        if hash_codes:
+            cond |= Q(hash_code__isnull=False, hash_code__in=hash_codes)
+        if uids:
+            cond |= Q(unique_id_from_tool__isnull=False, unique_id_from_tool__in=uids)
+        qs = Finding.objects.filter(Q(**scope_filter)).filter(cond)
+        if exclude_ids:
+            qs = qs.exclude(id__in=exclude_ids)
+        return qs.order_by("id")
+
+    if dedup_alg == "legacy":
+        pairs = {
+            (f.title, f.severity, Finding.get_numerical_severity(f.severity))
+            for f in findings
+            if getattr(f, "title", None)
+        }
+        if not pairs:
+            return Finding.objects.none()
+        cond = Q()
+        for title, severity, num_sev in pairs:
+            cond |= Q(title__iexact=title, severity=severity, numerical_severity=num_sev)
+        # Legacy does not exclude by id — matches the original match_finding_to_existing_findings behaviour.
+        return Finding.objects.filter(**scope_filter).filter(cond).order_by("id")
+
+    logger.error(
+        "FALSE_POSITIVE_HISTORY: unexpected deduplication_algorithm '%s', returning empty candidates",
+        dedup_alg,
+    )
+    return Finding.objects.none()
+
+
+def _fetch_fp_candidates_for_batch(findings, product, dedup_alg):
+    """
+    Fetch all existing findings in the product that could be FP matches for a batch,
+    returning a dict keyed by match identifier for in-memory lookup.
+
+    For unique_id_from_tool_or_hash_code the return value is a tuple (by_uid, by_hash).
+    For all other algorithms it is a plain dict.
+    """
+    scope_filter = {"test__engagement__product": product}
+    exclude_ids = {f.id for f in findings if f.id}
+    qs = _fp_candidates_qs(scope_filter, dedup_alg, findings, exclude_ids).only(
+        # Keep this list in sync with every field read from candidate objects in this function.
+        # Accessing a field not listed here causes Django to issue an extra SELECT per object,
+        # silently negating the .only() optimisation.
+        "id", "false_p", "active", "hash_code", "unique_id_from_tool", "title", "severity",
+    )
+
+    if dedup_alg == "unique_id_from_tool_or_hash_code":
+        by_hash: dict = {}
+        by_uid: dict = {}
+        for ef in qs:
+            if ef.hash_code:
+                by_hash.setdefault(ef.hash_code, []).append(ef)
+            if ef.unique_id_from_tool:
+                by_uid.setdefault(ef.unique_id_from_tool, []).append(ef)
+        return by_uid, by_hash
+
+    if dedup_alg == "hash_code":
+        result: dict = {}
+        for ef in qs:
+            result.setdefault(ef.hash_code, []).append(ef)
+        return result
+
+    if dedup_alg == "unique_id_from_tool":
+        result = {}
+        for ef in qs:
+            result.setdefault(ef.unique_id_from_tool, []).append(ef)
+        return result
+
+    if dedup_alg == "legacy":
+        result = {}
+        for ef in qs:
+            result.setdefault((ef.title.lower(), ef.severity), []).append(ef)
+        return result
+
+    return {}
+
+
+def do_false_positive_history_batch(findings):
+    """
+    Batch version of do_false_positive_history.
+
+    Processes a list of findings from the same product in a single DB round-trip
+    rather than one query per finding.  All findings are expected to share the
+    same test (i.e. same deduplication_algorithm and same product), which is
+    guaranteed by both callers (post_process_findings_batch and bulk-edit).
+
+    Args:
+        findings: list of :model:`dojo.Finding` instances
+
+    """
+    if not findings:
+        return
+
+    system_settings = System_Settings.objects.get()
+
+    product = findings[0].test.engagement.product
+    dedup_alg = findings[0].test.deduplication_algorithm
+
+    # Fetch all candidate existing findings with one DB query
+    candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg)
+
+    # Optional plugin hook: refine the per-finding candidate list after it is resolved by
+    # deduplication_algorithm. Lets a plugin (e.g. Pro) narrow candidates by fields that are
+    # excluded from the hash string but compared per pair (set-match tokens on
+    # vulnerability_ids / CWEs). Resolved once; a no-op when unset. See get_custom_method.
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+    fp_candidate_filter = get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD")
+
+    to_mark_as_fp_ids: set = set()
+
+    for finding in findings:
+        # Resolve candidate list(s) for this finding
+        if dedup_alg == "unique_id_from_tool_or_hash_code":
+            by_uid, by_hash = candidates  # type: ignore[misc]
+            uid_matches = by_uid.get(finding.unique_id_from_tool, []) if finding.unique_id_from_tool else []
+            hash_matches = by_hash.get(finding.hash_code, []) if finding.hash_code else []
+            # Deduplicate by id while preserving both uid and hash matches
+            seen: dict = {}
+            for ef in uid_matches + hash_matches:
+                seen.setdefault(ef.id, ef)
+            existing = list(seen.values())
+        elif dedup_alg == "hash_code":
+            existing = candidates.get(finding.hash_code, []) if finding.hash_code else []
+        elif dedup_alg == "unique_id_from_tool":
+            existing = candidates.get(finding.unique_id_from_tool, []) if finding.unique_id_from_tool else []
+        elif dedup_alg == "legacy":
+            key = (finding.title.lower(), finding.severity) if finding.title else None
+            existing = candidates.get(key, []) if key else []
         else:
-            logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
-            _dedupe_batch_legacy(findings)
+            existing = []
+
+        if fp_candidate_filter:
+            existing = fp_candidate_filter(finding, existing)
+
+        existing_fps = [ef for ef in existing if ef.false_p]
+
+        if existing_fps:
+            finding.false_p = True
+            if finding.id:
+                to_mark_as_fp_ids.add(finding.id)
+
+        if system_settings.retroactive_false_positive_history and finding.false_p:
+            for ef in existing:
+                if ef.active and not ef.false_p:
+                    to_mark_as_fp_ids.add(ef.id)
+
+    if to_mark_as_fp_ids:
+        deduplicationLogger.debug(
+            "FALSE_POSITIVE_HISTORY (batch): marking %i finding(s) as false positive: %s",
+            len(to_mark_as_fp_ids),
+            sorted(to_mark_as_fp_ids),
+        )
+        # QuerySet.update() bypasses Django signals — intentional as this code is called during (post) save processing.
+        # Note: .only() does not constrain update() — Django generates the UPDATE SQL independently.
+        Finding.objects.filter(id__in=to_mark_as_fp_ids).update(false_p=True, active=False, verified=False)
+
+
+def do_false_positive_history(finding, *args, **kwargs):
+    """
+    Replicate false positives across product.
+
+    Mark finding as false positive if the same finding was previously marked
+    as false positive in the same product, beyond that, retroactively mark
+    all equal findings in the product as false positive (if they weren't already).
+    The retroactively replication will be also trigerred if the finding passed as
+    an argument already is a false positive. With this feature we can assure that
+    on each call of this method all findings in the product complies to the rule
+    (if one finding is a false positive, all equal findings in the same product also are).
+
+    Args:
+        finding (:model:`dojo.Finding`): Finding to be replicated
+
+    """
+    do_false_positive_history_batch([finding])
+
+
+def match_finding_to_existing_findings(finding, product=None, engagement=None, test=None):
+    """
+    Customizable lookup that returns all existing findings for a given finding.
+
+    Takes one finding as an argument and returns all findings that are equal to it
+    on the same product, engagement or test. For now, only one custom filter can
+    be used, so you should choose between product, engagement or test.
+    The lookup is done based on the deduplication_algorithm of the given finding test.
+
+    Args:
+        finding (:model:`dojo.Finding`): Finding to be matched
+        product (:model:`dojo.Product`, optional): Product to filter findings by
+        engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
+        test (:model:`dojo.Test`, optional): Test to filter findings by
+
+    """
+    if product:
+        custom_filter_type = "product"
+        custom_filter = {"test__engagement__product": product}
+
+    elif engagement:
+        custom_filter_type = "engagement"
+        custom_filter = {"test__engagement": engagement}
+
+    elif test:
+        custom_filter_type = "test"
+        custom_filter = {"test": test}
+
     else:
-        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
-    return None
+        msg = "No product, engagement or test provided as argument."
+        raise ValueError(msg)
+
+    deduplication_algorithm = finding.test.deduplication_algorithm
+
+    deduplicationLogger.debug(
+        "Matching finding %i:%s to existing findings in %s %s using %s as deduplication algorithm.",
+        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm,
+    )
+
+    if deduplication_algorithm == "legacy":
+        # This is the legacy reimport behavior. Although it's pretty flawed and
+        # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
+        # Re-writing the legacy deduplication here would be complicated and counter-productive.
+        # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
+        logger.debug("Legacy dedupe. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
+
+    exclude_ids = {finding.id} if finding.id else set()
+    qs = _fp_candidates_qs(custom_filter, deduplication_algorithm, [finding], exclude_ids=exclude_ids)
+
+    if deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+        deduplicationLogger.debug(qs.query)
+
+    return qs
+
+
+def hashcode_values_writer(model_type, batch, fields):
+    """
+    mass_model_updater ``writer`` for the hash-recompute paths (dedupe command + tuner
+    async tasks). The hash fields are text columns, so write the whole batch with one
+    ``UPDATE t SET f = v.f FROM (VALUES (pk, f...), ...) WHERE t.pk = v.pk`` instead of
+    bulk_update's per-row CASE/WHEN. Values are bound as parameters and cast to text
+    (which also resolves the type of an all-NULL column). PostgreSQL only; falls back
+    to bulk_update on other backends.
+    """
+    from django.db import connection  # noqa: PLC0415
+
+    if not batch:
+        return
+    if connection.vendor != "postgresql":
+        model_type.objects.bulk_update(batch, fields)
+        return
+
+    meta = model_type._meta
+    columns = [meta.get_field(name).column for name in fields]
+    row_placeholder = "(" + ",".join(["%s"] * (1 + len(fields))) + ")"
+    placeholders = ",".join([row_placeholder] * len(batch))
+    params = []
+    for obj in batch:
+        params.append(obj.pk)
+        params.extend(getattr(obj, name) for name in fields)
+    value_cols = ", ".join(f"c{idx}" for idx in range(1 + len(fields)))
+    set_clause = ", ".join(f'"{col}" = v.c{idx + 1}::text' for idx, col in enumerate(columns))
+    sql = (
+        f'UPDATE "{meta.db_table}" AS t '
+        f"SET {set_clause} "
+        f"FROM (VALUES {placeholders}) AS v({value_cols}) "
+        f'WHERE t."{meta.pk.column}" = v.c0'
+    )
+    with connection.cursor() as cursor:
+        cursor.execute(sql, params)

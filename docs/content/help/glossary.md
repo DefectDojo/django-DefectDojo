@@ -5,7 +5,7 @@ weight: 1
 
 Below is a simple glossary to help understand DefectDojo's various capabilities, along with an indication of whether each defined feature is present/applicable in the Pro version of DefectDojo, the OS version, or both. 
 
-## Product Hierarchy (Both) 
+## Asset Hierarchy (Both) 
 The structural model used to organize security data within DefectDojo, consisting of Organizations → Assets → Engagements → Tests → Findings.
 ## Organization (Both)
 A top-level hierarchical object that serves as the parent object of Assets in DefectDojo Pro. It provides a shared context for governance, access control, and reporting across all child Assets.
@@ -19,8 +19,10 @@ A scoped security activity representing a testing window, pipeline, or assessmen
 A single execution of a scanner or manual assessment within an Engagement. Tests store execution metadata and act as the ingestion point for Findings.
 ## Service (Both)
 An optional sub-object used to attribute Findings to a specific component or interface within an Asset. Services are most useful in OS DefectDojo, as their functionality is replicated and enhanced by Asset Hierarchy in the Pro version.
+## Components (Both)
+A third-party library, software module, or external dependency that is tracked in DefectDojo Pro. Imported Components are derived from scan data and associated with Findings. In the Pro UI, the Component Table aggregates Active, Duplicate, and Total Finding counts per Component and remains populated even when all associated Findings are Mitigated.
 ## Finding (Both)
-The most granular vulnerability object in DefectDojo's Product Hierarchy that represents a discrete security issue.
+The most granular vulnerability object in DefectDojo's Asset Hierarchy that represents a discrete security issue.
 ### Finding Status (Both)
 The current lifecycle state of a Finding (e.g., Active, Verified, Inactive/Mitigated, Under Review, Risk Accepted, False Positive, Out Of Scope). Finding Status determines inclusion in metrics and dashboards.
 ### Finding Priority/Risk (Pro) 
@@ -55,12 +57,16 @@ A permission set defining allowed actions within DefectDojo. Roles enforce acces
 A flexible ingestion mechanism that allows scan data to be imported without a tool-specific importer. It relies on normalized field mapping rather than predefined scanner schemas.
 ## DefectDojo-CLI (Pro)
 A command-line interface used to interact with DefectDojo programmatically. The CLI is commonly used in CI/CD pipelines to automate scan uploads and object management.
-## API Connectors (Pro)
-Prebuilt, managed integrations that connect DefectDojo with external platforms (e.g., ticketing, messaging, or DevOps tools). API Connectors reduce the need for custom scripting.
+## Connectors (Pro)
+The unified area of the Pro UI (under Import) for every tool DefectDojo talks to. Upstream Connectors pull findings in from scanners; Downstream Connectors push findings out to issue trackers.
+## Upstream Connectors / API Connectors (Pro)
+Prebuilt, managed connectors that pull findings and asset inventory into DefectDojo from external scanners and security tools via their APIs, reducing the need for custom scripting. Formerly called API Connectors.
+## Downstream Connectors (Pro)
+Managed integrations that push Findings and Finding Groups out of DefectDojo into issue tracking and ticketing systems (e.g., Jira, Azure DevOps, GitHub). Formerly called Integrations.
 ## Universal Parser (Pro)
 A generalized parsing engine used by the Universal Importer to interpret incoming scan data. It applies consistent normalization and deduplication logic across unsupported formats.
 ## Smart Upload (Pro)
-An intelligent ingestion workflow that automatically determines how scan results should be mapped to Assets or Engagements, reducing manual configuration during import.
+An intelligent ingestion workflow that automatically determines how scan results should be mapped to Assets or Engagements, reducing manual configuration during import. When a scanned Host belongs to more than one Asset, a copy of the Finding is created in each matching Asset.
 ## Executive Insights (Pro)
 High-level, business-oriented analytics designed for leadership audiences, focusing on trends, exposure, and program health rather than individual Findings.
 ## Priority Insights (Pro)

@@ -1,0 +1,781 @@
+{
+  "database": {
+    "advisory-count": 1098,
+    "last-commit": "be6e70abbbc6be4aa1b768b234766d087731da2d",
+    "last-updated": "2026-05-27T17:33:53+02:00"
+  },
+  "lockfile": {
+    "dependency-count": 176
+  },
+  "settings": {
+    "target_arch": [],
+    "target_os": [],
+    "severity": null,
+    "ignore": [],
+    "informational_warnings": [
+      "unmaintained",
+      "unsound",
+      "notice"
+    ]
+  },
+  "vulnerabilities": {
+    "found": true,
+    "count": 10,
+    "list": [
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0047",
+          "package": "aws-lc-sys",
+          "title": "PKCS7_verify Signature Validation Bypass in AWS-LC",
+          "description": "Improper signature validation in `PKCS7_verify()` in AWS-LC allows an\nunauthenticated user to bypass signature verification when processing PKCS7\nobjects with Authenticated Attributes.\n\nCustomers of AWS services do not need to take action. `aws-lc-sys` contains\ncode from AWS-LC. Applications using `aws-lc-sys` should upgrade to the most\nrecent release of `aws-lc-sys`.\n\nThere is no workaround; applications using `aws-lc-sys` should upgrade to the \nmost recent release of `aws-lc-sys`.",
+          "date": "2026-03-02",
+          "aliases": [
+            "CVE-2026-3338",
+            "GHSA-hfpc-8r3f-gw53",
+            "GHSA-jchq-39cv-q4wj"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "crypto-failure"
+          ],
+          "keywords": [
+            "pkcs7",
+            "signature-verification",
+            "bypass"
+          ],
+          "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+          "informational": null,
+          "references": [
+            "https://github.com/aws/aws-lc-rs/security/advisories/GHSA-hfpc-8r3f-gw53"
+          ],
+          "source": null,
+          "url": "https://aws.amazon.com/security/security-bulletins/2026-005-AWS",
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.38.0"
+          ],
+          "unaffected": [
+            "<0.24.0"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "aws-lc-sys",
+          "version": "0.36.0",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "43a442ece363113bd4bd4c8b18977a7798dd4d3c3383f34fb61936960e8f4ad8",
+          "dependencies": [
+            {
+              "name": "cc",
+              "version": "1.2.53",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "cmake",
+              "version": "0.1.57",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "dunce",
+              "version": "1.0.5",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "fs_extra",
+              "version": "1.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0046",
+          "package": "aws-lc-sys",
+          "title": "PKCS7_verify Certificate Chain Validation Bypass in AWS-LC",
+          "description": "Improper certificate validation in `PKCS7_verify()` in AWS-LC allows an\nunauthenticated user to bypass certificate chain verification when processing\nPKCS7 objects with multiple signers, except the final signer.\n\nCustomers of AWS services do not need to take action. `aws-lc-sys` contains\ncode from AWS-LC. Applications using `aws-lc-sys` should upgrade to the most\nrecent release of `aws-lc-sys`.\n\nThere is no workaround; applications using `aws-lc-sys` should upgrade to the \nmost recent release of aws-lc-sys.",
+          "date": "2026-03-02",
+          "aliases": [
+            "CVE-2026-3336",
+            "GHSA-cfwj-9wp5-wqvp",
+            "GHSA-vw5v-4f2q-w9xf"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "crypto-failure"
+          ],
+          "keywords": [
+            "pkcs7",
+            "certificate",
+            "verification",
+            "bypass"
+          ],
+          "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+          "informational": null,
+          "references": [
+            "https://github.com/aws/aws-lc-rs/security/advisories/GHSA-vw5v-4f2q-w9xf"
+          ],
+          "source": null,
+          "url": "https://aws.amazon.com/security/security-bulletins/2026-005-AWS",
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.38.0"
+          ],
+          "unaffected": [
+            "<0.24.0"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "aws-lc-sys",
+          "version": "0.36.0",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "43a442ece363113bd4bd4c8b18977a7798dd4d3c3383f34fb61936960e8f4ad8",
+          "dependencies": [
+            {
+              "name": "cc",
+              "version": "1.2.53",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "cmake",
+              "version": "0.1.57",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "dunce",
+              "version": "1.0.5",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "fs_extra",
+              "version": "1.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0044",
+          "package": "aws-lc-sys",
+          "title": "AWS-LC X.509 Name Constraints Bypass via Wildcard/Unicode CN",
+          "description": "A logic error in CN (Common Name) validation allows certificates with\nwildcard or raw UTF-8 Unicode CN values to bypass name constraints\nenforcement. The `cn2dnsid` function does not recognize these CN patterns\nas valid DNS identifiers, causing `NAME_CONSTRAINTS_check_CN` to skip\nvalidation. However, `X509_check_host` accepts these CN values when no\ndNSName SAN is present, allowing certificates to bypass name constraints\nwhile still being used for hostname verification.\n\nCustomers of AWS services do not need to take action. Applications using\n`aws-lc-sys` should upgrade to the most recent release of `aws-lc-sys`.\n\n## Workarounds\n\nApplications that set `X509_CHECK_FLAG_NEVER_CHECK_SUBJECT` to disable CN\nfallback are not affected. Applications that only encounter certificates\nwith dNSName SANs (standard for public WebPKI) are also not affected.\n\nOtherwise, there is no workaround and applications using `aws-lc-sys` should\nupgrade to the most recent releases of `aws-lc-sys`.",
+          "date": "2026-03-19",
+          "aliases": [
+            "GHSA-394x-vwmw-crm3"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "crypto-failure"
+          ],
+          "keywords": [
+            "x509",
+            "name-constraints",
+            "bypass"
+          ],
+          "cvss": null,
+          "informational": null,
+          "references": [
+            "https://github.com/aws/aws-lc-rs/security/advisories/GHSA-394x-vwmw-crm3"
+          ],
+          "source": null,
+          "url": null,
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.39.0"
+          ],
+          "unaffected": [
+            "<0.32.0"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "aws-lc-sys",
+          "version": "0.36.0",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "43a442ece363113bd4bd4c8b18977a7798dd4d3c3383f34fb61936960e8f4ad8",
+          "dependencies": [
+            {
+              "name": "cc",
+              "version": "1.2.53",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "cmake",
+              "version": "0.1.57",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "dunce",
+              "version": "1.0.5",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "fs_extra",
+              "version": "1.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0045",
+          "package": "aws-lc-sys",
+          "title": "Timing Side-Channel in AES-CCM Tag Verification in AWS-LC",
+          "description": "Observable timing discrepancy in AES-CCM decryption in AWS-LC allows an\nunauthenticated user to potentially determine authentication tag validity\nvia timing analysis.\n\nThe impacted implementations are through the EVP CIPHER API:\n`EVP_aes_128_ccm`, `EVP_aes_192_ccm`, and `EVP_aes_256_ccm`.\n\nCustomers of AWS services do not need to take action. `aws-lc-sys` contains\ncode from AWS-LC. Applications using `aws-lc-sys` should upgrade to the most\nrecent release of `aws-lc-sys`.\n\n## Workarounds\n\nIn the special cases of using AES-CCM with (M=4, L=2), (M=8, L=2), or\n(M=16, L=2), applications can workaround this issue by using AES-CCM through\nthe EVP AEAD API using implementations `EVP_aead_aes_128_ccm_bluetooth`,\n`EVP_aead_aes_128_ccm_bluetooth_8`, and `EVP_aead_aes_128_ccm_matter`\nrespectively.\n\nOtherwise, there is no workaround and applications using `aws-lc-sys` should\nupgrade to the most recent release.",
+          "date": "2026-03-02",
+          "aliases": [
+            "CVE-2026-3337",
+            "GHSA-65p9-r9h6-22vj",
+            "GHSA-frmv-5gcm-jwxh"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "crypto-failure"
+          ],
+          "keywords": [
+            "aes-ccm",
+            "timing",
+            "side-channel"
+          ],
+          "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+          "informational": null,
+          "references": [
+            "https://github.com/aws/aws-lc-rs/security/advisories/GHSA-65p9-r9h6-22vj"
+          ],
+          "source": null,
+          "url": "https://aws.amazon.com/security/security-bulletins/2026-005-AWS",
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.38.0"
+          ],
+          "unaffected": [
+            "<0.14.0"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "aws-lc-sys",
+          "version": "0.36.0",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "43a442ece363113bd4bd4c8b18977a7798dd4d3c3383f34fb61936960e8f4ad8",
+          "dependencies": [
+            {
+              "name": "cc",
+              "version": "1.2.53",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "cmake",
+              "version": "0.1.57",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "dunce",
+              "version": "1.0.5",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "fs_extra",
+              "version": "1.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0048",
+          "package": "aws-lc-sys",
+          "title": "CRL Distribution Point Scope Check Logic Error in AWS-LC",
+          "description": "A logic error in CRL distribution point matching in AWS-LC allows a revoked\ncertificate to bypass revocation checks during certificate validation, when\nthe application enables CRL checking and uses partitioned CRLs with Issuing\nDistribution Point (IDP) extensions.\n\nCustomers of AWS services do not need to take action. `aws-lc-sys` contains\ncode from AWS-LC. Applications using `aws-lc-sys` should upgrade to the most\nrecent release of `aws-lc-sys`.\n\n## Workarounds\n\nApplications can workaround this issue if they do not enable CRL checking\n(`X509_V_FLAG_CRL_CHECK`). Applications using complete (non-partitioned)\nCRLs without IDP extensions are also not affected.\n\nOtherwise, there is no workaround and applications using `aws-lc-sys` should\nupgrade to the most recent releases of `aws-lc-sys`.",
+          "date": "2026-03-19",
+          "aliases": [
+            "CVE-2026-4428",
+            "GHSA-9f94-5g5w-gf6r"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "crypto-failure"
+          ],
+          "keywords": [
+            "crl",
+            "revocation",
+            "bypass"
+          ],
+          "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "informational": null,
+          "references": [
+            "https://github.com/aws/aws-lc-rs/security/advisories/GHSA-9f94-5g5w-gf6r"
+          ],
+          "source": null,
+          "url": "https://aws.amazon.com/security/security-bulletins/2026-010-AWS",
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.39.0"
+          ],
+          "unaffected": [
+            "<0.15.0"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "aws-lc-sys",
+          "version": "0.36.0",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "43a442ece363113bd4bd4c8b18977a7798dd4d3c3383f34fb61936960e8f4ad8",
+          "dependencies": [
+            {
+              "name": "cc",
+              "version": "1.2.53",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "cmake",
+              "version": "0.1.57",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "dunce",
+              "version": "1.0.5",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "fs_extra",
+              "version": "1.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0141",
+          "package": "lettre",
+          "title": "TLS hostname verification disabled when using Boring TLS backend",
+          "description": "An inverted-boolean bug in lettre's `boring-tls` integration silently\ndisables TLS hostname verification for callers using the default (strict)\nconfiguration. An on-path attacker presenting any chain-valid certificate\nfor any domain can intercept SMTP submission, including PLAIN/LOGIN\ncredentials and message contents, against any lettre user built with the\n`boring-tls` feature. Other TLS backends (`native-tls`, `rustls`) are\nunaffected.\n\nThe bug was introduced in v0.10.1 and persists through v0.11.21 (latest).",
+          "date": "2026-05-14",
+          "aliases": [
+            "GHSA-4pj9-g833-qx53"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "crypto-failure"
+          ],
+          "keywords": [
+            "tls",
+            "smtp",
+            "mitm"
+          ],
+          "cvss": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:N/SC:L/SI:L/SA:N",
+          "informational": null,
+          "references": [],
+          "source": null,
+          "url": "https://github.com/lettre/lettre/security/advisories/GHSA-4pj9-g833-qx53",
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.11.22"
+          ],
+          "unaffected": [
+            "<0.10.1"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "lettre",
+          "version": "0.11.19",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "9e13e10e8818f8b2a60f52cb127041d388b89f3a96a62be9ceaffa22262fef7f",
+          "dependencies": [
+            {
+              "name": "base64",
+              "version": "0.22.1",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "chumsky",
+              "version": "0.9.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "email-encoding",
+              "version": "0.4.1",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "email_address",
+              "version": "0.2.9",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "fastrand",
+              "version": "2.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "futures-util",
+              "version": "0.3.31",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "hostname",
+              "version": "0.4.2",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "httpdate",
+              "version": "1.0.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "idna",
+              "version": "1.1.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "mime",
+              "version": "0.3.17",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "native-tls",
+              "version": "0.2.14",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "nom",
+              "version": "8.0.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "percent-encoding",
+              "version": "2.3.2",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "quoted_printable",
+              "version": "0.5.1",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "socket2",
+              "version": "0.6.1",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "tokio",
+              "version": "1.49.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "url",
+              "version": "2.5.8",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0049",
+          "package": "rustls-webpki",
+          "title": "CRLs not considered authoritative by Distribution Point due to faulty matching logic",
+          "description": "If a certificate had more than one `distributionPoint`, then only the first `distributionPoint` would be considered against each CRL's `IssuingDistributionPoint` `distributionPoint`, and then the certificate's subsequent `distributionPoint`s would be ignored.\n\nThe impact was that correctly provided CRLs would not be consulted to check revocation. With `UnknownStatusPolicy::Deny` (the default) this would lead to incorrect but safe `Error::UnknownRevocationStatus`. With `UnknownStatusPolicy::Allow` this would lead to inappropriate acceptance of revoked certificates.\n\nThis vulnerability is thought to be of limited impact. This is because both the certificate and CRL are signed -- an attacker would need to compromise a trusted issuing authority to trigger this bug.  An attacker with such capabilities could likely bypass revocation checking through other more impactful means (such as publishing a valid, empty CRL.)\n\nMore likely, this bug would be latent in normal use, and an attacker could leverage faulty revocation checking to continue using a revoked credential.\n\nThis vulnerability is identified as [GHSA-pwjx-qhcg-rvj4](https://github.com/rustls/webpki/security/advisories/GHSA-pwjx-qhcg-rvj4). Thank you to @1seal for the report.",
+          "date": "2026-03-20",
+          "aliases": [
+            "GHSA-pwjx-qhcg-rvj4"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "privilege-escalation"
+          ],
+          "keywords": [
+            "crl",
+            "x509"
+          ],
+          "cvss": null,
+          "informational": null,
+          "references": [],
+          "source": null,
+          "url": null,
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.103.10"
+          ],
+          "unaffected": [
+            "<0.102.0-alpha.0"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "rustls-webpki",
+          "version": "0.103.9",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "d7df23109aa6c1567d1c575b9952556388da57401e4ace1d15f79eedad0d8f53",
+          "dependencies": [
+            {
+              "name": "aws-lc-rs",
+              "version": "1.15.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "ring",
+              "version": "0.17.14",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "rustls-pki-types",
+              "version": "1.14.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "untrusted",
+              "version": "0.9.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0104",
+          "package": "rustls-webpki",
+          "title": "Reachable panic in certificate revocation list parsing",
+          "description": "A panic was reachable when parsing certificate revocation lists via [`BorrowedCertRevocationList::from_der`]\nor [`OwnedCertRevocationList::from_der`].  This was the result of mishandling a syntactically valid empty\n`BIT STRING` appearing in the `onlySomeReasons` element of a `IssuingDistributionPoint` CRL extension.\n\nThis panic is reachable prior to a CRL's signature being verified.\n\nApplications that do not use CRLs are not affected.\n\nThank you to @tynus3 for the report.",
+          "date": "2026-04-22",
+          "aliases": [
+            "GHSA-82j2-j2ch-gfr8"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "denial-of-service"
+          ],
+          "keywords": [
+            "crl",
+            "certificate revocation list",
+            "x509"
+          ],
+          "cvss": null,
+          "informational": null,
+          "references": [],
+          "source": null,
+          "url": null,
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.103.13, <0.104.0-alpha.1",
+            ">=0.104.0-alpha.7"
+          ],
+          "unaffected": []
+        },
+        "affected": null,
+        "package": {
+          "name": "rustls-webpki",
+          "version": "0.103.9",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "d7df23109aa6c1567d1c575b9952556388da57401e4ace1d15f79eedad0d8f53",
+          "dependencies": [
+            {
+              "name": "aws-lc-rs",
+              "version": "1.15.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "ring",
+              "version": "0.17.14",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "rustls-pki-types",
+              "version": "1.14.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "untrusted",
+              "version": "0.9.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0099",
+          "package": "rustls-webpki",
+          "title": "Name constraints were accepted for certificates asserting a wildcard name",
+          "description": "Permitted subtree name constraints for DNS names were accepted for certificates asserting a wildcard name.\n\nThis was incorrect because, given a name constraint of `accept.example.com`, `*.example.com` could feasibly allow a name of `reject.example.com` which is outside the constraint.\nThis is very similar to [CVE-2025-61727](https://go.dev/issue/76442).\n\nSince name constraints are restrictions on otherwise properly-issued certificates, this bug is reachable only after signature verification and requires misissuance to exploit.\n\nThis vulnerability is identified as [GHSA-xgp8-3hg3-c2mh](https://github.com/rustls/webpki/security/advisories/GHSA-xgp8-3hg3-c2mh). Thank you to @1seal for the report.",
+          "date": "2026-04-14",
+          "aliases": [
+            "GHSA-xgp8-3hg3-c2mh"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [],
+          "keywords": [
+            "name constraints",
+            "x509"
+          ],
+          "cvss": null,
+          "informational": null,
+          "references": [],
+          "source": null,
+          "url": null,
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.103.12, <0.104.0-alpha.1",
+            ">=0.104.0-alpha.6"
+          ],
+          "unaffected": []
+        },
+        "affected": null,
+        "package": {
+          "name": "rustls-webpki",
+          "version": "0.103.9",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "d7df23109aa6c1567d1c575b9952556388da57401e4ace1d15f79eedad0d8f53",
+          "dependencies": [
+            {
+              "name": "aws-lc-rs",
+              "version": "1.15.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "ring",
+              "version": "0.17.14",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "rustls-pki-types",
+              "version": "1.14.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "untrusted",
+              "version": "0.9.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2026-0098",
+          "package": "rustls-webpki",
+          "title": "Name constraints for URI names were incorrectly accepted",
+          "description": "Name constraints for URI names were ignored and therefore accepted.\n\nNote this library does not provide an API for asserting URI names, and URI name constraints are otherwise not implemented.  URI name constraints are now rejected unconditionally.\n\nSince name constraints are restrictions on otherwise properly-issued certificates, this bug is reachable only after signature verification and requires misissuance to exploit.\n\nThis vulnerability is identified as [GHSA-965h-392x-2mh5](https://github.com/rustls/webpki/security/advisories/GHSA-965h-392x-2mh5). Thank you to @1seal for the report.",
+          "date": "2026-04-14",
+          "aliases": [
+            "GHSA-965h-392x-2mh5"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [],
+          "keywords": [
+            "name constraints",
+            "x509"
+          ],
+          "cvss": null,
+          "informational": null,
+          "references": [],
+          "source": null,
+          "url": null,
+          "withdrawn": null,
+          "license": "CC0-1.0",
+          "expect-deleted": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.103.12, <0.104.0-alpha.1",
+            ">=0.104.0-alpha.6"
+          ],
+          "unaffected": []
+        },
+        "affected": null,
+        "package": {
+          "name": "rustls-webpki",
+          "version": "0.103.9",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "d7df23109aa6c1567d1c575b9952556388da57401e4ace1d15f79eedad0d8f53",
+          "dependencies": [
+            {
+              "name": "aws-lc-rs",
+              "version": "1.15.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "ring",
+              "version": "0.17.14",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "rustls-pki-types",
+              "version": "1.14.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "untrusted",
+              "version": "0.9.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      }
+    ]
+  },
+  "warnings": {}
+}

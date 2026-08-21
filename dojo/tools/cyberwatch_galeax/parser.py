@@ -5,11 +5,11 @@ from pathlib import Path
 
 import cvss.parser
 from cvss.cvss3 import CVSS3
-from django.conf import settings
 from django.utils import timezone
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -207,8 +207,8 @@ class CyberwatchGaleaxParser:
         if not products:
             mitigated_date = timezone.now()
             mitigation = f"Fixed At: {mitigated_date}"
-            if settings.V3_FEATURE_LOCATIONS:
-                locations = [URL(host=e) for e in c_data["no_product_locations"]]
+            if locations_enabled():
+                locations = [LocationData.url(host=e) for e in c_data["no_product_locations"]]
             else:
                 # TODO: Delete this after the move to Locations
                 locations = [Endpoint(host=e) for e in c_data["no_product_locations"]]
@@ -241,8 +241,8 @@ class CyberwatchGaleaxParser:
             if mitigated_date and not active_status:
                 mitigation = f"Fixed At: {mitigated_date}"
 
-            if settings.V3_FEATURE_LOCATIONS:
-                locations = [URL(host=e) for e in p_data["locations"]]
+            if locations_enabled():
+                locations = [LocationData.url(host=e) for e in p_data["locations"]]
             else:
                 # TODO: Delete this after the move to Locations
                 locations = [Endpoint(host=e) for e in p_data["locations"]]
@@ -328,7 +328,7 @@ class CyberwatchGaleaxParser:
             component_version=component_version,
         )
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = locations
         else:
             # TODO: Delete this after the move to Locations
@@ -338,6 +338,8 @@ class CyberwatchGaleaxParser:
             finding.unsaved_vulnerability_ids = [cve_code]
         if cwe_num is not None:
             finding.cwe = cwe_num
+            all_cwes = [cwe_num, *(additional_cwes or [])]
+            finding.unsaved_cwes = all_cwes
         if epss and epss != "N/A":
             try:
                 finding.epss_score = float(epss)
@@ -452,7 +454,7 @@ class CyberwatchGaleaxParser:
         if cve_announcements:
             finding.unsaved_vulnerability_ids = cve_announcements
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = unsaved_locations
         else:
             # TODO: Delete this after the move to Locations
@@ -471,8 +473,8 @@ class CyberwatchGaleaxParser:
                 continue
 
             computer_name = server.get("computer_name", "Unknown Hostname")
-            if settings.V3_FEATURE_LOCATIONS:
-                location = URL(host=computer_name)
+            if locations_enabled():
+                location = LocationData.url(host=computer_name)
                 unsaved_locations.append(location)
             else:
                 # TODO: Delete this after the move to Locations

@@ -5,7 +5,7 @@
     {{ block.super }}
     <h3> Endpoint Meta Importer </h3>
     <br/>
-    <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
+    <form class="" action="" enctype="multipart/form-data" method="post">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">

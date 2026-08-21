@@ -21,7 +21,7 @@ class TestAuditConfig(TestCase):
 
     """Test audit configuration functionality."""
 
-    @patch("dojo.auditlog.call_command")
+    @patch("dojo.auditlog.services.call_command")
     def test_configure_pghistory_triggers_enabled(self, mock_call_command):
         """Test that configure_pghistory_triggers enables triggers when audit logging is enabled."""
         with override_settings(ENABLE_AUDITLOG=True):
@@ -30,7 +30,7 @@ class TestAuditConfig(TestCase):
         # Verify that pgtrigger enable command was called
         mock_call_command.assert_called_with("pgtrigger", "enable")
 
-    @patch("dojo.auditlog.call_command")
+    @patch("dojo.auditlog.services.call_command")
     def test_configure_pghistory_triggers_disabled(self, mock_call_command):
         """Test that configure_pghistory_triggers disables triggers when audit logging is disabled."""
         with override_settings(ENABLE_AUDITLOG=False):

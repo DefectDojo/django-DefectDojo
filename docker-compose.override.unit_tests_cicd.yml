@@ -20,15 +20,33 @@ services:
       DD_DATABASE_ENGINE: ${DD_DATABASE_ENGINE:-django.db.backends.postgresql}
       DD_DATABASE_HOST: ${DD_DATABASE_HOST:-postgres}
       DD_DATABASE_PORT: ${DD_DATABASE_PORT:-5432}
-      DD_CELERY_BROKER_SCHEME: 'sqla+sqlite'
-      DD_CELERY_BROKER_USER: ''
-      DD_CELERY_BROKER_PASSWORD: ''
-      DD_CELERY_BROKER_HOST: ''
-      DD_CELERY_BROKER_PORT: "-1"
-      DD_CELERY_BROKER_PATH: '/dojo.celerydb.sqlite'
-      DD_CELERY_BROKER_PARAMS: ''
+      # An in-process broker rather than the default sqlite file. Nothing consumes
+      # the queue in unit tests -- celeryworker and celerybeat are both reset
+      # above -- so a real broker contributes nothing but contention: under
+      # --parallel every worker process opens the same sqlite file and they race
+      # to declare the queue, which fails in whichever loses with
+      # "UNIQUE constraint failed: kombu_queue.name".
+      #
+      # Set through the scheme, because settings.dist.py only assembles a URL from
+      # the parts when DD_CELERY_BROKER_URL is empty. double_slashes=True there
+      # turns these two into exactly "memory://". The entrypoint also unsets
+      # DD_CELERY_BROKER_URL, but blanking it here means the broker does not
+      # depend on that happening -- and it stops the base compose file's
+      # redis://valkey URL, which no unit test has a valkey for, showing through.
+      DD_CELERY_BROKER_URL: ''
+      DD_CELERY_BROKER_SCHEME: 'memory'
+      DD_CELERY_BROKER_PATH: ''
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
       DD_V3_FEATURE_LOCATIONS: ${DD_V3_FEATURE_LOCATIONS:-False}
+      # full | prepare | reuse -- see docker/entrypoint-unit-tests.sh. CI sets
+      # this to replace the migrate with restoring a snapshot of its result.
+      DD_TEST_DB_MODE: ${DD_TEST_DB_MODE:-full}
+      # No Redis/valkey in unit tests -> default django cache is LocMemCache.
+      DD_CACHE_URL: ''
+      # In-process singleton cache (dojo/caching.py) stays ON: a singleton is read
+      # once per request/test (deterministic assertNumQueries), reset per request
+      # (middleware) and per test (dojo_test_case setUp).
+      DD_SETTINGS_CACHE_L1_TTL: '30'
   celerybeat: !reset
   celeryworker: !reset
   initializer: !reset

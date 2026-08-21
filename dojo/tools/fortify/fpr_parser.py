@@ -1,12 +1,14 @@
 import logging
 import re
-import zipfile
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Test
 from dojo.tools.fortify.fortify_data import DescriptionData, RuleData, SnippetData, VulnerabilityData
+from dojo.tools.locations import LocationData
+from dojo.tools.utils import safe_read_all_zip
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +28,9 @@ class FortifyFPRParser:
         pass
 
     def parse_fpr(self, filename, test):
-        if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
-            input_zip = zipfile.ZipFile(filename.name, "r")
-        else:
-            input_zip = zipfile.ZipFile(filename, "r")
         # Read each file from the zip artifact into a dict with the format of
         # filename: file_content
-        zip_data = {name: input_zip.read(name) for name in input_zip.namelist()}
+        zip_data = safe_read_all_zip(filename)
         root, self.namespaces = self.identify_root(zip_data, "audit.fvdl", "No audit.fvdl file found in the zip")
         audit_log, self.namespaces_audit_log = self.identify_root(zip_data, "audit.xml")
         return self.convert_vulnerabilities_to_findings(root, audit_log, test)
@@ -138,10 +136,23 @@ class FortifyFPRParser:
             finding.mitigation = self.format_mitigation(vuln_data, snippet, description, rule)
             finding.severity = self.compute_severity(vuln_data, rule)
             finding.impact = self.format_impact(related_data, vuln_data)
+            if rule and rule.cwe:
+                finding.cwe = rule.cwe
 
             finding.file_path = vuln_data.source_location_path
             finding.line = int(self.compute_line(vuln_data, snippet))
             finding.unique_id_from_tool = vuln_data.instance_id
+
+            if locations_enabled() and finding.file_path:
+                end_line = vuln_data.source_location_line_end
+                finding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=finding.file_path,
+                        line=finding.line,
+                        end_line=int(end_line) if end_line and str(end_line).isdigit() else None,
+                        snippet=snippet.text if snippet and snippet.text else "",
+                    ),
+                )
 
             findings.append(finding)
 
@@ -233,8 +244,22 @@ class FortifyFPRParser:
             rule_data.confidentiality_impact = rule.findtext("Group[@name='ConfidentialityImpact']", None, self.namespaces)
             rule_data.integrity_impact = rule.findtext("Group[@name='IntegrityImpact']", None, self.namespaces)
             rule_data.remediation_effort = rule.findtext("Group[@name='Recommendations']", None, self.namespaces)
+            rule_data.cwe = self.parse_cwe(rule.findtext("Group[@name='altcategoryCWE']", None, self.namespaces))
             logger.debug(f"Rule Impact: {rule_data.impact}")
         return rule_data
+
+    def parse_cwe(self, cwe_value: str | None) -> int | None:
+        """
+        Extract the first CWE id from a Fortify `altcategoryCWE` group value.
+
+        Values look like "CWE ID 352", may list several ("CWE ID 259,CWE ID 798"),
+        may be prefixed with an index ("[17] CWE ID 200"), or be absent/"None".
+        Finding.cwe holds a single integer, so we keep the first id.
+        """
+        if not cwe_value:
+            return None
+        match = re.search(r"CWE ID (\d+)", cwe_value)
+        return int(match.group(1)) if match else None
 
     def format_title(self, vulnerability, snippet) -> str:
         # defaults for when there is no snippet (shouldn't happen, future improvement: parser might also parse ReplacementDefinitions and/or Context elements)
@@ -337,3 +362,20 @@ class FortifyFPRParser:
         if snippet and snippet.start_line:
             return snippet.start_line
         return vulnerability.source_location_line
+
+
+class FortifyFPRParserV2(FortifyFPRParser):
+
+    """
+    FPR parser for the "Fortify Scan v2" scan type.
+
+    Stores the line Fortify reports for the vulnerability itself (the SourceLocation
+    "line" attribute) instead of the snippet StartLine used by the v1 parser, which
+    includes leading context lines and does not point at the finding. Kept as a
+    separate scan type so hashcodes of existing "Fortify Scan" findings are unaffected.
+    """
+
+    def compute_line(self, vulnerability, snippet) -> str:
+        if vulnerability.source_location_line:
+            return vulnerability.source_location_line
+        return super().compute_line(vulnerability, snippet)
