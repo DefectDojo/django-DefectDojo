@@ -4,7 +4,7 @@ description: Guides de configuration détaillés pour les connecteurs descendant
 weight: 2
 audience: pro
 aliases:
-- /connectors/downstream/downstream_toolreference/
+- /fr/connectors/downstream/downstream_toolreference/
 - /fr/en/share_your_findings/integrations_toolreference
 - /fr/issue_tracking/pro_integration/integrations_toolreference/
 ---

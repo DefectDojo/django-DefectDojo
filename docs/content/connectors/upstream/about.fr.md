@@ -100,7 +100,7 @@ Nous prenons actuellement en charge les Connecteurs en amont pour les outils sui
 * **Wiz**
 * **YesWeHack**
 
-Pour des instructions de configuration étape par étape pour chaque outil, consultez la référence [Configuration des connecteurs par outil](../toolreference/).
+Pour des instructions de configuration étape par étape pour chaque outil, consultez la référence [Configuration des connecteurs par outil](../../toolreference/upstream/).
 
 La plupart des connecteurs importent des **constatations**. Certains sont des **Connecteurs d'actifs** qui importent plutôt votre **inventaire d'actifs** — en construisant et en maintenant votre hiérarchie Produit (Actif) et Type de produit (Organisation) au lieu d'importer des constatations : **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets**, et **ServiceNow CMDB**. (**runZero** est principalement un Connecteur d'actifs, mais peut aussi, en option, importer des vulnérabilités sous forme de constatations.)
 

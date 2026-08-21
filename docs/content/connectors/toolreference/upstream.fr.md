@@ -5,7 +5,7 @@ description: Notre liste des outils de Connecteur pris en charge, et comment les
 weight: 1
 audience: pro
 aliases:
-- /connectors/upstream/toolreference/
+- /fr/connectors/upstream/toolreference/
 - /fr/import_data/pro/connectors/connectors_tool_reference/
 - /fr/en/connecting_your_tools/connectors/connectors_tool_reference
 ---

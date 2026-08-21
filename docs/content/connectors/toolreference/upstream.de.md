@@ -5,7 +5,7 @@ description: Unsere Liste der unterstützten Connector-Tools und wie Sie sie mit
 weight: 1
 audience: pro
 aliases:
-- /connectors/upstream/toolreference/
+- /de/connectors/upstream/toolreference/
 - /de/import_data/pro/connectors/connectors_tool_reference/
 - /de/en/connecting_your_tools/connectors/connectors_tool_reference
 ---

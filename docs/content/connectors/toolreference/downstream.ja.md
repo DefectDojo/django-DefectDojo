@@ -4,7 +4,7 @@ description: ダウンストリームコネクタの詳細なセットアップ�
 weight: 2
 audience: pro
 aliases:
-- /connectors/downstream/downstream_toolreference/
+- /ja/connectors/downstream/downstream_toolreference/
 - /ja/en/share_your_findings/integrations_toolreference
 - /ja/issue_tracking/pro_integration/integrations_toolreference/
 ---

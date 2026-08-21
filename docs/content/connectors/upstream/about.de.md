@@ -100,7 +100,7 @@ Wir unterstützen derzeit Upstream-Connectors für die folgenden Tools, weitere 
 * **Wiz**
 * **YesWeHack**
 
-Schritt-für-Schritt-Anleitungen zur Einrichtung für jedes Tool finden Sie in der Referenz [Tool-spezifische Connector-Einrichtung](../toolreference/).
+Schritt-für-Schritt-Anleitungen zur Einrichtung für jedes Tool finden Sie in der Referenz [Tool-spezifische Connector-Einrichtung](../../toolreference/upstream/).
 
 Die meisten Connectors importieren **Befunde**. Einige wenige sind **Asset Connectors**, die stattdessen Ihr **Asset-Inventar** importieren — sie bauen und pflegen Ihre Produkt- (Asset-) und Produkttyp- (Organisations-) Hierarchie, statt Befunde zu importieren: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets** und **ServiceNow CMDB**. (**runZero** ist in erster Linie ein Asset Connector, kann aber optional auch Schwachstellen als Befunde importieren.)
 

@@ -4,7 +4,7 @@ description: Detaillierte Einrichtungsanleitungen für Downstream Connectors
 weight: 2
 audience: pro
 aliases:
-- /connectors/downstream/downstream_toolreference/
+- /de/connectors/downstream/downstream_toolreference/
 - /de/en/share_your_findings/integrations_toolreference
 - /de/issue_tracking/pro_integration/integrations_toolreference/
 ---

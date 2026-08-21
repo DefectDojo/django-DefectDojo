@@ -100,7 +100,7 @@ DefectDojo を使用すると、洗練された API 連携を構築でき、脆�
 * **Wiz**
 * **YesWeHack**
 
-各ツールのステップバイステップのセットアップ手順については、[ツール別コネクタセットアップ](../toolreference/) のリファレンスを参照してください。
+各ツールのステップバイステップのセットアップ手順については、[ツール別コネクタセットアップ](../../toolreference/upstream/) のリファレンスを参照してください。
 
 ほとんどのコネクタは **検出事項** をインポートします。一部は **Asset Connector** であり、検出事項をインポートする代わりに **アセットインベントリ** をインポートします — 検出事項をインポートするのではなく、製品 (アセット) と製品タイプ (組織) の階層を構築・維持します: **Azure DevOps**、**Backstage**、**Bitbucket**、**GitHub**、**GitLab**、**Jira Service Management Assets**、**ServiceNow CMDB**。(**runZero** は主に Asset Connector ですが、オプションで脆弱性を検出事項としてインポートすることもできます。)
 

@@ -5,7 +5,7 @@ description: Nuestra lista de herramientas de Conector compatibles y cómo confi
 weight: 1
 audience: pro
 aliases:
-- /connectors/upstream/toolreference/
+- /es/connectors/upstream/toolreference/
 - /es/import_data/pro/connectors/connectors_tool_reference/
 - /es/en/connecting_your_tools/connectors/connectors_tool_reference
 ---

@@ -4,7 +4,7 @@ description: 対応している Connector ツールの一覧と、DefectDojo で
 weight: 1
 audience: pro
 aliases:
-- /connectors/upstream/toolreference/
+- /ja/connectors/upstream/toolreference/
 - /ja/import_data/pro/connectors/connectors_tool_reference/
 - /ja/en/connecting_your_tools/connectors/connectors_tool_reference
 ---
