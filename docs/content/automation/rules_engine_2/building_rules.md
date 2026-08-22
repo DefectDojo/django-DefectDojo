@@ -14,13 +14,14 @@ A rule is built on a canvas. You drag nodes out of a palette, wire them together
 
 Open **Rules Engine 2.0 > All Rules** and choose **New Rule**, or open an existing rule to edit it.
 
-The palette is grouped into four categories, which is also the order items flow through a typical graph:
+The palette is grouped into five categories, which is also the order items flow through a typical graph:
 
 | Category | What the nodes do |
 |----------|-------------------|
-| **Triggers** | Decide when the rule wakes up and which Findings enter it. Exactly one per graph. |
+| **Triggers** | Decide when the rule wakes up and which Findings or Assets enter it. |
 | **Logic** | Route, limit and de-duplicate the items flowing through. |
 | **Findings** | Change the Findings. |
+| **Assets** | Change the Assets. |
 | **Egress** | Send something outward: a ticket, a message, a report. |
 
 The palette is generated from the engine itself, so what you see in the editor is always exactly what the engine can execute.
@@ -48,6 +49,8 @@ Preview runs the real engine, not a simulation of it, and then rolls the whole t
 
 Preview is the one execution that caps how many items it looks at, so that it stays fast. When it truncates, it says so in the trace. A real run has no such cap.
 
+For an Asset rule, Preview lists the Assets it would change and what would change about each one, before and after, the same way it does for a Finding rule.
+
 ## What a rule works on
 
 Every rule works on one kind of item, and its trigger decides which:
@@ -73,9 +76,11 @@ Every graph starts with one of four triggers.
 
 ### Scope
 
-Every trigger takes a **Scope**, and scope is how you narrow what the rule considers. For a Finding rule it is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here. For an Asset rule it is the Assets list's own filters instead.
+Every trigger takes a **Scope**, and scope is how you narrow what the rule considers.
 
-Two things about scope are worth understanding:
+A Finding trigger's scope is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here. An Asset trigger's scope is the filter vocabulary the Assets list itself uses instead — name, tags, Organization, criticality, lifecycle and the rest of that list's filters — and the scope editor is that list, so picking one works the same way it does for a Finding rule.
+
+Two things about scope are worth understanding, and both hold for either kind of rule:
 
 * **Scope is applied on top of authorization, never instead of it.** The rule runs as its owner, so scope narrows an already-authorized set. Leaving scope empty does not mean "everything in the instance", it means "everything the rule owner can see".
 * **An invalid scope fails the run rather than widening it.** If a filter key does not exist, or a value is one the filter would silently discard, the run errors out. A rule that does nothing is recoverable. A rule that quietly edits everything in the instance is not.
@@ -157,6 +162,22 @@ Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `eng
 Dates are ISO-8601 strings. That is deliberate: it means `gt` and `lt` order them correctly as text, so `2026-07-28` is correctly greater than `2026-01-01`.
 
 `priority`, `risk` and `risk_score` come from Pro's prioritization. A Finding that has not been scored yet carries no value for them.
+
+### Referring to Asset data
+
+An Asset item carries no `finding`, `test` or `engagement` block at all — those paths simply resolve to nothing on it. `product` is the Asset itself, and `product_type` is the Organization it belongs to, the same two keys a Finding item carries.
+
+| Group | Fields |
+|-------|--------|
+| Identity | `id`, `name`, `asset_type` |
+| Classification | `business_criticality`, `platform`, `lifecycle`, `origin`, `tags` |
+| Exposure | `external_audience`, `internet_accessible`, `user_records` |
+| SLA and Risk Priority | `sla_configuration_id`, `sla_configuration_name`, `prioritization_engine_id`, `prioritization_engine_name` |
+| Dates | `created`, `updated` |
+
+`asset_type` is the type's code, not its display label.
+
+Alongside `product`, an Asset item carries `product_type` (`id`, `name`) and `ctx`. Because the key names match, a condition or template written against `product.name` or `product_type.name` means the same thing whichever kind of rule it is in.
 
 ### Conditions
 
@@ -252,4 +273,4 @@ The recommended order for a rule that sends anything:
 4. Let it run, then read **Deliveries** and check the recorded payloads are what you intended.
 5. Switch the mode to **Live**.
 
-Simulate is not a partial run. Every Finding edit in the graph happens for real in simulate mode. Only the outbound sends are held back.
+Simulate is not a partial run. Every Finding or Asset edit in the graph happens for real in simulate mode. Only the outbound sends are held back.
