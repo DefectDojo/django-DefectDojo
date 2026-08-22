@@ -196,10 +196,23 @@ is worth knowing before re-typing a live Organization.
 
 Because a type-scoped grant reaches Organizations that do not exist yet, it cannot be
 delegated through permissions on any single Organization. **Only superusers and global
-owners can view or manage these grants**, on the API at
+owners can view or manage these grants**, in the UI or on the API at
 `/api/v2/organization_type_roles/` (filterable by `org_type`, `user`, `group`, and
 `role`). A grant names either a user or a group — a group grant applies to the group's
 members — and each grantee holds at most one role per type.
+
+In the UI, grants live on the Roles settings page (**Settings → Roles**), in an
+**Organization Type Roles** card that appears for global owners once the feature is
+enabled. The card lists every grant with its type, grantee, and role; **New Grant**
+opens a dialog that takes the Organization type, a user or group, and the role, and
+each row offers a revoke action with a confirmation step.
+
+On an Organization's own view, a **type-scoped grant** indicator appears beside the
+title when one or more grants cover that Organization's type. Hovering it lists the
+grants (role and grantee), and clicking it opens the Roles page. The indicator is
+visible only to superusers and global owners, the same audience that can read the
+grant list itself, so an Organization-level viewer learns nothing about who holds
+broad access.
 
 Grants are created and revoked rather than edited: to change the role or the type,
 revoke the grant and create the replacement, which keeps the audit trail honest about
