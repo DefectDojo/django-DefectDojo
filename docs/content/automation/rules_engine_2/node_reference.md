@@ -8,7 +8,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine 2.0 is a DefectDojo Pro-only feature.</span>
 
-Rules Engine 2.0 ships 36 nodes in five categories. This page documents all of them.
+Rules Engine 2.0 ships 38 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -389,6 +389,34 @@ Removes one custom field's value from the Asset, recording what it held on the A
 | Setting | Notes |
 |---------|-------|
 | **Field** | Which custom field to clear. |
+
+### Naming a configuration or engine the rule owner cannot see
+
+Both action nodes below only offer what their rule's owner is [permitted to see](/admin/user_management/user_permission_chart/#configuration-permission-chart) in their own picker — the same permission the SLA Configuration and Prioritization Engine settings pages themselves require. That is a picker-level convenience, not the only gate: a hand-written graph naming a configuration or engine the owner cannot see still resolves it when the rule runs, so it fails the run with an error naming it instead of silently doing nothing.
+
+### Assign SLA Configuration
+
+`asset.set_sla_configuration`
+
+Assigns an SLA configuration to every Asset that reaches it. Findings under that Asset have their SLA expiration dates recalculated, exactly as [applying one by hand](/asset_modelling/pro_hierarchy/priority_sla/) on the Asset's own edit form does.
+
+| Setting | Notes |
+|---------|-------|
+| **SLA Configuration** | Which SLA configuration to assign. Required. |
+
+**An Asset already recalculating is skipped, not silently dropped.** If a person, or another rule, is already recalculating the same Asset's SLA dates when this node reaches it, writing here would not change anything and would be reverted, so the node counts that Asset as skipped instead of changed. The run's node summary reports the skip by name, alongside how many Assets were actually changed.
+
+### Assign Risk Priority
+
+`asset.set_risk_priority`
+
+Assigns a Risk Priority — a [prioritization engine](/asset_modelling/pro_hierarchy/priority_sla/) — to every Asset that reaches it. Findings under that Asset are rescored asynchronously.
+
+| Setting | Notes |
+|---------|-------|
+| **Risk Priority** | Which prioritization engine to assign. Required. |
+
+Unlike the SLA action, this node does not skip an Asset that is mid-recalculation: nothing reverts its write, so the assignment lands normally either way.
 
 ## Egress
 
