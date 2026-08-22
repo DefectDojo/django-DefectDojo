@@ -80,6 +80,8 @@ Every trigger takes a **Scope**, and scope is how you narrow what the rule consi
 
 A Finding trigger's scope is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here. An Asset trigger's scope is the filter vocabulary the Assets list itself uses instead — name, tags, Organization, criticality, lifecycle and the rest of that list's filters — and the scope editor is that list, so picking one works the same way it does for a Finding rule.
 
+Asset type is not one of those filters. The scope picker offers exactly what the Assets list can filter on, and type is not among them today. To act on Assets of one type, scope broadly and add an **If / Filter** node with a condition on `product.asset_type`, which compares the type's code rather than its display label.
+
 Two things about scope are worth understanding, and both hold for either kind of rule:
 
 * **Scope is applied on top of authorization, never instead of it.** The rule runs as its owner, so scope narrows an already-authorized set. Leaving scope empty does not mean "everything in the instance", it means "everything the rule owner can see".
