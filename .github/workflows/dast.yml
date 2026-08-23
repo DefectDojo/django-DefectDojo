@@ -1,0 +1,127 @@
+name: dast
+
+# Динамический анализ: поднимаем DefectDojo через его штатный docker-compose
+# и сканируем OWASP ZAP (baseline + full). Тяжёлый full-scan — по расписанию и вручную.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * 1"   # еженедельно, пн 02:00 UTC
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+env:
+  TARGET_URL: http://localhost:8080
+  REPORTS_DIR: reports
+
+jobs:
+  dast:
+    name: OWASP ZAP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & start DefectDojo
+        run: |
+          mkdir -p "$REPORTS_DIR"
+          # DefectDojo требует профиль БД; предпочитаем штатные helper-скрипты
+          if [ -x ./dc-build.sh ] && [ -x ./dc-up-d.sh ]; then
+            ./dc-build.sh
+            ./dc-up-d.sh postgres-redis
+          else
+            docker compose build
+            docker compose --profile postgres-redis up -d
+          fi
+          echo "Ожидаем инициализацию (миграции, статик, суперюзер)..."
+
+      - name: Wait for service
+        run: |
+          for i in $(seq 1 60); do
+            if curl -skf "$TARGET_URL/login" >/dev/null; then
+              echo "DefectDojo поднят"; exit 0
+            fi
+            echo "ждём... ($i/60)"; sleep 15
+          done
+          echo "Сервис не поднялся вовремя"; docker compose logs --tail=100; exit 1
+
+      # --- ZAP baseline (пассивный, быстрый) ---
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        continue-on-error: true
+        with:
+          target: ${{ env.TARGET_URL }}
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-J zap-baseline.json -w zap-baseline.md"
+          allow_issue_writing: true
+
+      # --- ZAP full scan (активный: инъекции, обход и т.п.) ---
+      - name: ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        continue-on-error: true
+        with:
+          target: ${{ env.TARGET_URL }}
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-J zap-full.json"
+          allow_issue_writing: false
+
+      # --- ZAP АУТЕНТИФИЦИРОВАННЫЙ скан (browser-based, обходит CSRF Django) ---
+      - name: ZAP Authenticated Scan
+        continue-on-error: true
+        env:
+          ZAP_USER: ${{ secrets.ZAP_USER }}
+          ZAP_PASSWORD: ${{ secrets.ZAP_PASSWORD }}
+        run: |
+          mkdir -p zap_wrk && chmod 777 zap_wrk
+          cp .zap/zap-auth.yaml zap_wrk/
+          docker run --rm --network host \
+            -e ZAP_USER -e ZAP_PASSWORD \
+            -v "$PWD/zap_wrk:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap.sh -cmd -autorun /zap/wrk/zap-auth.yaml || true
+
+      - name: Collect ZAP reports
+        if: always()
+        run: |
+          cp -v zap-baseline.json "$REPORTS_DIR/" 2>/dev/null || true
+          cp -v zap-full.json "$REPORTS_DIR/" 2>/dev/null || true
+          # аутентифицированные отчёты: SARIF для гейта + traditional-json для DefectDojo
+          cp -v zap_wrk/zap-auth.sarif "$REPORTS_DIR/" 2>/dev/null || true
+          cp -v zap_wrk/zap-auth.json "$REPORTS_DIR/zap-auth.sarif" 2>/dev/null || true
+          cp -v zap_wrk/zap-auth-dojo.json "$REPORTS_DIR/" 2>/dev/null || true
+
+      - name: Upload ZAP results to DefectDojo
+        if: always()
+        continue-on-error: true
+        env:
+          DOJO_URL: ${{ secrets.DOJO_URL }}
+          DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
+          DOJO_PRODUCT: "DefectDojo (self)"
+          DOJO_ENGAGEMENT: "DAST ${{ github.ref_name }}"
+        run: |
+          pip install requests
+          python security/dojo_upload.py --stage dast
+
+      - name: Security Gateway (DAST)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GATE_FAIL_ON: CRITICAL   # DAST шумит — блокируем только на critical
+        run: |
+          python security/gate.py --reports "$REPORTS_DIR"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-reports
+          path: |
+            ${{ env.REPORTS_DIR }}
+            zap-*.md
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

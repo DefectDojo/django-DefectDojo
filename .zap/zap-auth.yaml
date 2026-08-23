@@ -1,0 +1,76 @@
+# ZAP Automation Framework — АУТЕНТИФИЦИРОВАННЫЙ скан DefectDojo.
+# Browser-based авторизация: ZAP реально заполняет форму логина в headless-браузере,
+# поэтому Django CSRF-токен (csrfmiddlewaretoken) подхватывается автоматически.
+#
+# Запуск (см. dast.yml):
+#   docker run --network host -e ZAP_USER -e ZAP_PASSWORD \
+#     -v $PWD/zap_wrk:/zap/wrk:rw ghcr.io/zaproxy/zaproxy:stable \
+#     zap.sh -cmd -autorun /zap/wrk/zap-auth.yaml
+# ${ZAP_USER}/${ZAP_PASSWORD} подставляются ZAP из переменных окружения.
+
+env:
+  contexts:
+    - name: defectdojo
+      urls:
+        - "http://localhost:8080"
+      includePaths:
+        - "http://localhost:8080.*"
+      excludePaths:
+        - "http://localhost:8080/logout.*"
+        - ".*/logout/?$"
+      authentication:
+        method: "browser"
+        parameters:
+          loginPageUrl: "http://localhost:8080/login"
+          loginPageWait: 5
+          browserId: "firefox-headless"
+        verification:
+          method: "poll"
+          loggedInRegex: '\\bLogout\\b'
+          loggedOutRegex: '\\bLogin\\b'
+          pollUrl: "http://localhost:8080/"
+          pollFrequency: 60
+          pollUnits: "requests"
+      sessionManagement:
+        method: "cookie"
+      users:
+        - name: "zaptester"
+          credentials:
+            username: "${ZAP_USER}"
+            password: "${ZAP_PASSWORD}"
+  parameters:
+    failOnError: false
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  - type: spider
+    parameters:
+      context: defectdojo
+      user: "zaptester"
+      maxDuration: 5
+  - type: spiderAjax
+    parameters:
+      context: defectdojo
+      user: "zaptester"
+      maxDuration: 5
+      browserId: "firefox-headless"
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+  - type: activeScan
+    parameters:
+      context: defectdojo
+      user: "zaptester"
+      maxRuleDurationInMins: 3
+      maxScanDurationInMins: 30
+  - type: report               # для Security Gateway
+    parameters:
+      template: "sarif-json"
+      reportDir: "/zap/wrk"
+      reportFile: "zap-auth"
+  - type: report               # для нативного парсера DefectDojo
+    parameters:
+      template: "traditional-json"
+      reportDir: "/zap/wrk"
+      reportFile: "zap-auth-dojo"

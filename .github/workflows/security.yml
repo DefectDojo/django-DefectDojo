@@ -1,0 +1,154 @@
+name: security
+
+# SAST + SCA + secrets + IaC/image checks + Security Gateway.
+# Все отчёты приводятся к SARIF, публикуются во вкладку Security,
+# выгружаются в DefectDojo и проходят через gate.py.
+#
+# ВНИМАНИЕ: версии сторонних actions приведены как ориентир. Перед сдачей
+# зафиксируйте их (лучше — к commit SHA) и проверьте актуальность.
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write     # для комментариев gate.py в PR
+  security-events: write   # для загрузки SARIF во вкладку Security
+
+env:
+  REPORTS_DIR: reports
+
+jobs:
+  sast-sca:
+    name: SAST / SCA / IaC
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # нужна полная история для Gitleaks
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Prepare reports dir
+        run: mkdir -p "$REPORTS_DIR"
+
+      # --- Установка сканеров ---
+      - name: Install scanners
+        run: |
+          python -m pip install --upgrade pip
+          pip install semgrep bandit bandit-sarif-formatter njsscan checkov requests
+
+      # --- SAST: Semgrep (мультиязычный) ---
+      - name: Semgrep
+        continue-on-error: true
+        run: |
+          semgrep scan \
+            --config p/default --config p/security-audit \
+            --config p/python --config p/javascript \
+            --sarif --output "$REPORTS_DIR/semgrep.sarif" || true
+
+      # --- SAST: Bandit (Python) ---
+      - name: Bandit
+        continue-on-error: true
+        run: |
+          bandit -r . -f sarif -o "$REPORTS_DIR/bandit.sarif" \
+            -x ./tests,./unittests || true
+
+      # --- SAST: njsscan (JavaScript) ---
+      - name: njsscan
+        continue-on-error: true
+        run: |
+          njsscan --sarif -o "$REPORTS_DIR/njsscan.sarif" . || true
+
+      # --- SCA: Trivy filesystem (зависимости pip/npm) ---
+      - name: Trivy filesystem (SCA)
+        uses: aquasecurity/trivy-action@0.28.0
+        continue-on-error: true
+        with:
+          scan-type: fs
+          scanners: vuln
+          format: sarif
+          output: ${{ env.REPORTS_DIR }}/trivy-fs.sarif
+          severity: MEDIUM,HIGH,CRITICAL
+
+      # --- IaC / Dockerfile misconfig: Trivy config ---
+      - name: Trivy config (IaC)
+        uses: aquasecurity/trivy-action@0.28.0
+        continue-on-error: true
+        with:
+          scan-type: config
+          format: sarif
+          output: ${{ env.REPORTS_DIR }}/trivy-config.sarif
+
+      # --- IaC: Checkov (docker-compose / Dockerfile) ---
+      - name: Checkov
+        continue-on-error: true
+        run: |
+          checkov -d . --framework dockerfile,docker_compose \
+            -o sarif --output-file-path "$REPORTS_DIR" || true
+          # checkov кладёт results.sarif в каталог — переименуем
+          [ -f "$REPORTS_DIR/results.sarif" ] && mv "$REPORTS_DIR/results.sarif" "$REPORTS_DIR/checkov.sarif" || true
+
+      # --- Dockerfile lint: Hadolint по ВСЕМ Dockerfile форка ---
+      - name: Hadolint (all Dockerfiles)
+        continue-on-error: true
+        run: |
+          # (зона роста: пиннинговать версию вместо latest)
+          curl -sSL -o /tmp/hadolint \
+            https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+          chmod +x /tmp/hadolint
+          files=$(git ls-files | grep -Ei '(^|/)Dockerfile' | sort -u || true)
+          echo "Найдены Dockerfile: $files"
+          if [ -n "$files" ]; then
+            /tmp/hadolint -f sarif $files > "$REPORTS_DIR/hadolint.sarif" || true
+          fi
+
+      # --- Секреты: Gitleaks ---
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+        with:
+          # SARIF окажется в results.sarif — скопируем ниже
+          args: detect --report-format sarif --report-path ${{ env.REPORTS_DIR }}/gitleaks.sarif --redact
+
+      # --- Публикация во вкладку Security (GitHub code scanning) ---
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        with:
+          sarif_file: ${{ env.REPORTS_DIR }}
+
+      # --- Выгрузка в DefectDojo ---
+      - name: Upload results to DefectDojo
+        continue-on-error: true
+        env:
+          DOJO_URL: ${{ secrets.DOJO_URL }}
+          DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
+          DOJO_PRODUCT: "DefectDojo (self)"
+          DOJO_ENGAGEMENT: "CI ${{ github.ref_name }}"
+        run: |
+          python security/dojo_upload.py --stage sast
+
+      # --- Сохранить отчёты как артефакт ---
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-reports
+          path: ${{ env.REPORTS_DIR }}
+
+      # --- SECURITY GATEWAY ---
+      - name: Security Gateway
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GATE_FAIL_ON: HIGH        # Critical/High роняют пайплайн
+        run: |
+          python security/gate.py --reports "$REPORTS_DIR"
