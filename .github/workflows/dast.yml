@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: "0 2 * * 1"   # еженедельно, пн 02:00 UTC
   push:
-    branches: [ main, master ]
+    branches: [ main, master, devsecops-pipeline ]
 
 permissions:
   contents: read
