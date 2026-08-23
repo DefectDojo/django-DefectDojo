@@ -103,15 +103,15 @@ jobs:
           DOJO_PRODUCT: "DefectDojo (self)"
           DOJO_ENGAGEMENT: "DAST ${{ github.ref_name }}"
         run: |
-          pip install requests
-          python security/dojo_upload.py --stage dast
+          python3 -m pip install requests
+          python3 security/dojo_upload.py --stage dast
 
       - name: Security Gateway (DAST)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GATE_FAIL_ON: CRITICAL   # DAST шумит — блокируем только на critical
         run: |
-          python security/gate.py --reports "$REPORTS_DIR"
+          python3 security/gate.py --reports "$REPORTS_DIR"
 
       - name: Upload artifacts
         if: always()
