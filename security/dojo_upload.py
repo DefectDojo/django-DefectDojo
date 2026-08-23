@@ -47,6 +47,7 @@ def upload(url, token, product, engagement, file_path, scan_type):
     data = {
         "scan_type": scan_type,
         "product_name": product,
+        "product_type_name": "Research",
         "engagement_name": engagement,
         "auto_create_context": "true",
         "active": "true",
