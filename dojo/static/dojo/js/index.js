@@ -190,7 +190,7 @@ document.addEventListener('click', function (e) {
 
     // Don't prevent default for links with real href (non-collapse)
     var targetSel = toggle.getAttribute('data-target')
-                  || toggle.getAttribute('href');
+        || toggle.getAttribute('href');
     if (!targetSel || targetSel === '#') return;
 
     e.preventDefault();
@@ -502,11 +502,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-$.fn.serializeObject = function()
-{
+$.fn.serializeObject = function () {
     var o = {};
     var a = this.serializeArray();
-    $.each(a, function() {
+    $.each(a, function () {
         if (o[this.name] !== undefined && o[this.name] != 'csrfmiddlewaretoken') {
             if (!o[this.name].push) {
                 o[this.name] = [o[this.name]];
@@ -587,16 +586,16 @@ function dismissAddAnotherPopupDojo(win, newId, newRepr) {
 
 function togglePassVisibility() {
     var passwdInput = document.getElementById("id_password");
-    var toggleBox = document.getElementById("toggleBox");
+    var loginTogglePassword = document.getElementById("loginTogglePassword");
 
     // swap password
     if (passwdInput.type === "password") {
         passwdInput.type = "text";
-        toggleBox.innerHTML = "<i class='fa-solid fa-eye-slash'></i>\
+        loginTogglePassword.innerHTML = "<i class='fa-solid fa-eye-slash'></i>\
         <span>Hide Password</span>";
     } else {
         passwdInput.type = "password";
-        toggleBox.innerHTML = "<i class='fa-solid fa-eye'></i>\
+        loginTogglePassword.innerHTML = "<i class='fa-solid fa-eye'></i>\
         <span>Show Password</span>";
     }
 }
@@ -606,7 +605,7 @@ function togglePassVisibility() {
 // The htmlTagAttributValye is optional, and if supplied, then this function will look within the HTML tag attributes to
 // return the value. Example htmlTagAttributValye ( data-content=****** )
 // This function is used in the product.html,  view_product_details adn engagements_all for proper DataTables exports.
-function getDojoExportValueFromTag(htmlString, tag, htmlTagAttribValue){
+function getDojoExportValueFromTag(htmlString, tag, htmlTagAttribValue) {
     parser = new DOMParser();
     doc = parser.parseFromString(htmlString.toString(), "text/html");
     var tags = doc.getElementsByTagName(tag.toString());
@@ -631,52 +630,53 @@ function getDojoExportValueFromTag(htmlString, tag, htmlTagAttribValue){
             }
             exportValue = tagsValueArray;
         }
-    else {
-        exportValue = htmlString;
-    }}
+        else {
+            exportValue = htmlString;
+        }
+    }
 
     // Replace by a space any HTML tags that might still be in the string
     return exportValue.toString().replace(/<\/?[^>]+(>|$)/g, " ");
 }
 
-generateGUID = (typeof(window.crypto) != 'undefined' &&
-                typeof(window.crypto.getRandomValues) != 'undefined') ?
-    function() {
+generateGUID = (typeof (window.crypto) != 'undefined' &&
+    typeof (window.crypto.getRandomValues) != 'undefined') ?
+    function () {
         // If we have a cryptographically secure PRNG, use that
         // https://stackoverflow.com/questions/6906916/collisions-when-generating-uuids-in-javascript
         var buf = new Uint16Array(8);
         window.crypto.getRandomValues(buf);
-        var S4 = function(num) {
+        var S4 = function (num) {
             var ret = num.toString(16);
-            while(ret.length < 4){
-                ret = "0"+ret;
+            while (ret.length < 4) {
+                ret = "0" + ret;
             }
             return ret;
         };
-        return (S4(buf[0])+S4(buf[1])+"-"+S4(buf[2])+"-"+S4(buf[3])+"-"+S4(buf[4])+"-"+S4(buf[5])+S4(buf[6])+S4(buf[7]));
+        return (S4(buf[0]) + S4(buf[1]) + "-" + S4(buf[2]) + "-" + S4(buf[3]) + "-" + S4(buf[4]) + "-" + S4(buf[5]) + S4(buf[6]) + S4(buf[7]));
     }
 
     :
 
-    function() {
+    function () {
         // Otherwise, just use Math.random
         // https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/2117523#2117523
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
     };
 
-    var absolutePath = function(href) {
-        var link = document.createElement("a");
-        link.href = href;
-        return link.href;
-    }
+var absolutePath = function (href) {
+    var link = document.createElement("a");
+    link.href = href;
+    return link.href;
+}
 
-function clear_form(form){
+function clear_form(form) {
     var formEl = (form instanceof HTMLElement) ? form : form[0]; // Handle both DOM and jQuery
-    formEl.querySelectorAll('input, select, textarea').forEach(function(el) {
-        switch(el.type) {
+    formEl.querySelectorAll('input, select, textarea').forEach(function (el) {
+        switch (el.type) {
             case 'number':
             case 'password':
             case 'select-one':
@@ -694,7 +694,7 @@ function clear_form(form){
                     jQuery(el).data('select2').$container.find('.select2-selection__choice').remove();
                 }
                 // Clear selected options
-                Array.from(el.options).forEach(function(opt) { opt.selected = false; });
+                Array.from(el.options).forEach(function (opt) { opt.selected = false; });
                 el.dispatchEvent(new Event('change'));
                 break;
         }

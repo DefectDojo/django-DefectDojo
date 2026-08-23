@@ -1895,7 +1895,7 @@ small {
 }
 
 /* Show Password toggle — inline, not absolutely positioned */
-#toggleBox {
+#loginTogglePassword {
     background-color: transparent !important;
     border: none !important;
     font-weight: 500 !important;
@@ -1904,7 +1904,7 @@ small {
     color: var(--color-dd-primary-500, #1779C5);
     cursor: pointer;
 }
-#toggleBox:hover {
+#loginTogglePassword:hover {
     color: var(--color-dd-primary-700, #204D87);
     text-decoration: underline;
 }
