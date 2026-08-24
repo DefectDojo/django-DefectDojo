@@ -8,13 +8,13 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine 2.0 is a DefectDojo Pro-only feature.</span>
 
-Rules Engine 2.0 ships 29 nodes in five categories. This page documents all of them.
+Rules Engine 2.0 ships 35 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
 ## Triggers
 
-Every graph has exactly one trigger, and only a trigger can start a run. All three produce Finding items and all three take a **Scope** that narrows which Findings they produce. See [Building Rules](../building_rules/) for how scope works.
+Every graph has exactly one trigger, and only a trigger can start a run. The trigger also decides what kind of item the rule works on: Findings or Assets (Products). Every trigger takes a **Scope** that narrows what it produces. See [Building Rules](../building_rules/) for how scope and the kind of item work.
 
 ### On Finding Event
 
@@ -29,25 +29,40 @@ Runs when Findings are created, updated, closed or reopened.
 
 Findings named by the event are matched against scope before they enter the graph, so the event decides *when* and scope decides *which*.
 
+### On Asset Event
+
+`trigger.asset`
+
+Runs when Assets (Products) are created or updated. Tag changes count as updates, so a rule can react to an Asset being tagged.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Event** | `created` | Which Asset change wakes this rule: `created`, `updated`, or `any` for both. |
+| **Scope** | empty | Which Assets this rule considers, in the Assets list's own filters. Empty means every Asset the rule owner can see. |
+
+Assets named by the event are matched against scope before they enter the graph. For an update, the names of the changed fields travel with the items as `ctx.changed_fields`, so an If / Filter node can say "only when the organization changed" (`ctx.changed_fields` `contains` `organization`) or "only when tagged" (`contains` `tags`).
+
 ### On a Schedule
 
 `trigger.schedule`
 
-Sweeps every Finding in scope on a schedule. The schedule is configured on the rule and is limited to quarter-hour marks.
+Sweeps everything in scope on a schedule. The schedule is configured on the rule and is limited to quarter-hour marks.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Scope** | empty | Which Findings this rule considers. |
+| **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
+| **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
 
 ### Manual Run
 
 `trigger.manual`
 
-Sweeps every Finding in scope when you press **Run** on the rule.
+Sweeps everything in scope when you press **Run** on the rule.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Scope** | empty | Which Findings this rule considers. |
+| **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
+| **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
 
 ## Logic
 
@@ -255,7 +270,65 @@ Removes one custom field's value from the Finding. The value it held is recorded
 
 ## Assets
 
-These nodes change Assets (Products). They only join graphs whose trigger produces Assets, and every change is attributed back to the rule, run and node that made it on the Asset's provenance.
+These nodes change Assets (Products). Like the Findings nodes, every change is attributed back to the rule, run and node that made it, and shows up on the Asset's provenance. They only join graphs whose trigger produces Assets.
+
+These nodes save each Asset individually, so everything that normally follows an Asset edit still happens: organization membership follows a move, tag changes reconcile memberships, and Assets with tag inheritance enabled propagate added tags to their Findings.
+
+### Set a Field
+
+`asset.set_field`
+
+Sets a field on the Asset. Assets already holding the value are left alone, and Assets the rule owner may not edit are counted on the node trace as skipped rather than touched.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Field** | none | One of: `description`, `business_criticality`, `platform`, `lifecycle`, `origin`, `user_records`, `revenue`, `external_audience`, `internet_accessible`. |
+| **Value** | none | The control follows the field: a template for description (with `{{product.name}}` style placeholders), a picker for the choice fields, a number or a toggle for the rest. |
+
+Two fields are deliberately not offered: `name` (it is unique, so one rendered value written across a sweep cannot work) and the SLA configuration (it drives an asynchronous recalculation with its own write lock, and belongs to a dedicated flow).
+
+### Set Organization
+
+`asset.set_organization`
+
+Moves the Asset to a different Organization (Product Type). Its primary organization membership follows automatically, exactly as it does when the move is made on the Asset form.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Organization** | none | The destination. |
+
+The permission gate mirrors the Asset form: the rule owner needs edit permission on each Asset, and the add-asset permission on the destination Organization. Without the latter the run fails up front, before anything moves.
+
+### Add Tags
+
+`asset.add_tags`
+
+Adds tags to the Asset. Supports `{{product.name}}` style placeholders, so a sweep can tag by rendered value. On Assets with tag inheritance enabled, added tags propagate to their Findings.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Tags** | none | Comma separated tags. |
+
+### Remove Tags
+
+`asset.remove_tags`
+
+Removes tags from the Asset. A tag the Asset does not carry is simply not removed, and counts the Asset as unchanged.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Tags** | none | Comma separated tags. |
+
+### Set Parent
+
+`asset.set_parent`
+
+Places the Asset under a parent in the Asset hierarchy, or removes its parent. An edge the hierarchy refuses (a cycle, or the Asset being its own parent) is counted as failed on the node trace and skipped, rather than failing the run.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Action** | `Set Parent` | `Set Parent` or `Remove Parent`. |
+| **Parent** | none | The Asset to place these under. Shown while the action is Set Parent. |
 
 ### Set a Custom Field
 
@@ -284,9 +357,11 @@ Removes one custom field's value from the Asset, recording what it held on the A
 
 Egress nodes are the nodes that leave DefectDojo. Every one of them records a [Delivery](../deliveries/) before anything is sent, and every one of them honours the rule's **Simulate** or **Live** mode.
 
-Several of them offer the same **One Message per Finding** choice. Off, the node sends one message describing the whole batch, with a severity breakdown and a capped list of Findings. On, it sends one message per Finding.
+The notification nodes (Slack, Teams, email, SNS, webhook, in-app alert) work in Finding and Asset rules alike: in an Asset rule the default message line becomes the Asset's name and organization, digests count by business criticality instead of severity, and a webhook body carries an `assets` list plus an `entity` key (its `findings` list stays present and empty, so existing receivers never meet a missing key). The ticket nodes and the report node stay Finding-only: tickets and reports track Findings.
 
-A node sending one message per Finding stops after 1,000 sends in a single run by default, and records a visible skip saying how many Findings it did not send about. See [Configuration](../configuration/#per-finding-send-ceiling).
+Several of them offer the same **One Message per Item** choice. Off, the node sends one message describing the whole batch, with a breakdown and a capped list of items. On, it sends one message per item.
+
+A node sending one message per item stops after 1,000 sends in a single run by default, and records a visible skip saying how many items it did not send about. The ceiling counts items of either kind. See [Configuration](../configuration/#per-finding-send-ceiling).
 
 ### When a channel is unavailable
 
