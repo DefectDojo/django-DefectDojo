@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "response": [
+    {
+      "id": "1",
+      "app": "generic-app",
+      "type": "vuln",
+      "category": "SQL Injection",
+      "owasp_category": "a03-injection",
+      "severity": "critical",
+      "title": "SQL Injection in ReportController",
+      "description": "A request parameter is concatenated into a database query.",
+      "internal_id": "sl/00000000-0000-4000-8000-000000000001",
+      "related_findings": [],
+      "details": {
+        "source_method": "com.example.web.ReportController.list",
+        "sink_method": "java.sql.Statement.executeQuery",
+        "file_locations": ["src/main/java/com/example/web/ReportController.java:88",
+                           "src/main/java/com/example/db/Reports.java:120"]
+      },
+      "tags": [
+        {"key": "cwe_category", "value": "CWE-89"},
+        {"key": "reachability", "value": "reachable"},
+        {"key": "owasp_category", "value": "a03-injection"}
+      ]
+    },
+    {
+      "id": "2",
+      "app": "generic-app",
+      "type": "oss_vuln",
+      "category": "Vulnerable dependency",
+      "severity": "high",
+      "title": "CVE-2000-0001 in lib",
+      "description": "The dependency is affected by a known vulnerability.",
+      "internal_id": "sl/00000000-0000-4000-8000-000000000002",
+      "related_findings": ["sl/00000000-0000-4000-8000-000000000001"],
+      "details": {"file_locations": ["pom.xml"]},
+      "tags": [
+        {"key": "cve", "value": "CVE-2000-0001"},
+        {"key": "package_url", "value": "pkg:maven/org.example/lib@1.2.3"},
+        {"key": "cvss_score", "value": "9.8"},
+        {"key": "cwe_category", "value": "502"}
+      ]
+    },
+    {
+      "id": "3",
+      "type": "oss_vuln",
+      "category": "Vulnerable dependency",
+      "severity": "medium",
+      "title": "CVE-2000-0002 in other-lib",
+      "internal_id": "sl/00000000-0000-4000-8000-000000000003",
+      "related_findings": [],
+      "tags": [
+        {"key": "cve", "value": "CVE-2000-0002"},
+        {"key": "package_url", "value": "pkg:npm/other-lib@4.5.6"},
+        {"key": "cvss_score", "value": "not a score"},
+        {"key": "reachability", "value": "unreachable"}
+      ]
+    },
+    {
+      "id": "4",
+      "type": "vuln",
+      "category": "",
+      "severity": "not a label",
+      "title": "",
+      "internal_id": "",
+      "details": {"file_locations": ["src/main/java/com/example/Other.java"]},
+      "tags": [{"key": "cwe_category", "value": "not a cwe"}]
+    },
+    {
+      "id": "5",
+      "type": "vuln",
+      "category": "Hardcoded credential",
+      "severity": "low",
+      "title": "Hardcoded credential in Config",
+      "internal_id": "sl/00000000-0000-4000-8000-000000000005",
+      "details": {"file_locations": ["src/main/java/com/example/Config.java:not-a-line"]},
+      "tags": []
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "file": "scripts/deploy.sh",
+    "line": 5,
+    "endLine": 5,
+    "column": 6,
+    "endColumn": 8,
+    "level": "info",
+    "code": 2086,
+    "message": "Double quote to prevent globbing and word splitting.",
+    "fix": {
+      "replacements": [
+        {
+          "column": 6,
+          "endColumn": 6,
+          "endLine": 5,
+          "insertionPoint": "afterEnd",
+          "line": 5,
+          "precedence": 10,
+          "replacement": "\""
+        },
+        {
+          "column": 8,
+          "endColumn": 8,
+          "endLine": 5,
+          "insertionPoint": "beforeStart",
+          "line": 5,
+          "precedence": 10,
+          "replacement": "\""
+        }
+      ]
+    }
+  }
+]

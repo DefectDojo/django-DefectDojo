@@ -17,6 +17,8 @@ Lors de la configuration d'un Connecteur pour un outil pris en charge, vous deve
 * **Location** \- un champ qui fait généralement référence à l'URL de votre outil sur votre réseau,
 * **Secret** \- généralement une clé API.
 
+De nombreux outils exposent un seul hôte d'API fixe. Pour ceux\-là, DefectDojo remplit le champ **Location** lorsque vous ajoutez le connecteur, vous n'avez donc pas à copier l'URL depuis cette page. Conservez la valeur proposée. Ne la modifiez que si votre instance utilise un autre hôte, par exemple une installation auto\-hébergée ou une autre région.
+
 Certains outils nécessiteront des champs supplémentaires liés à l'API, en plus de **Location** et **Secret**. Ils peuvent également nécessiter que vous effectuiez des modifications de leur côté pour prendre en charge un Connecteur entrant depuis DefectDojo.
 
 ![image](images/connectors_tool_reference.png)

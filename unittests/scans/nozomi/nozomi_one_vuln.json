@@ -1,0 +1,28 @@
+{
+  "result": [
+    {
+      "id": "nc-0001",
+      "cve": "CVE-2000-0001",
+      "cve_score": 9.8,
+      "cve_summary": "A crafted control message causes the controller to execute attacker code.",
+      "cve_references": [
+        "https://example.com/advisories/CVE-2000-0001",
+        "https://example.com/vendor/advisory-2024-01"
+      ],
+      "cwe_id": "CWE-787",
+      "cwe_name": "Out-of-bounds Write",
+      "asset_id": "asset-0001",
+      "zone": "Cell Zone A",
+      "node_label": "generic-plc-01",
+      "node_type": "PLC",
+      "node_vendor": "Generic Controls",
+      "node_product_name": "GC-9000",
+      "node_firmware_version": "2.4.1",
+      "node_os": "GCOS 4",
+      "latest_hotfix": "2.4.3",
+      "minimum_hotfix": "2.4.2",
+      "likelihood": 0.8,
+      "resolved": false
+    }
+  ]
+}

@@ -5,6 +5,8 @@ aliases:
   - "/en/notifications/configure_system_notifs/"
   - /en/customize_dojo/notifications/configure_system_notifs
 ---
+
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: In DefectDojo Pro, notification settings live in the Pro UI as three separate pages rather than one page with a Scope drop-down: **Settings \> Notifications \> Personal Notifications**, **System Notifications** and **Notification Template**. System Notifications and the Notification Template are visible to superusers only. Notification Webhooks moved alongside them, under **Settings \> Notifications \> Notification Webhooks**.</span>
 DefectDojo has two different kinds of notifications: **Personal** (sent to a single account) and **System** (which are sent to all users).
 
 Both an account’s Personal Notifications and the global System Notifications can be configured from the same page: **⚙️Configuration \> Notifications** in the sidebar.

@@ -1,0 +1,48 @@
+{
+  "id": "scan-0001",
+  "status": "SUCCESS",
+  "issues": [
+    {
+      "id": "issue-0001",
+      "name": "SQL injection in the reports query",
+      "severity": "high",
+      "url": "https://api.example.com/v1/reports",
+      "method": "post",
+      "description": "A request parameter is concatenated into a database query.",
+      "remediation": "Use parameterised queries.",
+      "owasp": "API8:2023",
+      "cwe": "CWE-89"
+    },
+    {
+      "id": "issue-0002",
+      "name": "Missing rate limiting",
+      "severity": "medium",
+      "url": "https://api.example.com/v1/login",
+      "method": "post",
+      "description": "The endpoint accepted 500 requests in ten seconds.",
+      "owasp": "API4:2023",
+      "cwe": "770"
+    },
+    {
+      "id": "issue-0003",
+      "name": "Verbose error message",
+      "severity": "low",
+      "url": "https://api.example.com:8443/v1/search?q=1",
+      "description": "The response body contained a stack trace.",
+      "cwe": "not a cwe"
+    },
+    {
+      "id": "issue-0004",
+      "severity": "not a label",
+      "url": "https://api.example.com/v1/health",
+      "method": "get"
+    },
+    {
+      "id": "issue-0005",
+      "name": "An issue with no endpoint",
+      "severity": "info",
+      "description": "Reported against the application as a whole.",
+      "owasp": "API9:2023"
+    }
+  ]
+}

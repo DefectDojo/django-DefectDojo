@@ -1,0 +1,217 @@
+{
+  "tool": "grant",
+  "version": "0.0.1",
+  "run": {
+    "argv": [
+      "grant",
+      "check",
+      "uvproj_sbom.json"
+    ],
+    "policy": {
+      "rules": {
+        "allow": [],
+        "ignorePackages": []
+      },
+      "requireLicense": true,
+      "requireKnownLicense": false
+    },
+    "targets": [
+      {
+        "source": {
+          "type": "file",
+          "ref": "app-sbom.json"
+        },
+        "evaluation": {
+          "status": "noncompliant",
+          "summary": {
+            "packages": {
+              "cataloged": 14,
+              "total": 14,
+              "allowed": 0,
+              "denied": 14,
+              "ignored": 0,
+              "unlicensed": 14
+            },
+            "licenses": {
+              "unique": 0,
+              "allowed": 0,
+              "denied": 0,
+              "nonSPDX": 0
+            }
+          },
+          "findings": {
+            "packages": [
+              {
+                "id": "python:itsdangerous@2.2.0",
+                "name": "example-permissive",
+                "type": "python",
+                "version": "2.2.0",
+                "decision": "allow",
+                "licenses": [
+                  "MIT"
+                ],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:itsdangerous@2.2.0",
+                "name": "itsdangerous",
+                "type": "python",
+                "version": "2.2.0",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:jinja2@2.10",
+                "name": "jinja2",
+                "type": "python",
+                "version": "2.10",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:markupsafe@3.0.3",
+                "name": "markupsafe",
+                "type": "python",
+                "version": "3.0.3",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:chardet@3.0.4",
+                "name": "chardet",
+                "type": "python",
+                "version": "3.0.4",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:click@8.1.8",
+                "name": "click",
+                "type": "python",
+                "version": "8.1.8",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:click@8.4.2",
+                "name": "click",
+                "type": "python",
+                "version": "8.4.2",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:colorama@0.4.6",
+                "name": "colorama",
+                "type": "python",
+                "version": "0.4.6",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:idna@2.7",
+                "name": "idna",
+                "type": "python",
+                "version": "2.7",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:requests@2.19.1",
+                "name": "requests",
+                "type": "python",
+                "version": "2.19.1",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:urllib3@1.23",
+                "name": "urllib3",
+                "type": "python",
+                "version": "1.23",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:werkzeug@3.1.8",
+                "name": "werkzeug",
+                "type": "python",
+                "version": "3.1.8",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:certifi@2026.7.22",
+                "name": "certifi",
+                "type": "python",
+                "version": "2026.7.22",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:example-project@0.1.0",
+                "name": "example-project",
+                "type": "python",
+                "version": "0.1.0",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              },
+              {
+                "id": "python:flask@0.12",
+                "name": "flask",
+                "type": "python",
+                "version": "0.12",
+                "decision": "deny",
+                "licenses": [],
+                "locations": [
+                  "/uv.lock"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

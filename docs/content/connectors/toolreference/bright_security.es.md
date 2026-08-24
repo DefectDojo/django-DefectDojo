@@ -12,7 +12,7 @@ Necesitará una **API key** de Bright, creada en la aplicación Bright en **User
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://app.brightsec.com`, o ingrese explícitamente su host de Bright.
+1. Conserve el valor ya rellenado en **Location**, `https://app.brightsec.com`, o ingrese explícitamente su host de Bright.
 2. Ingrese la API key de Bright en el campo **Secret**.
 3. Opcionalmente, configure una **Minimum Severity** para limitar qué hallazgos se importan.
 

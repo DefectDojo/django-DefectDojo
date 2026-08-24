@@ -1,0 +1,65 @@
+{
+  "data": [
+    {
+      "id": "44444444-4444-4444-4444-444444444444",
+      "root_cause": {
+        "url": "https://app.example.com/old"
+      },
+      "severity": "HIGH",
+      "status": "REMEDIATED",
+      "variances": [
+        {
+          "id": "var-8",
+          "module": {
+            "id": "module-xss"
+          }
+        }
+      ]
+    },
+    {
+      "id": "55555555-5555-5555-5555-555555555555",
+      "root_cause": {
+        "url": "https://app.example.com/dupe"
+      },
+      "severity": "MEDIUM",
+      "status": "DUPLICATE",
+      "variances": []
+    },
+    {
+      "id": "66666666-6666-6666-6666-666666666666",
+      "root_cause": {
+        "url": "https://app.example.com/fp"
+      },
+      "severity": "LOW",
+      "status": "FALSE_POSITIVE",
+      "variances": []
+    },
+    {
+      "id": "77777777-7777-7777-7777-777777777777",
+      "root_cause": {
+        "url": "https://app.example.com/ignored"
+      },
+      "severity": "HIGH",
+      "status": "IGNORED",
+      "variances": []
+    }
+  ],
+  "modules": [
+    {
+      "id": "module-xss",
+      "name": "Cross-Site Scripting (XSS)",
+      "description": "<p>The application reflects input into the response without encoding.</p><script>alert('x')</script>"
+    },
+    {
+      "id": "module-sqli",
+      "name": "SQL Injection",
+      "description": "A parameter reaches a database query."
+    }
+  ],
+  "metadata": {
+    "index": 0,
+    "size": 50,
+    "total_data": 4,
+    "total_pages": 1
+  }
+}
