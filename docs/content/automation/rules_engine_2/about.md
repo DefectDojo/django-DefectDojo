@@ -21,6 +21,8 @@ The original [Rules Engine](/automation/rules_engine/about/) applies an ordered 
 * **Traceability.** Every execution is recorded node by node as a [Run](../runs/), and every outbound send is recorded as a [Delivery](../deliveries/) that says exactly what was sent, where it went, and how it ended.
 * **A simulate mode.** A rule can record precisely what it would send without sending anything, which is how you test one safely before it touches the outside world.
 
+Rules are not limited to Findings. An Asset (Product) rule reacts to Assets being created, updated or tagged, or sweeps them on a schedule, and can set their fields, move them between Organizations, tag and untag them, and place them in the Asset hierarchy. That makes recurring inventory work self-service: instead of a one-off migration to regroup Assets, a rule expresses the grouping and keeps enforcing it as new Assets arrive.
+
 Both engines run side by side. Turning on Rules Engine 2.0 does not disable or convert your existing rules, and there is a [converter](../converting_from_rules_engine/) for when you want to move them across.
 
 ## Enabling Rules Engine 2.0

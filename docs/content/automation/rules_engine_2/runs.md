@@ -129,3 +129,11 @@ Provenance survives the rule. Deleting a rule or a run keeps the timeline entrie
 ## Deleting rules with history
 
 A rule that has produced deliveries cannot be deleted out from under them. Delete the deliveries first, or keep the rule and disable it. This is intentional: deliveries hold the record of what was actually sent to external systems, and a cascade delete would take in-flight sends with it.
+
+## Asset runs
+
+A run of an Asset rule reads the same way a Finding run does, with the Asset surfaces in place of the Finding ones. The runs list's **Items Changed** and **Items Left Alone** counts link to the Assets list for an Asset run and to the Findings list for a Finding run, each filtered to exactly what that run touched or considered.
+
+The left-alone list carries the same caveat it does for Findings: for a scheduled or manual sweep it is the rule's scope evaluated now, minus what the run changed. An Asset created since the run appears there, and one the run moved out of scope does not.
+
+Every change an Asset rule makes is attributed to the rule, run and node that made it, and each Asset's own rules-engine history is available through the API at `/api/vue/rules_engine_v2/assets/{id}/provenance/`, the Asset twin of the Finding provenance timeline. Reading it follows Asset visibility: an Asset the caller cannot see answers 404 rather than an empty timeline.
