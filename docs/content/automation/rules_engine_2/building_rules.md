@@ -153,6 +153,8 @@ An **If / Filter** node holds a list of condition rows. Each row is a path, an o
 | `not_contains` | does not contain |
 | `in` | is one of |
 | `not_in` | is not one of |
+| `has` | includes (one of a multi-select custom field's stored options) |
+| `not_has` | does not include |
 | `gt` | is greater than |
 | `gte` | is greater than or equal to |
 | `lt` | is less than |
@@ -163,6 +165,23 @@ An **If / Filter** node holds a list of condition rows. Each row is a path, an o
 | `not_exists` | is not set |
 
 Comparisons are **loose**. A number is tried first, and if that fails the values are compared as trimmed, case-insensitive text. So a condition written as `finding.severity eq high` matches a Finding whose severity is `High`, which is almost always what the author meant.
+
+#### Custom fields
+
+With [Custom Fields](/asset_modelling/pro__custom_fields/) enabled, every custom field defined for the rule's kind of item is offered as a condition path too, under a `custom_fields` block:
+
+```
+finding.custom_fields.cost_center
+product.custom_fields.owner_team
+```
+
+A rule over Findings reads the Finding's custom fields and a rule over Assets reads the Asset's; there is no cross-kind path. A record holding no value for a field reads as not set, so `exists` and `not_exists` are how you condition on a field being filled in at all. The same paths work as `{{ }}` placeholders in templates.
+
+The field's data type decides which operators the editor offers: numbers take equality, list membership and ordering, dates take equality and ordering (against a `YYYY-MM-DD` value), booleans take equality, and a single-select offers equality and list membership over the field's own options. Text fields keep the full operator list.
+
+A **multi-select** field holds several options at once, and two operators exist for exactly that. `has` (*includes*) matches when the compared option is one of the stored ones, whole and exact: a Finding holding only `gdpr-eu` is not matched by `has gdpr`, where `contains` would match on the fragment. `not_has` (*does not include*) is its negation.
+
+"Includes **any of** several options" is one **If / Filter** node with one `has` row per option and **Match** set to `any`. To combine that with conditions that must all hold, chain two **If / Filter** nodes: the any-of rows in the first (Match `any`), everything else in the second (Match `all`).
 
 #### Transforms
 
