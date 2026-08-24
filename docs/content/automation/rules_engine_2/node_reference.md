@@ -8,7 +8,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine 2.0 is a DefectDojo Pro-only feature.</span>
 
-Rules Engine 2.0 ships 31 nodes in five categories. This page documents all of them.
+Rules Engine 2.0 ships 35 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -239,6 +239,35 @@ Sets the risk, overriding the computed one.
 |---------|---------|
 | **Risk** | `Low`, `Medium`, `Needs Action`, `Urgent` |
 
+### Set a Custom Field
+
+`finding.set_custom_field`
+
+Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_fields/) on the Finding. Offered only while Custom Fields is enabled, with one value control per field an administrator has defined for Findings.
+
+| Setting | Notes |
+|---------|-------|
+| **Field** | Which custom field to write. |
+| **Value** | Typed to the field: text takes a template with `{{finding.title}}` style placeholders, numbers take a number, dates take a `YYYY-MM-DD` date, booleans take true or false, and the select types offer the field's own options. |
+
+The value is checked against the field's current definition when the rule is saved and again on every run, so a rule can never write a value the field's data type refuses. A text template that renders empty for a Finding leaves that Finding untouched (removal is the Clear node's job), setting a multi-select replaces the whole stored list, and Findings already holding the value are left alone.
+
+Three behaviours worth knowing:
+
+* **Scope is the boundary.** Like every Findings node, the write applies to every Finding the trigger produced under the rule owner's visibility.
+* **A custom field write is not a Finding save.** Nothing that follows a Finding save runs: no SLA recomputation, no deduplication, no re-prioritization. A custom field edited by hand on a Finding's page does not wake **On Finding Event** rules either. A write made by a rule does cascade: other rules see it as an `updated` event, and later nodes in the same run read the new value.
+* **The field must still exist.** If the field is deleted after the rule was saved, the run errors naming it. If Custom Fields is switched off entirely, the node skips with the reason on its trace instead, so a saved rule never starts erroring over a feature flag.
+
+### Clear a Custom Field
+
+`finding.clear_custom_field`
+
+Removes one custom field's value from the Finding. The value it held is recorded on the Finding's provenance timeline, and a Finding holding no value counts as unchanged.
+
+| Setting | Notes |
+|---------|-------|
+| **Field** | Which custom field to clear. |
+
 ## Assets
 
 These nodes change Assets (Products). Like the Findings nodes, every change is attributed back to the rule, run and node that made it, and shows up on the Asset's provenance. They only join graphs whose trigger produces Assets.
@@ -300,6 +329,29 @@ Places the Asset under a parent in the Asset hierarchy, or removes its parent. A
 |---------|---------|-------|
 | **Action** | `Set Parent` | `Set Parent` or `Remove Parent`. |
 | **Parent** | none | The Asset to place these under. Shown while the action is Set Parent. |
+
+### Set a Custom Field
+
+`asset.set_custom_field`
+
+Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_fields/) on the Asset. The value control follows the field's data type exactly as the Findings node of the same name does (templates read `{{product.name}}` style paths), the same save-time and run-time validation applies, and a deleted field or a switched-off feature behaves the same.
+
+| Setting | Notes |
+|---------|-------|
+| **Field** | Which custom field to write. One entry per Asset custom field defined on the instance. |
+| **Value** | Typed to the field. |
+
+Two behaviours of its own: Assets the rule owner may not edit are counted on the node trace as `skipped_unauthorized` rather than touched, and the write lands on the custom field value rather than the Asset row itself, so nothing that follows an Asset edit runs. A custom field edited by hand does not wake **On Asset Event** rules; a write made by a rule still cascades as an `updated` event.
+
+### Clear a Custom Field
+
+`asset.clear_custom_field`
+
+Removes one custom field's value from the Asset, recording what it held on the Asset's provenance.
+
+| Setting | Notes |
+|---------|-------|
+| **Field** | Which custom field to clear. |
 
 ## Egress
 
