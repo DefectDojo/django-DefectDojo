@@ -112,6 +112,21 @@ All ensuing fields that can be edited are also available when the Asset is being
 
 ![image](images/assets_ss2.png)
 
+### Bulk Edit Assets
+
+Several Assets can be edited in one action from the All Assets list. Select the Assets using the checkboxes on the left of the list, then click **Bulk Edit** in the bar that appears above the table.
+
+The Bulk Edit form applies any combination of the following to every selected Asset:
+
+- **Organization**: moves the selected Assets to a different Organization. You need permission to add Assets to the destination Organization.
+- **SLA Configuration**
+- **Prioritization Engine**
+- **Tags**: added on top of each Asset's existing tags — nothing is removed.
+
+Leave a field empty to keep each Asset's current value. Assets you don't have edit permission for are skipped and counted in the result, as are Assets whose Findings are still being recalculated from an earlier SLA Configuration or Prioritization Engine change.
+
+![image](images/assets_bulk_edit.png)
+
 ### Export the Asset Inventory
 
 The All Assets list can be exported from the dropdown menu in the top-right corner, as CSV, Excel or JSON. The All Organizations list exports the same way.
