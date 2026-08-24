@@ -79,16 +79,25 @@ attributed to the user who triggered it.
 | Object                            | Create | Update | Delete | Notes                          |
 | --------------------------------- | :----: | :----: | :----: | ------------------------------ |
 | Enhanced Finding                  |   ✅   |   ✅   |   ✅   | Pro companion to Finding       |
+| Enhanced Risk Acceptance          |   ✅   |   ✅   |   ✅   | Pro companion to Risk Acceptance |
+| Risk Acceptance Finding Record    |   ✅   |   ✅   |   ✅   | Findings attached to a Risk Acceptance |
 | Rule                              |   ✅   |   ✅   |   ✅   | Rules engine                   |
 | Rule Action                       |   ✅   |   ✅   |   ✅   |                                |
 | Rule Action Condition             |   ✅   |   ✅   |   ✅   |                                |
 | Rule Filter Entry                 |   ✅   |   ✅   |   ✅   |                                |
 | Rules Engine Operation            |   ✅   |   ✅   |   ✅   |                                |
 | Rules Engine Operation Message    |   ✅   |   ✅   |   ✅   |                                |
+| Rules Engine 2.0 Rule             |   ✅   |   ✅   |   ✅   | Node based rules               |
+| Rules Engine 2.0 Delivery         |   ✅   |   ✅   |   ✅   | Entries in the Deliveries ledger |
 | Scheduled Task                    |   ✅   |   ✅   |   ✅   |                                |
 | Scheduled Task Run                |   ✅   |   ✅   |   ✅   |                                |
 | Mitigation Policy                 |   ✅   |   ✅   |   ✅   |                                |
+| Work Assignment                   |   ✅   |   ✅   |   ✅   | Findings and Risk Acceptances assigned to a person |
+| CMMC Assessment                   |   ✅   |   ✅   |   ✅   |                                |
 | Tunable Setting                   |   ✅   |   ✅   |   ✅   | System configuration changes   |
+| Custom Field Definition           |   ✅   |   ✅   |   ✅   | The custom field itself        |
+| Custom Field Value                |   ✅   |   ✅   |   ✅   | Values filled in on a record   |
+| Form Configuration                |   ✅   |   ✅   |   ✅   | Create and edit form settings  |
 | Feature Flag State                |   ✅   |   ✅   |   ✅   | Flag toggles + system pins     |
 | Feature Flag Definition           |   ✅   |   ✅   |   ✅   | Metadata / registry sync       |
 | Cloud Firewall                    |   ✅   |   ✅   |   ✅   | `locked` field excluded        |
@@ -100,6 +109,7 @@ attributed to the user who triggered it.
 | ----------------------------- | :----: | :----: | :----: |
 | Group                         |   ✅   |   ✅   |   ✅   |
 | Role                          |   ✅   |   ✅   |   ✅   |
+| Role permissions              |   ✅   |   ✅   |   ✅   |
 | Group Membership              |   ✅   |   ✅   |   ✅   |
 | Global Role                   |   ✅   |   ✅   |   ✅   |
 | Asset Group Assignment      |   ✅   |   ✅   |   ✅   |
