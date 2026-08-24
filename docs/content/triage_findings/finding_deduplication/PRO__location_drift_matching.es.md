@@ -1,5 +1,5 @@
 ---
-title: Coincidencia por desplazamiento de ubicación (Pro)
+title: Coincidencia por desplazamiento de ubicación
 description: 'Rastree los hallazgos a medida que sus ubicaciones cambian entre reimportaciones:
   los desplazamientos de línea, los renombrados de archivo, los cambios de URL y los
   cambios de versión de dependencias ya no cierran ni recrean hallazgos'

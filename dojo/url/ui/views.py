@@ -24,7 +24,12 @@ from dojo.forms import (
     ImportEndpointMetaForm,
 )
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
+from dojo.location.queries import (
+    annotate_location_counts_and_status,
+    get_authorized_locations,
+    locations_shared_outside,
+    remove_location_references,
+)
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
 from dojo.product.queries import get_authorized_products
@@ -326,6 +331,15 @@ def edit_endpoint(request, location_id):
         # Handle form submission for editing an endpoint
         form = URLForm(request.POST, instance=location.url)
         if form.is_valid():
+            editable_products = get_authorized_products(Permissions.Location_Edit, request.user)
+            if locations_shared_outside(Location.objects.filter(id=location.id), editable_products).exists():
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "This endpoint is also recorded by another product, so it cannot be renamed here.",
+                    extra_tags="alert-danger",
+                )
+                return HttpResponseRedirect(reverse("view_endpoint", args=(location.id,)))
             try:
                 form.save(update_only=True)
             except ValidationError:
@@ -402,8 +416,10 @@ def delete_endpoint(request, location_id):
     if request.method == "POST":
         form = DeleteEndpointForm(request.POST, instance=location)
         if form.is_valid():
-            # Delete the location, which will also cascade delete related findings and product references
-            location.delete()
+            remove_location_references(
+                Location.objects.filter(id=location.id),
+                get_authorized_products(Permissions.Location_Delete, request.user),
+            )
             messages.add_message(
                 request, messages.SUCCESS, _("Endpoint and relationships removed."), extra_tags="alert-success",
             )
@@ -529,8 +545,11 @@ def endpoint_bulk_update_all(request, product_id=None):
             locations = get_authorized_locations("delete", locations, request.user)
             skipped_location_count = total_location_count - locations.count()
             deleted_location_count = locations.count()
-            # This will also delete related finding and product location references via cascade
-            locations.delete()
+            if product_id is not None:
+                reference_products = Product.objects.filter(id=product_id)
+            else:
+                reference_products = get_authorized_products(Permissions.Location_Delete, request.user)
+            remove_location_references(locations, reference_products)
             # Notify user if any locations were skipped due to lack of authorization
             if skipped_location_count > 0:
                 add_error_message_to_response(

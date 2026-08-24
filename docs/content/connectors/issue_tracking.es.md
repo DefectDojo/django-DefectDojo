@@ -2,7 +2,7 @@
 title: Integración de seguimiento de incidencias
 description: Sincronice los hallazgos de DefectDojo con su sistema de seguimiento
   de incidencias para agilizar la remediación y la rendición de cuentas.
-weight: 5
+weight: 6
 aliases:
 - /es/issue_tracking/
 - /es/issue_tracking/intro/
@@ -16,7 +16,7 @@ Las integraciones de seguimiento de incidencias de DefectDojo conectan sus flujo
 | Edición      | Integraciones de seguimiento de incidencias admitidas |
 |--------------|---------------------------------------|
 | Community Edition  | * [Jira](/connectors/os_jira/os__jira_guide/)                          |
-| Pro          | * [Jira](/connectors/downstream/downstream_toolreference/#jira) ([guía heredada](/connectors/downstream/pro__jira_guide/))<br>* [Azure DevOps](/connectors/downstream/downstream_toolreference/#azure-devops-boards)<br>* [Bitbucket](/connectors/downstream/downstream_toolreference/#bitbucket)<br>* [Freshservice](/connectors/downstream/downstream_toolreference/#freshservice)<br>* [GitHub](/connectors/downstream/downstream_toolreference/#github)<br>* [GitLab Boards](/connectors/downstream/downstream_toolreference/#gitlab)<br>* [Linear](/connectors/downstream/downstream_toolreference/#linear)<br>* [PagerDuty](/connectors/downstream/downstream_toolreference/#pagerduty)<br>* [ServiceDesk Plus](/connectors/downstream/downstream_toolreference/#servicedesk-plus)<br>* [ServiceNow](/connectors/downstream/downstream_toolreference/#servicenow)<br>* [Shortcut](/connectors/downstream/downstream_toolreference/#shortcut)<br>* [Zendesk](/connectors/downstream/downstream_toolreference/#zendesk) |
+| Pro          | * [Jira](/connectors/toolreference/jira/) ([guía heredada](/connectors/downstream/pro__jira_guide/))<br>* [Azure DevOps](/connectors/toolreference/azure_devops_boards/)<br>* [Bitbucket](/connectors/toolreference/bitbucket/#downstream-connector)<br>* [Freshservice](/connectors/toolreference/freshservice/)<br>* [GitHub](/connectors/toolreference/github/#downstream-connector)<br>* [GitLab Boards](/connectors/toolreference/gitlab/#downstream-connector)<br>* [Linear](/connectors/toolreference/linear/)<br>* [PagerDuty](/connectors/toolreference/pagerduty/)<br>* [ServiceDesk Plus](/connectors/toolreference/servicedesk_plus/)<br>* [ServiceNow](/connectors/toolreference/servicenow/)<br>* [Shortcut](/connectors/toolreference/shortcut/)<br>* [Zendesk](/connectors/toolreference/zendesk/) |
 
 
 Cuando está habilitada, DefectDojo puede crear incidencias automáticamente, o de forma selectiva desde Productos o Compromisos. A medida que los Hallazgos se actualizan en DefectDojo —resueltos, mitigados o reactivados—, las incidencias correspondientes se pueden mantener sincronizadas, garantizando que ambos sistemas reflejen el estado actual del riesgo.

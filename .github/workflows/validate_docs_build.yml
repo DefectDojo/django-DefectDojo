@@ -35,6 +35,18 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Check front matter titles for (Pro) / (Open Source)
+        # Page titles must not hardcode the edition — that's what the
+        # `audience` front matter field is for.
+        run: |
+          set -euo pipefail
+          if grep -rEn --include='*.md' '^title:.*\((Pro|Open Source)\)' docs/content/; then
+            echo >&2
+            echo 'Found front matter titles hardcoding "(Pro)" or "(Open Source)".' >&2
+            echo 'Remove the suffix from the title and use the "audience" front matter field instead.' >&2
+            exit 1
+          fi
+
       - name: Test the build process
         env:
           HUGO_ENVIRONMENT: production

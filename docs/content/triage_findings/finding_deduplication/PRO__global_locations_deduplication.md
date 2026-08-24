@@ -1,5 +1,5 @@
 ---
-title: "Global Locations Deduplication (Pro)"
+title: "Global Locations Deduplication"
 description: "Deduplicate Findings by shared location (URL or dependency) across all Assets"
 weight: 6
 audience: pro

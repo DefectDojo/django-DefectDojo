@@ -169,7 +169,7 @@ Cela signifie qu'une même vulnérabilité peut recevoir un score de Priorité o
 
 ### Relations Jira / Connecteur en aval
 
-Les Actifs peuvent être associés directement à des instances [Jira](/connectors/downstream/pro__jira_guide/#main-content) ou d'[Intégrateurs](/connectors/downstream/downstream_toolreference/#main-content) (par ex. GitHub, GitLab, ServiceNow, etc.), qui poussent les Constatations de l'Actif vers l'extérieur, dans des systèmes externes de gestion de tickets/travail.
+Les Actifs peuvent être associés directement à des instances [Jira](/connectors/downstream/pro__jira_guide/#main-content) ou d'[Intégrateurs](/connectors/toolreference/downstream/#main-content) (par ex. GitHub, GitLab, ServiceNow, etc.), qui poussent les Constatations de l'Actif vers l'extérieur, dans des systèmes externes de gestion de tickets/travail.
 
 Étant donné que les Constatations héritent du risque, de la priorité et de la propriété de leur Actif parent, l'Actif détermine effectivement le contexte de remédiation qui alimente les tickets Jira et les flux de travail des Connecteurs en aval.
 
