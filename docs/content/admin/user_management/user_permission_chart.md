@@ -76,6 +76,7 @@ The majority of Configuration Permissions give users access to certain pages in 
 | Questionnaires | Access the **Questionnaires \> All Questionnaires** page | Add a new Questionnaire | Edit an existing Questionnaire | Delete a Questionnaire |
 | Questions | Access the **Questionnaires \> Questions** page | Add a new Question | Edit an existing Question | n/a |
 | Regulations | n/a | Add a Regulation to the **⚙️Configuration \> Regulations** page | Edit an existing Regulation | Delete a Regulation |
+| Rules Engine | Access the **Rules Engine 2.0** sidebar section and everything under it (All Rules, Runs, and Deliveries) | Create a rule, including converting one from the original Rules Engine | Change, enable, schedule, run, replay, or take ownership of an existing rule | Delete a rule |
 | Scheduling Service Schedule | Access the **Scheduling** page | Superuser only | Edit an existing Schedule (change trigger, enable/disable) | Delete a Schedule |
 | SLA Configuration | Access the **⚙️Configuration \> SLA Configuration** page | Add a new SLA Configuration | Edit an existing SLA Configuration | Delete an SLA Configuration |
 | Test Types | n/a | Add a new Test Type (under **Engagements \> Test Types**) | Edit an existing Test Type | n/a |

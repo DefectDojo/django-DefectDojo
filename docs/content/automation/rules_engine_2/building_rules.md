@@ -46,26 +46,41 @@ A node with several incoming edges receives all of their outputs concatenated.
 
 Preview runs the real engine, not a simulation of it, and then rolls the whole thing back. Nothing is written, no run is recorded, and egress is forced to simulate whatever the rule's mode says. It is the fastest way to check that your conditions match what you expected.
 
-Preview is the one execution that caps how many Findings it looks at, so that it stays fast. When it truncates, it says so in the trace. A real run has no such cap.
+Preview is the one execution that caps how many items it looks at, so that it stays fast. When it truncates, it says so in the trace. A real run has no such cap.
+
+## What a rule works on
+
+Every rule works on one kind of item, and its trigger decides which:
+
+* **On Finding Event** makes a Finding rule: Finding items flow along the edges, and the Findings nodes change them.
+* **On Asset Event** makes an Asset rule: Asset (Product) items flow instead, and the Assets nodes change them.
+* **On a Schedule** and **Manual Run** carry a **Sweep Over** setting that picks either kind. Rules saved before this setting existed sweep Findings, exactly as they always did.
+
+The editor enforces this as you build. Nodes that do not apply to the trigger are dimmed in the palette with a tooltip saying why, and a connection to an incompatible node will not complete. The same rule is enforced on save and on every run, so a graph cannot mix kinds however it was produced.
+
+Two categories work on either kind: **Logic** nodes route and trim whatever flows through them, and the notification **Egress** nodes (Slack, Teams, email, SNS, webhook, in-app alert) send about either. Three nodes stay Finding-only on purpose: **De-duplicate Within Run** (de-duplication is a Finding concept), and the **ticket** and **report** nodes (tickets and reports track Findings).
+
+The scope editor follows the kind too: a Finding trigger's scope opens the Findings list, and an Asset trigger's scope opens the Assets list, each in the same filter vocabulary its list page uses. Conditions and message templates offer the matching field paths (`finding.*` in a Finding rule, `product.*` in an Asset rule), and the insert menu only offers paths the rule's items actually carry.
 
 ## Triggers and scope
 
-Every graph starts with one of three triggers.
+Every graph starts with one of four triggers.
 
 * **On Finding Event** wakes the rule when Findings are created, updated, closed or reopened. Choose which of those in the node's **Event** setting, or `any` for all four.
-* **On a Schedule** sweeps Findings on a recurring schedule.
-* **Manual Run** sweeps Findings when you press **Run** on the rule.
+* **On Asset Event** wakes the rule when Assets are created or updated, tag changes included.
+* **On a Schedule** sweeps everything in scope on a recurring schedule, Findings or Assets per its **Sweep Over** setting.
+* **Manual Run** sweeps everything in scope when you press **Run** on the rule, Findings or Assets per its **Sweep Over** setting.
 
 ### Scope
 
-All three triggers take a **Scope**, and scope is how you narrow what the rule considers. It is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here.
+Every trigger takes a **Scope**, and scope is how you narrow what the rule considers. For a Finding rule it is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here. For an Asset rule it is the Assets list's own filters instead.
 
 Two things about scope are worth understanding:
 
-* **Scope is applied on top of authorization, never instead of it.** The rule runs as its owner, so scope narrows an already-authorized set of Findings. Leaving scope empty does not mean "every Finding in the instance", it means "every Finding the rule owner can see".
-* **An invalid scope fails the run rather than widening it.** If a filter key does not exist, or a value is one the filter would silently discard, the run errors out. A rule that does nothing is recoverable. A rule that quietly edits every Finding in the instance is not.
+* **Scope is applied on top of authorization, never instead of it.** The rule runs as its owner, so scope narrows an already-authorized set. Leaving scope empty does not mean "everything in the instance", it means "everything the rule owner can see".
+* **An invalid scope fails the run rather than widening it.** If a filter key does not exist, or a value is one the filter would silently discard, the run errors out. A rule that does nothing is recoverable. A rule that quietly edits everything in the instance is not.
 
-For an event trigger, scope acts as a second gate: the Findings named in the event are matched against it, and only those that pass enter the graph.
+For an event trigger, scope acts as a second gate: the Findings or Assets named in the event are matched against it, and only those that pass enter the graph.
 
 ### Scheduling
 
@@ -97,6 +112,8 @@ ctx.rule_name
 ```
 
 A path that does not resolve produces no value rather than an error.
+
+An Asset rule reads its items the same way, through `product.*`, `product_type.*` and `ctx.*` paths. `ctx.changed_fields` carries the names of the fields an update changed, and the insert menu only offers paths the rule's items actually carry.
 
 ### Conditioning on an exception
 
@@ -153,6 +170,8 @@ An **If / Filter** node holds a list of condition rows. Each row is a path, an o
 | `not_contains` | does not contain |
 | `in` | is one of |
 | `not_in` | is not one of |
+| `has` | includes (one of a multi-select custom field's stored options) |
+| `not_has` | does not include |
 | `gt` | is greater than |
 | `gte` | is greater than or equal to |
 | `lt` | is less than |
@@ -163,6 +182,23 @@ An **If / Filter** node holds a list of condition rows. Each row is a path, an o
 | `not_exists` | is not set |
 
 Comparisons are **loose**. A number is tried first, and if that fails the values are compared as trimmed, case-insensitive text. So a condition written as `finding.severity eq high` matches a Finding whose severity is `High`, which is almost always what the author meant.
+
+#### Custom fields
+
+With [Custom Fields](/asset_modelling/pro__custom_fields/) enabled, every custom field defined for the rule's kind of item is offered as a condition path too, under a `custom_fields` block:
+
+```
+finding.custom_fields.cost_center
+product.custom_fields.owner_team
+```
+
+A rule over Findings reads the Finding's custom fields and a rule over Assets reads the Asset's; there is no cross-kind path. A record holding no value for a field reads as not set, so `exists` and `not_exists` are how you condition on a field being filled in at all. The same paths work as `{{ }}` placeholders in templates.
+
+The field's data type decides which operators the editor offers: numbers take equality, list membership and ordering, dates take equality and ordering (against a `YYYY-MM-DD` value), booleans take equality, and a single-select offers equality and list membership over the field's own options. Text fields keep the full operator list.
+
+A **multi-select** field holds several options at once, and two operators exist for exactly that. `has` (*includes*) matches when the compared option is one of the stored ones, whole and exact: a Finding holding only `gdpr-eu` is not matched by `has gdpr`, where `contains` would match on the fragment. `not_has` (*does not include*) is its negation.
+
+"Includes **any of** several options" is one **If / Filter** node with one `has` row per option and **Match** set to `any`. To combine that with conditions that must all hold, chain two **If / Filter** nodes: the any-of rows in the first (Match `any`), everything else in the second (Match `all`).
 
 #### Transforms
 

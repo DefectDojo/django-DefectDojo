@@ -1,5 +1,5 @@
 ---
-title: Deduplicación de componente global (Pro)
+title: Deduplicación de componente global
 description: Deduplique los Hallazgos de Análisis de Composición de Software por nombre
   y versión de componente en todos los Productos
 weight: 5

@@ -1,5 +1,5 @@
 ---
-title: Correlación de causa raíz (Pro)
+title: Correlación de causa raíz
 description: Agrupe los Hallazgos que comparten una causa raíz -- el mismo componente
   vulnerable, CVE, recurso de infraestructura o debilidad en una URL -- para poder
   rastrear una sola corrección hasta cada Hallazgo que resuelve

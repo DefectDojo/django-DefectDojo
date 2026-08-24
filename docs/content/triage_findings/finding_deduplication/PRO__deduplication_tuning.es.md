@@ -1,5 +1,5 @@
 ---
-title: Ajuste de la deduplicación (Pro)
+title: Ajuste de la deduplicación
 description: Configure cómo DefectDojo identifica y gestiona los hallazgos duplicados
 weight: 4
 audience: pro

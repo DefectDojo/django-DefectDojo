@@ -1,5 +1,5 @@
 ---
-title: "Deduplication Tuning (Open Source)"
+title: "Deduplication Tuning"
 description: "Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service"
 weight: 5
 audience: opensource
