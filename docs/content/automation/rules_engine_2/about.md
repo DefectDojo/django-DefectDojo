@@ -39,12 +39,20 @@ Once the flag is on, a **Rules Engine 2.0** section appears in the sidebar with 
 
 ### Permissions
 
-Access is governed by two global role permissions, shared with the original Rules Engine:
+Access is governed by four global role permissions, shared with the original Rules Engine:
 
 * **Rule View** is required to see the sidebar section and everything under it.
-* **Rule Edit** is required to create, change, run, delete, convert, take ownership of, and replay.
+* **Rule Add** is required to create a rule, including converting one from the original Rules Engine.
+* **Rule Edit** is required to change, enable, schedule, run, replay, or take ownership of an existing rule.
+* **Rule Delete** is required to delete a rule.
 
-Rule Edit is close to an administrative permission. A rule author can reach any Finding their rule's owner can see, and can direct output at external systems, so grant it deliberately.
+Validating and previewing a rule are accepted with either authoring permission, Rule Add or Rule Edit.
+
+Rule Add and Rule Edit are close to administrative permissions. A rule author can reach any Finding their rule's owner can see, and can direct output at external systems, so grant them deliberately.
+
+All four are strict global permissions: a grant counts only when the role is held as a global role, never when it is held as an Organization or Asset membership role. Superusers keep access regardless.
+
+If you are upgrading, a role that already held Rule Edit keeps the ability to create and delete rules, so nobody loses access. No built-in role gains rule access on upgrade.
 
 ## The concepts
 
