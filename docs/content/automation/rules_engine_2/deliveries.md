@@ -111,8 +111,19 @@ Remember that Simulate holds back **only** the outbound sends. Findings nodes st
 
 Deliveries are kept for **180 days** by default, after which a retention job prunes them.
 
-This is the fastest-growing table in the feature, because a node sending one message per Finding writes a row per Finding, in Simulate mode as well as Live. The default is a real window rather than "keep everything", so the growth does not quietly become your problem.
+This is the fastest-growing table in the feature, because a node sending one message per item writes a row per item, in Simulate mode as well as Live. The default is a real window rather than "keep everything", so the growth does not quietly become your problem.
 
 You are told about it rather than left to discover it. A delivery's detail shows the retention window and the date that row will be deleted, and the date is recalculated on read, so changing the window takes effect immediately.
 
 Set the window longer if you need a longer outbound audit trail, or to `0` to keep everything. See [Configuration](../configuration/#retention).
+
+## Deliveries from Asset rules
+
+A notification sent by an Asset rule lands in the outbox like any other delivery. A per-item send names its Asset the way a per-Finding send names its Finding, and the row links to the Asset.
+
+Visibility follows the row's subject. A row about one Asset is visible to anyone who can view that Asset. A batch row (a digest) has no single subject and quotes the names of everything its send covered, so it stays behind the global Finding viewing grant, exactly as Finding digests do.
+
+Two rendering details worth knowing when reading recorded payloads:
+
+- An Asset digest counts its batch by business criticality ("7 asset(s): 2 very high, 5 unclassified") where a Finding digest counts by severity.
+- A webhook body from an Asset rule carries `"entity": "asset"` and an `assets` list with each Asset's identifying fields; its `findings` list is present and empty, so a receiver written against the Finding shape keeps parsing.
