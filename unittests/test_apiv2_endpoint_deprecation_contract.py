@@ -6,12 +6,15 @@ Three customer automations produced an hourly 500 flood because the deprecated
 named routes were fixed in 3.2.100; these tests hold them there and check that
 no other registered route has quietly picked the fault up.
 """
+
 from django.contrib.auth.models import User
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APIRequestFactory
 
+from dojo.api_v2.exception_handler import custom_exception_handler
+from dojo.endpoint.models import EndpointDeprecatedError
 from dojo.location.models import LocationProductReference
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
@@ -37,10 +40,10 @@ from .test_rest_framework import BASE_API_URL
 # Routes that are not plain list routes. Every entry is a route this sweep stops
 # protecting, so keep the list short and justified.
 SWEEP_EXEMPT = {
-    "import-scan",           # POST-only
-    "reimport-scan",         # POST-only
+    "import-scan",  # POST-only
+    "reimport-scan",  # POST-only
     "endpoint_meta_import",  # POST-only, multipart
-    "import-languages",      # POST-only
+    "import-languages",  # POST-only
 }
 
 
@@ -50,7 +53,9 @@ class ApiV2EndpointDeprecationSweep(DojoTestCase):
     def setUp(self):
         super().setUp()
         self.admin = User.objects.create(
-            username="apiv2_sunset_admin", is_staff=True, is_superuser=True,
+            username="apiv2_sunset_admin",
+            is_staff=True,
+            is_superuser=True,
         )
         UserContactInfo.objects.create(user=self.admin, block_execution=True)
         token, _ = Token.objects.get_or_create(user=self.admin)
@@ -59,32 +64,47 @@ class ApiV2EndpointDeprecationSweep(DojoTestCase):
 
         product_type = Product_Type.objects.create(name="Sunset Org")
         self.product = Product.objects.create(
-            name="Sunset Product", description="regression fixture", prod_type=product_type,
+            name="Sunset Product",
+            description="regression fixture",
+            prod_type=product_type,
         )
         engagement = Engagement.objects.create(
-            name="Sunset Eng", product=self.product,
-            target_start=timezone.now(), target_end=timezone.now(),
+            name="Sunset Eng",
+            product=self.product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
         )
         test = Test.objects.create(
             engagement=engagement,
             test_type=Test_Type.objects.get_or_create(name="Manual Test")[0],
-            target_start=timezone.now(), target_end=timezone.now(),
+            target_start=timezone.now(),
+            target_end=timezone.now(),
         )
         self.finding = Finding.objects.create(
-            test=test, title="Sunset finding", severity="High",
-            description="regression fixture", mitigation="n/a", impact="n/a",
-            reporter=self.admin, active=True, verified=True,
+            test=test,
+            title="Sunset finding",
+            severity="High",
+            description="regression fixture",
+            mitigation="n/a",
+            impact="n/a",
+            reporter=self.admin,
+            active=True,
+            verified=True,
         )
         test_import = Test_Import.objects.create(test=test, type=Test_Import.IMPORT_TYPE)
         Test_Import_Finding_Action.objects.create(
-            test_import=test_import, finding=self.finding, action=IMPORT_CREATED_FINDING,
+            test_import=test_import,
+            finding=self.finding,
+            action=IMPORT_CREATED_FINDING,
         )
 
         # A migrated tenant still carries legacy Endpoint rows. Without one, every
         # test below passes with nothing to hydrate.
         with Endpoint.allow_endpoint_init():
             endpoint = Endpoint(
-                product=self.product, protocol="https", host="legacy-sunset.example.com",
+                product=self.product,
+                protocol="https",
+                host="legacy-sunset.example.com",
             )
             endpoint.save()
             Endpoint_Status(endpoint=endpoint, finding=self.finding).save()
@@ -93,7 +113,8 @@ class ApiV2EndpointDeprecationSweep(DojoTestCase):
         url.clean()
         saved = URL.bulk_get_or_create([url])
         LocationProductReference.objects.create(
-            location=saved[0].location, product=self.product,
+            location=saved[0].location,
+            product=self.product,
             status=ProductLocationStatus.Active,
         )
 
@@ -128,3 +149,67 @@ class ApiV2EndpointDeprecationSweep(DojoTestCase):
                 failures.append((prefix, response.status_code))
 
         self.assertEqual(failures, [], f"v2 routes answered 5xx: {failures}")
+
+
+@skip_unless_v3
+@override_settings(SECURE_SSL_REDIRECT=False)
+class ApiV2EndpointSunsetBackstop(DojoTestCase):
+
+    """
+    Any v2 path that still reaches the deprecated Endpoint model must answer the
+    documented sunset contract, not a 500. This is the floor: a path nobody
+    converted still answers 410.
+    """
+
+    def test_endpoint_init_raises_a_dedicated_subclass(self):
+        """The backstop matches on a type, so the guard must raise its own class."""
+        with self.assertRaises(EndpointDeprecatedError):
+            Endpoint(host="sunset.example.com")
+
+        # Existing `except NotImplementedError` handlers must keep working.
+        self.assertTrue(issubclass(EndpointDeprecatedError, NotImplementedError))
+
+    def test_a_path_that_hydrates_an_endpoint_answers_410(self):
+        context = {"request": APIRequestFactory().get("/api/v2/findings/")}
+        response = custom_exception_handler(EndpointDeprecatedError("boom"), context)
+
+        self.assertEqual(response.status_code, 410)
+        self.assertEqual(response.data["code"], "endpoint_api_sunset")
+        self.assertEqual(response.data["replacement"], "/api/v2/location/")
+        self.assertEqual(
+            response.data["docs"],
+            "https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/",
+        )
+        self.assertIn("Locations", response.data["message"])
+
+    def test_an_unrelated_not_implemented_error_still_answers_500(self):
+        """The backstop must be narrow. A genuine bug must stay a 500."""
+        context = {"request": APIRequestFactory().get("/api/v2/findings/")}
+        response = custom_exception_handler(NotImplementedError("a real bug"), context)
+
+        self.assertEqual(response.status_code, 500)
+
+    def test_the_shipped_403_on_writes_is_unchanged(self):
+        """
+        The backstop must not move the documented write contract.
+
+        Writes answer 403 today and the migration guide says so. Changing that is
+        a separate decision for a minor release.
+        """
+        admin = User.objects.create(
+            username="apiv2_sunset_403_admin",
+            is_staff=True,
+            is_superuser=True,
+        )
+        UserContactInfo.objects.create(user=admin, block_execution=True)
+        token, _ = Token.objects.get_or_create(user=admin)
+        api_client = APIClient()
+        api_client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        response = api_client.post(
+            f"{BASE_API_URL}/endpoints/",
+            {"host": "write.example.com"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403, response.content)
