@@ -173,8 +173,10 @@ class TestInjectableCandidateScope(DojoTestCase):
 
     def test_supplied_scope_still_prefers_the_older_candidate(self):
         """Widening the scope does not weaken the never-link-to-a-newer-finding rule."""
-        newer_candidate = self._create_finding(self.test_b, "Ordering newer candidate")
+        # Creation order is the assertion here: the target must exist BEFORE the only
+        # candidate, so the candidate is the newer of the two and cannot be its original.
         target = self._create_finding(self.test_a, "Ordering target")
+        newer_candidate = self._create_finding(self.test_b, "Ordering newer candidate")
 
         matches = match_batch_hash_code([target], candidate_qs=Finding.objects.all())
 
