@@ -1,0 +1,130 @@
+"""
+The api/v2 contract on a V3-Locations tenant.
+
+Three customer automations produced an hourly 500 flood because the deprecated
+``Endpoint`` model raises on init and nothing on the v2 surface caught it. Both
+named routes were fixed in 3.2.100; these tests hold them there and check that
+no other registered route has quietly picked the fault up.
+"""
+from django.contrib.auth.models import User
+from django.test import override_settings
+from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
+
+from dojo.location.models import LocationProductReference
+from dojo.location.status import ProductLocationStatus
+from dojo.models import (
+    IMPORT_CREATED_FINDING,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    Test,
+    Test_Import,
+    Test_Import_Finding_Action,
+    Test_Type,
+    UserContactInfo,
+)
+from dojo.url.models import URL
+from dojo.urls import v2_api
+
+from .dojo_test_case import DojoTestCase, skip_unless_v3
+from .test_rest_framework import BASE_API_URL
+
+# Routes that are not plain list routes. Every entry is a route this sweep stops
+# protecting, so keep the list short and justified.
+SWEEP_EXEMPT = {
+    "import-scan",           # POST-only
+    "reimport-scan",         # POST-only
+    "endpoint_meta_import",  # POST-only, multipart
+    "import-languages",      # POST-only
+}
+
+
+@skip_unless_v3
+@override_settings(SECURE_SSL_REDIRECT=False)
+class ApiV2EndpointDeprecationSweep(DojoTestCase):
+    def setUp(self):
+        super().setUp()
+        self.admin = User.objects.create(
+            username="apiv2_sunset_admin", is_staff=True, is_superuser=True,
+        )
+        UserContactInfo.objects.create(user=self.admin, block_execution=True)
+        token, _ = Token.objects.get_or_create(user=self.admin)
+        self.api_client = APIClient()
+        self.api_client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        product_type = Product_Type.objects.create(name="Sunset Org")
+        self.product = Product.objects.create(
+            name="Sunset Product", description="regression fixture", prod_type=product_type,
+        )
+        engagement = Engagement.objects.create(
+            name="Sunset Eng", product=self.product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=Test_Type.objects.get_or_create(name="Manual Test")[0],
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        self.finding = Finding.objects.create(
+            test=test, title="Sunset finding", severity="High",
+            description="regression fixture", mitigation="n/a", impact="n/a",
+            reporter=self.admin, active=True, verified=True,
+        )
+        test_import = Test_Import.objects.create(test=test, type=Test_Import.IMPORT_TYPE)
+        Test_Import_Finding_Action.objects.create(
+            test_import=test_import, finding=self.finding, action=IMPORT_CREATED_FINDING,
+        )
+
+        # A migrated tenant still carries legacy Endpoint rows. Without one, every
+        # test below passes with nothing to hydrate.
+        with Endpoint.allow_endpoint_init():
+            endpoint = Endpoint(
+                product=self.product, protocol="https", host="legacy-sunset.example.com",
+            )
+            endpoint.save()
+            Endpoint_Status(endpoint=endpoint, finding=self.finding).save()
+
+        url = URL(protocol="https", host="loc-sunset.example.com")
+        url.clean()
+        saved = URL.bulk_get_or_create([url])
+        LocationProductReference.objects.create(
+            location=saved[0].location, product=self.product,
+            status=ProductLocationStatus.Active,
+        )
+
+    def test_shift_left_and_teambank_endpoints_list(self):
+        """The exact failing request: GET /api/v2/endpoints/?limit=500."""
+        response = self.api_client.get(f"{BASE_API_URL}/endpoints/?limit=500", format="json")
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIn("results", response.json())
+
+    def test_personio_ordered_test_imports_list(self):
+        """The exact failing request: an ordered GET /api/v2/test_imports/."""
+        response = self.api_client.get(f"{BASE_API_URL}/test_imports/?o=id", format="json")
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIn("results", response.json())
+
+    def test_no_registered_v2_list_route_answers_5xx(self):
+        """
+        The audit, as a running check.
+
+        A route that hydrates a legacy Endpoint raises and lands in the exception
+        handler's unknown-exception branch, which answers 500. This sweep is what
+        makes "zero unhandled paths" checkable rather than a claim.
+        """
+        failures = []
+        for prefix, _viewset, _basename in v2_api.registry:
+            if prefix in SWEEP_EXEMPT:
+                continue
+            response = self.api_client.get(f"{BASE_API_URL}/{prefix}/", format="json")
+            if response.status_code >= 500:
+                failures.append((prefix, response.status_code))
+
+        self.assertEqual(failures, [], f"v2 routes answered 5xx: {failures}")
