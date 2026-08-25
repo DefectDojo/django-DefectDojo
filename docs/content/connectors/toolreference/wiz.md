@@ -26,8 +26,8 @@ The service account must meet all of the following requirements. A service accou
 
 Wiz serves two different data classes, and the connector imports both by default:
 
-* **Issues** — a Wiz Control fired on a resource. These are policy and posture violations. A typical tenant has hundreds or thousands.
-* **Vulnerability Findings** — one CVE on one package on one asset. A tenant with a few thousand assets can hold millions, because each asset carries many packages and each package can carry many CVEs.
+* **Issues**: a Wiz Control fired on a resource. These are policy and posture violations. A typical tenant has hundreds or thousands.
+* **Vulnerability Findings**: one CVE on one package on one asset. A tenant with a few thousand assets can hold millions. Each asset carries many packages, and each package can carry many CVEs.
 
 If your DefectDojo finding count is far higher than your asset count, Vulnerability Findings are the reason. That is expected: a finding is one problem on one asset, not one asset.
 
@@ -35,7 +35,7 @@ Deselect **Vulnerability Findings** to import Issues only. The connector then sk
 
 Two things to know before you change this setting:
 
-* **Changing it triggers one full resync.** The connector normally asks Wiz only for what changed since the last sync. That cursor is cleared when you change the selection, so the next sync re-reads everything. Without the reset, re-enabling a data class would never backfill the rows it skipped while it was off.
-* **Deselecting a data class closes its existing findings.** The next sync sends none of that class, and DefectDojo closes what it no longer receives. If you turn off Vulnerability Findings on a connector that already imported a million of them, that sync closes a million findings.
+* **Changing it triggers one full resync.** The connector normally asks Wiz only for what changed since the last sync. That cursor is cleared when you change the selection, so the next sync re-reads everything. Without the reset, re-enabling a data class never backfills the rows it skipped while it was off.
+* **Deselecting a data class closes its existing findings.** The next sync sends none of that class, and DefectDojo closes what it no longer receives. Suppose you turn off Vulnerability Findings on a connector that already imported a million of them. That sync closes all one million.
 
 Minimum Severity is a separate control and cannot be changed after the connector is created.
