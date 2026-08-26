@@ -6,7 +6,7 @@ audience: pro
 aliases:
   - /en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
-Deduplication can be applied at an Asset\-wide level, or scoped more narrowly to a single Engagement.
+Deduplication can be applied at an Asset\-wide level, or scoped more narrowly to a single Engagement. To scope it the other way, across a chosen group of Assets, see [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/).
 
 ## Deduplication for Assets
 
