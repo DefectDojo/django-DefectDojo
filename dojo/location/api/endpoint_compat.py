@@ -273,7 +273,7 @@ class V3EndpointStatusCompatibleSerializer(ModelSerializer):
         return obj.created.date() if obj.created else None
 
     def get_mitigated(self, obj) -> bool | None:
-        return obj.created.date() if obj.created else None
+        return obj.status == FindingLocationStatus.Mitigated
 
     def get_mitigated_time(self, obj) -> datetime.datetime | None:
         return obj.audit_time if self.get_mitigated(obj) else None
