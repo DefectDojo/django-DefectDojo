@@ -101,6 +101,14 @@ To start scanning it, open its row actions and choose **Enable scanning**. From 
 
 ![Enabling scanning on a fix-only repository](images/enable_scanning_menu.png)
 
+## Cloud findings: link the repository inline
+
+A cloud posture finding (from a connected cloud account) is usually fixed by changing the infrastructure-as-code that provisions the resource, so Sensei opens a pull request against that repository rather than patching the finding's own file. Clicking **Fix** on such a finding follows the same gap-closing flow as a code finding.
+
+If the finding's cloud account is not yet linked to an infrastructure-as-code repository, Sensei asks for one inline, in the same **Link a Repository** dialog used for code findings. The cloud account is detected from the finding automatically (its provider and account are already on the finding), so you only supply the repository, from a connection or by pasting its URL and a token. Sensei records the account, links the repository, and continues into the fix.
+
+Once linked, the repository fixes that account's findings from then on, and if more than one repository is linked to the account Sensei asks which one a given finding belongs to before opening the pull request. Linking an infrastructure-as-code repository this way does not enable direct cloud remediation, which stays a separate, explicitly configured action.
+
 ## Auto-fix candidate triage
 
 When a repository has automated fixes enabled, each scan stages matching findings as **candidates** on the **Auto-fix Candidates** tab of the Sensei hub. This is Sensei's preview-first model: findings are staged, but **nothing runs (no LLM cost) until you approve**. Approving opens fix pull requests and consumes fixes.
