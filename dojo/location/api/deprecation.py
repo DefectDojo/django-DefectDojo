@@ -1,9 +1,4 @@
-"""
-The sunset contract for the deprecated Endpoint API surface.
-
-Imports nothing on purpose: ``dojo.api_v2.exception_handler`` imports this at
-request time and must not pull the model layer in behind it.
-"""
+"""The sunset contract for the deprecated Endpoint API surface."""
 
 SUNSET_CODE = "endpoint_api_sunset"
 

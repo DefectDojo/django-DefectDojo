@@ -106,6 +106,7 @@ def custom_exception_handler(exc, context):
         # A v2 route reached the deprecated Endpoint model. Answer the documented
         # sunset contract rather than the generic 500 below, and log at info: an
         # expected, documented answer reads as an outage in error reporting.
+        # This branch only catches exceptions raised during DRF's dispatch.
         logger.info(
             "endpoint api sunset on %s",
             (context or {}).get("request", "unknown request"),
