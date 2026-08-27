@@ -5,7 +5,7 @@
   "private": true,
   "dependencies": {
     "@fontsource-variable/work-sans": "^5.3",
-    "@scalar/api-reference": "1.65.1",
+    "@scalar/api-reference": "1.66.1",
     "bootstrap-wysiwyg": "^2.0.0",
     "chart.js": "^4.4",
     "chartjs-adapter-moment": "^1.0",
