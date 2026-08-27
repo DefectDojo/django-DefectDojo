@@ -2490,6 +2490,26 @@ class FindingMetadataTest(BaseClass.BaseClassTest):
         self.assertEqual(result["name"], "test_meta", "Metadata not edited correctly")
         self.assertEqual(result["value"], "40", "Metadata not edited correctly")
 
+    def test_update_rejects_oversized_value(self):
+        response = self.client.put(
+            self.base_url + "?name=test_meta",
+            data={"name": "test_meta", "value": "x" * 301},
+        )
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.data)
+
+        result = self.client.get(self.base_url).data[0]
+        self.assertEqual(result["value"], "20", "Rejected update still wrote to the database")
+
+    def test_update_rejects_missing_name(self):
+        response = self.client.put(self.base_url + "?name=test_meta", data={"value": "40"})
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.data)
+        # The unvalidated path also 400s here, but via IntegrityError with a misleading message.
+        self.assertIsInstance(response.data, dict, response.data)
+        self.assertIn("name", response.data)
+
+        result = self.client.get(self.base_url).data[0]
+        self.assertEqual(result["value"], "20", "Rejected update still wrote to the database")
+
     def test_delete(self):
         self.client.delete(self.base_url + "?name=test_meta")
         result = self.client.get(self.base_url).data
