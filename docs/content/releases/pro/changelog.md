@@ -1,7 +1,10 @@
 ---
 title: "DefectDojo Pro Changelog"
-description: "DefectDojo Changelog"
+description: "DefectDojo Pro Changelog"
 exclude_search: true
+outputs:
+  - "html"
+  - "rss"
 aliases:
   - "/en/changelog/changelog/"
   - "/changelog/pro_changelog/"
@@ -9,9 +12,31 @@ aliases:
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
+You can subscribe to these release notes with the [RSS feed](/releases/pro/changelog/index.xml).
+
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
 ## August 2026: v3.2
+
+### August 24, 2026: v3.2.300
+
+New features:
+* **(Custom Fields)** Added typed Custom Fields: define your own fields across seven datatypes and attach them to six entity types. Custom field values are tracked in the audit log, and Rules Engine 2.0 rules can read and write them.
+* **(Rules Engine 2.0)** Rules can now work with Assets end to end, and a new asset provenance widget on the asset page layout shows which rule produced an asset.
+* **(Asset Hierarchy)** Rebuilt the Asset Hierarchy page on the Rules Engine 2.0 editor shell.
+* **(Connectors)** The GitHub Advanced Security connector can now import repository issues as a fourth finding family, under the new **GitHub: Issues** scan type. Pre-existing mappings are backfilled with the new subtype automatically.
+* **(Connectors)** The OpenVAS / Greenbone connector now supports GMP over SSH as a transport.
+
+Enhancements:
+* **(Deduplication)** The deduplication identity ledger is now enabled by default.
+* **(Connectors)** The Action1 connector now consolidates findings per organization, with machines recorded as endpoints, and each connector tile now counts only actively syncing records as mapped and surfaces unmapped records directly on the tile.
+* **(Locations)** The component and code backfills now run in batches, and stale-run reaping was moved off the poll, making the data-migration suite faster and lighter.
+* **(Operations)** DefectDojo now reports when a Celery task is routed to a queue that no worker consumes.
+* **(Sensei)** The scan-and-fix release image is smaller, with scanner installs split into per-ecosystem layers.
+* **(MCP)** The Pro MCP server now reports its version (with commit hash) via a CLI option.
+* **(Compliance)** The POA&M scheduled completion date is now derived from the finding's SLA.
+* **(Reporting)** The Risk Acceptance name is now offered as a finding report column.
+* **(Jira)** The custom fields JSON limit was raised from 200 to 1000.
 
 ### August 18, 2026: v3.2.201
 

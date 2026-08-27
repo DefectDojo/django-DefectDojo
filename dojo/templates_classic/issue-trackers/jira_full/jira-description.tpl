@@ -43,13 +43,23 @@
 *Commit hash:* {{ finding.test.engagement.commit_hash }}
 {% endif %}
 
+{% if V3_FEATURE_LOCATIONS %}
+{% if finding.locations.all %}
+*Systems/Locations*:
+||Location||Status||
+{% for location_ref in finding.locations.all %}|{{ location_ref.location }}|{{ location_ref.get_status_display }}|
+{% endfor %}
+{% endif %}
+{% else %}
+{% comment %} TODO: Delete this after the move to Locations {% endcomment %}
 {% if finding.endpoints.all %}
 *Systems/Endpoints*:
 ||System/Endpoint||Status||
 {% for endpoint in finding|get_vulnerable_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
 {% endfor %}{% for endpoint in finding|get_mitigated_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
 {% endfor %}
-{%endif%}
+{% endif %}
+{% endif %}
 
 
 {% if finding.component_name %}

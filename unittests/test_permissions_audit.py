@@ -13,9 +13,11 @@ Tests verify:
 9. Finding Templates exposure via find_template_to_apply (H1 #3577363)
 10. Jira Epic BFLA - Reader cannot trigger update_jira_epic (H1 #3577193)
 11. Risk Acceptance remove_finding: edit_mode guard + scoped finding lookup (PR #14633)
+12. Jira Epic dispatch: the request body cannot set dispatcher control kwargs (H1 #3949034)
 """
 import datetime
-from unittest import skip
+import uuid
+from unittest import mock, skip
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
@@ -29,6 +31,8 @@ from dojo.authorization.models import (
     Product_Type_Member,
     Role,
 )
+from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.jira import services as jira_services
 from dojo.models import (
     Answered_Survey,
     Benchmark_Category,
@@ -1324,6 +1328,41 @@ class TestJiraEpicBFLA(LegacyAuthMirrorMixin, DojoTestCase):
         response = client.post(url, data={}, format="json")
         # Writer has Engagement_Edit, so should pass permission check.
         self.assertEqual(response.status_code, 200)
+
+    def test_request_body_cannot_set_dispatch_kwargs(self):
+        """H1 #3949034: only the declared epic fields reach the dispatcher."""
+        superuser = Dojo_User.objects.create_user(
+            username="jira_epic_super",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+            is_superuser=True,
+        )
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-update-jira-epic", args=(self.engagement.id,))
+        with mock.patch("dojo.engagement.api.views.dojo_dispatch_task") as dispatch:
+            response = client.post(url, data={
+                "epic_name": "kept",
+                "async_user_id": superuser.pk,
+                "_pgh_context": {"id": str(uuid.uuid4()), "metadata": {"user": superuser.pk}},
+                "force_sync": True,
+            }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(dispatch.call_args.kwargs, {"epic_name": "kept"})
+
+    def test_dispatch_rejects_reserved_kwargs(self):
+        """H1 #3949034: the dispatcher refuses its own control kwargs from a caller."""
+        task = jira_services.get_epic_task("add_epic")
+        for key in ("async_user_id", "_pgh_context"):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                dojo_dispatch_task(task, self.engagement.id, **{key: 1})
+
+    def test_non_mapping_body_is_rejected(self):
+        """H1 #3949034: a JSON array body is a 400, not an unhandled 500."""
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-update-jira-epic", args=(self.engagement.id,))
+        response = client.post(url, data=[1, 2, 3], format="json")
+        self.assertEqual(response.status_code, 400)
 
 
 class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):

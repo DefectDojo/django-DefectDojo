@@ -276,4 +276,14 @@ DefectDojo’s report builder lets you assemble a custom report from a set of co
 More information about DefectDojo’s Report Builder can be found [here](/metrics_reports/reports/report-builder/).
 
 ### Export Findings 
-Pages that show a list of Findings or a list of Engagements have a CSV and Excel export option at the top left. For Findings, there is also the option to perform a Quick Export, which will open a new tab with tables of metadata pertaining to each Finding. 
+Pages that show a list of Findings or a list of Engagements have a CSV and Excel export option at the top left. For Findings, there is also the option to perform a **Quick Export**.
+
+Selecting Quick Export opens a dialog with three choices:
+
+- **Template**: the report template to apply. This defaults to the standard Findings table, so you can export without choosing one.
+- **Report name**: the name the finished report is stored under. It arrives prefilled, and you can edit it before running the export.
+- **Format**: whether the report is produced as HTML or PDF.
+
+The export runs in the background, and the finished report appears in your Generated Reports list under the name you chose.
+
+The prefilled name describes what you exported, followed by where you exported it from in parentheses. It carries no date, because the Generated Reports list already shows when each report was requested and completed. Exporting from a Findings list that is not scoped to anything gives just the content name. 

@@ -21,6 +21,8 @@ The original [Rules Engine](/automation/rules_engine/about/) applies an ordered 
 * **Traceability.** Every execution is recorded node by node as a [Run](../runs/), and every outbound send is recorded as a [Delivery](../deliveries/) that says exactly what was sent, where it went, and how it ended.
 * **A simulate mode.** A rule can record precisely what it would send without sending anything, which is how you test one safely before it touches the outside world.
 
+Rules are not limited to Findings. An Asset (Product) rule reacts to Assets being created, updated or tagged, or sweeps them on a schedule, and can set their fields, move them between Organizations, tag and untag them, and place them in the Asset hierarchy. That makes recurring inventory work self-service: instead of a one-off migration to regroup Assets, a rule expresses the grouping and keeps enforcing it as new Assets arrive.
+
 Both engines run side by side. Turning on Rules Engine 2.0 does not disable or convert your existing rules, and there is a [converter](../converting_from_rules_engine/) for when you want to move them across.
 
 ## Enabling Rules Engine 2.0
@@ -37,12 +39,20 @@ Once the flag is on, a **Rules Engine 2.0** section appears in the sidebar with 
 
 ### Permissions
 
-Access is governed by two global role permissions, shared with the original Rules Engine:
+Access is governed by four global role permissions, shared with the original Rules Engine:
 
 * **Rule View** is required to see the sidebar section and everything under it.
-* **Rule Edit** is required to create, change, run, delete, convert, take ownership of, and replay.
+* **Rule Add** is required to create a rule, including converting one from the original Rules Engine.
+* **Rule Edit** is required to change, enable, schedule, run, replay, or take ownership of an existing rule.
+* **Rule Delete** is required to delete a rule.
 
-Rule Edit is close to an administrative permission. A rule author can reach any Finding their rule's owner can see, and can direct output at external systems, so grant it deliberately.
+Validating and previewing a rule are accepted with either authoring permission, Rule Add or Rule Edit.
+
+Rule Add and Rule Edit are close to administrative permissions. A rule author can reach any Finding their rule's owner can see, and can direct output at external systems, so grant them deliberately.
+
+All four are strict global permissions: a grant counts only when the role is held as a global role, never when it is held as an Organization or Asset membership role. Superusers keep access regardless.
+
+If you are upgrading, a role that already held Rule Edit keeps the ability to create and delete rules, so nobody loses access. No built-in role gains rule access on upgrade.
 
 ## The concepts
 
@@ -110,7 +120,7 @@ Runs and deliveries are both kept for 180 days by default, then pruned. The prod
 ## Where to go next
 
 * [Building Rules](../building_rules/) covers the editor, triggers, scope, conditions and templates.
-* [Node Reference](../node_reference/) documents all 25 nodes.
+* [Node Reference](../node_reference/) documents all 37 nodes.
 * [Runs](../runs/) covers execution, traces, cascading and limits.
 * [Deliveries](../deliveries/) covers channels, statuses, retries and replay.
 * [Converting from Rules Engine](../converting_from_rules_engine/) covers moving existing rules across.
