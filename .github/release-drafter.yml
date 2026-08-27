@@ -81,6 +81,8 @@ categories:
       label: 'patch'
 exclude-labels:
   - 'skip-changelog'
+  # Automated release-train PRs ('Release: Merge release ...' / 'Release: Merge back ...')
+  - 'release-management'
 
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
