@@ -3,6 +3,7 @@ from __future__ import annotations
 from django_filters import NumberFilter
 
 from dojo.api_helpers.filters import CommonFilters, StaticMethodFilters
+from dojo.location.api.tag_filters import create_readable_tag_filters
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 
 
@@ -28,7 +29,7 @@ class LocationFilter(CommonFilters):
     # ordering (the order of the fields is enforced)
     CommonFilters.create_char_filters("location_type", "Location Type", locals())
     CommonFilters.create_char_filters("location_value", "Location Value", locals())
-    CommonFilters.create_char_filters("tags__name", "Tags", locals())
+    create_readable_tag_filters("Tags", locals())
     CommonFilters.create_integer_filters("products__product", "Product ID", locals())
     CommonFilters.create_integer_filters("findings__finding", "Finding ID", locals())
     CommonFilters.create_ordering_filters(
