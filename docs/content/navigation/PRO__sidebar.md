@@ -1,6 +1,6 @@
 ---
 title: "The Sidebar Menu"
-description: "How the DefectDojo Pro sidebar is organized, the All Settings directory page, and how to switch between the current and previous layouts"
+description: "How the DefectDojo Pro sidebar is organized, how to search it, the All Settings directory page, and how to switch between the current and previous layouts"
 weight: 6
 audience: pro
 aliases:
@@ -22,6 +22,14 @@ Either way, **every page keeps the same URL**. Bookmarks, saved links and anythi
 | **Settings** | All Settings, plus the eight groups described under [The Settings section](#the-settings-section) |
 
 You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
+
+## Searching the menu
+
+Press **Cmd+K** (Mac) or **Ctrl+K**, or select the **Search menu** button pinned at the top of the sidebar, to open **Search Navigation Options**: a search over every menu destination your account can currently reach.
+
+Results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
+
+Move through results with the arrow keys, open one with **Enter**, and close the search with **Escape**. Entries that open in the Classic UI are marked and open in a new tab. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically, and it follows whichever menu layout is active.
 
 Three conventions run through the whole menu:
 
