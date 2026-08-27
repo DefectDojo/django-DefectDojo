@@ -44,11 +44,10 @@ As the containers that organize testing activity, Engagements can store or track
 - Assignee / Lead
 - Associated Tests (e.g., scans, pen tests, manual tests, etc.)
 - Findings and Finding Types (e.g., active, mitigated, risk accepted, duplicate, etc.) 
-- Threat models or risk acceptance info
+- Risk acceptance info
 - Tags
 - Files and notes
 - Jira project settings
-- Environment details (e.g., staging vs. production)
 - Build IDs (if linked to CI/CD)
 - Historical data from past Tests within the Engagement 
 

@@ -210,9 +210,9 @@ In order to add new data to an existing Test, you can either click **Re-Upload S
 
 ![image](images/tests_ss10.png)
 
-While completing the Reimport Scan form, you’ll have the option to update metadata for the scan being reimported, including the version, branch tag, commit hash, and build ID. 
+While completing the Reimport Scan form, you’ll have the option to update metadata for the scan being reimported, including the version, branch tag, commit hash, and build ID. Note that Test metadata such as Environment can't be changed through a reimport pipeline.
 
-These changes are reflected in the Import History section of the Test View, which will also include the same metadata from prior scan imports.
+The updated metadata are reflected in the Import History section of the Test View, which will also include the same metadata from prior scan imports. 
 
 For example, in the below screenshot, the branch tag, build ID, commit hash, and version were all manually updated between the initial import and the subsequent reimport.
 
