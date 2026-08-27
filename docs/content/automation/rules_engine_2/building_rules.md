@@ -153,6 +153,7 @@ Each item carries a fixed set of Finding fields. This list is a contract, so it 
 |-------|--------|
 | Identity | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Severity and scoring | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| Exploit evidence | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key` |
 | Text | `description`, `mitigation`, `impact` |
 | Status | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -164,6 +165,27 @@ Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `eng
 Dates are ISO-8601 strings. That is deliberate: it means `gt` and `lt` order them correctly as text, so `2026-07-28` is correctly greater than `2026-01-01`.
 
 `priority`, `risk` and `risk_score` come from Pro's prioritization. A Finding that has not been scored yet carries no value for them.
+
+The exploit-evidence fields come from KEV enrichment and threat intelligence. They are what a rule reaches for when it should treat a known-exploited vulnerability differently from an equally severe one nobody is attacking.
+
+`known_exploited` is true when any of the Finding's vulnerability ids is in the CISA Known Exploited Vulnerabilities catalog, and `ransomware_used` when CISA records known ransomware campaign use. `kev_date` is the earliest date CISA added any of them, and `kev_due_date` the earliest remediation date CISA assigned, so the deadline a rule sees is always the tightest one that applies.
+
+`exploit_maturity` is the ladder those signals roll up to, and the condition builder offers it by name rather than by number:
+
+| Value | Reads as |
+|-------|----------|
+| `30` | Active |
+| `20` | Weaponized |
+| `10` | PoC |
+| `0` | None |
+
+Condition on the number, because its ordering says something no ordering of the words can: `exploit_maturity gte 20` means "weaponized or worse". For a message body use `{{finding.exploit_maturity_label}}` instead, which renders `Active` where the number would render `30`.
+
+`threat_score` is the composite 0 to 100 score, `threat_ladder_rung` the EPSS-equivalent floor that score is built on, and `dominant_intel_key` the vulnerability id that produced the verdict. That last one is worth putting in a notification body, so a reader can see why a Finding was escalated.
+
+A Finding with no intelligence for any of its vulnerability ids carries no value for the threat fields. That is not the same as a value of `0`, so use **is set** to tell "nothing known" apart from "nothing found". The two KEV booleans differ here, defaulting to false rather than empty, which makes `known_exploited eq false` mean "not in the catalog".
+
+All of these are read-only. A rule can route and report on exploit evidence; enrichment owns the values, so no node writes them.
 
 ### Referring to Asset data
 
