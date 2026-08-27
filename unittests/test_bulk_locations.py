@@ -539,3 +539,97 @@ class TestStatusUpdateQueryEfficiency(DojoTestCase):
 
         product_ref.refresh_from_db()
         self.assertEqual(product_ref.status, ProductLocationStatus.Active)
+
+
+@skip_unless_v3
+class TestRecordBeforeFindingIsSaved(DojoTestCase):
+
+    """
+    Locations must be recordable for a finding that has not been written yet.
+
+    An importer that buffers inserts and writes them in bulk at a batch boundary records a
+    finding's locations while it is still unsaved. That used to be impossible for a reason
+    unrelated to locations: the accumulator was a dict keyed by the finding, and Django's
+    Model.__hash__ raises on an instance with no primary key. Nothing about persisting
+    locations needs the finding hashable -- persist() runs after the findings are written --
+    so the accumulator holds pairs instead.
+    """
+
+    def _unsaved_finding_on_a_real_product(self):
+        """A Finding with a real test/product but deliberately never saved."""
+        saved = _make_finding()
+        return Finding(test=saved.test, title="Unsaved", severity="Medium", reporter=saved.reporter), saved
+
+    def test_recording_for_an_unsaved_finding_does_not_raise(self):
+        unsaved, saved = self._unsaved_finding_on_a_real_product()
+        mgr = LocationManager(saved.test.engagement.product)
+
+        self.assertIsNone(unsaved.pk, "premise: the finding under test must be unsaved")
+        mgr.record_locations_for_finding(unsaved, [_make_url("unsaved-record.example.com")])
+
+        self.assertEqual(len(mgr._locations_by_finding), 1)
+        recorded_finding, recorded_locations = mgr._locations_by_finding[0]
+        self.assertIs(recorded_finding, unsaved)
+        self.assertEqual(len(recorded_locations), 1)
+
+    def test_repeated_records_for_one_unsaved_finding_coalesce(self):
+        """record_for_finding() records twice (unsaved_locations, then extras) for one finding."""
+        unsaved, saved = self._unsaved_finding_on_a_real_product()
+        mgr = LocationManager(saved.test.engagement.product)
+
+        mgr.record_locations_for_finding(unsaved, [_make_url("coalesce-a.example.com")])
+        mgr.record_locations_for_finding(unsaved, [_make_url("coalesce-b.example.com")])
+
+        self.assertEqual(len(mgr._locations_by_finding), 1, "one finding must occupy one slot")
+        self.assertEqual(len(mgr._locations_by_finding[0][1]), 2)
+
+    def test_two_distinct_unsaved_findings_do_not_collide(self):
+        """
+        Identity keying, not equality keying.
+
+        Two unsaved findings are `==` to each other under Django's Model.__eq__ (both have
+        pk None), so an equality-keyed accumulator would merge their locations. Keying on
+        object identity keeps them apart.
+        """
+        first, saved = self._unsaved_finding_on_a_real_product()
+        second = Finding(test=saved.test, title="Unsaved two", severity="Medium", reporter=saved.reporter)
+        mgr = LocationManager(saved.test.engagement.product)
+
+        mgr.record_locations_for_finding(first, [_make_url("distinct-a.example.com")])
+        mgr.record_locations_for_finding(second, [_make_url("distinct-b.example.com")])
+
+        self.assertEqual(len(mgr._locations_by_finding), 2)
+        self.assertEqual([entry[0] for entry in mgr._locations_by_finding], [first, second])
+
+    def test_locations_recorded_before_the_write_persist_after_it(self):
+        """The end-to-end shape a batched writer needs: record unsaved, write, then persist."""
+        unsaved, saved = self._unsaved_finding_on_a_real_product()
+        product = saved.test.engagement.product
+        mgr = LocationManager(product)
+
+        mgr.record_locations_for_finding(unsaved, [_make_url("deferred-write.example.com", "/api")])
+        # The buffered write happens here, exactly as a batched writer would flush it.
+        unsaved.save()
+        mgr.persist()
+
+        refs = LocationFindingReference.objects.filter(finding=unsaved)
+        self.assertEqual(refs.count(), 1)
+        self.assertEqual(refs.first().location.url.host, "deferred-write.example.com")
+
+    def test_accumulators_are_cleared_together(self):
+        """A stale slot index would point past the end of the emptied pair list."""
+        unsaved, saved = self._unsaved_finding_on_a_real_product()
+        mgr = LocationManager(saved.test.engagement.product)
+
+        mgr.record_locations_for_finding(unsaved, [_make_url("cleared.example.com")])
+        unsaved.save()
+        mgr.persist()
+
+        self.assertEqual(mgr._locations_by_finding, [])
+        self.assertEqual(mgr._location_slot_by_finding, {})
+
+        # A second cycle on the same manager must start from a clean slate, not reuse a slot.
+        again = Finding(test=saved.test, title="Second cycle", severity="Medium", reporter=saved.reporter)
+        mgr.record_locations_for_finding(again, [_make_url("second-cycle.example.com")])
+        self.assertEqual(len(mgr._locations_by_finding), 1)
+        self.assertIs(mgr._locations_by_finding[0][0], again)

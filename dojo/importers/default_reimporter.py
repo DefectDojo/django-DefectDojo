@@ -1032,7 +1032,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         unsaved_finding = self.process_cve(unsaved_finding)
         # Hash code is already calculated earlier as it's the primary matching criteria for reimport
         # Save it. Don't dedupe before endpoints/locations are added.
-        unsaved_finding.save_no_options()
+        self.persist_new_finding(unsaved_finding)
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
         finding.tags = None
@@ -1051,6 +1051,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)
         return unsaved_finding, finding_will_be_grouped
+
+    def persist_new_finding(self, finding: Finding) -> None:
+        """
+        Write a finding the report did not match to an existing one.
+
+        This is intentionally a separate method (like get_original_findings and
+        get_reimport_match_candidates_for_batch) so downstream editions can override it
+        without copying the full process_finding_that_was_not_matched() implementation.
+
+        The override this exists for buffers new findings and writes them in bulk at the batch
+        boundary, where locations, vulnerability ids, tags and post-processing are already
+        flushed. Such an edition overrides this to accumulate, and _flush_post_processing_batch
+        to write the buffer before calling super() -- so the rows exist by the time anything in
+        that block reads a primary key.
+
+        Overriding this is the only supported way to defer the write. Everything after the call
+        in the caller -- grouping, the new_items list, request/response pairs -- is safe on an
+        unwritten finding, and the caller's remaining work is deliberately kept that way.
+        """
+        finding.save_no_options()
 
     def reconcile_vulnerability_ids(
         self,
@@ -1073,7 +1093,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # stays a no-query read.
         from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
 
-        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
+        # A finding that has not been written yet has no persisted vulnerability ids, and the read
+        # helper raises on it ("instance needs to have a primary key value before this relationship
+        # can be used"). Treating it as empty is exact rather than a workaround: there are no rows
+        # to compare against, so every parsed id is new. This lets an importer that buffers inserts
+        # reconcile a finding's vulnerability ids before flushing the buffer.
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding)) if finding.pk else set()
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed
@@ -1139,7 +1164,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding = self.reconcile_vulnerability_ids(finding)
         # Save the finding only if the cve field was changed by save_vulnerability_ids
         # This is temporary as the cve field will be phased out
-        if finding.cve != old_cve:
+        #
+        # Only for a finding that already has a row. This save exists to push a changed cve onto
+        # an existing record; for a finding an importer is still buffering there is nothing to
+        # update, and saving here would insert it early -- defeating the buffering and splitting
+        # one batched INSERT into per-finding ones. The value rides along when the buffer flushes.
+        if finding.cve != old_cve and finding.pk:
             finding.save()
         return finding
 
