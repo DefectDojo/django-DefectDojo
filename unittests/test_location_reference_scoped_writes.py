@@ -137,17 +137,21 @@ class TestLocationReferenceScopedWrites(LegacyAuthMirrorMixin, DojoTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(self._refs(self.shared), {self.product_mine.name, self.product_outside.name})
 
-    def test_bulk_delete_removes_only_the_callers_reference(self):
+    def test_bulk_delete_stays_denied_without_the_delete_action(self):
+        # Same policy as the single delete route above: membership does not grant delete,
+        # so the bulk route removes nothing rather than removing the caller's reference.
         self.client.post(
             reverse("endpoints_bulk_all"),
             {"endpoints_to_update": [self.shared.id], "delete_bulk_endpoints": "1"},
         )
         self.assertTrue(Location.objects.filter(id=self.shared.id).exists())
-        self.assertEqual(self._refs(self.shared), {self.product_outside.name})
+        self.assertEqual(
+            self._refs(self.shared), {self.product_mine.name, self.product_outside.name},
+        )
 
-    def test_bulk_delete_removes_the_row_when_nothing_else_references_it(self):
+    def test_bulk_delete_stays_denied_for_a_row_only_the_caller_records(self):
         self.client.post(
             reverse("endpoints_bulk_all"),
             {"endpoints_to_update": [self.own.id], "delete_bulk_endpoints": "1"},
         )
-        self.assertFalse(Location.objects.filter(id=self.own.id).exists())
+        self.assertTrue(Location.objects.filter(id=self.own.id).exists())
