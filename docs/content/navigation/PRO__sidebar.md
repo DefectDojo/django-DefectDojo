@@ -25,7 +25,7 @@ You only ever see the entries your account has permission to open, and a group d
 
 ## Searching the menu
 
-Press **Cmd+K** (Mac) or **Ctrl+K**, or select the **Search menu** button pinned at the top of the sidebar, to open **Search Navigation Options**: a search over every menu destination your account can currently reach.
+Press **Cmd+K** (Mac) or **Ctrl+K**, or select the small magnifying-glass control pinned in the top-right corner of the sidebar, to open **Search Navigation Options**: a search over every menu destination your account can currently reach. The control shows the shortcut for your platform, so it reads `Ctrl K` on Windows and Linux, and the whole control is clickable. It stays in the corner as the menu scrolls.
 
 Results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
 
