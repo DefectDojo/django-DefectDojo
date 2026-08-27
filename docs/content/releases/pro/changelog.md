@@ -1,13 +1,18 @@
 ---
 title: "DefectDojo Pro Changelog"
-description: "DefectDojo Changelog"
+description: "DefectDojo Pro Changelog"
 exclude_search: true
+outputs:
+  - "html"
+  - "rss"
 aliases:
   - "/en/changelog/changelog/"
   - "/changelog/pro_changelog/"
 ---
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
+
+You can subscribe to these release notes with the [RSS feed](/releases/pro/changelog/index.xml).
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 

@@ -29,6 +29,20 @@ For a configurable field you can set:
 - **Required**, which makes the field mandatory. Someone filling in the form cannot submit it until the field has a value.
 - **Disabled**, which takes the field off the form entirely.
 
+## Custom fields
+
+If [Custom Fields](../../asset_modelling/pro__custom_fields/) is enabled, the fields defined for a
+form's record type are listed here too, marked **Custom Field**, and configure exactly like the
+built-in ones. They start in the Optional Fields section, so this page is where you promote one into
+the body of the form, hide it, require it, or move it in the order.
+
+A custom field defined as required carries **Always Required**: it cannot be hidden or made optional
+here, though you can still change where it appears. Requiring a custom field on this page instead
+makes it mandatory on this form only, leaving the same field optional elsewhere.
+
+Only forms whose records can carry custom fields list them: Organizations, Assets, Engagements, Tests,
+Findings, and Risk Acceptances. The Import Scan, Reimport Scan, and JIRA Instance forms do not.
+
 ## Changing the order
 
 Drag the handle at the left of a row to change the order fields render in. This controls the sequence only. Whether a field sits in the body of the form or in Optional Fields is still governed by its Placement setting, so reordering a field will not move it between the two sections.
