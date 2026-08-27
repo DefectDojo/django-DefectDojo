@@ -1,6 +1,9 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+
 
 class XeolParser:
     def get_scan_types(self):
@@ -24,9 +27,7 @@ class XeolParser:
             cycle = match.get("Cycle", {})
             artifact = match.get("artifact", {})
 
-            title = (
-                f"{cycle.get('ProductName', 'Unknown Product')} EOL Information"
-            )
+            title = f"{cycle.get('ProductName', 'Unknown Product')} EOL Information"
 
             description_lines = [
                 f"**Product Name:** {cycle.get('ProductName', 'N/A')}",
@@ -37,17 +38,9 @@ class XeolParser:
                 f"**Artifact Name:** {artifact.get('name', 'N/A')}",
                 f"**Artifact Version:** {artifact.get('version', 'N/A')}",
                 f"**Artifact Type:** {artifact.get('type', 'N/A')}",
-                (
-                    f"**Licenses:** {', '.join(artifact.get('licenses', []))}"
-                    if artifact.get("licenses")
-                    else "**Licenses:** N/A"
-                ),
+                f"**Licenses:** {', '.join(artifact.get('licenses', [])) if artifact.get('licenses') else 'N/A'}",
                 f"**Package URL:** {artifact.get('purl', 'N/A')}",
-                (
-                    f"**CPEs:** {', '.join(artifact.get('cpes', []))}"
-                    if artifact.get("cpes")
-                    else "**CPEs:** N/A"
-                ),
+                f"**CPEs:** {', '.join(artifact.get('cpes', [])) if artifact.get('cpes') else 'N/A'}",
                 f"**Distro Name:** {distro.get('name', 'N/A')}",
                 f"**Distro Version:** {distro.get('version', 'N/A')}",
             ]
@@ -58,21 +51,13 @@ class XeolParser:
                     f"Path: {loc.get('path', '')}, LayerID: {loc.get('layerID', '')}"
                     for loc in locations
                 ]
-                description_lines.append(
-                    "**Locations:**\n" + "\n".join(location_info),
-                )
+                description_lines.append("**Locations:**\n" + "\n".join(location_info))
 
             metadata = artifact.get("metadata", {})
             if isinstance(metadata, dict) and "files" in metadata:
-                file_paths = [
-                    f.get("path", "")
-                    for f in metadata["files"]
-                    if "path" in f
-                ]
+                file_paths = [f.get("path", "") for f in metadata["files"] if "path" in f]
                 if file_paths:
-                    description_lines.append(
-                        "**Files:**\n" + "\n".join(file_paths),
-                    )
+                    description_lines.append("**Files:**\n" + "\n".join(file_paths))
 
             description = "\n".join(description_lines)
 
@@ -96,11 +81,15 @@ class XeolParser:
                 dynamic_finding=False,
                 nb_occurences=1,
                 cwe=672,
-                references=(
-                    cycle.get("ProductPermalink", "")
-                    + "\n[www.xeol.io/explorer](https://www.xeol.io/explorer)"
-                ),
+                references=cycle.get("ProductPermalink", "") + "\n[www.xeol.io/explorer](https://www.xeol.io/explorer)",
             )
+
+            artifact_purl = artifact.get("purl")
+            if locations_enabled() and artifact_purl:
+                license_expression = " OR ".join(artifact.get("licenses", []))
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl=artifact_purl, license_expression=license_expression),
+                )
 
             findings.append(finding)
 
