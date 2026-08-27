@@ -4,7 +4,6 @@ from dojo.models import Finding
 
 
 class XeolParser:
-
     def get_scan_types(self):
         return ["Xeol Scan"]
 
@@ -46,11 +45,8 @@ class XeolParser:
             severity = "Info"
             eol_val = cycle.get("Eol", "")
             if eol_val:
-                if isinstance(eol_val, bool) and eol_val:
-                    severity = "Critical"
-                elif (
-                    isinstance(eol_val, str)
-                    and eol_val.lower() not in ["false", "none", ""]
+                if (isinstance(eol_val, bool) and eol_val) or (
+                    isinstance(eol_val, str) and eol_val.lower() not in {"false", "none", ""}
                 ):
                     severity = "Critical"
 
