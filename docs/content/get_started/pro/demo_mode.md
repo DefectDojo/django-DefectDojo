@@ -1,6 +1,6 @@
 ---
 title: "🧪 Demo Mode: sample data and the guided tour"
-description: "How trial and demo instances come preloaded with sample data, and how to remove it"
+description: "How to load sample data and take the guided tour, and how to remove it again"
 draft: "false"
 weight: 5
 chapter: true
@@ -8,19 +8,43 @@ exclude_search: false
 audience: pro
 ---
 
-Trial instances of DefectDojo Pro start with sample data already loaded and a short
-guided tour of the core workflow. The idea is simple: an empty instance does not
-show you very much. With around 130 findings from a handful of scanners already in
-place, the lists, the filters, the deduplication and the metrics all behave the way
-they will once your own scans are flowing.
+A brand new DefectDojo instance does not show you very much: empty lists, empty
+filters, and metrics pages with nothing to plot. Demo Mode fills it in. With
+around 150 findings from a handful of scanners in place, the lists, the filters,
+the deduplication and the metrics all behave the way they will once your own
+scans are flowing, and a short guided tour walks you through the loop.
 
-Everything the sample data creates is removable from inside the product, at any
-time, and removing it does not touch anything you created yourself.
+Nothing is loaded unless you ask for it. Your instance starts empty, sample data
+appears only when an administrator loads it, and it is removable from inside the
+product at any time. Removing it does not touch anything you created yourself.
+
+## Loading the sample data
+
+On an instance with nothing in it yet, the home page offers a **Getting Started**
+card with two choices:
+
+- **Import Your First Scan** takes you to the import page, which is what most
+  people want.
+- **Load Sample Data** fills the instance with the sample set described below.
+
+Loading runs in the background and takes a moment, because the sample scans go
+through the same importer your own scans do. When it finishes the page refreshes,
+a bar appears at the top confirming that sample data is loaded, and you are
+offered the tour.
+
+The card only appears on an instance that has no applications and no findings in
+it. Once you have data of your own, it goes away and stays away, so sample
+findings can never turn up alongside real ones by accident.
+
+{{% alert title="Only administrators can load it" color="info" %}}
+Sample data is visible to everyone on the instance, so loading it is offered only
+to superusers. The same rule applies to removing it.
+{{% /alert %}}
 
 ## What gets loaded
 
-The sample data is imported through the same importer your own scans go through, so
-it behaves like real data rather than looking like it.
+The sample data is imported through the same importer your own scans go through,
+so it behaves like real data rather than looking like it.
 
 | What | How much |
 |------|----------|
@@ -28,7 +52,7 @@ it behaves like real data rather than looking like it.
 | Applications | 4 (Storefront Web App, Payments API, Container Platform, Legacy Customer Portal) |
 | Engagements | 5, including one interactive penetration test |
 | Imports | 8 scan reports across static analysis, dependency scanning, container scanning, dynamic scanning and secret detection |
-| Findings | ~130, spread across every severity |
+| Findings | ~150, spread across every severity |
 
 A few of the imports are backdated by 30, 60 and 90 days. That is what gives the
 metrics pages a real trend line on the first day, and what puts some findings past
@@ -44,12 +68,16 @@ filter it out at any point.
 
 ## The guided tour
 
-On first sign-in you are offered a short tour, about three minutes, that walks the
-loop: where findings come from, how they are triaged, how a risk acceptance is
+Once sample data is loaded you are offered a short tour, a few minutes, that walks
+the loop: where findings come from, how they are triaged, how a risk acceptance is
 recorded, and where progress is reported.
 
-You can leave the tour at any point. A bar at the top of the page shows that sample
-data is loaded and offers **Resume tour**, which picks up from where you stopped.
+You can leave the tour at any point. The bar at the top of the page offers:
+
+- **Resume Tour**, which picks up from where you stopped.
+- **Restart Tour**, which starts again from the beginning.
+
+If you have never taken it, that second button reads **Start Tour** instead.
 
 The tour is available to every user on the instance, not just administrators, so it
 works for a walkthrough with several people signed in.
@@ -59,7 +87,7 @@ works for a walkthrough with several people signed in.
 Two places offer this, and both do the same thing:
 
 - The last step of the tour.
-- **Remove sample data** in the bar at the top of the page.
+- **Remove Sample Data** in the bar at the top of the page.
 
 You will be shown exactly what is about to be deleted before anything happens.
 Removal runs in the background; the bar shows progress and disappears once the data
@@ -73,38 +101,35 @@ never by their name or their tag, so renaming or re-tagging a sample object does
 change what gets removed, and tagging one of your own objects `sample-data` does not
 put it at risk.
 
-Removal is permanent. If you want the sample data back afterwards, an administrator
-can recreate it with the command below.
+Removal is permanent, and it also turns Demo Mode off: the bar and the tour go with
+the data they were about. If your instance is still empty afterwards, the
+**Getting Started** card comes back, so you can load the sample data again with one
+click.
 
-{{% alert title="Only administrators can remove it" color="info" %}}
-Everyone sees the tour and the bar, but **Remove sample data** is only offered to
-superusers.
-{{% /alert %}}
+## From the command line
 
-## Self-hosted instances
-
-Demo Mode is off by default on a fresh self-hosted install: a new instance boots
-clean. To turn it on:
+Everything above is also available to an administrator with shell access, which is
+useful for scripting a demo environment:
 
 ```bash
-manage.py set_feature demo_mode True
 manage.py seed_demo_data
-```
-
-And to remove it again:
-
-```bash
 manage.py purge_demo_data
-manage.py set_feature demo_mode False
 ```
 
-The two halves are deliberately independent. The feature flag controls the tour and
-the bar and creates nothing; seeding creates data and changes no setting. That means
-you can turn the tour off while keeping the sample data, or clear the sample data
-while leaving the flag on, without one surprising the other.
+These are the same operations the buttons run, including turning Demo Mode on and
+off, so an instance seeded from the command line offers the tour exactly as one
+seeded from the button does.
 
 `seed_demo_data` will not run twice by accident: if sample data is already present
 it reports that and exits without creating a second copy.
+
+The `demo_mode` feature flag controls the tour, the welcome dialog and the bar. It
+creates and deletes nothing on its own, so you can turn it off while keeping the
+sample data if you would rather keep the data without the tour:
+
+```bash
+manage.py set_feature demo_mode False
+```
 
 ## Notes
 
@@ -114,5 +139,5 @@ it reports that and exits without creating a second copy.
   simply skips that step.
 - **Findings count.** The sample findings count toward your instance's licensed
   finding total while they are present, and removing them gives that headroom back.
-- **Notifications.** Seeding does not send notifications, so importing the sample
+- **Notifications.** Seeding does not send notifications, so loading the sample
   data will not fill your alerts or email anyone.
