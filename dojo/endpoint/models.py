@@ -101,6 +101,17 @@ class Endpoint_Status(models.Model):
         return max(0, days)
 
 
+class EndpointDeprecatedError(NotImplementedError):
+
+    """
+    Raised when code hydrates an Endpoint while Locations is enabled.
+
+    A subclass rather than a bare NotImplementedError so the api_v2 exception
+    handler can answer the sunset contract for this case alone, and leave a
+    genuine NotImplementedError as the 500 it is.
+    """
+
+
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=20,
                                  help_text=_("The communication protocol/scheme such as 'http', 'ftp', 'dns', etc."))
@@ -157,7 +168,7 @@ class Endpoint(models.Model):
         # migration existing. See dojo/location/feature.py and pro/features/relabel.py:14-28.
         if settings.V3_FEATURE_LOCATIONS and not getattr(self, "_allow_v3_init", False):
             msg = "Endpoint model is deprecated when V3_FEATURE_LOCATIONS is enabled"
-            raise NotImplementedError(msg)
+            raise EndpointDeprecatedError(msg)
         super().__init__(*args, **kwargs)
 
     def __hash__(self):

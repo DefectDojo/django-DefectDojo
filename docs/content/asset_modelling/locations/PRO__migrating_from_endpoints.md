@@ -99,6 +99,21 @@ A few things behave differently from the original Endpoint API:
 - **`endpoint` field on Endpoint_Status.** The legacy `endpoint` field is reconstructed by looking up the matching Asset Reference. In rare cases where a Finding's Asset no longer matches its Location's Asset references, this field may be null.
 - **Pagination and ordering.** Available ordering fields on the read-compat shim are `host`, `product`, `id`, and `active_finding_count`. If your client orders by another field, switch to one of these or move to the new Locations endpoints.
 
+### If a Route Returns 410
+
+Any remaining `/api/v2/` path that reaches the old Endpoint data answers `HTTP 410 Gone` rather than a server error. The body is machine-readable, so your automation can branch on `code` instead of parsing the message:
+
+```json
+{
+  "code": "endpoint_api_sunset",
+  "message": "The Endpoint API is not available on instances with Locations enabled. Reads are served from Locations; writes are not available.",
+  "replacement": "/api/v2/location/",
+  "docs": "https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/"
+}
+```
+
+If you hit this on a read you expected to work, send us the request path. That response means we have a route left to convert, and it is a bug on our side, not on yours.
+
 ## Tags and Metadata
 
 Tags applied to Endpoints become tags on the Location object (not on the URL subtype). Tag-based filters in the legacy API continue to match.
