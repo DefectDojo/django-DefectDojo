@@ -42,6 +42,8 @@ Deduplication and Reimport are similar processes, but they use different algorit
 
 However, any Findings that remain after Reimport Deduplication are still subject to Same-Tool Deduplication.  So if you use narrower a scope for Same-Tool Deduplication, you can end up with Duplicates within a Reimport pipeline.
 
+This is also how a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) reaches a reimport. The reimport itself only ever matches inside its own Test, but the Findings it creates go through Same-Tool and Cross-Tool Deduplication afterwards, and those are pool-scoped. Pooling an Asset therefore does affect its reimports, by way of what happens to the Findings they produce.
+
 ### Example
 
 Here's a tool with a Reimport Deduplication algorithm which is different from the Same-Tool Deduplication algorithm.

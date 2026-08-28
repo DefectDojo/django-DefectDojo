@@ -31,9 +31,22 @@ An Asset joins a pool for one **matching kind** at a time, and can be in at most
 
 * **Same tool.** Findings from the same scanner deduplicate across the pool's Assets.
 * **Cross tool.** Findings from different scanners deduplicate across the pool's Assets.
-* **Reimport.** Selects the matching formula a reimport uses. It does **not** widen what is compared: reimport always matches inside its own Test.
+* **Reimport.** Selects the matching formula a reimport uses. It does **not** widen what a reimport itself compares: a reimport matches inside its own Test. Findings it creates are still deduplicated across the pool under same tool and cross tool.
 
-That last one is worth reading twice. Reimport appears alongside the other two because it is a matching decision a pool can carry, but pooling Assets for reimport does not make a reimport look outside its own Test. Only same tool and cross tool change scope.
+That last one is worth reading twice, because the obvious reading is wrong. Two things are true
+at once:
+
+* A reimport's **own** matching stays inside its Test. That matching decides whether an incoming
+  Finding updates an existing one, is created fresh, or whether a Finding missing from the scan
+  gets closed, so it is scoped to the Test the scan is authoritative over. Pooling Assets for
+  reimport does not change that.
+* Findings a reimport **creates** are then deduplicated like any other new Finding, under same
+  tool and cross tool. If the Asset is pooled for those kinds, that deduplication reaches across
+  the pool.
+
+So pooling does affect reimports; it just affects what happens to the Findings a reimport
+produces, rather than what the reimport itself compares against. Only same tool and cross tool
+change scope.
 
 If you try to add an Asset that already matches within another pool for that kind, DefectDojo refuses the change and names the pool holding it. Take it out of that pool first if the move is deliberate.
 
@@ -62,7 +75,10 @@ Adding members applies to **future imports**. Findings already in DefectDojo are
 
 The acknowledgement is derived from the specific change it describes, so the preview you ran for adding Assets does not authorize a re-run, and a re-run preview goes stale if the pool changes underneath it. Preview the thing you are about to do.
 
-Reimport offers no Apply Now, for the reason above: it cannot widen scope, so there is nothing retroactive to apply.
+Reimport offers no Apply Now, for the reason above: pooling for reimport changes which formula a
+reimport uses, not which Findings it compares against, so there is no widened scope to re-run
+over existing Findings. Re-running deduplication across the pool is what the same tool and
+cross tool kinds do, and Findings a reimport created are included in that like any other.
 
 ## Where originals collect
 
