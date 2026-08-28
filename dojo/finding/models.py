@@ -21,7 +21,7 @@ from django.utils.functional import cached_property
 from django.utils.html import escape
 from django.utils.translation import gettext as _
 from django_extensions.db.models import TimeStampedModel
-from tagulous.models import TagField
+from django_tagulous.models import TagField
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel

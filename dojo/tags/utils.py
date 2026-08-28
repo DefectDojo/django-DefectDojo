@@ -16,7 +16,7 @@ from collections.abc import Iterable
 
 from django.conf import settings
 from django.db import models, transaction
-from tagulous.utils import parse_tags
+from django_tagulous.utils import parse_tags
 
 from dojo.models import Product  # local import to avoid circulars at import time
 

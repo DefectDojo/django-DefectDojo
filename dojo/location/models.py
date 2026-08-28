@@ -23,7 +23,7 @@ from django.db.models import (
     UniqueConstraint,
 )
 from django.utils.translation import gettext_lazy as _
-from tagulous.models import TagField
+from django_tagulous.models import TagField
 
 from dojo.base_models.base import BaseModel, BaseModelWithoutTimeMeta
 from dojo.base_models.validators import validate_not_empty

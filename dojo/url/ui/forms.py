@@ -1,7 +1,7 @@
 import logging
 
 from django import forms
-from tagulous.forms import TagField
+from django_tagulous.forms import TagField
 
 from dojo.location.models import Location
 from dojo.url.models import URL
