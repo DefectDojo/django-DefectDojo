@@ -9,7 +9,9 @@ from .dojo_test_case import DojoTestCase
 
 
 class LogUserLogoutSignalTest(DojoTestCase):
-    """Regression tests for the user_logged_out receiver in dojo.utils.
+
+    """
+    Regression tests for the user_logged_out receiver in dojo.utils.
 
     An IdP-initiated SAML single-logout (POST /saml2/ls/) whose Django session has already
     expired reaches djangosaml2's do_logout_service, which calls django.contrib.auth.logout().
