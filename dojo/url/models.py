@@ -58,7 +58,8 @@ class HyperlinkParser:
 
     @staticmethod
     def _normalize_ipv6_authority(value: str) -> str:
-        """Bracket a bare IPv6 authority so hyperlink can parse it.
+        """
+        Bracket a bare IPv6 authority so hyperlink can parse it.
 
         RFC 3986 requires an IPv6 literal in a URL authority to be wrapped in "[...]",
         and hyperlink only recognises an authority after "//" or a scheme. Scanners and
