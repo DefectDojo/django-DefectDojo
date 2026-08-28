@@ -582,12 +582,11 @@ class BaseImporter(ImporterOptions):
 
         # In longer running imports it can happen that the async_dupe_delete task removes a finding before the history record is created
         # We filter out these findings here to avoid FK violations (IntegrityError)
-        all_finding_ids = []
-        for list_, _ in finding_action_mappings:
-            all_finding_ids.extend(list_)
-        existing_ids = finding_helper.filter_finding_ids_by_existence(all_finding_ids) if all_finding_ids else set()
+        dropped_finding_ids = self.deleted_finding_ids({
+            finding_id for list_, _ in finding_action_mappings for finding_id in list_
+        })
 
-        # Collect all import history records using the validated IDs
+        # Collect all import history records, skipping the findings that are gone
         import_history_records = []
         for finding_ids, action in finding_action_mappings:
             import_history_records.extend(
@@ -597,7 +596,7 @@ class BaseImporter(ImporterOptions):
                     action=action,
                 )
                 for finding_id in finding_ids
-                if finding_id in existing_ids
+                if finding_id is not None and finding_id not in dropped_finding_ids
             )
 
         # Bulk create all at once and let Django handle batching internally.
@@ -997,17 +996,14 @@ class BaseImporter(ImporterOptions):
 
     def deleted_finding_ids(self, finding_ids: set[int]) -> set[int]:
         """
-        Of the given buffered finding ids, the ones whose finding row is gone.
+        Of the given finding ids, the ones whose finding row is gone.
 
-        One indexed primary-key lookup for the whole set; see
-        drop_rows_for_deleted_findings() for why the buffers need this at all.
+        The importer's seam onto finding_helper.deleted_finding_ids -- kept as a method so
+        the flush paths and update_import_history share one lookup and a subclass has a
+        single place to override. See drop_rows_for_deleted_findings() for why the buffers
+        need this at all.
         """
-        if not finding_ids:
-            return set()
-        live_finding_ids = set(
-            Finding.objects.filter(pk__in=finding_ids).values_list("pk", flat=True),
-        )
-        return finding_ids - live_finding_ids
+        return finding_helper.deleted_finding_ids(finding_ids)
 
     def drop_rows_for_deleted_findings(self, rows: list, deleted_finding_ids: set[int] | None = None) -> list:
         """
