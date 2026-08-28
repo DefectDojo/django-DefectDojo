@@ -676,7 +676,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=1,
             expected_num_queries3=34,
             expected_num_async_tasks3=1,
-            expected_num_queries4=103,
+            expected_num_queries4=105,
             expected_num_async_tasks4=0,
         )
 
@@ -700,7 +700,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=1,
             expected_num_queries3=48,
             expected_num_async_tasks3=1,
-            expected_num_queries4=103,
+            expected_num_queries4=105,
             expected_num_async_tasks4=0,
         )
 
@@ -725,7 +725,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=4,
             expected_num_queries3=57,
             expected_num_async_tasks3=3,
-            expected_num_queries4=115,
+            expected_num_queries4=117,
             expected_num_async_tasks4=3,
         )
 

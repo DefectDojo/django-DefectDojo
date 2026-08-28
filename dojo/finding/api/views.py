@@ -749,17 +749,23 @@ class FindingViewSet(
                 "Metadata name is required", status=status.HTTP_400_BAD_REQUEST,
             )
 
+        metadata_data = FindingMetaSerializer(data=request.data)
+        if not metadata_data.is_valid():
+            return Response(
+                metadata_data.errors, status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             DojoMeta.objects.update_or_create(
                 name=metadata_name,
                 finding=finding,
                 defaults={
-                    "name": request.data.get("name"),
-                    "value": request.data.get("value"),
+                    "name": metadata_data.validated_data["name"],
+                    "value": metadata_data.validated_data["value"],
                 },
             )
 
-            return Response(data=request.data, status=status.HTTP_200_OK)
+            return Response(data=metadata_data.data, status=status.HTTP_200_OK)
         except IntegrityError:
             return Response(
                 "Update failed because the new name already exists",

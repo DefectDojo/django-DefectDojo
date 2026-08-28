@@ -297,6 +297,75 @@ class TestFKReassignmentAuthorization(LegacyAuthMirrorMixin, DojoTestCase):
         self.assertEqual(preset.product_id, self.product_src.id)
 
     # ────────────────────────────────────────────────────────────────────
+    # EngagementSerializer.preset (sibling FK; the preset's own fields are
+    # rendered back on the engagement page and its exports)
+    # ────────────────────────────────────────────────────────────────────
+    def _outside_preset(self):
+        return Engagement_Presets.objects.create(
+            title="FK Reassign Outside Preset",
+            product=self.product_outside,
+            notes="outside notes",
+            scope="outside scope",
+        )
+
+    def test_engagement_patch_preset_to_unauthorized_blocked(self):
+        preset = self._outside_preset()
+        r = self._client().patch(
+            reverse("engagement-detail", args=(self.engagement_src.id,)),
+            {"preset": preset.id},
+            format="json",
+        )
+        self._assert_rejected(r)
+        self.engagement_src.refresh_from_db()
+        self.assertIsNone(self.engagement_src.preset_id)
+
+    def test_engagement_put_preset_to_unauthorized_blocked(self):
+        preset = self._outside_preset()
+        r = self._client().put(
+            reverse("engagement-detail", args=(self.engagement_src.id,)),
+            {
+                "name": self.engagement_src.name,
+                "product": self.product_src.id,
+                "preset": preset.id,
+                "target_start": "2024-01-01",
+                "target_end": "2024-12-31",
+            },
+            format="json",
+        )
+        self._assert_rejected(r)
+        self.engagement_src.refresh_from_db()
+        self.assertIsNone(self.engagement_src.preset_id)
+
+    def test_engagement_create_with_unauthorized_preset_blocked(self):
+        preset = self._outside_preset()
+        r = self._client().post(
+            reverse("engagement-list"),
+            {
+                "name": "FK Reassign Preset Create",
+                "product": self.product_src.id,
+                "preset": preset.id,
+                "target_start": "2024-01-01",
+                "target_end": "2024-12-31",
+            },
+            format="json",
+        )
+        self._assert_rejected(r)
+        self.assertFalse(Engagement.objects.filter(preset=preset).exists())
+
+    def test_engagement_patch_preset_to_owned_allowed(self):
+        preset = Engagement_Presets.objects.create(
+            title="FK Reassign Owned Preset", product=self.product_src, scope="x",
+        )
+        r = self._client().patch(
+            reverse("engagement-detail", args=(self.engagement_src.id,)),
+            {"preset": preset.id},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 200, r.content[:500])
+        self.engagement_src.refresh_from_db()
+        self.assertEqual(self.engagement_src.preset_id, preset.id)
+
+    # ────────────────────────────────────────────────────────────────────
     # BurpRawRequestResponseMultiSerializer.finding
     # ────────────────────────────────────────────────────────────────────
     def test_burp_request_response_finding_reassignment_blocked(self):
