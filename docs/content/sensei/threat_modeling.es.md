@@ -21,7 +21,7 @@ Esta es la capacidad **pre-code** de Sensei. Mientras que [escanear y corregir](
 
 - La función con licencia **Sensei**. El modelado de amenazas se distribuye bajo el mismo derecho de uso que escanear y corregir.
 - Un rol global de **Maintainer** o **Owner**. Los usuarios que no lo tengan no verán la página.
-- Un producto al cual vincular el modelo de amenazas. Las instancias que usan la nomenclatura V3 ven los productos llamados **assets**; esta página dice *producto* en todo momento, y la interfaz sigue la nomenclatura que tenga configurada su instancia.
+- Un producto al cual vincular el modelo de amenazas. Las instancias que usan la nomenclatura 3.0 ven los productos llamados **assets**; esta página dice *producto* en todo momento, y la interfaz sigue la nomenclatura que tenga configurada su instancia.
 
 No se instala nada ni se conecta ningún repositorio. El modelado de amenazas solo lee el diseño que usted proporciona.
 

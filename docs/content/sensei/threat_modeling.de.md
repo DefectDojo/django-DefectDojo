@@ -21,7 +21,7 @@ Dies ist die **Pre-Code**-Fähigkeit von Sensei. Während [Scan-and-Fix](/sensei
 
 - Die lizenzierte Funktion **Sensei**. Threat Modeling wird unter derselben Berechtigung ausgeliefert wie Scan-and-Fix.
 - Eine globale Rolle als **Maintainer** oder **Owner**. Benutzer ohne diese Rolle sehen die Seite nicht.
-- Ein Produkt, dem das Bedrohungsmodell zugeordnet wird. Instanzen mit V3-Benennung sehen Produkte als **Assets** bezeichnet; diese Seite verwendet durchgehend *Produkt*, und die Benutzeroberfläche folgt der Benennung, auf die Ihre Instanz eingestellt ist.
+- Ein Produkt, dem das Bedrohungsmodell zugeordnet wird. Instanzen mit 3.0-Benennung sehen Produkte als **Assets** bezeichnet; diese Seite verwendet durchgehend *Produkt*, und die Benutzeroberfläche folgt der Benennung, auf die Ihre Instanz eingestellt ist.
 
 Es wird nichts installiert und kein Repository verbunden. Threat Modeling liest ausschließlich den von Ihnen bereitgestellten Entwurf.
 
