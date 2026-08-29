@@ -56,8 +56,48 @@ class HyperlinkParser:
         except (URLParseError, ValueError) as e:
             raise ValidationError(str(e))
 
+    @staticmethod
+    def _normalize_ipv6_authority(value: str) -> str:
+        """
+        Bracket a bare IPv6 authority so hyperlink can parse it.
+
+        RFC 3986 requires an IPv6 literal in a URL authority to be wrapped in "[...]",
+        and hyperlink only recognises an authority after "//" or a scheme. Scanners and
+        connectors routinely emit a bare IPv6 host (``fe80::1``) or a bracketed one with
+        no scheme (``[fe80::1]``); left as-is, hyperlink reads the tail as a port or the
+        leading group as a scheme and raises. Both are normalised to ``//[fe80::1]`` so
+        the host is parsed. Anything that is not a bare IPv6 authority -- hostnames,
+        IPv4, ``host:port``, userinfo, and already-schemed IPv6 URLs -- is returned
+        unchanged.
+        """
+        if not value:
+            return value
+        remainder, prefix = value, ""
+        scheme_separator = remainder.find("://")
+        if scheme_separator != -1:
+            prefix, remainder = remainder[: scheme_separator + 3], remainder[scheme_separator + 3 :]
+        elif remainder.startswith("//"):
+            prefix, remainder = "//", remainder[2:]
+        # The authority ends at the first path/query/fragment delimiter.
+        authority_end = len(remainder)
+        for delimiter in ("/", "?", "#"):
+            index = remainder.find(delimiter)
+            if index != -1:
+                authority_end = min(authority_end, index)
+        authority, rest = remainder[:authority_end], remainder[authority_end:]
+        # userinfo (and any port riding on it) makes a bare IPv6 authority ambiguous.
+        if "@" in authority:
+            return value
+        literal = authority[1:-1] if authority.startswith("[") and authority.endswith("]") else authority
+        try:
+            ipaddress.IPv6Address(literal)
+        except ValueError:
+            return value
+        # A scheme-less IPv6 authority needs "//" for hyperlink to treat it as a host.
+        return f"{prefix or '//'}[{literal}]{rest}"
+
     def parse(self, value: str) -> ParsedUrl:
-        parsed_url = self.from_text(value)
+        parsed_url = self.from_text(self._normalize_ipv6_authority(value))
 
         # A host value is required by the URL class. If we're not provided one, it's possible we can coerce things if
         # no scheme was included by making it a scheme-relative URL.
