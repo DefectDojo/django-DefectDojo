@@ -54,7 +54,13 @@ switch the floor off, in Prioritization Engine settings under <em>Actively-Explo
 Floor</em>.</p><p>The floor only ever raises — it never moves a finding down, and a finding that already
 scores higher on its own is untouched. Because it applies to Priority, the Risk band and
 Risk score follow from it automatically, so every list, filter, chart and SLA calculation
-sees the same consistent number.</p><h2 id=findings-without-a-cve>Findings without a CVE<a href=#findings-without-a-cve class=anchor aria-hidden=true>#</a></h2><p>Threat intelligence is matched by CVE. Many findings — most SAST results, secrets,
+sees the same consistent number.</p><p>Two boundaries worth knowing when you map an internal policy onto the floor:</p><ul><li>The floor is driven by the finding&rsquo;s <strong>exploit-maturity badge</strong>: it applies exactly to
+findings whose maturity shows <strong>Active in the wild</strong>, and to no others — lower rungs of
+the evidence ladder (weaponized exploits, PoCs, detection templates) raise the weighted
+score but never trigger the floor. The Exploit Maturity column on the findings list
+therefore shows you, at any time, precisely the set of findings the floor governs.</li><li>The floor responds to exploitation <em>evidence</em>, not to probability scores. An EPSS score
+by itself — however high — does not trigger the floor; EPSS contributes to the weighted
+Priority calculation instead.</li></ul><h2 id=findings-without-a-cve>Findings without a CVE<a href=#findings-without-a-cve class=anchor aria-hidden=true>#</a></h2><p>Threat intelligence is matched by CVE. Many findings — most SAST results, secrets,
 misconfigurations, custom rules — have no CVE, and no vulnerability-instance threat
 intelligence exists for them anywhere (this is true of every vendor, not just DefectDojo).
 Those findings:</p><ul><li>keep their <strong>exact</strong> current Priority and Risk — the feature never lowers a score</li><li>are still prioritized by all the other engine inputs (severity, business criticality,
