@@ -23,7 +23,7 @@ Pools and the global algorithms solve the same problem at different scales, and 
 | **Global Component** | Every Asset in the instance | Component name and version | Every SCA Finding for a dependency is the same Finding wherever it appears |
 | **Global Locations** | Every Asset in the instance | Package URL, or URL for DAST Findings | As above, keyed on the full location under the Locations data model |
 
-A pool does not change **how** two Findings are compared. It changes **which** Findings are eligible to be compared at all. Tuning stays where it was, on the [Deduplication Tuning](/triage_findings/finding_deduplication/pro__deduplication_tuning/) pages.
+A pool does not change **how** two Findings are compared. It changes **which** Findings are eligible to be compared at all. How they are compared is set per tool on [Matching Configuration](/triage_findings/finding_deduplication/pro__deduplication_tuning/), which a pool can override for its own members.
 
 ## Membership is per matching kind
 
