@@ -40,7 +40,7 @@ Copy the entire fenced block below and paste it into Claude, ChatGPT, or any oth
 
 ```text
 You are helping me build customizable dashboards in DefectDojo Pro using its
-REST API ("Dashboards V2" — layouts of widgets on a grid). Work carefully and
+REST API ("Dashboards 2.0" — layouts of widgets on a grid). Work carefully and
 pause for my approval before creating anything against my tenant.
 
 ================================================================================

@@ -22,7 +22,7 @@ Il s'agit de la capacité **pré-code** de Sensei. Là où [l'analyse et la corr
 
 - La fonctionnalité sous licence **Sensei**. La modélisation des menaces est livrée sous le même droit d'utilisation que l'analyse et la correction.
 - Un rôle global **Mainteneur** ou **Propriétaire**. Les utilisateurs qui ne l'ont pas ne voient pas la page.
-- Un produit auquel rattacher le modèle de menaces. Les instances utilisant la nomenclature V3 voient les produits appelés **assets** ; cette page utilise le terme *produit* partout, et l'interface suit la nomenclature configurée sur votre instance.
+- Un produit auquel rattacher le modèle de menaces. Les instances utilisant la nomenclature 3.0 voient les produits appelés **assets** ; cette page utilise le terme *produit* partout, et l'interface suit la nomenclature configurée sur votre instance.
 
 Rien n'est installé et aucun dépôt n'est connecté. La modélisation des menaces ne lit que la conception que vous fournissez.
 

@@ -397,6 +397,11 @@ get_findings({
 
 **Description:** Retrieve aggregate finding metrics in a single call, rather than fetching findings and counting them. Returns counts by severity, average priority and risk score, average finding age, and the most common CWEs.
 
+> **Note on counts:** The `active_*` counts cover every active finding, whether or not it has
+> been verified. Verified findings are reported separately as `verified_findings` and
+> `active_verified_findings`, so one call gives you both views. The **Enforce Verified Status**
+> system settings do not narrow these counts.
+
 **Parameters:**
 
 **product_id** (Optional)
@@ -435,6 +440,11 @@ finding_summary({
 <summary><h4>risk_summary</h4></summary>
 
 **Description:** Retrieve the aggregate risk posture for a single product, including average priority, risk score, active finding counts, and business criticality.
+
+> **Note on counts:** The `active_*` counts cover every active finding, whether or not it has
+> been verified. Verified findings are reported separately as `verified_findings` and
+> `active_verified_findings`, so one call gives you both views. The **Enforce Verified Status**
+> system settings do not narrow these counts.
 
 **Parameters:**
 

@@ -16,7 +16,7 @@ from crum import get_current_user
 from django.db.models import Q
 
 from dojo.authorization.query_filters import register_auth_filter
-from dojo.authorization.roles_permissions import permission_to_action
+from dojo.authorization.roles_permissions import Action, permission_to_action
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import (
     App_Analysis,
@@ -60,6 +60,15 @@ def _is_unrestricted(user, action):
     if user.is_superuser:
         return True
     return bool(user.is_staff)
+
+
+def _requires_staff(action):
+    """
+    Actions ``user_has_permission`` gates on is_staff rather than on
+    membership. Only reached after the superuser/staff bypass above, so
+    membership must not scope a queryset for these.
+    """
+    return action in {Action.Delete, Action.StaffOnly, Action.SuperuserOnly}
 
 
 def _authorized_product_ids(user):
@@ -126,6 +135,8 @@ def _filter_by_authorized_products(queryset, product_path, permission, user=None
     action = permission_to_action(permission)
     if _is_unrestricted(user, action):
         return queryset
+    if _requires_staff(action):
+        return queryset.none()
     return queryset.filter(**{f"{product_path}__id__in": _authorized_product_ids(user)})
 
 
@@ -138,8 +149,11 @@ def _get_authorized_products(permission, user=None):
     user = _resolve_user(user)
     if user is None or getattr(user, "is_anonymous", False):
         return Product.objects.none()
-    if _is_unrestricted(user, permission_to_action(permission)):
+    action = permission_to_action(permission)
+    if _is_unrestricted(user, action):
         return Product.objects.all().order_by("name")
+    if _requires_staff(action):
+        return Product.objects.none()
     return Product.objects.filter(
         Q(authorized_users=user) | Q(prod_type__authorized_users=user),
     ).distinct().order_by("name")
@@ -314,8 +328,11 @@ def _get_authorized_locations(permission, queryset=None, user=None):
     qs = queryset if queryset is not None else Location.objects.all()
     if user is None or getattr(user, "is_anonymous", False):
         return qs.none()
-    if _is_unrestricted(user, permission_to_action(permission)):
+    action = permission_to_action(permission)
+    if _is_unrestricted(user, action):
         return qs
+    if _requires_staff(action):
+        return qs.none()
     authorized_products = _authorized_product_ids(user)
     return qs.filter(products__product__id__in=authorized_products).distinct()
 
@@ -396,8 +413,11 @@ def _get_authorized_findings(permission, queryset=None, user=None):
     qs = queryset if queryset is not None else Finding.objects.all()
     if user is None or getattr(user, "is_anonymous", False):
         return qs.none()
-    if _is_unrestricted(user, permission_to_action(permission)):
+    action = permission_to_action(permission)
+    if _is_unrestricted(user, action):
         return qs
+    if _requires_staff(action):
+        return qs.none()
     return qs.filter(test__engagement__product__id__in=_authorized_product_ids(user))
 
 

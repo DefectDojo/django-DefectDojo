@@ -21,7 +21,7 @@ Esta é a capacidade **pré-código** do Sensei. Enquanto o [scan-and-fix](/sens
 
 - O recurso licenciado **Sensei**. A modelagem de ameaças é disponibilizada sob o mesmo direito de uso (entitlement) do scan-and-fix.
 - Uma função global de **Maintainer** ou **Owner**. Usuários sem essa função não veem a página.
-- Um produto ao qual anexar o modelo de ameaças. Instâncias que usam a nomenclatura V3 veem os produtos chamados de **assets**; esta página usa *produto* ao longo do texto, e a interface segue a nomenclatura configurada na sua instância.
+- Um produto ao qual anexar o modelo de ameaças. Instâncias que usam a nomenclatura 3.0 veem os produtos chamados de **assets**; esta página usa *produto* ao longo do texto, e a interface segue a nomenclatura configurada na sua instância.
 
 Nada é instalado e nenhum repositório é conectado. A modelagem de ameaças lê apenas o design que você fornece.
 

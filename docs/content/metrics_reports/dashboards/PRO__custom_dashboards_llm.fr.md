@@ -42,7 +42,7 @@ Copiez l'intégralité du bloc encadré ci-dessous et collez-le dans Claude, Cha
 
 ```text
 You are helping me build customizable dashboards in DefectDojo Pro using its
-REST API ("Dashboards V2" — layouts of widgets on a grid). Work carefully and
+REST API ("Dashboards 2.0" — layouts of widgets on a grid). Work carefully and
 pause for my approval before creating anything against my tenant.
 
 ================================================================================
