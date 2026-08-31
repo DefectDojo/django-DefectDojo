@@ -12,7 +12,7 @@ Socket の **API トークン**（Socket ダッシュボードの **Settings →
 
 #### Connector Mappings
 
-1. **Location** フィールドを空欄のままにすると `https://api.socket.dev/v0` が使用されます。明示的に入力することもできます。
+1. **Location** フィールドには `https://api.socket.dev/v0` が自動入力されます。この値をそのまま使用するか、明示的に入力してください。
 2. **Secret** フィールドに Socket API トークンを入力します。
 3. 必要に応じて、**Minimum Severity** を設定してインポートする検出事項を絞り込みます。
 

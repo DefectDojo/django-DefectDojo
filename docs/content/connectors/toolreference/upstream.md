@@ -17,6 +17,8 @@ When setting up a Connector for a supported tool, you'll need to give DefectDojo
 
 Some tools will require additional API\-related fields beyond **Location** and **Secret**. They may also require you to make changes on their side to accommodate an incoming Connector from DefectDojo.
 
+Many tools serve one fixed API host. For those, DefectDojo fills in **Location** for you when you add the Connector, so you do not have to copy the URL out of this page. Keep the value you are given. Change it only if your instance uses a different host, such as a self\-hosted deployment or a different region.
+
 ![image](images/connectors_tool_reference.png)
 
 Each tool has a different API configuration, and this guide is intended to help you set up the tool's API so that DefectDojo can connect.

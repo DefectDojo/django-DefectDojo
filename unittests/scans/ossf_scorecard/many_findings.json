@@ -1,0 +1,188 @@
+{
+  "date": "2026-08-08T02:15:39Z",
+  "repo": {
+    "name": "github.com/ossf/scorecard",
+    "commit": "40c1e35996730d4fdcbdb2e6a23917a2467e29b7"
+  },
+  "scorecard": {
+    "version": "v5.5.0",
+    "commit": "c395761df6afe1a69e476bc60a013a94bcbc153f"
+  },
+  "score": 9,
+  "checks": [
+    {
+      "name": "Maintained",
+      "score": 10,
+      "reason": "14 commit(s) and 0 issue activity found in the last 90 days -- score normalized to 10",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project is \"actively maintained\".",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#maintained"
+      }
+    },
+    {
+      "name": "Dependency-Update-Tool",
+      "score": 10,
+      "reason": "update tool detected",
+      "details": [
+        "Info: detected update tool: Dependabot: .github/dependabot.yml:1"
+      ],
+      "documentation": {
+        "short": "Determines if the project uses a dependency update tool.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#dependency-update-tool"
+      }
+    },
+    {
+      "name": "Branch-Protection",
+      "score": -1,
+      "reason": "internal error: error during branchesHandler.setup: internal error: some github tokens can't read classic branch protection rules: https://github.com/ossf/scorecard-action/blob/main/docs/authentication/fine-grained-auth-token.md",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the default and release branches are protected with GitHub's branch protection settings.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#branch-protection"
+      }
+    },
+    {
+      "name": "Token-Permissions",
+      "score": 9,
+      "reason": "detected GitHub workflow tokens with excessive permissions",
+      "details": [
+        "Info: jobLevel 'actions' permission set to 'read': .github/workflows/codeql-analysis.yml:45",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/codeql-analysis.yml:46",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/docker.yml:68",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/docker.yml:33",
+        "Info: jobLevel 'actions' permission set to 'read': .github/workflows/goreleaser.yaml:74",
+        "Info: jobLevel permissions set to 'read-all': .github/workflows/goreleaser.yaml:85",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:139",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:168",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:217",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:256",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:298",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:361",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:37",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:91",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/main.yml:326",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/osps-baseline.yml:13",
+        "Warn: jobLevel 'security-events' permission set to 'write': .github/workflows/osps-baseline.yml:14",
+        "Info: jobLevel 'contents' permission set to 'read': .github/workflows/publishimage.yml:32",
+        "Warn: jobLevel 'packages' permission set to 'write': .github/workflows/publishimage.yml:34",
+        "Warn: jobLevel 'checks' permission set to 'write': .github/workflows/verify.yml:24",
+        "Info: topLevel 'contents' permission set to 'read': .github/workflows/codeql-analysis.yml:37",
+        "Info: topLevel 'contents' permission set to 'read': .github/workflows/depsreview.yml:18",
+        "Info: topLevel 'contents' permission set to 'read': .github/workflows/docker.yml:16",
+        "Info: topLevel permissions set to 'read-all': .github/workflows/gitlab.yml:17",
+        "Info: topLevel 'contents' permission set to 'read': .github/workflows/goreleaser.yaml:23",
+        "Info: topLevel 'contents' permission set to 'read': .github/workflows/integration.yml:23",
+        "Info: topLevel 'contents' permission set to 'read': .github/workflows/lint.yml:11",
+        "Info: topLevel 'pull-requests' permission set to 'read': .github/workflows/lint.yml:12",
+        "Info: topLevel 'contents' permission set to 'read': .github/workflows/main.yml:18",
+        "Warn: no topLevel permission defined: .github/workflows/osps-baseline.yml:1",
+        "Info: topLevel permissions set to 'read-all': .github/workflows/publishimage.yml:17",
+        "Info: topLevel permissions set to 'read-all': .github/workflows/scdiff.yml:6",
+        "Info: topLevel permissions set to 'read-all': .github/workflows/scorecard-analysis.yml:11",
+        "Info: topLevel permissions set to 'read-all': .github/workflows/stale.yml:20",
+        "Info: topLevel permissions set to 'read-all': .github/workflows/verify.yml:19"
+      ],
+      "documentation": {
+        "short": "Determines if the project's workflows follow the principle of least privilege.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#token-permissions"
+      }
+    },
+    {
+      "name": "Pinned-Dependencies",
+      "score": 9,
+      "reason": "dependency not pinned by hash detected -- score normalized to 9",
+      "details": [
+        "Warn: third-party GitHubAction not pinned by hash: .github/workflows/goreleaser.yaml:77: update your workflow using https://app.stepsecurity.io/secureworkflow/ossf/scorecard/goreleaser.yaml/main?enable=pin",
+        "Info:  56 out of  56 GitHub-owned GitHubAction dependencies pinned",
+        "Info:  40 out of  41 third-party GitHubAction dependencies pinned",
+        "Info:   1 out of   1 goCommand dependencies pinned",
+        "Info:  25 out of  25 containerImage dependencies pinned"
+      ],
+      "documentation": {
+        "short": "Determines if the project has declared and pinned the dependencies of its build process.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#pinned-dependencies"
+      }
+    },
+    {
+      "name": "CII-Best-Practices",
+      "score": 5,
+      "reason": "badge detected: Passing",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project has an OpenSSF (formerly CII) Best Practices Badge.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#cii-best-practices"
+      }
+    },
+    {
+      "name": "Vulnerabilities",
+      "score": 0,
+      "reason": "59 existing vulnerabilities detected",
+      "details": [
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2022-0635",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2022-0646",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5064",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5338",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5378",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5475",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5622",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5758",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4883",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4887",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5617",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5668",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5746",
+        "Warn: Project is vulnerable to: https://osv.dev/GHSA-hc8v-wwc9-vgxm",
+        "Warn: Project is vulnerable to: https://osv.dev/GHSA-qgq7-7hm3-q39j",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5841",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4858",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4859",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5264",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5381",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5662",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5710",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5158",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5005",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5006",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5013",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5014",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5015",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5016",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5017",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5018",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5019",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5020",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5021",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5023",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5033",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5932",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5025",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5026",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5027",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5028",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5029",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5030",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5942",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5024",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5970",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5490",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5597",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5074",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5336",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5496",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5693",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4529",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5694",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5952",
+        "Warn: Project is vulnerable to: https://osv.dev/GHSA-wqqc-jjcq-vfxm",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5851",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5410",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5052"
+      ],
+      "documentation": {
+        "short": "Determines if the project has open, known unfixed vulnerabilities.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#vulnerabilities"
+      }
+    }
+  ]
+}

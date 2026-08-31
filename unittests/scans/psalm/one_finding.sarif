@@ -1,0 +1,59 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Psalm",
+          "informationUri": "https://psalm.dev",
+          "version": "6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac",
+          "rules": [
+            {
+              "id": "56",
+              "name": "TypeDoesNotContainType",
+              "shortDescription": {
+                "text": "TypeDoesNotContainType"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/056",
+              "help": {
+                "markdown": "# TypeDoesNotContainType\n\nEmitted checking whether one value has a type or value that is impossible given its currently-known type\n\n```php\n<?php\n\n$a = \"hello\";\nif ($a === 5) {}\n```\n",
+                "text": "# TypeDoesNotContainType\n\nEmitted checking whether one value has a type or value that is impossible given its currently-known type\n\n```php\n<?php\n\n$a = \"hello\";\nif ($a === 5) {}\n```\n"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "56",
+          "message": {
+            "text": "string cannot be identical to int"
+          },
+          "level": "error",
+          "rank": 94,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 32,
+                  "endLine": 32,
+                  "startColumn": 16,
+                  "endColumn": 25
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

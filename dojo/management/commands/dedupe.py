@@ -14,7 +14,7 @@ from dojo.finding.deduplication import (
     get_finding_models_for_deduplication,
     hashcode_values_writer,
 )
-from dojo.location.feature import locations_enabled
+from dojo.location.queries import location_prefetch_lookups
 from dojo.models import Finding, Product
 from dojo.utils import (
     calculate_grade,
@@ -44,6 +44,49 @@ class Command(BaseCommand):
 
     help = 'Usage: manage.py dedupe [--parser "Parser1 Scan" --parser "Parser2 Scan"...] [--hash_code_only] [--dedupe_only] [--dedupe_sync] [--dedupe_batch_mode]'
 
+    # ---------------------------------------------------------------- extension points
+    # Editions that ship extra hash fields or extra scoping subclass this command and
+    # override the hooks below rather than forking the whole run. Keeping them narrow is
+    # the point: a fork drifts silently (the location prefetch and the vulnerability-id
+    # prefetch each had to be fixed twice because of one), while an override that goes
+    # stale is a signature mismatch.
+
+    def add_extra_arguments(self, parser):
+        """Extra CLI arguments. Defaults to none."""
+
+    def apply_extra_scope(self, findings, options):
+        """Narrow the finding scope further from ``options``. Defaults to no narrowing."""
+        return findings
+
+    def describe_extra_scope(self, options):
+        """Human-readable fragments describing what ``apply_extra_scope`` narrowed to."""
+        return []
+
+    def hash_code_generator(self):
+        """The callable that recomputes one finding's hash_code in place."""
+        return generate_hash_code
+
+    def recompute_extra_hashes(self, findings, writer):
+        """Recompute hashes stored outside Finding.hash_code. Defaults to none."""
+
+    def dedupe_batch_sync(self, findings):
+        """Deduplicate one already-loaded batch of findings, in this thread."""
+        dedupe_batch_of_findings(findings)
+
+    def dedupe_batch_async(self, finding_ids):
+        """Queue one batch of finding ids for deduplication."""
+        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+        dojo_dispatch_task(do_dedupe_batch_task, finding_ids)
+
+    def grade_product(self, product):
+        """Recalculate one product's grade after a synchronous dedupe run."""
+        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+        dojo_dispatch_task(calculate_grade, product.id)
+
+    # ---------------------------------------------------------------------------------
+
     def add_arguments(self, parser):
         parser.add_argument(
             "--parser",
@@ -61,76 +104,72 @@ class Command(BaseCommand):
             default=True,
             help="Deduplicate in batches (similar to import), works with both sync and async modes (default: True)",
         )
+        self.add_extra_arguments(parser)
 
     def handle(self, *args, **options):
-        restrict_to_parsers = options["parser"]
         hash_code_only = options["hash_code_only"]
         dedupe_only = options["dedupe_only"]
         dedupe_sync = options["dedupe_sync"]
         dedupe_batch_mode = options.get("dedupe_batch_mode", True)  # Default to True (batch mode enabled)
 
-        # Wrap with pghistory context for audit trail
+        # Wrap with pghistory context for audit trail, so the hash_code churn this command
+        # produces is attributable to source="dedupe_command" in the audit log instead of
+        # being indistinguishable from ordinary import/save activity.
         with pghistory.context(
             source="dedupe_command",
             dedupe_sync=dedupe_sync,
         ):
             self._run_dedupe(
-                restrict_to_parsers=restrict_to_parsers,
+                options=options,
                 hash_code_only=hash_code_only,
                 dedupe_only=dedupe_only,
                 dedupe_sync=dedupe_sync,
                 dedupe_batch_mode=dedupe_batch_mode,
             )
 
-    def _run_dedupe(self, *, restrict_to_parsers, hash_code_only, dedupe_only, dedupe_sync, dedupe_batch_mode):
+    def _run_dedupe(self, *, options, hash_code_only, dedupe_only, dedupe_sync, dedupe_batch_mode):
         """Internal method to run the dedupe logic within pghistory context."""
-        if restrict_to_parsers is not None:
-            findings = Finding.objects.filter(test__test_type__name__in=restrict_to_parsers).exclude(duplicate=True)
-            logger.info("######## Will process only parsers %s and %d findings ########", *restrict_to_parsers, findings.count())
-        else:
-            # add filter on id to make counts not slow on mysql
-            # exclude duplicates to avoid reprocessing findings that are already marked as duplicates
-            findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
-            logger.info("######## Will process the full database with %d findings ########", findings.count())
+        restrict_to_parsers = options["parser"]
 
-        if locations_enabled():
-            # Prefetch related objects for synchronous deduplication
-            findings = findings.select_related(
-                "test", "test__engagement", "test__engagement__product", "test__test_type",
-            ).prefetch_related(
-                "locations",
-                # vulnerability id store feeds hash_code computation for parsers whose
-                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
-                # a per-finding query in get_vulnerability_ids().
-                vulnerability_id_prefetch(),
-                Prefetch(
-                    "original_finding",
-                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-                ),
-            )
-        else:
-            # TODO: Delete this after the move to Locations
-            # Prefetch related objects for synchronous deduplication
-            findings = findings.select_related(
-                "test", "test__engagement", "test__engagement__product", "test__test_type",
-            ).prefetch_related(
-                "endpoints",
-                # vulnerability id store feeds hash_code computation for parsers whose
-                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
-                # a per-finding query in get_vulnerability_ids().
-                vulnerability_id_prefetch(),
-                Prefetch(
-                    "original_finding",
-                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-                ),
-            )
+        # filter on id to make counts not slow on mysql, and exclude duplicates to avoid
+        # reprocessing findings that are already marked as duplicates
+        findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
+        if restrict_to_parsers is not None:
+            findings = findings.filter(test__test_type__name__in=restrict_to_parsers)
+        findings = self.apply_extra_scope(findings, options)
+
+        scope = ([f"parsers={restrict_to_parsers}"] if restrict_to_parsers else []) + self.describe_extra_scope(options)
+        logger.info(
+            "######## Will process %d findings%s ########",
+            findings.count(),
+            f" ({', '.join(scope)})" if scope else " (full database)",
+        )
+
+        # Prefetch related objects for synchronous deduplication
+        findings = findings.select_related(
+            "test", "test__engagement", "test__engagement__product", "test__test_type",
+        ).prefetch_related(
+            # location relation for the parsers that hash it; the lookup differs per location
+            # model, and prefetching the deprecated endpoint relation under V3 raises.
+            *location_prefetch_lookups(),
+            # vulnerability id store feeds hash_code computation for parsers whose
+            # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
+            # a per-finding query in get_vulnerability_ids().
+            vulnerability_id_prefetch(),
+            Prefetch(
+                "original_finding",
+                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+            ),
+        )
 
         # Phase 1: update hash_codes without deduplicating
         if not dedupe_only:
             logger.info("######## Start Updating Hashcodes (foreground) ########")
 
             hash_code_writer = hashcode_values_writer if settings.MASS_HASH_CODE_USE_SQL_WRITER else None
-            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ", writer=hash_code_writer)
+            mass_model_updater(Finding, findings, self.hash_code_generator(), fields=["hash_code"], order="asc", log_prefix="hash_code computation ", writer=hash_code_writer)
+
+            self.recompute_extra_hashes(findings, hash_code_writer)
 
             logger.info("######## Done Updating Hashcodes########")
 
@@ -161,9 +200,7 @@ class Command(BaseCommand):
                     # in async mode the background task that grades products every hour will pick it up
                     logger.debug("Updating grades for products...")
                     for product in Product.objects.all():
-                        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-                        dojo_dispatch_task(calculate_grade, product.id)
+                        self.grade_product(product)
 
                 logger.info("######## Done deduplicating (%s) ########", ("foreground" if dedupe_sync else "tasks submitted to celery"))
             else:
@@ -210,13 +247,11 @@ class Command(BaseCommand):
                         # Synchronous: load findings and process immediately
                         batch_findings = get_finding_models_for_deduplication(batch_finding_ids)
                         logger.debug(f"Deduplicating batch of {len(batch_findings)} findings for test {test_id}")
-                        dedupe_batch_of_findings(batch_findings)
+                        self.dedupe_batch_sync(batch_findings)
                     else:
                         # Asynchronous: submit task with finding IDs
                         logger.debug(f"Submitting async batch task for {len(batch_finding_ids)} findings for test {test_id}")
-                        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-                        dojo_dispatch_task(do_dedupe_batch_task, batch_finding_ids)
+                        self.dedupe_batch_async(batch_finding_ids)
 
                     total_processed += len(batch_finding_ids)
                     batch_finding_ids = []

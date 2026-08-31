@@ -1,0 +1,40 @@
+{
+  "info": {
+    "program": "licensecheck",
+    "version": "2026.0.8",
+    "license": "MIT LICENSE"
+  },
+  "project_license": "NO LICENSE/ UNKNOWN LICENSE",
+  "packages": [
+    {
+      "name": "chardet",
+      "version": "7.5.1",
+      "size": 837498,
+      "homePage": "",
+      "license": "0BSD",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "chardet-7.5.1"
+    },
+    {
+      "name": "click",
+      "version": "8.4.2",
+      "size": 426857,
+      "homePage": "",
+      "license": "BSD-3-Clause",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "click-8.4.2"
+    },
+    {
+      "name": "certifi",
+      "version": "2026.7.22",
+      "size": 247978,
+      "homePage": "https://github.com/certifi/python-certifi",
+      "license": "Mozilla Public License 2.0 _MPL 2.0_",
+      "licenseCompat": false,
+      "errorCode": 0,
+      "namever": "certifi-2026.7.22"
+    }
+  ]
+}

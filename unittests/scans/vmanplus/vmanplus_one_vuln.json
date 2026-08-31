@@ -1,0 +1,23 @@
+{
+  "vulnerabilities": [
+    {
+      "resource_id": "301",
+      "resource_name": "generic-host-01",
+      "fqdn_name": "generic-host-01.corp.example.com",
+      "ip_address": "10.20.0.11",
+      "vulnerabilityid": "50123",
+      "vulnerabilityname": "Remote code execution in the example office suite",
+      "cveids": "CVE-2000-0001",
+      "severity": "Important",
+      "cvss_2_score": 9.3,
+      "cvss_3_score": 8.8,
+      "patch_description": "Example Office Suite security update 2024-06",
+      "patchid": "77001",
+      "reference_links": "https://example.com/advisories/CVE-2000-0001",
+      "exploitscount": "0",
+      "vulnerability_status": "Open",
+      "updatedtime": 1717322400000
+    }
+  ],
+  "metadata": {"cursor": "c1", "isNextPageAvailable": false, "totalRecords": 1}
+}

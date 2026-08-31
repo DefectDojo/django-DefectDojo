@@ -12,7 +12,7 @@ You will need a Socket **API token** — an organization token created in the So
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://api.socket.dev/v0`, or enter it explicitly.
+1. Keep the pre-filled **Location**, `https://api.socket.dev/v0`, or enter it explicitly.
 2. Enter the Socket API token in the **Secret** field.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
 

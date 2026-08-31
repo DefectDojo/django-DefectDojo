@@ -8,19 +8,26 @@ Covers:
 - Query efficiency
 """
 
+import hashlib
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.db import connection
+from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+from dojo.finding.deduplication import (
+    are_locations_duplicates,
+    finding_locations,
+    get_finding_models_for_deduplication,
+)
 from dojo.importers.location_manager import LocationManager
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tools.locations import LocationAssociationData, LocationData
-from dojo.url.models import URL
+from dojo.url.models import URL, HyperlinkParser
 from unittests.dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
 User = get_user_model()
@@ -541,6 +548,131 @@ class TestStatusUpdateQueryEfficiency(DojoTestCase):
         self.assertEqual(product_ref.status, ProductLocationStatus.Active)
 
 
+# ---------------------------------------------------------------------------
+# URL string memoization + clean-once (locations import perf regression)
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestURLStringMemo(DojoTestCase):
+
+    def test_str_memoized_for_unchanged_fields(self):
+        url = _make_url("memo.example.com", "a/b")
+        first = str(url)
+        with patch.object(HyperlinkParser, "unparse", autospec=True) as mock_unparse:
+            self.assertEqual(str(url), first)
+            mock_unparse.assert_not_called()
+
+    def test_str_recomputed_after_field_change(self):
+        url = _make_url("memo-one.example.com")
+        before = str(url)
+        url.host = "memo-two.example.com"
+        after = str(url)
+        self.assertNotEqual(before, after)
+        self.assertIn("memo-two.example.com", after)
+
+    def test_identity_hash_matches_rendered_string(self):
+        url = _make_url("memo-hash.example.com", "x")
+        expected = hashlib.blake2b(str(url).encode(), digest_size=32).hexdigest()
+        self.assertEqual(url.identity_hash, expected)
+
+
+@skip_unless_v3
+class TestCleanedUnsavedLocationsMemo(DojoTestCase):
+
+    def test_cleaning_runs_once_per_unsaved_list(self):
+        finding = _make_finding()
+        finding.unsaved_locations = [LocationData.url(url="https://memo-once.example.com/a")]
+        first = LocationManager.cleaned_unsaved_locations(finding)
+        with patch.object(LocationManager, "clean_unsaved_locations") as mock_clean:
+            second = LocationManager.cleaned_unsaved_locations(finding)
+            mock_clean.assert_not_called()
+        self.assertIs(first, second)
+
+    def test_reassigned_list_is_recleaned(self):
+        finding = _make_finding()
+        finding.unsaved_locations = [LocationData.url(url="https://memo-a.example.com/")]
+        first = LocationManager.cleaned_unsaved_locations(finding)
+        finding.unsaved_locations = [LocationData.url(url="https://memo-b.example.com/")]
+        second = LocationManager.cleaned_unsaved_locations(finding)
+        self.assertNotEqual([str(u) for u in first], [str(u) for u in second])
+
+    def test_record_for_finding_reuses_prior_clean(self):
+        """The hash-code pass cleans first; record_for_finding must not clean again."""
+        finding = _make_finding()
+        finding.unsaved_locations = [LocationData.url(url="https://memo-rec.example.com/a")]
+        manager = LocationManager(finding.test.engagement.product)
+        LocationManager.cleaned_unsaved_locations(finding)
+        with patch.object(LocationManager, "clean_unsaved_locations") as mock_clean:
+            manager.record_for_finding(finding)
+            mock_clean.assert_not_called()
+        manager.persist()
+        self.assertEqual(finding.locations.count(), 1)
+
+
+@skip_unless_v3
+class TestBulkGetOrCreateSkipsReclean(DojoTestCase):
+
+    def test_cleaned_urls_are_not_recleaned(self):
+        urls = [_make_url("noreclean.example.com")]
+        with patch.object(URL, "clean", autospec=True) as mock_clean:
+            saved = URL.bulk_get_or_create(urls)
+            mock_clean.assert_not_called()
+        self.assertIsNotNone(saved[0].pk)
+
+    def test_uncleaned_urls_are_still_cleaned(self):
+        url = URL(protocol="https", host="RECLEAN.example.com")
+        saved = URL.bulk_get_or_create([url])
+        self.assertEqual(saved[0].host, "reclean.example.com")
+        self.assertTrue(saved[0].identity_hash)
+
+
+@skip_unless_v3
+class TestDedupeLocationAccess(DojoTestCase):
+
+    def _finding_with_location(self, host):
+        finding = _make_finding()
+        manager = LocationManager(finding.test.engagement.product)
+        finding.unsaved_locations = [LocationData.url(url=f"https://{host}/login")]
+        manager.record_for_finding(finding)
+        manager.persist()
+        return finding
+
+    @override_settings(DEDUPE_ALGO_ENDPOINT_FIELDS=["host", "path"])
+    def test_loader_prefetches_locations_for_pair_comparison(self):
+        f1 = self._finding_with_location("dedupe-prefetch.example.com")
+        f2 = self._finding_with_location("dedupe-prefetch.example.com")
+        loaded = get_finding_models_for_deduplication([f1.id, f2.id])
+        with self.assertNumQueries(0):
+            self.assertTrue(are_locations_duplicates(loaded[0], loaded[1]))
+
+    def test_finding_locations_skips_non_url_locations(self):
+        """A dependency/code Location has no `url` reverse row; it must be skipped, not crash."""
+        finding = self._finding_with_location("mixed-loc.example.com")
+        dep_location = Location.objects.create(location_type="dependency", location_value="pkg:pypi/x@1.0")
+        LocationFindingReference.objects.create(
+            location=dep_location, finding=finding, status=FindingLocationStatus.Active,
+        )
+        urls = finding_locations(finding.locations.select_related("location__url").all())
+        self.assertEqual(len(urls), 1)
+
+    @override_settings(DEDUPE_ALGO_ENDPOINT_FIELDS=["host", "path"])
+    def test_unsaved_finding_comparison_uses_unsaved_locations(self):
+        saved = self._finding_with_location("unsaved-cmp.example.com")
+        saved = get_finding_models_for_deduplication([saved.id])[0]
+        unsaved = Finding(test=saved.test, title="preview", severity="Medium")
+        unsaved.unsaved_locations = [LocationData.url(url="https://unsaved-cmp.example.com/login")]
+        self.assertTrue(are_locations_duplicates(unsaved, saved))
+
+    @override_settings(DEDUPE_ALGO_ENDPOINT_FIELDS=["host", "path"])
+    def test_mismatched_locations_are_not_duplicates(self):
+        f1 = self._finding_with_location("host-a.example.com")
+        f2 = self._finding_with_location("host-b.example.com")
+        loaded = get_finding_models_for_deduplication([f1.id, f2.id])
+        self.assertFalse(are_locations_duplicates(loaded[0], loaded[1]))
+
+
+# ---------------------------------------------------------------------------
+# Recording locations before the finding is written
+# ---------------------------------------------------------------------------
 @skip_unless_v3
 class TestRecordBeforeFindingIsSaved(DojoTestCase):
 

@@ -1,0 +1,43 @@
+{
+  "pagination": {
+    "total": 1,
+    "start": 0,
+    "limit": 100
+  },
+  "list": [
+    {
+      "issue": {
+        "issue_id": 9001,
+        "name": "TLS certificate expires in under 14 days",
+        "severity": 5
+      },
+      "target": {
+        "target_id": 3001,
+        "target": "app.example.com",
+        "target_name": "Main app",
+        "ip": "10.0.0.11",
+        "geo": "US"
+      },
+      "status": {
+        "issue_id": 9001,
+        "target_id": 3001,
+        "status": "confirmed",
+        "assigned_to": "Platform Team",
+        "scans_since_found": 4
+      },
+      "instances": []
+    }
+  ],
+  "details": {
+    "9001": {
+      "issue_id": 9001,
+      "name": "TLS certificate expires in under 14 days",
+      "description": "The certificate presented by the host expires shortly.",
+      "category": "Encryption",
+      "cve_ids": [],
+      "pci": 1,
+      "severity": 5,
+      "type": 2
+    }
+  }
+}

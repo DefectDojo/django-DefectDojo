@@ -12,7 +12,7 @@ Sie benötigen einen Fairwinds-Insights-**Organisationsnamen** und ein **API-Tok
 
 #### Connector-Zuordnungen
 
-1. Lassen Sie das Feld **Location** leer, um `https://insights.fairwinds.com` zu verwenden, oder geben Sie Ihren Insights-Host explizit an.
+1. Behalten Sie den vorgegebenen Wert im Feld **Location**, `https://insights.fairwinds.com`, oder geben Sie Ihren Insights-Host explizit an.
 2. Geben Sie Ihren Insights-**Organization**-Namen ein (den Slug, der in Ihrer Dashboard-URL angezeigt wird).
 3. Geben Sie das Insights-API-Token in das Feld **Secret** ein.
 4. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden.

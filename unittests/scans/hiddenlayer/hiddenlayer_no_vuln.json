@@ -1,0 +1,12 @@
+{
+  "scan_id": "scan-0001",
+  "sarif": {
+    "version": "2.1.0",
+    "runs": [
+      {
+        "tool": {"driver": {"name": "HiddenLayer Model Scanner", "version": "1.0.0", "rules": []}},
+        "results": []
+      }
+    ]
+  }
+}

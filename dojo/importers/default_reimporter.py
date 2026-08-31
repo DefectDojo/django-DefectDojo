@@ -24,6 +24,7 @@ from dojo.models import (
     DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
     Development_Environment,
     Finding,
+    Finding_Group,
     Notes,
     Test,
     Test_Import,
@@ -121,7 +122,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ) = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(findings_to_mitigate, **kwargs)
+        #
+        # process_findings() tracks findings_to_mitigate as ids (M1), but
+        # close_old_findings() calls .save() on each one and reads .finding_group --
+        # hydrate real instances for just this batch, chunked, right before use.
+        closed_findings = self.close_old_findings(
+            self._hydrate_findings_for_close_old(findings_to_mitigate),
+            **kwargs,
+        )
+        # actively_closed_matches: findings process_matched_active_finding closed inline
+        # (see its docstring) rather than via close_old_findings() -- disjoint from
+        # closed_findings by construction, since close_old_findings() no-ops on a finding
+        # that is already mitigated by the time it hydrates it.
+        closed_finding_ids = [f.id for f in closed_findings] + self.actively_closed_matches
         # Update the timestamps of the test object by looking at the findings imported
         logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
         # Update the timestamps of the test object by looking at the findings imported
@@ -145,7 +158,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # feature enabled
         test_import_history = self.update_import_history(
             new_findings=new_findings,
-            closed_findings=closed_findings,
+            closed_findings=closed_finding_ids,
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
         )
@@ -155,14 +168,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # so notifications and statistics reflect the deduplicated state.
         self.wait_for_post_processing()
         updated_count = (
-            len(closed_findings) + len(reactivated_findings) + len(new_findings)
+            len(closed_finding_ids) + len(reactivated_findings) + len(new_findings)
         )
         self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,
             findings_reactivated=reactivated_findings,
-            findings_mitigated=closed_findings,
+            findings_mitigated=closed_finding_ids,
             findings_untouched=untouched_findings,
         )
         # Update the test progress to reflect that the import has completed
@@ -173,7 +186,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.test,
             updated_count,
             len(new_findings),
-            len(closed_findings),
+            len(closed_finding_ids),
             len(reactivated_findings),
             len(untouched_findings),
             test_import_history,
@@ -266,64 +279,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 f"Added finding {finding.id} (title: {finding.title}, severity: {finding.severity}) to candidates for next findings in this report",
             )
 
-    def _flush_post_processing_batch(
-        self,
-        batch_finding_ids,
-        batch_findings,
-        new_findings_in_batch,
-        findings_with_parser_tags,
-        **kwargs,
-    ) -> None:
-        """
-        Persist and dispatch everything accumulated since the last flush.
-
-        Extracted so it can run both on the size trigger inside the loop and once more
-        after it. Every step is a no-op on empty state, so the final call is safe and is
-        deliberately unconditional.
-        """
-        self.location_handler.persist()
-        self.flush_vulnerability_ids()
-        self.flush_burp_request_response()
-        # Apply parser-supplied tags for this batch before post-processing starts,
-        # so rules/deduplication tasks see the tags already on the findings.
-        bulk_apply_parser_tags(findings_with_parser_tags)
-        findings_with_parser_tags.clear()
-        # Apply import-time tags before post-processing so rules/deduplication see them.
-        self.apply_import_tags_for_batch(batch_findings)
-        # Apply inherited Product tags to NEWLY CREATED findings only
-        # (and their endpoints/locations) BEFORE post_process_findings_batch
-        # dispatches, so rules/dedup see inherited tags on .tags.
-        # Matched/existing findings already have inheritance applied from
-        # their original creation; re-running it on no-change reimports
-        # would be ~8 wasted queries per batch.
-        apply_inherited_tags_for_findings(new_findings_in_batch)
-        new_findings_in_batch.clear()
-        batch_findings.clear()
-        # Partition the batch by each finding's own push_to_jira flag so one
-        # finding's grouping state is not applied to the whole batch. Uniform
-        # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
-        finding_ids_by_push: dict[bool, list[int]] = {}
-        for finding_id, finding_push_to_jira in batch_finding_ids:
-            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(finding_id)
-        batch_finding_ids.clear()
-        for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
-            result = dojo_dispatch_task(
-                finding_helper.post_process_findings_batch,
-                finding_ids_batch,
-                dedupe_option=True,
-                rules_option=True,
-                product_grading_option=True,
-                issue_updater_option=True,
-                push_to_jira=push_to_jira_batch,
-                jira_instance_id=getattr(self.jira_instance, "id", None),
-                # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
-                # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
-                **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
-                **self.post_processing_dispatch_kwargs(**kwargs),
-            )
-            if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
-                self.record_post_processing_result(result)
-
     def process_findings(
         self,
         parsed_findings: list[Finding],
@@ -368,24 +323,43 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
+    ) -> tuple[list[int], list[int], set[int], set[int]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         original_findings = self.get_original_findings()
 
         if logger.isEnabledFor(logging.DEBUG):
             # Guarded twice over: rendering .query raises EmptyResultSet for a none() queryset
             # (a legitimate get_original_findings() override), and the original_items render
-            # builds (id, hash) tuples for every finding already in the test — millions on a
-            # large test — even when DEBUG logging is off, because f-strings always evaluate.
+            # used to build (id, hash) tuples for every finding already in the test — millions
+            # on a large test — even when DEBUG logging is off, because f-strings always evaluate.
             with contextlib.suppress(EmptyResultSet):
                 logger.debug(f"original_findings_qyer: {original_findings.query}")
-        self.original_items = list(original_findings)
+        # Ids, not instances (M1): a 25M-finding reimport used to keep every original,
+        # new, reactivated and unchanged Finding *instance* alive in memory for the whole
+        # run, purely so notify_scan_added() and update_import_history() could read a few
+        # scalar fields off them at the very end. self.to_mitigate/untouched below are
+        # plain id-set arithmetic either way; the only consumers that ever needed real
+        # rows (close_old_findings, process_groups_for_all_findings) now requery
+        # deliberately, in bounded chunks, at the point they need them.
+        self.original_items = set(original_findings.values_list("id", flat=True))
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
+            logger.debug(f"original_items: {sorted(self.original_items)}")
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
+        # Findings process_matched_active_finding closed inline (report re-marked a
+        # matched, previously-active finding as mitigated/risk-accepted/false-p/out-of-
+        # scope) rather than via close_old_findings(). Neither reactivated nor unchanged,
+        # so to_mitigate's arithmetic below still includes their ids -- close_old_findings()
+        # correctly no-ops on them (already mitigated by the time it hydrates them), which
+        # means it never reports them as closed either. Tracked here so process_scan() can
+        # still count them for update_import_history()/notify_scan_added().
+        self.actively_closed_matches: list[int] = []
         self.group_names_to_findings_dict = {}
+        # New findings queued by process_finding_that_was_not_matched, drained (persisted
+        # via persist_new_findings, then post-processed) once per matching batch -- see
+        # _drain_pending_new_findings.
+        self._pending_new_findings: list[tuple[Finding, Finding, bool]] = []
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
@@ -434,7 +408,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
         # same batch must still be pushed. The batch is partitioned by flag at dispatch time
         # instead of applying one finding's flag to the whole batch.
-        batch_finding_ids: list[tuple[int, bool]] = []
+        #
+        # The finding is held rather than its id, and the id is read at dispatch time below.
+        # Nothing between the append and the dispatch needs the id, and deferring the read
+        # keeps this loop body free of direct primary-key reads -- one less obstacle for an
+        # importer that buffers inserts and writes them at batch boundaries, in the same
+        # spirit as get_original_findings and get_reimport_match_candidates_for_batch, which
+        # exist so downstream editions need not copy this method. (Not the only obstacle:
+        # the batch-boundary block below persists locations and applies tags, which also
+        # require written rows, before the ids are read.)
+        batch_findings_to_dispatch: list[tuple[Finding, bool]] = []
         batch_findings: list[Finding] = []
         # Findings that were newly created (else branch below) — pass these to
         # `apply_inherited_tags_for_findings` instead of `batch_findings` so
@@ -464,7 +447,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
             # Process each finding in the batch using pre-fetched candidates
             for unsaved_finding in unsaved_findings_batch:
-
                 # Match any findings to this new one coming in using pre-fetched candidates
                 matched_findings = self.match_finding_to_candidate_reimport(
                     unsaved_finding,
@@ -476,6 +458,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 # Determine how to proceed based on whether matches were found or not
                 if matched_findings:
                     existing_finding = matched_findings[0]
+                    if existing_finding.pk is None:
+                        # existing_finding is a same-report duplicate this same matching
+                        # batch queued earlier (add_new_finding_to_candidates) and hasn't
+                        # drained yet. Persist and post-process it now -- process_matched_finding
+                        # and finding_post_processing below both require a real primary key.
+                        self._finalize_specific_pending_new_finding(
+                            existing_finding,
+                            batch_findings_to_dispatch,
+                            batch_findings,
+                            new_findings_in_batch,
+                            findings_with_parser_tags,
+                        )
                     finding, force_continue = self.process_matched_finding(
                         unsaved_finding,
                         existing_finding,
@@ -496,10 +490,37 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             unsaved_finding,
                             self.user,
                         )
+                    # Matched findings already have a primary key: process and dispatch
+                    # immediately, exactly as before.
+                    #
+                    # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
+                    # In reimport scenarios, typically most findings match existing ones, so this check
+                    # crossing dedupe_batch_max_size is normally driven by matched findings, not new ones.
+                    # New findings are queued (see the else branch) and drained once per matching batch
+                    # instead -- see _drain_pending_new_findings.
+                    finding = self.finding_post_processing(
+                        finding,
+                        unsaved_finding,
+                        is_matched_finding=True,
+                        tag_accumulator=findings_with_parser_tags,
+                    )
+                    push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
+                    batch_findings_to_dispatch.append((finding, push_to_jira))
+                    batch_findings.append(finding)
+                    if len(batch_findings_to_dispatch) >= dedupe_batch_max_size:
+                        self._flush_post_processing_batch(
+                            batch_findings_to_dispatch,
+                            batch_findings,
+                            new_findings_in_batch,
+                            findings_with_parser_tags,
+                            **kwargs,
+                        )
                 else:
                     finding, finding_will_be_grouped = self.process_finding_that_was_not_matched(unsaved_finding)
 
-                    # Add newly created finding to candidates for subsequent findings in this batch
+                    # Add newly created finding to candidates for subsequent findings in this
+                    # batch. finding has no primary key yet -- match_finding_to_candidate_reimport
+                    # and add_new_finding_to_candidates are written to tolerate that.
                     self.add_new_finding_to_candidates(
                         finding,
                         candidates_by_hash,
@@ -507,54 +528,43 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         candidates_by_key,
                     )
                     if finding:
-                        new_findings_in_batch.append(finding)
+                        # Deferred: finding_post_processing() (vulnerability-id/CWE
+                        # reconciliation, file attachment) needs a real primary key, which
+                        # persist_new_findings() only assigns once this matching batch
+                        # finishes -- see _drain_pending_new_findings.
+                        self._pending_new_findings.append((finding, unsaved_finding, finding_will_be_grouped))
 
-                # This condition __appears__ to always be true, but am afraid to remove it
-                if finding:
-                    # Process the rest of the items on the finding
-                    finding = self.finding_post_processing(
-                        finding,
-                        unsaved_finding,
-                        is_matched_finding=bool(matched_findings),
-                        tag_accumulator=findings_with_parser_tags,
-                    )
-                    # all data is already saved on the finding, we only need to trigger post processing in batches
-                    push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
-                    batch_finding_ids.append((finding.id, push_to_jira))
-                    batch_findings.append(finding)
+            # Persist this matching batch's new findings (bulk, via persist_new_findings) and
+            # run their post-processing before the NEXT matching batch's
+            # get_reimport_match_candidates_for_batch() queries the database -- otherwise a
+            # same-report duplicate created in this batch would still be unsaved and invisible
+            # to that fresh query.
+            self._drain_pending_new_findings(
+                batch_findings_to_dispatch,
+                batch_findings,
+                new_findings_in_batch,
+                findings_with_parser_tags,
+            )
+            if len(batch_findings_to_dispatch) >= dedupe_batch_max_size:
+                self._flush_post_processing_batch(
+                    batch_findings_to_dispatch,
+                    batch_findings,
+                    new_findings_in_batch,
+                    findings_with_parser_tags,
+                    **kwargs,
+                )
 
-                    # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
-                    # These batches only contain "new" findings that were saved (not matched to existing findings).
-                    # In reimport scenarios, typically most findings match existing ones, so only a small fraction
-                    # of findings in each matching batch become new findings that need deduplication.
-                    #
-                    # We accumulate finding IDs across matching batches rather than dispatching at the end of each
-                    # matching batch. This ensures deduplication batches stay close to the intended batch size
-                    # (e.g., 1000 findings) for optimal bulk operation efficiency, even when only ~10% of findings
-                    # in matching batches are new. If we dispatched at the end of each matching batch, we would
-                    # end up with many small deduplication batches (e.g., ~100 findings each), reducing efficiency.
-                    #
-                    # The two batch types serve different purposes:
-                    # - Matching batches: optimize candidate fetching (solve 1+N query problem)
-                    # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
-                    # They don't need to be aligned since they optimize different operations.
-                    if len(batch_finding_ids) >= dedupe_batch_max_size:
-                        self._flush_post_processing_batch(
-                            batch_finding_ids,
-                            batch_findings,
-                            new_findings_in_batch,
-                            findings_with_parser_tags,
-                            **kwargs,
-                        )
-
-        # A final drain rather than an is_final flag inside the loop. The matched branch
-        # ends in `continue`, so a report whose last finding took that path never reached
-        # the in-loop is_final flush: everything appended since the previous size-triggered
-        # flush was silently dropped, with no deduplication, rules, issue updater or JIRA
-        # dispatch, and no parser or inherited tags for those findings. Draining here runs
-        # exactly once however the last iteration ended.
+        # A final drain instead of an is_final flag inside the loop. The matched branch's
+        # force_continue skips the rest of the loop body, so a report whose last sorted
+        # finding took that path never reached the old in-loop is_final flush -- everything
+        # appended since the previous size-triggered flush was silently dropped: no
+        # deduplication, rules, issue updater or JIRA dispatch, and no parser or inherited
+        # tags for those findings. Draining here runs exactly once however the last
+        # iteration ended. It is deliberately unconditional: matched findings can accumulate
+        # location status updates without appending anything to dispatch, and every step is
+        # a no-op on empty state (close_old_findings already calls persist() the same way).
         self._flush_post_processing_batch(
-            batch_finding_ids,
+            batch_findings_to_dispatch,
             batch_findings,
             new_findings_in_batch,
             findings_with_parser_tags,
@@ -580,6 +590,211 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         perform_product_grading(self.test.engagement.product)
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
+
+    def _finalize_pending_new_finding(
+        self,
+        finding: Finding,
+        unsaved_finding: Finding,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+        *,
+        finding_will_be_grouped: bool,
+    ) -> None:
+        """
+        Queue one now-prepared new finding for post-processing and dispatch.
+
+        `finding` is NOT guaranteed to have a primary key yet: persist_new_findings() has
+        run on it, but a downstream edition is allowed to override persist_new_finding()
+        to defer the actual write to its own batch boundary (see that method's docstring).
+        new_items is therefore populated later, from new_findings_in_batch, once
+        _flush_post_processing_batch() has flushed any such buffer and every finding in
+        the batch is guaranteed to have a real id -- not here, while it may still be None.
+        Shared by _drain_pending_new_findings (the normal per-matching-batch case) and
+        _finalize_specific_pending_new_finding (the on-demand case: a later finding in
+        this report just matched against this one while it was still pending).
+        """
+        new_findings_in_batch.append(finding)
+        finding = self.finding_post_processing(
+            finding,
+            unsaved_finding,
+            is_matched_finding=False,
+            tag_accumulator=findings_with_parser_tags,
+        )
+        push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
+        batch_findings_to_dispatch.append((finding, push_to_jira))
+        batch_findings.append(finding)
+
+    def _finalize_specific_pending_new_finding(
+        self,
+        existing_finding: Finding,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+    ) -> None:
+        """
+        Persist and post-process one specific still-pending new finding immediately,
+        out of its normal per-matching-batch drain order.
+
+        Called when a later finding in this report matches `existing_finding` while it
+        is still sitting in `_pending_new_findings` (a same-report duplicate queued by
+        add_new_finding_to_candidates earlier in this same matching batch, per issue
+        #3958): process_matched_finding and finding_post_processing both need a real
+        primary key for `existing_finding` right now, not whenever this batch happens to
+        drain -- see process_matched_active_finding's `.save_no_options()`/`.notes.add()`
+        calls and finding_post_processing's CWE/vulnerability-id reconciliation.
+        """
+        for index, (finding, unsaved_finding, finding_will_be_grouped) in enumerate(self._pending_new_findings):
+            if finding is existing_finding:
+                del self._pending_new_findings[index]
+                (saved_finding,) = self.persist_new_findings([finding])
+                self._finalize_pending_new_finding(
+                    saved_finding,
+                    unsaved_finding,
+                    batch_findings_to_dispatch,
+                    batch_findings,
+                    new_findings_in_batch,
+                    findings_with_parser_tags,
+                    finding_will_be_grouped=finding_will_be_grouped,
+                )
+                return
+
+    def _drain_pending_new_findings(
+        self,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+    ) -> None:
+        """
+        Persist this matching batch's queued new findings and run their post-processing.
+
+        Called once per matching batch -- not per finding (like matched findings get,
+        since they already have a primary key) and not at the larger dedupe-batch boundary
+        (like the dispatch flush) -- because get_reimport_match_candidates_for_batch()'s
+        database query for the NEXT matching batch would not find a same-report duplicate
+        created here while it is still unsaved. finding_post_processing() itself tolerates
+        an unsaved instance (see the finding.pk guard before its CVE save), which is what
+        lets a downstream edition defer the write further still, via persist_new_finding()
+        or persist_new_findings() -- but the candidate query has no such tolerance, so the
+        stock path saves eagerly here regardless.
+
+        A finding matched against earlier in this same batch (see
+        _finalize_specific_pending_new_finding) is already gone from
+        `_pending_new_findings` by the time this runs.
+        """
+        if not self._pending_new_findings:
+            return
+        pending, self._pending_new_findings = self._pending_new_findings, []
+        prepared_findings = [finding for finding, _unsaved_finding, _grouped in pending]
+        saved_findings = self.persist_new_findings(prepared_findings)
+        for (_finding, unsaved_finding, finding_will_be_grouped), saved_finding in zip(pending, saved_findings, strict=True):
+            self._finalize_pending_new_finding(
+                saved_finding,
+                unsaved_finding,
+                batch_findings_to_dispatch,
+                batch_findings,
+                new_findings_in_batch,
+                findings_with_parser_tags,
+                finding_will_be_grouped=finding_will_be_grouped,
+            )
+
+    def _flush_post_processing_batch(
+        self,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+        **kwargs: dict,
+    ) -> None:
+        """
+        Persist and dispatch everything accumulated for one post-processing batch, then
+        clear the accumulators (the passed-in lists are mutated in place).
+
+        Called from the processing loop each time the batch reaches
+        IMPORT_REIMPORT_DEDUPE_BATCH_SIZE, and once after the loop as an unconditional
+        drain, so a report whose final finding never reached the in-loop check (the
+        matched branch's force_continue, or a falsy finding) still gets its tail
+        deduplicated, tagged and dispatched. Every step is safe on empty state, which is
+        what makes the unconditional drain call cheap.
+        """
+        self.location_handler.persist()
+        self.flush_vulnerability_ids()
+        self.flush_burp_request_response()
+        # Apply parser-supplied tags for this batch before post-processing starts,
+        # so rules/deduplication tasks see the tags already on the findings.
+        bulk_apply_parser_tags(findings_with_parser_tags)
+        findings_with_parser_tags.clear()
+        # Apply import-time tags before post-processing so rules/deduplication see them.
+        self.apply_import_tags_for_batch(batch_findings)
+        # Apply inherited Product tags to NEWLY CREATED findings only
+        # (and their endpoints/locations) BEFORE post_process_findings_batch
+        # dispatches, so rules/dedup see inherited tags on .tags.
+        # Matched/existing findings already have inheritance applied from
+        # their original creation; re-running it on no-change reimports
+        # would be ~8 wasted queries per batch.
+        apply_inherited_tags_for_findings(new_findings_in_batch)
+        # Read here, not when each finding was queued: a downstream edition's
+        # persist_new_finding() may have deferred the actual write to this flush (see
+        # _finalize_pending_new_finding), so this is the first point every finding in
+        # new_findings_in_batch is guaranteed to have a real id.
+        self.new_items.extend(finding.id for finding in new_findings_in_batch)
+        new_findings_in_batch.clear()
+        batch_findings.clear()
+        # Partition the batch by each finding's own push_to_jira flag so one
+        # finding's grouping state is not applied to the whole batch. Uniform
+        # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
+        finding_ids_by_push: dict[bool, list[int]] = {}
+        for dispatch_finding, finding_push_to_jira in batch_findings_to_dispatch:
+            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(dispatch_finding.id)
+        batch_findings_to_dispatch.clear()
+        for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
+            result = dojo_dispatch_task(
+                finding_helper.post_process_findings_batch,
+                finding_ids_batch,
+                dedupe_option=True,
+                rules_option=True,
+                product_grading_option=True,
+                issue_updater_option=True,
+                push_to_jira=push_to_jira_batch,
+                jira_instance_id=getattr(self.jira_instance, "id", None),
+                # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
+                **self.post_processing_dispatch_kwargs(**kwargs),
+            )
+            if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+                self.record_post_processing_result(result)
+
+    def _hydrate_findings_for_close_old(self, finding_ids: set[int]) -> list[Finding]:
+        """
+        Fetch real Finding instances for close_old_findings() (M1).
+
+        process_findings() tracks the to-mitigate set as ids, not instances, but
+        close_old_findings() mutates and .save()s each one and reads .finding_group --
+        it needs real rows, not a `.only()` slice. Chunked the same way
+        _sync_close_old_finding_status_fields() chunks its own refresh query, so a
+        25M-finding reimport never materializes more than one chunk's worth at a time.
+
+        finding_group is a @cached_property (self.finding_group_set.all().first()),
+        not a real FK, so it is prefetched rather than select_related'd.
+
+        Every id here came from get_original_findings(), scoped to self.test -- so rather
+        than select_related("test__...") copying the parent chain onto each row, each
+        finding shares self.test the same way reimport matching's candidates do (see
+        ProReImporter._reimport_hash_candidate_index's "share self.test" comment): one
+        instance for the whole run instead of one lazy-loaded copy per finding closed.
+        """
+        if not finding_ids:
+            return []
+        findings: list[Finding] = []
+        for chunk in batched(finding_ids, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
+            for finding in Finding.objects.filter(id__in=chunk).prefetch_related("finding_group_set"):
+                finding.test = self.test
+                findings.append(finding)
+        return findings
 
     def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> list[Finding]:
         """
@@ -722,7 +937,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             candidates_by_key: Dictionary mapping (title_lower, severity) to list of findings (for legacy algorithm)
 
         Returns:
-            List of matching findings, ordered by id
+            List of matching findings, in a deterministic priority order: persisted existing
+            findings first, ordered by ascending id, then any same-report duplicate queued
+            earlier in this matching batch (which has no primary key yet -- persist_new_findings
+            only assigns one once the whole batch is queued, see _drain_pending_new_findings),
+            in the order it was created. Consumers key off matched_findings[0], so this order
+            must not depend on which key an existing finding happened to match on.
+
+            The single-algorithm branches (hash_code / unique_id_from_tool / legacy) already
+            satisfy this by construction and are returned as-is: get_reimport_match_candidates_for_batch
+            fetches existing candidates pre-sorted by id, and add_new_finding_to_candidates only
+            ever appends to that same list, so "existing by id, then same-report last" holds
+            without touching pk=None candidates.
+
+            The combined unique_id_from_tool_or_hash_code branch merges two such lists (hash
+            matches then uid matches), which is NOT globally id-sorted -- an existing finding
+            matched by hash could otherwise outrank a lower-id existing finding matched by uid,
+            silently changing which finding is reconciled vs. closed as stale. That branch
+            therefore applies a pk-tolerant stable sort to restore the id-ascending order while
+            still tolerating the not-yet-saved (pk=None) same-report case a plain `.id` sort
+            would crash on.
 
         """
         deduplicationLogger.debug("matching finding for reimport using algorithm: %s", self.deduplication_algorithm)
@@ -730,14 +964,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.deduplication_algorithm == "hash_code":
             if candidates_by_hash is None or unsaved_finding.hash_code is None:
                 return []
-            matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
-            return sorted(matches, key=lambda f: f.id)
+            return list(candidates_by_hash.get(unsaved_finding.hash_code, []))
 
         if self.deduplication_algorithm == "unique_id_from_tool":
             if candidates_by_uid is None or unsaved_finding.unique_id_from_tool is None:
                 return []
-            matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
-            return sorted(matches, key=lambda f: f.id)
+            return list(candidates_by_uid.get(unsaved_finding.unique_id_from_tool, []))
 
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             if candidates_by_hash is None and candidates_by_uid is None:
@@ -746,28 +978,37 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if unsaved_finding.hash_code is None and unsaved_finding.unique_id_from_tool is None:
                 return []
 
-            # Collect matches from both hash_code and unique_id_from_tool
-            matches_by_id = {}
+            # Collect matches from both hash_code and unique_id_from_tool, de-duplicated by
+            # object identity rather than `.id`: a same-report candidate matched via both
+            # keys has no id yet to de-duplicate on, but is still exactly one Python object
+            # within this candidate-building pass, so `id()` is a safe, always-available key.
+            matches_by_identity = {}
 
             if unsaved_finding.hash_code is not None:
                 hash_matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
                 for match in hash_matches:
-                    matches_by_id[match.id] = match
+                    matches_by_identity[id(match)] = match
 
             if unsaved_finding.unique_id_from_tool is not None:
                 uid_matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
                 for match in uid_matches:
-                    matches_by_id[match.id] = match
+                    matches_by_identity[id(match)] = match
 
-            matches = list(matches_by_id.values())
-            return sorted(matches, key=lambda f: f.id)
+            # Dict insertion order here is "all hash matches, then all uid matches", which is
+            # not globally id-sorted. Restore a deterministic order so matched_findings[0] is
+            # stable regardless of which key matched: persisted candidates first by ascending
+            # id, then any pk=None same-report duplicate last, in insertion order (sorted() is
+            # stable). The `f.pk is None` first key keeps None out of the id comparison.
+            return sorted(
+                matches_by_identity.values(),
+                key=lambda f: (f.pk is None, f.pk if f.pk is not None else 0),
+            )
 
         if self.deduplication_algorithm == "legacy":
             if candidates_by_key is None or not unsaved_finding.title:
                 return []
             key = (unsaved_finding.title.lower(), unsaved_finding.severity)
-            matches = candidates_by_key.get(key, [])
-            return sorted(matches, key=lambda f: f.id)
+            return list(candidates_by_key.get(key, []))
 
         logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
         return []
@@ -818,7 +1059,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             and existing_finding.out_of_scope == unsaved_finding.out_of_scope
             and existing_finding.risk_accepted == unsaved_finding.risk_accepted
         ):
-            self.unchanged_items.append(existing_finding)
+            self.unchanged_items.append(existing_finding.id)
             return existing_finding, True
         # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
         # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
@@ -826,7 +1067,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # We however do not exit the loop as we do want to update the endpoints/locations (in case some
         # endpoints/locations were fixed)
         if existing_finding.risk_accepted and not existing_finding.active:
-            self.unchanged_items.append(existing_finding)
+            self.unchanged_items.append(existing_finding.id)
             return existing_finding, False
         # The finding was not an exact match, so we need to add more details about from the
         # new finding to the existing. Return False here to make process further
@@ -850,7 +1091,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if unsaved_finding.is_mitigated:
             # The new finding is already mitigated, so nothing to change on the
             # the existing finding
-            self.unchanged_items.append(existing_finding)
+            self.unchanged_items.append(existing_finding.id)
             # Look closer at the mitigation timestamp
             if unsaved_finding.mitigated:
                 logger.debug(f"item mitigated time: {unsaved_finding.mitigated.timestamp()}")
@@ -937,7 +1178,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         note.save()
         self.location_handler.record_reactivations_for_finding(existing_finding)
         existing_finding.notes.add(note)
-        self.reactivated_items.append(existing_finding)
+        self.reactivated_items.append(existing_finding.id)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
         # be updated in some way
         # Return False here to make sure further processing happens
@@ -980,6 +1221,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
+                existing_finding.notes.create(
+                    author=self.user,
+                    entry=f"Mitigated by {self.test.test_type} re-upload.",
+                )
+                self.actively_closed_matches.append(existing_finding.id)
 
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
@@ -995,9 +1241,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
+                existing_finding.notes.create(
+                    author=self.user,
+                    entry=f"Mitigated by {self.test.test_type} re-upload.",
+                )
+                self.actively_closed_matches.append(existing_finding.id)
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
-                self.unchanged_items.append(existing_finding)
+                self.unchanged_items.append(existing_finding.id)
         # Set the component name and version on the existing finding if it is present
         # on the old finding, but not present on the existing finding (do not override)
         component_name = getattr(unsaved_finding, "component_name", None)
@@ -1015,7 +1266,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> tuple[Finding, bool]:
-        """Create a new finding from the one parsed from the report"""
+        """
+        Prepare a new finding from the one parsed from the report. Not persisted here:
+        the caller queues it and persist_new_findings() writes it (batched, via
+        _drain_pending_new_findings()) once this matching batch finishes, so a
+        same-report duplicate later in the batch can still be added to this batch's
+        candidates via add_new_finding_to_candidates -- see that method and
+        match_finding_to_candidate_reimport for why the candidate lists tolerate an
+        unsaved finding.
+        """
         # Set some explicit settings
         unsaved_finding.reporter = self.user
         unsaved_finding.last_reviewed = self.now
@@ -1030,47 +1289,60 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.scan_date_override:
             unsaved_finding.date = self.scan_date.date()
         unsaved_finding = self.process_cve(unsaved_finding)
-        # Hash code is already calculated earlier as it's the primary matching criteria for reimport
-        # Save it. Don't dedupe before endpoints/locations are added.
-        self.persist_new_finding(unsaved_finding)
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
         finding.tags = None
         logger.debug(
-            "Reimport created new finding as no existing finding match: "
-            f"{finding.id}: {finding.title} "
-            f"({finding.component_name} - {finding.component_version})",
+            "Reimport found no existing match; will create a new finding: "
+            f"{finding.title} ({finding.component_name} - {finding.component_version})",
         )
         # Manage the finding grouping selection
         finding_will_be_grouped = self.process_finding_groups(
             unsaved_finding,
             self.group_names_to_findings_dict,
         )
-        # Add the new finding to the list
-        self.new_items.append(unsaved_finding)
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)
         return unsaved_finding, finding_will_be_grouped
 
     def persist_new_finding(self, finding: Finding) -> None:
         """
-        Write a finding the report did not match to an existing one.
+        Write a single finding the report did not match to an existing one.
+
+        Called once per finding, by this class's persist_new_findings() default below --
+        not directly by process_finding_that_was_not_matched() any more, now that new
+        findings are queued (see _pending_new_findings) and persist_new_findings() writes
+        the whole matching batch at once via _drain_pending_new_findings().
 
         This is intentionally a separate method (like get_original_findings and
-        get_reimport_match_candidates_for_batch) so downstream editions can override it
-        without copying the full process_finding_that_was_not_matched() implementation.
+        get_reimport_match_candidates_for_batch) so a downstream edition can defer just
+        the write for a single finding -- accumulate here, and drain the buffer in
+        _flush_post_processing_batch (before calling super(), so the rows exist by the
+        time anything in that block reads a primary key) -- without reimplementing
+        persist_new_findings() or copying process_finding_that_was_not_matched(). An
+        edition that instead wants one bulk multi-row write for the whole batch overrides
+        persist_new_findings() directly.
 
-        The override this exists for buffers new findings and writes them in bulk at the batch
-        boundary, where locations, vulnerability ids, tags and post-processing are already
-        flushed. Such an edition overrides this to accumulate, and _flush_post_processing_batch
-        to write the buffer before calling super() -- so the rows exist by the time anything in
-        that block reads a primary key.
-
-        Overriding this is the only supported way to defer the write. Everything after the call
-        in the caller -- grouping, the new_items list, request/response pairs -- is safe on an
-        unwritten finding, and the caller's remaining work is deliberately kept that way.
+        Overriding this is a supported way to defer the write. Everything between the
+        original call site and here -- grouping, the new_items list, request/response
+        pairs -- is safe on an unwritten finding, and that work is deliberately kept
+        that way.
         """
         finding.save_no_options()
+
+    def persist_new_findings(self, prepared_findings: list[Finding]) -> list[Finding]:
+        """
+        Persist this matching batch's new findings, one at a time via persist_new_finding().
+
+        Overrides BaseImporter's per-instance save_no_options() loop so a downstream
+        edition wanting only per-finding deferral (see persist_new_finding()) does not
+        also have to override this method: the default here calls into it, so overriding
+        persist_new_finding() alone is enough. An edition wanting a genuine bulk write
+        instead overrides this method and ignores persist_new_finding() entirely.
+        """
+        for finding in prepared_findings:
+            self.persist_new_finding(finding)
+        return prepared_findings
 
     def reconcile_vulnerability_ids(
         self,
@@ -1199,11 +1471,21 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
         if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
-            for finding_group in {
-                    finding.finding_group
-                    for finding in self.reactivated_items + self.unchanged_items
-                    if finding.finding_group is not None and not finding.is_mitigated
-            }:
+            # reactivated_items/unchanged_items are ids (M1), so the group membership this
+            # used to read straight off in-memory instances is resolved in one query instead.
+            # finding_group is the reverse M2M query name (Finding has no finding_group_id
+            # column -- Finding.finding_group is a cached_property over finding_group_set), so
+            # select that relation, not a non-existent *_id field, which raises FieldError.
+            finding_group_ids = (
+                Finding.objects.filter(
+                    id__in=self.reactivated_items + self.unchanged_items,
+                    is_mitigated=False,
+                    finding_group__isnull=False,
+                )
+                .values_list("finding_group", flat=True)
+                .distinct()
+            )
+            for finding_group in Finding_Group.objects.filter(id__in=finding_group_ids):
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
                     jira_services.push(finding_group)

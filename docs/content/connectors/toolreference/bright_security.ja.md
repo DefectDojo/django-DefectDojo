@@ -12,7 +12,7 @@ Bright アプリの **User settings → API keys** で作成した Bright の**A
 
 #### Connector Mappings
 
-1. **Location** フィールドを空欄のままにすると `https://app.brightsec.com` が使用されます。または Bright のホストを明示的に入力してください。
+1. **Location** フィールドには `https://app.brightsec.com` が自動入力されます。この値をそのまま使用するか、Bright のホストを明示的に入力してください。
 2. **Secret** フィールドに Bright の API キーを入力します。
 3. 必要に応じて、インポートする検出事項を制限するために **Minimum Severity** を設定します。
 

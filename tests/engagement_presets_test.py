@@ -32,7 +32,7 @@ class EngagementPresetsTest(BaseTestCase):
         driver.get(self.base_url + f"product/{pid}/engagement_presets/add")
         driver.find_element(By.ID, "id_title").clear()
         driver.find_element(By.ID, "id_title").send_keys("Test Preset")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Engagement Preset Successfully Created")
@@ -47,7 +47,7 @@ class EngagementPresetsTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Edit").click()
         driver.find_element(By.ID, "id_title").clear()
         driver.find_element(By.ID, "id_title").send_keys("Edited Test Preset")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Engagement Preset Successfully Updated")

@@ -3,6 +3,7 @@ import logging
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
+from django.utils.translation import gettext as _
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -69,7 +70,7 @@ def custom_exception_handler(exc, context):
     if isinstance(exc, ParseError) and "JSON parse error" in str(exc):
         response = Response()
         response.status_code = HTTP_400_BAD_REQUEST
-        response.data = {"message": "JSON request content is malformed"}
+        response.data = {"message": _("JSON request content is malformed")}
     elif isinstance(exc, RestrictedError):
         # An object cannot be deleted because it has dependent objects.
         response = Response()
@@ -117,7 +118,7 @@ def custom_exception_handler(exc, context):
         if System_Settings.objects.get().api_expose_error_details:
             exception_message = str(exc.args[0])
         else:
-            exception_message = "Internal server error, check logs for details"
+            exception_message = _("Internal server error, check logs for details")
         # There is no standard error response, so we assume an unexpected
         # exception. It is logged but no details are given to the user,
         # to avoid leaking internal technical information.

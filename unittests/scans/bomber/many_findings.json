@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "generator": "bomber",
+    "url": "https://github.com/devops-kung-fu/bomber",
+    "version": "0.5.1",
+    "provider": "osv",
+    "severityFilter": "",
+    "date": "2026-01-15T10:04:11.000000-00:00"
+  },
+  "files": [
+    {
+      "name": "sbom.json",
+      "sha256": "f33453de356a632082bf9830977100bbb8abe455c2784dbbb001240ad7c4fa06"
+    }
+  ],
+  "summary": {
+    "Unspecified": 0,
+    "Low": 0,
+    "Moderate": 2,
+    "High": 3,
+    "Critical": 1
+  },
+  "packages": [
+    {
+      "coordinates": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.4",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2018-14719",
+          "title": "Arbitrary Code Execution in jackson-databind",
+          "description": "FasterXML jackson-databind 2.x before 2.9.7, 2.8.11.3, and 2.7.9.5 might allow remote attackers to execute arbitrary code by leveraging failure to block the blaze-ds-opt and blaze-ds-core classes from polymorphic deserialization.",
+          "cve": "CVE-2018-14719",
+          "severity": "CRITICAL",
+          "epss": {}
+        },
+        {
+          "id": "CVE-2020-11619",
+          "title": "jackson-databind mishandles the interaction between serialization gadgets and typing",
+          "description": "FasterXML jackson-databind 2.x before 2.9.10.4 mishandles the interaction between serialization gadgets and typing, related to org.springframework.aop.config.MethodLocatingFactoryBean (aka spring-aop).",
+          "cve": "CVE-2020-11619",
+          "severity": "HIGH",
+          "epss": {}
+        },
+        {
+          "id": "CVE-2020-25649",
+          "title": "XML External Entity (XXE) Injection in Jackson Databind",
+          "description": "A flaw was found in FasterXML Jackson Databind, where it did not have entity expansion secured properly. This flaw allows vulnerability to XML external entity (XXE) attacks. The highest threat from this vulnerability is data integrity.",
+          "cve": "CVE-2020-25649",
+          "severity": "HIGH",
+          "epss": {}
+        },
+        {
+          "id": "CVE-2020-36518",
+          "title": "Deeply nested json in jackson-databind",
+          "description": "jackson-databind is a data-binding package for the Jackson Data Processor. jackson-databind allows a Java stack overflow exception and denial of service via a large depth of nested objects.",
+          "cve": "CVE-2020-36518",
+          "severity": "HIGH",
+          "epss": {}
+        },
+        {
+          "id": "CVE-2026-54515",
+          "title": "jackson-databind has case-insensitive deserialization bypasses per-property @JsonIgnoreProperties",
+          "description": "## Summary\nIn `BeanDeserializerBase.createContextual()`, per-property `@JsonIgnoreProperties` exclusions are applied by `_handleByNameInclusion()`, producing a `contextual` deserializer whose `BeanPropertyMap` has the ignored properties removed. The subsequent per-property case-insensitivity block (triggered by `@JsonFormat(ACCEPT_CASE_INSENSITIVE_PROPERTIES)`) rebuilds from `this._beanProperties` (the original, unfiltered map) instead of `contextual._beanProperties`, then overwrites the filtered map \u2014 restoring every property `_handleByNameInclusion` had just removed. The ignored property becomes writable again.\n\n## Impact\nAn application that both enables case-insensitive matching and relies on per-property `@JsonIgnoreProperties` to keep a field unwritable can have that field set from untrusted JSON (mass-assignment-style write).\n\n## Affected / Patched\nWill be fixed in 2.18.9, 2.21.5, 2.22.1 and 3.1.4.\n\n## Severity / CWE\nMaintainer: minor. Reporter: Moderate. CWE-915.\n\n## Upstream fix\nFasterXML/jackson-databind#5962 (PR #5964, `0e1b0b2`), milestone 3.1.4. Released 2026-06-04.",
+          "cve": "CVE-2026-54515",
+          "severity": "MODERATE",
+          "epss": {}
+        },
+        {
+          "id": "CVE-2019-12814",
+          "title": "Deserialization of untrusted data in FasterXML jackson-databind",
+          "description": "A Polymorphic Typing issue was discovered in FasterXML jackson-databind 2.x through 2.9.9. When Default Typing is enabled (either globally or for a specific property) for an externally exposed JSON endpoint and the service has JDOM 1.x or 2.x jar in the classpath, an attacker can send a specifically crafted JSON message that allows them to read arbitrary local files on the server.",
+          "cve": "CVE-2019-12814",
+          "severity": "MODERATE",
+          "epss": {}
+        }
+      ]
+    }
+  ]
+}

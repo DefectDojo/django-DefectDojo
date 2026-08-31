@@ -1,0 +1,32 @@
+{
+  "host": {
+    "id": 11,
+    "hostname": "laptop-11.example.com",
+    "computer_name": "Laptop 11",
+    "display_name": "laptop-11",
+    "platform": "darwin",
+    "os_version": "macOS 14.5",
+    "primary_ip": "10.0.0.11",
+    "software": [
+      {
+        "id": 501,
+        "name": "Example Browser",
+        "version": "120.0.1",
+        "source": "apps",
+        "vendor": "Example Vendor",
+        "generated_cpe": "cpe:2.3:a:example:browser:120.0.1:*:*:*:*:macos:*:*",
+        "vulnerabilities": [
+          {
+            "cve": "CVE-2000-0001",
+            "cvss_score": 9.8,
+            "epss_probability": 0.94,
+            "cisa_known_exploit": true,
+            "cve_published": "2024-05-01T00:00:00Z",
+            "cve_description": "A memory-safety flaw allows remote code execution.",
+            "resolved_in_version": "120.0.2"
+          }
+        ]
+      }
+    ]
+  }
+}
