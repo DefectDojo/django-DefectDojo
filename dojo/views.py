@@ -67,8 +67,6 @@ def manage_files(request, oid, obj_type):
         files_formset = formset_class(
             request.POST, request.FILES, queryset=files_queryset)
         if files_formset.is_valid():
-            # remove all from database and disk
-
             files_formset.save()
 
             for o in getattr(files_formset, "deleted_objects", []):
@@ -80,15 +78,6 @@ def manage_files(request, oid, obj_type):
             for o in files_formset.new_objects:
                 logger.debug("adding file: %s", o.file.name)
                 obj.files.add(o)
-
-            orphan_files = FileUpload.objects.filter(engagement__isnull=True,
-                                                     test__isnull=True,
-                                                     finding__isnull=True)
-            for o in orphan_files:
-                logger.debug("purging orphan file: %s", o.file.name)
-                with suppress(FileNotFoundError):
-                    (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
-                o.delete()
 
             messages.add_message(
                 request,
