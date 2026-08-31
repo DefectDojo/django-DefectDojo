@@ -31,7 +31,7 @@ Le Dashboard personalizzabili sono disattivate per impostazione predefinita. Un 
 
 Una volta attivata, la pagina **🏠 Home** mostra la tua dashboard personalizzabile e la [REST API delle Dashboard](../custom-dashboards-api/) diventa disponibile.
 
-> **🔑 Important:** Finché la funzionalità è disattivata, la home page mantiene la dashboard precedente e ogni endpoint `/api/v2/dashboards/` restituisce `403 Dashboard V2 is not enabled.` L'attivazione **non** modifica in alcun modo l'accesso ai dati di nessuno — ogni widget continua a rispettare il controllo degli accessi basato sui ruoli di DefectDojo, quindi ogni utente vede sempre e solo i Riscontri, gli Asset e gli altri record che è autorizzato a visualizzare.
+> **🔑 Important:** Finché la funzionalità è disattivata, la home page mantiene la dashboard precedente e ogni endpoint `/api/v2/dashboards/` restituisce `403 Dashboards 2.0 is not enabled.` L'attivazione **non** modifica in alcun modo l'accesso ai dati di nessuno — ogni widget continua a rispettare il controllo degli accessi basato sui ruoli di DefectDojo, quindi ogni utente vede sempre e solo i Riscontri, gli Asset e gli altri record che è autorizzato a visualizzare.
 
 ## Concetti fondamentali
 
