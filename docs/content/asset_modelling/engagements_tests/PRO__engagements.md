@@ -44,11 +44,10 @@ As the containers that organize testing activity, Engagements can store or track
 - Assignee / Lead
 - Associated Tests (e.g., scans, pen tests, manual tests, etc.)
 - Findings and Finding Types (e.g., active, mitigated, risk accepted, duplicate, etc.) 
-- Threat models or risk acceptance info
+- Threat models (if enabled)
 - Tags
 - Files and notes
 - Jira project settings
-- Environment details (e.g., staging vs. production)
 - Build IDs (if linked to CI/CD)
 - Historical data from past Tests within the Engagement 
 
@@ -168,6 +167,47 @@ For auditing purposes, it is recommended to close any completed Engagements, rat
 | **Close** | Marks as inactive; data remains; can be reopened | Yes (reopen) |
 | **Expire** | Visual warning only; optional auto-close; notifications | N/A |
 | **Delete** | Permanently removes Engagement, Tests, Findings, notes, files, and any Jira Epic mappings (Epics remain in Jira) | No |
+
+## Engagement Checklists
+
+A checklist records the review work a tester performed during an Engagement, across eight fixed
+security categories: Session, Encryption, Configuration, Authentication, Authorization, Data
+Input, Sensitive Data, and Other.
+
+Each category holds three things:
+
+- A **status**: Pass, Fail, or N/A. A category you have not looked at yet reads "Not Evaluated".
+- Any **Findings** that back up that status, linked from the Findings already in the Engagement.
+- A **note**, for the detail a status alone cannot carry.
+
+The checklist appears on the Engagement page. If the Engagement does not have one yet, the panel
+says so and offers to start one. The checklist is also available from the Engagement's settings
+menu, as **Complete Checklist** or **Edit Checklist**.
+
+### Filling in a Checklist
+
+Select **Complete Checklist** to open the form. You do not have to complete every category at
+once: a partial checklist saves, so you can record categories as the review progresses and return
+to it later. The Findings picker for each category is limited to the Findings in that Engagement,
+and to those you have permission to view.
+
+Once saved, the panel lists each category with its status, its note, and its linked Findings as
+chips you can select to open the Finding. The panel also shows who last saved the checklist and
+when.
+
+### Availability
+
+Checklists apply to **Interactive** Engagements only, because a checklist records testing a
+person performed. CI/CD Engagements collect automated scan results, so they do not offer one.
+
+Checklists can also be switched off for the whole instance. A superuser can clear **Enable
+checklists** in System Settings, which hides the checklist panel and its menu entry everywhere.
+
+### Permissions
+
+Viewing a checklist requires View permission on the Engagement. Creating or editing one requires
+Edit permission on the Engagement. Users without Edit permission see the checklist but are not
+offered the buttons to change it.
 
 ## Jira Integration
 

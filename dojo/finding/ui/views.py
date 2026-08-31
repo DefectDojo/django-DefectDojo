@@ -1565,8 +1565,9 @@ def request_finding_review(request, fid):
         if form.is_valid():
             now = timezone.now()
             new_note = Notes()
+            # The note must stay public: the reviewers it is addressed to
+            # cannot read a private note (author and superusers only).
             new_note.entry = "Review Request: " + form.cleaned_data["entry"]
-            new_note.private = True
             new_note.author = request.user
             new_note.date = now
             new_note.save()

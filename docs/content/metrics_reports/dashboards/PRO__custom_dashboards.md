@@ -21,7 +21,7 @@ Open source DefectDojo has a single, built-in [Main Dashboard](../introduction_d
 
 DefectDojo Pro replaces that fixed page with **per-user customizable dashboards**. You choose which widgets appear, how they are filtered, and where they sit on the grid. You can build any number of named layouts, switch between them, share them with your team, and drive the whole system from the [REST API](../custom-dashboards-api/) or an [LLM](../custom-dashboards-llm/).
 
-> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Assets** and **Organizations** were formerly **Organizations**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
+> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
 
 ## Enabling Customizable Dashboards
 
@@ -29,7 +29,7 @@ Customizable Dashboards are off by default. A superuser can turn them on from **
 
 Once it is enabled, the **🏠 Home** page shows your customizable dashboard and the [Dashboards REST API](../custom-dashboards-api/) becomes available.
 
-> **🔑 Important:** While the feature is off, the home page keeps the previous dashboard and every `/api/v2/dashboards/` endpoint returns `403 Dashboard V2 is not enabled.` Turning it on does **not** change anyone's data access — every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
+> **🔑 Important:** While the feature is off, the home page keeps the previous dashboard and every `/api/v2/dashboards/` endpoint returns `403 Dashboards 2.0 is not enabled.` Turning it on does **not** change anyone's data access — every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
 
 ## Core concepts
 

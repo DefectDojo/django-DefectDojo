@@ -35,13 +35,14 @@ rule, because both create one.
 
 Open a rule to edit it, or start one of the two ways above.
 
-The palette is grouped into four categories, which is also the order items flow through a typical graph:
+The palette is grouped into five categories, which is also the order items flow through a typical graph:
 
 | Category | What the nodes do |
 |----------|-------------------|
-| **Triggers** | Decide when the rule wakes up and which Findings enter it. Exactly one per graph. |
+| **Triggers** | Decide when the rule wakes up and which Findings or Assets enter it. |
 | **Logic** | Route, limit and de-duplicate the items flowing through. |
 | **Findings** | Change the Findings. |
+| **Assets** | Change the Assets. |
 | **Egress** | Send something outward: a ticket, a message, a report. |
 
 The palette is generated from the engine itself, so what you see in the editor is always exactly what the engine can execute.
@@ -69,6 +70,8 @@ Preview runs the real engine, not a simulation of it, and then rolls the whole t
 
 Preview is the one execution that caps how many items it looks at, so that it stays fast. When it truncates, it says so in the trace. A real run has no such cap.
 
+For an Asset rule, Preview lists the Assets it would change and what would change about each one, before and after, the same way it does for a Finding rule.
+
 ## What a rule works on
 
 Every rule works on one kind of item, and its trigger decides which:
@@ -94,9 +97,13 @@ Every graph starts with one of four triggers.
 
 ### Scope
 
-Every trigger takes a **Scope**, and scope is how you narrow what the rule considers. For a Finding rule it is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here. For an Asset rule it is the Assets list's own filters instead.
+Every trigger takes a **Scope**, and scope is how you narrow what the rule considers.
 
-Two things about scope are worth understanding:
+A Finding trigger's scope is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here. An Asset trigger's scope is the filter vocabulary the Assets list itself uses instead — name, tags, Organization, criticality, lifecycle and the rest of that list's filters — and the scope editor is that list, so picking one works the same way it does for a Finding rule.
+
+Asset type is not one of those filters. The scope picker offers exactly what the Assets list can filter on, and type is not among them today. To act on Assets of one type, scope broadly and add an **If / Filter** node with a condition on `product.asset_type`, which compares the type's code rather than its display label.
+
+Two things about scope are worth understanding, and both hold for either kind of rule:
 
 * **Scope is applied on top of authorization, never instead of it.** The rule runs as its owner, so scope narrows an already-authorized set. Leaving scope empty does not mean "everything in the instance", it means "everything the rule owner can see".
 * **An invalid scope fails the run rather than widening it.** If a filter key does not exist, or a value is one the filter would silently discard, the run errors out. A rule that does nothing is recoverable. A rule that quietly edits everything in the instance is not.
@@ -167,12 +174,12 @@ Each item carries a fixed set of Finding fields. This list is a contract, so it 
 |-------|--------|
 | Identity | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Severity and scoring | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| Exploit evidence | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Text | `description`, `mitigation`, `impact` |
 | Status | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
 | Location | `file_path`, `line`, `component_name`, `component_version`, `service` |
 | Classification | `cwe`, `vulnerability_ids`, `tags` |
-| Exploit evidence | `exploit_maturity`, `kev_due_date`, `vex_state` |
 | Reachability | `reachability`, `reachability_confidence` |
 
 Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`, `internet_accessible`, `business_criticality`, `exposure`), `product_type` (`id`, `name`), and `ctx`.
@@ -181,12 +188,31 @@ Dates are ISO-8601 strings. That is deliberate: it means `gt` and `lt` order the
 
 `priority`, `risk` and `risk_score` come from Pro's prioritization. A Finding that has not been scored yet carries no value for them.
 
+The exploit-evidence fields come from KEV enrichment and threat intelligence. They are what a rule reaches for when it should treat a known-exploited vulnerability differently from an equally severe one nobody is attacking.
+
+`known_exploited` is true when any of the Finding's vulnerability ids is in the CISA Known Exploited Vulnerabilities catalog, and `ransomware_used` when CISA records known ransomware campaign use. `kev_date` is the earliest date CISA added any of them, and `kev_due_date` the earliest remediation date CISA assigned, so the deadline a rule sees is always the tightest one that applies.
+
+`exploit_maturity` is the ladder those signals roll up to, and the condition builder offers it by name rather than by number:
+
+| Value | Reads as |
+|-------|----------|
+| `30` | Active |
+| `20` | Weaponized |
+| `10` | PoC |
+| `0` | None |
+
+Condition on the number, because its ordering says something no ordering of the words can: `exploit_maturity gte 20` means "weaponized or worse". For a message body use `{{finding.exploit_maturity_label}}` instead, which renders `Active` where the number would render `30`.
+
+`threat_score` is the composite 0 to 100 score, `threat_ladder_rung` the EPSS-equivalent floor that score is built on, and `dominant_intel_key` the vulnerability id that produced the verdict. That last one is worth putting in a notification body, so a reader can see why a Finding was escalated.
+
+A Finding with no intelligence for any of its vulnerability ids carries no value for the threat fields. That is not the same as a value of `0`, so use **is set** to tell "nothing known" apart from "nothing found". The two KEV booleans differ here, defaulting to false rather than empty, which makes `known_exploited eq false` mean "not in the catalog".
+
+All of these are read-only. A rule can route and report on exploit evidence; enrichment owns the values, so no node writes them.
+
 ### Conditioning on exploitability and exposure
 
-Four of the fields above answer "is this actually exploitable, and can it be reached", which is what most remediation-priority rules are really asking.
+Two more fields answer "is this actually exploitable, and can it be reached", which is what most remediation-priority rules are really asking.
 
-- `exploit_maturity` is a number: `0` none, `10` proof of concept, `20` weaponized, `30` observed being exploited in the wild. Greater-than comparisons work the way you would expect, so `exploit_maturity gte 20` means "weaponized or worse".
-- `kev_due_date` is CISA's own deadline for a vulnerability in the Known Exploited Vulnerabilities catalog, and is empty for anything not listed.
 - `vex_state` is the CycloneDX analysis verdict, when a VEX document has been imported: `exploitable`, `not_affected`, `in_triage`, `false_positive`, `resolved`, `resolved_with_pedigree`.
 - `reachability` is whether the vulnerable code can be reached *inside* the application: `reachable_runtime`, `reachable_static`, `potentially_reachable`, `unreachable`, `unknown`. `reachability_confidence` is a number from 0.0 to 1.0.
 
@@ -195,6 +221,22 @@ Exposure is a separate question, and it lives on the asset rather than the Findi
 `product.internet_accessible` is the older manual checkbox on the asset. Both are offered because they can disagree: the checkbox is what somebody ticked, while `exposure` is computed from the evidence connectors collect, and prefers an explicit override when one is set. A rule that means "reachable from the internet" usually wants `exposure`, falling back to the checkbox on an instance with no exposure evidence.
 
 These fields are populated by Pro's threat intelligence, reachability and asset-exposure features. Where a feature is off, its fields read empty (`reachability` reads `unknown`), so a rule written against them matches nothing rather than matching on half-populated data.
+
+### Referring to Asset data
+
+An Asset item carries no `finding`, `test` or `engagement` block at all — those paths simply resolve to nothing on it. `product` is the Asset itself, and `product_type` is the Organization it belongs to, the same two keys a Finding item carries.
+
+| Group | Fields |
+|-------|--------|
+| Identity | `id`, `name`, `asset_type` |
+| Classification | `business_criticality`, `platform`, `lifecycle`, `origin`, `tags` |
+| Exposure | `external_audience`, `internet_accessible`, `user_records` |
+| SLA and Risk Priority | `sla_configuration_id`, `sla_configuration_name`, `prioritization_engine_id`, `prioritization_engine_name` |
+| Dates | `created`, `updated` |
+
+`asset_type` is the type's code, not its display label.
+
+Alongside `product`, an Asset item carries `product_type` (`id`, `name`) and `ctx`. Because the key names match, a condition or template written against `product.name` or `product_type.name` means the same thing whichever kind of rule it is in.
 
 ### Conditions
 
@@ -290,4 +332,4 @@ The recommended order for a rule that sends anything:
 4. Let it run, then read **Deliveries** and check the recorded payloads are what you intended.
 5. Switch the mode to **Live**.
 
-Simulate is not a partial run. Every Finding edit in the graph happens for real in simulate mode. Only the outbound sends are held back.
+Simulate is not a partial run. Every Finding or Asset edit in the graph happens for real in simulate mode. Only the outbound sends are held back.

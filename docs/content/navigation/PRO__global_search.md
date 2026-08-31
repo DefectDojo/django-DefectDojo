@@ -7,6 +7,8 @@ weight: 3
 
 DefectDojo Pro includes a **global search** that looks across your Findings and related objects from a single box in the topbar. It is backed by native Postgres full-text search with fuzzy, typo-tolerant matching, so you can find an object without remembering its exact wording.
 
+Global search finds your **data**: findings, assets, engagements, and the other records listed below. To find a **page** (a menu destination such as a settings screen or a list view), use the menu search instead: press **Cmd+K** or **Ctrl+K**, or the magnifying-glass control in the top-right corner of the sidebar. See [The Sidebar Menu](/navigation/pro__sidebar/).
+
 ## Running a search
 
 - **Topbar search box** — click the **Search** box in the top navigation and start typing. As you type, a dropdown previews the top matches **grouped by object type**, with a count next to each type and a **See all *N* results** link at the bottom.

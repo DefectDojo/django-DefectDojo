@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("dojo", "0294_usercontactinfo_language"),
+        ("dojo", "0295_usercontactinfo_language"),
     ]
 
     operations = [

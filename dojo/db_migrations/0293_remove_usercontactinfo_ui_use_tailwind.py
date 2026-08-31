@@ -4,7 +4,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0291_dojometa_location_product'),
+        ('dojo', '0292_review_request_notes_public'),
     ]
 
     operations = [

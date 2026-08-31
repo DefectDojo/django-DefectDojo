@@ -46,7 +46,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 重要:** ダッシュボードAPI全体はカスタムダッシュボード機能に依存しています。有効になるまでは、すべてのエンドポイントが`403 Dashboard V2 is not enabled.`を返します。詳細は[カスタムダッシュボードの有効化](../custom-dashboards/#enabling-customizable-dashboards)を参照してください。
+> **🔑 重要:** ダッシュボードAPI全体はカスタムダッシュボード機能に依存しています。有効になるまでは、すべてのエンドポイントが`403 Dashboards 2.0 is not enabled.`を返します。詳細は[カスタムダッシュボードの有効化](../custom-dashboards/#enabling-customizable-dashboards)を参照してください。
 
 > **⚠️ セキュリティに関する注意:** APIトークンはDefectDojoデータへの完全なアクセス権を付与します。チャット、スクリーンショット、チケット、コミットされたファイルには絶対に貼り付けないでください。環境変数から読み込み、万一漏えいした場合はローテーションし、可能な限りサービスアカウントにトークンのスコープを限定してください。
 

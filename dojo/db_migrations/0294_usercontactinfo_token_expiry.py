@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0292_remove_usercontactinfo_ui_use_tailwind"),
+        ("dojo", "0293_remove_usercontactinfo_ui_use_tailwind"),
     ]
 
     operations = [

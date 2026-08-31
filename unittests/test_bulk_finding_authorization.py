@@ -10,6 +10,7 @@ findings to a group.
 
 from django.urls import reverse
 
+from dojo.authorization.authorization import user_has_permission
 from dojo.models import Dojo_User, Finding, Finding_Group, Test
 
 from .dojo_test_case import DojoTestCase, versioned_fixtures
@@ -84,3 +85,51 @@ class TestBulkFindingAuthorizationScoping(DojoTestCase):
             list(other_group.findings.values_list("id", flat=True)),
             msg="scoped user added a finding to a group outside their authorized products",
         )
+
+
+@versioned_fixtures
+class TestBulkFindingDeleteRequiresStaff(DojoTestCase):
+
+    """
+    The bulk route must apply the same staff-only delete policy the single
+    delete view applies. Product membership alone authorizes viewing and
+    editing a finding, not deleting it.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.product = Test.objects.get(id=3).engagement.product
+        self.finding = Finding.objects.filter(
+            test__engagement__product=self.product,
+        ).first()
+        self.assertIsNotNone(self.finding)
+
+    def _bulk_delete_as(self, user):
+        self.product.authorized_users.add(user)
+        self.client.force_login(user)
+        response = self.client.post(reverse("finding_bulk_update_all"), {
+            "finding_to_update": [self.finding.id],
+            "delete_bulk_findings": "1",
+        })
+        self.assertLess(response.status_code, 500)
+        return Finding.objects.filter(id=self.finding.id).exists()
+
+    def test_member_cannot_bulk_delete_findings_in_their_own_product(self):
+        member = Dojo_User.objects.create(
+            username="bulk_delete_member", is_active=True, is_staff=False,
+        )
+        self.product.authorized_users.add(member)
+        self.assertTrue(user_has_permission(member, self.finding, "edit"))
+        self.assertFalse(user_has_permission(member, self.finding, "delete"))
+        self.assertTrue(
+            self._bulk_delete_as(member),
+            msg="non-staff member deleted a finding the single delete view denies them",
+        )
+
+    def test_staff_can_still_bulk_delete_findings(self):
+        staff = Dojo_User.objects.create(
+            username="bulk_delete_staff", is_active=True, is_staff=True,
+        )
+        self.assertFalse(self._bulk_delete_as(staff))

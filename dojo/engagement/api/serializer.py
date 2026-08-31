@@ -2,6 +2,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 from dojo.models import Check_List, Engagement, Engagement_Presets
+from dojo.product.queries import get_authorized_engagement_presets
 
 
 class EngagementSerializer(serializers.ModelSerializer):
@@ -15,6 +16,8 @@ class EngagementSerializer(serializers.ModelSerializer):
         )
         fields = super().get_fields()
         fields["tags"] = TagListSerializerField(required=False)
+        if preset := fields.get("preset"):
+            preset.queryset = get_authorized_engagement_presets("view")
         return fields
 
     def validate(self, data):

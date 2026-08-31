@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0293_usercontactinfo_token_expiry"),
+        ("dojo", "0294_usercontactinfo_token_expiry"),
     ]
 
     operations = [

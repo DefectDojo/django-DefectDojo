@@ -1,6 +1,6 @@
 ---
 title: "Custom Fields"
-description: "Define typed custom fields per record type, fill them in on each record, and turn them on as typed table columns"
+description: "Define typed custom fields per record type, fill them in on the forms and on each record, and turn them on as typed table columns"
 audience: pro
 weight: 7
 ---
@@ -42,6 +42,8 @@ add the fields that apply to it. Each definition has:
   suggested automatically from the label and can be edited before you save.
 - **Data type**: one of seven types, which fixes how the value is entered, validated, filtered, and
   sorted.
+- **Required**: whether a value has to be filled in on the record type's create and edit forms. A
+  required field always appears on those forms and cannot be hidden from them.
 
 ### Data types
 
@@ -70,6 +72,26 @@ Risk Acceptances.
 
 If no fields are defined for the record type yet, the editor says so, and an administrator can define
 them under **Settings → Configuration → Custom Fields**.
+
+## Custom fields on the create and edit forms
+
+Custom fields also appear on the create and edit forms for their record type, so a value can be filled
+in while the record is being created rather than only afterwards. Each field uses the same input as the
+typed editor, and is validated the same way when the form is submitted.
+
+By default custom fields appear at the end of the **Optional Fields** section. An administrator can
+change that for each form under **Settings → UI Defaults → Form Configuration**, where every custom
+field is listed alongside the built-in fields and can be moved into the main body of the form, hidden,
+made required for that form, or reordered. See
+[Configuring Forms](../../navigation/pro__form_configuration/) for how those controls work.
+
+A field marked **Required** when it was defined is required on every form for its record type: the form
+cannot be submitted until it has a value, and it cannot be hidden. Form Configuration can additionally
+require a field that was not defined as required, which applies to that one form.
+
+Custom field values are stored separately from the record itself, so they are saved immediately after
+the record is. If a value cannot be saved, the record is still created or updated and a message names
+the fields that were not saved.
 
 ## Showing custom fields on a record's page
 
