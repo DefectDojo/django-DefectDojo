@@ -11,6 +11,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetView
 from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.contrib.sites.models import Site
+from django.contrib.sites.requests import RequestSite
+from django.contrib.sites.shortcuts import get_current_site
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import get_connection
@@ -58,6 +61,27 @@ labels = get_labels()
 class DojoLoginView(LoginView):
     template_name = "dojo/login.html"
     authentication_form = AuthenticationForm
+
+    def get_context_data(self, **kwargs):
+        # Django's LoginView.get_context_data() resolves the current Site via
+        # get_current_site(), which raises Site.DoesNotExist (surfacing as an
+        # HTTP 500 on the login page) when the django_site row referenced by
+        # SITE_ID is absent on an instance. Resolve the site defensively and
+        # fall back to a request-derived site -- mirroring what Django itself
+        # does when the sites framework is not installed -- so the login page
+        # always renders instead of 500ing.
+        try:
+            current_site = get_current_site(self.request)
+        except Site.DoesNotExist:
+            current_site = RequestSite(self.request)
+        context = super(LoginView, self).get_context_data(**kwargs)
+        context.update({
+            self.redirect_field_name: self.get_redirect_url(),
+            "site": current_site,
+            "site_name": current_site.name,
+            **(self.extra_context or {}),
+        })
+        return context
 
     def form_valid(self, form):
         last_login = None
