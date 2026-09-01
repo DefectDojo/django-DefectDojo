@@ -44,6 +44,15 @@ Learn more about Priority and Risk with DefectDojo, Inc.'s May 2025 Office Hours
 The range of Priority values is from 0 to 1150. The higher the number, the more urgency
 the Finding is to triage or remediate.
 
+The upper bound is not a fixed property of the scale.  It is the highest Priority a
+hypothetical worst-case Finding could reach under the default Prioritization Engine
+settings: a Finding with the highest Severity, the strongest possible exploit evidence,
+and every Asset-level risk factor at its maximum.  The bound is derived entirely from the
+engine's configuration — never from the Findings or Assets in your instance.  If you
+adjust the multipliers in your [Prioritization Engine](#prioritization-engines), the
+attainable maximum changes with them, and the recommended
+[Risk Thresholds](#risk-thresholds) are recalculated to match.
+
 Similar to Severity, Risk is scored from Low -> Medium -> Needs Action -> Urgent.  **Risk** considers Priority fields and may be different from a tool's reported Severity as a result.
 
 ![image](images/priority-overview.png)
@@ -167,10 +176,44 @@ You can tune your Prioritization Engine by adjusting how these factors are appli
 
 Select a factor by clicking the button, and adjust this slider allows you to control the percentage a particular factor is applied.  As you adjust the slider, you'll see the Risk thresholds change as a result.
 
+#### How the multiplier percentages work
+
+Each percentage scales that factor's contribution **relative to its built-in default
+weight**: 100% applies the factor's default influence, 50% halves it, and 200% doubles it.
+The percentage is **not** the factor's share of the final Priority score.  The built-in
+weights deliberately differ in size from factor to factor — exploit evidence carries far
+more weight than any single business-context field, for example — so two factors set to
+the same percentage generally do not contribute equal amounts to the result.
+
+A few more things to know when tuning:
+
+* The factors are not fully independent.  Several factors scale with the Finding's
+  Severity contribution, so lowering the **Severity** multiplier also reduces the effect
+  of those factors — it behaves more like a master volume control than an isolated
+  weight.
+* Setting a factor to 0% removes it from the calculation entirely.
+* The true/false Asset factors (**External Audience**, **Internet Accessible**) only
+  contribute when the corresponding flag is set to True on the Asset.  An Asset that is
+  not Internet Accessible receives no contribution from that factor, at any percentage.
+* Because the percentages are relative multipliers, typing a target distribution directly
+  into the sliders (for example "40% Severity, 30% Exploitability") will not produce that
+  split in the final score.  Tune iteratively instead: adjust a slider, then read the
+  effect off the recommended [Risk Thresholds](#risk-thresholds), which always reflect
+  the Priority range attainable under the current settings.
+
+The exact weight each factor carries is intentionally not published.  If you need to map
+an in-house scoring model onto the Prioritization Engine, contact DefectDojo support —
+translating an existing weighting scheme into slider settings is a common request.
+
 #### Finding-Level Multipliers
 
 * **Severity** - a Finding's Severity level
-* **Exploitability** - a Finding's KEV and/or EPSS score
+* **Exploitability** - the exploit evidence available for a Finding: its EPSS score, its
+KEV (Known Exploited Vulnerabilities) status, and — when
+[Threat Intelligence](/asset_modelling/pro_hierarchy/threat_intelligence/) is enabled —
+further evidence such as publicly available exploit code.  The strongest single piece of
+evidence drives this factor, and this one slider scales the combined result; the
+underlying sources (KEV, EPSS, public exploits) cannot be weighted individually.
 * **Endpoints** - the amount of Endpoints associated with a Finding
 
 #### Asset-Level Multipliers
@@ -185,6 +228,20 @@ High)
 ### Risk Thresholds
 
 Based on the tuning of the Priority Engine, DefectDojo will automatically recommend Risk Thresholds.  However, these thresholds can be adjusted as well and set to whatever values you deem appropriate.
+
+A few notes on how the recommendations behave:
+
+* The recommended values are computed from the Prioritization Engine's settings alone —
+  they describe the theoretical Priority range attainable under the current multipliers.
+  They are never derived from the Findings or Assets in your instance, so two instances
+  with the same engine settings see the same recommendations regardless of their data.
+* Each threshold is the highest Priority value that still falls **inside** its band: a
+  Finding at exactly the Low threshold is Low, a Finding at exactly the Medium threshold
+  is Medium, and so on.  A Finding whose Priority exceeds the Urgent threshold is still
+  Urgent.
+* Because the attainable range depends on the multipliers, moving any slider changes the
+  recommendations.  If you have set custom thresholds, review them after changing
+  multipliers — the same threshold value covers a different share of the new range.
 
 ![image](images/risk_threshold.png)
 
@@ -269,8 +326,23 @@ If you have SLA configurations, you can choose which of these is applied to your
 
 Once a new SLA has been selected for an Asset, all of the associated Findings' SLAs will need to be recalculated by DefectDojo.  While this process is running, an Asset's SLA cannot be changed.
 
+### Risk-based SLAs and Risk changes
+
+When an SLA Configuration uses **Risk** as its benchmark, DefectDojo automatically
+recalculates a Finding's SLA deadline whenever the Finding's Risk changes — including
+changes driven by data updates, such as a new KEV listing, an updated EPSS score, or new
+Threat Intelligence evidence.  The remediation window for the new Risk level is applied
+as soon as the Risk is recalculated.
+
+The recalculation changes the *number of days allowed*, not the starting point.  SLAs are
+always measured from the Finding's SLA start date — by default, the date the Finding was
+first detected (see [Notes on SLAs](#notes-on-slas) for the exceptions).  A Risk change
+does not restart the countdown.  A long-open Finding that moves into a stricter Risk band
+can therefore go into breach immediately; this is deliberate, as the time the Finding has
+already been open counts against the tighter deadline.
+
 ## Notes on SLAs
 
 * SLAs can be optionally restarted once a [Risk Accepted](/triage_findings/findings_workflows/pro__risk_acceptance/) Finding reactivates.  This is set when creating the Risk Acceptance by setting the **Restart SLA Expired** field.
 * Reimporting a Finding does not restart the SLA - SLAs are always calculated from when a Finding was first detected unless **Restart SLA on Finding Reactivation** is enabled.
-* Risk Acceptance expiry or reactivation of a Closed Finding are the only ways to reset or recalculate an SLA for a Finding once it is created (without changing the Asset's SLA configuration).
+* Risk Acceptance expiry or reactivation of a Closed Finding are the only ways to reset the SLA start date for a Finding once it is created (without changing the Asset's SLA configuration).  Note that with a Risk-based SLA Configuration, a Finding's *deadline* can still change when its Risk changes — see [Risk-based SLAs and Risk changes](#risk-based-slas-and-risk-changes) — but the start date the countdown is measured from stays the same.

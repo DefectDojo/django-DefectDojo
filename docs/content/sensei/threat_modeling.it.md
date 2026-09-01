@@ -21,7 +21,7 @@ Questa è la capacità **pre-code** di Sensei. Mentre [scan-and-fix](/sensei/abo
 
 - La funzionalità con licenza **Sensei**. Threat modeling viene distribuito con lo stesso entitlement di scan-and-fix.
 - Un ruolo globale di **Maintainer** o **Owner**. Gli utenti privi di questo ruolo non vedono la pagina.
-- Un Prodotto a cui allegare il modello di minaccia. Le istanze che usano la denominazione V3 vedono i Prodotti chiamati **asset**; questa pagina usa sempre il termine *Prodotto*, e l'interfaccia segue la denominazione impostata sulla tua istanza.
+- Un Prodotto a cui allegare il modello di minaccia. Le istanze che usano la denominazione 3.0 vedono i Prodotti chiamati **asset**; questa pagina usa sempre il termine *Prodotto*, e l'interfaccia segue la denominazione impostata sulla tua istanza.
 
 Non viene installato nulla e non viene collegato alcun repository. Threat modeling legge solo il design che fornisci.
 

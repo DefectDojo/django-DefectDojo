@@ -46,7 +46,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 重要提示：** 整个仪表板 API 都依赖于可自定义仪表板功能。在该功能启用之前，每个端点都会返回 `403 Dashboard V2 is not enabled.` —— 参见[启用可自定义仪表板](../custom-dashboards/#enabling-customizable-dashboards)。
+> **🔑 重要提示：** 整个仪表板 API 都依赖于可自定义仪表板功能。在该功能启用之前，每个端点都会返回 `403 Dashboards 2.0 is not enabled.` —— 参见[启用可自定义仪表板](../custom-dashboards/#enabling-customizable-dashboards)。
 
 > **⚠️ 安全提示：** 您的 API 令牌拥有对您 DefectDojo 数据的完全访问权限。切勿将其粘贴到聊天记录、屏幕截图、工单或已提交的文件中。请从环境变量中读取它，一旦泄露就立即轮换，并尽可能将令牌的权限范围限定在服务账户内。
 

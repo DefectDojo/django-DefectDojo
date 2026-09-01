@@ -48,7 +48,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 Important :** L'ensemble de l'API des tableaux de bord dépend de la fonctionnalité des tableaux de bord personnalisables. Tant qu'elle n'est pas activée, chaque point de terminaison renvoie `403 Dashboard V2 is not enabled.` — voir [Activer les tableaux de bord personnalisables](../custom-dashboards/#enabling-customizable-dashboards).
+> **🔑 Important :** L'ensemble de l'API des tableaux de bord dépend de la fonctionnalité des tableaux de bord personnalisables. Tant qu'elle n'est pas activée, chaque point de terminaison renvoie `403 Dashboards 2.0 is not enabled.` — voir [Activer les tableaux de bord personnalisables](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Avis de sécurité :** Votre jeton API donne un accès complet à vos données DefectDojo. Ne le collez jamais dans un chat, une capture d'écran, un ticket ou un fichier versionné. Lisez-le depuis une variable d'environnement, faites-le tourner s'il est un jour exposé, et limitez la portée des jetons à des comptes de service lorsque c'est possible.
 

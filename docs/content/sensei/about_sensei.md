@@ -20,6 +20,8 @@ weight: 1
 
 > **🧠 Before the code exists:** Sensei also generates a threat model, attack paths and security requirements from a feature *design*, with no repository involved — see [Threat Modeling](/sensei/threat_modeling/).
 
+> **🤖 AI agent skills:** Sensei's scanning also covers **AI agent skills**: the `SKILL.md` definitions and helper scripts that coding agents load. When a DefectDojo-hosted scan runs on an onboarded repository that ships agent skills, Sensei statically analyzes them for prompt injection, data exfiltration, and other risky or malicious patterns, then imports the results as findings alongside the repository's code.
+
 > **🔎 BETA:** Sensei is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases.
 
 > **📍 Where to find it:** open **Sensei** from the left-hand navigation.
