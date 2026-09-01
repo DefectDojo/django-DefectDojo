@@ -4,6 +4,42 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: chore(deps)_ update valkey _ tag from 0.24.6 to v0.25.0 (_/defect_/chart.yaml)
+        - kind: changed
+          description: chore(deps)_ update valkey docker tag from 0.25.0 to v0.25.4 (helm/defectdojo/chart.yaml)
+        - kind: changed
+          description: chore(deps)_ update valkey docker tag from 0.25.4 to v0.25.5 (helm/defectdojo/chart.yaml)
+        - kind: changed
+          description: chore(deps)_ update gcr.io/cloudsql-docker/gce-proxy docker tag from 1.38.2 to v1.38.3 (helm/defectdojo/values.yaml)
+        - kind: changed
+          description: chore(deps)_ update nginx/nginx-prometheus-exporter docker tag from 1.5.1 to v1.5.3 (helm/defectdojo/values.yaml)
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 3.3.0-dev
+    created: "2026-09-01T05:19:02.30269931Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: 16.7.27
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.25.5
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: 2615d59506da1fac934b05972cb3d1dfda6c4cf054729edd1b82b9dfc7bab625
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/nightly-dev/defectdojo-1.9.50-dev.tgz
+    version: 1.9.50-dev
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: Bump DefectDojo to 3.2.400
       artifacthub.io/prerelease: "false"
     apiVersion: v2
@@ -9824,4 +9860,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2026-08-31T15:14:17.381167903Z"
+generated: "2026-09-01T05:19:02.29194984Z"
