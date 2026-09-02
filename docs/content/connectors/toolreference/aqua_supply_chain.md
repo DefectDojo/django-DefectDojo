@@ -26,7 +26,7 @@ Each repository in the tenant becomes a Record. A repository that disappears fro
 A repository's default branch is always imported. Two optional fields extend this:
 
 - **Branch**: an exact branch name, or a `*` wildcard family such as `release/*`. It adds matching branches on top of the default branch.
-- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first, so the same finding recurring on another branch deduplicates against the default branch's original. When this is off, all selected branches import into the Record's default engagement.
+- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. When this is off, all selected branches import into the Record's default engagement.
 
 Aqua only stores results for a branch it has actually scanned. A Branch value that matches no scanned branch contributes no findings for that branch.
 
@@ -40,4 +40,4 @@ Aqua can return several byte-identical rows for the same finding. One example is
 
 #### Sync cost
 
-A full sync pulls the whole tenant in a handful of requests. It sends roughly one request per 10,000 findings, plus one request for the repository list. The connector groups the results locally.
+A full sync pulls the whole tenant in a handful of requests. It sends roughly one request per 10,000 findings, plus the repository list, which takes two or three requests. The connector groups the results locally.
