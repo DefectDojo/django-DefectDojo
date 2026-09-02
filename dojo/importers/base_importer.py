@@ -561,6 +561,33 @@ class BaseImporter(ImporterOptions):
         import_settings["create_finding_groups_for_all_findings"] = self.create_finding_groups_for_all_findings
         if len(self.endpoints_to_add) > 0:
             import_settings.update(self.location_handler.serialize_extra_locations(self.endpoints_to_add))
+        # Persist through an overridable hook so a subclass can redirect the write (below).
+        return self._persist_import_history(
+            import_settings,
+            new_findings,
+            closed_findings,
+            reactivated_findings,
+            untouched_findings,
+        )
+
+    def _persist_import_history(
+        self,
+        import_settings: dict,
+        new_findings: list[int],
+        closed_findings: list[int],
+        reactivated_findings: list[int],
+        untouched_findings: list[int],
+    ) -> Test_Import:
+        """
+        Persist the import-history write: the Test_Import row plus one
+        Test_Import_Finding_Action per affected finding, and return the Test_Import.
+
+        Factored out of update_import_history as an OVERRIDABLE extension point. The default is
+        the Django ORM write; a subclass may redirect the write elsewhere (e.g. delegate it to
+        another service) without reimplementing the settings-building and list-normalization that
+        update_import_history has already done. update_import_history has also already applied the
+        TRACK_IMPORT_HISTORY gate, so this is only reached when history is being recorded.
+        """
         # Create the test import object
         test_import = Test_Import.objects.create(
             test=self.test,
