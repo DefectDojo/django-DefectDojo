@@ -45,6 +45,8 @@ From the same toolbar you can schedule the **executive posture pack**: a server-
 
 ## New widget types
 
-The Command Center adds twelve widget types to the catalog, each wired to real tables and available on any layout: Big KPI, Posture Score, Pipeline Funnel, Coverage Freshness, Ingest Health, Automation Rate, Threat Pulse, Risk Acceptance Debt, Fix Durability, Top Fixes, Morning Brief, and Team Scorecard. Four existing widgets gained modes: MTTR/MTTD (survival curve), SLA Burndown (five-state model), Recent Activity (live feed), and KPI/Trend (snapshot-backed deltas). Details and configuration schemas are discoverable at `GET /api/v2/dashboards/widget_catalog/`.
+The Command Center adds thirteen widget types to the catalog, each wired to real tables and available on any layout: Big KPI, Posture Score, Pipeline Funnel, Coverage Freshness, Ingest Health, Automation Rate, Threat Pulse, Risk Acceptance Debt, Fix Durability, Top Fixes, Morning Brief, Team Scorecard, and Insights Plot. Four existing widgets gained modes: MTTR/MTTD (survival curve), SLA Burndown (five-state model), Recent Activity (live feed), and KPI/Trend (snapshot-backed deltas). Details and configuration schemas are discoverable at `GET /api/v2/dashboards/widget_catalog/`.
+
+**Insights Plot** puts one of three charts from the Insights pages onto a dashboard: noise reduction by category, average EPSS score by tool, or findings past SLA. Pick the plot and a window in the widget's settings. These run the same aggregation as the matching Insights chart rather than a dashboard-side copy of it, so the two screens cannot report different numbers for the same window, and both are scoped to the findings you are authorized to see.
 
 The posture score's scale, weights, and versioning policy are published: see [Posture Score](../posture-score/).
