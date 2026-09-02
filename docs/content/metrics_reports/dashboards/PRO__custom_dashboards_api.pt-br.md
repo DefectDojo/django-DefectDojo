@@ -47,7 +47,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 Importante:** Toda a API de Painéis depende do recurso Painéis Personalizáveis. Até que ele seja ativado, todo endpoint retorna `403 Dashboard V2 is not enabled.` — veja [Ativando Painéis Personalizáveis](../custom-dashboards/#enabling-customizable-dashboards).
+> **🔑 Importante:** Toda a API de Painéis depende do recurso Painéis Personalizáveis. Até que ele seja ativado, todo endpoint retorna `403 Dashboards 2.0 is not enabled.` — veja [Ativando Painéis Personalizáveis](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Aviso de Segurança:** Seu token de API concede acesso total aos seus dados do DefectDojo. Nunca o cole em um chat, captura de tela, chamado ou arquivo versionado. Leia-o a partir de uma variável de ambiente, revogue-o (rotacione) se ele for exposto e restrinja tokens a contas de serviço sempre que possível.
 
