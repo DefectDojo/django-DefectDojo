@@ -45,6 +45,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, JSM Assets, and ServiceNow C
 - [Anchore Enterprise](/connectors/toolreference/anchore_enterprise/)
 - [AppCheck](/connectors/toolreference/appcheck/)
 - [Aqua Security](/connectors/toolreference/aqua_security/)
+- [Aqua Supply Chain](/connectors/toolreference/aqua_supply_chain/)
 - [Automox](/connectors/toolreference/automox/)
 - [Azure DevOps](/connectors/toolreference/azure_devops/)
 - [Backstage](/connectors/toolreference/backstage/)
