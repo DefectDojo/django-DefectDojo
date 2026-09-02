@@ -139,6 +139,55 @@ class TestBulkGetOrCreateURL(DojoTestCase):
 
         self.assertEqual(Location.objects.count(), initial_count)
 
+    def test_recovers_when_row_committed_concurrently(self):
+        """
+        A concurrent writer that commits the same identity_hash between our
+        existence check and our INSERT must not abort the batch.
+
+        Reproduces the production failure (``duplicate key value violates unique
+        constraint "..._identity_hash_key"`` raised out of an entire scan import):
+        the pre-existing row is hidden from the FIRST existence lookup only, so
+        the code attempts to INSERT a duplicate and hits the real DB unique
+        constraint, then must re-resolve the existing row and still create the
+        genuinely-new one instead of raising.
+        """
+        existing = URL.get_or_create_from_object(_make_url("oss-race-existing.example.com"))
+        incoming = [
+            _make_url("oss-race-existing.example.com"),  # committed by a "concurrent" writer
+            _make_url("oss-race-new.example.com"),  # genuinely new
+        ]
+
+        original_lookup = URL._existing_by_identity_hash
+        state = {"calls": 0}
+
+        def racing_lookup(hashes):
+            state["calls"] += 1
+            result = original_lookup(hashes)
+            if state["calls"] == 1:
+                # Simulate the row not yet being visible when we first checked
+                result.pop(existing.identity_hash, None)
+            return result
+
+        with patch.object(URL, "_existing_by_identity_hash", side_effect=racing_lookup):
+            saved = URL.bulk_get_or_create(incoming)
+
+        by_hash = {s.identity_hash: s for s in saved}
+        # Order preserved and every input resolved to a saved instance
+        self.assertEqual(len(saved), 2)
+        self.assertTrue(all(s.pk is not None and s.location_id is not None for s in saved))
+        # The raced row resolves to the ORIGINAL, with no duplicate created
+        self.assertEqual(by_hash[existing.identity_hash].pk, existing.pk)
+        self.assertEqual(URL.objects.filter(identity_hash=existing.identity_hash).count(), 1)
+        # The genuinely-new row was still created
+        self.assertNotEqual(by_hash[incoming[1].identity_hash].pk, existing.pk)
+        # No orphaned parent Location rows left behind by the rolled-back batch
+        orphan_urls = (
+            Location.objects.filter(location_type="url")
+            .exclude(pk__in=URL.objects.values("location_id"))
+            .exists()
+        )
+        self.assertFalse(orphan_urls)
+
 
 # ---------------------------------------------------------------------------
 # LocationManager._bulk_get_or_create_locations (URL-only)
