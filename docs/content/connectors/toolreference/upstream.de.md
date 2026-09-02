@@ -94,6 +94,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Asse
 - [Quay](/connectors/toolreference/quay/)
 - [Rapid7 InsightAppSec](/connectors/toolreference/rapid7_insightappsec/)
 - [Rapid7 InsightVM](/connectors/toolreference/rapid7_insightvm/)
+- [Rapid7 InsightVM - Cloud Instance](/connectors/toolreference/rapid7_insightvm_cloud/)
 - [runZero](/connectors/toolreference/runzero/)
 - [Semgrep](/connectors/toolreference/semgrep/)
 - [ServiceNow CMDB](/connectors/toolreference/servicenow_cmdb/)
