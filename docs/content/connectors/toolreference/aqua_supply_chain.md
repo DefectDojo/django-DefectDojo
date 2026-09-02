@@ -12,7 +12,7 @@ An **admin-generated** Aqua **API key and secret**, created under **Account Mana
 
 #### Connector Mappings
 
-1. Enter your Aqua Supply Chain **edge** host in the **Location** field, for example `https://eu-central-1.edge.cloud.aquasec.com`. This is not the tenant URL the Aqua Security connector uses: Aqua Supply Chain Security answers on the region's **edge** host, not `<tenant>.cloud.aquasec.com`.
+1. Enter your Aqua Supply Chain **edge** host in the **Location** field, for example `https://eu-central-1.edge.cloud.aquasec.com`. This is not the tenant URL the Aqua Security connector uses. Aqua Supply Chain Security answers on the region's **edge** host, not `<tenant>.cloud.aquasec.com`.
 2. Enter the API key in the **API Key** field.
 3. Enter the API secret in the **API Secret** field.
 4. If your tenant is in the EU, set the **Auth Host** field to `https://eu-1.api.cloudsploit.com`. Leave it blank for the US host, `https://api.cloudsploit.com`. Aqua caps the issued authentication token at two hours, regardless of the validity the connector requests. The connector re-authenticates on its own when the token expires.
@@ -32,7 +32,7 @@ Aqua only stores results for a branch it has actually scanned. A Branch value th
 
 #### Filing
 
-Set **Filing Prefixes** to a comma-separated list of repository-name prefixes, for example `DIAI,DAAR,DCCP,TECS`. Each repository is filed under the prefix its name starts with. A repository that matches none of the configured prefixes is filed under **Fallback Filing Name**, which defaults to `Aqua Unmapped`. Leave **Filing Prefixes** blank to file each repository under the first hyphen- or underscore-delimited part of its name instead.
+Set **Filing Prefixes** to a comma-separated list of repository-name prefixes, for example `PAY,WEB,INFRA`. Each repository is filed under the prefix its name starts with. A repository that matches none of the configured prefixes is filed under **Fallback Filing Name**, which defaults to `Aqua Unmapped`. Leave **Filing Prefixes** blank to file each repository under the first hyphen- or underscore-delimited part of its name instead.
 
 #### Duplicate findings
 
