@@ -10,6 +10,7 @@ from django.db.models.query_utils import Q
 import dojo.finding.helper as finding_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
+    are_locations_duplicates,
     deduplication_ordering_key,
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_uid_or_hash,
@@ -731,6 +732,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if candidates_by_hash is None or unsaved_finding.hash_code is None:
                 return []
             matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
+            # Findings that share a hash code but differ by endpoint should not
+            # be merged during reimport.  This mirrors the endpoint check that
+            # the import-time deduplication logic already performs via
+            # get_matches_from_hash_candidates / are_locations_duplicates.
+            matches = [m for m in matches if are_locations_duplicates(unsaved_finding, m)]
             return sorted(matches, key=lambda f: f.id)
 
         if self.deduplication_algorithm == "unique_id_from_tool":
@@ -752,7 +758,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if unsaved_finding.hash_code is not None:
                 hash_matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
                 for match in hash_matches:
-                    matches_by_id[match.id] = match
+                    if are_locations_duplicates(unsaved_finding, match):
+                        matches_by_id[match.id] = match
 
             if unsaved_finding.unique_id_from_tool is not None:
                 uid_matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
