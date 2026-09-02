@@ -255,83 +255,8 @@ def are_urls_equal(url1, url2, fields):
 
 
 def finding_locations(location_refs):
-    """
-    Extract URL-like objects from a list of location references.
-
-    Handles both saved Location_Reference instances (via .location.url) and
-    unsaved LocationData DTOs (via parsing .data["url"]).  The returned
-    objects expose the same attribute names (.protocol, .host, .port, .path,
-    .query, .fragment, .user_info) that are_location_urls_equal relies on.
-    """
-    from dojo.tools.locations import LocationData  # noqa: PLC0415 -- lazy import, avoids circular dependency
-
-    urls = []
-    for ref in location_refs:
-        if isinstance(ref, LocationData):
-            if ref.type != "url":
-                continue
-            raw = ref.data.get("url", "")
-            if not raw:
-                continue
-            # Parse exactly the way the location handler will when persisting.
-            parseable = raw if "://" in raw else "//" + raw
-            try:
-                parsed = hyperlink.parse(parseable)
-            except Exception:
-                deduplicationLogger.debug("Failed to parse location URL %r, skipping", raw)
-                continue
-            urls.append(_ParsedLocationProxy(parsed))
-        else:
-            # Standard path: Location_Reference -> AbstractLocation (URL model)
-            urls.append(ref.location.url)
-    return urls
-
-
-class _ParsedLocationProxy:
-
-    """
-    Thin adapter that maps hyperlink attribute names to URL-model names.
-
-    are_location_urls_equal accesses .protocol, .host, .port, .path, .query,
-    .fragment, .user_info — a hyperlink.DecodedURL uses .scheme, .host, .port,
-    .path, .query, .fragment, .userinfo instead.
-    """
-
-    __slots__ = ("_url",)
-
-    def __init__(self, parsed_url):
-        self._url = parsed_url
-
-    @property
-    def protocol(self):
-        return self._url.scheme or ""
-
-    @property
-    def host(self):
-        return self._url.host or ""
-
-    @property
-    def port(self):
-        return self._url.port
-
-    @property
-    def path(self):
-        return "/".join(self._url.path) if self._url.path else ""
-
-    @property
-    def query(self):
-        return self._url.query or ""
-
-    @property
-    def fragment(self):
-        return self._url.fragment or ""
-
-    @property
-    def user_info(self):
-        return self._url.userinfo or ""
-
-    def __repr__(self):
-        return f"_ParsedLocationProxy({self._url!r})"
+    """Extract URLs from a list of location references."""
+    return [ref.location.url for ref in location_refs]
 
 
 def are_location_urls_equal(url1, url2, fields):
