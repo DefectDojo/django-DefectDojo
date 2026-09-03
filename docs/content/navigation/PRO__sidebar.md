@@ -1,13 +1,15 @@
 ---
 title: "The Sidebar Menu"
-description: "How the DefectDojo Pro sidebar is organized, how to search it, the All Settings directory page, and how to switch between the current and previous layouts"
+description: "How the DefectDojo Pro sidebar is organized, how to search it, collapsing it to an icon rail, the All Settings directory page, and how to switch between the current and previous layouts"
 weight: 6
 audience: pro
 aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
+The DefectDojo Pro sidebar is the application shell: as of DefectDojo Pro 3.3.100 it runs the full height of the window and carries the brand, the search field, the menu, and (at the bottom) your account, alerts and the light/dark switch. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
+
+The menu groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
 
 Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
 
@@ -23,11 +25,14 @@ Either way, **every page keeps the same URL**. Bookmarks, saved links and anythi
 
 You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
 
-## Searching the menu
+## Searching
 
-Press **Cmd+K** (Mac) or **Ctrl+K**, or select the small magnifying-glass control pinned in the top-right corner of the sidebar, to open **Search Navigation Options**: a search over every menu destination your account can currently reach. The control shows the shortcut for your platform, so it reads `Ctrl K` on Windows and Linux, and the whole control is clickable. It stays in the corner as the menu scrolls.
+The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two kinds of results:
 
-Results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
+- **Data Results**: your records (findings, assets, engagements and the rest), through the same engine as the full results page. **See all results** at the bottom opens that page. See [Global Search](/navigation/pro__global_search/).
+- **Navigation Results**: every menu destination your account can currently reach.
+
+Navigation results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
 
 Move through results with the arrow keys, open one with **Enter**, and close the search with **Escape**. Entries that open in the Classic UI are marked and open in a new tab. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically, and it follows whichever menu layout is active.
 
@@ -37,6 +42,22 @@ Three conventions run through the whole menu:
 - **Nothing nests more than one level below a section.** Reaching a page is at most section, group, page.
 - **A feature occupies one entry, not one per screen.** PSIRT's nine pages, the Triage Engine's four and the record catalogs all sit behind a single entry each, instead of spreading across the menu.
 - **An entry is not repeated inside itself.** Where a group already names the thing, its entries do not name it again: **Findings** holds Active, Mitigated and All rather than "All Findings", and **Attack Surface** holds Endpoints and Hosts rather than "All Endpoints".
+
+## Collapsing the sidebar
+
+The chevron beside the logo, or **Cmd+B** (Mac) / **Ctrl+B**, collapses the sidebar to a slim icon rail and back. Your choice is remembered across reloads. On desktop windows narrower than 1200px the rail starts collapsed to leave room for content; widening the window brings your stored preference back. (Cmd+B is ignored while you are typing in an editor, where it means bold.)
+
+![The collapsed rail with a section flyout open](images/sidebar_rail_flyout.png)
+
+While collapsed:
+
+- Rows show only their icon. Hovering a page shows its name (and its badge, if it carries one) as a tooltip.
+- Hovering or selecting a **section** opens its entries in a flyout panel beside the rail. The panel is fully keyboard-driven: selecting a section moves focus into it, the arrow keys walk the entries, **Enter** opens one, and **Escape** closes the panel and puts focus back where it was.
+- The icon of the section holding your **current page** stays highlighted, and the flyout marks the exact row, so you never lose your place.
+- Badges shrink to small marks on the row icon: the `NEW` flame, the `BETA` seedling, and a padlock for license-locked entries. See [Menu Badges](/navigation/pro__menu_badges/).
+- The magnifying glass under the logo keeps a mouse path to [Global Search](#searching); the keyboard shortcut works as always.
+
+The rail also follows your page as you navigate: opening a page that lives inside a menu group opens that group (expanded) or lights its section (collapsed), including when you arrive from a bookmark or a link.
 
 ## Sensei + AI
 

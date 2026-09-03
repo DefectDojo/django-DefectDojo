@@ -1,18 +1,20 @@
 ---
 title: "Global Search"
-description: "Search across Findings, Assets, and related objects from the DefectDojo Pro topbar"
+description: "Search across Findings, Assets, related objects, and every menu destination from one dialog in DefectDojo Pro"
 audience: pro
 weight: 3
 ---
 
-DefectDojo Pro includes a **global search** that looks across your Findings and related objects from a single box in the topbar. It is backed by native Postgres full-text search with fuzzy, typo-tolerant matching, so you can find an object without remembering its exact wording.
+DefectDojo Pro includes a **global search** that looks across your Findings and related objects. It is backed by native Postgres full-text search with fuzzy, typo-tolerant matching, so you can find an object without remembering its exact wording.
 
-Global search finds your **data**: findings, assets, engagements, and the other records listed below. To find a **page** (a menu destination such as a settings screen or a list view), use the menu search instead: press **Cmd+K** or **Ctrl+K**, or the magnifying-glass control in the top-right corner of the sidebar. See [The Sidebar Menu](/navigation/pro__sidebar/).
+As of DefectDojo Pro 3.3.100, data search and menu search share one dialog. **Data Results** are your records: findings, assets, engagements, and the other types listed below. **Navigation Results** are pages: every menu destination your account can reach, searchable by label, position and related vocabulary. See [The Sidebar Menu](/navigation/pro__sidebar/) for how navigation results rank and what they cover.
+
+![The Global Search dialog with data and navigation results](images/global_search_dialog.png)
 
 ## Running a search
 
-- **Topbar search box** — click the **Search** box in the top navigation and start typing. As you type, a dropdown previews the top matches **grouped by object type**, with a count next to each type and a **See all *N* results** link at the bottom.
-- **Full results page** — press **Enter**, or click **See all *N* results**, to open the full results page. This is a single, sortable, filterable table of every match across all object types.
+- **Open the dialog**: select the **Search** field at the top of the sidebar, press **Cmd+K** (Mac) or **Ctrl+K**, or (with the sidebar collapsed) the magnifying glass under the logo. Start typing: the top data matches appear first, each chipped with its object type, with the menu destinations that match beneath them.
+- **Full results page**: select **See all *N* results** under the data results to open the full results page. This is a single, sortable, filterable table of every match across all object types.
 
 Results are always **scoped to what you are authorized to view** — global search never surfaces objects you would not otherwise have access to. (Finding Templates are the one exception: like elsewhere in DefectDojo, they are visible to any signed-in user.)
 
@@ -72,4 +74,4 @@ On the full results page, the columns can be filtered and sorted independently o
 
 - The full results page is **paginated** (25 rows per page by default).
 - Each object type contributes up to a **maximum number of matches** per search — **100** by default. When more matches exist than are shown, the results are flagged as truncated; narrow your query to see the most relevant hits.
-- The topbar dropdown shows a smaller preview (the top few matches per type) with the total counts, so **See all *N* results** always reflects the true totals.
+- The dialog shows a smaller preview (the top few matches) with the total count, so **See all *N* results** always reflects the true totals.

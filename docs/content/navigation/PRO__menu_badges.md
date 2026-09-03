@@ -1,6 +1,6 @@
 ---
 title: "Menu Badges"
-description: "What the SOON, NEW, BETA, LEGACY and DEPRECATED tags in the DefectDojo Pro sidebar mean, and what each one asks you to do"
+description: "What the SOON, NEW, BETA, LOCKED, LEGACY and DEPRECATED tags in the DefectDojo Pro sidebar mean, and what each one asks you to do"
 weight: 7
 audience: pro
 ---
@@ -11,9 +11,12 @@ Entries in the DefectDojo Pro sidebar can carry a small coloured tag. Each one a
 | --- | --- | --- | --- |
 | `SOON` | Gold | Announced, not released yet | Nothing. The entry does not open a page |
 | `NEW` | Green | Recently released | Nothing — it is there so you notice the feature |
-| `BETA` | Orange | Working, still being finished; behaviour may change between releases | Try it, and expect rough edges |
+| `BETA` | Brand-colored | Working, still being finished; behaviour may change between releases | Try it, and expect rough edges |
+| `LOCKED` | Grey | Not included in your license | Selecting the entry explains what unlocks it |
 | `LEGACY` | Red | Superseded by a newer feature, with no announced removal date | Prefer the replacement for new work |
 | `DEPRECATED` | Red | Scheduled for removal in a named release | Migrate before that release |
+
+Two badges carry a small icon on their corner so they stay recognizable at a glance: `NEW` a flame, `BETA` a seedling. `LOCKED` carries a padlock inside the pill. When the sidebar is [collapsed to its icon rail](/navigation/pro__sidebar/#collapsing-the-sidebar), those icons are what remains: they shrink to small marks on the row's icon, in the badge's colour, and hovering the row names the page and its badge together.
 
 ## SOON marks a capability that has not shipped
 
