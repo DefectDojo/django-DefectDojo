@@ -14,7 +14,7 @@ dependencies:
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
   - name: valkey
-    version: 0.25.5
+    version: 0.25.8
     repository: "oci://registry-1.docker.io/cloudpirates"
     condition: valkey.enabled
 # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
@@ -34,4 +34,4 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: "- kind: changed\n  description: chore(deps)_ update valkey _ tag from 0.24.6 to v0.25.0 (_/defect_/chart.yaml)\n- kind: changed\n  description: chore(deps)_ update valkey docker tag from 0.25.0 to v0.25.4 (helm/defectdojo/chart.yaml)\n- kind: changed\n  description: chore(deps)_ update valkey docker tag from 0.25.4 to v0.25.5 (helm/defectdojo/chart.yaml)\n- kind: changed\n  description: chore(deps)_ update gcr.io/cloudsql-docker/gce-proxy docker tag from 1.38.2 to v1.38.3 (helm/defectdojo/values.yaml)\n- kind: changed\n  description: chore(deps)_ update nginx/nginx-prometheus-exporter docker tag from 1.5.1 to v1.5.3 (helm/defectdojo/values.yaml)\n"
+  artifacthub.io/changes: "- kind: changed\n  description: chore(deps)_ update valkey _ tag from 0.24.6 to v0.25.0 (_/defect_/chart.yaml)\n- kind: changed\n  description: chore(deps)_ update valkey docker tag from 0.25.0 to v0.25.4 (helm/defectdojo/chart.yaml)\n- kind: changed\n  description: chore(deps)_ update valkey docker tag from 0.25.4 to v0.25.5 (helm/defectdojo/chart.yaml)\n- kind: changed\n  description: chore(deps)_ update gcr.io/cloudsql-docker/gce-proxy docker tag from 1.38.2 to v1.38.3 (helm/defectdojo/values.yaml)\n- kind: changed\n  description: chore(deps)_ update nginx/nginx-prometheus-exporter docker tag from 1.5.1 to v1.5.3 (helm/defectdojo/values.yaml)\n- kind: changed\n  description: chore(deps)_ update valkey docker tag from 0.25.5 to v0.25.8 (helm/defectdojo/chart.yaml)\n"
