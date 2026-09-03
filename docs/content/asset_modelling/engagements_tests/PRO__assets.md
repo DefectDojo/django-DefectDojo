@@ -58,6 +58,8 @@ Optional Asset metadata includes:
 
 This metadata improves filtering, reporting, and prioritization across your security program, but most importantly, Assets also contain all of the Engagements, Tests, and Findings related to the testing efforts surrounding that Asset. All Findings from Tests ultimately roll up to the Asset level, enabling long-term tracking, trend analysis, and reporting.
 
+Beyond these built-in fields, an administrator can define typed **Custom Fields** for Assets, which you fill in on the Asset's page and can turn on as opt-in columns on the All Assets table. See [Custom Fields](/asset_modelling/pro__custom_fields/).
+
 ## Accessing Assets 
 
 Assets are accessible via the sidebar. The submenu provides access to the [Asset Hierarchy](/asset_modelling/engagements_tests/pro__assets/#asset-nesting) and All Assets, as well as the option to create a new Asset.
@@ -109,6 +111,21 @@ Assets can be edited by clicking **Edit Asset** from within the gear menu at the
 All ensuing fields that can be edited are also available when the Asset is being created.
 
 ![image](images/assets_ss2.png)
+
+### Bulk Edit Assets
+
+Several Assets can be edited in one action from the All Assets list. Select the Assets using the checkboxes on the left of the list, then click **Bulk Edit** in the bar that appears above the table.
+
+The Bulk Edit form applies any combination of the following to every selected Asset:
+
+- **Organization**: moves the selected Assets to a different Organization. You need permission to add Assets to the destination Organization.
+- **SLA Configuration**
+- **Prioritization Engine**
+- **Tags**: added on top of each Asset's existing tags — nothing is removed.
+
+Leave a field empty to keep each Asset's current value. Assets you don't have edit permission for are skipped and counted in the result, as are Assets whose Findings are still being recalculated from an earlier SLA Configuration or Prioritization Engine change.
+
+![image](images/assets_bulk_edit.png)
 
 ### Export the Asset Inventory
 
@@ -178,7 +195,7 @@ This means that the same vulnerability may receive a different Priority or Risk 
 
 ### Jira / Downstream Connector Relationships
 
-Assets can be mapped directly to [Jira](/connectors/downstream/pro__jira_guide/#main-content) or [Integrators](/connectors/downstream/downstream_toolreference/#main-content) instances (e.g. GitHub, GitLab, ServiceNow, etc.), which push the Asset’s Findings outward into external ticketing/work-management systems.
+Assets can be mapped directly to [Jira](/connectors/downstream/pro__jira_guide/#main-content) or [Integrators](/connectors/toolreference/downstream/#main-content) instances (e.g. GitHub, GitLab, ServiceNow, etc.), which push the Asset’s Findings outward into external ticketing/work-management systems.
 
 Because Findings inherit risk, priority, and ownership from their parent Asset, the Asset effectively determines the remediation context that flows into Jira tickets and Downstream Connector workflows.
 

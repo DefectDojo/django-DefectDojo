@@ -100,7 +100,7 @@ Actualmente admitimos Conectores ascendentes para las siguientes herramientas, c
 * **Wiz**
 * **YesWeHack**
 
-Para obtener instrucciones de configuración paso a paso de cada herramienta, consulte la referencia de [Configuración de conectores específicos por herramienta](../toolreference/).
+Para obtener instrucciones de configuración paso a paso de cada herramienta, consulte la referencia de [Configuración de conectores específicos por herramienta](../../toolreference/upstream/).
 
 La mayoría de los Conectores importan **hallazgos**. Unos pocos son **Conectores de activos** que en su lugar importan su **inventario de activos** — creando y manteniendo su jerarquía de Producto (Activo) y Tipo de Producto (Organización) en lugar de importar hallazgos: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets** y **ServiceNow CMDB**. (**runZero** es principalmente un Conector de activos, pero opcionalmente también puede importar vulnerabilidades como hallazgos.)
 

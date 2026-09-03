@@ -7,7 +7,7 @@ weight: 7
 
 DefectDojo Pro can serialize an Asset's current dependency inventory back out as a standards-compliant SBOM, and its vulnerability triage decisions as a machine-readable VEX document. Both are produced from the same [Dependency Locations](../pro__working_with_sboms/) that SBOM imports and scan findings populate, so whatever your scanners and uploads have accumulated is what the export describes — the documents are consumed by downstream tooling, compliance pipelines, and AI agents, not just humans.
 
-Both endpoints require **V3 Locations** to be enabled, and respect Asset-level permissions: an Asset the requesting user cannot view returns a 404.
+Both endpoints require **Locations** to be enabled, and respect Asset-level permissions: an Asset the requesting user cannot view returns a 404.
 
 ## Exporting from the Asset page
 

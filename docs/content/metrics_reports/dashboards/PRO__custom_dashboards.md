@@ -21,7 +21,7 @@ Open source DefectDojo has a single, built-in [Main Dashboard](../introduction_d
 
 DefectDojo Pro replaces that fixed page with **per-user customizable dashboards**. You choose which widgets appear, how they are filtered, and where they sit on the grid. You can build any number of named layouts, switch between them, share them with your team, and drive the whole system from the [REST API](../custom-dashboards-api/) or an [LLM](../custom-dashboards-llm/).
 
-> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Assets** and **Organizations** were formerly **Organizations**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
+> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
 
 ## Enabling Customizable Dashboards
 
@@ -29,7 +29,7 @@ Customizable Dashboards are off by default. A superuser can turn them on from **
 
 Once it is enabled, the **🏠 Home** page shows your customizable dashboard and the [Dashboards REST API](../custom-dashboards-api/) becomes available.
 
-> **🔑 Important:** While the feature is off, the home page keeps the previous dashboard and every `/api/v2/dashboards/` endpoint returns `403 Dashboard V2 is not enabled.` Turning it on does **not** change anyone's data access — every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
+> **🔑 Important:** While the feature is off, the home page keeps the previous dashboard and every `/api/v2/dashboards/` endpoint returns `403 Dashboards 2.0 is not enabled.` Turning it on does **not** change anyone's data access — every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
 
 ## Core concepts
 
@@ -65,6 +65,11 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 - **Clone** — copy any layout (one of yours, or a shared template) into your own space as a fresh, independent starting point. Cloning gives the copy its own widgets, so editing the clone never touches the original.
 - **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout. Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
+- **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults).
+
+### Restricting customization
+
+An administrator can enable **Restrict Layout Customization** (Settings, then UI Defaults, then Layout Defaults) to limit dashboard changes to superusers. Everyone else is shown the global default dashboard, or the built-in starter dashboard when none is designated, with no toolbar options to create, switch, edit, or manage layouts. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
 
 ## Building a dashboard in the UI
 

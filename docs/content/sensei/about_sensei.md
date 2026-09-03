@@ -16,7 +16,11 @@ weight: 1
 - **Short-lived credentials:** Sensei runs entirely through a GitHub App and uses short-lived installation tokens. There is nothing to paste and nothing to rotate.
 - **Metered and license-gated:** Sensei is a Pro feature with per-instance quotas for fixes and onboarded repositories.
 
+> **☁️ Beyond code — cloud posture (CSPM):** the same scan-and-fix flow applies to **cloud accounts**. Connect an AWS account, Azure subscription, or GCP project; Sensei scans it for misconfigurations, imports them as findings, and remediates them by an IaC pull request or a **reversible change to the live resource**. AppSec and CSPM share one hub, selected by a capability card. See [Cloud Security Posture (CSPM)](/sensei/cloud_posture/).
+
 > **🧠 Before the code exists:** Sensei also generates a threat model, attack paths and security requirements from a feature *design*, with no repository involved — see [Threat Modeling](/sensei/threat_modeling/).
+
+> **🤖 AI agent skills:** Sensei's scanning also covers **AI agent skills**: the `SKILL.md` definitions and helper scripts that coding agents load. When a DefectDojo-hosted scan runs on an onboarded repository that ships agent skills, Sensei statically analyzes them for prompt injection, data exfiltration, and other risky or malicious patterns, then imports the results as findings alongside the repository's code.
 
 > **🔎 BETA:** Sensei is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases.
 

@@ -31,7 +31,11 @@ Recovery codes are what let you get back in when you lose your phone, so store t
 
 ### Turning MFA off
 
-**Disable MFA** on the MFA Settings page turns it off for your own account. You only need to be logged in — you are not asked for a code to confirm.
+**Disable MFA** on the MFA Settings page turns it off for your own account. You are asked to confirm with a code first: either the current six-digit code from your authenticator app, or one of your unused recovery codes. Being logged in is not enough on its own.
+
+That is deliberate. Removing MFA also deletes your recovery codes, so an attacker who got hold of a logged-in session could otherwise strip the second factor and keep access to the account. Requiring the factor in order to remove it means they need your authenticator, not just your session.
+
+DefectDojo notifies you when MFA is removed from your account, so if it happens without you doing it, you will hear about it.
 
 If your administrator has made MFA mandatory, you will be prompted to set it up again on your next login.
 
@@ -62,7 +66,7 @@ There is no setting to exempt SSO users. If your identity provider already enfor
 Work through these in order:
 
 1. **Use a recovery code.** If the user still has their recovery codes, they enter one instead of an app code at login, then set MFA up again from scratch.
-2. **If they are still logged in somewhere,** they can go to **MFA Settings** and click **Disable MFA** without needing a code, then re-enroll.
+2. **If they still have an unused recovery code,** they can go to **MFA Settings**, click **Disable MFA**, and enter that recovery code to confirm, then re-enroll. Being logged in is not sufficient by itself; disabling MFA requires a code.
 3. **Ask an administrator to clear their MFA.** With server access, an administrator can remove MFA from an account:
 
    ```

@@ -127,7 +127,7 @@
                                                       title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}">&#128681;</span>
                                             {% endif %}
                                         </a>
-                                        {% include "dojo/snippets/tags.html" with tags=location.tags.all %}
+                                        {% include "dojo/snippets/tags.html" with tags=location.readable_tags %}
                                     </td>
                                 {% endif %}
                                 {% if not product_tab %}

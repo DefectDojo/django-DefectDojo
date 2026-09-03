@@ -1,5 +1,5 @@
 ---
-title: Deduplizierungs-Tuning (Pro)
+title: Deduplizierungs-Tuning
 description: Konfigurieren Sie, wie DefectDojo doppelte Befunde erkennt und verwaltet
 weight: 4
 audience: pro

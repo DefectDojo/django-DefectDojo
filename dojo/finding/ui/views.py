@@ -1092,7 +1092,9 @@ class DeleteFinding(View):
     def process_form(self, request: HttpRequest, finding: Finding, context: dict):
         if context["form"].is_valid():
             product = finding.test.engagement.product
-            finding.delete(push_to_jira=context["form"].cleaned_data.get("push_to_jira"))
+            finding_helper.delete_finding_with_conflict_retry(
+                finding, push_to_jira=context["form"].cleaned_data.get("push_to_jira"),
+            )
             # Update the grade of the product async
             dojo_dispatch_task(calculate_grade, product.id)
             # Add a message to the request that the finding was successfully deleted
@@ -1563,8 +1565,9 @@ def request_finding_review(request, fid):
         if form.is_valid():
             now = timezone.now()
             new_note = Notes()
+            # The note must stay public: the reviewers it is addressed to
+            # cannot read a private note (author and superusers only).
             new_note.entry = "Review Request: " + form.cleaned_data["entry"]
-            new_note.private = True
             new_note.author = request.user
             new_note.date = now
             new_note.save()

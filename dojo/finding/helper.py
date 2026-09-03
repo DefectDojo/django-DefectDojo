@@ -19,7 +19,7 @@ from fieldsignals import pre_save_changed
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
-from dojo.db_utils import is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.cwe import finding_cwe_labels
@@ -458,6 +458,17 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_services.push(finding.finding_group)
 
 
+# post_process_findings_batch runs the status-changing dedup / false-positive-history
+# writes for a batch of findings. Two of these tasks racing on overlapping dojo_finding
+# rows -- concurrent imports or connector syncs into the same product -- can deadlock
+# (Postgres SQLSTATE 40P01 deadlock_detected): each holds a row the other needs and
+# Postgres aborts one participant. The aborted batch is not wrong, only rolled back, so
+# re-running it is safe. This mirrors bulk_delete_findings' backstop for the same class
+# of transient conflict on the same table.
+POST_PROCESS_BATCH_RETRY_DELAY = 0.5  # seconds before the first retry; doubled each attempt
+POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES = 3
+
+
 @app.task
 def post_process_findings_batch(
     finding_ids,
@@ -498,25 +509,48 @@ def post_process_findings_batch(
 
     system_settings = System_Settings.objects.get()
 
-    # use list() to force a complete query execution and related objects to be loaded once
-    logger.debug(f"getting finding models for batch deduplication with: {len(finding_ids)} findings")
-    findings = get_finding_models_for_deduplication(finding_ids)
-    logger.debug(f"found {len(findings)} findings for batch deduplication")
+    # The status-changing dedup / false-positive-history writes below update dojo_finding
+    # rows and can deadlock against a concurrent batch touching the same rows (see the
+    # POST_PROCESS_BATCH_* notes above). Retry the whole write unit on a transient DB
+    # conflict; the findings are reloaded on each attempt so a retry acts on the state the
+    # winning transaction just committed. Only transient conflicts (deadlock /
+    # serialization failure) are retried -- anything else re-raises at once, as does a
+    # conflict that survives every attempt. The non-status-changing follow-ups (issue
+    # updater, product grading, JIRA push) run once, after this loop succeeds, so a retry
+    # never re-fires them.
+    findings = []
+    for attempt in range(POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES + 1):
+        try:
+            # use list() to force a complete query execution and related objects to be loaded once
+            logger.debug(f"getting finding models for batch deduplication with: {len(finding_ids)} findings")
+            findings = get_finding_models_for_deduplication(finding_ids)
+            logger.debug(f"found {len(findings)} findings for batch deduplication")
 
-    if not findings:
-        logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
-        return
+            if not findings:
+                logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
+                return
 
-    # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
-    if dedupe_option and system_settings.enable_deduplication:
-        dedupe_batch_of_findings(findings)
+            # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
+            if dedupe_option and system_settings.enable_deduplication:
+                dedupe_batch_of_findings(findings)
 
-    if system_settings.false_positive_history:
-        # Only perform false positive history if deduplication is disabled
-        if system_settings.enable_deduplication:
-            deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+            if system_settings.false_positive_history:
+                # Only perform false positive history if deduplication is disabled
+                if system_settings.enable_deduplication:
+                    deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+                else:
+                    do_false_positive_history_batch(findings)
+        except OperationalError as exc:
+            if not is_transient_db_conflict(exc) or attempt == POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES:
+                raise
+            backoff = POST_PROCESS_BATCH_RETRY_DELAY * (2 ** attempt)
+            logger.warning(
+                "post_process_findings_batch: transient DB conflict on %d finding(s), retry %d/%d in %.1fs: %s",
+                len(finding_ids), attempt + 1, POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES, backoff, exc,
+            )
+            sleep(backoff)
         else:
-            do_false_positive_history_batch(findings)
+            break
 
     # Non-status changing tasks
     if issue_updater_option:
@@ -608,6 +642,51 @@ def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug("finding delete: clearing found by")
     instance.found_by.clear()
+
+
+# Seconds before the first retry of a single-finding delete; doubled on each attempt.
+SINGLE_DELETE_RETRY_DELAY = 0.5
+SINGLE_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
+def delete_finding_with_conflict_retry(finding, **kwargs):
+    """
+    Delete one finding, retrying the delete-vs-import race that otherwise returns a 500.
+
+    A single-finding delete runs Django's collector, which clears the finding's
+    ``Test_Import_Finding_Action`` children before deleting the finding row. Those FK
+    constraints are ``DEFERRABLE INITIALLY DEFERRED``, so a concurrent import that commits a
+    new child row referencing this finding between the child clear and the transaction COMMIT
+    trips a foreign-key violation at commit time (SQLSTATE 23503). The reference is real but
+    transient: on a re-run the collector clears the newly-created child and the delete
+    completes. Deadlocks and serialization failures (40P01/40001) against a concurrent import
+    or the dedup job are retried the same way.
+
+    This mirrors the async cascade delete's ``_is_retryable_delete_conflict`` handling (see
+    ``dojo.utils.async_delete_task``) for the synchronous single-finding API/UI delete path,
+    which previously had no such protection and surfaced the race as an Internal Server Error.
+    Each attempt re-runs ``Finding.delete`` in a fresh transaction (there is no
+    ``ATOMIC_REQUESTS``), and the failed attempt has already rolled back, so the finding still
+    exists to be re-deleted. Any non-conflict error, and a conflict that survives every
+    attempt, is re-raised. ``kwargs`` (e.g. ``push_to_jira``) are forwarded to
+    ``Finding.delete``.
+    """
+    for attempt in range(SINGLE_DELETE_MAX_CONFLICT_RETRIES + 1):
+        try:
+            finding.delete(**kwargs)
+        except (OperationalError, IntegrityError) as exc:
+            retryable = is_transient_db_conflict(exc) or is_foreign_key_conflict(exc)
+            if not retryable or attempt == SINGLE_DELETE_MAX_CONFLICT_RETRIES:
+                raise
+            backoff = SINGLE_DELETE_RETRY_DELAY * (2 ** attempt)
+            logger.warning(
+                "delete_finding_with_conflict_retry: transient DB conflict deleting finding %s, "
+                "retry %d/%d in %.1fs: %s",
+                getattr(finding, "pk", None), attempt + 1, SINGLE_DELETE_MAX_CONFLICT_RETRIES, backoff, exc,
+            )
+            sleep(backoff)
+        else:
+            return
 
 
 @receiver(post_delete, sender=Finding)

@@ -18,6 +18,7 @@ from drf_spectacular.utils import (
 )
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -39,6 +40,7 @@ from dojo.api_v2.views import (
     report_generate_response,
 )
 from dojo.authorization import api_permissions as permissions
+from dojo.db_utils import is_foreign_key_conflict
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
     BurpRawRequestResponseMultiSerializer,
@@ -175,7 +177,24 @@ class FindingViewSet(
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        serializer.save(push_to_jira=push_to_jira)
+        finding_pk = serializer.instance.pk
+        try:
+            serializer.save(push_to_jira=push_to_jira)
+        except IntegrityError as exc:
+            # A finding PATCH is not wrapped in a single transaction
+            # (ATOMIC_REQUESTS is False), so a concurrent delete of this finding --
+            # a reimport close_old_findings, a bulk delete, or another pipeline step --
+            # can remove the parent dojo_finding row mid-update. The child writes then
+            # reference a finding_id that is already gone and raise a foreign-key
+            # violation: the dojo_finding_tags through-row, and on Pro the
+            # pro_enhanced_finding companion. That is not a server defect -- the
+            # resource the client PATCHed no longer exists -- so answer 404 rather than
+            # letting a bare FK violation fall through to a 500. A genuine FK defect
+            # (the finding is still present) keeps surfacing as the original error.
+            if is_foreign_key_conflict(exc) and not Finding.objects.filter(pk=finding_pk).exists():
+                msg = "This finding was deleted while the update was being processed."
+                raise NotFound(msg) from exc
+            raise
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -183,7 +202,7 @@ class FindingViewSet(
             push_to_jira = get_request_boolean(request, "push_to_jira")
         except DRFValidationError as error:
             raise DRFValidationError({"push_to_jira": error.detail}) from error
-        instance.delete(push_to_jira=push_to_jira)
+        finding_helper.delete_finding_with_conflict_retry(instance, push_to_jira=push_to_jira)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
@@ -730,17 +749,23 @@ class FindingViewSet(
                 "Metadata name is required", status=status.HTTP_400_BAD_REQUEST,
             )
 
+        metadata_data = FindingMetaSerializer(data=request.data)
+        if not metadata_data.is_valid():
+            return Response(
+                metadata_data.errors, status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             DojoMeta.objects.update_or_create(
                 name=metadata_name,
                 finding=finding,
                 defaults={
-                    "name": request.data.get("name"),
-                    "value": request.data.get("value"),
+                    "name": metadata_data.validated_data["name"],
+                    "value": metadata_data.validated_data["value"],
                 },
             )
 
-            return Response(data=request.data, status=status.HTTP_200_OK)
+            return Response(data=metadata_data.data, status=status.HTTP_200_OK)
         except IntegrityError:
             return Response(
                 "Update failed because the new name already exists",

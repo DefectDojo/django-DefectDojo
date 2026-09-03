@@ -1,0 +1,246 @@
+# Docs UI strings for zh-hans.
+# custom keys (dd_* section below) are used by the DefectDojo layouts;
+# theme keys mirror node_modules/@thulite/doks-core/i18n/en.toml for
+# languages the theme does not ship.
+
+[404_text]
+other = "您要查找的页面不存在或已被移动。"
+
+[404_title]
+other = "页面未找到 :("
+
+[browse]
+other = "浏览"
+
+[by]
+other = "作者："
+
+[chapter_next]
+other = "下一页"
+
+[chapter_previous]
+other = "上一页"
+
+[edit_page]
+other = "编辑此页面于"
+
+[get_started]
+other = "示例指南"
+
+[home]
+other = "首页"
+
+[in]
+other = "分类："
+
+[last_updated]
+other = "最后更新于"
+
+[minute]
+one = "分钟"
+other = "分钟"
+
+[on_this_page]
+other = "本页内容"
+
+[reading_time]
+other = "预计阅读时间"
+
+[search_loading]
+other = "正在加载搜索索引…"
+
+[search_no_recent]
+other = "没有最近的搜索"
+
+[search_no_results]
+other = "没有结果"
+
+[search_placeholder]
+other = "搜索"
+
+[search_title]
+other = "搜索"
+
+[video_unsupported]
+other = "您的浏览器不支持嵌入式视频，不过别担心，您可以<a href=\"{{ .RelPermalink }}\">下载视频</a>，然后用您喜欢的视频播放器观看！"
+
+[nav_get_started]
+other = "快速入门"
+
+[nav_import_data]
+other = "导入数据"
+
+[nav_triage_findings]
+other = "分级发现项"
+
+[nav_model_assets]
+other = "建模资产"
+
+[nav_metrics_reports]
+other = "指标与报告"
+
+[nav_issue_tracking]
+other = "问题跟踪"
+
+[nav_automation]
+other = "自动化"
+
+[nav_admin]
+other = "管理"
+
+[nav_supported_tools]
+other = "支持的工具"
+
+[card_get_started_desc]
+other = "安装 DefectDojo 并了解核心概念。"
+
+[card_import_data_desc]
+other = "从 500+ 种安全工具导入扫描结果到 DefectDojo。"
+
+[card_triage_desc]
+other = "管理、去重并确定安全发现项的优先级。"
+
+[card_assets_desc]
+other = "组织产品、测试活动和资产层级。"
+
+[card_metrics_desc]
+other = "使用仪表板和自定义报告跟踪安全指标。"
+
+[card_issue_tracking_desc]
+other = "从您的工具导入发现项，并将其推送到 Jira、GitHub Issues 和其他跟踪工具。"
+
+[card_automation_title]
+other = "自动化与 API"
+
+[card_automation_desc]
+other = "使用 REST API 将 DefectDojo 集成到 CI/CD 流水线。"
+
+[card_admin_title]
+other = "系统管理"
+
+[card_admin_desc]
+other = "配置用户、权限、系统设置和集成。"
+
+[card_tools_desc]
+other = "浏览安全扫描器和集成的完整列表。"
+
+[cta_community_heading]
+other = "加入 Dojo 社区"
+
+[cta_community_link]
+other = "社区页面"
+
+[cta_support_heading]
+other = "联系支持团队"
+
+[cta_support_text]
+other = "需要帮助？Pro 用户可发送邮件至 support@defectdojo.com"
+
+[cta_trial_link]
+other = "注册试用"
+
+[footer_tagline]
+other = "安全的秘密武器 - 统一并自动化 AppSec。开源漏洞管理与 DevSecOps。"
+
+[footer_heading_documentation]
+other = "文档"
+
+[footer_heading_community]
+other = "社区"
+
+[footer_heading_company]
+other = "公司"
+
+[footer_heading_connect]
+other = "联系我们"
+
+[footer_link_get_started]
+other = "快速入门"
+
+[footer_link_import_data]
+other = "导入数据"
+
+[footer_link_supported_tools]
+other = "支持的工具"
+
+[footer_link_api]
+other = "API"
+
+[footer_link_community]
+other = "社区"
+
+[footer_link_release_notes]
+other = "版本说明"
+
+[footer_link_pricing]
+other = "定价"
+
+[footer_link_trust_center]
+other = "信任中心"
+
+[footer_link_status]
+other = "服务状态"
+
+[footer_link_support]
+other = "支持"
+
+[footer_rights]
+other = "保留所有权利。"
+
+[aria_search]
+other = "搜索网站"
+
+[aria_nav_main]
+other = "打开主导航菜单"
+
+[aria_nav_section]
+other = "打开章节导航菜单"
+
+[aria_close]
+other = "关闭"
+
+[aria_toggle_theme]
+other = "切换主题"
+
+[aria_version_select]
+other = "选择文档版本"
+
+[aria_version_toggle]
+other = "切换版本菜单"
+
+[aria_nav_secondary]
+other = "二级导航"
+
+[aria_nav_tertiary]
+other = "三级导航"
+
+[aria_nav_quaternary]
+other = "四级导航"
+
+[aria_breadcrumb]
+other = "面包屑导航"
+
+[version_opensource]
+other = "开源版"
+
+[version_pro]
+other = "Pro"
+
+[hero_subtitle]
+other = "DefectDojo Pro 版与开源版的官方文档，由 DefectDojo, Inc. 和开源社区共同维护。"
+
+[cta_community_text]
+other = "了解线上活动和即将推出的功能，并在我们的{{ .link }}上与其他安全专业人士交流。"
+
+[cta_trial_text]
+other = "准备升级到 Pro？请{{ .link }}向 DefectDojo, Inc. 团队申请报价。"
+
+[cta_trial_link_text]
+other = "点此"
+
+[whats_new]
+other = "{{ .release }} 中的新增功能"
+
+[card_connectors_title]
+other = "连接器"
+

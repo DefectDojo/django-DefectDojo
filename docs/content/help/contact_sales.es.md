@@ -55,7 +55,7 @@ Antes de completar el proceso, confirme el plan que desea utilizar junto con la 
 
 ## Paso 6: Revise y Envíe su Solicitud
 
-Se le pedirá que revise su solicitud una vez más. Una vez enviada, solo su equipo podrá modificar las Reglas de Firewall sin la asistencia de Soporte. Para contactar a Soporte, envíe un correo electrónico a [support@defectdojo.com](mailto:support@defectdojo.com) o siga las instrucciones en [este artículo](/en/about_defectdojo/contact_defectdojo_support/).
+Se le pedirá que revise su solicitud una vez más. Una vez enviada, solo su equipo podrá modificar las Reglas de Firewall sin la asistencia de Soporte. Para contactar a Soporte, envíe un correo electrónico a [support@defectdojo.com](mailto:support@defectdojo.com) o siga las instrucciones en [este artículo](/help/contact_support/).
 
 ![imagen](images/request_a_trial_6.png)
 

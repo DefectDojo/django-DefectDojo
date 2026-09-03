@@ -1,5 +1,5 @@
 ---
-title: Corrélation de cause racine (Pro)
+title: Corrélation de cause racine
 description: Regrouper les Constatations qui partagent une cause racine -- le même
   composant vulnérable, le même CVE, la même ressource d'infrastructure ou la même
   faiblesse sur une URL -- afin qu'un correctif unique puisse être relié à chaque

@@ -13,13 +13,13 @@ django-filter==26.1
 django-htmx==1.29.0
 django-imagekit==6.1.0
 django-multiselectfield==1.0.1
-django-ninja==1.6.2  # API v3 framework (alpha); pulls pydantic v2 (already present transitively)
+django-ninja==1.6.3  # API v3 framework (alpha); pulls pydantic v2 (already present transitively)
 django-polymorphic==4.11.7
 django-crispy-forms==2.7
 django_extensions==4.1
 django-slack==5.19.0
 django-watson==1.6.3
-django-permissions-policy==4.32.0
+django-permissions-policy==4.33.0
 django-prometheus==2.5.0
 Django==5.2.16
 django-single-session==0.2.0
@@ -27,8 +27,8 @@ djangorestframework==3.18.0
 html2text==2025.4.15
 humanize==4.16.0
 jira==3.10.5
-PyGithub==2.9.1
-lxml==6.1.1
+PyGithub==2.10.0
+lxml==6.1.2
 Markdown==3.10.3
 openpyxl==3.1.5
 Pillow==12.3.0  # required by django-imagekit
@@ -37,13 +37,13 @@ cryptography==50.0.0
 python-dateutil==2.9.0.post0
 redis==8.1.0
 requests==2.34.2
-sqlalchemy==2.0.51  # Required by Celery broker transport
+sqlalchemy==2.0.52  # Required by Celery broker transport
 urllib3==2.7.0
 uWSGI==2.0.31
 vobject==0.9.9
 whitenoise==5.2.0
 titlecase==2.4.1
-gitpython==3.1.58
+gitpython==3.1.59
 python-gitlab==8.5.0
 cpe==1.3.1
 packageurl-python==0.17.6
@@ -63,7 +63,7 @@ django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3
 netaddr==1.3.0
-vulners==4.0.0
+vulners==4.3.0
 fontawesomefree==6.6.0
 PyYAML==6.0.3
 pyopenssl==26.4.0

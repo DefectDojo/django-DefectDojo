@@ -1,5 +1,5 @@
 ---
-title: Standort-Drift-Zuordnung (Pro)
+title: Standort-Drift-Zuordnung
 description: Verfolgen Sie Befunde, während sich deren Standorte über mehrere Reimporte
   hinweg ändern — Zeilenverschiebungen, Dateiumbenennungen, URL-Änderungen und Abhängigkeits-Versionssprünge
   schließen und erzeugen Befunde nicht mehr neu

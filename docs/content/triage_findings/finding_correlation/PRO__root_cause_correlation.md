@@ -1,5 +1,5 @@
 ---
-title: "Root Cause Correlation (Pro)"
+title: "Root Cause Correlation"
 description: "Group Findings that share a root cause -- the same vulnerable component, CVE, infrastructure resource, or weakness at a URL -- so one fix can be traced to every Finding it resolves"
 weight: 1
 audience: pro
@@ -149,6 +149,7 @@ you have access to, ranked so the largest, riskiest ones come first.
 | **CVEs** | Every CVE seen across the cluster's members (component clusters) |
 | **Active Findings** | How many outstanding Findings this one cause accounts for |
 | **Assets** | Blast radius — how many Assets are affected |
+| **Organizations** | Blast radius — how many Organizations are affected |
 | **Risk** | Aggregate risk, summed from the severities of the active members |
 | **Muted** | Whether the cluster has been muted |
 
@@ -156,12 +157,30 @@ CVE causes that a component or resource cause already covers entirely are hidden
 **Show covered CVEs** is on; see
 [When a CVE is already covered by a component](#when-a-cve-is-already-covered-by-a-component).
 
+### Narrowing the list to your Assets or Organizations
+
+A Root Cause is portfolio-wide by design: one cluster can span many Assets across many
+Organizations. When several teams share an instance, that is more than any one team needs to
+see at once. The **Assets** and **Organizations** columns each carry a filter that scopes the
+list to the causes reaching the Assets or Organizations you pick, so a team can pull the whole
+portfolio down to just the Root Causes relevant to it. Filtering this way selects *which* causes
+appear; it does not change the counts on the rows that remain — each still reports its full blast
+radius, scoped to your access, not the slice that matched the filter. Both columns also sort on
+their count, so you can rank by how widely a cause has spread.
+
 Selecting a row opens the cluster, listing each member Finding with its severity, Asset,
 domain, **match** type, and the **evidence** that links it. Evidence is recorded per link, so a
 cluster can always explain itself: a component link records the purl it matched on, a CVE link
 records the identifier, an endpoint link records the URL and the CWE. The **Match** column reads
 `exact` for component, CVE and resource links and `heuristic` for endpoint links, so a judgement
 is never presented as an identity.
+
+The blast-radius counts in the cluster header are the drill-downs behind the **Assets** and
+**Organizations** columns. A count on its own is not actionable when it can read "400 Assets", so
+clicking either count opens a breakdown — one row per Asset, or per Organization — most-affected
+first, name-searchable, with each row's own Finding count and worst scores. The per-Organization
+breakdown also shows how many of that Organization's Assets the cause reaches, and the per-Asset
+breakdown drills one step further into that Asset's member Findings.
 
 Aggregate risk is a deterministic sum over the active members' severities (Critical 100, High
 70, Medium 40, Low 10, Info 1). It does not depend on the prioritization engine being enabled.
@@ -261,14 +280,22 @@ deliberately not published while the feature is in Beta, so that adding them lat
 anything you have already built against.
 
 Filters on the list: `cause_type` (`exact` or `in`), `muted`, `identity_key` (`exact` or
-`icontains`) and `display_name__icontains`.
+`icontains`) and `display_name__icontains`. Two membership filters scope the list the way the
+Assets and Organizations columns do in the UI: `product` takes one or more Asset ids and
+`prod_type` takes one or more Organization ids (comma-separated), returning only the Root Causes
+that reach them. Membership selects which causes are listed and leaves each cause's counts at its
+full, access-scoped blast radius.
+
+`GET /api/v2/root_causes/{id}/organizations/` returns the per-Organization breakdown behind
+`organization_count` — one row per affected Organization, most-affected first, with its Finding
+count and how many of its Assets the cause reaches.
 
 Two behaviors worth knowing before you script against it:
 
 - **Counts are scoped to the token's access**, exactly as they are in the UI. Two tokens with
-  different Product access will report different `active_member_count`, `product_count` and
-  `risk_score` for the same Root Cause. This is intended -- the numbers describe what *that*
-  caller can see -- so do not treat them as portfolio-wide totals.
+  different Product access will report different `active_member_count`, `product_count`,
+  `organization_count` and `risk_score` for the same Root Cause. This is intended -- the numbers
+  describe what *that* caller can see -- so do not treat them as portfolio-wide totals.
 - **Covered CVE causes are left out of the list** but are always retrievable by id. Pass
   `?include_subsumed=true` to include them; a Root Cause id you stored earlier keeps working
   through `GET /api/v2/root_causes/{id}/` even after it becomes covered. Each covered cause

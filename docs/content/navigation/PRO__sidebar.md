@@ -1,16 +1,13 @@
 ---
 title: "The Sidebar Menu"
-description: "How the DefectDojo Pro sidebar is organized, the All Settings directory page, and how to switch between the current and previous layouts"
+description: "How the DefectDojo Pro sidebar is organized, how to search it, the All Settings directory page, and how to switch between the current and previous layouts"
 weight: 6
 audience: pro
 aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. Which layout you see depends on when your instance was created:
-
-- **New installations** open on the reorganized layout described below.
-- **Existing installations** keep the previous layout until an administrator turns on **Menu 2.0** (see [Switching layouts](#switching-layouts)).
+The DefectDojo Pro sidebar groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
 
 Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
 
@@ -22,9 +19,17 @@ Either way, **every page keeps the same URL**. Bookmarks, saved links and anythi
 | **Sensei + AI** | AppSec, CSPM, Threat Modeling, MCP, AI Model Settings |
 | **Connect** | Upstream, Downstream, Jira, Authorization, Diagnostics, Import |
 | **Act** | Triage Engine, Vulnerability Explorer, Root Causes, Risk Acceptances, PSIRT, Explore |
-| **Settings** | All Settings, plus the seven groups described under [The Settings section](#the-settings-section) |
+| **Settings** | All Settings, plus the eight groups described under [The Settings section](#the-settings-section) |
 
 You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
+
+## Searching the menu
+
+Press **Cmd+K** (Mac) or **Ctrl+K**, or select the small magnifying-glass control pinned in the top-right corner of the sidebar, to open **Search Navigation Options**: a search over every menu destination your account can currently reach. The control shows the shortcut for your platform, so it reads `Ctrl K` on Windows and Linux, and the whole control is clickable. It stays in the corner as the menu scrolls.
+
+Results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
+
+Move through results with the arrow keys, open one with **Enter**, and close the search with **Escape**. Entries that open in the Classic UI are marked and open in a new tab. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically, and it follows whichever menu layout is active.
 
 Three conventions run through the whole menu:
 
@@ -81,11 +86,12 @@ Connect answers what is connected to this instance and whether it is working. **
 
 ## The Settings section
 
-Settings is divided into seven groups, named for what you are trying to do rather than for the part of the system involved.
+Settings is divided into eight groups, named for what you are trying to do rather than for the part of the system involved.
 
 | Group | What it holds |
 | --- | --- |
 | **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail |
+| **UI Defaults** | Form Configuration, Layout Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | The three Deduplication pages, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
@@ -100,6 +106,13 @@ Settings is divided into seven groups, named for what you are trying to do rathe
 The first entry in the section, **All Settings**, opens a directory of every settings page your account can reach, arranged in the same groups as the menu and searchable by name or by what the page does. Searching `deduplication` finds the three deduplication pages *and* System Settings, because System Settings holds deduplication options too.
 
 The last category, **Elsewhere in the app**, lists pages that configure DefectDojo but live in other sidebar sections: the authorization providers, Login and MFA settings, Jira instances, the Upstream and Downstream connectors, and the Universal Parser. Each tile is chipped with the section it belongs to.
+
+### UI Defaults
+
+The **UI Defaults** group collects the settings that control how much of the interface each person can tailor:
+
+- **[Form Configuration](/navigation/pro__form_configuration/)**: choose which fields the create and edit forms show and require, and whether the Optional Fields panel starts expanded.
+- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, and table views; everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
 
 ## What moved
 
@@ -164,9 +177,11 @@ The Calendar toggle used to be **Enable Calendar** in System Settings. It moved 
 
 **Menu 2.0** on the [Feature Flags](/admin/feature_flags/pro__feature_flags/) page controls which layout is active. Turning it on or off reshapes the sidebar immediately; no restart is needed and nothing else about your instance changes.
 
-New installations start with it on. Existing installations start with it off, so an upgrade never rearranges the menu under a team mid-flight. Turn it on when your administrators are ready.
+Menu 2.0 is on by default everywhere as of DefectDojo Pro 3.2.200. An instance that turned it off earlier keeps that choice through upgrades, and the toggle stays available if your team prefers the previous layout.
 
 While it is off, the **All Settings** page is unavailable and its URL returns Not Found.
+
+> **Menu 2.0 becomes the standard in the 3.3.0 release (September 8, 2026).** That release removes the classic sidebar and this toggle, so every instance moves to Menu 2.0. An instance still on the classic layout switches automatically on upgrade; turn Menu 2.0 on beforehand if you would rather move on your own schedule. In the patch releases leading up to 3.3.0, a banner in the app reminds anyone still on the classic layout.
 
 ## Related
 

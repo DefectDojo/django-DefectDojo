@@ -2041,7 +2041,12 @@ def log_user_login(sender, request, user, **kwargs):
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
+    # user can be None: Django's auth.logout() sends user_logged_out with user=None whenever the
+    # request has no authenticated user. This happens on an IdP-initiated SAML single-logout
+    # (POST /saml2/ls/) whose Django session has already expired -- djangosaml2 still calls
+    # auth.logout(request), so the signal fires with no user. Guard so logout cannot 500.
+    username = user.username if user is not None else "<anonymous>"
+    logger.info("logout user: %s via ip: %s", username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)

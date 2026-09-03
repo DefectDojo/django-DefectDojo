@@ -1,6 +1,8 @@
 ---
 title: "SARIF"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/sarif/"
 ---
 OASIS Static Analysis Results Interchange Format (SARIF). SARIF is
 supported by many tools. More details about the format here:

@@ -1,5 +1,5 @@
 ---
-title: "Location Drift Matching (Pro)"
+title: "Location Drift Matching"
 description: "Track findings as their locations change across reimports — line shifts, file renames, URL moves, and dependency version bumps no longer close and recreate findings"
 weight: 6
 audience: pro

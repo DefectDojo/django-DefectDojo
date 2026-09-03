@@ -31,7 +31,7 @@ Les tableaux de bord personnalisables sont désactivés par défaut. Un superuti
 
 Une fois activée, la page **🏠 Accueil** affiche votre tableau de bord personnalisable, et l'[API REST des tableaux de bord](../custom-dashboards-api/) devient disponible.
 
-> **🔑 Important :** Tant que la fonctionnalité est désactivée, la page d'accueil conserve l'ancien tableau de bord et chaque point de terminaison `/api/v2/dashboards/` renvoie `403 Dashboard V2 is not enabled.` L'activer ne modifie **pas** l'accès aux données de qui que ce soit — chaque widget continue de respecter le contrôle d'accès basé sur les rôles de DefectDojo, de sorte que chaque utilisateur ne voit jamais que les Constatations, Assets et autres enregistrements qu'il est autorisé à consulter.
+> **🔑 Important :** Tant que la fonctionnalité est désactivée, la page d'accueil conserve l'ancien tableau de bord et chaque point de terminaison `/api/v2/dashboards/` renvoie `403 Dashboards 2.0 is not enabled.` L'activer ne modifie **pas** l'accès aux données de qui que ce soit — chaque widget continue de respecter le contrôle d'accès basé sur les rôles de DefectDojo, de sorte que chaque utilisateur ne voit jamais que les Constatations, Assets et autres enregistrements qu'il est autorisé à consulter.
 
 ## Concepts fondamentaux
 

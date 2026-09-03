@@ -1,6 +1,8 @@
 ---
 title: "Fortify"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/fortify/"
 ---
 You can either import the findings in .xml or in .fpr file format. </br>
 If you import a .fpr file, the parser will look for the file 'audit.fvdl' and analyze it. An extracted example can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/fortify/audit.fvdl). The optional `audit.xml` is also parsed. All vulnerabilities marked with `suppressed="true"` will be marked as false positive.
@@ -31,7 +33,7 @@ required XML:
 ```
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - cwe

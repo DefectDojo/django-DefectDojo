@@ -1,5 +1,5 @@
 ---
-title: "Global Component Deduplication (Pro)"
+title: "Global Component Deduplication"
 description: "Deduplicate Software Composition Analysis Findings by component name and version across all Assets"
 weight: 5
 audience: pro

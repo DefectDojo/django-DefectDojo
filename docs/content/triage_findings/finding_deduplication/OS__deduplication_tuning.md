@@ -1,5 +1,5 @@
 ---
-title: "Deduplication Tuning (Open Source)"
+title: "Deduplication Tuning"
 description: "Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service"
 weight: 5
 audience: opensource
@@ -7,7 +7,7 @@ aliases:
   - /en/working_with_findings/finding_deduplication/deduplication_tuning_os
   - /en/working_with_findings/finding_deduplication/deduplication_algorithms
 ---
-The Open Source edition of DefectDojo uses settings files and environment variables tune deduplication.
+The Open Source edition of DefectDojo uses settings files and environment variables to tune deduplication.
 
 See also: [Open Source Configuration](/get_started/open_source/configuration/) for details on environment variables and `local_settings.py` overrides.
 
@@ -155,7 +155,7 @@ If you submit dedupe to Celery (without `--dedupe_sync`), allow time for tasks t
 
 To help troubleshooting deduplication use the following tools:
 
-- Observe log out in the `dojo.specific-loggers.deduplication` category. This is a class independant logger that outputs details about the deduplication process and settings when processing findings.
+- Observe log out in the `dojo.specific-loggers.deduplication` category. This is a class independent logger that outputs details about the deduplication process and settings when processing findings.
 - Observe the `unique_id_from_tool` and `hash_code` values by hovering over the `ID` field or `Status` column:
 
 ![Unique ID from Tool and Hash Code on the View Finding page](images/hash_code_id_field.png)

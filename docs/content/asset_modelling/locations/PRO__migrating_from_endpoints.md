@@ -9,11 +9,15 @@ When you enable Locations on an existing DefectDojo Pro instance, the data alrea
 
 Note that migration is **one-way**. There is no automated rollback path that re-creates Endpoints from Locations.
 
+> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations and are scheduled for **removal in 3.4.0**. Until then the Endpoints UI and the read-only Endpoint API stay available, and the **DEPRECATED** badges shown on the Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables link here. Enable Locations and run the migration below before 3.4.0.
+
 ## Running the migration from the Feature Flags page
 
 Enabling Locations only changes behaviour for *new* imports; your existing history is carried forward by a **data-migration suite** that appears under the Locations row on the **Settings > Feature Flags** page once the feature is on. Each item is run on demand by a superuser, shows live progress and an ETA, and is safe to re-run (every step is idempotent).
 
 When a backfill finishes it reports how many source objects it processed and how many distinct **Locations** those objects resolved to. The two numbers differ by design: several source objects can share one Location (many Endpoints normalising to the same URL, or many Findings sharing one component), so the Location count is normally lower than the object count. If any individual object could not be migrated it is skipped rather than aborting the run, and the number skipped is shown alongside the result.
+
+A running item shows a **Cancel** button. Cancelling stops the run at the next batch boundary, so it is not instant: the current batch finishes and commits first. A cancelled run keeps everything it had already migrated, is reported as **Cancelled** with its partial counts, and because every step is idempotent, running the same item again resumes from where it stopped and converges on the same result as an uninterrupted run. Cancel is also the recovery path when a run's worker is lost: a run that stops reporting progress is marked failed on its own so the item becomes runnable again, and forcing a cancel releases a run that is otherwise wedged.
 
 The suite has four items, because a Finding can carry three independent kinds of location:
 
@@ -93,7 +97,23 @@ A few things behave differently from the original Endpoint API:
 
 - **Single status instead of flags.** Locations have one status at a time. If your code relied on a Finding being *both* `mitigated=True` *and* `false_positive=True` simultaneously on an Endpoint_Status, that is no longer representable — the migration picks the highest-priority flag (the order shown in the table above).
 - **`endpoint` field on Endpoint_Status.** The legacy `endpoint` field is reconstructed by looking up the matching Asset Reference. In rare cases where a Finding's Asset no longer matches its Location's Asset references, this field may be null.
+- **`mitigated` returned a date before 3.2.400.** On releases before 3.2.400 the `mitigated` field of `/api/v2/endpoint_status/` returned the record's creation date instead of a boolean. Because a date string is truthy, `mitigated_time` and `mitigated_by` answered as though every status was mitigated. From 3.2.400 the field is a boolean that is true only when the Location status is `Mitigated`. If you poll for mitigated statuses, upgrade before you trust this field.
 - **Pagination and ordering.** Available ordering fields on the read-compat shim are `host`, `product`, `id`, and `active_finding_count`. If your client orders by another field, switch to one of these or move to the new Locations endpoints.
+
+### If a Route Returns 410
+
+Any remaining `/api/v2/` path that reaches the old Endpoint data answers `HTTP 410 Gone` rather than a server error. The body is machine-readable, so your automation can branch on `code` instead of parsing the message:
+
+```json
+{
+  "code": "endpoint_api_sunset",
+  "message": "The Endpoint API is not available on instances with Locations enabled. Reads are served from Locations; writes are not available.",
+  "replacement": "/api/v2/location/",
+  "docs": "https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/"
+}
+```
+
+If you hit this on a read you expected to work, send us the request path. That response means we have a route left to convert, and it is a bug on our side, not on yours.
 
 ## Tags and Metadata
 

@@ -45,7 +45,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 Important:** The entire Dashboards API depends on the Customizable Dashboards feature. Until it is turned on, every endpoint returns `403 Dashboard V2 is not enabled.` — see [Enabling Customizable Dashboards](../custom-dashboards/#enabling-customizable-dashboards).
+> **🔑 Important:** The entire Dashboards API depends on the Customizable Dashboards feature. Until it is turned on, every endpoint returns `403 Dashboards 2.0 is not enabled.` — see [Enabling Customizable Dashboards](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Security Notice:** Your API token grants full access to your DefectDojo data. Never paste it into a chat, screenshot, ticket, or committed file. Read it from an environment variable, rotate it if it is ever exposed, and scope tokens to service accounts where possible.
 

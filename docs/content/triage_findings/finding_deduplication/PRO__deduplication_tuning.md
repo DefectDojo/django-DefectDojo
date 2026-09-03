@@ -1,5 +1,5 @@
 ---
-title: "Deduplication Tuning (Pro)"
+title: "Deduplication Tuning"
 description: "Configure how DefectDojo identifies and manages duplicate findings"
 weight: 4
 audience: pro

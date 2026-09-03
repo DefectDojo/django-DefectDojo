@@ -31,7 +31,7 @@ Anpassbare Dashboards sind standardmäßig deaktiviert. Ein Superuser kann sie u
 
 Sobald die Funktion aktiviert ist, zeigt die Seite **🏠 Home** Ihr anpassbares Dashboard an, und die [Dashboards-REST-API](../custom-dashboards-api/) wird verfügbar.
 
-> **🔑 Wichtig:** Solange die Funktion deaktiviert ist, behält die Startseite das bisherige Dashboard bei, und jeder `/api/v2/dashboards/`-Endpunkt gibt `403 Dashboard V2 is not enabled.` zurück. Das Aktivieren ändert **nicht** den Datenzugriff eines Benutzers — jedes Widget respektiert weiterhin die rollenbasierte Zugriffskontrolle von DefectDojo, sodass jeder Benutzer stets nur die Befunde, Assets und anderen Datensätze sieht, für die er berechtigt ist.
+> **🔑 Wichtig:** Solange die Funktion deaktiviert ist, behält die Startseite das bisherige Dashboard bei, und jeder `/api/v2/dashboards/`-Endpunkt gibt `403 Dashboards 2.0 is not enabled.` zurück. Das Aktivieren ändert **nicht** den Datenzugriff eines Benutzers — jedes Widget respektiert weiterhin die rollenbasierte Zugriffskontrolle von DefectDojo, sodass jeder Benutzer stets nur die Befunde, Assets und anderen Datensätze sieht, für die er berechtigt ist.
 
 ## Grundkonzepte
 

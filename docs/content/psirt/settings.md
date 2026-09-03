@@ -2,7 +2,7 @@
 title: "PSIRT Settings"
 description: "Case-worthiness calibration, the \"new\" item window, and what counts as a material change"
 draft: false
-weight: 11
+weight: 12
 pro-feature: true
 ---
 

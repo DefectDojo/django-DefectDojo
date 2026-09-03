@@ -3,7 +3,7 @@ title: "Sensei Reference"
 description: "Statuses, row actions, quotas, and troubleshooting"
 draft: false
 audience: pro
-weight: 5
+weight: 6
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature and is currently in BETA.</span>
 
@@ -32,6 +32,8 @@ Auto-fix candidates and fix records move through these states:
 | **PR Open** | A fix pull request is open; the badge links to it. |
 | **Failed** | The fix could not be completed; it stays listed so it doesn't disappear silently. |
 
+A cloud finding fixed *directly* (see [CSPM](/sensei/cloud_posture/#cloud-remediations-ledger)) adds three more, tracked on the hub's **Cloud Remediations** tab: **Applied in Cloud** (the change landed on the live resource — the direct-path analog of *PR Open*), **Revert in Progress**, and **Reverted**.
+
 ## Repository row actions
 
 Each onboarded repository has a row-actions menu on the Sensei hub:
@@ -50,6 +52,7 @@ Sensei is metered against your DefectDojo Pro license, shown as meters at the to
 
 - **Fixes:** remediations applied against your prepaid limit. Approving a candidate or triggering a fix consumes from this quota; when it is exhausted, further fixes are blocked (a warning banner appears) until the limit is raised.
 - **Onboarded Repositories:** repositories onboarded against your repository limit. When it is reached, onboarding new repositories is blocked.
+- **Onboarded Cloud Accounts:** cloud accounts onboarded against your cloud-account limit (`sensei_cloud_account_limit`), shown when Sensei is licensed (CSPM has no feature flag of its own). When it is reached, onboarding new accounts is blocked. The Fixes quota is **shared** — an AppSec fix and a cloud remediation both spend `sensei_fix_limit` — and the Fixes card breaks its total down by capability. See [CSPM → Quotas](/sensei/cloud_posture/#quotas).
 
 To raise a limit, contact your DefectDojo account team.
 
@@ -92,6 +95,13 @@ GitHub Enterprise Server uses the **same GitHub App** model as github.com; only 
 - **Coexistence:** a github.com App connection and a GHES App connection can be configured on the same instance; each repository resolves to the connection it was onboarded through.
 - **Reachability:** DefectDojo must reach the GHES API host, and GHES must reach DefectDojo's `…/sensei/webhooks` endpoint (internal hosts are fine if both sides can connect).
 
+## Cloud (CSPM) specifics
+
+Cloud accounts are the CSPM analog of onboarded repositories; the full flow is on the [Cloud Security Posture (CSPM)](/sensei/cloud_posture/) page. Two reference points worth calling out:
+
+- **Two credentials, two jobs.** The **scan** credential is read-only (it only reads posture). A **direct fix** ("Fix in Cloud") uses a *separate* **write** credential, supplied per account and never widening the scan credential. A read-only account can be scanned but not directly remediated.
+- **Direct fixes are reversible and drift-checked.** Sensei snapshots the resource's prior state before applying a change and fingerprints it; a **Revert** restores that state but refuses if the resource has drifted out-of-band since the fix. Statuses (**Applied in Cloud** / **Reverted** / **Failed**) live on the hub's **Cloud Remediations** tab.
+
 ## Troubleshooting
 
 - **The Sensei button on a finding says "Configure Asset."** The finding's Asset isn't onboarded. Click it to onboard a repository for that Asset, then return to the finding.
@@ -99,5 +109,8 @@ GitHub Enterprise Server uses the **same GitHub App** model as github.com; only 
 - **A repository isn't listed when onboarding.** Only repositories the connection can access are shown. On **GitHub**, confirm the App is installed on the correct organization and its repository access includes the repository. On **GitLab**, confirm the access token's scope covers the project. On **Bitbucket Cloud**, confirm the **workspace** is set (tokens are workspace-scoped). On **Azure DevOps**, confirm the PAT's organization matches and its **Code** scope is granted.
 - **Scans or fixes never start after a webhook.** Confirm the repository's webhook points at the provider's receiver (`…/sensei/{gitlab,bitbucket,azure}/webhooks`, or `…/sensei/webhooks` for GitHub) with the correct secret/credentials, and subscribes to push + pull-request (+ comment) events. The provider's **recent deliveries** should show `HTTP 200`. Webhook-driven runs fire only for repositories onboarded in **hosted** mode; a push to a non-default branch is scanned via its pull request, not on its own.
 - **Nothing is happening after a scan.** Check that automated fixes are enabled (and your severity/risk thresholds match findings) on the repository's configuration, and that your **Fixes** quota isn't exhausted.
+- **Approve is disabled on every candidate.** The hub says which of the two reasons applies, and they need different actions. *"Your fix quota is exhausted"* means the fixes on your license have all been used, so ask your DefectDojo administrator to raise the limit. *"No fixes are included in this license"* means no fix quota was ever provisioned: scanning and candidate staging still work so you can see what Sensei would fix, but approving needs a quota to be added.
+- **A finding is still open after Sensei fixed it.** Expected: the pull request changes your code, not what is running. The badge says whether the change is waiting to be merged or waiting to be deployed, and the finding closes on the next scan that sees the fix in place — for cloud findings, the next scan after the infrastructure change is applied. See [A fix does not close the finding on its own](/sensei/fixing_findings/#a-fix-does-not-close-the-finding-on-its-own).
+- **A fixed finding keeps reappearing in new scans.** Also expected while the fix is outstanding, and it does not cost you extra fixes: Sensei links each reappearance back to the original and will not stage a second candidate or open a second pull request for it.
 
 > **🔎 Still in BETA:** Sensei is evolving quickly. If behavior doesn't match this guide, check the [Pro changelog](/releases/pro/changelog/) for recent changes.

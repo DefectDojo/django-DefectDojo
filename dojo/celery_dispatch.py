@@ -8,6 +8,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 
+# The dispatcher injects these itself; a caller must never supply them.
+RESERVED_DISPATCH_KWARGS = frozenset({"async_user_id", "_pgh_context"})
+
+
 class _SupportsSi(Protocol):
     def si(self, *args: Any, **kwargs: Any) -> Signature: ...
 
@@ -74,6 +78,10 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
 
     """
     from dojo.decorators import dojo_async_task_counter, we_want_async  # noqa: PLC0415 circular import
+
+    if reserved := RESERVED_DISPATCH_KWARGS.intersection(kwargs):
+        msg = f"reserved dispatch kwargs may not be supplied by callers: {sorted(reserved)}"
+        raise ValueError(msg)
 
     countdown = cast("int", kwargs.pop("countdown", 0))
     # Per-dispatch result storage. The task default is `ignore_result` (global

@@ -1,6 +1,9 @@
 ---
 title: "Burp XML"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/burp/"
+  - "/supported_tools/file/burp/"
 ---
 ### File Types
 DefectDojo parser accepts Burp Issue data as an .xml file.
@@ -44,7 +47,7 @@ All XML elements are required and will be parsed as strings.
 Sample Burp scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

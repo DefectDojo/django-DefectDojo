@@ -2,7 +2,7 @@
 title: "SLA Policies"
 description: "Tune how long each severity tier gets before a PSIRT clock warns and breaches"
 draft: false
-weight: 10
+weight: 11
 pro-feature: true
 ---
 

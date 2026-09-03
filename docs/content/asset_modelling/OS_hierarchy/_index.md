@@ -8,4 +8,6 @@ weight: 3
 sidebar:
   collapsed: false
 exclude_search: true
+aliases:
+  - "/asset_modelling/hierarchy/"
 ---

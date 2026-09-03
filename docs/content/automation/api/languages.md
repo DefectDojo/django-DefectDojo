@@ -4,6 +4,7 @@ description: "Import language composition data for an Asset using the cloc tool"
 weight: 3
 audience: opensource
 aliases:
+  - "/open_source/languages/"
   - /en/open_source/languages
 ---
 

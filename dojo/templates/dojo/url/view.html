@@ -214,12 +214,12 @@
                 </div>
             {% endif %}
         </div>
-        {% if not host_view and location.tags.exists %}
+        {% if not host_view and location.readable_tags %}
             <div class="panel panel-default tags">
                 <div class="panel-heading">
                     <h4>Tags</h4>
                 </div>
-                <div class="tags panel-body">{% include "dojo/snippets/tags.html" with tags=location.tags.all %}</div>
+                <div class="tags panel-body">{% include "dojo/snippets/tags.html" with tags=location.readable_tags %}</div>
             </div>
         {% endif %}
         {% if not host_view and metadata %}

@@ -75,6 +75,11 @@ All methods use these core parameters:
 
 ## Quick Start Guides by AI Provider
 
+> **💡 Using Claude Code?** Do not configure it by hand. The
+> [Claude Code Plugin](../claude_code_plugin/) wires up this MCP server for you
+> in two commands, and adds the write operations these read-only tools do not
+> cover, such as changing finding status and importing scans.
+
 <details>
 <summary><h3>🖥️ Claude Desktop (Method 1: Configuration File)</h3></summary>
 
@@ -305,7 +310,7 @@ Once connected, you can explore:
 
 ## Available Tools Reference
 
-The DefectDojo MCP Server provides 12 tools for accessing and analyzing vulnerability data. Each tool includes intelligent parameter handling and returns structured data optimized for LLM analysis.
+The DefectDojo MCP Server provides 14 tools for accessing and analyzing vulnerability data. Each tool includes intelligent parameter handling and returns structured data optimized for LLM analysis.
 
 > **💡 Parameter Note:** All tools accept an optional `token` parameter. If not provided in individual calls, the LLM will use the token from the connection configuration.
 
@@ -384,6 +389,75 @@ get_findings({
 **User asks:** "Get details for finding #1234"
 
 **LLM calls:** `get_finding_by_id({ finding_id: 1234 })`
+
+</details>
+
+<details>
+<summary><h4>finding_summary</h4></summary>
+
+**Description:** Retrieve aggregate finding metrics in a single call, rather than fetching findings and counting them. Returns counts by severity, average priority and risk score, average finding age, and the most common CWEs.
+
+> **Note on counts:** The `active_*` counts cover every active finding, whether or not it has
+> been verified. Verified findings are reported separately as `verified_findings` and
+> `active_verified_findings`, so one call gives you both views. The **Enforce Verified Status**
+> system settings do not narrow these counts.
+
+**Parameters:**
+
+**product_id** (Optional)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** Scope the summary to a single product.
+
+**engagement_id** (Optional)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** Scope the summary to a single engagement.
+
+**date** (Optional)
+- **Type:** Array with single string value
+- **Values:** `0 - Any date`, `1 - Today`, `2 - Past 7 days`, `3 - Past 30 days`, `4 - Past 90 days`, `5 - Current month`, `6 - Current year`, `7 - Past year`
+- **Example:** `["3 - Past 30 days"]`
+- **Usage:** Restrict the summary to findings discovered in the period.
+
+> **💡 Best Practice:** Use this instead of `get_findings` whenever the question is "how many" or "what is the spread". One summary call replaces paging through findings and counting them, and the counts stay correct beyond the 100-record page limit.
+
+**Example Query:**
+
+**User asks:** "Give me a severity breakdown for the payments product over the last quarter"
+
+**LLM calls:**
+```
+finding_summary({
+  product_id: 42,
+  date: ["4 - Past 90 days"]
+})
+```
+
+</details>
+
+<details>
+<summary><h4>risk_summary</h4></summary>
+
+**Description:** Retrieve the aggregate risk posture for a single product, including average priority, risk score, active finding counts, and business criticality.
+
+> **Note on counts:** The `active_*` counts cover every active finding, whether or not it has
+> been verified. Verified findings are reported separately as `verified_findings` and
+> `active_verified_findings`, so one call gives you both views. The **Enforce Verified Status**
+> system settings do not narrow these counts.
+
+**Parameters:**
+
+**product_id** (Required)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** The product to summarize.
+
+**Example Query:**
+
+**User asks:** "How risky is the payments API right now?"
+
+**LLM calls:** `risk_summary({ product_id: 42 })`
 
 </details>
 
