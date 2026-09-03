@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from django.db.models import Model
 
 from django.db.models import Q
-from tagulous.models.managers import FakeTagRelatedManager
+from django_tagulous.models.managers import FakeTagRelatedManager
 
 # Top-level imports of dojo internals are safe here because
 # ``dojo.tags.inheritance`` is loaded lazily — never during the initial

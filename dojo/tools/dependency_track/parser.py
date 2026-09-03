@@ -1,7 +1,9 @@
+import contextlib
 import json
 import logging
 
 from dateutil import parser
+from packaging.version import InvalidVersion, Version
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
@@ -31,6 +33,74 @@ class DependencyTrackParser:
         if severity.startswith("info"):
             return "Informational"
         return None
+
+    def _component_version_in_range(self, component_version, affected_range):
+        bound_fields = ("versionStartIncluding", "versionStartExcluding", "versionEndIncluding", "versionEndExcluding")
+        if all(affected_range.get(field) is None for field in bound_fields):
+            # No range bounds (for example an exact-version entry): it describes no band,
+            # so it cannot be said to contain a version.
+            return False
+        try:
+            version_start_including = affected_range.get("versionStartIncluding")
+            if version_start_including is not None and component_version < Version(version_start_including):
+                return False
+            version_start_excluding = affected_range.get("versionStartExcluding")
+            if version_start_excluding is not None and component_version <= Version(version_start_excluding):
+                return False
+            version_end_including = affected_range.get("versionEndIncluding")
+            if version_end_including is not None and component_version > Version(version_end_including):
+                return False
+            version_end_excluding = affected_range.get("versionEndExcluding")
+            if version_end_excluding is not None and component_version >= Version(version_end_excluding):
+                return False
+        except InvalidVersion:
+            return False
+        return True
+
+    def _build_message(self, chosen_range):
+        version_end_excluding = chosen_range.get("versionEndExcluding")
+        if version_end_excluding is not None:
+            return f"Upgrade to {version_end_excluding} or later"
+        version_end_including = chosen_range.get("versionEndIncluding")
+        if version_end_including is not None:
+            return f"Upgrade to a version after {version_end_including}"
+        return None
+
+    def _derive_mitigation_from_affected_versions(self, dependency_track_finding):
+        affected_versions = dependency_track_finding["vulnerability"].get("affectedVersions")
+        if not affected_versions:
+            return None
+        component = dependency_track_finding.get("component", {})
+        purl = component.get("purl")
+        if purl is None:
+            return None
+        component_version = None
+        component_version_string = component.get("version")
+        if component_version_string is not None:
+            with contextlib.suppress(InvalidVersion):
+                component_version = Version(component_version_string)
+        clean_purl = purl.rsplit("@", 1)[0]
+        filtered_affected_ranges = [
+            entry
+            for entry in affected_versions
+            if entry.get("identityType") == "PURL" and entry.get("identity") == clean_purl
+        ]
+        if not filtered_affected_ranges:
+            return None
+        chosen_range = None
+        if component_version is None:
+            # Without a comparable version we cannot choose between ranges; only a lone
+            # range is unambiguous enough to act on.
+            if len(filtered_affected_ranges) == 1:
+                chosen_range = filtered_affected_ranges[0]
+        else:
+            for affected_range in filtered_affected_ranges:
+                if self._component_version_in_range(component_version, affected_range):
+                    chosen_range = affected_range
+                    break
+        if chosen_range is None:
+            return None
+        return self._build_message(chosen_range)
 
     def _convert_dependency_track_finding_to_dojo_finding(self, dependency_track_finding, test):
         """
@@ -179,6 +249,7 @@ class DependencyTrackParser:
             test=test,
             cwe=cwe,
             description=vulnerability_description,
+            mitigation=self._derive_mitigation_from_affected_versions(dependency_track_finding),
             severity=vulnerability_severity,
             false_p=is_false_positive,
             component_name=component_name,

@@ -121,8 +121,8 @@ class UpdateImportHistoryTests(TransactionTestCase):
         new_findings = self._create_findings(9)
         bad = self._create_findings(1)[0]
 
-        # Patch the existence filter to return all findings as-if they exist, then delete to simulate race after check
-        with patch("dojo.finding.helper.filter_findings_by_existence", side_effect=lambda lst: lst):
+        # Patch the existence check to report nothing deleted, then delete to simulate race after check
+        with patch("dojo.finding.helper.deleted_finding_ids", return_value=set()):
             bad_id = bad.id
             Finding.objects.filter(id=bad_id).delete()
             test_import = self.importer.update_import_history(new_findings=[*new_findings, bad])
@@ -138,7 +138,7 @@ class UpdateImportHistoryTests(TransactionTestCase):
 
         # Delete a finding in the second batch (index 150) after the existence check
         bad = new_findings[150]
-        with patch("dojo.finding.helper.filter_findings_by_existence", side_effect=lambda lst: lst):
+        with patch("dojo.finding.helper.deleted_finding_ids", return_value=set()):
             Finding.objects.filter(id=bad.id).delete()
             test_import = self.importer.update_import_history(new_findings=new_findings)
 

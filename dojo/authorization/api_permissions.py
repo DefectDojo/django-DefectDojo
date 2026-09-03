@@ -34,6 +34,10 @@ from dojo.models import (
     Test,
 )
 
+# Imported from the leaf module (not dojo.models) to avoid a circular import during
+# dojo.models loading, matching how Location is imported above.
+from dojo.product_attributes.models import Product_Lifecycle, Product_Origin, Product_Platform
+
 
 def check_post_permission(
     request: Request,
@@ -1107,6 +1111,38 @@ class UserHasDevelopmentEnvironmentPermission(BaseDjangoModelPermission):
     # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L93
     # It looks like view permission was explicitly not supported, so I assume
     # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductPlatformPermission(BaseDjangoModelPermission):
+    django_model = Product_Platform
+    # Reads are open to any authenticated user (the asset form and asset views need to
+    # render the option labels). Writes require the configuration permission.
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductLifecyclePermission(BaseDjangoModelPermission):
+    django_model = Product_Lifecycle
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductOriginPermission(BaseDjangoModelPermission):
+    django_model = Product_Origin
     request_method_permission_map = {
         "POST": "add",
         "PUT": "change",
