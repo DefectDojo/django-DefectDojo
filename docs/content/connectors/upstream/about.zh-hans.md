@@ -84,6 +84,7 @@ DefectDojo 允许用户构建复杂的 API 集成，并让用户完全掌控其�
 * **Quay**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **runZero**
 * **Semgrep**
 * **ServiceNow CMDB**

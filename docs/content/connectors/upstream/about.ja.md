@@ -84,6 +84,7 @@ DefectDojo を使用すると、洗練された API 連携を構築でき、脆�
 * **Quay**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **runZero**
 * **Semgrep**
 * **ServiceNow CMDB**

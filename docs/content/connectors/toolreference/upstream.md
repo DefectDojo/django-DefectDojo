@@ -134,6 +134,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, JSM Assets, and ServiceNow C
 - [Qwiet AI](/connectors/toolreference/qwiet_ai/)
 - [Rapid7 InsightAppSec](/connectors/toolreference/rapid7_insightappsec/)
 - [Rapid7 InsightVM](/connectors/toolreference/rapid7_insightvm/)
+- [Rapid7 InsightVM - Cloud Instance](/connectors/toolreference/rapid7_insightvm_cloud/)
 - [Red Hat Satellite](/connectors/toolreference/red_hat_satellite/)
 - [runZero](/connectors/toolreference/runzero/)
 - [Scantist](/connectors/toolreference/scantist/)
