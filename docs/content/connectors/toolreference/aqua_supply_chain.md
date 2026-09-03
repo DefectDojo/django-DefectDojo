@@ -26,7 +26,7 @@ Each repository in the tenant becomes a Record. A repository that disappears fro
 A repository's default branch is always imported. Two optional fields extend this:
 
 - **Branch**: an exact branch name, or a `*` wildcard family such as `release/*`. It adds matching branches on top of the default branch.
-- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. When this is off, all selected branches import into the Record's default engagement.
+- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding. When this is off, all selected branches import into the Record's default engagement.
 
 This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua has scanned is imported.
 
