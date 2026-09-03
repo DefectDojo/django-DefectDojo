@@ -1,0 +1,5 @@
+Library,Version,Ecosystem,Vulnerabilities,Can Seal,Sealed Version,Score
+log4j-core,2.14.1,Maven,CVE-2021-44228,TRUE,2.14.1+sp1,10.0
+requests,2.19.1,PyPI,CVE-2018-18074,TRUE,2.19.1+sp1,7.5
+lodash,4.17.15,NPM,CVE-2020-8203,TRUE,4.17.15-sp1,5.6
+tar,4.4.10,NPM,CVE-2021-32803,FALSE,,3.1

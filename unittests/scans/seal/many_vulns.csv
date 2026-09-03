@@ -1,0 +1,6 @@
+Library,Version,Ecosystem,Vulnerabilities,Can Seal,Sealed Version
+lodash,4.17.15,NPM,CVE-2021-23337|CVE-2020-8203,TRUE,4.17.15-sp1
+django,3.2.4,PyPI,CVE-2021-33203|CVE-2021-33571|GHSA-jrh2-hc4r-7jrq,TRUE,3.2.4+sp1
+org.apache.commons:commons-lang3,3.9,Maven,CVE-2025-48924,FALSE,
+github.com/gin-gonic/gin,1.7.7,GO,CVE-2023-26125,TRUE,1.7.7+sp1
+requests,2.19.1,PyPI,CVE-2018-18074,TRUE,
