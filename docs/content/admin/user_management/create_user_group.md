@@ -27,7 +27,7 @@ From the sidebar, navigate to 👤**Users \> Groups** to see a list of all activ
 From here, you can create, delete or view your individual Group pages.
 
 For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users, the Pro UI's All Groups has a few additional options.
-* You can filter this table by Group Name, Description, E-mail Address, Global Role, as well as the total number of Users, Organizations, and Assets associated with the Group.
+* You can filter this table by Group Name, Description, Email Address, Global Role, as well as the total number of Users, Organizations, and Assets associated with the Group.
 * You can also adjust a Group's Permissions or other settings by clicking the "⋮" button next to the Group you wish to edit.
 
 ![image](images/all_groups_pro.png)

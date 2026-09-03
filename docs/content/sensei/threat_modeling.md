@@ -26,7 +26,7 @@ Nothing is installed and no repository is connected. Threat modeling reads only 
 
 ## Generating a threat model
 
-Choose **New threat model**, pick the Asset, give it a name, and supply the design in whichever form you have it:
+Choose **New Threat Model**, pick the Asset, give it a name, and supply the design in whichever form you have it:
 
 - **Paste the description** directly, or
 - **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` or `.pdf`. Text extraction from PDF is best-effort; if a PDF is mostly images, paste the text instead.

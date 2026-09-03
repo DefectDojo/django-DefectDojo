@@ -27,7 +27,7 @@ Es wird nichts installiert und kein Repository verbunden. Threat Modeling liest 
 
 ## Ein Bedrohungsmodell erstellen
 
-Wählen Sie **New threat model**, wählen Sie das Produkt aus, vergeben Sie einen Namen und liefern Sie den Entwurf in der Form, in der er vorliegt:
+Wählen Sie **New Threat Model**, wählen Sie das Produkt aus, vergeben Sie einen Namen und liefern Sie den Entwurf in der Form, in der er vorliegt:
 
 - **Fügen Sie die Beschreibung** direkt ein, oder
 - **Laden Sie ein Design-Dokument hoch** — `.md`, `.markdown`, `.txt`, `.text` oder `.pdf`. Die Textextraktion aus PDF erfolgt nach bestem Bemühen; besteht ein PDF größtenteils aus Bildern, fügen Sie den Text stattdessen direkt ein.

@@ -118,7 +118,7 @@ So DefectDojo receives push, merge-request, and comment events, add a webhook to
 
 Leave SSL verification enabled, click **Add webhook**, then use **Test → Push events** to confirm DefectDojo responds with **HTTP 200**.
 
-After connecting, click **Choose projects** and continue with [Select repositories](#select-repositories); onboarding, configuration, and scanning work the same as GitHub.
+After connecting, click **Choose Projects** and continue with [Select repositories](#select-repositories); onboarding, configuration, and scanning work the same as GitHub.
 
 > **GitLab equivalents:** where this guide says *pull request*, GitLab uses a **merge request**; the pull-request **status check** is posted as a GitLab **commit status** on the merge request's head commit.
 
@@ -177,7 +177,7 @@ Add a webhook to **each** Bitbucket repository (**Repository settings → Webhoo
 - **Secret:** the webhook secret shown on the page (used for HMAC-SHA256 `X-Hub-Signature` verification).
 - **Triggers:** **Repository push**, **Pull request** (created, updated, merged, declined), and **Pull request comment created** (for `/fix` comments).
 
-After connecting, click **Choose repositories** and continue with [Select repositories](#select-repositories).
+After connecting, click **Choose Repositories** and continue with [Select repositories](#select-repositories).
 
 > **Bitbucket specifics:** repositories are addressed as `workspace/repo` (Cloud) or `PROJECTKEY/repo` (Server). The pull-request **status check** is posted as a Bitbucket **build status** on the head commit. OAuth is the recommended method because it is user-context (no workspace/username quirks) and refreshes automatically; app passwords are deprecated and not supported.
 
@@ -213,7 +213,7 @@ Azure DevOps authenticates its **Service Hooks** with HTTP Basic, and uses **one
 - **URL:** the webhook URL shown on the connection screen (`https://<your-defectdojo-host>/sensei/azure/webhooks`).
 - **Basic authentication username / password:** the values shown on the page.
 
-After connecting, click **Choose repositories** and continue with [Select repositories](#select-repositories).
+After connecting, click **Choose Repositories** and continue with [Select repositories](#select-repositories).
 
 > **Azure DevOps specifics:** repositories are addressed as `project/repo` (the organization is stored on the connection). The pull-request **status check** is posted as a Git **commit status** on the head commit.
 

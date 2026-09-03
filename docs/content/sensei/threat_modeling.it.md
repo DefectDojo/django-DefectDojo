@@ -27,7 +27,7 @@ Non viene installato nulla e non viene collegato alcun repository. Threat modeli
 
 ## Generare un modello di minaccia
 
-Scegli **New threat model**, seleziona il Prodotto, assegnagli un nome e fornisci il design nel formato che hai a disposizione:
+Scegli **New Threat Model**, seleziona il Prodotto, assegnagli un nome e fornisci il design nel formato che hai a disposizione:
 
 - **Incolla la descrizione** direttamente, oppure
 - **Carica un documento di progettazione** — `.md`, `.markdown`, `.txt`, `.text` o `.pdf`. L'estrazione del testo dai PDF è best-effort; se un PDF è composto per lo più da immagini, incolla invece il testo.
