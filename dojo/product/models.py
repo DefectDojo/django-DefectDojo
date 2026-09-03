@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
-from tagulous.models import TagField
+from django_tagulous.models import TagField
 
 from dojo.base_models.base import BaseModel
 

@@ -897,7 +897,7 @@ INSTALLED_APPS = (
     "django_celery_results",
     "drf_spectacular",
     "drf_spectacular_sidecar",  # required for Django collectstatic discovery
-    "tagulous",
+    "django_tagulous",  # app_label stays "tagulous" (DB tables/static paths unaffected)
     "fontawesomefree",
     "django_filters",
     "auditlog",
@@ -2103,10 +2103,10 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 QUALYS_WAS_UNIQUE_ID = False
 
 SERIALIZATION_MODULES = {
-    "xml": "tagulous.serializers.xml_serializer",
-    "json": "tagulous.serializers.json",
-    "python": "tagulous.serializers.python",
-    "yaml": "tagulous.serializers.pyyaml",
+    "xml": "django_tagulous.serializers.xml_serializer",
+    "json": "django_tagulous.serializers.json",
+    "python": "django_tagulous.serializers.python",
+    "yaml": "django_tagulous.serializers.pyyaml",
 }
 
 # There seems to be no way just use the default and just leave out jquery, so we have to copy...
