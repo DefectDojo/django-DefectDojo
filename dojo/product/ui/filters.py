@@ -20,6 +20,11 @@ from dojo.location.feature import locations_enabled
 from dojo.location.status import ProductLocationStatus
 from dojo.models import Product, Product_Type
 from dojo.product.queries import get_authorized_products
+from dojo.product_attributes.choices import (
+    lifecycle_value_choices,
+    origin_value_choices,
+    platform_value_choices,
+)
 from dojo.product_type.queries import get_authorized_product_types
 
 labels = get_labels()
@@ -90,9 +95,9 @@ class ProductFilterHelper(FilterSet):
     name = CharFilter(lookup_expr="icontains", label=labels.ASSET_FILTERS_NAME_LABEL)
     name_exact = CharFilter(field_name="name", lookup_expr="iexact", label=labels.ASSET_FILTERS_NAME_EXACT_LABEL)
     business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES, null_label="Empty")
-    platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES, null_label="Empty")
-    lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, null_label="Empty")
-    origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES, null_label="Empty")
+    platform = MultipleChoiceFilter(field_name="platform__value", choices=platform_value_choices, null_label="Empty")
+    lifecycle = MultipleChoiceFilter(field_name="lifecycle__value", choices=lifecycle_value_choices, null_label="Empty")
+    origin = MultipleChoiceFilter(field_name="origin__value", choices=origin_value_choices, null_label="Empty")
     external_audience = BooleanFilter(field_name="external_audience")
     internet_accessible = BooleanFilter(field_name="internet_accessible")
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag contains")
@@ -135,9 +140,9 @@ class ProductFilterHelper(FilterSet):
             ("name_exact", "name_exact"),
             ("prod_type__name", "prod_type__name"),
             ("business_criticality", "business_criticality"),
-            ("platform", "platform"),
-            ("lifecycle", "lifecycle"),
-            ("origin", "origin"),
+            ("platform__name", "platform"),
+            ("lifecycle__name", "lifecycle"),
+            ("origin__name", "origin"),
             ("external_audience", "external_audience"),
             ("internet_accessible", "internet_accessible"),
             ("findings_count", "findings_count"),

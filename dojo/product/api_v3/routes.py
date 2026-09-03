@@ -59,7 +59,16 @@ from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.api_v3.writes import bind_payload, split_extras
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_User, Endpoint, Product, Product_Type, SLA_Configuration
+from dojo.models import (
+    Dojo_User,
+    Endpoint,
+    Product,
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
+    Product_Type,
+    SLA_Configuration,
+)
 from dojo.product.api_v3.schemas import (
     AssetDetail,
     AssetReplace,
@@ -110,6 +119,21 @@ _USER_FK_FIELDS = {
 # Sentinel distinguishing "tags omitted" from "tags set to null/empty" on PATCH.
 _UNSET = object()
 
+# Wire write-field -> editable option model. These arrive as the option's ``value`` string
+# and are resolved to the FK row (mirrors the v2 SlugRelatedField(slug_field="value")).
+_OPTION_FK_FIELDS = {
+    "platform": Product_Platform,
+    "lifecycle": Product_Lifecycle,
+    "origin": Product_Origin,
+}
+
+
+def _resolve_option(field: str, model: type, value: str):
+    option = model.objects.filter(value=value).first()
+    if option is None:
+        raise validation_problem({field: [f"{field} '{value}' is not a valid option"]})
+    return option
+
 
 # Derived from the row schema so a factory called with ``schema=<subclass>`` documents what it
 # serves (I4). See ``dojo/api_v3/pagination.py::list_envelope``.
@@ -158,6 +182,10 @@ def _apply_optional_relations_and_scalars(instance: Product, data: dict) -> None
             if sla is None:
                 raise validation_problem({"sla_configuration": [f"SLA configuration {pk} does not exist"]})
             instance.sla_configuration = sla
+    for wire_field, model in _OPTION_FK_FIELDS.items():
+        if wire_field in data:
+            value = data.pop(wire_field)
+            setattr(instance, wire_field, _resolve_option(wire_field, model, value) if value is not None else None)
     for key, value in data.items():
         setattr(instance, key, value)
 

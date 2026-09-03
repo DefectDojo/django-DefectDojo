@@ -382,6 +382,11 @@ from dojo.engagement.models import (  # noqa: E402 -- re-export; class-body FKs 
     Engagement,
     Engagement_Presets,  # noqa: F401 -- re-export
 )
+from dojo.product_attributes.models import (  # noqa: E402, F401 -- re-export; Product FKs below reference these
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
+)
 
 
 class Sonarqube_Issue(models.Model):
