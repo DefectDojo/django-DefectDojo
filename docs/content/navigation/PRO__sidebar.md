@@ -90,7 +90,7 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 
 | Group | What it holds |
 | --- | --- |
-| **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail |
+| **System** | System Settings, Appearance, Announcement Banner, Login Banner, Email |
 | **UI Defaults** | Form Configuration, Layout Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | The three Deduplication pages, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
@@ -141,7 +141,7 @@ If you are used to the previous layout:
 | Settings → Pro Settings → Appearance | Settings → System → Appearance |
 | Settings → Pro Settings → Banner Settings → Announcement Banner Settings | Settings → System → Announcement Banner |
 | Settings → Pro Settings → Banner Settings → Login Banner Settings | Settings → System → Login Banner |
-| Settings → Pro Settings → E-mail Settings | Settings → System → E-mail |
+| Settings → Pro Settings → Email Settings | Settings → System → Email |
 | Settings → Users → All Users / New User | Settings → Users & Permissions → Users |
 | Settings → Users → All Groups / New Group | Settings → Users & Permissions → Groups |
 | Settings → Users → Roles | Settings → Users & Permissions → Roles |

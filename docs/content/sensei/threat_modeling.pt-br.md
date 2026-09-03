@@ -27,7 +27,7 @@ Nada é instalado e nenhum repositório é conectado. A modelagem de ameaças l�
 
 ## Gerando um modelo de ameaças
 
-Escolha **New threat model**, selecione o produto, dê um nome a ele e forneça o design na forma que você tiver:
+Escolha **New Threat Model**, selecione o produto, dê um nome a ele e forneça o design na forma que você tiver:
 
 - **Cole a descrição** diretamente, ou
 - **Faça upload de um documento de design** — `.md`, `.markdown`, `.txt`, `.text` ou `.pdf`. A extração de texto de PDF é feita em base de melhor esforço; se um PDF for majoritariamente composto de imagens, cole o texto em vez disso.

@@ -27,7 +27,7 @@ No se instala nada ni se conecta ningún repositorio. El modelado de amenazas so
 
 ## Generar un modelo de amenazas
 
-Elija **New threat model**, seleccione el producto, asígnele un nombre y proporcione el diseño en el formato que tenga disponible:
+Elija **New Threat Model**, seleccione el producto, asígnele un nombre y proporcione el diseño en el formato que tenga disponible:
 
 - **Paste the description** directamente, o
 - **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` o `.pdf`. La extracción de texto desde PDF es best-effort; si un PDF es mayormente imágenes, pegue el texto en su lugar.
