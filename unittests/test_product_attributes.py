@@ -11,9 +11,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.models import Product, Product_Lifecycle, Product_Origin, Product_Platform, Product_Type, SLA_Configuration
-from unittests.dojo_test_case import DojoAPITestCase
+from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
 
+@versioned_fixtures
 @override_settings(SECURE_SSL_REDIRECT=False)
 class ProductAttributeModelTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
@@ -24,6 +25,7 @@ class ProductAttributeModelTest(DojoAPITestCase):
         self.assertEqual(Product_Origin.objects.filter(value="internal").first().name, "Internally Developed")
 
 
+@versioned_fixtures
 @override_settings(SECURE_SSL_REDIRECT=False)
 class ProductAttributeApiTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]

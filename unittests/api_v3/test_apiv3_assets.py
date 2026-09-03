@@ -6,7 +6,7 @@ from unittest import mock
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
-from dojo.models import Dojo_User, Product, Product_Type, User
+from dojo.models import Dojo_User, Product, Product_Lifecycle, Product_Origin, Product_Platform, Product_Type, User
 
 from .base import ApiV3TestCase
 
@@ -116,7 +116,7 @@ class TestApiV3AssetsWrite(ApiV3TestCase):
         self.assertEqual("v3 created asset", body["name"])
         self.assertEqual(pt.id, body["organization"]["id"])
         created = Product.objects.get(name="v3 created asset")
-        self.assertEqual("production", created.lifecycle)
+        self.assertEqual("production", created.lifecycle.value)
         self.assertEqual({"pci", "v3"}, {t.name for t in created.tags.all()})
 
     def test_create_missing_required_is_400(self):
@@ -168,6 +168,11 @@ class TestApiV3AssetsReplace(ApiV3TestCase):
         pt = Product_Type.objects.first()
         defaults = {"name": "v3 put asset", "description": "old", "prod_type": pt, "sla_configuration_id": 1}
         defaults.update(kwargs)
+        # platform/lifecycle/origin are FKs to editable option tables; resolve any value string
+        # kwarg to its option row (mirrors the API's SlugRelatedField(slug_field="value")).
+        for field, model in (("platform", Product_Platform), ("lifecycle", Product_Lifecycle), ("origin", Product_Origin)):
+            if isinstance(defaults.get(field), str):
+                defaults[field] = model.objects.get(value=defaults[field])
         return Product.objects.create(**defaults), pt
 
     def test_put_full_replace_resets_omitted_optionals(self):
