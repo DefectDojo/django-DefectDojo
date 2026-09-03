@@ -9,7 +9,7 @@ from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django_extensions.db.models import TimeStampedModel
-from tagulous.models import TagField
+from django_tagulous.models import TagField
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

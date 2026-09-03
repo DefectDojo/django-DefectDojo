@@ -186,17 +186,42 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     new_state_finding.last_status_update = now
 
 
-def filter_finding_ids_by_existence(finding_ids):
-    """
-    Return the subset of the given ids that still exist in the database.
+# Bounds the IN clause of the existence lookup below. An import's result set is not
+# bounded by anything else, so without this a large scan asks the database about tens of
+# thousands of ids in one statement.
+FINDING_EXISTENCE_CHUNK = 1000
 
-    Centralized helper used by importers to avoid FK violations during
-    bulk_create -- e.g. a background async_dupe_delete task removing a finding
-    between when an importer collected it and when it writes a history record.
+
+def deleted_finding_ids(finding_ids) -> set[int]:
     """
+    Of the given finding ids, the ones whose row is no longer in the database.
+
+    The single place that answers "which of these findings are gone", for every caller
+    holding finding references across a window in which a finding can be deleted --
+    import history records, the child-row buffers flushed at an import batch boundary,
+    and anything else that would otherwise insert a dangling reference or re-save a
+    deleted row. Those references are only rejected at COMMIT (Django declares its
+    foreign keys DEFERRABLE INITIALLY DEFERRED), far from the code that wrote them, so
+    the check has to happen before the write rather than around it.
+
+    Returns the missing ids rather than the survivors: it is the smaller set, and every
+    caller wants it to skip work rather than to drive it. Costs one indexed primary-key
+    lookup per FINDING_EXISTENCE_CHUNK ids, and no query at all for an empty input.
+
+    Note for callers that already read rows for these findings: existence falls out of
+    any such read for free (see _sync_close_old_finding_status_fields, which learns it
+    from the refresh it needs anyway). Do not route those through here -- it buys
+    consistency with an extra round trip.
+    """
+    finding_ids = {finding_id for finding_id in finding_ids if finding_id is not None}
     if not finding_ids:
         return set()
-    return set(Finding.objects.filter(id__in=finding_ids).values_list("id", flat=True))
+    live_finding_ids: set[int] = set()
+    for chunk in batched(finding_ids, FINDING_EXISTENCE_CHUNK, strict=False):
+        live_finding_ids.update(
+            Finding.objects.filter(pk__in=chunk).values_list("pk", flat=True),
+        )
+    return finding_ids - live_finding_ids
 
 
 def can_edit_mitigated_data(user):

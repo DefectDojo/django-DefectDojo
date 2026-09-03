@@ -369,15 +369,15 @@
           </tr>
           <tr>
             <td><strong>{% trans "Platform" %}</strong></td>
-            <td>{{ prod.get_platform_display|notspecified }}</td>
+            <td>{{ prod.platform.name|notspecified }}</td>
           </tr>
           <tr>
             <td><strong>{% trans "Lifecycle" %}</strong></td>
-            <td>{{ prod.get_lifecycle_display|notspecified }}</td>
+            <td>{{ prod.lifecycle.name|notspecified }}</td>
           </tr>
           <tr>
             <td><strong>{% trans "Origin" %}</strong></td>
-            <td>{{ prod.get_origin_display|notspecified }}</td>
+            <td>{{ prod.origin.name|notspecified }}</td>
           </tr>
           <tr>
             <td><strong>{% trans "User Records" %}</strong></td>
