@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Self
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
 from django.core.validators import MinLengthValidator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import (
     CASCADE,
     RESTRICT,
@@ -410,6 +410,20 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         msg = "Subclasses must implement get_or_create_from_object"
         raise NotImplementedError(msg)
 
+    # Upper bound on the concurrent-writer recovery retries in
+    # bulk_get_or_create. Each pass shrinks the batch to only the rows still
+    # missing, so the loop makes progress every iteration; the cap guards
+    # against pathological churn rather than being expected to be reached.
+    _BULK_CREATE_MAX_ATTEMPTS = 3
+
+    @classmethod
+    def _existing_by_identity_hash(cls, hashes: list[str]) -> dict[str, Self]:
+        """Map identity_hash -> already-saved instance for the given hashes."""
+        return {
+            obj.identity_hash: obj
+            for obj in cls.objects.filter(identity_hash__in=hashes).select_related("location")
+        }
+
     @classmethod
     def bulk_get_or_create(cls, locations: Iterable[Self]) -> list[Self]:
         """
@@ -419,6 +433,11 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         bulk_create for both the parent Location rows and the subtype rows.
         Returns the full list of saved instances (existing + newly created),
         in the same order as the input. Duplicate inputs map to the same saved instance.
+
+        identity_hash is a global singleton, so two imports that reference the same
+        package (Dependency) or endpoint (URL) race to create the same row. Creation
+        tolerates that race — see ``_bulk_create_tolerating_races`` — rather than
+        letting one importer abort the other's whole scan import.
         """
         if not locations:
             return []
@@ -435,51 +454,106 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             hashes.append(loc.identity_hash)
 
         # Look up existing objects, grouping by hash
-        existing_by_hash = {
-            obj.identity_hash: obj
-            for obj in cls.objects.filter(identity_hash__in=hashes).select_related("location")
-        }
+        existing_by_hash = cls._existing_by_identity_hash(hashes)
 
-        # Create the list of new locations to create
-        new_locations = []
+        # Determine which locations still need creating, deduplicated by hash.
+        to_create: dict[str, Self] = {}
         for loc in locations:
-            if loc.identity_hash not in existing_by_hash:
-                new_locations.append(loc)
-                # Mark it so we don't try to create duplicates within the same batch
-                existing_by_hash[loc.identity_hash] = loc
-            else:
+            if loc.identity_hash in existing_by_hash:
                 # Preserve association data from the input onto the existing saved object, in case we're associating
                 # existing locations with findings/products
                 saved = existing_by_hash[loc.identity_hash]
                 if hasattr(loc, "_association_data") and not hasattr(saved, "_association_data"):
                     saved._association_data = loc._association_data
+            elif loc.identity_hash not in to_create:
+                # First occurrence of a not-yet-persisted hash in this batch
+                to_create[loc.identity_hash] = loc
 
-        # Create 'em
-        if new_locations:
-            location_type = cls.get_location_type()
-            with transaction.atomic():
-                # Bulk create parent Locations
-                parents = [
-                    Location(
-                        location_type=location_type,
-                        location_value=loc.get_location_value(),
-                    )
-                    for loc in new_locations
-                ]
-                Location.objects.bulk_create(parents, batch_size=1000)
-                # Assign Location FKs to the subtypes, then bulk create them.
-                for loc, parent in zip(new_locations, parents, strict=True):
-                    loc.location_id = parent.id
-                    loc.location = parent
-                # Note: there is a subtle potential race condition here, if somehow one of the locations to be created
-                # has already been created, e.g. by a separate thread that commits while this thread is running. Setting
-                # `ignore_conflicts=True` here would prevent this step from raising an IntegrityError, but would leave
-                # dangling parent Location objects that were created above. Rather than performing a cleanup in that
-                # (unlikely?) case, just allow the transaction to rollback.
-                cls.objects.bulk_create(new_locations, batch_size=1000)
+        # Create 'em (tolerating a concurrent writer that beats us to some rows)
+        if to_create:
+            existing_by_hash.update(cls._bulk_create_tolerating_races(to_create))
 
         # Return in input order
         return [existing_by_hash[h] for h in hashes]
+
+    @classmethod
+    def _bulk_create_tolerating_races(cls, to_create: dict[str, Self]) -> dict[str, Self]:
+        """
+        Bulk create the given subtype rows (keyed by identity_hash), tolerating a
+        concurrent writer that commits some of the same identity_hashes first.
+
+        Parent Location rows and their subtype rows are created together inside a
+        savepoint. A unique-constraint collision aborts the whole INSERT, so the
+        savepoint rolls back — the batch's parent Locations included, leaving no
+        orphaned rows — and the enclosing transaction stays usable. We then
+        re-resolve the rows the concurrent writer committed, drop them from the
+        batch, and retry only the genuine remainder.
+
+        Without this, one racing import raised IntegrityError out of the whole
+        persist() and aborted the entire scan import: identity_hash is a global
+        singleton, so two imports referencing the same package collide routinely.
+        """
+        location_type = cls.get_location_type()
+        resolved: dict[str, Self] = {}
+        remaining = dict(to_create)
+
+        for _attempt in range(cls._BULK_CREATE_MAX_ATTEMPTS):
+            batch = list(remaining.values())
+            try:
+                with transaction.atomic():
+                    # Bulk create parent Locations
+                    parents = [
+                        Location(
+                            location_type=location_type,
+                            location_value=loc.get_location_value(),
+                        )
+                        for loc in batch
+                    ]
+                    Location.objects.bulk_create(parents, batch_size=1000)
+                    # Assign Location FKs to the subtypes, then bulk create them.
+                    for loc, parent in zip(batch, parents, strict=True):
+                        loc.location_id = parent.id
+                        loc.location = parent
+                    cls.objects.bulk_create(batch, batch_size=1000)
+            except IntegrityError:
+                # A concurrent writer committed one or more of these between our
+                # existence check and this INSERT. Re-resolve those, carry over
+                # their association data, and retry the rest. The savepoint
+                # rollback already discarded this batch's parents, so nothing is
+                # orphaned.
+                remaining = cls._absorb_raced_rows(remaining, resolved)
+                if not remaining:
+                    return resolved
+                continue
+            # No collision: every remaining row was created in this batch.
+            resolved.update(remaining)
+            return resolved
+
+        # Retries exhausted (persistent contention). Resolve whatever now exists
+        # so callers still get saved instances; only a hash that is genuinely
+        # still absent is a real failure.
+        remaining = cls._absorb_raced_rows(remaining, resolved)
+        if remaining:
+            error_message = (
+                f"Could not persist {cls.__name__} rows for identity_hashes: {sorted(remaining)}"
+            )
+            raise IntegrityError(error_message)
+        return resolved
+
+    @classmethod
+    def _absorb_raced_rows(cls, remaining: dict[str, Self], resolved: dict[str, Self]) -> dict[str, Self]:
+        """
+        Move rows a concurrent writer already committed out of ``remaining`` and
+        into ``resolved`` (carrying the input's association data onto the fetched
+        instance), and return the hashes still needing creation.
+        """
+        now_existing = cls._existing_by_identity_hash(list(remaining))
+        for identity_hash, saved in now_existing.items():
+            source = remaining[identity_hash]
+            if hasattr(source, "_association_data") and not hasattr(saved, "_association_data"):
+                saved._association_data = source._association_data
+        resolved.update(now_existing)
+        return {h: loc for h, loc in remaining.items() if h not in now_existing}
 
 
 class ReferenceDataMixin(Model):
