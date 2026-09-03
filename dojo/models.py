@@ -378,15 +378,15 @@ class Network_Locations(models.Model):
 
 from dojo.development_environment.models import Development_Environment  # noqa: E402, F401 -- re-export
 from dojo.endpoint.models import Endpoint, Endpoint_Params, Endpoint_Status  # noqa: E402, F401 -- re-export
-from dojo.product_attributes.models import (  # noqa: E402, F401 -- re-export; Product FKs below reference these
-    Product_Lifecycle,
-    Product_Origin,
-    Product_Platform,
-)
 from dojo.engagement.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
     ENGAGEMENT_STATUS_CHOICES,  # noqa: F401 -- re-export
     Engagement,
     Engagement_Presets,  # noqa: F401 -- re-export
+)
+from dojo.product_attributes.models import (  # noqa: E402, F401 -- re-export; Product FKs below reference these
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
 )
 
 

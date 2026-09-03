@@ -1,4 +1,5 @@
-"""Classic (Django-rendered) CRUD for the three asset attribute lookup tables.
+"""
+Classic (Django-rendered) CRUD for the three asset attribute lookup tables.
 
 The rich editor lives in the Vue Pro UI; these views give open-source installs and
 admins a functional fallback, mirroring the Development_Environment ("Environments")
@@ -82,6 +83,7 @@ def _list(request, kind):
 
 def _add(request, kind):
     cfg = _CONFIG[kind]
+    user_has_configuration_permission_or_403(request.user, f"dojo.add_{cfg['model_name']}")
     form = cfg["form"]()
     if request.method == "POST":
         form = cfg["form"](request.POST)
@@ -105,6 +107,7 @@ def _edit(request, kind, pk):
     edit_key = f"edit_{cfg['model_name']}"
     delete_key = f"delete_{cfg['model_name']}"
     if request.method == "POST" and request.POST.get(edit_key):
+        user_has_configuration_permission_or_403(request.user, f"dojo.change_{cfg['model_name']}")
         form = cfg["form"](request.POST, instance=option)
         if form.is_valid():
             form.save()

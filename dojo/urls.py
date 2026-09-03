@@ -41,8 +41,6 @@ from dojo.components.urls import urlpatterns as component_urls
 from dojo.decorators import dojo_ratelimit
 from dojo.development_environment.api.urls import add_development_environment_urls
 from dojo.development_environment.ui.urls import urlpatterns as dev_env_urls
-from dojo.product_attributes.api.urls import add_product_attribute_urls
-from dojo.product_attributes.ui.urls import urlpatterns as product_attribute_urls
 from dojo.endpoint.api.urls import add_endpoint_urls, register_endpoint_meta_import
 from dojo.endpoint.ui.urls import urlpatterns as endpoint_urls
 from dojo.engagement.api.urls import add_engagement_urls
@@ -66,6 +64,8 @@ from dojo.object.ui.urls import urlpatterns as object_urls
 from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.product.api.urls import add_product_urls
+from dojo.product_attributes.api.urls import add_product_attribute_urls
+from dojo.product_attributes.ui.urls import urlpatterns as product_attribute_urls
 from dojo.product_type.api.urls import add_product_type_urls
 from dojo.regulations.api.urls import add_regulations_urls
 from dojo.regulations.ui.urls import urlpatterns as regulations

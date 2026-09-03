@@ -1,4 +1,5 @@
-"""Tests for the editable Asset attribute lookup tables (platform/lifecycle/origin).
+"""
+Tests for the editable Asset attribute lookup tables (platform/lifecycle/origin).
 
 Covers the models and their seeded defaults, the /api/v2 CRUD endpoints (including the immutability
 of ``value``), and that the Product API keeps exposing/accepting the option's ``value`` string via
@@ -10,7 +11,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.models import Product, Product_Lifecycle, Product_Origin, Product_Platform, Product_Type, SLA_Configuration
-
 from unittests.dojo_test_case import DojoAPITestCase
 
 

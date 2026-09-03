@@ -1,4 +1,5 @@
-"""Lazy choice callables for the Product platform/lifecycle/origin filters.
+"""
+Lazy choice callables for the Product platform/lifecycle/origin filters.
 
 Passed as ``choices=`` to django-filter ``MultipleChoiceFilter``s so the option lists are
 read from the database at request time (never at import time, which would break app

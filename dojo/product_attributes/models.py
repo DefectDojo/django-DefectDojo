@@ -1,4 +1,5 @@
-"""Editable lookup tables for the Asset/Product ``platform``, ``lifecycle`` and
+"""
+Editable lookup tables for the Asset/Product ``platform``, ``lifecycle`` and
 ``origin`` fields.
 
 These three fields used to be fixed ``CharField(choices=...)`` enums on
@@ -21,6 +22,7 @@ from django.urls import reverse
 
 
 class ProductAttributeOption(models.Model):
+
     """Abstract base for the three asset attribute lookup tables."""
 
     # The reverse() url name of the classic-UI edit view; set by each concrete model.
