@@ -103,7 +103,7 @@ gcloud iam service-accounts add-iam-policy-binding "$SCAN_SA" \
 echo "$SCAN_SA"   # paste this into "Target service account"
 ```
 
-`<DEFECTDOJO_SERVICE_ACCOUNT_EMAIL>` is the identity DefectDojo itself runs as (its GKE Workload Identity or attached GCE service account); ask whoever installed DefectDojo if you are unsure. To scan a whole organization or folder, grant the same two read-only roles at that level instead of per project. The AWS "read-only role" method produces the equivalent Terraform (an IAM role with a web-identity trust policy plus `SecurityAudit` + `ViewOnlyAccess`).
+`<DEFECTDOJO_SERVICE_ACCOUNT_EMAIL>` is the identity DefectDojo itself runs as (its GKE Workload Identity or attached GCE service account). When DefectDojo runs in Google Cloud, the wizard **detects this automatically and fills it in** (it reads the runtime service account from the host metadata server); the placeholder only remains when it cannot be detected, in which case ask whoever installed DefectDojo. To scan a whole organization or folder, grant the same two read-only roles at that level instead of per project. The AWS "read-only role" method produces the equivalent Terraform (an IAM role with a web-identity trust policy plus `SecurityAudit` + `ViewOnlyAccess`); on AWS the wizard shows the account and identity DefectDojo runs as (from STS) as context.
 
 The credential is stored as a small JSON document. The onboarding form assembles it for you from the keyless fields; if you drive the API directly, the shapes are:
 
