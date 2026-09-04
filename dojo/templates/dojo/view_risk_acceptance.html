@@ -81,6 +81,10 @@
                             <i class="fa-solid fa-circle-question has-popover" data-content="Restart SLA for findings when risk acceptance expires?">
                             </i>
                         </th>
+                        <th>Restore Verified
+                            <i class="fa-solid fa-circle-question has-popover" data-content="Mark reactivated findings Verified when risk acceptance expires?">
+                            </i>
+                        </th>
                         <th>Owner</th>
                     </tr>
                     <tr>
@@ -108,6 +112,9 @@
                         </td>
                         <td>
                             {{ risk_acceptance.restart_sla_expired }}
+                        </td>
+                        <td>
+                            {{ risk_acceptance.restore_verified_expired }}
                         </td>
                         <td>{{ risk_acceptance.owner.get_full_name }}</td>
                     </tr>
