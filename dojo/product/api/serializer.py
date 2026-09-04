@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from dojo.authorization.serializer_guards import (
+    ActiveUserContactGuardMixin,
     AuthorizedUsersMemberGuardMixin,
     ToolConfigurationUseGuardMixin,
 )
@@ -19,7 +20,7 @@ class ProductAPIScanConfigurationSerializer(ToolConfigurationUseGuardMixin, seri
         fields = "__all__"
 
 
-class ProductSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
+class ProductSerializer(ActiveUserContactGuardMixin, AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
