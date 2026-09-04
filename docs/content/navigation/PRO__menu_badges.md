@@ -62,7 +62,7 @@ Both are removed in **3.5.0**, along with the API-based (pull) parsers they exis
 
 ![DEPRECATED badges under Settings > Configuration](images/menu_badge_deprecated.png)
 
-Where a label and its badge do not fit side by side in the sidebar, the badge wraps onto its own line beneath the label rather than being truncated.
+A label and its badge always share one line in the sidebar. Where the pair genuinely does not fit, it is the label that gives way (an ellipsis), never the badge dropping onto its own line; the full name still surfaces through the collapsed rail's tooltips and on the page itself.
 
 ## Related
 
