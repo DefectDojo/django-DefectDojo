@@ -32,7 +32,7 @@ Select a tool's row to change its algorithm, its hash fields, or both. Because a
 
 **The two axes behave very differently, and the impact review says which one you are moving.**
 
-- **Changing the algorithm** selects which stored value candidates are looked up by. Nothing is recomputed, and the change decides what the next import compares; existing duplicate links are left exactly as they are. The review warns you when the new algorithm would leave findings with no identity to match on at all — a tool whose findings carry no unique ID matches nothing once the algorithm requires one, and nothing errors when that happens.
+- **Changing the algorithm** selects which stored value candidates are looked up by. Nothing is recomputed, and the change decides what the next import compares; existing duplicate links are left exactly as they are. The review warns you when the new algorithm would leave findings with no identity to match on at all: a tool whose findings carry no unique ID matches nothing once the algorithm requires one, and nothing errors when that happens.
 - **Changing the hash fields** changes the value stored on every finding of that tool, so every hash already stored for it becomes stale. Applying queues a background recompute of the tool's whole backlog. Until that finishes, the tool's findings are hashed under two different definitions and may not match each other. The review tells you how many findings will be recomputed before you commit to it.
 
 Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
@@ -132,7 +132,7 @@ Reimport can completely discard Findings before they are recorded, so Reimport D
 
 ### Track Findings as Locations Change
 
-A tool whose Reimport algorithm is **Hash Code** can also track findings as their locations change. With that enabled, a finding whose location moved between reimports — a line shift or file rename, a URL move, or a dependency version bump — is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
+A tool whose Reimport algorithm is **Hash Code** can also track findings as their locations change. With that enabled, a finding whose location moved between reimports (a line shift or file rename, a URL move, or a dependency version bump) is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
 
 It is off by default and applies only to the Hash Code reimport algorithm (tools with a reliable Unique ID From Tool already track movement through their stable IDs). Tick it in the tool's **Reimport** column on **Settings > Deduplication Settings > Matching Configuration**. Because it changes which fields the reimport hash is built from, applying it re-hashes the tool's existing findings in the background; the impact review tells you how many before you commit.
 
@@ -150,7 +150,7 @@ A common situation when first tuning matching is having a large backlog of Findi
 
 If you make several changes in quick succession, each queues its own job. Allow the previous one to finish before evaluating results, especially when comparing Finding counts before and after.
 
-> **Note for self-hosted Pro:** the job runs in the Celery worker pool. If workers are starved or backlogged, the re-hash takes longer than expected — check worker health if results do not appear within the timeframe you would expect for your instance size.
+> **Note for self-hosted Pro:** the job runs in the Celery worker pool. If workers are starved or backlogged, the re-hash takes longer than expected. Check worker health if results do not appear within the timeframe you would expect for your instance size.
 
 **Changing the algorithm re-hashes nothing**, by design: it selects which already-stored value is compared, so there is nothing to recompute. It decides what the next import compares, and existing duplicate links are left as they are.
 

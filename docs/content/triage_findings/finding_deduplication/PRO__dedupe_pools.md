@@ -84,6 +84,13 @@ Adding members applies to **future imports**. Findings already in DefectDojo are
 
 The acknowledgement is derived from the specific change it describes, so the preview you ran for adding Assets does not authorize a re-run, and a re-run preview goes stale if the pool changes underneath it. Preview the thing you are about to do.
 
+Apply Now runs while you wait, so it is capped at 50,000 Findings across the pool. Above that
+it refuses and tells you the count rather than running past the request. Narrow the pool, or
+contact DefectDojo Support to have the re-run queued in the background.
+
+If deduplication is turned off for the instance, Apply Now reports that nothing was matched and
+points you at System Settings rather than reporting a silent zero.
+
 Reimport offers no Apply Now, for the reason above: pooling for reimport changes which formula a
 reimport uses, not which Findings it compares against, so there is no widened scope to re-run
 over existing Findings. Re-running deduplication across the pool is what the same tool and
