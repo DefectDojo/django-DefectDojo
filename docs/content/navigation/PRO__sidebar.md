@@ -7,7 +7,7 @@ aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar is the application shell: as of DefectDojo Pro 3.3.100 it runs the full height of the window and carries the brand, the search field, the menu, and (at the bottom) your account, alerts and the light/dark switch. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
+The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and (at the bottom) your account, alerts and the light/dark switch. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
 
 The menu groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
 
@@ -55,7 +55,7 @@ Pins are stored per user on the server, so they survive a browser reset and foll
 
 ## Your preferences follow you
 
-The shape you give the shell is stored per user on the server, not just in the browser: pinned pages, folded sections, whether the rail is collapsed, and the light/dark choice (which is shared with the Classic UI, so the two interfaces always agree). Clearing your browser or signing in on a new machine brings it all back on the next sign-in. On the first sign-in after upgrading to this version, whatever shape this browser already had is imported automatically, so nothing resets.
+The shape you give the shell is stored per user on the server, not just in the browser: pinned pages, folded sections, whether the rail is collapsed, and the light/dark choice (which is shared with the Classic UI, so the two interfaces always agree). Clearing your browser or signing in on a new machine brings it all back on the next sign-in. The first time you sign in on an instance that has this, whatever shape your browser already had is imported automatically, so nothing resets.
 
 ## Collapsing the sidebar
 

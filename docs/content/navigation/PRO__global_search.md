@@ -7,7 +7,7 @@ weight: 3
 
 DefectDojo Pro includes a **global search** that looks across your Findings and related objects. It is backed by native Postgres full-text search with fuzzy, typo-tolerant matching, so you can find an object without remembering its exact wording.
 
-As of DefectDojo Pro 3.3.100, data search and menu search share one dialog. **Data Results** are your records: findings, assets, engagements, and the other types listed below. **Navigation Results** are pages: every menu destination your account can reach, searchable by label, position and related vocabulary. See [The Sidebar Menu](/navigation/pro__sidebar/) for how navigation results rank and what they cover.
+Data search and menu search share one dialog. **Data Results** are your records: findings, assets, engagements, and the other types listed below. **Navigation Results** are pages: every menu destination your account can reach, searchable by label, position and related vocabulary. See [The Sidebar Menu](/navigation/pro__sidebar/) for how navigation results rank and what they cover.
 
 ![The Global Search dialog with data and navigation results](images/global_search_dialog.png)
 
