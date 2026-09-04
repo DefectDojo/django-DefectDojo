@@ -343,6 +343,21 @@ The DefectDojo MCP Server provides 14 tools for accessing and analyzing vulnerab
 - **Example:** `["3 - Past 30 days"]`
 - **Usage:** Filter findings by discovery date. Only one value allowed.
 
+**tags** (Optional)
+- **Type:** Array of strings
+- **Example:** `["production", "external"]`
+- **Usage:** Match findings that carry **any** of these exact tags (OR). Combine with the other filters to narrow further.
+
+**tags__and** (Optional)
+- **Type:** Array of strings
+- **Example:** `["production", "pci"]`
+- **Usage:** Match findings that carry **all** of these exact tags (AND).
+
+**not_tags** (Optional)
+- **Type:** Array of strings
+- **Example:** `["wontfix"]`
+- **Usage:** Exclude findings that carry **any** of these exact tags.
+
 **limit** (Optional)
 - **Type:** Number
 - **Default:** 100
@@ -367,6 +382,16 @@ get_findings({
   status: ["Active"],
   date: ["3 - Past 30 days"],
   limit: 100
+})
+```
+
+**User asks:** "Show me active findings tagged both `production` and `pci`"
+
+**LLM calls:**
+```
+get_findings({
+  status: ["Active"],
+  tags__and: ["production", "pci"]
 })
 ```
 
@@ -420,6 +445,23 @@ get_findings({
 - **Example:** `["3 - Past 30 days"]`
 - **Usage:** Restrict the summary to findings discovered in the period.
 
+**tags** (Optional)
+- **Type:** Array of strings
+- **Example:** `["production", "external"]`
+- **Usage:** Restrict the summary to findings that carry **any** of these exact tags (OR).
+
+**tags__and** (Optional)
+- **Type:** Array of strings
+- **Example:** `["production", "pci"]`
+- **Usage:** Restrict the summary to findings that carry **all** of these exact tags (AND).
+
+**not_tags** (Optional)
+- **Type:** Array of strings
+- **Example:** `["wontfix"]`
+- **Usage:** Exclude findings that carry **any** of these exact tags from the summary.
+
+> **ℹ️ Scope required:** Provide at least one scoping filter: `product_id`, `engagement_id`, `date`, `tags`, or `tags__and`. `not_tags` only refines an existing scope.
+
 > **💡 Best Practice:** Use this instead of `get_findings` whenever the question is "how many" or "what is the spread". One summary call replaces paging through findings and counting them, and the counts stay correct beyond the 100-record page limit.
 
 **Example Query:**
@@ -431,6 +473,15 @@ get_findings({
 finding_summary({
   product_id: 42,
   date: ["4 - Past 90 days"]
+})
+```
+
+**User asks:** "What's the severity spread for everything tagged `internet-facing`?"
+
+**LLM calls:**
+```
+finding_summary({
+  tags: ["internet-facing"]
 })
 ```
 
