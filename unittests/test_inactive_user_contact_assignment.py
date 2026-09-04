@@ -1,10 +1,12 @@
+from crum import impersonate
 from django.test import override_settings
 from django.urls import reverse
 from rest_framework import serializers
 
 from dojo.authorization.serializer_guards import CONTACT_FIELDS, ActiveUserContactGuardMixin
 from dojo.models import Dojo_User, Product, Product_Type, User
-from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
+from dojo.product.ui.forms import ProductForm
+from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, versioned_fixtures
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
@@ -218,3 +220,87 @@ class ContactGuardCoverageTest(DojoAPITestCase):
             "these serializers write a contact field without the active-user guard; "
             "add ActiveUserContactGuardMixin, exclude the field, or mark it read_only",
         )
+
+
+@versioned_fixtures
+class ProductFormInactiveContactTest(DojoTestCase):
+
+    """
+    The edit form's dropdowns list active users only, which is the rule this story
+    is about. But a form whose queryset excludes the instance's own value renders
+    it unselected and saves None, so opening and saving an untouched asset deletes
+    the contact. The current value stays selectable; nothing else joins the list.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def run(self, result=None):
+        # ProductForm.__init__ narrows prod_type through get_authorized_product_types,
+        # which reads the acting user from crum. Without a user, Pro's registered auth
+        # filter returns nothing and every form in this class fails on prod_type.
+        with impersonate(self.get_test_admin()):
+            super().run(result)
+
+    def setUp(self):
+        super().setUp()
+        self.prod_type = Product_Type.objects.create(name="IUC Form PT")
+        self.inactive_user = Dojo_User.objects.get(
+            pk=User.objects.create_user(
+                username="iuc_form_inactive",
+                password="not-a-real-secret",  # noqa: S106 - test fixture user
+                is_active=False,
+            ).pk,
+        )
+        self.product = Product.objects.create(
+            name="IUC Form Product",
+            description="product for form tests",
+            prod_type=self.prod_type,
+            technical_contact=self.inactive_user,
+        )
+
+    def _post_data(self, **overrides):
+        data = {
+            "name": self.product.name,
+            "description": self.product.description,
+            "prod_type": self.prod_type.pk,
+            "sla_configuration": self.product.sla_configuration_id,
+            "technical_contact": self.inactive_user.pk,
+        }
+        data.update(overrides)
+        return data
+
+    def test_current_inactive_contact_stays_in_the_queryset(self):
+        form = ProductForm(instance=self.product)
+        self.assertIn(
+            self.inactive_user.pk,
+            form.fields["technical_contact"].queryset.values_list("pk", flat=True),
+        )
+
+    def test_saving_an_untouched_form_keeps_the_inactive_contact(self):
+        form = ProductForm(data=self._post_data(), instance=self.product)
+        self.assertTrue(form.is_valid(), form.errors)
+        form.save()
+        self.product.refresh_from_db()
+        self.assertEqual(self.inactive_user.pk, self.product.technical_contact_id)
+
+    def test_a_different_inactive_user_is_still_refused(self):
+        other = Dojo_User.objects.get(
+            pk=User.objects.create_user(
+                username="iuc_form_other",
+                password="not-a-real-secret",  # noqa: S106 - test fixture user
+                is_active=False,
+            ).pk,
+        )
+        form = ProductForm(data=self._post_data(technical_contact=other.pk), instance=self.product)
+        self.assertFalse(form.is_valid())
+        self.assertIn("technical_contact", form.errors)
+
+    def test_an_inactive_user_is_refused_on_a_new_product(self):
+        form = ProductForm(data={
+            "name": "IUC Form New",
+            "description": "new",
+            "prod_type": self.prod_type.pk,
+            "technical_contact": self.inactive_user.pk,
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn("technical_contact", form.errors)
