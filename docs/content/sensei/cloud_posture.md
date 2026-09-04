@@ -65,7 +65,7 @@ The scan credential should be **read-only** — Sensei only needs to *read* post
 
 ### Keyless authentication (self-hosted only)
 
-A long-lived key is a liability, and some organizations forbid creating exportable service-account keys at all. On a **self-hosted** DefectDojo you can authenticate a scan with your DefectDojo host's own workload identity instead, so there is no key to create, store, or rotate. Choose a **keyless** authentication method when you onboard an account or a connection, and fill in the identifiers rather than pasting a key:
+A long-lived key is a liability, and some organizations forbid creating exportable service-account keys at all. On a **self-hosted** DefectDojo you can authenticate a scan with your DefectDojo host's own workload identity instead, so there is no key to create, store, or rotate. Choose a no-key method when you onboard an account or a connection, and fill in the identifiers rather than pasting a key. You do not need to know the term "federation": pick the method labelled **recommended**, and the wizard shows a copy-paste setup script for it (see [The wizard writes the setup script](#the-wizard-writes-the-setup-script)).
 
 | Provider | Keyless method | What DefectDojo does | What you set up |
 |----------|----------------|----------------------|-----------------|
@@ -75,6 +75,35 @@ A long-lived key is a liability, and some organizations forbid creating exportab
 | **AWS** | **Web identity (OIDC)** | Assumes an IAM role with the host's projected OIDC token (for example EKS IRSA), with no access keys; you enter the role ARN and the token-file location. | An IAM OIDC identity provider trusting your cluster's issuer, and a role with a web-identity trust policy carrying the read-only scan permissions. |
 
 > **🔒 Keyless authentication is self-hosted only.** These methods authenticate as your DefectDojo instance's *own* identity. On DefectDojo Cloud that identity belongs to DefectDojo rather than to your tenant, so keyless methods are offered and accepted only on a self-hosted install, and only when the operator sets `SENSEI_ALLOW_AMBIENT_CLOUD_AUTH=true` on the Sensei engine (the Helm chart sets it for you on self-hosted values). On DefectDojo Cloud, use one of the scan credentials from the table above.
+
+#### The wizard writes the setup script
+
+When you pick a no-key method, the onboarding form shows a ready-to-run **gcloud** or **Terraform** snippet that grants DefectDojo read-only access, with a **Copy** button. The recommended GCP method — a read-only service account DefectDojo uses without a key — produces this (run it in Cloud Shell as a project owner):
+
+```bash
+PROJECT_ID=<PROJECT_ID>
+DEFECTDOJO_IDENTITY=<DEFECTDOJO_SERVICE_ACCOUNT_EMAIL>   # the identity DefectDojo runs as
+
+# 1) Create a read-only service account for DefectDojo to scan as
+gcloud iam service-accounts create defectdojo-cspm \
+  --project="$PROJECT_ID" --display-name="DefectDojo CSPM (read-only)"
+SCAN_SA="defectdojo-cspm@$PROJECT_ID.iam.gserviceaccount.com"
+
+# 2) Give it read-only access to the project
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SCAN_SA" --role="roles/viewer"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SCAN_SA" --role="roles/iam.securityReviewer"
+
+# 3) Let DefectDojo use this account without a key
+gcloud iam service-accounts add-iam-policy-binding "$SCAN_SA" \
+  --member="serviceAccount:$DEFECTDOJO_IDENTITY" \
+  --role="roles/iam.serviceAccountTokenCreator"
+
+echo "$SCAN_SA"   # paste this into "Target service account"
+```
+
+`<DEFECTDOJO_SERVICE_ACCOUNT_EMAIL>` is the identity DefectDojo itself runs as (its GKE Workload Identity or attached GCE service account); ask whoever installed DefectDojo if you are unsure. To scan a whole organization or folder, grant the same two read-only roles at that level instead of per project. The AWS "read-only role" method produces the equivalent Terraform (an IAM role with a web-identity trust policy plus `SecurityAudit` + `ViewOnlyAccess`).
 
 The credential is stored as a small JSON document. The onboarding form assembles it for you from the keyless fields; if you drive the API directly, the shapes are:
 
