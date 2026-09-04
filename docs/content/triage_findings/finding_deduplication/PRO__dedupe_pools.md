@@ -11,7 +11,7 @@ Pools are for the case where the same thing is genuinely deployed in several pla
 
 A pool may span Organizations. You only ever see the members you have access to, and a member you cannot read is shown as a placeholder rather than hidden, so a pool never looks smaller than it is.
 
-Find pools at **Settings \> Deduplication Settings \> Dedupe Pools**.
+Find pools at **Settings \> Deduplication Settings \> Dedupe Pools**. Matching Configuration sits beside it in the same group.
 
 ## Pools vs. the global algorithms
 
@@ -22,6 +22,15 @@ Pools and the global algorithms solve the same problem at different scales, and 
 | **Dedupe Pool** | The Assets you put in it | Whatever the tool's normal algorithm already uses | Some Assets should share matching and the rest should not |
 | **Global Component** | Every Asset in the instance | Component name and version | Every SCA Finding for a dependency is the same Finding wherever it appears |
 | **Global Locations** | Every Asset in the instance | Package URL, or URL for DAST Findings | As above, keyed on the full location under the Locations data model |
+
+> **Pooling an Asset narrows a global algorithm rather than leaving it alone.** The two are not
+> independent settings at different blast radii. While an Asset is unpooled, Global Component and
+> Global Locations reach the whole instance as described above. Once that Asset joins a pool for
+> the matching kind in question, those algorithms are **bounded to the pool**: its Findings match
+> only against the pool's other members, not instance-wide. So creating a pool that happens to
+> contain an Asset running Global Component silently narrows matching that was previously
+> instance-wide. If you want a tool to keep matching across every Asset, leave its Assets out of
+> a pool for that kind.
 
 A pool does not change **how** two Findings are compared. It changes **which** Findings are eligible to be compared at all. How they are compared is set per tool on [Matching Configuration](/triage_findings/finding_deduplication/pro__deduplication_tuning/), which a pool can override for its own members.
 
