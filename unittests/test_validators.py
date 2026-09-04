@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
+from parameterized import parameterized
 
-from dojo.validators import clean_tags
+from dojo.validators import ImporterFileExtensionValidator, clean_tags
 from unittests.dojo_test_case import DojoTestCase
 
 
@@ -30,3 +32,22 @@ class TestCleanTags(DojoTestCase):
     def test_clean_tags_invalid_type_raises(self):
         with self.assertRaises(ValidationError):
             clean_tags(42)
+
+
+class TestImporterFileExtensionValidator(DojoTestCase):
+    # Regression: .spdx reports were rejected by the import extension allowlist
+    # even though the SPDX parser and a .spdx test fixture support the format.
+
+    @parameterized.expand([
+        ("report.spdx",),
+        ("report.json",),
+    ])
+    def test_accepted_import_extensions(self, filename):
+        upload = SimpleUploadedFile(filename, b"data")
+        # Should not raise for a supported import extension.
+        ImporterFileExtensionValidator()(upload)
+
+    def test_rejected_import_extension_raises(self):
+        upload = SimpleUploadedFile("report.exe", b"data")
+        with self.assertRaises(ValidationError):
+            ImporterFileExtensionValidator()(upload)
