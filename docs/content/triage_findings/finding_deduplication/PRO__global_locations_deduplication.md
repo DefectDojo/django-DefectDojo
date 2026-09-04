@@ -23,7 +23,15 @@ Once the feature is enabled, **Global Locations** becomes available as an option
 
 ## Configuring Global Locations Deduplication
 
-Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Deduplication Settings > Matching Configuration** (see [The Sidebar Menu](/navigation/pro__sidebar/)).
+
+> **A pooled Asset is bounded to its pool.** "Across all Assets" holds while an Asset is not in a
+> [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) for the matching kind
+> in question. Once it joins one, this algorithm matches its Findings only against that pool's
+> other members, not instance-wide. Pooling therefore narrows this algorithm rather than leaving
+> it untouched, which is worth knowing before creating a pool that happens to contain Assets
+> relying on it.
+
 
 When you select **Global Locations**, the Hash Code Fields selector is hidden (it does not apply) and a **Location Types** selector appears instead.
 

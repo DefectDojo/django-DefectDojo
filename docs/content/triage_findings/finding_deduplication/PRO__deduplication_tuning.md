@@ -5,39 +5,52 @@ weight: 4
 audience: pro
 aliases:
   - /en/working_with_findings/finding_deduplication/tune_deduplication
+  - /en/triage_findings/finding_deduplication/matching_configuration
 ---
 
 Deduplication Tuning is a DefectDojo Pro feature that gives you fine-grained control over how findings are deduplicated, allowing you to optimize duplicate detection for your specific security testing workflow.
 
-## Deduplication Settings
+## Matching Configuration
 
-In DefectDojo Pro, you can access Deduplication Tuning through:
-**Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout)
+In DefectDojo Pro, matching is configured at **Settings > Deduplication Settings > Matching Configuration**, beside [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/) in the same group.
 
-![image](images/deduplication_tuning.png)
+This page replaced three separate pages (Same Tool Deduplication, Cross Tool Deduplication and Reimport Deduplication). Bookmarks to those pages redirect here. Instead of picking a tool from a dropdown on one of three pages, every tool is listed once with a column for each of the three matching kinds:
 
-The Deduplication Settings page offers three key configuration areas:
-- Same Tool Deduplication
-- Cross Tool Deduplication
-- Reimport Deduplication
+- **Same tool**: how repeated scans from one tool are recognised as the same finding.
+- **Cross tool**: how findings from different tools are matched against each other.
+- **Reimport**: which formula a reimport uses inside its own test.
+
+A tool's row shows the algorithm in force for each kind, how many hash fields it uses, whether anyone has changed it from the shipped default, and whether a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) overrides it.
+
+### Changing a tool's matching
+
+Select a tool's row to change its algorithm, its hash fields, or both. Because a matching change decides which findings are treated as the same finding, it is not saved directly:
+
+1. Choose the new algorithm, the new hash fields, or both. The page explains what each algorithm matches on.
+2. Select **Review impact**. DefectDojo reports how many findings of that tool are in scope, and warns you about the two things that are easy to miss (see below).
+3. Confirm you understand the change, then select **Apply**.
+
+**The two axes behave very differently, and the impact review says which one you are moving.**
+
+- **Changing the algorithm** selects which stored value candidates are looked up by. Nothing is recomputed, and the change decides what the next import compares; existing duplicate links are left exactly as they are. The review warns you when the new algorithm would leave findings with no identity to match on at all: a tool whose findings carry no unique ID matches nothing once the algorithm requires one, and nothing errors when that happens.
+- **Changing the hash fields** changes the value stored on every finding of that tool, so every hash already stored for it becomes stale. Applying queues a background recompute of the tool's whole backlog. Until that finishes, the tool's findings are hashed under two different definitions and may not match each other. The review tells you how many findings will be recomputed before you commit to it.
+
+Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
+
+> **Hash fields are set on the instance default, not per pool.** A [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) can give its members a different **algorithm**, but not a different field list. A finding stores one hash, and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows.
 
 ## Same Tool Deduplication
 
 Same Tool Deduplication is enabled by default for all security tool parsers. This ensures findings from consecutive scans using the same tool are properly deduplicated.
 
-To adjust Same Tool Deduplication:
-
-1. Select a specific **Security Tool** from the dropdown
-2. Choose a **Deduplication Algorithm** from the available options
-
-![image](images/same_tool_deduplication.png)
+To adjust Same Tool Deduplication, select the tool's **Same tool** column on **Settings > Deduplication Settings > Matching Configuration** and follow the review-and-confirm steps above.
 
 ### Available Deduplication Algorithms
 
 DefectDojo Pro offers the following deduplication methods for same-tool deduplication:
 
 #### Hash Code
-Uses a combination of selected fields to generate a unique hash. When selected, a third dropdown will appear showing the fields being used to calculate the hash.
+Uses a combination of selected fields to generate a unique hash. A tool's row on **Settings > Deduplication Settings > Matching Configuration** shows how many fields make up its hash, and selecting the row lets you change them.
 
 ##### Content Fingerprint
 
@@ -94,13 +107,7 @@ The `_partial` and `_subset` fields are compared per finding pair rather than fo
 
 Cross Tool Deduplication is disabled by default, as deduplication between different security tools requires careful configuration due to variations in how tools report the same vulnerabilities.
 
-![image](images/cross_tool_deduplication.png)
-
-To enable Cross Tool Deduplication:
-
-1. Select a **Security Tool** from the dropdown
-2. Change the **Deduplication Algorithm** from "Disabled" to "Hash Code"
-3. Select which fields should be used for generating the hash in the **Hash Code Fields** dropdown
+To enable Cross Tool Deduplication, select the tool's **Cross tool** column on **Settings > Deduplication Settings > Matching Configuration**, change the algorithm to Hash Code, and select the fields the hash should be built from.
 
 Cross Tool Deduplication supports the Hash Code algorithm, which is suitable for most workflows, as different tools rarely share compatible unique identifiers. For SCA tools reporting the same dependencies, [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) is also available as a cross-tool option (off by default).
 
@@ -114,12 +121,7 @@ Reimport Deduplication Settings can be used to set an algorithm for Universal Pa
 
 Reimport Deduplication cannot be adjusted for other tools by default.  Users who want to adjust the Reimport Deduplication algorithm for other tools in their instance should reach out to [DefectDojo Support](mailto:support@defectdojo.com) for assistance.
 
-![image](images/reimport_deduplication.png)
-
-When configuring Reimport Deduplication:
-
-1. Select the **Security Tool** (Universal or Generic Parser)
-2. Choose the appropriate **Deduplication Algorithm**
+To configure Reimport Deduplication, select the tool's **Reimport** column on **Settings > Deduplication Settings > Matching Configuration**.
 
 The following algorithm options are available for Reimport Deduplication:
 - Hash Code
@@ -130,35 +132,40 @@ Reimport can completely discard Findings before they are recorded, so Reimport D
 
 ### Track Findings as Locations Change
 
-When a tool's Reimport Deduplication algorithm is **Hash Code**, an additional toggle appears: **Track findings as locations change**. With it enabled, a finding whose location moved between reimports — a line shift or file rename, a URL move, or a dependency version bump — is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
+A tool whose Reimport algorithm is **Hash Code** can also track findings as their locations change. With that enabled, a finding whose location moved between reimports (a line shift or file rename, a URL move, or a dependency version bump) is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
 
-The toggle is off by default and applies only to the Hash Code reimport algorithm (tools with a reliable Unique ID From Tool already track movement through their stable IDs). Enabling it automatically re-hashes the tool's existing findings in the background so historical data participates immediately.
+It is off by default and applies only to the Hash Code reimport algorithm (tools with a reliable Unique ID From Tool already track movement through their stable IDs). Tick it in the tool's **Reimport** column on **Settings > Deduplication Settings > Matching Configuration**. Because it changes which fields the reimport hash is built from, applying it re-hashes the tool's existing findings in the background; the impact review tells you how many before you commit.
 
 See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/) for how the matching works, what is preserved, and guidance for enabling it on large instances.
 
 ## Running Deduplication Retroactively on Existing Data
 
-A common situation when first turning on Deduplication Tuning is having a large backlog of Findings that were imported *before* the dedup configuration changed.  In DefectDojo Pro, you do not need to run a separate command to dedupe this historical data — **changing the Deduplication Settings for a tool automatically triggers a background re-hash of all existing Findings associated with that test type**.
+A common situation when first tuning matching is having a large backlog of Findings that were imported *before* the configuration changed. What happens to them depends on which axis you changed.
 
-What this means in practice:
+**Changing the hash fields re-hashes the backlog.** DefectDojo queues a background job to recompute the stored hash for every Finding from that tool, because the fields determine that value. The impact review tells you how many Findings that is before you apply.
 
-- When you change the **Deduplication Algorithm** or the **Hash Code Fields** for a tool, DefectDojo queues a background job to recompute hashes for every Finding from that tool already in the instance.
-- The job runs asynchronously.  On large instances (millions of Findings), this can take some time to complete and you will not see immediate changes in the Findings table.
-- Newly-computed hashes apply to subsequent dedup decisions across the whole backlog.
+- The job runs asynchronously. On large instances (millions of Findings), this takes time and you will not see immediate changes in the Findings table.
+- Until it finishes, that tool's Findings are hashed under two different definitions and may not match each other.
+- Existing duplicate links are not revisited. Re-hashing changes what future comparisons produce, not what was already decided.
 
-If you make several configuration changes in quick succession, each one queues its own re-hash job.  Allow the previous job to finish before evaluating results, especially when comparing Findings counts before and after the change.
+If you make several changes in quick succession, each queues its own job. Allow the previous one to finish before evaluating results, especially when comparing Finding counts before and after.
 
-> **Note for self-hosted Pro:** The background job runs in the Celery worker pool.  If you have starved or backlogged workers, the re-hash can take longer than expected — check worker health if results don't appear within the timeframe you would expect for your instance size.
+> **Note for self-hosted Pro:** the job runs in the Celery worker pool. If workers are starved or backlogged, the re-hash takes longer than expected. Check worker health if results do not appear within the timeframe you would expect for your instance size.
 
-> **Feature flags do not gate an existing configuration.** A tool's saved Deduplication Settings stay in effect for as long as they are configured; turning off a related feature flag does **not** retroactively revert that tool to default deduplication. To change or stop a tool's deduplication behavior, update its Deduplication Settings directly (which also queues the background re-hash described above).
+**Changing the algorithm re-hashes nothing**, by design: it selects which already-stored value is compared, so there is nothing to recompute. It decides what the next import compares, and existing duplicate links are left as they are.
+
+If you need existing Findings re-evaluated against a new configuration, use a [dedupe pool's](/triage_findings/finding_deduplication/pro__dedupe_pools/) **Apply Now**, which re-runs deduplication over the Findings already in scope and reports what it would link before it does anything.
+
+> **Feature flags do not gate an existing configuration.** A tool's saved matching configuration stays in effect for as long as it is configured; turning off a related feature flag does **not** retroactively revert that tool to default deduplication. To change a tool's behavior, change its algorithm on **Settings > Deduplication Settings > Matching Configuration**.
 
 ## Deduplication Best Practices
 
 For optimal results with Deduplication Tuning:
 
 - **Start with defaults**: The preconfigured deduplication settings work well for most scenarios
-- **Test changes carefully**: After adjusting deduplication settings, monitor a few imports to ensure proper behavior.
-- **Plan retroactive re-hashes**: Changing dedup settings re-hashes every existing Finding from that tool in the background.  See [Running Deduplication Retroactively on Existing Data](#running-deduplication-retroactively-on-existing-data) above.
+- **Read the impact review before applying**: it tells you how many findings are in scope, whether a new algorithm leaves any of them with nothing to match on, and how many findings a field change will re-hash.
+- **Plan retroactive re-hashes**: changing hash fields recomputes every existing Finding from that tool in the background. See [Running Deduplication Retroactively on Existing Data](#running-deduplication-retroactively-on-existing-data).
+- **Test changes carefully**: After adjusting matching configuration, monitor a few imports to ensure proper behavior.
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
 - **Keep cross-tool sources in the same Asset**: Cross-Tool Deduplication is Asset-scoped.  Findings split across separate Assets will not dedupe even with matching hash fields.  See [Cross Tool Deduplication](#cross-tool-deduplication) above.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
@@ -167,6 +174,8 @@ For optimal results with Deduplication Tuning:
 
 By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.
 
-## Locked Findings 
+## Where a tool's matching came from
 
-Whenever Deduplication Settings are changed for a given tool, Deduplication hashes are re-calculated for that tool across the entire DefectDojo instance.
+A tool's row on **Settings > Deduplication Settings > Matching Configuration** marks configuration that has been changed from the shipped default, and names any dedupe pool that overrides it. A test's **Matching Policy** panel shows the same thing from the other direction: the algorithm actually in force for that test, and the pool responsible when it differs from the instance default.
+
+That pairing is what answers "why did these two findings deduplicate differently" without a support ticket: two tests on the same tool showing different algorithms is a pool override, not a fault.

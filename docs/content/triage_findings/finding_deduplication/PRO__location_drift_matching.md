@@ -18,14 +18,14 @@ Each of these previously produced a closed finding plus a "new" finding — losi
 
 ## Enabling Location Tracking
 
-Location tracking is configured per tool under:
-**Settings > Finding Workflow > Reimport Deduplication** (**Settings > Pro Settings > Deduplication Settings > Reimport Deduplication** on instances still using the previous menu layout)
+Location tracking is configured per tool on **Settings > Deduplication Settings > Matching Configuration**.
 
-1. Select the **Security Tool**.
-2. Set the **Deduplication Algorithm** to **Hash Code**. Location tracking applies to the Hash Code algorithm only — tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
-3. Enable **Track findings as locations change**.
+1. Find the tool's row and select its **Reimport** column.
+2. Set the **Algorithm** to **Hash code**. Location tracking applies to that algorithm only: tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
+3. Tick **Track findings as locations change**.
+4. Select **Review impact**, then **Apply**.
 
-Saving the setting automatically triggers a background re-hash of the tool's existing findings (see [Enabling on Existing Data](#enabling-on-existing-data-upgrades) below), so findings imported before the toggle participate immediately.
+The review step matters here. Turning tracking on or off changes which fields the reimport hash is built from, so every hash already stored for that tool becomes stale and the whole backlog is recomputed in the background. The review tells you how many findings that is before you commit, and until the recompute finishes the tool's findings are hashed under two different definitions and may not match each other. See [Enabling on Existing Data](#enabling-on-existing-data-upgrades) below.
 
 ## How Matching Works
 

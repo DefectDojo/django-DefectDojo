@@ -28,6 +28,8 @@ Within a *single* report, the order the scanner happens to list its findings in 
 
 By default, these Tests would need to be nested under the same Asset for Deduplication to be applied. If you wish, you can further limit the Deduplication scope to a single Engagement.
 
+DefectDojo Pro can also widen it. A [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) is a named group of Assets whose Findings deduplicate against each other, so the same vulnerability found in several Assets you deliberately model separately can still resolve to one original.
+
 ![Deduplication on Asset and engagement level](images/deduplication.png)
 
 Duplicate Findings are set as Inactive by default. This does not mean the Duplicate Finding itself is Inactive. Rather, this is so that your team only has a single active Finding to work on and remediate, with the implication being that once the original Finding is Mitigated, the Duplicates will also be Mitigated.
@@ -39,6 +41,8 @@ Deduplication and Reimport are similar processes, but they use different algorit
 * When you Reimport to a Test, the Reimport process looks at incoming Findings, **compares hash codes, and then discards any matches**. Those matches will never be created as Findings or Finding Duplicates.
 
 However, any Findings that remain after Reimport Deduplication are still subject to Same-Tool Deduplication.  So if you use narrower a scope for Same-Tool Deduplication, you can end up with Duplicates within a Reimport pipeline.
+
+This is also how a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) reaches a reimport. The reimport itself only ever matches inside its own Test, but the Findings it creates go through Same-Tool and Cross-Tool Deduplication afterwards, and those are pool-scoped. Pooling an Asset therefore does affect its reimports, by way of what happens to the Findings they produce.
 
 ### Example
 
@@ -77,7 +81,7 @@ DefectDojo Open Source supports four deduplication algorithms that can be select
 - **Unique ID From Tool or Hash Code**: Prefer the tool’s unique ID; fall back to hash when no matching unique ID is found.
 - **Legacy**: Historical algorithm with multiple conditions; only available in the Open Source version.
 
-**DefectDojo Pro adds more.** Two additional algorithms match across **all Assets** in the instance rather than within a single Asset or Engagement — **Global Component** (by component name and version) and **Global Vulnerability ID** (by CVE, GHSA, …). Both are off by default and enabled by DefectDojo Support. Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
+**DefectDojo Pro adds more.** [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/) widen the scope of the existing algorithms to a chosen group of Assets, per matching kind, without changing how two Findings are compared. Two additional algorithms instead match across **all Assets** in the instance rather than within a single Asset or Engagement: **Global Component** (by component name and version) and **Global Vulnerability ID** (by CVE, GHSA, and similar). Both are off by default and enabled by DefectDojo Support. Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
 
 ### An alternative to Deduplication: False Positive History
 
@@ -171,6 +175,7 @@ Sometimes, Deduplication does not work as expected.  Here are some examples of w
 | Duplicates are created across different tools | Cross-tool matching is disabled or too strict | <strong>Cross Tool Deduplication (Pro only)</strong> (hash-based matching) |
 | The same SCA dependency imported into multiple Assets creates separate Findings instead of duplicates | Deduplication is scoped per Asset by default | <strong>Global Component Deduplication (Pro only)</strong> ([enable for your SCA tools](/triage_findings/finding_deduplication/pro__global_component_deduplication/)), or, under the Locations data model, <strong>Global Locations Deduplication (Pro only)</strong> ([match on shared location](/triage_findings/finding_deduplication/pro__global_locations_deduplication/)) |
 | The same URL / web Finding imported into multiple Assets creates separate Findings instead of duplicates | Deduplication is scoped per Asset by default, and Global Component matches only components | <strong>Global Locations Deduplication (Pro only)</strong> ([match DAST/URL Findings across Assets](/triage_findings/finding_deduplication/pro__global_locations_deduplication/)) |
+| The same vulnerability in a handful of related Assets creates separate Findings, but you do not want instance-wide matching | Deduplication is scoped per Asset by default, and the global algorithms are all-or-nothing | <strong>Dedupe Pools (Pro only)</strong> ([group just those Assets](/triage_findings/finding_deduplication/pro__dedupe_pools/)) |
 | Excess duplicates of the same Finding are being created, across Tests | Asset Hierarchy is not set up correctly | [Consider Reimport for continual testing](/triage_findings/finding_deduplication/avoid_excess_duplicates/) |
 
 When automatic deduplication misses Findings that you believe belong together, you can link them by hand from the View Finding page. See Similar Findings for how to discover related Findings and mark them as duplicates manually ([Open Source](/triage_findings/finding_deduplication/os__similar_findings/) | [Pro](/triage_findings/finding_deduplication/pro__similar_findings/)).
