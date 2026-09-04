@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from parameterized import parameterized
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -1607,3 +1608,52 @@ class TestDojoImporterBatchPushToJira(DojoTestCase):
             flags[ungrouped_db.id],
             msg=f"ungrouped finding must be pushed individually, dispatched with push_to_jira={flags[ungrouped_db.id]}",
         )
+
+
+class TestSanitizeSeverity(DojoTestCase):
+
+    """Unit tests for BaseImporter.sanitize_severity severity normalization."""
+
+    # Regression: findings imported with a lowercase severity such as "medium"
+    # (e.g. via Generic Findings Import) were rejected with
+    # 'Finding severity "medium" is not supported' because only info/none
+    # variants were case-normalized. Severity matching must be case-insensitive.
+
+    def setUp(self):
+        # sanitize_severity does not use importer state, so it is exercised on a
+        # bare importer instance to keep this a pure unit test with no DB setup.
+        self.importer = DefaultImporter.__new__(DefaultImporter)
+
+    @parameterized.expand([
+        # Failing cases before the fix (wrong-case supported severities)
+        ("medium", "Medium"),
+        ("MEDIUM", "Medium"),
+        ("high", "High"),
+        ("HIGH", "High"),
+        ("critical", "Critical"),
+        ("low", "Low"),
+        # Control cases (already-correct values must be preserved)
+        ("Medium", "Medium"),
+        ("Critical", "Critical"),
+        ("Info", "Info"),
+        # Existing info/none normalization must keep working
+        ("info", "Info"),
+        ("informational", "Info"),
+        ("none", "Info"),
+    ])
+    def test_sanitize_severity_is_case_insensitive(self, submitted, expected):
+        finding = Finding(severity=submitted)
+        result = self.importer.sanitize_severity(finding)
+        self.assertEqual(
+            result.severity, expected,
+            msg=f"expected severity={expected} for input {submitted!r}, got {result.severity!r}",
+        )
+        self.assertEqual(
+            result.numerical_severity, Finding.get_numerical_severity(expected),
+            msg=f"numerical_severity not set for normalized severity {expected}",
+        )
+
+    def test_sanitize_severity_rejects_genuinely_unsupported(self):
+        finding = Finding(severity="bogus")
+        with self.assertRaises(ValidationError):
+            self.importer.sanitize_severity(finding)

@@ -908,7 +908,10 @@ class BaseImporter(ImporterOptions):
         There is a simple conversion process to convert any of the following
         to a value of Info
         - info, informational, Informational, None, none
-        If not, raise a ValidationError explaining as such
+        Severity matching is case-insensitive, so values such as "medium" or
+        "CRITICAL" are normalized to their supported form ("Medium", "Critical").
+        If the severity is still not recognized, raise a ValidationError
+        explaining as such
         """
         # Checks around Informational/Info severity
         starts_with_info = finding.severity.lower().startswith("info")
@@ -918,6 +921,11 @@ class BaseImporter(ImporterOptions):
         if not_info and (starts_with_info or lower_none):
             # Correct the severity
             finding.severity = "Info"
+        # Normalize the case of any remaining severity so that a value like
+        # "medium" is accepted as the supported "Medium" instead of rejected
+        if finding.severity not in SEVERITIES:
+            canonical_severities = {severity.lower(): severity for severity in SEVERITIES}
+            finding.severity = canonical_severities.get(finding.severity.lower(), finding.severity)
         # Ensure the final severity is one of the supported options
         if finding.severity not in SEVERITIES:
             msg = (
