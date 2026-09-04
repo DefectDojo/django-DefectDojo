@@ -50,7 +50,7 @@ Optional Asset metadata includes:
 - **Business criticality**
 - **User records** (i.e., the estimated number of user records in the Asset)
 - **Revenue**
-- **Personnel information** (e.g., Asset Manager, Team Manager, Technical Contact, etc.). Only active users can be assigned to these fields, in the UI and over the API. If a user is deactivated later, the assignment stays in place as a historical reference and continues to be readable, but that user cannot be assigned again until the account is reactivated.
+- **Personnel information** (e.g., Asset Manager, Team Manager, Technical Contact, etc.). Only active users can be assigned to these fields, in the UI and over the API. If a user is deactivated later, the assignment stays in place as a historical reference and continues to be readable, but that user cannot be assigned again until the account is reactivated. An update that re-sends the value already stored is still accepted.
 - **Regulations** (e.g., HIPAA, GLBA, OPPA, etc.)
 - **Platform** (e.g., API, Desktop, IoT, Mobile, Web, etc.)
 - **Lifecycle** (e.g., Construction, Production, Retirement, etc.)

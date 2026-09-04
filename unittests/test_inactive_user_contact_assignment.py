@@ -199,7 +199,7 @@ def _writable_contact_fields(ser):
     return writable
 
 
-class ContactGuardCoverageTest(DojoAPITestCase):
+class ContactGuardCoverageTest(DojoTestCase):
 
     def test_every_serializer_writing_a_contact_field_carries_the_guard(self):
         """
@@ -236,7 +236,7 @@ class ProductFormInactiveContactTest(DojoTestCase):
 
     def run(self, result=None):
         # ProductForm.__init__ narrows prod_type through get_authorized_product_types,
-        # which reads the acting user from crum. Without a user, Pro's registered auth
+        # which reads the acting user from crum. Without a user the registered auth
         # filter returns nothing and every form in this class fails on prod_type.
         with impersonate(self.get_test_admin()):
             super().run(result)
