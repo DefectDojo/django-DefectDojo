@@ -1,6 +1,8 @@
 from django.test import override_settings
 from django.urls import reverse
+from rest_framework import serializers
 
+from dojo.authorization.serializer_guards import CONTACT_FIELDS, ActiveUserContactGuardMixin
 from dojo.models import Dojo_User, Product, Product_Type, User
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
@@ -155,3 +157,64 @@ class InactiveUserContactAssignmentTest(DojoAPITestCase):
     def test_an_unrelated_edit_still_works(self):
         response = self._patch(self.product_url, {"description": "edited"})
         self.assertEqual(200, response.status_code, response.content[:400])
+
+
+def _all_model_serializers():
+    found, stack = set(), [serializers.ModelSerializer]
+    while stack:
+        for sub in stack.pop().__subclasses__():
+            if sub not in found:
+                found.add(sub)
+                stack.append(sub)
+    return found
+
+
+def _writable_contact_fields(ser):
+    """The contact fields this serializer class writes, by model field name."""
+    meta = getattr(ser, "Meta", None)
+    if getattr(meta, "model", None) is not Product:
+        return set()
+
+    writable = set()
+
+    # A declared field can rename the column, which is how AssetSerializer reaches
+    # product_manager under the name asset_managers.
+    declared_sources = set()
+    for name, field in ser._declared_fields.items():
+        source = field.source or name
+        declared_sources.add(source)
+        if source in CONTACT_FIELDS and not field.read_only:
+            writable.add(source)
+
+    declared_meta = getattr(meta, "fields", None)
+    excluded = tuple(getattr(meta, "exclude", ()) or ())
+    read_only = tuple(getattr(meta, "read_only_fields", ()) or ())
+    for model_field in CONTACT_FIELDS:
+        if model_field in declared_sources or model_field in excluded or model_field in read_only:
+            continue
+        if declared_meta is None or declared_meta == "__all__" or model_field in declared_meta:
+            writable.add(model_field)
+    return writable
+
+
+class ContactGuardCoverageTest(DojoAPITestCase):
+
+    def test_every_serializer_writing_a_contact_field_carries_the_guard(self):
+        """
+        Fails on a newly added serializer that forgets the guard, rather than
+        leaving a gap for a support report to find. A serializer that only reads
+        these fields declares them read_only and is skipped.
+        """
+        reverse("asset-detail", args=[1])  # force the URLconf, and so every viewset module, to load
+
+        unguarded = []
+        for ser in _all_model_serializers():
+            fields = _writable_contact_fields(ser)
+            if fields and not issubclass(ser, ActiveUserContactGuardMixin):
+                unguarded.append(f"{ser.__module__}.{ser.__name__} writes {sorted(fields)}")
+
+        self.assertEqual(
+            [], sorted(unguarded),
+            "these serializers write a contact field without the active-user guard; "
+            "add ActiveUserContactGuardMixin, exclude the field, or mark it read_only",
+        )
