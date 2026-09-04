@@ -155,7 +155,10 @@ class NucleiParser:
             )
 
             if locations_enabled():
-                dupe_host = (urlparse(matched).hostname or "") if matched else ""
+                # Prepend "//" for protocol-less URLs so urlparse extracts
+                # the hostname correctly (mirrors LocationData construction).
+                parseable = matched if "://" in matched else "//" + matched
+                dupe_host = (urlparse(parseable).hostname or "") if matched else ""
             else:
                 # TODO: Delete this after the move to Locations
                 dupe_host = str(location.host) if location else ""
