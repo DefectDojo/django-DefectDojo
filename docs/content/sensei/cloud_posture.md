@@ -51,9 +51,11 @@ The **Cloud Accounts** list mirrors the AppSec repository list: the account iden
 
 ### Provider identity and scan credentials
 
+**Federation is the recommended way to authenticate a scan** — it uses your DefectDojo host's own identity, so there is no key to create, store, or rotate, and it needs no service-account-key org-policy exception. See [Keyless authentication](#keyless-authentication-self-hosted-only) below; it is the primary path on a self-hosted install. The static credentials in the table below (a GCP service-account key, AWS access keys) are the **backup**, and on multi-tenant DefectDojo Cloud they are the only option, since federation there would authenticate as DefectDojo's identity rather than yours.
+
 The scan credential should be **read-only** — Sensei only needs to *read* posture to scan. (Applying a *direct* fix uses a separate write credential; see [Fix in Cloud](#fix-in-cloud-direct-remediation).)
 
-| Provider | Account identity | Read-only scan credential |
+| Provider | Account identity | Read-only scan credential (backup) |
 |----------|------------------|---------------------------|
 | **AWS** | The 12-digit **account ID** (resource ARNs derive from it). | Access keys for a principal with `SecurityAudit` + `ViewOnlyAccess`. Base access keys are required; organization-wide scanning additionally assumes a role (`role_arn` / `organizations_role_arn`) on top of those keys. |
 | **Azure** | The **subscription ID**. | A **service principal** (client ID, client secret, tenant ID) with **Reader** + **Security Reader**, plus the Microsoft Graph read permissions Prowler needs (`Directory.Read.All`, `Policy.Read.All`, `UserAuthenticationMethod.Read.All`). |
