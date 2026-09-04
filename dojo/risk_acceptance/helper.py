@@ -109,6 +109,13 @@ def expire_now(risk_acceptance, user=None, reason=None):
                 finding.active = True
                 finding.risk_accepted = False
 
+                # Restore Verified so the finding returns to "Active, Verified" rather than
+                # keeping the (usually unverified) state it had while risk accepted. Opt-in,
+                # because the pre-acceptance verified value is not tracked and some workflows
+                # rely on reactivated findings staying unverified until re-triaged.
+                if risk_acceptance.restore_verified_expired:
+                    finding.verified = True
+
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)
 
