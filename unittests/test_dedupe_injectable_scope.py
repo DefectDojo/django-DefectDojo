@@ -19,6 +19,11 @@ from django.utils import timezone
 from dojo.finding.deduplication import (
     _dedupe_batch_hash_code,  # noqa: PLC2701
     build_candidate_scope_queryset,
+    find_candidates_for_deduplication_hash,
+    find_candidates_for_deduplication_legacy,
+    find_candidates_for_deduplication_uid_or_hash,
+    find_candidates_for_deduplication_unique_id,
+    find_candidates_for_reimport_legacy,
     match_batch_hash_code,
 )
 from dojo.models import (
@@ -79,7 +84,7 @@ class TestInjectableCandidateScope(DojoTestCase):
             target_end=timezone.now(),
         )
 
-    def _create_finding(self, test, title, hash_code=SHARED_HASH):
+    def _create_finding(self, test, title, hash_code=SHARED_HASH, *, unique_id=None, cwe=0):
         finding = Finding.objects.create(
             test=test,
             title=title,
@@ -90,9 +95,10 @@ class TestInjectableCandidateScope(DojoTestCase):
             reporter=self.testuser,
             active=True,
             verified=True,
+            cwe=cwe,
         )
         # Assigning after create keeps Finding.save() from recomputing it.
-        Finding.objects.filter(pk=finding.pk).update(hash_code=hash_code)
+        Finding.objects.filter(pk=finding.pk).update(hash_code=hash_code, unique_id_from_tool=unique_id)
         finding.refresh_from_db()
         return finding
 
@@ -228,4 +234,122 @@ class TestInjectableCandidateScope(DojoTestCase):
                 "an ordering key must not be able to make a newer finding the original "
                 f"(newer id={newer.id}, target id={target.id})"
             ),
+        )
+
+    # --- every finder forwards it ----------------------------------------
+    #
+    # Five finders each build their own base queryset, so candidate_qs has to be threaded
+    # through every one of them and any of them could drop it and stay green. The hash finder
+    # is also reached through match_batch_hash_code above; it is called directly here so all
+    # five state the property the same way.
+
+    def test_supplied_scope_reaches_the_hash_finder(self):
+        theirs = self._create_finding(self.test_b, "Hash scoped original")
+        mine = self._create_finding(self.test_a, "Hash scoped newer")
+
+        default = find_candidates_for_deduplication_hash(self.test_a, [mine])
+        self.assertNotIn(theirs.id, [c.id for c in default.get(SHARED_HASH, [])])
+
+        supplied = find_candidates_for_deduplication_hash(
+            self.test_a, [mine], candidate_qs=Finding.objects.all(),
+        )
+        self.assertIn(
+            theirs.id, [c.id for c in supplied.get(SHARED_HASH, [])],
+            "the supplied scope did not reach the hash finder",
+        )
+
+    def test_supplied_scope_reaches_the_unique_id_finder(self):
+        """
+        Forwarding, not just the hash path.
+
+        Each finder builds its own base queryset, so ``candidate_qs`` has to be threaded
+        through every one of them. Covering only the hash finder would leave the unique-id and
+        legacy paths free to drop the argument and stay green.
+        """
+        shared_uid = "SCOPE-UID-1"
+        theirs = self._create_finding(self.test_b, "Uid scoped original", unique_id=shared_uid)
+        mine = self._create_finding(self.test_a, "Uid scoped newer", unique_id=shared_uid)
+
+        default = find_candidates_for_deduplication_unique_id(self.test_a, [mine])
+        self.assertNotIn(
+            theirs.id, [candidate.id for group in default.values() for candidate in group],
+            "the derived scope must not reach the other product",
+        )
+
+        supplied = find_candidates_for_deduplication_unique_id(
+            self.test_a, [mine], candidate_qs=Finding.objects.all(),
+        )
+        self.assertIn(
+            theirs.id, [candidate.id for candidate in supplied.get(shared_uid, [])],
+            "the supplied scope did not reach the unique-id finder",
+        )
+
+    def test_supplied_scope_reaches_the_legacy_finder(self):
+        """Same forwarding property for the title/CWE finder, which returns two maps."""
+        theirs = self._create_finding(self.test_b, "Legacy scoped finding", cwe=79)
+        mine = self._create_finding(self.test_a, "Legacy scoped finding", cwe=79)
+        # The map is keyed by the PERSISTED title, and Finding.save() titlecases it, so the
+        # string passed to _create_finding is not the key. Read it back off the saved row.
+        stored_title = mine.title
+
+        default_by_title, default_by_cwe = find_candidates_for_deduplication_legacy(self.test_a, [mine])
+        self.assertNotIn(
+            theirs.id, [candidate.id for candidate in default_by_title.get(stored_title, [])],
+            "the derived scope must not reach the other product",
+        )
+        self.assertNotIn(theirs.id, [candidate.id for candidate in default_by_cwe.get(79, [])])
+
+        by_title, by_cwe = find_candidates_for_deduplication_legacy(
+            self.test_a, [mine], candidate_qs=Finding.objects.all(),
+        )
+        self.assertIn(
+            theirs.id, [candidate.id for candidate in by_title.get(stored_title, [])],
+            "the supplied scope did not reach the legacy finder's title map",
+        )
+        self.assertIn(
+            theirs.id, [candidate.id for candidate in by_cwe.get(79, [])],
+            "the supplied scope did not reach the legacy finder's CWE map",
+        )
+
+    def test_supplied_scope_reaches_the_uid_or_hash_finder(self):
+        """The combined finder builds its own base queryset too, and returns two maps."""
+        shared_uid = "SCOPE-UID-2"
+        theirs = self._create_finding(self.test_b, "Uid-or-hash scoped original", unique_id=shared_uid)
+        mine = self._create_finding(self.test_a, "Uid-or-hash scoped newer", unique_id=shared_uid)
+
+        default_by_uid, default_by_hash = find_candidates_for_deduplication_uid_or_hash(self.test_a, [mine])
+        self.assertNotIn(theirs.id, [c.id for c in default_by_uid.get(shared_uid, [])])
+        self.assertNotIn(theirs.id, [c.id for c in default_by_hash.get(SHARED_HASH, [])])
+
+        by_uid, by_hash = find_candidates_for_deduplication_uid_or_hash(
+            self.test_a, [mine], candidate_qs=Finding.objects.all(),
+        )
+        self.assertIn(
+            theirs.id, [c.id for c in by_uid.get(shared_uid, [])],
+            "the supplied scope did not reach the combined finder's unique-id map",
+        )
+        self.assertIn(
+            theirs.id, [c.id for c in by_hash.get(SHARED_HASH, [])],
+            "the supplied scope did not reach the combined finder's hash map",
+        )
+
+    def test_supplied_scope_reaches_the_legacy_reimport_finder(self):
+        """Reimport normally scopes to the incoming test alone, which a supplied scope replaces."""
+        shared_title = "Legacy reimport scoped finding"
+        theirs = self._create_finding(self.test_b, shared_title)
+        mine = self._create_finding(self.test_a, shared_title)
+        key = (shared_title.lower(), "High")
+
+        default = find_candidates_for_reimport_legacy(self.test_a, [mine])
+        self.assertNotIn(
+            theirs.id, [c.id for c in default.get(key, [])],
+            "reimport's derived scope is the incoming test, so the other product must not appear",
+        )
+
+        supplied = find_candidates_for_reimport_legacy(
+            self.test_a, [mine], candidate_qs=Finding.objects.all(),
+        )
+        self.assertIn(
+            theirs.id, [c.id for c in supplied.get(key, [])],
+            "the supplied scope did not reach the legacy reimport finder",
         )
