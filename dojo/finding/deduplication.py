@@ -321,7 +321,7 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
     return False
 
 
-def build_candidate_scope_queryset(test, mode="deduplication", service=None, candidate_qs=None):
+def build_candidate_scope_queryset(test, mode="deduplication", service=None, *, candidate_qs=None):
     """
     Build a queryset for candidate finding.
 
