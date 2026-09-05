@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from dojo.api_v2.serializers import ProductMetaSerializer, TagListSerializerField
 from dojo.authorization.serializer_guards import (
+    ActiveUserContactGuardMixin,
     AuthorizedUsersMemberGuardMixin,
     ToolConfigurationUseGuardMixin,
 )
@@ -27,7 +28,7 @@ class AssetAPIScanConfigurationSerializer(ToolConfigurationUseGuardMixin, serial
         exclude = ("product",)
 
 
-class AssetSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
+class AssetSerializer(ActiveUserContactGuardMixin, AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
@@ -40,7 +41,7 @@ class AssetSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializ
     enable_asset_tag_inheritance = serializers.BooleanField(source="enable_product_tag_inheritance", required=False, default=False)
     asset_managers = serializers.PrimaryKeyRelatedField(
         source="product_manager",
-        queryset=Dojo_User.objects.exclude(is_active=False),
+        queryset=Dojo_User.objects.all(),
         required=False, allow_null=True,
     )
     business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)

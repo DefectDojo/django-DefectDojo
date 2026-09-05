@@ -46,6 +46,12 @@ class ProductForm(forms.ModelForm):
         if prod_type_id := kwargs.get("instance", Product()).prod_type_id:  # we are editing existing instance
             self.fields["prod_type"].queryset |= Product_Type.objects.filter(pk=prod_type_id)  # even if user does not have permission for any other ProdType we need to add at least assign ProdType to make form submittable (otherwise empty list was here which generated invalid form)
 
+        # Same reason as prod_type above: a queryset that excludes the instance's
+        # own value renders it unselected, and saving then writes None.
+        for contact in ("product_manager", "technical_contact", "team_manager"):
+            if current_id := getattr(self.instance, f"{contact}_id", None):
+                self.fields[contact].queryset |= Dojo_User.objects.filter(pk=current_id)
+
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
             self.fields["sla_configuration"].disabled = True

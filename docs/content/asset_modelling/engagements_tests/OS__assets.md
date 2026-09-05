@@ -49,7 +49,7 @@ Assets will always include the following components:
 Optional Asset metadata includes: 
 
 - **Tags**
-- **Personnel information** (e.g., Asset Manager, Team Manager, Technical Contact, etc.)
+- **Personnel information** (e.g., Asset Manager, Team Manager, Technical Contact, etc.). Only active users can be assigned to these fields, in the UI and over the API. If a user is deactivated later, the assignment stays in place as a historical reference and continues to be readable, but that user cannot be assigned again until the account is reactivated. An update that re-sends the value already stored is still accepted.
 - **Regulations** (e.g., HIPAA, GLBA, OPPA, etc.)
 - **Business criticality**
 - **Platform** (e.g., API, Desktop, IoT, Mobile, Web, etc.)
