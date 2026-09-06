@@ -1,13 +1,15 @@
 ---
 title: "The Sidebar Menu"
-description: "How the DefectDojo Pro sidebar is organized, how to search it, the All Settings directory page, and how to switch between the current and previous layouts"
+description: "How the DefectDojo Pro sidebar is organized, how to search it, pinning pages, collapsing it to an icon rail, the All Settings directory page, and how to switch between the current and previous layouts"
 weight: 6
 audience: pro
 aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
+The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and (at the bottom) your account, alerts and the light/dark switch. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
+
+The menu groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
 
 Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
 
@@ -23,11 +25,16 @@ Either way, **every page keeps the same URL**. Bookmarks, saved links and anythi
 
 You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
 
-## Searching the menu
+## Searching
 
-Press **Cmd+K** (Mac) or **Ctrl+K**, or select the small magnifying-glass control pinned in the top-right corner of the sidebar, to open **Search Navigation Options**: a search over every menu destination your account can currently reach. The control shows the shortcut for your platform, so it reads `Ctrl K` on Windows and Linux, and the whole control is clickable. It stays in the corner as the menu scrolls.
+The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two kinds of results:
 
-Results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
+- **Data Results**: your records (findings, assets, engagements and the rest), through the same engine as the full results page. **See all results** at the bottom opens that page. See [Global Search](/navigation/pro__global_search/).
+- **Navigation Results**: every menu destination your account can currently reach.
+
+Navigation results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
+
+Before you type anything, the dialog offers your **recent destinations**: the last few menu pages you visited (excluding the one you are on), one **Enter** away. Recents are remembered per browser.
 
 Move through results with the arrow keys, open one with **Enter**, and close the search with **Escape**. Entries that open in the Classic UI are marked and open in a new tab. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically, and it follows whichever menu layout is active.
 
@@ -37,6 +44,34 @@ Three conventions run through the whole menu:
 - **Nothing nests more than one level below a section.** Reaching a page is at most section, group, page.
 - **A feature occupies one entry, not one per screen.** PSIRT's nine pages, the Triage Engine's four and the record catalogs all sit behind a single entry each, instead of spreading across the menu.
 - **An entry is not repeated inside itself.** Where a group already names the thing, its entries do not name it again: **Findings** holds Active, Mitigated and All rather than "All Findings", and **Attack Surface** holds Endpoints and Hosts rather than "All Endpoints".
+
+## Pinned pages
+
+![The Pinned section at the top of the sidebar](images/sidebar_pinned_pages.png)
+
+Hover any page row (in the sidebar, in a collapsed-rail flyout, or in a Global Search result) and a pin appears at its end; on touch screens the pin always shows. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
+
+Pins are stored per user on the server, so they survive a browser reset and follow you across machines. When the **Restrict Layout Customization** switch is on (see [UI Defaults](#ui-defaults)), pins count as layout customization: only superusers can change them, and everyone else sees their existing pins read-only.
+
+## Your preferences follow you
+
+The shape you give the shell is stored per user on the server, not just in the browser: pinned pages, folded sections, whether the rail is collapsed, and the light/dark choice (which is shared with the Classic UI, so the two interfaces always agree). Clearing your browser or signing in on a new machine brings it all back on the next sign-in. The first time you sign in on an instance that has this, whatever shape your browser already had is imported automatically, so nothing resets.
+
+## Collapsing the sidebar
+
+The chevron beside the logo, or **Cmd+B** (Mac) / **Ctrl+B**, collapses the sidebar to a slim icon rail and back. Your choice is remembered across reloads. On desktop windows narrower than 1200px the rail starts collapsed to leave room for content; widening the window brings your stored preference back. (Cmd+B is ignored while you are typing in an editor, where it means bold.)
+
+![The collapsed rail with a section flyout open](images/sidebar_rail_flyout.png)
+
+While collapsed:
+
+- Rows show only their icon. Hovering a page shows its name (and its badge, if it carries one) as a tooltip.
+- Hovering or selecting a **section** opens its entries in a flyout panel beside the rail. The panel is fully keyboard-driven: selecting a section moves focus into it, the arrow keys walk the entries, **Enter** opens one, and **Escape** closes the panel and puts focus back where it was.
+- The icon of the section holding your **current page** stays highlighted, and the flyout marks the exact row, so you never lose your place.
+- Badges shrink to small marks on the row icon: the `NEW` flame, the `BETA` seedling, and a padlock for license-locked entries. See [Menu Badges](/navigation/pro__menu_badges/).
+- The magnifying glass under the logo keeps a mouse path to [Global Search](#searching); the keyboard shortcut works as always.
+
+The rail also follows your page as you navigate: opening a page that lives inside a menu group opens that group (expanded) or lights its section (collapsed), including when you arrive from a bookmark or a link.
 
 ## Sensei + AI
 
@@ -112,7 +147,7 @@ The last category, **Elsewhere in the app**, lists pages that configure DefectDo
 The **UI Defaults** group collects the settings that control how much of the interface each person can tailor:
 
 - **[Form Configuration](/navigation/pro__form_configuration/)**: choose which fields the create and edit forms show and require, and whether the Optional Fields panel starts expanded.
-- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, and table views; everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
+- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
 
 ## What moved
 
