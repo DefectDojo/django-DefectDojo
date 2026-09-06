@@ -16,6 +16,18 @@ You can subscribe to these release notes with the [RSS feed](/releases/pro/chang
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## September 2026: v3.3
+
+### September 8, 2026: v3.3.0
+
+New features:
+* **(Deduplication)** Added Dedupe Pools: group the Assets that should deduplicate against each other, choose where their originals collect, preview what a membership change would link, and re-run deduplication over the Findings already in scope with Apply Now.
+* **(Deduplication)** The three deduplication tuning pages are now one Matching Configuration page: every tool listed once, with its same-tool, cross-tool and reimport matching side by side, and every change previewed before it is saved.
+
+Behavior changes:
+* **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. Instances using false-positive history across such Engagements see narrower replication than before.
+* **(Deduplication)** For an Asset in a Dedupe Pool, Global Component and Global Locations matching is bounded to the pool rather than the whole instance.
+
 ## August 2026: v3.2
 
 ### August 31, 2026: v3.2.400

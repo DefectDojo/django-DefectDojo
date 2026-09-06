@@ -77,7 +77,7 @@ Adding members applies to **future imports**. Findings already in DefectDojo are
 
 The acknowledgement is derived from the specific change it describes, so the preview you ran for adding Assets does not authorize a re-run, and a re-run preview goes stale if the pool changes underneath it. Preview the thing you are about to do.
 
-Apply Now runs while you wait, so it is capped at 50,000 Findings across the pool. Above that
+Apply Now runs while you wait, so it is capped at 10,000 Findings across the pool. Above that
 it refuses and tells you the count rather than running past the request. Narrow the pool, or
 contact DefectDojo Support to have the re-run queued in the background.
 

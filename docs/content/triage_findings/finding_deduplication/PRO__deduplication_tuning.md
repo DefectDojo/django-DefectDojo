@@ -111,6 +111,8 @@ To enable Cross Tool Deduplication, select the tool's **Cross tool** column on *
 
 Cross Tool Deduplication supports the Hash Code algorithm, which is suitable for most workflows, as different tools rarely share compatible unique identifiers. For SCA tools reporting the same dependencies, [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) is also available as a cross-tool option (off by default).
 
+To turn Cross Tool Deduplication off again for a tool, set its algorithm back to **Disabled**. That also clears the tool's cross-tool hash fields, and the cross-tool hashes already stored for its Findings are recomputed to empty in the background. Until that finishes, other tools' imports can still match against those Findings.
+
 Note that Cross Tool Deduplication is also scoped to individual Assets only.
 
 ## Reimport Deduplication
