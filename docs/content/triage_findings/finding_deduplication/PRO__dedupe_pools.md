@@ -32,7 +32,7 @@ Pools and the global algorithms solve the same problem at different scales, and 
 > instance-wide. If you want a tool to keep matching across every Asset, leave its Assets out of
 > a pool for that kind.
 
-A pool does not change **how** two Findings are compared. It changes **which** Findings are eligible to be compared at all. How they are compared is set per tool on [Matching Configuration](/triage_findings/finding_deduplication/pro__deduplication_tuning/), which a pool can override for its own members.
+A pool does not change **how** two Findings are compared. It changes **which** Findings are eligible to be compared at all. How they are compared is set per tool on [Matching Configuration](/triage_findings/finding_deduplication/pro__deduplication_tuning/). Per-pool overrides of that configuration are not yet available; today every member uses the instance default.
 
 ## Membership is per matching kind
 
@@ -40,22 +40,15 @@ An Asset joins a pool for one **matching kind** at a time, and can be in at most
 
 * **Same tool.** Findings from the same scanner deduplicate across the pool's Assets.
 * **Cross tool.** Findings from different scanners deduplicate across the pool's Assets.
-* **Reimport.** Selects the matching formula a reimport uses. It does **not** widen what a reimport itself compares: a reimport matches inside its own Test. Findings it creates are still deduplicated across the pool under same tool and cross tool.
+Membership is offered for these two kinds only. There is no reimport kind to pool for, and that
+is deliberate rather than an omission: a reimport matches inside its own Test, so pooling could
+never widen what it compares, and the one thing a reimport membership could do (select a
+per-pool reimport formula) depends on per-pool overrides, which are not yet available. Offering
+the kind would accept a membership that changes nothing.
 
-That last one is worth reading twice, because the obvious reading is wrong. Two things are true
-at once:
-
-* A reimport's **own** matching stays inside its Test. That matching decides whether an incoming
-  Finding updates an existing one, is created fresh, or whether a Finding missing from the scan
-  gets closed, so it is scoped to the Test the scan is authoritative over. Pooling Assets for
-  reimport does not change that.
-* Findings a reimport **creates** are then deduplicated like any other new Finding, under same
-  tool and cross tool. If the Asset is pooled for those kinds, that deduplication reaches across
-  the pool.
-
-So pooling does affect reimports; it just affects what happens to the Findings a reimport
-produces, rather than what the reimport itself compares against. Only same tool and cross tool
-change scope.
+Pooling still affects reimports, in the way that matters: the Findings a reimport **creates**
+are deduplicated like any other new Finding, under same tool and cross tool, and if the Asset is
+pooled for those kinds that deduplication reaches across the pool.
 
 If you try to add an Asset that already matches within another pool for that kind, DefectDojo refuses the change and names the pool holding it. Take it out of that pool first if the move is deliberate.
 
@@ -90,11 +83,6 @@ contact DefectDojo Support to have the re-run queued in the background.
 
 If deduplication is turned off for the instance, Apply Now reports that nothing was matched and
 points you at System Settings rather than reporting a silent zero.
-
-Reimport offers no Apply Now, for the reason above: pooling for reimport changes which formula a
-reimport uses, not which Findings it compares against, so there is no widened scope to re-run
-over existing Findings. Re-running deduplication across the pool is what the same tool and
-cross tool kinds do, and Findings a reimport created are included in that like any other.
 
 ## Where originals collect
 
@@ -144,3 +132,9 @@ Pools are governed by four global permissions, granted through global roles:
 | **Delete Dedupe Pool** | Delete a pool |
 
 Membership lists and every preview are filtered to the Assets you can read, so the numbers a preview reports are the numbers for **your** visibility, not the instance's.
+
+### Custom roles on upgrade
+
+Matching Configuration used to be read through the tuner's **View Tuner** permission and edited through **Edit Tuner**. Neither gates the new pages: reading pools and Matching Configuration needs **View Dedupe Pool**, and editing a matching formula needs **Edit Dedupe Pool**.
+
+The upgrade carries existing grants over. A custom role holding **Edit Tuner** receives all four pool permissions; a role holding only **View Tuner** receives **View Dedupe Pool**, so a view-only tuner role keeps its read access without gaining any write. Built-in roles are re-seeded from the shipped definitions. Only a custom role created **after** the upgrade needs the pool permissions granted explicitly by an administrator.

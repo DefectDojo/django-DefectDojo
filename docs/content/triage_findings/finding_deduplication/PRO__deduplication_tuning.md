@@ -20,7 +20,7 @@ This page replaced three separate pages (Same Tool Deduplication, Cross Tool Ded
 - **Cross tool**: how findings from different tools are matched against each other.
 - **Reimport**: which formula a reimport uses inside its own test.
 
-A tool's row shows the algorithm in force for each kind, how many hash fields it uses, whether anyone has changed it from the shipped default, and whether a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) overrides it.
+A tool's row shows the algorithm in force for each kind, how many hash fields it uses, and whether anyone has changed it from the shipped default.
 
 ### Changing a tool's matching
 
@@ -37,7 +37,7 @@ Select a tool's row to change its algorithm, its hash fields, or both. Because a
 
 Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
 
-> **Hash fields are set on the instance default, not per pool.** A [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) can give its members a different **algorithm**, but not a different field list. A finding stores one hash, and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows.
+> **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows.
 
 ## Same Tool Deduplication
 
@@ -138,6 +138,21 @@ It is off by default and applies only to the Hash Code reimport algorithm (tools
 
 See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/) for how the matching works, what is preserved, and guidance for enabling it on large instances.
 
+## Upgrading from the tuner pages
+
+The three tuner deduplication pages were replaced by Matching Configuration, and the upgrade
+moves their configuration into it. The migration copies every per-tool entry from the tuner's
+three stored settings into Matching Configuration rows, marks the ones you had changed from the
+shipped defaults as edited, and then removes the tuner's stored settings.
+
+**That last step is one-way. Take a database backup before upgrading.** The migration cannot be
+reversed: rolling back to the previous release means restoring the backup, not running the
+migration in reverse. Nothing about your matching behaviour changes at upgrade time; every tool
+keeps the algorithm and fields it had. The backup is for the case where you need the previous
+release back for some other reason.
+
+Permission changes for custom roles are described under [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/#custom-roles-on-upgrade).
+
 ## Running Deduplication Retroactively on Existing Data
 
 A common situation when first tuning matching is having a large backlog of Findings that were imported *before* the configuration changed. What happens to them depends on which axis you changed.
@@ -176,6 +191,6 @@ By tuning deduplication settings to your specific tools, you can significantly r
 
 ## Where a tool's matching came from
 
-A tool's row on **Settings > Deduplication Settings > Matching Configuration** marks configuration that has been changed from the shipped default, and names any dedupe pool that overrides it. A test's **Matching Policy** panel shows the same thing from the other direction: the algorithm actually in force for that test, and the pool responsible when it differs from the instance default.
+A tool's row on **Settings > Deduplication Settings > Matching Configuration** marks configuration that has been changed from the shipped default. A test's **Matching Policy** panel shows the same thing from the other direction: the algorithm actually in force for that test, and the pool its Asset matches within.
 
-That pairing is what answers "why did these two findings deduplicate differently" without a support ticket: two tests on the same tool showing different algorithms is a pool override, not a fault.
+That pairing is what answers "why did these two findings deduplicate differently" without a support ticket: the panel names the scope each test matched within, so two tests on the same tool with different results point at different pools rather than at a fault.

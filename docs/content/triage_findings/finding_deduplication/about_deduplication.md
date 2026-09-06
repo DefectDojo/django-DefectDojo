@@ -85,7 +85,15 @@ DefectDojo Open Source supports four deduplication algorithms that can be select
 
 ### An alternative to Deduplication: False Positive History
 
-Instances that deliberately do **not** deduplicate can instead use [False Positive History](/triage_findings/finding_deduplication/false_positive_history/), which automatically marks an incoming Finding as a false positive when a matching Finding in the same Asset was already triaged that way. It is **mutually exclusive with Deduplication** — DefectDojo does not allow both to be enabled — and it is still marked experimental.
+Instances that deliberately do **not** deduplicate can instead use [False Positive History](/triage_findings/finding_deduplication/false_positive_history/), which automatically marks an incoming Finding as a false positive when a matching Finding in the same Asset was already triaged that way. It is **mutually exclusive with Deduplication** (DefectDojo does not allow both to be enabled) and it is still marked experimental.
+
+**In DefectDojo Pro, False Positive History uses the same scope as deduplication.** Three consequences follow, and the first two narrow replication for instances that use engagement-scoped deduplication:
+
+* An Engagement that has deduplication scoped to itself is **excluded** from every other Engagement's false positive history in the same Asset.
+* An import into such an Engagement reads **only that Engagement's** history.
+* An Asset in a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) replicates a false positive across the pool's Assets, not only within itself.
+
+Previously the search always covered the whole Asset regardless of engagement scoping.
 
 ## How endpoints are assessed per algorithm
 
