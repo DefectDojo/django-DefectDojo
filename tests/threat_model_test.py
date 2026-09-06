@@ -32,6 +32,7 @@ class ThreatModelTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
+        self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
         driver.find_element(By.LINK_TEXT, "Threat Model Engagement").click()
         # Click the dropdown to find the Upload Threat Model link
         driver.find_element(By.ID, "dropdownMenu1").click()

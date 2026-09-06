@@ -38,6 +38,7 @@ class TestCopyTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
+        self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
         driver.find_element(By.LINK_TEXT, "Copy Test Engagement").click()
         driver.find_element(By.LINK_TEXT, "Pen Test").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
