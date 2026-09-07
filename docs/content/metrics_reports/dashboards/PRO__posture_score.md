@@ -3,7 +3,7 @@ title: "Posture Score"
 description: "DefectDojo Pro's published, versioned security posture score: the scale, every weight, every formula, and the counterfactual semantics"
 draft: false
 audience: pro
-weight: 12
+weight: 14
 slug: posture-score
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: the Posture Score ships with the DefectDojo Pro <b>Command Center</b> (beta). See <a href="../command-center/">Command Center</a> for enabling it.</span>

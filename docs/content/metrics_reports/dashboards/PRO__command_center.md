@@ -3,7 +3,7 @@ title: "Command Center"
 description: "The flagship DefectDojo Pro dashboard family: posture score, instrumented pipeline funnel, honest coverage, TV mode, and the scheduled executive pack"
 draft: false
 audience: pro
-weight: 11
+weight: 13
 slug: command-center
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: the Command Center is a DefectDojo Pro feature in beta. It builds on [Customizable Dashboards](../custom-dashboards/) and is off by default. A superuser can turn on the <b>command_center</b> flag from <b>Settings &gt; Feature Flags</b> (it requires the <b>dashboard_v2</b> flag).</span>
