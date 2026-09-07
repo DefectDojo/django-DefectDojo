@@ -19,7 +19,7 @@ Global Locations is defined over the DefectDojo **Locations** data model and is 
 
 Global Locations Deduplication is gated behind a feature flag and is **off by default**. Once Locations is enabled, a superuser can turn it on from **Settings > Feature Flags** on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
-Once the feature is enabled, **Global Locations** becomes available as an option in the **Deduplication Algorithm** dropdown for both Same Tool and Cross Tool Deduplication settings in the Tuner.
+Once the feature is enabled, **Global Locations** becomes available as an **Algorithm** for both Same tool and Cross tool on **Settings > Finding Workflow > Matching Configuration**.
 
 ## Configuring Global Locations Deduplication
 
@@ -39,8 +39,8 @@ When you select **Global Locations**, the Hash Code Fields selector is hidden (i
 
 Choose which location types participate in matching:
 
-- **URLs** — two Findings match when they share a URL (compared on the configured endpoint fields, `DEDUPE_ALGO_ENDPOINT_FIELDS`).
-- **Dependencies** — two Findings match when they reference the same dependency, by full Package URL identity.
+- **URLs**: two Findings match when they share a URL (compared on the configured endpoint fields, `DEDUPE_ALGO_ENDPOINT_FIELDS`).
+- **Dependencies**: two Findings match when they reference the same dependency, by full Package URL identity.
 
 At least one type must be selected; both are selected by default. A tool configured for **URLs** only ignores shared dependencies, and a tool configured for **Dependencies** only ignores shared URLs.
 
@@ -69,7 +69,7 @@ A new Finding is marked as a duplicate of an existing Finding anywhere in the in
 - **A URL** whose configured endpoint fields (`DEDUPE_ALGO_ENDPOINT_FIELDS`) all match, **or**
 - **A dependency** with the same Package URL (an exact purl match, so `pkg:npm/timespan@2.3.0` does **not** match `pkg:npm/timespan@2.3.1`).
 
-The match is **strict and non-vacuous**: two Findings that have no locations of a selected type are **never** deduplicated (unlike scoped location matching, "both empty" is not a match). If endpoint-field comparison is disabled (`DEDUPE_ALGO_ENDPOINT_FIELDS = []`), URLs cannot establish a match at all — only a shared dependency can.
+The match is **strict and non-vacuous**: two Findings that have no locations of a selected type are **never** deduplicated (unlike scoped location matching, "both empty" is not a match). If endpoint-field comparison is disabled (`DEDUPE_ALGO_ENDPOINT_FIELDS = []`), URLs cannot establish a match at all: only a shared dependency can.
 
 Same-Tool matching stays within a single tool (test type). Cross-Tool matching crosses tools intentionally. The Engagement-scoped deduplication setting is ignored for this algorithm. Matching is instance-wide unless the Asset is in a dedupe pool for that matching kind, in which case it is bounded to the pool (see the callout above), and the `service` field still partitions deduplication as it does for the other global algorithms.
 
@@ -82,8 +82,8 @@ Assume Global Locations (both location types) is enabled on a DAST tool (Same To
 | 1 | DAST Finding at `https://shared.example.com/login` | Application 0 | 1 active Finding created |
 | 2 | Same URL, **different** vulnerability (title + severity) | Application 1 | 1 Finding created, marked as duplicate of the Application 0 Finding (location alone matches) |
 | 3 | Second DAST tool, same URL | Application 2 | 1 Finding created, marked as duplicate of the Application 0 Finding (cross-tool match) |
-| 4 | DAST Finding at `https://other.example.com/admin` | Application 3 | 1 active Finding created — different URL, no shared location |
-| 5 | Finding with no URL and no dependency | Application 4 | 1 active Finding created — no location to share |
+| 4 | DAST Finding at `https://other.example.com/admin` | Application 3 | 1 active Finding created (different URL, no shared location) |
+| 5 | Finding with no URL and no dependency | Application 4 | 1 active Finding created (no location to share) |
 
 Each duplicate Finding shows its original at the bottom of the Finding page in the duplicate chain.
 
@@ -96,7 +96,7 @@ Both are global (cross-Asset) algorithms that ignore the Engagement scope and ma
 | Matches on | Component **name + version** | A shared **location**: a URL and/or a dependency |
 | Dependency identity | Name and version | Full **Package URL** (type, namespace, name, version, qualifiers) |
 | URL / DAST Findings | Not matched | Matched (on the configured endpoint fields) |
-| Configurable | No | Yes — choose URLs, Dependencies, or both per tool |
+| Configurable | No | Yes: choose URLs, Dependencies, or both per tool |
 | Data model | Works with or without Locations | Requires **Locations** (Pro) |
 | Best for | SCA tools where a package name+version is the identity | Web/DAST tools and SCA under the Locations model, where the URL or exact dependency is the identity |
 

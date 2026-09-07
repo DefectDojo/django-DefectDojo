@@ -54,11 +54,11 @@ Uses a combination of selected fields to generate a unique hash. A tool's row on
 
 ##### Content Fingerprint
 
-**Content Fingerprint** is a selectable hash field (available in all three configuration areas) that provides a *location-invariant* identity for static-analysis findings. It is derived from the vulnerable code snippet a tool includes in the finding — normalized so that indentation, line-number annotations, and formatting differences do not change it. Two findings about the same vulnerable code hash identically even when the code moved to a different line or file.
+**Content Fingerprint** is a selectable hash field (available in all three configuration areas) that provides a *location-invariant* identity for static-analysis findings. It is derived from the vulnerable code snippet a tool includes in the finding, normalized so that indentation, line-number annotations, and formatting differences do not change it. Two findings about the same vulnerable code hash identically even when the code moved to a different line or file.
 
-Content Fingerprint is computed for tools that include a code snippet in the finding description — including **Bandit**, **Gosec**, **Brakeman**, **Checkmarx One**, and any tool whose description carries a fenced code block or SARIF snippet.
+Content Fingerprint is computed for tools that include a code snippet in the finding description, including **Bandit**, **Gosec**, **Brakeman**, **Checkmarx One**, and any tool whose description carries a fenced code block or SARIF snippet.
 
-> **Before selecting Content Fingerprint as a hash field**, populate fingerprints for existing findings by running `./manage.py backfill_fingerprints`. Findings imported after the feature is present get fingerprints automatically, but pre-existing findings have none — selecting the field without backfilling makes existing and incoming findings hash differently, splitting every match until the backfill runs.
+> **Before selecting Content Fingerprint as a hash field**, populate fingerprints for existing findings by running `./manage.py backfill_fingerprints`. Findings imported after the feature is present get fingerprints automatically, but pre-existing findings have none. Selecting the field without backfilling makes existing and incoming findings hash differently, splitting every match until the backfill runs.
 
 Content Fingerprint pairs well with **CWE** for tools that embed file paths or line numbers inside their titles, where other identity fields change every time the code moves. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#choosing-hash-fields-for-tracked-tools).
 
@@ -76,7 +76,7 @@ Matches findings by component name and version across **all Assets** in the inst
 #### Global Vulnerability ID
 Matches findings by their **vulnerability IDs** (CVE, GHSA, …) across **all Assets** in the instance, rather than within a single Asset or Engagement. Intended for tools that report the same CVE across many Assets. Gated behind a feature flag and off by default; a superuser can turn it on from **Settings > Feature Flags**. Like the other instance-wide algorithms it is bounded to the Asset's dedupe pool when the Asset is in one for that matching kind.
 
-> **Two tools on the same instance-wide algorithm become mutual deduplication candidates.** When two *different* tools are both configured with an instance-wide algorithm (Global Component, or Global Vulnerability ID), their findings share a constant grouping hash, so a finding from either tool is considered for deduplication against the other on that shared dimension (component, or vulnerability ID). This is the intended cross-tool behavior — enable it only when you want those tools to dedupe together.
+> **Two tools on the same instance-wide algorithm become mutual deduplication candidates.** When two *different* tools are both configured with an instance-wide algorithm (Global Component, or Global Vulnerability ID), their findings share a constant grouping hash, so a finding from either tool is considered for deduplication against the other on that shared dimension (component, or vulnerability ID). This is the intended cross-tool behavior: enable it only when you want those tools to dedupe together.
 
 ### Set-based Hash Code Fields (Vulnerability IDs and CWEs)
 
@@ -91,16 +91,16 @@ Two finding attributes hold a *set* of values rather than a single value: vulner
 | `cwes_partial` | they share **at least one** CWE |
 | `cwes_subset` | one finding's CWEs are a **subset** of the other's |
 
-The `_partial` and `_subset` fields are compared per finding pair rather than folded into the hash: the remaining Hash Code Fields group the candidate findings, and the set comparison then narrows that group. (Exact matching — `vulnerability_ids` and `cwes` — is folded into the hash directly.)
+The `_partial` and `_subset` fields are compared per finding pair rather than folded into the hash: the remaining Hash Code Fields group the candidate findings, and the set comparison then narrows that group. (Exact matching, `vulnerability_ids` and `cwes`, is folded into the hash directly.)
 
 **Empty values.** If a finding has no vulnerability IDs (or no CWEs) for the configured matcher:
 
-- If Hash Code Fields also include an ordinary field (for example `title`), that field carries the identity — the set matcher is skipped for the pair and the findings can still match on the rest of the hash.
+- If Hash Code Fields also include an ordinary field (for example `title`), that field carries the identity: the set matcher is skipped for the pair and the findings can still match on the rest of the hash.
 - If a set matcher is the **only** field, a finding with no values does not match anything: with nothing else to identify it, an empty set is not treated as matching every other finding.
 
 **Configuration rules** (enforced when you save settings):
 
-- A vulnerability IDs field (`vulnerability_ids`, `vulnerability_ids_partial`, or `vulnerability_ids_subset`) may be used on its own — a CVE or GHSA identifies a specific vulnerability instance.
+- A vulnerability IDs field (`vulnerability_ids`, `vulnerability_ids_partial`, or `vulnerability_ids_subset`) may be used on its own: a CVE or GHSA identifies a specific vulnerability instance.
 - CWE fields (`cwes`, `cwes_partial`, `cwes_subset`) may **not** be the only criteria. A CWE is a weakness *class*, not a specific instance, so matching on CWE alone would merge unrelated findings. Pair a CWE matcher with an identifying field such as `title` or `file_path`.
 
 ## Cross Tool Deduplication
@@ -184,7 +184,7 @@ For optimal results with Deduplication Tuning:
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
 - **Keep cross-tool sources in the same Asset**: Cross-Tool Deduplication is Asset-scoped.  Findings split across separate Assets will not dedupe even with matching hash fields.  See [Cross Tool Deduplication](#cross-tool-deduplication) above.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
-- **Backfill before selecting Content Fingerprint**: run `./manage.py backfill_fingerprints` first, then select the field — the triggered re-hash then has fingerprints to work with. See [Content Fingerprint](#content-fingerprint) above.
+- **Backfill before selecting Content Fingerprint**: run `./manage.py backfill_fingerprints` first, then select the field: the triggered re-hash then has fingerprints to work with. See [Content Fingerprint](#content-fingerprint) above.
 - **Enable location tracking between scan runs**: the toggle's automatic re-hash covers the tool's whole backlog; on large instances let it finish before the next scheduled reimport. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#enabling-on-existing-data-upgrades).
 
 By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.
