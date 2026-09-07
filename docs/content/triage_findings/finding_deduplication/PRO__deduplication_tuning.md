@@ -50,7 +50,7 @@ To adjust Same Tool Deduplication, select the tool's **Same tool** column on **S
 DefectDojo Pro offers the following deduplication methods for same-tool deduplication:
 
 #### Hash Code
-Uses a combination of selected fields to generate a unique hash. A tool's row on **Settings > Finding Workflow > Matching Configuration** shows how many fields make up its hash, and selecting the row lets you change them.
+Uses a combination of selected fields to generate a unique hash. A tool's row on **Settings > Finding Workflow > Matching Configuration** shows how many fields make up its hash, and selecting the cell lets you change them.
 
 ##### Content Fingerprint
 

@@ -21,6 +21,7 @@ Pools and the global algorithms solve the same problem at different scales, and 
 | --- | --- | --- | --- |
 | **Dedupe Pool** | The Assets you put in it | Whatever the tool's normal algorithm already uses | Some Assets should share matching and the rest should not |
 | **Global Component** | Every Asset in the instance | Component name and version | Every SCA Finding for a dependency is the same Finding wherever it appears |
+| **Global Vulnerability ID** | Every Asset in the instance | A shared vulnerability identifier (CVE, GHSA, and so on) | Every Finding for a given vulnerability is the same Finding wherever it appears |
 | **Global Locations** | Every Asset in the instance | Package URL, or URL for DAST Findings | As above, keyed on the full location under the Locations data model |
 
 > **Pooling an Asset narrows a global algorithm rather than leaving it alone.** The two are not
@@ -107,7 +108,7 @@ That is the safe default, but it leaves duplicates pointing outside their own As
 
 The **Dedupe Pool** panel on an Asset page shows which pool that Asset matches within, per kind, and lets you change it in place. Add it from the page layout editor if it is not already on your Asset pages.
 
-The panel also offers **Pool this Asset and everything under it**, which pools the Asset and its descendants for that kind in one action. Two things about it are worth knowing:
+The panel also offers **Pool this asset and everything under it**, which pools the Asset and its descendants for that kind in one action. Two things about it are worth knowing:
 
 * It follows **parent relationships only**. A reference between two Assets is not containment, so an Asset that merely uses another is not pulled in.
 * It **skips rather than steals**. A descendant already pooled elsewhere for that kind is reported back as left alone, not moved.

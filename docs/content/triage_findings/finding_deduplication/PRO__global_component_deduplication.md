@@ -9,7 +9,7 @@ Global Component Deduplication is a DefectDojo Pro algorithm that identifies dup
 
 Unlike the other deduplication algorithms, Global Component matching is **not scoped to a single Asset or Engagement**. A Finding imported into Asset B can be marked as a duplicate of an older Finding in Asset A, even if the two Assets are unrelated.
 
-> **Global Component vs. Global Locations:** Global Component matches only on component name and version. If your instance uses the Locations data model, [Global Locations Deduplication](/triage_findings/finding_deduplication/pro__global_locations_deduplication/) is the more precise successor — it keys dependencies on the full Package URL and additionally deduplicates URL/DAST Findings across Assets. See that page's comparison table for which to choose.
+> **Global Component vs. Global Locations:** Global Component matches only on component name and version. If your instance uses the Locations data model, [Global Locations Deduplication](/triage_findings/finding_deduplication/pro__global_locations_deduplication/) is the more precise successor: it keys dependencies on the full Package URL and additionally deduplicates URL/DAST Findings across Assets. See that page's comparison table for which to choose.
 
 ## Enabling the Global Component Algorithm
 
@@ -34,8 +34,8 @@ Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplica
 Use Same-Tool Deduplication with the Global Component algorithm when you want to deduplicate findings from a single SCA tool across multiple Assets.
 
 1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same tool** cell.
-3. Set the **Algorithm** to **Global Component**.
-4. Review the impact and confirm.
+2. Set the **Algorithm** to **Global Component**.
+3. Review the impact and confirm.
 
 Hash Code Fields are not used by this algorithm and are hidden when it is selected.
 
@@ -45,15 +45,15 @@ Use Cross-Tool Deduplication with the Global Component algorithm when you want t
 
 Cross-tool matching requires Global Component to be configured on **each** tool that should participate.
 
-1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Cross tool** cell.
-2. For each tool to include: select it from the **Security Tool** dropdown, set the algorithm to **Global Component**, and submit.
+1. Open **Settings > Finding Workflow > Matching Configuration**.
+2. For each tool to include: select its **Cross tool** cell, set the **Algorithm** to **Global Component**, review the impact and confirm.
 
 ## How Matching Works
 
 A new Finding is marked as a duplicate of an existing Finding when:
 
 - The component name and component version match exactly, **and**
-- An older Finding with the same component name and version exists anywhere in the DefectDojo instance — in any Asset or Engagement.
+- An older Finding with the same component name and version exists anywhere in the DefectDojo instance, in any Asset or Engagement, unless the Asset is in a pool (see below).
 
 Component version matching is exact. A Finding for `timespan@2.3.0` will **not** deduplicate against one for `timespan@2.3.1`.
 
@@ -68,7 +68,7 @@ Assume Global Component is enabled on `Dependency Track Finding Packaging Format
 | 1 | Dependency Track scan for `timespan@2.3.0` | Application 0 | 1 active Finding created |
 | 2 | Same Dependency Track scan | Application 1 | 1 Finding created, marked as duplicate of the Application 0 Finding |
 | 3 | Generic Findings Import for `timespan@2.3.0` | Application 2 | 1 Finding created, marked as duplicate of the Application 0 Finding (cross-tool match) |
-| 4 | Dependency Track scan for `timespan@2.3.1` | Application 3 | 1 active Finding created — different version, no match |
+| 4 | Dependency Track scan for `timespan@2.3.1` | Application 3 | 1 active Finding created (different version, no match) |
 
 Each duplicate Finding shows its original at the bottom of the Finding page in the duplicate chain.
 
@@ -80,7 +80,7 @@ In that case, the Finding is visible and labelled as a duplicate, but the user w
 
 ## Reverting
 
-To stop using Global Component for a given tool, open its Deduplication Settings and switch the algorithm back to one of the scoped options.
+To stop using Global Component for a given tool, open **Settings > Finding Workflow > Matching Configuration**, select the tool's cell for the matching kind in question, and switch the algorithm back to one of the scoped options.
 
 For **Same Tool** Deduplication:
 

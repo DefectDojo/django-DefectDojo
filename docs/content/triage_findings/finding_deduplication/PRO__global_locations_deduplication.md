@@ -5,9 +5,9 @@ weight: 6
 audience: pro
 ---
 
-Global Locations Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Assets** based purely on a **shared location**: a URL, or a dependency (identified by its Package URL). Two Findings that share a location of a selected type are treated as duplicates regardless of their title, severity, CWE, or vulnerability IDs — the location alone is the identity.
+Global Locations Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Assets** based purely on a **shared location**: a URL, or a dependency (identified by its Package URL). Two Findings that share a location of a selected type are treated as duplicates regardless of their title, severity, CWE, or vulnerability IDs: the location alone is the identity.
 
-It is the location-aware counterpart to [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/), applied to the DefectDojo Locations data model. Where Global Component matches only on a component name and version, Global Locations matches on the same dependency **by full Package URL** *and* on shared **URLs** — so it can deduplicate DAST/web Findings across Assets, which Global Component cannot.
+It is the location-aware counterpart to [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/), applied to the DefectDojo Locations data model. Where Global Component matches only on a component name and version, Global Locations matches on the same dependency **by full Package URL** *and* on shared **URLs**, so it can deduplicate DAST/web Findings across Assets, which Global Component cannot.
 
 Unlike the scoped algorithms, Global Locations matching is **not scoped to a single Asset or Engagement**. A Finding imported into Asset B can be marked as a duplicate of an older Finding in Asset A, even if the two Assets are unrelated.
 
@@ -49,9 +49,9 @@ At least one type must be selected; both are selected by default. A tool configu
 Use Same-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings from a single tool across multiple Assets by shared location.
 
 1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same tool** cell.
-3. Set the **Algorithm** to **Global Locations**.
-4. Choose the **Location Types** to match on.
-5. Review the impact and confirm.
+2. Set the **Algorithm** to **Global Locations**.
+3. Choose the **Location Types** to match on.
+4. Review the impact and confirm.
 
 ### Cross-Tool
 
@@ -59,8 +59,8 @@ Use Cross-Tool Deduplication with the Global Locations algorithm when you want t
 
 Cross-tool matching reads the importing tool's location-type selection, so configure Global Locations on **each** tool that should participate, with matching Location Types.
 
-1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Cross tool** cell.
-2. For each tool to include: select it from the **Security Tool** dropdown, set the algorithm to **Global Locations**, choose the Location Types, and submit.
+1. Open **Settings > Finding Workflow > Matching Configuration**.
+2. For each tool to include: select its **Cross tool** cell, set the **Algorithm** to **Global Locations**, choose the Location Types, review the impact and confirm.
 
 ## How Matching Works
 
@@ -110,7 +110,7 @@ In that case, the Finding is visible and labelled as a duplicate, but the user w
 
 ## Reverting
 
-To stop using Global Locations for a given tool, open its Deduplication Settings and switch the algorithm back to one of the scoped options.
+To stop using Global Locations for a given tool, open **Settings > Finding Workflow > Matching Configuration**, select the tool's cell for the matching kind in question, and switch the algorithm back to one of the scoped options.
 
 For **Same Tool** Deduplication:
 
