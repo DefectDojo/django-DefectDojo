@@ -19,7 +19,7 @@ Once the feature is enabled, **Global Component** will become available as an op
 
 ## Configuring Global Component Deduplication
 
-Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Deduplication Settings > Matching Configuration** (see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
 
 > **A pooled Asset is bounded to its pool.** "Across all Assets" holds while an Asset is not in a
 > [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) for the matching kind
@@ -33,10 +33,9 @@ Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplica
 
 Use Same-Tool Deduplication with the Global Component algorithm when you want to deduplicate findings from a single SCA tool across multiple Assets.
 
-1. Open the **Same Tool Deduplication** tab.
-2. Select the SCA tool from the **Security Tool** dropdown (for example, `Dependency Track Finding Packaging Format (FPF) Export`).
-3. Set the **Deduplication Algorithm** to **Global Component**.
-4. Submit the form.
+1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same tool** cell.
+3. Set the **Algorithm** to **Global Component**.
+4. Review the impact and confirm.
 
 Hash Code Fields are not used by this algorithm and are hidden when it is selected.
 
@@ -46,7 +45,7 @@ Use Cross-Tool Deduplication with the Global Component algorithm when you want t
 
 Cross-tool matching requires Global Component to be configured on **each** tool that should participate.
 
-1. Open the **Cross Tool Deduplication** tab.
+1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Cross tool** cell.
 2. For each tool to include: select it from the **Security Tool** dropdown, set the algorithm to **Global Component**, and submit.
 
 ## How Matching Works
@@ -58,7 +57,7 @@ A new Finding is marked as a duplicate of an existing Finding when:
 
 Component version matching is exact. A Finding for `timespan@2.3.0` will **not** deduplicate against one for `timespan@2.3.1`.
 
-The Engagement-scoped deduplication setting is ignored for this algorithm; matching is always global.
+The Engagement-scoped deduplication setting is ignored for this algorithm. Matching is instance-wide unless the Asset is in a dedupe pool for that matching kind, in which case it is bounded to the pool (see the callout above).
 
 ## Example
 
@@ -94,4 +93,4 @@ For **Cross Tool** Deduplication:
 - Hash Code
 - Disabled
 
-Changing the algorithm triggers a background recalculation of deduplication hashes for the tool's existing Findings.
+Changing the algorithm changes what the next import compares and recomputes nothing; existing duplicate links are left as they are. Changing a tool's hash fields (or, for Global Locations, its location types) is what triggers the background recalculation of that tool's stored hashes.

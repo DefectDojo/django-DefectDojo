@@ -81,7 +81,7 @@ DefectDojo Open Source supports four deduplication algorithms that can be select
 - **Unique ID From Tool or Hash Code**: Prefer the tool’s unique ID; fall back to hash when no matching unique ID is found.
 - **Legacy**: Historical algorithm with multiple conditions; only available in the Open Source version.
 
-**DefectDojo Pro adds more.** [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/) widen the scope of the existing algorithms to a chosen group of Assets, per matching kind, without changing how two Findings are compared. Two additional algorithms instead match across **all Assets** in the instance rather than within a single Asset or Engagement: **Global Component** (by component name and version) and **Global Vulnerability ID** (by CVE, GHSA, and similar). Both are off by default and enabled by DefectDojo Support. Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
+**DefectDojo Pro adds more.** [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/) widen the scope of the existing algorithms to a chosen group of Assets, per matching kind, without changing how two Findings are compared. Three additional algorithms instead match across **all Assets** in the instance rather than within a single Asset or Engagement, or across the Asset's pool when it is in one for that matching kind: **Global Component** (by component name and version), **Global Vulnerability ID** (by CVE, GHSA, and similar) and **Global Locations** (by shared URLs or dependencies). All three are off by default and gated behind feature flags (**Settings > Feature Flags**). Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
 
 ### An alternative to Deduplication: False Positive History
 
@@ -91,7 +91,7 @@ Instances that deliberately do **not** deduplicate can instead use [False Positi
 
 * An Engagement that has deduplication scoped to itself is **excluded** from every other Engagement's false positive history in the same Asset.
 * An import into such an Engagement reads **only that Engagement's** history.
-* An Asset in a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) replicates a false positive across the pool's Assets, not only within itself.
+* An Asset in a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) replicates a false positive across the pool's Assets for same-tool matching, not only within itself.
 
 Previously the search always covered the whole Asset regardless of engagement scoping.
 

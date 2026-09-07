@@ -25,8 +25,8 @@ New features:
 * **(Deduplication)** The three deduplication tuning pages are now one Matching Configuration page: every tool listed once, with its same-tool, cross-tool and reimport matching side by side, and every change previewed before it is saved.
 
 Behavior changes:
-* **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. Instances using false-positive history across such Engagements see narrower replication than before.
-* **(Deduplication)** For an Asset in a Dedupe Pool, Global Component and Global Locations matching is bounded to the pool rather than the whole instance.
+* **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. An Asset in a Dedupe Pool replicates its false positives across the pool for same-tool matching. Instances using false-positive history across such Engagements see narrower replication than before.
+* **(Deduplication)** For an Asset in a Dedupe Pool, Global Component, Global Vulnerability ID and Global Locations matching is bounded to the pool rather than the whole instance.
 
 ## August 2026: v3.2
 

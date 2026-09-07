@@ -11,7 +11,7 @@ Pools are for the case where the same thing is genuinely deployed in several pla
 
 A pool may span Organizations. You only ever see the members you have access to, and a member you cannot read is shown as a placeholder rather than hidden, so a pool never looks smaller than it is.
 
-Find pools at **Settings \> Deduplication Settings \> Dedupe Pools**. Matching Configuration sits beside it in the same group.
+Find pools at **Settings \> Finding Workflow \> Dedupe Pools** (**Settings \> Pro Settings \> Deduplication Settings \> Dedupe Pools** on instances still using the previous menu layout). Matching Configuration sits beside it in the same group.
 
 ## Pools vs. the global algorithms
 
@@ -24,8 +24,8 @@ Pools and the global algorithms solve the same problem at different scales, and 
 | **Global Locations** | Every Asset in the instance | Package URL, or URL for DAST Findings | As above, keyed on the full location under the Locations data model |
 
 > **Pooling an Asset narrows a global algorithm rather than leaving it alone.** The two are not
-> independent settings at different blast radii. While an Asset is unpooled, Global Component and
-> Global Locations reach the whole instance as described above. Once that Asset joins a pool for
+> independent settings at different blast radii. While an Asset is unpooled, Global Component,
+> Global Vulnerability ID and Global Locations reach the whole instance as described above. Once that Asset joins a pool for
 > the matching kind in question, those algorithms are **bounded to the pool**: its Findings match
 > only against the pool's other members, not instance-wide. So creating a pool that happens to
 > contain an Asset running Global Component silently narrows matching that was previously
@@ -56,7 +56,7 @@ If you try to add an Asset that already matches within another pool for that kin
 
 A new pool has no members, so nothing about deduplication changes until you add some. This is deliberate: creating a pool to look at it is safe.
 
-1. Open **Settings \> Deduplication Settings \> Dedupe Pools**.
+1. Open **Settings \> Finding Workflow \> Dedupe Pools**.
 2. Enter a name under **New pool** and click **Create Pool**.
 3. Select the pool, then pick the **Matching kind** you want to configure.
 
@@ -89,7 +89,7 @@ points you at System Settings rather than reporting a silent zero.
 **Where originals collect** decides which Finding a pool's duplicates point at.
 
 * **Oldest finding wins.** The default, and what deduplication has always done.
-* **Designated Asset, then oldest.** Duplicates point at the chosen Asset wherever it has a matching Finding, and at the oldest Finding otherwise.
+* **Designated asset, then oldest.** Duplicates point at the chosen Asset where it has a matching Finding old enough to be the original (the engine's age check still applies), and at the oldest Finding otherwise. The designated Asset has to be a member of the pool for same-tool or cross-tool matching: add it first, then designate it.
 
 Use the second when one Asset is the place your team actually works, and you want the originals to land there rather than wherever the earliest scan happened to run.
 
@@ -101,7 +101,7 @@ Changing the placement affects **new** matches. Existing duplicates keep their c
 
 Removing a member also applies to future imports. Findings already linked **keep their links**, including links to an original in an Asset the removed Asset no longer shares a pool with.
 
-That is the safe default, but it leaves duplicates pointing outside their own Asset. When you want those cleaned up, **Reset external links** clears exactly those links. It never deletes anything: a Finding whose link is cleared goes back to being an ordinary active Finding.
+That is the safe default, but it leaves duplicates pointing outside their own Asset. When you want those cleaned up, **Reset External Links** clears exactly those links. Like Apply Now it is preview-gated: **Preview Cleanup** counts the links first and hands back the acknowledgement the reset requires. It never deletes anything: a Finding whose link is cleared goes back to being an ordinary active Finding.
 
 ## Pooling from the Asset page
 
@@ -111,6 +111,7 @@ The panel also offers **Pool this Asset and everything under it**, which pools t
 
 * It follows **parent relationships only**. A reference between two Assets is not containment, so an Asset that merely uses another is not pulled in.
 * It **skips rather than steals**. A descendant already pooled elsewhere for that kind is reported back as left alone, not moved.
+* It pools only what you can read. A descendant you do not have access to is neither pooled nor named; the panel reports how many were left alone for that reason.
 
 A membership created this way is marked **from parent**. **Untoggle subtree** removes only the memberships the toggle created; a membership someone added by hand survives it.
 
@@ -122,19 +123,19 @@ Like the subtree toggle, it counts an Asset already pooled elsewhere for that ki
 
 ## Permissions
 
-Pools are governed by four global permissions, granted through global roles:
+Pools are governed by the **Dedupe Pool** row of the roles editor, four global permissions that take effect only through a global role:
 
-| Permission | Allows |
+| Dedupe Pool column | Allows |
 | --- | --- |
-| **View Dedupe Pool** | See pools and their members |
-| **Add Dedupe Pool** | Create a pool |
-| **Edit Dedupe Pool** | Change membership, placement, and run Apply Now |
-| **Delete Dedupe Pool** | Delete a pool |
+| **View** | See pools, their members, and Matching Configuration |
+| **Add** | Create a pool |
+| **Edit** | Change membership, placement, matching formulas, and run Apply Now |
+| **Delete** | Delete a pool |
 
 Membership lists and every preview are filtered to the Assets you can read, so the numbers a preview reports are the numbers for **your** visibility, not the instance's.
 
 ### Custom roles on upgrade
 
-Matching Configuration used to be read through the tuner's **View Tuner** permission and edited through **Edit Tuner**. Neither gates the new pages: reading pools and Matching Configuration needs **View Dedupe Pool**, and editing a matching formula needs **Edit Dedupe Pool**.
+Matching Configuration used to be read through the tuner's **View Tuner** permission and edited through **Edit Tuner**. Neither gates the new pages: reading pools and Matching Configuration needs **Dedupe Pool: View**, and editing a matching formula needs **Dedupe Pool: Edit**. Both are global permissions, so a role scoped to an Asset or Organization grants nothing here.
 
-The upgrade carries existing grants over. A custom role holding **Edit Tuner** receives all four pool permissions; a role holding only **View Tuner** receives **View Dedupe Pool**, so a view-only tuner role keeps its read access without gaining any write. Built-in roles are re-seeded from the shipped definitions. Only a custom role created **after** the upgrade needs the pool permissions granted explicitly by an administrator.
+The upgrade carries existing grants over. A custom role holding **Edit Tuner** receives all four Dedupe Pool permissions; a role holding only **View Tuner** receives **Dedupe Pool: View**, so a view-only tuner role keeps its read access without gaining any write. Built-in roles are re-seeded from the shipped definitions. A custom role that held neither tuner permission receives nothing, and so does a custom role created **after** the upgrade: both need the Dedupe Pool permissions granted explicitly by an administrator.

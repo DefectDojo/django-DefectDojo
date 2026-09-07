@@ -128,7 +128,7 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 | **System** | System Settings, Appearance, Announcement Banner, Login Banner, Email |
 | **UI Defaults** | Form Configuration, Layout Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
-| **Finding Workflow** | The three Deduplication pages, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
+| **Finding Workflow** | Dedupe Pools, Matching Configuration, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
 | **Notifications** | Notification Events, Notification Webhooks |
 | **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal, Firewall Rules, Maintenance Windows |
@@ -180,7 +180,7 @@ If you are used to the previous layout:
 | Settings → Users → All Users / New User | Settings → Users & Permissions → Users |
 | Settings → Users → All Groups / New Group | Settings → Users & Permissions → Groups |
 | Settings → Users → Roles | Settings → Users & Permissions → Roles |
-| Settings → Pro Settings → Deduplication Settings → *(three pages)* | Settings → Finding Workflow → Same Tool / Cross Tool / Reimport Deduplication |
+| Settings → Pro Settings → Deduplication Settings → *(three pages)* | Settings → Finding Workflow → Matching Configuration (one page covering same-tool, cross-tool and reimport matching), beside Dedupe Pools |
 | Settings → Pro Settings → Finding Enrichment Settings | Settings → Finding Workflow → Finding Enrichment |
 | Settings → Configuration → Service Level Agreements | Settings → Finding Workflow → Service Level Agreements |
 | Settings → Configuration → Prioritization Engines | Settings → Finding Workflow → Prioritization Engines |

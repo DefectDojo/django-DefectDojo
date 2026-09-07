@@ -23,7 +23,7 @@ Once the feature is enabled, **Global Locations** becomes available as an option
 
 ## Configuring Global Locations Deduplication
 
-Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Deduplication Settings > Matching Configuration** (see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
 
 > **A pooled Asset is bounded to its pool.** "Across all Assets" holds while an Asset is not in a
 > [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) for the matching kind
@@ -48,11 +48,10 @@ At least one type must be selected; both are selected by default. A tool configu
 
 Use Same-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings from a single tool across multiple Assets by shared location.
 
-1. Open the **Same Tool Deduplication** tab.
-2. Select the tool from the **Security Tool** dropdown.
-3. Set the **Deduplication Algorithm** to **Global Locations**.
+1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same tool** cell.
+3. Set the **Algorithm** to **Global Locations**.
 4. Choose the **Location Types** to match on.
-5. Submit the form.
+5. Review the impact and confirm.
 
 ### Cross-Tool
 
@@ -60,7 +59,7 @@ Use Cross-Tool Deduplication with the Global Locations algorithm when you want t
 
 Cross-tool matching reads the importing tool's location-type selection, so configure Global Locations on **each** tool that should participate, with matching Location Types.
 
-1. Open the **Cross Tool Deduplication** tab.
+1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Cross tool** cell.
 2. For each tool to include: select it from the **Security Tool** dropdown, set the algorithm to **Global Locations**, choose the Location Types, and submit.
 
 ## How Matching Works
@@ -72,7 +71,7 @@ A new Finding is marked as a duplicate of an existing Finding anywhere in the in
 
 The match is **strict and non-vacuous**: two Findings that have no locations of a selected type are **never** deduplicated (unlike scoped location matching, "both empty" is not a match). If endpoint-field comparison is disabled (`DEDUPE_ALGO_ENDPOINT_FIELDS = []`), URLs cannot establish a match at all — only a shared dependency can.
 
-Same-Tool matching stays within a single tool (test type). Cross-Tool matching crosses tools intentionally. The Engagement-scoped deduplication setting is ignored for this algorithm; matching is always global, and the `service` field still partitions deduplication as it does for the other global algorithms.
+Same-Tool matching stays within a single tool (test type). Cross-Tool matching crosses tools intentionally. The Engagement-scoped deduplication setting is ignored for this algorithm. Matching is instance-wide unless the Asset is in a dedupe pool for that matching kind, in which case it is bounded to the pool (see the callout above), and the `service` field still partitions deduplication as it does for the other global algorithms.
 
 ## Example
 
@@ -124,4 +123,4 @@ For **Cross Tool** Deduplication:
 - Hash Code
 - Disabled
 
-Changing the algorithm triggers a background recalculation of deduplication hashes for the tool's existing Findings.
+Changing the algorithm changes what the next import compares and recomputes nothing; existing duplicate links are left as they are. Changing a tool's hash fields (or, for Global Locations, its location types) is what triggers the background recalculation of that tool's stored hashes.

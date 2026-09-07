@@ -18,7 +18,7 @@ Each of these previously produced a closed finding plus a "new" finding — losi
 
 ## Enabling Location Tracking
 
-Location tracking is configured per tool on **Settings > Deduplication Settings > Matching Configuration**.
+Location tracking is configured per tool on **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout).
 
 1. Find the tool's row and select its **Reimport** column.
 2. Set the **Algorithm** to **Hash code**. Location tracking applies to that algorithm only: tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
