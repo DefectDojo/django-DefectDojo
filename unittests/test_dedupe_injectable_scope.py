@@ -14,11 +14,13 @@ changes nothing.
 
 import logging
 
+from django.test import override_settings
 from django.utils import timezone
 
 from dojo.finding.deduplication import (
     _dedupe_batch_hash_code,  # noqa: PLC2701
     build_candidate_scope_queryset,
+    do_false_positive_history_batch,
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_legacy,
     find_candidates_for_deduplication_uid_or_hash,
@@ -44,9 +46,9 @@ logger = logging.getLogger(__name__)
 SHARED_HASH = "a" * 64
 
 
-class TestInjectableCandidateScope(DojoTestCase):
+class _TwoProductFixture(DojoTestCase):
 
-    """A caller may supply the candidate scope instead of letting the engine derive it."""
+    """Two products under one type, with helpers for tests and findings that share an identity."""
 
     def setUp(self):
         super().setUp()
@@ -101,6 +103,11 @@ class TestInjectableCandidateScope(DojoTestCase):
         Finding.objects.filter(pk=finding.pk).update(hash_code=hash_code, unique_id_from_tool=unique_id)
         finding.refresh_from_db()
         return finding
+
+
+class TestInjectableCandidateScope(_TwoProductFixture):
+
+    """A caller may supply the candidate scope instead of letting the engine derive it."""
 
     # --- the default: unchanged ------------------------------------------
 
@@ -353,3 +360,71 @@ class TestInjectableCandidateScope(DojoTestCase):
             theirs.id, [c.id for c in supplied.get(key, [])],
             "the supplied scope did not reach the legacy reimport finder",
         )
+
+
+#: What the module-level scope provider below answers with. A test sets it, the provider
+#: returns a copy, so the hook can be exercised through the same settings path production uses.
+_FP_SCOPE: dict = {}
+_FP_SCOPE_CALLS: list = []
+
+
+def _module_fp_scope(findings):
+    _FP_SCOPE_CALLS.append([finding.pk for finding in findings])
+    return dict(_FP_SCOPE) or None
+
+
+class TestInjectableFalsePositiveHistoryScope(_TwoProductFixture):
+
+    """
+    False-positive history asks a plugin for its scope when the caller supplied none.
+
+    The post-import task calls ``do_false_positive_history_batch(findings)`` with no scope, so
+    without this hook a plugin that widens deduplication to a group of products could not widen
+    the history search the same way, and a false positive marked in one product never reached a
+    sibling on import. The default stays the product.
+    """
+
+    def setUp(self):
+        super().setUp()
+        _FP_SCOPE.clear()
+        _FP_SCOPE_CALLS.clear()
+        # Same title and hash on both sides: whichever algorithm the test type resolves to,
+        # the two findings share an identity and only the scope decides whether they meet.
+        self.marked = self._create_finding(self.test_a, "Same identity in two products")
+        Finding.objects.filter(pk=self.marked.pk).update(false_p=True, active=False)
+        self.sibling = self._create_finding(self.test_b, "Same identity in two products")
+
+    def test_the_default_scope_is_still_the_product(self):
+        do_false_positive_history_batch([self.sibling])
+
+        self.sibling.refresh_from_db()
+        self.assertFalse(self.sibling.false_p)
+        self.assertEqual(_FP_SCOPE_CALLS, [], "no hook is configured, so none may be consulted")
+
+    @override_settings(FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD="unittests.test_dedupe_injectable_scope._module_fp_scope")
+    def test_a_configured_scope_provider_decides_the_search_when_the_caller_did_not(self):
+        _FP_SCOPE.update({"test__engagement__product__in": [self.test_a.engagement.product_id, self.test_b.engagement.product_id]})
+
+        do_false_positive_history_batch([self.sibling])
+
+        self.sibling.refresh_from_db()
+        self.assertTrue(self.sibling.false_p, "the provider widened the search to both products")
+        self.assertEqual(_FP_SCOPE_CALLS, [[self.sibling.pk]])
+
+    @override_settings(FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD="unittests.test_dedupe_injectable_scope._module_fp_scope")
+    def test_a_provider_returning_none_keeps_the_default(self):
+        do_false_positive_history_batch([self.sibling])
+
+        self.sibling.refresh_from_db()
+        self.assertFalse(self.sibling.false_p)
+        self.assertEqual(len(_FP_SCOPE_CALLS), 1)
+
+    @override_settings(FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD="unittests.test_dedupe_injectable_scope._module_fp_scope")
+    def test_an_explicit_scope_wins_over_the_provider(self):
+        _FP_SCOPE.update({"test__engagement__product__in": [self.test_a.engagement.product_id, self.test_b.engagement.product_id]})
+
+        do_false_positive_history_batch([self.sibling], scope_filter={"test__engagement__product": self.test_b.engagement.product})
+
+        self.sibling.refresh_from_db()
+        self.assertFalse(self.sibling.false_p)
+        self.assertEqual(_FP_SCOPE_CALLS, [], "a caller that said where to search is not second-guessed")

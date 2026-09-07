@@ -1228,6 +1228,10 @@ def do_false_positive_history_batch(findings, *, scope_filter=None):
 
     Args:
         findings: list of :model:`dojo.Finding` instances
+        scope_filter: which findings the history is searched over, as filter keyword
+            arguments for ``Finding.objects.filter``. ``None`` asks the
+            ``FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD`` plugin hook, and falls back to
+            the findings' own product when no hook is configured or it returns ``None``.
 
     """
     if not findings:
@@ -1238,6 +1242,16 @@ def do_false_positive_history_batch(findings, *, scope_filter=None):
     product = findings[0].test.engagement.product
     dedup_alg = findings[0].test.deduplication_algorithm
 
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+
+    # Optional plugin hook: the scope the history is searched over, when the caller did not say.
+    # The engine's own scope is the product; a plugin (e.g. Pro) can widen it to a group of
+    # products or narrow it to one engagement by returning filter keyword arguments, and keeps
+    # the default by returning None. Every caller that passes no scope (the post-import task
+    # included) gets the same answer, so a plugin's scope cannot depend on which door was used.
+    if scope_filter is None and (scope_provider := get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD")):
+        scope_filter = scope_provider(findings)
+
     # Fetch all candidate existing findings with one DB query
     candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg, scope_filter=scope_filter)
 
@@ -1245,7 +1259,6 @@ def do_false_positive_history_batch(findings, *, scope_filter=None):
     # deduplication_algorithm. Lets a plugin (e.g. Pro) narrow candidates by fields that are
     # excluded from the hash string but compared per pair (set-match tokens on
     # vulnerability_ids / CWEs). Resolved once; a no-op when unset. See get_custom_method.
-    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
     fp_candidate_filter = get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD")
 
     to_mark_as_fp_ids: set = set()
