@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '24.18.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
+          node-version: '24.19.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
       - name: Cache dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

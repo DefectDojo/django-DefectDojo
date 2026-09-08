@@ -21,7 +21,7 @@ class TestTypeTest(BaseTestCase):
         time.sleep(1)
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Integration Test Type")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Test type added successfully")
@@ -40,7 +40,7 @@ class TestTypeTest(BaseTestCase):
             time.sleep(1)
             driver.find_element(By.ID, "id_name").clear()
             driver.find_element(By.ID, "id_name").send_keys("Integration Test Type Edited")
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             self.assertTrue(
                 self.is_success_message_present(text="Test type updated successfully")
                 or self.is_text_present_on_page(text="Test Type List"),

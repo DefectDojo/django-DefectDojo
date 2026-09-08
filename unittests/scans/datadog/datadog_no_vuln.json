@@ -1,0 +1,79 @@
+{
+  "data": [
+    {
+      "id": "AAAAA-BBBB-CCCC-0004",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "A muted finding",
+          "severity": "high",
+          "status": "muted",
+          "rule": {
+            "id": "rule-0004",
+            "name": "Muted rule"
+          }
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0005",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "A finding muted through the workflow",
+          "severity": "high",
+          "status": "open",
+          "workflow": {
+            "mute": {
+              "is_muted": true,
+              "is_muted_by_rule": true,
+              "reason": "accepted risk"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0006",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "A compliance rule that passed",
+          "severity": "high",
+          "status": "open",
+          "compliance": {
+            "evaluation": "pass"
+          }
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0008",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "A resolved finding",
+          "severity": "critical",
+          "status": "resolved"
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0009",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "An auto-closed finding",
+          "severity": "critical",
+          "status": "auto_closed"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "after": ""
+    },
+    "status": "done"
+  }
+}

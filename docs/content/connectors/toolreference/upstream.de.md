@@ -17,6 +17,8 @@ Beim Einrichten eines Connectors für ein unterstütztes Tool müssen Sie Defect
 * **Location** \-ein Feld, das im Allgemeinen auf die URL Ihres Tools in Ihrem Netzwerk verweist,
 * **Secret** \- in der Regel ein API-Schlüssel.
 
+Viele Tools stellen genau einen festen API\-Host bereit. Für diese füllt DefectDojo das Feld **Location** beim Anlegen des Connectors automatisch aus. Sie müssen die URL also nicht von dieser Seite kopieren. Behalten Sie den vorgegebenen Wert. Ändern Sie ihn nur, wenn Ihre Instanz einen anderen Host verwendet, zum Beispiel eine selbst gehostete Installation oder eine andere Region.
+
 Manche Tools benötigen über **Location** und **Secret** hinaus weitere API-bezogene Felder. Möglicherweise müssen Sie auch auf der Seite des Tools Änderungen vornehmen, um einen eingehenden Connector von DefectDojo zu ermöglichen.
 
 ![image](images/connectors_tool_reference.png)
@@ -92,6 +94,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Asse
 - [Quay](/connectors/toolreference/quay/)
 - [Rapid7 InsightAppSec](/connectors/toolreference/rapid7_insightappsec/)
 - [Rapid7 InsightVM](/connectors/toolreference/rapid7_insightvm/)
+- [Rapid7 InsightVM - Cloud Instance](/connectors/toolreference/rapid7_insightvm_cloud/)
 - [runZero](/connectors/toolreference/runzero/)
 - [Semgrep](/connectors/toolreference/semgrep/)
 - [ServiceNow CMDB](/connectors/toolreference/servicenow_cmdb/)

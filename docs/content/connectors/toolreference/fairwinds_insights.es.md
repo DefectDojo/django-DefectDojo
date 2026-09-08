@@ -12,7 +12,7 @@ Necesitará un nombre de **organización** de Fairwinds Insights y un **API toke
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://insights.fairwinds.com`, o introduzca explícitamente el host de Insights.
+1. Conserve el valor ya rellenado en **Location**, `https://insights.fairwinds.com`, o introduzca explícitamente el host de Insights.
 2. Introduzca el nombre de **Organization** de Insights (el slug que aparece en la URL de su panel).
 3. Introduzca el token de API de Insights en el campo **Secret**.
 4. De forma opcional, defina una **Minimum Severity** para limitar qué hallazgos se importan.

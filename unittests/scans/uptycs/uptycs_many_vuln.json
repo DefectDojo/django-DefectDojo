@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "cve_list": ["CVE-2000-0001", "CVE-2000-0002", "CVE-2000-0003"],
+      "package_name": "example-tls",
+      "package_version": "1.0.2k-1",
+      "cvss_score": 9.8,
+      "os": "Ubuntu 22.04",
+      "upt_asset_id": "asset-0001",
+      "upt_hostname": "generic-host-01",
+      "upt_asset_group_name": "production-linux"
+    },
+    {
+      "cve_list": "CVE-2000-0004, CVE-2000-0005",
+      "package_name": "example-compress",
+      "package_version": "1.2.3",
+      "cvss_score": "7.5",
+      "os": "Ubuntu 22.04",
+      "upt_asset_id": "asset-0001",
+      "upt_hostname": "generic-host-01",
+      "upt_asset_group_name": "production-linux"
+    },
+    {
+      "cve_list": [],
+      "package_name": "example-agent",
+      "package_version": "3.0.0",
+      "cvss_score": 0,
+      "os": "Windows Server 2019",
+      "upt_asset_id": "asset-0002",
+      "upt_hostname": "generic-host-02"
+    },
+    {
+      "cve_list": ["CVE-2000-0006"],
+      "package_name": "",
+      "package_version": "",
+      "cvss_score": 4.3,
+      "upt_asset_id": "asset-0003"
+    }
+  ]
+}

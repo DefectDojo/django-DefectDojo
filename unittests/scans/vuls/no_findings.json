@@ -1,0 +1,29 @@
+{
+  "jsonVersion": 4,
+  "lang": "en",
+  "serverUUID": "00000000-0000-0000-0000-000000000000",
+  "serverName": "sample-host",
+  "family": "debian",
+  "release": "13",
+  "container": {},
+  "platform": {
+    "name": "other"
+  },
+  "scannedAt": "2026-08-10T09:00:00Z",
+  "scanMode": "fast",
+  "scannedVersion": "v0.30.0",
+  "scannedBy": "sample-host",
+  "scannedVia": "local",
+  "reportedAt": "2026-08-10T09:01:00Z",
+  "reportedVersion": "v0.30.0",
+  "errors": [],
+  "warnings": [],
+  "runningKernel": {
+    "release": "6.1.0-23-amd64",
+    "version": "",
+    "rebootRequired": false
+  },
+  "packages": {},
+  "cweDict": {},
+  "scannedCves": {}
+}

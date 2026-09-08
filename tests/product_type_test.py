@@ -20,7 +20,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Product test type")
         driver.find_element(By.ID, "id_critical_product").click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Organization added successfully."))
         self.assertFalse(self.is_error_message_present())
@@ -42,7 +42,7 @@ class ProductTypeTest(BaseTestCase):
         # Tab into the description area to fill some text
         # Couldnt find a way to get into the box with selenium
         driver.find_element(By.ID, "id_name").send_keys("\tThis is just a test. Be very afraid.")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
@@ -67,7 +67,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Edit").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Edited product test type")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Organization updated successfully."))
 

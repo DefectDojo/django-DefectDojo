@@ -6,8 +6,8 @@ import dojo.base_models.validators
 import dojo.url.validators
 import pgtrigger.compiler
 import pgtrigger.migrations
-import tagulous.models.fields
-import tagulous.models.models
+import django_tagulous.models.fields
+import django_tagulous.models.models
 from django.db import migrations, models
 
 
@@ -89,7 +89,7 @@ class Migration(migrations.Migration):
                 'ordering': ('name',),
                 'abstract': False,
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_Location_tags',
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
                 'ordering': ('name',),
                 'abstract': False,
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='URL',
@@ -315,7 +315,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='location',
             name='inherited_tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field', to='dojo.tagulous_location_inherited_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field', to='dojo.tagulous_location_inherited_tags'),
         ),
         migrations.AlterUniqueTogether(
             name='tagulous_location_tags',
@@ -324,7 +324,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='location',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='A tag that can be used to differentiate a Location', related_name='location_tags', to='dojo.tagulous_location_tags', verbose_name='Tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='A tag that can be used to differentiate a Location', related_name='location_tags', to='dojo.tagulous_location_tags', verbose_name='Tags'),
         ),
         migrations.AddField(
             model_name='url',

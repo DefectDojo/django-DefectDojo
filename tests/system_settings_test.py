@@ -25,8 +25,17 @@ class SystemSettingsTest(BaseTestCase):
     def test_toggle_false_positive_history(self):
         # Disable then re-enable to test both states
         # (always end with disabled since that's the default)
+        #
+        # False positive history and deduplication are mutually exclusive: the
+        # settings view refuses the save outright with "Deduplicate findings and
+        # False positive history can not be set at the same time", and the
+        # deduplication toggle above deliberately ends with deduplication ON. So
+        # turn deduplication off for the duration and put it back afterwards,
+        # the way dedupe_test.py expects to find it.
+        self.disable_system_setting("id_enable_deduplication")
         self.enable_system_setting("id_false_positive_history")
         self.disable_system_setting("id_false_positive_history")
+        self.enable_system_setting("id_enable_deduplication")
 
     @on_exception_html_source_logger
     def test_toggle_jira_integration(self):
@@ -51,21 +60,21 @@ class SystemSettingsTest(BaseTestCase):
         original_value = max_dupes_field.get_attribute("value")
         max_dupes_field.clear()
         max_dupes_field.send_keys("10")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Verify saved
         driver.get(self.base_url + "system_settings")
         self.assertEqual(driver.find_element(By.ID, "id_max_dupes").get_attribute("value"), "10")
         # Reset to original
         driver.find_element(By.ID, "id_max_dupes").clear()
         driver.find_element(By.ID, "id_max_dupes").send_keys(original_value)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
     @on_exception_html_source_logger
     def test_settings_save_and_reload(self):
         driver = self.driver
         driver.get(self.base_url + "system_settings")
         # Just verify the page loads and save button works
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # After save, the page should reload without errors
         self.assertFalse(self.is_error_message_present())
 

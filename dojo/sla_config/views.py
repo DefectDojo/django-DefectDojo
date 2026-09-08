@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
 from dojo.forms import SLAConfigForm
@@ -20,7 +21,7 @@ def new_sla_config(request):
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "SLA configuration Successfully Created.",
+                                 _("SLA configuration Successfully Created."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("sla_config"))
     else:
@@ -50,12 +51,12 @@ def edit_sla_config(request, slaid):
                 sla_config.delete()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    "SLA Configuration Deleted.",
+                                    _("SLA Configuration Deleted."),
                                     extra_tags="alert-success")
             return HttpResponseRedirect(reverse("sla_config"))
         messages.add_message(request,
                              messages.ERROR,
-                             "The Default SLA Configuration cannot be deleted.",
+                             _("The Default SLA Configuration cannot be deleted."),
                              extra_tags="alert-danger")
         return HttpResponseRedirect(reverse("sla_config"))
 
@@ -65,7 +66,7 @@ def edit_sla_config(request, slaid):
             form.save(commit=True)
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "SLA configuration successfully updated. All SLA expiration dates for findings within this SLA configuration will be recalculated asynchronously.",
+                                 _("SLA configuration successfully updated. All SLA expiration dates for findings within this SLA configuration will be recalculated asynchronously."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("sla_config"))
     else:

@@ -18,6 +18,22 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## August 2026: v3.2
 
+### August 31, 2026: v3.2.400
+
+New features:
+* **(Sensei)** Added a generic fix flow: you can now associate a repository with a finding inline, and a gap-closing wizard walks you through anything else Sensei needs before it can generate a fix. Finding file paths are also resolved against the repository tree before the fix is generated, so fixes land in the right file.
+* **(Sensei)** Scan-and-fix now includes a scanner for AI agent skills (Skillspector).
+* **(Engagements)** Added engagement checklists to the Pro UI.
+* **(Rules Engine 2.0)** Rules can now be conditioned on KEV (Known Exploited Vulnerabilities) listing and exploit evidence.
+* **(Navigation)** Added a searchable menu palette over the sidebar, opened with Cmd/Ctrl+K.
+* **(Correlation)** The Root Cause view now has a Root Cause Organization column, asset and organization filters, and per-organization drill-in.
+* **(Exporters)** The UI SBOM export now offers SPDX alongside CycloneDX.
+
+Enhancements:
+* **(Custom Fields)** Custom fields now render on the entity create and edit forms, and are configured like any other form field.
+* **(Connectors)** The Wiz, Microsoft Defender for Cloud, and CrowdStrike connectors now stream findings page by page rather than holding a whole sync in memory, so large syncs are faster and lighter.
+
+
 ### August 24, 2026: v3.2.300
 
 New features:

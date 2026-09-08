@@ -1,0 +1,46 @@
+[
+  {
+    "config": "\nserver {\n\tserver_name example.org;\n\n\tif ($http_referer ~ evil) {\n\t}\n}",
+    "description": "Improve the regular expression to match only correct and trusted referers and origins.",
+    "file": "nginx/nginx.conf",
+    "line": 16,
+    "path": "nginx/nginx.conf",
+    "plugin": "origins",
+    "reason": "Regex matches insecure \"https://def.comevil\" as a valid referer.",
+    "reference": "https://gixy.getpagespeed.com/checks/origins/",
+    "severity": "MEDIUM",
+    "summary": "Validation regex for \"origin\" or \"referer\" matches untrusted domain or invalid value."
+  },
+  {
+    "config": "\nserver {\n\tserver_name example.org;\n}",
+    "description": "Using server_tokens on; or server_tokens build;  allows an attacker to learn the version of NGINX you are running, which can be used to exploit known vulnerabilities.",
+    "file": "nginx/nginx.conf",
+    "fixes": [
+      {
+        "description": "Add server_tokens off to disable version disclosure",
+        "replace": "server {\n    server_tokens off;",
+        "search": "server {",
+        "title": "Add server_tokens off"
+      }
+    ],
+    "line": 2,
+    "path": "nginx/nginx.conf",
+    "plugin": "version_disclosure",
+    "reason": "Missing server_tokens directive - defaults to 'on' which promotes information disclosure",
+    "reference": "https://gixy.getpagespeed.com/checks/version-disclosure/",
+    "severity": "HIGH",
+    "summary": "Do not enable server_tokens on or server_tokens build"
+  },
+  {
+    "config": "\nserver {\n\tserver_name example.org;\n\n\tlocation /redirect {\n\t\trewrite ^ https://$host$uri;\n\t}\n}",
+    "description": "Using variables that can contain \"\\n\" or \"\\r\" may lead to http injection.",
+    "file": "nginx/nginx.conf",
+    "line": 13,
+    "path": "nginx/nginx.conf",
+    "plugin": "http_splitting",
+    "reason": "At least variable \"$uri\" can contain \"\\n\"",
+    "reference": "https://gixy.getpagespeed.com/checks/http-splitting/",
+    "severity": "HIGH",
+    "summary": "Possible HTTP-Splitting vulnerability."
+  }
+]

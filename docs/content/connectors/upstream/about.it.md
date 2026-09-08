@@ -84,6 +84,7 @@ Attualmente supportiamo Connettori Upstream per i seguenti strumenti, con altri 
 * **Quay**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **runZero**
 * **Semgrep**
 * **ServiceNow CMDB**

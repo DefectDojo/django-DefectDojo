@@ -1,0 +1,96 @@
+{
+  "scan_id": "scan-0001",
+  "sarif": {
+    "version": "2.1.0",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "HiddenLayer Model Scanner",
+            "version": "1.0.0",
+            "rules": [
+              {
+                "id": "PICKLE_DESERIALIZATION",
+                "name": "UnsafePickleDeserialization",
+                "shortDescription": {"text": "The model file deserialises untrusted pickle data"},
+                "fullDescription": {"text": "Loading this model executes arbitrary code."},
+                "helpUri": "https://example.com/rules/pickle-deserialization",
+                "properties": {"security-severity": "9.3",
+                               "tags": ["external/cwe/cwe-502", "model-integrity"]},
+                "relationships": [{"target": {"id": "CWE-502"}}]
+              },
+              {
+                "id": "SUSPICIOUS_IMPORT",
+                "name": "SuspiciousImport",
+                "shortDescription": {"text": "The model imports a module used to run commands"},
+                "help": {"text": "https://example.com/rules/suspicious-import"},
+                "properties": {"security-severity": "high", "tags": ["external/cwe/cwe-94"]}
+              },
+              {
+                "id": "ARCHITECTURE_NOTE",
+                "shortDescription": {"text": "The model architecture is unusual"},
+                "help": {"text": "Review the architecture by hand."}
+              },
+              {
+                "id": "CVE-2000-0001",
+                "name": "VulnerableDependency",
+                "shortDescription": {"text": "The model bundles a vulnerable library"},
+                "properties": {"security-severity": "not a number at all", "tags": []}
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "PICKLE_DESERIALIZATION",
+            "level": "error",
+            "kind": "fail",
+            "message": {"text": "Unsafe pickle opcode found in the model archive"},
+            "locations": [
+              {"physicalLocation": {"artifactLocation": {"uri": "generic-model/pytorch_model.bin"},
+                                    "region": {"startLine": 42}}}
+            ],
+            "fixes": [
+              {"description": {"text": "Re-export the model in the safetensors format."}},
+              {"description": {"text": "Load the model with weights_only=True."}}
+            ],
+            "properties": {"tags": ["supply-chain"]}
+          },
+          {
+            "ruleId": "SUSPICIOUS_IMPORT",
+            "level": "warning",
+            "message": {"text": "The archive imports the subprocess module"},
+            "locations": [
+              {"physicalLocation": {"artifactLocation": {"uri": "generic-model/loader.py"},
+                                    "region": {"startLine": "17"}}}
+            ],
+            "suppressions": [{"kind": "external", "justification": "Reviewed and accepted"}]
+          },
+          {
+            "ruleId": "ARCHITECTURE_NOTE",
+            "level": "note",
+            "message": {"text": "The architecture is unusual"}
+          },
+          {
+            "ruleId": "CVE-2000-0001",
+            "message": {"text": ""},
+            "locations": [
+              {"physicalLocation": {"artifactLocation": {"uri": "generic-model/requirements.txt"}}}
+            ]
+          },
+          {
+            "ruleId": "PICKLE_DESERIALIZATION",
+            "kind": "pass",
+            "message": {"text": "Never imported: this result is a pass, not a failure"}
+          },
+          {
+            "ruleId": "UNKNOWN_RULE",
+            "level": "error",
+            "message": {"text": "A result whose rule is not defined in the run"},
+            "properties": {"tags": ["external/cwe/cwe-77"]}
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,379 @@
+{
+  "pit_id": "example-pit-id",
+  "hits": {
+    "total": {
+      "value": 13,
+      "relation": "eq"
+    },
+    "hits": [
+      {
+        "_id": "doc-cnvm-1",
+        "_index": "logs-cloud_security_posture.vulnerabilities-default",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "vulnerability": {
+            "id": "CVE-2000-0001",
+            "title": "openssl: remote code execution",
+            "description": "A memory-safety flaw allows remote code execution.",
+            "severity": "HIGH",
+            "reference": "https://nvd.example.com/vuln/detail/CVE-2000-0001",
+            "classification": "CVSS",
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "published_date": "2024-05-01T00:00:00.000Z"
+          },
+          "package": {
+            "name": "openssl",
+            "version": "3.0.2",
+            "fixed_version": "3.0.13",
+            "type": "deb"
+          },
+          "resource": {
+            "id": "i-0000000000000001",
+            "name": "web-node-1",
+            "type": "instance",
+            "sub_type": "ec2"
+          },
+          "host": {
+            "name": "web-node-1",
+            "hostname": "web-node-1.example.com",
+            "os": {
+              "name": "Ubuntu",
+              "version": "22.04",
+              "full": "Ubuntu 22.04.4 LTS"
+            }
+          },
+          "cloud": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "account": {
+              "id": "acct-1234",
+              "name": "example-account"
+            }
+          }
+        }
+      },
+      {
+        "_id": "doc-cnvm-2",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "vulnerability": {
+            "id": "CVE-2000-0002",
+            "description": "An integer overflow crashes the parser.",
+            "severity": "SEVERE",
+            "score": {
+              "base": 7.5,
+              "version": "3.0"
+            }
+          },
+          "package": {
+            "name": "libxml2",
+            "version": "2.9.13",
+            "type": "deb"
+          },
+          "host": {
+            "name": "web-node-1"
+          },
+          "cloud": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "account": {
+              "id": "acct-1234",
+              "name": "example-account"
+            }
+          }
+        }
+      },
+      {
+        "_id": "doc-cnvm-3",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "vulnerability": {
+            "id": "CVE-2000-0003",
+            "description": "A legacy issue scored under CVSS v2 only.",
+            "severity": "not a label",
+            "score": {
+              "base": "5.0",
+              "version": "2.0"
+            }
+          },
+          "package": {
+            "name": "zlib",
+            "version": "1.2.11"
+          },
+          "host": {
+            "hostname": "batch-node-2.example.com"
+          }
+        }
+      },
+      {
+        "_id": "doc-cnvm-4",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "vulnerability": {
+            "id": "CVE-2000-0004",
+            "severity": "unrecognised"
+          },
+          "kubernetes": {
+            "namespace": "payments",
+            "pod": {
+              "name": "api-7c9f-abcde"
+            }
+          },
+          "orchestrator": {
+            "cluster": {
+              "id": "cluster-1",
+              "name": "example-cluster"
+            }
+          }
+        }
+      },
+      {
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "vulnerability": {
+            "id": "CVE-2000-0005",
+            "severity": "low"
+          },
+          "package": {
+            "name": "curl",
+            "version": "7.81.0"
+          },
+          "resource": {
+            "name": "batch-node-2",
+            "type": "instance"
+          }
+        }
+      },
+      {
+        "_id": "doc-cnvm-not-a-vulnerability",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "vulnerability": {
+            "description": "A document with no CVE id."
+          },
+          "host": {
+            "name": "web-node-1"
+          }
+        }
+      },
+      {
+        "_id": "doc-posture-1",
+        "_index": "logs-cloud_security_posture.findings-default",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "rule": {
+            "id": "rule-0001",
+            "name": "Ensure the audit log is enabled",
+            "description": "Checks the API server's audit-log configuration.",
+            "rationale": "An audit log records administrative actions for later review.",
+            "remediation": "Enable the audit log in the cluster configuration.",
+            "impact": "Log volume increases.",
+            "section": "Logging",
+            "tags": [
+              "CIS",
+              "CIS 3.2.1",
+              "Kubernetes"
+            ],
+            "references": "https://docs.example.com/cis/3.2.1",
+            "severity": "medium",
+            "benchmark": {
+              "id": "cis_k8s",
+              "name": "CIS Kubernetes V1.23",
+              "version": "v1.0.1",
+              "posture_type": "kspm",
+              "rule_number": "3.2.1"
+            }
+          },
+          "result": {
+            "evaluation": "failed"
+          },
+          "orchestrator": {
+            "cluster_name": "example-cluster"
+          },
+          "kubernetes": {
+            "namespace": "kube-system",
+            "pod": {
+              "name": "kube-apiserver-1"
+            }
+          },
+          "host": {
+            "name": "control-plane-1",
+            "os": {
+              "full": "Ubuntu 22.04.4 LTS"
+            }
+          }
+        }
+      },
+      {
+        "_id": "doc-posture-2",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "rule": {
+            "name": "Ensure encryption at rest is configured",
+            "description": "The same text as the rationale.",
+            "rationale": "The same text as the rationale.",
+            "remediation": "Enable encryption at rest.",
+            "severity": "not a label",
+            "benchmark": {
+              "id": "cis_aws",
+              "name": "CIS AWS Foundations",
+              "version": "v1.5.0",
+              "posture_type": "cspm",
+              "rule_number": "2.1.1"
+            }
+          },
+          "result": {
+            "evaluation": "FAILED"
+          },
+          "resource": {
+            "id": "bucket-1",
+            "name": "example-bucket",
+            "type": "s3",
+            "sub_type": "bucket"
+          },
+          "cloud": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "account": {
+              "id": "acct-1234",
+              "name": "example-account"
+            }
+          }
+        }
+      },
+      {
+        "_id": "doc-posture-passed",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "rule": {
+            "id": "rule-0003",
+            "name": "Ensure logging is enabled",
+            "severity": "high"
+          },
+          "result": {
+            "evaluation": "passed"
+          },
+          "host": {
+            "name": "control-plane-1"
+          }
+        }
+      },
+      {
+        "_id": "doc-posture-unnamed",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "rule": {
+            "id": "rule-0004",
+            "severity": "high"
+          },
+          "result": {
+            "evaluation": "failed"
+          },
+          "host": {
+            "name": "control-plane-1"
+          }
+        }
+      },
+      {
+        "_id": "doc-detection-1",
+        "_index": ".internal.alerts-security.alerts-default-000001",
+        "_source": {
+          "@timestamp": "2024-07-02T08:30:00.000Z",
+          "message": "Suspicious process started",
+          "event": {
+            "kind": "signal",
+            "category": [
+              "process",
+              "malware"
+            ],
+            "module": "endpoint"
+          },
+          "kibana": {
+            "alert": {
+              "uuid": "alert-0001",
+              "reason": "malware detected on web-node-1",
+              "severity": "critical",
+              "risk_score": 99,
+              "workflow_status": "open",
+              "rule": {
+                "uuid": "rule-uuid-0001",
+                "name": "Malware Detection Alert",
+                "description": "Detects known malware signatures on an endpoint.",
+                "severity": "critical",
+                "risk_score": 99,
+                "tags": [
+                  "Elastic",
+                  "Endpoint Security"
+                ],
+                "references": [
+                  "https://docs.example.com/rules/malware",
+                  "https://attack.example.com/techniques/T0000"
+                ]
+              }
+            }
+          },
+          "host": {
+            "name": "web-node-1",
+            "os": {
+              "full": "Ubuntu 22.04.4 LTS"
+            }
+          },
+          "cloud": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "account": {
+              "id": "acct-1234",
+              "name": "example-account"
+            }
+          }
+        }
+      },
+      {
+        "_id": "doc-detection-2",
+        "_source": {
+          "@timestamp": "2024-07-02T09:00:00.000Z",
+          "event": {
+            "category": [
+              "network"
+            ]
+          },
+          "signal": {
+            "uuid": "alert-0002",
+            "reason": "unusual outbound connection from batch-node-2",
+            "rule": {
+              "uuid": "rule-uuid-0002",
+              "severity": "not a label",
+              "risk_score": "47"
+            }
+          },
+          "host": {
+            "hostname": "batch-node-2.example.com"
+          }
+        }
+      },
+      {
+        "_id": "doc-detection-3",
+        "_source": {
+          "@timestamp": "2024-07-02T09:30:00.000Z",
+          "kibana": {
+            "alert": {
+              "uuid": "alert-0003",
+              "reason": "",
+              "severity": "low",
+              "rule": {
+                "uuid": "rule-uuid-0003",
+                "name": ""
+              }
+            }
+          },
+          "host": {
+            "name": "web-node-1"
+          }
+        }
+      }
+    ]
+  }
+}

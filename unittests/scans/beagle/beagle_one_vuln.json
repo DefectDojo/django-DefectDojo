@@ -1,0 +1,6 @@
+{
+  "code": "0",
+  "message": "success",
+  "applicationToken": "example-application-token",
+  "result": "{\"project_name\": \"Default project\", \"application_name\": \"generic-app\", \"url\": \"https://app.example.com\", \"generated_date\": \"04 Sep 2021\", \"approved_date\": \"04 Sep 2021\", \"vulnerabilities\": [{\"name\": \"SQL injection\", \"severity\": \"Critical\", \"cwe\": \"CWE-89\", \"cvss_score\": 9.8, \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\", \"description\": \"A request parameter is concatenated into a database query.\", \"solution\": \"Use parameterised queries.\", \"occurences\": [{\"status\": \"Open\", \"vulnerability\": {\"Method\": \"post\", \"Url\": \"https://app.example.com/api/report\"}}]}]}"
+}

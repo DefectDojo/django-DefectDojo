@@ -12,7 +12,7 @@ Necesitará un **token de API** de Socket — un token de organización creado e
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://api.socket.dev/v0`, o introdúzcalo explícitamente.
+1. Conserve el valor ya rellenado en **Location**, `https://api.socket.dev/v0`, o introdúzcalo explícitamente.
 2. Introduzca el token de API de Socket en el campo **Secret**.
 3. Opcionalmente, establezca una **Minimum Severity** para limitar qué hallazgos se importan.
 

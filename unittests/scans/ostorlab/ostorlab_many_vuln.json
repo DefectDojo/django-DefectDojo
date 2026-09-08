@@ -1,0 +1,79 @@
+{
+  "data": {
+    "scan": {
+      "id": 4002,
+      "assetType": "WEB",
+      "progress": "DONE",
+      "createdTime": "2024-06-03T09:30:00Z",
+      "vulnerabilities": {
+        "pageInfo": {"hasNext": false, "numPages": 1},
+        "vulnerabilities": [
+          {
+            "id": 900010,
+            "technicalDetail": "The endpoint reflects the q parameter without escaping.",
+            "detail": {
+              "title": "Reflected cross-site scripting",
+              "shortDescription": "User input is echoed into the page.",
+              "description": "See CVE-2000-0002 and CVE-2000-0001 for the underlying library flaw.",
+              "recommendation": "Escape user input before rendering it.",
+              "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+              "riskRating": "CRITICAL",
+              "references": [{"title": "Advisory", "url": "https://example.com/CVE-2000-0001"}]
+            },
+            "vulnerabilityLocation": {
+              "asset": {"host": "app.example.com", "name": ""},
+              "metadata": [{"metadataType": "URL", "metadataValue": "https://app.example.com/search?q=1"}]
+            }
+          },
+          {
+            "id": 900011,
+            "technicalDetail": "",
+            "detail": {
+              "title": "Missing security header",
+              "riskRating": "POTENTIALLY",
+              "references": []
+            },
+            "vulnerabilityLocation": {
+              "asset": {"name": "app.example.com"}
+            }
+          },
+          {
+            "id": 900012,
+            "detail": {
+              "title": "Server banner discloses a version",
+              "riskRating": "HARDENING"
+            }
+          },
+          {
+            "id": 900013,
+            "detail": {
+              "title": "An important-rated finding",
+              "riskRating": "IMPORTANT"
+            }
+          },
+          {
+            "id": 900014,
+            "detail": {
+              "title": "Never imported: this check passed",
+              "riskRating": "SECURE"
+            }
+          },
+          {
+            "id": 900015,
+            "technicalDetail": "A finding with no detail block at all."
+          },
+          {
+            "id": 900016,
+            "detail": {
+              "title": "A finding on a host DefectDojo cannot accept",
+              "riskRating": "MEDIUM"
+            },
+            "vulnerabilityLocation": {
+              "asset": {"name": "not a valid host!!"}
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -12,7 +12,7 @@ Vous aurez besoin d'un nom d'**organisation** Fairwinds Insights et d'un **jeton
 
 #### Mappages du connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://insights.fairwinds.com`, ou saisissez explicitement l'hôte de votre instance Insights.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://insights.fairwinds.com`, ou saisissez explicitement l'hôte de votre instance Insights.
 2. Saisissez votre nom d'**Organization** Insights (le slug affiché dans l'URL de votre tableau de bord).
 3. Saisissez le jeton d'API Insights dans le champ **Secret**.
 4. Facultativement, définissez une **Minimum Severity** pour limiter les constatations importées.

@@ -66,7 +66,7 @@ class EndpointExtendedTest(BaseTestCase):
         # Navigate to the product and its endpoints
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+        self.open_product_tab(driver, "endpoints")
         driver.find_element(By.LINK_TEXT, "View Endpoints").click()
         # Click on the first endpoint
         driver.find_element(By.CSS_SELECTOR, "table tbody tr td a").click()
@@ -91,7 +91,7 @@ class EndpointExtendedTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+        self.open_product_tab(driver, "endpoints")
         driver.find_element(By.LINK_TEXT, "View Endpoints").click()
         # Click on the first endpoint
         driver.find_element(By.CSS_SELECTOR, "table tbody tr td a").click()

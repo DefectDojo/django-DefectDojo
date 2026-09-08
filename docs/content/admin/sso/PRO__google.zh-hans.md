@@ -31,7 +31,7 @@ DefectDojo Pro 支持通过 Google 账户登录。首次登录时,如果新用�
 - **Google OAuth Key**——输入您的 **Client ID**
 - **Google OAuth Secret**——输入您的 **Client Secret Key**
 - **Whitelisted Domains**——输入您组织的域名(例如 `yourcompany.com`),以允许该域下的任何用户登录
-- **Whitelisted E-mail Addresses**——或者,输入允许登录的特定邮箱地址(例如 `user1@yourcompany.com, user2@yourcompany.com`)
+- **Whitelisted Email Addresses**——或者,输入允许登录的特定邮箱地址(例如 `user1@yourcompany.com, user2@yourcompany.com`)
 
 您必须至少设置一个白名单域名或邮箱地址,否则将没有任何用户能够通过 Google 登录。
 

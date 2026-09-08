@@ -14,6 +14,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.celery_dispatch import dojo_dispatch_task
@@ -197,7 +198,7 @@ def edit_endpoint(request, eid):
             endpoint = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Endpoint updated successfully.",
+                                 _("Endpoint updated successfully."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_endpoint", args=(endpoint.id,)))
     else:
@@ -227,7 +228,7 @@ def delete_endpoint(request, eid):
                 endpoint.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "Endpoint and relationships removed.",
+                                     _("Endpoint and relationships removed."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("view_product", args=(product.id,)))
 
@@ -263,7 +264,7 @@ def add_endpoint(request, pid):
                 e.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Endpoint added successfully.",
+                                 _("Endpoint added successfully."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("endpoint") + "?product=" + pid)
 
@@ -288,7 +289,7 @@ def add_product_endpoint(request):
                 e.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Endpoint added successfully.",
+                                 _("Endpoint added successfully."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("endpoint") + f"?product={form.product.id}")
     add_breadcrumb(title="Add Endpoint", top_level=False, request=request)
@@ -310,7 +311,7 @@ def manage_meta_data(request, eid):
         if formset.is_valid():
             formset.save()
             messages.add_message(
-                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success",
+                request, messages.SUCCESS, _("Metadata updated successfully."), extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
 
@@ -383,7 +384,7 @@ def endpoint_bulk_update_all(request, pid=None):
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 "Unable to process bulk update. Required fields were not selected.",
+                                 _("Unable to process bulk update. Required fields were not selected."),
                                  extra_tags="alert-danger")
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
@@ -400,7 +401,7 @@ def endpoint_status_bulk_update(request, fid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Selected endpoints have been removed from this finding.",
+                _("Selected endpoints have been removed from this finding."),
                 extra_tags="alert-success",
             )
         elif endpoints_to_update and len(enable) > 0:
@@ -421,12 +422,12 @@ def endpoint_status_bulk_update(request, fid):
                 endpoint_status.save()
             messages.add_message(request,
                                     messages.SUCCESS,
-                                    "Bulk edit of endpoints was successful. Check to make sure it is what you intended.",
+                                    _("Bulk edit of endpoints was successful. Check to make sure it is what you intended."),
                                     extra_tags="alert-success")
         else:
             messages.add_message(request,
                                     messages.ERROR,
-                                    "Unable to process bulk update. Required fields were not selected.",
+                                    _("Unable to process bulk update. Required fields were not selected."),
                                     extra_tags="alert-danger")
     return redirect(request, post["return_url"])
 

@@ -58,7 +58,7 @@ class CloseOldDedupeTest(BaseTestCase):
         if not driver.find_element(By.ID, "id_enable_deduplication").is_selected():
             driver.find_element(By.XPATH, '//*[@id="id_enable_deduplication"]').click()
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check if it's enabled after reload
             driver.get(self.base_url + "system_settings")
             self.assertTrue(driver.find_element(By.ID, "id_enable_deduplication").is_selected())

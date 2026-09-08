@@ -1,0 +1,293 @@
+"""
+Error contract for API v3 (D9 / §4.10) and the shared success renderer.
+
+All error bodies are RFC 9457 ``application/problem+json`` with a ``fields`` extension for
+validation errors. Routes never hand-build error bodies -- they raise ``ProblemDetail`` (or a
+standard Django/ninja exception) and the registered handlers shape the response. Invariant I9:
+the error contract is closed; new error kinds get new ``type`` URIs, not new shapes.
+
+The shared success renderer (``json_response``) lives here too because it shares the JSON
+encoder and the ``X-API-Status`` header logic with the problem renderer.
+"""
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING
+
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.utils import IntegrityError
+from django.http import Http404, JsonResponse
+from django.utils.translation import gettext as _
+from ninja.errors import AuthenticationError, ValidationError
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest, HttpResponse
+    from ninja import NinjaAPI
+
+logger = logging.getLogger(__name__)
+
+# Problem-type identifiers (RFC 9457 §3.1.1). Distinct per problem type via a fragment on the v3
+# alpha docs page. The base is the page's committed front-matter alias (``/en/api/api-v3-alpha-docs``),
+# so the URL is guaranteed to resolve in the built docs site — the in-app-docs link check
+# (validate_docs_build.yml) requires every docs.defectdojo.com URL under dojo/ to exist.
+_ERROR_TYPE_BASE = "https://docs.defectdojo.com/en/api/api-v3-alpha-docs/#error-"
+
+
+class V3JSONEncoder(DjangoJSONEncoder):
+
+    """
+    DjangoJSONEncoder already renders aware datetimes as ISO-8601 with a ``Z`` suffix and dates
+    as ``YYYY-MM-DD`` (§4.11). We normalise aware datetimes to UTC first so the ``Z`` conversion
+    always applies regardless of the active timezone.
+    """
+
+    def default(self, o):
+        import datetime  # noqa: PLC0415 -- localized to the encoder hot path
+
+        if isinstance(o, datetime.datetime) and o.tzinfo is not None:
+            o = o.astimezone(datetime.UTC)
+        return super().default(o)
+
+
+def _with_status_header(response: HttpResponse) -> HttpResponse:
+    response["X-API-Status"] = settings.API_V3_STATUS
+    return response
+
+
+def json_response(data, *, status: int = 200) -> JsonResponse:
+    """Shared success renderer: JSON body + ``X-API-Status`` header, v3 datetime conventions."""
+    response = JsonResponse(data, status=status, encoder=V3JSONEncoder, safe=False)
+    return _with_status_header(response)
+
+
+def problem_response(
+    request: HttpRequest,
+    *,
+    status: int,
+    error_type: str,
+    title: str,
+    detail: str | None = None,
+    fields: dict | None = None,
+) -> JsonResponse:
+    """Build an RFC 9457 ``application/problem+json`` response (§4.10)."""
+    body: dict = {
+        "type": _ERROR_TYPE_BASE + error_type,
+        "title": title,
+        "status": status,
+    }
+    if detail is not None:
+        body["detail"] = detail
+    if fields is not None:
+        body["fields"] = fields
+    response = JsonResponse(body, status=status, encoder=V3JSONEncoder)
+    response["Content-Type"] = "application/problem+json"
+    return _with_status_header(response)
+
+
+class ProblemDetail(Exception):  # noqa: N818 -- RFC 9457 "problem detail"; not an "*Error" by name
+
+    """
+    Raise from routes/kernel to emit a problem+json response. The single registered handler
+    shapes it, so callers never touch response objects (keeps I9 honest).
+    """
+
+    def __init__(
+        self,
+        *,
+        status: int,
+        error_type: str,
+        title: str,
+        detail: str | None = None,
+        fields: dict | None = None,
+    ) -> None:
+        super().__init__(title)
+        self.status = status
+        self.error_type = error_type
+        self.title = title
+        self.detail = detail
+        self.fields = fields
+
+
+# --- Convenience constructors for the common problem kinds -------------------------------------
+#
+# The ``title`` strings are translated, matching what the platform i18n work did to v2's generic
+# API messages (``dojo/api_v2/exception_handler.py``). RFC 9457 §3.1.1 permits exactly this: title
+# "SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of
+# localization". The stable machine identifier is the ``type`` URI, which is never translated, so a
+# client keying off ``type`` is unaffected.
+#
+# ``gettext`` and not ``gettext_lazy``: these values are serialized by ``V3JSONEncoder`` and are
+# resolved per request, so a plain ``str`` in the active locale is what the body needs.
+
+def validation_problem(fields: dict, *, detail: str | None = None) -> ProblemDetail:
+    n = len(fields)
+    return ProblemDetail(
+        status=400,
+        error_type="validation",
+        title=_("Validation failed"),
+        detail=detail if detail is not None else f"{n} field{'s' if n != 1 else ''} failed validation",
+        fields=fields,
+    )
+
+
+def expand_problem(detail: str) -> ProblemDetail:
+    return ProblemDetail(status=400, error_type="expand", title=_("Invalid expand"), detail=detail)
+
+
+def fields_problem(detail: str) -> ProblemDetail:
+    # `?fields=` (§4.7) is a distinct capability from `?expand=`; a distinct type URI keeps the
+    # error contract closed (I9: new error kinds get new type URIs, not new shapes).
+    return ProblemDetail(status=400, error_type="fields", title=_("Invalid fields"), detail=detail)
+
+
+def filter_problem(detail: str) -> ProblemDetail:
+    return ProblemDetail(status=400, error_type="filter", title=_("Invalid filter"), detail=detail)
+
+
+def pagination_problem(detail: str) -> ProblemDetail:
+    return ProblemDetail(status=400, error_type="pagination", title=_("Invalid pagination"), detail=detail)
+
+
+def not_found_problem(detail: str | None = None) -> ProblemDetail:
+    # 404 for unknown *or unauthorized* objects -- never leak existence (§4.10). The default detail
+    # is resolved here rather than in the signature so it is translated per request, not once at
+    # import time.
+    return ProblemDetail(
+        status=404,
+        error_type="not-found",
+        title=_("Not found"),
+        detail=detail if detail is not None else _("Not found"),
+    )
+
+
+# --- Handler registration ---------------------------------------------------------------------
+
+def _handle_problem_detail(request: HttpRequest, exc: ProblemDetail) -> JsonResponse:
+    return problem_response(
+        request,
+        status=exc.status,
+        error_type=exc.error_type,
+        title=exc.title,
+        detail=exc.detail,
+        fields=exc.fields,
+    )
+
+
+def _handle_ninja_validation(request: HttpRequest, exc: ValidationError) -> JsonResponse:
+    # Reshape ninja/pydantic request-validation errors into the field-keyed contract (§4.10).
+    fields: dict[str, list[str]] = {}
+    for err in exc.errors:
+        loc = err.get("loc", ())
+        # Drop the leading source segment ("body"/"query"/"form"/"path") for a clean field name.
+        parts = [str(p) for p in loc[1:]] if loc and loc[0] in {"body", "query", "form", "path"} else [str(p) for p in loc]
+        key = ".".join(parts) if parts else "non_field_errors"
+        fields.setdefault(key, []).append(err.get("msg", "Invalid value."))
+    return _handle_problem_detail(request, validation_problem(fields))
+
+
+def _handle_auth_error(request: HttpRequest, exc: AuthenticationError) -> JsonResponse:
+    return problem_response(
+        request,
+        status=401,
+        error_type="unauthorized",
+        title="Authentication required",
+        detail="Valid authentication credentials were not provided.",
+    )
+
+
+def _handle_permission_denied(request: HttpRequest, exc: PermissionDenied) -> JsonResponse:
+    return problem_response(
+        request,
+        status=403,
+        error_type="forbidden",
+        title="Permission denied",
+        detail="You do not have permission to perform this action.",
+    )
+
+
+def _handle_not_found(request: HttpRequest, exc: Http404) -> JsonResponse:
+    return problem_response(
+        request,
+        status=404,
+        error_type="not-found",
+        title="Not found",
+        detail="Not found",
+    )
+
+
+def _handle_integrity_error(request: HttpRequest, exc: IntegrityError) -> JsonResponse:
+    """
+    409 for unique-constraint violations (v2 parity, #15407): the pre-INSERT uniqueness checks
+    are check-then-insert, so of two concurrent writers the loser reaches the database constraint
+    -- a conflict the caller can act on, not a server fault. Every other IntegrityError (foreign
+    key, not-null, check constraint) points at a defect on our side and must keep surfacing as a
+    500, so it is re-raised (ninja's production default for unhandled exceptions is the same
+    re-raise into Django's 500 path).
+    """
+    # v2's handler module is the canonical home of the detection predicate and the deliberately
+    # generic response wording (driver messages carry constraint/table/value -- none belong on the
+    # wire). Localized import: the v2 module pulls in dojo.models at import time.
+    from dojo.api_v2.exception_handler import (  # noqa: PLC0415 -- boundary adapter (see comment)
+        UNIQUE_VIOLATION_RESPONSE_MESSAGE,
+        _is_unique_violation,
+    )
+    if not _is_unique_violation(exc):
+        raise exc
+    # Info, not error: an expected outcome of concurrent writers, not an outage (mirrors v2).
+    logger.info("unique constraint violation on %s: %s", request.path, exc)
+    return problem_response(
+        request,
+        status=409,
+        error_type="conflict",
+        title="Conflict",
+        detail=UNIQUE_VIOLATION_RESPONSE_MESSAGE,
+    )
+
+
+# Why DRF constants in a ninja API: v3 deliberately REUSES v2's battle-tested internals -- the
+# import permission helpers, check_auto_create_permission, and dojo/finding/services.py all raise
+# rest_framework exceptions (the finding services do so intentionally: it is the exact exception
+# type the reference v2 serializer raises, D7). Those are DRF APIException subclasses; without the
+# adapter below they would surface as 500s instead of problem+json. These two maps translate a DRF
+# exception's status code onto the closed v3 error contract (I9). DRF itself stays installed
+# regardless -- all of v2 runs on it and v3's tokens live in rest_framework.authtoken.
+_DRF_ERROR_TYPES = {400: "validation", 401: "unauthorized", 403: "forbidden", 404: "not-found", 409: "conflict"}
+_DRF_ERROR_TITLES = {
+    400: "Validation failed",
+    401: "Authentication required",
+    403: "Permission denied",
+    404: "Not found",
+    409: "Conflict",
+}
+
+
+def _handle_drf_api_exception(request: HttpRequest, exc) -> JsonResponse:
+    """
+    Boundary adapter: v3 reuses v2 permission/import helpers that raise DRF ``APIException``
+    subclasses (PermissionDenied/ValidationError/NotFound). Map them onto the closed problem+json
+    contract so a reused helper never leaks a 500 (I9).
+    """
+    status = getattr(exc, "status_code", 400)
+    detail = getattr(exc, "detail", str(exc))
+    error_type = _DRF_ERROR_TYPES.get(status, "error")
+    title = _DRF_ERROR_TITLES.get(status, "Error")
+    if isinstance(detail, dict):
+        fields = {k: (v if isinstance(v, list) else [str(v)]) for k, v in detail.items()}
+        return problem_response(request, status=status, error_type=error_type, title=title, fields=fields)
+    detail_str = "; ".join(str(d) for d in detail) if isinstance(detail, list) else str(detail)
+    return problem_response(request, status=status, error_type=error_type, title=title, detail=detail_str)
+
+
+def register_exception_handlers(api: NinjaAPI) -> None:
+    """Register every v3 problem+json handler on the given NinjaAPI instance."""
+    from rest_framework.exceptions import APIException  # noqa: PLC0415 -- boundary adapter only
+
+    api.add_exception_handler(ProblemDetail, _handle_problem_detail)
+    api.add_exception_handler(ValidationError, _handle_ninja_validation)
+    api.add_exception_handler(AuthenticationError, _handle_auth_error)
+    api.add_exception_handler(PermissionDenied, _handle_permission_denied)
+    api.add_exception_handler(Http404, _handle_not_found)
+    api.add_exception_handler(IntegrityError, _handle_integrity_error)
+    api.add_exception_handler(APIException, _handle_drf_api_exception)

@@ -1,0 +1,21 @@
+[
+  {
+    "cell": null,
+    "code": "S602",
+    "end_location": {
+      "column": 20,
+      "row": 3
+    },
+    "filename": "src/app.py",
+    "fix": null,
+    "location": {
+      "column": 5,
+      "row": 3
+    },
+    "message": "`subprocess` call with `shell=True` identified, security issue",
+    "name": "subprocess-popen-with-shell-equals-true",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/subprocess-popen-with-shell-equals-true"
+  }
+]

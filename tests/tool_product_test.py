@@ -54,7 +54,7 @@ class ToolProductTest(BaseTestCase):
             if len(description_fields) > 0:
                 description_fields[0].clear()
                 description_fields[0].send_keys("Tool type for integration tests")
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             time.sleep(1)
         # Verify tool type list page loads without errors
         driver.get(self.base_url + "tool_type")
@@ -88,7 +88,7 @@ class ToolProductTest(BaseTestCase):
                 # No non-API tool type available; select index 1 as last resort
                 if len(tool_type_select.options) > 1:
                     tool_type_select.select_by_index(1)
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             time.sleep(2)
         # Verify tool config list page loads
         driver.get(self.base_url + "tool_config")
@@ -127,7 +127,7 @@ class ToolProductTest(BaseTestCase):
         if len(url_fields) > 0:
             url_fields[0].clear()
             url_fields[0].send_keys("https://tool.example.com")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         time.sleep(2)
 
         self.assertTrue(
@@ -146,7 +146,7 @@ class ToolProductTest(BaseTestCase):
             edit_links[0].click()
             driver.find_element(By.ID, "id_name").clear()
             driver.find_element(By.ID, "id_name").send_keys("Edited Tool Product Config")
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             self.assertTrue(
                 self.is_success_message_present(text="Tool Product Configuration Successfully Updated")
                 or self.is_text_present_on_page(text="Tools"),

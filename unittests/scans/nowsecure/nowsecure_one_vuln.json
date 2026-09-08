@@ -1,0 +1,38 @@
+{
+  "assessment": {
+    "ref": "aaaaaaaa-0000-4000-8000-000000000001",
+    "task": 900001,
+    "application": "bbbbbbbb-0000-4000-8000-000000000001",
+    "account": "example-account",
+    "group": "example-group",
+    "package": "com.example.genericapp",
+    "platform": "android",
+    "created": "2024-07-01T12:00:00Z",
+    "updated": "2024-07-01T12:45:00Z",
+    "task_status": "completed",
+    "status": {
+      "static": "completed",
+      "dynamic": "completed"
+    },
+    "binary": "cccccccc-0000-4000-8000-000000000001"
+  },
+  "findings": [
+    {
+      "affected": true,
+      "hidden": false,
+      "analysis_type": "static",
+      "category": "Data Storage",
+      "check_id": "insecure_data_storage_world_readable",
+      "title": "World-readable files created by the app",
+      "severity": "high",
+      "cvss": 7.5,
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+      "description": "The app writes files that any other app on the device can read.",
+      "vulnerability_detail": "Observed mode 0644 on two files under the app's data directory.",
+      "unique_vulnerability_id": 12345,
+      "recommendations": {
+        "developer": "Use MODE_PRIVATE when opening files."
+      }
+    }
+  ]
+}

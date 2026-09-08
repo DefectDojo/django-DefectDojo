@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "title": "SQL string concatenation in db.py",
+      "severity": "High",
+      "description": "Query built by concatenation.",
+      "unique_id_from_tool": "requires login"
+    },
+    {
+      "title": "AWS access key committed in settings.py",
+      "severity": "Critical",
+      "description": "Access key id committed.",
+      "unique_id_from_tool": "requires login"
+    },
+    {
+      "title": "TLS verification disabled in client.py",
+      "severity": "Medium",
+      "description": "Certificate verification explicitly disabled.",
+      "unique_id_from_tool": "requires login"
+    },
+    {
+      "title": "Outdated dependency lodash",
+      "severity": "Low",
+      "description": "Update lodash.",
+      "unique_id_from_tool": "dep-lodash-4.17.20"
+    }
+  ]
+}

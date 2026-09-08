@@ -1,0 +1,25 @@
+{
+  "asset": {
+    "id": "artifact-0001",
+    "name": "generic-router-firmware-1.4.0.bin",
+    "vendor": "Generic Networks",
+    "product": "GN-1000",
+    "version": "1.4.0"
+  },
+  "vulnerabilities": {
+    "edges": [
+      {
+        "node": {
+          "cve": "CVE-2000-0001",
+          "name": "example-tls",
+          "severity": "critical",
+          "cvssScore": 9.8,
+          "fixVersions": ["1.1.1w", "3.0.12"],
+          "isReachable": true,
+          "inKnownExploitedVulnerabilities": true
+        }
+      }
+    ],
+    "pageInfo": {"endCursor": "cursor-1", "hasNextPage": false}
+  }
+}

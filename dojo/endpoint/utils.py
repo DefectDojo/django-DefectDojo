@@ -9,6 +9,7 @@ from django.core.validators import validate_ipv46_address
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.location.models import Location
@@ -310,7 +311,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
             messages.add_message(
                 request,
                 messages.ERROR,
-                'The column "hostname" must be present to map host to Endpoint.',
+                _('The column "hostname" must be present to map host to Endpoint.'),
                 extra_tags="alert-danger")
             return HttpResponseRedirect(reverse("import_endpoint_meta", args=(product.id, )))
         if origin == "API":

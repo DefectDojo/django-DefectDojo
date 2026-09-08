@@ -1,0 +1,257 @@
+[
+  {
+    "object_name": "Deployment/apps/v1/example-ns/example-api",
+    "type_meta": {
+      "kind": "Deployment",
+      "apiVersion": "apps/v1"
+    },
+    "object_meta": {
+      "name": "example-api",
+      "namespace": "example-ns",
+      "creationTimestamp": null
+    },
+    "checks": [
+      {
+        "check": {
+          "name": "Stable version",
+          "id": "stable-version",
+          "target_type": "all",
+          "comment": "Checks if the object is using a deprecated apiVersion",
+          "optional": false
+        },
+        "grade": 10,
+        "skipped": false,
+        "comments": null
+      },
+      {
+        "check": {
+          "name": "Label values",
+          "id": "label-values",
+          "target_type": "all",
+          "comment": "Validates label values",
+          "optional": false
+        },
+        "grade": 10,
+        "skipped": false,
+        "comments": null
+      },
+      {
+        "check": {
+          "name": "Container Image Pull Policy",
+          "id": "container-image-pull-policy",
+          "target_type": "Pod",
+          "comment": "Makes sure that the pullPolicy is set to Always. This makes sure that imagePullSecrets are always validated.",
+          "optional": false
+        },
+        "grade": 10,
+        "skipped": false,
+        "comments": null
+      },
+      {
+        "check": {
+          "name": "Container Memory Requests Equal Limits",
+          "id": "container-memory-requests-equal-limits",
+          "target_type": "Pod",
+          "comment": "Makes sure that all pods have the same memory requests as limits set.",
+          "optional": true
+        },
+        "grade": 10,
+        "skipped": true,
+        "comments": [
+          {
+            "path": "",
+            "summary": "Skipped because container-memory-requests-equal-limits is ignored",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "check": {
+          "name": "Container Ephemeral Storage Request and Limit",
+          "id": "container-ephemeral-storage-request-and-limit",
+          "target_type": "Pod",
+          "comment": "Makes sure all pods have ephemeral-storage requests and limits set",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "api",
+            "summary": "Ephemeral Storage limit is not set",
+            "description": "Resource limits are recommended to avoid resource DDOS. Set resources.limits.ephemeral-storage"
+          },
+          {
+            "path": "api",
+            "summary": "Ephemeral Storage request is not set",
+            "description": "Resource requests are recommended to make sure the application can start and run without crashing. Set resource.requests.ephemeral-storage"
+          }
+        ]
+      },
+      {
+        "check": {
+          "name": "Container Security Context Privileged",
+          "id": "container-security-context-privileged",
+          "target_type": "Pod",
+          "comment": "Makes sure that all pods have a unprivileged security context set",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "api",
+            "summary": "The container is privileged",
+            "description": "Set securityContext.privileged to false. Privileged containers can access all devices on the host, and grants almost the same access as non-containerized processes on the host."
+          }
+        ]
+      },
+      {
+        "check": {
+          "name": "Container Image Tag",
+          "id": "container-image-tag",
+          "target_type": "Pod",
+          "comment": "Makes sure that a explicit non-latest tag is used",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "api",
+            "summary": "Image with latest tag",
+            "description": "Using a fixed tag is recommended to avoid accidental upgrades"
+          }
+        ]
+      },
+      {
+        "check": {
+          "name": "Container Security Context ReadOnlyRootFilesystem",
+          "id": "container-security-context-readonlyrootfilesystem",
+          "target_type": "Pod",
+          "comment": "Makes sure that all pods have a security context with read only filesystem set",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "api",
+            "summary": "The pod has a container with a writable root filesystem",
+            "description": "Set securityContext.readOnlyRootFilesystem to true"
+          }
+        ]
+      },
+      {
+        "check": {
+          "name": "Container Resources",
+          "id": "container-resources",
+          "target_type": "Pod",
+          "comment": "Makes sure that all pods have resource limits and requests set. The --ignore-container-cpu-limit flag can be used to disable the requirement of having a CPU limit",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "api",
+            "summary": "CPU limit is not set",
+            "description": "Resource limits are recommended to avoid resource DDOS. Set resources.limits.cpu"
+          },
+          {
+            "path": "api",
+            "summary": "Memory limit is not set",
+            "description": "Resource limits are recommended to avoid resource DDOS. Set resources.limits.memory"
+          },
+          {
+            "path": "api",
+            "summary": "CPU request is not set",
+            "description": "Resource requests are recommended to make sure that the application can start and run without crashing. Set resources.requests.cpu"
+          },
+          {
+            "path": "api",
+            "summary": "Memory request is not set",
+            "description": "Resource requests are recommended to make sure that the application can start and run without crashing. Set resources.requests.memory"
+          }
+        ]
+      },
+      {
+        "check": {
+          "name": "Pod NetworkPolicy",
+          "id": "pod-networkpolicy",
+          "target_type": "Pod",
+          "comment": "Makes sure that all Pods are targeted by a NetworkPolicy",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "",
+            "summary": "The pod does not have a matching NetworkPolicy",
+            "description": "Create a NetworkPolicy that targets this pod to control who/what can communicate with this pod. Note, this feature needs to be supported by the CNI implementation used in the Kubernetes cluster to have an effect."
+          }
+        ]
+      },
+      {
+        "check": {
+          "name": "Container Security Context User Group ID",
+          "id": "container-security-context-user-group-id",
+          "target_type": "Pod",
+          "comment": "Makes sure that all pods have a security context with valid UID and GID set ",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "api",
+            "summary": "The container is running with a low user ID",
+            "description": "A userid above 10 000 is recommended to avoid conflicts with the host. Set securityContext.runAsUser to a value > 10000"
+          },
+          {
+            "path": "api",
+            "summary": "The container running with a low group ID",
+            "description": "A groupid above 10 000 is recommended to avoid conflicts with the host. Set securityContext.runAsGroup to a value > 10000"
+          }
+        ]
+      }
+    ],
+    "file_name": "manifests/deployment.yaml",
+    "file_row": 1
+  },
+  {
+    "object_name": "Deployment/apps/v1/example-ns/example-api",
+    "type_meta": {
+      "kind": "Deployment",
+      "apiVersion": "apps/v1"
+    },
+    "object_meta": {
+      "name": "example-api",
+      "namespace": "example-ns",
+      "creationTimestamp": null
+    },
+    "checks": [
+      {
+        "check": {
+          "name": "Deployment has host PodAntiAffinity",
+          "id": "deployment-has-host-podantiaffinity",
+          "target_type": "Deployment",
+          "comment": "Makes sure that a podAntiAffinity has been set that prevents multiple pods from being scheduled on the same node. https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
+          "optional": false
+        },
+        "grade": 5,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "",
+            "summary": "Deployment does not have a host podAntiAffinity set",
+            "description": "It's recommended to set a podAntiAffinity that stops multiple pods from a deployment from being scheduled on the same node. This increases availability in case the node becomes unavailable."
+          }
+        ]
+      }
+    ],
+    "file_name": "manifests/dep2.yaml",
+    "file_row": 1
+  }
+]

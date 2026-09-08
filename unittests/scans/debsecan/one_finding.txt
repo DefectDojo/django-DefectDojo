@@ -1,0 +1,6 @@
+CVE-2026-13595
+  A flaw was found in the libblkid library of util-linux. During nested  ...
+  installed: bsdutils 1:2.41-5
+             (built from util-linux 2.41-5)
+  fixed in unstable: util-linux 2.42.2-1 (source package)
+

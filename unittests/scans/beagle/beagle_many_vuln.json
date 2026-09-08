@@ -1,0 +1,67 @@
+{
+  "project_name": "Default project",
+  "application_name": "generic-app",
+  "url": "https://app.example.com",
+  "generated_date": "04 Sep 2021",
+  "approved_date": "05 Sep 2021",
+  "vulnerabilities": [
+    {
+      "name": "Information disclosure in HTTP headers",
+      "severity": "Medium",
+      "cwe": "CWE-215",
+      "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+      "description": "The server discloses version information in its response headers.",
+      "solution": "* Remove headers that disclose information.\n* Remove any unnecessary comments.",
+      "occurences": [
+        {
+          "status": "Open",
+          "vulnerability": {"Method": "get", "Url": "https://app.example.com/status.asp"}
+        },
+        {
+          "status": "Fixed",
+          "vulnerability": {"Method": "post", "Url": "https://app.example.com/login"}
+        }
+      ]
+    },
+    {
+      "title": "Reflected cross-site scripting",
+      "risk": 8.2,
+      "cwe_id": 79,
+      "details": "A request parameter is reflected into the response without encoding.",
+      "remediation": "Encode user input before rendering it.",
+      "occurrences": [
+        {
+          "status": "Open",
+          "vulnerability": {"Method": "get", "Url": "https://app.example.com/search?q=1"}
+        }
+      ]
+    },
+    {
+      "name": "Missing security headers",
+      "severity": "Somewhat risky",
+      "cwes": ["CWE-693", "CWE-1021"],
+      "summary": "Several recommended response headers were absent.",
+      "occurences": []
+    },
+    {
+      "signature_name": "Outdated TLS protocol offered",
+      "priority": "critical",
+      "cvss_score": "9.4",
+      "impact": "The host still negotiates a deprecated protocol version.",
+      "fix": "Disable the deprecated protocol version.",
+      "instances": [
+        {
+          "status": "Reopened",
+          "vulnerability": {"Method": "", "Url": "https://api.example.com:8443/v1/health"}
+        }
+      ]
+    },
+    {
+      "cwe": "215, 216",
+      "score": 2.4,
+      "occurences": [
+        {"status": "Open", "vulnerability": {"Method": "head", "Url": ""}}
+      ]
+    }
+  ]
+}

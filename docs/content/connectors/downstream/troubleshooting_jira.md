@@ -178,7 +178,7 @@ As this command requires access to the backend, it is not available to Cloud use
 {{< highlight bash >}}
 usage: manage.py jira_status_reconciliation [-h] [--mode MODE] [--product PRODUCT] [--engagement ENGAGEMENT] [--dryrun] [--version] [-v {0,1,2,3}]
 
-Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results.
+Reconcile finding status with JIRA issue status, stdout will contain semicolon separated CSV results.
 Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped.
 
 optional arguments:
@@ -209,7 +209,7 @@ DEBUG output can be obtains via `-v 3`, but only after increasing the logging to
 $ docker compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation -v 3'
 {{< /highlight >}}
 
-At the end of the command a semicolon seperated CSV summary will be printed. This can be captured by redirecting stdout to a file:
+At the end of the command a semicolon separated CSV summary will be printed. This can be captured by redirecting stdout to a file:
 
 {{< highlight bash >}}
 $ docker compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation > jira_reconciliation.csv'

@@ -3,7 +3,7 @@ import logging
 
 from django.db.models import signals
 from django.dispatch import receiver
-from tagulous.models.fields import SingleTagField, TagField
+from django_tagulous.models.fields import SingleTagField, TagField
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -25,8 +25,8 @@ def _flush_pending_tag_fields(instance):
     Tagulous holds tags set on an unsaved instance (``finding.tags = [...]``
     followed by ``finding.save()``) in an in-memory manager and only writes
     them to the through table from its own ``post_save`` handler. That handler
-    is registered by ``tagulous``' AppConfig.ready(), which runs *after*
-    ``dojo``'s (``dojo`` precedes ``tagulous`` in ``INSTALLED_APPS``), so the
+    is registered by ``django_tagulous``' AppConfig.ready(), which runs *after*
+    ``dojo``'s (``dojo`` precedes ``django_tagulous`` in ``INSTALLED_APPS``), so the
     inheritance ``post_save`` handler below fires first. When it reads
     ``instance.tags`` on the freshly-saved row it loads an empty, DB-backed
     manager and the pending pre-save tags are lost — the user's tags silently

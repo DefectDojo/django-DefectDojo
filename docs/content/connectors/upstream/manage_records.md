@@ -65,6 +65,32 @@ own identifier rather than the shared name.
 Remapping a Record by hand always wins. When you change a Record's Mapping yourself, the
 tool's identifier moves with it, and the next sync follows your decision.
 
+#### How Auto-Mapping chooses the Product
+
+Auto-Mapping resolves each Record in a fixed order, and stops at the first answer:
+
+1. **The tool's own identifier.** Every Record stores the identifier the tool uses for the
+Vendor-Equivalent Product. Once a Connector has mapped that identifier once, it recognises it
+on every later Discover — so renaming the project in the tool, or in DefectDojo, no longer
+loses the Mapping or creates a duplicate Product.
+2. **The name.** If the Connector has not seen the identifier before, it looks for a Product
+whose name matches. When one is found, the Record is mapped to it and the identifier is
+recorded, so step 1 answers from then on.
+3. **A new Product.** If neither matches, DefectDojo creates one.
+
+Step 1 requires the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
+Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
+nothing about existing Mappings: the first Discover after it is turned on records identifiers
+for the Records you already have, and later runs use them.
+
+Because names are matched globally, two tools that each report something called `payments` map
+to the same Product on first sight. Recording each tool's identifier separately is what stops
+that coincidence from becoming permanent — after the first mapping, each Connector follows its
+own identifier rather than the shared name.
+
+Remapping a Record by hand always wins. When you change a Record's Mapping yourself, the
+tool's identifier moves with it, and the next sync follows your decision.
+
 #### Mapping - Example Workflow:
 
 David has just finished setting up a connector for his BurpSuite tool, and runs a Discover operation. David has Burp set up to scan 4 different 'Sites', and DefectDojo creates a new Record for each of those Sites.

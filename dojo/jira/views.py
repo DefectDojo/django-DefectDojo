@@ -360,7 +360,7 @@ class NewJiraView(View):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Unable to authenticate. Please check credentials.",
+                    _("Unable to authenticate. Please check credentials."),
                     extra_tags="alert-danger")
                 return render(request, self.get_template(), {"jform": jform})
             # authentication successful
@@ -422,7 +422,7 @@ class NewJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "JIRA Configuration Successfully Created.",
+                _("JIRA Configuration Successfully Created."),
                 extra_tags="alert-success")
             create_notification(
                 event="jira_config_added",
@@ -467,7 +467,7 @@ class AdvancedJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "JIRA Configuration Successfully Created.",
+                _("JIRA Configuration Successfully Created."),
                 extra_tags="alert-success")
             create_notification(
                 event="jira_config_added",
@@ -521,7 +521,7 @@ class EditJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "JIRA Configuration Successfully Saved.",
+                _("JIRA Configuration Successfully Saved."),
                 extra_tags="alert-success")
             create_notification(
                 event="jira_config_edited",
@@ -586,7 +586,7 @@ class DeleteJiraView(View):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "JIRA Conf and relationships removed.",
+                        _("JIRA Conf and relationships removed."),
                         extra_tags="alert-success")
                     create_notification(
                         event="jira_config_deleted",

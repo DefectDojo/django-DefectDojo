@@ -233,3 +233,5 @@ A typical case is a package installed at multiple paths in a container image (e.
 | `fix_version` | `vulnerability.fix.versions[0]` (or comma-joined if multiple) |
 | `cvssv3` | `vulnerability.cvss` or `relatedVulnerabilities[0].cvss` |
 | `epss_score` / `epss_percentile` | `vulnerability.epss` or `relatedVulnerabilities[0].epss` |
+| `kev_date` | `vulnerability.knownExploited[].dateAdded` (matched by CVE) |
+| `known_exploited` | `true` if `kev_date` is present, `false` otherwise |

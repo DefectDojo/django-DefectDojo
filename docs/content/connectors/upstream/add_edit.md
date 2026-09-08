@@ -34,6 +34,10 @@ You can also edit an existing Connector under the **Configured Connectors** head
 
 ![image](images/add_edit_connectors_3.png)
 
+## Checking that the connector can see your data
+
+When you submit, DefectDojo asks the tool what those credentials can actually see, and tells you the answer. If the account you connected has not been granted access to any projects, hosts, or repositories, or otherwise reports no data for your credentials, DefectDojo saves the connector and shows a No Data Visible warning. A new account that is actually empty is a valid setup, and the connector will start importing as soon as data appears. If data is present but fails to be recognized, check your tool's account permissions.
+
 ## Next Steps
 
 * Now that you've added a connector, you can confirm everything is set up correctly by running a [Discover](../manage_operations/#discover-operations) operation.

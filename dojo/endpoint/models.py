@@ -14,7 +14,7 @@ from django.db.models import F, Q
 from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from tagulous.models import TagField
+from django_tagulous.models import TagField
 
 # get_current_date/get_current_datetime/copy_model_util are defined early in dojo.models,
 # before the re-export that loads this module — resolves despite partial circular load.

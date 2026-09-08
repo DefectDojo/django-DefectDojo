@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.labels import get_labels
@@ -19,7 +20,7 @@ class EngForm(forms.ModelForm):
             "Without a name the target start date will be set."
         ))
     description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False, help_text="Description of the engagement and details regarding the engagement.")
+                                  required=False, help_text=_("Description of the engagement and details regarding the engagement."))
     product = forms.ModelChoiceField(label=labels.ASSET_LABEL,
                                      queryset=Product.objects.none(),
                                      required=True)
@@ -29,8 +30,8 @@ class EngForm(forms.ModelForm):
         attrs={"class": "datepicker", "autocomplete": "off"}))
     lead = forms.ModelChoiceField(
         queryset=None,
-        required=True, label="Testing Lead")
-    test_strategy = forms.URLField(required=False, label="Test Strategy URL")
+        required=True, label=_("Testing Lead"))
+    test_strategy = forms.URLField(required=False, label=_("Test Strategy URL"))
 
     def __init__(self, *args, **kwargs):
         cicd = False
@@ -48,7 +49,7 @@ class EngForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if product:
-            self.fields["preset"] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
+            self.fields["preset"] = forms.ModelChoiceField(help_text=_("Settings and notes for performing this engagement."), required=False, queryset=Engagement_Presets.objects.filter(product=product))
             self.fields["lead"].queryset = get_authorized_users_for_product_and_product_type(None, product, "view").filter(is_active=True)
         else:
             self.fields["lead"].queryset = get_authorized_users("view").filter(is_active=True)
@@ -103,10 +104,10 @@ class DeleteEngagementForm(forms.ModelForm):
 class EngagementPresetsForm(forms.ModelForm):
 
     notes = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False, help_text="Description of what needs to be tested or setting up environment for testing")
+                                  required=False, help_text=_("Description of what needs to be tested or setting up environment for testing"))
 
     scope = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False, help_text="Scope of Engagement testing, IP's/Resources/URL's)")
+                                  required=False, help_text=_("Scope of Engagement testing, IP's/Resources/URL's)"))
 
     class Meta:
         model = Engagement_Presets
@@ -132,7 +133,7 @@ class AddEngagementForm(forms.Form):
         queryset=Product.objects.none(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text="Select which product to attach Engagement")
+        help_text=_("Select which product to attach Engagement"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -144,7 +145,7 @@ class ExistingEngagementForm(forms.Form):
         queryset=Engagement.objects.none(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text="Select which Engagement to link the Questionnaire to")
+        help_text=_("Select which Engagement to link the Questionnaire to"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

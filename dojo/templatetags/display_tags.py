@@ -142,7 +142,7 @@ def dojo_version():
     version = __version__
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
-    return f"v. {version}"
+    return f"Version {version}"
 
 
 @register.simple_tag
@@ -608,47 +608,30 @@ def last_value(value):
     return value
 
 
+def _option_icon(option):
+    # option is a Product_Platform / Product_Lifecycle / Product_Origin instance (or None).
+    # The icon and label now live on the editable option row; fall back to the label text
+    # for custom options that have no icon configured.
+    if not option:
+        return ""
+    if option.icon:
+        return mark_safe(icon(option.icon, option.name))
+    return option.name
+
+
 @register.filter
 def platform_icon(value):
-    if value == Product.WEB_PLATFORM:
-        return mark_safe(icon("list-alt", "Web"))
-    if value == Product.DESKTOP_PLATFORM:
-        return mark_safe(icon("desktop", "Desktop"))
-    if value == Product.MOBILE_PLATFORM:
-        return mark_safe(icon("mobile", "Mobile"))
-    if value == Product.WEB_SERVICE_PLATFORM:
-        return mark_safe(icon("plug", "Web Service"))
-    if value == Product.IOT:
-        return mark_safe(icon("random", "Internet of Things"))
-    return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
+    return _option_icon(value)
 
 
 @register.filter
 def lifecycle_icon(value):
-    if value == Product.CONSTRUCTION:
-        return mark_safe(icon("compass", "Explore"))
-    if value == Product.PRODUCTION:
-        return mark_safe(icon("ship", "Sustain"))
-    if value == Product.RETIREMENT:
-        return mark_safe(icon("moon-o", "Retire"))
-    return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
+    return _option_icon(value)
 
 
 @register.filter
 def origin_icon(value):
-    if value == Product.THIRD_PARTY_LIBRARY_ORIGIN:
-        return mark_safe(icon("book", "Third-Party Library"))
-    if value == Product.PURCHASED_ORIGIN:
-        return mark_safe(icon("money", "Purchased"))
-    if value == Product.CONTRACTOR_ORIGIN:
-        return mark_safe(icon("suitcase", "Contractor Developed"))
-    if value == Product.INTERNALLY_DEVELOPED_ORIGIN:
-        return mark_safe(icon("home", "Internally Developed"))
-    if value == Product.OPEN_SOURCE_ORIGIN:
-        return mark_safe(icon("code", "Open Source"))
-    if value == Product.OUTSOURCED_ORIGIN:
-        return mark_safe(icon("globe", "Outsourced"))
-    return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
+    return _option_icon(value)
 
 
 @register.filter

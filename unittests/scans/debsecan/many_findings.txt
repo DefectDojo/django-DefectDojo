@@ -1,0 +1,46 @@
+CVE-2026-13595
+  A flaw was found in the libblkid library of util-linux. During nested  ...
+  installed: bsdutils 1:2.41-5
+             (built from util-linux 2.41-5)
+  fixed in unstable: util-linux 2.42.2-1 (source package)
+
+CVE-2026-27456
+  util-linux is a random collection of Linux utilities. Prior to version ...
+  installed: bsdutils 1:2.41-5
+             (built from util-linux 2.41-5)
+  fixed in unstable: util-linux 2.42-1 (source package)
+
+CVE-2026-3184
+  A flaw was found in util-linux. Improper hostname canonicalization in  ...
+  installed: bsdutils 1:2.41-5
+             (built from util-linux 2.41-5)
+  fixed in unstable: util-linux 2.42-1 (source package)
+  fixed on branch:   util-linux 2.42~rc1-1 (source package)
+
+CVE-2026-53613
+  Local Privilege Escalation via TOCTOU in mount(8) - Target Path Redirection
+  installed: bsdutils 1:2.41-5
+             (built from util-linux 2.41-5)
+  fixed in unstable: util-linux 2.42.2-1 (source package)
+
+CVE-2026-53615
+  Integer Overflow or Wraparound in libblkid/src/partitions/dos.c
+  installed: bsdutils 1:2.41-5
+             (built from util-linux 2.41-5)
+
+CVE-2026-41991
+  GNU gzip contains a vulnerability in the gzexe utility related to inse ...
+  installed: gzip 1.13-1
+             (built from gzip 1.13-1)
+
+CVE-2026-41992
+  GNU gzip contains a global buffer overflow vulnerability in the LZH de ...
+  installed: gzip 1.13-1
+             (built from gzip 1.13-1)
+
+CVE-2026-54369
+  acl before version 2.4.0 contains a symlink traversal vulnerability in ...
+  installed: libacl1 2.3.2-2+b1
+             (built from acl 2.3.2-2)
+  fixed in unstable: acl 2.4.0-1 (source package)
+

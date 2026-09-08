@@ -4,7 +4,14 @@ from dojo.authorization.serializer_guards import (
     AuthorizedUsersMemberGuardMixin,
     ToolConfigurationUseGuardMixin,
 )
-from dojo.models import DojoMeta, Product, Product_API_Scan_Configuration
+from dojo.models import (
+    DojoMeta,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
+)
 
 
 class ProductMetaSerializer(serializers.ModelSerializer):
@@ -24,9 +31,12 @@ class ProductSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerial
     findings_list = serializers.SerializerMethodField()
 
     business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)
-    platform = serializers.ChoiceField(choices=Product.PLATFORM_CHOICES, allow_blank=True, allow_null=True, required=False)
-    lifecycle = serializers.ChoiceField(choices=Product.LIFECYCLE_CHOICES, allow_blank=True, allow_null=True, required=False)
-    origin = serializers.ChoiceField(choices=Product.ORIGIN_CHOICES, allow_blank=True, allow_null=True, required=False)
+    # platform/lifecycle/origin are FKs to editable lookup tables. They are exposed over
+    # the API by their stable ``value`` string (SlugRelatedField), so existing clients
+    # and imports keep sending/receiving the same strings as before.
+    platform = serializers.SlugRelatedField(slug_field="value", queryset=Product_Platform.objects.all(), allow_null=True, required=False)
+    lifecycle = serializers.SlugRelatedField(slug_field="value", queryset=Product_Lifecycle.objects.all(), allow_null=True, required=False)
+    origin = serializers.SlugRelatedField(slug_field="value", queryset=Product_Origin.objects.all(), allow_null=True, required=False)
 
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 

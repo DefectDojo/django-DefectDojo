@@ -1,0 +1,109 @@
+[
+  {
+    "file": "scripts/deploy.sh",
+    "line": 5,
+    "endLine": 5,
+    "column": 6,
+    "endColumn": 8,
+    "level": "info",
+    "code": 2086,
+    "message": "Double quote to prevent globbing and word splitting.",
+    "fix": {
+      "replacements": [
+        {
+          "column": 6,
+          "endColumn": 6,
+          "endLine": 5,
+          "insertionPoint": "afterEnd",
+          "line": 5,
+          "precedence": 10,
+          "replacement": "\""
+        },
+        {
+          "column": 8,
+          "endColumn": 8,
+          "endLine": 5,
+          "insertionPoint": "beforeStart",
+          "line": 5,
+          "precedence": 10,
+          "replacement": "\""
+        }
+      ]
+    }
+  },
+  {
+    "file": "scripts/deploy.sh",
+    "line": 5,
+    "endLine": 5,
+    "column": 9,
+    "endColumn": 14,
+    "level": "info",
+    "code": 2086,
+    "message": "Double quote to prevent globbing and word splitting.",
+    "fix": {
+      "replacements": [
+        {
+          "column": 9,
+          "endColumn": 9,
+          "endLine": 5,
+          "insertionPoint": "afterEnd",
+          "line": 5,
+          "precedence": 10,
+          "replacement": "\""
+        },
+        {
+          "column": 14,
+          "endColumn": 14,
+          "endLine": 5,
+          "insertionPoint": "beforeStart",
+          "line": 5,
+          "precedence": 10,
+          "replacement": "\""
+        }
+      ]
+    }
+  },
+  {
+    "file": "scripts/deploy.sh",
+    "line": 8,
+    "endLine": 8,
+    "column": 8,
+    "endColumn": 15,
+    "level": "warning",
+    "code": 2115,
+    "message": "Use \"${var:?}\" to ensure this never expands to /* .",
+    "fix": null
+  },
+  {
+    "file": "scripts/deploy.sh",
+    "line": 8,
+    "endLine": 8,
+    "column": 8,
+    "endColumn": 13,
+    "level": "info",
+    "code": 2086,
+    "message": "Double quote to prevent globbing and word splitting.",
+    "fix": {
+      "replacements": [
+        {
+          "column": 8,
+          "endColumn": 8,
+          "endLine": 8,
+          "insertionPoint": "afterEnd",
+          "line": 8,
+          "precedence": 7,
+          "replacement": "\""
+        },
+        {
+          "column": 13,
+          "endColumn": 13,
+          "endLine": 8,
+          "insertionPoint": "beforeStart",
+          "line": 8,
+          "precedence": 7,
+          "replacement": "\""
+        }
+      ]
+    }
+  }
+]

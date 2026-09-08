@@ -12,7 +12,7 @@ Sie benötigen einen Bright-**API-Schlüssel**, der in der Bright-App unter **Us
 
 #### Connector-Zuordnungen
 
-1. Lassen Sie das Feld **Location** leer, um `https://app.brightsec.com` zu verwenden, oder geben Sie Ihren Bright-Host explizit an.
+1. Behalten Sie den vorgegebenen Wert im Feld **Location**, `https://app.brightsec.com`, oder geben Sie Ihren Bright-Host explizit an.
 2. Geben Sie den Bright-API-Schlüssel in das Feld **Secret** ein.
 3. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden.
 

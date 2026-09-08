@@ -1,0 +1,17 @@
+{
+  "artifacts": [],
+  "source": {
+    "id": "2b2482043d69967e67385987eb23ecae315ba0d2df7e8999b61eaa7d9e8a52d2",
+    "name": "app/",
+    "version": "",
+    "type": "directory",
+    "metadata": {
+      "path": "work/uvproj"
+    }
+  },
+  "descriptor": {
+    "name": "syft",
+    "version": "[not provided]"
+  },
+  "distro": {}
+}

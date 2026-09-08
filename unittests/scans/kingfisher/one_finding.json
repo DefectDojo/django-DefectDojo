@@ -1,0 +1,41 @@
+{
+  "findings": [
+    {
+      "rule": {
+        "name": "AWS Secret Access Key",
+        "id": "kingfisher.aws.2"
+      },
+      "finding": {
+        "snippet": "dB9PyxlN/qa8sF0tJ4uM2qZr7eVw6TgHkC0nBpZq",
+        "fingerprint": "17034522315778178539",
+        "confidence": "medium",
+        "entropy": "4.67",
+        "validation": {
+          "status": "Active Credential",
+          "response": "AKIAFAKEKEY123456789 --- ARN: arn:aws:iam::000000000000:user/example_user --- AWS Account Number: 000000000000"
+        },
+        "language": "Unknown",
+        "line": 1,
+        "column_start": 65,
+        "column_end": 104,
+        "path": "/tmp/repo/tmp/secretstuff/utf8.txt "
+      }
+    }
+  ],
+  "stats": {
+    "total": 259,
+    "critical": 37,
+    "validated": 167,
+    "unique_paths": 21,
+    "confidence_buckets": {
+      "High": 37,
+      "Medium": 222
+    },
+    "confidence_order": [
+      "High",
+      "Medium"
+    ],
+    "scan_date": "2025-11-25T15:37:41.863868-08:00",
+    "kingfisher_version": "1.68.0"
+  }
+}

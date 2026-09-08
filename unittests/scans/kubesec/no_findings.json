@@ -1,0 +1,55 @@
+[
+  {
+    "object": "Deployment/example-api.example-ns",
+    "valid": true,
+    "fileName": "manifests/dep2.yaml",
+    "message": "Passed with a score of 7 points",
+    "score": 7,
+    "scoring": {
+      "passed": [
+        {
+          "id": "RunAsNonRoot",
+          "selector": ".spec, .spec.containers[] | .securityContext .runAsNonRoot == true",
+          "reason": "Force the running image to run as a non-root user to ensure least privilege",
+          "points": 1
+        },
+        {
+          "id": "RunAsUser",
+          "selector": ".spec, .spec.containers[] | .securityContext .runAsUser -gt 10000",
+          "reason": "Run as a high-UID user to avoid conflicts with the host's users",
+          "points": 1
+        },
+        {
+          "id": "LimitsCPU",
+          "selector": "containers[] .resources .limits .cpu",
+          "reason": "Enforcing CPU limits prevents DOS via resource exhaustion",
+          "points": 1
+        },
+        {
+          "id": "LimitsMemory",
+          "selector": "containers[] .resources .limits .memory",
+          "reason": "Enforcing memory limits prevents DOS via resource exhaustion",
+          "points": 1
+        },
+        {
+          "id": "RequestsCPU",
+          "selector": "containers[] .resources .requests .cpu",
+          "reason": "Enforcing CPU requests aids a fair balancing of resources across the cluster",
+          "points": 1
+        },
+        {
+          "id": "RequestsMemory",
+          "selector": "containers[] .resources .requests .memory",
+          "reason": "Enforcing memory requests aids a fair balancing of resources across the cluster",
+          "points": 1
+        },
+        {
+          "id": "ReadOnlyRootFilesystem",
+          "selector": "containers[] .securityContext .readOnlyRootFilesystem == true",
+          "reason": "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
+          "points": 1
+        }
+      ]
+    }
+  }
+]

@@ -20,7 +20,7 @@ Settings è suddiviso in sette gruppi, denominati in base a ciò che si sta cerc
 
 | Gruppo | Cosa contiene |
 | --- | --- |
-| **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail, Feature Flags |
+| **System** | System Settings, Appearance, Announcement Banner, Login Banner, Email, Feature Flags |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | le tre pagine Deduplication, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
@@ -52,7 +52,7 @@ Per chi è abituato al layout precedente:
 | Settings → Pro Settings → Appearance | Settings → System → Appearance |
 | Settings → Pro Settings → Banner Settings → Announcement Banner Settings | Settings → System → Announcement Banner |
 | Settings → Pro Settings → Banner Settings → Login Banner Settings | Settings → System → Login Banner |
-| Settings → Pro Settings → E-mail Settings | Settings → System → E-mail |
+| Settings → Pro Settings → Email Settings | Settings → System → Email |
 | Settings → Users → All Users / New User | Settings → Users & Permissions → Users |
 | Settings → Users → All Groups / New Group | Settings → Users & Permissions → Groups |
 | Settings → Users → Roles | Settings → Users & Permissions → Roles |

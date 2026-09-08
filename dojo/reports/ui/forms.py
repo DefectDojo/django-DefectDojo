@@ -1,15 +1,16 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dojo.utils import get_system_setting
 
 
 class ReportOptionsForm(forms.Form):
     yes_no = (("0", "No"), ("1", "Yes"))
-    include_finding_notes = forms.ChoiceField(choices=yes_no, label="Finding Notes")
-    include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
-    include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
-    include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
+    include_finding_notes = forms.ChoiceField(choices=yes_no, label=_("Finding Notes"))
+    include_finding_images = forms.ChoiceField(choices=yes_no, label=_("Finding Images"))
+    include_executive_summary = forms.ChoiceField(choices=yes_no, label=_("Executive Summary"))
+    include_table_of_contents = forms.ChoiceField(choices=yes_no, label=_("Table of Contents"))
+    include_disclaimer = forms.ChoiceField(choices=yes_no, label=_("Disclaimer"))
     report_type = forms.ChoiceField(choices=(("HTML", "HTML"),))
 
     def __init__(self, *args, **kwargs):
@@ -24,5 +25,5 @@ class CustomReportOptionsForm(forms.Form):
     yes_no = (("0", "No"), ("1", "Yes"))
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
-    include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
+    include_finding_images = forms.ChoiceField(choices=yes_no, label=_("Finding Images"))
     report_type = forms.ChoiceField(choices=(("HTML", "HTML"),))

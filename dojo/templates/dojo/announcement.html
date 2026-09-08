@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
     {{ block.super }}
     <form class="" action="{%  url 'configure_announcement' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
@@ -6,9 +7,9 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 {% if remove %}
-                    <input aria-label="Remove" class="btn btn-danger" type="submit" name="_Remove" value="Remove"/>
+                    <input aria-label="{% trans 'Remove' %}" class="btn btn-danger" type="submit" name="_Remove" value="Remove"/>
                 {% else %}
-                    <input aria-label="Create" class="btn btn-primary" type="submit" name="_Create" value="Create"/>
+                    <input aria-label="{% trans 'Create' %}" class="btn btn-primary" type="submit" name="_Create" value="Create"/>
                 {% endif %}
             </div>
         </div>
