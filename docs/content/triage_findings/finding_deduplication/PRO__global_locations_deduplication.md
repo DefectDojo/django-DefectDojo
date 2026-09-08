@@ -13,7 +13,7 @@ Unlike the scoped algorithms, Global Locations matching is **not scoped to a sin
 
 ## Requirements
 
-Global Locations is defined over the DefectDojo **Locations** data model and is only offered when the **Locations** feature is enabled. On instances where Locations is turned off, the Global Locations feature flag is shown as locked ("Requires Locations to be enabled") and the algorithm does not appear in the Tuner.
+Global Locations is defined over the DefectDojo **Locations** data model and is only offered when the **Locations** feature is enabled. On instances where Locations is turned off, the Global Locations feature flag is shown as locked ("Requires Locations to be enabled") and the algorithm is not offered on **Settings > Finding Workflow > Matching Configuration**.
 
 ## Enabling the Global Locations Algorithm
 

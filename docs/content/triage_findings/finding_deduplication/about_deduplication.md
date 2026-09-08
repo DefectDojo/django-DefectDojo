@@ -22,7 +22,7 @@ By creating and marking Duplicates in this way, DefectDojo ensures that all the 
 
 ### Which Finding becomes the original
 
-Deduplication always treats the **earliest-created** Finding in a duplicate chain as the canonical original, so a Finding from an earlier import is never demoted to a duplicate of a newer one — an original that is already established does not change hands.
+Deduplication always treats the **earliest-created** Finding in a duplicate chain as the canonical original, so a Finding from an earlier import is never demoted to a duplicate of a newer one: an original that is already established does not change hands.
 
 Within a *single* report, the order the scanner happens to list its findings in does not decide the winner. Findings from one import are created in a stable, content-derived order, so a report that contains several findings colliding on the same deduplication key produces the **same original every time it is imported**. Re-scanning and re-importing the same results will not shuffle which Finding your team has been working on.
 
