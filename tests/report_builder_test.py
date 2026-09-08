@@ -215,6 +215,56 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element(By.NAME, "_generate").click()
 
+    # A quote in a heading survives the round trip through #contents.innerHTML
+    # undecoded, so the table-of-contents builder must not let it terminate the
+    # href/name values it generates.
+    TOC_PROBE_TITLE = 'Toc Probe X"autofocus="X"onfocus="window.__tocXss=1'
+
+    def test_toc_anchor_rejects_injected_title(self):
+        driver = self.driver
+        self.goto_all_findings_list(driver)
+        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Edit Finding").click()
+        title_field = driver.find_element(By.ID, "id_title")
+        title_field.clear()
+        title_field.send_keys(self.TOC_PROBE_TITLE)
+        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.assertTrue(self.is_success_message_present(text="Finding saved successfully"))
+
+        self.goto_product_overview(driver)
+        driver.find_element(By.LINK_TEXT, "QA Test").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Asset Report").click()
+        Select(driver.find_element(By.ID, "id_include_table_of_contents")).select_by_index(1)
+        driver.find_element(By.NAME, "_generate").click()
+
+        # Without this the assertions below can run before window.onload has
+        # built the table of contents, which passes on unpatched code too.
+        WebDriverWait(driver, 20).until(
+            lambda d: d.execute_script("return document.querySelectorAll('#toc li').length > 0;"))
+
+        injected = driver.execute_script(
+            "return document.querySelectorAll("
+            "'#toc [onfocus], #toc [autofocus], #contents [onfocus], #contents [autofocus]'"
+            ").length;")
+        self.assertEqual(injected, 0)
+        self.assertIsNone(driver.execute_script("return window.__tocXss || null;"))
+        # The title itself still displays in full; only the generated anchor is stripped.
+        self.assertIn(
+            'Toc Probe X"autofocus=',
+            driver.execute_script("return document.getElementById('toc').textContent;"))
+
+        self.goto_all_findings_list(driver)
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Toc Probe").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Edit Finding").click()
+        title_field = driver.find_element(By.ID, "id_title")
+        title_field.clear()
+        title_field.send_keys("App Vulnerable to XSS")
+        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.assertTrue(self.is_success_message_present(text="Finding saved successfully"))
+
 
 def add_report_tests_to_suite(suite):
     # Add each test the the suite to be run
@@ -231,6 +281,7 @@ def add_report_tests_to_suite(suite):
     suite.addTest(ReportBuilderTest("test_engagement_report"))
     suite.addTest(ReportBuilderTest("test_test_report"))
     suite.addTest(ReportBuilderTest("test_product_endpoint_report"))
+    suite.addTest(ReportBuilderTest("test_toc_anchor_rejects_injected_title"))
 
     suite.addTest(ProductTest("test_delete_product"))
     return suite
