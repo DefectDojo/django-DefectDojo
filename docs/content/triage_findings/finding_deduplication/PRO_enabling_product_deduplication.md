@@ -20,7 +20,7 @@ Deduplication can be applied at an Asset\-wide level, or scoped more narrowly to
 
 ### Enable Finding Deduplication
 
-**Enable Finding Deduplication** turns on the Deduplication Algorithm for all Findings. Once enabled, Deduplication runs on every subsequent import — DefectDojo compares imported Findings against existing Findings in the destination Asset and marks duplicates according to your configuration.
+**Enable Finding Deduplication** turns on the Deduplication Algorithm for all Findings. Once enabled, Deduplication runs on every subsequent import: DefectDojo compares imported Findings against existing Findings in the destination Asset and marks duplicates according to your configuration.
 
 ### Delete Duplicate Findings
 

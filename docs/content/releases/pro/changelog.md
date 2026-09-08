@@ -333,7 +333,7 @@ Additional features:
 ### June 15, 2026: v3.0.0
 
 * **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
-* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic — API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
+* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic: API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
 * **(Authorization)** Open Source restores the **Authorized Users** panel on Product/Product Type detail under the legacy authorization model; Pro deployments retain full RBAC and are not impacted. See [Authorized Users panel replaces Members/Groups under legacy authorization](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
 * **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
 * **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
@@ -367,7 +367,7 @@ Additional features:
 * **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
 * **(Pro UI)** Anchor links now open in a new tab as expected, so following a reference no longer pulls you away from the page you were working on.
 * **(Pro UI)** Adding Findings to an existing Risk Acceptance works reliably again. A recent performance improvement caused the form to fail for some users; you can now resume managing accepted Findings without errors.
-* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default — forcing you to reorder columns every session.
+* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default, forcing you to reorder columns every session.
 * **(API)** Fixed a 500 error when fetching vulnerable endpoints (`GET /api/vue/endpoints/{id}/vulnerable/`), restoring reliable access to vulnerability data for an endpoint.
 
 ### May 4, 2026: v2.58.0
