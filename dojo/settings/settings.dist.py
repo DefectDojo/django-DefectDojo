@@ -259,7 +259,7 @@ env = environ.FileAwareEnv(
                                  ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
     # List of acceptable file types that can be (re)imported
     DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
-                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),
+                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl", ".spdx"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be

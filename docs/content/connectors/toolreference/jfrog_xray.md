@@ -64,7 +64,7 @@ With Artifact-Level Records enabled:
 
 * Repositories remain as Records and become **parent assets**: they carry no findings themselves, but when the Asset Hierarchy feature is enabled, DefectDojo automatically relates each artifact asset to its repository asset with a `parent` relationship. Assets can then be filtered by parent/child, and findings roll up the hierarchy.
 * A vulnerability that impacts several artifacts is imported into each affected artifact's asset, so every asset shows the complete set of findings that affect it.
-* Findings are scoped to each artifact's **latest build**, so an artifact's findings describe its current build rather than accumulating results from every build Xray has ever scanned.
+* Findings are scoped to each artifact's **latest build**, so an artifact's findings describe its current build rather than accumulating results from every build Xray has ever scanned. When an artifact contains nested child images (for example `my-app/my-app-master/<tag>` and `my-app/my-app-worker/<tag>`), each child image is scoped to its own latest build, so the artifact's findings describe the current build of every child.
 * Hierarchy relationships created by the connector never overwrite relationships you created by hand. If an asset already has a parent you assigned, the connector leaves it alone.
 * The token additionally needs read access to the Artifactory storage API (included in the scopes above).
 

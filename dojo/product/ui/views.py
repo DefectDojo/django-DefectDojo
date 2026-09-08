@@ -13,7 +13,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.models import Count, DateField, F, OuterRef, Prefetch, Q, Subquery, Sum, Value
+from django.db.models import Count, DateField, F, IntegerField, OuterRef, Prefetch, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import Http404, HttpRequest, HttpResponseRedirect, JsonResponse
@@ -62,6 +62,7 @@ from dojo.forms import (
 from dojo.jira import services as jira_services
 from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
+from dojo.location.models import LocationProductReference
 from dojo.models import (
     App_Analysis,
     Benchmark_Product_Summary,
@@ -132,6 +133,35 @@ logger = logging.getLogger(__name__)
 labels = get_labels()
 
 
+def annotate_product_findings_count(prods):
+    base_findings = Finding.objects.filter(test__engagement__product_id=OuterRef("pk"), active=True)
+    return prods.annotate(
+        findings_count=Coalesce(
+            build_count_subquery(base_findings, group_field="test__engagement__product_id"), Value(0),
+        ),
+    )
+
+
+def annotate_product_location_counts(prods):
+    location_refs = LocationProductReference.objects.filter(product_id=OuterRef("pk"))
+    return prods.annotate(
+        location_count=Coalesce(
+            build_count_subquery(location_refs, group_field="product_id"), Value(0),
+        ),
+        location_host_count=Coalesce(
+            Subquery(
+                location_refs.order_by()
+                .values("product_id")
+                .annotate(c=Count("location__url__host", distinct=True))
+                .order_by("product_id")
+                .values("c")[:1],
+                output_field=IntegerField(),
+            ),
+            Value(0),
+        ),
+    )
+
+
 def product(request):
     prods = get_authorized_products("view")
     # perform all stuff for filtering and pagination first, before annotation/prefetching
@@ -139,17 +169,9 @@ def product(request):
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
 
     name_words = prods.values_list("name", flat=True)
-    base_findings = Finding.objects.filter(test__engagement__product_id=OuterRef("pk"), active=True)
-    prods = prods.annotate(
-        findings_count=Coalesce(
-            build_count_subquery(base_findings, group_field="test__engagement__product_id"), Value(0),
-        ),
-    )
+    prods = annotate_product_findings_count(prods)
     if locations_enabled():
-        prods = prods.annotate(
-            location_host_count=Count("locations__location__url__host", distinct=True),
-            location_count=Count("locations", distinct=True),
-        )
+        prods = annotate_product_location_counts(prods)
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter

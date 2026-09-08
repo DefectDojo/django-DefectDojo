@@ -31,7 +31,7 @@ DefectDojoで**Enterprise Settings > OAuth Settings**に移動し、**Google**�
 - **Google OAuth Key** — **Client ID**を入力します
 - **Google OAuth Secret** — **Client Secret Key**を入力します
 - **Whitelisted Domains** — 組織のドメイン(例: `yourcompany.com`)を入力すると、そのドメインを持つすべてのユーザーがログインできるようになります
-- **Whitelisted E-mail Addresses** — あるいは、許可する特定のメールアドレス(例: `user1@yourcompany.com, user2@yourcompany.com`)を入力します
+- **Whitelisted Email Addresses** — あるいは、許可する特定のメールアドレス(例: `user1@yourcompany.com, user2@yourcompany.com`)を入力します
 
 ホワイトリストのドメインまたはメールアドレスを少なくとも1つ設定する必要があります。設定しないと、Google経由でログインできるユーザーがいなくなります。
 

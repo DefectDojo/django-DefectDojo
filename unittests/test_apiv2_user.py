@@ -1,3 +1,6 @@
+import time
+from unittest.mock import patch
+
 from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.test import override_settings
@@ -68,11 +71,19 @@ class UserTest(APITestCase):
         url = reverse("api-token-auth")
         creds = {"username": "ratelimit-probe", "password": "not-the-real-password"}
 
-        reached_auth_view = 0
-        for _ in range(8):
-            r = anon.post(url, creds, format="json")
-            if b"non_field_errors" in r.content:
-                reached_auth_view += 1
+        # django-ratelimit counts hits in fixed wall-clock windows (60s for a
+        # "/m" rate, jittered per key). Each failed login runs a full password
+        # hash, so on a slow runner this loop can take several seconds and
+        # straddle a window boundary, resetting the counter mid-loop: 3 allowed,
+        # then blocked, then 2 more allowed after the reset. Pin the window so
+        # all 8 requests deterministically land in the same bucket.
+        pinned_window = int(time.time()) + 3600
+        with patch("django_ratelimit.core._get_window", return_value=pinned_window):
+            reached_auth_view = 0
+            for _ in range(8):
+                r = anon.post(url, creds, format="json")
+                if b"non_field_errors" in r.content:
+                    reached_auth_view += 1
 
         self.assertEqual(reached_auth_view, 3, "api-token-auth should honor the configured rate limit")
 
