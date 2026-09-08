@@ -64,8 +64,8 @@ class ApiFindingFilter(DojoFilter):
     exact_title = CharFilter(field_name="title", lookup_expr="iexact", help_text="Finding title exact match (case-insensitive)")
     product_name = CharFilter(lookup_expr="engagement__product__name__iexact", field_name="test", label=labels.ASSET_FILTERS_NAME_EXACT_LABEL)
     product_name_contains = CharFilter(lookup_expr="engagement__product__name__icontains", field_name="test", label=labels.ASSET_FILTERS_NAME_CONTAINS_LABEL)
-    product_lifecycle = CharFilter(method=custom_filter, lookup_expr="engagement__product__lifecycle",
-                                   field_name="test__engagement__product__lifecycle", label=labels.ASSET_FILTERS_CSV_LIFECYCLES_LABEL)
+    product_lifecycle = CharFilter(method=custom_filter, lookup_expr="engagement__product__lifecycle__value",
+                                   field_name="test__engagement__product__lifecycle__value", label=labels.ASSET_FILTERS_CSV_LIFECYCLES_LABEL)
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()

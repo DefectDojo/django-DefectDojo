@@ -1,5 +1,4 @@
 import json
-from datetime import datetime, timedelta
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
@@ -62,24 +61,14 @@ class XeolParser:
 
             description = "\n".join(description_lines)
 
-            # Determine severity based on EOL date
+            # Determine severity deterministically without wall-clock dependencies
             severity = "Info"
-            eol_str = cycle.get("Eol", "")
-            try:
-                eol_date = datetime.strptime(eol_str, "%Y-%m-%d")
-                now = datetime.now()
-                if eol_date < now:
-                    delta = now - eol_date
-                    if delta <= timedelta(weeks=2):
-                        severity = "Low"
-                    elif delta <= timedelta(weeks=4):
-                        severity = "Medium"
-                    elif delta <= timedelta(weeks=6):
-                        severity = "High"
-                    else:
-                        severity = "Critical"
-            except Exception:
-                severity = "Info"
+            eol_val = cycle.get("Eol", "")
+            if (isinstance(eol_val, bool) and eol_val) or (
+                isinstance(eol_val, str)
+                and eol_val.lower() not in {"false", "none", ""}
+            ):
+                severity = "Critical"
 
             finding = Finding(
                 title=title,

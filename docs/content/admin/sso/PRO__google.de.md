@@ -31,7 +31,7 @@ Gehen Sie in DefectDojo zu **Enterprise Settings > OAuth Settings**, wählen Sie
 - **Google OAuth Key** — geben Sie Ihre **Client ID** ein
 - **Google OAuth Secret** — geben Sie Ihren **Client Secret Key** ein
 - **Whitelisted Domains** — geben Sie die Domain Ihrer Organisation ein (z. B. `yourcompany.com`), um jedem Benutzer mit dieser Domain die Anmeldung zu erlauben
-- **Whitelisted E-mail Addresses** — geben Sie alternativ bestimmte zulässige E-Mail-Adressen ein (z. B. `user1@yourcompany.com, user2@yourcompany.com`)
+- **Whitelisted Email Addresses** — geben Sie alternativ bestimmte zulässige E-Mail-Adressen ein (z. B. `user1@yourcompany.com, user2@yourcompany.com`)
 
 Sie müssen mindestens eine zugelassene Domain oder E-Mail-Adresse festlegen, sonst kann sich kein Benutzer über Google anmelden.
 

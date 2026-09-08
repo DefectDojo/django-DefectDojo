@@ -2,6 +2,7 @@ import base64
 import logging
 
 from django.db import connection
+from django.test import override_settings
 from django.utils import timezone
 
 from dojo.importers.default_importer import DefaultImporter
@@ -13,6 +14,7 @@ from dojo.models import (
     Finding,
     Product,
     Product_Type,
+    Test_Import_Finding_Action,
     User,
 )
 from dojo.vulnerability.models import FindingVulnerabilityReference
@@ -252,6 +254,41 @@ class TestImportersDeletedFindingChildRows(DojoTestCase):
                 self._buffered_request_response_count(finding),
                 msg=f"finding {finding.pk} lost its request/response pair",
             )
+
+    @override_settings(TRACK_IMPORT_HISTORY=True)
+    def test_update_import_history_skips_a_finding_deleted_during_the_import(self):
+        """
+        The import-history records go through the same existence lookup as the buffers.
+
+        Its own test class (UpdateImportHistoryTests) needs TransactionTestCase for the
+        IntegrityError fallback and is skipped, so the shared pre-check is asserted here.
+        """
+        importer = self._importer()
+        importer.test = self.test
+        deleted_finding, *surviving_findings = self.findings
+        deleted_pk = deleted_finding.pk
+        Finding.objects.filter(pk=deleted_pk).delete()
+
+        test_import = importer.update_import_history(
+            new_findings=[finding.pk for finding in self.findings],
+        )
+        connection.check_constraints()
+
+        recorded_finding_ids = set(
+            Test_Import_Finding_Action.objects.filter(
+                test_import=test_import,
+            ).values_list("finding_id", flat=True),
+        )
+        self.assertNotIn(
+            deleted_pk,
+            recorded_finding_ids,
+            msg=f"no history record may be written for deleted finding {deleted_pk}",
+        )
+        self.assertEqual(
+            {finding.pk for finding in surviving_findings},
+            recorded_finding_ids,
+            msg="every surviving finding must still get its history record",
+        )
 
 
 class TestReconcileBeforeFindingIsWritten(DojoTestCase):

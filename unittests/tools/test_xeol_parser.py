@@ -20,6 +20,7 @@ class TestXeolParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         finding = list(findings)[0]
         self.assertEqual(finding.title, "Perl EOL Information")
+        self.assertEqual(finding.severity, "Critical")
 
     def test_parse_file_with_multiple_finding(self):
         testfile = (get_unit_tests_scans_path("xeol") / "xeol_multiple_findings.json").open(encoding="utf-8")

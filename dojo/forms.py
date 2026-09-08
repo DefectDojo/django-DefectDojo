@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from tagulous.forms import TagField
+from django_tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
 from dojo.github.ui.forms import (  # noqa: F401 -- backward compat

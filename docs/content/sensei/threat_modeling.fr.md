@@ -28,7 +28,7 @@ Rien n'est installé et aucun dépôt n'est connecté. La modélisation des mena
 
 ## Générer un modèle de menaces
 
-Choisissez **New threat model**, sélectionnez le produit, donnez-lui un nom, et fournissez la conception sous la forme dont vous disposez :
+Choisissez **New Threat Model**, sélectionnez le produit, donnez-lui un nom, et fournissez la conception sous la forme dont vous disposez :
 
 - **Collez la description** directement, ou
 - **Téléversez un document de conception** — `.md`, `.markdown`, `.txt`, `.text` ou `.pdf`. L'extraction du texte à partir d'un PDF se fait au mieux ; si un PDF est essentiellement composé d'images, collez plutôt le texte.

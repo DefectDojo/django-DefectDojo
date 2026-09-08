@@ -259,7 +259,7 @@ env = environ.FileAwareEnv(
                                  ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
     # List of acceptable file types that can be (re)imported
     DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
-                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),
+                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl", ".spdx"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -897,7 +897,7 @@ INSTALLED_APPS = (
     "django_celery_results",
     "drf_spectacular",
     "drf_spectacular_sidecar",  # required for Django collectstatic discovery
-    "tagulous",
+    "django_tagulous",  # app_label stays "tagulous" (DB tables/static paths unaffected)
     "fontawesomefree",
     "django_filters",
     "auditlog",
@@ -1215,6 +1215,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
     "JFrog Xray API Summary Artifact Scan": ["title", "description", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
+    # severity is deliberately excluded: the Seal CSV has no severity column today, so
+    # every finding gets the same default, and including it would fork all existing
+    # findings into duplicates once the CLI starts exporting a score
+    "Seal Security Scan": ["vulnerability_ids", "component_name", "component_version"],
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
@@ -1670,6 +1674,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Zimperium zScan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Group-IB ASM - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Aqua Supply Chain - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
@@ -1755,6 +1760,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # findings mitigated and re-created in one reimport of otherwise unchanged data).
     "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
+    "Seal Security Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
     "Github SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
@@ -2103,10 +2109,10 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 QUALYS_WAS_UNIQUE_ID = False
 
 SERIALIZATION_MODULES = {
-    "xml": "tagulous.serializers.xml_serializer",
-    "json": "tagulous.serializers.json",
-    "python": "tagulous.serializers.python",
-    "yaml": "tagulous.serializers.pyyaml",
+    "xml": "django_tagulous.serializers.xml_serializer",
+    "json": "django_tagulous.serializers.json",
+    "python": "django_tagulous.serializers.python",
+    "yaml": "django_tagulous.serializers.pyyaml",
 }
 
 # There seems to be no way just use the default and just leave out jquery, so we have to copy...

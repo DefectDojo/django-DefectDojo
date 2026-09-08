@@ -125,6 +125,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Qwiet AI**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **Red Hat Satellite**
 * **runZero**
 * **Scantist**

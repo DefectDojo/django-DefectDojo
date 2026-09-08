@@ -56,9 +56,19 @@ from dojo.api_v3.filtering import (
 )
 from dojo.api_v3.include import apply_includes
 from dojo.api_v3.pagination import list_envelope, paginate
+from dojo.api_v3.writes import bind_payload, split_extras
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_User, Endpoint, Product, Product_Type, SLA_Configuration
+from dojo.models import (
+    Dojo_User,
+    Endpoint,
+    Product,
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
+    Product_Type,
+    SLA_Configuration,
+)
 from dojo.product.api_v3.schemas import (
     AssetDetail,
     AssetReplace,
@@ -109,6 +119,21 @@ _USER_FK_FIELDS = {
 # Sentinel distinguishing "tags omitted" from "tags set to null/empty" on PATCH.
 _UNSET = object()
 
+# Wire write-field -> editable option model. These arrive as the option's ``value`` string
+# and are resolved to the FK row (mirrors the v2 SlugRelatedField(slug_field="value")).
+_OPTION_FK_FIELDS = {
+    "platform": Product_Platform,
+    "lifecycle": Product_Lifecycle,
+    "origin": Product_Origin,
+}
+
+
+def _resolve_option(field: str, model: type, value: str):
+    option = model.objects.filter(value=value).first()
+    if option is None:
+        raise validation_problem({field: [f"{field} '{value}' is not a valid option"]})
+    return option
+
 
 # Derived from the row schema so a factory called with ``schema=<subclass>`` documents what it
 # serves (I4). See ``dojo/api_v3/pagination.py::list_envelope``.
@@ -157,6 +182,10 @@ def _apply_optional_relations_and_scalars(instance: Product, data: dict) -> None
             if sla is None:
                 raise validation_problem({"sla_configuration": [f"SLA configuration {pk} does not exist"]})
             instance.sla_configuration = sla
+    for wire_field, model in _OPTION_FK_FIELDS.items():
+        if wire_field in data:
+            value = data.pop(wire_field)
+            setattr(instance, wire_field, _resolve_option(wire_field, model, value) if value is not None else None)
     for key, value in data.items():
         setattr(instance, key, value)
 
@@ -167,6 +196,15 @@ def build_assets_router(
     detail_schema: type = AssetDetail,
     filter_spec: FilterSpec = ASSET_FILTER_SPEC,
     queryset_hook: Callable | None = None,
+    # Write payload schemas, parameterized exactly as the findings router's are (I4/I5): a
+    # downstream distribution subclasses them to accept its own columns. Anything the subclass adds
+    # beyond ``AssetWrite``/``AssetUpdate``/``AssetReplace`` is split out of the payload and handed
+    # to ``on_write`` instead of being applied to the ``Product`` row, so the OS write path is never
+    # passed a field it does not own. See dojo/api_v3/writes.py.
+    create_schema: type = AssetWrite,
+    update_schema: type = AssetUpdate,
+    replace_schema: type = AssetReplace,
+    on_write: Callable | None = None,
     auth=NOT_SET,
 ) -> Router:
     """Build the assets router (I5)."""
@@ -220,8 +258,9 @@ def build_assets_router(
         return json_response(apply_fields(serialize(obj, detail_schema, expand_tree), fields))
 
     @router.post("/assets", response=detail_schema, url_name="assets_create")
-    def create_asset(request: HttpRequest, payload: AssetWrite):
-        data = payload.dict()
+    @bind_payload(create_schema)
+    def create_asset(request: HttpRequest, payload):
+        data, extras = split_extras(payload.dict(), AssetWrite)
         tags = data.pop("tags")
         organization_id = data.pop("organization")
         # Mirror check_post_permission(request, Product_Type, "prod_type", "add"): 404 if the target
@@ -241,10 +280,13 @@ def build_assets_router(
             instance.save()
         except DjangoValidationError as exc:
             raise _validation_from_django(exc) from exc
+        if on_write is not None:
+            on_write(instance, extras, user=request.user, created=True)
         return json_response(serialize(instance, detail_schema, {}), status=201)
 
     @router.patch("/assets/{int:asset_id}", response=detail_schema, url_name="assets_update")
-    def update_asset(request: HttpRequest, asset_id: int, payload: AssetUpdate):
+    @bind_payload(update_schema)
+    def update_asset(request: HttpRequest, asset_id: int, payload):
         instance = _base_queryset(request, queryset_hook).filter(pk=asset_id).first()
         if instance is None:
             msg = f"Asset {asset_id} not found"
@@ -252,7 +294,7 @@ def build_assets_router(
         if not user_has_permission(request.user, instance, Permissions.Product_Edit):
             raise PermissionDenied  # 403: visible but not editable
 
-        data = payload.dict(exclude_unset=True)
+        data, extras = split_extras(payload.dict(exclude_unset=True), AssetUpdate)
         tags = data.pop("tags", _UNSET)
         if "organization" in data:
             new_org_id = data.pop("organization")
@@ -273,10 +315,13 @@ def build_assets_router(
             instance.save()
         except DjangoValidationError as exc:
             raise _validation_from_django(exc) from exc
+        if on_write is not None:
+            on_write(instance, extras, user=request.user, created=False)
         return json_response(serialize(instance, detail_schema, {}))
 
     @router.put("/assets/{int:asset_id}", response=detail_schema, url_name="assets_replace")
-    def replace_asset(request: HttpRequest, asset_id: int, payload: AssetReplace):
+    @bind_payload(replace_schema)
+    def replace_asset(request: HttpRequest, asset_id: int, payload):
         # Full replace (PUT). Validates against the create-shaped AssetReplace (required
         # name/description/organization, extra="forbid") and applies payload.dict() WITHOUT
         # exclude_unset, so omitted optionals reset to their schema defaults (§4.11). Permission
@@ -289,7 +334,7 @@ def build_assets_router(
         if not user_has_permission(request.user, instance, Permissions.Product_Edit):
             raise PermissionDenied  # 403: visible but not editable
 
-        data = payload.dict()
+        data, extras = split_extras(payload.dict(), AssetReplace)
         tags = data.pop("tags")
         new_org_id = data.pop("organization")
         if new_org_id != instance.prod_type_id:
@@ -307,6 +352,8 @@ def build_assets_router(
             instance.save()
         except DjangoValidationError as exc:
             raise _validation_from_django(exc) from exc
+        if on_write is not None:
+            on_write(instance, extras, user=request.user, created=False)
         return json_response(serialize(instance, detail_schema, {}))
 
     @router.delete("/assets/{int:asset_id}", url_name="assets_delete")

@@ -64,6 +64,8 @@ from dojo.object.ui.urls import urlpatterns as object_urls
 from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.product.api.urls import add_product_urls
+from dojo.product_attributes.api.urls import add_product_attribute_urls
+from dojo.product_attributes.ui.urls import urlpatterns as product_attribute_urls
 from dojo.product_type.api.urls import add_product_type_urls
 from dojo.regulations.api.urls import add_regulations_urls
 from dojo.regulations.ui.urls import urlpatterns as regulations
@@ -104,6 +106,7 @@ v2_api = DefaultRouter()
 v2_api = add_announcement_urls(v2_api)
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
 v2_api = add_development_environment_urls(v2_api)
+v2_api = add_product_attribute_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   dojo_groups, dojo_group_members → pro/groups, pro/group_members
 v2_api = register_endpoint_meta_import(v2_api)
@@ -167,6 +170,7 @@ add_organization_urls(v2_api)
 ur = []
 ur += asset_urls
 ur += dev_env_urls
+ur += product_attribute_urls
 ur += eng_urls
 ur += finding_urls
 ur += finding_group_urls
