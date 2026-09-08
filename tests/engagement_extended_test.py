@@ -22,14 +22,14 @@ class EngagementExtendedTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Extended Test Engagement")
         driver.find_element(By.ID, "id_name").send_keys(Keys.TAB, "Extended engagement for testing.")
         Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text("Admin User (admin)")
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully"))
 
@@ -38,7 +38,7 @@ class EngagementExtendedTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
         driver.find_element(By.LINK_TEXT, "Extended Test Engagement").click()
@@ -52,7 +52,7 @@ class EngagementExtendedTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
         driver.find_element(By.LINK_TEXT, "Extended Test Engagement").click()
@@ -66,14 +66,14 @@ class EngagementExtendedTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
         driver.find_element(By.LINK_TEXT, "Extended Test Engagement").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Copy Engagement").click()
         driver.find_element(By.ID, "id_done").click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Engagement Copied successfully."))
 
@@ -82,7 +82,7 @@ class EngagementExtendedTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
         driver.find_element(By.LINK_TEXT, "Extended Test Engagement").click()
@@ -105,7 +105,7 @@ class EngagementExtendedTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
         driver.find_element(By.LINK_TEXT, "Extended Test Engagement").click()

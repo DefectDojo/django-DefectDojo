@@ -12,7 +12,7 @@ Vous aurez besoin d'un **jeton API** Socket — un jeton d'organisation créé d
 
 #### Mappages du connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://api.socket.dev/v0`, ou saisissez-le explicitement.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://api.socket.dev/v0`, ou saisissez-le explicitement.
 2. Saisissez le jeton API Socket dans le champ **Secret**.
 3. Optionnellement, définissez une **Minimum Severity** pour limiter les constatations importées.
 

@@ -1,0 +1,193 @@
+[
+  {
+    "description": "",
+    "elements": [
+      {
+        "description": "",
+        "id": "1",
+        "keyword": "Scenario",
+        "line": 3,
+        "name": "Postgres servers must not use a public network",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 4,
+            "name": "Given I have azurerm_postgresql_server defined",
+            "result": {
+              "duration": 52000,
+              "endtime": "2026-08-10 16:07:15.996323+00:00",
+              "starttime": "2026-08-10 16:07:15.996271+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then",
+            "line": 5,
+            "name": "Then it must contain public_network_access_enabled",
+            "result": {
+              "duration": 84000,
+              "endtime": "2026-08-10 16:07:15.996429+00:00",
+              "starttime": "2026-08-10 16:07:15.996345+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "And",
+            "line": 6,
+            "name": "And its value must be false",
+            "result": {
+              "duration": 92000,
+              "endtime": "2026-08-10 16:07:15.996540+00:00",
+              "error_message": "\r       ",
+              "starttime": "2026-08-10 16:07:15.996448+00:00",
+              "status": "failed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "2",
+        "keyword": "Scenario",
+        "line": 8,
+        "name": "Postgres servers must enforce a minimum TLS version",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 9,
+            "name": "Given I have azurerm_postgresql_server defined",
+            "result": {
+              "duration": 21000,
+              "endtime": "2026-08-10 16:07:15.996601+00:00",
+              "starttime": "2026-08-10 16:07:15.996580+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then",
+            "line": 10,
+            "name": "Then it must contain ssl_minimal_tls_version_enforced",
+            "result": {
+              "duration": 18000,
+              "endtime": "2026-08-10 16:07:15.996631+00:00",
+              "starttime": "2026-08-10 16:07:15.996613+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "And",
+            "line": 11,
+            "name": "And its value must be TLS1_2",
+            "result": {
+              "duration": 60000,
+              "endtime": "2026-08-10 16:07:15.996702+00:00",
+              "error_message": "\r       ",
+              "starttime": "2026-08-10 16:07:15.996642+00:00",
+              "status": "failed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "3",
+        "keyword": "Scenario",
+        "line": 13,
+        "name": "Postgres servers must have geo redundant backups",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 14,
+            "name": "Given I have azurerm_postgresql_server defined",
+            "result": {
+              "duration": 17000,
+              "endtime": "2026-08-10 16:07:15.996753+00:00",
+              "starttime": "2026-08-10 16:07:15.996736+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then",
+            "line": 15,
+            "name": "Then it must contain geo_redundant_backup_enabled",
+            "result": {
+              "duration": 14000,
+              "endtime": "2026-08-10 16:07:15.996778+00:00",
+              "starttime": "2026-08-10 16:07:15.996764+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "And",
+            "line": 16,
+            "name": "And its value must be true",
+            "result": {
+              "duration": 49000,
+              "endtime": "2026-08-10 16:07:15.996838+00:00",
+              "error_message": "\r       ",
+              "starttime": "2026-08-10 16:07:15.996789+00:00",
+              "status": "failed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "4",
+        "keyword": "Scenario",
+        "line": 18,
+        "name": "Postgres servers must enforce SSL",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 19,
+            "name": "Given I have azurerm_postgresql_server defined",
+            "result": {
+              "duration": 15000,
+              "endtime": "2026-08-10 16:07:15.996888+00:00",
+              "starttime": "2026-08-10 16:07:15.996873+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then",
+            "line": 20,
+            "name": "Then it must contain ssl_enforcement_enabled",
+            "result": {
+              "duration": 13000,
+              "endtime": "2026-08-10 16:07:15.996920+00:00",
+              "starttime": "2026-08-10 16:07:15.996907+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "And",
+            "line": 21,
+            "name": "And its value must be true",
+            "result": {
+              "duration": 11000,
+              "endtime": "2026-08-10 16:07:15.996942+00:00",
+              "starttime": "2026-08-10 16:07:15.996931+00:00",
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      }
+    ],
+    "id": "1",
+    "keyword": "Feature",
+    "line": 1,
+    "name": "Postgres server hardening",
+    "tags": [],
+    "type": "feature",
+    "uri": "features/many.feature"
+  }
+]

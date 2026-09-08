@@ -26,6 +26,17 @@
                 {% endfor %}
                 </details>
             </p>
+            {% if findings_new_duplicate %}
+            <p>
+                <details>
+                <summary>{% blocktranslate %}New findings detected as duplicates{% endblocktranslate %} ({{ findings_new_duplicate | length }})</summary><br/>
+                {% for finding in findings_new_duplicate %}
+                    {% url 'view_finding' finding.id as finding_url %}
+                    <a href="{{ finding_url|full_url }}">{{ finding.title }}</a> ({{ finding.severity }})<br/>
+                {% endfor %}
+                </details>
+            </p>
+            {% endif %}
             <p>
                 <details>
                 <summary>{% blocktranslate %}Reactivated findings{% endblocktranslate %} ({{ findings_reactivated | length }})</summary><br/>
@@ -37,6 +48,17 @@
                 {% endfor %}
                 </details>
             </p>
+            {% if findings_reactivated_duplicate %}
+            <p>
+                <details>
+                <summary>{% blocktranslate %}Reactivated findings detected as duplicates{% endblocktranslate %} ({{ findings_reactivated_duplicate | length }})</summary><br/>
+                {% for finding in findings_reactivated_duplicate %}
+                    {% url 'view_finding' finding.id as finding_url %}
+                    <a href="{{ finding_url|full_url }}">{{ finding.title }}</a> ({{ finding.severity }})<br/>
+                {% endfor %}
+                </details>
+            </p>
+            {% endif %}
             <p>
                 <details>
                 <summary>{% blocktranslate %}Closed findings{% endblocktranslate %} ({{ findings_mitigated | length }})</summary><br/>
@@ -59,6 +81,17 @@
                 {% endfor %}
                 </details>
             </p>
+            {% if findings_untouched_duplicate %}
+            <p>
+                <details>
+                <summary>{% blocktranslate %}Existing findings detected as duplicates{% endblocktranslate %} ({{ findings_untouched_duplicate | length }})</summary><br/>
+                {% for finding in findings_untouched_duplicate %}
+                    {% url 'view_finding' finding.id as finding_url %}
+                    <a href="{{ finding_url|full_url }}">{{ finding.title }}</a> ({{ finding.severity }})<br/>
+                {% endfor %}
+                </details>
+            </p>
+            {% endif %}
             <br/><br/>
                 {% trans "Kind regards" %},
             <br/><br/>

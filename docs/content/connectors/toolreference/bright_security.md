@@ -12,7 +12,7 @@ You will need a Bright **API key**, created in the Bright app under **User setti
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://app.brightsec.com`, or enter your Bright host explicitly.
+1. Keep the pre-filled **Location**, `https://app.brightsec.com`, or enter your Bright host explicitly.
 2. Enter the Bright API key in the **Secret** field.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
 

@@ -1,6 +1,7 @@
 /* ============================================================
    DataTables — DefectDojo custom theme
-   Replaces datatables.net-bs Bootstrap variant with Tailwind-aligned styles.
+   Styles DataTables' own dt-* markup directly; no styling integration package
+   is loaded.
    Loaded AFTER tailwind-out.css so it can reference CSS custom properties.
    ============================================================ */
 
@@ -256,19 +257,15 @@ div.dt-container div.dt-search input:focus {
 div.dt-container div.dt-paging {
   margin: 0;
 }
-div.dt-container div.dt-paging ul.pagination {
+/* DataTables' own pagination markup: <div class="dt-paging"><nav><button
+   class="dt-paging-button">. The Bootstrap integration used to replace this
+   with ul.pagination > li > a; it is no longer loaded. */
+div.dt-container div.dt-paging nav {
   display: flex;
   flex-wrap: wrap;
   gap: 0.125rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
 }
-div.dt-container div.dt-paging ul.pagination li {
-  display: inline-block;
-}
-div.dt-container div.dt-paging ul.pagination li a,
-div.dt-container div.dt-paging ul.pagination li span {
+div.dt-container div.dt-paging button.dt-paging-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -284,19 +281,18 @@ div.dt-container div.dt-paging ul.pagination li span {
   transition: background-color 150ms, border-color 150ms;
   cursor: pointer;
 }
-div.dt-container div.dt-paging ul.pagination li a:hover {
+div.dt-container div.dt-paging button.dt-paging-button:hover:not(.current):not(.disabled) {
   background-color: var(--color-surface-2, #f8fafc);
   border-color: var(--color-dd-primary-300, #a5b4fc);
 }
-div.dt-container div.dt-paging ul.pagination li.active a,
-div.dt-container div.dt-paging ul.pagination li.active span {
+div.dt-container div.dt-paging button.dt-paging-button.current {
   background-color: var(--color-dd-primary-500, #4f46e5);
   border-color: var(--color-dd-primary-500, #4f46e5);
   color: white;
   font-weight: 600;
 }
-div.dt-container div.dt-paging ul.pagination li.disabled a,
-div.dt-container div.dt-paging ul.pagination li.disabled span {
+div.dt-container div.dt-paging button.dt-paging-button.disabled,
+div.dt-container div.dt-paging button.dt-paging-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
@@ -334,6 +330,26 @@ div.dt-container .dt-button.active {
   background-color: var(--color-dd-primary-500, #4f46e5);
   border-color: var(--color-dd-primary-500, #4f46e5);
   color: white;
+}
+
+/* -- Legacy `dom` control row -------------------------------- */
+/* With the legacy `dom` option (the tables here use dom: 'Bfrtip'), DataTables
+   emits the control divs as direct children of the container with no
+   dt-layout-row wrapper, so they stack vertically. The Bootstrap integration
+   used to inline them by putting .form-inline on the container; do it here
+   instead so buttons and search share one row. Must stay after the .dt-buttons
+   rule above, which sets display:flex at equal specificity. */
+div.dt-container > div.dt-buttons,
+div.dt-container > div.dt-length,
+div.dt-container > div.dt-search {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  width: auto;
+}
+div.dt-container > div.dt-length,
+div.dt-container > div.dt-search {
+  margin-left: 0.75rem;
 }
 
 /* -- DT processing spinner ----------------------------------- */

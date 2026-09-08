@@ -1,0 +1,21 @@
+{
+  "assessment": {
+    "id": "assess-0001",
+    "appVersion": "3.2.0",
+    "buildNumber": "412",
+    "buildUploadedAt": "2024-06-02T09:00:00Z"
+  },
+  "app": {
+    "zdevAppId": "app-0001",
+    "name": "Generic Mobile App",
+    "bundleIdentifier": "com.example.genericapp",
+    "platform": "android",
+    "os": "android"
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "runs": [
+      {"tool": {"driver": {"name": "zScan", "version": "1.0.0", "rules": []}}, "results": []}
+    ]
+  }
+}

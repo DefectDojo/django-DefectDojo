@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites time="0.007">
+  <testsuite name="Postgres server hardening" failures="1" errors="0" skipped="0" tests="3" time="0.007">
+    <testcase classname="Postgres server hardening" name="Postgres servers must enforce SSL" time="0.000"/>
+    <testcase classname="Postgres server hardening" name="Postgres servers must not use a public network" time="0.000">
+      <failure type="Failure" message="And its value must be false"><![CDATA[Given I have azurerm_postgresql_server defined
+Then it must contain public_network_access_enabled
+And its value must be false
+
+Failure: public_network_access_enabled property in azurerm_postgresql_server.example resource does not match with ^false$ case insensitive regex. It is set to True.]]></failure>
+    </testcase>
+    <testcase classname="Postgres server hardening" name="Resource groups must be defined" time="0.000"/>
+  </testsuite>
+</testsuites>

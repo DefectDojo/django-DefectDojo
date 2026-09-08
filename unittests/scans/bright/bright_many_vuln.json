@@ -1,0 +1,48 @@
+[
+  {
+    "id": "issue-0001",
+    "name": "Reflected cross-site scripting",
+    "severity": "High",
+    "cvss": 6.1,
+    "cwe": "CWE-79",
+    "details": "A request parameter is reflected into the response without encoding.",
+    "remediation": "Encode user input before rendering it.",
+    "resources": ["https://app.example.com/search?q=1", "https://app.example.com/find?q=1"],
+    "request": "GET /search?q=%3Cscript%3E HTTP/1.1\nHost: app.example.com",
+    "response": "HTTP/1.1 200 OK\n\n<html><script>",
+    "entryPoint": "https://app.example.com/search?q=1",
+    "protocol": "http",
+    "time": "2024-07-01T12:00:00.000Z"
+  },
+  {
+    "id": "issue-0002",
+    "name": "Missing security header",
+    "severity": "low",
+    "cvss": "3.1",
+    "cwe": "693",
+    "details": "The response omitted a recommended header.",
+    "resources": ["https://app.example.com/", "https://api.example.com:8443/v1/health"],
+    "protocol": "https"
+  },
+  {
+    "id": "issue-0003",
+    "name": "",
+    "severity": "not a label",
+    "cvss": 0,
+    "cwe": "not a cwe",
+    "details": "",
+    "resources": [],
+    "entryPoint": "an internal service"
+  },
+  {
+    "id": "issue-0004",
+    "name": "SQL injection",
+    "severity": "Critical",
+    "cvss": 9.8,
+    "cwe": "CWE-89",
+    "details": "A parameter reaches a database query.",
+    "remediation": "Use parameterised queries.",
+    "resources": ["https://api.example.com/v1/reports"],
+    "entryPoint": ""
+  }
+]

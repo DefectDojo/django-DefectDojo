@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load humanize %}
 {% load display_tags %}
@@ -26,7 +27,7 @@
                             Endpoint: {{ location|url_shortener }}
                             {% if location.host_validation_failure %}
                                 <span data-toggle="tooltip"
-                                      title="Endpoint is broken. Check documentation to look for fix process">&#128681;</span>
+                                      title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}">&#128681;</span>
                             {% endif %}
                         </span>
                     {% endif %}
@@ -41,7 +42,7 @@
                                 id="dropdownMenu1"
                                 data-toggle="dropdown"
                                 aria-expanded="true"
-                                aria-label="Endpoint options">
+                                aria-label="{% trans 'Endpoint options' %}">
                             <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
                         </button>
@@ -99,7 +100,7 @@
                         <div class="row">
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-calendar-days fa-2x"></i>
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">&nbsp;</span>
                                     <span>
                                         Finding Age ({{ all_findings_count|apnumber }}
@@ -120,7 +121,7 @@
                         <div class="row">
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-bug fa-2x"></i>
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">{{ all_findings_count }}</span>
                                     <span>
                                         {% if not host_view %}
@@ -145,7 +146,7 @@
                             <div class="row">
                                 <div class="col-xs-12">
                                     <i class="fa-solid fa-bug fa-2x"></i>
-                                    <div class="pull-right inline-block text-right">
+                                    <div class="pull-right inline-block text-end">
                                         <span>Opened findings count by month</span>
                                     </div>
                                 </div>
@@ -187,7 +188,7 @@
                                                 &nbsp;{{ item|url_shortener }}
                                                 {% if location.url.host_validation_failure %}
                                                     <span data-toggle="tooltip"
-                                                          title="Endpoint is broken. Check documentation to look for fix process">&#128681;</span>
+                                                          title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}">&#128681;</span>
                                                 {% endif %}
                                             </a>
                                         {% endif %}
@@ -229,12 +230,12 @@
                             <h4>
                                 Additional Information
                                 <div class="btn-group pull-right">
-                                    <a title="Edit Information"
+                                    <a title="{% trans 'Edit Information' %}"
                                        class="btn btn-sm btn-primary"
                                        href="{% url 'edit_endpoint_meta_data' location.id %}">
                                         <span class="fa-solid fa-pen-to-square"></span>
                                     </a>
-                                    <a title="Add Information"
+                                    <a title="{% trans 'Add Information' %}"
                                        class="btn btn-sm btn-primary"
                                        href="{% url 'add_endpoint_meta_data' location.id %}">
                                         <span class="fa-solid fa-plus"></span>

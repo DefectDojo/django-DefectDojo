@@ -1,0 +1,10 @@
+{
+  "warnings": [
+    {
+      "path": "src/sec_test.py",
+      "line": 2,
+      "code": "aws_secret_key",
+      "message": "Amazon Web Services secret key"
+    }
+  ]
+}

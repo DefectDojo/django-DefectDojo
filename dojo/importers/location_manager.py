@@ -107,11 +107,11 @@ class LocationManager(BaseLocationManager):
 
     def clean_unsaved(self, finding: Finding) -> None:
         """Clean the unsaved locations on this finding."""
-        self.clean_unsaved_locations(finding.unsaved_locations)
+        self.cleaned_unsaved_locations(finding)
 
     def record_for_finding(self, finding: Finding, extra_locations: list[UnsavedLocation] | None = None) -> None:
         """Record locations from the finding + any form-added extras for later batch creation."""
-        self.record_locations_for_finding(finding, finding.unsaved_locations)
+        self._record_cleaned_locations(finding, self.cleaned_unsaved_locations(finding))
         if extra_locations:
             self.record_locations_for_finding(finding, extra_locations)
 
@@ -145,6 +145,19 @@ class LocationManager(BaseLocationManager):
 
     def persist(self) -> None:
         """Persist all accumulated location operations to the database."""
+        # Both steps below already short-circuit when their accumulators are empty, so with
+        # nothing buffered the only cost of proceeding is an empty transaction -- inside an
+        # outer atomic block that is a SAVEPOINT/RELEASE pair, i.e. two queries to do
+        # nothing. persist() is called unconditionally at every batch boundary and again by
+        # close_old_findings, so those pairs are paid on imports that touched no location at
+        # all. The condition is the union of the two inner guards.
+        if not (
+            self._product_locations
+            or self._status_updates
+            or self._refs_to_reactivate
+            or self._refs_to_mitigate
+        ):
+            return
         with transaction.atomic():
             self._persist_locations()
             self._persist_status_updates()
@@ -321,7 +334,7 @@ class LocationManager(BaseLocationManager):
                     # The new finding is not mitigated; we need to reactivate locations that are in the new finding and
                     # mitigate statuses that are NOT in the new finding.
                     new_loc_values = {
-                        str(loc) for loc in self.clean_unsaved_locations(new_finding.unsaved_locations)
+                        str(loc) for loc in self.cleaned_unsaved_locations(new_finding)
                     }
                     for ref in finding_refs:
                         if ref.location.location_value in new_loc_values:
@@ -479,6 +492,28 @@ class LocationManager(BaseLocationManager):
             except ValidationError as e:
                 logger.warning("DefectDojo is storing broken locations because cleaning wasn't successful: %s", e)
         return locations
+
+    @classmethod
+    def cleaned_unsaved_locations(cls, finding: Finding) -> list[AbstractLocation]:
+        """
+        Clean finding.unsaved_locations exactly once per finding and memoize the result.
+
+        The import pipeline needs the cleaned list several times per finding — hash_code
+        computation (Finding.get_locations), recording for persistence, and reimport
+        status comparison. Cleaning converts LocationData to model instances and
+        re-parses/re-hashes every URL, so repeating it is pure CPU waste and was the
+        dominant cost of a locations-on import for endpoint-heavy reports. The memo is
+        keyed on the identity of the raw list, so code that assigns a fresh
+        unsaved_locations list gets a fresh clean; mutating the list in place after the
+        first clean is not supported (no in-tree caller does).
+        """
+        raw = finding.unsaved_locations
+        cached = getattr(finding, "_cleaned_unsaved_locations_cache", None)
+        if cached is not None and cached[0] is raw:
+            return cached[1]
+        cleaned = cls.clean_unsaved_locations(raw)
+        finding._cleaned_unsaved_locations_cache = (raw, cleaned)
+        return cleaned
 
     # ------------------------------------------------------------------
     # Bulk internals

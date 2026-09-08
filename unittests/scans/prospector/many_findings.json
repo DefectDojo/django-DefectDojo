@@ -1,0 +1,93 @@
+{
+  "summary": {
+    "started": "2026-08-09 15:27:00.587743",
+    "libraries": [],
+    "strictness": null,
+    "profiles": "default, no_doc_warnings, no_test_warnings, strictness_medium, strictness_high, strictness_veryhigh, no_member_warnings",
+    "tools": [
+      "dodgy",
+      "mccabe",
+      "profile-validator",
+      "pycodestyle",
+      "pyflakes",
+      "pylint"
+    ],
+    "message_count": 5,
+    "completed": "2026-08-09 15:27:00.745258",
+    "time_taken": "0.16",
+    "formatter": "json"
+  },
+  "messages": [
+    {
+      "source": "dodgy",
+      "code": "aws_secret_key",
+      "location": {
+        "path": "app.py",
+        "module": "app",
+        "function": null,
+        "line": 2,
+        "character": 0
+      },
+      "message": "Amazon Web Services secret key",
+      "isFixable": false
+    },
+    {
+      "source": "dodgy",
+      "code": "secret",
+      "location": {
+        "path": "app.py",
+        "module": "app",
+        "function": null,
+        "line": 2,
+        "character": 0
+      },
+      "message": "Possible hardcoded secret key",
+      "isFixable": false
+    },
+    {
+      "source": "pylint",
+      "code": "unused-import",
+      "location": {
+        "path": "app.py",
+        "module": "app",
+        "function": null,
+        "line": 1,
+        "character": 0,
+        "lineEnd": 1,
+        "characterEnd": 9
+      },
+      "message": "Unused import os",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-import.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-variable",
+      "location": {
+        "path": "app.py",
+        "module": "app",
+        "function": "run",
+        "line": 5,
+        "character": 4,
+        "lineEnd": 5,
+        "characterEnd": 12
+      },
+      "message": "Unused variable 'password'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-variable.html"
+    },
+    {
+      "source": "pyflakes",
+      "code": "F841",
+      "location": {
+        "path": "app.py",
+        "module": "app",
+        "function": null,
+        "line": 7,
+        "character": 5
+      },
+      "message": "local variable 'unused_var' is assigned to but never used",
+      "isFixable": false
+    }
+  ]
+}

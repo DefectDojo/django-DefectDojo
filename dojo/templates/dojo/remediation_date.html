@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load event_tags %}
 {% block content %}
     {{ block.super }}
@@ -12,7 +13,7 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
 
-                <input class="btn btn-primary" name='submit' type="submit" value="Save" aria-label="Save"/>
+                <input class="btn btn-primary" name='submit' type="submit" value="Save" aria-label="{% trans 'Save' %}"/>
 
             </div>
         </div>

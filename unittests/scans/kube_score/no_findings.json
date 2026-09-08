@@ -1,0 +1,72 @@
+[
+  {
+    "object_name": "Deployment/apps/v1/example-ns/example-api",
+    "type_meta": {
+      "kind": "Deployment",
+      "apiVersion": "apps/v1"
+    },
+    "object_meta": {
+      "name": "example-api",
+      "namespace": "example-ns",
+      "creationTimestamp": null
+    },
+    "checks": [
+      {
+        "check": {
+          "name": "Stable version",
+          "id": "stable-version",
+          "target_type": "all",
+          "comment": "Checks if the object is using a deprecated apiVersion",
+          "optional": false
+        },
+        "grade": 10,
+        "skipped": false,
+        "comments": null
+      },
+      {
+        "check": {
+          "name": "Label values",
+          "id": "label-values",
+          "target_type": "all",
+          "comment": "Validates label values",
+          "optional": false
+        },
+        "grade": 10,
+        "skipped": false,
+        "comments": null
+      },
+      {
+        "check": {
+          "name": "Container Image Pull Policy",
+          "id": "container-image-pull-policy",
+          "target_type": "Pod",
+          "comment": "Makes sure that the pullPolicy is set to Always. This makes sure that imagePullSecrets are always validated.",
+          "optional": false
+        },
+        "grade": 10,
+        "skipped": false,
+        "comments": null
+      },
+      {
+        "check": {
+          "name": "Container Memory Requests Equal Limits",
+          "id": "container-memory-requests-equal-limits",
+          "target_type": "Pod",
+          "comment": "Makes sure that all pods have the same memory requests as limits set.",
+          "optional": true
+        },
+        "grade": 10,
+        "skipped": true,
+        "comments": [
+          {
+            "path": "",
+            "summary": "Skipped because container-memory-requests-equal-limits is ignored",
+            "description": ""
+          }
+        ]
+      }
+    ],
+    "file_name": "manifests/deployment.yaml",
+    "file_row": 1
+  }
+]

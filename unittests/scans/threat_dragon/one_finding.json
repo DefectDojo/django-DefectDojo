@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "title": "Example Threat Model",
+    "owner": "Example Owner",
+    "description": "A sample model of a web application, with a queue-decoupled background process.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Tom Brown"
+      },
+      {
+        "name": "Albert Moneypenny"
+      }
+    ],
+    "diagrams": [
+      {
+        "title": "Main Request Data Flow",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "diagramType": "STRIDE",
+        "id": 0,
+        "diagramJson": {
+          "cells": [
+            {
+              "type": "tm.Store",
+              "size": {
+                "width": 160,
+                "height": 80
+              },
+              "position": {
+                "x": 637,
+                "y": 388
+              },
+              "angle": 0,
+              "id": "a25bbb4e-093f-4238-a620-31efdee452dc",
+              "z": 1,
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "High",
+                  "mitigation": "Encrypt the DB credentials in the configuration file.\n\nExpire and replace the DB credentials regularly.",
+                  "description": "The Background Worker configuration stores the credentials used by the worker to access the DB. An attacker could compromise the Background Worker and get access to the DB credentials.",
+                  "title": "Accessing DB credentials",
+                  "type": "Information disclosure"
+                }
+              ],
+              "storesCredentials": true,
+              "hasOpenThreats": true,
+              "attrs": {
+                ".element-shape": {
+                  "class": "element-shape hasOpenThreats isInScope"
+                },
+                "text": {
+                  "text": "Worker Config"
+                },
+                ".undefined": {
+                  "class": "undefinedhasOpenThreats isInScope"
+                },
+                ".element-text": {
+                  "class": "element-text hasOpenThreats isInScope"
+                }
+              }
+            }
+          ]
+        },
+        "size": {
+          "height": 594,
+          "width": 869
+        }
+      }
+    ],
+    "reviewer": "Jane Smith"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "items": [
+    {
+      "cve_id": "CVE-2000-0001",
+      "name": "Remote code execution in Example Browser",
+      "cvss_score": 9.8,
+      "base_severity": "Critical",
+      "score": "Critical",
+      "remediation_status": "Overdue",
+      "software": [
+        {
+          "product_name": "Example Browser",
+          "versions": [{"version": "120.0.1"}],
+          "available_updates": [{"package_id": "pkg-1", "name": "Example Browser", "version": "120.0.2"}]
+        }
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "ep-0001",
+          "endpoint_name": "workstation-01",
+          "software": [
+            {
+              "product_name": "Example Browser",
+              "versions": [{"version": "119.0.4"}],
+              "available_updates": [{"package_id": "pkg-1", "name": "Example Browser", "version": "120.0.2"}]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "managed_endpoints": [
+    {"id": "ep-0001", "name": "workstation-01", "OS": "Windows 11 Pro 23H2", "status": "Online"}
+  ]
+}

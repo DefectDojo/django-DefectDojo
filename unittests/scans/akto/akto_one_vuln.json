@@ -1,0 +1,30 @@
+{
+  "issueDetails": [
+    {
+      "apiCollectionId": 1700000001,
+      "apiUrl": "https://api.example.com/v1/users/{id}",
+      "apiMethod": "GET",
+      "testSubCategory": "BOLA",
+      "issueUrl": "https://app.example.com/dashboard/issues/1",
+      "testName": "Broken Object Level Authorization",
+      "testCategory": "BOLA",
+      "testDescription": "The endpoint returned another user's record.",
+      "testDetails": "Changing {id} to a second account's id returned that account's data.",
+      "testImpact": "Any authenticated user can read every user's record.",
+      "testRemediation": "Check that the requested object belongs to the caller.",
+      "severity": "CRITICAL",
+      "status": "OPEN",
+      "creationTime": 1719792000,
+      "lastSeen": 1721001600,
+      "testCwe": "CWE-639",
+      "testCve": "",
+      "testTags": [
+        "OWASP API1:2023",
+        "Authorization"
+      ],
+      "testReferences": [
+        "https://owasp.example.com/api1"
+      ]
+    }
+  ]
+}

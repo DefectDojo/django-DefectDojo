@@ -12,7 +12,7 @@ You will need an Escape **API key**, created in the Escape app under **Settings 
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://public.escape.tech/v2`, or enter your Escape API host explicitly.
+1. Keep the pre-filled **Location**, `https://public.escape.tech/v2`, or enter your Escape API host explicitly.
 2. Enter the Escape API key in the **Secret** field.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
 

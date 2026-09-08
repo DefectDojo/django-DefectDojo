@@ -1,0 +1,14 @@
+[
+  {
+    "id": "finding-0010",
+    "title": "A finding exported with no build context",
+    "date": "2024-06-02T10:05:00Z",
+    "severity": "high",
+    "cvssScore": 7.5,
+    "vulnIdFromTool": "FS-2024-0010",
+    "description": "Exported from the findings query alone.",
+    "category": "SBOM",
+    "affects": [{"name": "example-lib", "version": "1.0.0"}],
+    "cves": [{"cveId": "CVE-2000-0011"}]
+  }
+]

@@ -494,7 +494,8 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
     # These are used on purpose so we capture the behaviour of import and reimport in this scenario.
     def test_sarif_single_import_no_duplicates(self):
         """Test that importing SARIF scan (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm) creates 0 duplicate findings"""
-        # bash-report.sarif has 18 internal duplicates, so we expect 18 duplicates even on first import
+        # bash-report.sarif has 15 internal duplicates (since 3.3.0 fingerprints repeated within a report
+        # are dropped and only hash-equal findings merge), so the fabricated variant is used here
         test_id = self._test_single_import_assess_duplicates("scans/sarif/bash-report-fabricated-no-internal-dupes.sarif", "SARIF", 0)
 
         # duplicates should be sorted by id (currently not usefull as tests are running celery tasks in the foreground)
@@ -510,7 +511,7 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
 
     def test_sarif_different_products_no_duplicates(self):
         """Test that importing SARIF scan into different products creates 0 duplicates"""
-        # bash-report.sarif has 18 internal duplicates per import
+        # raw bash-report.sarif has internal duplicates per import, hence the fabricated variant
         self._test_different_products_no_duplicates("scans/sarif/bash-report-fabricated-no-internal-dupes.sarif", "SARIF", 0)
 
     def test_sarif_same_product_different_engagements_duplicates(self):
@@ -529,38 +530,41 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
     # The samples for SARIF is the bash report that has internal duplicates
     # These are used on purpose so we capture the behaviour of import and reimport in this scenario.
     def test_sarif_single_import_internal_duplicates(self):
-        """Test that importing SARIF scan (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm) creates 18 internal duplicates"""
-        # bash-report.sarif has 18 internal duplicates, so we expect 18 duplicates even on first import
-        test_id = self._test_single_import_assess_duplicates("scans/sarif/bash-report.sarif", "SARIF", 18)
+        """Test that importing SARIF scan (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm) creates 15 internal duplicates"""
+        # bash-report.sarif has 15 internal duplicates: its repeated fingerprints are dropped at parse
+        # time (they hash line content and collide), so only hash-equal findings merge on first import
+        test_id = self._test_single_import_assess_duplicates("scans/sarif/bash-report.sarif", "SARIF", 15)
 
         # duplicates should be sorted by id (currently not usefull as tests are running celery tasks in the foreground)
         for finding in Finding.objects.filter(test_id=test_id, duplicate=True):
             self.assertTrue(finding.duplicate_finding.id < finding.id)
 
     def test_sarif_full_then_subset_internal_duplicates(self):
-        """Test that importing full SARIF scan then subset creates 18 internal duplicates + 9 cross-import duplicates = 27 duplicates in second import"""
+        """Test that importing full SARIF scan then subset marks every second-import finding a duplicate"""
         # For now, use the same file for both full and subset
-        # First import has 18 internal duplicates, second import also has 18 internal duplicates + 9 cross-import duplicates = 27 total in second test
-        # Total = 18 (first) + 27 (second) = 45
-        self._test_full_then_subset_duplicates("scans/sarif/bash-report.sarif", "scans/sarif/bash-report.sarif", "SARIF", 27, first_import_duplicates=18)
+        # First import has 15 internal duplicates; on the identical second import every finding
+        # matches something (4 by their kept unique ids, 23 by equal hash) = 27 total in second test
+        # Total = 15 (first) + 27 (second) = 42
+        self._test_full_then_subset_duplicates("scans/sarif/bash-report.sarif", "scans/sarif/bash-report.sarif", "SARIF", 27, first_import_duplicates=15)
 
     def test_sarif_different_products_internal_duplicates(self):
-        """Test that importing SARIF scan into different products creates 18 internal duplicates per import"""
-        # bash-report.sarif has 18 internal duplicates per import
-        self._test_different_products_no_duplicates("scans/sarif/bash-report.sarif", "SARIF", 18)
+        """Test that importing SARIF scan into different products creates 15 internal duplicates per import"""
+        # bash-report.sarif has 15 internal duplicates per import
+        self._test_different_products_no_duplicates("scans/sarif/bash-report.sarif", "SARIF", 15)
 
     def test_sarif_same_product_different_engagements_internal_duplicates(self):
-        """Test that importing SARIF scan into same product but different engagements creates 45 total duplicates (18 + 18 + 9)"""
-        # 18 internal duplicates in first import + 18 in second import + 9 cross-import duplicates = 45 total
-        self._test_same_product_different_engagements_duplicates("scans/sarif/bash-report.sarif", "SARIF", 45)
+        """Test that importing SARIF scan into same product but different engagements creates 42 total duplicates (15 + 27)"""
+        # 15 internal duplicates in first import + 27 in the second (every finding matches across
+        # engagements: 4 by kept unique ids, 23 by equal hash) = 42 total
+        self._test_same_product_different_engagements_duplicates("scans/sarif/bash-report.sarif", "SARIF", 42)
 
     def test_sarif_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
-        """Test that importing SARIF scan with 18 internal duplicates into same product but different engagements with dedupe_on_engagements creates only 18 duplicates (no cross-engagement duplicates)"""
-        # bash-report.sarif has 18 internal duplicates per import
-        # Second test has 18 internal duplicates (no cross-engagement duplicates due to dedupe_on_engagements=True)
-        # Total product duplicates = 18 (first) + 18 (second) = 36
+        """Test that importing SARIF scan with 15 internal duplicates into same product but different engagements with dedupe_on_engagements creates only 15 duplicates (no cross-engagement duplicates)"""
+        # bash-report.sarif has 15 internal duplicates per import
+        # Second test has 15 internal duplicates (no cross-engagement duplicates due to dedupe_on_engagements=True)
+        # Total product duplicates = 15 (first) + 15 (second) = 30
         self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/sarif/bash-report.sarif", "SARIF",
-        18, first_import_duplicates=18)
+        15, first_import_duplicates=15)
 
     # Test cases for Veracode (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm)
     def test_veracode_single_import_no_duplicates(self):

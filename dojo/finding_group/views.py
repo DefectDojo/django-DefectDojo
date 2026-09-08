@@ -9,6 +9,7 @@ from django.http import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
 
@@ -84,7 +85,7 @@ def view_finding_group(request, fgid):
                     messages.add_message(
                         request,
                         messages.ERROR,
-                        "Cannot process JIRA issue: JIRA instance is not configured or has been deleted.",
+                        _("Cannot process JIRA issue: JIRA instance is not configured or has been deleted."),
                         extra_tags="alert-danger",
                     )
                     return render(request, "dojo/edit_finding_group.html", {"form": edit_finding_group_form, "finding_group": finding_group})
@@ -130,7 +131,7 @@ def delete_finding_group(request, fgid):
                 finding_group.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "Finding Group and relationships removed.",
+                                     _("Finding Group and relationships removed."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("view_test", args=(finding_group.test.id,)))
 
@@ -162,7 +163,7 @@ def unlink_jira(request, fgid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Link to JIRA issue succesfully deleted",
+                _("Link to JIRA issue succesfully deleted"),
                 extra_tags="alert-success")
 
             return JsonResponse({"result": "OK"})
@@ -171,7 +172,7 @@ def unlink_jira(request, fgid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Link to JIRA could not be deleted, see alerts for details",
+                _("Link to JIRA could not be deleted, see alerts for details"),
                 extra_tags="alert-danger")
 
             return HttpResponse(status=500)
@@ -179,7 +180,7 @@ def unlink_jira(request, fgid):
         messages.add_message(
             request,
             messages.ERROR,
-            "Link to JIRA not found",
+            _("Link to JIRA not found"),
             extra_tags="alert-danger")
         return HttpResponse(status=400)
 
@@ -204,7 +205,7 @@ def push_to_jira(request, fgid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Push to JIRA failed, check alerts on the top right for errors",
+                _("Push to JIRA failed, check alerts on the top right for errors"),
                 extra_tags="alert-danger")
 
         return JsonResponse({"result": "OK"})
@@ -213,7 +214,7 @@ def push_to_jira(request, fgid):
         messages.add_message(
             request,
             messages.ERROR,
-            "Error pushing to JIRA",
+            _("Error pushing to JIRA"),
             extra_tags="alert-danger")
         return HttpResponse(status=500)
 

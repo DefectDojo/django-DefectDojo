@@ -1,0 +1,50 @@
+{
+  "name": "template.yaml",
+  "metadata": {},
+  "status": "FAIL",
+  "not_compliant": [
+    {
+      "Rule": {
+        "name": "s3_bucket_encryption_enabled",
+        "metadata": {},
+        "messages": {
+          "custom_message": null,
+          "error_message": null
+        },
+        "checks": [
+          {
+            "Clause": {
+              "Unary": {
+                "check": {
+                  "UnResolved": {
+                    "value": {
+                      "traversed_to": {
+                        "path": "/Resources/DataBucket/Properties",
+                        "value": {
+                          "BucketName": "reports-archive"
+                        }
+                      },
+                      "remaining_query": "BucketEncryption",
+                      "reason": "Could not find key BucketEncryption inside struct at path /Resources/DataBucket/Properties[L:4,C:6]"
+                    },
+                    "comparison": [
+                      "Exists",
+                      false
+                    ]
+                  }
+                },
+                "context": " Properties.BucketEncryption EXISTS  ",
+                "messages": {
+                  "custom_message": "\n            violation: S3 buckets must define BucketEncryption.\n        ",
+                  "error_message": "Check was not compliant as property [BucketEncryption] is missing. Value traversed to [Path=/Resources/DataBucket/Properties[L:4,C:6] Value={\"BucketName\":\"reports-archive\"}]."
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "not_applicable": [],
+  "compliant": []
+}

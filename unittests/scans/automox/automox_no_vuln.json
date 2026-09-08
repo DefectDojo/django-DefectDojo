@@ -1,0 +1,16 @@
+{
+  "devices": [
+    {
+      "id": 1001,
+      "name": "generic-host-01",
+      "os_family": "Windows",
+      "os_name": "Windows Server",
+      "os_version": "2019",
+      "server_group_id": 21,
+      "organization_id": 5,
+      "connected": true,
+      "tags": []
+    }
+  ],
+  "packages": []
+}

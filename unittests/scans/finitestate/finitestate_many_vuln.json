@@ -1,0 +1,89 @@
+{
+  "asset": {"id": "asset-0001", "name": "Generic Router"},
+  "assetVersion": {"id": "ver-0001", "name": "1.4.0", "relativeRiskScore": 2.5},
+  "data": {
+    "allFindings": [
+      {
+        "id": "finding-0001",
+        "title": "Outdated TLS library in the firmware image",
+        "date": "2024-06-02T10:05:00Z",
+        "severity": "critical",
+        "cvssScore": 9.8,
+        "riskScore": 87.5,
+        "vulnIdFromTool": "FS-2024-0001",
+        "description": "The image bundles a TLS library with known flaws.",
+        "category": "SBOM",
+        "subcategory": "Known vulnerability",
+        "sourceTypes": ["BINARY_ANALYSIS"],
+        "affects": [{"id": "comp-1", "name": "example-tls", "version": "1.0.2k"}],
+        "currentStatus": {"status": "AFFECTED", "updatedAt": "2024-06-03T11:00:00Z"},
+        "cwes": [{"cweId": "CWE-787"}],
+        "cves": [
+          {"cveId": "CVE-2000-0001", "epss": {"epssScore": 0.11, "epssPercentile": 0.80},
+           "cvssBaseMetricV3": {"cvssv3": {"baseScore": 9.8, "vectorString": "CVSS:3.1/AV:N"}},
+           "exploitsInfo": {"weaponized": false, "reportedInTheWild": false}},
+          {"cveId": "CVE-2000-0002", "epss": {"epssScore": 0.62, "epssPercentile": 0.99},
+           "cvssBaseMetricV3": {"cvssv3": {"baseScore": 7.5, "vectorString": "CVSS:3.1/AV:L"}},
+           "exploitsInfo": {"weaponized": true, "reportedInTheWild": true}}
+        ],
+        "origin": "FIRMWARE",
+        "test": {"tools": [{"name": "Binary Analysis"}, {"name": "SBOM"}]}
+      },
+      {
+        "id": "finding-0002",
+        "title": "A vulnerability the product team has ruled out",
+        "createdAt": "2024-05-20T08:00:00Z",
+        "severity": "high",
+        "cvssScore": 0,
+        "cvssSeverity": "medium",
+        "description": "",
+        "category": "SBOM",
+        "affects": [{"name": "example-parser", "version": "2.0.0"}],
+        "currentStatus": {
+          "status": "NOT_AFFECTED",
+          "justification": "VULNERABLE_CODE_NOT_PRESENT",
+          "comment": "The vulnerable routine is compiled out of this build.",
+          "updatedAt": "2024-06-04T09:00:00Z"
+        },
+        "cwes": [{"cweId": "not a cwe"}, {"cweId": "89"}],
+        "cves": [{"cveId": "CVE-2000-0003"}]
+      },
+      {
+        "id": "finding-0003",
+        "title": "A vulnerability ruled out for a reason that is not absence",
+        "createdAt": "2024-05-21T08:00:00Z",
+        "severity": "medium",
+        "currentStatus": {
+          "status": "NOT_AFFECTED",
+          "justification": "INLINE_MITIGATIONS_ALREADY_EXIST",
+          "updatedAt": "2024-06-04T09:00:00Z"
+        },
+        "affects": [{"name": "example-utils", "version": "1.1.0"}]
+      },
+      {
+        "id": "finding-0004",
+        "title": "A vulnerability fixed in a later build",
+        "createdAt": "2024-05-22T08:00:00Z",
+        "severity": "low",
+        "currentStatus": {"status": "FIXED", "updatedAt": "2024-06-05T14:30:00Z"},
+        "affects": [{"name": "example-agent", "version": "3.0.0"}],
+        "regression": true
+      },
+      {
+        "id": "finding-0005",
+        "title": "A vulnerability nobody has ruled on yet",
+        "createdAt": "2024-05-23T08:00:00Z",
+        "severity": "",
+        "cvssSeverity": "high",
+        "currentStatus": {"status": "UNDER_INVESTIGATION", "updatedAt": "2024-06-06T09:00:00Z"}
+      },
+      {
+        "id": "finding-0006",
+        "title": "A finding with no status assertion at all",
+        "createdAt": "not a timestamp",
+        "severity": "a word Finite State does not use",
+        "cvssSeverity": "also not a level"
+      }
+    ]
+  }
+}

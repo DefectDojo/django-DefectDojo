@@ -10,9 +10,30 @@ aliases:
 
 A rule is built on a canvas. You drag nodes out of a palette, wire them together, and configure each one in a side panel. This page covers the parts of that process that are the same whichever nodes you use. The nodes themselves are in the [Node Reference](../node_reference/).
 
+## Starting a rule
+
+From **Rules Engine 2.0 > All Rules** there are two ways to begin.
+
+**From Template** opens a gallery of rules that ship with DefectDojo, grouped into packs. Each card
+says what the rule is for, which nodes its graph contains, and what you have to configure before it
+does anything — a scheduled rule with no schedule never runs at all, so that last part matters.
+Adopting one creates a rule of your own and drops you into the editor on it.
+
+An adopted rule arrives **disabled and in simulate mode**, exactly like any new rule. Nothing runs
+and nothing is sent until you have set its scope, finished its setup steps, and enabled it. That is
+deliberate: several templates raise tickets and send messages, and the first run of one across an
+unfiltered set of Assets is not something you want to discover after the fact.
+
+Templates are starting points, not links. Editing an adopted rule does not affect the template, and
+adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
+gets pointed at two different sets of Assets. The second one is named with a suffix.
+
+**New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
+rule, because both create one.
+
 ## The editor
 
-Open **Rules Engine 2.0 > All Rules** and choose **New Rule**, or open an existing rule to edit it.
+Open a rule to edit it, or start one of the two ways above.
 
 The palette is grouped into five categories, which is also the order items flow through a typical graph:
 
@@ -153,14 +174,15 @@ Each item carries a fixed set of Finding fields. This list is a contract, so it 
 |-------|--------|
 | Identity | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Severity and scoring | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
-| Exploit evidence | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key` |
+| Exploit evidence | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Text | `description`, `mitigation`, `impact` |
 | Status | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
 | Location | `file_path`, `line`, `component_name`, `component_version`, `service` |
 | Classification | `cwe`, `vulnerability_ids`, `tags` |
+| Reachability | `reachability`, `reachability_confidence` |
 
-Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`), `product_type` (`id`, `name`), and `ctx`.
+Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`, `internet_accessible`, `business_criticality`, `exposure`), `product_type` (`id`, `name`), and `ctx`.
 
 Dates are ISO-8601 strings. That is deliberate: it means `gt` and `lt` order them correctly as text, so `2026-07-28` is correctly greater than `2026-01-01`.
 
@@ -186,6 +208,19 @@ Condition on the number, because its ordering says something no ordering of the 
 A Finding with no intelligence for any of its vulnerability ids carries no value for the threat fields. That is not the same as a value of `0`, so use **is set** to tell "nothing known" apart from "nothing found". The two KEV booleans differ here, defaulting to false rather than empty, which makes `known_exploited eq false` mean "not in the catalog".
 
 All of these are read-only. A rule can route and report on exploit evidence; enrichment owns the values, so no node writes them.
+
+### Conditioning on exploitability and exposure
+
+Two more fields answer "is this actually exploitable, and can it be reached", which is what most remediation-priority rules are really asking.
+
+- `vex_state` is the CycloneDX analysis verdict, when a VEX document has been imported: `exploitable`, `not_affected`, `in_triage`, `false_positive`, `resolved`, `resolved_with_pedigree`.
+- `reachability` is whether the vulnerable code can be reached *inside* the application: `reachable_runtime`, `reachable_static`, `potentially_reachable`, `unreachable`, `unknown`. `reachability_confidence` is a number from 0.0 to 1.0.
+
+Exposure is a separate question, and it lives on the asset rather than the Finding: `product.exposure` is whether the asset can be reached from *outside*, as `exposed_public`, `exposed_limited`, `reachable_private`, `internal_only` or `unknown`. `reachable_private` means an internal path exists but no internet one.
+
+`product.internet_accessible` is the older manual checkbox on the asset. Both are offered because they can disagree: the checkbox is what somebody ticked, while `exposure` is computed from the evidence connectors collect, and prefers an explicit override when one is set. A rule that means "reachable from the internet" usually wants `exposure`, falling back to the checkbox on an instance with no exposure evidence.
+
+These fields are populated by Pro's threat intelligence, reachability and asset-exposure features. Where a feature is off, its fields read empty (`reachability` reads `unknown`), so a rule written against them matches nothing rather than matching on half-populated data.
 
 ### Referring to Asset data
 

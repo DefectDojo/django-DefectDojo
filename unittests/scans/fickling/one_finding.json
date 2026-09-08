@@ -1,0 +1,9 @@
+{
+  "severity": "LIKELY_OVERTLY_MALICIOUS",
+  "analysis": "`from posix import system` is suspicious and indicative of an overtly malicious pickle file\nVariable `_var0` is assigned value `system('echo placeholder')` but unused afterward; this is suspicious and indicative of a malicious pickle file",
+  "detailed_results": {
+    "AnalysisResult": {
+      "UnsafeImports": "from posix import system"
+    }
+  }
+}

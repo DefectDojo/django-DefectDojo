@@ -12,7 +12,7 @@ Fairwinds Insightsの**organization**名と**APIトークン**が必要です。
 
 #### Connector Mappings
 
-1. **Location**フィールドを空欄のままにすると`https://insights.fairwinds.com`が使用されます。あるいは、Insightsのホストを明示的に入力することもできます。
+1. **Location**フィールドには`https://insights.fairwinds.com`が自動入力されます。この値をそのまま使用するか、Insightsのホストを明示的に入力してください。
 2. Insightsの**Organization**名（ダッシュボードのURLに表示されるスラッグ）を入力します。
 3. **Secret**フィールドにInsightsのAPIトークンを入力します。
 4. 必要に応じて、インポートする検出事項を制限するために**Minimum Severity**を設定します。

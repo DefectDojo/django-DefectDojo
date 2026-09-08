@@ -1,0 +1,19 @@
+{
+  "certificates": [
+    {
+      "id": "cert-0002",
+      "fingerprint": "BB11CC22DD33EE44FF5500112233445566778899",
+      "subjectCN": ["legacy.example.com"],
+      "subjectDN": "CN=legacy.example.com,O=Generic Org",
+      "subjectAlternativeNamesByType": {"dNSName": ["legacy.example.com"]},
+      "issuerCN": ["Generic Issuing CA"],
+      "keyStrength": 4096,
+      "encryptionType": "RSA",
+      "signatureHashAlgorithm": "SHA256",
+      "validityEnd": "2020-03-01T12:00:00Z",
+      "certificateStatus": "ACTIVE",
+      "selfSigned": false
+    }
+  ],
+  "count": 1
+}

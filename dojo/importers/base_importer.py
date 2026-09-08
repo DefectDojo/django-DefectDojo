@@ -516,10 +516,10 @@ class BaseImporter(ImporterOptions):
 
     def update_import_history(
         self,
-        new_findings: list[Finding] | None = None,
-        closed_findings: list[Finding] | None = None,
-        reactivated_findings: list[Finding] | None = None,
-        untouched_findings: list[Finding] | None = None,
+        new_findings: list[int] | None = None,
+        closed_findings: list[int] | None = None,
+        reactivated_findings: list[int] | None = None,
+        untouched_findings: list[int] | None = None,
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
@@ -561,6 +561,33 @@ class BaseImporter(ImporterOptions):
         import_settings["create_finding_groups_for_all_findings"] = self.create_finding_groups_for_all_findings
         if len(self.endpoints_to_add) > 0:
             import_settings.update(self.location_handler.serialize_extra_locations(self.endpoints_to_add))
+        # Persist through an overridable hook so a subclass can redirect the write (below).
+        return self._persist_import_history(
+            import_settings,
+            new_findings,
+            closed_findings,
+            reactivated_findings,
+            untouched_findings,
+        )
+
+    def _persist_import_history(
+        self,
+        import_settings: dict,
+        new_findings: list[int],
+        closed_findings: list[int],
+        reactivated_findings: list[int],
+        untouched_findings: list[int],
+    ) -> Test_Import:
+        """
+        Persist the import-history write: the Test_Import row plus one
+        Test_Import_Finding_Action per affected finding, and return the Test_Import.
+
+        Factored out of update_import_history as an OVERRIDABLE extension point. The default is
+        the Django ORM write; a subclass may redirect the write elsewhere (e.g. delegate it to
+        another service) without reimplementing the settings-building and list-normalization that
+        update_import_history has already done. update_import_history has also already applied the
+        TRACK_IMPORT_HISTORY gate, so this is only reached when history is being recorded.
+        """
         # Create the test import object
         test_import = Test_Import.objects.create(
             test=self.test,
@@ -582,23 +609,21 @@ class BaseImporter(ImporterOptions):
 
         # In longer running imports it can happen that the async_dupe_delete task removes a finding before the history record is created
         # We filter out these findings here to avoid FK violations (IntegrityError)
-        all_findings = []
-        for list_, _ in finding_action_mappings:
-            all_findings.extend(list_)
-        existing_findings = finding_helper.filter_findings_by_existence(all_findings) if all_findings else []
-        existing_ids = {f.id for f in existing_findings}
+        dropped_finding_ids = self.deleted_finding_ids({
+            finding_id for list_, _ in finding_action_mappings for finding_id in list_
+        })
 
-        # Collect all import history records using the validated IDs
+        # Collect all import history records, skipping the findings that are gone
         import_history_records = []
-        for findings, action in finding_action_mappings:
+        for finding_ids, action in finding_action_mappings:
             import_history_records.extend(
                 Test_Import_Finding_Action(
                     test_import=test_import,
-                    finding_id=finding.id,
+                    finding_id=finding_id,
                     action=action,
                 )
-                for finding in findings
-                if finding.id in existing_ids
+                for finding_id in finding_ids
+                if finding_id is not None and finding_id not in dropped_finding_ids
             )
 
         # Bulk create all at once and let Django handle batching internally.
@@ -938,6 +963,20 @@ class BaseImporter(ImporterOptions):
         # Return the finding if all else is good
         return finding
 
+    def persist_new_findings(self, prepared_findings: list[Finding]) -> list[Finding]:
+        """
+        Persist a batch of new findings that have already been fully prepared
+        (scalar overrides applied, hash_code computed) and have no primary key yet.
+
+        Default: an ordinary per-instance save, in the order given. Exists as an
+        override seam so a downstream edition can swap the write strategy (e.g. a
+        bulk insert) without reimplementing the grouping/tagging/location/
+        vulnerability-id processing that runs on the returned, now-saved findings.
+        """
+        for finding in prepared_findings:
+            finding.save_no_options()
+        return prepared_findings
+
     def process_finding_groups(
         self,
         finding: Finding,
@@ -992,17 +1031,14 @@ class BaseImporter(ImporterOptions):
 
     def deleted_finding_ids(self, finding_ids: set[int]) -> set[int]:
         """
-        Of the given buffered finding ids, the ones whose finding row is gone.
+        Of the given finding ids, the ones whose finding row is gone.
 
-        One indexed primary-key lookup for the whole set; see
-        drop_rows_for_deleted_findings() for why the buffers need this at all.
+        The importer's seam onto finding_helper.deleted_finding_ids -- kept as a method so
+        the flush paths and update_import_history share one lookup and a subclass has a
+        single place to override. See drop_rows_for_deleted_findings() for why the buffers
+        need this at all.
         """
-        if not finding_ids:
-            return set()
-        live_finding_ids = set(
-            Finding.objects.filter(pk__in=finding_ids).values_list("pk", flat=True),
-        )
-        return finding_ids - live_finding_ids
+        return finding_helper.deleted_finding_ids(finding_ids)
 
     def drop_rows_for_deleted_findings(self, rows: list, deleted_finding_ids: set[int] | None = None) -> list:
         """
@@ -1236,6 +1272,13 @@ class BaseImporter(ImporterOptions):
         findings_reactivated=None,
         findings_untouched=None,
     ):
+        """
+        new_findings/findings_mitigated/findings_reactivated/findings_untouched are
+        ids, not instances (M1) -- nothing here needs a live Finding until the
+        notification is actually built, and then only a capped, ordered slice of it
+        (a reimport that touches thousands of findings should not template all of
+        them into an email/webhook body).
+        """
         if findings_untouched is None:
             findings_untouched = []
         if findings_reactivated is None:
@@ -1247,48 +1290,55 @@ class BaseImporter(ImporterOptions):
         logger.debug("Scan added notifications")
 
         # When deduplication has finished (synchronous mode, or async_wait after the
-        # join), the in-memory findings still carry their pre-dedup duplicate=False
-        # flag because deduplication runs on separately-fetched instances. Refresh the
-        # flag from the database and split each list into "real" and duplicate findings
-        # so the notification reflects post-dedup reality instead of counting/listing
-        # deduplicated findings as brand new. In plain async mode dedup has not run yet,
-        # so we leave the lists untouched (best-effort, historical behavior).
-        findings_new_duplicate: list[Finding] = []
-        findings_reactivated_duplicate: list[Finding] = []
-        findings_untouched_duplicate: list[Finding] = []
+        # join), the ids collected during matching still reflect pre-dedup reality
+        # because deduplication runs on separately-fetched instances. Split each list
+        # of ids into "real" and duplicate ids from a fresh query so the notification
+        # reflects post-dedup reality instead of counting/listing deduplicated
+        # findings as brand new. In plain async mode dedup has not run yet, so we
+        # leave the lists untouched (best-effort, historical behavior).
+        findings_new_duplicate_ids: list[int] = []
+        findings_reactivated_duplicate_ids: list[int] = []
+        findings_untouched_duplicate_ids: list[int] = []
         if getattr(self, "deduplication_complete", False):
-            all_ids = [f.id for f in (*new_findings, *findings_reactivated, *findings_untouched)]
+            all_ids = [*new_findings, *findings_reactivated, *findings_untouched]
             duplicate_ids = set()
             if all_ids:
                 duplicate_ids = set(
                     Finding.objects.filter(id__in=all_ids, duplicate=True).values_list("id", flat=True),
                 )
 
-            def _split(findings):
-                kept, duplicates = [], []
-                for finding in findings:
-                    if finding.id in duplicate_ids:
-                        # refresh the in-memory flag so any template logic is correct
-                        finding.duplicate = True
-                        duplicates.append(finding)
-                    else:
-                        kept.append(finding)
+            def _split(ids):
+                kept = [i for i in ids if i not in duplicate_ids]
+                duplicates = [i for i in ids if i in duplicate_ids]
                 return kept, duplicates
 
-            new_findings, findings_new_duplicate = _split(new_findings)
-            findings_reactivated, findings_reactivated_duplicate = _split(findings_reactivated)
-            findings_untouched, findings_untouched_duplicate = _split(findings_untouched)
+            new_findings, findings_new_duplicate_ids = _split(new_findings)
+            findings_reactivated, findings_reactivated_duplicate_ids = _split(findings_reactivated)
+            findings_untouched, findings_untouched_duplicate_ids = _split(findings_untouched)
             # Recompute the headline count to exclude findings that turned out to be
             # duplicates of an existing finding (they are not genuinely new activity).
             updated_count = len(new_findings) + len(findings_reactivated) + len(findings_mitigated)
 
-        new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
-        findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
-        findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
-        findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
-        findings_new_duplicate = sorted(findings_new_duplicate, key=lambda x: x.numerical_severity)
-        findings_reactivated_duplicate = sorted(findings_reactivated_duplicate, key=lambda x: x.numerical_severity)
-        findings_untouched_duplicate = sorted(findings_untouched_duplicate, key=lambda x: x.numerical_severity)
+        max_findings = settings.NOTIFICATION_SCAN_ADDED_MAX_FINDINGS
+
+        def _hydrate(ids):
+            # duplicate is re-read fresh here, so unlike the old in-memory instances
+            # there is no separate write-back needed to keep template logic correct.
+            if not ids:
+                return []
+            return list(
+                Finding.objects.filter(id__in=ids)
+                .only("id", "title", "severity", "numerical_severity", "duplicate")
+                .order_by("numerical_severity")[:max_findings],
+            )
+
+        new_findings = _hydrate(new_findings)
+        findings_mitigated = _hydrate(findings_mitigated)
+        findings_reactivated = _hydrate(findings_reactivated)
+        findings_untouched = _hydrate(findings_untouched)
+        findings_new_duplicate = _hydrate(findings_new_duplicate_ids)
+        findings_reactivated_duplicate = _hydrate(findings_reactivated_duplicate_ids)
+        findings_untouched_duplicate = _hydrate(findings_untouched_duplicate_ids)
 
         title = (
             f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"

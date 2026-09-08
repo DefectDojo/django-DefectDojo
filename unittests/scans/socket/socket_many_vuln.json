@@ -1,0 +1,69 @@
+{
+  "artifacts": [
+    {
+      "id": "art-1",
+      "type": "npm",
+      "namespace": "@example-scope",
+      "name": "utils",
+      "version": "0.2.1",
+      "alerts": [
+        {
+          "key": "alert-1",
+          "type": "malware",
+          "severity": "critical",
+          "category": "supplyChainRisk",
+          "file": "package.json",
+          "props": {
+            "note": "obfuscated install script",
+            "confidence": "high"
+          }
+        }
+      ]
+    },
+    {
+      "id": "art-2",
+      "type": "pypi",
+      "namespace": "",
+      "name": "requests",
+      "version": "2.0.0",
+      "alerts": [
+        {
+          "key": "alert-2",
+          "type": "cve",
+          "severity": "high",
+          "category": "vulnerability",
+          "props": {
+            "cve": "CVE-2000-0000"
+          }
+        },
+        {
+          "key": "alert-3",
+          "type": "typosquat",
+          "severity": "middle",
+          "category": "supplyChainRisk"
+        }
+      ]
+    },
+    {
+      "id": "art-3",
+      "type": "golang",
+      "namespace": "github.com/example",
+      "name": "widget",
+      "version": "1.4.0",
+      "alerts": [
+        {
+          "key": "alert-4",
+          "type": "installScripts",
+          "severity": "low",
+          "category": "supplyChainRisk"
+        },
+        {
+          "key": "alert-5",
+          "type": "unknownThing",
+          "severity": "not-a-level",
+          "category": ""
+        }
+      ]
+    }
+  ]
+}

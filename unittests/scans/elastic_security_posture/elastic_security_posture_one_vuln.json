@@ -1,0 +1,59 @@
+{
+  "pit_id": "example-pit-id",
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "hits": [
+      {
+        "_id": "doc-posture-1",
+        "_index": "logs-cloud_security_posture.findings-default",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "rule": {
+            "id": "rule-0001",
+            "name": "Ensure the audit log is enabled",
+            "description": "Checks the API server's audit-log configuration.",
+            "rationale": "An audit log records administrative actions for later review.",
+            "remediation": "Enable the audit log in the cluster configuration.",
+            "impact": "Log volume increases.",
+            "section": "Logging",
+            "tags": [
+              "CIS",
+              "CIS 3.2.1",
+              "Kubernetes"
+            ],
+            "references": "https://docs.example.com/cis/3.2.1",
+            "severity": "medium",
+            "benchmark": {
+              "id": "cis_k8s",
+              "name": "CIS Kubernetes V1.23",
+              "version": "v1.0.1",
+              "posture_type": "kspm",
+              "rule_number": "3.2.1"
+            }
+          },
+          "result": {
+            "evaluation": "failed"
+          },
+          "orchestrator": {
+            "cluster_name": "example-cluster"
+          },
+          "kubernetes": {
+            "namespace": "kube-system",
+            "pod": {
+              "name": "kube-apiserver-1"
+            }
+          },
+          "host": {
+            "name": "control-plane-1",
+            "os": {
+              "full": "Ubuntu 22.04.4 LTS"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

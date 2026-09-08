@@ -423,7 +423,7 @@
     "pk": 999,
     "model": "dojo.test_type",
     "fields": {
-      "name": "Checkmarx Scan detailed"
+      "name": "Burp REST API"
     }
   },
   {
@@ -1039,7 +1039,7 @@
     "fields": {
       "lead": null,
       "test_type": 999,
-      "scan_type": "Checkmarx Scan detailed",
+      "scan_type": "Burp REST API",
       "engagement": 5,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
@@ -1054,7 +1054,7 @@
     "fields": {
       "lead": null,
       "test_type": 999,
-      "scan_type": "Checkmarx Scan detailed",
+      "scan_type": "Burp REST API",
       "engagement": 5,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",

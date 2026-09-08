@@ -1,5 +1,6 @@
+{% load i18n %}
 <div class="panel panel-available-widget" data-multiple="{{ multiple }}">
-    <div class="panel-heading" title="Click and drag to move" data-toggle="tooltip">
+    <div class="panel-heading" title="{% trans 'Click and drag to move' %}" data-toggle="tooltip">
         <div class="clearfix">
             <h5 class="pull-left">{{ title }}</h5>
             <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>

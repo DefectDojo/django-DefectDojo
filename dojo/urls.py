@@ -64,6 +64,8 @@ from dojo.object.ui.urls import urlpatterns as object_urls
 from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.product.api.urls import add_product_urls
+from dojo.product_attributes.api.urls import add_product_attribute_urls
+from dojo.product_attributes.ui.urls import urlpatterns as product_attribute_urls
 from dojo.product_type.api.urls import add_product_type_urls
 from dojo.regulations.api.urls import add_regulations_urls
 from dojo.regulations.ui.urls import urlpatterns as regulations
@@ -86,7 +88,7 @@ from dojo.tool_type.ui.urls import urlpatterns as tool_type_urls
 from dojo.url.api.urls import add_url_urls
 from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.user.api.urls import add_user_urls
-from dojo.user.api.views import UserProfileView
+from dojo.user.api.views import RevokeApiTokenView, UserProfileView
 from dojo.user.ui.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
@@ -104,6 +106,7 @@ v2_api = DefaultRouter()
 v2_api = add_announcement_urls(v2_api)
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
 v2_api = add_development_environment_urls(v2_api)
+v2_api = add_product_attribute_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   dojo_groups, dojo_group_members → pro/groups, pro/group_members
 v2_api = register_endpoint_meta_import(v2_api)
@@ -167,6 +170,7 @@ add_organization_urls(v2_api)
 ur = []
 ur += asset_urls
 ur += dev_env_urls
+ur += product_attribute_urls
 ur += eng_urls
 ur += finding_urls
 ur += finding_group_urls
@@ -210,6 +214,7 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/api-tokens/revoke/$".format(get_system_setting("url_prefix")), RevokeApiTokenView.as_view(), name="api-token-revoke"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
@@ -223,6 +228,26 @@ if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH
                 name="api-token-auth",
             ),
         ]
+
+# API v3 (alpha) -- mounted conditionally on V3_FEATURE_LOCATIONS (D5/§4.1). With the flag off the
+# whole /api/v3/ tree is absent. The prefix and version live in settings (single source).
+if getattr(settings, "V3_FEATURE_LOCATIONS", False):
+    from dojo.api_v3.api import api_v3
+    from dojo.api_v3.reference_docs import scalar_reference
+
+    api_v2_urls += [
+        # Scalar reference (CDN + SRI, §12) must be registered BEFORE the NinjaAPI catch-all
+        # prefix so /reference is not swallowed by the API's 404 handling.
+        re_path(
+            r"^{}{}/reference$".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            scalar_reference,
+            name="api_v3_reference",
+        ),
+        re_path(
+            r"^{}{}/".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            api_v3.urls,
+        ),
+    ]
 
 urlpatterns = []
 

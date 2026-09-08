@@ -36,7 +36,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_email").clear()
         driver.find_element(By.ID, "id_email").send_keys("propersam@example.com")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the user has been created
 
         # Assert ot the query to dtermine status of failure
@@ -75,7 +75,7 @@ class UserTest(BaseTestCase):
         if not staff_checkbox.is_selected():
             staff_checkbox.click()
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the user has been created
         # Assert ot the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text="User added successfully.")
@@ -88,7 +88,7 @@ class UserTest(BaseTestCase):
         checkbox = driver.find_element(By.ID, "id_enable_user_profile_editable")
         if not checkbox.is_selected():
             checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.logout()
 
     def disable_user_profile_writing(self):
@@ -98,7 +98,7 @@ class UserTest(BaseTestCase):
         checkbox = driver.find_element(By.ID, "id_enable_user_profile_editable")
         if checkbox.is_selected():
             checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.logout()
 
     def test_user_edit_permissions(self):
@@ -122,7 +122,7 @@ class UserTest(BaseTestCase):
         # Select Superuser Permission
         driver.find_element(By.NAME, "is_superuser").click()
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the User permission has been changed
 
         # Assert ot the query to dtermine status of failure

@@ -1,0 +1,52 @@
+{
+  "violations": [
+    {
+      "id": "vio_00000000000000000001",
+      "integration": "GITHUB",
+      "createdAt": 1719792000,
+      "updatedAt": 1721001600,
+      "state": "ACTIVE",
+      "resourceLink": "https://app.example.com/violations/vio_00000000000000000001",
+      "policyUUIDs": ["11111111-1111-1111-1111-111111111111"],
+      "policyNames": ["Cloud credentials in source code"],
+      "detectionRuleUUIDs": ["33333333-3333-3333-3333-333333333333"],
+      "detectorUUIDs": ["22222222-2222-2222-2222-222222222222"],
+      "risk": "HIGH",
+      "riskSource": "POLICY",
+      "riskScore": 8.5,
+      "metadata": {
+        "githubMetadata": {
+          "organization": "example-org",
+          "repository": "generic-app",
+          "branchName": "main",
+          "filePath": "deploy/settings.py",
+          "authorUsername": "example-user",
+          "githubPermalink": "https://github.example.com/example-org/generic-app/blob/main/deploy/settings.py#L42",
+          "isRepoPrivate": true
+        }
+      },
+      "userInfo": {"username": "example-user", "userEmail": "example-user@example.com"},
+      "findings": [
+        {
+          "id": "fnd_00000000000000000001",
+          "detectorUUID": "22222222-2222-2222-2222-222222222222",
+          "subDetectorUUID": "44444444-4444-4444-4444-444444444444",
+          "confidence": "VERY_LIKELY",
+          "redactedSensitiveText": "AKIA****REDACTED****",
+          "redactedContext": {"beforeContext": "AWS_ACCESS_KEY_ID = \"", "afterContext": "\""},
+          "redactedLocation": {
+            "byteRange": {"start": 1200, "end": 1220},
+            "lineRange": {"start": 42, "end": 42}
+          },
+          "metadata": {
+            "apiKeyMetaData": {
+              "status": "ACTIVE",
+              "kind": "AWS",
+              "description": "AWS access key id"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
