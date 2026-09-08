@@ -5,7 +5,7 @@
 &lt;li&gt;Checkout &lt;code&gt;dev&lt;/code&gt; and make sure you&amp;rsquo;re up to date with the latest changes.&lt;/li&gt;
 &lt;li&gt;It&amp;rsquo;s advised that you create a dedicated branch for your development, such as &lt;code&gt;git checkout -b parser-name&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;It is easiest to use the docker compose deployment as it has hot-reload capbility for uWSGI.
+&lt;p&gt;It is easiest to use the docker compose deployment as it has hot-reload capability for uWSGI.
 Set up your environment to use the dev environment:&lt;/p&gt;</description></item><item><title>Parser Documentation Template</title><link>https://docs.defectdojo.com/get_started/contributing/parser-documentation-template/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/contributing/parser-documentation-template/</guid><description>&lt;p&gt;This template is designed to document a new or existing parser. Please feel free to improve with any additional information that might help your fellow security professionals.&lt;/p&gt;</description></item><item><title>Open-Source Branching &amp; Releases</title><link>https://docs.defectdojo.com/get_started/contributing/branching-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/contributing/branching-model/</guid><description>&lt;h2 id="regular-releases"&gt;Regular releases&lt;/h2&gt;
 &lt;p&gt;The DefectDojo team aims to maintain the following cadence:&lt;/p&gt;
 &lt;ul&gt;

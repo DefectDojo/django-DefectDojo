@@ -2,4 +2,9 @@
 the same CVE on a live request path. &lt;strong&gt;Reachability&lt;/strong&gt; captures that
 difference: DefectDojo Pro records whether each Finding&amp;rsquo;s vulnerable code can
 actually be reached, shows you where that conclusion came from, and feeds it
-into the Finding&amp;rsquo;s computed &lt;strong&gt;priority&lt;/strong&gt;.&lt;/p&gt;</description></item></channel></rss>
+into the Finding&amp;rsquo;s computed &lt;strong&gt;priority&lt;/strong&gt;.&lt;/p&gt;</description></item><item><title>Asset Exposure</title><link>https://docs.defectdojo.com/triage_findings/finding_scoring/asset_exposure/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/triage_findings/finding_scoring/asset_exposure/</guid><description>&lt;p&gt;A Critical vulnerability on a service anyone on the internet can reach is not the same
+risk as the same vulnerability on an isolated internal system, or on a branch nobody has
+deployed. &lt;strong&gt;Asset Exposure&lt;/strong&gt; captures both differences: DefectDojo Pro records how
+reachable each asset is from outside, whether each Finding&amp;rsquo;s code is actually running in
+production, shows you where those conclusions came from, and feeds both into the Finding&amp;rsquo;s
+computed &lt;strong&gt;priority&lt;/strong&gt;.&lt;/p&gt;</description></item></channel></rss>

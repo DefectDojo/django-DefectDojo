@@ -4,7 +4,7 @@
 &lt;li&gt;&lt;strong&gt;Location&lt;/strong&gt; - 通常、ネットワーク内のツールの URL を指すフィールド&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Secret&lt;/strong&gt; - 通常は API キー&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;ツールによっては、&lt;strong&gt;Location&lt;/strong&gt; と &lt;strong&gt;Secret&lt;/strong&gt; 以外にも追加の API 関連フィールドが必要になる場合があります。また、DefectDojo からの Connector 接続を受け入れるために、ツール側での設定変更が必要になることもあります。&lt;/p&gt;</description></item><item><title>ダウンストリームコネクタ ツールリファレンス</title><link>https://docs.defectdojo.com/ja/connectors/toolreference/downstream/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/toolreference/downstream/</guid><description>&lt;p&gt;DefectDojo のダウンストリームコネクタをサードパーティの Issue トラッカーと連携させるための、具体的な設定手順を以下に示します。&lt;/p&gt;
+&lt;p&gt;多くのツールは固定の API ホストを 1 つだけ公開します。その場合、コネクタを追加した時点で DefectDojo が &lt;strong&gt;Location&lt;/strong&gt; を自動入力するため、このページから URL をコピーする必要はありません。入力済みの値はそのまま使用してください。セルフホスト環境や別リージョンなど、お使いのインスタンスが異なるホストを使う場合にのみ変更してください。&lt;/p&gt;</description></item><item><title>ダウンストリームコネクタ ツールリファレンス</title><link>https://docs.defectdojo.com/ja/connectors/toolreference/downstream/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/toolreference/downstream/</guid><description>&lt;p&gt;DefectDojo のダウンストリームコネクタをサードパーティの Issue トラッカーと連携させるための、具体的な設定手順を以下に示します。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.defectdojo.com/connectors/toolreference/azure_devops_boards/"&gt;Azure DevOps Boards&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://docs.defectdojo.com/connectors/toolreference/bitbucket/#downstream-connector"&gt;Bitbucket&lt;/a&gt;&lt;/li&gt;
