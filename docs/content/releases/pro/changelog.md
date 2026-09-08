@@ -18,7 +18,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## September 2026: v3.3
 
-### September 8, 2026: v3.3.0
+### September 14, 2026: v3.3.100
 
 New features:
 * **(Deduplication)** Added Dedupe Pools: group the Assets that should deduplicate against each other, choose where their originals collect, preview what a membership change would link, and re-run deduplication over the Findings already in scope with Apply Now.
