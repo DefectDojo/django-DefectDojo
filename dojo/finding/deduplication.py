@@ -1299,11 +1299,6 @@ def do_false_positive_history_batch(findings, *, scope_filter=None):
     if not findings:
         return
 
-    system_settings = System_Settings.objects.get()
-
-    product = findings[0].test.engagement.product
-    dedup_alg = findings[0].test.deduplication_algorithm
-
     from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
 
     # Optional plugin hook: the scope the history is searched over, when the caller did not say.
@@ -1312,7 +1307,29 @@ def do_false_positive_history_batch(findings, *, scope_filter=None):
     # the default by returning None. Every caller that passes no scope (the post-import task
     # included) gets the same answer, so a plugin's scope cannot depend on which door was used.
     if scope_filter is None and (scope_provider := get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD")):
-        scope_filter = scope_provider(findings)
+        # The provider answers for one engagement: a plugin may isolate an engagement from the
+        # rest of its product, and a batch that mixes an isolated engagement with a normal one
+        # (the classic bulk edit groups by product and algorithm only) has no single right scope.
+        # Ask once per engagement and process each group with its own answer; a None answer
+        # keeps the default for that group and is not asked again.
+        by_engagement: dict = {}
+        for finding in findings:
+            by_engagement.setdefault(finding.test.engagement_id, []).append(finding)
+        for group in by_engagement.values():
+            _do_false_positive_history_batch_in_scope(group, scope_provider(group))
+        return
+
+    _do_false_positive_history_batch_in_scope(findings, scope_filter)
+
+
+def _do_false_positive_history_batch_in_scope(findings, scope_filter):
+    """The batch itself, once the scope is settled: ``None`` searches the findings' own product."""
+    system_settings = System_Settings.objects.get()
+
+    product = findings[0].test.engagement.product
+    dedup_alg = findings[0].test.deduplication_algorithm
+
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
 
     # Fetch all candidate existing findings with one DB query
     candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg, scope_filter=scope_filter)

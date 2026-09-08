@@ -27,6 +27,11 @@ New features:
 Behavior changes:
 * **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. An Asset in a Dedupe Pool replicates its false positives across the pool for same-tool matching. Instances using false-positive history across such Engagements see narrower replication than before.
 * **(Deduplication)** For an Asset in a Dedupe Pool, Global Component, Global Vulnerability ID and Global Locations matching is bounded to the pool rather than the whole instance.
+* **(Deduplication)** The upgrade copies the deduplication tuning into per-tool matching rows and then drops the tuning columns. That second step is one-way: take a database backup before upgrading, because the migration refuses to reverse and the way back is the backup.
+* **(Deduplication)** The tuner's permissions are retired in favour of four Dedupe Pool permissions (view, add, edit, delete). Roles that held the tuner permissions are carried over: tuner edit maps to all four, tuner view to view only.
+* **(Rules)** A new asset rule action, Assign to Dedupe Pool, pools an Asset or removes the rows a rule created; it never moves an Asset another pool holds, and the rule owner needs the Dedupe Pool edit permission.
+* **(Assets)** The Asset page gains a Dedupe Pool panel showing which pool the Asset matches within, per kind, with the pool change, subtree pooling and untoggle available in place.
+* **(Audit Log)** Dedupe pools, their memberships and the per-tool matching rows are tracked in the audit log.
 
 ## August 2026: v3.2
 

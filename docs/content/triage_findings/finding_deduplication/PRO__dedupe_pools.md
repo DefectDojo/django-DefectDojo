@@ -1,7 +1,7 @@
 ---
 title: "Dedupe Pools"
 description: "Group Assets so their Findings deduplicate against each other, per matching kind"
-weight: 3
+weight: 8
 audience: pro
 ---
 
@@ -76,6 +76,8 @@ Adding members applies to **future imports**. Findings already in DefectDojo are
 1. Click **Preview Re-run**. This reports how many Findings you can see share an identity with a Finding in another Asset in the pool.
 2. **Apply Now** stays disabled until that preview has run, and uses the acknowledgement the preview returned.
 
+Apply Now is scoped to one pool and one matching kind: it re-runs deduplication over the pool's members for the kind selected on the page, over the Findings that are not already duplicates. Existing duplicate links are left as they are, so it is not a general re-run of deduplication.
+
 The acknowledgement is derived from the specific change it describes, so the preview you ran for adding Assets does not authorize a re-run, and a re-run preview goes stale if the pool changes underneath it. Preview the thing you are about to do.
 
 Apply Now runs while you wait, so it is capped at 10,000 Findings across the pool. Above that
@@ -120,7 +122,7 @@ A membership created this way is marked **from parent**. **Untoggle subtree** re
 
 The Rules Engine action **Assign to a Dedupe Pool** puts an Asset into a pool, or takes it out of one. Run it on Asset creation and new Assets get pooled the way their siblings are, without anyone remembering to do it.
 
-Like the subtree toggle, it counts an Asset already pooled elsewhere for that kind as skipped rather than moving it. An Asset's pool is a deliberate decision, and a rule that silently relocated it would change which Findings deduplicate against each other with nothing in the run saying so.
+Like the subtree toggle, it leaves an Asset already pooled elsewhere for that kind unchanged rather than moving it. An Asset's pool is a deliberate decision, and a rule that silently relocated it would change which Findings deduplicate against each other with nothing in the run saying so.
 
 ## Permissions
 

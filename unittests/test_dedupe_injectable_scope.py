@@ -420,6 +420,35 @@ class TestInjectableFalsePositiveHistoryScope(_TwoProductFixture):
         self.assertEqual(len(_FP_SCOPE_CALLS), 1)
 
     @override_settings(FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD="unittests.test_dedupe_injectable_scope._module_fp_scope")
+    def test_a_batch_spanning_engagements_asks_the_provider_once_per_engagement(self):
+        """
+        The classic bulk edit groups by product and algorithm only, so its batches can mix
+        engagements whose scopes differ; the provider is asked per engagement, with that
+        engagement's findings, rather than once for the first finding's engagement.
+        """
+        other_engagement = Engagement.objects.create(
+            name="Scope Engagement B2",
+            product=self.test_b.engagement.product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        other_test = Test.objects.create(
+            engagement=other_engagement,
+            test_type=self.test_type,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        elsewhere = self._create_finding(other_test, "Same identity in two products")
+
+        do_false_positive_history_batch([self.sibling, elsewhere])
+
+        self.assertEqual(
+            sorted(sorted(group) for group in _FP_SCOPE_CALLS),
+            sorted([[self.sibling.pk], [elsewhere.pk]]),
+            "one call per engagement, each with only that engagement's findings",
+        )
+
+    @override_settings(FINDING_FALSE_POSITIVE_HISTORY_SCOPE_METHOD="unittests.test_dedupe_injectable_scope._module_fp_scope")
     def test_an_explicit_scope_wins_over_the_provider(self):
         _FP_SCOPE.update({"test__engagement__product__in": [self.test_a.engagement.product_id, self.test_b.engagement.product_id]})
 

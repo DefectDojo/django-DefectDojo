@@ -79,7 +79,7 @@ DefectDojo Open Source supports four deduplication algorithms that can be select
 - **Unique ID From Tool**: Uses the scanner-provided unique identifier.
 - **Hash Code**: Uses a configured set of fields to compute a hash.
 - **Unique ID From Tool or Hash Code**: Prefer the tool’s unique ID; fall back to hash when no matching unique ID is found.
-- **Legacy**: Historical algorithm with multiple conditions; only available in the Open Source version.
+- **Legacy**: Historical algorithm with multiple conditions. Matching Configuration offers it for same-tool and reimport matching; it is the fallback when a tool has no other configuration.
 
 **DefectDojo Pro adds more.** [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/) widen the scope of the existing algorithms to a chosen group of Assets, per matching kind, without changing how two Findings are compared. Three additional algorithms instead match across **all Assets** in the instance rather than within a single Asset or Engagement, or across the Asset's pool when it is in one for that matching kind: **Global Component** (by component name and version), **Global Vulnerability ID** (by CVE, GHSA, and similar) and **Global Locations** (by shared URLs or dependencies). All three are off by default and gated behind feature flags (**Settings > Feature Flags**). Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
 
