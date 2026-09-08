@@ -1,0 +1,28 @@
+{
+  "class": "web",
+  "count": 1,
+  "results": [
+    {
+      "hid": "HID-100001",
+      "vulnerability_name": "Cross-site scripting in the search form",
+      "cve_ids": [
+        "CVE-2000-0001"
+      ],
+      "cvss_score": 5.4,
+      "cvss_base": 6.1,
+      "severity_level": 2,
+      "severity": "high",
+      "status": "open",
+      "solution": "Encode user input before rendering it.",
+      "detection_information": "The payload was reflected in the response body.",
+      "vulnerability_impact": "An attacker can run script in a visitor's session.",
+      "vendor_reference": "https://vendor.example.com/advisory/xss",
+      "asset_uuid": "asset-0001",
+      "detected_port": 443,
+      "detected_port_protocol": "tcp",
+      "url": "https://app.example.com/search?q=1",
+      "first_detected": "2024-06-01T00:00:00Z",
+      "last_detected": "2024-07-01T12:00:00Z"
+    }
+  ]
+}

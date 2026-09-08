@@ -1,0 +1,11 @@
+{
+  "name": "clean.yaml",
+  "metadata": {},
+  "status": "PASS",
+  "not_compliant": [],
+  "not_applicable": [],
+  "compliant": [
+    "s3_bucket_encryption_enabled",
+    "security_group_no_open_ssh"
+  ]
+}

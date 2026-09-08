@@ -1287,7 +1287,7 @@ def manage_meta_data(request, pid):
         if formset.is_valid():
             formset.save()
             messages.add_message(
-                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success",
+                request, messages.SUCCESS, _("Metadata updated successfully."), extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_product", args=(pid,)))
 

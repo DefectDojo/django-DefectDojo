@@ -17,6 +17,11 @@ from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
 )
+from dojo.product_attributes.choices import (
+    lifecycle_value_choices,
+    origin_value_choices,
+    platform_value_choices,
+)
 
 labels = get_labels()
 
@@ -38,9 +43,9 @@ class ApiAssetFilter(DojoFilter):
     name_exact = CharFilter(field_name="name", lookup_expr="iexact")
     description = CharFilter(lookup_expr="icontains")
     business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES)
-    platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES)
-    lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES)
-    origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
+    platform = MultipleChoiceFilter(field_name="platform__value", choices=platform_value_choices)
+    lifecycle = MultipleChoiceFilter(field_name="lifecycle__value", choices=lifecycle_value_choices)
+    origin = MultipleChoiceFilter(field_name="origin__value", choices=origin_value_choices)
     # NumberInFilter
     id = NumberInFilter(field_name="id", lookup_expr="in")
     asset_manager = NumberInFilter(field_name="product_manager", lookup_expr="in")
@@ -81,9 +86,9 @@ class ApiAssetFilter(DojoFilter):
             ("created", "created"),
             ("prod_numeric_grade", "asset_numeric_grade"),
             ("business_criticality", "business_criticality"),
-            ("platform", "platform"),
-            ("lifecycle", "lifecycle"),
-            ("origin", "origin"),
+            ("platform__name", "platform"),
+            ("lifecycle__name", "lifecycle"),
+            ("origin__name", "origin"),
             ("revenue", "revenue"),
             ("external_audience", "external_audience"),
             ("internet_accessible", "internet_accessible"),

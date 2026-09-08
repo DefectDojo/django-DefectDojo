@@ -1,0 +1,61 @@
+[
+  {
+    "id": 5001,
+    "date": "2026-06-02T10:15:00Z",
+    "status": "TRIGGERED",
+    "severity": "critical",
+    "validity": "valid",
+    "occurrences_count": 3,
+    "secret_revoked": false,
+    "incident_name": "AWS IAM key exposed in generic-app",
+    "gitguardian_url": "https://dashboard.example.com/incidents/5001",
+    "detector": {
+      "name": "aws_iam",
+      "display_name": "AWS IAM Key",
+      "nature": "specific",
+      "family": "api_key",
+      "category": "cloud_provider"
+    }
+  },
+  {
+    "id": 5002,
+    "date": "2026-06-03T11:00:00Z",
+    "status": "TRIGGERED",
+    "severity": "high",
+    "validity": "invalid",
+    "occurrences_count": 1,
+    "secret_revoked": true,
+    "incident_name": "",
+    "gitguardian_url": "https://dashboard.example.com/incidents/5002",
+    "detector": {
+      "name": "generic_api_key",
+      "display_name": "Generic API Key",
+      "family": "api_key",
+      "category": "other"
+    }
+  },
+  {
+    "id": 5003,
+    "date": "2026-06-04T12:00:00Z",
+    "status": "TRIGGERED",
+    "severity": "medium",
+    "validity": "no_checker",
+    "occurrences_count": 0,
+    "secret_revoked": false,
+    "incident_name": "",
+    "gitguardian_url": "",
+    "detector": {"name": "private_key", "display_name": "", "family": "", "category": ""}
+  },
+  {
+    "id": 5004,
+    "date": "2026-06-05T13:00:00Z",
+    "status": "TRIGGERED",
+    "severity": "not-a-severity",
+    "validity": "some_new_validity",
+    "occurrences_count": 7,
+    "secret_revoked": false,
+    "incident_name": "Database URI exposed",
+    "gitguardian_url": "https://dashboard.example.com/incidents/5004",
+    "detector": {"name": "database_uri", "display_name": "Database URI", "category": "database"}
+  }
+]

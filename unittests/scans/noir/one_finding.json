@@ -1,0 +1,31 @@
+{
+  "endpoints": [
+    {
+      "callees": [],
+      "url": "/api/login",
+      "method": "POST",
+      "internal": false,
+      "details": {
+        "code_paths": [
+          {
+            "path": "app/app.py",
+            "line": 4
+          }
+        ],
+        "technology": "python_flask"
+      },
+      "protocol": "http",
+      "kind": "",
+      "tags": [],
+      "params": [
+        {
+          "name": "username",
+          "value": "",
+          "param_type": "form",
+          "tags": []
+        }
+      ]
+    }
+  ],
+  "passive_results": []
+}

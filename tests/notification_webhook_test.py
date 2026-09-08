@@ -32,7 +32,7 @@ class NotificationWebhookTest(BaseTestCase):
         webhook_checkbox = driver.find_element(By.ID, "id_enable_webhooks_notifications")
         if not webhook_checkbox.is_selected():
             webhook_checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -49,7 +49,7 @@ class NotificationWebhookTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").send_keys("Test Webhook")
         driver.find_element(By.ID, "id_url").clear()
         driver.find_element(By.ID, "id_url").send_keys(WEBHOOK_ENDPOINT_URL)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
@@ -70,7 +70,7 @@ class NotificationWebhookTest(BaseTestCase):
         # Ensure the endpoint stays pointed at the local mock so the save-time ping succeeds.
         driver.find_element(By.ID, "id_url").clear()
         driver.find_element(By.ID, "id_url").send_keys(WEBHOOK_ENDPOINT_URL)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
@@ -86,7 +86,7 @@ class NotificationWebhookTest(BaseTestCase):
         if len(delete_links) == 0:
             self.fail("No Delete link found for webhook")
         delete_links[0].click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
+        self.click_submit(driver, "input.btn.btn-danger")
 
         self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
@@ -100,7 +100,7 @@ class NotificationWebhookTest(BaseTestCase):
         webhook_checkbox = driver.find_element(By.ID, "id_enable_webhooks_notifications")
         if webhook_checkbox.is_selected():
             webhook_checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.assertFalse(self.is_error_message_present())
 
 

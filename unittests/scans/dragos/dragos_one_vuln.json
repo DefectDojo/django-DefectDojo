@@ -1,0 +1,53 @@
+{
+  "content": [
+    {
+      "host": {
+        "id": "asset-0001",
+        "name": "generic-plc-01",
+        "hostname": ["generic-plc-01.plant.example.com"],
+        "ip": ["10.10.0.11", "10.10.0.12"],
+        "mac": ["00:00:5e:00:53:01"],
+        "vendor": "Generic Controls",
+        "type": "PLC",
+        "is_ot": true,
+        "zone": {"id": "zone-1", "name": "Cell Zone A"},
+        "pera_level": 1,
+        "hardware": {
+          "model": "GC-9000",
+          "family": "GC",
+          "series": "9000",
+          "vendor": "Generic Controls",
+          "firmware": {"version": "2.4.1"}
+        }
+      },
+      "vulnerability": {
+        "id": "vuln-0001",
+        "report_id": "DRA-2024-0001",
+        "reference": "CVE-2000-0001",
+        "enumeration": "CVE-2000-0001",
+        "title": "Unauthenticated command execution on the controller",
+        "summary": "The controller accepts control commands without authentication.",
+        "description": "A device on the same network segment can issue control commands.",
+        "severity": 5,
+        "score": {"base": 9.8, "version": "3.1"},
+        "dragos_score": 8.5,
+        "mitigations": [
+          "Restrict the control protocol to the engineering workstation segment.",
+          "Apply vendor firmware 2.4.3 at the next maintenance window."
+        ],
+        "state": "open",
+        "intel": {
+          "active_exploit": true,
+          "poc_exists": true,
+          "remotely_exploitable": true,
+          "code_execution": true,
+          "privilege_escalation": false
+        }
+      }
+    }
+  ],
+  "pageSize": 100,
+  "pageNumber": 0,
+  "totalCount": 1,
+  "totalPages": 1
+}

@@ -1,0 +1,83 @@
+{
+  "MetaData": {
+    "TenantId": "ABCDEFG",
+    "DisplayName": "Cool Example Org",
+    "DomainName": "example.org",
+    "ProductSuite": "Google Workspace"
+  },
+  "Results": {
+    "calendar": [
+      {
+        "GroupName": "External Sharing Options",
+        "GroupNumber": "1",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#1-external-sharing-options",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.1.1v1",
+            "Requirement": "External sharing options for primary calendars SHALL be configured to &quot;Only free/busy information (hide event details).&quot;<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.CALENDAR.1.2v1",
+            "Requirement": "External sharing options for secondary calendars SHALL be configured to &quot;Only free/busy information (hide event details).&quot;<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Calendar Interop Management",
+        "GroupNumber": "3",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#3-calendar-interop-management",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.3.1v1",
+            "Requirement": "Calendar Interop SHOULD be disabled.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Should",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.CALENDAR.3.2v1",
+            "Requirement": "Microsoft 365 (Graph API) SHALL be used instead of basic authentication to establish connectivity between tenants or organizations in cases where Calendar Interop is deemed necessary for agency mission fulfillment.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #046B9A; color: white;\" title=\"Requires manual verification\">Manual</span></div>",
+            "Result": "N/A",
+            "Criticality": "Shall/Not-Implemented",
+            "Details": "Currently not able to be tested automatically; please manually check.",
+            "OriginalResult": "N/A",
+            "OriginalDetails": "Currently not able to be tested automatically; please manually check.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Paid Appointments",
+        "GroupNumber": "4",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#4-paid-appointments",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.4.1v1",
+            "Requirement": "&quot;Appointment Schedule with Payments&quot; SHOULD be disabled.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Should",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "list": {
+    "objects": [
+      {
+        "uuid": "00000000-0000-4000-8000-000000000001",
+        "meta": {
+          "name": "CVE-2000-0001 in generic-lib",
+          "kind": "Finding",
+          "create_time": "2026-06-01T12:00:00.000Z"
+        },
+        "tenant_meta": {"namespace": "example-tenant"},
+        "spec": {
+          "level": "FINDING_LEVEL_CRITICAL",
+          "finding_categories": ["FINDING_CATEGORY_VULNERABILITY", "FINDING_CATEGORY_SCA"],
+          "finding_tags": [
+            "FINDING_TAGS_REACHABLE_FUNCTION",
+            "FINDING_TAGS_DIRECT",
+            "FINDING_TAGS_FIX_AVAILABLE",
+            "FINDING_TAGS_UNSPECIFIED"
+          ],
+          "summary": "generic-lib is vulnerable to remote code execution.",
+          "explanation": "<p>The <b>parse()</b> helper evaluates untrusted input.</p><script>alert('x')</script>",
+          "remediation": "Upgrade generic-lib to 1.2.4 or later.",
+          "ecosystem": "ECOSYSTEM_NPM",
+          "project_uuid": "00000000-0000-4000-8000-0000000000aa",
+          "target_dependency_name": "generic-lib",
+          "target_dependency_version": "1.2.3",
+          "target_dependency_package_name": "npm://generic-lib",
+          "finding_metadata": {
+            "vulnerability": {
+              "uuid": "00000000-0000-4000-8000-0000000000bb",
+              "meta": {"name": "CVE-2000-0001"},
+              "spec": {
+                "aliases": ["GHSA-0000-0000-0001", "CVE-2000-0001"],
+                "summary": "Remote code execution in generic-lib.",
+                "references": [
+                  "https://example.com/advisories/cve-2000-0001",
+                  "https://example.com/commit/abcdef1"
+                ],
+                "cvss_v3_severity": {
+                  "level": "CRITICAL",
+                  "score": 9.8,
+                  "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                },
+                "cvss_v4_severity": {"base_level": "CRITICAL", "base_score": 9.3, "vector": "CVSS:4.0/AV:N"},
+                "epss_score": {"probability_score": 0.04231, "percentile_score": 0.91},
+                "disputed": false,
+                "malicious": false
+              }
+            }
+          }
+        }
+      },
+      {
+        "uuid": "00000000-0000-4000-8000-000000000002",
+        "meta": {"name": ""},
+        "spec": {
+          "level": "FINDING_LEVEL_HIGH",
+          "finding_categories": ["FINDING_CATEGORY_SCA"],
+          "finding_tags": ["FINDING_TAGS_UNREACHABLE_DEPENDENCY", "FINDING_TAGS_TRANSITIVE"],
+          "summary": "generic-parser is vulnerable to denial of service.",
+          "target_dependency_name": "",
+          "target_dependency_package_name": "pypi://generic-parser",
+          "target_dependency_version": "3.1.0",
+          "finding_metadata": {
+            "vulnerability": {
+              "meta": {"name": "GHSA-0000-0000-0002"},
+              "spec": {
+                "aliases": [],
+                "summary": "Unbounded recursion.",
+                "references": [],
+                "cvss_v4_severity": {"base_level": "HIGH", "base_score": 7.7, "vector": "CVSS:4.0/AV:N"},
+                "epss_score": {"probability_score": 0}
+              }
+            }
+          }
+        }
+      },
+      {
+        "uuid": "",
+        "meta": {"name": ""},
+        "spec": {
+          "level": "FINDING_LEVEL_MEDIUM",
+          "finding_categories": [],
+          "finding_tags": ["FINDING_TAGS_POTENTIALLY_REACHABLE_FUNCTION"],
+          "target_dependency_name": "generic-widget",
+          "target_dependency_version": "4.0.0",
+          "finding_metadata": {
+            "vulnerability": {"meta": {"name": "CVE-2000-0003"}, "spec": {}}
+          }
+        }
+      },
+      {
+        "uuid": "00000000-0000-4000-8000-000000000004",
+        "meta": {"name": "Secret committed in generic-app"},
+        "spec": {
+          "level": "NOT_A_LEVEL",
+          "finding_categories": ["FINDING_CATEGORY_SECRETS", "FINDING_CATEGORY_UNSPECIFIED"],
+          "finding_tags": [],
+          "summary": "A credential was committed to the repository.",
+          "target_dependency_name": "",
+          "target_dependency_version": "",
+          "finding_metadata": {}
+        }
+      }
+    ],
+    "response": {"next_page_id": "", "next_page_token": 0}
+  }
+}

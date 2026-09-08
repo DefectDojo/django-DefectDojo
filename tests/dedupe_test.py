@@ -64,7 +64,7 @@ class DedupeTest(BaseTestCase):
             if driver.find_element(By.ID, "id_retroactive_false_positive_history").is_selected():
                 driver.find_element(By.XPATH, '//*[@id="id_retroactive_false_positive_history"]').click()
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check if it's enabled after reload
             driver.get(self.base_url + "system_settings")
             self.assertTrue(driver.find_element(By.ID, "id_enable_deduplication").is_selected())
@@ -127,7 +127,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Path Test 2")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Bandit Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 
@@ -203,7 +203,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Endpoint Test 2")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 
@@ -267,7 +267,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Same Eng Test 2")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Generic Findings Import")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 
@@ -337,7 +337,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Path Test 2")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Checkmarx Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 
@@ -394,7 +394,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Generic Test")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Generic Findings Import")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 
@@ -411,7 +411,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Immuniweb Test")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 

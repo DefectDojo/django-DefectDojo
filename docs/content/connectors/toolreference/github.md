@@ -8,7 +8,7 @@ audience: pro
 
 The GitHub connector is an **Asset Connector**: it enumerates the repositories your token can access and creates a DefectDojo Asset for each one, grouped into Organizations by GitHub owner (organization or user). No findings are imported.
 
-**Please note:** this connector imports your repository **inventory** only. To import GitHub security alerts — code scanning, Dependabot, and secret scanning — as findings, use the separate [GitHub Advanced Security](/connectors/toolreference/github_advanced_security/) connector. The two are independent and can be run together.
+**Please note:** this connector imports your repository **inventory** only. To import findings from GitHub — code scanning, Dependabot, and secret scanning alerts, or issues from the repository issue tracker — use the separate [GitHub Advanced Security](/connectors/toolreference/github_advanced_security/) connector. The two are independent and can be run together.
 
 #### Prerequisites
 

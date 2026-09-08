@@ -4,7 +4,6 @@ from datetime import timedelta
 from pathlib import Path
 from uuid import uuid4
 
-import tagulous.admin
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.indexes import GinIndex
@@ -19,8 +18,8 @@ from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
-from tagulous.models import TagField
-from tagulous.models.managers import FakeTagRelatedManager  # noqa: F401 -- backward compat re-export
+from django_tagulous.models import TagField
+from django_tagulous.models.managers import FakeTagRelatedManager  # noqa: F401 -- backward compat re-export
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -383,6 +382,11 @@ from dojo.engagement.models import (  # noqa: E402 -- re-export; class-body FKs 
     Engagement,
     Engagement_Presets,  # noqa: F401 -- re-export
 )
+from dojo.product_attributes.models import (  # noqa: E402, F401 -- re-export; Product FKs below reference these
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
+)
 
 
 class Sonarqube_Issue(models.Model):
@@ -620,15 +624,15 @@ from dojo.utils import (  # noqa: E402
     parse_cvss_data,  # noqa: F401 -- backward compat re-export; side-effect loads dojo.utils → dojo.location models
 )
 
-tagulous.admin.register(Product.tags)
-tagulous.admin.register(Test.tags)
-tagulous.admin.register(Test.inherited_tags)
-tagulous.admin.register(Finding.tags)
-tagulous.admin.register(Finding.inherited_tags)
-tagulous.admin.register(Engagement.tags)
-tagulous.admin.register(Engagement.inherited_tags)
-tagulous.admin.register(Finding_Template.tags)
-tagulous.admin.register(App_Analysis.tags)
+admin.site.register(Product.tags.tag_model)
+admin.site.register(Test.tags.tag_model)
+admin.site.register(Test.inherited_tags.tag_model)
+admin.site.register(Finding.tags.tag_model)
+admin.site.register(Finding.inherited_tags.tag_model)
+admin.site.register(Engagement.tags.tag_model)
+admin.site.register(Engagement.inherited_tags.tag_model)
+admin.site.register(Finding_Template.tags.tag_model)
+admin.site.register(App_Analysis.tags.tag_model)
 # Objects_Product.tags registered in dojo/object/admin.py
 
 # Testing

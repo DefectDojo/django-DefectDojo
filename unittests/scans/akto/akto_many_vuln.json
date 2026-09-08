@@ -1,0 +1,71 @@
+{
+  "issueDetails": [
+    {
+      "apiCollectionId": 1700000001,
+      "apiUrl": "https://api.example.com/v1/users/{id}",
+      "apiMethod": "GET",
+      "testSubCategory": "BOLA",
+      "issueUrl": "https://app.example.com/dashboard/issues/1",
+      "testName": "Broken Object Level Authorization",
+      "testCategory": "BOLA",
+      "testDescription": "The endpoint returned another user's record.",
+      "testDetails": "Changing {id} to a second account's id returned that account's data.",
+      "testImpact": "Any authenticated user can read every user's record.",
+      "testRemediation": "Check that the requested object belongs to the caller.",
+      "severity": "CRITICAL",
+      "status": "OPEN",
+      "creationTime": 1719792000,
+      "lastSeen": 1721001600,
+      "testCwe": "CWE-639",
+      "testCve": "",
+      "testTags": ["OWASP API1:2023", "Authorization"],
+      "testReferences": ["https://owasp.example.com/api1"]
+    },
+    {
+      "apiCollectionId": "1700000001",
+      "apiUrl": "/v1/reports",
+      "apiMethod": "POST",
+      "testSubCategory": "SSRF",
+      "testName": "Server-Side Request Forgery",
+      "testCategory": "SSRF",
+      "testDescription": "The endpoint fetched a URL supplied by the caller.",
+      "testRemediation": "Allow-list the hosts the service may fetch.",
+      "severity": "high",
+      "status": "OPEN",
+      "creationTime": 1717200000,
+      "testCwe": "918",
+      "testCve": "CVE-2000-0002 and cve-2000-0002 and CVE-2000-0001",
+      "testTags": ["OWASP API7:2023"]
+    },
+    {
+      "apiCollectionId": 1700000002,
+      "apiUrl": "https://api.example.com/v1/health",
+      "apiMethod": "GET",
+      "testSubCategory": "INFO_DISCLOSURE",
+      "testName": "Verbose health endpoint",
+      "severity": "not a label",
+      "status": "IGNORED",
+      "creationTime": 0,
+      "testCwe": "not a cwe"
+    },
+    {
+      "apiCollectionId": 1700000002,
+      "apiUrl": "https://api.example.com/v1/legacy",
+      "apiMethod": "DELETE",
+      "testSubCategory": "NO_AUTH",
+      "testName": "Unauthenticated destructive endpoint",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "creationTime": 1717200000
+    },
+    {
+      "apiCollectionId": 1700000003,
+      "apiUrl": "",
+      "apiMethod": "",
+      "testSubCategory": "",
+      "testName": "",
+      "severity": "LOW",
+      "status": "OPEN"
+    }
+  ]
+}

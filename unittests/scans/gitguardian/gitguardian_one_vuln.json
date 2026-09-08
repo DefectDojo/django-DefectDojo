@@ -1,0 +1,20 @@
+[
+  {
+    "id": 5001,
+    "date": "2026-06-02T10:15:00Z",
+    "status": "TRIGGERED",
+    "severity": "critical",
+    "validity": "valid",
+    "occurrences_count": 3,
+    "secret_revoked": false,
+    "incident_name": "AWS IAM key exposed in generic-app",
+    "gitguardian_url": "https://dashboard.example.com/incidents/5001",
+    "detector": {
+      "name": "aws_iam",
+      "display_name": "AWS IAM Key",
+      "nature": "specific",
+      "family": "api_key",
+      "category": "cloud_provider"
+    }
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "apiId": "api-0001",
+  "report": {
+    "index": [
+      "/paths/~1orders/get/security",
+      "/paths/~1orders/post/requestBody"
+    ],
+    "score": 62.5,
+    "security": {
+      "issues": {
+        "v3-global-securityscheme-apikey-inheader": {
+          "criticality": 4,
+          "description": "The API key is passed in a header, which is exposed to intermediaries",
+          "issues": [
+            {
+              "score": 12.5,
+              "pointer": 0,
+              "specificDescription": "The GET /orders operation accepts an API key in a request header"
+            }
+          ]
+        }
+      }
+    },
+    "data": {"issues": {}},
+    "warnings": {"issues": {}},
+    "semanticErrors": {"issues": {}},
+    "validationErrors": {"issues": {}}
+  }
+}

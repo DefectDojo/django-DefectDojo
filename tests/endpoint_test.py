@@ -26,7 +26,7 @@ class EndpointTest(BaseTestCase):
         # Select product to assign endpoint to
         Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -43,7 +43,7 @@ class EndpointTest(BaseTestCase):
         # Select product to assign endpoint to
         Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -62,7 +62,7 @@ class EndpointTest(BaseTestCase):
         # Select product to assign endpoint to
         Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -79,7 +79,7 @@ class EndpointTest(BaseTestCase):
         # Select product to assign endpoint to
         Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -96,7 +96,7 @@ class EndpointTest(BaseTestCase):
         # Select product to assign endpoint to
         Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -113,7 +113,7 @@ class EndpointTest(BaseTestCase):
         # Select product to assign endpoint to
         Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -130,7 +130,7 @@ class EndpointTest(BaseTestCase):
         # Select product to assign endpoint to
         Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -155,7 +155,7 @@ class EndpointTest(BaseTestCase):
         driver.find_element(By.ID, "id_port").clear()
         driver.find_element(By.ID, "id_port").send_keys("8080")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure

@@ -1,0 +1,90 @@
+{
+  "pagination": {"total": 6, "start": 0, "limit": 100},
+  "list": [
+    {
+      "issue": {"issue_id": 9001, "name": "TLS certificate expires in under 14 days", "severity": 5},
+      "target": {"target_id": 3001, "target": "app.example.com", "target_name": "Main app",
+                 "ip": "10.0.0.11", "geo": "US"},
+      "status": {"issue_id": 9001, "target_id": 3001, "status": "confirmed",
+                 "assigned_to": "Platform Team", "scans_since_found": 4},
+      "instances": []
+    },
+    {
+      "issue": {"issue_id": 9002, "name": "Missing HSTS header", "severity": 2},
+      "target": {"target_id": 3001, "target": "app.example.com"},
+      "status": {"issue_id": 9002, "target_id": 3001, "status": "new",
+                 "assigned_to": "Nobody", "scans_since_found": 1},
+      "instances": []
+    },
+    {
+      "issue": {"issue_id": 9002, "name": "Missing HSTS header", "severity": 2},
+      "target": {"target_id": 3002, "target": "shop.example.com"},
+      "status": {"issue_id": 9002, "target_id": 3002, "status": "fixed",
+                 "assigned_to": "Nobody", "scans_since_found": 0},
+      "instances": []
+    },
+    {
+      "issue": {"issue_id": 9003, "name": "Acknowledged false positive", "severity": 3},
+      "target": {"target_id": 3002, "target": "shop.example.com"},
+      "status": {"issue_id": 9003, "target_id": 3002, "status": "ack_false_positive",
+                 "assigned_to": "Nobody", "scans_since_found": 7},
+      "instances": []
+    },
+    {
+      "issue": {"issue_id": 9004, "name": "Accepted risk on a legacy host", "severity": 4},
+      "target": {"target_id": 3003, "target": "legacy.example.com"},
+      "status": {"issue_id": 9004, "target_id": 3003, "status": "ack_acceptable_risk",
+                 "assigned_to": "Nobody", "scans_since_found": 12},
+      "instances": []
+    },
+    {
+      "issue": {"issue_id": 9005, "name": "", "severity": 0},
+      "target": {"target_id": 0, "target": ""},
+      "status": {"issue_id": 9005, "target_id": 0, "status": "", "assigned_to": "",
+                 "scans_since_found": 0},
+      "instances": []
+    }
+  ],
+  "details": {
+    "9001": {
+      "issue_id": 9001,
+      "name": "TLS certificate expires in under 14 days",
+      "description": "The certificate presented by the host expires shortly.",
+      "category": "Encryption",
+      "cve_ids": [],
+      "pci": 1,
+      "severity": 5,
+      "type": 2
+    },
+    "9002": {
+      "issue_id": 9002,
+      "name": "Missing HSTS header",
+      "description": "No Strict-Transport-Security header was returned.",
+      "category": "Headers",
+      "cve_ids": [],
+      "pci": 0,
+      "severity": 2,
+      "type": 1
+    },
+    "9004": {
+      "issue_id": 9004,
+      "name": "Accepted risk on a legacy host",
+      "description": "An outdated component is exposed.",
+      "category": "Software",
+      "cve_ids": ["CVE-2000-0001", "CVE-2000-0002", "CVE-2000-0001"],
+      "pci": 0,
+      "severity": 4,
+      "type": 3
+    },
+    "9005": {
+      "issue_id": 9005,
+      "name": "A detail-only name",
+      "description": "",
+      "category": "",
+      "cve_ids": [],
+      "pci": 0,
+      "severity": 3,
+      "type": 0
+    }
+  }
+}

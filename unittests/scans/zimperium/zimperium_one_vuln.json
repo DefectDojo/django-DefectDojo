@@ -1,0 +1,61 @@
+{
+  "assessment": {
+    "id": "assess-0001",
+    "appVersion": "3.2.0",
+    "buildNumber": "412",
+    "buildUploadedAt": "2024-06-02T09:00:00Z"
+  },
+  "app": {
+    "zdevAppId": "app-0001",
+    "name": "Generic Mobile App",
+    "bundleIdentifier": "com.example.genericapp",
+    "platform": "android"
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "zScan",
+            "version": "1.0.0",
+            "rules": [
+              {
+                "id": "ZS_CLEARTEXT_TRAFFIC",
+                "name": "CleartextTrafficPermitted",
+                "shortDescription": {"text": "The app permits cleartext HTTP traffic"},
+                "fullDescription": {
+                  "text": "The network security configuration allows unencrypted HTTP to any host."
+                },
+                "helpUri": "https://example.com/rules/cleartext-traffic",
+                "properties": {
+                  "security-severity": "7.4",
+                  "tags": ["external/cwe/cwe-319", "network"]
+                },
+                "relationships": [{"target": {"id": "CWE-319"}}]
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "ZS_CLEARTEXT_TRAFFIC",
+            "level": "error",
+            "kind": "fail",
+            "message": {"text": "Cleartext traffic is permitted for all domains"},
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {"uri": "res/xml/network_security_config.xml"},
+                  "region": {"startLine": 3}
+                }
+              }
+            ],
+            "fixes": [{"description": {"text": "Set cleartextTrafficPermitted to false."}}],
+            "properties": {"tags": ["mobile"]}
+          }
+        ]
+      }
+    ]
+  }
+}

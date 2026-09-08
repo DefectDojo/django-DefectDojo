@@ -32,7 +32,9 @@ class BlackduckBinaryAnalysisImporter(Importer):
         self, sha1_hash_keys, orig_report_name, vulnerabilities,
     ):
         """Process findings for each project."""
-        for sha1_hash_key in sha1_hash_keys:
+        # sorted(): sha1_hash_keys is a set, so iterating it directly makes the order in which
+        # findings are produced depend on PYTHONHASHSEED
+        for sha1_hash_key in sorted(sha1_hash_keys):
             for vuln in vulnerabilities[sha1_hash_key]:
                 vuln_dict = dict(vuln)
 

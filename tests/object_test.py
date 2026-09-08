@@ -17,7 +17,7 @@ class ObjectTest(BaseTestCase):
         tracking_checkbox = driver.find_element(By.ID, "id_enable_product_tracking_files")
         if not tracking_checkbox.is_selected():
             tracking_checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -64,7 +64,7 @@ class ObjectTest(BaseTestCase):
             select = Select(review_fields[0])
             if len(select.options) > 1:
                 select.select_by_index(1)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.assertTrue(
             self.is_success_message_present(text="added successfully")
             or self.is_text_present_on_page(text="Tracked Files"),

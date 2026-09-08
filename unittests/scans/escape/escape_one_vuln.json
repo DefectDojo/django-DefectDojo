@@ -1,0 +1,21 @@
+{
+  "id": "app-0001",
+  "name": "generic-api",
+  "lastScan": {
+    "id": "scan-0001",
+    "status": "SUCCESS",
+    "issues": [
+      {
+        "id": "issue-0001",
+        "name": "SQL injection in the reports query",
+        "severity": "high",
+        "url": "https://api.example.com/v1/reports",
+        "method": "post",
+        "description": "A request parameter is concatenated into a database query.",
+        "remediation": "Use parameterised queries.",
+        "owasp": "API8:2023",
+        "cwe": "CWE-89"
+      }
+    ]
+  }
+}

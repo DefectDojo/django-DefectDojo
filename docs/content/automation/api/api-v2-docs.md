@@ -35,11 +35,11 @@ If you're logged in to the Defect Dojo web UI, you do not need to provide the au
 ## Authentication
 
 The API uses header authentication with API key. The format of the
-header should be: :
+header should be:
 
     Authorization: Token <api.key>
 
-For example: :
+For example:
 
     Authorization: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff
 
@@ -49,10 +49,66 @@ If you use [an alternative authentication method](/admin/sso/) for users, you ma
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
+### Token management
+
+DefectDojo provides API endpoints to revoke and set expiry on API tokens programmatically.
+
+#### Revoking a token by key
+
+When a token value is compromised, a superuser or Global Owner can revoke it directly by its key, without needing to know which user it belongs to:
+
+```
+POST /api/v2/api-tokens/revoke/
+Authorization: Token <api_key>
+Content-Type: application/json
+
+{"key": "<token_to_revoke>"}
+```
+
+Returns 204 on success. The token is deleted, any per-user expiry override is cleared, and the owner is notified that their token was revoked. The owner will need to generate a new token via the UI (`/api/key-v2`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
+
+Returns 404 if no token matches the supplied key, 400 if `key` is missing, and 403 for non-superusers.
+
+#### Token expiry
+
+An optional expiry datetime can be set per user via the `user_contact_infos` endpoint (superuser only):
+
+```
+PATCH /api/v2/user_contact_infos/{id}/
+Authorization: Token <api_key>
+Content-Type: application/json
+
+{"token_expiry": "2026-12-31T23:59:59Z"}
+```
+
+Once set, any request using that user's token after the expiry datetime will receive a `403 Forbidden` response with `{"detail": "API token has expired."}`. The user must generate a new token to regain access.
+
+To clear a per-user expiry, set `token_expiry` to `null`. The token then falls back to the instance-wide default described below, so this makes a token permanent only when that default is `0`.
+
+Setting this field is restricted to superusers. It is not editable from the user profile page, and an expired token is rejected rather than deleted, so raising the expiry restores access without forcing a rotation.
+
+#### Default token lifetime
+
+To enforce a maximum token lifetime across all users, set the environment variable:
+
+```
+DD_API_TOKEN_DEFAULT_EXPIRY_DAYS=90
+```
+
+When set to a value greater than `0`, every token expires that many days after it was created. This is measured from the token's own creation time and is evaluated when the token is used, so it applies to every token on the instance, including ones that already exist and ones obtained through `POST /api/v2/api-token-auth/` or the UI key page. The default is `0`, meaning tokens do not expire unless a per-user expiry is set.
+
+A per-user `token_expiry` takes precedence over this default, in either direction: it can pin a shorter life for one user, or grant a longer one.
+
+Resetting or revoking a token clears the per-user override, because that value described the token being replaced. The instance default still applies to the new token, measured from its creation.
+
+**Switching this setting on is retroactive.** Because expiry is evaluated when a token is used rather than recorded when it is issued, raising the value above `0` immediately invalidates every token on the instance that is already older than the window. That includes your own API token and any token driving a CI/CD pipeline.
+
+Plan the change before making it: pick a window, ask token owners to rotate first, then enable the setting. If you do lock yourself out of the API, the UI is unaffected because it uses session authentication, and you can issue a new token from `/api/key-v2`.
+
 ## Sample Code
 
 Here are some simple python examples and their results produced against
-the `/users` endpoint: :
+the `/users` endpoint:
 
 {{< highlight python >}}
 import requests
@@ -68,7 +124,7 @@ for key, value in r.__dict__.items():
 {{< /highlight >}}
 
 This code will return the list of all the users defined in DefectDojo.
-The json object result looks like : :
+The json object result looks like:
 
 {{< highlight json >}}
     [
@@ -106,7 +162,7 @@ for key, value in r.__dict__.items():
   print('------------------')
 {{< /highlight >}}
 
-The json object result is: :
+The json object result is:
 
 {{< highlight json >}}
 [
@@ -174,7 +230,7 @@ Example for importing a scan result:
 | Wrapper                      | Status                   | Notes |
 | -----------------------------| ------------------------| ------------------------|
 | [Specific python wrapper](https://github.com/DefectDojo/defectdojo_api)      | working (2021-01-21)    | API Wrapper including scripts for continous CI/CD uploading. Is lagging behind a bit on latest API features as we plan to revamp the API wrapper |
-| [Openapi python wrapper](https://github.com/alles-klar/defectdojo-api-v2-client)       | | proof of concept only where we found out the the OpenAPI spec is not perfect yet |
+| [Openapi python wrapper](https://github.com/alles-klar/defectdojo-api-v2-client)       | | Proof of concept only where we found out the the OpenAPI spec is not perfect yet |
 | [Java library](https://github.com/secureCodeBox/defectdojo-client-java)                 | working (2021-08-30)    | Created by the kind people of [SecureCodeBox](https://github.com/secureCodeBox/secureCodeBox) |
 | [Image using the Java library](https://github.com/SDA-SE/defectdojo-client) | working (2021-08-30)    | |
 | [.Net/C# library](https://www.nuget.org/packages/DefectDojo.Api/)              | working (2021-06-08)    | |
@@ -250,7 +306,7 @@ When `auto_create_context` is `True`, the Organization, Asset and Engagement wil
 
 When `do_not_reactivate` is `True`, the importing/reimporting will ignore uploaded active findings and not reactivate previously closed findings, while still creating new findings if there are new ones. You will get a note on the finding to explain that it was not reactivated for that reason.
 
-A reimport will automatically select the latest test inside the provided engagement that satisifes the provided `scan_type` and (optionally) provided `test_title`.
+A reimport will automatically select the latest test inside the provided engagement that satisfies the provided `scan_type` and (optionally) provided `test_title`.
 
 If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Asset / Engagement.
 

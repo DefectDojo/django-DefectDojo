@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "id": "1000001",
+      "type": "report",
+      "attributes": {
+        "title": "Stored XSS in the profile page",
+        "state": "triaged",
+        "vulnerability_information": "A stored cross-site scripting issue lets an attacker run script in another user's session.",
+        "created_at": "2026-07-10T09:00:00.000Z"
+      },
+      "relationships": {
+        "severity": {
+          "data": {
+            "id": "sev-1",
+            "type": "severity",
+            "attributes": {
+              "rating": "high",
+              "score": 7.6,
+              "cvss_vector_string": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:L/A:N"
+            }
+          }
+        },
+        "weakness": {
+          "data": {
+            "id": "weak-1",
+            "type": "weakness",
+            "attributes": {
+              "external_id": "cwe-79",
+              "name": "Cross-site Scripting (XSS) - Stored"
+            }
+          }
+        },
+        "reporter": {
+          "data": {
+            "id": "user-1",
+            "type": "user",
+            "attributes": {
+              "username": "researcher-one"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "links": {
+    "next": ""
+  }
+}

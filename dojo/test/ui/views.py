@@ -331,13 +331,13 @@ def copy_test(request, tid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Test Copied successfully.",
+                _("Test Copied successfully."),
                 extra_tags="alert-success")
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(engagement.id, )))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to copy test, please try again.",
+            _("Unable to copy test, please try again."),
             extra_tags="alert-danger")
 
     product_tab = Product_Tab(product, title="Copy Test", tab="engagements")

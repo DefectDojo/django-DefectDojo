@@ -1,0 +1,81 @@
+{
+  "vulnerabilities": [
+    {
+      "uuid": "00000000-0000-4000-8000-000000000001",
+      "title": "Remote code execution via CVE-2000-0001",
+      "asset_token": "asset-0001",
+      "host": "app.example.com",
+      "location": "/api/upload",
+      "status": "active",
+      "severity": "critical",
+      "created_at": "2026-07-01T09:00:00Z",
+      "updated_at": "2026-07-01T09:00:00Z",
+      "scan_source": "surface-monitoring",
+      "scan_profile_token": "profile-0001",
+      "cvss_scores": {
+        "cvss_2_0": {
+          "score": 9.0,
+          "severity": "high",
+          "vector": "AV:N/AC:L/Au:N/C:C/I:C/A:C"
+        },
+        "cvss_3_0": {
+          "score": 9.5,
+          "severity": "critical",
+          "vector": "CVSS:3.0/AV:N/AC:L"
+        },
+        "cvss_3_1": {
+          "score": 9.8,
+          "severity": "critical",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        }
+      },
+      "cwe": 502,
+      "definition": {
+        "title": "Insecure Deserialization",
+        "description": "The endpoint deserializes untrusted input.",
+        "risk": "An attacker can execute arbitrary code on the host."
+      },
+      "tags": [
+        {
+          "uuid": "tag-1",
+          "name": "production"
+        },
+        {
+          "uuid": "tag-2",
+          "name": "external"
+        }
+      ],
+      "references": [
+        {
+          "uuid": "ref-1",
+          "name": "Advisory CVE-2000-0002",
+          "source": "nvd",
+          "link": "https://example.com/advisories/cve-2000-0001"
+        },
+        {
+          "uuid": "ref-2",
+          "name": "",
+          "source": "",
+          "link": "https://example.com/guidance"
+        },
+        {
+          "uuid": "ref-3",
+          "name": "Vendor bulletin",
+          "source": "",
+          "link": ""
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "https://app.example.com/api/upload",
+        "body": "{\"payload\":\"...\"}"
+      },
+      "response": {
+        "status_code": 500,
+        "body": "Internal Server Error"
+      }
+    }
+  ],
+  "has_more": false,
+  "total_vulnerabilities": 1
+}

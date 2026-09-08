@@ -1,0 +1,89 @@
+{
+  "name": "template.yaml",
+  "metadata": {},
+  "status": "FAIL",
+  "not_compliant": [
+    {
+      "Rule": {
+        "name": "s3_bucket_encryption_enabled",
+        "metadata": {},
+        "messages": {
+          "custom_message": null,
+          "error_message": null
+        },
+        "checks": [
+          {
+            "Clause": {
+              "Unary": {
+                "check": {
+                  "UnResolved": {
+                    "value": {
+                      "traversed_to": {
+                        "path": "/Resources/DataBucket/Properties",
+                        "value": {
+                          "BucketName": "reports-archive"
+                        }
+                      },
+                      "remaining_query": "BucketEncryption",
+                      "reason": "Could not find key BucketEncryption inside struct at path /Resources/DataBucket/Properties[L:4,C:6]"
+                    },
+                    "comparison": [
+                      "Exists",
+                      false
+                    ]
+                  }
+                },
+                "context": " Properties.BucketEncryption EXISTS  ",
+                "messages": {
+                  "custom_message": "\n            violation: S3 buckets must define BucketEncryption.\n        ",
+                  "error_message": "Check was not compliant as property [BucketEncryption] is missing. Value traversed to [Path=/Resources/DataBucket/Properties[L:4,C:6] Value={\"BucketName\":\"reports-archive\"}]."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Rule": {
+        "name": "security_group_no_open_ssh",
+        "metadata": {},
+        "messages": {
+          "custom_message": null,
+          "error_message": null
+        },
+        "checks": [
+          {
+            "Clause": {
+              "Binary": {
+                "context": " CidrIp not EQUALS  \"0.0.0.0/0\"",
+                "messages": {
+                  "custom_message": "\n                violation: Security groups must not expose ports to 0.0.0.0/0.\n            ",
+                  "error_message": "Check was not compliant as property value [Path=/Resources/OpenGroup/Properties/SecurityGroupIngress/0/CidrIp[L:13,C:18] Value=\"0.0.0.0/0\"] equal to value [Path=[L:0,C:0] Value=\"0.0.0.0/0\"]."
+                },
+                "check": {
+                  "Resolved": {
+                    "from": {
+                      "path": "/Resources/OpenGroup/Properties/SecurityGroupIngress/0/CidrIp",
+                      "value": "0.0.0.0/0"
+                    },
+                    "to": {
+                      "path": "",
+                      "value": "0.0.0.0/0"
+                    },
+                    "comparison": [
+                      "Eq",
+                      true
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "not_applicable": [],
+  "compliant": []
+}

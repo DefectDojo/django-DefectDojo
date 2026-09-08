@@ -1,0 +1,86 @@
+{
+  "results": {
+    "data": [
+      {
+        "id": "test-mfa-enabled",
+        "name": "MFA is enabled for all users",
+        "description": "Every user with console access must have multi-factor authentication enabled.",
+        "failureDescription": "One or more users have no MFA device registered.",
+        "remediationDescription": "Register an MFA device for each user listed below.",
+        "category": "Access Control",
+        "integrations": ["aws", "okta"],
+        "status": "NEEDS_ATTENTION",
+        "lastTestRunDate": "2024-07-15T06:00:00Z",
+        "latestFlipDate": "2024-06-20T06:00:00Z",
+        "owner": {"id": "owner-1", "displayName": "Example Owner", "emailAddress": "owner@example.com"}
+      },
+      {
+        "id": "test-disk-encryption",
+        "name": "Disk encryption is enabled on workstations",
+        "description": "Company workstations must encrypt the startup volume.",
+        "failureDescription": "A workstation reported encryption as off.",
+        "remediationDescription": "Enable full-disk encryption on the workstation.",
+        "category": "Endpoint Security",
+        "integrations": [],
+        "status": "NEEDS_ATTENTION",
+        "latestFlipDate": "2024-05-01T06:00:00Z"
+      },
+      {
+        "id": "test-no-failing-entities",
+        "name": "Backups are configured",
+        "description": "Production data must be backed up.",
+        "remediationDescription": "Configure backups.",
+        "category": "Availability",
+        "status": "OK",
+        "latestFlipDate": "2024-01-01T06:00:00Z"
+      },
+      {
+        "id": "test-unnamed",
+        "name": "",
+        "category": "",
+        "status": "NEEDS_ATTENTION"
+      }
+    ]
+  },
+  "entities": {
+    "test-mfa-enabled": {
+      "results": {
+        "data": [
+          {
+            "id": "user-0001",
+            "entityStatus": "FAILING",
+            "displayName": "example-user@example.com",
+            "responseType": "IAM_USER",
+            "createdDate": "2024-07-01T12:00:00Z",
+            "lastUpdatedDate": "2024-07-15T06:00:00Z"
+          },
+          {
+            "id": "user-0002",
+            "entityStatus": "FAILING",
+            "displayName": "second-user@example.com",
+            "responseType": "IAM_USER",
+            "createdDate": "not a timestamp"
+          },
+          {
+            "id": "user-0003",
+            "entityStatus": "OK",
+            "displayName": "compliant-user@example.com",
+            "responseType": "IAM_USER",
+            "createdDate": "2024-07-01T12:00:00Z"
+          }
+        ]
+      }
+    },
+    "test-disk-encryption": [
+      {
+        "id": "workstation-0001",
+        "entityStatus": "FAILING",
+        "displayName": "laptop-11",
+        "responseType": "WORKSTATION"
+      }
+    ],
+    "test-unnamed": [
+      {"id": "resource-0001", "entityStatus": "FAILING", "displayName": "", "responseType": ""}
+    ]
+  }
+}

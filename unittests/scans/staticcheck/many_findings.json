@@ -1,0 +1,3 @@
+{"code": "S1002", "severity": "error", "location": {"file": "main.go", "line": 15, "column": 9}, "end": {"file": "main.go", "line": 15, "column": 41}, "message": "should omit comparison to bool constant, can be simplified to strings.Contains(s, \"a\")"}
+{"code": "SA4014", "severity": "error", "location": {"file": "main.go", "line": 21, "column": 12}, "end": {"file": "main.go", "line": 21, "column": 17}, "message": "this condition occurs multiple times in this if/else if chain"}
+{"code": "SA9003", "severity": "error", "location": {"file": "main.go", "line": 32, "column": 2}, "end": {"file": "main.go", "line": 32, "column": 10}, "message": "empty branch"}

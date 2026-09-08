@@ -1,0 +1,35 @@
+{
+  "devices": [
+    {
+      "id": 1001,
+      "name": "generic-host-01",
+      "custom_name": "",
+      "os_family": "Windows",
+      "os_name": "Windows Server",
+      "os_version": "2019",
+      "server_group_id": 21,
+      "organization_id": 5,
+      "connected": true,
+      "tags": ["production"]
+    }
+  ],
+  "packages": [
+    {
+      "id": 900001,
+      "server_id": 1001,
+      "installed": false,
+      "name": "example-runtime",
+      "display_name": "Example Runtime",
+      "version": "4.8.1",
+      "repo": "Vendor Update Catalog",
+      "cves": ["CVE-2000-0001", "CVE-2000-0002"],
+      "cve_score": 8.8,
+      "severity": "high",
+      "requires_reboot": true,
+      "os_name": "Windows Server",
+      "os_version": "2019",
+      "organization_id": 5,
+      "create_time": "2024-05-13T18:02:45+0000"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load authorization_tags %}
 {% load event_tags %}
 {% block content %}
@@ -48,7 +49,7 @@
                 <div class="panel-heading">
                     General Questionnaires
                     {% if "dojo.add_engagement_survey"|has_configuration_permission:request %}
-                    <a title="Add Questionnaire" class="pull-right btn btn-sm btn-primary" href="/empty_questionnaire"><span class="fa-solid fa-plus"></span></a>
+                    <a title="{% trans 'Add Questionnaire' %}" class="pull-right btn btn-sm btn-primary" href="/empty_questionnaire"><span class="fa-solid fa-plus"></span></a>
                     {% endif %}
                 </div>
                 <div class="panel-body">
@@ -129,7 +130,7 @@
     <dialog class="modal" id="shareQuestionnaireModal" aria-labelledby="shareQuestionnaireModalLabel">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" onclick="this.closest('dialog').close()" aria-label="Close"><span
+                <button type="button" class="close" onclick="this.closest('dialog').close()" aria-label="{% trans 'Close' %}"><span
                         aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="shareQuestionnaireModalLabel">Share Questionnaire Link</h4>
             </div>

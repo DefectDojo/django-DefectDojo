@@ -1,0 +1,54 @@
+{
+    "meta": {
+        "application": "Dependency-Track",
+        "version": "4.14.0",
+        "timestamp": "2026-01-01T00:00:00Z"
+    },
+    "findings": [
+        {
+            "component": {
+                "name": "example-lib",
+                "project": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4",
+                "purl": "pkg:maven/com.example/example-lib@2.14.1",
+                "uuid": "c8a65fcd-dbf4-41eb-b1ec-55e67c91b22b",
+                "version": "2.14.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-01-01 00:00:00.000"
+            },
+            "vulnerability": {
+                "uuid": "f8469ce4-019a-4482-8510-624dcf65f005",
+                "source": "NVD",
+                "vulnId": "CVE-2026-0002",
+                "severity": "HIGH",
+                "description": "Example vulnerability with one exact affected version and one affected range.",
+                "aliases": [],
+                "affectedVersions": [
+                    {
+                        "identityType": "PURL",
+                        "identity": "pkg:maven/com.example/example-lib",
+                        "versionType": "EXACT",
+                        "version": "1.0.0",
+                        "uuid": "aaaa1111-0f38-4d3b-8f6c-9c0d5f0a1b2c"
+                    },
+                    {
+                        "identityType": "PURL",
+                        "identity": "pkg:maven/com.example/example-lib",
+                        "versionType": "RANGE",
+                        "versionStartIncluding": "2.0.0",
+                        "versionEndExcluding": "2.15.0",
+                        "uuid": "bbbb2222-0f38-4d3b-8f6c-9c0d5f0a1b2c"
+                    }
+                ]
+            },
+            "matrix": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4:c8a65fcd-dbf4-41eb-b1ec-55e67c91b22b:f8469ce4-019a-4482-8510-624dcf65f005"
+        }
+    ],
+    "project": {
+        "name": "test-app",
+        "uuid": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4",
+        "version": "1.0.0"
+    },
+    "version": "1.6"
+}

@@ -12,7 +12,7 @@ Sie benötigen einen Escape-**API-Schlüssel**, der in der Escape-App unter **Se
 
 #### Connector-Zuordnungen
 
-1. Lassen Sie das Feld **Location** leer, um `https://public.escape.tech/v2` zu verwenden, oder geben Sie Ihren Escape-API-Host explizit an.
+1. Behalten Sie den vorgegebenen Wert im Feld **Location**, `https://public.escape.tech/v2`, oder geben Sie Ihren Escape-API-Host explizit an.
 2. Geben Sie den Escape-API-Schlüssel in das Feld **Secret** ein.
 3. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden.
 

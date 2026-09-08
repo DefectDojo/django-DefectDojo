@@ -8,6 +8,7 @@ from crispy_forms.layout import Layout
 from django import forms
 from django.db.models import Count
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from polymorphic.base import ManagerInheritanceWarning
 
 from dojo.survey.models import (
@@ -210,7 +211,7 @@ class Add_Questionnaire_Form(forms.ModelForm):
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text="Select the Questionnaire to add.")
+        help_text=_("Select the Questionnaire to add."))
 
     class Meta:
         model = Answered_Survey
@@ -226,7 +227,7 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text="Select the Questionnaire to add.")
+        help_text=_("Select the Questionnaire to add."))
     expiration = forms.DateField(widget=forms.TextInput(
         attrs={"class": "datepicker", "autocomplete": "off"}))
 
@@ -290,7 +291,7 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
         questions = forms.ModelMultipleChoiceField(
             Question.polymorphic.all(),
             required=True,
-            help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
+            help_text=_("Select questions to include on this questionnaire.  Field can be used to search available questions."),
             widget=MultipleSelectWithPop(attrs={"size": "11"}))
 
         class Meta:
@@ -304,14 +305,14 @@ class CreateQuestionForm(forms.Form):
     order = forms.IntegerField(
         min_value=1,
         widget=forms.TextInput(attrs={"data-type": "both"}),
-        help_text="The order the question will appear on the questionnaire")
-    optional = forms.BooleanField(help_text="If selected, user doesn't have to answer this question",
+        help_text=_("The order the question will appear on the questionnaire"))
+    optional = forms.BooleanField(help_text=_("If selected, user doesn't have to answer this question"),
                                   initial=False,
                                   required=False,
                                   widget=forms.CheckboxInput(attrs={"data-type": "both"}))
     text = forms.CharField(widget=forms.Textarea(attrs={"data-type": "text"}),
-                           label="Question Text",
-                           help_text="The actual question.")
+                           label=_("Question Text"),
+                           help_text=_("The actual question."))
 
 
 class CreateTextQuestionForm(forms.Form):
@@ -359,7 +360,7 @@ class CreateChoiceQuestionForm(forms.Form):
     multichoice = forms.BooleanField(required=False,
                                      initial=False,
                                      widget=forms.CheckboxInput(attrs={"data-type": "choice"}),
-                                     help_text="Can more than one choice can be selected?")
+                                     help_text=_("Can more than one choice can be selected?"))
 
     answer_choices = MultiExampleField(required=False, widget=MultiWidgetBasic(attrs={"data-type": "choice"}))
 
@@ -384,7 +385,7 @@ class EditChoiceQuestionForm(EditQuestionForm):
     choices = forms.ModelMultipleChoiceField(
         Choice.objects.all(),
         required=True,
-        help_text="Select choices to include on this question.  Field can be used to search available choices.",
+        help_text=_("Select choices to include on this question.  Field can be used to search available choices."),
         widget=MultipleSelectWithPop(attrs={"size": "11"}))
 
     class Meta:
