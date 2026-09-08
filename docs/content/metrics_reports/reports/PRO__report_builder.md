@@ -81,6 +81,10 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 
 The difference is presentation: a **Tabular** block lays the records out as a table of columns, which is ideal for summaries and inventories, while a **Detail** block renders one record at a time in a long-form layout that is best suited to markdown-rich fields like description, impact, mitigation, and references.
 
+Fields render in the order they are listed. Selecting a field adds it to the end of the list, and the **Fields** section of the block editor shows the selection as a numbered list you can rearrange: drag a field by its handle, or use the arrow buttons to move it up or down. Removing a field from that list deselects it. Columns in a Tabular block, and the label and value pairs in a Detail block, follow this order when the report is generated.
+
+When Locations are enabled, each of the Organization, Asset, Engagement, Test, and Finding entities offers a **Location Count** field. An Asset counts the locations it references directly and a Finding counts the locations attached to it. An Organization rolls up the distinct locations across its Assets, and an Engagement or Test counts the distinct locations touched by its Findings, so a host shared by several findings counts once. The counts respect the viewer's permissions, so a user who can only see some Assets in an Organization sees only those Assets' locations in its count.
+
 A **Chart** block draws one chart from the catalog below — the same charts the Insights dashboards use, so a figure in a report matches the figure your team already reads on screen. You choose the chart, and the chart decides what it can be filtered by:
 
 - Charts of findings expose the **Finding** filter, and the filter narrows the findings the chart counts.
@@ -160,7 +164,7 @@ Next, build the content Blocks. The Blocks list shows all of your Blocks across 
 
 ![Blocks list](images/pro_report_blocks_list.png)
 
-To create a data-driven Block, choose its type and configure it. The example below is a **Tabular** Block named for open findings: the Block Type is set to Tabular, a header is supplied, the Model is **Finding**, the selected fields are Severity, Title, Asset, Age (Days), and SLA Days Remaining, and the records are ordered by Numerical Severity in descending order. Because filters live on the Block, the **Filter Entries** here scope exactly which records this Block will pull wherever it is used.
+To create a data-driven Block, choose its type and configure it. The example below is a **Tabular** Block named for open findings: the Block Type is set to Tabular, a header is supplied, the Model is **Finding**, the selected fields are Severity, Title, Asset, Age (Days), and SLA Days Remaining, and the records are ordered by Numerical Severity in descending order. The selected fields appear as a numbered list under the field picker; drag them, or use the arrows, to set the column order without deselecting anything. Because filters live on the Block, the **Filter Entries** here scope exactly which records this Block will pull wherever it is used.
 
 ![Tabular block configuration](images/pro_report_block_new_tabular.png)
 
