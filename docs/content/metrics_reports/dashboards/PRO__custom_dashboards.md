@@ -110,7 +110,9 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 ### Step 4: Arrange, then save
 
-Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, the duplicate icon to copy it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+
+Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
 
 ### Managing layouts
 
