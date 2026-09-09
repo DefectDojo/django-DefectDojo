@@ -30,12 +30,9 @@ DefectDojo Proのサブスクリプションには、初期トライアル期間
 
 ### DefectDojo内で
 
-DefectDojoアプリを通じて、次の2つの方法でサポートチームに連絡できます。
+セルフホスト型インスタンスでは、スーパーユーザーが左サイドバーの **Settings > Contact Support** を開けます。ページには連絡先のアドレスが表示されます。
 
-1. 左サイドバーの**Cloud Manager > Contact Support**を開く
-2. **{your-instance}.defectdojo.com/cloud_portal/support** にアクセスする
-
-![image](images/contact_defectdojo_support.png)
+DefectDojo Cloud では、上記のメールアドレスまたは下記の Cloud Portal をご利用ください。
 
 ### クラウドポータル経由
 

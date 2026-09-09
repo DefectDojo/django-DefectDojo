@@ -30,12 +30,9 @@ DefectDojo Pro 订阅在初始试用期及之后均可获得 DefectDojo, Inc. �
 
 ### 在 DefectDojo 内部
 
-您可以通过 DefectDojo 应用内的两种方式联系支持团队:
+在自托管实例上，超级用户可以从左侧边栏打开 **Settings > Contact Support**。该页面会显示可写信的地址。
 
-1. 从左侧边栏打开 **Cloud Manager > Contact Support**
-2. 通过 **{your-instance}.defectdojo.com/cloud_portal/support** 访问。
-
-![image](images/contact_defectdojo_support.png)
+在 DefectDojo Cloud 上，请使用上面的电子邮件地址或下面的 Cloud Portal。
 
 ### 通过 Cloud Portal
 
