@@ -71,13 +71,26 @@ resolves them through the standard AWS credential chain, in this order:
    Key** (and a **Session Token** for temporary STS credentials) to authenticate as a specific
    IAM identity.
 2. **Otherwise, the engine's ambient AWS identity.** With the key fields left blank, the engine
-   uses whatever IAM role is attached to where it runs — an IRSA role on EKS, an EC2 instance
-   profile, an ECS task role, or a Lambda execution role.
+   uses whatever IAM role is attached to where it runs:
+   - **EKS** — an IRSA or EKS Pod Identity role bound to the Sensei engine's service account.
+   - **ECS** — the task role.
+   - **EC2**, including a Docker Compose host running on an EC2 instance — the instance profile.
+     Note that IMDSv2's default hop limit of `1` blocks a metadata request coming from inside a
+     container (it is one network hop too deep); set the instance's metadata hop limit to `2` so
+     the engine container can reach the instance role.
+   - **Lambda** — the execution role.
 
-Leaving the keys blank is the recommended setup when the engine already runs inside AWS: the
-workload's own IAM role grants Bedrock access, so there are no long-lived keys to store or
-rotate. Either way, the identity used needs permission to invoke the Bedrock model
-(`bedrock:InvokeModel`) in the chosen region.
+Leaving the keys blank is the recommended setup **when the engine runs inside AWS** with an
+attached role: the workload's own identity grants Bedrock access, so there are no long-lived keys
+to store or rotate.
+
+> **Running on-prem or outside AWS?** There is no ambient AWS identity to fall back on when the
+> engine does not run inside AWS — a non-EKS Kubernetes cluster or a Docker Compose host in your
+> own data center has none. In those deployments you must enter static AWS keys above; the
+> "leave the keys blank" path applies only to AWS-hosted runtimes.
+
+Either way, the identity used needs permission to invoke the Bedrock model (`bedrock:InvokeModel`)
+in the chosen region.
 
 ## Test connection
 
