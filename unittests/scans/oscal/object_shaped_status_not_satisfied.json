@@ -1,0 +1,22 @@
+{
+  "assessment-results": {
+    "results": [
+      {
+        "uuid": "res-1",
+        "findings": [
+          {
+            "uuid": "find-obj-001",
+            "title": "Non-compliant check: s3_bucket_default_encryption",
+            "description": "not encrypted",
+            "target": {
+              "type": "objective-id",
+              "target-id": "s3_bucket_default_encryption",
+              "status": {"state": "not-satisfied", "reason": "fail"}
+            },
+            "props": [{"name": "severity", "value": "high"}]
+          }
+        ]
+      }
+    ]
+  }
+}

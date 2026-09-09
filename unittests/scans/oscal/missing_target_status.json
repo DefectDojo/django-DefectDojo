@@ -1,0 +1,18 @@
+{
+  "assessment-results": {
+    "results": [
+      {
+        "uuid": "res-1",
+        "findings": [
+          {
+            "uuid": "find-003",
+            "title": "No target.status at all",
+            "description": "d",
+            "target": {"target-id": "x"},
+            "props": [{"name": "status", "value": "fail"}]
+          }
+        ]
+      }
+    ]
+  }
+}
