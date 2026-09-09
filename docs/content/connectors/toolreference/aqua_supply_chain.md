@@ -26,11 +26,35 @@ Each repository in the tenant becomes a Record. A repository that disappears fro
 A repository's default branch is always imported. Two optional fields extend this:
 
 - **Branch**: an exact branch name, or a `*` wildcard family such as `release/*`. It adds matching branches on top of the default branch.
-- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding. When this is off, all selected branches import into the Record's default engagement.
+- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding, unless **Separate Deduplication Per Branch** is on. When this is off, all selected branches import into the Record's default engagement.
 
 This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua has scanned is imported.
 
 Aqua only stores results for a branch it has actually scanned. A Branch value that matches no scanned branch contributes no findings for that branch.
+
+#### Separate Deduplication Per Branch
+
+By default, the same issue found on two branches is one finding. The second branch's copy is
+marked a duplicate of the default branch's finding. This keeps one row per real issue when a
+release branch carries the same code as the default branch.
+
+Turn on **Separate Deduplication Per Branch** to keep each branch apart. The same issue on two
+branches then stays two findings, and each branch reports its own counts.
+
+This setting applies only to branches that have their own engagement. Turn on **Track Scanned
+Branches** first if you import more than the default branch. It also has an effect only when
+deduplication is enabled in System Settings.
+
+A change takes effect on the next sync. It applies to every branch that sync imports, including
+branches that were imported before you changed the setting. A branch that Aqua no longer reports
+keeps its previous setting.
+
+The connector owns this setting on the branch engagements it creates. If you change it by hand
+on one of those engagements, the next sync sets it back to what the connector is configured for.
+
+Findings that were already marked as duplicates before you turned the setting on keep that mark.
+A later sync does not change them, and the `dedupe` management command skips findings that are
+already duplicates. If you need those findings active again, reopen them by hand.
 
 #### Filing
 
