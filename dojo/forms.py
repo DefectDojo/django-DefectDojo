@@ -156,7 +156,7 @@ class MonthYearWidget(Widget):
         return data.get(name, None)
 
 
-from dojo.product_type.ui.forms import Add_Product_Type_AuthorizedUsersForm, Delete_Product_TypeForm, Product_TypeForm  # noqa: E402, F401, I001
+from dojo.product_type.ui.forms import Add_Product_Type_AuthorizedUsersForm, Delete_Product_TypeForm, Product_TypeForm  # noqa: E402, F401
 
 
 class Test_TypeForm(forms.ModelForm):
