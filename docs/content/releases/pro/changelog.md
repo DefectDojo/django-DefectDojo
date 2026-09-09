@@ -16,6 +16,51 @@ You can subscribe to these release notes with the [RSS feed](/releases/pro/chang
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## September 2026: v3.3
+
+### September 9, 2026: v3.3.0
+
+New features:
+* **(Correlation)** Cross-domain finding correlation groups related findings into shared root causes. A finding's page now lists its root causes, root-cause blast radius feeds finding prioritization, and a new Top Root Causes dashboard widget plus a Product breakdown show where risk concentrates. Root causes cover CVE, component, resource, and endpoint types, hide CVE causes a component already covers, and are readable through a public read-only Root Cause API.
+* **(PSIRT)** PSIRT 2.0 is folded natively into DefectDojo Pro: native advisory feeds and a catalog, feed rules and rule templates, advisory-to-case conversion, and a dedicated PSIRT permission so an analyst does not need global maintainer.
+* **(Risk Acceptance)** Risk Acceptances 2.0 adds a reviewable lifecycle with a pending-review queue and a durable ledger. You can also choose to restore a finding to Verified when its risk acceptance expires.
+* **(Assets)** A rebuilt asset model adds asset versions with BOM snapshots and per-version SBOM/VEX export, per-source identity and aliases so connectors resolve assets by the vendor's id, typed asset kinds, typed relationship edges that distinguish direct from indirect vulnerabilities, and asset exposure and deployment context (including live reachability probing and business-criticality sync from the CMDB).
+* **(Organizations)** Organizations can now be non-exclusive: an asset can belong to multiple organizations with union-of-grants RBAC, membership-aware organization filters on the asset and finding lists, and roles that can be granted across an entire organization type.
+* **(Dashboards)** Dashboards 2.0 expands into the DefectDojo Command Center, with a published security-posture score.
+* **(Locations)** Endpoints continue their move to Locations: asset connectors can emit standalone location inventory, and a new Location Map draws an asset's locations as derived trees per location type.
+* **(Navigation)** Menu 2.0 now covers the whole sidebar, including a Sensei + AI section, a full-height sidebar rail with pinned pages, and server-backed shell preferences.
+* **(Sensei)** Added Sensei Advisor, which recommends settings changes and offers one-click fixes for mechanical deduplication-hygiene issues, with per-run license quotas for threat modeling and Advisor. The Sensei engine now ships in the on-prem compose bundles.
+* **(Connectors)** New Rapid7 InsightVM - Cloud Instance and Aqua Supply Chain connectors, plus a Wiz option to import Issues only. Connectors gain customer-defined field mappings (versioned and identity-safe, per scan type), a connector registry the UI reads from, per-record sync checkpoints so an interrupted sync resumes, and health notifications when a connector stops working or authenticates but sees no data.
+* **(Universal Parser)** Universal Parser field mappings can now be edited from a dedicated screen, with an impact warning attached.
+* **(Compliance)** Added DISA STIG checklist import (.ckl/.cklb) with a CCI to NIST 800-53 crosswalk.
+* **(Exporters)** Added a CycloneDX/SPDX SBOM and CycloneDX VEX export API, and the Pro UI now accepts .spdx files on import.
+* **(API)** Added API v3 (alpha) at `/api/v3-alpha/` with slim references, expansion, RBAC sub-resources, and the Pro importer. Custom Fields are now available on the token-authenticated `/api/v2` API.
+* **(Federal)** Added FIPS 140-3 image support (FedRAMP SC-13), PAIN-keyed FedRAMP VDR remediation deadlines, and a FedRAMP prioritization preset.
+* **(Rules Engine 2.0)** Rules can now trigger on scan absence, draw from a rule-template gallery, assign an SLA configuration or Risk Priority to assets, and condition on exploit evidence, reachability, and asset exposure.
+* **(Reporting)** Added a Location Count field on every entity and reorderable block fields in the Report Builder.
+* **(Assets)** Added checkbox bulk edit on the asset list (organization, SLA, engine, tags) and customer-editable platform, lifecycle, and origin dropdowns.
+* **(Integrations)** The Freshservice integration can push findings as ITIL Incidents or Problems per mapping, and MCP finding tools gained tag filtering.
+* **(Audit Log)** System Settings changes are now recorded in the audit log.
+
+Enhancements:
+* **(Connectors)** The JFrog, Tenable.io WAS, and Tenable VM connectors now stream findings per page instead of holding a whole sync in memory, and connectors report data-visibility warnings at config-test time. The Location URL is pre-filled for single-host tools.
+* **(UI)** A first pass of accessibility and readability foundations: a visible focus ring, AA-contrast muted text, a System theme option, comfortable reading line-height, and shared type tokens. Toggleable panels now expand from a click anywhere on the header, and locked dropdowns gained a copy button.
+* **(Deduplication)** Finding identity is now recorded in a signature ledger, versioned and bridged across formula changes, with a scheduled drift check that reports what moved; reimport can match on identity signatures.
+* **(Notifications)** Notifications now fan out to every organization an asset belongs to.
+* **(Reporting)** Report charts export as PNG so labels survive PDF rendering.
+* **(Importers)** Import and reimport bulk-create new findings, reducing per-finding overhead on large scans.
+
+Bug fixes:
+* **(Connectors)** Wiz now imports findings from tenants that use no Projects, the Microsoft Defender connector no longer fails a good sync during spool cleanup, and connector product descriptions are capped at the column limit.
+* **(Licensing)** A usage block now answers with 402 rather than a throttle status, and license enforcement no longer blocks authentication.
+* **(Importers)** Scan severities are accepted case-insensitively, `.spdx` files are accepted for import, concurrent imports no longer race on scan-directory creation, and edited tests keep their scan type so reimport matching survives.
+* **(Parsers)** Fortify now marks only suppressed FPR findings as false positive, Anchore Grype parses the CISA KEV date, and Xeol and Checkmarx One finding identity is deterministic.
+* **(UI)** The Components list no longer renders an empty body while its paginator counts every row, ECharts resolves theme tokens to concrete colors, and the New Issue Tracker Assignment dialog no longer closes when going full-screen.
+
+Notable changes:
+* **(UI)** The classic Bootstrap UI and the classic report engine have been retired; Menu 2.0 and the Pro Vue UI are now standard.
+* **(Operations)** The maintenance window feature has been removed.
+
 ## August 2026: v3.2
 
 ### August 31, 2026: v3.2.400
