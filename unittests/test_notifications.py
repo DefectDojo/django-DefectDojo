@@ -1510,6 +1510,7 @@ class TestReviewRequestedWebhookTemplate(DojoTestCase):
         self.assertNotIn("finding:", fallback)
 
 
+@versioned_fixtures
 class TestAlertNotificationResilience(DojoTestCase):
 
     """
