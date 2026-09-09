@@ -6,9 +6,11 @@ from unittest.mock import Mock, patch
 import pghistory
 from auditlog.context import set_actor
 from crum import impersonate
+from django.db.utils import DataError
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from parameterized import parameterized
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
@@ -1506,3 +1508,80 @@ class TestReviewRequestedWebhookTemplate(DojoTestCase):
         )
         self.assertNotEqual(rendered.strip(), fallback.strip())
         self.assertNotIn("finding:", fallback)
+
+
+class TestAlertNotificationResilience(DojoTestCase):
+
+    """
+    Regression: a failure to persist an in-app Alert (e.g. the ``dojo_alerts``
+    primary-key sequence reaching the PostgreSQL int4 maximum, 2147483647) must
+    not propagate out of the notification helper. Alert creation is a side
+    effect of operations like scan import, and ``send_alert_notification``
+    already guards its own ``alert.save()`` -- but its fallback ``_log_alert``
+    saved another Alert without a guard, so the same underlying DB failure
+    re-raised there and aborted the caller (customer-reported: reimport-scan
+    failing wholesale because the alert could not be written).
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    SEQUENCE_EXHAUSTED_MESSAGE = (
+        'nextval: reached maximum value of sequence "dojo_alerts_id_seq" (2147483647)'
+    )
+
+    def _failing_save(self, *_args, **_kwargs):
+        raise DataError(self.SEQUENCE_EXHAUSTED_MESSAGE)
+
+    @parameterized.expand([
+        (True,),
+        (False,),
+    ])
+    def test_alert_persistence_failure_does_not_propagate(self, save_fails):
+        """
+        ``send_alert_notification`` must return normally whether the underlying
+        Alert save succeeds or fails; a persistence failure is swallowed and
+        logged, never raised to the caller (which would break scan import).
+        """
+        admin = Dojo_User.objects.get(username="admin")
+        manager = AlertNotificationManger()
+
+        if save_fails:
+            with patch.object(Alerts, "save", side_effect=self._failing_save):
+                # Must NOT raise, even though both the primary alert save and the
+                # ``_log_alert`` fallback save hit the same DB failure.
+                manager.send_alert_notification(
+                    "scan_added",
+                    user=admin,
+                    title="Regression alert persistence failure",
+                    url=reverse("alerts"),
+                )
+        else:
+            before = Alerts.objects.count()
+            manager.send_alert_notification(
+                "scan_added",
+                user=admin,
+                title="Regression alert persistence success",
+                url=reverse("alerts"),
+            )
+            after = Alerts.objects.count()
+            self.assertEqual(
+                after, before + 1,
+                msg=f"expected one Alert persisted, before={before} after={after}",
+            )
+
+    def test_log_alert_fallback_does_not_propagate_db_failure(self):
+        """
+        ``_log_alert`` is the last-resort error logger for every notification
+        channel. If persisting its own Alert fails, it must log and return, not
+        raise -- otherwise an infrastructure-level DB failure defeats the
+        per-channel error isolation of the whole notification pipeline.
+        """
+        manager = AlertNotificationManger()
+        with patch.object(Alerts, "save", side_effect=self._failing_save):
+            manager._log_alert(
+                DataError(self.SEQUENCE_EXHAUSTED_MESSAGE),
+                "Alert Notification",
+                title="Regression log_alert failure",
+                description=self.SEQUENCE_EXHAUSTED_MESSAGE,
+                url=reverse("alerts"),
+            )
