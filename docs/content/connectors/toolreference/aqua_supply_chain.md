@@ -49,6 +49,9 @@ A change takes effect on the next sync. It applies to every branch that sync imp
 branches that were imported before you changed the setting. A branch that Aqua no longer reports
 keeps its previous setting.
 
+The connector owns this setting on the branch engagements it creates. If you change it by hand
+on one of those engagements, the next sync sets it back to what the connector is configured for.
+
 Findings that were already marked as duplicates before you turned the setting on keep that mark.
 A later sync does not change them, and the `dedupe` management command skips findings that are
 already duplicates. If you need those findings active again, reopen them by hand.
