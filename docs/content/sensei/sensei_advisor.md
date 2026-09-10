@@ -74,4 +74,4 @@ is reverted by removing that engine (only possible while no products are assigne
 
 Sensei Advisor is part of Sensei and requires a Sensei-enabled license. On self-hosted
 installations without cloud AI, configure a provider under **AI Model Settings**. The feature
-is in beta and enabled per instance by DefectDojo.
+is enabled per instance by DefectDojo.
