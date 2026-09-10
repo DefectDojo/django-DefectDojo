@@ -24,11 +24,19 @@
  loading="lazy"
  alt="Scan with Sensei dialog"
  id="h-rh-i-0"
-&gt;&lt;/p&gt;</description></item><item><title>威胁建模</title><link>https://docs.defectdojo.com/zh-hans/sensei/threat_modeling/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/sensei/threat_modeling/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：威胁建模是 DefectDojo Pro 专属功能，目前处于 BETA 测试阶段。&lt;/span&gt;&lt;/p&gt;
+&gt;&lt;/p&gt;</description></item><item><title>威胁建模</title><link>https://docs.defectdojo.com/zh-hans/sensei/threat_modeling/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/sensei/threat_modeling/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：威胁建模是 DefectDojo Pro 专属功能。&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;威胁建模&lt;/strong&gt;将功能设计转化为经过审阅的威胁模型。您提供设计内容——可以是粘贴的文本、设计文档，也可以再加上一份架构图——DefectDojo 便会生成其中所描述的组件和数据流、针对它们的威胁，以及缓解这些威胁的安全需求。随后可以将这些需求推送到 DefectDojo 中作为发现项，使设计阶段的工作与其他一切内容一样，流经相同的分诊、SLA、Jira 和报告机制。&lt;/p&gt;
 &lt;p&gt;这是 Sensei 的&lt;strong&gt;代码编写前&lt;/strong&gt;能力。&lt;a href="https://docs.defectdojo.com/sensei/about_sensei/"&gt;扫描并修复&lt;/a&gt;针对的是已经存在的代码仓库，而威胁建模针对的是设计本身，在有代码可供扫描之前就已发挥作用。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;**🔎 BETA：**威胁建模正在积极开发中，在界面中始终标记为 &lt;strong&gt;BETA&lt;/strong&gt;。行为和界面可能会在不同版本之间发生变化。在 BETA 期间，该功能由 DefectDojo 按实例启用——请联系您的 DefectDojo 代表以开启此功能。&lt;/p&gt;</description></item><item><title>Sensei 参考</title><link>https://docs.defectdojo.com/zh-hans/sensei/sensei_reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/sensei/sensei_reference/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：Sensei 是 DefectDojo Pro 专属功能，目前处于 BETA（测试）阶段。&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;📍 位置：&lt;strong&gt;从左侧导航栏中打开&lt;/strong&gt;威胁建模&lt;/strong&gt;，位于 Sensei 正下方。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="所需条件"&gt;所需条件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Sensei&lt;/strong&gt; 许可功能。威胁建模与扫描并修复共用同一授权。&lt;/li&gt;
+&lt;li&gt;全局&lt;strong&gt;维护者&lt;/strong&gt;或&lt;strong&gt;所有者&lt;/strong&gt;角色。没有此角色的用户看不到此页面。&lt;/li&gt;
+&lt;li&gt;一个用于关联威胁模型的产品。使用 3.0 命名的实例中，产品被称为&lt;strong&gt;资产&lt;/strong&gt;；本页统一使用&lt;em&gt;产品&lt;/em&gt;一词，界面则会遵循您实例所设置的命名方式。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不会安装任何内容，也不会连接任何代码仓库。威胁建模只会读取您提供的设计内容。&lt;/p&gt;</description></item><item><title>Sensei 参考</title><link>https://docs.defectdojo.com/zh-hans/sensei/sensei_reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/sensei/sensei_reference/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：Sensei 是 DefectDojo Pro 专属功能，目前处于 BETA（测试）阶段。&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;以下是您在使用 Sensei 时会遇到的状态、操作和限制的快速参考。&lt;/p&gt;
 &lt;h2 id="仓库状态"&gt;仓库状态&lt;/h2&gt;
 &lt;p&gt;Sensei 中心页面上，已接入仓库显示的状态：&lt;/p&gt;

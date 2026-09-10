@@ -9,7 +9,7 @@
 关联起来，绝不会将任何内容标记为重复项。两者相互独立运行，可以同时启用。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="启用根本原因关联"&gt;启用根本原因关联&lt;/h2&gt;
-&lt;p&gt;根本原因关联目前处于&lt;strong&gt;测试版&lt;/strong&gt;阶段，由功能开关控制，且&lt;strong&gt;默认关闭&lt;/strong&gt;。
+&lt;p&gt;根本原因关联由功能开关控制，且&lt;strong&gt;默认关闭&lt;/strong&gt;。
 超级用户可以在 Cloud 和本地部署实例上通过&lt;strong&gt;设置 &amp;gt; 功能开关&lt;/strong&gt;将其启用。请参见
 &lt;a href="https://docs.defectdojo.com/admin/feature_flags/pro__feature_flags/"&gt;功能开关&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;该开关关闭时，引擎完全不会执行任何操作：不会构建任何聚类，不会创建任何链接，

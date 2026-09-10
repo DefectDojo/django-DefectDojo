@@ -7,7 +7,7 @@
 ありません。両者は独立して動作し、どちらも有効にできます。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="根本原因相関の有効化"&gt;根本原因相関の有効化&lt;/h2&gt;
-&lt;p&gt;根本原因相関は&lt;strong&gt;ベータ版&lt;/strong&gt;であり、機能フラグの背後に置かれ、&lt;strong&gt;デフォルトで無効&lt;/strong&gt;になっています。
+&lt;p&gt;根本原因相関は機能フラグの背後に置かれ、&lt;strong&gt;デフォルトで無効&lt;/strong&gt;になっています。
 スーパーユーザーは、Cloud版とオンプレミス版の両方のインスタンスで&lt;strong&gt;設定 &amp;gt; 機能フラグ&lt;/strong&gt;からこれを
 有効にできます。&lt;a href="https://docs.defectdojo.com/admin/feature_flags/pro__feature_flags/"&gt;機能フラグ&lt;/a&gt;を参照してください。&lt;/p&gt;
 &lt;p&gt;フラグが無効の間、エンジンは一切の処理を行いません。クラスタは構築されず、リンクも作成されず、
