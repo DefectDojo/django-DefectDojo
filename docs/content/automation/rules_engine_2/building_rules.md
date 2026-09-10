@@ -256,10 +256,16 @@ An **If / Filter** node holds a list of condition rows. Each row is a path, an o
 | `gte` | is greater than or equal to |
 | `lt` | is less than |
 | `lte` | is less than or equal to |
+| `older_than_days` | is more than N days ago |
+| `within_last_days` | is within the last N days |
+| `within_next_days` | is within the next N days |
+| `more_than_days_ahead` | is more than N days from now |
 | `startswith` | starts with |
 | `endswith` | ends with |
 | `exists` | is set |
 | `not_exists` | is not set |
+
+The last four are **relative-date operators**, offered only on date fields (`date`, `mitigated`, `last_status_update`, `sla_expiration_date`, `kev_date`, `kev_due_date`, and any date custom field). Their value is a number of days, and they compare the field against today rather than against a fixed calendar date. This is what lets one rule say "more than 192 days old" and have it mean 192 days after *each* Finding's own date — a threshold no single calendar date can express, and one that would otherwise drift every day. Use `older_than_days` for age ("accept any Finding not remediated within 192 days"), `within_next_days` for an approaching deadline (`sla_expiration_date within_next_days 7`), and their siblings for the opposite direction. The comparison is by calendar day, so a time-of-day field like `mitigated` is matched on the day it happened.
 
 Comparisons are **loose**. A number is tried first, and if that fails the values are compared as trimmed, case-insensitive text. So a condition written as `finding.severity eq high` matches a Finding whose severity is `High`, which is almost always what the author meant.
 
