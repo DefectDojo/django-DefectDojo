@@ -24,7 +24,7 @@ les Constatations, les nœuds de cluster dans lesquels ces liens se regroupent, 
 
 ## Activer la corrélation de cause racine
 
-La corrélation de cause racine est en **Bêta**, elle est contrôlée par un indicateur de fonctionnalité (feature flag) et elle est **désactivée par défaut**.
+La corrélation de cause racine est contrôlée par un indicateur de fonctionnalité (feature flag) et elle est **désactivée par défaut**.
 Un superutilisateur peut l'activer depuis **Paramètres > Indicateurs de fonctionnalité** sur les instances Cloud comme On-Premise.
 Voir [Indicateurs de fonctionnalité](/admin/feature_flags/pro__feature_flags/).
 
@@ -266,7 +266,7 @@ utilisateur.
   preuve qui la relie et si la correspondance était exacte ou heuristique.
 
 Les deux sont en lecture seule. Confirmer, rejeter et mettre en sourdine se font depuis l'interface utilisateur
-pour l'instant ; ces actions ne sont délibérément pas publiées tant que la fonctionnalité est en Bêta, afin que
+pour l'instant ; ces actions ne sont délibérément pas encore publiées, afin que
 leur ajout ultérieur ne puisse rien casser de ce que vous avez déjà construit.
 
 Filtres sur la liste : `cause_type` (`exact` ou `in`), `muted`, `identity_key` (`exact` ou `icontains`) et

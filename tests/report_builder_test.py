@@ -215,6 +215,56 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element(By.NAME, "_generate").click()
 
+    # A quote in a report heading survives the round trip through
+    # #contents.innerHTML undecoded, so the table-of-contents builder must not let
+    # it terminate the href/name values it generates. The product name is the
+    # carrier here because it always reaches a report heading; every heading level
+    # runs through the same anchor builder.
+    TOC_PROBE_NAME = 'QA Test X"autofocus="X"onfocus="window.__tocXss=1'
+
+    def rename_qa_test_product(self, link_text, new_name):
+        driver = self.driver
+        self.goto_product_overview(driver)
+        driver.find_element(By.PARTIAL_LINK_TEXT, link_text).click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Edit").click()
+        name_field = driver.find_element(By.ID, "id_name")
+        name_field.clear()
+        name_field.send_keys(new_name)
+        self.click_submit(driver)
+
+    def test_toc_anchor_rejects_injected_heading(self):
+        driver = self.driver
+        self.rename_qa_test_product("QA Test", self.TOC_PROBE_NAME)
+        try:
+            # Same flow as test_product_report, so the charts assertion is the signal
+            # that window.onload ran the table-of-contents builder to completion.
+            self.goto_product_overview(driver)
+            driver.find_element(By.PARTIAL_LINK_TEXT, "QA Test").click()
+            driver.find_element(By.ID, "dropdownMenu1").click()
+            driver.find_element(By.PARTIAL_LINK_TEXT, "Asset Report").click()
+            Select(driver.find_element(By.ID, "id_include_finding_notes")).select_by_index(1)
+            Select(driver.find_element(By.ID, "id_include_executive_summary")).select_by_index(1)
+            Select(driver.find_element(By.ID, "id_include_table_of_contents")).select_by_index(1)
+            driver.find_element(By.NAME, "_generate").click()
+            self.assert_report_charts_painted(["open_findings", "finding_age"])
+
+            toc_text = driver.execute_script(
+                "return document.getElementById('toc').textContent;")
+            # Guards against a vacuous pass: the probe has to be in the generated
+            # table of contents before the absence of injected attributes means
+            # anything. It also shows the heading text still displays in full, and
+            # only the generated anchor is stripped.
+            self.assertIn('QA Test X"autofocus=', toc_text)
+            self.assertEqual(
+                driver.execute_script(
+                    "return document.querySelectorAll("
+                    "'#toc [onfocus], #toc [autofocus], #contents [onfocus], #contents [autofocus]'"
+                    ").length;"), 0)
+            self.assertIsNone(driver.execute_script("return window.__tocXss || null;"))
+        finally:
+            self.rename_qa_test_product("QA Test", "QA Test")
+
 
 def add_report_tests_to_suite(suite):
     # Add each test the the suite to be run
@@ -231,6 +281,7 @@ def add_report_tests_to_suite(suite):
     suite.addTest(ReportBuilderTest("test_engagement_report"))
     suite.addTest(ReportBuilderTest("test_test_report"))
     suite.addTest(ReportBuilderTest("test_product_endpoint_report"))
+    suite.addTest(ReportBuilderTest("test_toc_anchor_rejects_injected_heading"))
 
     suite.addTest(ProductTest("test_delete_product"))
     return suite
