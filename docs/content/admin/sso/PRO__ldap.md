@@ -1,7 +1,7 @@
 ---
 title: "LDAP Authentication"
 description: "Configure LDAP authentication in DefectDojo Pro"
-weight: 20
+weight: 130
 audience: pro
 aliases:
   - "/admin/sso/os__ldap/"
