@@ -14,7 +14,7 @@ object.
 
 Attached files are separate from images placed inside a description or a note. To show a
 screenshot within the text itself, paste or drop it into the markdown editor instead; see
-[Adding images](../intro_to_findings/#adding-images).
+[The Markdown Editor](/navigation/pro__markdown_editor/).
 
 ## Supported File Types
 

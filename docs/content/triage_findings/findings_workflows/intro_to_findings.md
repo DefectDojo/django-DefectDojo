@@ -76,16 +76,9 @@ Note entries support markdown, so you can use headings, **bold** and *italic* te
 
 ### Adding images
 
-You can put a screenshot straight into any markdown field without uploading it somewhere else first. Paste an image from your clipboard into the editor, drag an image file onto it, or use the **Insert image** button in the editor toolbar to pick a file. DefectDojo stores the image and inserts it into the text as a markdown image, so it appears wherever that text is shown: the Finding page, the notes feed, and generated reports.
+You can paste a screenshot from your clipboard straight into a note, drag an image file onto the editor, or pick one with the **Insert image** toolbar button. DefectDojo stores the image and shows it inline in the notes feed and in generated reports.
 
-This works in every markdown editor, including a Finding's description, mitigation, impact, steps to reproduce, severity justification and references, as well as notes and the description fields on other objects.
-
-A few details worth knowing:
-
-* PNG, JPEG, GIF and WebP images are accepted, up to 10 MB each.
-* Images are only shown to users who are logged in to DefectDojo. The link in the text is unguessable, so an image is visible to whoever can read the text that contains it.
-* Only images stored by DefectDojo are rendered. A markdown image that points at an outside website is not displayed.
-* An image that is uploaded but never saved, or that is later removed from every field that used it, is cleaned up automatically after two days.
+This is not specific to notes: the same editor and the same image support are used by a Finding's description and its other markdown fields, and by descriptions across the rest of DefectDojo. See [The Markdown Editor](/navigation/pro__markdown_editor/) for the accepted formats, the size limit, who can see a stored image, and how unused images are cleaned up.
 
 ### Editing, deleting and history
 

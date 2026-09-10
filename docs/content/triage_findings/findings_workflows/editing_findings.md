@@ -27,7 +27,7 @@ This will open the **Edit Finding** form, where you can edit the metadata, chang
 ​
 * **Date** is meant to represent the date the Finding was uncovered by the scanner \- not necessarily the date the Finding was imported into DefectDojo. This date is pulled from the scan report, but you can update this date to be more accurate if you need to (for example, if working with historical data, or if using a scanning tool which does not log discovery dates).  
 ​
-* **Description** is the description of a Finding provided by the scan tool. You can add or remove information from the Finding Description if you wish. Screenshots can be pasted or dropped straight into the Description and the other markdown fields (Mitigation, Impact, Steps to Reproduce, Severity Justification, References); see [Adding images](../intro_to_findings/#adding-images).  
+* **Description** is the description of a Finding provided by the scan tool. You can add or remove information from the Finding Description if you wish. Screenshots can be pasted or dropped straight into the Description and the other markdown fields (Mitigation, Impact, Steps to Reproduce, Severity Justification, References); see [The Markdown Editor](/navigation/pro__markdown_editor/).  
 ​
 * **Severity** is calculated based on several factors. At a base level, this will be the Severity reported by a tool, but a Finding’s Severity can be affected by EPSS changes. You can also manually adjust the Finding’s Severity to an appropriate level.  
 ​
