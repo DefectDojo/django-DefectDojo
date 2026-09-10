@@ -228,18 +228,22 @@ curl -s -X POST \
   }'
 ```
 
-The response echoes the saved layout including its new `id`, plus read-only helper fields (`is_default`, `is_owned`, `is_catalog`, `category`, `icon`, and timestamps).
+The response echoes the saved layout including its new `id`, plus read-only helper fields (`is_default`, `is_owned`, `can_edit`, `can_manage`, `is_catalog`, `category`, `icon`, and timestamps). `can_edit` reports whether the caller may change the layout's `widgets`, `layout`, and `settings`; `can_manage` whether they may rename, share, unshare, flag, or delete it.
 
 ### Custom actions
 
 | Action | Call | What it does |
 |--------|------|--------------|
-| Set default | `POST /dashboards/layouts/{id}/set_default/` | Makes this layout the one your home page loads. You can only default a layout you own. |
+| Set default | `POST /dashboards/layouts/{id}/set_default/` | Makes this layout the one your home page loads. You can default a layout you own, or any collaborative shared layout. |
 | Clone | `POST /dashboards/layouts/{id}/clone/` (optional body `{"name": "..."}`) | Copies a layout (yours or a shared template) into your space with fresh widget IDs. Defaults to `"Copy of <name>"`. |
 | List shared | `GET /dashboards/layouts/shared/` | Lists every shared layout — curated templates plus team-published ones. |
-| Bootstrap | `GET /dashboards/layouts/for_current_user/` | Returns `{"results": [...your layouts...], "default_id": <id>}`. On a first call, it auto-clones the starter template so you always get at least one layout back. |
+| Bootstrap | `GET /dashboards/layouts/for_current_user/` | Returns `{"results": [...your layouts, then any collaborative shared layouts...], "default_id": <id>}`. On a first call, it auto-clones the starter template so you always get at least one layout back. |
 
 Publishing a shared layout (`"is_shared": true` on create or update) requires the global **Maintainer** role.
+
+### Collaborative layouts
+
+A shared layout can also be flagged `"is_collaborative": true` (same Maintainer requirement; only a shared layout can carry the flag, and unsharing clears it). A collaborative layout is one live dashboard for everyone rather than a template to clone: it is included in every user's `for_current_user/` results, any user may make it their default, and any authenticated user may `PATCH` its `widgets`, `layout`, and `settings`. Changing its `name`, `is_shared`, or `is_collaborative`, or deleting it, still requires the Maintainer role; a collaborator attempting that receives `403`. The `clone` action on a collaborative layout produces an ordinary personal copy. Writes are last-write-wins, so clients that edit collaborative layouts should re-read the row before saving.
 
 ## Step 3: Render widget data (optional)
 
