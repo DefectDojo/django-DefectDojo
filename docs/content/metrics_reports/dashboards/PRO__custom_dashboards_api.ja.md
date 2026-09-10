@@ -304,6 +304,7 @@ curl -s -X POST \
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | SLA違反が近い検出事項 |
 | `recent_activity` | GET | `?model=`, `?limit=` | 最近のレコードフィード |
 | `saved_reports` | GET | `?limit=` | 保存済みレポートテンプレート *（Reportingが必要）* |
+| `root_causes` | POST | `limit?` | ランク付けされた根本原因クラスタ *（根本原因相関が必要）* |
 | `usage` | GET | — | ライセンス使用状況の内訳 *（Maintainerが必要）* |
 
 ## まとめ: 完全なライフサイクルスクリプト

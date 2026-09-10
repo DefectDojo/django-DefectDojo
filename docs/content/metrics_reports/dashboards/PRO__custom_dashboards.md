@@ -187,6 +187,7 @@ Ranked lists, feeds, and embedded tables.
 | **SLA Burndown** | Findings approaching SLA breach, ranked by days remaining, with countdown badges. |
 | **My Work** | Your personal queue — assignments, mentions, and pending risk-acceptance reviews. Always scoped to the viewer. |
 | **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature.* |
+| **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
 
 ### Static & Utility
 
