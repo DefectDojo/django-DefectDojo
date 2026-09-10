@@ -7,13 +7,11 @@ audience: pro
 weight: 4
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: a Modelagem de Ameaças é um recurso exclusivo do DefectDojo Pro e atualmente está em BETA.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: a Modelagem de Ameaças é um recurso exclusivo do DefectDojo Pro.</span>
 
 A **Modelagem de Ameaças** transforma o design de uma funcionalidade em um modelo de ameaças revisado. Você fornece o design — texto colado, um documento de design e, opcionalmente, um diagrama de arquitetura — e o DefectDojo produz os componentes e fluxos de dados que ele descreve, as ameaças contra eles e os requisitos de segurança que mitigam essas ameaças. Os requisitos podem então ser enviados ao DefectDojo como achados, de modo que o trabalho da etapa de design passe pelo mesmo mecanismo de triagem, SLA, Jira e relatórios que tudo o mais.
 
 Esta é a capacidade **pré-código** do Sensei. Enquanto o [scan-and-fix](/sensei/about_sensei/) atua sobre um repositório que já existe, a modelagem de ameaças atua sobre o design, antes de haver código para escanear.
-
-> **🔎 BETA:** a Modelagem de Ameaças está em desenvolvimento ativo e é identificada como **BETA** em toda a interface. O comportamento e as telas podem mudar entre versões. Durante o BETA, ela é habilitada por instância pelo DefectDojo — entre em contato com seu representante DefectDojo para ativá-la.
 
 > **📍 Onde encontrar:** abra **Threat Modeling** na navegação à esquerda, logo abaixo de Sensei.
 
