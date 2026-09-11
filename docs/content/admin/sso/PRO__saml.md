@@ -1,7 +1,7 @@
 ---
 title: "SAML Configuration"
 description: "Configure SAML in DefectDojo Pro"
-weight: 1
+weight: 30
 audience: pro
 ---
 
