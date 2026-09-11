@@ -1,7 +1,7 @@
 ---
 title: "OIDC"
 description: "Configure OpenID Connect (OIDC) SSO in DefectDojo Pro"
-weight: 17
+weight: 40
 audience: pro
 ---
 
