@@ -84,10 +84,13 @@ Enabling PAIN deadlines **replaces** the three tiers rather than combining with 
 N2 gets 48 days, not the 4-day tier it would have received without a rating — which is the point of
 rating it.
 
-The date each rating was set is recorded, because FedRAMP measures remediation timeframes from
-*evaluation* rather than from discovery, and asks reporting to show when each impact reduction
-happened. Re-running a rule that assigns the same rating a finding already has does not move that
-date.
+The date each rating was set is recorded as **PAIN Evaluated**, so reporting can show when each
+impact decision was made. The deadline itself still runs from the finding's SLA start date — its
+discovery date. Re-running a rule that assigns the same rating a finding already has does not move
+the evaluated date.
+
+For the FedRAMP requirement in full, a worked example, and how to assign ratings at scale, see
+[Potential Agency Impact (PAIN) Ratings](../pain_ratings).
 
 ## Relationship to the ledger
 
