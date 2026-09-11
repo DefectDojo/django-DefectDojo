@@ -6,8 +6,8 @@
 
 &lt;img
  src="https://docs.defectdojo.com/admin/sso/images/authorization_connectors.png"
- width="1800"
- height="1150"
+ width="1118"
+ height="1605"
  decoding="async"
  fetchpriority="auto"
  loading="lazy"
@@ -117,8 +117,8 @@
 
 &lt;img
  src="https://docs.defectdojo.com/images/oidc_pro.png"
- width="448"
- height="506"
+ width="1118"
+ height="861"
  decoding="async"
  fetchpriority="auto"
  loading="lazy"
