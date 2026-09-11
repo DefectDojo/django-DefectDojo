@@ -114,6 +114,10 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **OpenVAS / Greenbone**
 * **Orca Security**
 * **Ostorlab**
+* **Palo Alto Cortex Cloud**
+* **Palo Alto Cortex XDR**
+* **Palo Alto Cortex XSIAM**
+* **Palo Alto Cortex XSOAR**
 * **Parasoft DTP**
 * **Picus Security**
 * **PingCastle**
