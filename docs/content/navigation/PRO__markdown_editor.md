@@ -30,4 +30,8 @@ A few details worth knowing:
 * Only images stored by DefectDojo are rendered. A markdown image pointing at an outside website is not displayed, which keeps imported scan text from loading remote content.
 * An image that is uploaded but never saved, or that is later removed from every field that used it, is cleaned up automatically after two days.
 
+### Images in tickets pushed to another tool
+
+When a description is pushed to an issue tracker (Jira, ServiceNow, GitHub, GitLab, Linear, or Azure DevOps), the image itself is not copied into the ticket. The ticket instead carries a line naming the screenshot and linking back to it in DefectDojo, and opening that link requires signing in. This keeps a stored image from being exposed to everyone who can read the ticket, and avoids a broken image in trackers that cannot reach your DefectDojo instance.
+
 Images placed inside the text are separate from file attachments. Attachments live in their own tab and are listed and downloaded separately; see [Attaching Files](/triage_findings/findings_workflows/pro__add_files/).
