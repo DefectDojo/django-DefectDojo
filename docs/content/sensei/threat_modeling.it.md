@@ -7,13 +7,11 @@ audience: pro
 weight: 4
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Threat Modeling è una funzionalità esclusiva di DefectDojo Pro ed è attualmente in BETA.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Threat Modeling è una funzionalità esclusiva di DefectDojo Pro.</span>
 
 **Threat Modeling** trasforma il design di una funzionalità in un modello di minaccia sottoposto a revisione. Fornisci il design — testo incollato, un documento di progettazione e facoltativamente un diagramma architetturale — e DefectDojo produce i componenti e i flussi di dati che descrive, le minacce a loro carico e i requisiti di sicurezza che le mitigano. I requisiti possono poi essere inviati a DefectDojo come riscontri, in modo che il lavoro della fase di design passi attraverso lo stesso meccanismo di triage, SLA, Jira e reportistica di tutto il resto.
 
 Questa è la capacità **pre-code** di Sensei. Mentre [scan-and-fix](/sensei/about_sensei/) lavora su un repository già esistente, il threat modeling lavora sul design, prima ancora che ci sia codice da sottoporre a scansione.
-
-> **🔎 BETA:** Threat Modeling è in sviluppo attivo ed è contrassegnato come **BETA** in tutta l'interfaccia. Il comportamento e le schermate possono cambiare tra una release e l'altra. Durante la fase BETA viene abilitato per singola istanza da DefectDojo — contatta il tuo referente DefectDojo per farlo attivare.
 
 > **📍 Dove trovarlo:** apri **Threat Modeling** dalla navigazione a sinistra, subito sotto Sensei.
 
