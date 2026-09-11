@@ -12,6 +12,10 @@ network diagram, or a spreadsheet that backs up a result.
 Each object keeps its own set of files, and you can attach **up to 10 files** to a single
 object.
 
+Attached files are separate from images placed inside a description or a note. To show a
+screenshot within the text itself, paste or drop it into the markdown editor instead; see
+[The Markdown Editor](/navigation/pro__markdown_editor/).
+
 ## Supported File Types
 
 By default the following extensions are accepted:
