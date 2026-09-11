@@ -17,5 +17,6 @@ The key's **Role** must grant **read access to incidents** — used to search in
 1. Enter your XSOAR API base URL in the **Location** field — for a Cortex\-hosted tenant this is the FQDN from the API Keys page, for example `https://api-\<your-tenant\>.xsoar.paloaltonetworks.com`; for a self\-hosted XSOAR use your server's base URL.
 2. Enter the **API Key**.
 3. Optionally, enter the **API Key ID** (XSOAR 8 / Cortex multi\-tenant only).
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each XSOAR incident becomes a finding under the tenant Record.
