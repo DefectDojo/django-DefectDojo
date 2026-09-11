@@ -1,6 +1,6 @@
 ---
 title: "Support"
-description: "Filing a support request from DefectDojo Pro, the documentation search above the form, the community board, and the settings that cover self-hosted and airgapped instances"
+description: "Filing a support request from DefectDojo Pro, the documentation and community search above the form, the community board, and the settings that cover self-hosted and airgapped instances"
 weight: 11
 audience: pro
 ---
@@ -11,7 +11,7 @@ DefectDojo Pro carries two support pages. **Support** is where you file a reques
 
 ## Support requests
 
-**Support** (`/cloud/support`) holds one form and one list.
+**Support** (`/cloud/support`) holds a search box, a request form behind a link, and a list.
 
 The form takes four kinds of request:
 
@@ -30,13 +30,15 @@ Under the form, **My requests** lists everything your account has filed, with th
 
 A request you file does not reach the board on its own. DefectDojo staff decide what to publish there.
 
-## The documentation search
+## The documentation and community search
 
-A search box sits above the request form. Type a question into it and it lists the documentation pages that match, so you can answer the question before you file anything. Select a page to open it in a new tab.
+A search box sits at the top of the page. Type a question into it and it lists the open community requests that match, up to three, then the documentation pages that match, so you can find an answer or an existing request before you file anything. Select a community request to open the community board. Select a documentation page to open it in a new tab.
+
+The request form stays hidden until you select **Can't find what you're looking for?** under the box.
 
 The instance's own server reads the published documentation index (see `DOCS_SEARCH_URL` below) and keeps it for an hour. Your browser never calls the documentation site.
 
-A lookup that fails leaves the form usable. The box shows no matches and you file the request as normal. A failed lookup is remembered for a minute, so an outage at the documentation site does not slow down every keystroke.
+A lookup that fails leaves the form reachable. The box shows no matches and you file the request as normal. A failed lookup is remembered for a minute, so an outage at the documentation site does not slow down every keystroke.
 
 ## Self-hosted instances
 
