@@ -32,7 +32,7 @@ A request you file does not reach the board on its own. DefectDojo staff decide 
 
 ## The documentation and community search
 
-A search box sits at the top of the page. Type a question into it and it lists the open community requests that match, up to three, then the documentation pages that match, so you can find an answer or an existing request before you file anything. Select a community request to open the community board. Select a documentation page to open it in a new tab.
+A search box sits at the top of the page. Type a question into it and it lists the open community requests that match, up to three, then the documentation pages that match, so you can find an answer or an existing request before you file anything. Select a community request to open the community board with that request outlined and scrolled into view. Select a documentation page to open it in a new tab.
 
 The request form stays hidden until you select **Can't find what you're looking for?** under the box.
 
