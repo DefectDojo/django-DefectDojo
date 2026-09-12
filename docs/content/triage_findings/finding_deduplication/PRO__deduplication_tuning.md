@@ -151,6 +151,14 @@ migration in reverse. Nothing about your matching behaviour changes at upgrade t
 keeps the algorithm and fields it had. The backup is for the case where you need the previous
 release back for some other reason.
 
+**Run the migration before you roll pods, and hold imports until the roll finishes.** The copy
+and the removal commit together, so the changeover is instant rather than gradual. A pod still
+running the previous release reads settings that no longer exist the moment the migration
+commits, and a pod on the new release that started before it has no Matching Configuration rows
+to read yet. Migrating first, rolling second, and resuming imports last means no import straddles
+the changeover. On a single-node deployment this is the ordinary upgrade order and needs nothing
+extra; it matters where web, worker and matching pods restart independently of the migration job.
+
 Permission changes for custom roles are described under [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/#custom-roles-on-upgrade).
 
 ## Running Deduplication Retroactively on Existing Data
