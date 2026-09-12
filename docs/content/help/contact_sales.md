@@ -43,7 +43,7 @@ Pre-pay plans let you choose where your instance is hosted. Pick the location cl
 
 Review the details of your request. Once submitted, only firewall rules can be changed by your team without assistance from Support. To contact Support, email [support@defectdojo.com](mailto:support@defectdojo.com) or follow the instructions in [this article](/help/contact_support/).
 
-By continuing you agree to DefectDojo's Master Subscription Agreement and Privacy Policy.
+Clicking either action agrees to DefectDojo's Master Subscription Agreement and Privacy Policy.
 
 * **Pay as you go:** click **Checkout With Stripe** to enter your billing details, or **Contact Sales** if you would rather talk to us first.
 * **Annual plans:** click **Contact Sales**. Our Sales team will be in touch to agree pricing and terms and to finalize your subscription.
