@@ -64,7 +64,11 @@ It is created/updated under /api/v2/dashboards/ with these resources:
         POST {id}/clone/        copy a layout (fresh widget IDs)
         POST {id}/set_default/  make a layout my home-page default
         GET  shared/            list curated + team-shared templates
-        GET  for_current_user/  my layouts + my default_id (bootstrap)
+        GET  for_current_user/  my layouts (+ collaborative shared ones) + my default_id (bootstrap)
+        A shared layout with is_collaborative=true is one live dashboard anyone may
+        edit (widgets/layout/settings) and default to; flipping is_shared or
+        is_collaborative needs the Maintainer role, and only a shared layout can
+        be collaborative.
   /api/v2/dashboards/widget_catalog/  GET: every widget type + a config example
   /api/v2/dashboards/widget_data/<action>/  render a widget's data on demand
 
