@@ -35,9 +35,9 @@ The Pricing Plans step shows two tiles.
 * **Pay as you go** is the self-serve plan. Expand **Full price list** to see every rate, and set an optional **Monthly spend limit**: once a month's charges reach the limit, new findings stop being accepted until the next month. You can change the limit at any time from your subscription page. Click **Choose pay as you go** to continue.
 * **Pre-pay & save** is the annual plan: billed yearly, with volume discounts when you pre-pay, capacity sized to your findings volume, custom agreement terms and an annual commitment. No tier or price is shown here; click **Choose pre-pay** and our team takes it from there.
 
-## Step 4: Select a Server Location (annual plans only)
+## Step 4: Select a Server Location
 
-Annual plans let you choose where your instance is hosted. Pick the location closest to your team to reduce latency. Pay-as-you-go instances run in our shared US East region, so this step is skipped for them.
+Pre-pay plans let you choose where your instance is hosted. Pick the location closest to your team to reduce latency. Pay-as-you-go instances run in our shared US East region, so for them this step only tells you where the instance runs.
 
 ## Step 5: Verification
 
