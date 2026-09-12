@@ -34,7 +34,9 @@ The same base windows, further tightened by exploitability and exposure:
 **Credibly exploitable** means the finding is KEV-listed, or its EPSS score is at or above your
 threshold. **Internet-reachable** is signalled by a finding tag — `internet-reachable` by default.
 
-All the thresholds, tag names, and day counts are editable on the SLA configuration.
+All the thresholds, tag names, and day counts are editable on the SLA configuration, in the
+**FedRAMP VDR & PAIN Tiering** section of the SLA configuration form (create or edit an SLA
+configuration to reach it), or through the `/api/v2/sla_configurations/` API.
 
 Internet-reachability can also come from the computed asset exposure verdict rather than only a tag.
 Turn on **Use Asset Exposure for VDR Tiering** to include it. The two sources union, so enabling it
@@ -60,8 +62,9 @@ Turn on **Use PAIN Ratings for VDR Deadlines** to switch from the three tiers to
 | N3 — disruptive effect on one agency | 16 days | 32 days | 128 days |
 | N2 — narrow customer effect | 48 days | 128 days | 192 days |
 
-Every cell is editable. The shipped numbers are FedRAMP's published Class C values; providers holding
-a Class B or Class D certification change the numbers, not the shape.
+Every cell is editable in that same **FedRAMP VDR & PAIN Tiering** section, once **Use PAIN Ratings
+for VDR Deadlines** is turned on. The shipped numbers are FedRAMP's published Class C values; providers
+holding a Class B or Class D certification change the numbers, not the shape.
 
 ### Rating your findings
 

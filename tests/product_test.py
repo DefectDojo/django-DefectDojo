@@ -290,7 +290,7 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.ID, "id_endpoints_to_add").send_keys("product.finding.com")
         # "Click" the Done button to Add the finding with other defaults
         with WaitForPageLoad(driver, timeout=30):
-            driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+            self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
         # Query the site to determine if the finding has been added
 
         # Assert to the query to dtermine status of failure
@@ -496,7 +496,7 @@ class ProductTest(BaseTestCase):
         # Select the specific product to delete
         driver.find_element(By.LINK_TEXT, "QA Test").click()
 
-        driver.find_element(By.XPATH, "//input[@name='engagement_added' and @value='mail']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='engagement_added' and @value='mail']"))
         # clicking == ajax call to submit, but I think selenium gets this
 
         self.assertTrue(self.is_success_message_present(text="Notification settings updated"))
@@ -504,7 +504,7 @@ class ProductTest(BaseTestCase):
         self.assertFalse(driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected())
         self.assertFalse(driver.find_element(By.XPATH, "//input[@name='test_added' and @value='mail']").is_selected())
 
-        driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']"))
 
         self.assertTrue(self.is_success_message_present(text="Notification settings updated"))
         self.assertTrue(driver.find_element(By.XPATH, "//input[@name='engagement_added' and @value='mail']").is_selected())
@@ -535,7 +535,10 @@ class ProductTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_product_type"))
         my_select.select_by_index(1)
 
-        self.click_submit(driver)
+        # The metrics filter is a plain GET form, so this navigates. Wait for the
+        # document, otherwise tearDown reads the console on a half-loaded page.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_submit(driver)
 
     def test_simple_metrics(self):
         # Test To Edit Product Tracking Files

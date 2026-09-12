@@ -63,7 +63,8 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 
 - **Default** — one of your layouts is your **default**: the one that loads when you open the home page. You can change which layout is your default at any time.
 - **Clone** — copy any layout (one of yours, or a shared template) into your own space as a fresh, independent starting point. Cloning gives the copy its own widgets, so editing the clone never touches the original.
-- **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout. Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
+- **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout (unless it is collaborative, below). Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
+- **Collaborative** — a Maintainer can mark a shared layout as **collaborative** from **Manage Layouts** (**Make Collaborative**, reversed with **Stop Collaborating**). A collaborative layout is one live dashboard rather than a template to copy: it appears in every user's layout picker, anyone can set it as their default, and anyone can add, remove, rearrange, or configure its widgets. Every change is saved to the same layout, so everyone using it sees it. Renaming, unsharing, deleting, and the collaborative setting itself stay with a Maintainer. If a layout stops being collaborative (or is unshared), users who had it as their default fall back to their own layouts. Edits are saved as they are made, so two people editing at the same moment can overwrite each other's change; the layout re-syncs from the server when you enter edit mode.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
 - **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults).
 
@@ -75,7 +76,7 @@ An administrator can enable **Restrict Layout Customization** (Settings, then UI
 
 ### The dashboard toolbar
 
-The toolbar across the top of the home page is where you switch layouts and manage them. It includes a **layout picker** (with badges that mark your default layout and any shared layouts/templates), and buttons to create a **New Layout**, open **Manage Layouts**, **Refresh** all widgets, and toggle **Edit** mode.
+The toolbar across the top of the home page is where you switch layouts and manage them. It includes a **layout picker** (with badges that mark your default layout, any shared layouts/templates, and collaborative layouts shared with you), and buttons to create a **New Layout**, open **Manage Layouts**, **Refresh** all widgets, and toggle **Edit** mode.
 
 ![The dashboard toolbar (highlighted): the layout picker, plus New Layout, Manage Layouts, Refresh, and Edit](images/pro_dashboard_v2_home.png)
 
@@ -110,13 +111,15 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 ### Step 4: Arrange, then save
 
-Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, the duplicate icon to copy it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+
+Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
 
 ### Managing layouts
 
 The **Manage Layouts** dialog (the gear button on the toolbar) is the hub for everything layout-level:
 
-- **Your Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own.
+- **Your Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts.
 - **Create New** — start a fresh, empty layout to build from scratch.
 - **Shared Templates** — browse curated and team-published layouts grouped by category, and click **Use Layout** to clone one into your own space.
 
@@ -133,7 +136,7 @@ DefectDojo ships four ready-to-use shared templates you can clone as a starting 
 | **Mitigation Layout** | A remediation-velocity board (closure trends, MTTR/MTTD, aging). |
 | **Tool Layout** | A scanner-effectiveness board built around test types and recent scan activity. |
 
-> **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it.
+> **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it. A **collaborative** layout is the exception by design: it is used live rather than copied, so edits made to it are visible to everyone. Take your own copy of a collaborative layout only when you want a private version that no longer follows the shared one.
 
 ### The empty state
 
