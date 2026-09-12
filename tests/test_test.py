@@ -78,8 +78,17 @@ class TestUnitTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text("Admin User (admin)")
         # engagement status
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
-        # "Click" the 'Add Test' button to Add Test to engagement
-        driver.find_element(By.NAME, "_Add Tests").click()
+        # "Click" the 'Add Test' button to Add Test to engagement.
+        # Two separate hazards here, and the raw click below used to hit both.
+        # The button sits at the bottom of a long form, so a plain .click() can
+        # land on the footer and be silently lost (see click_centered), leaving
+        # the form unsubmitted. And the submit navigates to the Add Test page, so
+        # the id_title lookup that follows needs that document rather than the 1s
+        # implicit wait. Centre the click, then wait for the navigation: without
+        # the first the click goes missing, and without the second the lookup
+        # races the render. Either way id_title used to raise NoSuchElementException.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
         # Fill at least required fields needed to create Test
         # Test title
         driver.find_element(By.ID, "id_title").clear()  # clear field before inserting anything
@@ -179,7 +188,7 @@ class TestUnitTest(BaseTestCase):
         driver.find_element(By.ID, "id_endpoints_to_add").send_keys("product2.finding.com")
         # "Click" the Done button to Add the finding with other defaults
         with WaitForPageLoad(driver, timeout=30):
-            driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+            self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
         # Query the site to determine if the finding has been added
 
         # Assert to the query to dtermine status of failure

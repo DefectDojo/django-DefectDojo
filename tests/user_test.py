@@ -89,6 +89,12 @@ class UserTest(BaseTestCase):
         if not checkbox.is_selected():
             checkbox.click()
         self.click_submit(driver)
+        # Wait for the save to land before logging out. click_submit() only clicks,
+        # so without this the logout() below navigates away while the POST is still
+        # in flight, the setting is never persisted, and the test that called this
+        # helper reads a field in the wrong state. is_success_message_present()
+        # waits for the banner, so it is the barrier as well as the check.
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
         self.logout()
 
     def disable_user_profile_writing(self):
@@ -99,6 +105,12 @@ class UserTest(BaseTestCase):
         if checkbox.is_selected():
             checkbox.click()
         self.click_submit(driver)
+        # Wait for the save to land before logging out. click_submit() only clicks,
+        # so without this the logout() below navigates away while the POST is still
+        # in flight, the setting is never persisted, and the test that called this
+        # helper reads a field in the wrong state. is_success_message_present()
+        # waits for the banner, so it is the barrier as well as the check.
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
         self.logout()
 
     def test_user_edit_permissions(self):

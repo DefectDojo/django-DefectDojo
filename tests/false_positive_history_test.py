@@ -24,16 +24,23 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         # Fill up engagement name
         driver.find_element(By.ID, "id_name").send_keys(engagement_name)
-        # Click the 'Add Test' button to Add Test to engagement
-        driver.find_element(By.NAME, "_Add Tests").click()
+        # Click the 'Add Test' button to Add Test to engagement.
+        # Same two hazards as tests/test_test.py: this submit sits at the bottom
+        # of a long form where a raw click can be lost to the footer (see
+        # click_centered), and it navigates, so the id_title lookup below needs
+        # that document rather than the 1s implicit wait.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
         # Fill up test title
         driver.find_element(By.ID, "id_title").send_keys(test_name)
         # Select Test type
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Manual Code Review")
         # Select environment
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Test")
-        # Click the 'Add Findings' button to Add Finding to Test
-        driver.find_element(By.NAME, "_Add Findings").click()
+        # Click the 'Add Findings' button to Add Finding to Test. Same hazards
+        # as the 'Add Test' submit above.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_centered(driver, driver.find_element(By.NAME, "_Add Findings"))
         # Fill up finding title
         driver.find_element(By.ID, "id_title").send_keys(finding_name)
         # cvssv3 field
@@ -46,7 +53,7 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("REF-1\nREF-2")
         # Click the Done button
         with WaitForPageLoad(driver, timeout=30):
-            driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+            self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
         # Query the site to determine if the finding has been added
         self.assertTrue(self.is_text_present_on_page(text=finding_name))
         # Select and click on the finding
@@ -81,7 +88,10 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Click on False Positive checkbox
         driver.find_element(By.ID, "id_false_p").click()
         # Send
-        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
+        # Wait for the save to land: callers navigate straight afterwards, which
+        # would cancel the POST and leave the finding in its old state.
+        self.assertTrue(self.is_success_message_present(text="Finding saved successfully"))
 
     def bulk_edit(self, finding_url, status_id):
         driver = self.driver
@@ -97,6 +107,10 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.ID, status_id).click()
         # Submit
         self.click_submit(driver, "input[type='submit']")
+        # Wait for the bulk update to land. Callers assert on the finding page
+        # straight afterwards, and that navigation would otherwise cancel the POST.
+        # The banner counts the findings it touched, so match the banner, not text.
+        self.assertTrue(self.is_success_message_present())
 
     def test_retroactive_edit_finding(self):
         # Create two equal findings on different engagements

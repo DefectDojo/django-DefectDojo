@@ -59,6 +59,9 @@ class CloseOldDedupeTest(BaseTestCase):
             driver.find_element(By.XPATH, '//*[@id="id_enable_deduplication"]').click()
             # save settings
             self.click_submit(driver)
+            # Wait for the save before reloading, or the reload cancels the POST and
+            # deduplication silently stays off for every test that follows.
+            self.assertTrue(self.is_success_message_present(text="Settings saved."))
             # check if it's enabled after reload
             driver.get(self.base_url + "system_settings")
             self.assertTrue(driver.find_element(By.ID, "id_enable_deduplication").is_selected())

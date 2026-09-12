@@ -2,7 +2,7 @@ import sys
 import unittest
 
 from base_test_class import BaseTestCase
-from product_test import ProductTest
+from product_test import ProductTest, WaitForPageLoad
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -92,7 +92,7 @@ class ReportBuilderTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_include_table_of_contents"))
         my_select.select_by_index(1)
 
-        driver.find_element(By.NAME, "_generate").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_generate"))
 
         # opened_per_month_2 is only rendered when the product type has
         # endpoint-per-month data, so only the unconditional chart is asserted.
@@ -114,7 +114,7 @@ class ReportBuilderTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_include_table_of_contents"))
         my_select.select_by_index(1)
 
-        driver.find_element(By.NAME, "_generate").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_generate"))
 
         self.assert_report_charts_painted(["open_findings", "finding_age"])
 
@@ -137,7 +137,7 @@ class ReportBuilderTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_include_table_of_contents"))
         my_select.select_by_index(1)
 
-        driver.find_element(By.NAME, "_generate").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_generate"))
 
         self.assert_report_charts_painted(["open_findings", "finding_age"])
 
@@ -161,7 +161,7 @@ class ReportBuilderTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_include_table_of_contents"))
         my_select.select_by_index(1)
 
-        driver.find_element(By.NAME, "_generate").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_generate"))
 
         self.assert_report_charts_painted(["open_findings", "finding_age"])
 
@@ -189,7 +189,7 @@ class ReportBuilderTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_include_table_of_contents"))
         my_select.select_by_index(1)
 
-        driver.find_element(By.NAME, "_generate").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_generate"))
 
         self.assert_report_charts_painted(["accepted_findings", "open_findings", "closed_findings", "finding_age"])
 
@@ -213,7 +213,7 @@ class ReportBuilderTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_include_table_of_contents"))
         my_select.select_by_index(1)
 
-        driver.find_element(By.NAME, "_generate").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_generate"))
 
     # A quote in a report heading survives the round trip through
     # #contents.innerHTML undecoded, so the table-of-contents builder must not let
@@ -231,7 +231,12 @@ class ReportBuilderTest(BaseTestCase):
         name_field = driver.find_element(By.ID, "id_name")
         name_field.clear()
         name_field.send_keys(new_name)
-        self.click_submit(driver)
+        # Wait for the rename to land: the caller navigates straight afterwards,
+        # and the teardown rename back would otherwise race the first one. The
+        # banner text relabels between Product and Asset, so do not match on it.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_submit(driver)
+        self.assertTrue(self.is_success_message_present())
 
     def test_toc_anchor_rejects_injected_heading(self):
         driver = self.driver
@@ -246,7 +251,7 @@ class ReportBuilderTest(BaseTestCase):
             Select(driver.find_element(By.ID, "id_include_finding_notes")).select_by_index(1)
             Select(driver.find_element(By.ID, "id_include_executive_summary")).select_by_index(1)
             Select(driver.find_element(By.ID, "id_include_table_of_contents")).select_by_index(1)
-            driver.find_element(By.NAME, "_generate").click()
+            self.click_centered(driver, driver.find_element(By.NAME, "_generate"))
             self.assert_report_charts_painted(["open_findings", "finding_age"])
 
             toc_text = driver.execute_script(
