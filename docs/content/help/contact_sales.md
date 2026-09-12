@@ -10,7 +10,7 @@ aliases:
 DefectDojo Cloud can be started in two ways:
 
 * **Pay as you go.** A monthly subscription billed to your card for what you process: a platform fee plus a per-finding rate, with Sensei AI billed per use. There is no annual commitment, and you can set a monthly spend limit. You check out with Stripe, and your instance is provisioned once checkout completes.
-* **Pre-pay & save, through our sales team.** An annual plan billed yearly, with capacity sized to your findings volume and pricing agreed with our team. Pre-paying for the year saves 40% or more compared with pay as you go.
+* **Pre-Pay & Save, through our sales team.** An annual plan billed yearly, with capacity sized to your findings volume and pricing agreed with our team. Pre-paying for the year saves 40% or more compared with pay as you go.
 
 If your team requires an on-premise DefectDojo installation, please connect with our Sales team by emailing [hello@defectdojo.com](mailto:hello@defectdojo.com). The steps below apply to DefectDojo Cloud.
 
@@ -32,8 +32,8 @@ Normally, DefectDojo names your domain according to your company name. If you se
 
 The Pricing Plans step shows two tiles.
 
-* **Pay as you go** is the self-serve plan. Expand **Full price list** to see every rate, and set an optional **Monthly spend limit**: once a month's charges reach the limit, new findings stop being accepted until the next month. You can change the limit at any time from your subscription page. Click **Choose pay as you go** to continue.
-* **Pre-pay & save** is the annual plan: billed yearly, with volume discounts when you pre-pay, capacity sized to your findings volume, custom agreement terms and an annual commitment. No tier or price is shown here; click **Choose pre-pay** and our team takes it from there.
+* **Pay As You Go** is the self-serve plan. Expand **Full price list** to see every rate, and set an optional **Monthly spend limit**: once a month's charges reach the limit, new findings stop being accepted until the next month. You can change the limit at any time from your subscription page. Click **Choose pay as you go** to continue.
+* **Pre-Pay & Save** is the annual plan: billed yearly, with volume discounts when you pre-pay, capacity sized to your findings volume, custom agreement terms and an annual commitment. No tier or price is shown here; click **Choose Pre-Pay** and our team takes it from there.
 
 ## Step 4: Select a Server Location
 
