@@ -430,6 +430,8 @@ class FindingSerializer(serializers.ModelSerializer):
             "cve",
             "inherited_tags",
         )
+        # The related model is superuser-only; only the SonarQube importer assigns it.
+        read_only_fields = ("sonarqube_issue",)
 
     def get_fields(self):
         from dojo.api_v2.serializers import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
@@ -702,6 +704,8 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             "cve",
             "inherited_tags",
         )
+        # The related model is superuser-only; only the SonarQube importer assigns it.
+        read_only_fields = ("sonarqube_issue",)
         extra_kwargs = {
             "active": {"required": True},
             "verified": {"required": True},
