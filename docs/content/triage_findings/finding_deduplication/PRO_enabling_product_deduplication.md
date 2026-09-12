@@ -6,7 +6,7 @@ audience: pro
 aliases:
   - /en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
-Deduplication can be applied at an Asset\-wide level, or scoped more narrowly to a single Engagement.
+Deduplication can be applied at an Asset\-wide level, or scoped more narrowly to a single Engagement. To scope it the other way, across a chosen group of Assets, see [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/).
 
 ## Deduplication for Assets
 
@@ -20,7 +20,7 @@ Deduplication can be applied at an Asset\-wide level, or scoped more narrowly to
 
 ### Enable Finding Deduplication
 
-**Enable Finding Deduplication** turns on the Deduplication Algorithm for all Findings. Once enabled, Deduplication runs on every subsequent import — DefectDojo compares imported Findings against existing Findings in the destination Asset and marks duplicates according to your configuration.
+**Enable Finding Deduplication** turns on the Deduplication Algorithm for all Findings. Once enabled, Deduplication runs on every subsequent import: DefectDojo compares imported Findings against existing Findings in the destination Asset and marks duplicates according to your configuration.
 
 ### Delete Duplicate Findings
 
