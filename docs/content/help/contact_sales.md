@@ -33,7 +33,7 @@ Normally, DefectDojo names your domain according to your company name. If you se
 The Pricing Plans step shows two tiles.
 
 * **Pay As You Go** is the self-serve plan. Expand **Full price list** to see every rate, and set an optional **Monthly spend limit**: once a month's charges reach the limit, new findings stop being accepted until the next month. You can change the limit at any time from your subscription page. Click **Choose pay as you go** to continue.
-* **Pre-Pay & Save** is the annual plan: billed yearly, with volume discounts when you pre-pay, capacity sized to your findings volume, custom agreement terms and an annual commitment. No tier or price is shown here; click **Choose Pre-Pay** and our team takes it from there.
+* **Pre-Pay & Save** is the annual plan: billed yearly, with volume discounts when you pre-pay, capacity sized to your findings volume, custom agreement terms and an annual commitment. The smallest plan starts at 250,000 findings a year. Drag the slider to the volume you process and the card estimates the price to start from and what it saves against pay as you go; your final price is confirmed with our team. Click **Choose Pre-Pay** and our team takes it from there.
 
 ## Step 4: Select a Server Location
 
