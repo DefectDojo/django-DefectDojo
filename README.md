@@ -68,7 +68,7 @@ if running DefectDojo in detached mode via `docker compose up -d`, obtain admin 
 
 ## Supported Installation Options
 
-* Pro - SaaS or self-hosted (via K8s or docker compose). [Speak to our team](https://defectdojo.com/contact) or [sign-up for SaaS directly](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1)
+* Pro - SaaS or self-hosted (via K8s or docker compose). [Speak to our team](https://defectdojo.com/contact) or [get Pro from $100/mo](https://cloud.defectdojo.com/onboarding?payg=1)
 * OS - [docker compose](readme-docs/DOCKER.md)
 
 
