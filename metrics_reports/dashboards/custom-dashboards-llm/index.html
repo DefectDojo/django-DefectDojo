@@ -50,7 +50,11 @@
 </span></span><span class=line><span class=cl>        POST {id}/clone/        copy a layout (fresh widget IDs)
 </span></span><span class=line><span class=cl>        POST {id}/set_default/  make a layout my home-page default
 </span></span><span class=line><span class=cl>        GET  shared/            list curated + team-shared templates
-</span></span><span class=line><span class=cl>        GET  for_current_user/  my layouts + my default_id (bootstrap)
+</span></span><span class=line><span class=cl>        GET  for_current_user/  my layouts (+ collaborative shared ones) + my default_id (bootstrap)
+</span></span><span class=line><span class=cl>        A shared layout with is_collaborative=true is one live dashboard anyone may
+</span></span><span class=line><span class=cl>        edit (widgets/layout/settings) and default to; flipping is_shared or
+</span></span><span class=line><span class=cl>        is_collaborative needs the Maintainer role, and only a shared layout can
+</span></span><span class=line><span class=cl>        be collaborative.
 </span></span><span class=line><span class=cl>  /api/v2/dashboards/widget_catalog/  GET: every widget type + a config example
 </span></span><span class=line><span class=cl>  /api/v2/dashboards/widget_data/&lt;action&gt;/  render a widget&#39;s data on demand
 </span></span><span class=line><span class=cl>
