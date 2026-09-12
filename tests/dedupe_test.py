@@ -115,7 +115,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
         driver.find_element(By.ID, "id_name").send_keys("Dedupe Path Test")
         driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element(By.NAME, "_Add Tests").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
         # Add the tests
@@ -123,7 +123,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Path Test 1")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Bandit Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.NAME, "_Add Another Test").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Another Test"))
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
         # Test 2
@@ -191,7 +191,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
         driver.find_element(By.ID, "id_name").send_keys("Dedupe Endpoint Test")
         driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element(By.NAME, "_Add Tests").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
         # Add the tests
@@ -199,7 +199,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Endpoint Test 1")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.NAME, "_Add Another Test").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Another Test"))
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
         # Test 2
@@ -255,7 +255,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
         driver.find_element(By.ID, "id_name").send_keys("Dedupe Same Eng Test")
         driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element(By.NAME, "_Add Tests").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
         # Add the tests
@@ -263,7 +263,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Same Eng Test 1")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.NAME, "_Add Another Test").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Another Test"))
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
         # Test 2
@@ -325,7 +325,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
         driver.find_element(By.ID, "id_name").send_keys("Dedupe on hash_code only")
         driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element(By.NAME, "_Add Tests").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
         # Add the tests
@@ -333,7 +333,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("Path Test 1")
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Checkmarx Scan")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.NAME, "_Add Another Test").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Another Test"))
 
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
         # Test 2
@@ -390,7 +390,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
         driver.find_element(By.ID, "id_name").send_keys("Dedupe Generic Test")
         # driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element(By.NAME, "_Add Tests").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
         # Test
@@ -407,7 +407,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
         driver.find_element(By.ID, "id_name").send_keys("Dedupe Immuniweb Test")
         # driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element(By.NAME, "_Add Tests").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
         # Test

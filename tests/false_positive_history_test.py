@@ -53,7 +53,7 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("REF-1\nREF-2")
         # Click the Done button
         with WaitForPageLoad(driver, timeout=30):
-            driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+            self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
         # Query the site to determine if the finding has been added
         self.assertTrue(self.is_text_present_on_page(text=finding_name))
         # Select and click on the finding
@@ -88,7 +88,10 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Click on False Positive checkbox
         driver.find_element(By.ID, "id_false_p").click()
         # Send
-        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
+        # Wait for the save to land: callers navigate straight afterwards, which
+        # would cancel the POST and leave the finding in its old state.
+        self.assertTrue(self.is_success_message_present(text="Finding saved successfully"))
 
     def bulk_edit(self, finding_url, status_id):
         driver = self.driver

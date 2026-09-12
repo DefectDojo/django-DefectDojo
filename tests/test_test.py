@@ -188,7 +188,7 @@ class TestUnitTest(BaseTestCase):
         driver.find_element(By.ID, "id_endpoints_to_add").send_keys("product2.finding.com")
         # "Click" the Done button to Add the finding with other defaults
         with WaitForPageLoad(driver, timeout=30):
-            driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+            self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
         # Query the site to determine if the finding has been added
 
         # Assert to the query to dtermine status of failure
