@@ -1,7 +1,7 @@
 ---
 title: "CMMC Level 2 Assessments"
 description: "Score a self-assessment against NIST 800-171 Rev 2"
-weight: 5
+weight: 6
 audience: pro
 ---
 
