@@ -307,6 +307,7 @@ The full set of `widget_data` actions:
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | findings nearing SLA breach |
 | `recent_activity` | GET | `?model=`, `?limit=` | recent records feed |
 | `saved_reports` | GET | `?limit=` | saved Report Templates *(requires Reporting)* |
+| `root_causes` | POST | `limit?` | ranked Root Cause clusters *(requires Root Cause Correlation)* |
 | `usage` | GET | — | license-usage breakdown *(requires Maintainer)* |
 
 ## Putting it together: a full lifecycle script

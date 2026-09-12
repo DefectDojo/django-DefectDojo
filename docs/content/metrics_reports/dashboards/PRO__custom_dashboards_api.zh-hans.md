@@ -304,6 +304,7 @@ curl -s -X POST \
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | 临近 SLA 违约的发现项 |
 | `recent_activity` | GET | `?model=`, `?limit=` | 近期记录动态 |
 | `saved_reports` | GET | `?limit=` | 已保存的报告模板 *(需要报告功能)* |
+| `root_causes` | POST | `limit?` | 已排名的根本原因分组 *(需要根本原因关联功能)* |
 | `usage` | GET | — | 许可证使用情况明细 *(需要维护者角色)* |
 
 ## 综合示例：完整的生命周期脚本

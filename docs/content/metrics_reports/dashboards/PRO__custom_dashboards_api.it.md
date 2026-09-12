@@ -305,6 +305,7 @@ L'insieme completo delle azioni `widget_data`:
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | riscontri vicini alla violazione SLA |
 | `recent_activity` | GET | `?model=`, `?limit=` | feed dei record recenti |
 | `saved_reports` | GET | `?limit=` | modelli di report salvati *(richiede Reporting)* |
+| `root_causes` | POST | `limit?` | cluster di cause radice classificati *(richiede Correlazione delle cause radice)* |
 | `usage` | GET | — | ripartizione dell'utilizzo della licenza *(richiede Maintainer)* |
 
 ## Mettendo tutto insieme: uno script completo del ciclo di vita
