@@ -493,13 +493,14 @@ class BaseTestCase(unittest.TestCase):
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
                 #    f.write(self.driver.page_source)
 
+                current_url = self.driver.current_url
                 logger.info(entry)
                 logger.info(
                     "There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens",
                 )
                 logger.info(
                     "Currently there is no reliable way to find out at which url the error happened, but it could be: ."
-                    + self.driver.current_url,
+                    + current_url,
                 )
                 if self.accept_javascript_errors:
                     logger.debug(
@@ -510,7 +511,18 @@ class BaseTestCase(unittest.TestCase):
                         "skipping javascript errors related to known issues, see https://github.com/DefectDojo/django-DefectDojo/blob/master/tests/base_test_class.py#L324",
                     )
                 else:
-                    self.assertNotEqual(entry["level"], "SEVERE")
+                    # Carry the console entry into the assertion message. On its own
+                    # this assertion reports "'SEVERE' == 'SEVERE'", which says nothing
+                    # about what broke, and the logger lines above do not reliably reach
+                    # a captured CI log. A failure here is usually a side effect of an
+                    # earlier step in the test (often a 404 the browser logged), so the
+                    # message and the url are what make it diagnosable.
+                    self.assertNotEqual(
+                        entry["level"],
+                        "SEVERE",
+                        f"SEVERE javascript console error: {entry['message']} "
+                        f"(source: {entry.get('source')}, current url: {current_url})",
+                    )
 
         return True
 
