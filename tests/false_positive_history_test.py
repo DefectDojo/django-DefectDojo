@@ -24,16 +24,23 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         # Fill up engagement name
         driver.find_element(By.ID, "id_name").send_keys(engagement_name)
-        # Click the 'Add Test' button to Add Test to engagement
-        driver.find_element(By.NAME, "_Add Tests").click()
+        # Click the 'Add Test' button to Add Test to engagement.
+        # Same two hazards as tests/test_test.py: this submit sits at the bottom
+        # of a long form where a raw click can be lost to the footer (see
+        # click_centered), and it navigates, so the id_title lookup below needs
+        # that document rather than the 1s implicit wait.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_centered(driver, driver.find_element(By.NAME, "_Add Tests"))
         # Fill up test title
         driver.find_element(By.ID, "id_title").send_keys(test_name)
         # Select Test type
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Manual Code Review")
         # Select environment
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Test")
-        # Click the 'Add Findings' button to Add Finding to Test
-        driver.find_element(By.NAME, "_Add Findings").click()
+        # Click the 'Add Findings' button to Add Finding to Test. Same hazards
+        # as the 'Add Test' submit above.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_centered(driver, driver.find_element(By.NAME, "_Add Findings"))
         # Fill up finding title
         driver.find_element(By.ID, "id_title").send_keys(finding_name)
         # cvssv3 field
