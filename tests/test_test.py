@@ -78,8 +78,13 @@ class TestUnitTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text("Admin User (admin)")
         # engagement status
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
-        # "Click" the 'Add Test' button to Add Test to engagement
-        driver.find_element(By.NAME, "_Add Tests").click()
+        # "Click" the 'Add Test' button to Add Test to engagement.
+        # This submits the engagement form and navigates to the Add Test page, so
+        # wait for that document rather than riding on the 1s implicit wait: on a
+        # loaded runner the render takes longer than that and id_title below
+        # raises NoSuchElementException.
+        with WaitForPageLoad(driver, timeout=30):
+            driver.find_element(By.NAME, "_Add Tests").click()
         # Fill at least required fields needed to create Test
         # Test title
         driver.find_element(By.ID, "id_title").clear()  # clear field before inserting anything
