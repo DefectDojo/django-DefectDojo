@@ -10,7 +10,7 @@ aliases:
 Logging into DefectDojo's Cloud Manager allows you to configure your account settings and manage your subscription with DefectDojo Cloud.
 
 ## **New Subscription**
-<https://cloud.defectdojo.com/accounts/onboarding/step_1>
+<https://cloud.defectdojo.com/onboarding>
 
 This page allows you to request a new, [or additional](../additional-cloud-instance/) Cloud instance from DefectDojo. 
 
