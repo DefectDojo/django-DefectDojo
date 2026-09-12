@@ -358,7 +358,14 @@ class BaseTestCase(unittest.TestCase):
             self.click_centered(driver, driver.find_element(By.ID, setting_id))
             # save settings
             self.click_submit(driver)
-            # check if it's enabled after reload
+            # Wait for the save to land before reading the checkbox back.
+            # click_submit() only clicks, so without this the read below can hit
+            # the pre-submit document, where the box is already ticked in the DOM
+            # but nothing has been persisted, and the check passes on a lost save.
+            # Waiting for "Settings saved." also rules out the rejection branches
+            # ("Settings cannot be saved: ..."), which re-render the submitted
+            # values on a bound form and would otherwise read back as success.
+            self.assertTrue(self.is_success_message_present(text="Settings saved."))
 
         is_enabled = driver.find_element(By.ID, setting_id).is_selected()
 
@@ -401,7 +408,8 @@ class BaseTestCase(unittest.TestCase):
             self.click_centered(driver, driver.find_element(By.ID, "id_block_execution"))
             # save settings
             self.click_submit(driver)
-            # check if it's enabled after reload
+            # Barrier before reading the checkbox back: see change_system_setting above.
+            self.assertTrue(self.is_success_message_present(text="Profile updated successfully."))
             self.assertEqual(
                 driver.find_element(By.ID, "id_block_execution").is_selected(),
                 block_execution,
@@ -426,7 +434,9 @@ class BaseTestCase(unittest.TestCase):
             select.select_by_value(mode)
             # save settings
             self.click_submit(driver)
-            # check it persisted after reload
+            # Wait for the save before reloading: the reload would otherwise cancel
+            # the POST while it is still in flight and the mode would never persist.
+            self.assertTrue(self.is_success_message_present(text="Profile updated successfully."))
             driver.get(self.base_url + "profile")
             select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
             self.assertEqual(select.first_selected_option.get_attribute("value"), mode)

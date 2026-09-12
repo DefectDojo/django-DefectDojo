@@ -535,7 +535,10 @@ class ProductTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_product_type"))
         my_select.select_by_index(1)
 
-        self.click_submit(driver)
+        # The metrics filter is a plain GET form, so this navigates. Wait for the
+        # document, otherwise tearDown reads the console on a half-loaded page.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_submit(driver)
 
     def test_simple_metrics(self):
         # Test To Edit Product Tracking Files

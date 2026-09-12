@@ -97,6 +97,10 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.ID, status_id).click()
         # Submit
         self.click_submit(driver, "input[type='submit']")
+        # Wait for the bulk update to land. Callers assert on the finding page
+        # straight afterwards, and that navigation would otherwise cancel the POST.
+        # The banner counts the findings it touched, so match the banner, not text.
+        self.assertTrue(self.is_success_message_present())
 
     def test_retroactive_edit_finding(self):
         # Create two equal findings on different engagements

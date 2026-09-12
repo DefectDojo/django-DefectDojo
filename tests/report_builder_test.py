@@ -2,7 +2,7 @@ import sys
 import unittest
 
 from base_test_class import BaseTestCase
-from product_test import ProductTest
+from product_test import ProductTest, WaitForPageLoad
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -231,7 +231,12 @@ class ReportBuilderTest(BaseTestCase):
         name_field = driver.find_element(By.ID, "id_name")
         name_field.clear()
         name_field.send_keys(new_name)
-        self.click_submit(driver)
+        # Wait for the rename to land: the caller navigates straight afterwards,
+        # and the teardown rename back would otherwise race the first one. The
+        # banner text relabels between Product and Asset, so do not match on it.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_submit(driver)
+        self.assertTrue(self.is_success_message_present())
 
     def test_toc_anchor_rejects_injected_heading(self):
         driver = self.driver
