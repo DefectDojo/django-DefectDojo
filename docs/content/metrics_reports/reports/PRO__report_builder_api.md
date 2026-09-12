@@ -206,7 +206,15 @@ The response includes the new theme `id`. Header and footer images are optional 
 
 ### Create blocks
 
-A block has a `name`, a `block_type`, and a matching configuration object. The supported `block_type` values are `stock`, `tabular`, and `detail`. (A `chart` type exists in the data model but is not yet exposed through the API.)
+A block has a `name`, a `block_type`, and a matching configuration object. The supported `block_type` values are `stock`, `tabular`, `detail`, `chart`, and `widget`.
+
+A `chart` block takes a `chart_configuration` of `{"model_choice": ..., "chart_key": ...}`, where `chart_key` names one of the charts listed on the [Report Builder](../report-builder/) page.
+
+A `widget` block takes a `widget_configuration` of `{"widget_type": ..., "config": {...}}`. The `widget_type` is a dashboard widget type, and `config` is that widget's own configuration object in exactly the shape a dashboard layout stores it, validated by the same rules. `GET /report_blocks/widget_options/` lists the widget types a report can draw, each with the label, description, and how the report renders it. Filters belong inside `config`; `filter_entries` are not accepted on a widget block, because a dashboard filter value can be a list or a boolean and a filter entry's value is a string.
+
+Two endpoints return render-ready data for a widget block, which is useful for checking a configuration without generating a report: `POST /report_blocks/widget_data/` for a configuration you have not saved, and `POST /report_blocks/{id}/widget_data/` for a saved block. Both accept an optional `runtime_filters` object and echo back the effective configuration alongside the data.
+
+Creating or reconfiguring a `widget` block requires Customizable Dashboards to be enabled. Blocks saved earlier keep generating regardless.
 
 **A stock cover page.** Stock blocks hold fixed content. The `stock_type` is one of `cover_page`, `table_of_contents`, `page_break`, `image`, or `text_block`.
 

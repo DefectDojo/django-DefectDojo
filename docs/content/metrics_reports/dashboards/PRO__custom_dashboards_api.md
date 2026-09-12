@@ -69,7 +69,7 @@ Three things in a widget are easy to get wrong if you guess: the **widget type**
 
 ### The widget catalog
 
-`GET /dashboards/widget_catalog/` returns every widget type, the category it belongs to, the data endpoint(s) it renders against, and — most usefully — a minimal known-good `config_example` you can copy as a starting point:
+`GET /dashboards/widget_catalog/` returns every widget type, the category it belongs to, the data endpoint(s) it renders against, which surfaces it can appear on, and — most usefully — a minimal known-good `config_example` you can copy as a starting point:
 
 ```bash
 curl -s \
@@ -122,6 +122,8 @@ The response is shaped like this (truncated):
   ]
 }
 ```
+
+Each entry also carries `surfaces`. Every widget lists `dashboard`; the ones a report can also draw additionally list `report`, and those are exactly the widget types a `widget` report block may name (see the [Report Builder API](../../reports/report-builder-api/)).
 
 Use a widget's `type` as the widget's `type`, and its `config_example` as the starting point for the widget's `config`. The catalog lists 26 widget types across the four categories.
 

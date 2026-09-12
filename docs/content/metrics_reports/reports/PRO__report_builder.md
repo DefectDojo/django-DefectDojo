@@ -50,7 +50,7 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Blocks
 
-A **Block** is a reusable unit of content. You build a Block once, configure what it shows, and then drop it into as many Templates as you like. There are four block types:
+A **Block** is a reusable unit of content. You build a Block once, configure what it shows, and then drop it into as many Templates as you like. There are five block types:
 
 | Block type | What it produces |
 |------------|------------------|
@@ -58,6 +58,7 @@ A **Block** is a reusable unit of content. You build a Block once, configure wha
 | **Tabular** | A table of records drawn from a single entity. |
 | **Detail** | A per-record layout, best for long-form fields that render as markdown (for example, description, impact, mitigation, and references). |
 | **Chart** | A single chart, chosen from the same catalog of charts used on the Insights dashboards. |
+| **Widget** | A dashboard widget, rendered in the report. Requires Customizable Dashboards. |
 
 A **Stock** block is configured by choosing one of five stock types, along with a title, subtitle, text content, or image as appropriate:
 
@@ -114,6 +115,43 @@ A **Chart** block draws one chart from the catalog below — the same charts the
 Charts appear in Block and Template previews and in the reports you generate, in both HTML and PDF output. Reports created through the [API](../report-builder-api/), and reports delivered automatically by a rule, include their charts as well.
 
 > **💡 Tip:** A Chart block carries its filters like any other Block, so the same chart filtered two ways is two Blocks. Duplicate the Block and adjust the copy rather than editing one shared Block.
+
+### Widget blocks
+
+A **Widget** block puts a [Customizable Dashboards](../../dashboards/custom-dashboards/) widget into a report. It is the same widget, configured by the same settings dialog you use on a dashboard, filters included, so a figure your team already reads on screen can go into the document you send out without being rebuilt.
+
+The block type appears only while Customizable Dashboards is enabled, because everything that configures a widget lives there. A Widget block saved earlier keeps working and keeps generating if the feature is later turned off.
+
+Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type.
+
+Not every widget can go in a report, and the picker lists only the ones that can. How each one is drawn depends on the widget:
+
+| Widget | Drawn as |
+|--------|----------|
+| Count | A headline number |
+| MTTR / MTTD | A pair of headline numbers, in days |
+| Gauge | A threshold-banded arc with the percentage in the middle |
+| Graph | A bar, line, area, pie, or doughnut chart, as configured |
+| Finding Velocity | A line chart of findings created against findings closed |
+| Vulnerability Aging | A bar chart of age bands, stacked by severity |
+| Priority Histogram | A bar chart of priority bands |
+| Portfolio Treemap | Area-proportional tiles |
+| Rate by Category | A table of per-category rates |
+| Top-N | A ranked table |
+| Scan Coverage | A table of coverage per window |
+
+Widgets that are relative to whoever is looking (My Work, SLA Burndown, Recent Activity) are deliberately absent: they would mean something different to every reader of the same PDF. So are Sankey, Sunburst, Risk Matrix, and Activity Heatmap for now. A Table widget is what a Tabular block already does, and a Markdown widget is what a Stock text block is for.
+
+> **💡 Tip:** Widget blocks are drawn on the server in every case, so a Widget block looks the same whether you generated the report from the UI, through the API, or automatically from a rule. The Block preview shows exactly what the report will contain.
+
+### Moving a figure between a dashboard and a report
+
+The two features share one widget catalog, so a figure can start on either side and move to the other. Both directions **copy** rather than link: the copy is what the original was at that moment, and editing either one afterwards does not change the other.
+
+- **From a dashboard into a report.** Click the export icon on any widget that a report can draw and choose **Add to Report**. Name the block, optionally pick a Template to append it to, and it is created with the widget's current filters.
+- **From a report onto a dashboard.** Open the menu on a Chart or Widget block and choose **Add to Dashboard**, then pick which of your dashboards to add it to. You can also browse saved blocks from the dashboard side: in **Add Widget**, the **From Reports** tab lists your Chart and Widget blocks.
+
+A Chart block that carries its own filters has no faithful dashboard equivalent, because a dashboard Insights Plot widget is scoped by a date window rather than by a filter set. Those blocks are refused rather than being placed on a dashboard with a wider scope than the block they came from.
 
 > **💡 Tip:** Filters live on the Block, not on the Template. A Block carries its own filters with it, so reusing a Block reuses its filters identically everywhere it appears. If you need the same content but with a different filter, duplicate the Block and adjust the copy.
 
