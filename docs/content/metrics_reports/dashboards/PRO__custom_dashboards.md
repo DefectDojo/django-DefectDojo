@@ -88,10 +88,11 @@ Click **Edit** to unlock the dashboard. The grid becomes draggable and resizable
 
 ### Step 2: Add a widget
 
-In edit mode, click **Add Widget** to open the picker. It has two tabs:
+In edit mode, click **Add Widget** to open the picker. It has three tabs:
 
 - **By Type** — browse the catalog by category (Numbers, Charts, Lists & Feeds, Static & Utility). Each card shows the widget's name and a short description. Picking one adds it to the grid and opens its configuration dialog.
 - **From Catalog** — start from a pre-configured widget taken from one of the shared templates (for example, the "Findings by Severity" chart from the Default Dashboard). These come ready-configured, so they drop straight onto the grid.
+- **From Reports**: start from a Chart or Widget block someone already built in the [Report Builder](../../reports/report-builder/). The widget lands configured the way that block is. This tab appears when Reporting is enabled and you can view report templates.
 
 ![The Add Widget dialog, By Type tab](images/pro_dashboard_v2_add_widget.png)
 
@@ -114,6 +115,14 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, the duplicate icon to copy it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
 
 Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
+
+### Putting a widget into a report
+
+Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go into a document you send out without being rebuilt.
+
+Click the export icon on a widget and choose **Add to Report**. Name the block, optionally pick a report Template to append it to, and it is created carrying the widget's current filters. The action appears on widgets a report can draw, when Reporting is enabled and you have permission to add report templates.
+
+This **copies** the widget rather than linking to it. Editing the dashboard widget later does not change the report block, and the reverse is also true, so a shared dashboard never depends on who can see which report block.
 
 ### Managing layouts
 
