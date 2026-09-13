@@ -26,7 +26,7 @@ You can also edit an existing Connector under the **Configured Connectors** head
 ​
 5. Set a **Label** for this connection to help you identify it in DefectDojo.  
 ​
-6. Schedule the Connector's automatic discovery and sync using the **Discovery Configuration** and **Synchronization Configuration** schedules. These can be changed later.  
+6. Schedule the Connector's automatic discovery and sync under the **Discovery Configuration** and **Synchronization Configuration** sections. For each, pick a **Frequency** (every 6, 12, or 24 hours) and a **Time**. At *Every 24 hours* the connector runs once a day at that time; at *Every 6 hours* or *Every 12 hours* the time sets when the first run of the day happens, and the connector repeats from there. Times are shown in your browser's local timezone. You can change any of this later.  
 ​
 7. Select whether you wish to **Enable Auto\-Mapping**. Enable Auto\-Mapping will create a new Asset in DefectDojo to store the data from this connector. Auto\-Mapping can be turned on or off at any time.  
 ​

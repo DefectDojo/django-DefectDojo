@@ -358,7 +358,14 @@ class BaseTestCase(unittest.TestCase):
             self.click_centered(driver, driver.find_element(By.ID, setting_id))
             # save settings
             self.click_submit(driver)
-            # check if it's enabled after reload
+            # Wait for the save to land before reading the checkbox back.
+            # click_submit() only clicks, so without this the read below can hit
+            # the pre-submit document, where the box is already ticked in the DOM
+            # but nothing has been persisted, and the check passes on a lost save.
+            # Waiting for "Settings saved." also rules out the rejection branches
+            # ("Settings cannot be saved: ..."), which re-render the submitted
+            # values on a bound form and would otherwise read back as success.
+            self.assertTrue(self.is_success_message_present(text="Settings saved."))
 
         is_enabled = driver.find_element(By.ID, setting_id).is_selected()
 
@@ -401,7 +408,8 @@ class BaseTestCase(unittest.TestCase):
             self.click_centered(driver, driver.find_element(By.ID, "id_block_execution"))
             # save settings
             self.click_submit(driver)
-            # check if it's enabled after reload
+            # Barrier before reading the checkbox back: see change_system_setting above.
+            self.assertTrue(self.is_success_message_present(text="Profile updated successfully."))
             self.assertEqual(
                 driver.find_element(By.ID, "id_block_execution").is_selected(),
                 block_execution,
@@ -426,7 +434,9 @@ class BaseTestCase(unittest.TestCase):
             select.select_by_value(mode)
             # save settings
             self.click_submit(driver)
-            # check it persisted after reload
+            # Wait for the save before reloading: the reload would otherwise cancel
+            # the POST while it is still in flight and the mode would never persist.
+            self.assertTrue(self.is_success_message_present(text="Profile updated successfully."))
             driver.get(self.base_url + "profile")
             select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
             self.assertEqual(select.first_selected_option.get_attribute("value"), mode)
@@ -493,13 +503,14 @@ class BaseTestCase(unittest.TestCase):
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
                 #    f.write(self.driver.page_source)
 
+                current_url = self.driver.current_url
                 logger.info(entry)
                 logger.info(
                     "There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens",
                 )
                 logger.info(
                     "Currently there is no reliable way to find out at which url the error happened, but it could be: ."
-                    + self.driver.current_url,
+                    + current_url,
                 )
                 if self.accept_javascript_errors:
                     logger.debug(
@@ -510,7 +521,18 @@ class BaseTestCase(unittest.TestCase):
                         "skipping javascript errors related to known issues, see https://github.com/DefectDojo/django-DefectDojo/blob/master/tests/base_test_class.py#L324",
                     )
                 else:
-                    self.assertNotEqual(entry["level"], "SEVERE")
+                    # Carry the console entry into the assertion message. On its own
+                    # this assertion reports "'SEVERE' == 'SEVERE'", which says nothing
+                    # about what broke, and the logger lines above do not reliably reach
+                    # a captured CI log. A failure here is usually a side effect of an
+                    # earlier step in the test (often a 404 the browser logged), so the
+                    # message and the url are what make it diagnosable.
+                    self.assertNotEqual(
+                        entry["level"],
+                        "SEVERE",
+                        f"SEVERE javascript console error: {entry['message']} "
+                        f"(source: {entry.get('source')}, current url: {current_url})",
+                    )
 
         return True
 

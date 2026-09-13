@@ -184,6 +184,7 @@ Rangierte Listen, Feeds und eingebettete Tabellen.
 | **SLA Burndown** | Befunde, die einer SLA-Überschreitung nahekommen, sortiert nach verbleibenden Tagen, mit Countdown-Badges. |
 | **My Work** | Ihre persönliche Warteschlange — Zuweisungen, Erwähnungen und ausstehende Risikoakzeptanz-Prüfungen. Immer auf den Betrachter eingegrenzt. |
 | **Saved Reports** | Ein-Klick-Zugriff auf Ihre gespeicherten Berichtsvorlagen. *Erfordert die Reporting-Funktion.* |
+| **Top Root Causes** | Die am höchsten eingestuften Ursachen-Cluster, mit der Anzahl der jeweils gruppierten Befunde, den betroffenen Assets sowie Priorität und Risikostufe. *Erfordert die Funktion Root-Ursachen-Korrelation.* |
 
 ### Static & Utility
 
