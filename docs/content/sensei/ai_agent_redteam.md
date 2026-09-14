@@ -13,7 +13,7 @@ Sensei's capabilities share one hub. **AppSec** scans and fixes source-code repo
 
 ## How it works
 
-1. **Onboard an agent target** — the endpoint of a deployed agent (an OpenAI-compatible chat endpoint, or a generic JSON HTTP API), linked to an Asset.
+1. **Onboard an agent target** — the endpoint of a deployed agent (an OpenAI-compatible chat endpoint, an OpenAI tool-calling endpoint, or a generic JSON HTTP API), linked to an Asset.
 2. **Sensei attacks it** — on demand from the hub, an autonomous attacker runs a multi-turn conversation with the agent, cycling through a library of attack techniques: prompt injection, jailbreaks, system-prompt extraction, tool coercion, indirect injection, data exfiltration, gradual goal-hijacking, improper output handling, retrieval (RAG) injection, and unbounded consumption.
 3. **Each confirmed break becomes a finding** — a dynamic DefectDojo finding recorded against the agent's endpoint, carrying the attack technique, the full attacker/agent transcript, an OWASP LLM risk tag, and a CWE.
 4. **Reconcile on re-scan** — a finding's identity is the technique, the target, and the objective, so re-scanning updates the same findings rather than duplicating them.
@@ -34,7 +34,7 @@ Use **Add Target** in the hub's **AI Agents** tab, give the target a label, link
 | Field | Meaning |
 |-------|---------|
 | **Label** | A display name for the target (e.g. "Support chatbot"). Unique within an Asset. |
-| **Adapter** | How the attacker talks to the target: **OpenAI-compatible** or **Generic JSON** (see below). |
+| **Adapter** | How the attacker talks to the target: **OpenAI-compatible**, **OpenAI tool calling**, or **Generic JSON** (see below). |
 | **Base URL** | The deployed agent endpoint to attack. |
 | **Auth header** | The header the target credential is sent in. Blank sends it as `Authorization: Bearer <credential>`; set it (e.g. `x-api-key`) to send the raw credential instead. |
 | **Target credential** | The bearer token or API key for the target agent (encrypted at rest). Optional — a target may be unauthenticated. This is **not** the LLM credential the attacker uses. |
@@ -47,6 +47,8 @@ Use **Add Target** in the hub's **AI Agents** tab, give the target a label, link
 ### Adapters
 
 **OpenAI-compatible** — for an endpoint that accepts the OpenAI Chat Completions shape. The attacker POSTs the running conversation to `<base URL>/chat/completions` and reads the reply from `choices[0].message.content`. This is the simplest option when your agent already speaks that protocol.
+
+**OpenAI tool calling** — the same Chat Completions shape, but the attacker also declares a set of decoy tools (destructive, data-exfiltrating, or safety-disabling operations a well-behaved agent should refuse) and watches for the agent actually **invoking** one. A returned tool call for a restricted tool is recorded as a Critical break — a real unsafe-tool-use signal rather than a match on the agent's chat text. Choose this adapter for an agent that exposes function/tool calling.
 
 **Generic JSON** — for any JSON HTTP chat API. You provide:
 
