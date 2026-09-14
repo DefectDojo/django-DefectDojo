@@ -14,7 +14,7 @@ Sensei's capabilities share one hub. **AppSec** scans and fixes source-code repo
 ## How it works
 
 1. **Onboard an agent target** — the endpoint of a deployed agent (an OpenAI-compatible chat endpoint, or a generic JSON HTTP API), linked to an Asset.
-2. **Sensei attacks it** — on demand from the hub, an autonomous attacker runs a multi-turn conversation with the agent, cycling through a library of attack techniques (prompt injection, jailbreaks, system-prompt extraction, tool coercion, indirect injection, data exfiltration, and gradual goal-hijacking).
+2. **Sensei attacks it** — on demand from the hub, an autonomous attacker runs a multi-turn conversation with the agent, cycling through a library of attack techniques: prompt injection, jailbreaks, system-prompt extraction, tool coercion, indirect injection, data exfiltration, gradual goal-hijacking, improper output handling, retrieval (RAG) injection, and unbounded consumption.
 3. **Each confirmed break becomes a finding** — a dynamic DefectDojo finding recorded against the agent's endpoint, carrying the attack technique, the full attacker/agent transcript, an OWASP LLM risk tag, and a CWE.
 4. **Reconcile on re-scan** — a finding's identity is the technique, the target, and the objective, so re-scanning updates the same findings rather than duplicating them.
 
@@ -65,7 +65,7 @@ Each imported finding is a confirmed **break**: a technique that got the agent t
 - the **attack technique** as its rule and the first part of its identity,
 - the full **attacker/agent transcript** in its description, so a triager can see exactly how the break was achieved,
 - an **OWASP LLM** risk tag (`owasp-llm01`, `owasp-llm02`, and so on),
-- a **CWE** — prompt injection, jailbreaks and goal-hijacking map to **CWE-1427**; system-prompt disclosure and data exfiltration to **CWE-200**; unsafe tool use to **CWE-77/78**.
+- a **CWE** — prompt injection, jailbreaks, goal-hijacking and retrieval injection map to **CWE-1427**; system-prompt disclosure and data exfiltration to **CWE-200**; unsafe tool use to **CWE-77/78**; improper output handling to **CWE-79**; unbounded consumption to **CWE-400**.
 
 A scan that breaks nothing is a successful, empty scan — the same way a cloud scan that finds no misconfiguration is a success.
 
