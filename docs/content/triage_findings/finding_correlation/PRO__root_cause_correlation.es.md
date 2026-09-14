@@ -24,7 +24,7 @@ vínculo.
 
 ## Activación de la correlación de causa raíz
 
-La correlación de causa raíz está en **Beta**, depende de un feature flag y está **desactivada de forma
+La correlación de causa raíz depende de un feature flag y está **desactivada de forma
 predeterminada**. Un superusuario puede activarla desde **Configuración > Feature Flags** tanto en
 instancias Cloud como On-Premise. Consulte [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
@@ -268,7 +268,7 @@ abrir tickets a partir de ellas, o rastrearlas como una métrica sin pasar por l
   evidencia que lo vincula y si la coincidencia fue exacta o heurística.
 
 Ambos son de solo lectura. Confirmar, rechazar y silenciar se hacen desde la interfaz por ahora; eso se
-deja deliberadamente sin publicar mientras la función está en Beta, de modo que agregarlos más adelante no
+deja deliberadamente sin publicar por ahora, de modo que agregarlos más adelante no
 pueda romper nada que usted ya haya construido.
 
 Filtros en la lista: `cause_type` (`exact` o `in`), `muted`, `identity_key` (`exact` o `icontains`) y

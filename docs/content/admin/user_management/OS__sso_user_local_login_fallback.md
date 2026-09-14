@@ -30,7 +30,7 @@ Run these steps from the Django shell inside the `uwsgi` container:
 docker compose exec -it uwsgi ./manage.py shell
 ```
 
-### Exmaple for a single user
+### Example for a single user
 
 ```python
 from dojo.user.models import Dojo_User, UserContactInfo

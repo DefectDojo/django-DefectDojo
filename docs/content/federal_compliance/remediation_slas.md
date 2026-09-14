@@ -34,7 +34,9 @@ The same base windows, further tightened by exploitability and exposure:
 **Credibly exploitable** means the finding is KEV-listed, or its EPSS score is at or above your
 threshold. **Internet-reachable** is signalled by a finding tag — `internet-reachable` by default.
 
-All the thresholds, tag names, and day counts are editable on the SLA configuration.
+All the thresholds, tag names, and day counts are editable on the SLA configuration, in the
+**FedRAMP VDR & PAIN Tiering** section of the SLA configuration form (create or edit an SLA
+configuration to reach it), or through the `/api/v2/sla_configurations/` API.
 
 Internet-reachability can also come from the computed asset exposure verdict rather than only a tag.
 Turn on **Use Asset Exposure for VDR Tiering** to include it. The two sources union, so enabling it
@@ -60,8 +62,9 @@ Turn on **Use PAIN Ratings for VDR Deadlines** to switch from the three tiers to
 | N3 — disruptive effect on one agency | 16 days | 32 days | 128 days |
 | N2 — narrow customer effect | 48 days | 128 days | 192 days |
 
-Every cell is editable. The shipped numbers are FedRAMP's published Class C values; providers holding
-a Class B or Class D certification change the numbers, not the shape.
+Every cell is editable in that same **FedRAMP VDR & PAIN Tiering** section, once **Use PAIN Ratings
+for VDR Deadlines** is turned on. The shipped numbers are FedRAMP's published Class C values; providers
+holding a Class B or Class D certification change the numbers, not the shape.
 
 ### Rating your findings
 
@@ -84,10 +87,13 @@ Enabling PAIN deadlines **replaces** the three tiers rather than combining with 
 N2 gets 48 days, not the 4-day tier it would have received without a rating — which is the point of
 rating it.
 
-The date each rating was set is recorded, because FedRAMP measures remediation timeframes from
-*evaluation* rather than from discovery, and asks reporting to show when each impact reduction
-happened. Re-running a rule that assigns the same rating a finding already has does not move that
-date.
+The date each rating was set is recorded as **PAIN Evaluated**, so reporting can show when each
+impact decision was made. The deadline itself still runs from the finding's SLA start date — its
+discovery date. Re-running a rule that assigns the same rating a finding already has does not move
+the evaluated date.
+
+For the FedRAMP requirement in full, a worked example, and how to assign ratings at scale, see
+[Potential Agency Impact (PAIN) Ratings](../pain_ratings).
 
 ## Relationship to the ledger
 

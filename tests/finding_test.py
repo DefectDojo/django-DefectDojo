@@ -117,7 +117,7 @@ class FindingTest(BaseTestCase):
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
-        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
@@ -167,7 +167,7 @@ class FindingTest(BaseTestCase):
             driver.find_element(By.ID, "id_cvssv4_score").send_keys(str(cvssv4_score))
 
         # Submit the form
-        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
 
         if expect_success:
             self.assertTrue(self.is_success_message_present(text=success_message))
@@ -616,7 +616,7 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.XPATH, "//button[@data-option='Replace']").click()
         self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
-        driver.find_element(By.NAME, "_Finished").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Finished"))
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
 

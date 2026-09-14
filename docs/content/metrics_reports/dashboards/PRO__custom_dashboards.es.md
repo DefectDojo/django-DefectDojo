@@ -184,6 +184,7 @@ Listas clasificadas, feeds y tablas incorporadas.
 | **SLA Burndown** | Hallazgos que se acercan al incumplimiento del SLA, clasificados por días restantes, con distintivos de cuenta regresiva. |
 | **My Work** | Su cola personal — asignaciones, menciones y revisiones de aceptación de riesgo pendientes. Siempre limitado al propio usuario. |
 | **Saved Reports** | Acceso con un clic a sus Plantillas de informe guardadas. *Requiere la función de Informes.* |
+| **Top Root Causes** | Los clústeres de causa raíz mejor clasificados, con el número de Hallazgos que agrupa cada uno, los Assets afectados y su prioridad y banda de riesgo. *Requiere la función Correlación de causa raíz.* |
 
 ### Estático y utilidades
 

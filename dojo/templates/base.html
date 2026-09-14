@@ -502,8 +502,8 @@
                             {% if request.user.is_authenticated %}
                                 <div class="border-t border-gray-200 my-1"></div>
                                 {% if SHOW_PLG_LINK %}
-                                    <a href="https://cloud.defectdojo.com/accounts/onboarding/plg_step_1" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fa-solid fa-level-up fa-fw"></i> {% trans "Try Pro for Free!" %}
+                                    <a href="https://cloud.defectdojo.com/onboarding?payg=1" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fa-solid fa-level-up fa-fw"></i> {% trans "Get Pro from $100/mo" %}
                                     </a>
                                 {% endif %}
                                 <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
