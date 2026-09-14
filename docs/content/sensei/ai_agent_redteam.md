@@ -71,6 +71,12 @@ Each imported finding is a confirmed **break**: a technique that got the agent t
 
 A scan that breaks nothing is a successful, empty scan — the same way a cloud scan that finds no misconfiguration is a success.
 
+## Reports and hardening
+
+Each target has a **report** (from its row menu) that gathers what its scans have found: a summary, a **technique-coverage matrix** (every technique the attacker can attempt, and whether the target currently has an open break for it), the breaks with their severity and judge confidence, and the scan history.
+
+For any break, **Suggest hardening** turns the finding into a concrete guardrail suggestion for the agent's *own* system prompt and input handling — the instruction lines to add, how to frame untrusted input, why the attack worked, and the residual risk. It is advice a human reviews and applies (nothing is changed automatically), and it needs a configured Sensei AI provider.
+
 ## Runtime action checks
 
 AI Agent Red Teaming also exposes a runtime-defense API your own agent can call while it runs, to vet an action before performing it. This is a **public, token-authenticated** API under `/api/v2/agentsec/runtime/` — use a personal API token, exactly as with the rest of the public API. It is **best-effort advisory**: it tells your agent whether an action looks unsafe given the run's context; it does not sit inline and block the call itself.
