@@ -151,13 +151,29 @@ migration in reverse. Nothing about your matching behaviour changes at upgrade t
 keeps the algorithm and fields it had. The backup is for the case where you need the previous
 release back for some other reason.
 
-**Run the migration before you roll pods, and hold imports until the roll finishes.** The copy
-and the removal commit together, so the changeover is instant rather than gradual. A pod still
-running the previous release reads settings that no longer exist the moment the migration
-commits, and a pod on the new release that started before it has no Matching Configuration rows
-to read yet. Migrating first, rolling second, and resuming imports last means no import straddles
-the changeover. On a single-node deployment this is the ordinary upgrade order and needs nothing
-extra; it matters where web, worker and matching pods restart independently of the migration job.
+**Run the migration before you roll pods, hold imports until the roll finishes, and roll the Go
+matching service to the same release.** The copy and the removal commit together, so the
+changeover is instant rather than gradual. A pod still running the previous release keeps
+serving, but every Tuner-backed setting it reads at request time degrades or fails from the moment
+the migration commits: its settings query names columns that no longer exist, the error is
+swallowed, and the read comes back empty. Sign-in and MFA settings applied when the process
+started survive; SCIM, finding enrichment, the OSV source, notifications, the health check and the
+import drift settings do not. A pod on the new release that started before the migration committed
+cannot import: matching resolves from the old settings while they exist, but pool membership has
+no such fallback, so an import on that pod fails until its table is there. Migrating first,
+rolling second, and resuming imports last means no import straddles the changeover. On a
+single-node deployment this is the ordinary upgrade order and needs nothing extra; it matters
+where web, worker and matching pods restart independently of the migration job.
+
+Two things to expect from the upgrade itself. The migration holds an exclusive lock on the
+settings table for its final steps, from dropping the old columns to commit; requests reading
+settings during those statements wait rather than fail, and the copy step before it, which is the
+long one on a large instance, does not hold that lock. And the first nightly identity check after
+the upgrade may send a system notification that the cross-tool identity changed for some tools.
+Those tools had cross-tool hash fields configured but no algorithm; the previous release treated
+that as Hash code and the upgrade records Hash code explicitly, so the definition moved while the
+stored hashes did not. The rehash it suggests is safe, recomputes the same values, and records the
+new baseline so the notice does not repeat.
 
 Permission changes for custom roles are described under [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/#custom-roles-on-upgrade).
 
