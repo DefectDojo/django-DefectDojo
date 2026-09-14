@@ -168,7 +168,10 @@ where web, worker and matching pods restart independently of the migration job.
 Two things to expect from the upgrade itself. The migration holds an exclusive lock on the
 settings table for its final steps, from dropping the old columns to commit; requests reading
 settings during those statements wait rather than fail, and the copy step before it, which is the
-long one on a large instance, does not hold that lock. And the first nightly identity check after
+long one on a large instance, does not hold that lock. The rows the migration seeds carry no audit
+log entry, because they are written before their audit triggers are installed; audit history for
+Matching Configuration starts with the first change made after the upgrade. And the first nightly
+identity check after
 the upgrade may send a system notification that the cross-tool identity changed for some tools.
 Those tools had cross-tool hash fields configured but no algorithm; the previous release treated
 that as Hash code and the upgrade records Hash code explicitly, so the definition moved while the
