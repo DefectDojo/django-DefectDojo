@@ -321,8 +321,10 @@
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownAuthorizedUserActions">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             <li>
+                                                {# escapejs, not HTML escaping: this string is compiled as JavaScript, where an HTML entity decodes back into a quote. #}
+                                                {% autoescape off %}{% blocktrans asvar remove_authorized_user_message with username=u.username %}Remove {{ username }} from authorized users?{% endblocktrans %}{% endautoescape %}
                                                 <a name="removeAuthorizedUser" href="#"
-                                                   onclick="if (confirm('{% blocktrans with username=u.username %}Remove {{ username }} from authorized users?{% endblocktrans %}')) { document.getElementById('remove-authorized-user-{{ u.id }}').submit(); } return false;">
+                                                   onclick="if (confirm('{{ remove_authorized_user_message|escapejs }}')) { document.getElementById('remove-authorized-user-{{ u.id }}').submit(); } return false;">
                                                     <i class="fa-solid fa-trash"></i> {% trans "Remove" %}
                                                 </a>
                                             </li>
