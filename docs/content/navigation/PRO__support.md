@@ -26,7 +26,7 @@ Under the form, **My requests** lists everything your account has filed, with th
 
 ## Community requests
 
-**Community requests** (`/cloud/support/community`) lists the topics DefectDojo has published. Each row carries a title, a status and a vote button. Vote once per topic to say it matters to you. The count rises and the button locks.
+**Community requests** (`/cloud/support/community`) lists the topics DefectDojo has published. Each row carries a title, a status and a vote button. Vote once per topic to say it matters to you. The count rises and the button locks. Completed topics (Shipped, Merged, Aged out) sit greyed out at the bottom of the board and no longer take votes. If DefectDojo decides not to pursue a topic, it leaves the board; a request you linked to it stays in **My requests**.
 
 A request you file does not reach the board on its own. DefectDojo staff decide what to publish there.
 
