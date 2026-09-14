@@ -22,6 +22,9 @@ class NotificationTest(BaseTestCase):
         if not mail_control.is_selected():
             self.click_centered(driver, mail_control)
         self.click_submit(driver)
+        # Wait for the save before returning: callers navigate away immediately,
+        # which would cancel the POST and leave the setting unchanged.
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
 
     def disable_notification(self):
         driver = self.driver
@@ -31,6 +34,9 @@ class NotificationTest(BaseTestCase):
         if mail_control.is_selected():
             self.click_centered(driver, mail_control)
         self.click_submit(driver)
+        # Wait for the save before returning: callers navigate away immediately,
+        # which would cancel the POST and leave the setting unchanged.
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
 
     def test_disable_personal_notification(self):
         # Login to the site. Password will have to be modified

@@ -61,6 +61,8 @@ class SystemSettingsTest(BaseTestCase):
         max_dupes_field.clear()
         max_dupes_field.send_keys("10")
         self.click_submit(driver)
+        # Wait for the save before reloading, or the reload cancels the POST.
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
         # Verify saved
         driver.get(self.base_url + "system_settings")
         self.assertEqual(driver.find_element(By.ID, "id_max_dupes").get_attribute("value"), "10")
@@ -68,6 +70,9 @@ class SystemSettingsTest(BaseTestCase):
         driver.find_element(By.ID, "id_max_dupes").clear()
         driver.find_element(By.ID, "id_max_dupes").send_keys(original_value)
         self.click_submit(driver)
+        # Confirm the reset persisted too: this test leaves state behind for the
+        # rest of the suite, so a lost save here surfaces somewhere else.
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
 
     @on_exception_html_source_logger
     def test_settings_save_and_reload(self):
@@ -75,7 +80,10 @@ class SystemSettingsTest(BaseTestCase):
         driver.get(self.base_url + "system_settings")
         # Just verify the page loads and save button works
         self.click_submit(driver)
-        # After save, the page should reload without errors
+        # Assert the banner, not just the absence of an error one. The pre-submit
+        # page has no .alert-danger either, so is_error_message_present() alone
+        # passes whether or not the save ever happened.
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
         self.assertFalse(self.is_error_message_present())
 
 

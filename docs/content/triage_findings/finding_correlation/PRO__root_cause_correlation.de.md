@@ -24,7 +24,7 @@ Befunden hinzu, die Cluster-Knoten, zu denen diese Verknüpfungen zusammengefass
 
 ## Aktivieren der Ursachenkorrelation
 
-Die Ursachenkorrelation befindet sich in der **Beta**-Phase, ist hinter einem Feature-Flag verborgen und ist **standardmäßig deaktiviert**.
+Die Ursachenkorrelation ist hinter einem Feature-Flag verborgen und ist **standardmäßig deaktiviert**.
 Ein Superuser kann sie sowohl auf Cloud- als auch auf On-Premise-Instanzen unter **Settings > Feature Flags** aktivieren.
 Siehe [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
@@ -260,7 +260,7 @@ eröffnen oder sie als Kennzahl verfolgen können, ohne die UI zu verwenden.
   Beleg, der sie verknüpft, und ob die Übereinstimmung exakt oder heuristisch war.
 
 Beide sind schreibgeschützt. Bestätigen, Ablehnen und Stummschalten erfolgen vorerst über die UI; diese werden
-absichtlich nicht veröffentlicht, solange sich die Funktion in der Beta-Phase befindet, damit ein späteres Hinzufügen nichts
+absichtlich noch nicht veröffentlicht, damit ein späteres Hinzufügen nichts
 beeinträchtigen kann, was Sie bereits darauf aufgebaut haben.
 
 Filter für die Liste: `cause_type` (`exact` oder `in`), `muted`, `identity_key` (`exact` oder

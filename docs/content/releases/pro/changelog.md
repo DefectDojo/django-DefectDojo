@@ -18,6 +18,26 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## September 2026: v3.3
 
+### September 14, 2026: v3.3.100
+
+New features:
+* **(Deduplication)** Added Dedupe Pools: group the Assets that should deduplicate against each other, choose where their originals collect, preview what a membership change would link, and re-run deduplication over the Findings already in scope with Apply Now.
+* **(Deduplication)** The three deduplication tuning pages are now one Matching Configuration page: every tool listed once, with its same-tool, cross-tool and reimport matching side by side, and every change previewed before it is saved.
+
+Behavior changes:
+* **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. An Asset in a Dedupe Pool replicates its false positives across the pool for same-tool matching. Instances using false-positive history across such Engagements see narrower replication than before. A pool may span Organizations, and both effects follow the pool: a duplicate mark or a replicated false positive originating in one Organization can change a Finding in another Organization that shares the pool.
+* **(Deduplication)** For an Asset in a Dedupe Pool, Global Component, Global Vulnerability ID and Global Locations matching is bounded to the pool rather than the whole instance.
+* **(Deduplication)** The three deduplication pages move off the Tuner permissions onto four Dedupe Pool permissions (view, add, edit, delete). Roles that held the Tuner permissions are carried over for those pages: Tuner edit maps to all four, Tuner view to view only. The Tuner permissions themselves are unchanged and still gate the other 14 Tuner sections (SSO, LDAP, SCIM, email, MFA and the rest).
+* **(Rules)** A new asset rule action, Assign to Dedupe Pool, pools an Asset or removes the rows a rule created; it never moves an Asset another pool holds, and the rule owner needs the Dedupe Pool edit permission.
+* **(Assets)** The Asset page gains a Dedupe Pool panel showing which pool the Asset matches within, per kind, with the pool change, subtree pooling and untoggle available in place.
+* **(Audit Log)** Dedupe pools, their memberships and the per-tool matching rows are tracked in the audit log.
+
+Upgrade notes:
+* **(Deduplication)** Pods may roll in either order relative to the migration. The upgrade copies the deduplication tuning into per-tool matching rows and retires the old tuning fields from the application, but leaves their columns in the database for this release. A pod still on the previous image keeps reading and writing those columns and behaves exactly as before until it is rolled; a pod on the new image reaches a database that has not migrated yet and matches without pools, reading the old tuning where it needs to, until the migration lands. The columns are removed by a later release, once no pod on the previous image can exist. Hold imports across the roll if you want no import to straddle the changeover; nothing fails if you do not.
+* **(Deduplication)** The migration is reversible. Rolling back to the previous node drops the new pool tables and restores the previous release's view of the settings; the tuning columns never left. Take a database backup before upgrading anyway, as ordinary upgrade hygiene.
+* **(Deduplication)** The matching rows the upgrade seeds carry no audit log entry: the migration writes them before it installs their audit triggers. Audit history for Matching Configuration starts with the first change made after the upgrade; the seeded state itself is what the Tuner held, and is not recorded as an event.
+* **(Deduplication)** The first nightly identity check after the upgrade may send a system notification saying the cross-tool identity changed for some tools. Those tools had cross-tool hash fields configured but no algorithm; the previous release treated that as Hash code, and the upgrade records Hash code explicitly, so the identity definition moved while the stored hashes did not. The rehash the notification suggests (`manage.py identity_drift --kind cross_tool --rehash`) is safe, recomputes the same values, and records the new baseline so the notice does not repeat.
+
 ### September 9, 2026: v3.3.0
 
 New features:
@@ -366,7 +386,7 @@ Additional features:
 ### June 15, 2026: v3.0.0
 
 * **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
-* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic — API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
+* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic: API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
 * **(Authorization)** Open Source restores the **Authorized Users** panel on Product/Product Type detail under the legacy authorization model; Pro deployments retain full RBAC and are not impacted. See [Authorized Users panel replaces Members/Groups under legacy authorization](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
 * **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
 * **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
@@ -400,7 +420,7 @@ Additional features:
 * **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
 * **(Pro UI)** Anchor links now open in a new tab as expected, so following a reference no longer pulls you away from the page you were working on.
 * **(Pro UI)** Adding Findings to an existing Risk Acceptance works reliably again. A recent performance improvement caused the form to fail for some users; you can now resume managing accepted Findings without errors.
-* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default — forcing you to reorder columns every session.
+* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default, forcing you to reorder columns every session.
 * **(API)** Fixed a 500 error when fetching vulnerable endpoints (`GET /api/vue/endpoints/{id}/vulnerable/`), restoring reliable access to vulnerability data for an endpoint.
 
 ### May 4, 2026: v2.58.0
