@@ -69,7 +69,7 @@ Three things in a widget are easy to get wrong if you guess: the **widget type**
 
 ### The widget catalog
 
-`GET /dashboards/widget_catalog/` returns every widget type, the category it belongs to, the data endpoint(s) it renders against, which surfaces it can appear on, and — most usefully — a minimal known-good `config_example` you can copy as a starting point:
+`GET /dashboards/widget_catalog/` returns every widget type, the category it belongs to, the data endpoint(s) it renders against, which surfaces it can appear on, and, most usefully, a minimal known-good `config_example` you can copy as a starting point:
 
 ```bash
 curl -s \
@@ -93,6 +93,7 @@ The response is shaped like this (truncated):
       "type": "count",
       "label": "Count",
       "category": "numbers",
+      "surfaces": ["dashboard", "report"],
       "description": "Single number rendered from a filtered queryset...",
       "data_endpoints": ["/api/v2/dashboards/widget_data/count/"],
       "config_example": {
@@ -106,6 +107,7 @@ The response is shaped like this (truncated):
       "type": "graph",
       "label": "Graph",
       "category": "charts",
+      "surfaces": ["dashboard", "report"],
       "description": "Generic chart over any model + group-by dimension...",
       "data_endpoints": ["/api/v2/dashboards/widget_data/aggregate/"],
       "config_example": {

@@ -137,10 +137,12 @@ Not every widget can go in a report, and the picker lists only the ones that can
 | Priority Histogram | A bar chart of priority bands |
 | Portfolio Treemap | Area-proportional tiles |
 | Rate by Category | A table of per-category rates |
-| Top-N | A ranked table |
+| Top-N Leaderboard | A ranked table |
 | Scan Coverage | A table of coverage per window |
 
-Widgets that are relative to whoever is looking (My Work, SLA Burndown, Recent Activity) are deliberately absent: they would mean something different to every reader of the same PDF. So are Sankey, Sunburst, Risk Matrix, and Activity Heatmap for now. A Table widget is what a Tabular block already does, and a Markdown widget is what a Stock text block is for.
+Some widgets are left out on purpose. Widgets that are relative to whoever is looking (My Work, SLA Burndown, Recent Activity) would mean something different to every reader of the same PDF. License Usage requires the Maintainer role, which a report's readers need not have. KPI / Trend is covered by a Count block for its headline number. A Table widget is what a Tabular block already does, and a Markdown widget is what a Stock text block is for.
+
+Sankey, Sunburst, Risk Matrix, and Activity Heatmap cannot be drawn in a report yet.
 
 > **💡 Tip:** Widget blocks are drawn on the server in every case, so a Widget block looks the same whether you generated the report from the UI, through the API, or automatically from a rule. The Block preview shows exactly what the report will contain.
 

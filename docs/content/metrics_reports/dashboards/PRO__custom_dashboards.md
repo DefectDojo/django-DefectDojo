@@ -90,8 +90,8 @@ Click **Edit** to unlock the dashboard. The grid becomes draggable and resizable
 
 In edit mode, click **Add Widget** to open the picker. It has three tabs:
 
-- **By Type** — browse the catalog by category (Numbers, Charts, Lists & Feeds, Static & Utility). Each card shows the widget's name and a short description. Picking one adds it to the grid and opens its configuration dialog.
-- **From Catalog** — start from a pre-configured widget taken from one of the shared templates (for example, the "Findings by Severity" chart from the Default Dashboard). These come ready-configured, so they drop straight onto the grid.
+- **By Type**: browse the catalog by category (Numbers, Charts, Lists & Feeds, Static & Utility). Each card shows the widget's name and a short description. Picking one adds it to the grid and opens its configuration dialog.
+- **From Catalog**: start from a pre-configured widget taken from one of the shared templates (for example, the "Findings by Severity" chart from the Default Dashboard). These come ready-configured, so they drop straight onto the grid.
 - **From Reports**: start from a Chart or Widget block someone already built in the [Report Builder](../../reports/report-builder/). The widget lands configured the way that block is. This tab appears when Reporting is enabled and you can view report templates.
 
 ![The Add Widget dialog, By Type tab](images/pro_dashboard_v2_add_widget.png)
@@ -118,7 +118,7 @@ Duplicating a tile is the fastest way to build a row of related tiles: the copy 
 
 ### Putting a widget into a report
 
-Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go into a document you send out without being rebuilt.
+Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go straight into a document you send out.
 
 Click the export icon on a widget and choose **Add to Report**. Name the block, optionally pick a report Template to append it to, and it is created carrying the widget's current filters. The action appears on widgets a report can draw, when Reporting is enabled and you have permission to add report templates.
 
