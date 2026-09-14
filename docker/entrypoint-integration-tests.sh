@@ -46,6 +46,31 @@ function success() {
     printf 'Success: %s test passed\n' "$1"
 }
 
+# One integration-test file occasionally fails on an environmental flake rather
+# than a real regression: a transient 404 while a just-enabled system setting
+# propagates across uwsgi workers, a Selenium timing hiccup, a slow first paint.
+# Those pass on an immediate re-run in the same stack. A single failed file calls
+# fail() (exit 1), which fails the job -- and in the merge queue that ejects the
+# PR. Give each file a second attempt before giving up so one flake does not sink
+# an otherwise-green change; a deterministic failure still loses every attempt and
+# fails. Set DD_INTEGRATION_TEST_ATTEMPTS=1 to opt out (e.g. when bisecting).
+INTEGRATION_TEST_ATTEMPTS="${DD_INTEGRATION_TEST_ATTEMPTS:-2}"
+
+function run_integration_test_file() {
+    local test_file="$1"
+    local attempt=1
+    while true; do
+        if python3 "$test_file"; then
+            return 0
+        fi
+        if [ "$attempt" -ge "$INTEGRATION_TEST_ATTEMPTS" ]; then
+            return 1
+        fi
+        printf '::warning::%s failed on attempt %s of %s; retrying\n' "$test_file" "$attempt" "$INTEGRATION_TEST_ATTEMPTS"
+        attempt=$((attempt + 1))
+    done
+}
+
 echo "IT FILENAME: $DD_INTEGRATION_TEST_FILENAME"
 if [[ -n "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     if [[ "$DD_INTEGRATION_TEST_FILENAME" == "openapi-validatator" ]]; then
@@ -72,7 +97,7 @@ if [[ -n "$DD_INTEGRATION_TEST_FILENAME" ]]; then
         for test_file in $DD_INTEGRATION_TEST_FILENAME; do
             test=$test_file
             echo "Running: $test"
-            if python3 "$test_file"; then
+            if run_integration_test_file "$test_file"; then
                 success "$test"
             else
                 fail "$test"
