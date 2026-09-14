@@ -145,38 +145,27 @@ moves their configuration into it. The migration copies every per-tool entry fro
 three stored settings into Matching Configuration rows, marks the ones you had changed from the
 shipped defaults as changed, and then removes the tuner's stored settings.
 
-**That last step is one-way. Take a database backup before upgrading.** The migration cannot be
-reversed: rolling back to the previous release means restoring the backup, not running the
-migration in reverse. Nothing about your matching behaviour changes at upgrade time; every tool
-keeps the algorithm and fields it had. The backup is for the case where you need the previous
-release back for some other reason.
+**Pods may roll in either order relative to the migration.** The migration copies the tuning into
+Matching Configuration rows and retires the old tuning fields from the application, but leaves
+their columns in the database for this release. A pod still running the previous release keeps
+reading and writing those columns and behaves exactly as before until it is rolled. A pod on the
+new release that reaches a database which has not migrated yet matches without pools, reading the
+old tuning where it needs to, until the migration lands. The columns are removed by a later
+release, once no pod on the previous release can exist. If you would rather no import straddle
+the changeover, hold imports across the roll; nothing fails if you do not.
 
-**Run the migration before you roll pods, hold imports until the roll finishes, and roll the Go
-matching service to the same release.** The copy and the removal commit together, so the
-changeover is instant rather than gradual. A pod still running the previous release keeps
-serving, but every Tuner-backed setting it reads at request time degrades or fails from the moment
-the migration commits: its settings query names columns that no longer exist, the error is
-swallowed, and the read comes back empty. Sign-in and MFA settings applied when the process
-started survive; SCIM, finding enrichment, the OSV source, notifications, the health check and the
-import drift settings do not. A pod on the new release that started before the migration committed
-cannot import: matching resolves from the old settings while they exist, but pool membership has
-no such fallback, so an import on that pod fails until its table is there. Migrating first,
-rolling second, and resuming imports last means no import straddles the changeover. On a
-single-node deployment this is the ordinary upgrade order and needs nothing extra; it matters
-where web, worker and matching pods restart independently of the migration job.
+**The migration is reversible, and you should still take a backup.** Rolling back to the previous
+migration drops the new pool tables and restores the previous release's view of the settings; the
+tuning columns never left. The backup is ordinary upgrade hygiene, not the only way back.
 
-Two things to expect from the upgrade itself. The migration holds an exclusive lock on the
-settings table for its final steps, from dropping the old columns to commit; requests reading
-settings during those statements wait rather than fail, and the copy step before it, which is the
-long one on a large instance, does not hold that lock. The rows the migration seeds carry no audit
-log entry, because they are written before their audit triggers are installed; audit history for
+Two things to expect from the upgrade itself. The rows the migration seeds carry no audit log
+entry, because they are written before their audit triggers are installed; audit history for
 Matching Configuration starts with the first change made after the upgrade. And the first nightly
-identity check after
-the upgrade may send a system notification that the cross-tool identity changed for some tools.
-Those tools had cross-tool hash fields configured but no algorithm; the previous release treated
-that as Hash code and the upgrade records Hash code explicitly, so the definition moved while the
-stored hashes did not. The rehash it suggests is safe, recomputes the same values, and records the
-new baseline so the notice does not repeat.
+identity check after the upgrade may send a system notification that the cross-tool identity
+changed for some tools. Those tools had cross-tool hash fields configured but no algorithm; the
+previous release treated that as Hash code and the upgrade records Hash code explicitly, so the
+definition moved while the stored hashes did not. The rehash it suggests is safe, recomputes the
+same values, and records the new baseline so the notice does not repeat.
 
 Permission changes for custom roles are described under [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/#custom-roles-on-upgrade).
 
