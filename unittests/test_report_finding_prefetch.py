@@ -16,6 +16,7 @@ while the report serializer iterated the queryset -- turning report generation i
 ``prefetch_related_findings_for_report`` is the sole authority for the report's finding prefetch
 set, so it now clears any prefetch the caller already applied before layering on its own.
 """
+from crum import impersonate
 from rest_framework.test import APIRequestFactory
 
 from dojo.api_v2.views import report_generate
@@ -54,8 +55,13 @@ class ReportFindingVulnerabilityPrefetchTest(DojoTestCase):
     def test_report_generate_with_pre_prefetched_findings_queryset(self):
         request = APIRequestFactory().get("/api/v2/findings/generate_report/")
         request.user = self.user
-        data = report_generate(request, self._pre_prefetched_findings(), {"report_type": "JSON"})
-        # data["findings"] is a queryset; forcing evaluation triggers prefetch resolution,
-        # the operation that produced the customer-facing 500.
-        report_findings = list(data["findings"])
+        # impersonate a superuser so the report filter's authorization pass returns the
+        # queryset unchanged (preserving its prefetches) instead of scoping it to none()
+        # for the crum-less test context -- otherwise the conflicting prefetch is dropped
+        # and the bug is not exercised end to end.
+        with impersonate(self.user):
+            data = report_generate(request, self._pre_prefetched_findings(), {"report_type": "JSON"})
+            # data["findings"] is a queryset; forcing evaluation triggers prefetch resolution,
+            # the operation that produced the customer-facing 500.
+            report_findings = list(data["findings"])
         self.assertIn(self.finding.id, {f.id for f in report_findings})
