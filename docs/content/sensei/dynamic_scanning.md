@@ -107,6 +107,23 @@ Scheduling uses DefectDojo's scheduling service, so it is available only when th
 enabled. Ownership is re-checked at each scheduled run, exactly as for a manual or
 deploy-triggered scan, so a lapsed or revoked verification stops the next run.
 
+## Rules Engine
+
+Dynamic scanning is wired into the Rules Engine in both directions, so scans can be driven by,
+and can drive, your rules.
+
+- **Launch a scan from a rule.** The **Launch DAST Scan** action scans the verified targets of a
+  matched item's product when a rule fires. For example, when a finding's severity is raised to
+  Critical, or an asset becomes internet-accessible, launch a fresh dynamic scan. An optional
+  environment filter limits which targets it scans. Verification is re-checked at launch, so a
+  rule never scans an unverified target.
+- **React to a completed scan.** The **On DAST Scan Completed** trigger starts a rule when a
+  dynamic scan finishes, over the findings that scan produced. Use it to notify a team, tag the
+  findings, or open a ticket once a scan is done, which a per-finding trigger cannot express.
+
+Both appear in the rule editor only when dynamic scanning is enabled, and the trigger runs only
+when the Rules Engine is enabled.
+
 ## Limits
 
 The number of dynamic-scanning targets you can onboard is capped by your license. When the cap
