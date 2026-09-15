@@ -22,16 +22,40 @@ Open a repository's Sensei configuration (the **Configure Repository** screen fo
 repo) and find the **Dynamic Scanning (DAST)** section. Choose **Add target** and fill in:
 
 - **Target URL**: the deployed environment to scan, for example `https://staging.example.com`.
-- **Environment**: a label (Production, Staging, Development, Other). It is descriptive only
-  and does not change what the scan does.
+- **Environment**: a label (Production, Staging, Development, Other). It is descriptive, and it
+  is also matched against deploy events (see [Scanning on deploy](#scanning-on-deploy)).
+- **Scanner**: which engine runs against the target (see [Choosing a scanner](#choosing-a-scanner)).
+- **API Schema**: shown only for the Schemathesis scanner. The OpenAPI/Swagger schema to fuzz,
+  as a URL or a path in the repository. Leave it blank to use the target origin's
+  `/openapi.json`.
 - **Allowed Host Scope**: optional. The hosts a scan is permitted to reach, for example
   `*.example.com`. Leave it blank to allow the target host only. The scope is enforced by the
   egress boundary, not by the scan configuration, so a scan cannot wander outside it even if a
   page redirects.
+- **Scan on deploy**: optional. Automatically launch a scan of this target when its repository
+  and environment are deployed (see [Scanning on deploy](#scanning-on-deploy)).
 
 Targets attach to a saved configuration, so the panel appears when you are editing an existing
 repository. In the multi-repository onboarding flow there is no saved configuration to attach a
 target to yet; save first, then reopen the configuration to add targets.
+
+## Choosing a scanner
+
+Each target runs one of three open-source engines, so you can match the depth of the scan to
+the target:
+
+- **Nuclei**: a fast, request-only baseline that checks for known CVEs and misconfigurations.
+  It sends no mutating traffic, needs no authentication, and is the default.
+- **ZAP**: a deeper, authenticated active scan that spiders the app and fires mutating,
+  injection-style traffic. Sensei seeds ZAP's plan from what it already knows about the code.
+- **Schemathesis**: API fuzzing driven by the target's OpenAPI/Swagger schema. It generates
+  requests for every documented operation and checks the responses against the contract: no
+  server errors, status-code and schema conformance, and so on. Point it at a schema with the
+  **API Schema** field.
+
+ZAP and Schemathesis can present authentication on every request when the target needs a signed
+session; set that on the target's authentication surface. The credentials are stored encrypted
+and are never shown back.
 
 Each target shows an ownership badge: **Unverified** until you complete the challenge below,
 **Verified** once you have.
@@ -54,6 +78,22 @@ scan traffic to the target within its allowed host scope. Ownership is re-checke
 and the launch is refused if the target is no longer verified, so a lapsed or revoked
 verification can never turn into a scan. Findings are imported back against the repository's
 product as they complete.
+
+## Scanning on deploy
+
+A target can scan itself whenever its environment is deployed, so dynamic scanning keeps pace
+with what is actually running instead of waiting for someone to press **Scan**. Turn on **Scan
+on deploy** for the target, then connect the repository's GitHub App so Sensei receives its
+deployment events.
+
+When GitHub reports a **successful** deployment, Sensei launches a scan of every target on that
+repository that has **Scan on deploy** turned on and whose **Environment** matches the one that
+was deployed (`production`, `staging`, and `dev` are matched flexibly). A deployment that fails,
+or one to an environment no target is watching, launches nothing.
+
+Ownership is still re-checked at launch, exactly as for a manual scan, so a deploy never turns a
+lapsed or revoked verification into a scan. Deploy-triggered scans are only sent for GitHub
+targets today.
 
 ## Limits
 
