@@ -14,6 +14,8 @@ Because you host the deployment, your data stays inside your own environment for
 
 At a high level, you export the database and the media files from the open source instance, restore them into the database and the storage your Pro deployment uses, point Pro at the restored database, and then validate the result.
 
+Running on Kubernetes? The [Kubernetes Migration Runbook & Troubleshooting](/get_started/pro/onprem/kubernetes/migration_runbook/) turns this into a validated, end-to-end Helm sequence, with an error-keyed troubleshooting index and a post-migration verification checklist.
+
 ## Before you start
 
 Confirm the following before you export anything.
@@ -137,7 +139,16 @@ If the restore reports errors, capture the output and contact support before you
 
 Put the contents of the media archive where your Pro deployment reads uploaded files from. The application looks for them at `/app/media`, which your deployment backs with either a bind mount or a persistent volume. Check the installation documentation supplied with your license for the host path or volume your deployment uses.
 
-For a Docker Compose deployment backed by a named volume:
+{{< tabs "migrate-media-restore" >}}
+{{< tab "Kubernetes" >}}
+Extract the archive locally and copy it into the Django pod, which writes to the persistent volume claim mounted at `/app/media`:
+
+```bash
+kubectl cp ./media-extracted/. <namespace>/<django-pod-name>:/app/media/
+```
+{{< /tab >}}
+{{< tab "Compose" >}}
+For a deployment backed by a named volume:
 
 ```bash
 docker run --rm \
@@ -145,28 +156,29 @@ docker run --rm \
   -v $(pwd):/backup \
   alpine sh -c "tar xzf /backup/defectdojo-v<VERSION>-media.tar.gz -C /media"
 ```
-
-For a Kubernetes deployment, extract the archive locally and copy it into the Django pod, which writes to the persistent volume claim mounted at `/app/media`:
-
-```bash
-kubectl cp ./media-extracted/. <namespace>/<django-pod-name>:/app/media/
-```
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Step 6: Point DefectDojo Pro at the restored database
 
 Update the database connection so Pro uses the database you just restored, then start the application. On first start, Pro runs the database migrations that upgrade the schema from your open source version to the Pro version. Depending on the size of your database and the size of the version gap, this can take a while, and the application is not available until it finishes.
 
-For Docker Compose deployments, set the database URL in your deployment configuration and restart the stack. The exact configuration key and command depend on the version of `dojo-compose-cli` you were supplied, so follow the installation documentation that came with your license. The connection string takes this form:
-
-```text
-postgresql://defectdojo:<app_db_password>@<db-endpoint>:5432/defectdojo
-```
-
-For Kubernetes deployments, set the database URL in your Helm values and redeploy:
+{{< tabs "migrate-db-url" >}}
+{{< tab "Kubernetes" >}}
+Set the database URL in your Helm values and redeploy:
 
 ```yaml
 databaseUrl: postgresql://defectdojo:<app_db_password>@<db-endpoint>:5432/defectdojo
 ```
+{{< /tab >}}
+{{< tab "Compose" >}}
+Set the database URL in your deployment configuration and restart the stack. The exact configuration key and command depend on the version of `dojo-compose-cli` you were supplied, so follow the installation documentation that came with your license. The connection string takes this form:
+
+```text
+postgresql://defectdojo:<app_db_password>@<db-endpoint>:5432/defectdojo
+```
+{{< /tab >}}
+{{< /tabs >}}
 
 Which Pro capabilities are available to your deployment depends on your license and on how you deploy, since some of them are not applicable to a self-hosted install. DefectDojo confirms the set that applies to you during the migration.
 
