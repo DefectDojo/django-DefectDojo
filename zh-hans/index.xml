@@ -164,7 +164,14 @@
  &lt;/tr&gt;
  &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;每个发现项在底层模型上都有专门的 &lt;code&gt;cvssv3&lt;/code&gt; / &lt;code&gt;cvssv3_score&lt;/code&gt; 以及 &lt;code&gt;cvssv4&lt;/code&gt; / &lt;code&gt;cvssv4_score&lt;/code&gt; 字段。这些字段既可以通过 API 访问，也可以通过 UI 访问。&lt;/p&gt;</description></item><item><title>DefectDojo 主仪表板</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;仪表板很可能是您打开 DefectDojo 时看到的第一个页面。它汇总了您团队的整体表现，并提供跟踪工具，用于监控您的漏洞跟踪环境中的特定领域。&lt;/p&gt;
+&lt;p&gt;每个发现项在底层模型上都有专门的 &lt;code&gt;cvssv3&lt;/code&gt; / &lt;code&gt;cvssv3_score&lt;/code&gt; 以及 &lt;code&gt;cvssv4&lt;/code&gt; / &lt;code&gt;cvssv4_score&lt;/code&gt; 字段。这些字段既可以通过 API 访问，也可以通过 UI 访问。&lt;/p&gt;</description></item><item><title>DefectDojo Pro 安装指南</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</guid><description>&lt;!--
+ Generated from the DefectDojo Pro Helm chart repository.
+ Source: docs/INSTALLATION_GUIDE.md at chart version 3.1.304.
+ Edit the source guide, not this file. Local edits are overwritten
+ the next time the chart is released.
+--&gt;
+&lt;p&gt;涵盖在 AWS EKS 和 OpenShift (ROSA) 上的部署。两种平台的工作流程相同：
+搭建基础设施、创建密钥、安装 Chart。&lt;/p&gt;</description></item><item><title>DefectDojo 主仪表板</title><link>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;仪表板很可能是您打开 DefectDojo 时看到的第一个页面。它汇总了您团队的整体表现，并提供跟踪工具，用于监控您的漏洞跟踪环境中的特定领域。&lt;/p&gt;
 &lt;div class="version-opensource"&gt;
 &lt;p&gt;
 
@@ -200,35 +207,4 @@
 &lt;h2 id="acs-url-assertion-consumer-service"&gt;ACS URL (Assertion Consumer Service)&lt;/h2&gt;
 &lt;p&gt;您的身份提供程序需要知道在用户完成身份验证后应将 SAML 响应 POST 到哪里。DefectDojo 的 ACS URL 为：&lt;/p&gt;</description></item><item><title>Sensei</title><link>https://docs.defectdojo.com/zh-hans/sensei/os__sensei/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/sensei/os__sensei/</guid><description>&lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;注意：Sensei 仅是 DefectDojo Pro 版专属功能。&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Sensei&lt;/strong&gt; 是 DefectDojo 面向源代码代码库、由 AI 驱动的&lt;strong&gt;扫描并修复&lt;/strong&gt;功能，仅在 &lt;strong&gt;DefectDojo Pro&lt;/strong&gt; 中提供，并不属于开源版的一部分。&lt;/p&gt;
-&lt;p&gt;借助 Sensei，DefectDojo Pro 可以：&lt;/p&gt;</description></item><item><title>安装</title><link>https://docs.defectdojo.com/zh-hans/get_started/open_source/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/open_source/installation/</guid><description>&lt;h2 id="推荐选项"&gt;&lt;strong&gt;推荐选项&lt;/strong&gt;&lt;/h2&gt;
-&lt;hr&gt;
-&lt;h3 id="docker-compose"&gt;Docker Compose&lt;/h3&gt;
-&lt;p&gt;请参阅 &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md"&gt;DOCKER.md&lt;/a&gt; 中的说明&lt;/p&gt;
-&lt;h3 id="saas包含支持并有助于项目发展"&gt;SaaS（包含支持并有助于项目发展）&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://defectdojo.com/platform"&gt;SaaS 链接&lt;/a&gt;&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id="docker-镜像变体"&gt;&lt;strong&gt;Docker 镜像变体&lt;/strong&gt;&lt;/h2&gt;
-&lt;hr&gt;
-&lt;p&gt;DefectDojo 发布多种变体的 Docker 镜像：&lt;/p&gt;
-&lt;table&gt;
- &lt;thead&gt;
- &lt;tr&gt;
- &lt;th&gt;&lt;/th&gt;
- &lt;th&gt;AMD64&lt;/th&gt;
- &lt;th&gt;ARM64&lt;/th&gt;
- &lt;/tr&gt;
- &lt;/thead&gt;
- &lt;tbody&gt;
- &lt;tr&gt;
- &lt;td&gt;&lt;strong&gt;Debian&lt;/strong&gt;&lt;/td&gt;
- &lt;td&gt;✅ 受支持&lt;/td&gt;
- &lt;td&gt;⚠️ 已进行单元测试&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td&gt;&lt;strong&gt;Alpine&lt;/strong&gt;&lt;/td&gt;
- &lt;td&gt;⚠️ 社区维护&lt;/td&gt;
- &lt;td&gt;⚠️ 社区维护&lt;/td&gt;
- &lt;/tr&gt;
- &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;AMD64 上的 Debian&lt;/strong&gt; 是官方支持并经过测试的配置。所有 CI 测试（单元测试、集成测试和性能测试）都针对此组合运行。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;借助 Sensei，DefectDojo Pro 可以：&lt;/p&gt;</description></item></channel></rss>

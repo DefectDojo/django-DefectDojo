@@ -247,7 +247,15 @@
  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;各検出事項には、基盤となるモデル上に専用の&lt;code&gt;cvssv3&lt;/code&gt;/&lt;code&gt;cvssv3_score&lt;/code&gt;および&lt;code&gt;cvssv4&lt;/code&gt;/
-&lt;code&gt;cvssv4_score&lt;/code&gt;フィールドがあります。これらはUIだけでなくAPI経由でもアクセスできます。&lt;/p&gt;</description></item><item><title>DefectDojo メインダッシュボード</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;ダッシュボードは、DefectDojo を開いたときに最初に表示されるページであることが多いです。チームのパフォーマンスを要約し、脆弱性トラッキング環境の特定領域を監視するための追跡ツールを提供します。&lt;/p&gt;
+&lt;code&gt;cvssv4_score&lt;/code&gt;フィールドがあります。これらはUIだけでなくAPI経由でもアクセスできます。&lt;/p&gt;</description></item><item><title>DefectDojo Pro インストールガイド</title><link>https://docs.defectdojo.com/ja/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</guid><description>&lt;!--
+ DefectDojo Pro Helm チャートリポジトリから生成されています。
+ ソース: chart バージョン 3.1.304 の docs/INSTALLATION_GUIDE.md。
+ このファイルではなく、ソースのガイドを編集してください。ローカルでの変更は
+ 次回チャートがリリースされた際に上書きされます。
+--&gt;
+&lt;p&gt;AWS EKS と OpenShift (ROSA) へのデプロイを対象としています。どちらもワークフローは
+同じです。インフラストラクチャをセットアップし、シークレットを作成し、チャートを
+インストールします。&lt;/p&gt;</description></item><item><title>DefectDojo メインダッシュボード</title><link>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/metrics_reports/dashboards/introduction_dashboard/</guid><description>&lt;p&gt;ダッシュボードは、DefectDojo を開いたときに最初に表示されるページであることが多いです。チームのパフォーマンスを要約し、脆弱性トラッキング環境の特定領域を監視するための追跡ツールを提供します。&lt;/p&gt;
 &lt;div class="version-opensource"&gt;
 &lt;p&gt;
 
@@ -278,25 +286,14 @@
 &lt;li&gt;&lt;strong&gt;過去7日間にクローズ&lt;/strong&gt; — 最近解決された検出事項。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;過去7日間に受容&lt;/strong&gt; — 最近リスク受容された検出事項。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;各カードは該当するフィルタ済みリストに直接リンクしているため、ワンクリックで詳細を確認できます。&lt;/p&gt;</description></item><item><title>Downstream Connectors</title><link>https://docs.defectdojo.com/ja/connectors/downstream/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/downstream/about/</guid><description>&lt;p&gt;&lt;strong&gt;提供状況:&lt;/strong&gt; ダウンストリームコネクタは一般提供されており、Cloud・On-Premiseを問わずすべてのDefectDojo Proインスタンスで有効になっています。有効化の操作は不要で、Feature Flagsページにも表示されなくなりました。&lt;/p&gt;
-&lt;p&gt;ダウンストリームコネクタを使うと、検出事項や検出事項グループをチケット管理システムにプッシュし、セキュリティ対応をチームの既存の開発ワークフローに簡単に組み込むことができます。&lt;/p&gt;
-&lt;p&gt;サポートされているダウンストリームコネクタ:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Azure Devops&lt;/li&gt;
-&lt;li&gt;Bitbucket&lt;/li&gt;
-&lt;li&gt;Freshservice&lt;/li&gt;
-&lt;li&gt;GitHub&lt;/li&gt;
-&lt;li&gt;GitLab Boards&lt;/li&gt;
-&lt;li&gt;Jira&lt;/li&gt;
-&lt;li&gt;Linear&lt;/li&gt;
-&lt;li&gt;Opsgenie&lt;/li&gt;
-&lt;li&gt;PagerDuty&lt;/li&gt;
-&lt;li&gt;ServiceDesk Plus&lt;/li&gt;
-&lt;li&gt;ServiceNow&lt;/li&gt;
-&lt;li&gt;ServiceNow SecOps / Vulnerability Response&lt;/li&gt;
-&lt;li&gt;Shortcut&lt;/li&gt;
-&lt;li&gt;Zendesk&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id="ダウンストリームコネクタページを開く"&gt;ダウンストリームコネクタページを開く&lt;/h2&gt;
-&lt;p&gt;ダウンストリームコネクタページは、サイドバーの &lt;strong&gt;Import &amp;gt; Connectors &amp;gt; Downstream Connectors&lt;/strong&gt; から見つけることができます。&lt;/p&gt;</description></item><item><title>Jira(レガシー)</title><link>https://docs.defectdojo.com/ja/connectors/downstream/pro__jira_guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/connectors/downstream/pro__jira_guide/</guid><description>&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;このページはレガシーな Jira 連携について説明しています。&lt;/strong&gt; ここで説明している製品単位の Jira 連携は、&lt;strong&gt;&lt;a href="https://docs.defectdojo.com/connectors/downstream/about/"&gt;Jira ダウンストリームコネクタ&lt;/a&gt;&lt;/strong&gt; に置き換えられました。このコネクタはすべての DefectDojo Pro インスタンスで一般提供されており、検出事項を Jira にプッシュする際の推奨方法です。Pro のサイドバーでは、この理由から &lt;strong&gt;Connect &amp;gt; Jira&lt;/strong&gt; に &lt;code&gt;LEGACY&lt;/code&gt; バッジが表示されます — 詳細は &lt;a href="https://docs.defectdojo.com/navigation/pro__menu_badges/"&gt;メニューバッジ&lt;/a&gt; を参照してください。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;各カードは該当するフィルタ済みリストに直接リンクしているため、ワンクリックで詳細を確認できます。&lt;/p&gt;</description></item><item><title>Docker Composeへのインストール</title><link>https://docs.defectdojo.com/ja/get_started/pro/onprem/docker_compose/installing_on_docker_compose/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/onprem/docker_compose/installing_on_docker_compose/</guid><description>&lt;p&gt;このページでは、セルフホスト型の二つのモデルのうちよりシンプルな方法であり、すでにKubernetesを運用していない場合に適した選択肢である、Docker ComposeへのDefectDojo Proのインストールについて説明します。&lt;/p&gt;
+&lt;p&gt;結果として二台のホストが必要になります。一台はDocker Compose上でアプリケーションとその補助サービスを実行し、もう一台はPostgreSQLを実行します。自前で運用する代わりに管理型データベースを指定することもでき、評価用途であればアプリケーションホスト上のコンテナ内でデータベースを実行することもできますが、それは本番データには適していません。&lt;/p&gt;
+&lt;p&gt;作業のほとんどは、DefectDojoがライセンスとともに提供する&lt;code&gt;dojo-compose-cli&lt;/code&gt;が行います。その&lt;code&gt;first-install&lt;/code&gt;コマンドは、デプロイを設定し、イメージをプルし、すべてを起動し、systemdサービスを登録する対話式ウィザードです。&lt;/p&gt;
+&lt;h2 id="開始前に"&gt;開始前に&lt;/h2&gt;
+&lt;p&gt;まずデプロイのサイズを決めてください。このセクションのハードウェアサイジングのガイダンスでは、アプリケーションホストとデータベースの両方について何をプロビジョニングすべきかを説明しています。&lt;/p&gt;
+&lt;p&gt;このインストールでサポートされているオペレーティングシステムはUbuntu 24.04 LTSです。開始前に完全にアップデートしてください。インストールはrootとしてコマンドを実行するため、両方のホストで&lt;code&gt;sudo&lt;/code&gt;またはrootシェルが必要です。&lt;/p&gt;
+&lt;p&gt;サブスクリプションとともに届く、DefectDojoからの二つのファイルが必要です。&lt;code&gt;dojo-compose-cli&lt;/code&gt;アーカイブと、通常&lt;code&gt;dojopro.lic&lt;/code&gt;という名前のライセンスファイルです。お持ちでない場合は、アカウント担当者または&lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="support",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;support at defectdojo dot com&lt;/noscript&gt;
+
+ までご連絡ください。&lt;/p&gt;
+&lt;h2 id="データベースをセットアップする"&gt;データベースをセットアップする&lt;/h2&gt;
+&lt;p&gt;DefectDojo ProにはPostgreSQL 16以降が必要です。&lt;/p&gt;</description></item></channel></rss>
