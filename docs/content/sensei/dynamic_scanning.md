@@ -79,6 +79,15 @@ and the launch is refused if the target is no longer verified, so a lapsed or re
 verification can never turn into a scan. Findings are imported back against the repository's
 product as they complete.
 
+## AI triage of findings
+
+A dynamic scanner reports what it saw, not whether it matters, so its output is noisy. After a
+scan imports its findings, Sensei asks the AI to assess each one's exploitability and records a
+verdict on the finding: exploitable, false positive, not affected, or in triage, with a short
+rationale as a note. This is a proposal, not a decision. The finding is not closed or marked
+verified on the AI's say-so, so a reviewer confirms before a finding's disposition changes. AI
+triage uses your Sensei AI configuration and needs no extra setup.
+
 ## Scanning on deploy
 
 A target can scan itself whenever its environment is deployed, so dynamic scanning keeps pace
