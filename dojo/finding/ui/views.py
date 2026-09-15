@@ -2724,7 +2724,8 @@ def _bulk_update_finding_groups(finds, form):
 
         if skipped:
             add_success_message_to_response(
-                f"Skipped {skipped} findings in group creation, findings already part of another group",
+                f"Skipped {skipped} findings in group creation, findings are already part of "
+                "another group or do not belong to the group's test",
             )
 
         # refresh findings from db
@@ -2754,7 +2755,8 @@ def _bulk_update_finding_groups(finds, form):
         if skipped:
             add_success_message_to_response(
                 f"Skipped {skipped} findings when adding to finding group {finding_group.name}, "
-                "findings already part of another group",
+                "findings are already part of another group or do not belong to the "
+                "group's test",
             )
 
         # refresh findings from db

@@ -14,7 +14,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.finding.queries import prefetch_for_findings
+from dojo.finding.queries import get_authorized_findings_for_queryset, prefetch_for_findings
 from dojo.finding.ui.filters import (
     FindingFilter,
     FindingFilterWithoutObjectLookups,
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 def view_finding_group(request, fgid):
     finding_group = get_object_or_404(Finding_Group, pk=fgid)
-    findings = finding_group.findings.all()
+    findings = get_authorized_findings_for_queryset("view", finding_group.findings.all())
     edit_finding_group_form = EditFindingGroupForm(instance=finding_group)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
