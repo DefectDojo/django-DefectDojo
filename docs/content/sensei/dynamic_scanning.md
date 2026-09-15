@@ -95,6 +95,18 @@ Ownership is still re-checked at launch, exactly as for a manual scan, so a depl
 lapsed or revoked verification into a scan. Deploy-triggered scans are only sent for GitHub
 targets today.
 
+## Scheduling scans
+
+A target can also run on a recurring schedule, independent of deploys, so a deployed
+environment is re-checked on a regular cadence. On a verified target, open the schedule
+action and set a cron expression. DAST is the heaviest scan Sensei runs, so a target may be
+scheduled at most once per day (a single time of day). Use the deploy trigger for "scan when
+it changes" and a schedule for "scan regularly regardless"; a target can use both.
+
+Scheduling uses DefectDojo's scheduling service, so it is available only when that service is
+enabled. Ownership is re-checked at each scheduled run, exactly as for a manual or
+deploy-triggered scan, so a lapsed or revoked verification stops the next run.
+
 ## Limits
 
 The number of dynamic-scanning targets you can onboard is capped by your license. When the cap
