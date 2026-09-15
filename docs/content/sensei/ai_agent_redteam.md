@@ -13,17 +13,17 @@ Sensei's capabilities share one hub. **AppSec** scans and fixes source-code repo
 
 ## How it works
 
-1. **Onboard an agent target** — the endpoint of a deployed agent (an OpenAI-compatible chat endpoint, an OpenAI tool-calling endpoint, or a generic JSON HTTP API), linked to an Asset.
-2. **Sensei attacks it** — on demand from the hub, an autonomous attacker runs a multi-turn conversation with the agent, cycling through a library of attack techniques: prompt injection, jailbreaks, system-prompt extraction, tool coercion, indirect injection, data exfiltration, gradual goal-hijacking, improper output handling, retrieval (RAG) injection, and unbounded consumption.
-3. **Each confirmed break becomes a finding** — a dynamic DefectDojo finding recorded against the agent's endpoint, carrying the attack technique, the full attacker/agent transcript, an OWASP LLM risk tag, and a CWE.
-4. **Reconcile on re-scan** — a finding's identity is the technique, the target, and the objective, so re-scanning updates the same findings rather than duplicating them.
+1. **Onboard an agent target**: the endpoint of a deployed agent (an OpenAI-compatible chat endpoint, an OpenAI tool-calling endpoint, or a generic JSON HTTP API), linked to an Asset.
+2. **Sensei attacks it**: on demand from the hub, an autonomous attacker runs a multi-turn conversation with the agent, cycling through a library of attack techniques: prompt injection, jailbreaks, system-prompt extraction, tool coercion, indirect injection, data exfiltration, gradual goal-hijacking, improper output handling, retrieval (RAG) injection, and unbounded consumption.
+3. **Each confirmed break becomes a finding**: a dynamic DefectDojo finding recorded against the agent's endpoint, carrying the attack technique, the full attacker/agent transcript, an OWASP LLM risk tag, and a CWE.
+4. **Reconcile on re-scan**: a finding's identity is the technique, the target, and the objective, so re-scanning updates the same findings rather than duplicating them.
 
-Separately, a **runtime-check API** lets your own agent ask DefectDojo to vet a proposed action before it runs — see [Runtime action checks](#runtime-action-checks).
+Separately, a **runtime-check API** lets your own agent ask DefectDojo to vet a proposed action before it runs. See [Runtime action checks](#runtime-action-checks).
 
 ## Requirements
 
 - A **DefectDojo Pro** license that includes the **Sensei** feature, with an **agent-target quota** (`sensei_agent_target_limit`). While in beta, the capability is also gated behind the **`agent_redteam`** feature flag (**Settings > Feature Flags**).
-- An **AI provider configured** for the instance (the same AI Model Settings the rest of Sensei uses) — the attacker is itself LLM-driven.
+- An **AI provider configured** for the instance (the same AI Model Settings the rest of Sensei uses); the attacker is itself LLM-driven.
 - A **reachable agent endpoint**. The attacker makes outbound HTTP calls to it, so the endpoint must be reachable from the Sensei engine.
 - To **onboard** targets and **run scans**: a global **Maintainer** or **Owner** role.
 
@@ -37,24 +37,24 @@ Use **Add Target** in the hub's **AI Agents** tab, give the target a label, link
 | **Adapter** | How the attacker talks to the target: **OpenAI-compatible**, **OpenAI tool calling**, or **Generic JSON** (see below). |
 | **Base URL** | The deployed agent endpoint to attack. |
 | **Auth header** | The header the target credential is sent in. Blank sends it as `Authorization: Bearer <credential>`; set it (e.g. `x-api-key`) to send the raw credential instead. |
-| **Target credential** | The bearer token or API key for the target agent (encrypted at rest). Optional — a target may be unauthenticated. This is **not** the LLM credential the attacker uses. |
+| **Target credential** | The bearer token or API key for the target agent (encrypted at rest). Optional; a target may be unauthenticated. This is **not** the LLM credential the attacker uses. |
 | **Objective** | What the attacker should try to achieve. Leave blank for a general objective (make the agent violate its safety instructions, leak its system prompt, or invoke a restricted tool). |
-| **Mode tier** | How thorough — and how expensive — the attack is: **fast**, **shallow**, **standard**, or **deep**. A deeper tier tries more techniques for more turns and spends more LLM budget. |
+| **Mode tier** | How thorough (and how expensive) the attack is: **fast**, **shallow**, **standard**, or **deep**. A deeper tier tries more techniques for more turns and spends more LLM budget. |
 | **Hints** | Optional free-text notes about the target's architecture (e.g. "uses a retrieval store", "has a delete-account tool") given to the attacker to guide it. |
 
-> **🔐 Credentials are encrypted at rest.** The target credential is stored with DefectDojo's encrypted field storage and is never returned by the API — the UI shows only whether one is set.
+> **🔐 Credentials are encrypted at rest.** The target credential is stored with DefectDojo's encrypted field storage and is never returned by the API. The UI shows only whether one is set.
 
 ### Adapters
 
-**OpenAI-compatible** — for an endpoint that accepts the OpenAI Chat Completions shape. The attacker POSTs the running conversation to `<base URL>/chat/completions` and reads the reply from `choices[0].message.content`. This is the simplest option when your agent already speaks that protocol.
+**OpenAI-compatible**: for an endpoint that accepts the OpenAI Chat Completions shape. The attacker POSTs the running conversation to `<base URL>/chat/completions` and reads the reply from `choices[0].message.content`. This is the simplest option when your agent already speaks that protocol.
 
-**OpenAI tool calling** — the same Chat Completions shape, but the attacker also declares a set of decoy tools (destructive, data-exfiltrating, or safety-disabling operations a well-behaved agent should refuse) and watches for the agent actually **invoking** one. A returned tool call for a restricted tool is recorded as a Critical break — a real unsafe-tool-use signal rather than a match on the agent's chat text. Choose this adapter for an agent that exposes function/tool calling.
+**OpenAI tool calling**: the same Chat Completions shape, but the attacker also declares a set of decoy tools (destructive, data-exfiltrating, or safety-disabling operations a well-behaved agent should refuse) and watches for the agent actually **invoking** one. A returned tool call for a restricted tool is recorded as a Critical break, a real unsafe-tool-use signal rather than a match on the agent's chat text. Choose this adapter for an agent that exposes function/tool calling.
 
-**Generic JSON** — for any JSON HTTP chat API. You provide:
+**Generic JSON**: for any JSON HTTP chat API. You provide:
 
-- A **request template** — the JSON body to POST, with `{{message}}` and `{{session_id}}` placeholders. The attacker substitutes its probe (safely JSON-escaped) for `{{message}}` on each turn.
-- A **response JSON path** — a dotted path to the reply text in the response (for example `data.reply` or `choices.0.message.content`).
-- Optionally, a **session-start template** and **session-id JSON path** — for a stateful API that mints a session id the per-message calls then carry.
+- A **request template**: the JSON body to POST, with `{{message}}` and `{{session_id}}` placeholders. The attacker substitutes its probe (safely JSON-escaped) for `{{message}}` on each turn.
+- A **response JSON path**: a dotted path to the reply text in the response (for example `data.reply` or `choices.0.message.content`).
+- Optionally, a **session-start template** and **session-id JSON path**: for a stateful API that mints a session id the per-message calls then carry.
 
 For example, an agent whose API takes `{"prompt": "..."}` and answers `{"result": {"text": "..."}}` uses request template `{"prompt": "{{message}}"}` and response path `result.text`.
 
@@ -67,27 +67,27 @@ Each imported finding is a confirmed **break**: a technique that got the agent t
 - the **attack technique** as its rule and the first part of its identity,
 - the full **attacker/agent transcript** in its description, so a triager can see exactly how the break was achieved,
 - an **OWASP LLM** risk tag (`owasp-llm01`, `owasp-llm02`, and so on),
-- a **CWE** — prompt injection, jailbreaks, goal-hijacking and retrieval injection map to **CWE-1427**; system-prompt disclosure and data exfiltration to **CWE-200**; unsafe tool use to **CWE-77/78**; improper output handling to **CWE-79**; unbounded consumption to **CWE-400**.
+- a **CWE**: prompt injection, jailbreaks, goal-hijacking and retrieval injection map to **CWE-1427**; system-prompt disclosure and data exfiltration to **CWE-200**; unsafe tool use to **CWE-77/78**; improper output handling to **CWE-79**; unbounded consumption to **CWE-400**.
 
-A scan that breaks nothing is a successful, empty scan — the same way a cloud scan that finds no misconfiguration is a success.
+A scan that breaks nothing is a successful, empty scan, the same way a cloud scan that finds no misconfiguration is a success.
 
 ## Reports and hardening
 
 Each target has a **report** (from its row menu) that gathers what its scans have found: a summary, a **technique-coverage matrix** (every technique the attacker can attempt, and whether the target currently has an open break for it), the breaks with their severity and judge confidence, and the scan history.
 
-For any break, **Suggest hardening** turns the finding into a concrete guardrail suggestion for the agent's *own* system prompt and input handling — the instruction lines to add, how to frame untrusted input, why the attack worked, and the residual risk. It is advice a human reviews and applies (nothing is changed automatically), and it needs a configured Sensei AI provider.
+For any break, **Suggest hardening** turns the finding into a concrete guardrail suggestion for the agent's *own* system prompt and input handling: the instruction lines to add, how to frame untrusted input, why the attack worked, and the residual risk. It is advice a human reviews and applies (nothing is changed automatically), and it needs a configured Sensei AI provider.
 
 ## Runtime action checks
 
-AI Agent Red Teaming also exposes a runtime-defense API your own agent can call while it runs, to vet an action before performing it. This is a **public, token-authenticated** API under `/api/v2/agentsec/runtime/` — use a personal API token, exactly as with the rest of the public API. It is **best-effort advisory**: it tells your agent whether an action looks unsafe given the run's context; it does not sit inline and block the call itself.
+AI Agent Red Teaming also exposes a runtime-defense API your own agent can call while it runs, to vet an action before performing it. This is a **public, token-authenticated** API under `/api/v2/agentsec/runtime/`. Use a personal API token, exactly as with the rest of the public API. It is **best-effort advisory**: it tells your agent whether an action looks unsafe given the run's context; it does not sit inline and block the call itself.
 
 Three endpoints, all `POST`:
 
 | Endpoint | Body | Returns |
 |----------|------|---------|
-| `register_run` | `agent_id`, `system_prompt`, optional `product` | `{ "trace_id": "..." }` — the handle every later call carries. |
+| `register_run` | `agent_id`, `system_prompt`, optional `product` | `{ "trace_id": "..." }`. The handle every later call carries. |
 | `event` | `trace_id`, `type` (`user`/`model_input`/`model_output`/`tool`/`environment`/`memory`/`system`/`error`), `content` | `202 Accepted`. Append-only; builds the context a check reasons over. |
-| `check` | `trace_id`, `action` | `{ "is_safe": bool, "reasoning": "...", "action_check_id": "..." }` — a synchronous verdict on the proposed action. |
+| `check` | `trace_id`, `action` | `{ "is_safe": bool, "reasoning": "...", "action_check_id": "..." }`. A synchronous verdict on the proposed action. |
 
 A check runs a deterministic pass first (refusing known-dangerous patterns outright) and then, when an AI provider is configured, asks it to judge the action against the run's system prompt and recent events.
 
