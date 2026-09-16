@@ -32,6 +32,19 @@ DefectDojo Pro seeds an SLA configuration named **PCI DSS 6.3.3** that encodes t
 
 This configuration is seeded once and is never made the default and never assigned to an Asset automatically. To apply it, assign it to an Asset the same way as any other SLA configuration.
 
+### SLA start policy
+
+Requirement 6.3.3 runs the one-month clock from when a patch was released, not from when the finding happened to be detected. Each SLA configuration therefore carries an **SLA start policy** that chooses which date the clock starts from:
+
+- **Detection date**: the default, and the same behavior as before. The clock starts when the finding was found.
+- **Vulnerability publish date**: the clock starts when the vulnerability was published.
+- **Fix-available date**: the clock starts when a fix became available.
+- **Earliest known**: the clock starts from the earliest of the dates above.
+
+A computed start that would fall after the detection date is clamped to the detection date, so a policy can only tighten the clock, never lengthen it. A start date a user sets by hand is treated as authoritative and the policy never overrides it. Changing a configuration's policy recalculates the start and expiration dates of the findings already under it.
+
+The fix-available date comes from a scanner or connector that reports a fixed version's release date (mapped through the universal parser), and otherwise falls back to the date the fix-available flag was first seen on import.
+
 ## Scope inventory export
 
 The scope inventory export produces the list an assessor reviews under Requirement 12.5.1. It returns every Asset the user is authorized to view, with its scope, component kind, public-facing flag, business criticality, SLA configuration, owner, and the date scope was last confirmed, as a CSV file.
