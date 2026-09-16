@@ -36,7 +36,7 @@ A search box sits at the top of the page. Type a question into it and it lists t
 
 The request form stays hidden until you select **Can't find what you're looking for?** under the box.
 
-The instance's own server reads the published documentation index (see `DOCS_SEARCH_URL` below) and keeps it for an hour. Your browser never calls the documentation site.
+The instance's own server reads the published documentation index at `docs.defectdojo.com` and keeps it for an hour. Your browser never calls the documentation site.
 
 A lookup that fails leaves the form reachable. The box shows no matches and you file the request as normal. A failed lookup is remembered for a minute, so an outage at the documentation site does not slow down every keystroke.
 
@@ -52,14 +52,10 @@ If enrolment is refused for any other reason, the log line names the credential 
 
 ## Airgapped instances
 
-An instance with no route off its network cannot use the support pages at all. Set `DD_AIRGAPPED` and both pages open a dialog that says support tracking is not supported for airgapped instances, with an address to write to instead.
+An instance with no route off its network cannot use the support pages at all. Turn on the **Airgapped instance** feature flag under **Settings → Feature Flags**. Both pages then open a dialog that says support tracking is not supported for airgapped instances, with the DefectDojo support address to write to instead. The flag takes effect on the next page load; no restart is needed.
 
 With the setting on, the instance makes no outbound support call and no documentation call. The dialog opens as soon as the page loads. It does not wait for a call to time out first.
 
 ## Settings
 
-| Setting | Type | Default | What it does |
-| --- | --- | --- | --- |
-| `DD_AIRGAPPED` | boolean | `False` | Blocks both support pages and shows the airgapped dialog. |
-| `SUPPORT_EMAIL` | string | `support@defectdojo.com` | The address the airgapped dialog tells people to write to. |
-| `DOCS_SEARCH_URL` | string | `https://docs.defectdojo.com/search-index.json` | The documentation index the search box reads. |
+The support pages need no environment variables. The one switch, **Airgapped instance**, is a feature flag under **Settings → Feature Flags** (off by default). The dialog address is `support@defectdojo.com`.
