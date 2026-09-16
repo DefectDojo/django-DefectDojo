@@ -3,7 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.paginator import Page, Paginator
-from django.db.models import Count, Min, Q, QuerySet, Subquery
+from django.db.models import Count, Min, Q, QuerySet
 from django.db.utils import DEFAULT_DB_ALIAS
 from django.http import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -14,16 +14,17 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import prefetch_for_findings
 from dojo.finding.ui.filters import (
     FindingFilter,
     FindingFilterWithoutObjectLookups,
     FindingGroupsFilter,
 )
+from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.jira import services as jira_services
 from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
-from dojo.product.queries import get_authorized_products
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
@@ -267,18 +268,7 @@ class ListFindingGroups(View):
             q_objects &= Q(findings__severity__in=valid_severities_for_filter)
         return q_objects
 
-    def get_findings(self, products: QuerySet[Product] | None) -> tuple[QuerySet[Finding], QuerySet[Finding]]:
-        filters: dict = {}
-        if products:
-            filters["test__engagement__product__in"] = products
-        user_findings_qs = Finding.objects.filter(**filters)
-        return user_findings_qs, user_findings_qs.filter(active=True)
-
-    def get_finding_groups(self, request: HttpRequest, products: QuerySet[Product] | None = None) -> QuerySet[Finding_Group]:
-        finding_groups_queryset = Finding_Group.objects.all()
-        if products is not None:
-            user_findings, _ = self.get_findings(products)
-            finding_groups_queryset = finding_groups_queryset.filter(findings__id__in=Subquery(user_findings.values("id"))).distinct()
+    def get_finding_groups(self, request: HttpRequest, finding_groups_queryset: QuerySet[Finding_Group]) -> QuerySet[Finding_Group]:
         request_filters_q = self.filter_check(request)
         finding_groups_queryset = finding_groups_queryset.filter(request_filters_q).distinct()
         finding_groups_queryset = finding_groups_queryset.annotate(
@@ -294,13 +284,10 @@ class ListFindingGroups(View):
         return paginator.get_page(page_number)
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        products = get_authorized_products("view")
-        if request.user.is_superuser:
-            finding_groups = self.get_finding_groups(request)
-        elif products.exists():
-            finding_groups = self.get_finding_groups(request, products)
-        else:
-            finding_groups = Finding_Group.objects.none()
+        authorized_finding_groups = get_authorized_finding_groups(
+            Permissions.Finding_Group_View, user=request.user,
+        )
+        finding_groups = self.get_finding_groups(request, authorized_finding_groups)
 
         paginated_finding_groups = self.paginate_queryset(finding_groups, request)
 
@@ -317,16 +304,14 @@ class ListFindingGroups(View):
 class ListOpenFindingGroups(ListFindingGroups):
     filter_name: str = "Open"
 
-    def get_finding_groups(self, request: HttpRequest, products: QuerySet[Product] | None = None) -> QuerySet[Finding_Group]:
-        finding_groups_queryset = super().get_finding_groups(request, products)
-        _, active_findings = self.get_findings(products)
-        return finding_groups_queryset.filter(findings__id__in=Subquery(active_findings.values("id"))).distinct()
+    def get_finding_groups(self, request: HttpRequest, finding_groups_queryset: QuerySet[Finding_Group]) -> QuerySet[Finding_Group]:
+        finding_groups_queryset = super().get_finding_groups(request, finding_groups_queryset)
+        return finding_groups_queryset.filter(findings__active=True).distinct()
 
 
 class ListClosedFindingGroups(ListFindingGroups):
     filter_name: str = "Closed"
 
-    def get_finding_groups(self, request: HttpRequest, products: QuerySet[Product] | None = None) -> QuerySet[Finding_Group]:
-        finding_groups_queryset = super().get_finding_groups(request, products)
-        _, active_findings = self.get_findings(products)
-        return finding_groups_queryset.exclude(findings__id__in=Subquery(active_findings.values("id"))).distinct()
+    def get_finding_groups(self, request: HttpRequest, finding_groups_queryset: QuerySet[Finding_Group]) -> QuerySet[Finding_Group]:
+        finding_groups_queryset = super().get_finding_groups(request, finding_groups_queryset)
+        return finding_groups_queryset.exclude(findings__active=True).distinct()
