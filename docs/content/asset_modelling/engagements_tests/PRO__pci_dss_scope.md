@@ -7,7 +7,7 @@ weight: 8
 
 The PCI DSS scope features let an organization record how each Asset relates to its cardholder data environment, run a patch clock that matches the Requirement 6.3.3 timeline, and export the scope inventory an assessor asks for under Requirement 12.5.1. These features are additive: they record the entity's own determinations and never decide compliance, which remains the assessor's judgment.
 
-The PCI DSS scope UI is released behind a feature flag. An administrator turns it on per instance from the Feature Flags page before it is generally available.
+The PCI DSS scope features, including their API endpoints, are released behind a feature flag. An administrator turns it on per instance from the Feature Flags page before it is generally available. Until then the regulatory profile and inventory endpoints answer with a 403.
 
 ## PCI DSS scope on an Asset
 
@@ -41,18 +41,20 @@ Requirement 6.3.3 runs the one-month clock from when a patch was released, not f
 - **Fix-available date**: the clock starts when a fix became available.
 - **Earliest known**: the clock starts from the earliest of the dates above.
 
-A computed start that would fall after the detection date is clamped to the detection date, so a policy can only tighten the clock, never lengthen it. A start date a user sets by hand is treated as authoritative and the policy never overrides it. Changing a configuration's policy recalculates the start and expiration dates of the findings already under it.
+A computed start that would fall after the detection date is clamped to the detection date, so a policy can only tighten the clock, never lengthen it. A start date set by hand, through the finding edit form or the API, is authoritative and the policy never overrides it; clearing it hands the start back to the policy. A start date that was already in place before a policy was chosen is treated the same way. Changing a configuration's policy recalculates the start and expiration dates of the findings already under it, in the background.
 
-The fix-available date comes from a scanner or connector that reports a fixed version's release date (mapped through the universal parser), and otherwise falls back to the date the fix-available flag was first seen on import.
+The default detection date policy changes nothing about how a finding's dates are set today.
+
+The fix-available date comes from a scanner or connector that reports a fixed version's release date (mapped through the universal parser). When no such date is known, the fix-available policy falls back to the detection date.
 
 ## Targeted risk analyses
 
 PCI DSS Requirement 12.3.1 asks for a targeted risk analysis behind each frequency or timeframe an entity chooses for itself, such as the medium and low patch windows under Requirement 6.3.3. The **Targeted Risk Analyses** page records these:
 
-- Each analysis cites the requirement it justifies (for example 6.3.3 or 11.3.1.1), names what is protected and the threats, the likelihood and impact, and the decision reached.
-- An analysis is scoped to a product, to an organization, or left entity-wide, and can be linked to the SLA configuration whose frequency it justifies.
-- An analysis moves through draft, approved, and superseded. Approving it records who approved it and sets a review-due date 12 months out, since Requirement 12.3.1 asks for review at least every 12 months.
-- A weekly check raises an alert for each approved analysis whose review is due within 30 days or already overdue, so a review does not lapse unnoticed.
+- Each analysis cites the requirement it justifies (for example 6.3.3, 11.3.1.1, or an Appendix A reference such as A3.2.1), names what is protected and the threats, the likelihood and impact, and the decision reached.
+- An analysis is scoped to one Asset, to one Organization, or left entity-wide, and can be linked to the SLA configuration whose frequency it justifies. The scope is fixed when the analysis is created. Members of the Asset or Organization can read it; editing it takes the same permission as editing the Asset or Organization, and entity-wide analyses are managed by administrators.
+- An analysis moves from draft to approved, and an approved analysis can be superseded. Approving it records who approved it and sets a review-due date 12 months out, since Requirement 12.3.1 asks for review at least every 12 months. A superseded analysis stays closed; record a new draft to replace it.
+- A weekly check alerts the people responsible (the Asset's or Organization's members, or administrators for an entity-wide analysis) when an approved analysis is due for review within 30 days, again when it becomes overdue, and then monthly while it stays overdue.
 
 ## Scope inventory export
 
@@ -60,4 +62,4 @@ The scope inventory export produces the list an assessor reviews under Requireme
 
 ## Filtering by scope
 
-The Asset list can be narrowed by PCI DSS scope and by component kind, so an assessor or owner can pull up, for example, only the Assets in the cardholder data environment.
+The Asset list can be narrowed by PCI DSS scope and by component kind, so an assessor or owner can pull up, for example, only the Assets in the cardholder data environment. An Asset whose scope has never been recorded counts as not assessed, so filtering for not assessed lists everything still waiting on a determination.
