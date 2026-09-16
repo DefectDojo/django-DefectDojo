@@ -58,6 +58,7 @@ from dojo.api_v3.pagination import paginate
 from dojo.api_v3.refs import Ref, to_ref
 from dojo.authorization.authorization import user_has_permission
 from dojo.file_uploads.models import FileUpload
+from dojo.notes.helper import visible_notes
 from dojo.notes.models import NoteHistory, Notes
 from dojo.utils import generate_file_response
 
@@ -208,10 +209,7 @@ def build_notes_router(
     def list_notes(request: HttpRequest, parent_id: int):
         parent = _resolve_parent(request, get_parent_queryset, parent_label, parent_id)
         _require(request, parent, view_permission)
-        # Mirror v2 exactly: return every note incl. private ones. In v2 the notes @action returns
-        # `parent.notes.all()`; `private` only excludes a note from generated reports, it is not a
-        # per-user read filter (§12). `select_related("author")` keeps the list query count flat.
-        notes = parent.notes
+        notes = visible_notes(parent.notes, request.user)
         page_qs = notes.select_related("author").order_by("-date", "-id")
         envelope = paginate(request, count_qs=notes.all(), page_qs=page_qs, serialize=_serialize_note)
         return json_response(envelope)
