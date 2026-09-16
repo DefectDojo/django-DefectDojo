@@ -45,6 +45,15 @@ A computed start that would fall after the detection date is clamped to the dete
 
 The fix-available date comes from a scanner or connector that reports a fixed version's release date (mapped through the universal parser), and otherwise falls back to the date the fix-available flag was first seen on import.
 
+## Targeted risk analyses
+
+PCI DSS Requirement 12.3.1 asks for a targeted risk analysis behind each frequency or timeframe an entity chooses for itself, such as the medium and low patch windows under Requirement 6.3.3. The **Targeted Risk Analyses** page records these:
+
+- Each analysis cites the requirement it justifies (for example 6.3.3 or 11.3.1.1), names what is protected and the threats, the likelihood and impact, and the decision reached.
+- An analysis is scoped to a product, to an organization, or left entity-wide, and can be linked to the SLA configuration whose frequency it justifies.
+- An analysis moves through draft, approved, and superseded. Approving it records who approved it and sets a review-due date 12 months out, since Requirement 12.3.1 asks for review at least every 12 months.
+- A weekly check raises an alert for each approved analysis whose review is due within 30 days or already overdue, so a review does not lapse unnoticed.
+
 ## Scope inventory export
 
 The scope inventory export produces the list an assessor reviews under Requirement 12.5.1. It returns every Asset the user is authorized to view, with its scope, component kind, public-facing flag, business criticality, SLA configuration, owner, and the date scope was last confirmed, as a CSV file.
