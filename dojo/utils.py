@@ -47,7 +47,7 @@ from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.http import FileResponse, HttpResponseRedirect
+from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, reverse
 from django.utils import timezone
@@ -2283,6 +2283,13 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
     # Clean the title by removing some problematic characters
     cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
+    # The database may reference a file that is no longer present on disk (e.g. media
+    # that was never persisted or was removed out of band). Reading file_object.file.size
+    # in that case raises a low-level FileNotFoundError that surfaces as an HTTP 500.
+    # Treat a missing file as a 404 so the caller gets a clean "not found" response.
+    if not Path(file_path).is_file():
+        msg = f"File {cleaned_file_name} could not be found on disk"
+        raise Http404(msg)
 
     return generate_file_response_from_file_path(
         file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
@@ -2295,6 +2302,12 @@ def generate_file_response_from_file_path(
     """Serve an local file in a uniformed way."""
     # Determine the file path
     path = Path(file_path)
+    # Guard against a missing file on disk so callers that pass a raw path (e.g. the
+    # engagement threat model download) also get a clean 404 instead of a low-level
+    # FileNotFoundError bubbling up as an HTTP 500.
+    if not path.is_file():
+        msg = f"File {path.name} could not be found on disk"
+        raise Http404(msg)
     file_path_without_extension = path.parent / path.stem
     file_extension = path.suffix
     # Determine the file name if not supplied
