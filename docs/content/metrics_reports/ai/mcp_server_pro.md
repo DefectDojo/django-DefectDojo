@@ -30,6 +30,15 @@ The DefectDojo Model Context Protocol (MCP) Server enables Large Language Models
 - Valid DefectDojo API token with appropriate permissions
 - AI provider: Claude, ChatGPT, Gemini, or custom MCP-compatible client
 
+#### Enabling the MCP Server
+
+A superuser switches the MCP Server on in either of two places:
+
+- **MCP** in the sidebar (the *DefectDojo MCP Service* page), with the Enabled/Disabled control at the top of the page, or
+- **Settings → Feature Flags**, with the **MCP Server** toggle.
+
+Both control the same setting. While the MCP Server is disabled, every tool call fails with `MCP integration is disabled on this DefectDojo Pro instance`, and the MCP Service page is hidden from non-superusers.
+
 > **⚠️ Security Notice:** Your API token is a highly sensitive piece of information used for authentication and authorization. **DO NOT SHOW THE TOKEN IN ANY REQUESTS OR RESPONSES** when sharing configurations or screenshots.
 
 ### Connection Methods
@@ -72,6 +81,48 @@ All methods use these core parameters:
 | **MCP Endpoint URL** | `https://[YOUR-INSTANCE].defectdojo.com/mcp` | Used for establishing MCP connection |
 | **Base URL for Functions** | `https://[YOUR-INSTANCE].defectdojo.com/` | Used in all tool function calls |
 | **Authentication** | `Authorization: Token [YOUR_API_TOKEN]` | ⚠️ Use "Token" prefix, not "Bearer" |
+
+### Toolsets
+
+The MCP Server groups its tools into **toolsets**. The `core` toolset is what `/mcp` has always served: the read-only finding, Asset, engagement, test, user and group tools, the reference resources, and the two report prompts. It is available as soon as the MCP Server is enabled. Every other toolset is an add-on that an administrator switches on separately and that a client asks for in its connection URL.
+
+#### Enabling toolsets
+
+Toolsets are enabled under **Settings → Feature Flags**, nested below the **MCP Server** toggle. A toolset toggle is only available while the MCP Server is on; switching the MCP Server off disables every toolset with it.
+
+| Toolset | Feature Flag | Also requires |
+|---------|--------------|---------------|
+| `core` | none — always on with the MCP Server | — |
+| `hierarchy` | **MCP: Asset Hierarchy** | the **Asset Hierarchy** feature |
+
+More toolsets appear in the Feature Flags menu as they are released. A toolset's flag only controls what the MCP Server offers: it does not change the REST API, and every tool call still runs with the permissions of the API token that connects.
+
+#### Selecting toolsets in the connection URL
+
+Add a `toolsets` query parameter to the MCP endpoint URL. Names are comma-separated; `core` is always included, so it never needs to be listed.
+
+| Endpoint URL | Tools offered |
+|--------------|---------------|
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp` | `core` only. Unchanged from earlier releases. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy` | `core` plus the Asset Hierarchy toolset. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=all` | `core` plus every toolset enabled on the instance. Requires the `Authorization` header to be sent when connecting, because the server reads the instance's Feature Flags with your token to resolve `all`. |
+
+Any selection with a `toolsets` parameter also offers `get_instance_info`, a tool that reports the DefectDojo Pro version, which toolsets are enabled (`mcp_toolsets_enabled`), each Feature Flag's state, and whether the instance names its objects **Assets / Organizations** or **Products / Product Types**. Ask your assistant to call it when you are unsure which toolsets an instance provides.
+
+The query string goes wherever your client takes the server URL — for the configuration-file clients in the guides below that is the URL argument, for example `"https://your-instance.defectdojo.com/mcp?toolsets=hierarchy"` in place of the plain `/mcp` URL. `mcp-remote`, Claude Code, Cursor, VS Code and other Streamable HTTP clients pass the query string through unchanged.
+
+#### When a connection is refused
+
+The MCP Server answers the connection request with a plain-text error instead of a session when it cannot serve the selection:
+
+| Status | Meaning | What to do |
+|--------|---------|------------|
+| `400` | Unknown toolset name, an empty list, `all` mixed with names, or `toolsets` given twice. The body lists the valid names. | Fix the URL. |
+| `401` | `toolsets=all` without an `Authorization` header. | Send the header, or list the toolsets explicitly. |
+| `403` | `toolset '<name>' is not enabled on this DefectDojo Pro instance`. The toolset's Feature Flag is off. Checked when the connection carries an `Authorization` header; a connection without one is accepted and the same check runs on each tool call instead. | Ask an administrator to enable it under **Settings → Feature Flags**, or remove it from the URL. |
+| `503` | The MCP Server could not read the instance's Feature Flags (DefectDojo unavailable or the token was rejected). It never silently falls back to `core`. | Check the instance and the token, then reconnect. |
+
+If a toolset is switched off while a session is open, its tools stay listed but each call returns an error naming the toolset and its Feature Flag. Reconnect after the flag is enabled again.
 
 ## Quick Start Guides by AI Provider
 
@@ -294,9 +345,9 @@ This will start a local web server (usually at `http://localhost:6274`)
 
 Once connected, you can explore:
 
-- **Tools tab:** View all 12 available tools and their parameters
-- **Prompts tab:** See pre-configured prompt templates
-- **Resources tab:** Check available data resources
+- **Tools tab:** View all 18 `core` tools and their parameters (19 when the URL carries a `toolsets` parameter, plus any add-on toolsets you selected)
+- **Prompts tab:** See the 2 pre-configured prompt templates
+- **Resources tab:** Check the 6 reference data resources
 
 > **✅ Perfect for:** Verifying your configuration works before setting up AI assistants, exploring tool capabilities, and troubleshooting connection issues.
 
@@ -310,9 +361,11 @@ Once connected, you can explore:
 
 ## Available Tools Reference
 
-The DefectDojo MCP Server provides 14 tools for accessing and analyzing vulnerability data. Each tool includes intelligent parameter handling and returns structured data optimized for LLM analysis.
+The `core` toolset of the DefectDojo MCP Server provides 18 tools for accessing and analyzing vulnerability data, 6 reference resources, and 2 pre-configured prompts. Each tool includes intelligent parameter handling and returns structured data optimized for LLM analysis. Connections that select toolsets in the URL (see [Toolsets](#toolsets)) also receive `get_instance_info`, and add-on toolsets contribute their own tools on top of the ones listed here.
 
 > **💡 Parameter Note:** All tools accept an optional `token` parameter. If not provided in individual calls, the LLM will use the token from the connection configuration.
+
+> **💡 Pagination Note:** Every list tool accepts `limit` (1–1000, default 100) and `offset` (minimum 0, default 0). Every `*_by_id` tool takes a single required numeric ID (minimum 1).
 
 ---
 
@@ -531,6 +584,41 @@ finding_summary({
 - **Default:** 0
 - **Usage:** Pagination offset.
 
+**name** (Optional)
+- **Type:** String
+- **Usage:** Filter Assets by name.
+
+**business_criticality** (Optional)
+- **Type:** Array
+- **Values:** `Very High`, `High`, `Medium`, `Low`, `Very Low`
+
+**platform** (Optional)
+- **Type:** Array
+- **Values:** `API`, `Desktop`, `Internet of Things`, `Mobile`, `Web`
+
+**lifecycle** (Optional)
+- **Type:** Array
+- **Values:** `Construction`, `Production`, `Retirement`
+
+**external_audience** (Optional)
+- **Type:** Boolean string (`true` / `false`)
+
+**internet_accessible** (Optional)
+- **Type:** Boolean string (`true` / `false`)
+
+</details>
+
+<details>
+<summary><h4>get_product_by_id</h4></summary>
+
+**Description:** Retrieve one Asset by its ID, including its `prod_type` (the owning Organization). Use it to resolve the Asset that owns an engagement without paging through `get_products`.
+
+**Parameters:**
+
+**product_id** (Required)
+- **Type:** Number
+- **Minimum:** 1
+
 </details>
 
 <details>
@@ -538,7 +626,20 @@ finding_summary({
 
 **Description:** Retrieve Organizations from DefectDojo. Organizations help organize Assets into logical groupings.
 
-**Parameters:** Same as `get_products`
+**Parameters:** `limit` and `offset` only.
+
+</details>
+
+<details>
+<summary><h4>get_product_type_by_id</h4></summary>
+
+**Description:** Retrieve one Organization by its ID.
+
+**Parameters:**
+
+**product_type_id** (Required)
+- **Type:** Number
+- **Minimum:** 1
 
 </details>
 
@@ -547,7 +648,27 @@ finding_summary({
 
 **Description:** Retrieve security testing engagements. Engagements represent specific testing activities or time periods for an Asset.
 
-**Parameters:** Same as `get_products`
+**Parameters:**
+
+**limit** / **offset** (Optional) — as for `get_products`.
+
+**product_id** (Optional)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** Only return engagements belonging to this Asset.
+
+</details>
+
+<details>
+<summary><h4>get_engagement_by_id</h4></summary>
+
+**Description:** Retrieve one engagement by its ID. The response's `product` field is the owning Asset, so a finding's `engagement_id` can be walked up to its Asset with one call.
+
+**Parameters:**
+
+**engagement_id** (Required)
+- **Type:** Number
+- **Minimum:** 1
 
 </details>
 
@@ -556,9 +677,31 @@ finding_summary({
 
 **Description:** Retrieve security tests from DefectDojo. Tests contain scan results from specific security tools or manual testing.
 
-**Parameters:** Same as `get_products`
+**Parameters:**
+
+**limit** / **offset** (Optional) — as for `get_products`.
+
+**engagement_id** (Optional)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** Only return tests belonging to this engagement.
 
 </details>
+
+<details>
+<summary><h4>get_test_by_id</h4></summary>
+
+**Description:** Retrieve one test by its ID. The response's `engagement` field is the owning engagement.
+
+**Parameters:**
+
+**test_id** (Required)
+- **Type:** Number
+- **Minimum:** 1
+
+</details>
+
+> **💡 Walking the object graph:** Finding → `get_test_by_id` → `get_engagement_by_id` → `get_product_by_id` → `get_product_type_by_id` resolves a finding's owning test, engagement, Asset and Organization with four direct calls instead of paging the list tools.
 
 ---
 
@@ -576,6 +719,18 @@ finding_summary({
 
 **offset** (Optional)
 - **Default:** 0
+
+**username** (Optional)
+- **Type:** String
+
+**email** (Optional)
+- **Type:** String
+
+**is_active** (Optional)
+- **Type:** Boolean string (`true` / `false`)
+
+**is_superuser** (Optional)
+- **Type:** Boolean string (`true` / `false`)
 
 </details>
 
@@ -597,7 +752,13 @@ finding_summary({
 
 **Description:** Retrieve user groups for organizational structure analysis and permission mapping.
 
-**Parameters:** Same as `get_users`
+**Parameters:**
+
+**limit** / **offset** (Optional) — as for `get_users`.
+
+**name** (Optional)
+- **Type:** String
+- **Usage:** Filter groups by name.
 
 </details>
 
@@ -617,13 +778,19 @@ finding_summary({
 <details>
 <summary><h4>get_dojo_group_members</h4></summary>
 
-**Description:** Retrieve all members of a specific group for team analysis.
+**Description:** Retrieve group memberships for team analysis. Filter by group to list a group's members, by user to list the groups a user belongs to, or leave both out to page through every membership.
 
 **Parameters:**
 
-**group_id** (Required)
+**group_id** (Optional)
 - **Type:** Number
 - **Minimum:** 1
+- **Usage:** Only return memberships of this group.
+
+**user_id** (Optional)
+- **Type:** Number
+- **Minimum:** 1
+- **Usage:** Only return memberships of this user.
 
 **limit** (Optional)
 - **Default:** 100
@@ -638,9 +805,26 @@ finding_summary({
 
 **Description:** Retrieve role definitions from DefectDojo for understanding permission structures.
 
-**Parameters:** Same as `get_users`
+**Parameters:** `limit` and `offset` only.
 
 </details>
+
+---
+
+## Reference Resources
+
+The `core` toolset publishes 6 read-only JSON resources (MIME type `application/json`). They are reference material bundled with the MCP Server, not data from your DefectDojo instance, and are available without any tool call so an assistant can map findings to a standard or explain a regulatory obligation while it reports.
+
+| Resource | URI | Contents |
+|----------|-----|----------|
+| `eu-cyber-resilience-act` | `mcp://resource/eu_cyber_resilience_act.json` | EU Cyber Resilience Act (CRA) |
+| `owasp-top-10-2025` | `mcp://resource/owasp_top_10_2025.json` | OWASP Top 10 (2025) |
+| `cwe-to-owasp-top-10-2025` | `mcp://resource/cwe_to_owasp_2025_mapping.json` | Mapping of CWE to OWASP Top 10 (2025) |
+| `owasp-agentic-top-10-2026` | `mcp://resource/owasp_agentic_top_10_2026.json` | OWASP Agentic Top 10 (2026) |
+| `owasp-top-10-2021` | `mcp://resource/owasp_top_10_2021.json` | OWASP Top 10 (2021) |
+| `cwe-to-owasp-top-10-2021` | `mcp://resource/cwe_to_owasp_2021_mapping.json` | Mapping of CWE to OWASP Top 10 (2021) |
+
+Ask your assistant to read a resource by URI (for example, "read `mcp://resource/cwe_to_owasp_2025_mapping.json` and group our open findings by OWASP category") when a report should cite a standard.
 
 ---
 
@@ -974,6 +1158,18 @@ Verify these items when experiencing connection issues:
 2. Ensure Authorization header toggle is ENABLED (turned ON)
 3. Verify token is still valid in DefectDojo (Admin → API Tokens)
 4. Check token has appropriate permissions for read access
+
+---
+
+#### ❌ "toolset 'hierarchy' is not enabled on this DefectDojo Pro instance"
+
+**Cause:** The connection URL asks for a toolset whose Feature Flag is off, or the MCP Server itself is disabled.
+
+**Solutions:**
+
+1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature)
+2. Or remove the toolset from the `toolsets` parameter and reconnect
+3. Ask your assistant to call `get_instance_info` to see which toolsets the instance has enabled
 
 ---
 
