@@ -139,6 +139,9 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object 
     auto = AutoCreateContextManager()
     context = {
         "scan_type": payload.scan_type,
+        # The auto branch dispatches on this id, so the check has to resolve the target the same
+        # way execution does.
+        "engagement": payload.engagement,
         "product_name": payload.asset_name,
         "engagement_name": payload.engagement_name,
         "product_type_name": payload.organization_name,
