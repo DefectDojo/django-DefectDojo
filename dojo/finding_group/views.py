@@ -257,9 +257,9 @@ class ListFindingGroups(View):
         if name_filter:
             q_objects &= Q(name__icontains=name_filter)
         if product_filter:
-            q_objects &= Q(findings__test__engagement__product__id__in=product_filter)
+            q_objects &= Q(test__engagement__product__id__in=product_filter)
         if engagement_filter:
-            q_objects &= Q(findings__test__engagement__id__in=engagement_filter)
+            q_objects &= Q(test__engagement__id__in=engagement_filter)
         if min_severity_filter:
             min_severity_order_value = self.SEVERITY_ORDER.get(min_severity_filter, -1)
             valid_severities_for_filter = [

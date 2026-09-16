@@ -699,6 +699,8 @@ class TestGetAuthorizedFindingGroups(AuthorizationQueriesTestBase):
             test=cls.test_2,
             defaults={"creator": cls.superuser},
         )
+        cls.finding_group_1.findings.clear()
+        cls.finding_group_2.findings.clear()
         cls.open_finding_group_1, _ = Finding_Group.objects.get_or_create(
             name="Auth Test Open Finding Group 1",
             test=cls.test_1,
@@ -730,9 +732,9 @@ class TestGetAuthorizedFindingGroups(AuthorizationQueriesTestBase):
         self.assertIn(self.finding_group_1, finding_groups)
         self.assertNotIn(self.finding_group_2, finding_groups)
 
-    def _listed_finding_groups(self, user, view_name="all_finding_groups"):
+    def _listed_finding_groups(self, user, view_name="all_finding_groups", query=None):
         self.client.force_login(user)
-        response = self.client.get(reverse(view_name))
+        response = self.client.get(reverse(view_name), query or {})
         self.assertEqual(response.status_code, 200)
         return list(response.context["finding_groups"].object_list)
 
@@ -748,6 +750,38 @@ class TestGetAuthorizedFindingGroups(AuthorizationQueriesTestBase):
 
     def test_user_without_permissions_sees_no_finding_groups_in_list(self):
         finding_groups = self._listed_finding_groups(self.user_no_perms)
+        self.assertNotIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_product_filter_includes_authorized_finding_group_without_findings(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_product_member,
+            query={"product": self.product_1.id},
+        )
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_engagement_filter_includes_authorized_finding_group_without_findings(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_product_member,
+            query={"engagement": self.engagement_1.id},
+        )
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_product_filter_excludes_unauthorized_finding_groups(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_no_perms,
+            query={"product": self.product_1.id},
+        )
+        self.assertNotIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_engagement_filter_excludes_unauthorized_finding_groups(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_no_perms,
+            query={"engagement": self.engagement_1.id},
+        )
         self.assertNotIn(self.finding_group_1, finding_groups)
         self.assertNotIn(self.finding_group_2, finding_groups)
 
