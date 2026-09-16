@@ -8,6 +8,7 @@ for various user permission scenarios.
 from unittest.mock import patch
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.models import (
@@ -715,6 +716,27 @@ class TestGetAuthorizedFindingGroups(AuthorizationQueriesTestBase):
         """User with product membership should get only that product's finding groups"""
         finding_groups = get_authorized_finding_groups(Permissions.Finding_Group_View, user=self.user_product_member)
         self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def _listed_finding_groups(self, user):
+        self.client.force_login(user)
+        response = self.client.get(reverse("all_finding_groups"))
+        self.assertEqual(response.status_code, 200)
+        return list(response.context["finding_groups"].object_list)
+
+    def test_superuser_sees_all_finding_groups_in_list(self):
+        finding_groups = self._listed_finding_groups(self.superuser)
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertIn(self.finding_group_2, finding_groups)
+
+    def test_product_member_sees_authorized_finding_groups_in_list(self):
+        finding_groups = self._listed_finding_groups(self.user_product_member)
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_user_without_permissions_sees_no_finding_groups_in_list(self):
+        finding_groups = self._listed_finding_groups(self.user_no_perms)
+        self.assertNotIn(self.finding_group_1, finding_groups)
         self.assertNotIn(self.finding_group_2, finding_groups)
 
 
