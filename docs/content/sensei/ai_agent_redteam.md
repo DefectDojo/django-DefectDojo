@@ -71,6 +71,14 @@ Each imported finding is a confirmed **break**: a technique that got the agent t
 
 A scan that breaks nothing is a successful, empty scan, the same way a cloud scan that finds no misconfiguration is a success.
 
+### Schedule recurring scans
+
+Instead of running a scan by hand each time, you can put a target on a recurring schedule. Open the target's row menu, choose **Schedule scans**, and set a cadence. A scheduled scan takes the same path a manual one does, so it respects the same requirements: a disabled target, or one with no endpoint, records a failed run rather than silently skipping.
+
+An agent scan is capped at **once per day**. A red-team scan drives an LLM through many turns against a live endpoint, so it is deliberately more conservative than the hourly cadence the other capabilities allow, and an agent's behavior does not usually change on an hourly timescale.
+
+The **Schedule scans** action appears only when the scheduling service is enabled on your instance. If you do not see it, ask your DefectDojo administrator whether the scheduling service is turned on.
+
 ## Reports and hardening
 
 Each target has a **report** (from its row menu) that gathers what its scans have found: a summary, a **technique-coverage matrix** (every technique the attacker can attempt, and whether the target currently has an open break for it), the breaks with their severity and judge confidence, and the scan history.
