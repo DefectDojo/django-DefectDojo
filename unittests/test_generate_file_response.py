@@ -38,7 +38,10 @@ class TestGenerateFileResponse(DojoTestCase):
                 FileResponse,
                 msg=f"expected FileResponse when the file exists at {disk_path}",
             )
-            response.close()
+            # Close the underlying file handle directly. response.close() would emit
+            # Django's request_finished signal, whose close_old_connections handler closes
+            # this TestCase's DB connection and breaks the remaining tests in the class.
+            response.file_to_stream.close()
         else:
             # Previously raised FileNotFoundError -> HTTP 500; must now be Http404.
             with self.assertRaises(
@@ -61,7 +64,10 @@ class TestGenerateFileResponse(DojoTestCase):
                 FileResponse,
                 msg=f"expected FileResponse when the file exists at {disk_path}",
             )
-            response.close()
+            # Close the underlying file handle directly. response.close() would emit
+            # Django's request_finished signal, whose close_old_connections handler closes
+            # this TestCase's DB connection and breaks the remaining tests in the class.
+            response.file_to_stream.close()
         else:
             self.assertFalse(
                 Path(disk_path).is_file(),
