@@ -2308,11 +2308,13 @@ def generate_file_response_from_file_path(
     if not path.is_file():
         msg = f"File {path.name} could not be found on disk"
         raise Http404(msg)
-    file_path_without_extension = path.parent / path.stem
     file_extension = path.suffix
-    # Determine the file name if not supplied
+    # Determine the file name if not supplied. path.stem is the final path component
+    # without its extension (the previous Path.rsplit call raised AttributeError, so this
+    # branch — reached e.g. by the engagement threat-model download, which passes no
+    # file_name — always 500'd).
     if file_name is None:
-        file_name = file_path_without_extension.rsplit("/")[-1]
+        file_name = path.stem
     # Determine the file size if not supplied
     if file_size is None:
         file_size = pathlib.Path(file_path).stat().st_size
