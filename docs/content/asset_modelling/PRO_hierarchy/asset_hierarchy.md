@@ -26,9 +26,9 @@ Asset Hierarchy is generally available and on for every instance, Cloud and On-P
 Label changes are on by default as of 3.0. There are two controls, covering different parts of the application:
 
 * **Pro UI** (the default UI): a superuser toggles "Organization / Asset Relabeling" at **Settings > Feature Flags**, on both Cloud and On-Premise instances. The new labels appear on the next page load. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
-* **Classic UI pages and generated reports**: their labels and URLs come from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting, which is read when DefectDojo starts. On-premise, set it and restart DefectDojo. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), email [support@defectdojo.com](mailto:support@defectdojo.com) with your instance URL.
+* **Classic UI pages and generated reports**: their labels and URLs are decided when DefectDojo starts, so they follow the same toggle after the next restart. On-premise, restart DefectDojo after changing the toggle. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), email [support@defectdojo.com](mailto:support@defectdojo.com) with your instance URL if you need a restart scheduled.
 
-Both default to on, and the Feature Flags value was seeded from the deployment setting, so the two agree unless you change one of them. Keep them in sync if you use the Classic UI as well as the Pro UI.
+The toggle is on by default. Its stored value was seeded from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting on upgrade; from then on the database owns it, and the setting is only a fallback for when the database cannot be reached at start-up.
 
 Note that label changes are cosmetic only: API endpoints and field names remain unchanged, so existing automation will continue to work.
 
