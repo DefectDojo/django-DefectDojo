@@ -88,13 +88,6 @@ def _resolve_engagement_for_import(request: HttpRequest, payload: ImportForm) ->
         raise validation_problem(
             {"engagement": ["Need engagement or asset_name + engagement_name to perform import"]},
         )
-    _require_permission(
-        allowed=check_auto_create_permission(
-            request.user, None, payload.asset_name, None, payload.engagement_name, None,
-            payload.organization_name,
-            "Need engagement or asset_name + engagement_name to perform import",
-        ),
-    )
     auto = AutoCreateContextManager()
     context = {
         "product_name": payload.asset_name,
@@ -103,6 +96,17 @@ def _resolve_engagement_for_import(request: HttpRequest, payload: ImportForm) ->
         "auto_create_context": payload.auto_create_context,
     }
     auto.process_import_meta_data_from_dict(context)
+    # The names below are resolved before the check, so an existing target is authorized as the
+    # object it is rather than as a target that does not exist yet.
+    context["product"] = auto.get_target_product_if_exists(**context)
+    context["engagement"] = auto.get_target_engagement_if_exists(**context)
+    _require_permission(
+        allowed=check_auto_create_permission(
+            request.user, context.get("product"), payload.asset_name, context.get("engagement"),
+            payload.engagement_name, None, payload.organization_name,
+            "Need engagement or asset_name + engagement_name to perform import",
+        ),
+    )
     return auto.get_or_create_engagement(**context)
 
 

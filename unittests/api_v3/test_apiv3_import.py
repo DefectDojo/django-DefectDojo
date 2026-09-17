@@ -190,3 +190,59 @@ class TestApiV3ImportAuthz(ApiV3TestCase):
         finding.refresh_from_db()
         self.assertTrue(finding.active)
         self.assertEqual(1, Finding.objects.filter(test__engagement=self.engagement).count())
+
+    def _post_import_mode(self, **overrides):
+        scan = SimpleUploadedFile(
+            "scan.json",
+            b'{"findings":[{"title":"injected","severity":"High","description":"x"}]}',
+            content_type="application/json",
+        )
+        payload = {
+            "scan_type": _GENERIC,
+            "mode": "import",
+            "auto_create_context": "true",
+            "asset_name": self.engagement.product.name,
+            "organization_name": self.engagement.product.prod_type.name,
+            "engagement_name": "authz probe engagement",
+            "file": scan,
+        }
+        payload.update(overrides)
+        return self.token_client(user=self.outsider).post(
+            self.v3_url("import"), payload, format="multipart",
+        )
+
+    def test_import_mode_rejects_existing_asset_by_name(self):
+        response = self._post_import_mode()
+        self.assertEqual(403, response.status_code, response.content[:400])
+        self.assertFalse(
+            Engagement.objects.filter(product=self.engagement.product, name="authz probe engagement").exists(),
+        )
+
+    def test_import_mode_rejects_close_old_findings_on_existing_asset(self):
+        test = Test.objects.create(
+            engagement=self.engagement,
+            test_type=Test_Type.objects.get_or_create(name=_GENERIC)[0],
+            scan_type=_GENERIC,
+            target_start=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC),
+            target_end=datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC),
+        )
+        finding = Finding.objects.create(
+            test=test, title="existing", severity="High", description="x",
+            active=True, verified=False, reporter=self.admin,
+        )
+
+        response = self._post_import_mode(
+            close_old_findings="true", close_old_findings_product_scope="true",
+        )
+
+        self.assertEqual(403, response.status_code, response.content[:400])
+        finding.refresh_from_db()
+        self.assertTrue(finding.active)
+        self.assertFalse(finding.is_mitigated)
+
+    def test_import_mode_still_allows_auto_create_of_a_new_asset(self):
+        response = self._post_import_mode(
+            asset_name="authz brand new asset",
+            organization_name="authz brand new org",
+        )
+        self.assertEqual(200, response.status_code, response.content[:400])
