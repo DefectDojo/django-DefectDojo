@@ -51,4 +51,5 @@ purpose.
 | [Remediation Deadlines](remediation_slas) | The FedRAMP Rev 5 and FedRAMP VDR SLA presets |
 | [Potential Agency Impact (PAIN) Ratings](pain_ratings) | Rating findings on FedRAMP's N-scale, and the Class C deadline matrix |
 | [CMMC Level 2 Assessments](cmmc_assessments) | Scoring a self-assessment against NIST 800-171 Rev 2 |
+| [CRA and DORA Evidence Packs](eu_evidence_packs) | Assessing an Asset against authored EU regulatory catalogs and exporting its evidence |
 | [Control Coverage](control_coverage) | Which 800-53 controls your scanners test, and open weaknesses per control |
