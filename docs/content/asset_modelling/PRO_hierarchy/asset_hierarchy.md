@@ -181,6 +181,17 @@ Where an Asset's parent has not been loaded, a **Load Parents** button appears a
 
 Where an Asset has more children than the diagram is currently showing, a **Load** button appears below it, together with a choice of how many to add at a time.
 
+## Suggested edges from container evidence
+
+When [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/) are enabled, DefectDojo can notice a deployment relationship nobody has drawn: an image whose repository belongs to one asset is seen running in another, and no **deploys to** edge joins the two. Each such pair appears as a **suggested edge** on the hierarchy page, with the images as evidence.
+
+- A banner at the top of the page counts the open suggestions. **Review** opens the list.
+- **Accept** draws the deploys-to edge from the asset that built the image to the asset that runs it. Because deploys-to propagates exposure, the deployed asset then inherits its host's exposure when you read it; finding priority is unaffected, since it runs on the asset's own exposure.
+- **Dismiss** suppresses the pair. Further images for the same pair are counted but do not reopen it. A dismissed suggestion can be reopened from the same dialog.
+- Accepted edges carry their own origin (container evidence), so they can be told apart from edges people drew and from connector-declared ones.
+
+Suggestions are never accepted automatically, and they are only offered within one organization while deploys-to stays a same-organization relationship. Reviewing requires the Asset Hierarchy view permission; deciding requires the edit permission plus edit access to both assets.
+
 ## Notes
 
 * Note that deduplication scopes have not changed; Assets only deduplicate Findings within themselves, and do not consider Findings in other Assets, regardless of Parent/Child relationships.

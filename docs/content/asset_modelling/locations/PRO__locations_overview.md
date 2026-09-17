@@ -22,8 +22,9 @@ Locations fix all three by introducing a **base `Location` object** with a typed
 - **URL Locations** — functional equivalent of the old Endpoints, with the same protocol/host/port/path/query/fragment fields.
 - **Dependency Locations** — software libraries identified by [Package URL (pURL)](https://github.com/package-url/purl-spec), used to model SBOM contents.
 - **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
+- **[Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)**: the container image a finding was found in, identified by registry, repository and digest, together with the assets that run it and the repository that built it. Scan-managed, behind its own flag.
 
-Future Location types under consideration include cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) and container images (registry/repository:tag and SHA256 fingerprints).
+Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and container images as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
 
 ## Key Concepts
 
