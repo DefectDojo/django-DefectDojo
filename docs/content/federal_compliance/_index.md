@@ -50,5 +50,6 @@ purpose.
 | [ConMon Snapshots](conmon_snapshots) | Monthly deliverables in FedRAMP Excel and OSCAL, and the optional OSCAL validation service |
 | [Remediation Deadlines](remediation_slas) | The FedRAMP Rev 5 and FedRAMP VDR SLA presets |
 | [Potential Agency Impact (PAIN) Ratings](pain_ratings) | Rating findings on FedRAMP's N-scale, and the Class C deadline matrix |
+| [Setting Up PAIN Ratings](pain_ratings_setup) | A step-by-step walkthrough: turn tiering on, assign a rating, and check the deadlines against the matrix |
 | [CMMC Level 2 Assessments](cmmc_assessments) | Scoring a self-assessment against NIST 800-171 Rev 2 |
 | [Control Coverage](control_coverage) | Which 800-53 controls your scanners test, and open weaknesses per control |

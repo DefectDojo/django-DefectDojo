@@ -11,7 +11,8 @@ from the internet, and how much damage its exploitation would do to the agencies
 That third factor is the **Potential Agency Impact N-rating**, or PAIN.
 
 This page covers the rating, how it changes a deadline, and how to assign ratings at scale. For the
-SLA presets that carry the matrix, see [Remediation Deadlines](../remediation_slas).
+SLA presets that carry the matrix, see [Remediation Deadlines](../remediation_slas). To switch it on
+and check the result step by step, see [Setting Up PAIN Ratings](../pain_ratings_setup).
 
 ## The N-rating scale
 
