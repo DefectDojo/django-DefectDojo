@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Triage Engine ships 41 nodes in five categories. This page documents all of them.
+Triage Engine ships 43 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -101,6 +101,93 @@ ctx.never_imported            true when this asset has never received this scan 
 ```
 
 Wire these into **Egress** nodes — a Slack message, an email, a JIRA issue, a batched digest. Wiring them into a **Findings** node is harmless but pointless: there is no Finding to change, so the node does nothing.
+
+### When a Scan Has Landed
+
+`trigger.import`
+
+Runs once for each scan import that finishes, or fails, on an asset in scope. Every way a scan reaches DefectDojo counts: an upload in the UI, an import or reimport through the API, a background import, and a connector sync (one event for the whole sync, however many chunks carried it). The trigger fires after the import has finished writing: findings persisted, old findings closed, import history recorded, post-processing run.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Event** | `completed` | `completed`, `failed`, or either. A failed import is one that raised before or while writing; a parser error counts, and it is announced even when no test was created. |
+| **Scope** | empty | Which assets this rule watches imports on, in the Assets list's vocabulary. Empty is every asset the rule owner can see. |
+| **Engagements** | empty | Narrow to imports into these engagements. Empty watches every engagement of the assets in scope. |
+| **Scan Types** | empty | Scan type names to react to, as a list. Empty reacts to every scan type. |
+
+It emits **one item per import**. The item has no Finding (every `finding.*` path is empty), and carries the test, engagement and asset in their usual places, so templates written for Findings keep working. The import specifics are on `ctx`:
+
+```
+ctx.import_outcome        success, empty (the report carried no findings), or failed
+ctx.import_kind           import, reimport, or connector_sync
+ctx.import_error          the failure message, for a failed import
+ctx.findings_created      findings the import created
+ctx.findings_closed       findings it closed
+ctx.findings_reactivated  findings it reactivated
+ctx.findings_untouched    findings it left as they were
+ctx.build_id              the build id the import was submitted with, if any
+ctx.commit_hash           the commit, if any
+ctx.branch_tag            the branch or tag, if any
+ctx.version               the version, if any
+ctx.test_ids              the test the import wrote, for the report node's "triggering imports" scope
+```
+
+### When a Group of Scans Has Landed
+
+`trigger.import_group`
+
+Waits for a set of scan types to finish importing into an asset, then fires **once** for the whole group. It has two outputs: `complete` when every expected scan arrived, `incomplete` when the group gave up with scans still missing or failed. Wire the action for a finished pipeline (typically **Generate a Report**) to `complete`, and whatever should happen when the pipeline did not finish (an email naming the missing scans, or nothing) to `incomplete`.
+
+A group is three separate decisions, and the settings keep them apart: **which scans make up the group**, **which arrivals belong together**, and **when it is safe to act**.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Scope** | empty | Which assets this rule watches, in the Assets list's vocabulary. Each asset waits for its own group. |
+| **Engagements** | empty | Narrow to these engagements. When set, each engagement waits for its own group instead of the asset as a whole. |
+| **Expected Scans** | `The scan types listed below` | Or `Every scan type seen recently`: the group is whatever scan types the asset has received within the lookback. That finds a scanner that stopped, but cannot find one that was never wired up. |
+| **Scan Types** | empty | The group, as a list of scan type names. A member may instead be an object `{"scan_type": "ZAP Scan", "required": false, "on_failure": "count_as_arrived"}` to make it optional or give it its own failure policy. |
+| **Lookback (days)** | `30` | Shown for **Every scan type seen recently**. How far back to look for the scan types the asset receives. |
+| **Group Imports By** | `Arrival time only` | With a key (`Build ID`, `Commit hash`, `Branch or tag`, or `A test tag`), imports sharing the same value wait together and different values wait separately. Without one, the first arrival opens the group and later arrivals of missing scan types join it. |
+| **Tag Prefix** | empty | Shown for **A test tag**. Only test tags starting with this correlate, for example `pipeline:`. |
+| **Gives Up** | `After the maximum wait` | Or `At each tick of this rule's schedule`: every tick closes whatever is open, incomplete if scans are still missing. The schedule option needs a schedule on the rule. |
+| **Maximum Wait (minutes)** | `1440` | Shown for **After the maximum wait**. How long after the first arrival the group waits for the rest before firing `incomplete`. Set it a little longer than the slowest scanner takes to report. |
+| **Settle (minutes)** | `2` | A quiet period after the last expected scan lands before the rule fires, so a report is not built while that import is still being deduplicated. Zero fires as soon as the last scan lands. |
+| **When a Scan Fails** | `Keep waiting for the deadline` | What a failed import of an expected scan type does to the group. See below. |
+
+**How a group waits.** The first expected scan to land opens a *cycle* for its asset (and engagement, when narrowed; and correlation key, when grouping by one). Each further expected scan is recorded in that cycle; a scan type that lands twice keeps the latest import, so an hourly scanner and a daily one in the same group produce "the latest hourly result at the moment the daily one landed". When every required scan has arrived and the settle delay has passed, the cycle closes `complete`. When the maximum wait passes first, or the rule's schedule ticks (for **At each tick of this rule's schedule**), it closes `incomplete`. A scan landing after the cycle closed opens the next one. Pressing **Run** on the rule closes every open cycle as it stands, which is how you fire a group that is never going to complete.
+
+**When a scan fails.** A failed import of an expected scan type is recorded against the cycle, and what happens next is the policy:
+
+| Policy | Effect |
+|--------|--------|
+| **Keep waiting for the deadline** | The failure is recorded and the group keeps waiting. A retry that lands replaces it. At the deadline the rule fires `incomplete`, and the items say which scans failed and which never came. |
+| **Fire incomplete immediately** | The cycle closes `incomplete` the moment a scan fails. |
+| **Count it as arrived** | The failed scan satisfies the group; the cycle can complete, and the items still say which scan failed. |
+
+A member listed as an object may override the rule's policy for itself. An optional member (`"required": false`) never blocks completion and never triggers a failure policy; it is simply included if it arrives.
+
+**What the items look like.** The rule fires with **one item per expected scan type**, arrived or not. Like a missing-scan item, each has an empty Finding block; the test, engagement and asset are filled in for scans that arrived and empty for scans that did not. Every item carries the whole cycle on `ctx`, so a template on any of them can describe the group:
+
+```
+ctx.cycle_status        complete or incomplete
+ctx.import_summary      one line, for example "3 of 4 feeds arrived; missing: ZAP Scan"
+ctx.expected_count      how many scan types the group expects
+ctx.arrived_count       how many arrived
+ctx.missing_count       how many never came
+ctx.failed_count        how many failed
+ctx.arrived_members     the scan types that arrived, as a list
+ctx.missing_members     the scan types that never came
+ctx.failed_members      the scan types whose import failed
+ctx.test_ids            the tests the arrived scans wrote
+ctx.member_scan_type    this item's scan type
+ctx.member_status       this item's scan: arrived, failed, or missing
+ctx.member_outcome      success, empty, or failed, when it arrived
+ctx.findings_created    finding counts of this item's import, as on When a Scan Has Landed
+```
+
+Two egress settings are built for these items. **Generate a Report** has a **Findings Included** option, `Findings of the Triggering Imports`, that reports on every Finding of the tests the group wrote, however many there are. **Send an Email** offers `{{ctx.imports_html}}`, a list of the group's scans and how each one ended, and `{{ctx.import_summary}}` renders in any template, including the report node's announcement.
+
+The shipped template **Report when a group of scans has landed** wires all of this: the group trigger, a report on `complete`, and an email naming the missing scans on `incomplete`.
 
 ## Logic
 
@@ -589,10 +676,10 @@ Generates a report from a template, scoped to the Findings that reached this nod
 |---------|---------|-------|
 | **Report Template** | none | Which template to generate from. Required. |
 | **Format** | `pdf` | `pdf` or `html`. |
-| **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. |
+| **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. |
 | **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. |
 | **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
-| **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link. |
+| **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.
 
