@@ -1072,8 +1072,8 @@ kubectl get jobs -n $NAMESPACE
 kubectl get pods -n $NAMESPACE
 # Expected components (chart 2.57+): django, celery-worker, celery-beat,
 # connectors, nginx, ddorch, ddorch-workers, integrators, mcp-server, plus
-# redis and postgresql if you are using the bundled copies, plus psirt and
-# sensei if you enabled them (psirt.enabled, sensei.enabled).
+# redis and postgresql if you are using the bundled copies, plus sensei if
+# you enabled it (sensei.enabled).
 # Note: ddorch-workers replaces the legacy kairos, rulesengine, and
 # hatchet-integrators workers.
 
@@ -1246,60 +1246,6 @@ Operational notes:
 The `minimal` profile disables the importer deployment to keep the footprint
 small; imports then share the single uwsgi pool as before.
 
-### PSIRT Advisory Engine (optional)
-
-The chart can deploy the PSIRT Advisory Engine, a service for authoring and
-publishing security advisories from DefectDojo findings. It is off by default.
-When enabled it appears under `/psirt/` on your main DefectDojo host — the
-nginx sidecar proxies it, so no extra ingress or DNS entry is needed.
-
-```yaml
-psirt:
-  enabled: true
-  # REQUIRED: full async connection URL. Use a dedicated database (its
-  # migrations must not share DefectDojo's database).
-  databaseUrl: "postgresql+asyncpg://pae:<password>@<host>:5432/pae"
-  # Pre-shared secret for autonomous advisory publishing. The scheduler sends
-  # it to DefectDojo as an X-Psirt-Secret header (no minted token, no UI step);
-  # the chart injects the SAME value into the DefectDojo pods so they accept it.
-  # Optional — omit to disable autonomous publishing (the pod still boots).
-  psirtSharedSecret: "<high-entropy secret>"
-  # Strongly recommended: pin both secrets. Left empty they are re-generated
-  # on every helm upgrade, which logs out active sessions and invalidates
-  # stored DefectDojo tokens.
-  sessionSecretKey: ""   # any 64-character string
-  fernetSaltB64: ""      # python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-`psirtSharedSecret` is a plain value you choose — no DefectDojo user or minted
-token is involved. Set a high-entropy string (e.g.
-`python -c "import secrets; print(secrets.token_urlsafe(48))"`). The chart wires
-it into both the psirt engine Secret and the DefectDojo pods, so a single value
-enables hands-off publishing on a fresh install with no post-boot step. Rotation:
-change it and `helm upgrade`.
-
-Database setup: point `databaseUrl` at the same PostgreSQL host DefectDojo
-uses (or any other reachable host) with a database name of your choosing. The
-pod creates the database on first start if it doesn't exist, which requires a
-one-time grant as the postgres superuser:
-
-```sql
-ALTER ROLE pae CREATEDB;
-```
-
-Operational notes:
-
-- Keep `psirt.replicas` at 1. The service runs its own internal job scheduler,
-  and a second replica would run every scheduled job twice.
-- The pod mounts the shared media volume (advisory attachments live under
-  `<media>/pae/uploads`), so the same ReadWriteMany storage guidance as the
-  importer pool applies.
-- Outbound HTTPS is required for advisory feeds and NVD lookups. With
-  `networkPolicy.profile=aggressive`, the allowed CIDR list
-  (`networkPolicy.externalAPIs.allowedCidrs`) must cover those endpoints.
-- An optional `psirt.nvdApiKey` raises the NVD rate limit from 5 to 50
-  requests per 30 seconds.
-
 ### Sensei scan/fix engine (optional)
 
 The chart can deploy the Sensei engine, the service behind server-side
@@ -1451,7 +1397,7 @@ arbitrary extra manifests — without forking the chart:
   `extraVolumeMounts`, `extraInitContainers`, `extraContainers`, `hostAliases`,
   `priorityClassName`, `topologySpreadConstraints`, `dnsConfig`, and
   `serviceAccountName` on every workload (django, celery worker/beat,
-  connectors, ddorch, ddorch-workers, integrators, mcp-server, psirt).
+  connectors, ddorch, ddorch-workers, integrators, mcp-server).
 - **Top-level `extraManifests`** — render arbitrary user-supplied YAML
   (ConfigMaps, Secrets, NetworkPolicies, etc.) alongside the chart, passed
   through Helm `tpl` with the chart's root context.
@@ -2220,6 +2166,7 @@ template includes commented examples for:
 
 | Date       | Version | Changes                                                              |
 |------------|---------|----------------------------------------------------------------------|
+| 2026-09-16 | 3.3.200+ | Remove the PSIRT Advisory Engine section. DefectDojo Pro 3.3.0 replaced the sidecar with PSIRT 2.0 inside the main application, and the chart no longer ships the component. Drop `psirt:` (and `vpa.components.psirt`, `egress.proxy.components.psirt`) from overrides; the chart rejects the nested keys as unknown components. Carry an existing sidecar database into PSIRT 2.0 with `manage.py psirt_import_legacy` |
 | 2026-07-09 | 3.1.0   | Add optional PSIRT Advisory Engine (`psirt.enabled`): served under `/psirt/` via the nginx sidecar, dedicated database via `psirt.databaseUrl`, secret pinning guidance, network policy rules, BYO hooks |
 | 2026-04-17 | 2.57.1  | Document `ddorch` + `ddorch-workers` (new orchestrator pair that replaces kairos/rulesengine/hatchet-integrators); add `ddorch.tls.rootCa/cert/key` `--set-file` flags to pre-flight and deploy commands; new ddorch mTLS certificates section with SAN requirements; mcp-server listed in expected pods; PDBs added for ddorch (singleton) and ddorch-workers; ArgoCD prerequisites note about ddorch cert delivery; update Hatchet warning to reflect worker consolidation |
 | 2026-03-25 | 2.55.4  | Add EFS access point documentation and template field; document initializer crash recovery (BUG-18); document connectors crashloop during init as expected; clarify Hatchet token warning is harmless; fix stale known-issues anchor; versioned chart extraction path; consolidate no-HTTPS guidance; PV cleanup in uninstall; namespace consistency note; ArgoCD vs CLI preset versioning callout |
