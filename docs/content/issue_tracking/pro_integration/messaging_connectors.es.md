@@ -6,7 +6,7 @@ weight: 4
 audience: pro
 ---
 
-**Disponibilidad:** los Conectores de mensajería son una función en beta. Active **Messaging Connectors** en la página Feature Flags. Como las alertas se enrutan mediante reglas, **Rules Engine 2.0** también debe estar activado.
+**Disponibilidad:** los Conectores de mensajería son una función en beta. Active **Messaging Connectors** en la página Feature Flags. Como las alertas se enrutan mediante reglas, **Triage Engine** también debe estar activado.
 
 Los Conectores de mensajería envían alertas desde DefectDojo a un servicio de chat, a una dirección de correo electrónico o a un topic de Amazon SNS. Se ubican junto a los conectores de tickets y de gestión de incidentes en la misma página **Downstream Connectors**, y se configuran de la misma manera: cree una conexión una vez y luego decida qué se debe enviar a ella.
 
@@ -14,7 +14,7 @@ Los conectores de tickets y los conectores de mensajería responden preguntas di
 
 ## Qué puede enviar
 
-Las alertas se enrutan mediante Rules Engine 2.0. Una regla decide **cuándo** enviar (un disparador), **qué** Hallazgos califican (condiciones) y **adónde** va el mensaje (un nodo de notificación que direcciona su conexión y canal).
+Las alertas se enrutan mediante Triage Engine. Una regla decide **cuándo** enviar (un disparador), **qué** Hallazgos califican (condiciones) y **adónde** va el mensaje (un nodo de notificación que direcciona su conexión y canal).
 
 Esto significa que los filtros disponibles para una alerta son los mismos que están disponibles para una regla: severidad, alcance, etiquetas, estado y cualquier otra cosa que una condición de regla pueda expresar. Varias alertas distintas que van a varios canales distintos son, simplemente, varias reglas.
 
@@ -157,7 +157,7 @@ Una prueba exitosa también reactiva una conexión que había sido deshabilitada
 
 ## Crear una alerta
 
-Hay dos formas de hacerlo. Ambas producen lo mismo: una regla de Rules Engine 2.0.
+Hay dos formas de hacerlo. Ambas producen lo mismo: una regla de Triage Engine.
 
 ### La página de alertas
 
@@ -183,7 +183,7 @@ Las alertas son reglas, así que también pueden abrirse en el editor de reglas 
 
 La vía completa, para todo lo que el formulario no cubre.
 
-1. Vaya a **Automation > Rules Engine 2.0** y cree una regla.
+1. Vaya a **Automation > Triage Engine** y cree una regla.
 2. Agregue un disparador. Para alertas sobre Hallazgos recién importados, use el disparador de eventos de Hallazgo en **created**. Las importaciones se procesan por lotes, de modo que una importación produce una alerta en lugar de una por Hallazgo.
 3. Agregue condiciones para lo que debe calificar, por ejemplo una severidad mínima de Alta.
 4. Agregue un nodo de mensaje para el proveedor que quiera (**Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email** o **Publish to an SNS Topic**) y configure:
