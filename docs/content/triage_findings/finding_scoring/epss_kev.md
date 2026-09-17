@@ -135,7 +135,7 @@ This flows automatically — priority is recomputed for exactly the Findings upd
 
 Once Findings are enriched, the EPSS and KEV values are available throughout the Pro UI:
 
-- **On the Finding** — EPSS score, EPSS percentile, Known Exploited, Ransomware Used, and KEV Date all display on the Finding detail.
+- **On the Finding** — EPSS score, EPSS percentile, Known Exploited, Ransomware Used, and KEV Date all display on the Finding detail. They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms, which matters for a Finding that has no CVE and is therefore never enriched. On a Finding that does reference a CVE, the next sync overwrites hand-entered values; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
 - **Sorting** — Finding tables can be ordered by EPSS score / percentile to surface the most likely-to-be-exploited Findings first.
 - **Filtering** — the Findings list offers **Known Exploited** and **Ransomware Used** filters, so you can build views or reports scoped to confirmed real-world-exploited vulnerabilities.
 
