@@ -4,18 +4,25 @@ Import equivalence tests for API v3 (§4.13, §6 OS1).
 The consolidated ``POST /import`` (import/reimport/auto) must reproduce the v2 endpoints' DB state
 for identical payloads, including ``close_old_findings``. Both paths run in the shared test
 transaction so DB-state assertions are exact.
+
+``TestApiV3ImportAuthz`` covers the other half: auto mode dispatches on the numeric ``engagement``,
+so the permission check has to resolve that same target rather than the name fields alone.
 """
 from __future__ import annotations
 
+import datetime
 from collections import Counter
 
+from django.contrib.auth.models import Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from dojo.models import Finding, Test
+from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
 
 from .base import ApiV3TestCase
 
 _ZAP = "ZAP Scan"
+_GENERIC = "Generic Findings Import"
 
 
 def _finding_multiset(test_id: int) -> Counter:
@@ -117,3 +124,69 @@ class TestApiV3Import(ApiV3TestCase):
         )
         self.assertEqual("reimport", reused["mode_resolved"])
         self.assertEqual(first_test, reused["test"]["id"])
+
+
+class TestApiV3ImportAuthz(ApiV3TestCase):
+
+    """Auto mode must not import into an engagement the caller cannot import to."""
+
+    def setUp(self):
+        super().setUp()
+        product = Product.objects.create(
+            name="authz victim product",
+            prod_type=Product_Type.objects.create(name="authz victim org"),
+            description="victim",
+        )
+        self.engagement = Engagement.objects.create(
+            name="authz victim engagement", product=product,
+            target_start=datetime.date(2026, 1, 1), target_end=datetime.date(2026, 2, 1),
+        )
+        # Holds the self-service product-type add permission and nothing else, so the name-based
+        # auto-create check passes while the engagement stays out of reach.
+        self.outsider = User.objects.create(username="authz outsider", is_active=True)
+        self.outsider.user_permissions.add(Permission.objects.get(codename="add_product_type"))
+        self.outsider = User.objects.get(pk=self.outsider.pk)
+
+    def _post(self):
+        scan = SimpleUploadedFile(
+            "scan.json",
+            b'{"findings":[{"title":"injected","severity":"High","description":"x"}]}',
+            content_type="application/json",
+        )
+        return self.token_client(user=self.outsider).post(self.v3_url("import"), {
+            "scan_type": _GENERIC,
+            "mode": "auto",
+            "auto_create_context": "true",
+            "asset_name": "authz unused name",
+            "organization_name": "authz unused org",
+            "engagement_name": "authz unused engagement",
+            "engagement": self.engagement.id,
+            "file": scan,
+        }, format="multipart")
+
+    def test_auto_mode_rejects_unauthorized_engagement_id(self):
+        response = self._post()
+        self.assertEqual(403, response.status_code, response.content[:400])
+        self.assertFalse(Test.objects.filter(engagement=self.engagement).exists())
+
+    def test_auto_mode_rejects_unauthorized_engagement_id_with_existing_test(self):
+        # With a matching test already there, auto resolves to reimport, which also closes the
+        # engagement's active findings. Same denial.
+        test = Test.objects.create(
+            engagement=self.engagement,
+            test_type=Test_Type.objects.get_or_create(name=_GENERIC)[0],
+            scan_type=_GENERIC,
+            target_start=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC),
+            target_end=datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC),
+        )
+        finding = Finding.objects.create(
+            test=test, title="existing", severity="High", description="x",
+            active=True, verified=False, reporter=self.admin,
+        )
+
+        response = self._post()
+
+        self.assertEqual(403, response.status_code, response.content[:400])
+        finding.refresh_from_db()
+        self.assertTrue(finding.active)
+        self.assertEqual(1, Finding.objects.filter(test__engagement=self.engagement).count())
