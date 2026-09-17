@@ -73,7 +73,7 @@ Scale with **processes, not threads.** uWSGI threads do not run Python in parall
 
 ```bash
 dojo-compose-cli environment add --key "DD_UWSGI_NUM_OF_THREADS"        --value "4"
-dojo-compose-cli environment add --key "DD_UWSGI_NUM_OF_PROCESSES"      --value "<start near the host's CPU count, then tune>"
+dojo-compose-cli environment add --key "DD_UWSGI_NUM_OF_PROCESSES"      --value "<1–1.5× the host's CPU count, then tune>"
 dojo-compose-cli environment add --key "DD_CELERY_WORKER_CONCURRENCY"   --value "<app_cpus>"
 dojo-compose-cli environment add --key "DD_CELERY_WORKER_AUTOSCALE_MAX" --value "<app_cpus>"
 
@@ -82,9 +82,42 @@ dojo-compose-cli app stop
 dojo-compose-cli app start
 ```
 
-**Watch the database connection count.** Every uWSGI process and every Celery worker opens its own database connections, so the total the application holds open is roughly `processes × threads` plus the worker concurrency. Size the database's `max_connections` to stay comfortably ahead of that total — and resist over-provisioning. Too many processes and threads open more connections than the database can serve and end up hammering it, which surfaces as slow queries and 500s under load rather than more throughput. Raise processes gradually while watching CPU headroom and connection use, rather than setting a large multiple of the core count up front.
+What each knob does:
+
+| Knob | Start at | What raising it does |
+| --- | --- | --- |
+| `DD_UWSGI_NUM_OF_PROCESSES` | 1–1.5× host vCPU | The main throughput lever. More web processes serve more requests at once, until they saturate CPU or outrun the database's connections. |
+| `DD_UWSGI_NUM_OF_THREADS` | 4 | Little throughput to gain past a handful, since the GIL serializes them, and each thread still opens its own database connections. Leave it low. |
+| `DD_CELERY_WORKER_CONCURRENCY` | host vCPU | Parallel async workers for imports, deduplication, and notifications. Raise it for import-heavy or CI-driven workloads; lower it if background work is starving the web processes of CPU. |
+| `DD_CELERY_WORKER_AUTOSCALE_MAX` | host vCPU | The ceiling Celery scales up to under load. Keep it near the core count so bursts don't open more connections than the database can serve. |
+
+These four decide how many database connections the application holds open, so tune them alongside the database's own limits (see [Tuning the database](#tuning-the-database)). The Helm chart derives the same settings from your values, so on Kubernetes you normally leave them to the chart.
 {{< /tab >}}
 {{< /tabs >}}
+
+## Tuning the database
+
+The database is where finding queries live or die, and PostgreSQL ships with defaults tuned for a small machine. On a dedicated database host you have to raise a handful of settings before it will use the memory you gave it. A 64 GB host left on stock `shared_buffers` performs like a small one. These are the settings that move the needle for DefectDojo's aggregation-heavy reads, in rough order of impact:
+
+| Setting | Starting point | What it controls |
+| --- | --- | --- |
+| `shared_buffers` | ~25% of the host's RAM | PostgreSQL's own cache of table and index pages. This is the lever behind "buy memory before cores": while the working set and its indexes fit here, finding queries stay fast; once they don't, the database reaches for disk and latency climbs sharply. |
+| `effective_cache_size` | ~50–75% of RAM | A planner hint, not an allocation. It tells the planner how much data is likely cached, which steers it toward index scans over full-table scans on your findings. Set too low, the planner picks slow plans on a host that had the memory all along. |
+| `work_mem` | 32–128 MB | Memory for one sort or hash step, and DefectDojo sorts and groups findings constantly. It is allocated per operation per connection, so a large value multiplied by hundreds of connections is how you run the host out of memory. Raise it in small steps. |
+| `maintenance_work_mem` | 512 MB–2 GB | Memory for index builds, `VACUUM`, and schema migrations. It doesn't affect steady-state queries, but it decides how long an upgrade's migrations and reindexes take. |
+| `max_connections` | above the application's total | The ceiling on concurrent connections. It has to clear what the application holds open, with headroom. Too low and requests fail outright under load; far too high and every idle connection still costs memory. |
+
+On a managed database (RDS, Cloud SQL, and the like) these are parameter-group settings rather than lines in `postgresql.conf`, but they are the same knobs. Whichever you run, raise them together with the memory you provision.
+
+### Keep the connection budget balanced
+
+The application tier and the database are tuned against one shared number: how many connections the application holds open. Every uWSGI process and every Celery worker keeps its own, so the total is roughly:
+
+```
+(uWSGI processes × uWSGI threads) + Celery worker concurrency
+```
+
+On a 12 vCPU host tuned as above that is `18 × 4 + 12 = 84`, and under load it settles near that. Keep the database's `max_connections` comfortably ahead of the number you land on. The failure mode is not the obvious one: too many processes and workers open more connections than the database can serve and end up hammering it, which surfaces as slow queries and 500s under load rather than as more throughput. Raise the application's process and worker counts gradually while watching the connection count and CPU headroom, rather than setting a large multiple of the core count up front.
 
 ## Storage
 
