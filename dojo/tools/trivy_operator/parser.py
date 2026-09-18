@@ -2,6 +2,8 @@
 
 import json
 
+from dojo.location.feature import locations_enabled
+from dojo.tools.locations import LocationData
 from dojo.tools.trivy_operator.checks_handler import TrivyChecksHandler
 from dojo.tools.trivy_operator.clustercompliance_handler import TrivyClusterComplianceHandler
 from dojo.tools.trivy_operator.compliance_handler import TrivyComplianceHandler
@@ -38,6 +40,21 @@ class TrivyOperatorParser:
             findings += self.output_findings(data, test)
         return findings
 
+    def image_location(self, report):
+        """The scanned image from report.artifact and report.registry, or None."""
+        if not locations_enabled():
+            return None
+        artifact = report.get("artifact") or {}
+        repository = artifact.get("repository") or ""
+        if not repository:
+            return None
+        return LocationData.image(
+            registry=(report.get("registry") or {}).get("server") or "",
+            repository=repository,
+            digest=artifact.get("digest") or "",
+            tag=artifact.get("tag") or "",
+        )
+
     def output_findings(self, data, test):
         findings = []
         if data is None:
@@ -50,15 +67,16 @@ class TrivyOperatorParser:
             return []
         report = data.get("report", None)
         if report is not None:
+            image = self.image_location(report)
             vulnerabilities = report.get("vulnerabilities", None)
             if vulnerabilities is not None:
-                findings += TrivyVulnerabilityHandler().handle_vulns(labels, vulnerabilities, test)
+                findings += TrivyVulnerabilityHandler().handle_vulns(labels, vulnerabilities, test, image=image)
             checks = report.get("checks", None)
             if checks is not None:
                 findings += TrivyChecksHandler().handle_checks(labels, checks, test)
             secrets = report.get("secrets", None)
             if secrets is not None:
-                findings += TrivySecretsHandler().handle_secrets(labels, secrets, test)
+                findings += TrivySecretsHandler().handle_secrets(labels, secrets, test, image=image)
         status = data.get("status", None)
         if status is not None:
             benchmarkreport = status.get("detailReport", None)

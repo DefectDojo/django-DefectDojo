@@ -5,7 +5,7 @@ from cvss.cvss3 import CVSS3
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
-from dojo.tools.locations import LocationData
+from dojo.tools.locations import LocationData, split_image_reference
 from dojo.tools.snyk_code.parser import SnykCodeParser
 
 SNYK_PM_TO_PURL = {
@@ -122,10 +122,11 @@ class SnykParser:
         if "vulnerabilities" in tree:
             target_file = tree.get("displayTargetFile", None)
             upgrades = tree.get("remediation", {}).get("upgrade", None)
+            image = self.image_location(tree)
             vulnerabilityTree = tree["vulnerabilities"]
             for node in vulnerabilityTree:
                 item = self.get_item(
-                    node, test, target_file=target_file, upgrades=upgrades,
+                    node, test, target_file=target_file, upgrades=upgrades, image=image,
                 )
                 items.append(item)
             return items
@@ -138,7 +139,27 @@ class SnykParser:
             return findings
         return []
 
-    def get_item(self, vulnerability, test, target_file=None, upgrades=None):
+    def image_location(self, tree):
+        """
+        A Snyk Container project names its image as ``docker-image|<repository>`` and puts
+        ``<repository>:<tag>/...`` in ``path``. Snyk does not report the digest.
+        """
+        if not locations_enabled():
+            return None
+        project_name = tree.get("projectName") or ""
+        if not project_name.startswith("docker-image|"):
+            return None
+        reference = project_name.split("|", 1)[1]
+        parts = split_image_reference(reference)
+        if not parts.get("repository"):
+            return None
+        tag = parts["tag"]
+        path = tree.get("path") or ""
+        if not tag and path.startswith(reference + ":"):
+            tag = path[len(reference) + 1 :].split("/", 1)[0]
+        return LocationData.image(registry=parts["registry"], repository=parts["repository"], tag=tag)
+
+    def get_item(self, vulnerability, test, target_file=None, upgrades=None, image=None):
         # vulnerable and unaffected versions can be in string format for a single vulnerable version,
         # or an array for multiple versions depending on the language.
         if isinstance(vulnerability["semver"]["vulnerable"], list):
@@ -298,5 +319,7 @@ class SnykParser:
                 finding.unsaved_locations.append(
                     LocationData.dependency(purl_type=purl_type, name=vulnerability["packageName"], version=vulnerability["version"], file_path=vulnPath),
                 )
+            if image is not None:
+                finding.unsaved_locations.append(image)
 
         return finding
