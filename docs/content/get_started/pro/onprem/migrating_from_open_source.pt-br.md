@@ -3,7 +3,7 @@ title: Migrando do Open Source para o DefectDojo Pro autogerenciado
 description: Mova o banco de dados e os arquivos de mídia do seu DefectDojo open source
   para uma implantação autogerenciada do DefectDojo Pro
 draft: false
-weight: 6
+weight: 3
 audience: pro
 ---
 

@@ -1,7 +1,9 @@
 ---
 title: "Self-Hosting DefectDojo Pro"
+description: "The self-hosted deployment models for DefectDojo Pro (Docker Compose and Kubernetes), what you need before you start, and how the rest of this section fits"
+draft: false
 date: 2021-02-02T20:46:29+01:00
-weight: 5
+weight: 1
 audience: pro
 ---
 

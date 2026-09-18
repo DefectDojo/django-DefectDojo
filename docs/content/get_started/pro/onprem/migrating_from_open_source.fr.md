@@ -3,7 +3,7 @@ title: Migration depuis Open Source vers DefectDojo Pro autohébergé
 description: Déplacez votre base de données et vos fichiers multimédias DefectDojo
   open source vers un déploiement DefectDojo Pro autohébergé
 draft: false
-weight: 6
+weight: 3
 audience: pro
 ---
 

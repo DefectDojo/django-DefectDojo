@@ -2,7 +2,7 @@
 title: "Hardware Sizing for Self-Hosted DefectDojo Pro"
 description: "General guidance for sizing compute, memory, and storage for a self-hosted DefectDojo Pro deployment"
 draft: false
-weight: 4
+weight: 2
 audience: pro
 ---
 

@@ -1,8 +1,11 @@
 ---
 title: "Running DefectDojo Behind a Forward HTTPS Proxy"
 description: "Configure DefectDojo Pro on-prem to reach Jira, SonarQube, and Connectors through an outbound HTTPS proxy"
+draft: false
+weight: 6
 audience: pro
-weight: 5
+aliases:
+  - /onprem_deployment/forward_proxy/
 ---
 
 If your DefectDojo Pro on-prem deployment cannot make direct outbound connections to the internet — for example, because firewall rules require all egress to go through a forward HTTPS proxy — you can configure the standard `HTTPS_PROXY`, `HTTP_PROXY`, and `NO_PROXY` environment variables.  DefectDojo will route its outbound calls through the proxy accordingly.

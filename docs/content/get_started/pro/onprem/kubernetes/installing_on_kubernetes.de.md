@@ -1,5 +1,5 @@
 ---
-title: DefectDojo Pro Installationsleitfaden
+title: DefectDojo Pro Installationsleitfaden (Kubernetes / Helm)
 description: 'DefectDojo Pro mit dem Helm-Chart auf Kubernetes installieren: Infrastruktur,
   Secrets und die Installation selbst'
 draft: false
@@ -1639,7 +1639,7 @@ auch für Upgrades — verwenden Sie `helm upgrade` statt `helm install` gegen d
 entpackten `$CHART`-Pfad.
 
 Informationen zu Authentifizierung, ArgoCD-Upgrades, Überprüfung, Rollback und
-Fehlersuche finden Sie im [Upgrade-Leitfaden](/get_started/pro/onprem/upgrading_on_kubernetes/) — in der PDF-Ausgabe als
+Fehlersuche finden Sie im [Upgrade-Leitfaden](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) — in der PDF-Ausgabe als
 **Appendix: Upgrading DefectDojo Pro** enthalten.
 
 ---

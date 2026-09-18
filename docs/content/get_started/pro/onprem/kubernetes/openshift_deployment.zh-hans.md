@@ -84,7 +84,7 @@ oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'
 
 可利用性数据丰富功能为可选项,需要额外通过 443 端口访问两个目标。EPSS 评分来自 `api.first.org`,CISA KEV 数据来自 `www.cisa.gov`。两者均由内容分发网络提供服务,其地址会发生变化,因此应放行相应主机名。如果不放行,DefectDojo 仍可正常运行,只是发现项不会附加 EPSS 或 KEV 数据。
 
-如果出站流量通过代理而非直连,请参阅[在正向 HTTPS 代理后运行 DefectDojo](/onprem_deployment/forward_proxy/)。
+如果出站流量通过代理而非直连,请参阅[在正向 HTTPS 代理后运行 DefectDojo](/get_started/pro/onprem/forward_proxy/)。
 
 ## 初始化作业必须先完成
 

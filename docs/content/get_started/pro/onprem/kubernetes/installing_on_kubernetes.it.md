@@ -1,5 +1,5 @@
 ---
-title: Guida all'installazione di DefectDojo Pro
+title: Guida all'installazione di DefectDojo Pro (Kubernetes / Helm)
 description: Installare DefectDojo Pro su Kubernetes utilizzando il chart Helm, trattando
   infrastruttura, secret e l'installazione vera e propria
 draft: false
@@ -1622,7 +1622,7 @@ Il flusso di lavoro con zip pacchettizzato usato al momento dell'installazione
 funziona anche per gli aggiornamenti: sostituire `helm install` con
 `helm upgrade` puntando al percorso `$CHART` estratto.
 
-Vedere la [Guida all'aggiornamento](/get_started/pro/onprem/upgrading_on_kubernetes/) — inclusa
+Vedere la [Guida all'aggiornamento](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) — inclusa
 come **Appendice: aggiornamento di DefectDojo Pro** nell'edizione PDF — per
 autenticazione, aggiornamenti ArgoCD, verifica, rollback e risoluzione dei
 problemi.

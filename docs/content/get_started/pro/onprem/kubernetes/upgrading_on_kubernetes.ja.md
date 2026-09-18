@@ -1,11 +1,10 @@
 ---
-title: DefectDojo Pro アップグレードガイド
+title: DefectDojo Pro アップグレードガイド (Kubernetes / Helm)
 description: 既存の DefectDojo Pro Helm リリースをアップグレードする方法。チャートの取得、アップグレードの実行、ロールバックを含みます
 draft: false
 weight: 2
 audience: pro
 aliases:
-- /ja/get_started/pro/onprem/upgrading/
 - /ja/get_started/pro/onprem/upgrading_on_kubernetes/
 ---
 
@@ -107,7 +106,7 @@ DefectDojo Pro のリリースは、チャートバージョン、コンテナ�
 > egress 許可リストよりも寛容な設定です。ロックダウンされた挙動を維持したい場合は、
 > `networkPolicy.profile: aggressive` を設定し、例外設定（`nodeLocalDns`、
 > `dnsSelectors`、`externalAPIs`）を見直してください。詳細は
-> [ネットワークポリシー](/get_started/pro/onprem/installing_on_kubernetes/#network-policies)
+> [ネットワークポリシー](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#network-policies)
 > を参照してください。
 
 > **オーケストレーター用データベースの要件。** オーケストレーター（`ddorch`）は
@@ -117,7 +116,7 @@ DefectDojo Pro のリリースは、チャートバージョン、コンテナ�
 > おいてください（`CREATE DATABASE "defectdojo-ddorch" OWNER defectdojo;`）。作成して
 > おかないと、ddorch の Pod は
 > `permission denied to create database (SQLSTATE 42501)` で失敗します。詳細は
-> [事前確認: オーケストレーター（ddorch）データベース](/get_started/pro/onprem/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database)
+> [事前確認: オーケストレーター（ddorch）データベース](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database)
 > を参照してください。
 
 > **Organization/Asset のリラベルのデフォルト。**

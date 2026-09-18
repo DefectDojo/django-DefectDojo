@@ -1,12 +1,11 @@
 ---
-title: Guida all'aggiornamento di DefectDojo Pro
+title: Guida all'aggiornamento di DefectDojo Pro (Kubernetes / Helm)
 description: Aggiorna una release Helm esistente di DefectDojo Pro, incluso il recupero
   del chart, l'esecuzione dell'aggiornamento e il rollback
 draft: false
 weight: 2
 audience: pro
 aliases:
-- /it/get_started/pro/onprem/upgrading/
 - /it/get_started/pro/onprem/upgrading_on_kubernetes/
 ---
 
@@ -78,9 +77,9 @@ Ogni aggiornamento dovrebbe iniziare allo stesso modo. Saltare questi passaggi �
 > NAMESPACE="dojopro"
 > ```
 
-> **Il valore predefinito della policy di rete è cambiato.** Le NetworkPolicy sono ora governate da `networkPolicy.profile`, che per impostazione predefinita è `standard`: tutto l'egress e l'ingress tra i pod di questa stessa release sono consentiti (l'ingress esterno resta comunque limitato al percorso di ingress). Questo è più permissivo rispetto alla precedente allowlist di egress sempre granulare. Per mantenere il comportamento bloccato, imposta `networkPolicy.profile: aggressive` e rivedi le eccezioni (`nodeLocalDns`, `dnsSelectors`, `externalAPIs`) — vedi [Network Policies](/get_started/pro/onprem/installing_on_kubernetes/#network-policies).
+> **Il valore predefinito della policy di rete è cambiato.** Le NetworkPolicy sono ora governate da `networkPolicy.profile`, che per impostazione predefinita è `standard`: tutto l'egress e l'ingress tra i pod di questa stessa release sono consentiti (l'ingress esterno resta comunque limitato al percorso di ingress). Questo è più permissivo rispetto alla precedente allowlist di egress sempre granulare. Per mantenere il comportamento bloccato, imposta `networkPolicy.profile: aggressive` e rivedi le eccezioni (`nodeLocalDns`, `dnsSelectors`, `externalAPIs`) — vedi [Network Policies](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#network-policies).
 
-> **Requisito del database dell'orchestratore.** L'orchestratore (`ddorch`) utilizza un secondo database chiamato `<main-db-name>-ddorch` e lo crea all'avvio se non esiste già. Se il ruolo della tua applicazione non ha `CREATEDB`, crealo in anticipo (`CREATE DATABASE "defectdojo-ddorch" OWNER defectdojo;`) prima di aggiornare a una versione del chart che abilita ddorch — altrimenti il pod ddorch fallisce con `permission denied to create database (SQLSTATE 42501)`. Vedi [Pre-flight: Orchestrator (ddorch) Database](/get_started/pro/onprem/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
+> **Requisito del database dell'orchestratore.** L'orchestratore (`ddorch`) utilizza un secondo database chiamato `<main-db-name>-ddorch` e lo crea all'avvio se non esiste già. Se il ruolo della tua applicazione non ha `CREATEDB`, crealo in anticipo (`CREATE DATABASE "defectdojo-ddorch" OWNER defectdojo;`) prima di aggiornare a una versione del chart che abilita ddorch — altrimenti il pod ddorch fallisce con `permission denied to create database (SQLSTATE 42501)`. Vedi [Pre-flight: Orchestrator (ddorch) Database](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
 
 > **Valore predefinito della rietichettatura Organization/Asset.** `dojo.V3EnableOrganizationAssetRelabel` ora ha come valore predefinito `null` (automatico): è **abilitato per le nuove installazioni** e **disattivato negli aggiornamenti**, in modo che la rietichettatura dell'interfaccia (Organization/Asset al posto di ProductType/Product) non si attivi mai inaspettatamente su una release esistente. Per attivarla su una release aggiornata, imposta esplicitamente `dojo.V3EnableOrganizationAssetRelabel: true`; un valore esplicito `true`/`false` prevale sempre sul valore automatico predefinito.
 

@@ -1,12 +1,11 @@
 ---
-title: Guide de mise à niveau de DefectDojo Pro
+title: Guide de mise à niveau de DefectDojo Pro (Kubernetes / Helm)
 description: Mettez à niveau une version Helm existante de DefectDojo Pro, y compris
   le téléchargement du chart, l'exécution de la mise à niveau et la restauration
 draft: false
 weight: 2
 audience: pro
 aliases:
-- /fr/get_started/pro/onprem/upgrading/
 - /fr/get_started/pro/onprem/upgrading_on_kubernetes/
 ---
 
@@ -108,7 +107,7 @@ fréquente d'échec des mises à niveau.
 > l'ancienne liste d'autorisation toujours granulaire pour le trafic sortant. Pour conserver le
 > comportement verrouillé, définissez `networkPolicy.profile: aggressive` et vérifiez les
 > exceptions (`nodeLocalDns`, `dnsSelectors`, `externalAPIs`) — voir
-> [Politiques réseau](/get_started/pro/onprem/installing_on_kubernetes/#network-policies).
+> [Politiques réseau](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#network-policies).
 
 > **Exigence de base de données de l'orchestrateur.** L'orchestrateur (`ddorch`) utilise une
 > seconde base de données nommée `<main-db-name>-ddorch` et la crée au démarrage si elle
@@ -116,7 +115,7 @@ fréquente d'échec des mises à niveau.
 > préalable (`CREATE DATABASE "defectdojo-ddorch" OWNER defectdojo;`) avant de mettre à niveau
 > vers une version de chart qui active ddorch — sinon le pod ddorch échoue avec
 > `permission denied to create database (SQLSTATE 42501)`. Voir
-> [Préflight : base de données de l'orchestrateur (ddorch)](/get_started/pro/onprem/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
+> [Préflight : base de données de l'orchestrateur (ddorch)](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
 
 > **Valeur par défaut du renommage Organization/Asset.**
 > `dojo.V3EnableOrganizationAssetRelabel` a désormais pour valeur par défaut `null` (auto) : il

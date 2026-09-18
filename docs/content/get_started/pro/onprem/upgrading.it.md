@@ -3,7 +3,7 @@ title: Aggiornamento di DefectDojo Pro (On-Premise)
 description: Procedura di aggiornamento supportata per i deployment self-hosted di
   DefectDojo Pro che utilizzano il chart Helm
 draft: false
-weight: 7
+weight: 5
 audience: pro
 ---
 

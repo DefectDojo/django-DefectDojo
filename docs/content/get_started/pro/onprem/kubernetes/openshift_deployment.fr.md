@@ -84,7 +84,7 @@ Le cluster doit également pouvoir atteindre votre base de données sur le port 
 
 L'enrichissement d'exploitabilité est optionnel et nécessite deux destinations supplémentaires en HTTPS sur le port 443. Les scores EPSS proviennent de `api.first.org`, et les données CISA KEV proviennent de `www.cisa.gov`. Les deux sont servis depuis des réseaux de diffusion de contenu dont les adresses changent, autorisez donc les noms d'hôte. Sans cela, DefectDojo fonctionne normalement et les constatations ne sont pas enrichies avec les données EPSS ou KEV.
 
-Lorsque le trafic sortant passe par un proxy plutôt qu'en direct, consultez [Exécuter DefectDojo derrière un proxy HTTPS sortant](/onprem_deployment/forward_proxy/).
+Lorsque le trafic sortant passe par un proxy plutôt qu'en direct, consultez [Exécuter DefectDojo derrière un proxy HTTPS sortant](/get_started/pro/onprem/forward_proxy/).
 
 ## Le job d'initialisation doit se terminer en premier
 

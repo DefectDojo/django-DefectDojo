@@ -96,7 +96,7 @@ In a restricted network, the application host needs outbound access to the follo
 
 Allowlist by hostname rather than by address. The registry sits behind a content delivery network, so its addresses vary by location and change over time.
 
-If the host reaches the internet through an outbound proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/). If it has no route to the internet at all, follow the air-gapped installation procedure in this section instead.
+If the host reaches the internet through an outbound proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/). If it has no route to the internet at all, follow the air-gapped installation procedure in this section instead.
 
 ### Confirm the database is reachable
 
