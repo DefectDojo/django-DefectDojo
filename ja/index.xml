@@ -4,7 +4,21 @@
 &lt;li&gt;&lt;strong&gt;アップストリームコネクタ&lt;/strong&gt;(旧称 &lt;strong&gt;API Connectors&lt;/strong&gt;)は、スキャナーやセキュリティツールから検出事項とアセットインベントリを&lt;em&gt;取り込み&lt;/em&gt;ます。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;ダウンストリームコネクタ&lt;/strong&gt;(旧称 &lt;strong&gt;Integrations&lt;/strong&gt;)は、検出事項を課題管理システムやチケッティングシステムに&lt;em&gt;送信&lt;/em&gt;します。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;DefectDojo をセキュリティデータのハブと考えると、アップストリームコネクタはデータが到着する経路であり、ダウンストリームコネクタは修復作業が出ていく経路です。&lt;/p&gt;</description></item><item><title>DefectDojoについて</title><link>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;DefectDojo をセキュリティデータのハブと考えると、アップストリームコネクタはデータが到着する経路であり、ダウンストリームコネクタは修復作業が出ていく経路です。&lt;/p&gt;</description></item><item><title>DefectDojo Proのセルフホスティング</title><link>https://docs.defectdojo.com/ja/get_started/pro/onprem/installation_options/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/onprem/installation_options/</guid><description>&lt;p&gt;DefectDojo Proは、お客様自身の環境に完全にセルフホストでき、インフラ、データ、セキュリティ体制を自社で管理できます。ホスト型デプロイを除外するコンプライアンス、データレジデンシー、社内セキュリティ要件を持つ組織に適しており、クラウドホスト版の製品と同じ機能を提供します。&lt;/p&gt;
+&lt;p&gt;このページでは、利用可能なデプロイモデル、開始前に必要なもの、このセクションの他のページとの関係について説明します。&lt;/p&gt;
+&lt;h2 id="二つのデプロイモデル"&gt;二つのデプロイモデル&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;単一ホスト上のDocker Compose&lt;/strong&gt;は、二つのうちよりシンプルな方法です。アプリケーション、非同期ワーカー、キャッシュはすべて一台のマシン上で動作し、弊社が提供するコマンドラインツールで管理します。この構成はスケールアウトしないため、ホストは平均値ではなくピーク値に合わせてサイズを決める必要があり、多くのデプロイではそのピークはUIで作業しているユーザーがいる最中に大規模なスキャンインポートが到着する場合です。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Helmチャートを使用したKubernetes&lt;/strong&gt;は、同じコンポーネントを個別のワークロードとして実行します。これにより定常状態に合わせてプロビジョニングし、負荷が来たときにレプリカを追加でき、マシン全体ではなく実際にビジーな部分だけをスケールできます。&lt;/p&gt;
+&lt;p&gt;どちらのモデルもPostgreSQLを使用します。本番環境では、Helmチャートがデフォルトで想定している外部の管理型データベースを推奨します。Composeツールはアプリケーションと並んでコンテナ内でPostgreSQLを実行することもでき、これは評価用には便利ですが、本番データには適していません。&lt;/p&gt;
+&lt;p&gt;すでにKubernetesを運用しているなら、それを使ってください。単一ホストでも問題なく動作し、多くのデプロイがその方式で運用されていますが、再配分できない余剰キャパシティを購入することになります。Kubernetesを運用しておらず、導入したくもない場合、Composeは妥協案ではなく正当な選択肢です。&lt;/p&gt;
+&lt;h2 id="開始前に"&gt;開始前に&lt;/h2&gt;
+&lt;p&gt;まずデプロイのサイズを決めてください。どちらのモデルも、保持を見込む検出事項の件数と、同時に製品を利用する人数のおおよその見当が必要で、この二つの数値がデプロイの異なる部分を左右します。このセクションのハードウェアサイジングのガイダンスでは、両方について説明しています。&lt;/p&gt;
+&lt;p&gt;選択したモデル用のライセンスファイルとデプロイツールが必要です。DefectDojoはサブスクリプション開始時に両方を提供します。お持ちでない場合、または再発行が必要な場合は、アカウント担当者または&lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="support",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;support at defectdojo dot com&lt;/noscript&gt;
+
+ までご連絡ください。&lt;/p&gt;
+&lt;p&gt;また、実行する場所、到達可能なPostgreSQLデータベース、デプロイ先を解決するホスト名も必要です。個々のインストールページで、各モデルの詳細を説明しています。&lt;/p&gt;
+&lt;h2 id="このセクションのその他の内容"&gt;このセクションのその他の内容&lt;/h2&gt;
+&lt;p&gt;このページに関連するページでは、ライフサイクルの残りの部分を扱っています。ハードウェア選定のためのサイジングガイダンス、既存のオープンソースインスタンスをセルフホスト型Proデプロイに移行する手順、対象ホストがインターネットに接続できない環境でのインストール手順があります。&lt;/p&gt;</description></item><item><title>DefectDojoについて</title><link>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
 &lt;p&gt;
 
 &lt;img
@@ -247,7 +261,7 @@
  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;各検出事項には、基盤となるモデル上に専用の&lt;code&gt;cvssv3&lt;/code&gt;/&lt;code&gt;cvssv3_score&lt;/code&gt;および&lt;code&gt;cvssv4&lt;/code&gt;/
-&lt;code&gt;cvssv4_score&lt;/code&gt;フィールドがあります。これらはUIだけでなくAPI経由でもアクセスできます。&lt;/p&gt;</description></item><item><title>DefectDojo Pro インストールガイド</title><link>https://docs.defectdojo.com/ja/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</guid><description>&lt;!--
+&lt;code&gt;cvssv4_score&lt;/code&gt;フィールドがあります。これらはUIだけでなくAPI経由でもアクセスできます。&lt;/p&gt;</description></item><item><title>DefectDojo Pro インストールガイド (Kubernetes / Helm)</title><link>https://docs.defectdojo.com/ja/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</guid><description>&lt;!--
  DefectDojo Pro Helm チャートリポジトリから生成されています。
  ソース: chart バージョン 3.1.304 の docs/INSTALLATION_GUIDE.md。
  このファイルではなく、ソースのガイドを編集してください。ローカルでの変更は
@@ -286,14 +300,4 @@
 &lt;li&gt;&lt;strong&gt;過去7日間にクローズ&lt;/strong&gt; — 最近解決された検出事項。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;過去7日間に受容&lt;/strong&gt; — 最近リスク受容された検出事項。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;各カードは該当するフィルタ済みリストに直接リンクしているため、ワンクリックで詳細を確認できます。&lt;/p&gt;</description></item><item><title>Docker Composeへのインストール</title><link>https://docs.defectdojo.com/ja/get_started/pro/onprem/docker_compose/installing_on_docker_compose/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/pro/onprem/docker_compose/installing_on_docker_compose/</guid><description>&lt;p&gt;このページでは、セルフホスト型の二つのモデルのうちよりシンプルな方法であり、すでにKubernetesを運用していない場合に適した選択肢である、Docker ComposeへのDefectDojo Proのインストールについて説明します。&lt;/p&gt;
-&lt;p&gt;結果として二台のホストが必要になります。一台はDocker Compose上でアプリケーションとその補助サービスを実行し、もう一台はPostgreSQLを実行します。自前で運用する代わりに管理型データベースを指定することもでき、評価用途であればアプリケーションホスト上のコンテナ内でデータベースを実行することもできますが、それは本番データには適していません。&lt;/p&gt;
-&lt;p&gt;作業のほとんどは、DefectDojoがライセンスとともに提供する&lt;code&gt;dojo-compose-cli&lt;/code&gt;が行います。その&lt;code&gt;first-install&lt;/code&gt;コマンドは、デプロイを設定し、イメージをプルし、すべてを起動し、systemdサービスを登録する対話式ウィザードです。&lt;/p&gt;
-&lt;h2 id="開始前に"&gt;開始前に&lt;/h2&gt;
-&lt;p&gt;まずデプロイのサイズを決めてください。このセクションのハードウェアサイジングのガイダンスでは、アプリケーションホストとデータベースの両方について何をプロビジョニングすべきかを説明しています。&lt;/p&gt;
-&lt;p&gt;このインストールでサポートされているオペレーティングシステムはUbuntu 24.04 LTSです。開始前に完全にアップデートしてください。インストールはrootとしてコマンドを実行するため、両方のホストで&lt;code&gt;sudo&lt;/code&gt;またはrootシェルが必要です。&lt;/p&gt;
-&lt;p&gt;サブスクリプションとともに届く、DefectDojoからの二つのファイルが必要です。&lt;code&gt;dojo-compose-cli&lt;/code&gt;アーカイブと、通常&lt;code&gt;dojopro.lic&lt;/code&gt;という名前のライセンスファイルです。お持ちでない場合は、アカウント担当者または&lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="support",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;support at defectdojo dot com&lt;/noscript&gt;
-
- までご連絡ください。&lt;/p&gt;
-&lt;h2 id="データベースをセットアップする"&gt;データベースをセットアップする&lt;/h2&gt;
-&lt;p&gt;DefectDojo ProにはPostgreSQL 16以降が必要です。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;各カードは該当するフィルタ済みリストに直接リンクしているため、ワンクリックで詳細を確認できます。&lt;/p&gt;</description></item></channel></rss>
