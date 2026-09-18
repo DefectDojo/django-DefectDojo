@@ -84,7 +84,7 @@ Der Cluster muss außerdem Ihre Datenbank über den PostgreSQL-Port erreichen k�
 
 Die Exploitability-Anreicherung ist optional und benötigt zwei weitere Ziele über HTTPS auf Port 443. EPSS-Werte stammen von `api.first.org`, und CISA-KEV-Daten stammen von `www.cisa.gov`. Beide werden über Content Delivery Networks ausgeliefert, deren Adressen sich ändern, weshalb Sie die Hostnamen freigeben sollten. Ohne sie läuft DefectDojo normal, und Findings werden nicht mit EPSS- oder KEV-Daten angereichert.
 
-Wenn ausgehender Datenverkehr über einen Proxy statt direkt läuft, siehe [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/).
+Wenn ausgehender Datenverkehr über einen Proxy statt direkt läuft, siehe [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/).
 
 ## Der Initializer-Job muss zuerst abgeschlossen sein
 

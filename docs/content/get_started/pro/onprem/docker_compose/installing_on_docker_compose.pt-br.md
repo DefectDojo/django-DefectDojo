@@ -97,7 +97,7 @@ Em uma rede restrita, o host da aplicação precisa de acesso de saída para o s
 
 Inclua na lista de permissões por nome de host, e não por endereço. O registro fica atrás de uma rede de distribuição de conteúdo, então seus endereços variam por localização e mudam com o tempo.
 
-Se o host acessa a internet através de um proxy de saída, veja [Executando o DefectDojo Atrás de um Proxy HTTPS de Encaminhamento](/onprem_deployment/forward_proxy/). Se ele não tiver nenhuma rota para a internet, siga o procedimento de instalação air-gapped desta seção.
+Se o host acessa a internet através de um proxy de saída, veja [Executando o DefectDojo Atrás de um Proxy HTTPS de Encaminhamento](/get_started/pro/onprem/forward_proxy/). Se ele não tiver nenhuma rota para a internet, siga o procedimento de instalação air-gapped desta seção.
 
 ### Confirme que o banco de dados está acessível
 

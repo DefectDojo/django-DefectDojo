@@ -52,7 +52,7 @@ newgrp docker
 
 使用 `id` 命令确认输出中同时列出了 `docker` 和 `dojosrv`。一旦您的用户加入 `docker` 组，后续命令就无需使用 `sudo`。
 
-如果暂存主机是通过出站 HTTPS 代理访问互联网的，请在拉取任何内容之前先配置好代理相关变量。请参阅[在正向 HTTPS 代理后运行 DefectDojo](/onprem_deployment/forward_proxy/)。
+如果暂存主机是通过出站 HTTPS 代理访问互联网的，请在拉取任何内容之前先配置好代理相关变量。请参阅[在正向 HTTPS 代理后运行 DefectDojo](/get_started/pro/onprem/forward_proxy/)。
 
 ### 2. Set the version
 
@@ -341,7 +341,7 @@ dojo-compose-cli app restart
 
 离线（气隙）部署在没有任何出站连接的情况下运行，但需要访问外部服务的功能，在处于断网状态时无法正常工作。这包括从云端托管工具拉取数据的连接器（connector）和集成器（integrator）、诸如 Jira 之类的问题跟踪工具集成、面向 Slack 和 Microsoft Teams 等服务的出站通知，以及通常按计划定期获取的漏洞增强数据（vulnerability enrichment data）。
 
-这些功能是按部署单独配置的，而非默认开启，因此缺少这些功能并不会导致离线（气隙）安装出现故障。如果您启用了其中某项功能，在该部署具备通往相应服务的连接路径之前，应预料到它会因名称解析或连接错误而失败。如果存在出站路径但需经过代理，请参阅[在正向 HTTPS 代理后运行 DefectDojo](/onprem_deployment/forward_proxy/)。
+这些功能是按部署单独配置的，而非默认开启，因此缺少这些功能并不会导致离线（气隙）安装出现故障。如果您启用了其中某项功能，在该部署具备通往相应服务的连接路径之前，应预料到它会因名称解析或连接错误而失败。如果存在出站路径但需经过代理，请参阅[在正向 HTTPS 代理后运行 DefectDojo](/get_started/pro/onprem/forward_proxy/)。
 
 ### EPSS and KEV data from an internal mirror
 

@@ -83,7 +83,7 @@ DefectDojo Proのライセンスファイル。
 
 悪用可能性のエンリッチメントはオプション機能で、ポート443のHTTPSでさらに2つの宛先が必要です。EPSSスコアは`api.first.org`から、CISA KEVデータは`www.cisa.gov`から取得されます。どちらもアドレスが変化するコンテンツデリバリーネットワークから配信されるため、ホスト名を許可してください。これらを許可しない場合でもDefectDojoは正常に動作しますが、検出事項にEPSSやKEVのデータは付与されません。
 
-アウトバウンドトラフィックが直接ではなくプロキシを経由する場合は、[フォワードHTTPSプロキシ経由でのDefectDojoの実行](/onprem_deployment/forward_proxy/)を参照してください。
+アウトバウンドトラフィックが直接ではなくプロキシを経由する場合は、[フォワードHTTPSプロキシ経由でのDefectDojoの実行](/get_started/pro/onprem/forward_proxy/)を参照してください。
 
 ## 初期化ジョブを先に完了させる必要がある
 

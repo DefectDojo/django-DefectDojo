@@ -96,7 +96,7 @@ systemctl restart postgresql
 
 请按主机名而非地址加入允许列表。镜像仓库位于内容分发网络之后，因此其地址会因地理位置而异，并且会随时间变化。
 
-如果该主机通过出站代理访问互联网，请参阅[在正向 HTTPS 代理后运行 DefectDojo](/onprem_deployment/forward_proxy/)。如果该主机完全无法访问互联网，请改为遵循本节中的离线（air-gapped）安装流程。
+如果该主机通过出站代理访问互联网，请参阅[在正向 HTTPS 代理后运行 DefectDojo](/get_started/pro/onprem/forward_proxy/)。如果该主机完全无法访问互联网，请改为遵循本节中的离线（air-gapped）安装流程。
 
 ### 确认数据库可访问
 

@@ -52,7 +52,7 @@ newgrp docker
 
 Confirm with `id` that both `docker` and `dojosrv` are listed. Once your user is in the `docker` group, the remaining commands do not need `sudo`.
 
-If the staging host reaches the internet through an outbound HTTPS proxy, configure the proxy variables before pulling anything. See [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/).
+If the staging host reaches the internet through an outbound HTTPS proxy, configure the proxy variables before pulling anything. See [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/).
 
 ### 2. Set the version
 
@@ -341,7 +341,7 @@ Back up your database before any upgrade, and review the [upgrade notes](/releas
 
 An air-gapped deployment runs without any outbound connectivity, but features that reach external services cannot work while it is disconnected. This applies to the connectors and integrators that pull from cloud-hosted tools, issue tracker integrations such as Jira, outbound notifications to services like Slack and Microsoft Teams, and vulnerability enrichment data that is normally fetched on a schedule.
 
-These are configured per deployment rather than being on by default, so an air-gapped install is not broken by their absence. If you enable one, expect it to fail with name resolution or connection errors until the deployment has a route to that service. Where the outbound path exists but goes through a proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/).
+These are configured per deployment rather than being on by default, so an air-gapped install is not broken by their absence. If you enable one, expect it to fail with name resolution or connection errors until the deployment has a route to that service. Where the outbound path exists but goes through a proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/).
 
 ### EPSS and KEV data from an internal mirror
 
