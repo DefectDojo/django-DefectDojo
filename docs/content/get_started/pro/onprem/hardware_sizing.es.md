@@ -3,7 +3,7 @@ title: Dimensionamiento de hardware para DefectDojo Pro autoalojado
 description: Orientación general para dimensionar cómputo, memoria y almacenamiento
   para un despliegue autoalojado de DefectDojo Pro
 draft: false
-weight: 4
+weight: 1
 audience: pro
 ---
 

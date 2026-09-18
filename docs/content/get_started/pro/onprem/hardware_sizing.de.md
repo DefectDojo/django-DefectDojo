@@ -3,7 +3,7 @@ title: Hardware-Dimensionierung für selbst gehostetes DefectDojo Pro
 description: Allgemeine Anleitung zur Dimensionierung von Rechenleistung, Arbeitsspeicher
   und Speicherplatz für eine selbst gehostete DefectDojo-Pro-Bereitstellung
 draft: false
-weight: 4
+weight: 1
 audience: pro
 ---
 

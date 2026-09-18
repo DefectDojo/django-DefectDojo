@@ -3,7 +3,7 @@ title: Dimensionamento hardware per DefectDojo Pro self-hosted
 description: Linee guida generali per dimensionare risorse di calcolo, memoria e storage
   per una distribuzione self-hosted di DefectDojo Pro
 draft: false
-weight: 4
+weight: 1
 audience: pro
 ---
 

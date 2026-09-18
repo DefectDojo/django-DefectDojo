@@ -3,7 +3,7 @@ title: Fazendo Backup de uma Implantação Autogerenciada
 description: As quatro coisas a capturar, onde cada uma reside em implantações Compose
   e Kubernetes, e como confirmar que um backup pode realmente ser restaurado
 draft: false
-weight: 12
+weight: 9
 audience: pro
 ---
 
