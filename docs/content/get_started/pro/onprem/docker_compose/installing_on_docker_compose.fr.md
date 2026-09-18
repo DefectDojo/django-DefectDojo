@@ -97,7 +97,7 @@ Dans un réseau restreint, l'hôte applicatif a besoin d'un accès sortant vers 
 
 Autorisez par nom d'hôte plutôt que par adresse. Le registre se trouve derrière un réseau de diffusion de contenu, si bien que ses adresses varient selon la localisation et changent au fil du temps.
 
-Si l'hôte accède à Internet via un proxy sortant, consultez [Exécuter DefectDojo derrière un proxy HTTPS sortant](/onprem_deployment/forward_proxy/). S'il n'a aucun accès à Internet, suivez plutôt la procédure d'installation en environnement isolé (air-gapped) de cette section.
+Si l'hôte accède à Internet via un proxy sortant, consultez [Exécuter DefectDojo derrière un proxy HTTPS sortant](/get_started/pro/onprem/forward_proxy/). S'il n'a aucun accès à Internet, suivez plutôt la procédure d'installation en environnement isolé (air-gapped) de cette section.
 
 ### Vérifier que la base de données est accessible
 

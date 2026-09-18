@@ -53,7 +53,7 @@ newgrp docker
 
 Confirme com `id` que tanto `docker` quanto `dojosrv` estão listados. Depois que seu usuário estiver no grupo `docker`, os comandos restantes não precisam de `sudo`.
 
-Se o host de preparação acessa a internet por meio de um proxy HTTPS de saída, configure as variáveis de proxy antes de baixar qualquer coisa. Consulte [Executando o DefectDojo Atrás de um Proxy HTTPS de Encaminhamento](/onprem_deployment/forward_proxy/).
+Se o host de preparação acessa a internet por meio de um proxy HTTPS de saída, configure as variáveis de proxy antes de baixar qualquer coisa. Consulte [Executando o DefectDojo Atrás de um Proxy HTTPS de Encaminhamento](/get_started/pro/onprem/forward_proxy/).
 
 ### 2. Defina a versão
 
@@ -342,7 +342,7 @@ Faça backup do seu banco de dados antes de qualquer atualização e revise as [
 
 Uma implantação isolada funciona sem nenhuma conectividade de saída, mas os recursos que acessam serviços externos não podem funcionar enquanto ela estiver desconectada. Isso se aplica aos conectores e integradores que buscam dados de ferramentas hospedadas na nuvem, às integrações com rastreadores de issues como o Jira, às notificações de saída para serviços como Slack e Microsoft Teams, e aos dados de enriquecimento de vulnerabilidades que normalmente são obtidos periodicamente.
 
-Esses recursos são configurados por implantação, em vez de vir ativados por padrão, então uma instalação isolada não fica comprometida pela ausência deles. Se você ativar algum, espere que ele falhe com erros de resolução de nome ou de conexão até que a implantação tenha uma rota até aquele serviço. Quando o caminho de saída existe, mas passa por um proxy, consulte [Executando o DefectDojo Atrás de um Proxy HTTPS de Encaminhamento](/onprem_deployment/forward_proxy/).
+Esses recursos são configurados por implantação, em vez de vir ativados por padrão, então uma instalação isolada não fica comprometida pela ausência deles. Se você ativar algum, espere que ele falhe com erros de resolução de nome ou de conexão até que a implantação tenha uma rota até aquele serviço. Quando o caminho de saída existe, mas passa por um proxy, consulte [Executando o DefectDojo Atrás de um Proxy HTTPS de Encaminhamento](/get_started/pro/onprem/forward_proxy/).
 
 ### Dados de EPSS e KEV a partir de um espelho interno
 

@@ -97,7 +97,7 @@ In einem eingeschränkten Netzwerk benötigt der Anwendungs-Host ausgehenden Zug
 
 Erstellen Sie die Allowlist nach Hostname statt nach Adresse. Die Registry liegt hinter einem Content Delivery Network, daher variieren ihre Adressen je nach Standort und ändern sich mit der Zeit.
 
-Wenn der Host das Internet über einen ausgehenden Proxy erreicht, siehe [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/). Hat er überhaupt keine Verbindung zum Internet, folgen Sie stattdessen dem Verfahren für die Air-Gapped-Installation in diesem Abschnitt.
+Wenn der Host das Internet über einen ausgehenden Proxy erreicht, siehe [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/). Hat er überhaupt keine Verbindung zum Internet, folgen Sie stattdessen dem Verfahren für die Air-Gapped-Installation in diesem Abschnitt.
 
 ### Erreichbarkeit der Datenbank prüfen
 

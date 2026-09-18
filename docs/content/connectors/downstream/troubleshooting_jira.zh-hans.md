@@ -24,7 +24,7 @@ aliases:
 
 如果 DefectDojo 的 Jira 集成出现类似“connection refused”“no route to host”之类的连接错误，或出现通用的 TLS 握手失败——而且凭据本身是有效的——那么您的 DefectDojo 实例可能位于防火墙之后，出站流量需要经过正向 HTTPS 代理。
 
-对于本地部署的 Pro 版本，请在部署环境中设置 `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` 环境变量。`dojo-compose-cli` 会自动将这些变量传递给 `uwsgi`、`celeryworker` 以及 Connector 容器。完整配置步骤请参见[在正向 HTTPS 代理后运行 DefectDojo](/onprem_deployment/forward_proxy/)。
+对于本地部署的 Pro 版本，请在部署环境中设置 `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` 环境变量。`dojo-compose-cli` 会自动将这些变量传递给 `uwsgi`、`celeryworker` 以及 Connector 容器。完整配置步骤请参见[在正向 HTTPS 代理后运行 DefectDojo](/get_started/pro/onprem/forward_proxy/)。
 
 > 注意：设置 `HTTPS_PROXY` 只会配置 DefectDojo 的**出站**流量。它不会影响 Jira 向 DefectDojo 投递**入站** webhook 的能力——这种情况请参见下方的 [Jira 问题的更改未能更新 DefectDojo 中的发现项](#changes-made-to-jira-issues-are-not-updating-findings-in-defectdojo)。
 

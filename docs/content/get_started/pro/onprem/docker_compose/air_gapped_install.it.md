@@ -53,7 +53,7 @@ newgrp docker
 
 Verifica con `id` che siano elencati sia `docker` che `dojosrv`. Una volta che il tuo utente fa parte del gruppo `docker`, i comandi restanti non richiedono `sudo`.
 
-Se l'host di staging raggiunge Internet tramite un proxy HTTPS in uscita, configura le variabili del proxy prima di scaricare qualsiasi elemento. Consulta [Eseguire DefectDojo dietro un proxy HTTPS forward](/onprem_deployment/forward_proxy/).
+Se l'host di staging raggiunge Internet tramite un proxy HTTPS in uscita, configura le variabili del proxy prima di scaricare qualsiasi elemento. Consulta [Eseguire DefectDojo dietro un proxy HTTPS forward](/get_started/pro/onprem/forward_proxy/).
 
 ### 2. Imposta la versione
 
@@ -342,7 +342,7 @@ Esegui il backup del database prima di ogni aggiornamento e consulta le [note di
 
 Un deployment air-gapped funziona senza alcuna connettività in uscita, ma le funzionalità che raggiungono servizi esterni non possono operare mentre è disconnesso. Questo vale per i connector e gli integrator che effettuano il pull da strumenti ospitati nel cloud, per le integrazioni con issue tracker come Jira, per le notifiche in uscita verso servizi come Slack e Microsoft Teams, e per i dati di arricchimento delle vulnerabilità normalmente recuperati secondo una pianificazione.
 
-Questi elementi vengono configurati per singolo deployment invece di essere attivi per impostazione predefinita, quindi la loro assenza non compromette un'installazione air-gapped. Se ne abiliti uno, aspettati che fallisca con errori di risoluzione dei nomi o di connessione finché il deployment non avrà un percorso verso quel servizio. Se il percorso in uscita esiste ma passa attraverso un proxy, consulta [Eseguire DefectDojo dietro un proxy HTTPS forward](/onprem_deployment/forward_proxy/).
+Questi elementi vengono configurati per singolo deployment invece di essere attivi per impostazione predefinita, quindi la loro assenza non compromette un'installazione air-gapped. Se ne abiliti uno, aspettati che fallisca con errori di risoluzione dei nomi o di connessione finché il deployment non avrà un percorso verso quel servizio. Se il percorso in uscita esiste ma passa attraverso un proxy, consulta [Eseguire DefectDojo dietro un proxy HTTPS forward](/get_started/pro/onprem/forward_proxy/).
 
 ### Dati EPSS e KEV da un mirror interno
 
