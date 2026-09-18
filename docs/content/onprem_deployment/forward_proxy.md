@@ -41,7 +41,7 @@ Once the stack is restarted:
 
 If outbound calls fail with TLS errors after configuring the proxy, the most common causes are:
 
-- The proxy's TLS certificate is not trusted by the container.  You may need to inject a CA bundle into the containers depending on your proxy's TLS configuration.
+- The proxy's TLS certificate is not trusted by the container.  If the proxy (or any upstream service) presents a certificate signed by an internal or private CA, add that CA to the containers' trust store. On Docker Compose, see [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca); on Kubernetes, see [Trusting an internal or private CA](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#trusting-an-internal-or-private-ca).
 - `NO_PROXY` is not configured for internal hosts, so DefectDojo is trying to reach internal services *through* the proxy and failing.
 
 ## Known limitation: inbound Jira webhooks
