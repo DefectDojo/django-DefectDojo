@@ -121,10 +121,10 @@ two-day cell. Nothing else about the finding changed.
 
 ## Rating findings with the Rules Engine
 
-Ratings are assigned through **Rules Engine 2.0**. The **Set Potential Agency Impact (PAIN)** action
+Ratings are assigned through **Triage Engine**. The **Set Potential Agency Impact (PAIN)** action
 writes a rating to every finding that reaches it.
 
-![The Set Potential Agency Impact (PAIN) action in the Rules Engine 2.0 editor](images/11-rules-engine-set-pain-node.jpg)
+![The Set Potential Agency Impact (PAIN) action in the Triage Engine editor](images/11-rules-engine-set-pain-node.jpg)
 
 The rating selector offers FedRAMP's own customer-effect wording rather than bare numbers, so
 whoever builds the rule sees the judgment being made.
@@ -140,7 +140,7 @@ The action behaves the way a compliance workflow needs it to:
   so a rule-set rating and a hand-set one produce the same date.
 * A rating outside 1 to 5 is rejected.
 * Every run records a per-finding trace of the change, from and to — the audit trail for each impact
-  decision. See [Runs](/automation/rules_engine_2/runs/).
+  decision. See [Runs](/automation/triage_engine/runs/).
 
 `finding.pain_rating` is also available as a condition in any filter node, which is what makes
 escalation rules such as "above N3 and internet-reachable" possible.
@@ -148,7 +148,7 @@ escalation rules such as "above N3 and internet-reachable" possible.
 The rule below produced the deadline change above: a Manual Run trigger, an If / Filter node
 selecting the finding, and **Set Potential Agency Impact (PAIN)** set to N5, switched to Live.
 
-![A complete PAIN rating rule in the Rules Engine 2.0 editor](images/13-pain-rating-rule.jpg)
+![A complete PAIN rating rule in the Triage Engine editor](images/13-pain-rating-rule.jpg)
 
 The run trace records each node's input and output counts. This run swept 10,008 findings, one
 matched the filter, and one rating was written.
@@ -161,14 +161,14 @@ Two templates covering the PAIN workflow ship in the template gallery, alongside
 scan-cadence watchdogs. Adopting a template creates a new rule of your own, disabled and in simulate
 mode, so nothing runs until you configure and enable it.
 
-![The FedRAMP Class C templates in the Rules Engine 2.0 template gallery](images/15-fedramp-rule-templates.jpg)
+![The FedRAMP Class C templates in the Triage Engine template gallery](images/15-fedramp-rule-templates.jpg)
 
 | Template | What it does |
 | --- | --- |
 | **FedRAMP — route unrated findings for impact review** | A scheduled sweep for active findings that carry exploit evidence — weaponized or worse — and no PAIN rating, raising an alert to the reviewers who own impact decisions. It surfaces the queue rather than assigning a rating, which is what FedRAMP's provider-judgment requirement asks for. |
 | **FedRAMP — escalate reportable-incident candidates** | A scheduled sweep for active findings rated above N3 that are likely exploitable and sit on exposed assets, raising a ticket for each. Class C treats such a finding as a FedRAMP Reportable Incident until it is mitigated to N3 or below. |
 
-See [Building Rules](/automation/rules_engine_2/building_rules/) for how a template is adopted.
+See [Building Rules](/automation/triage_engine/building_rules/) for how a template is adopted.
 
 ## Where the deadline shows up
 

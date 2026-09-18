@@ -76,7 +76,10 @@ class KubeHunterParser:
             # internal de-duplication
             if finding.steps_to_reproduce is None:
                 finding.steps_to_reproduce = ""
-            dupe_key = hashlib.sha256(str(finding.description + finding.title + finding.steps_to_reproduce + finding.vuln_id_from_tool).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.sha256(
+                f"{finding.description}{finding.title}"
+                f"{finding.steps_to_reproduce}{finding.vuln_id_from_tool or ''}".encode(),
+            ).hexdigest()
 
             if dupe_key not in dupes:
                 dupes[dupe_key] = finding

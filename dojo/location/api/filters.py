@@ -10,8 +10,10 @@ from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 class AbstractedLocationFilter(StaticMethodFilters):
     StaticMethodFilters.create_integer_filters("id", "ID", locals())
     StaticMethodFilters.create_char_filters("location__tags__name", "Tags", locals())
-    StaticMethodFilters.create_char_filters("location__created_at", "Created At", locals())
-    StaticMethodFilters.create_char_filters("location__updated_at", "Updated At", locals())
+    StaticMethodFilters.create_char_filters(
+        "location__created_at", "Created At", locals(), model_field_name="location__created")
+    StaticMethodFilters.create_char_filters(
+        "location__updated_at", "Updated At", locals(), model_field_name="location__updated")
     StaticMethodFilters.create_integer_filters("location__products__product", "Product ID", locals())
     StaticMethodFilters.create_integer_filters("location__findings__finding", "Finding ID", locals())
 
@@ -38,8 +40,8 @@ class LocationFilter(CommonFilters):
             "id",
             "location_type",
             "location_value",
-            "created_at",
-            "updated_at",
+            ("created", "created_at"),
+            ("updated", "updated_at"),
         ),
     )
 
@@ -60,8 +62,8 @@ class LocationProductReferenceFilter(CommonFilters):
             "product",
             "product__name",
             "status",
-            "created_at",
-            "updated_at",
+            ("created", "created_at"),
+            ("updated", "updated_at"),
         ),
     )
 
@@ -82,7 +84,7 @@ class LocationFindingReferenceFilter(CommonFilters):
             "finding",
             "finding__severity",
             "status",
-            "created_at",
-            "updated_at",
+            ("created", "created_at"),
+            ("updated", "updated_at"),
         ),
     )

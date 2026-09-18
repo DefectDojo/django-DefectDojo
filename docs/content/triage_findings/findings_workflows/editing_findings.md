@@ -35,7 +35,9 @@ This will open the **Edit Finding** form, where you can edit the metadata, chang
 ​
 * **Active / Verified** are the primary Finding statuses used by a tool. Active Findings are Findings that are currently active in your network and have been reported by a tool. Verified means that this Finding has been confirmed to exist by a team member.  
 ​
-* **SAST / DAST** are labels used to organize your Findings into the context they were discovered in. Generally, this label is populated based on the scanning tool used, but you can adjust this to a more accurate level (for example, if the Finding was found by both a SAST and a DAST tool).
+* **SAST / DAST** are labels used to organize your Findings into the context they were discovered in. Generally, this label is populated based on the scanning tool used, but you can adjust this to a more accurate level (for example, if the Finding was found by both a SAST and a DAST tool).  
+​
+* **Threat Intelligence** (a collapsed panel under **Optional Fields**) holds the EPSS Score, EPSS Percentile, Known Exploited, Used in Ransomware and KEV Date Added values. These are normally written by the [EPSS / KEV sync](/triage_findings/finding_scoring/epss_kev/), which runs nightly, after each import, and on demand from the Vulnerability Explorer. You can set them by hand, but treat a hand-entered value as provisional on any Finding that references a CVE: the next sync replaces it with the feed's values, and clears the KEV fields when none of the Finding's CVEs are in the CISA catalog. A Finding without a CVE is never enriched, so it keeps whatever you enter. Hand-set values feed the priority and risk calculation exactly as synced values do. A Rules Engine rule that should react to a hand-set flag needs a condition on **KEV: Known Exploited**; the FedRAMP "route unrated findings for impact review" template keys on **Exploit Maturity**, which comes from the threat-intelligence feed and is not affected by these fields.
 
 ### Editing the Mitigated Date and Mitigated By
 

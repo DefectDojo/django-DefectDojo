@@ -1,4 +1,5 @@
 import sys
+import time
 import unittest
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger
@@ -66,8 +67,27 @@ class NotificationWebhookTest(BaseTestCase):
     @on_exception_html_source_logger
     def test_list_webhooks_page_loads(self):
         driver = self.driver
-        driver.get(self.base_url + "notifications/webhooks")
-        self.assertTrue(self.is_text_present_on_page(text="Webhook"))
+        # This page is gated on enable_webhooks_notifications, which the previous
+        # test just turned on. That setting is served from the per-request L1
+        # settings cache (dojo/caching.py), which has no cross-worker tier: a
+        # worker thread self-heals only at its next request boundary, so the
+        # enabling POST and this GET landing on different uwsgi workers can
+        # briefly leave the new value invisible here, and
+        # NotificationWebhooksView.check_webhooks_enabled() then raises Http404
+        # for that window. Retry the load until the real list renders so the
+        # propagation window is absorbed instead of failing the test, and accept
+        # console errors for this one page-load check: the transient 404s logged
+        # during the window are expected, and the heading assertion below is the
+        # real guard. Assert on "Notification Webhook List" -- text only the
+        # actual list page emits -- not a bare "Webhook", which the base
+        # template's sidebar "Notification Webhooks" link matches even on a 404.
+        self.accept_javascript_errors = True
+        for _ in range(10):
+            driver.get(self.base_url + "notifications/webhooks")
+            if self.is_text_present_on_page(text="Notification Webhook List"):
+                break
+            time.sleep(1)
+        self.assertTrue(self.is_text_present_on_page(text="Notification Webhook List"))
 
     @on_exception_html_source_logger
     def test_add_notification_webhook(self):

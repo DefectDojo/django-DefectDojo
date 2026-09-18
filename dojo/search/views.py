@@ -17,7 +17,8 @@ from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
 from dojo.location.feature import locations_enabled
-from dojo.location.queries import get_authorized_locations, prefetch_for_locations
+from dojo.location.models import Location
+from dojo.location.queries import get_authorized_locations, prefetch_for_locations, readable_tag_match
 from dojo.models import Engagement, Finding, Finding_Template, Product, Test
 from dojo.product.queries import get_authorized_app_analysis, get_authorized_languages, get_authorized_products
 from dojo.test.queries import get_authorized_tests
@@ -237,7 +238,11 @@ def simple_search(request):
                 tagged_tests = authorized_tests.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
                 tagged_engagements = authorized_engagements.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
                 tagged_products = authorized_products.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
-                tagged_endpoints = authorized_endpoints.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
+                if locations_enabled():
+                    L1, L2, L3, L4 = location_tag_queries(tag, tags, not_tag, not_tags)
+                    tagged_endpoints = authorized_endpoints.filter(L1 | L2).exclude(L3 | L4).distinct()[:max_results].prefetch_related("tags")
+                else:
+                    tagged_endpoints = authorized_endpoints.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
             else:
                 tagged_findings = None
                 tagged_finding_templates = None
@@ -477,7 +482,42 @@ def vulnerability_id_fix(keyword):
     return keyword
 
 
+def location_tag_queries(tag, tags, not_tag, not_tags):
+    """The four tag predicates of ``simple_search``, matched over readable tag sets only."""
+    def match(**lookups):
+        return readable_tag_match("pk", **lookups)
+    return (
+        match(tags__name__contains=tag) if tag else Q(),
+        match(tags__name__in=tags) if tags else Q(),
+        match(tags__name__contains=not_tag) if not_tag else Q(),
+        match(tags__name__in=not_tags) if not_tags else Q(),
+    )
+
+
+def apply_location_tag_filters(qs, operators):
+    """
+    The Location branch of :func:`apply_tag_filters`.
+
+    A Location row is shared by every product referencing it and so is its tag set, so a
+    filter joining the tag relation directly matches through other products' tags and turns
+    a substring lookup into an oracle over a set the page withholds. These run the same
+    predicate the templates render, so a filter never matches on a withheld value.
+    """
+    if "tag" in operators:
+        qs = qs.filter(readable_tag_match("pk", tags__name__contains=",".join(operators["tag"])))
+    if "tags" in operators:
+        qs = qs.filter(readable_tag_match("pk", tags__name__in=operators["tags"]))
+    if "not-tag" in operators:
+        qs = qs.exclude(readable_tag_match("pk", tags__name__contains=",".join(operators["not-tag"])))
+    if "not-tags" in operators:
+        qs = qs.exclude(readable_tag_match("pk", tags__name__in=operators["not-tags"]))
+    return qs
+
+
 def apply_tag_filters(qs, operators, *, skip_relations=False):
+    if qs.model is Location:
+        return apply_location_tag_filters(qs, operators)
+
     tag_filters = {"tag": ""}
 
     if qs.model == Finding:
