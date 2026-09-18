@@ -3,7 +3,7 @@ title: Dimensionamento de hardware para o DefectDojo Pro autogerenciado
 description: Orientação geral para dimensionar processamento, memória e armazenamento
   em uma implantação autogerenciada do DefectDojo Pro
 draft: false
-weight: 1
+weight: 2
 audience: pro
 ---
 

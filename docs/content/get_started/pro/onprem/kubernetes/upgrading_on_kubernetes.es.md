@@ -1,12 +1,11 @@
 ---
-title: Guía de actualización de DefectDojo Pro
+title: Guía de actualización de DefectDojo Pro (Kubernetes / Helm)
 description: Actualice una versión existente de DefectDojo Pro Helm, incluyendo la
   extracción del chart, la ejecución de la actualización y la reversión
 draft: false
 weight: 2
 audience: pro
 aliases:
-- /es/get_started/pro/onprem/upgrading/
 - /es/get_started/pro/onprem/upgrading_on_kubernetes/
 ---
 
@@ -105,7 +104,7 @@ más común de actualizaciones fallidas.
 > siempre granular. Para mantener el comportamiento restringido, configure
 > `networkPolicy.profile: aggressive` y revise las excepciones
 > (`nodeLocalDns`, `dnsSelectors`, `externalAPIs`) — consulte
-> [Políticas de red](/get_started/pro/onprem/installing_on_kubernetes/#network-policies).
+> [Políticas de red](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#network-policies).
 
 > **Requisito de base de datos del orquestador.** El orquestador (`ddorch`) usa una
 > segunda base de datos llamada `<main-db-name>-ddorch` y la crea al iniciar si
@@ -113,7 +112,7 @@ más común de actualizaciones fallidas.
 > (`CREATE DATABASE "defectdojo-ddorch" OWNER defectdojo;`) antes de actualizar
 > a una versión de chart que habilite ddorch — de lo contrario, el pod de ddorch fallará con
 > `permission denied to create database (SQLSTATE 42501)`. Consulte
-> [Pre-flight: base de datos del orquestador (ddorch)](/get_started/pro/onprem/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
+> [Pre-flight: base de datos del orquestador (ddorch)](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
 
 > **Valor predeterminado del reetiquetado de Organization/Asset.** `dojo.V3EnableOrganizationAssetRelabel`
 > ahora tiene como valor predeterminado `null` (automático): está **habilitado para instalaciones nuevas** y **desactivado

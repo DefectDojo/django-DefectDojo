@@ -1,5 +1,5 @@
 ---
-title: DefectDojo Pro 安装指南
+title: DefectDojo Pro 安装指南 (Kubernetes / Helm)
 description: 使用 Helm Chart 在 Kubernetes 上安装 DefectDojo Pro，涵盖基础设施、密钥以及安装过程本身
 draft: false
 weight: 1
@@ -1549,7 +1549,7 @@ helm upgrade dojopro \
 `$CHART` 路径，将 `helm install` 替换为 `helm upgrade` 即可。
 
 有关身份验证、ArgoCD 升级、验证、回滚和故障排查的内容，请参阅
-[升级指南](/get_started/pro/onprem/upgrading_on_kubernetes/)——在
+[升级指南](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/)——在
 PDF 版本中作为**附录：升级 DefectDojo Pro**收录。
 
 ---

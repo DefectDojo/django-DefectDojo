@@ -1,7 +1,7 @@
 ---
 title: FIPS-140-3-Modus
 date: 2026-07-27 00:00:00+00:00
-weight: 5
+weight: 7
 audience: pro
 ---
 

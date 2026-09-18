@@ -2,7 +2,7 @@
 title: セルフホスト型 DefectDojo Pro のハードウェアサイジング
 description: セルフホスト型 DefectDojo Pro デプロイのコンピュート、メモリ、ストレージをサイジングするための一般的なガイダンス
 draft: false
-weight: 1
+weight: 2
 audience: pro
 ---
 
