@@ -2,7 +2,7 @@
 title: 备份自托管部署
 description: 需要备份的四项内容、它们在 Compose 和 Kubernetes 部署中各自的位置，以及如何确认备份确实可以恢复
 draft: false
-weight: 9
+weight: 7
 audience: pro
 ---
 

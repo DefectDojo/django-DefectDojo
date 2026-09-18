@@ -2,7 +2,7 @@
 title: DefectDojo Pro(オンプレミス)のアップグレード
 description: Helmチャートを使用したセルフホスト型DefectDojo Proデプロイメントのサポートされるアップグレード手順
 draft: false
-weight: 6
+weight: 4
 audience: pro
 ---
 

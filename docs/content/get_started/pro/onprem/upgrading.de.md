@@ -3,7 +3,7 @@ title: Upgrade von DefectDojo Pro (On-Premise)
 description: Unterstütztes Upgrade-Verfahren für selbst gehostete DefectDojo-Pro-Bereitstellungen
   mit dem Helm-Chart
 draft: false
-weight: 6
+weight: 4
 audience: pro
 ---
 

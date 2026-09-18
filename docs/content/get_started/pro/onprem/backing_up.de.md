@@ -4,7 +4,7 @@ description: Die vier Dinge, die gesichert werden müssen, wo sie sich bei Compo
   und Kubernetes-Deployments jeweils befinden, und wie Sie bestätigen, dass ein Backup
   tatsächlich wiederhergestellt werden kann
 draft: false
-weight: 9
+weight: 7
 audience: pro
 ---
 

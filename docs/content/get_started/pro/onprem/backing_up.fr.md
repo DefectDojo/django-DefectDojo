@@ -4,7 +4,7 @@ description: Les quatre éléments à capturer, leur emplacement pour les déplo
   Compose et Kubernetes, et comment vérifier qu'une sauvegarde peut réellement être
   restaurée
 draft: false
-weight: 9
+weight: 7
 audience: pro
 ---
 

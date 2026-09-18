@@ -2,7 +2,7 @@
 title: "Running DefectDojo Behind a Forward HTTPS Proxy"
 description: "Configure DefectDojo Pro on-prem to reach Jira, SonarQube, and Connectors through an outbound HTTPS proxy"
 draft: false
-weight: 10
+weight: 8
 audience: pro
 aliases:
   - /onprem_deployment/forward_proxy/

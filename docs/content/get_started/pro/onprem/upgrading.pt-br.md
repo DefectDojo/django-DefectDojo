@@ -3,7 +3,7 @@ title: Atualizando o DefectDojo Pro (on-premise)
 description: Procedimento de upgrade suportado para implantações autogerenciadas do
   DefectDojo Pro usando o Helm chart
 draft: false
-weight: 6
+weight: 4
 audience: pro
 ---
 

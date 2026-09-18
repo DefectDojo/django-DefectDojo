@@ -4,7 +4,7 @@ description: Las cuatro cosas que debe capturar, dónde vive cada una en impleme
   con Compose y Kubernetes, y cómo confirmar que una copia de seguridad realmente
   se puede restaurar
 draft: false
-weight: 9
+weight: 7
 audience: pro
 ---
 

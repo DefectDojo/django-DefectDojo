@@ -3,7 +3,7 @@ title: "FIPS 140-3 Mode"
 description: "Deploy DefectDojo Pro with FIPS 140-3 validated cryptography using the -fips container images, for FedRAMP SC-13 and similar requirements"
 draft: false
 date: 2026-07-27T00:00:00+00:00
-weight: 7
+weight: 5
 audience: pro
 ---
 

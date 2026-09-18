@@ -3,7 +3,7 @@ title: Eseguire il backup di un deployment self-hosted
 description: Le quattro cose da acquisire, dove si trova ciascuna nei deployment Compose
   e Kubernetes, e come verificare che un backup possa essere effettivamente ripristinato
 draft: false
-weight: 9
+weight: 7
 audience: pro
 ---
 
