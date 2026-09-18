@@ -64,6 +64,31 @@
   pageRef = "/sensei/sensei_reference"
   weight = 4
 
+# Left-hand section sidebar for the Releases chapter. Defining this menu
+# replaces the auto-generated releases tree, so it reproduces the two release
+# groups (each auto-expands to its child pages) and then adds the two Pro
+# on-prem upgrade guides so they are discoverable from this panel too. Entries
+# are audience-filtered by the version toggle via each referenced page's audience.
+[[sidebar_releases]]
+  name = "Open Source Upgrades"
+  pageRef = "/releases/os_upgrading"
+  weight = 0
+
+[[sidebar_releases]]
+  name = "Pro Upgrades"
+  pageRef = "/releases/pro"
+  weight = 1
+
+[[sidebar_releases]]
+  name = "Upgrade on Kubernetes (Helm)"
+  pageRef = "/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes"
+  weight = 2
+
+[[sidebar_releases]]
+  name = "Upgrade on Docker Compose"
+  pageRef = "/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose"
+  weight = 3
+
 [[main]]
   name = "Admin"
   url = "/admin/admin_intro/intro/"

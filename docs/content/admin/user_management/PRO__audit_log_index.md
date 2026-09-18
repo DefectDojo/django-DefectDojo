@@ -87,8 +87,8 @@ attributed to the user who triggered it.
 | Rule Filter Entry                 |   ✅   |   ✅   |   ✅   |                                |
 | Rules Engine Operation            |   ✅   |   ✅   |   ✅   |                                |
 | Rules Engine Operation Message    |   ✅   |   ✅   |   ✅   |                                |
-| Rules Engine 2.0 Rule             |   ✅   |   ✅   |   ✅   | Node based rules               |
-| Rules Engine 2.0 Delivery         |   ✅   |   ✅   |   ✅   | Entries in the Deliveries ledger |
+| Triage Engine Rule             |   ✅   |   ✅   |   ✅   | Node based rules               |
+| Triage Engine Delivery         |   ✅   |   ✅   |   ✅   | Entries in the Deliveries ledger |
 | Scheduled Task                    |   ✅   |   ✅   |   ✅   |                                |
 | Scheduled Task Run                |   ✅   |   ✅   |   ✅   |                                |
 | Mitigation Policy                 |   ✅   |   ✅   |   ✅   |                                |
