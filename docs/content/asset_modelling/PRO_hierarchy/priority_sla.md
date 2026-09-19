@@ -421,6 +421,55 @@ When a fact is unknown, DefectDojo resolves the finding as if it held whichever 
 policy treats more urgently, and records that it did so. An unmeasured fact can never earn a
 finding more time.
 
+### The evaluation clock
+
+Publishing a deadline is only half of what these frameworks ask for. They also ask that every
+vulnerability be looked at quickly, and that you can show it was. A response policy therefore
+carries an evaluation window as well as a timeframe table, measured in days from the date the
+finding was detected, and different authorization levels usually get different windows.
+
+A finding counts as evaluated once somebody establishes one of the three facts. There is no
+separate confirmation step, because deciding that a finding is internet reachable, or rating its
+adverse impact, is the judgment the framework is asking for. DefectDojo records when that happened
+and, where a person did it rather than a rule, who.
+
+Findings whose window has passed without an evaluation appear in the unevaluated queue. Once a day
+DefectDojo sends one notification per asset listing how many of its findings are overdue. One per
+asset, not one per finding: a window measured in days will sometimes produce hundreds of overdue
+findings at once, and an alert for each would bury the thing it exists to raise. The notification
+goes to the asset's members and its organization's members.
+
+Only open findings are counted. A finding that was closed without ever being evaluated is worth
+knowing about in a report, but it is not something anyone can still act on, and leaving it in a
+daily queue would make the queue permanently dirty.
+
+### Rules can do the routine evaluations
+
+A window measured in days is hard to meet by hand across a large estate, so the rules engine has a
+**Set a vulnerability response fact** action. It sets one of the three facts, records that a rule
+was the source, and stamps the evaluation clock in the same step.
+
+The intended shape is a rule that answers the cases your scanners already have evidence for, so
+that the findings left for a person are the ones that need a judgment. A rule never overwrites a
+value somebody set by hand, and a rule running every night does not keep moving the recorded
+evaluation time on findings it has already seen.
+
+### Escalation
+
+Some frameworks treat a particular combination of facts as an incident rather than as a
+vulnerability, and expect it to be handled as one until it is brought back below that line. The
+condition is part of the policy, so it can differ between standards and between versions of the
+same standard.
+
+DefectDojo flags a finding that meets its policy's escalation condition and lists it in a separate
+queue. The flag clears on its own when the finding stops meeting the condition, which usually means
+its impact has been mitigated down a level. The record that it was escalated, and when, is kept
+after the flag clears, because the fact that it happened is part of what a reviewer asks about.
+
+There is no separate incident record to manage. A flag and a filtered view are what the frameworks
+actually require, and the process that follows an escalation already lives in whatever incident
+tooling you use.
+
 ### Versions
 
 A new release of a standard arrives as a new policy rather than as an edit to the one already
