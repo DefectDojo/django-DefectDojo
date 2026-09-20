@@ -52,9 +52,10 @@ label you use.
 using the median volume of your connected scanners, and the page says so on the card. A
 scanner left out entirely would quietly understate your volume.
 
-**How long must closed findings be kept?** Retention is driven by your compliance obligations
+**How long should findings be kept?** Retention is driven by your compliance obligations
 rather than by volume, and it is priced separately, so it is asked here while you are already
-answering questions.
+answering questions. Retention governs closed findings and scan history; findings that are
+still open are never aged out.
 
 ## What you get back
 
