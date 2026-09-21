@@ -1,14 +1,14 @@
 ---
 title: "Command Center"
-description: "The flagship DefectDojo Pro dashboard family: posture score, instrumented pipeline funnel, honest coverage, TV mode, and the scheduled executive pack"
+description: "The DefectDojo Pro home page: posture score, instrumented pipeline funnel, honest coverage, TV mode, and the scheduled executive pack"
 draft: false
 audience: pro
 weight: 13
 slug: command-center
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: the Command Center is a DefectDojo Pro feature in beta. It builds on [Customizable Dashboards](../custom-dashboards/) and is off by default. A superuser can turn on the <b>command_center</b> flag from <b>Settings &gt; Feature Flags</b> (it requires the <b>dashboard_v2</b> flag).</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: the Command Center is the DefectDojo Pro home page. It is on for every user and needs no feature flag. The customizable grids it links to are [Customizable Dashboards](../custom-dashboards/), which keep their own flag.</span>
 
-The Command Center is one composed screen that answers, in fixed zones, **what's on fire**, **are we winning**, and **is the machine healthy**. Sources stream in from the left, the flow narrows through three numbers wrapped in the posture score, and the outcomes fan out on the right, with the numbers a leader asks for along the bottom. Behind it sits the same dashboard system as [Customizable Dashboards](../custom-dashboards/): a customizable grid preset, new widget types, and the [dashboards REST API](../custom-dashboards-api/), so everything the scene shows can also be laid out, shared, cloned and exported your own way.
+The Command Center is one composed screen that answers, in fixed zones, **what's on fire**, **are we winning**, and **is the machine healthy**. Sources stream in from the left, the flow narrows through three numbers wrapped in the posture score, and the outcomes fan out on the right, with the numbers a leader asks for along the bottom. Beside it sits [Customizable Dashboards](../custom-dashboards/): new widget types, seeded preset layouts, and the [dashboards REST API](../custom-dashboards-api/), so with that feature on everything the scene shows can also be laid out, shared, cloned and exported your own way.
 
 > **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The UI follows your instance's naming setting.
 
@@ -16,7 +16,7 @@ The Command Center is one composed screen that answers, in fixed zones, **what's
 
 ![The Command Center scene](images/command_center_scene.png)
 
-With the flag on, **Home** lands on the scene, which has its own page at `/command-center`. It is read left to right:
+**Home** is the scene. It is read left to right:
 
 * **The brief**: up to three grounded sentences as outlined cards across the top of the scene itself, every card a door to its evidence. When nothing changed since the previous snapshot, the row says so.
 * **Sources**: one row per scanner or connector with its volume in the window, its state, and its change against the previous window. Each row stacks its volume over the tool's name, right-aligned to a gap before its ribbon, inside a faint dashed, unfilled box under a bold **Top sources** title (the rail keeps the twelve largest sources and folds the rest into one row), mirroring the two family boxes on the right. Each ribbon is a dashed line of short, rounded dashes, every line the same weight (volume is carried by the beam's glow, below), dim neutral gray on the sources side (raw volume is not a signal), the accent blue on the outcomes side. A source that has stopped reporting draws as dashes that fade along their length; a source whose last run failed fades in the down color, and a source with failed imports draws in the warning color. The screen shows when it is blind rather than letting silence read as clean.
@@ -50,20 +50,21 @@ Clicking a number lands on the matching list with the filter chips visible, so w
 
 The scene always shows what you are authorized to see, so every door lands on a list that adds up to its number. The list's breadcrumb says where you came from and what you are looking at: **Command Center** (a link back to the scene) then the door's own words, with the scene's window spelled out ("New findings in the last 30 days"). The window picker sets 7, 30, 90 or 365 days; every number and every delta follows it. The history scrubber replays any day in the last year from the daily snapshot ledger: drag it, or press left and right, and the whole scene re-renders as of that day with a badge saying so. A day the ledger reconstructed rather than observed is marked "reconstructed, no live state", and the parts of the screen the ledger did not carry that day read as dashes. Today is the live end stop. These settings are remembered per browser; they are never part of the page address.
 
-### The customizable grid
+### Building your own version
 
-The grid preset that used to be called Command Center is now **Command Center (custom)**: the same layout, with its widgets, that you can clone and rearrange. It is a preset like any other, so new users are still handed **Default Dashboard** on first login. **Customize** in the scene header opens it, and it stays under **Dashboards** in the sidebar. Its "Within SLA" gauge has become a big KPI of the SLA breach count, in line with the design rule that the Command Center uses no gauges.
+There is no grid preset that mirrors the scene. One shipped briefly, and it was removed: it answered the same questions as the scene with a different arithmetic, so the two screens could never quite agree, which is worse than having one of them. With [Customizable Dashboards](../custom-dashboards/) on, **Customize** in the scene header opens your grids, every widget the old preset used is available on any dashboard from the Add Existing Widget catalog, and the three preset layouts below each take one part of the scene's story if you want a starting point. New users are handed **Default Dashboard** on first login.
+
+If you had that preset set as your default, or your administrator had set it as the default for everyone, you are moved to **Default Dashboard** automatically. Any copy you made of it is your own dashboard and is left exactly as it is.
 
 ## The preset family
 
-Turning the flag on publishes four seeded, cloneable layouts under the **Command Center** group of the Shared Templates picker:
+With Customizable Dashboards on, three seeded, cloneable layouts are published under the **Command Center** group of the Shared Templates picker:
 
-* **Command Center (custom)**: the customizable grid behind the scene. Existing users keep their current dashboards and defaults, and can clone it whenever they like.
 * **Exec Brief**: the board-facing view. The posture score with its why panel, the quarter's trajectory, risk acceptance debt, fix durability, and a fairness-normalized team scorecard.
-* **Ops Triage**: queue first. Your work, what breaches next, this week's intake funnel, live activity, backlog aging.
+* **Ops Triage**: queue first. Your work, what breaches next, this week's intake funnel, live activity, backlog aging, and the fixes that clear the most at once.
 * **Platform Health**: the machinery deep dive. The pipeline funnel at full width, the sensors rail, automation throughput, coverage freshness, license headroom.
 
-With the flag on, the sidebar has two dashboard entries: **Home** lands on the scene, and **Dashboards** opens the customizable grids.
+The sidebar has two dashboard entries: **Home**, which is the scene, and below it the dashboards you keep: **Dashboards** opens the customizable grids when Customizable Dashboards is on, and **Dashboard** opens the classic tile dashboard when it is off.
 
 ## The daily snapshot backbone
 
