@@ -2,6 +2,34 @@ apiVersion: v1
 entries:
   defectdojo:
   - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: Bump DefectDojo to 3.3.200
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 3.3.200
+    created: "2026-09-21T16:45:49.582053511Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: 16.7.27
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.25.8
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: 0393332d77412d2a76921f418faf933e9739088ddbf207b2a4b94867daa0657d
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/3.3.200/defectdojo-1.9.53.tgz
+    version: 1.9.53
+  - annotations:
       artifacthub.io/changes: ""
       artifacthub.io/prerelease: "true"
     apiVersion: v2
@@ -10036,4 +10064,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2026-09-21T05:13:09.08033088Z"
+generated: "2026-09-21T16:45:49.571400578Z"
