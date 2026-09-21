@@ -5,9 +5,8 @@ from crum import get_current_request
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.notifications.helper import create_notification, process_tag_notifications
-from dojo.utils import calculate_grade
+from dojo.utils import schedule_product_grade
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ def copy_test(test, engagement, user):
     """
     product = test.engagement.product
     test_copy = test.copy(engagement=engagement)
-    dojo_dispatch_task(calculate_grade, product.id)
+    schedule_product_grade(product.id)
     create_notification(
         event="test_copied",
         title=_("Copying of %s") % test.title,
