@@ -906,7 +906,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
                 engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name="valentijn", expected_http_status_code=400)
             self.assertEqual(import0, [(
                     "The fetched product has a conflict with the supplied product type name: "
-                    f"existing product type name - {PRODUCT_TYPE_NAME_DEFAULT} vs "
                     f"supplied product type name - {another_product_type_name}"
             )])
 
@@ -1108,7 +1107,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
                 engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name="valentijn", expected_http_status_code=400)
             self.assertEqual(import0, [(
                     "The fetched product has a conflict with the supplied product type name: "
-                    f"existing product type name - {PRODUCT_TYPE_NAME_DEFAULT} vs "
                     f"supplied product type name - {another_product_type_name}"
             )])
 
