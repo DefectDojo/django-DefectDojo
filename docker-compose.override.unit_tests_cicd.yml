@@ -43,6 +43,13 @@ services:
       DD_TEST_DB_MODE: ${DD_TEST_DB_MODE:-full}
       # No Redis/valkey in unit tests -> default django cache is LocMemCache.
       DD_CACHE_URL: ''
+      # Product grading is debounced through a cache marker with a wall-clock window
+      # (dojo.utils.schedule_product_grade). Under the test runner a dispatched grade task
+      # may never run, so a marker would outlive its test and silently skip grading for the
+      # next test whose product gets the same id, and it makes query counts depend on
+      # timing. 0 queues a task per change, as before; the debounce's own unit tests turn
+      # the window on explicitly.
+      DD_PRODUCT_GRADE_DEBOUNCE_SECONDS: '0'
       # In-process singleton cache (dojo/caching.py) stays ON: a singleton is read
       # once per request/test (deterministic assertNumQueries), reset per request
       # (middleware) and per test (dojo_test_case setUp).

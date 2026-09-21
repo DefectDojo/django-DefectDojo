@@ -20,6 +20,7 @@ from dojo.utils import calculate_grade, grade_debounce_cache_key, schedule_produ
 from .dojo_test_case import DojoTestCase
 
 
+@override_settings(PRODUCT_GRADE_DEBOUNCE_SECONDS=30)
 class TestProductGradeDebounce(DojoTestCase):
     # No fixture: the guard is keyed by product id alone, and calculate_grade drops it before it looks
     # the product up, so the ids below do not need to exist.
