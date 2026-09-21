@@ -15,7 +15,16 @@ An **admin-generated** Aqua **API key and secret**, created under **Account Mana
 1. Enter your Aqua Supply Chain **edge** host in the **Location** field, for example `https://eu-central-1.edge.cloud.aquasec.com`. This is not the tenant URL the Aqua Security connector uses. Aqua Supply Chain Security answers on the region's **edge** host, not `<tenant>.cloud.aquasec.com`.
 2. Enter the API key in the **API Key** field.
 3. Enter the API secret in the **API Secret** field.
-4. If your tenant is in the EU, set the **Auth Host** field to `https://eu-1.api.cloudsploit.com`. Leave it blank for the US host, `https://api.cloudsploit.com`. Aqua caps the issued authentication token at two hours, regardless of the validity the connector requests. The connector re-authenticates on its own when the token expires.
+4. Set the **Auth Host** field to your region's Aqua **CSPM API** host. This is a different host from the **Location** edge host above, and it is used only to exchange the API key and secret for a token. Pick the row for your region:
+
+   | Region | Auth Host |
+   |--------|-----------|
+   | US | `https://api.cloudsploit.com` (or leave blank) |
+   | EU | `https://eu-1.api.cloudsploit.com` |
+   | Singapore | `https://asia-1.api.cloudsploit.com` |
+   | Sydney | `https://ap-2.api.cloudsploit.com` |
+
+   Do not put the edge host (a `cloud.aquasec.com` address) in **Auth Host**, and do not put the CSPM API host in **Location**. Aqua caps the issued authentication token at two hours, regardless of the validity the connector requests. The connector re-authenticates on its own when the token expires.
 5. Optionally, set **Scan Categories** to a comma-separated list of the categories to import. The five values are `vulnerabilities` (SCA), `secrets`, `iacMisconfigurations` (IaC), `sast` and `pipelineMisconfigurations` (Pipeline). Leave it blank to import all five. Each finding carries a `category:<value>` tag naming the category it came from.
 6. Optionally, set a **Minimum Severity** to limit which findings are imported. Aqua reports severity as a 0-4 value, which DefectDojo maps to Info, Low, Medium, High and Critical.
 
@@ -25,12 +34,12 @@ Each repository in the tenant becomes a Record. A repository that disappears fro
 
 A repository's default branch is always imported. Two optional fields extend this:
 
-- **Branch**: a comma-separated list of exact branch names or `*` wildcard families, for example `release/*, bugfix/*`. Every entry adds its matching branches on top of the default branch. Blank entries are ignored.
+- **Branch**: a comma-separated list of exact branch names or `*` wildcard families, for example `release/*, bugfix/*`. Every entry adds its matching branches on top of the default branch. Blank entries are ignored. A branch is only available to import if it is the repository's default branch or is pinned in Aqua (see the next paragraph).
 - **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding, unless **Separate Deduplication Per Branch** is on. When this is off, all selected branches import into the Record's default engagement.
 
-This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua has scanned is imported.
+This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua returns for the repository is imported, which is the default branch plus any pinned branches.
 
-Aqua only stores results for a branch it has actually scanned. A Branch value that matches no scanned branch contributes no findings for that branch.
+Aqua's scan-results API returns a repository's default branch plus any branches **pinned** in Aqua. It does not return a non-default branch that is not pinned, even when Aqua has scanned that branch and shows its results in the Aqua console. So to import a non-default branch you must first pin that branch for the repository in Aqua Supply Chain (pinned branches are set per repository, in the Aqua console). Until a branch is pinned, a **Branch** entry naming it contributes no findings and no engagement is created for it, and only the default branch is imported. This applies per repository: pinning `main` on one repository does not pin it on another.
 
 #### Separate Deduplication Per Branch
 
@@ -67,3 +76,8 @@ Aqua can return several byte-identical rows for the same finding. One example is
 #### Sync cost
 
 A full sync pulls the whole tenant in a handful of requests. It sends roughly one request per 10,000 findings, plus the repository list, which takes two or three requests. The connector groups the results locally.
+
+#### Troubleshooting
+
+- **Validation fails with `aqua token exchange failed: unexpected status 405`** (or an "Auth Host redirected" message): the **Auth Host** is not your region's CSPM API host. The token exchange is a `POST` to `<Auth Host>/v2/tokens`, and Aqua's gateway answers a `405` when the request lands on a host that redirects it. Set **Auth Host** to the `*.api.cloudsploit.com` host for your region (see the table above) and keep the edge `cloud.aquasec.com` host in **Location**.
+- **Validation fails with `401`/`Access denied`**: the API key or secret is wrong, or the key is not admin-generated. Regenerate the key and secret under **Account Management \> API Keys** and re-enter both.

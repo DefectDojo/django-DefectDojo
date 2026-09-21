@@ -13,7 +13,7 @@ Mit der Rules Engine von DefectDojo können Sie benutzerdefinierte Workflows und
 
 Die Rules Engine ist nur über die [Pro UI](/get_started/about/ui_pro_vs_os/) zugänglich.
 
-**Suchen Sie den grafischen Editor?** [Rules Engine 2.0](/automation/rules_engine_2/about/) baut Automatisierung als visuelle Knotengraphen auf und fügt Verzweigungen, ausgehende Aktionen wie Tickets und Nachrichten, Spuren pro Lauf und ein Zustellungsprotokoll hinzu. Beide Engines laufen nebeneinander, und bestehende Regeln können [dorthin übertragen werden](/automation/rules_engine_2/converting_from_rules_engine/).
+**Suchen Sie den grafischen Editor?** [Triage Engine](/automation/triage_engine/about/) baut Automatisierung als visuelle Knotengraphen auf und fügt Verzweigungen, ausgehende Aktionen wie Tickets und Nachrichten, Spuren pro Lauf und ein Zustellungsprotokoll hinzu. Beide Engines laufen nebeneinander, und bestehende Regeln können [dorthin übertragen werden](/automation/triage_engine/converting_from_rules_engine/).
 
 ## Rules Engine aktivieren
 

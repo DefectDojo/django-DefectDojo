@@ -3,7 +3,7 @@ title: Mise à niveau de DefectDojo Pro (sur site)
 description: Procédure de mise à niveau prise en charge pour les déploiements DefectDojo
   Pro autohébergés utilisant le chart Helm
 draft: false
-weight: 7
+weight: 5
 audience: pro
 ---
 

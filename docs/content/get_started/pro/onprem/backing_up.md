@@ -2,7 +2,7 @@
 title: "Backing Up a Self-Hosted Deployment"
 description: "The four things to capture, where each one lives for Compose and Kubernetes deployments, and how to confirm a backup can actually be restored"
 draft: false
-weight: 12
+weight: 4
 audience: pro
 ---
 
@@ -40,9 +40,9 @@ Take the dump on a schedule, store it off the machine that produced it, and keep
 
 ## Uploaded files
 
-On a Docker Compose deployment, uploaded files are in the `media` directory inside your deployment directory on the host. Back that path up with your normal filesystem backup. If you have moved it onto separate storage, back up that filesystem rather than the mount point.
-
-On Kubernetes, the media volume is provisioned according to the storage backend you configured, and where the data physically lives determines how you protect it:
+{{< tabs "backup-media" >}}
+{{< tab "Kubernetes" >}}
+The media volume is provisioned according to the storage backend you configured, and where the data physically lives determines how you protect it:
 
 | Storage backend | Where the data lives | How to protect it |
 | --- | --- | --- |
@@ -53,18 +53,35 @@ On Kubernetes, the media volume is provisioned according to the storage backend 
 | `pvc` | A volume from your storage class | A CSI volume snapshot, if your driver supports them |
 
 The chart provisions the volume, it does not protect the contents. There is no snapshot schedule built into it, so the backup has to come from the platform or from your own tooling.
+{{< /tab >}}
+{{< tab "Compose" >}}
+Uploaded files are in the `media` directory inside your deployment directory on the host. Back that path up with your normal filesystem backup. If you have moved it onto separate storage, back up that filesystem rather than the mount point.
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Configuration and keys
 
-On Compose, capture your `customizations` directory, your `certs` directory, and the CLI's stored configuration and environment values. `config print` and `environment print` will show you what is set.
-
-On Kubernetes, capture your values files and the contents of the secrets your release references.
+{{< tabs "backup-config" >}}
+{{< tab "Kubernetes" >}}
+Capture your values files and the contents of the secrets your release references.
+{{< /tab >}}
+{{< tab "Compose" >}}
+Capture your `customizations` directory, your `certs` directory, and the CLI's stored configuration and environment values. `config print` and `environment print` will show you what is set.
+{{< /tab >}}
+{{< /tabs >}}
 
 In both cases, keep the credential encryption key and the secret key somewhere durable and separate, in a secret manager rather than alongside the backup. Anyone holding both the database and those keys can read every stored credential that is encrypted, so they should not travel together. Keys and backup travelling separately narrows the exposure of a lost backup; it does not eliminate it, because the backup still holds the credentials that are not encrypted.
 
 ## What is not a backup
 
+{{< tabs "backup-not-a-backup" >}}
+{{< tab "Kubernetes" >}}
 The chart annotates its persistent volume claims so they survive `helm uninstall`, which is on by default. That is a guard against an accidental uninstall, not a backup. It does nothing for corruption, for a deletion inside the application, or for an upgrade that goes badly, because in every one of those cases the volume survives and the damage is on it.
+{{< /tab >}}
+{{< tab "Compose" >}}
+The `media` directory staying on the host after `dojo-compose-cli app stop` is not a backup either. Stopping the stack leaves the files in place, but corruption, a deletion inside the application, or an upgrade that goes badly all land on that same directory.
+{{< /tab >}}
+{{< /tabs >}}
 
 Snapshots retained only in the same account or project as the deployment are similarly weaker than they look. Whatever can delete the deployment can usually delete those too.
 
