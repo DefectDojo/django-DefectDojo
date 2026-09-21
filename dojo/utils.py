@@ -41,6 +41,7 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import IntegrityError, OperationalError, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
@@ -1121,8 +1122,45 @@ def grade_product(crit, high, med, low):
     return max(health, 5)
 
 
+def grade_debounce_cache_key(product_id):
+    """The cache key that marks a grade recalculation as already queued for this product."""
+    return f"dojo_product_grade_pending:{product_id}"
+
+
+def schedule_product_grade(product_id, *, force_sync=False):
+    """
+    Queue a recalculation of the product's grade, at most once per debounce window.
+
+    Every finding save used to dispatch its own calculate_grade task, so a bulk operation queued one
+    task per finding for a value that only needs computing once per product per burst; on a large
+    import that was thousands of identical tasks competing with the import itself for the worker
+    pool. Here the first change in a window queues one task with a countdown of
+    PRODUCT_GRADE_DEBOUNCE_SECONDS and later changes in the window do nothing. The task drops the
+    marker as it starts, so a change that lands while it runs queues the follow-up it needs, and the
+    marker expires with the window, so a task the broker never delivered cannot block grading for good.
+
+    Only background dispatch is coalesced. A foreground recalculation (``force_sync``, or a user whose
+    profile blocks background execution) runs right away as before: its caller expects the grade when
+    the call returns, and there is no queue for it to flood. With the LocMem cache (no DD_CACHE_URL)
+    the window is per process, which coalesces less but never loses a recalculation.
+    """
+    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+    from dojo.decorators import we_want_async  # noqa: PLC0415 circular import
+
+    if force_sync:
+        return dojo_dispatch_task(calculate_grade, product_id, force_sync=True)
+    window = settings.PRODUCT_GRADE_DEBOUNCE_SECONDS
+    if window <= 0 or not we_want_async(func=calculate_grade):
+        return dojo_dispatch_task(calculate_grade, product_id)
+    if not cache.add(grade_debounce_cache_key(product_id), value=True, timeout=window):
+        logger.debug("grade recalculation for product %s is already queued", product_id)
+        return None
+    return dojo_dispatch_task(calculate_grade, product_id, countdown=window)
+
+
 @app.task
 def calculate_grade(product_id, *args, **kwargs):
+    cache.delete(grade_debounce_cache_key(product_id))
     product = get_object_or_none(Product, id=product_id)
     if not product:
         logger.warning("Product with id %s does not exist, skipping calculate_grade", product_id)
@@ -1178,9 +1216,7 @@ def calculate_grade_internal(product, *args, **kwargs):
 def perform_product_grading(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade:
-        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-        dojo_dispatch_task(calculate_grade, product.id)
+        schedule_product_grade(product.id)
 
 
 def get_celery_worker_status():

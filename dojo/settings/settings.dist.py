@@ -122,6 +122,10 @@ env = environ.FileAwareEnv(
     # Celery silently discards it — it is never executed and no exception is raised. Does not
     # affect tasks that are already running. (0 = disabled, no limit)
     DD_CELERY_TASK_DEFAULT_EXPIRES=(int, 43200),   # default: 12 hours
+    # A product's grade is recalculated at most once per this many seconds: the first finding change
+    # in a window queues one calculate_grade task with this countdown, and later changes in the same
+    # window are no-ops. 0 queues a task for every change.
+    DD_PRODUCT_GRADE_DEBOUNCE_SECONDS=(int, 30),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
@@ -1004,6 +1008,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
+PRODUCT_GRADE_DEBOUNCE_SECONDS = env("DD_PRODUCT_GRADE_DEBOUNCE_SECONDS")
 
 if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
     CELERY_TASK_TIME_LIMIT = env("DD_CELERY_TASK_TIME_LIMIT")
