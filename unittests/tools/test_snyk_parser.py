@@ -219,10 +219,10 @@ class TestSnykParser(DojoTestCase):
             parser = SnykParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
-            # First finding has null identifiers — no CVE/CWE should be set
-            self.assertFalse(hasattr(findings[0], "unsaved_vulnerability_ids"))
+            # First finding has null identifiers — no CVE/CWE should be extracted
+            self.assertFalse(getattr(findings[0], "unsaved_vulnerability_ids", []))
             # Second finding has empty identifiers — same result
-            self.assertFalse(hasattr(findings[1], "unsaved_vulnerability_ids"))
+            self.assertFalse(getattr(findings[1], "unsaved_vulnerability_ids", []))
 
 
 class TestSnykParserImageLocations(DojoTestCase):

@@ -297,6 +297,8 @@ class AquaParser:
         return finding
 
     def severity_of(self, score):
+        if score is None:
+            return "Info"
         if isinstance(score, str):
             if score == "high":
                 return "High"
