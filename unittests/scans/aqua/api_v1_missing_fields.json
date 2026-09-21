@@ -1,0 +1,16 @@
+{
+    "cves": [
+        {
+            "name": "CVE-2023-0003",
+            "score": 8.1,
+            "description": "Test finding with missing file field",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-0003"
+        },
+        {
+            "file": "/usr/lib/libssl.so",
+            "name": null,
+            "score": 6.5,
+            "description": "Test finding with null name field"
+        }
+    ]
+}

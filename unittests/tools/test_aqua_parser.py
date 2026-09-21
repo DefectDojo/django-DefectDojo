@@ -139,3 +139,22 @@ Aqua severity (high) used for classification.
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
+
+    def test_aqua_parser_api_v2_with_missing_fields(self):
+        with (get_unit_tests_scans_path("aqua") / "api_v2_missing_fields.json").open(encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            # First result has null resource, second is missing cpe
+            self.assertEqual(2, len(findings))
+
+    def test_aqua_parser_api_v1_with_missing_fields(self):
+        with (get_unit_tests_scans_path("aqua") / "api_v1_missing_fields.json").open(encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+
+    def test_aqua_parser_cicd_with_missing_resource_fields(self):
+        with (get_unit_tests_scans_path("aqua") / "cicd_missing_resource_fields.json").open(encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))

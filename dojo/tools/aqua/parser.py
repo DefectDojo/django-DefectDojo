@@ -115,32 +115,32 @@ class AquaParser:
         elif "result" in tree:     # Aqua Scan Report from apiv2
             resulttree = tree["result"]
             for vuln in resulttree:
-                resource = vuln.get("resource")
+                resource = vuln.get("resource") or {}
                 item = self.get_item(resource, vuln, test)
-                unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
+                unique_key = (resource.get("cpe") or "") + (vuln.get("name") or "") + (resource.get("path") or "")
                 self.items[unique_key] = item
         elif "cves" in tree:       # Aqua Scan Report from apiv1
             for cve in tree["cves"]:
-                unique_key = cve.get("file") + cve.get("name")
+                unique_key = (cve.get("file") or "") + (cve.get("name") or "")
                 self.items[unique_key] = self.get_item_v2(cve, test)
         return list(self.items.values())
 
     def vulnerability_tree(self, vulnerabilitytree, test):
         for node in vulnerabilitytree:
-            resource = node.get("resource")
+            resource = node.get("resource") or {}
             vulnerabilities = node.get("vulnerabilities", [])
             sensitive_items = resource.get("sensitive_items", [])
             if vulnerabilities is None:
                 vulnerabilities = []
             for vuln in vulnerabilities:
                 item = self.get_item(resource, vuln, test)
-                unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
+                unique_key = (resource.get("cpe") or "") + (vuln.get("name") or "") + (resource.get("path") or "")
                 self.items[unique_key] = item
             if sensitive_items is None:
                 sensitive_items = []
             for sensitive_item in sensitive_items:
                 item = self.get_item_sensitive_data(resource, sensitive_item, test)
-                unique_key = resource.get("cpe") + resource.get("path", "None") + str(sensitive_item)
+                unique_key = (resource.get("cpe") or "") + (resource.get("path") or "") + str(sensitive_item)
                 self.items[unique_key] = item
 
     def get_item(self, resource, vuln, test):
