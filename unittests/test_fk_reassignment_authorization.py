@@ -40,6 +40,7 @@ from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
     Product_Type,
+    Sonarqube_Issue,
     Test,
     Test_Type,
     Tool_Configuration,
@@ -517,3 +518,49 @@ class TestFKReassignmentAuthorization(LegacyAuthMirrorMixin, DojoTestCase):
         self._assert_rejected(r)
         self.test_src.refresh_from_db()
         self.assertIsNone(self.test_src.api_scan_configuration_id)
+
+    # ────────────────────────────────────────────────────────────────────
+    # FindingSerializer.sonarqube_issue: the model is superuser-only, so the
+    # relation is not assignable from the public finding API at all. The
+    # field is read-only, so DRF answers 200/201 and drops the value.
+    # ────────────────────────────────────────────────────────────────────
+    def _foreign_sonarqube_issue(self):
+        issue = Sonarqube_Issue.objects.create(
+            key="FK-REASSIGN-OUTSIDE-SONAR-KEY", status="OPEN", type="VULNERABILITY",
+        )
+        self.finding_outside.sonarqube_issue = issue
+        self.finding_outside.save()
+        return issue
+
+    def test_finding_patch_sonarqube_issue_from_unauthorized_finding_blocked(self):
+        issue = self._foreign_sonarqube_issue()
+        r = self._client().patch(
+            reverse("finding-detail", args=(self.finding_src.id,)),
+            {"sonarqube_issue": issue.id},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 200, r.content[:500])
+        self.finding_src.refresh_from_db()
+        self.assertIsNone(self.finding_src.sonarqube_issue_id)
+
+    def test_finding_create_with_unauthorized_sonarqube_issue_blocked(self):
+        issue = self._foreign_sonarqube_issue()
+        r = self._client().post(
+            reverse("finding-list"),
+            {
+                "test": self.test_src.id,
+                "title": "FK Reassign Sonar Carrier",
+                "severity": "High",
+                "description": "carrier",
+                "active": True,
+                "verified": False,
+                "numerical_severity": "S1",
+                "found_by": [Test_Type.objects.get(name="Manual Code Review").id],
+                "sonarqube_issue": issue.id,
+            },
+            format="json",
+        )
+        self.assertEqual(r.status_code, 201, r.content[:500])
+        self.assertFalse(
+            Finding.objects.filter(test=self.test_src, sonarqube_issue=issue).exists(),
+        )

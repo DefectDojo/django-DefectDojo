@@ -12,11 +12,13 @@ from django.db.models import (
     RESTRICT,
     CharField,
     DateTimeField,
+    Exists,
     ForeignKey,
     Index,
     JSONField,
     Model,
     OneToOneField,
+    OuterRef,
     Q,
     QuerySet,
     TextChoices,
@@ -245,10 +247,20 @@ class Location(BaseModel):
         return []
 
     def all_related_products(self) -> QuerySet[Product]:
-        return Product.objects.filter(
-            Q(locations__location=self)
-            | Q(engagement__test__finding__locations__location=self),
-        ).distinct()
+        direct_match = LocationProductReference.objects.filter(
+            product_id=OuterRef("pk"),
+            location=self,
+        )
+        finding_match = LocationFindingReference.objects.filter(
+            location=self,
+            finding__test__engagement__product_id=OuterRef("pk"),
+        )
+        return Product.objects.annotate(
+            _has_direct_location=Exists(direct_match),
+            _has_finding_location=Exists(finding_match),
+        ).filter(
+            Q(_has_direct_location=True) | Q(_has_finding_location=True),
+        )
 
     def iter_related_products(self) -> list[Product]:
         """
@@ -268,7 +280,7 @@ class Location(BaseModel):
 
         Use this method from bulk paths where many Locations are processed at
         once. The original `all_related_products()` still issues a single
-        DISTINCT JOIN query and is kept for per-instance signal paths where
+        EXISTS-based query and is kept for per-instance signal paths where
         prefetching is not possible.
         """
         seen: set[int] = set()
@@ -425,7 +437,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         }
 
     @classmethod
-    def bulk_get_or_create(cls, locations: Iterable[Self]) -> list[Self]:
+    def bulk_get_or_create(cls, locations: Iterable[Self], *, created_out: list[Self] | None = None) -> list[Self]:
         """
         Get or create multiple locations in bulk.
 
@@ -433,6 +445,12 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         bulk_create for both the parent Location rows and the subtype rows.
         Returns the full list of saved instances (existing + newly created),
         in the same order as the input. Duplicate inputs map to the same saved instance.
+
+        If ``created_out`` is given, the instances created by THIS call (those absent
+        before it, deduplicated by identity_hash) are appended to it. A chunked backfill
+        can sum ``len(created_out)`` per chunk to report the distinct locations it created
+        without holding a set of every location id for the whole run — the accumulator
+        that otherwise grows with the corpus and OOMs a large migration.
 
         identity_hash is a global singleton, so two imports that reference the same
         package (Dependency) or endpoint (URL) race to create the same row. Creation
@@ -477,6 +495,13 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         # Create 'em (tolerating a concurrent writer that beats us to some rows)
         if to_create:
             existing_by_hash.update(cls._bulk_create_tolerating_races(to_create))
+            if created_out is not None:
+                # to_create holds one entry per hash absent at the start of this call,
+                # i.e. exactly the new distinct locations. Single-writer migrations see no
+                # races, so this is the set this run created. (A concurrent writer that
+                # beat us to a row would leave it counted here but resolved to the other
+                # writer's instance — immaterial to a single-threaded backfill.)
+                created_out.extend(to_create.values())
 
         # Return in input order
         return [existing_by_hash[h] for h in hashes]

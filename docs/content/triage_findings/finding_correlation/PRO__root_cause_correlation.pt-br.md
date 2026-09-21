@@ -23,7 +23,7 @@ Achados, os nós de cluster nos quais esses vínculos se agrupam, e as evidênci
 
 ## Habilitando a Correlação de Causa Raiz
 
-A Correlação de Causa Raiz está em **Beta**, é controlada por um feature flag, e vem **desativada por padrão**.
+A Correlação de Causa Raiz é controlada por um feature flag e vem **desativada por padrão**.
 Um superusuário pode ativá-la em **Settings > Feature Flags** tanto em instâncias Cloud quanto On-Premise.
 Veja [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
@@ -259,7 +259,7 @@ a partir delas, ou acompanhá-las como uma métrica sem passar pela interface.
   evidência que o vincula e se a correspondência foi exata ou heurística.
 
 Ambos são somente leitura. Confirmar, rejeitar e silenciar são feitos pela interface por enquanto; isso é
-deliberadamente não publicado enquanto o recurso está em Beta, de modo que adicioná-los depois não quebre
+deliberadamente não publicado por enquanto, de modo que adicioná-los depois não quebre
 nada que você já tenha construído em cima disso.
 
 Filtros na listagem: `cause_type` (`exact` ou `in`), `muted`, `identity_key` (`exact` ou

@@ -126,6 +126,14 @@ class TestLocationFilterJoinScoping(DojoTestCase):
         self.assertEqual(related, {OWN_PRODUCT_NAME, VICTIM_PRODUCT_NAME})
         self.assertEqual(self._matches(self.alice), {self.shared.id, self.own.id})
 
+    def test_all_related_products_uses_exists_not_join(self):
+        sql = str(self.shared.all_related_products().query)
+        self.assertIn("EXISTS", sql)
+        self.assertNotIn('LEFT OUTER JOIN "dojo_locationproductreference"', sql)
+        self.assertNotIn('LEFT OUTER JOIN "dojo_locationfindingreference"', sql)
+        related = {p.name for p in self.shared.all_related_products()}
+        self.assertEqual(related, {OWN_PRODUCT_NAME, VICTIM_PRODUCT_NAME})
+
     def test_other_products_data_never_matches(self):
         for label, params in (
             ("finding tag, exact", {"findings__finding__tags__name_exact": VICTIM_FINDING_TAG}),

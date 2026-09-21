@@ -29,7 +29,6 @@ Because enforcement happens **inside the container**, FIPS mode does not require
 | Initializer (`init`) | yes | OpenSSL FIPS Provider 3.1.2 |
 | Orchestration workers (`ddorch-workers`) | yes | OpenSSL FIPS Provider 3.1.2 |
 | nginx | yes | OpenSSL FIPS Provider 3.1.2 |
-| PSIRT advisory engine | yes | OpenSSL FIPS Provider 3.1.2 |
 | Connectors, Integrators, ddorch, MCP server | yes | Go Cryptographic Module v1.0.0 |
 | **Sensei** | **partial** | service binaries: Go Cryptographic Module v1.0.0. Bundled scanner toolchain: **not covered** |
 | **PostgreSQL / Redis (embedded)** | **no** | use external FIPS-compliant services |
@@ -57,10 +56,6 @@ x-dojo-vars: &dojoenv
 
 x-nginx-vars: &nginxenv
   DD_FIPS_MODE: "1"        # nginx
-  # ... existing settings
-
-x-psirt-vars: &psirtenv
-  DD_FIPS_MODE: "1"        # psirt
   # ... existing settings
 ```
 
@@ -131,7 +126,7 @@ If you already run DefectDojo Pro on ECS, only two things change:
 
 **2. `DD_FIPS_MODE=1`** in the `environment` block of every container running
 application code — uwsgi, celery worker, celery beat, the initializer, the
-orchestration workers, nginx and psirt.
+orchestration workers and nginx.
 
 The rest of this section is a complete FIPS-enabled ECS deployment for readers
 starting from nothing.
@@ -293,7 +288,6 @@ Both containers live in one task so nginx reaches uwsgi on `127.0.0.1`.
         { "name": "DD_SITE_URL", "value": "https://<YOUR_HOSTNAME>" },
         { "name": "DD_MCP_HOST", "value": "127.0.0.1" },
         { "name": "DD_MCP_PORT", "value": "9142" },
-        { "name": "PSIRT_ENABLED", "value": "false" },
         { "name": "NGINX_METRICS_ENABLED", "value": "false" }
       ],
       "mountPoints": [

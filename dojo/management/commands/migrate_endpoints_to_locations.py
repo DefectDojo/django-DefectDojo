@@ -538,7 +538,9 @@ class Command(BaseCommand):
                 return []
 
             try:
-                saved = URL.bulk_get_or_create([url for _, url in pairs])
+                created: list[URL] = []
+                saved = URL.bulk_get_or_create([url for _, url in pairs], created_out=created)
+                self.location_count += len(created)
             except Exception:
                 logger.exception(
                     "Bulk location resolution failed for %d endpoint(s); "
@@ -634,7 +636,6 @@ class Command(BaseCommand):
         )
 
         chunk_location_ids = {location.id for _, location in resolved}
-        self.migrated_location_ids.update(chunk_location_ids)
         self._reconcile_product_statuses(list(chunk_location_ids))
 
         # Inheritance runs per chunk (bounded memory, converging) — see the
@@ -737,20 +738,24 @@ class Command(BaseCommand):
             return f"{m}m {s}s"
         return f"{s}s"
 
-    def _emit_progress(self, processed: int, total: int) -> None:
+    def _emit_progress(self, processed: int, total: int, checkpoint_id: int | None = None) -> None:
         """
         Publish chunk-level progress to an optional programmatic callback.
 
-        Pro's migration suite passes ``progress_callback`` (a stealth option) so
-        it can persist processed/total for a progress bar and ETA. A callback
-        failure must never abort a multi-hour migration, so it is swallowed with
-        a logged warning. CLI runs pass no callback and are unaffected.
+        Pro's migration suite passes ``progress_callback`` (a stealth option) so it can
+        persist processed/total for a progress bar and ETA, and ``checkpoint_id`` — the
+        last endpoint id committed so far — so an interrupted run can resume from it via
+        ``--start-after-id``. The callback is invoked as
+        ``callback(processed, total, checkpoint_id)``; ``checkpoint_id`` is None on the
+        initial 0-tick, before any chunk has committed. A callback failure must never
+        abort a multi-hour migration, so it is swallowed with a logged warning. CLI runs
+        pass no callback and are unaffected.
         """
         callback = self.progress_callback
         if callback is None:
             return
         try:
-            callback(processed, total)
+            callback(processed, total, checkpoint_id)
         except Exception:
             logger.warning("progress_callback raised; continuing migration", exc_info=True)
 
@@ -939,9 +944,13 @@ class Command(BaseCommand):
         self.failed_endpoints: list[tuple[int | None, str]] = []
         self.failed_endpoint_ids: set[int | None] = set()
 
-        # Distinct Location ids this run resolved, so the caller can report how many
-        # Locations the endpoints collapsed onto (many endpoints can share one URL).
-        self.migrated_location_ids: set[int] = set()
+        # Count of new distinct Locations this run created, summed per chunk from
+        # bulk_get_or_create's created_out (see _resolve_locations). A per-chunk count
+        # rather than a whole-run set of ids: that set grew with the corpus and was the
+        # accumulator that OOM'd large migrations at ~75%. On a first run this equals the
+        # distinct Locations the endpoints collapsed onto; a resume counts only what it
+        # newly created.
+        self.location_count: int = 0
 
         if self.query_count:
             connection.force_debug_cursor = True
@@ -975,9 +984,10 @@ class Command(BaseCommand):
             #   - `product` is select_related so we don't lazy-load it for the
             #     no-findings branch
             #   - `tags` and `endpoint_meta` are prefetched managers
-            #   - `status_endpoint` is prefetched together with the FK chain
-            #     `finding -> test -> engagement -> product` and `mitigated_by`
-            #     so the reference rows can be built without queries.
+            #   - `status_endpoint` is prefetched with `mitigated_by` inline; the
+            #     finding -> test -> engagement -> product chain is prefetched per
+            #     level (NOT select_related) so the reference rows can be built
+            #     without queries and without the whole-table join below.
             # Explicit id ordering makes the scan deterministic across runs,
             # which is what gives the progress lines' "last id" its meaning as
             # a resume cursor for --start-after-id.
@@ -988,13 +998,20 @@ class Command(BaseCommand):
                 .prefetch_related(
                     "tags",
                     "endpoint_meta",
+                    # mitigated_by is a single narrow FK on the status row: join it inline.
                     Prefetch(
                         "status_endpoint",
-                        queryset=Endpoint_Status.objects.select_related(
-                            "finding__test__engagement__product",
-                            "mitigated_by",
-                        ),
+                        queryset=Endpoint_Status.objects.select_related("mitigated_by"),
                     ),
+                    # The finding chain is prefetched, NOT select_related. As one
+                    # `finding__test__engagement__product` join it folds into the status
+                    # query, and on a large corpus the planner mis-estimates the status
+                    # IN-list (~180x) and seq-scans every finding/test/product to hash
+                    # them down to the chunk's handful of rows — the 76-194s chunks behind
+                    # the ~75% stall. Prefetching resolves each FK level with a PK-driven
+                    # IN query scoped to the chunk, which the planner answers by index
+                    # lookup. `_collect_references` reads the same cached objects either way.
+                    "status_endpoint__finding__test__engagement__product",
                 )
             )
             if self.start_after_id is not None:
@@ -1040,7 +1057,9 @@ class Command(BaseCommand):
 
                     # Programmatic progress at every chunk boundary (independent
                     # of the throttled stdout line below), for the migration suite.
-                    self._emit_progress(i, endpoint_count)
+                    # last_id (this chunk's final endpoint id, set above) is the resume
+                    # cursor for everything committed so far.
+                    self._emit_progress(i, endpoint_count, checkpoint_id=last_id)
 
                     # Cancellation checkpoint. Chunks are separately committed and the
                     # tag queue was just flushed, so stopping here leaves a consistent,
@@ -1099,16 +1118,18 @@ class Command(BaseCommand):
             connection.force_debug_cursor = False
 
         # Summary for programmatic callers (the Pro Locations migration suite). CLI runs
-        # pass no summary_callback and are unaffected. ``locations`` is the distinct-
-        # Location count the endpoints collapsed onto (<= processed); ``failures`` are the
-        # per-endpoint errors isolated during the run so the suite can surface "N skipped";
+        # pass no summary_callback and are unaffected. ``locations`` is the count of new
+        # distinct Locations this run created (<= processed; on a first run, the number the
+        # endpoints collapsed onto — a resume counts only what it newly created);
+        # ``failures`` are the per-endpoint errors isolated during the run so the suite can
+        # surface "N skipped";
         # ``cancelled`` tells the suite the run stopped early (processed < total) rather
         # than finishing, so it can land the run on "cancelled" instead of "completed".
         self._emit_summary(
             {
                 "processed": i,
                 "total": endpoint_count,
-                "locations": len(self.migrated_location_ids),
+                "locations": self.location_count,
                 "failures": [{"id": endpoint_id, "error": error} for endpoint_id, error in self.failed_endpoints],
                 "cancelled": self.cancelled,
             },

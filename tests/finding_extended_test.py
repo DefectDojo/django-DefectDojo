@@ -130,7 +130,7 @@ class FindingExtendedTest(BaseTestCase):
         driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
         driver.find_element(By.NAME, "impact").send_keys(Keys.TAB, "Test impact")
         with WaitForPageLoad(driver, timeout=30):
-            driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+            self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
 
         self.assertTrue(self.is_text_present_on_page(text="Ad Hoc Test Finding"))
 

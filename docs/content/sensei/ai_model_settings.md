@@ -29,6 +29,7 @@ match the provider you choose.
 | **Claude (Anthropic)** | an Anthropic API key |
 | **OpenAI** | an OpenAI API key |
 | **Amazon Bedrock** | AWS credentials (see [How Bedrock access is determined](#how-bedrock-access-is-determined)) |
+| **Google Vertex AI** | a GCP service account, or the engine's ambient identity (see [Google Vertex AI](#google-vertex-ai)) |
 
 Every provider also accepts an optional **Model** override (leave blank to use the provider's
 default) and an optional **API Base URL** to point at an on-prem or self-hosted gateway.
@@ -71,13 +72,60 @@ resolves them through the standard AWS credential chain, in this order:
    Key** (and a **Session Token** for temporary STS credentials) to authenticate as a specific
    IAM identity.
 2. **Otherwise, the engine's ambient AWS identity.** With the key fields left blank, the engine
-   uses whatever IAM role is attached to where it runs — an IRSA role on EKS, an EC2 instance
-   profile, an ECS task role, or a Lambda execution role.
+   uses whatever IAM role is attached to where it runs:
+   - **EKS** — an IRSA or EKS Pod Identity role bound to the Sensei engine's service account.
+   - **ECS** — the task role.
+   - **EC2**, including a Docker Compose host running on an EC2 instance — the instance profile.
+     Note that IMDSv2's default hop limit of `1` blocks a metadata request coming from inside a
+     container (it is one network hop too deep); set the instance's metadata hop limit to `2` so
+     the engine container can reach the instance role.
+   - **Lambda** — the execution role.
 
-Leaving the keys blank is the recommended setup when the engine already runs inside AWS: the
-workload's own IAM role grants Bedrock access, so there are no long-lived keys to store or
-rotate. Either way, the identity used needs permission to invoke the Bedrock model
-(`bedrock:InvokeModel`) in the chosen region.
+Leaving the keys blank is the recommended setup **when the engine runs inside AWS** with an
+attached role: the workload's own identity grants Bedrock access, so there are no long-lived keys
+to store or rotate.
+
+> **Running on-prem or outside AWS?** There is no ambient AWS identity to fall back on when the
+> engine does not run inside AWS — a non-EKS Kubernetes cluster or a Docker Compose host in your
+> own data center has none. In those deployments you must enter static AWS keys above; the
+> "leave the keys blank" path applies only to AWS-hosted runtimes.
+
+Either way, the identity used needs permission to invoke the Bedrock model (`bedrock:InvokeModel`)
+in the chosen region.
+
+### Google Vertex AI
+
+Google Vertex AI serves models from **your own GCP project's Model Garden**. It is a single,
+model-agnostic provider: the **Model** you enter selects the family, so one provider choice runs
+any Vertex model. A `gemini-*` model id runs a Google Gemini model; anything else — or a blank
+model, which defaults to a Claude model — runs an Anthropic Claude model on Vertex. Enable the
+model you intend to use in your project's Vertex Model Garden first.
+
+Its fields differ from the key-based providers:
+
+1. **Model (optional)** — any model enabled in your project's Model Garden, e.g.
+   `claude-sonnet-4-6` or `gemini-2.5-pro`. Blank uses the engine default (a Claude model).
+2. **Vertex Project ID** — **required**. The GCP project hosting Vertex AI.
+3. **Vertex Region** — the Vertex region, e.g. `global` (the default) or `us-east5`.
+4. **Service Account Key (JSON)** — **optional** (see below).
+
+#### How Vertex access is determined
+
+The project is always required, but the service-account key is optional because the Sensei engine
+resolves GCP credentials in this order:
+
+1. **The service-account key JSON you paste here, if any.** The engine uses it to authenticate as
+   that service account.
+2. **Otherwise, the engine's ambient GCP identity** (Application Default Credentials) — the
+   workload identity or attached service account of wherever the engine runs (for example a GKE
+   Workload Identity binding). This only exists when the engine runs on GCP with an attached
+   identity.
+
+Either way, the service account needs the **`roles/aiplatform.user`** role on the project, and the
+model must be enabled in that project's Model Garden.
+
+> **Running on-prem or outside GCP?** There is no ambient GCP identity to fall back on when the
+> engine does not run inside GCP. In those deployments, paste a service-account key above.
 
 ## Test connection
 
@@ -89,6 +137,9 @@ rotate. Either way, the identity used needs permission to invoke the Bedrock mod
 - For **Amazon Bedrock without static keys**, it reports that the engine's instance IAM role is
   used at runtime — DefectDojo can't validate that role on the engine's behalf, so confirm
   Bedrock access from the engine's own environment.
+- For **Google Vertex AI**, it makes a minimal call to the configured model (routed to the Claude
+  or Gemini client by the model id), surfacing an authorization or model-availability error if the
+  service account lacks access or the model is not enabled in the project's Model Garden.
 
 ## Save
 

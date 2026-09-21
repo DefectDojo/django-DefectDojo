@@ -494,12 +494,12 @@ class MigrateEndpointsToLocationsTest(TestCase):
         original = URL.bulk_get_or_create
         calls = []
 
-        def fail_first_chunk(locations):
+        def fail_first_chunk(locations, *, created_out=None):
             calls.append(len(locations))
             if len(calls) == 1:
                 msg = "simulated bulk location write failure"
                 raise RuntimeError(msg)
-            return original(locations)
+            return original(locations, created_out=created_out)
 
         stdout = StringIO()
         with (
@@ -720,3 +720,46 @@ class MigrateEndpointsToLocationsTest(TestCase):
             sorted(tag.name for tag in location.inherited_tags.all()),
             ["tag-product-one", "tag-product-two"],
         )
+
+    def test_progress_callback_receives_checkpoint_id(self):
+        # The suite passes a 3-arg progress_callback so a lost run can resume from the last
+        # committed endpoint id. The initial 0-tick carries no cursor; the final tick's
+        # checkpoint is the max (last committed) endpoint id.
+        endpoints = [self._make_endpoint(f"cb-{i}.example.com", []) for i in range(3)]
+        records = []
+
+        def rec(processed, total, checkpoint_id=None):
+            records.append((processed, total, checkpoint_id))
+
+        self._run(progress_every=1, batch_size=1, progress_callback=rec)
+
+        self.assertEqual(records[0], (0, 3, None), msg=records)
+        last = max(endpoint.id for endpoint in endpoints)
+        self.assertEqual(records[-1][0], 3, msg=records)
+        self.assertEqual(records[-1][2], last, msg=records)
+
+    def test_summary_locations_counts_created_locations_only(self):
+        # ``locations`` is the count of Locations this run CREATED (a memory-bounded count,
+        # not a whole-run set of ids). A full rerun creates nothing, so it reports 0.
+        self._make_endpoint("rerun.example.com", [])
+        self._run()
+        summaries = []
+        self._run(summary_callback=summaries.append)
+        self.assertEqual(summaries[0]["locations"], 0, msg=summaries[0])
+
+    def test_bulk_get_or_create_created_out_appends_only_new(self):
+        # created_out receives only the instances this call created (absent beforehand),
+        # so a chunked backfill can sum a per-chunk count without a whole-run set.
+        def make(host):
+            return URL.from_parts(
+                protocol="https", user_info="", host=host,
+                port=None, path="", query="", fragment="",
+            )
+
+        URL.bulk_get_or_create([make("only-new.example.com")])  # pre-create one Location
+        created = []
+        saved = URL.bulk_get_or_create(
+            [make("only-new.example.com"), make("brand-new.example.com")], created_out=created,
+        )
+        self.assertEqual(len(saved), 2)
+        self.assertEqual([url.host for url in created], ["brand-new.example.com"])
