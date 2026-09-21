@@ -17,9 +17,9 @@ from dojo.finding.deduplication import (
 from dojo.location.queries import location_prefetch_lookups
 from dojo.models import Finding, Product
 from dojo.utils import (
-    calculate_grade,
     get_system_setting,
     mass_model_updater,
+    schedule_product_grade,
 )
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
@@ -81,9 +81,7 @@ class Command(BaseCommand):
 
     def grade_product(self, product):
         """Recalculate one product's grade after a synchronous dedupe run."""
-        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-        dojo_dispatch_task(calculate_grade, product.id)
+        schedule_product_grade(product.id)
 
     # ---------------------------------------------------------------------------------
 

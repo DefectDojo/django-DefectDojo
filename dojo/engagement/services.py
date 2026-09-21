@@ -12,7 +12,7 @@ from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.models import Engagement
 from dojo.notifications.helper import create_notification, process_tag_notifications
-from dojo.utils import calculate_grade
+from dojo.utils import schedule_product_grade
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ def copy_engagement(engagement, user):
     """
     product = engagement.product
     engagement_copy = engagement.copy()
-    dojo_dispatch_task(calculate_grade, product.id)
+    schedule_product_grade(product.id)
     create_notification(
         event="engagement_copied",
         title=_("Copying of %s") % engagement.name,
@@ -155,8 +155,8 @@ def reassign_engagement_product_endpoints(engagement, old_product, new_product):
 
     # Findings moved between products change the aggregate grade of both, so recompute
     # the grade for the source and destination product.
-    dojo_dispatch_task(calculate_grade, old_product.id)
-    dojo_dispatch_task(calculate_grade, new_product.id)
+    schedule_product_grade(old_product.id)
+    schedule_product_grade(new_product.id)
 
 
 @receiver(pre_save, sender=Engagement)
