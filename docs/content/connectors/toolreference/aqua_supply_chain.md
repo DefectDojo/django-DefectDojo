@@ -34,12 +34,12 @@ Each repository in the tenant becomes a Record. A repository that disappears fro
 
 A repository's default branch is always imported. Two optional fields extend this:
 
-- **Branch**: a comma-separated list of exact branch names or `*` wildcard families, for example `release/*, bugfix/*`. Every entry adds its matching branches on top of the default branch. Blank entries are ignored. A branch is only available to import if it is the repository's default branch or is pinned in Aqua (see the next paragraph).
+- **Branch**: a comma-separated list of exact branch names or `*` wildcard families, for example `release/*, bugfix/*`. Every entry adds its matching branches on top of the default branch. Blank entries are ignored. A branch imports only if Aqua returns it for that repository in the scan-results feed the connector reads (see the note below).
 - **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding, unless **Separate Deduplication Per Branch** is on. When this is off, all selected branches import into the Record's default engagement.
 
-This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua returns for the repository is imported, which is the default branch plus any pinned branches.
+This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua returns for the repository in its scan-results feed is imported.
 
-Aqua's scan-results API returns a repository's default branch plus any branches **pinned** in Aqua. It does not return a non-default branch that is not pinned, even when Aqua has scanned that branch and shows its results in the Aqua console. So to import a non-default branch you must first pin that branch for the repository in Aqua Supply Chain (pinned branches are set per repository, in the Aqua console). Until a branch is pinned, a **Branch** entry naming it contributes no findings and no engagement is created for it, and only the default branch is imported. This applies per repository: pinning `main` on one repository does not pin it on another.
+The connector imports the branches Aqua returns for a repository in its scan-results feed. For some repositories and source types (for example Azure DevOps), that feed returns only the repository's default branch, even when Aqua has scanned other branches and shows their results in the Aqua console. When that happens, a **Branch** entry naming a non-default branch contributes no findings and no engagement is created for it, and only the default branch is imported. If you expect a branch to import and it does not, contact DefectDojo support. Broader support for non-default branches is being worked on.
 
 #### Separate Deduplication Per Branch
 
