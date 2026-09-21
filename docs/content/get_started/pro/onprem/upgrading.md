@@ -2,7 +2,7 @@
 title: "Upgrading DefectDojo Pro (On-Premise)"
 description: "Supported upgrade procedure for self-hosted DefectDojo Pro, on both the Helm chart and Docker Compose"
 draft: false
-weight: 7
+weight: 5
 audience: pro
 ---
 

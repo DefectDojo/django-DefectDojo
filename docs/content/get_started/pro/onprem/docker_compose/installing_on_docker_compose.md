@@ -96,7 +96,7 @@ In a restricted network, the application host needs outbound access to the follo
 
 Allowlist by hostname rather than by address. The registry sits behind a content delivery network, so its addresses vary by location and change over time.
 
-If the host reaches the internet through an outbound proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/). If it has no route to the internet at all, follow the air-gapped installation procedure in this section instead.
+If the host reaches the internet through an outbound proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/). If it has no route to the internet at all, follow the air-gapped installation procedure in this section instead.
 
 ### Confirm the database is reachable
 
@@ -189,6 +189,41 @@ The installation ships a self-signed certificate so that the site works immediat
 - `/opt/dojo/certs/dojo.key`
 
 Then `dojo-compose-cli app restart` to pick them up.
+
+## Trusting an internal or private CA
+
+If DefectDojo has to reach services whose TLS certificates are signed by an internal or private certificate authority (CA), the containers need to trust that CA first. This is common with a self-hosted Jira, an internal SSO or identity provider, SonarQube, or a security tool reached through a Connector. It is a separate concern from [replacing the server certificate](#replace-the-tls-certificate) above: that controls the certificate DefectDojo presents to browsers, whereas this controls which CAs DefectDojo trusts on its outbound calls.
+
+You set the trust by placing PEM-encoded CA bundles in the `certs/private/` directory under the install directory, which is `/opt/dojo/certs/private/` in a default install. Two bundles cover the two sides of the application:
+
+- `dojo-ca-bundle.crt` is for services the application calls directly, such as Jira and SSO providers. On startup the `dojo`, `celeryworker`, and `ddorch-workers` containers read it and set `REQUESTS_CA_BUNDLE` to it when it is present and not empty.
+- `connectors-ca-bundle.crt` is for tools reached through Connectors, such as Burp or Semgrep. The connectors container appends it to `CA_BUNDLES` on startup.
+
+Each file must be in PEM format (Base64-encoded X.509, starting with `-----BEGIN CERTIFICATE-----` and ending with `-----END CERTIFICATE-----`), and each may hold more than one certificate concatenated together. The file has to be readable by the container process, so set permissions accordingly (for example `chmod 644`).
+
+To install a bundle for the application side:
+
+```bash
+# Create the directory if it does not already exist
+sudo mkdir -p /opt/dojo/certs/private
+
+# Copy your PEM bundle into place under the expected name
+sudo cp my-internal-ca.crt /opt/dojo/certs/private/dojo-ca-bundle.crt
+sudo chmod 644 /opt/dojo/certs/private/dojo-ca-bundle.crt
+
+# Restart the application so the containers pick it up
+dojo-compose-cli app restart
+```
+
+Use the filename `connectors-ca-bundle.crt` instead when the CA is only needed for Connector tools, and install both files if you need both. Inside the containers these paths are `/app/certs/private/dojo-ca-bundle.crt` and `/app/certs/private/connectors-ca-bundle.crt`.
+
+To confirm the bundle was loaded, look at the `dojo` container's startup logs for the confirmation line:
+
+```text
+REQUESTS_CA_BUNDLE set to /app/certs/private/dojo-ca-bundle.crt
+```
+
+If the file is missing or empty the container logs `No CA bundle found ...` instead and starts normally, so a bundle you forgot to install fails as an untrusted-certificate error on the outbound call rather than as a startup error.
 
 ## Reset the admin password
 

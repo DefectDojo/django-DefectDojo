@@ -84,7 +84,7 @@ El clúster también necesita alcanzar su base de datos en el puerto de PostgreS
 
 El enriquecimiento de explotabilidad es opcional y necesita dos destinos adicionales por HTTPS en el puerto 443. Las puntuaciones EPSS provienen de `api.first.org`, y los datos de CISA KEV provienen de `www.cisa.gov`. Ambos se sirven desde redes de distribución de contenido cuyas direcciones cambian, así que permita los hostnames. Sin ellos, DefectDojo funciona con normalidad y los hallazgos no se enriquecen con datos de EPSS o KEV.
 
-Cuando el tráfico saliente pasa por un proxy en lugar de ser directo, consulte [Ejecución de DefectDojo detrás de un proxy HTTPS de reenvío](/onprem_deployment/forward_proxy/).
+Cuando el tráfico saliente pasa por un proxy en lugar de ser directo, consulte [Ejecución de DefectDojo detrás de un proxy HTTPS de reenvío](/get_started/pro/onprem/forward_proxy/).
 
 ## El job de initializer debe finalizar primero
 

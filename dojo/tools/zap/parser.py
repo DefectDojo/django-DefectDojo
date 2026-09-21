@@ -113,10 +113,10 @@ class ZapParser:
                         # Assemble the request from header and body
                         request = instance.findtext(
                             "requestheader",
-                        ) + instance.findtext("requestbody")
+                        ) + (instance.findtext("requestbody") or "")
                         response = instance.findtext(
                             "responseheader",
-                        ) + instance.findtext("responsebody")
+                        ) + (instance.findtext("responsebody") or "")
                     else:
                         # The report is in the regular XML format, without requests and responses.
                         # Use the default settings for constructing the request

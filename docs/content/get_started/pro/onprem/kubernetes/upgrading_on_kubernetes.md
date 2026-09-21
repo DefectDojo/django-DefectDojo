@@ -1,11 +1,10 @@
 ---
-title: "DefectDojo Pro Upgrade Guide"
+title: "DefectDojo Pro Upgrade Guide (Kubernetes / Helm)"
 description: "Upgrade an existing DefectDojo Pro Helm release, including pulling the chart, running the upgrade, and rolling back"
 draft: false
 weight: 2
 audience: pro
 aliases:
-  - "/get_started/pro/onprem/upgrading/"
   - /get_started/pro/onprem/upgrading_on_kubernetes/
 ---
 
@@ -104,7 +103,7 @@ common cause of failed upgrades.
 > always-granular egress allowlist. To keep the locked-down behavior, set
 > `networkPolicy.profile: aggressive` and review the carve-outs
 > (`nodeLocalDns`, `dnsSelectors`, `externalAPIs`) — see
-> [Network Policies](/get_started/pro/onprem/installing_on_kubernetes/#network-policies).
+> [Network Policies](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#network-policies).
 
 > **Orchestrator database requirement.** The orchestrator (`ddorch`) uses a
 > second database named `<main-db-name>-ddorch` and creates it at startup if
@@ -112,7 +111,7 @@ common cause of failed upgrades.
 > (`CREATE DATABASE "defectdojo-ddorch" OWNER defectdojo;`) before upgrading
 > to a chart version that enables ddorch — otherwise the ddorch pod fails with
 > `permission denied to create database (SQLSTATE 42501)`. See
-> [Pre-flight: Orchestrator (ddorch) Database](/get_started/pro/onprem/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
+> [Pre-flight: Orchestrator (ddorch) Database](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database).
 
 > **Organization/Asset relabel default.** `dojo.V3EnableOrganizationAssetRelabel`
 > now defaults to `null` (auto): it is **enabled for new installs** and **left

@@ -84,7 +84,7 @@ O cluster também precisa conseguir alcançar o seu banco de dados na porta do P
 
 O enriquecimento de exploitability é opcional e precisa de mais dois destinos via HTTPS na porta 443. As pontuações EPSS vêm de `api.first.org`, e os dados do CISA KEV vêm de `www.cisa.gov`. Ambos são servidos por content delivery networks cujos endereços mudam, então libere os hostnames. Sem eles, o DefectDojo funciona normalmente e os achados não são enriquecidos com dados de EPSS ou KEV.
 
-Quando o tráfego de saída passa por um proxy em vez de ser direto, consulte [Executando o DefectDojo Atrás de um Forward HTTPS Proxy](/onprem_deployment/forward_proxy/).
+Quando o tráfego de saída passa por um proxy em vez de ser direto, consulte [Executando o DefectDojo Atrás de um Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/).
 
 ## O job initializer precisa terminar primeiro
 

@@ -97,7 +97,7 @@ En una red restringida, el host de la aplicación necesita acceso saliente a lo 
 
 Incluya en la lista de permitidos por nombre de host en lugar de por dirección. El registro está detrás de una red de distribución de contenido, por lo que sus direcciones varían según la ubicación y cambian con el tiempo.
 
-Si el host llega a internet a través de un proxy saliente, consulte [Ejecución de DefectDojo detrás de un proxy HTTPS de reenvío](/onprem_deployment/forward_proxy/). Si no tiene ninguna ruta a internet, siga en su lugar el procedimiento de instalación con espacio de aire (air-gapped) de esta sección.
+Si el host llega a internet a través de un proxy saliente, consulte [Ejecución de DefectDojo detrás de un proxy HTTPS de reenvío](/get_started/pro/onprem/forward_proxy/). Si no tiene ninguna ruta a internet, siga en su lugar el procedimiento de instalación con espacio de aire (air-gapped) de esta sección.
 
 ### Confirmar que la base de datos es accesible
 

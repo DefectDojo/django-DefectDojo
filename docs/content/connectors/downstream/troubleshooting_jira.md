@@ -24,7 +24,7 @@ If the setting is already enabled and you still can't see the Jira menu, your us
 
 If DefectDojo's Jira integration fails with connection errors that look like "connection refused", "no route to host", or generic TLS handshake failures — and the credentials themselves are valid — your DefectDojo instance may be behind a firewall that requires outbound traffic to go through a forward HTTPS proxy.
 
-For on-prem Pro deployments, set the `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` environment variables on the deployment.  `dojo-compose-cli` propagates these to the `uwsgi`, `celeryworker`, and Connector containers automatically.  See [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/) for the full configuration walkthrough.
+For on-prem Pro deployments, set the `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` environment variables on the deployment.  `dojo-compose-cli` propagates these to the `uwsgi`, `celeryworker`, and Connector containers automatically.  See [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/) for the full configuration walkthrough.
 
 > Note: setting `HTTPS_PROXY` configures **outbound** traffic from DefectDojo only.  It does not affect Jira's ability to deliver **inbound** webhooks to DefectDojo — see [Changes made to Jira issues are not updating Findings in DefectDojo](#changes-made-to-jira-issues-are-not-updating-findings-in-defectdojo) below for that case.
 

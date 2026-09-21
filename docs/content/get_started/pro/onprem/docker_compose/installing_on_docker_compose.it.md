@@ -97,7 +97,7 @@ In una rete con restrizioni, l'host dell'applicazione necessita di accesso in us
 
 Creare l'allowlist per hostname anziché per indirizzo. Il registro si trova dietro una rete di distribuzione dei contenuti, quindi i suoi indirizzi variano a seconda della località e cambiano nel tempo.
 
-Se l'host raggiunge Internet tramite un proxy in uscita, vedere [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/). Se non ha alcun accesso a Internet, seguire invece la procedura di installazione air-gapped in questa sezione.
+Se l'host raggiunge Internet tramite un proxy in uscita, vedere [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/). Se non ha alcun accesso a Internet, seguire invece la procedura di installazione air-gapped in questa sezione.
 
 ### Verificare che il database sia raggiungibile
 

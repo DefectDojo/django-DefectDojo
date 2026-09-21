@@ -115,3 +115,12 @@ class TestTerrascanParser(DojoTestCase):
                 self.assertEqual("google_container_node_pool/k8s_cluster_node_pool", finding.component_name)
                 self.assertEqual("accurics.gcp.OPS.101", finding.vuln_id_from_tool)
                 self.assertEqual(1, finding.nb_occurences)
+
+    def test_parse_findings_with_null_fields(self):
+        """Verify the parser does not crash when resource_name/resource_type are null."""
+        with (get_unit_tests_scans_path("terrascan") / "findings_with_null_fields.json").open(encoding="utf-8") as testfile:
+            parser = TerrascanParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            self.assertEqual("Security: testRule", findings[0].title)
+            self.assertEqual("test.rule.001", findings[0].vuln_id_from_tool)

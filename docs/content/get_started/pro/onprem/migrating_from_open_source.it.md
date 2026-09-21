@@ -3,7 +3,7 @@ title: Migrazione da Open Source a DefectDojo Pro self-hosted
 description: Sposta il database e i file multimediali di DefectDojo open source in
   un deployment self-hosted di DefectDojo Pro
 draft: false
-weight: 6
+weight: 3
 audience: pro
 ---
 

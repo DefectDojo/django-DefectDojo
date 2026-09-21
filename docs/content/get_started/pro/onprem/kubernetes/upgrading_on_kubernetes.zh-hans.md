@@ -1,11 +1,10 @@
 ---
-title: DefectDojo Pro 升级指南
+title: DefectDojo Pro 升级指南 (Kubernetes / Helm)
 description: 升级现有的 DefectDojo Pro Helm 发行版，包括拉取 Chart、执行升级和回滚
 draft: false
 weight: 2
 audience: pro
 aliases:
-- /zh-hans/get_started/pro/onprem/upgrading/
 - /zh-hans/get_started/pro/onprem/upgrading_on_kubernetes/
 ---
 
@@ -97,7 +96,7 @@ aliases:
 > 的出站允许列表更为宽松。若要保留原有的严格限制行为，请设置
 > `networkPolicy.profile: aggressive` 并检查其中的例外项（`nodeLocalDns`、
 > `dnsSelectors`、`externalAPIs`）—— 参见
-> [网络策略](/get_started/pro/onprem/installing_on_kubernetes/#network-policies)。
+> [网络策略](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#network-policies)。
 
 > **编排器数据库要求。** 编排器（`ddorch`）使用一个名为
 > `<main-db-name>-ddorch` 的第二数据库，如果该数据库不存在，会在启动时
@@ -106,7 +105,7 @@ aliases:
 > （`CREATE DATABASE "defectdojo-ddorch" OWNER defectdojo;`）—— 否则
 > ddorch Pod 会因 `permission denied to create database (SQLSTATE 42501)`
 > 而失败。参见
-> [预检：编排器（ddorch）数据库](/get_started/pro/onprem/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database)。
+> [预检：编排器（ddorch）数据库](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#pre-flight-orchestrator-ddorch-database)。
 
 > **Organization/Asset 重新标注默认值。**
 > `dojo.V3EnableOrganizationAssetRelabel` 现在默认值为 `null`（自动）：

@@ -54,7 +54,7 @@ newgrp docker
 
 Bestätigen Sie mit `id`, dass sowohl `docker` als auch `dojosrv` aufgeführt sind. Sobald sich Ihr Benutzer in der Gruppe `docker` befindet, benötigen die übrigen Befehle kein `sudo` mehr.
 
-Wenn der Staging-Host das Internet über einen ausgehenden HTTPS-Proxy erreicht, konfigurieren Sie die Proxy-Variablen, bevor Sie irgendetwas herunterladen. Siehe [Betrieb von DefectDojo hinter einem Forward-HTTPS-Proxy](/onprem_deployment/forward_proxy/).
+Wenn der Staging-Host das Internet über einen ausgehenden HTTPS-Proxy erreicht, konfigurieren Sie die Proxy-Variablen, bevor Sie irgendetwas herunterladen. Siehe [Betrieb von DefectDojo hinter einem Forward-HTTPS-Proxy](/get_started/pro/onprem/forward_proxy/).
 
 ### 2. Festlegen der Version
 
@@ -343,7 +343,7 @@ Sichern Sie Ihre Datenbank vor jedem Upgrade und lesen Sie die [Upgrade-Hinweise
 
 Ein abgeschottetes Deployment läuft ohne jegliche ausgehende Konnektivität, aber Funktionen, die externe Dienste erreichen, können im getrennten Zustand nicht funktionieren. Dies betrifft die Connectors und Integrators, die Daten von cloudgehosteten Tools abrufen, Issue-Tracker-Integrationen wie Jira, ausgehende Benachrichtigungen an Dienste wie Slack und Microsoft Teams sowie Schwachstellen-Anreicherungsdaten, die normalerweise nach einem Zeitplan abgerufen werden.
 
-Diese werden pro Deployment konfiguriert, anstatt standardmäßig aktiviert zu sein, sodass eine Air-Gapped-Installation durch ihr Fehlen nicht beeinträchtigt wird. Wenn Sie eine solche Funktion aktivieren, ist mit Namensauflösungs- oder Verbindungsfehlern zu rechnen, bis das Deployment über einen Weg zu diesem Dienst verfügt. Wenn der ausgehende Pfad zwar existiert, aber über einen Proxy verläuft, siehe [Betrieb von DefectDojo hinter einem Forward-HTTPS-Proxy](/onprem_deployment/forward_proxy/).
+Diese werden pro Deployment konfiguriert, anstatt standardmäßig aktiviert zu sein, sodass eine Air-Gapped-Installation durch ihr Fehlen nicht beeinträchtigt wird. Wenn Sie eine solche Funktion aktivieren, ist mit Namensauflösungs- oder Verbindungsfehlern zu rechnen, bis das Deployment über einen Weg zu diesem Dienst verfügt. Wenn der ausgehende Pfad zwar existiert, aber über einen Proxy verläuft, siehe [Betrieb von DefectDojo hinter einem Forward-HTTPS-Proxy](/get_started/pro/onprem/forward_proxy/).
 
 ### EPSS- und KEV-Daten von einem internen Mirror
 

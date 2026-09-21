@@ -29,12 +29,13 @@ class TerrascanParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        if "results" not in data and "violations" not in data.get("results"):
+        results = data.get("results")
+        if results is None or "violations" not in results:
             msg = "missing mandatory attribute 'results'"
             raise ValueError(msg)
-        if data.get("results").get("violations") is None:
+        if results.get("violations") is None:
             return []
-        for item in data.get("results").get("violations"):
+        for item in results.get("violations"):
             rule_name = item.get("rule_name")
             description = item.get("description")
             severity = self.SEVERITY.get(item.get("severity"), "Info")
@@ -47,13 +48,10 @@ class TerrascanParser:
 
             dupe_key = hashlib.sha256(
                 (
-                    rule_id
-                    + rule_name
-                    + resource_name
-                    + resource_type
-                    + file
-                    + str(line)
-                ).encode("utf-8"),
+                    f"{rule_id or ''}|{rule_name or ''}"
+                    f"|{resource_name or ''}|{resource_type or ''}"
+                    f"|{file or ''}|{line}"
+                ).encode(),
             ).hexdigest()
 
             if dupe_key in dupes:
