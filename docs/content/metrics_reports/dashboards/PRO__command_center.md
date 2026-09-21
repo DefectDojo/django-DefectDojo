@@ -16,7 +16,7 @@ The Command Center is one composed screen that answers, in fixed zones, **what's
 
 ![The Command Center scene](images/command_center_scene.png)
 
-With the flag on, **Home** lands on the scene at **Dashboards > Command Center**. It is read left to right:
+With the flag on, **Home** lands on the scene, which has its own page at `/command-center`. It is read left to right:
 
 * **The brief**: up to three grounded sentences as outlined cards across the top of the scene itself, every card a door to its evidence. When nothing changed since the previous snapshot, the row says so.
 * **Sources**: one row per scanner or connector with its volume in the window, its state, and its change against the previous window. Each row stacks its volume over the tool's name, right-aligned to a gap before its ribbon, inside a faint dashed, unfilled box under a bold **Top sources** title (the rail keeps the twelve largest sources and folds the rest into one row), mirroring the two family boxes on the right. Each ribbon is a dashed line of short, rounded dashes, every line the same weight (volume is carried by the beam's glow, below), dim neutral gray on the sources side (raw volume is not a signal), the accent blue on the outcomes side. A source that has stopped reporting draws as dashes that fade along their length; a source whose last run failed fades in the down color, and a source with failed imports draws in the warning color. The screen shows when it is blind rather than letting silence read as clean.
@@ -52,18 +52,18 @@ The scene always shows what you are authorized to see, so every door lands on a 
 
 ### The customizable grid
 
-The grid preset that used to be called Command Center is now **Command Center (custom)**: the same starter layout, with its widgets, that you can clone and rearrange. **Customize** in the scene header opens it, and it stays under **Dashboards** in the sidebar. Its "Within SLA" gauge has become a big KPI of the SLA breach count, in line with the design rule that the Command Center uses no gauges.
+The grid preset that used to be called Command Center is now **Command Center (custom)**: the same layout, with its widgets, that you can clone and rearrange. It is a preset like any other, so new users are still handed **Default Dashboard** on first login. **Customize** in the scene header opens it, and it stays under **Dashboards** in the sidebar. Its "Within SLA" gauge has become a big KPI of the SLA breach count, in line with the design rule that the Command Center uses no gauges.
 
 ## The preset family
 
 Turning the flag on publishes four seeded, cloneable layouts under the **Command Center** group of the Shared Templates picker:
 
-* **Command Center (custom)** (the starter): the customizable grid behind the scene. Existing users keep their current dashboards and defaults, and can clone it whenever they like.
+* **Command Center (custom)**: the customizable grid behind the scene. Existing users keep their current dashboards and defaults, and can clone it whenever they like.
 * **Exec Brief**: the board-facing view. The posture score with its why panel, the quarter's trajectory, risk acceptance debt, fix durability, and a fairness-normalized team scorecard.
 * **Ops Triage**: queue first. Your work, what breaches next, this week's intake funnel, live activity, backlog aging.
 * **Platform Health**: the machinery deep dive. The pipeline funnel at full width, the sensors rail, automation throughput, coverage freshness, license headroom.
 
-With the flag on, the sidebar **Home** entry lands on the scene, **Dashboards** opens the customizable grids, and the classic dashboard stays reachable as **Legacy Dashboard** while your team migrates.
+With the flag on, the sidebar has two dashboard entries: **Home** lands on the scene, and **Dashboards** opens the customizable grids.
 
 ## The daily snapshot backbone
 
