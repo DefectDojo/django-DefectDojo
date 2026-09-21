@@ -43,6 +43,7 @@ two Findings genuinely name the same thing -- and one is a labelled heuristic.
 | **CVE** | reference the same CVE identifier | `CVE-2021-44228` | Exact |
 | **Resource** | name the same infrastructure object | `aws_s3_bucket.logs` | Exact |
 | **Endpoint** | report the same weakness class at the same URL | `CWE-79 at example.com/search` | Heuristic |
+| **Container Image** | were found in the same container image, identified by its digest (requires Container Image Locations) | `ghcr.io/example/api@sha256:...` | Exact |
 
 A Finding joins **every** cluster that applies to it, not just one. An SCA Finding for
 `log4j-core 2.14.1` carrying three CVEs joins four Root Causes: its component cluster and one

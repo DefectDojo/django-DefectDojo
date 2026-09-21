@@ -3,7 +3,7 @@ title: Migración de código abierto a DefectDojo Pro autoalojado
 description: Traslade la base de datos y los archivos multimedia de su DefectDojo
   de código abierto a una implementación autoalojada de DefectDojo Pro
 draft: false
-weight: 6
+weight: 3
 audience: pro
 ---
 

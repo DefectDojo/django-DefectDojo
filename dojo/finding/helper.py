@@ -53,10 +53,10 @@ from dojo.notifications.helper import create_notification
 from dojo.tools import tool_issue_updater
 from dojo.url.models import URL
 from dojo.utils import (
-    calculate_grade,
     close_external_issue,
     get_current_user,
     get_object_or_none,
+    schedule_product_grade,
     to_str_typed,
 )
 from dojo.vulnerability.manager import persist_for_finding
@@ -252,7 +252,10 @@ def create_finding_group(finds, finding_group_name):
         else:
             raise
 
-    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    available_findings = [
+        find for find in finds
+        if not find.finding_group_set.all() and find.test_id == finding_group.test_id
+    ]
     finding_group.findings.set(available_findings)
 
     added = len(available_findings)
@@ -263,7 +266,10 @@ def create_finding_group(finds, finding_group_name):
 def add_to_finding_group(finding_group, finds):
     added = 0
     skipped = 0
-    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    available_findings = [
+        find for find in finds
+        if not find.finding_group_set.all() and find.test_id == finding_group.test_id
+    ]
     finding_group.findings.add(*available_findings)
 
     # Now update the JIRA to add the finding to the finding group
@@ -464,9 +470,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-            dojo_dispatch_task(calculate_grade, finding.test.engagement.product.id)
+            schedule_product_grade(finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -583,9 +587,7 @@ def post_process_findings_batch(
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id, force_sync=force_sync)
+        schedule_product_grade(findings[0].test.engagement.product.id, force_sync=force_sync)
 
     # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
     jira_instance = None

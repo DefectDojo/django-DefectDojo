@@ -23,6 +23,38 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 New features:
 * **(Deduplication)** Added Dedupe Pools: group the Assets that should deduplicate against each other, choose where their originals collect, preview what a membership change would link, and re-run deduplication over the Findings already in scope with Apply Now.
 * **(Deduplication)** The three deduplication tuning pages are now one Matching Configuration page: every tool listed once, with its same-tool, cross-tool and reimport matching side by side, and every change previewed before it is saved.
+* **(Connectors)** New Palo Alto Cortex connector family, covering XDR, XSIAM, XSOAR, and Cloud.
+* **(Connectors)** Connector sync and discovery frequency is now configurable (6, 12, or 24 hours), with schedule times shown in your browser's local time.
+* **(Dashboards)** Collaborative shared dashboard layouts.
+* **(Editor)** The markdown editor now stores images you paste or drop into any markdown field.
+* **(Sensei)** Google Vertex AI is available as an on-prem LLM provider.
+* **(Sensei)** Keyless and delegated cloud authentication for Prowler scans and Sensei CSPM, using cloud federation or Connect DefectDojo Cloud.
+* **(Reporting)** Dashboards 2.0 widgets can now be reused as Report Builder blocks.
+* **(Rules Engine 2.0)** Date condition fields support relative-date operators.
+* **(Federal)** FedRAMP VDR, PAIN, and KEV-cap SLA fields are exposed in the Pro UI and REST API.
+* **(Qualys)** Opt-in endpoint creation from host identity.
+
+Enhancements:
+* **(Dashboards)** Duplicate a dashboard tile from its edit-mode chrome.
+* **(Connectors)** The Aqua Supply Chain Branch field accepts a comma-separated list and gains a per-branch deduplication toggle, and its placeholders now show the real default.
+* **(SSO)** Auth settings show callback and ACS URLs inline, with richer help text and corrected field labels.
+* **(Sensei)** The Threat Modeling and Advisor pages show the licensed per-run quotas.
+
+Bug fixes:
+* **(Connectors)** JFrog scopes each nested child image to its own latest build; Dependency-Track paginates project findings so large projects aren't truncated; YesWeHack maps every workflow state and falls back to the CVSS score for severity; GitHub Advanced Security 403 and 404 responses are treated as feature-disabled rather than token errors; a tool-reported finding status now survives a sync; and KEV/EPSS enrichment staging is isolated per connection to avoid concurrent-run collisions.
+* **(Findings)** You can now request a review from yourself.
+* **(Rules Engine)** "Clear Filters" now clears a rule's saved filters.
+* **(SSO)** Unconfigured social-login backends return you to the login form instead of a 500.
+* **(Assets)** Each personnel picker gets its own users list.
+* **(API)** A stored inactive contact stays readable, a new contact can no longer be assigned to an inactive user, and the finding API's SonarQube issue relation is read-only.
+* **(Dashboards)** The Top Root Causes widget is registered and receives its configuration.
+* **(Sensei)** GitHub App creation opens in a new tab, and the Targets "Last Scan" value aligns with the scan-run ledger while the Scan-now dialog stays responsive.
+* **(UI)** Table columns size to fit their headers so filter and sort controls stay reachable, and the Upstream menu item is a plain link while Field Mappings is unreleased.
+* **(Questionnaires)** Corrected the share note on the general questionnaire list.
+* **(JIRA)** Corrected the exception class the webhook lookups catch.
+* **(Reporting)** Removed a duplicate vulnerability reference prefetch in the finding report.
+* **(Parsers)** bundler-audit resets advisory fields so warnings can't inherit stale values.
+* **(Deduplication)** The endpoint rehash runs once per tool instead of once per finding.
 
 Behavior changes:
 * **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. An Asset in a Dedupe Pool replicates its false positives across the pool for same-tool matching. Instances using false-positive history across such Engagements see narrower replication than before. A pool may span Organizations, and both effects follow the pool: a duplicate mark or a replicated false positive originating in one Organization can change a Finding in another Organization that shares the pool.
@@ -37,6 +69,7 @@ Upgrade notes:
 * **(Deduplication)** The migration is reversible. Rolling back to the previous node drops the new pool tables and restores the previous release's view of the settings; the tuning columns never left. Take a database backup before upgrading anyway, as ordinary upgrade hygiene.
 * **(Deduplication)** The matching rows the upgrade seeds carry no audit log entry: the migration writes them before it installs their audit triggers. Audit history for Matching Configuration starts with the first change made after the upgrade; the seeded state itself is what the Tuner held, and is not recorded as an event.
 * **(Deduplication)** The first nightly identity check after the upgrade may send a system notification saying the cross-tool identity changed for some tools. Those tools had cross-tool hash fields configured but no algorithm; the previous release treated that as Hash code, and the upgrade records Hash code explicitly, so the identity definition moved while the stored hashes did not. The rehash the notification suggests (`manage.py identity_drift --kind cross_tool --rehash`) is safe, recomputes the same values, and records the new baseline so the notice does not repeat.
+* **(Deployment)** A new `DD_V3_ASSET_ALIASES` chart value and compose environment variable enable per-source asset aliases; Sensei CSPM adds keyless and delegated cloud-auth boot gates.
 
 ### September 9, 2026: v3.3.0
 

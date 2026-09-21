@@ -15,7 +15,16 @@ An **admin-generated** Aqua **API key and secret**, created under **Account Mana
 1. Enter your Aqua Supply Chain **edge** host in the **Location** field, for example `https://eu-central-1.edge.cloud.aquasec.com`. This is not the tenant URL the Aqua Security connector uses. Aqua Supply Chain Security answers on the region's **edge** host, not `<tenant>.cloud.aquasec.com`.
 2. Enter the API key in the **API Key** field.
 3. Enter the API secret in the **API Secret** field.
-4. If your tenant is in the EU, set the **Auth Host** field to `https://eu-1.api.cloudsploit.com`. Leave it blank for the US host, `https://api.cloudsploit.com`. Aqua caps the issued authentication token at two hours, regardless of the validity the connector requests. The connector re-authenticates on its own when the token expires.
+4. Set the **Auth Host** field to your region's Aqua **CSPM API** host. This is a different host from the **Location** edge host above, and it is used only to exchange the API key and secret for a token. Pick the row for your region:
+
+   | Region | Auth Host |
+   |--------|-----------|
+   | US | `https://api.cloudsploit.com` (or leave blank) |
+   | EU | `https://eu-1.api.cloudsploit.com` |
+   | Singapore | `https://asia-1.api.cloudsploit.com` |
+   | Sydney | `https://ap-2.api.cloudsploit.com` |
+
+   Do not put the edge host (a `cloud.aquasec.com` address) in **Auth Host**, and do not put the CSPM API host in **Location**. Aqua caps the issued authentication token at two hours, regardless of the validity the connector requests. The connector re-authenticates on its own when the token expires.
 5. Optionally, set **Scan Categories** to a comma-separated list of the categories to import. The five values are `vulnerabilities` (SCA), `secrets`, `iacMisconfigurations` (IaC), `sast` and `pipelineMisconfigurations` (Pipeline). Leave it blank to import all five. Each finding carries a `category:<value>` tag naming the category it came from.
 6. Optionally, set a **Minimum Severity** to limit which findings are imported. Aqua reports severity as a 0-4 value, which DefectDojo maps to Info, Low, Medium, High and Critical.
 
@@ -25,12 +34,36 @@ Each repository in the tenant becomes a Record. A repository that disappears fro
 
 A repository's default branch is always imported. Two optional fields extend this:
 
-- **Branch**: a comma-separated list of exact branch names or `*` wildcard families, for example `release/*, bugfix/*`. Every entry adds its matching branches on top of the default branch. Blank entries are ignored.
-- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding. When this is off, all selected branches import into the Record's default engagement.
+- **Branch**: a comma-separated list of exact branch names or `*` wildcard families, for example `release/*, bugfix/*`. Every entry adds its matching branches on top of the default branch. Blank entries are ignored. A branch imports only if Aqua returns it for that repository in the scan-results feed the connector reads (see the note below).
+- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding, unless **Separate Deduplication Per Branch** is on. When this is off, all selected branches import into the Record's default engagement.
 
-This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua has scanned is imported.
+This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua returns for the repository in its scan-results feed is imported.
 
-Aqua only stores results for a branch it has actually scanned. A Branch value that matches no scanned branch contributes no findings for that branch.
+The connector imports the branches Aqua returns for a repository in its scan-results feed. For some repositories and source types (for example Azure DevOps), that feed returns only the repository's default branch, even when Aqua has scanned other branches and shows their results in the Aqua console. When that happens, a **Branch** entry naming a non-default branch contributes no findings and no engagement is created for it, and only the default branch is imported. If you expect a branch to import and it does not, contact DefectDojo support. Broader support for non-default branches is being worked on.
+
+#### Separate Deduplication Per Branch
+
+By default, the same issue found on two branches is one finding. The second branch's copy is
+marked a duplicate of the default branch's finding. This keeps one row per real issue when a
+release branch carries the same code as the default branch.
+
+Turn on **Separate Deduplication Per Branch** to keep each branch apart. The same issue on two
+branches then stays two findings, and each branch reports its own counts.
+
+This setting applies only to branches that have their own engagement. Turn on **Track Scanned
+Branches** first if you import more than the default branch. It also has an effect only when
+deduplication is enabled in System Settings.
+
+A change takes effect on the next sync. It applies to every branch that sync imports, including
+branches that were imported before you changed the setting. A branch that Aqua no longer reports
+keeps its previous setting.
+
+The connector owns this setting on the branch engagements it creates. If you change it by hand
+on one of those engagements, the next sync sets it back to what the connector is configured for.
+
+Findings that were already marked as duplicates before you turned the setting on keep that mark.
+A later sync does not change them, and the `dedupe` management command skips findings that are
+already duplicates. If you need those findings active again, reopen them by hand.
 
 #### Filing
 
@@ -43,3 +76,8 @@ Aqua can return several byte-identical rows for the same finding. One example is
 #### Sync cost
 
 A full sync pulls the whole tenant in a handful of requests. It sends roughly one request per 10,000 findings, plus the repository list, which takes two or three requests. The connector groups the results locally.
+
+#### Troubleshooting
+
+- **Validation fails with `aqua token exchange failed: unexpected status 405`** (or an "Auth Host redirected" message): the **Auth Host** is not your region's CSPM API host. The token exchange is a `POST` to `<Auth Host>/v2/tokens`, and Aqua's gateway answers a `405` when the request lands on a host that redirects it. Set **Auth Host** to the `*.api.cloudsploit.com` host for your region (see the table above) and keep the edge `cloud.aquasec.com` host in **Location**.
+- **Validation fails with `401`/`Access denied`**: the API key or secret is wrong, or the key is not admin-generated. Regenerate the key and secret under **Account Management \> API Keys** and re-enter both.
