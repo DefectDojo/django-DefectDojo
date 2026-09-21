@@ -29,10 +29,11 @@ class TestLocationReferenceFilterFieldResolution(DojoTestCase):
 
     """Filtering / ordering by location_type and location_value must not raise FieldError."""
 
-    fixtures = ["dojo_testdata.json"]
-
     @classmethod
     def setUpTestData(cls):
+        # No dojo_testdata fixture: it carries deprecated Endpoint rows that fail to
+        # load in the V3_FEATURE_LOCATIONS lane. Build the minimal graph directly.
+        cls.reporter = User.objects.create(username="locreffilter_user")
         prod_type, _ = Product_Type.objects.get_or_create(name="LocRefFilter PT")
         test_type, _ = Test_Type.objects.get_or_create(name="LocRefFilter Scan")
         cls.product = Product.objects.create(
@@ -61,7 +62,7 @@ class TestLocationReferenceFilterFieldResolution(DojoTestCase):
             numerical_severity="S0",
             active=True,
             verified=True,
-            reporter=User.objects.get(username="admin"),
+            reporter=cls.reporter,
         )
 
         cls.url_location = Location.objects.create(
