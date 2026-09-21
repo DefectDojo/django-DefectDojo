@@ -100,6 +100,11 @@ class GovulncheckParser:
                     return event["introduced"]
         return ""
 
+    def get_cve(self, osv):
+        # Go-only advisories may have no "aliases" at all, or an empty list
+        aliases = osv.get("aliases") or []
+        return aliases[0] if aliases else None
+
     def get_finding_trace_info(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract traces.
         trace_info_strs = []
@@ -160,13 +165,14 @@ class GovulncheckParser:
                 if data["Vulns"]:
                     # Parsing for old govulncheck output format
                     list_vulns = data["Vulns"]
-                    for cve, elems in groupby(
-                        list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0],
+                    # Go-only advisories can come without any alias (CVE/GHSA); group those by OSV id
+                    for _, elems in groupby(
+                        list_vulns, key=lambda vuln: self.get_cve(vuln["OSV"]) or vuln["OSV"]["id"],
                     ):
                         elem_values = list(elems)
                         first_elem = list(islice(elem_values, 1))
                         d = {
-                            "cve": cve,
+                            "cve": self.get_cve(first_elem[0]["OSV"]),
                             "severity": SEVERITY,
                             "title": first_elem[0]["OSV"]["id"],
                             "component_name": first_elem[0]["OSV"]["affected"][0][
@@ -218,7 +224,7 @@ class GovulncheckParser:
                 # Parsing for new govulncheck output format
                 for elem in data:
                     if "osv" in elem:
-                        cve = elem["osv"]["aliases"][0]
+                        cve = self.get_cve(elem["osv"])
                         osv_data = elem["osv"]
                         affected_package = osv_data["affected"][0]["package"]
                         affected_ranges = osv_data["affected"][0]["ranges"]
