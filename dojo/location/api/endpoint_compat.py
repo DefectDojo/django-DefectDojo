@@ -257,7 +257,11 @@ class V3EndpointStatusCompatibleFilterSet(FilterSet):
         return queryset.filter(status=FindingLocationStatus.Mitigated, auditor__iexact=value)
 
     def filter_endpoint(self, queryset, name, value):
-        return queryset.filter(location__products__id=value)
+        # A Location is shared, so match only against references the caller may see.
+        visible = get_authorized_location_product_reference(
+            "view", user=getattr(getattr(self, "request", None), "user", None),
+        ).filter(id=value)
+        return queryset.filter(location__products__in=visible)
 
     class Meta:
         model = LocationFindingReference
