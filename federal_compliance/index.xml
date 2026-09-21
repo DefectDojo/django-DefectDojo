@@ -15,4 +15,7 @@ DoD Assessment Methodology point weights.&lt;/p&gt;</description></item><item><t
 Resilience Act (CRA) and Digital Operational Resilience Act (DORA). A regulatory assessment
 collects the operational facts DefectDojo already holds, gives an assessor space to document the
 remaining evidence, and produces a dated evidence pack.&lt;/p&gt;</description></item><item><title>Control Coverage</title><link>https://docs.defectdojo.com/federal_compliance/control_coverage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/federal_compliance/control_coverage/</guid><description>&lt;p&gt;The control coverage view answers a simple question: which 800-53 controls do my scanners actually
-test, and where are the open weaknesses per control?&lt;/p&gt;</description></item></channel></rss>
+test, and where are the open weaknesses per control?&lt;/p&gt;</description></item><item><title>PCI DSS Evidence Packs</title><link>https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/</guid><description>&lt;p&gt;DefectDojo Pro includes an authored catalog for the PCI DSS v4.0.1 requirements that a
+vulnerability management programme answers. A PCI DSS assessment collects the operational facts
+DefectDojo already holds, gives an assessor space to record the rest, and produces a dated
+workbook in the wording a Report on Compliance uses.&lt;/p&gt;</description></item></channel></rss>
