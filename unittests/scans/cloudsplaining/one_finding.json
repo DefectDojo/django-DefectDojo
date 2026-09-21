@@ -1,0 +1,13 @@
+{
+  "customer_managed_policies": {
+    "InsecurePolicy": {
+      "PolicyName": "InsecurePolicy",
+      "PolicyId": "InsecurePolicy",
+      "Arn": "arn:aws:iam::012345678901:policy/InsecurePolicy",
+      "is_excluded": false,
+      "ResourceExposure": [
+        "s3:PutObjectAcl"
+      ]
+    }
+  }
+}

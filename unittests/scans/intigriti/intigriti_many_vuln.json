@@ -1,0 +1,106 @@
+{
+  "records": [
+    {
+      "code": "GENERIC-0001",
+      "title": "Stored XSS in the comment field",
+      "originators": {"programId": "prog-0001", "pentestCode": ""},
+      "severity": {"id": 5, "value": "Exceptional", "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:H/A:N"},
+      "state": {
+        "status": {"id": 3, "value": "Accepted"},
+        "closeReason": {"id": 0, "value": ""}
+      },
+      "createdAt": 1784000000,
+      "lastUpdatedAt": 1784100000,
+      "tags": ["web"],
+      "webLinks": {
+        "details": "https://app.example.com/submissions/GENERIC-0001",
+        "submissions": "https://app.example.com/submissions"
+      },
+      "detail": {
+        "code": "GENERIC-0001",
+        "title": "Stored XSS in the comment field",
+        "severity": {"id": 5, "value": "Exceptional", "vector": ""},
+        "state": {"status": {"value": "Accepted"}, "closeReason": {"value": ""}},
+        "webLinks": {"details": "https://app.example.com/submissions/GENERIC-0001"},
+        "report": {
+          "originalTitle": "XSS in comments",
+          "type": {"name": "Cross-site Scripting", "category": "Injection", "cwe": "cwe-79"},
+          "domain": {"name": "app.example.com", "description": "Main web application"},
+          "endpointVulnerableComponent": "/comments",
+          "pocDescription": "<p>Submit <b>&lt;script&gt;</b> in the comment body.</p><script>alert(1)</script>",
+          "impact": "<p>An attacker can run script in another user's session.</p>",
+          "recommendedSolution": "<p>Encode user input before rendering.</p>",
+          "questions": [
+            {"question": "Which browsers did you test?", "answer": "<p>Latest Chrome and Firefox.</p>"},
+            {"question": "", "answer": ""}
+          ]
+        }
+      }
+    },
+    {
+      "code": "GENERIC-0002",
+      "title": "Resolved header issue",
+      "severity": {"id": 2, "value": "Low", "vector": ""},
+      "state": {"status": {"value": "Closed"}, "closeReason": {"value": "Solved"}},
+      "webLinks": {"details": "https://app.example.com/submissions/GENERIC-0002"}
+    },
+    {
+      "code": "GENERIC-0003",
+      "title": "Accepted risk submission",
+      "severity": {"id": 3, "value": "Medium", "vector": ""},
+      "state": {"status": {"value": "Closed"}, "closeReason": {"value": "Accepted risk"}},
+      "webLinks": {"details": ""}
+    },
+    {
+      "code": "GENERIC-0004",
+      "title": "Duplicate submission",
+      "severity": {"id": 4, "value": "High", "vector": ""},
+      "state": {"status": {"value": "Closed"}, "closeReason": {"value": "Duplicate"}},
+      "webLinks": {"details": ""}
+    },
+    {
+      "code": "GENERIC-0005",
+      "title": "Out of scope submission",
+      "severity": {"id": 2, "value": "Low", "vector": ""},
+      "state": {"status": {"value": "Archived"}, "closeReason": {"value": "Out of scope"}},
+      "webLinks": {"details": ""}
+    },
+    {
+      "code": "GENERIC-0006",
+      "title": "Rejected submission",
+      "severity": {"id": 1, "value": "Low", "vector": ""},
+      "state": {"status": {"value": "Closed"}, "closeReason": {"value": "Not applicable"}},
+      "webLinks": {"details": ""}
+    },
+    {
+      "code": "GENERIC-0007",
+      "title": "Terse rejection",
+      "severity": {"id": 1, "value": "Low", "vector": ""},
+      "state": {"status": {"value": "Closed"}, "closeReason": {"value": "No"}},
+      "webLinks": {"details": ""}
+    },
+    {
+      "code": "GENERIC-0008",
+      "title": "Still in triage",
+      "severity": {"id": 0, "value": "not-a-severity", "vector": ""},
+      "state": {"status": {"value": "Triage"}, "closeReason": {"value": ""}},
+      "webLinks": {"details": ""}
+    },
+    {
+      "code": "GENERIC-0009",
+      "title": "Detail carried on the entry itself",
+      "severity": {"id": 0, "value": "", "vector": ""},
+      "state": {"status": {"value": "Open"}, "closeReason": {"value": ""}},
+      "webLinks": {"details": ""},
+      "report": {
+        "type": {"name": "", "category": "Access Control", "cwe": "not-a-cwe"},
+        "domain": {"name": "", "description": ""},
+        "endpointVulnerableComponent": "api.example.com/v1/users",
+        "pocDescription": "",
+        "impact": "",
+        "recommendedSolution": "",
+        "questions": []
+      }
+    }
+  ]
+}

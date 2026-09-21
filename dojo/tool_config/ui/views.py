@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.decorators import deprecated_view
 from dojo.tool_config.factory import create_API
@@ -32,7 +33,7 @@ def new_tool_config(request):
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "Tool Configuration successfully updated.",
+                                     _("Tool Configuration successfully updated."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("tool_config"))
             except Exception as e:
@@ -79,7 +80,7 @@ def edit_tool_config(request, ttid):
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "Tool Configuration successfully updated.",
+                                     _("Tool Configuration successfully updated."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("tool_config"))
             except Exception as e:

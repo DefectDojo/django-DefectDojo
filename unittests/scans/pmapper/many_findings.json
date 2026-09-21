@@ -1,0 +1,28 @@
+{
+  "account": "000000000000",
+  "date_and_time": "2026-08-10T09:00:00",
+  "findings": [
+    {
+      "title": "IAM Role Available to Compute Service That Can Escalate Privileges",
+      "severity": "High",
+      "impact": "An attacker with access to the compute service can gain administrative access.",
+      "description": "The IAM Role sample-instance-role can be assumed by ec2.amazonaws.com and can reach the IAM Role sample-admin-role via iam:PassRole.",
+      "recommendation": "Restrict iam:PassRole on sample-instance-role to the roles it needs."
+    },
+    {
+      "title": "Privilege Escalation via Lambda Function Update",
+      "severity": "Medium",
+      "impact": "A principal can alter a function that runs with a more privileged role.",
+      "description": "The IAM User sample-build-user can call lambda:UpdateFunctionCode on a function running as sample-deploy-role.",
+      "recommendation": "Separate the ability to update function code from the deploy role."
+    },
+    {
+      "title": "Principals With Administrator Access",
+      "severity": "Low",
+      "impact": "Broad administrative access widens the blast radius of a credential compromise.",
+      "description": "The IAM Role sample-admin-role has the AdministratorAccess policy attached.",
+      "recommendation": "Scope the policy to the actions the role actually performs."
+    }
+  ],
+  "source": "sample-org-graph"
+}

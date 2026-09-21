@@ -1,0 +1,20 @@
+{
+  "totals": {
+    "errors": 0,
+    "file_errors": 1
+  },
+  "files": {
+    "src/Report.php": {
+      "errors": 1,
+      "messages": [
+        {
+          "message": "Method Sample\\App\\Report::missing() should return int but return statement is missing.",
+          "line": 18,
+          "ignorable": false,
+          "identifier": "return.missing"
+        }
+      ]
+    }
+  },
+  "errors": []
+}

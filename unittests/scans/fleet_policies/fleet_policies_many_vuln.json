@@ -1,0 +1,75 @@
+{
+  "hosts": [
+    {
+      "id": 11,
+      "hostname": "laptop-11.example.com",
+      "computer_name": "Laptop 11",
+      "display_name": "laptop-11",
+      "platform": "darwin",
+      "os_version": "macOS 14.5",
+      "primary_ip": "10.0.0.11",
+      "policies": [
+        {
+          "id": 90,
+          "name": "Disk encryption enabled",
+          "query": "SELECT 1 FROM disk_encryption WHERE user_uuid IS NOT NULL AND filevault_status = 'on';",
+          "description": "Checks that FileVault is enabled on the startup volume.",
+          "resolution": "Turn on FileVault in System Settings, Privacy & Security.",
+          "platform": "darwin",
+          "critical": true,
+          "response": "fail"
+        },
+        {
+          "id": 91,
+          "name": "Screen lock after 15 minutes",
+          "query": "SELECT 1 FROM screenlock WHERE enabled = 1 AND grace_period <= 900;",
+          "description": "Checks that the screen locks within 15 minutes.",
+          "resolution": "Set the screen lock to 15 minutes or less.",
+          "platform": "darwin",
+          "critical": false,
+          "response": "fail"
+        },
+        {
+          "id": 92,
+          "name": "Firewall enabled",
+          "query": "SELECT 1 FROM alf WHERE global_state >= 1;",
+          "resolution": "Turn on the firewall.",
+          "platform": "darwin",
+          "critical": true,
+          "response": "pass"
+        },
+        {
+          "id": 93,
+          "name": "",
+          "query": "SELECT 1;",
+          "response": "fail"
+        },
+        {
+          "id": 94,
+          "name": "Automatic updates enabled",
+          "description": "Checks that automatic updates are on.",
+          "response": ""
+        }
+      ],
+      "software": []
+    },
+    {
+      "id": 12,
+      "hostname": "server-12.example.com",
+      "platform": "ubuntu",
+      "os_version": "22.04.4 LTS",
+      "primary_ip": "10.0.0.12",
+      "policies": [
+        {
+          "id": 90,
+          "name": "Disk encryption enabled",
+          "description": "Checks that the root volume is encrypted.",
+          "resolution": "Enable full-disk encryption.",
+          "platform": "linux",
+          "critical": true,
+          "response": "FAIL"
+        }
+      ]
+    }
+  ]
+}

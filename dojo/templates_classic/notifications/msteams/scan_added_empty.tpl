@@ -1,1 +1,0 @@
-{% include "notifications/msteams/scan_added.tpl" %}

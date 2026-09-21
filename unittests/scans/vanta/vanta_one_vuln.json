@@ -1,0 +1,42 @@
+{
+  "results": {
+    "data": [
+      {
+        "id": "test-mfa-enabled",
+        "name": "MFA is enabled for all users",
+        "description": "Every user with console access must have multi-factor authentication enabled.",
+        "failureDescription": "One or more users have no MFA device registered.",
+        "remediationDescription": "Register an MFA device for each user listed below.",
+        "category": "Access Control",
+        "integrations": [
+          "aws",
+          "okta"
+        ],
+        "status": "NEEDS_ATTENTION",
+        "lastTestRunDate": "2024-07-15T06:00:00Z",
+        "latestFlipDate": "2024-06-20T06:00:00Z",
+        "owner": {
+          "id": "owner-1",
+          "displayName": "Example Owner",
+          "emailAddress": "owner@example.com"
+        }
+      }
+    ]
+  },
+  "entities": {
+    "test-mfa-enabled": {
+      "results": {
+        "data": [
+          {
+            "id": "user-0001",
+            "entityStatus": "FAILING",
+            "displayName": "example-user@example.com",
+            "responseType": "IAM_USER",
+            "createdDate": "2024-07-01T12:00:00Z",
+            "lastUpdatedDate": "2024-07-15T06:00:00Z"
+          }
+        ]
+      }
+    }
+  }
+}

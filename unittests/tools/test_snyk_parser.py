@@ -1,6 +1,6 @@
 from dojo.models import Test
 from dojo.tools.snyk.parser import SnykParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestSnykParser(DojoTestCase):
@@ -213,3 +213,15 @@ class TestSnykParser(DojoTestCase):
                 "docker-image|sarim04/juiceshop@latest: CVE-2023-4039",
                 findings[0].title,
             )
+
+
+class TestSnykParserImageLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_container_projects_carry_the_image_without_a_digest(self):
+        with (get_unit_tests_scans_path("snyk") / "snykcontainer_issue_9270.json").open(encoding="utf-8") as test_file:
+            findings = SnykParser().get_findings(test_file, Test())
+        self.assertTrue(findings)
+        expected = {"registry": "", "repository": "sarim04/juiceshop", "digest": "", "tag": "latest", "oci_source": "", "oci_revision": ""}
+        for finding in findings:
+            images = [loc.data for loc in finding.unsaved_locations if loc.type == "image"]
+            self.assertEqual([expected], images)

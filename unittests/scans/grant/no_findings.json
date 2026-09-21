@@ -1,0 +1,63 @@
+{
+  "tool": "grant",
+  "version": "0.0.1",
+  "run": {
+    "argv": [
+      "grant",
+      "check",
+      "uvproj_sbom.json"
+    ],
+    "policy": {
+      "rules": {
+        "allow": [],
+        "ignorePackages": []
+      },
+      "requireLicense": true,
+      "requireKnownLicense": false
+    },
+    "targets": [
+      {
+        "source": {
+          "type": "file",
+          "ref": "app-sbom.json"
+        },
+        "evaluation": {
+          "status": "noncompliant",
+          "summary": {
+            "packages": {
+              "cataloged": 14,
+              "total": 14,
+              "allowed": 0,
+              "denied": 14,
+              "ignored": 0,
+              "unlicensed": 14
+            },
+            "licenses": {
+              "unique": 0,
+              "allowed": 0,
+              "denied": 0,
+              "nonSPDX": 0
+            }
+          },
+          "findings": {
+            "packages": [
+              {
+                "id": "python:itsdangerous@2.2.0",
+                "name": "example-permissive",
+                "type": "python",
+                "version": "2.2.0",
+                "decision": "allow",
+                "licenses": [
+                  "MIT"
+                ],
+                "locations": [
+                  "/uv.lock"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

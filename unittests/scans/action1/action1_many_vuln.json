@@ -1,0 +1,85 @@
+{
+  "items": [
+    {
+      "cve_id": "CVE-2000-0001",
+      "name": "Remote code execution in Example Browser",
+      "cvss_score": 9.8,
+      "base_severity": "Critical",
+      "score": "Critical",
+      "remediation_status": "Overdue",
+      "software": [
+        {
+          "product_name": "Example Browser",
+          "versions": [{"version": "120.0.1"}],
+          "available_updates": [{"package_id": "pkg-1", "name": "Example Browser", "version": "120.0.2"}]
+        }
+      ]
+    },
+    {
+      "cve_id": "CVE-2000-0002",
+      "name": "Information disclosure in Example Reader",
+      "cvss_score": "6.5",
+      "base_severity": "",
+      "score": "Medium",
+      "remediation_status": "Control_applied",
+      "software": [
+        {"product_name": "Example Reader", "versions": [{"version": "9.1"}], "available_updates": []}
+      ]
+    },
+    {
+      "cve_id": "CVE-2000-0003",
+      "name": "",
+      "cvss_score": 0,
+      "base_severity": "Not graded",
+      "remediation_status": ""
+    },
+    {
+      "cve_id": "CVE-2000-0004",
+      "name": "A vulnerability nothing is affected by",
+      "cvss_score": 7.1,
+      "base_severity": "High"
+    }
+  ],
+  "endpoints": {
+    "CVE-2000-0001": [
+      {
+        "endpoint_id": "ep-0001",
+        "endpoint_name": "workstation-01",
+        "software": [
+          {
+            "product_name": "Example Browser",
+            "versions": [{"version": "119.0.4"}],
+            "available_updates": [
+              {"package_id": "pkg-1", "name": "Example Browser", "version": "120.0.2"},
+              {"package_id": "pkg-2", "name": "Example Browser security update"}
+            ]
+          }
+        ]
+      },
+      {
+        "endpoint_id": "ep-0002",
+        "endpoint_name": "workstation-02",
+        "software": [
+          {"product_name": "Example Browser", "versions": [{"version": "120.0.1"}], "available_updates": []}
+        ]
+      },
+      {"endpoint_id": "", "endpoint_name": "a row with no id"}
+    ],
+    "CVE-2000-0002": [
+      {"endpoint_id": "ep-0001", "endpoint_name": "workstation-01"}
+    ],
+    "CVE-2000-0003": [
+      {"endpoint_id": "ep-0003", "endpoint_name": "Reception Desk PC"}
+    ]
+  },
+  "managed_endpoints": {
+    "items": [
+      {"id": "ep-0001", "name": "workstation-01", "OS": "Windows 11 Pro 23H2", "status": "Online"},
+      {"id": "ep-0002", "name": "workstation-02", "OS": "Windows 10 Pro 22H2", "status": "Offline"},
+      {"id": "ep-0003", "name": "Reception Desk PC", "OS": "Windows 11 Pro 23H2", "status": "Online"}
+    ]
+  },
+  "total_items": 4,
+  "from": 0,
+  "limit": 100
+}

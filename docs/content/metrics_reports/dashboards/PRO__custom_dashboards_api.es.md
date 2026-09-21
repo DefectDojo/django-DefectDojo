@@ -47,7 +47,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 Importante:** Toda la API de Paneles depende de la función Paneles personalizables. Hasta que se active, cada endpoint devuelve `403 Dashboard V2 is not enabled.` — consulte [Habilitación de los Paneles personalizables](../custom-dashboards/#enabling-customizable-dashboards).
+> **🔑 Importante:** Toda la API de Paneles depende de la función Paneles personalizables. Hasta que se active, cada endpoint devuelve `403 Dashboards 2.0 is not enabled.` — consulte [Habilitación de los Paneles personalizables](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Aviso de seguridad:** Su token de API otorga acceso completo a sus datos de DefectDojo. Nunca lo pegue en un chat, una captura de pantalla, un ticket o un archivo confirmado en el repositorio. Léalo desde una variable de entorno, rótelo si alguna vez se expone, y limite el alcance de los tokens a cuentas de servicio cuando sea posible.
 
@@ -305,6 +305,7 @@ El conjunto completo de acciones de `widget_data`:
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | Hallazgos próximos a incumplir el SLA |
 | `recent_activity` | GET | `?model=`, `?limit=` | feed de registros recientes |
 | `saved_reports` | GET | `?limit=` | plantillas de informes guardadas *(requiere Reporting)* |
+| `root_causes` | POST | `limit?` | clústeres de causa raíz clasificados *(requiere Correlación de causa raíz)* |
 | `usage` | GET | — | desglose de uso de licencia *(requiere Maintainer)* |
 
 ## Todo junto: un script de ciclo de vida completo

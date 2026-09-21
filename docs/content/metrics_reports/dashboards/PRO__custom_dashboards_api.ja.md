@@ -46,7 +46,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 重要:** ダッシュボードAPI全体はカスタムダッシュボード機能に依存しています。有効になるまでは、すべてのエンドポイントが`403 Dashboard V2 is not enabled.`を返します。詳細は[カスタムダッシュボードの有効化](../custom-dashboards/#enabling-customizable-dashboards)を参照してください。
+> **🔑 重要:** ダッシュボードAPI全体はカスタムダッシュボード機能に依存しています。有効になるまでは、すべてのエンドポイントが`403 Dashboards 2.0 is not enabled.`を返します。詳細は[カスタムダッシュボードの有効化](../custom-dashboards/#enabling-customizable-dashboards)を参照してください。
 
 > **⚠️ セキュリティに関する注意:** APIトークンはDefectDojoデータへの完全なアクセス権を付与します。チャット、スクリーンショット、チケット、コミットされたファイルには絶対に貼り付けないでください。環境変数から読み込み、万一漏えいした場合はローテーションし、可能な限りサービスアカウントにトークンのスコープを限定してください。
 
@@ -304,6 +304,7 @@ curl -s -X POST \
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | SLA違反が近い検出事項 |
 | `recent_activity` | GET | `?model=`, `?limit=` | 最近のレコードフィード |
 | `saved_reports` | GET | `?limit=` | 保存済みレポートテンプレート *（Reportingが必要）* |
+| `root_causes` | POST | `limit?` | ランク付けされた根本原因クラスタ *（根本原因相関が必要）* |
 | `usage` | GET | — | ライセンス使用状況の内訳 *（Maintainerが必要）* |
 
 ## まとめ: 完全なライフサイクルスクリプト

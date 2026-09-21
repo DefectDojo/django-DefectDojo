@@ -5,6 +5,7 @@ draft: false
 weight: 5
 audience: opensource
 aliases:
+  - "/asset_modelling/hierarchy/os__source-code-repositories/"
   - /en/working_with_findings/organizing_engagements_tests/source-code-repositories
 ---
 Certain tools (particularly SAST tools) will include the associated file name and line number in vulnerability data. If the repository of the source code is specified in the Engagement, DefectDojo will present the filepath as a link and the user can navigate directly to the location of the vulnerability.

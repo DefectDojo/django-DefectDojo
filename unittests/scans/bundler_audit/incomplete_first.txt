@@ -1,0 +1,14 @@
+Name: sprockets
+Version: 2.2.3
+CVE: CVE-2018-3760
+URL: https://groups.google.com/forum/#!topic/ruby-security-ann/2S9Pwz2i16k
+
+Name: rack
+Version: 1.6.13
+CVE: CVE-2020-8161
+Criticality: High
+URL: https://groups.google.com/forum/#!topic/ruby-security-ann/T4ZIsfRf2eA
+Title: Directory traversal in Rack::Directory app bundled with Rack
+Solution: upgrade to ~> 2.1.3, >= 2.2.0
+
+Vulnerabilities found!

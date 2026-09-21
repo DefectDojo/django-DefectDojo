@@ -1,0 +1,125 @@
+[
+  {
+    "description": "",
+    "elements": [
+      {
+        "description": "",
+        "id": "1",
+        "keyword": "Scenario",
+        "line": 3,
+        "name": "Postgres servers must enforce SSL",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 4,
+            "name": "Given I have azurerm_postgresql_server defined",
+            "result": {
+              "duration": 53000,
+              "endtime": "2026-08-10 15:44:40.137288+00:00",
+              "starttime": "2026-08-10 15:44:40.137235+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then",
+            "line": 5,
+            "name": "Then it must contain ssl_enforcement_enabled",
+            "result": {
+              "duration": 86000,
+              "endtime": "2026-08-10 15:44:40.137397+00:00",
+              "starttime": "2026-08-10 15:44:40.137311+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "And",
+            "line": 6,
+            "name": "And its value must be true",
+            "result": {
+              "duration": 38000,
+              "endtime": "2026-08-10 15:44:40.137453+00:00",
+              "starttime": "2026-08-10 15:44:40.137415+00:00",
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "2",
+        "keyword": "Scenario",
+        "line": 8,
+        "name": "Postgres servers must not use a public network",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 9,
+            "name": "Given I have azurerm_postgresql_server defined",
+            "result": {
+              "duration": 20000,
+              "endtime": "2026-08-10 15:44:40.137505+00:00",
+              "starttime": "2026-08-10 15:44:40.137485+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then",
+            "line": 10,
+            "name": "Then it must contain public_network_access_enabled",
+            "result": {
+              "duration": 17000,
+              "endtime": "2026-08-10 15:44:40.137533+00:00",
+              "starttime": "2026-08-10 15:44:40.137516+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "And",
+            "line": 11,
+            "name": "And its value must be false",
+            "result": {
+              "duration": 80000,
+              "endtime": "2026-08-10 15:44:40.137624+00:00",
+              "error_message": "\r       ",
+              "starttime": "2026-08-10 15:44:40.137544+00:00",
+              "status": "failed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "3",
+        "keyword": "Scenario",
+        "line": 13,
+        "name": "Resource groups must be defined",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 14,
+            "name": "Given I have azurerm_resource_group defined",
+            "result": {
+              "duration": 17000,
+              "endtime": "2026-08-10 15:44:40.137679+00:00",
+              "starttime": "2026-08-10 15:44:40.137662+00:00",
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      }
+    ],
+    "id": "1",
+    "keyword": "Feature",
+    "line": 1,
+    "name": "Postgres server hardening",
+    "tags": [],
+    "type": "feature",
+    "uri": "features/postgres.feature"
+  }
+]

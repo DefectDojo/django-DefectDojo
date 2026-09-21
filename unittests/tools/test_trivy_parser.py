@@ -2,7 +2,7 @@ import re
 
 from dojo.models import Test
 from dojo.tools.trivy.parser import TrivyParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 def sample_path(file_name):
@@ -381,3 +381,43 @@ Number  Content
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N", finding.cvssv4)
                 self.assertEqual(6.3, finding.cvssv4_score)
+
+
+class TestTrivyParserImageLocations(DojoTestCase):
+
+    """A container_image scan attaches the scanned image to every finding as an Image location."""
+
+    def _image_locations(self, finding):
+        return [loc.data for loc in finding.unsaved_locations if loc.type == "image"]
+
+    @skip_unless_v3
+    def test_tag_only_image_when_no_digest_is_reported(self):
+        with (get_unit_tests_scans_path("trivy") / "scheme_2_many_vulns.json").open(encoding="utf-8") as test_file:
+            findings = TrivyParser().get_findings(test_file, Test())
+        self.assertTrue(findings)
+        for finding in findings:
+            self.assertEqual(
+                [{"registry": "", "repository": "teamdojo", "digest": "", "tag": "latest", "oci_source": "", "oci_revision": ""}],
+                self._image_locations(finding),
+            )
+
+    @skip_unless_v3
+    def test_one_image_location_per_repo_digest(self):
+        with (get_unit_tests_scans_path("trivy") / "image_multi_digest.json").open(encoding="utf-8") as test_file:
+            findings = TrivyParser().get_findings(test_file, Test())
+        self.assertEqual(1, len(findings))
+        self.assertEqual(
+            [
+                {"registry": "ghcr.io", "repository": "example/api", "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "tag": "1.4.2", "oci_source": "", "oci_revision": ""},
+                {"registry": "ghcr.io", "repository": "example/api", "digest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2", "tag": "1.4.2", "oci_source": "", "oci_revision": ""},
+            ],
+            self._image_locations(findings[0]),
+        )
+
+    @skip_unless_v3
+    def test_non_image_artifacts_add_no_image_location(self):
+        with (get_unit_tests_scans_path("trivy") / "misconfigurations_and_secrets.json").open(encoding="utf-8") as test_file:
+            findings = TrivyParser().get_findings(test_file, Test())
+        self.assertTrue(findings)
+        for finding in findings:
+            self.assertEqual([], self._image_locations(finding))

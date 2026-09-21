@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
 from dojo.regulations.models import Regulation
@@ -22,7 +23,7 @@ def new_regulation(request):
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Regulation Successfully Created.",
+                                 _("Regulation Successfully Created."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("regulations"))
     else:
@@ -39,7 +40,7 @@ def edit_regulations(request, ttid):
         Regulation.objects.filter(pk=ttid).delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             "Regulation Deleted.",
+                             _("Regulation Deleted."),
                              extra_tags="alert-success")
         return HttpResponseRedirect(reverse("regulations"))
     if request.method == "POST":
@@ -48,7 +49,7 @@ def edit_regulations(request, ttid):
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Regulation Successfully Updated.",
+                                 _("Regulation Successfully Updated."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("regulations"))
     else:

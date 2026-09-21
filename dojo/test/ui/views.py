@@ -331,13 +331,13 @@ def copy_test(request, tid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Test Copied successfully.",
+                _("Test Copied successfully."),
                 extra_tags="alert-success")
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(engagement.id, )))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to copy test, please try again.",
+            _("Unable to copy test, please try again."),
             extra_tags="alert-danger")
 
     product_tab = Product_Tab(product, title="Copy Test", tab="engagements")
@@ -803,6 +803,8 @@ def add_finding_from_template(request, tid, fid):
 
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
+    # This listing returns template content, a shared cross-product store
+    user_has_global_permission_or_403(request.user, "edit")
     templates = Finding_Template.objects.all()
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)

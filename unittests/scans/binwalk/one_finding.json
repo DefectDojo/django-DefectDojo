@@ -1,0 +1,20 @@
+[
+  {
+    "Analysis": {
+      "file_path": "firmware/example.bin",
+      "file_map": [
+        {
+          "offset": 4716889,
+          "id": "fda3280f-8240-4672-8b9e-b6707c6349a1",
+          "size": 49239,
+          "name": "copyright",
+          "confidence": 250,
+          "description": "Copyright text: \"copyrightsbom_toolCOMPONENT[--flags][command]bad indirreflect: WednesdaySeptemberlocaltimeParseBoolP\"",
+          "always_display": false,
+          "extraction_declined": false
+        }
+      ],
+      "extractions": {}
+    }
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "config": "\nserver {\n\tserver_name example.org;\n}",
+    "description": "Using server_tokens on; or server_tokens build;  allows an attacker to learn the version of NGINX you are running, which can be used to exploit known vulnerabilities.",
+    "file": "nginx/nginx.conf",
+    "fixes": [
+      {
+        "description": "Add server_tokens off to disable version disclosure",
+        "replace": "server {\n    server_tokens off;",
+        "search": "server {",
+        "title": "Add server_tokens off"
+      }
+    ],
+    "line": 2,
+    "path": "nginx/nginx.conf",
+    "plugin": "version_disclosure",
+    "reason": "Missing server_tokens directive - defaults to 'on' which promotes information disclosure",
+    "reference": "https://gixy.getpagespeed.com/checks/version-disclosure/",
+    "severity": "HIGH",
+    "summary": "Do not enable server_tokens on or server_tokens build"
+  }
+]

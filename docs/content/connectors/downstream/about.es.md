@@ -93,20 +93,20 @@ Cada proveedor tiene requisitos distintos sobre cómo debe interactuar DefectDoj
 
 Para consultar la lista completa de requisitos, abra a continuación las páginas específicas de cada proveedor:
 
-- [Azure Devops](/connectors/downstream/downstream_toolreference/#azure-devops-boards)
-- [Bitbucket](/connectors/downstream/downstream_toolreference/#bitbucket)
-- [Freshservice](/connectors/downstream/downstream_toolreference/#freshservice)
-- [GitHub](/connectors/downstream/downstream_toolreference/#github)
-- [GitLab Boards](/connectors/downstream/downstream_toolreference/#gitlab)
-- [Jira](/connectors/downstream/downstream_toolreference/#jira)
-- [Linear](/connectors/downstream/downstream_toolreference/#linear)
-- [Opsgenie](/connectors/downstream/downstream_toolreference/#opsgenie)
-- [PagerDuty](/connectors/downstream/downstream_toolreference/#pagerduty)
-- [ServiceDesk Plus](/connectors/downstream/downstream_toolreference/#servicedesk-plus)
-- [ServiceNow](/connectors/downstream/downstream_toolreference/#servicenow)
-- [ServiceNow SecOps / Vulnerability Response](/connectors/downstream/downstream_toolreference/#servicenow-secops)
-- [Shortcut](/connectors/downstream/downstream_toolreference/#shortcut)
-- [Zendesk](/connectors/downstream/downstream_toolreference/#zendesk)
+- [Azure Devops](/connectors/toolreference/azure_devops_boards/)
+- [Bitbucket](/connectors/toolreference/bitbucket/#downstream-connector)
+- [Freshservice](/connectors/toolreference/freshservice/)
+- [GitHub](/connectors/toolreference/github/#downstream-connector)
+- [GitLab Boards](/connectors/toolreference/gitlab/#downstream-connector)
+- [Jira](/connectors/toolreference/jira/)
+- [Linear](/connectors/toolreference/linear/)
+- [Opsgenie](/connectors/toolreference/opsgenie/)
+- [PagerDuty](/connectors/toolreference/pagerduty/)
+- [ServiceDesk Plus](/connectors/toolreference/servicedesk_plus/)
+- [ServiceNow](/connectors/toolreference/servicenow/)
+- [ServiceNow SecOps / Vulnerability Response](/connectors/toolreference/servicenow_secops/)
+- [Shortcut](/connectors/toolreference/shortcut/)
+- [Zendesk](/connectors/toolreference/zendesk/)
 
 ## Manejo de errores y depuración
 

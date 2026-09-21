@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "itemSource": "Trivy",
+      "itemSourceId": "TRIVY-0001",
+      "title": "CVE-2000-0001 in generic-lib",
+      "repository": "generic-app",
+      "priority": "Critical",
+      "status": "Overdue",
+      "openedAt": "2026-06-10T08:00:00Z",
+      "closedAt": "",
+      "dueAt": "2026-06-24T08:00:00Z",
+      "ignored": null,
+      "htmlUrl": "https://app.example.com/items/1",
+      "securityCategory": "Vulnerability",
+      "scanType": "SCA",
+      "summary": "generic-lib is vulnerable to remote code execution.",
+      "additionalInfo": "The library evaluates untrusted input during deserialization.",
+      "remediation": "Upgrade generic-lib to 1.2.4 or later.",
+      "cwe": "CWE-502",
+      "cve": "CVE-2000-0001",
+      "cvssScore": 9.8,
+      "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "likelihood": "High",
+      "effortToFix": "Low",
+      "affectedVersion": "1.2.3",
+      "fixedVersion": [
+        "1.2.4",
+        "2.0.0"
+      ],
+      "application": "",
+      "affectedTargets": "",
+      "imageName": "",
+      "imageTag": "",
+      "dependencyChains": [
+        [
+          "generic-app",
+          "generic-framework",
+          "generic-lib"
+        ]
+      ]
+    }
+  ],
+  "pagination": {
+    "total": 1
+  }
+}

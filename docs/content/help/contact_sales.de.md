@@ -56,7 +56,7 @@ Bevor Sie den Prozess abschließen, bestätigen Sie bitte den gewünschten Plan 
 
 ## Schritt 6: Überprüfen und Absenden Ihrer Anfrage
 
-Wir bitten Sie, Ihre Anfrage noch einmal zu überprüfen. Nach dem Absenden können von Ihrem Team ohne Unterstützung durch den Support nur noch die Firewall-Regeln geändert werden. Um den Support zu kontaktieren, senden Sie bitte eine E-Mail an [support@defectdojo.com](mailto:support@defectdojo.com) oder folgen Sie den Anweisungen in [diesem Artikel](/en/about_defectdojo/contact_defectdojo_support/).
+Wir bitten Sie, Ihre Anfrage noch einmal zu überprüfen. Nach dem Absenden können von Ihrem Team ohne Unterstützung durch den Support nur noch die Firewall-Regeln geändert werden. Um den Support zu kontaktieren, senden Sie bitte eine E-Mail an [support@defectdojo.com](mailto:support@defectdojo.com) oder folgen Sie den Anweisungen in [diesem Artikel](/help/contact_support/).
 
 ![image](images/request_a_trial_6.png)
 

@@ -6,6 +6,7 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
+  - "/en/pro_reports/using-the-report-builder/"
   - /en/share_your_findings/pro_reports/working_with_generated_reports
   - /metrics_reports/reports/working_with_generated_reports
 ---

@@ -1,0 +1,99 @@
+{
+  "images": [
+    {
+      "imageID": "img-0001",
+      "registry": "registry.example.com/",
+      "repository": "generic-app",
+      "tag": "1.4.0",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "scan_result": "Fail",
+      "result": "Fail",
+      "resultTime": "2024-06-02T10:05:00Z",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2000-0001",
+          "name": "Heap overflow in the example compression library",
+          "severity": "low",
+          "description": "A crafted archive can overflow a heap buffer during decompression.",
+          "cvss3Score": 9.1,
+          "package_name": "example-compress",
+          "version": "1.2.3",
+          "fixVersions": ["1.2.4", "1.3.0"],
+          "url": "https://example.com/advisories/CVE-2000-0001"
+        },
+        {
+          "id": "CVE-2000-0002",
+          "name": "CVE-2000-0002",
+          "severity": "critical",
+          "cvss": {"base_score": "7.5"},
+          "package": "example-tls",
+          "version": "3.0.1",
+          "fix": "3.0.2"
+        },
+        {
+          "id": "CALICO-2024-0003",
+          "name": "A Calico advisory with no score at all",
+          "severity": "medium",
+          "package_name": "example-utils",
+          "version": "0.9.0"
+        },
+        {
+          "id": "CVE-2000-0004",
+          "name": "A negligible finding",
+          "severity": "negligible",
+          "cvss3Score": 0,
+          "package_name": "example-docs",
+          "version": "2.0.0"
+        }
+      ]
+    },
+    {
+      "imageID": "img-0002",
+      "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "scan_result": "Unknown",
+      "result": "Unknown",
+      "scanned": "2024-06-03T08:00:00Z",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2000-0099",
+          "name": "Never imported: the image scan is still being processed",
+          "severity": "critical",
+          "cvss3Score": 9.8,
+          "package_name": "example-pending",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    {
+      "imageID": "img-0003",
+      "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "scan_result": "Fail",
+      "result": "Fail",
+      "scanned": "2024-06-04T08:00:00Z",
+      "vulnerabilities": [
+        {
+          "id": "",
+          "name": "",
+          "severity": "high",
+          "package_name": "example-nameless",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    {
+      "imageID": "img-0004",
+      "scan_result": "Fail",
+      "result": "Fail",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2000-0005",
+          "name": "An image known only by its id",
+          "severity": "medium",
+          "cvss3Score": 5.4,
+          "package_name": "example-lib",
+          "version": "4.0.0"
+        }
+      ]
+    }
+  ]
+}

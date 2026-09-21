@@ -169,7 +169,7 @@ DefectDojo Proでは、検出事項はそれを含むアセットからSLA目標
 
 ### Jira/ダウンストリームコネクターとの関係
 
-アセットは、[Jira](/connectors/downstream/pro__jira_guide/#main-content)や[インテグレーター](/connectors/downstream/downstream_toolreference/#main-content)のインスタンス(GitHub、GitLab、ServiceNowなど)に直接マッピングでき、アセットの検出事項を外部のチケット/作業管理システムに送信できます。
+アセットは、[Jira](/connectors/downstream/pro__jira_guide/#main-content)や[インテグレーター](/connectors/toolreference/downstream/#main-content)のインスタンス(GitHub、GitLab、ServiceNowなど)に直接マッピングでき、アセットの検出事項を外部のチケット/作業管理システムに送信できます。
 
 検出事項は親アセットからリスク、優先度、所有権を継承するため、実質的にアセットが、Jiraチケットやダウンストリームコネクターのワークフローに流れ込む修復コンテキストを決定することになります。
 

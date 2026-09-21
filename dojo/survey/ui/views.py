@@ -11,10 +11,12 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone as tz
 from django.utils.html import escape
+from django.utils.translation import gettext as _
 from django.views import View
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
+    user_has_configuration_permission_or_403,
     user_has_permission,
     user_has_permission_or_403,
 )
@@ -75,13 +77,13 @@ def delete_engagement_survey(request, eid, sid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Questionnaire deleted successfully.",
+                _("Questionnaire deleted successfully."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id, )))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to delete Questionnaire.",
+            _("Unable to delete Questionnaire."),
             extra_tags="alert-danger")
 
     add_breadcrumb(
@@ -110,7 +112,7 @@ def answer_questionnaire(request, eid, sid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "You must be authorized to answer questionnaire. Otherwise, enable anonymous response in system settings.",
+                _("You must be authorized to answer questionnaire. Otherwise, enable anonymous response in system settings."),
                 extra_tags="alert-danger")
             raise PermissionDenied
 
@@ -142,13 +144,13 @@ def answer_questionnaire(request, eid, sid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Successfully answered, all answers valid.",
+                _("Successfully answered, all answers valid."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id, )))
         messages.add_message(
             request,
             messages.ERROR,
-            "Questionnaire has errors, please correct.",
+            _("Questionnaire has errors, please correct."),
             extra_tags="alert-danger")
     add_breadcrumb(
         title="Answer " + survey.survey.name + " Survey",
@@ -234,7 +236,7 @@ def add_questionnaire(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Questionnaire successfully added, answers pending.",
+                _("Questionnaire successfully added, answers pending."),
                 extra_tags="alert-success")
             if "respond_survey" in request.POST:
                 return HttpResponseRedirect(reverse("answer_questionnaire", args=(eid, survey.id)))
@@ -242,7 +244,7 @@ def add_questionnaire(request, eid):
         messages.add_message(
             request,
             messages.ERROR,
-            "Questionnaire could not be added.",
+            _("Questionnaire could not be added."),
             extra_tags="alert-danger")
 
     form.fields["survey"].queryset = surveys
@@ -267,7 +269,7 @@ def edit_questionnaire(request, sid):
         messages.add_message(
             request,
             messages.ERROR,
-            "This questionnaire already has answered instances. If you change it, the responses may no longer be valid.",
+            _("This questionnaire already has answered instances. If you change it, the responses may no longer be valid."),
             extra_tags="alert-info")
 
     if request.method == "POST":
@@ -281,13 +283,13 @@ def edit_questionnaire(request, sid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Questionnaire successfully updated, you may now add/edit questions.",
+                    _("Questionnaire successfully updated, you may now add/edit questions."),
                     extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("edit_questionnaire", args=(survey.id,)))
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "No changes detected, questionnaire not updated.",
+                _("No changes detected, questionnaire not updated."),
                 extra_tags="alert-warning")
             if "add_questions" in request.POST:
                 return HttpResponseRedirect(reverse("edit_questionnaire_questions", args=(survey.id,)))
@@ -295,7 +297,7 @@ def edit_questionnaire(request, sid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Please correct any errors displayed below.",
+                _("Please correct any errors displayed below."),
                 extra_tags="alert-danger")
 
     add_breadcrumb(title="Edit Questionnaire", top_level=False, request=request)
@@ -324,7 +326,7 @@ def delete_questionnaire(request, sid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Questionnaire and relationships removed.",
+                    _("Questionnaire and relationships removed."),
                     extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("questionnaire"))
 
@@ -347,15 +349,16 @@ def create_questionnaire(request):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Questionnaire successfully created, you may now add questions.",
+                _("Questionnaire successfully created, you may now add questions."),
                 extra_tags="alert-success")
-            if "add_questions" in request.POST:
+            if "add_questions" in request.POST and user_has_configuration_permission(
+                    request.user, "dojo.change_engagement_survey"):
                 return HttpResponseRedirect(reverse("edit_questionnaire_questions", args=(survey.id,)))
             return HttpResponseRedirect(reverse("questionnaire"))
         messages.add_message(
             request,
             messages.ERROR,
-            "Please correct any errors displayed below.",
+            _("Please correct any errors displayed below."),
             extra_tags="alert-danger")
 
     add_breadcrumb(title="Create Questionnaire", top_level=False, request=request)
@@ -366,12 +369,9 @@ def create_questionnaire(request):
     })
 
 
-# complex permission check inside the function
 def edit_questionnaire_questions(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
-    if not user_has_configuration_permission(request.user, "dojo.add_engagement_survey") and \
-            not user_has_configuration_permission(request.user, "dojo.change_engagement_survey"):
-        raise PermissionDenied
+    user_has_configuration_permission_or_403(request.user, "dojo.change_engagement_survey")
 
     answered_surveys = Answered_Survey.objects.filter(survey=survey)
     reverted = False
@@ -392,18 +392,18 @@ def edit_questionnaire_questions(request, sid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Answered questionnaires associated with this survey have been set to uncompleted.",
+                    _("Answered questionnaires associated with this survey have been set to uncompleted."),
                     extra_tags="alert-warning")
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Questionnaire questions successfully saved.",
+                _("Questionnaire questions successfully saved."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("questionnaire"))
         messages.add_message(
             request,
             messages.ERROR,
-            "Questionnaire questions not saved, please correct any errors displayed below.",
+            _("Questionnaire questions not saved, please correct any errors displayed below."),
             extra_tags="alert-success")
 
     add_breadcrumb(title="Update Questionnaire Questions", top_level=False, request=request)
@@ -470,7 +470,7 @@ def create_question(request):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Text Question added successfully.",
+                        _("Text Question added successfully."),
                         extra_tags="alert-success")
                     return HttpResponseRedirect(reverse("questions"))
                 error = True
@@ -492,7 +492,7 @@ def create_question(request):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Choice Question added successfully.",
+                        _("Choice Question added successfully."),
                         extra_tags="alert-success")
                     return HttpResponseRedirect(reverse("questions"))
                 error = True
@@ -525,8 +525,8 @@ def edit_question(request, qid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "This question is part of an already answered survey. If you change it, the responses "
-                "may no longer be valid.",
+                _("This question is part of an already answered survey. If you change it, the responses "
+                "may no longer be valid."),
                 extra_tags="alert-info")
     content_type = str(ContentType.objects.get_for_model(question))
 
@@ -557,12 +557,12 @@ def edit_question(request, qid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Answered surveys associated with this survey have been set to uncompleted.",
+                    _("Answered surveys associated with this survey have been set to uncompleted."),
                     extra_tags="alert-warning")
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Question updated successfully.",
+                _("Question updated successfully."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("questions"))
 
@@ -584,7 +584,7 @@ def add_choices(request):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Choice added successfully.",
+                    _("Choice added successfully."),
                     extra_tags="alert-success")
             if "_popup" in request.GET:
                 resp = ""
@@ -614,7 +614,7 @@ def add_empty_questionnaire(request):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Engagement Created, Questionnaire successfully added, answers pending.",
+                _("Engagement Created, Questionnaire successfully added, answers pending."),
                 extra_tags="alert-success")
             if "respond_survey" in request.POST:
                 return HttpResponseRedirect(reverse("dashboard"))
@@ -622,7 +622,7 @@ def add_empty_questionnaire(request):
         messages.add_message(
             request,
             messages.ERROR,
-            "Questionnaire could not be added.",
+            _("Questionnaire could not be added."),
             extra_tags="alert-danger")
 
     form.fields["survey"].queryset = surveys
@@ -676,13 +676,13 @@ def delete_empty_questionnaire(request, esid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Questionnaire deleted successfully.",
+                _("Questionnaire deleted successfully."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("questionnaire"))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to delete Questionnaire.",
+            _("Unable to delete Questionnaire."),
             extra_tags="alert-danger")
 
     add_breadcrumb(
@@ -710,13 +710,13 @@ def delete_general_questionnaire(request, esid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Questionnaire deleted successfully.",
+                _("Questionnaire deleted successfully."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("questionnaire"))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to delete questionnaire.",
+            _("Unable to delete questionnaire."),
             extra_tags="alert-danger")
 
     add_breadcrumb(
@@ -733,6 +733,9 @@ def delete_general_questionnaire(request, esid):
 
 def answer_empty_survey(request, esid):
     general_survey = get_object_or_404(General_Survey, id=esid)
+    # Same comparison as the sweep in questionnaire(), so the two cannot disagree.
+    if general_survey.expiration < tz.now():
+        raise Http404
     engagement_survey = get_object_or_404(Engagement_Survey, id=general_survey.survey_id)
     engagement, survey = None, None
     settings = System_Settings.objects.all()[0]
@@ -742,7 +745,7 @@ def answer_empty_survey(request, esid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.",
+                _("You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings."),
                 extra_tags="alert-danger")
             # will render 403
             raise PermissionDenied
@@ -799,7 +802,7 @@ def answer_empty_survey(request, esid):
         messages.add_message(
             request,
             messages.ERROR,
-            "Questionnaire has errors, please correct.",
+            _("Questionnaire has errors, please correct."),
             extra_tags="alert-danger")
     add_breadcrumb(
         title="Answer Empty " + engagement_survey.name + " Questionnaire",
@@ -838,13 +841,13 @@ def engagement_empty_survey(request, esid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Engagement created and questionnaire successfully linked.",
+                _("Engagement created and questionnaire successfully linked."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("edit_engagement", args=(engagement.id, )))
         messages.add_message(
             request,
             messages.ERROR,
-            "Questionnaire could not be added.",
+            _("Questionnaire could not be added."),
             extra_tags="alert-danger")
     add_breadcrumb(
         title="Link Questionnaire to new Engagement",
@@ -882,14 +885,14 @@ class ExistingEngagementEmptySurveyView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Questionnaire successfully linked to Engagement.",
+                _("Questionnaire successfully linked to Engagement."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id,)))
 
         messages.add_message(
             request,
             messages.ERROR,
-            "Questionnaire could not be linked to the selected Engagement.",
+            _("Questionnaire could not be linked to the selected Engagement."),
             extra_tags="alert-danger")
         self.add_breadcrumb(request)
         return render(request, self.get_template(), {"form": form})

@@ -1,6 +1,8 @@
 ---
 title: "AWS Inspector2 Scanner"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/aws_inspector2/"
 ---
 
 ### File Types
@@ -24,7 +26,7 @@ Detailed API response format can be obtained [here](https://docs.aws.amazon.com/
 Sample AWS Inspector2 findings can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/aws_inspector2).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

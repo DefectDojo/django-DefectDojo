@@ -4,6 +4,7 @@ description: "Configure Service Level Agreements for different Assets"
 weight: 2
 audience: opensource
 aliases:
+  - "/asset_modelling/hierarchy/os__sla_configuration/"
   - /en/working_with_findings/sla_configuration
 ---
 Each Asset in DefectDojo can have its own Service Level Agreement (SLA) configuration, which represents the days your organization has to remediate or otherwise manage a Finding.

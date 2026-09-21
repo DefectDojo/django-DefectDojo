@@ -1,0 +1,82 @@
+{
+  "records": [
+    {
+      "code": "GENERIC-0001",
+      "title": "Stored XSS in the comment field",
+      "originators": {
+        "programId": "prog-0001",
+        "pentestCode": ""
+      },
+      "severity": {
+        "id": 5,
+        "value": "Exceptional",
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "state": {
+        "status": {
+          "id": 3,
+          "value": "Accepted"
+        },
+        "closeReason": {
+          "id": 0,
+          "value": ""
+        }
+      },
+      "createdAt": 1784000000,
+      "lastUpdatedAt": 1784100000,
+      "tags": [
+        "web"
+      ],
+      "webLinks": {
+        "details": "https://app.example.com/submissions/GENERIC-0001",
+        "submissions": "https://app.example.com/submissions"
+      },
+      "detail": {
+        "code": "GENERIC-0001",
+        "title": "Stored XSS in the comment field",
+        "severity": {
+          "id": 5,
+          "value": "Exceptional",
+          "vector": ""
+        },
+        "state": {
+          "status": {
+            "value": "Accepted"
+          },
+          "closeReason": {
+            "value": ""
+          }
+        },
+        "webLinks": {
+          "details": "https://app.example.com/submissions/GENERIC-0001"
+        },
+        "report": {
+          "originalTitle": "XSS in comments",
+          "type": {
+            "name": "Cross-site Scripting",
+            "category": "Injection",
+            "cwe": "cwe-79"
+          },
+          "domain": {
+            "name": "app.example.com",
+            "description": "Main web application"
+          },
+          "endpointVulnerableComponent": "/comments",
+          "pocDescription": "<p>Submit <b>&lt;script&gt;</b> in the comment body.</p><script>alert(1)</script>",
+          "impact": "<p>An attacker can run script in another user's session.</p>",
+          "recommendedSolution": "<p>Encode user input before rendering.</p>",
+          "questions": [
+            {
+              "question": "Which browsers did you test?",
+              "answer": "<p>Latest Chrome and Firefox.</p>"
+            },
+            {
+              "question": "",
+              "answer": ""
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

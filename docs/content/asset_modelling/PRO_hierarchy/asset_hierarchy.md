@@ -26,9 +26,9 @@ Asset Hierarchy is generally available and on for every instance, Cloud and On-P
 Label changes are on by default as of 3.0. There are two controls, covering different parts of the application:
 
 * **Pro UI** (the default UI): a superuser toggles "Organization / Asset Relabeling" at **Settings > Feature Flags**, on both Cloud and On-Premise instances. The new labels appear on the next page load. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
-* **Classic UI pages and generated reports**: their labels and URLs come from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting, which is read when DefectDojo starts. On-premise, set it and restart DefectDojo. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), email [support@defectdojo.com](mailto:support@defectdojo.com) with your instance URL.
+* **Classic UI pages and generated reports**: their labels and URLs are decided when DefectDojo starts, so they follow the same toggle after the next restart. On-premise, restart DefectDojo after changing the toggle. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), email [support@defectdojo.com](mailto:support@defectdojo.com) with your instance URL if you need a restart scheduled.
 
-Both default to on, and the Feature Flags value was seeded from the deployment setting, so the two agree unless you change one of them. Keep them in sync if you use the Classic UI as well as the Pro UI.
+The toggle is on by default. Its stored value was seeded from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting on upgrade; from then on the database owns it, and the setting is only a fallback for when the database cannot be reached at start-up.
 
 Note that label changes are cosmetic only: API endpoints and field names remain unchanged, so existing automation will continue to work.
 
@@ -110,33 +110,87 @@ You can visualize the structure of Assets in DefectDojo, and change relationship
 
 ![image](images/asset_hierarchy.png)
 
-Opening Asset Hierarchy will display a table of all of your Assets which can be filtered.  Selecting one or more Assets from this table will render a hierarchy diagram.
+The page has three parts: a list of your Assets across the top, the diagram below it, and a panel on either side of the diagram. Selecting one or more Assets in the list draws them, and each Asset you select becomes a starting point that the diagram builds around. The list can be filtered, and once you have the Assets you want you can collapse it with the **Hide Asset List** button to give the diagram the whole page.
 
 ![image](images/asset_hierarchy_diagram.png)
 
 ### Diagram navigation
 
-The icons at the top left of the hierarchy diagram allow you to zoom in and out.  Clicking and dragging in this diagram allows you to scroll through the diagram.
+The buttons at the bottom left of the diagram zoom in and out, and fit the whole diagram in view. Clicking and dragging the background moves the diagram, and each Asset can be dragged for display purposes.
 
-Each Asset is rendered as a single node in this diagram, which can be moved around for display purposes.
+Assets are connected by labelled arrows, which represent the kind of relationship each node has to the other.
 
-Assets are connected together using labelled paths, which represent the kind of relationship each note has to one another.  Currently, `parent` is the only label supported.
+Three relationship types ship by default:
 
-### Exploring Asset nodes
+| Label | Meaning | Rolls up? |
+| --- | --- | --- |
+| `parent` | The tree relationship you build from the Asset Hierarchy screen. An Asset has at most one parent. | Yes |
+| `contains` | Composition — the source Asset is made up of the target. Unlike `parent`, the same Asset can be contained by several others. | Yes |
+| `derived_from` | Lineage — the source Asset was built from the target, as a container image is built from a base image. | **No** |
 
-Each Asset node can be interacted with by clicking on the blue buttons.  These buttons appear only when an Asset node is selected (by clicking on the node).
+"Rolls up" is what decides whether a relationship aggregates upward: it controls both the
+indirect counts described below and the **Include child assets** option on metrics. `derived_from`
+deliberately does not roll up. A base image's Findings are not the derived Asset's own exposure,
+and attributing them to every Asset built from it multiplies the same Finding across your whole
+estate.
+
+Each node is coloured by where it came from: one colour for the Assets you selected in the list, another for Assets the diagram loaded because they are related to your selection. The **Legend** in the left panel names both.
+
+The left panel also chooses what the nodes display. **Asset ID**, **Organization ID**, **Organization Name**, **Child Count** and **Vulnerabilities** can each be turned on or off.
+
+### Direct and indirect vulnerabilities
+
+Each node shows two counts:
+
+* **direct** — Findings on that Asset itself.
+* **indirect** — Findings on the Assets below it, reached over relationships that roll up.
+
+So an Asset that contains a library shows the library's Findings as indirect, while an Asset
+built from a base image does **not** show the base image's Findings at all.
+
+A Finding reachable by more than one path is counted once. The counts are always calculated from
+the graph as it currently stands — nothing is stored, so re-parenting an Asset changes them
+immediately, and no Finding is ever copied onto another Asset. Assets you do not have permission
+to view contribute nothing, and show no counts at all rather than a zero.
+
+The same split appears under the Findings count on the Asset page. There, **direct** matches the
+total in that page's Open Finding Severity breakdown: both exclude duplicates, false positives
+and out-of-scope Findings.
+
+### Acting on an Asset
+
+Clicking an Asset's node selects it, which fills both panels: the left panel lists what you can do with that Asset, and the right panel describes it, including its Organization, its relationship to its parent, how many children it has, and links to its metrics.
 
 ![image](images/asset_hierarchy_node.png)
 
-* 👁️ (eyeball icon) will take you directly to the corresponding Asset View (formerly known as the Product View).
-* ✏️ (pencil icon) will open a modal with the Edit Asset form (formerly known as the Edit Product form)
-* ➕ (plus icon) will allow you to add a new Child Asset to this Asset.  The Asset does not need to be currently visible in the diagram, but must be part of the same Organization.
-* ✥ (four-arrows icon) allows you to change the Parent Asset of the currently selected Asset.
-* 🗑️ (trash can icon) allows you to remove an Asset's parent relationship. This icon only appears if an Asset already has a Parent.
+* **Open Asset** takes you to the corresponding Asset View (formerly known as the Product View).
+* **Edit Asset** opens the Edit Asset form (formerly known as the Edit Product form).
+* **Add Child** nests another Asset under this one. You can choose an Asset that is not currently in the diagram, or create a new one, but either way it must be part of the same Organization.
+* **Change Parent** moves the selected Asset underneath a different parent.
+* **Remove From Hierarchy** detaches the Asset from its parent, and asks whether that Asset's own children should be left without a parent or moved up to the parent you are detaching from. It is only available when the Asset has a parent.
 
-If your diagram displays an Asset with un-selected Parent Assets, you can click the Load More button to populate the diagram with the Parent Asset (as well as that Parent Asset's children).
+Each of these opens in the right panel, so the diagram stays visible while you work on it. An action you cannot use is shown greyed out, and hovering it explains why: changing relationships needs edit permission on the Asset itself as well as permission to edit the hierarchy.
+
+### Loading more of the hierarchy
+
+The diagram loads part of the hierarchy at a time, so a large one stays readable.
+
+Where an Asset's parent has not been loaded, a **Load Parents** button appears above it, which adds that parent along with the parent's other children.
 
 ![image](images/assets_loadmore.png)
+
+Where an Asset has more children than the diagram is currently showing, a **Load** button appears below it, together with a choice of how many to add at a time.
+
+## Suggested edges from container evidence
+
+When [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/) are enabled, DefectDojo can notice a deployment relationship nobody has drawn: an image whose repository belongs to one asset is seen running in another, and no **deploys to** edge joins the two. Each such pair appears as a **suggested edge** on the hierarchy page, with the images as evidence.
+
+- A banner at the top of the page counts the open suggestions. **Review** opens the list.
+- **Accept** draws the deploys-to edge from the asset that built the image to the asset that runs it. Because deploys-to propagates exposure, the deployed asset then inherits its host's exposure when you read it; finding priority is unaffected, since it runs on the asset's own exposure.
+- **Dismiss** suppresses the pair. Further images for the same pair are counted but do not reopen it. A dismissed suggestion can be reopened from the same dialog.
+- Accepted edges carry their own origin (container evidence), so they can be told apart from edges people drew and from connector-declared ones.
+
+Suggestions are never accepted automatically, and they are only offered within one organization while deploys-to stays a same-organization relationship. Reviewing requires the Asset Hierarchy view permission; deciding requires the edit permission plus edit access to both assets.
 
 ## Notes
 
@@ -145,4 +199,5 @@ If your diagram displays an Asset with un-selected Parent Assets, you can click 
   * Giving a user access to an entire Organization will still give that user access to all Assets contained within that Organization (as with Product Types).
   * Giving a user access to a single Asset does not give that user access to any related Parent or Child Assets, nor access to the Organization.
 * There is no limit to the number of Parent/Child relationships that can be created. Theoretically, you could represent a repository's entire directory structure with separate Assets if you wished.
-* Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets.
+* Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets. This is enforced per relationship type and in the database itself, so it holds no matter how the edge was created.
+* Indirect counts are calculated on read and never stored. Attributing a Finding to an Asset that did not report it would multiply that Finding across every Asset below it, so DefectDojo shows the number and leaves the Finding where it was found.

@@ -169,7 +169,7 @@ Esto significa que la misma vulnerabilidad puede recibir una puntuación de Prio
 
 ### Relaciones con Jira / Downstream Connector
 
-Los Activos se pueden asignar directamente a instancias de [Jira](/connectors/downstream/pro__jira_guide/#main-content) o de [Integrators](/connectors/downstream/downstream_toolreference/#main-content) (por ejemplo, GitHub, GitLab, ServiceNow, etc.), que envían los Hallazgos del Activo hacia sistemas externos de tickets/gestión de trabajo.
+Los Activos se pueden asignar directamente a instancias de [Jira](/connectors/downstream/pro__jira_guide/#main-content) o de [Integrators](/connectors/toolreference/downstream/#main-content) (por ejemplo, GitHub, GitLab, ServiceNow, etc.), que envían los Hallazgos del Activo hacia sistemas externos de tickets/gestión de trabajo.
 
 Dado que los Hallazgos heredan el riesgo, la prioridad y la propiedad de su Activo principal, el Activo determina de forma efectiva el contexto de remediación que fluye hacia los tickets de Jira y los flujos de trabajo de Downstream Connector.
 

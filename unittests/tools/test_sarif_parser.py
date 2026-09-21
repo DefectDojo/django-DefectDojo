@@ -182,10 +182,9 @@ add_core(ptr, offset, val);
                 )
                 self.assertEqual("Info", finding.severity)
                 self.assertIsNone(finding.unsaved_vulnerability_ids)
-                self.assertEqual(
-                    "scanFileHash:5b05533780915bfc|scanPrimaryLocationHash:4d655189c485c086",
-                    finding.unique_id_from_tool,
-                )
+                # This fingerprint repeats within the report, so it is dropped as
+                # non-identifying and the finding deduplicates by hash code.
+                self.assertIsNone(finding.unique_id_from_tool)
             for finding in findings:
                 self.common_checks(finding)
 
@@ -390,9 +389,10 @@ add_core(ptr, offset, val);
                 self.assertEqual(29, finding.line)
                 self.assertEqual(327, finding.cwe)
                 self.assertEqual("FF1048", finding.vuln_id_from_tool)
-                self.assertEqual(
-                    "e6c1ad2b1d96ffc4035ed8df070600566ad240b8ded025dac30620f3fd4aa9fd", finding.unique_id_from_tool,
-                )
+                # Flawfinder fingerprints hash the flagged line's content, and this
+                # line appears verbatim elsewhere in the report, so the repeated value
+                # is dropped as non-identifying.
+                self.assertIsNone(finding.unique_id_from_tool)
                 self.assertEqual("https://cwe.mitre.org/data/definitions/327.html", finding.references)
             with self.subTest(i=20):
                 finding = findings[20]
@@ -414,9 +414,8 @@ add_core(ptr, offset, val);
                 self.assertEqual(120, finding.cwe)
                 self.assertEqual([120], finding.unsaved_cwes)
                 self.assertEqual("FF1004", finding.vuln_id_from_tool)
-                self.assertEqual(
-                    "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda", finding.unique_id_from_tool,
-                )
+                # Same shape: the line-content hash repeats in the report and is dropped.
+                self.assertIsNone(finding.unique_id_from_tool)
                 self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
             with self.subTest(i=52):
                 finding = findings[52]
@@ -637,3 +636,26 @@ add_core(ptr, offset, val);
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(77, len(findings))
+
+    def test_repeated_fingerprints_are_dropped(self):
+        """
+        A fingerprint carried by several findings in one report is not an identity.
+
+        Live shape: a scanner emitted the literal string "requires login" as every result's
+        fingerprint, and unique-id deduplication merged unrelated findings (SQL injection,
+        committed credentials, disabled TLS verification) into one cluster. A value that
+        repeats inside its own report is dropped so those findings deduplicate by hash code;
+        a fingerprint that is genuinely unique in the report is kept.
+        """
+        with (get_unit_tests_scans_path("sarif") / "sentinel_fingerprints.sarif").open(encoding="utf-8") as testfile:
+            parser = SarifParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+        sentinel_carriers = [f for f in findings if f.unique_id_from_tool is None]
+        self.assertEqual(3, len(sentinel_carriers))
+        keeper = [f for f in findings if f.unique_id_from_tool is not None]
+        self.assertEqual(1, len(keeper))
+        self.assertEqual(
+            "5c1f36e0a9de13c3c96c26fa9a1a02a5d5be0c4a3ad9d0f27b3c4d2f8f4a91aa",
+            keeper[0].unique_id_from_tool,
+        )

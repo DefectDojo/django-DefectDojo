@@ -75,6 +75,17 @@ scores higher on its own is untouched. Because it applies to Priority, the Risk 
 Risk score follow from it automatically, so every list, filter, chart and SLA calculation
 sees the same consistent number.
 
+Two boundaries worth knowing when you map an internal policy onto the floor:
+
+* The floor is driven by the finding's **exploit-maturity badge**: it applies exactly to
+  findings whose maturity shows **Active in the wild**, and to no others — lower rungs of
+  the evidence ladder (weaponized exploits, PoCs, detection templates) raise the weighted
+  score but never trigger the floor. The Exploit Maturity column on the findings list
+  therefore shows you, at any time, precisely the set of findings the floor governs.
+* The floor responds to exploitation *evidence*, not to probability scores. An EPSS score
+  by itself — however high — does not trigger the floor; EPSS contributes to the weighted
+  Priority calculation instead.
+
 ## Findings without a CVE
 
 Threat intelligence is matched by CVE. Many findings — most SAST results, secrets,

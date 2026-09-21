@@ -1,0 +1,41 @@
+{
+  "data": {
+    "scan": {
+      "id": 4001,
+      "assetType": "ANDROID_STORE",
+      "packageName": "com.example.genericapp",
+      "version": "3.2.0",
+      "progress": "DONE",
+      "createdTime": "2024-06-02T10:00:00Z",
+      "vulnerabilities": {
+        "pageInfo": {"hasNext": false, "numPages": 1},
+        "vulnerabilities": [
+          {
+            "id": 900001,
+            "technicalDetail": "The application ships a debuggable manifest flag.",
+            "detail": {
+              "title": "Application is debuggable",
+              "shortDescription": "The release build allows a debugger to attach.",
+              "description": "A debuggable release build lets anyone with the device read memory and step through the application.",
+              "recommendation": "Set android:debuggable to false in the release manifest.",
+              "cvssV3Vector": "CVSS:3.1/AV:P/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "riskRating": "HIGH",
+              "references": [
+                {"title": "Vendor guidance", "url": "https://example.com/guidance/debuggable"},
+                {"title": "", "url": "https://example.com/advisories/CVE-2000-0001"},
+                {"title": "A reference with no link", "url": ""}
+              ]
+            },
+            "vulnerabilityLocation": {
+              "asset": {"packageName": "com.example.genericapp", "bundleId": "", "host": "", "name": ""},
+              "metadata": [
+                {"metadataType": "File path", "metadataValue": "AndroidManifest.xml"},
+                {"metadataType": "Code location", "metadataValue": "application/@android:debuggable"}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ description: "Configure rate limiting on the login page to mitigate brute force 
 weight: 4
 audience: opensource
 aliases:
+  - "/open_source/rate_limiting/"
   - /en/open_source/rate_limiting
 ---
 

@@ -1,6 +1,8 @@
 ---
 title: "Semgrep JSON Report"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/semgrep/"
 ---
 Import Semgrep output (--json)
 
@@ -22,7 +24,7 @@ finding title reflects where the rule file lives.
 Sample Semgrep JSON Report scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/semgrep).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - cwe

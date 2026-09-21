@@ -1,0 +1,16 @@
+{
+  "results": {
+    "data": [
+      {
+        "id": "test-no-failing-entities",
+        "name": "Backups are configured",
+        "description": "Production data must be backed up.",
+        "remediationDescription": "Configure backups.",
+        "category": "Availability",
+        "status": "OK",
+        "latestFlipDate": "2024-01-01T06:00:00Z"
+      }
+    ]
+  },
+  "entities": {}
+}

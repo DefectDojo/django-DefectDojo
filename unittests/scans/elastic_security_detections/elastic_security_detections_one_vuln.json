@@ -1,0 +1,65 @@
+{
+  "pit_id": "example-pit-id",
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "hits": [
+      {
+        "_id": "doc-detection-1",
+        "_index": ".internal.alerts-security.alerts-default-000001",
+        "_source": {
+          "@timestamp": "2024-07-02T08:30:00.000Z",
+          "message": "Suspicious process started",
+          "event": {
+            "kind": "signal",
+            "category": [
+              "process",
+              "malware"
+            ],
+            "module": "endpoint"
+          },
+          "kibana": {
+            "alert": {
+              "uuid": "alert-0001",
+              "reason": "malware detected on web-node-1",
+              "severity": "critical",
+              "risk_score": 99,
+              "workflow_status": "open",
+              "rule": {
+                "uuid": "rule-uuid-0001",
+                "name": "Malware Detection Alert",
+                "description": "Detects known malware signatures on an endpoint.",
+                "severity": "critical",
+                "risk_score": 99,
+                "tags": [
+                  "Elastic",
+                  "Endpoint Security"
+                ],
+                "references": [
+                  "https://docs.example.com/rules/malware",
+                  "https://attack.example.com/techniques/T0000"
+                ]
+              }
+            }
+          },
+          "host": {
+            "name": "web-node-1",
+            "os": {
+              "full": "Ubuntu 22.04.4 LTS"
+            }
+          },
+          "cloud": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "account": {
+              "id": "acct-1234",
+              "name": "example-account"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

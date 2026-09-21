@@ -8,6 +8,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 
 from dojo.github.models import GITHUB_Conf
@@ -36,14 +37,14 @@ def new_github(request):
                 new_j.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "GitHub Configuration Successfully Created.",
+                                     _("GitHub Configuration Successfully Created."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("github"))
             except Exception as info:
                 logger.error(info)
                 messages.add_message(request,
                                      messages.ERROR,
-                                     "Unable to authenticate on GitHub.",
+                                     _("Unable to authenticate on GitHub."),
                                      extra_tags="alert-danger")
                 return HttpResponseRedirect(reverse("github"))
         return None
@@ -75,7 +76,7 @@ def delete_github(request, tid):
                 github_instance.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "GitHub Conf and relationships removed.",
+                                     _("GitHub Conf and relationships removed."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("github"))
 

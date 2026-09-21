@@ -13,7 +13,9 @@ Test, Finding) via both the UI and the API, plus the delete-preview path for eac
 """
 import logging
 from types import SimpleNamespace
+from unittest import skipUnless
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import Client, override_settings
 from django.urls import reverse
@@ -38,8 +40,15 @@ from .dojo_test_case import DojoTestCase
 logger = logging.getLogger(__name__)
 
 
+@skipUnless(
+    settings.V3_FEATURE_LOCATIONS,
+    "This regression only exists when V3_FEATURE_LOCATIONS is enabled (the legacy Endpoint model "
+    "is deprecated only then), so it runs in the flag-on CI leg. It must NOT be forced on via "
+    "override_settings: the api_v3 URL namespace is registered at urls.py import time from the "
+    "process-level flag, and override_settings does not re-import the URLconf -- flipping the flag "
+    "at runtime in the flag-off leg makes base.html's {% url 'api_v3:...' %} raise NoReverseMatch.",
+)
 @override_settings(
-    V3_FEATURE_LOCATIONS=True,
     DELETE_PREVIEW=True,
     ASYNC_OBJECT_DELETE=False,
 )

@@ -41,7 +41,7 @@ export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 
 ```text
 You are helping me build customizable dashboards in DefectDojo Pro using its
-REST API ("Dashboards V2" — layouts of widgets on a grid). Work carefully and
+REST API ("Dashboards 2.0" — layouts of widgets on a grid). Work carefully and
 pause for my approval before creating anything against my tenant.
 
 ================================================================================
@@ -94,7 +94,7 @@ STEP 1 — DISCOVER (do this BEFORE designing anything; never invent values)
    Each widget entry has: type, label, category, description, data_endpoints,
    and a minimal known-good config_example. USE THESE config_examples as the
    starting point for each widget's config — do not guess the config shape.
-   There are 26 widget types in four categories: Numbers, Charts,
+   There are 27 widget types in four categories: Numbers, Charts,
    Lists & Feeds, Static & Utility.
 
 2. For any chart/leaderboard that groups data, fetch the valid dimensions:

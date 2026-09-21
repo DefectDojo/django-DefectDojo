@@ -50,7 +50,7 @@ class QuestionnaireAdvancedTest(BaseTestCase):
             text_fields[0].clear()
             text_fields[0].send_keys("Is the application using encryption?")
         # Submit the form
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary[name='submit']").click()
+        self.click_submit(driver, "input.btn.btn-primary[name='submit']")
         time.sleep(1)
 
         self.assertTrue(
@@ -89,7 +89,7 @@ class QuestionnaireAdvancedTest(BaseTestCase):
         if len(submit_btns) > 0:
             submit_btns[0].click()
         else:
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
         time.sleep(1)
 
         self.assertTrue(
@@ -118,7 +118,7 @@ class QuestionnaireAdvancedTest(BaseTestCase):
                 if len(submit_btns) > 0:
                     submit_btns[0].click()
                 else:
-                    driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+                    self.click_submit(driver)
                 time.sleep(1)
 
         self.assertTrue(

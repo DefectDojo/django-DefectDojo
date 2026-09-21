@@ -105,6 +105,64 @@ class LocationData:
             },
         )
 
+    @classmethod
+    def image(
+        cls,
+        *,
+        registry: str = "",
+        repository: str = "",
+        digest: str = "",
+        tag: str = "",
+        oci_source: str = "",
+        oci_revision: str = "",
+    ) -> LocationData:
+        """
+        A container image a finding was found in. Exactly these six keys, always
+        present, so every consumer reads one shape: ``registry`` and ``repository``
+        as reported (the consumer normalises Docker Hub aliases and the ``library/``
+        prefix), ``digest`` as ``sha256:<64 hex>`` when the scanner knows it, ``tag``
+        as reported, and the ``org.opencontainers.image.source`` / ``.revision``
+        labels when the tool exposes image labels. Identity is the digest when
+        present, else registry/repository:tag; an image with neither digest nor
+        tag is still a valid location for its repository.
+        """
+        return cls(
+            type="image",
+            data={
+                "registry": registry,
+                "repository": repository,
+                "digest": digest,
+                "tag": tag,
+                "oci_source": oci_source,
+                "oci_revision": oci_revision,
+            },
+        )
+
+
+def split_image_reference(reference: str) -> dict[str, str]:
+    """
+    Split ``[registry/]repository[:tag][@digest]`` into its raw parts without
+    normalising them. The first path segment is a registry only when it contains a
+    dot or a colon or is ``localhost``; ``nginx:1.25`` therefore has no registry and
+    the consumer decides what the default registry is. Returns empty strings for the
+    parts that are absent, and an empty dict for an empty reference.
+    """
+    text = (reference or "").strip()
+    if not text:
+        return {}
+    digest = ""
+    if "@" in text:
+        text, _, digest = text.partition("@")
+    registry = ""
+    first, sep, rest = text.partition("/")
+    if sep and ("." in first or ":" in first or first == "localhost"):
+        registry, text = first, rest
+    tag = ""
+    last_segment = text.rsplit("/", 1)[-1]
+    if ":" in last_segment:
+        text, _, tag = text.rpartition(":")
+    return {"registry": registry, "repository": text, "tag": tag, "digest": digest}
+
 
 @dataclass(frozen=True)
 class LocationAssociationData:

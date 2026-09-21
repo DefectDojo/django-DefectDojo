@@ -1,0 +1,67 @@
+{
+  "apiId": "api-0001",
+  "report": {
+    "index": [
+      "/paths/~1orders/get/security",
+      "/paths/~1orders/post/requestBody",
+      "/paths/~1orders~1{id}/get/responses/200"
+    ],
+    "score": 41.0,
+    "security": {
+      "issues": {
+        "v3-global-securityscheme-apikey-inheader": {
+          "criticality": 4,
+          "description": "The API key is passed in a header, which is exposed to intermediaries",
+          "issues": [
+            {"score": 12.5, "pointer": 0,
+             "specificDescription": "The GET /orders operation accepts an API key in a request header"},
+            {"score": 12.5, "pointer": 1, "specificDescription": ""}
+          ]
+        },
+        "v3-operation-securityscheme-missing": {
+          "criticality": 5,
+          "description": "The operation has no security requirement",
+          "issues": [
+            {"score": 20.0, "pointer": 99, "specificDescription": "No security on POST /orders"}
+          ]
+        }
+      }
+    },
+    "data": {
+      "issues": {
+        "v3-schema-response-string-maxlength": {
+          "criticality": 3,
+          "description": "The string response has no maximum length",
+          "issues": [{"score": 4.0, "pointer": 2, "specificDescription": ""}]
+        }
+      }
+    },
+    "warnings": {
+      "issues": {
+        "v3-operation-summary": {
+          "criticality": 1,
+          "description": "The operation has no summary",
+          "issues": [{"score": 0, "pointer": 2, "specificDescription": ""}]
+        }
+      }
+    },
+    "semanticErrors": {
+      "issues": {
+        "v3-semantic-mismatch": {
+          "criticality": 2,
+          "description": "",
+          "issues": [{"score": 1.0, "pointer": 0, "specificDescription": ""}]
+        }
+      }
+    },
+    "validationErrors": {
+      "issues": {
+        "v3-validation-broken": {
+          "criticality": 0,
+          "description": "The definition does not validate",
+          "issues": [{"score": 0, "pointer": -1, "specificDescription": ""}]
+        }
+      }
+    }
+  }
+}

@@ -7,13 +7,11 @@ audience: pro
 weight: 4
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Threat Modeling ist eine Funktion, die ausschließlich in DefectDojo Pro verfügbar ist, und befindet sich derzeit in der BETA-Phase.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Threat Modeling ist eine Funktion, die ausschließlich in DefectDojo Pro verfügbar ist.</span>
 
 **Threat Modeling** verwandelt einen Feature-Entwurf in ein geprüftes Bedrohungsmodell. Sie liefern den Entwurf — eingefügten Text, ein Design-Dokument und optional ein Architekturdiagramm —, und DefectDojo ermittelt daraus die beschriebenen Komponenten und Datenflüsse, die Bedrohungen dagegen sowie die Sicherheitsanforderungen, die diese Bedrohungen mindern. Anforderungen können anschließend als Befunde in DefectDojo übernommen werden, sodass Arbeit auf Design-Ebene durch dieselbe Triage-, SLA-, Jira- und Reporting-Maschinerie läuft wie alles andere.
 
 Dies ist die **Pre-Code**-Fähigkeit von Sensei. Während [Scan-and-Fix](/sensei/about_sensei/) mit einem bereits existierenden Repository arbeitet, arbeitet Threat Modeling mit dem Entwurf, noch bevor es Code zum Scannen gibt.
-
-> **🔎 BETA:** Threat Modeling wird aktiv weiterentwickelt und ist in der gesamten Benutzeroberfläche mit **BETA** gekennzeichnet. Verhalten und Bildschirme können sich zwischen Releases ändern. Während der BETA-Phase wird die Funktion pro Instanz von DefectDojo aktiviert — wenden Sie sich an Ihren DefectDojo-Ansprechpartner, um sie freischalten zu lassen.
 
 > **📍 Wo Sie es finden:** Öffnen Sie **Threat Modeling** über die Navigation auf der linken Seite, direkt unterhalb von Sensei.
 
@@ -21,13 +19,13 @@ Dies ist die **Pre-Code**-Fähigkeit von Sensei. Während [Scan-and-Fix](/sensei
 
 - Die lizenzierte Funktion **Sensei**. Threat Modeling wird unter derselben Berechtigung ausgeliefert wie Scan-and-Fix.
 - Eine globale Rolle als **Maintainer** oder **Owner**. Benutzer ohne diese Rolle sehen die Seite nicht.
-- Ein Produkt, dem das Bedrohungsmodell zugeordnet wird. Instanzen mit V3-Benennung sehen Produkte als **Assets** bezeichnet; diese Seite verwendet durchgehend *Produkt*, und die Benutzeroberfläche folgt der Benennung, auf die Ihre Instanz eingestellt ist.
+- Ein Produkt, dem das Bedrohungsmodell zugeordnet wird. Instanzen mit 3.0-Benennung sehen Produkte als **Assets** bezeichnet; diese Seite verwendet durchgehend *Produkt*, und die Benutzeroberfläche folgt der Benennung, auf die Ihre Instanz eingestellt ist.
 
 Es wird nichts installiert und kein Repository verbunden. Threat Modeling liest ausschließlich den von Ihnen bereitgestellten Entwurf.
 
 ## Ein Bedrohungsmodell erstellen
 
-Wählen Sie **New threat model**, wählen Sie das Produkt aus, vergeben Sie einen Namen und liefern Sie den Entwurf in der Form, in der er vorliegt:
+Wählen Sie **New Threat Model**, wählen Sie das Produkt aus, vergeben Sie einen Namen und liefern Sie den Entwurf in der Form, in der er vorliegt:
 
 - **Fügen Sie die Beschreibung** direkt ein, oder
 - **Laden Sie ein Design-Dokument hoch** — `.md`, `.markdown`, `.txt`, `.text` oder `.pdf`. Die Textextraktion aus PDF erfolgt nach bestem Bemühen; besteht ein PDF größtenteils aus Bildern, fügen Sie den Text stattdessen direkt ein.

@@ -5,6 +5,8 @@ draft: "false"
 audience: pro
 weight: 1
 pro-feature: true
+aliases:
+  - "/en/connecting_your_tools/parsers/universal_parser/"
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Universal Parser is only available in DefectDojo Pro.</span>

@@ -1,0 +1,51 @@
+{
+  "scan_id": "scan-0001",
+  "sarif": {
+    "version": "2.1.0",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "HiddenLayer Model Scanner",
+            "version": "1.0.0",
+            "rules": [
+              {
+                "id": "PICKLE_DESERIALIZATION",
+                "name": "UnsafePickleDeserialization",
+                "shortDescription": {"text": "The model file deserialises untrusted pickle data"},
+                "fullDescription": {
+                  "text": "Loading this model executes arbitrary code from the pickle stream."
+                },
+                "helpUri": "https://example.com/rules/pickle-deserialization",
+                "help": {"text": "Convert the model to a safetensors file."},
+                "properties": {
+                  "security-severity": "9.3",
+                  "tags": ["external/cwe/cwe-502", "model-integrity"]
+                },
+                "relationships": [{"target": {"id": "CWE-502"}}]
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "PICKLE_DESERIALIZATION",
+            "level": "error",
+            "kind": "fail",
+            "message": {"text": "Unsafe pickle opcode found in the model archive"},
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {"uri": "generic-model/pytorch_model.bin"},
+                  "region": {"startLine": 42}
+                }
+              }
+            ],
+            "fixes": [{"description": {"text": "Re-export the model in the safetensors format."}}],
+            "properties": {"tags": ["supply-chain"]}
+          }
+        ]
+      }
+    ]
+  }
+}

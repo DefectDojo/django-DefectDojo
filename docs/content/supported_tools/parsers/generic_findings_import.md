@@ -2,6 +2,8 @@
 title: "Using Generic Findings Import"
 toc_hide: true
 weight: 2
+aliases:
+  - "/en/connecting_your_tools/parsers/generic_findings_import/"
 ---
 
 Open-source and Pro users can use Generic Findings Import as a method to ingest JSON or CSV files into DefectDojo which are not already in the supported Tools list.

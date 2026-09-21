@@ -76,7 +76,7 @@ Pour comprendre la différence, il est utile de considérer l'Import comme l'enr
 
 Voici une analogie : si vous étiez comptable, vous utiliseriez l'Import pour suivre un reçu unique, tandis que vous utiliseriez le Reimport pour tenir un registre continu des dépenses.
 
-Les deux méthodes utilisent également la Déduplication différemment : alors que deux Tests Importés distincts dans le même Produit identifieront et étiquetteront les Constatations en double séparément, le Reimport ne créera aucune Constatation qu'il identifie comme [doublon](/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport/) au sein du Test.
+Les deux méthodes utilisent également la Déduplication différemment : alors que deux Tests Importés distincts dans le même Produit identifieront et étiquetteront les Constatations en double séparément, le Reimport ne créera aucune Constatation qu'il identifie comme [doublon](/triage_findings/finding_deduplication/avoid_excess_duplicates/) au sein du Test.
 
 De manière générale, si vous avez besoin d'un rapport ponctuel, l'Import est la meilleure méthode à utiliser. Si vous exécutez et ingérez en continu des rapports depuis un outil, le Reimport est la meilleure méthode pour garder les choses organisées.
 

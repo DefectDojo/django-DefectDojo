@@ -35,7 +35,7 @@ class BannerTest(BaseTestCase):
         enable_fields = driver.find_elements(By.ID, "id_banner_enable")
         if len(enable_fields) > 0 and not enable_fields[0].is_selected():
             enable_fields[0].click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         time.sleep(1)
 
         self.assertTrue(
@@ -54,7 +54,7 @@ class BannerTest(BaseTestCase):
         enable_fields = driver.find_elements(By.ID, "id_banner_enable")
         if len(enable_fields) > 0 and enable_fields[0].is_selected():
             enable_fields[0].click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         time.sleep(1)
 
         self.assertTrue(

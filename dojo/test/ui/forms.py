@@ -1,6 +1,7 @@
 import logging
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dojo.models import Development_Environment, Engagement, Product_API_Scan_Configuration, Test, Test_Type
 from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type
@@ -22,7 +23,7 @@ class TestForm(forms.ModelForm):
         attrs={"class": "datepicker", "autocomplete": "off"}))
     lead = forms.ModelChoiceField(
         queryset=None,
-        required=False, label="Testing Lead")
+        required=False, label=_("Testing Lead"))
 
     def __init__(self, *args, **kwargs):
         obj = None

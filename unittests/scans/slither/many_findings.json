@@ -1,0 +1,705 @@
+{
+  "success": true,
+  "error": null,
+  "results": {
+    "detectors": [
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "withdraw",
+            "source_mapping": {
+              "start": 286,
+              "length": 213,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "Example",
+                "source_mapping": {
+                  "start": 57,
+                  "length": 600,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 2
+                }
+              },
+              "signature": "withdraw(uint256)"
+            }
+          },
+          {
+            "type": "node",
+            "name": "(ok,None) = msg.sender.call{value: amount}()",
+            "source_mapping": {
+              "start": 383,
+              "length": 48,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                16
+              ],
+              "starting_column": 9,
+              "ending_column": 57
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 286,
+                  "length": 213,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Example",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 600,
+                      "filename_relative": "sol/Example.sol",
+                      "filename_absolute": "sol/Example.sol",
+                      "filename_short": "sol/Example.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                        24,
+                        25,
+                        26,
+                        27,
+                        28
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "withdraw(uint256)"
+                }
+              }
+            },
+            "additional_fields": {
+              "underlying_type": "external_calls"
+            }
+          },
+          {
+            "type": "node",
+            "name": "balances[msg.sender] -= amount",
+            "source_mapping": {
+              "start": 462,
+              "length": 30,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                18
+              ],
+              "starting_column": 9,
+              "ending_column": 39
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 286,
+                  "length": 213,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Example",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 600,
+                      "filename_relative": "sol/Example.sol",
+                      "filename_absolute": "sol/Example.sol",
+                      "filename_short": "sol/Example.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                        24,
+                        25,
+                        26,
+                        27,
+                        28
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "withdraw(uint256)"
+                }
+              }
+            },
+            "additional_fields": {
+              "underlying_type": "variables_written",
+              "variable_name": "balances"
+            }
+          }
+        ],
+        "description": "Reentrancy in Example.withdraw(uint256) (sol/Example.sol#14-19):\n\tExternal calls:\n\t- (ok,None) = msg.sender.call{value: amount}() (sol/Example.sol#16)\n\tState variables written after the call(s):\n\t- balances[msg.sender] -= amount (sol/Example.sol#18)\n\tExample.balances (sol/Example.sol#5) can be used in cross function reentrancies:\n\t- Example.balances (sol/Example.sol#5)\n\t- Example.deposit() (sol/Example.sol#10-12)\n\t- Example.withdraw(uint256) (sol/Example.sol#14-19)\n",
+        "markdown": "Reentrancy in [Example.withdraw(uint256)](sol/Example.sol#L14-L19):\n\tExternal calls:\n\t- [(ok,None) = msg.sender.call{value: amount}()](sol/Example.sol#L16)\n\tState variables written after the call(s):\n\t- [balances[msg.sender] -= amount](sol/Example.sol#L18)\n\t[Example.balances](sol/Example.sol#L5) can be used in cross function reentrancies:\n\t- [Example.balances](sol/Example.sol#L5)\n\t- [Example.deposit()](sol/Example.sol#L10-L12)\n\t- [Example.withdraw(uint256)](sol/Example.sol#L14-L19)\n",
+        "first_markdown_element": "sol/Example.sol#L14-L19",
+        "id": "542a76284e99f1be4394cbe91528615be2e846f69939997a18f5a6fddfba0b95",
+        "check": "reentrancy-eth",
+        "impact": "High",
+        "confidence": "Medium",
+        "reference": "https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1"
+      },
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "kill",
+            "source_mapping": {
+              "start": 587,
+              "length": 68,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                25,
+                26,
+                27
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "Example",
+                "source_mapping": {
+                  "start": 57,
+                  "length": 600,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 2
+                }
+              },
+              "signature": "kill()"
+            }
+          }
+        ],
+        "description": "Example.kill() (sol/Example.sol#25-27) allows anyone to destruct the contract\n",
+        "markdown": "[Example.kill()](sol/Example.sol#L25-L27) allows anyone to destruct the contract\n",
+        "first_markdown_element": "sol/Example.sol#L25-L27",
+        "id": "9d6063d2d0671baf939d3ba4342bbc1e880c19761edaa0bef57cda4e1959217a",
+        "check": "suicidal",
+        "impact": "High",
+        "confidence": "High",
+        "reference": "https://github.com/crytic/slither/wiki/Detector-Documentation#suicidal"
+      },
+      {
+        "elements": [
+          {
+            "type": "variable",
+            "name": "newOwner",
+            "source_mapping": {
+              "start": 523,
+              "length": 16,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                21
+              ],
+              "starting_column": 23,
+              "ending_column": 39
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "setOwner",
+                "source_mapping": {
+                  "start": 505,
+                  "length": 76,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    21,
+                    22,
+                    23
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Example",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 600,
+                      "filename_relative": "sol/Example.sol",
+                      "filename_absolute": "sol/Example.sol",
+                      "filename_short": "sol/Example.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                        24,
+                        25,
+                        26,
+                        27,
+                        28
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "setOwner(address)"
+                }
+              }
+            }
+          },
+          {
+            "type": "node",
+            "name": "owner = newOwner",
+            "source_mapping": {
+              "start": 558,
+              "length": 16,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                22
+              ],
+              "starting_column": 9,
+              "ending_column": 25
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "setOwner",
+                "source_mapping": {
+                  "start": 505,
+                  "length": 76,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    21,
+                    22,
+                    23
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Example",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 600,
+                      "filename_relative": "sol/Example.sol",
+                      "filename_absolute": "sol/Example.sol",
+                      "filename_short": "sol/Example.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                        24,
+                        25,
+                        26,
+                        27,
+                        28
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "setOwner(address)"
+                }
+              }
+            }
+          }
+        ],
+        "description": "Example.setOwner(address).newOwner (sol/Example.sol#21) lacks a zero-check on :\n\t\t- owner = newOwner (sol/Example.sol#22)\n",
+        "markdown": "[Example.setOwner(address).newOwner](sol/Example.sol#L21) lacks a zero-check on :\n\t\t- [owner = newOwner](sol/Example.sol#L22)\n",
+        "first_markdown_element": "sol/Example.sol#L21",
+        "id": "76112107250c1c76c86b999cf4806880ab173cbdff978c19d70137bb0b0c928d",
+        "check": "missing-zero-check",
+        "impact": "Low",
+        "confidence": "Medium",
+        "reference": "https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation"
+      },
+      {
+        "elements": [
+          {
+            "type": "pragma",
+            "name": "^0.8.0",
+            "source_mapping": {
+              "start": 32,
+              "length": 23,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                2
+              ],
+              "starting_column": 1,
+              "ending_column": 24
+            },
+            "type_specific_fields": {
+              "directive": [
+                "solidity",
+                "^",
+                "0.8",
+                ".0"
+              ]
+            }
+          }
+        ],
+        "description": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- ^0.8.0 (sol/Example.sol#2)\n",
+        "markdown": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- [^0.8.0](sol/Example.sol#L2)\n",
+        "first_markdown_element": "sol/Example.sol#L2",
+        "id": "5798238fb579215f1a7fc14e027be9556f6170a3bd12fda60f85c8a443477330",
+        "check": "solc-version",
+        "impact": "Informational",
+        "confidence": "High",
+        "reference": "https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity"
+      },
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "withdraw",
+            "source_mapping": {
+              "start": 286,
+              "length": 213,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "Example",
+                "source_mapping": {
+                  "start": 57,
+                  "length": 600,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 2
+                }
+              },
+              "signature": "withdraw(uint256)"
+            }
+          },
+          {
+            "type": "node",
+            "name": "(ok,None) = msg.sender.call{value: amount}()",
+            "source_mapping": {
+              "start": 383,
+              "length": 48,
+              "filename_relative": "sol/Example.sol",
+              "filename_short": "sol/Example.sol",
+              "is_dependency": false,
+              "lines": [
+                16
+              ],
+              "starting_column": 9,
+              "ending_column": 57
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 286,
+                  "length": 213,
+                  "filename_relative": "sol/Example.sol",
+                  "filename_absolute": "sol/Example.sol",
+                  "filename_short": "sol/Example.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Example",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 600,
+                      "filename_relative": "sol/Example.sol",
+                      "filename_absolute": "sol/Example.sol",
+                      "filename_short": "sol/Example.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                        24,
+                        25,
+                        26,
+                        27,
+                        28
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "withdraw(uint256)"
+                }
+              }
+            }
+          }
+        ],
+        "description": "Low level call in Example.withdraw(uint256) (sol/Example.sol#14-19):\n\t- (ok,None) = msg.sender.call{value: amount}() (sol/Example.sol#16)\n",
+        "markdown": "Low level call in [Example.withdraw(uint256)](sol/Example.sol#L14-L19):\n\t- [(ok,None) = msg.sender.call{value: amount}()](sol/Example.sol#L16)\n",
+        "first_markdown_element": "sol/Example.sol#L14-L19",
+        "id": "ac6ecdd2115b79ea89146b57fc4bd0e4e7c516180e0003a893113f2eac9c08ec",
+        "check": "low-level-calls",
+        "impact": "Informational",
+        "confidence": "High",
+        "reference": "https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls"
+      }
+    ]
+  }
+}

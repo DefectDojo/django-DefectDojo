@@ -1,0 +1,126 @@
+{
+  "data": [
+    {
+      "id": "AAAAA-BBBB-CCCC-0001",
+      "type": "finding",
+      "attributes": {
+        "tags": ["service:payments-api", "env:prod", "team:platform"],
+        "timestamp": 1719792000000,
+        "attributes": {
+          "finding_id": "finding-0001",
+          "finding_type": "vulnerability",
+          "title": "openssl 3.0.2 is affected by CVE-2000-0001",
+          "description": "The installed openssl build is affected by a memory-safety flaw.",
+          "severity": "critical",
+          "base_severity": "high",
+          "status": "open",
+          "resource_id": "i-0000000000000001",
+          "resource_name": "web-node-1",
+          "resource_type": "aws_ec2_instance",
+          "first_seen_at": 1719792000000,
+          "detection_changed_at": 1721001600000,
+          "rule": {"id": "rule-0001", "name": "Vulnerable library detected", "type": "vulnerability", "version": 3},
+          "advisory": {
+            "cve": "CVE-2000-0001",
+            "aliases": ["GHSA-aaaa-bbbb-cccc", "CVE-2000-0001"],
+            "id": "adv-1",
+            "summary": "Memory-safety flaw in openssl.",
+            "type": "cve"
+          },
+          "severity_details": {
+            "base": {"score": 9.8, "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", "value": "critical"},
+            "adjusted": {"score": 7.2, "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", "value": "high"}
+          },
+          "package": {"name": "openssl", "version": "3.0.2", "manager": "deb"},
+          "cloud_resource": {
+            "cloud_provider": "AWS",
+            "region": "us-east-1",
+            "account": {"account_id": "acct-1234", "name": "example-account"}
+          }
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0002",
+      "attributes": {
+        "tags": ["env:prod"],
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "",
+          "severity": "medium",
+          "status": "open",
+          "resource_id": "arn:aws:s3:::example-bucket",
+          "resource_type": "aws_s3_bucket",
+          "first_seen_at": 1717200000000,
+          "rule": {"id": "rule-0002", "name": "S3 bucket should not allow public reads"},
+          "compliance": {"evaluation": "fail"}
+        }
+      }
+    },
+    {
+      "attributes": {
+        "tags": [],
+        "attributes": {
+          "finding_id": "finding-0003",
+          "finding_type": "api_security",
+          "title": "Unauthenticated endpoint accepts writes",
+          "description": "Observed unauthenticated POST traffic reaching a write endpoint.",
+          "severity": "high",
+          "status": "open",
+          "resource_name": "payments-api",
+          "resource_type": "service",
+          "detection_changed_at": 1721001600000
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0004",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "A muted finding",
+          "severity": "high",
+          "status": "muted",
+          "rule": {"id": "rule-0004", "name": "Muted rule"}
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0005",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "A finding muted through the workflow",
+          "severity": "high",
+          "status": "open",
+          "workflow": {"mute": {"is_muted": true, "is_muted_by_rule": true, "reason": "accepted risk"}}
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0006",
+      "attributes": {
+        "attributes": {
+          "finding_type": "misconfiguration",
+          "title": "A compliance rule that passed",
+          "severity": "high",
+          "status": "open",
+          "compliance": {"evaluation": "pass"}
+        }
+      }
+    },
+    {
+      "id": "AAAAA-BBBB-CCCC-0007",
+      "attributes": {
+        "attributes": {
+          "finding_type": "attack_path",
+          "severity": "not a label",
+          "status": "open",
+          "resource_name": "web-node-1"
+        }
+      }
+    }
+  ],
+  "meta": {"page": {"after": "next-page-token"}, "status": "done"},
+  "links": {"next": "https://api.example.com/api/v2/posture_management/findings?page%5Bcursor%5D=next"}
+}

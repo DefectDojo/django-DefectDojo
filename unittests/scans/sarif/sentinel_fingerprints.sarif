@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "SentinelScanner",
+          "rules": [
+            {"id": "mutable-tag", "shortDescription": {"text": "GitHub Actions step uses a mutable tag"}, "defaultConfiguration": {"level": "warning"}},
+            {"id": "sql-concat", "shortDescription": {"text": "SQL string concatenation"}, "defaultConfiguration": {"level": "error"}},
+            {"id": "aws-key", "shortDescription": {"text": "AWS access key id detected"}, "defaultConfiguration": {"level": "error"}},
+            {"id": "cert-verify", "shortDescription": {"text": "Certificate verification disabled"}, "defaultConfiguration": {"level": "warning"}}
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "mutable-tag",
+          "message": {"text": "Step uses a mutable tag."},
+          "locations": [{"physicalLocation": {"artifactLocation": {"uri": ".github/workflows/ci.yml"}, "region": {"startLine": 12}}}],
+          "fingerprints": {"hashV1": "requires login"}
+        },
+        {
+          "ruleId": "sql-concat",
+          "message": {"text": "Query built by concatenation."},
+          "locations": [{"physicalLocation": {"artifactLocation": {"uri": "app/db.py"}, "region": {"startLine": 44}}}],
+          "fingerprints": {"hashV1": "requires login"}
+        },
+        {
+          "ruleId": "aws-key",
+          "message": {"text": "Access key id committed."},
+          "locations": [{"physicalLocation": {"artifactLocation": {"uri": "config/settings.py"}, "region": {"startLine": 7}}}],
+          "fingerprints": {"hashV1": "requires login"}
+        },
+        {
+          "ruleId": "cert-verify",
+          "message": {"text": "TLS verification explicitly disabled."},
+          "locations": [{"physicalLocation": {"artifactLocation": {"uri": "app/client.py"}, "region": {"startLine": 89}}}],
+          "fingerprints": {"hashV1": "5c1f36e0a9de13c3c96c26fa9a1a02a5d5be0c4a3ad9d0f27b3c4d2f8f4a91aa"}
+        }
+      ]
+    }
+  ]
+}

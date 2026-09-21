@@ -1,6 +1,6 @@
 ---
 title: "Calendar"
-description: "How to use the Calendar in DefectDojo Pro"
+description: "How to use the Calendar in DefectDojo OS"
 audience: opensource
 weight: 9
 ---
@@ -15,7 +15,7 @@ The Calendar page is accessible via the Calendar button in the sidebar.
 
 ![image](images/OSC_ss3.png)
 
-## Visiblity and Permissions 
+## Visibility and Permissions 
 
 ### Visibility 
 

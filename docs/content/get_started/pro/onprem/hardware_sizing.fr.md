@@ -3,7 +3,7 @@ title: Dimensionnement matériel pour DefectDojo Pro auto-hébergé
 description: Recommandations générales pour dimensionner le calcul, la mémoire et
   le stockage d'un déploiement DefectDojo Pro auto-hébergé
 draft: false
-weight: 4
+weight: 2
 audience: pro
 ---
 

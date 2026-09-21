@@ -18,7 +18,12 @@ class AnnouncementBannerTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "configure_announcement")
         if self.is_element_by_css_selector_present("input.btn.btn-danger"):
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
+            self.click_submit(driver, "input.btn.btn-danger")
+            # Wait for the removal to land. Every other call site asserts this
+            # banner right after the helper returns; this one had nothing, so the
+            # next test could navigate away before the POST completed and find an
+            # announcement still on the page.
+            self.assertTrue(self.is_success_message_present("Announcement removed for everyone."))
 
     def enable_announcement(self, message, dismissable, style):
         driver = self.driver
@@ -31,12 +36,12 @@ class AnnouncementBannerTest(BaseTestCase):
         if xor(bool(dismissable_control.is_selected()), bool(dismissable)):
             dismissable_control.click()
 
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
     def disable_announcement(self):
         driver = self.driver
         driver.get(self.base_url + "configure_announcement")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
+        self.click_submit(driver, "input.btn.btn-danger")
 
     def test_create_announcement(self):
         driver = self.driver

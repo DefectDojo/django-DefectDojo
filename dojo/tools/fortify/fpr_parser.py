@@ -354,7 +354,10 @@ class FortifyFPRParser:
 
     def compute_status(self, related_data, vulnerability) -> tuple[bool, bool]:
         """Compute the status of the vulnerability based on the instance ID. Return active, false_p"""
-        if vulnerability.instance_id in related_data.suppressed:
+        # audit.xml lists every issue with suppressed="true" OR "false"; check the
+        # value, not just membership, otherwise every audited finding becomes false_p
+        # and every reimport closes the whole test.
+        if related_data.suppressed.get(vulnerability.instance_id):
             return False, True
         return True, False
 

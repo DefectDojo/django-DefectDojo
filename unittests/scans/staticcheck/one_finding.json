@@ -1,0 +1,1 @@
+{"code": "S1002", "severity": "error", "location": {"file": "main.go", "line": 15, "column": 9}, "end": {"file": "main.go", "line": 15, "column": 41}, "message": "should omit comparison to bool constant, can be simplified to strings.Contains(s, \"a\")"}

@@ -19,7 +19,7 @@ Smart Upload es un importador especializado que ingiere informes de **herramient
 
 Smart Upload es único porque puede dividir los Hallazgos de un archivo de análisis en Productos independientes. Esto es relevante en un contexto de análisis de infraestructura, donde los Hallazgos pueden aplicarse a muchos equipos distintos, tener SLA implícitos diferentes, o necesitar incluirse en informes separados según el lugar de la infraestructura donde se descubrieron.
 
-Smart Upload resuelve esto clasificando los hallazgos entrantes según los Endpoints descubiertos en el análisis. Al principio, esos Hallazgos deberán asignarse manualmente, o dirigirse al Producto correcto desde una lista de Hallazgos sin asignar. Sin embargo, una vez que un Hallazgo se ha asignado a un Producto, todos los Hallazgos posteriores que compartan un Endpoint o Host se enviarán a ese mismo Producto.
+Smart Upload resuelve esto clasificando los hallazgos entrantes según los Endpoints descubiertos en el análisis. Al principio, esos Hallazgos deberán asignarse manualmente, o dirigirse al Producto correcto desde una lista de Hallazgos sin asignar. Sin embargo, una vez que un Hallazgo se ha asignado a un Producto, todos los Hallazgos posteriores que compartan un Endpoint o Host se enviarán a ese mismo Producto. Si ese Host está asociado a más de un Producto, el Hallazgo se envía a cada uno de ellos (consulte más abajo).
 
 ## Opciones del menú de Smart Upload
 
@@ -57,3 +57,11 @@ Cuando un Hallazgo se asigna a un Producto nuevo o existente, se colocará en un
 ### Hallazgos descartados
 
 Si un Hallazgo se descarta (Disregard), se eliminará de la lista Unassigned Findings. Sin embargo, el Hallazgo no quedará registrado en memoria, por lo que las cargas de análisis posteriores pueden hacer que el Hallazgo vuelva a aparecer en la lista Unassigned Findings.
+
+## Hallazgos que coinciden con más de un Producto
+
+Un mismo Host o Endpoint puede pertenecer a más de un Producto, por ejemplo un balanceador de carga compartido o un host que dos equipos rastrean. Cuando Smart Upload hace coincidir el Host de un Hallazgo entrante con varios Productos, no elige uno solo: crea una copia de ese Hallazgo en **cada** Producto coincidente, colocando cada copia en el Compromiso y el Test de Smart Upload propios de ese Producto.
+
+Esto es intencionado. Cada Producto conserva una imagen completa de las vulnerabilidades que afectan a los hosts que posee, y los informes, los SLA y las métricas de cada Producto permanecen independientes.
+
+La coincidencia se basa en el valor de Host descubierto en el análisis (el nombre de dominio completo y, en su defecto, la dirección IP), de modo que cualquier Producto que ya posea ese Host recibe una copia del Hallazgo.

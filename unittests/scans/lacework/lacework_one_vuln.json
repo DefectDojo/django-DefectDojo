@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+      "imageId": "sha256:aaaa1111",
+      "vulnId": "CVE-2000-0001",
+      "severity": "Critical",
+      "status": "Active",
+      "evalCtx": {
+        "image_info": {
+          "repo": "registry.example.com/generic-app",
+          "registry": "registry.example.com",
+          "digest": "sha256:bbbb2222"
+        }
+      },
+      "featureKey": {
+        "name": "openssl",
+        "namespace": "debian:12",
+        "version": "3.0.11-1"
+      },
+      "fixInfo": {
+        "fix_available": 1,
+        "fixed_version": "3.0.13-1"
+      }
+    }
+  ]
+}

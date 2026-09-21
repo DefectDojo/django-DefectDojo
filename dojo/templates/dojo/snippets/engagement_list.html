@@ -1,4 +1,5 @@
 {% load filter_tags %}
+{% load i18n %}
 {% load humanize %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -7,8 +8,8 @@
         <div class="panel-heading">
             <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} Engagements ({{ count }})
                 <div class="dropdown pull-right">
-                    <button id="show-filters-{{status}}" data-toggle="collapse" data-target="#the-filters-{{status}}" class="btn btn-primary toggle-filters" aria-label="Filter"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-label="Add Engagement"
+                    <button id="show-filters-{{status}}" data-toggle="collapse" data-target="#the-filters-{{status}}" class="btn btn-primary toggle-filters" aria-label="{% trans 'Filter' %}"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-label="{% trans 'Add Engagement' %}"
                     data-toggle="dropdown" aria-expanded="true">
                 <span class="fa-solid fa-bars"></span>
                 <span class="caret"></span>
@@ -43,8 +44,8 @@
                     <th>Name</th>
                     <th>Type</th>
                     <th>Lead</th>
-                    <th class="text-left">Date</th>
-                    <th class="text-left">Length</th>
+                    <th class="text-start">Date</th>
+                    <th class="text-start">Length</th>
                     {% if system_settings.enable_jira %}
                     <th class="text-center">JIRA</th>
                     {% endif %}
@@ -55,7 +56,7 @@
                     <th class="text-center">All</th>
                     <th class="text-center">Duplicates</th>
                     {% if status == "paused" or status == "closed" %}
-                      <th class="text-left">Status</th>
+                      <th class="text-start">Status</th>
                     {% endif %}
                 </tr>
                 </thead>
@@ -175,12 +176,12 @@
                           {{ eng.lead |default_if_none:""}}
                       {% endif %}
                     </td>
-                    <td class="text-left" style="width: 200px;" data-order={{ eng.target_start|date:"U" }}>
+                    <td class="text-start" style="width: 200px;" data-order={{ eng.target_start|date:"U" }}>
                       <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
                       {{ eng.target_start|date:"jS F" }} {% if eng.target_start|datediff_time:eng.target_end != "1 day" %} - {{ eng.target_end|date:"jS F" }}{% endif %}
                     </a>
                     </td>
-                    <td class="text-left" class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
+                    <td class="text-start" class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
                       {% if status == "open" %}
                         {% if eng.is_overdue and eng.status != 'Completed' %}
                         <sup>
@@ -253,7 +254,7 @@
                     <td class="text-center">{{ eng.count_findings_all }}</td>
                     <td class="text-center">{{ eng.count_findings_duplicate }}</td>
                     {% if status == "paused" or status == "closed" %}
-                    <td class="text-left">
+                    <td class="text-start">
                       {% if eng.status == "Blocked" %}
                       <em class="text-danger">
                       {% elif eng.status == "On Hold" %}

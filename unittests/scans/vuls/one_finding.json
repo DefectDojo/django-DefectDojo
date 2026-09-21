@@ -1,0 +1,92 @@
+{
+  "jsonVersion": 4,
+  "lang": "en",
+  "serverUUID": "00000000-0000-0000-0000-000000000000",
+  "serverName": "sample-host",
+  "family": "debian",
+  "release": "13",
+  "container": {},
+  "platform": {
+    "name": "other"
+  },
+  "scannedAt": "2026-08-10T09:00:00Z",
+  "scanMode": "fast",
+  "scannedVersion": "v0.30.0",
+  "scannedBy": "sample-host",
+  "scannedVia": "local",
+  "reportedAt": "2026-08-10T09:01:00Z",
+  "reportedVersion": "v0.30.0",
+  "errors": [],
+  "warnings": [],
+  "runningKernel": {
+    "release": "6.1.0-23-amd64",
+    "version": "",
+    "rebootRequired": false
+  },
+  "packages": {},
+  "cweDict": {},
+  "scannedCves": {
+    "CVE-2026-11001": {
+      "cveID": "CVE-2026-11001",
+      "confidences": [
+        {
+          "score": 100,
+          "detectionMethod": "OvalMatch"
+        }
+      ],
+      "affectedPackages": [
+        {
+          "name": "openssl",
+          "notFixedYet": false,
+          "fixState": "",
+          "fixedIn": "3.0.14-1"
+        }
+      ],
+      "cveContents": {
+        "nvd3": [
+          {
+            "type": "nvd3",
+            "cveID": "CVE-2026-11001",
+            "title": "openssl: heap overflow in certificate parsing",
+            "summary": "A heap overflow in certificate parsing allows remote code execution.",
+            "cvss3Score": 9.8,
+            "cvss3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss3Severity": "CRITICAL",
+            "cvss2Score": 0.0,
+            "cvss2Vector": "",
+            "cvss2Severity": "",
+            "sourceLink": "https://nvd.nist.gov/vuln/detail/CVE-2026-11001",
+            "cweIDs": [
+              "CWE-122"
+            ],
+            "published": "2026-02-01T00:00:00Z",
+            "lastModified": "2026-02-10T00:00:00Z",
+            "references": []
+          }
+        ]
+      },
+      "exploits": [
+        {
+          "url": "https://example.test/exploit/CVE-2026-11001"
+        },
+        {
+          "url": "https://example.test/exploit/CVE-2026-11001"
+        }
+      ],
+      "metasploits": [],
+      "mitigations": [
+        {
+          "cveContentType": "nvd3",
+          "mitigation": "Upgrade the package.",
+          "url": "https://security-tracker.example.test/CVE-2026-11001"
+        }
+      ],
+      "kevs": [
+        {
+          "type": "cisa",
+          "cveID": "CVE-2026-11001"
+        }
+      ]
+    }
+  }
+}

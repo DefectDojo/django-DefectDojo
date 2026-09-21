@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dojo.notes.models import Notes
 from dojo.utils import get_system_setting
@@ -6,7 +7,7 @@ from dojo.utils import get_system_setting
 
 class NoteForm(forms.ModelForm):
     entry = forms.CharField(max_length=2400, widget=forms.Textarea(attrs={"rows": 4, "cols": 15}),
-                            label="Notes:")
+                            label=_("Notes:"))
 
     class Meta:
         model = Notes
@@ -23,7 +24,7 @@ class TypedNoteForm(NoteForm):
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop("available_note_types")
         super().__init__(*args, **kwargs)
-        self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label="Note Type", required=True)
+        self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label=_("Note Type"), required=True)
 
     class Meta:
         model = Notes

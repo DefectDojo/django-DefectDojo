@@ -55,7 +55,7 @@ Avant de finaliser le processus, veuillez confirmer le forfait que vous souhaite
 
 ## Étape 6 : Vérifiez et soumettez votre demande
 
-Nous vous inviterons à relire votre demande une dernière fois. Une fois soumise, seules les règles de pare-feu pourront être modifiées par votre équipe sans l'aide du support. Pour contacter le support, merci d'envoyer un e-mail à [support@defectdojo.com](mailto:support@defectdojo.com) ou de suivre les instructions de [cet article](/en/about_defectdojo/contact_defectdojo_support/).
+Nous vous inviterons à relire votre demande une dernière fois. Une fois soumise, seules les règles de pare-feu pourront être modifiées par votre équipe sans l'aide du support. Pour contacter le support, merci d'envoyer un e-mail à [support@defectdojo.com](mailto:support@defectdojo.com) ou de suivre les instructions de [cet article](/help/contact_support/).
 
 ![image](images/request_a_trial_6.png)
 

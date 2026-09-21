@@ -1,0 +1,21 @@
+{
+  "opfVersion": "1.1",
+  "textFormat": "html",
+  "metadata": { "source": "Cairn", "exportedAt": "2026-08-06T00:00:00Z", "findingCount": 4 },
+  "findings": [
+    { "id": "sqli-search", "title": "SQL injection in the report search endpoint", "severity": "critical",
+      "description": "<p>The <code>q</code> parameter is concatenated into the query without parameterisation.</p>",
+      "impact": "An attacker can read or modify arbitrary rows.", "recommendation": "Use parameterised queries.",
+      "cvssScore": 9.8, "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", "cvssVersion": "3.1",
+      "cweIds": ["CWE-89"], "owaspCategory": "A03:2021 Injection", "mitreTechniques": ["T1190"],
+      "affectedAssets": ["src/search/query.ts"],
+      "references": [{ "title": "CWE-89", "url": "https://cwe.mitre.org/data/definitions/89.html", "type": "cwe" }] },
+    { "id": "s3-public", "title": "Publicly readable S3 bucket", "severity": "high",
+      "description": "Bucket policy grants s3:GetObject to * (anonymous).", "recommendation": "Restrict the bucket policy; enable Block Public Access.",
+      "cvssScore": 7.5, "cweIds": ["CWE-200"], "affectedAssets": ["infra/s3.tf"] },
+    { "id": "verbose-errors", "title": "Verbose error messages leak stack traces", "severity": "medium",
+      "description": "Unhandled exceptions return full stack traces to the client.", "cweIds": ["CWE-209"], "affectedAssets": ["src/app/errors.ts"] },
+    { "id": "missing-hsts", "title": "HSTS header not set", "severity": "low",
+      "description": "Responses do not include Strict-Transport-Security.", "affectedAssets": ["src/server/headers.ts"] }
+  ]
+}

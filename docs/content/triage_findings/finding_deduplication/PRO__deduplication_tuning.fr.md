@@ -1,5 +1,5 @@
 ---
-title: Réglage de la déduplication (Pro)
+title: Réglage de la déduplication
 description: Configurez la façon dont DefectDojo identifie et gère les constatations
   en double
 weight: 4

@@ -1,0 +1,81 @@
+{
+  "data": [
+    {
+      "imageId": "sha256:aaaa1111",
+      "vulnId": "CVE-2000-0001",
+      "severity": "Critical",
+      "status": "Active",
+      "evalCtx": {
+        "image_info": {
+          "repo": "registry.example.com/generic-app",
+          "registry": "registry.example.com",
+          "digest": "sha256:bbbb2222"
+        }
+      },
+      "featureKey": {
+        "name": "openssl",
+        "namespace": "debian:12",
+        "version": "3.0.11-1"
+      },
+      "fixInfo": {
+        "fix_available": 1,
+        "fixed_version": "3.0.13-1"
+      }
+    },
+    {
+      "mid": 4242,
+      "vulnId": "CVE-2000-0002",
+      "severity": "High",
+      "status": "Active",
+      "evalCtx": {
+        "hostname": "host01.example.com"
+      },
+      "featureKey": {
+        "name": "curl",
+        "namespace": "ubuntu:22.04",
+        "version_installed": "7.81.0-1"
+      },
+      "cveProps": {
+        "description": "A flaw in URL parsing.",
+        "link": "https://example.com/cve-2000-0002"
+      },
+      "fixInfo": {
+        "fix_available": "1",
+        "fixed_version": "7.81.0-4"
+      }
+    },
+    {
+      "imageId": "sha256:cccc3333",
+      "vulnId": "CVE-2000-0003",
+      "severity": "Medium",
+      "status": "Fixed",
+      "evalCtx": {
+        "image_info": {
+          "repo": "registry.example.com/generic-app",
+          "registry": "registry.example.com"
+        }
+      },
+      "featureKey": {
+        "name": "zlib",
+        "version": "1.2.13"
+      },
+      "fixInfo": {
+        "fix_available": 0,
+        "fixed_version": ""
+      }
+    },
+    {
+      "mid": 77,
+      "vulnId": "",
+      "severity": "not-a-level",
+      "status": "Active",
+      "evalCtx": {},
+      "featureKey": {
+        "name": "",
+        "version_installed": ""
+      },
+      "cveProps": {},
+      "fixInfo": {}
+    }
+  ]
+}

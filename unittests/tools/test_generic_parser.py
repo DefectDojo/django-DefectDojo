@@ -837,3 +837,23 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual("OSV-2021-1234", finding.unsaved_vulnerability_ids[2])
             for vid in finding.unsaved_vulnerability_ids:
                 self.assertIsInstance(vid, str)
+
+    def test_parse_json_repeated_unique_ids_are_dropped(self):
+        """
+        A unique id carried by several findings in one report is not an identity.
+
+        The shipped algorithm for this scan type is hash-only, so classic matching never
+        reads the field, but it is stored and consumed as a vendor identity by anything
+        that does (an operator-configured unique-id algorithm, Pro's identity ledger).
+        A repeated value would merge visibly different findings there, so it is dropped
+        at parse time; a genuinely unique id is kept.
+        """
+        with (get_unit_tests_scans_path("generic") / "generic_repeated_unique_ids.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+        self.assertEqual(4, len(findings))
+        dropped = [f for f in findings if f.unique_id_from_tool is None]
+        self.assertEqual(3, len(dropped))
+        kept = [f for f in findings if f.unique_id_from_tool is not None]
+        self.assertEqual(1, len(kept))
+        self.assertEqual("dep-lodash-4.17.20", kept[0].unique_id_from_tool)

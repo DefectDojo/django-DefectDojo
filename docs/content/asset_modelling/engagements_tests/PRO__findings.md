@@ -77,10 +77,11 @@ Mitigation policies can be found and edited in the sidebar under **Configuration
     - Unlike the Unique ID From Tool, this identifier is not unique to an individual Finding and may appear on many Findings that match the same detection rule. 
     - Unlike Vulnerability IDs, these identifiers are specific to the reporting tool and are not publicly standardized.
         - Example: `semgrep.rule.lang.security.sql-injection`
-- **EPSS Score / Percentile**: ESS score and percentile for the CVE.
+- **EPSS Score / Percentile**: EPSS score and percentile for the CVE.
 - **Known Exploited**: Whether there is confirmation that the vulnerability has been exploited. 
 - **Ransomware Used**: Whether ransomware was involved in the exploitation of the vulnerability. 
 - **KEV Date**: The date the Finding was added to the KEV catalog.
+    - The EPSS and KEV values are maintained by the [EPSS / KEV sync](/triage_findings/finding_scoring/epss_kev/). They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms; on a Finding that references a CVE, the next sync overwrites what was entered.
 - **Found By**: The type of tool that identified the vulnerability.
 - **CVSSv3 and CVSSv4 Vector and Score**: The CVSS3 and CVSS4 vector and score of the selected Finding.
 - **Integrator Tickets**: Third-party issue tracker ticket numbers associated with the Finding. 
@@ -156,7 +157,7 @@ The ⋮ kebab menu next to Findings contains the following functions:
 - **Add Risk Acceptance**: Initiates the Risk Acceptance process. More information can be found [here](/triage_findings/findings_workflows/pro__risk_acceptance/).
 - **Add File**: Initiates the process to add a file to the Finding (see the section below).
 - **Add Note**: Initiates the process to add a note to the Finding. 
-- **Add Custom Field**: Initiates a pop-up that allows you to add and define a custom field to apply to the Finding. 
+- **Add Custom Field**: Adds a free-form metadata field to the Finding. With the typed [Custom Fields](/asset_modelling/pro__custom_fields/) feature enabled, this becomes **Custom Fields** and opens the typed editor, where you fill in a value for each field an administrator has defined for Findings. 
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
 - **Push to Integrator**: Pushes the Finding to any integrated third-party issue trackers.
 - **Delete Finding**: Deletes the selected Finding. 
@@ -276,4 +277,14 @@ DefectDojo’s report builder lets you assemble a custom report from a set of co
 More information about DefectDojo’s Report Builder can be found [here](/metrics_reports/reports/report-builder/).
 
 ### Export Findings 
-Pages that show a list of Findings or a list of Engagements have a CSV and Excel export option at the top left. For Findings, there is also the option to perform a Quick Export, which will open a new tab with tables of metadata pertaining to each Finding. 
+Pages that show a list of Findings or a list of Engagements have a CSV and Excel export option at the top left. For Findings, there is also the option to perform a **Quick Export**.
+
+Selecting Quick Export opens a dialog with three choices:
+
+- **Template**: the report template to apply. This defaults to the standard Findings table, so you can export without choosing one.
+- **Report name**: the name the finished report is stored under. It arrives prefilled, and you can edit it before running the export.
+- **Format**: whether the report is produced as HTML or PDF.
+
+The export runs in the background, and the finished report appears in your Generated Reports list under the name you chose.
+
+The prefilled name describes what you exported, followed by where you exported it from in parentheses. It carries no date, because the Generated Reports list already shows when each report was requested and completed. Exporting from a Findings list that is not scoped to anything gives just the content name. 

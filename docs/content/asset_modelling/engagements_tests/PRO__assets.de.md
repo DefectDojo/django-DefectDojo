@@ -169,7 +169,7 @@ Das bedeutet, dass dieselbe Schwachstelle je nachdem, ob sie ein internes Entwic
 
 ### Jira-/Downstream-Connector-Beziehungen
 
-Assets können direkt mit [Jira](/connectors/downstream/pro__jira_guide/#main-content)- oder [Integrators](/connectors/downstream/downstream_toolreference/#main-content)-Instanzen (z. B. GitHub, GitLab, ServiceNow usw.) verknüpft werden, die die Befunde des Assets nach außen in externe Ticketing-/Work-Management-Systeme übertragen.
+Assets können direkt mit [Jira](/connectors/downstream/pro__jira_guide/#main-content)- oder [Integrators](/connectors/toolreference/downstream/#main-content)-Instanzen (z. B. GitHub, GitLab, ServiceNow usw.) verknüpft werden, die die Befunde des Assets nach außen in externe Ticketing-/Work-Management-Systeme übertragen.
 
 Da Befunde Risiko, Priorität und Zuständigkeit von ihrem übergeordneten Asset übernehmen, bestimmt das Asset effektiv den Behebungskontext, der in Jira-Tickets und Downstream-Connector-Workflows einfließt.
 

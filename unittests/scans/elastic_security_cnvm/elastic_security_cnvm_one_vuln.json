@@ -1,0 +1,60 @@
+{
+  "pit_id": "example-pit-id",
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "hits": [
+      {
+        "_id": "doc-cnvm-1",
+        "_index": "logs-cloud_security_posture.vulnerabilities-default",
+        "_source": {
+          "@timestamp": "2024-07-01T12:00:00.000Z",
+          "vulnerability": {
+            "id": "CVE-2000-0001",
+            "title": "openssl: remote code execution",
+            "description": "A memory-safety flaw allows remote code execution.",
+            "severity": "HIGH",
+            "reference": "https://nvd.example.com/vuln/detail/CVE-2000-0001",
+            "classification": "CVSS",
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "published_date": "2024-05-01T00:00:00.000Z"
+          },
+          "package": {
+            "name": "openssl",
+            "version": "3.0.2",
+            "fixed_version": "3.0.13",
+            "type": "deb"
+          },
+          "resource": {
+            "id": "i-0000000000000001",
+            "name": "web-node-1",
+            "type": "instance",
+            "sub_type": "ec2"
+          },
+          "host": {
+            "name": "web-node-1",
+            "hostname": "web-node-1.example.com",
+            "os": {
+              "name": "Ubuntu",
+              "version": "22.04",
+              "full": "Ubuntu 22.04.4 LTS"
+            }
+          },
+          "cloud": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "account": {
+              "id": "acct-1234",
+              "name": "example-account"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

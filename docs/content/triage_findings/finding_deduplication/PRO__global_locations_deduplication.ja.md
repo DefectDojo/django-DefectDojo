@@ -1,5 +1,5 @@
 ---
-title: Global Locations Deduplication (Pro)
+title: Global Locations Deduplication
 description: 共有される位置情報(URL または依存関係)に基づき、すべての Product にわたって検出事項を重複排除します
 weight: 6
 audience: pro

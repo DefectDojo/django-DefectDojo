@@ -13,6 +13,8 @@ seo:
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
 exclude_search: true
+aliases:
+  - "/en/customize_dojo/user_management/"
 ---
 
 DefectDojo's user management surface is different in each edition. Pick the section that matches your installation.

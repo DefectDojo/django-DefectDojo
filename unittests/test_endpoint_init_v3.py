@@ -31,6 +31,7 @@ from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
 from openpyxl import load_workbook
+from parameterized import parameterized
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -38,6 +39,7 @@ from dojo.finding.deduplication import get_finding_models_for_deduplication
 from dojo.finding.helper import post_process_findings_batch
 from dojo.github.services import github_body
 from dojo.jira.helper import jira_description
+from dojo.location.api.endpoint_compat import V3EndpointStatusCompatibleSerializer
 from dojo.location.models import LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
@@ -335,3 +337,54 @@ class TestEndpointInitV3(DojoTestCase):
         )
 
         self.assertTrue(Finding.objects.filter(id=tree.finding.id).exists())
+
+    # ------------------------------------------------------------------
+    # endpoint_status compatibility serializer
+    # ------------------------------------------------------------------
+    # Regression: V3EndpointStatusCompatibleSerializer.get_mitigated returned obj.created.date()
+    # (a copy of get_date) instead of the Mitigated status, so every row reported a truthy date.
+    @parameterized.expand([
+        (FindingLocationStatus.Active, False),
+        (FindingLocationStatus.Mitigated, True),
+        (FindingLocationStatus.FalsePositive, False),
+        (FindingLocationStatus.RiskAccepted, False),
+        (FindingLocationStatus.OutOfScope, False),
+    ])
+    def test_endpoint_status_mitigated_is_a_bool_tracking_the_status(self, status, expected):
+        """``mitigated`` must be a bool that is True only for a Mitigated location."""
+        tree = self._make_tree(f"mit-{status.value}")
+        ref = self._add_location(tree, f"loc-{status.value.lower()}.example.com", status=status)
+
+        data = V3EndpointStatusCompatibleSerializer(ref).data
+
+        self.assertIsInstance(
+            data["mitigated"], bool,
+            msg=f"expected a bool for status={status.value}, got {type(data['mitigated']).__name__} {data['mitigated']!r}",
+        )
+        self.assertEqual(
+            data["mitigated"], expected,
+            msg=f"expected mitigated={expected} for status={status.value}, got {data['mitigated']!r}",
+        )
+
+    @parameterized.expand([
+        (FindingLocationStatus.Active, False),
+        (FindingLocationStatus.Mitigated, True),
+    ])
+    def test_endpoint_status_mitigated_time_and_by_follow_mitigated(self, status, expected):
+        """``mitigated_time``/``mitigated_by`` branch on get_mitigated, so they must follow it."""
+        tree = self._make_tree(f"mitby-{status.value}")
+        ref = self._add_location(tree, f"loc-mitby-{status.value.lower()}.example.com", status=status)
+        ref.auditor = self.admin
+        ref.audit_time = timezone.now()
+        ref.save()
+
+        data = V3EndpointStatusCompatibleSerializer(ref).data
+
+        self.assertEqual(
+            data["mitigated_time"] is not None, expected,
+            msg=f"expected mitigated_time set={expected} for status={status.value}, got {data['mitigated_time']!r}",
+        )
+        self.assertEqual(
+            data["mitigated_by"], self.admin.id if expected else None,
+            msg=f"expected mitigated_by set={expected} for status={status.value}, got {data['mitigated_by']!r}",
+        )

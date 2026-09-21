@@ -76,7 +76,7 @@ Um den Unterschied zu verstehen, hilft es, sich Import als das Erfassen eines ei
 
 Hier eine Analogie: Wären Sie Buchhalter, könnten Sie Import verwenden, um einen einzelnen Beleg zu erfassen, während Sie Reimport nutzen würden, um ein fortlaufendes Ausgabenbuch zu führen.
 
-Beide Methoden nutzen die Deduplizierung außerdem unterschiedlich: Während zwei separate importierte Tests im selben Produkt doppelte Befunde jeweils eigenständig erkennen und kennzeichnen, erstellt Reimport innerhalb des Tests keine Befunde, die es als [Duplikate](/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport/) identifiziert.
+Beide Methoden nutzen die Deduplizierung außerdem unterschiedlich: Während zwei separate importierte Tests im selben Produkt doppelte Befunde jeweils eigenständig erkennen und kennzeichnen, erstellt Reimport innerhalb des Tests keine Befunde, die es als [Duplikate](/triage_findings/finding_deduplication/avoid_excess_duplicates/) identifiziert.
 
 Grundsätzlich gilt: Wenn Sie einen Bericht zu einem bestimmten Zeitpunkt benötigen, ist Import die beste Methode. Wenn Sie fortlaufend Berichte aus einem Tool ausführen und einlesen, ist Reimport die bessere Methode, um alles organisiert zu halten.
 

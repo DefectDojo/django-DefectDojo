@@ -1,0 +1,70 @@
+{
+  "result": [
+    {
+      "id": "nc-0001",
+      "cve": "CVE-2000-0001",
+      "cve_score": 9.8,
+      "cve_summary": "A crafted control message causes the controller to execute attacker code.",
+      "cve_references": ["https://example.com/advisories/CVE-2000-0001"],
+      "cwe_id": "CWE-787",
+      "cwe_name": "Out-of-bounds Write",
+      "asset_id": "asset-0001",
+      "zone": "Cell Zone A",
+      "node_label": "generic-plc-01",
+      "node_type": "PLC",
+      "node_vendor": "Generic Controls",
+      "node_product_name": "GC-9000",
+      "node_firmware_version": "2.4.1",
+      "node_os": "GCOS 4",
+      "latest_hotfix": "2.4.3",
+      "minimum_hotfix": "2.4.2",
+      "resolved": false
+    },
+    {
+      "id": "",
+      "cve": "CVE-2000-0002",
+      "cve_score": "7.5",
+      "cve_summary": "",
+      "cve_references": [],
+      "cwe_id": "89",
+      "cwe_name": "",
+      "asset_id": "asset-0002",
+      "zone": "Cell Zone B",
+      "node_label": "generic-hmi-02",
+      "node_type": "HMI",
+      "node_vendor": "Generic HMI Works",
+      "node_product_name": "HMI-100",
+      "node_firmware_version": "5.0.0",
+      "minimum_hotfix": "5.0.1",
+      "resolved": false
+    },
+    {
+      "id": "nc-0003",
+      "cve": "",
+      "cve_score": 0,
+      "cwe_id": "not a cwe",
+      "asset_id": "asset-0003",
+      "node_label": "generic-rtu-03",
+      "node_type": "RTU",
+      "resolved": false
+    },
+    {
+      "id": "nc-0004",
+      "cve": "CVE-2000-0004",
+      "cve_score": 9.9,
+      "cve_summary": "Never imported: Nozomi has already resolved this one.",
+      "asset_id": "asset-0004",
+      "node_label": "generic-plc-04",
+      "resolved": true
+    },
+    {
+      "id": "nc-0005",
+      "cve": "CVE-2000-0005",
+      "cve_score": 4.3,
+      "asset_id": "asset-0005",
+      "node_label": "generic-switch-05",
+      "node_product_name": "SW-200",
+      "node_firmware_version": "1.0.0"
+    }
+  ]
+}

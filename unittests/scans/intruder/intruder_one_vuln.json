@@ -1,0 +1,31 @@
+{
+  "count": 1,
+  "results": [
+    {
+      "id": 9001,
+      "severity": "high",
+      "title": "TLS certificate expires in under 14 days",
+      "description": "The certificate presented by the service expires shortly.",
+      "remediation": "Renew the certificate and redeploy it to every listener.",
+      "cvss_score": 7.4,
+      "snoozed": false,
+      "exploit_likelihood": "MEDIUM",
+      "occurrences": [
+        {
+          "id": 1,
+          "occurrence_id": 500001,
+          "target": "app.example.com",
+          "display_address": "app.example.com (production)",
+          "port": "443",
+          "protocol": "tcp",
+          "first_seen_at": "2024-07-01T12:00:00Z",
+          "snoozed": false,
+          "exploit_likelihood": "MEDIUM",
+          "cvss_score": 8.1,
+          "cves": ["CVE-2000-0001"],
+          "extra_info": {"issuer": "Example CA", "expires": "2024-07-20"}
+        }
+      ]
+    }
+  ]
+}

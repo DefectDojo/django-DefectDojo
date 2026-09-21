@@ -1,0 +1,75 @@
+{
+  "apiId": "api-0001",
+  "report": {
+    "data": {
+      "index": {
+        "jsonPointers": [
+          "/paths/~1orders/get/responses/200",
+          "/paths/~1orders/post/requestBody"
+        ],
+        "injectionDescriptions": [
+          "The response returned %s instead of the documented %s",
+          "The operation accepted a request with no authentication",
+          "The response body did not match the schema"
+        ],
+        "responseDescriptions": ["OK", "Unauthorized"]
+      },
+      "summary": {"state": "finished", "criticality": 5},
+      "paths": {
+        "/orders": {
+          "get": {
+            "issues": [
+              {
+                "id": "3f8b0c1e-0000-4000-8000-000000000001",
+                "criticality": 5,
+                "injectionDescription": 0,
+                "injectionDescriptionParams": ["500", "200"],
+                "url": "https://api.example.com/orders?limit=1",
+                "curl": "curl -X GET 'https://api.example.com/orders?limit=1'",
+                "responseHttpStatusCode": 500,
+                "jsonPointer": 0
+              },
+              {
+                "id": "3f8b0c1e-0000-4000-8000-000000000002",
+                "criticality": 4,
+                "injectionDescription": 1,
+                "injectionDescriptionParams": [],
+                "url": "https://api.example.com/orders",
+                "curl": "curl -X GET 'https://api.example.com/orders'",
+                "responseHttpStatusCode": 200,
+                "jsonPointer": 0
+              }
+            ]
+          },
+          "post": {
+            "issues": [
+              {
+                "id": "3f8b0c1e-0000-4000-8000-000000000003",
+                "criticality": 3,
+                "injectionDescription": 2,
+                "url": "https://api.example.com/orders",
+                "curl": "",
+                "responseHttpStatusCode": 0,
+                "jsonPointer": 1
+              }
+            ]
+          }
+        },
+        "/health": {
+          "get": {
+            "issues": [
+              {
+                "id": "3f8b0c1e-0000-4000-8000-000000000004",
+                "criticality": 2,
+                "injectionDescription": 99,
+                "url": "not a url at all",
+                "responseHttpStatusCode": 404,
+                "jsonPointer": 99
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

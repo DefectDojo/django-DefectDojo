@@ -1,4 +1,5 @@
 import sys
+import time
 import unittest
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger
@@ -17,29 +18,76 @@ WEBHOOK_ENDPOINT_URL = "http://webhook.endpoint:8080/post"
 class NotificationWebhookTest(BaseTestCase):
 
     def wait_for_alert(self):
-        """Wait for a Bootstrap alert to render after a form submit."""
+        """
+        Wait for a Bootstrap alert to render after a form submit.
+
+        This is the barrier that tells us the POST response has been rendered,
+        so the caller is looking at the saved page rather than the pre-submit
+        one. base.html only emits .alert markup for the messages framework, so
+        nothing else on the page can satisfy this wait.
+
+        .alert-warning is included because a rejected save is a warning, not an
+        error: the system settings view answers "Settings cannot be saved: ..."
+        with messages.WARNING. Waiting only for success or danger would sit here
+        for the full timeout and then report a TimeoutException, instead of
+        letting the caller's assertions name what actually went wrong.
+        """
         WebDriverWait(self.driver, 30).until(
             expected_conditions.presence_of_element_located(
-                (By.CSS_SELECTOR, ".alert-success, .alert-danger"),
+                (By.CSS_SELECTOR, ".alert-success, .alert-danger, .alert-warning"),
             ),
         )
 
     @on_exception_html_source_logger
     def test_enable_webhook_notifications(self):
-        """Enable webhook notifications in system settings."""
+        """
+        Enable webhook notifications in system settings.
+
+        Wait for the save to land before returning. click_submit() only clicks:
+        it does not wait for the POST response, and is_error_message_present()
+        is an emptiness check on .alert-danger that the pre-submit page passes
+        just as happily as the saved one. Without a barrier the next test in the
+        suite can navigate away while the POST is still in flight, the setting
+        is never persisted, and /notifications/webhooks then 404s (see
+        NotificationWebhooksView.check_webhooks_enabled). The failure surfaces
+        in the NEXT test's teardown as a SEVERE console error, which blames the
+        wrong test. The sibling tests below already wait, so do the same here.
+        """
         driver = self.driver
         driver.get(self.base_url + "system_settings")
         webhook_checkbox = driver.find_element(By.ID, "id_enable_webhooks_notifications")
         if not webhook_checkbox.is_selected():
             webhook_checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
+
+        self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
 
     @on_exception_html_source_logger
     def test_list_webhooks_page_loads(self):
         driver = self.driver
-        driver.get(self.base_url + "notifications/webhooks")
-        self.assertTrue(self.is_text_present_on_page(text="Webhook"))
+        # This page is gated on enable_webhooks_notifications, which the previous
+        # test just turned on. That setting is served from the per-request L1
+        # settings cache (dojo/caching.py), which has no cross-worker tier: a
+        # worker thread self-heals only at its next request boundary, so the
+        # enabling POST and this GET landing on different uwsgi workers can
+        # briefly leave the new value invisible here, and
+        # NotificationWebhooksView.check_webhooks_enabled() then raises Http404
+        # for that window. Retry the load until the real list renders so the
+        # propagation window is absorbed instead of failing the test, and accept
+        # console errors for this one page-load check: the transient 404s logged
+        # during the window are expected, and the heading assertion below is the
+        # real guard. Assert on "Notification Webhook List" -- text only the
+        # actual list page emits -- not a bare "Webhook", which the base
+        # template's sidebar "Notification Webhooks" link matches even on a 404.
+        self.accept_javascript_errors = True
+        for _ in range(10):
+            driver.get(self.base_url + "notifications/webhooks")
+            if self.is_text_present_on_page(text="Notification Webhook List"):
+                break
+            time.sleep(1)
+        self.assertTrue(self.is_text_present_on_page(text="Notification Webhook List"))
 
     @on_exception_html_source_logger
     def test_add_notification_webhook(self):
@@ -49,7 +97,7 @@ class NotificationWebhookTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").send_keys("Test Webhook")
         driver.find_element(By.ID, "id_url").clear()
         driver.find_element(By.ID, "id_url").send_keys(WEBHOOK_ENDPOINT_URL)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
@@ -70,7 +118,7 @@ class NotificationWebhookTest(BaseTestCase):
         # Ensure the endpoint stays pointed at the local mock so the save-time ping succeeds.
         driver.find_element(By.ID, "id_url").clear()
         driver.find_element(By.ID, "id_url").send_keys(WEBHOOK_ENDPOINT_URL)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
@@ -86,7 +134,7 @@ class NotificationWebhookTest(BaseTestCase):
         if len(delete_links) == 0:
             self.fail("No Delete link found for webhook")
         delete_links[0].click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
+        self.click_submit(driver, "input.btn.btn-danger")
 
         self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
@@ -94,14 +142,22 @@ class NotificationWebhookTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_disable_webhook_notifications(self):
-        """Disable webhook notifications to reset system settings."""
+        """
+        Disable webhook notifications to reset system settings.
+
+        Same barrier as test_enable_webhook_notifications: this test claims to
+        reset the setting, so it has to confirm the reset actually saved.
+        """
         driver = self.driver
         driver.get(self.base_url + "system_settings")
         webhook_checkbox = driver.find_element(By.ID, "id_enable_webhooks_notifications")
         if webhook_checkbox.is_selected():
             webhook_checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
+
+        self.wait_for_alert()
         self.assertFalse(self.is_error_message_present())
+        self.assertTrue(self.is_success_message_present(text="Settings saved."))
 
 
 def suite():

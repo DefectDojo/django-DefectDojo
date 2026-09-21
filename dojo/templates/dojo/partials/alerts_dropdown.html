@@ -3,7 +3,7 @@
     <a href="{{ alert.url }}" class="block px-4 py-2 text-sm hover:bg-gray-50 border-b border-gray-100" title="{{ alert.description|truncatechars:100 }}">
         <i class="fa-solid fa-{{ alert.icon }} fa-fw text-gray-400"></i>
         {{ alert.title|default:alert.description|truncatechars:50 }}
-        <span class="float-right text-xs text-gray-400">{{ alert.source }}</span>
+        <span class="float-end text-xs text-gray-400">{{ alert.source }}</span>
     </a>
 {% endfor %}
 {% if alerts %}

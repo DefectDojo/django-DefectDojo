@@ -117,7 +117,7 @@ class FindingTest(BaseTestCase):
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
-        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
@@ -167,7 +167,7 @@ class FindingTest(BaseTestCase):
             driver.find_element(By.ID, "id_cvssv4_score").send_keys(str(cvssv4_score))
 
         # Submit the form
-        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='_Finished']"))
 
         if expect_success:
             self.assertTrue(self.is_success_message_present(text=success_message))
@@ -497,7 +497,7 @@ class FindingTest(BaseTestCase):
         # fill notes stating why finding should be closed
         driver.find_element(By.ID, "id_entry").send_keys("All issues in this Finding have been resolved successfully")
         # click 'close Finding' submission button
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Finding closed."))
@@ -616,7 +616,7 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.XPATH, "//button[@data-option='Replace']").click()
         self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
-        driver.find_element(By.NAME, "_Finished").click()
+        self.click_centered(driver, driver.find_element(By.NAME, "_Finished"))
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
 
@@ -694,7 +694,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From \\Template"))
 
         # Navigate back to the finding list
-        driver.find_element(By.LINK_TEXT, "Findings").click()
+        self.goto_all_findings_list(driver)
         self.assertNoConsoleErrors()
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS from \\Template").click()
         self.assertNoConsoleErrors()
@@ -725,7 +725,7 @@ class FindingTest(BaseTestCase):
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Click on the 'Finding' dropdown menubar
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Findings").click()
+        self.open_product_tab(driver, "findings")
         # Click on `Import Scan Results` link text
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         # Select `ZAP Scan` as Scan Type

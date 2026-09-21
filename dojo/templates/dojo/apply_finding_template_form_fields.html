@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load as_json %}
 {% load event_tags %}
 {% load get_attribute %}
@@ -9,7 +10,7 @@
 {% endblock %}
 {% if form.non_field_errors %}
     <div class="alert alert-danger alert-dismissible" role="alert" x-data="{ show: true }" x-show="show" x-transition>
-        <button type="button" class="close" @click="show = false" aria-label="Close"><span
+        <button type="button" class="close" @click="show = false" aria-label="{% trans 'Close' %}"><span
                 aria-hidden="true">&times;</span></button>
         {{ form.non_field_errors }}
     </div>

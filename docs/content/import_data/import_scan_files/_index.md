@@ -13,4 +13,6 @@ seo:
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
 exclude_search: true
+aliases:
+  - "/en/connecting_your_tools/import_scan_files/"
 ---

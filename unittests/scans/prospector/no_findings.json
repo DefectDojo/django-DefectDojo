@@ -1,0 +1,21 @@
+{
+  "summary": {
+    "started": "2026-08-09 15:27:00.587743",
+    "libraries": [],
+    "strictness": null,
+    "profiles": "default, no_doc_warnings, no_test_warnings, strictness_medium, strictness_high, strictness_veryhigh, no_member_warnings",
+    "tools": [
+      "dodgy",
+      "mccabe",
+      "profile-validator",
+      "pycodestyle",
+      "pyflakes",
+      "pylint"
+    ],
+    "message_count": 0,
+    "completed": "2026-08-09 15:27:00.745258",
+    "time_taken": "0.16",
+    "formatter": "json"
+  },
+  "messages": []
+}

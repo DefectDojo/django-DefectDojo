@@ -23,7 +23,7 @@ class RiskAcceptanceTest(BaseTestCase):
         checkbox = driver.find_element(By.ID, "id_enable_full_risk_acceptance")
         if not checkbox.is_selected():
             checkbox.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Asset updated successfully")
@@ -63,7 +63,7 @@ class RiskAcceptanceTest(BaseTestCase):
         proof_path = Path(os.path.realpath(__file__)).parent / "dedupe_scans" / "dedupe_path_1.json"
         driver.find_element(By.ID, "id_path").send_keys(str(proof_path))
         # Owner is pre-filled (current user), submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         time.sleep(1)
 
         self.assertTrue(

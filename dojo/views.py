@@ -9,6 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
@@ -67,8 +68,6 @@ def manage_files(request, oid, obj_type):
         files_formset = formset_class(
             request.POST, request.FILES, queryset=files_queryset)
         if files_formset.is_valid():
-            # remove all from database and disk
-
             files_formset.save()
 
             for o in getattr(files_formset, "deleted_objects", []):
@@ -81,19 +80,10 @@ def manage_files(request, oid, obj_type):
                 logger.debug("adding file: %s", o.file.name)
                 obj.files.add(o)
 
-            orphan_files = FileUpload.objects.filter(engagement__isnull=True,
-                                                     test__isnull=True,
-                                                     finding__isnull=True)
-            for o in orphan_files:
-                logger.debug("purging orphan file: %s", o.file.name)
-                with suppress(FileNotFoundError):
-                    (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
-                o.delete()
-
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Files updated successfully.",
+                _("Files updated successfully."),
                 extra_tags="alert-success")
 
         else:
@@ -101,7 +91,7 @@ def manage_files(request, oid, obj_type):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Please check form data and try again.",
+                _("Please check form data and try again."),
                 extra_tags="alert-danger")
 
         if not error:

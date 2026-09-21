@@ -1,0 +1,152 @@
+{
+  "rule_results": [
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_instance.example",
+      "resource_type": "aws_instance",
+      "resource_tags": {},
+      "rule_description": "EC2 instances should not have a public IP association (IPv4). Publicly accessible EC2 instances are reachable over the internet even if you have protections such as NACLs or security groups. If these protections are accidentally removed your instances may be vulnerable to attack.",
+      "rule_id": "FG_R00271",
+      "rule_message": "",
+      "rule_name": "tf_aws_ec2_instance_no_public_ip",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00271.html",
+      "rule_result": "PASS",
+      "rule_severity": "Medium",
+      "rule_summary": "EC2 instances should not have a public IP association (IPv4)",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies and ACLs should not be configured for public read access. It is a security risk for a bucket to have an ACL or bucket policy that is configured for public read access, even if the bucket itself is not currently public. A bucket configured for public read access can potentially be made public, allowing any AWS user or anonymous user to access the data in it.",
+      "rule_id": "FG_R00279",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucket_config_public_read",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00279.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies and ACLs should not be configured for public read access",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 buckets should not be publicly readable. A bucket with a public ACL or bucket policy is exposed to the entire internet if all block public access settings are disabled at the resource and account level. This poses a critical security vulnerability, as any AWS user or anonymous user can access the data in the bucket.",
+      "rule_id": "FG_R00277",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucket_is_public",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00277.html",
+      "rule_result": "PASS",
+      "rule_severity": "Critical",
+      "rule_summary": "S3 buckets should not be publicly readable",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow all actions for all IAM principals and public users. S3 bucket policies - and access control policies in general - should not allow wildcard/all actions, except in very specific administrative situations. Allowing all principals to wildcard access is overly permissive.",
+      "rule_id": "FG_R00210",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowall",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00210.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow all actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow list actions for all IAM principals and public users. S3 bucket policies list actions enable users to enumerate information on an organization's S3 buckets and objects. Malicious actors may use this information to identify potential targets for hacks. Users should scope list actions only to users and roles that require this information - not all principals.",
+      "rule_id": "FG_R00211",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowlist",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00211.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow list actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "filepaths": [
+      "work/tf/main.tf"
+    ],
+    "rule_results": {
+      "FAIL": 9,
+      "PASS": 5,
+      "WAIVED": 0
+    },
+    "severities": {
+      "Critical": 0,
+      "High": 3,
+      "Informational": 0,
+      "Low": 2,
+      "Medium": 4,
+      "Unknown": 0
+    }
+  }
+}

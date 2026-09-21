@@ -63,7 +63,7 @@ class EngagementChecklistTest(BaseTestCase):
             if len(fields) > 0:
                 Select(fields[0]).select_by_visible_text("Pass")
 
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         time.sleep(1)
 
         self.assertTrue(

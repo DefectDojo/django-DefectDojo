@@ -3,30 +3,28 @@ title: "Threat Modeling"
 description: "Generate a threat model, attack paths and security requirements from a feature design, before the code exists"
 draft: false
 audience: pro
-weight: 4
+weight: 5
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Threat Modeling is a DefectDojo Pro-only feature and is currently in BETA.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Threat Modeling is a DefectDojo Pro-only feature.</span>
 
 **Threat Modeling** turns a feature design into a reviewed threat model. You supply the design — pasted text, a design document, and optionally an architecture diagram — and DefectDojo produces the components and data flows it describes, the threats against them, and the security requirements that mitigate those threats. Requirements can then be pushed into DefectDojo as findings, so design-stage work flows through the same triage, SLA, Jira and reporting machinery as everything else.
 
 This is Sensei's **pre-code** capability. Where [scan-and-fix](/sensei/about_sensei/) works on a repository that already exists, threat modeling works on the design, before there is code to scan.
-
-> **🔎 BETA:** Threat Modeling is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases. It is on by default; a superuser can switch it off, or back on, from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required.
 
 > **📍 Where to find it:** open **Threat Modeling** from the left-hand navigation, directly below Sensei.
 
 ## What you need
 
 - The **Sensei** licensed feature. Threat modeling ships under the same entitlement as scan-and-fix.
-- The **AI Threat Modeling** feature flag, which is on by default. If your instance turned it off, a superuser can turn it back on from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/).
+- The **AI Threat Modeling** feature flag, which is on by default. If your instance turned it off, a superuser can turn it back on from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
 - A global **Maintainer** or **Owner** role. Users without it do not see the page.
-- An Asset to attach the threat model to. Instances using V3 naming see Assets called **assets**; this page says *Asset* throughout, and the UI follows whichever naming your instance is set to.
+- An Asset to attach the threat model to. Instances that have not enabled 3.0 naming see Assets called **products**; this page says *Asset* throughout, and the UI follows whichever naming your instance is set to.
 
 Nothing is installed and no repository is connected. Threat modeling reads only the design you supply.
 
 ## Generating a threat model
 
-Choose **New threat model**, pick the Asset, give it a name, and supply the design in whichever form you have it:
+Choose **New Threat Model**, pick the Asset, give it a name, and supply the design in whichever form you have it:
 
 - **Paste the description** directly, or
 - **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` or `.pdf`. Text extraction from PDF is best-effort; if a PDF is mostly images, paste the text instead.

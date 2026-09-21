@@ -35,7 +35,7 @@ class ProductMemberTest(BaseTestCase):
         product_option = element.find_elements(By.TAG_NAME, "option")[0]
         Select(element).select_by_value(product_option.get_attribute("value"))
         # Submit (legacy auth does not use a role field)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.assertTrue(self.is_success_message_present(text="Authorized propersahm"))
         # Verify QA Test is now listed in the user's accessible products
         self.assertEqual(driver.find_elements(By.NAME, "member_product")[0].text, "QA Test")
@@ -79,7 +79,7 @@ class ProductMemberTest(BaseTestCase):
                 break
         self.assertIsNotNone(propersahm_option, "propersahm option not found in users select")
         Select(element).select_by_value(propersahm_option.get_attribute("value"))
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.assertTrue(self.is_success_message_present(text="Added 1 user(s) to authorized users."))
         # Verify propersahm is now listed in the product's authorized users
         usernames = [e.text for e in driver.find_elements(By.NAME, "authorized_user_username")]

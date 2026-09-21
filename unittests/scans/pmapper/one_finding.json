@@ -1,0 +1,14 @@
+{
+  "account": "000000000000",
+  "date_and_time": "2026-08-10T09:00:00",
+  "findings": [
+    {
+      "title": "IAM Role Available to Compute Service That Can Escalate Privileges",
+      "severity": "High",
+      "impact": "An attacker with access to the compute service can gain administrative access.",
+      "description": "The IAM Role sample-instance-role can be assumed by ec2.amazonaws.com and can reach the IAM Role sample-admin-role via iam:PassRole.",
+      "recommendation": "Restrict iam:PassRole on sample-instance-role to the roles it needs."
+    }
+  ],
+  "source": "sample-org-graph"
+}

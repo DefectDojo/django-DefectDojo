@@ -73,7 +73,7 @@ In addition to metadata corresponding to the tables in a Finding’s view, optio
 - **CVSS3/CVSS4 vector and score**: The CVSS3 and CVSS4 vector and score of the selected Finding. 
 - **Request and response pairs**: A copy of the message sent by the client and the server's reply to the request.
 - **Endpoints to add**: Vulnerable endpoints that may be affected by the selected Finding that are not reflected in the preceding list of systems/endpoints. 
-- **EPSS score and percentile**: ESS score and percentile for the CVE. 
+- **EPSS score and percentile**: EPSS score and percentile for the CVE. 
 - **KEV date added**: The date the Finding was added to the KEV catalog. 
 - **Fix availability and version**: Defines if there is a fix available for the vulnerability, and the version of the affected component in which the fix was implemented. 
 - **User who requested a defect review**: Records who requested a defect review for the flaw in question. 

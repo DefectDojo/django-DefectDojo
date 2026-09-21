@@ -1,0 +1,74 @@
+{
+  "class": "web",
+  "count": 5,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "hid": "HID-100001",
+      "vulnerability_name": "Cross-site scripting in the search form",
+      "cve_ids": ["CVE-2000-0001"],
+      "cvss_score": 5.4,
+      "cvss_base": 6.1,
+      "severity_level": 2,
+      "severity": "high",
+      "status": "open",
+      "solution": "Encode user input before rendering it.",
+      "detection_information": "The payload was reflected in the response body.",
+      "vulnerability_impact": "An attacker can run script in a visitor's session.",
+      "vendor_reference": "https://vendor.example.com/advisory/xss",
+      "asset_uuid": "asset-0001",
+      "detected_port": 443,
+      "detected_port_protocol": "tcp",
+      "url": "https://app.example.com/search?q=1",
+      "first_detected": "2024-06-01T00:00:00Z",
+      "last_detected": "2024-07-01T12:00:00Z"
+    },
+    {
+      "hid": "HID-100002",
+      "vulnerability_name": "",
+      "cve_ids": ["CVE-2000-0002", "CVE-2000-0003"],
+      "cvss_score": 7.5,
+      "cvss_base": 0,
+      "severity_level": "3",
+      "severity": "",
+      "status": "open",
+      "solution": "Upgrade the service.",
+      "asset_uuid": "asset-0001",
+      "detected_port": 8443,
+      "url": "https://app.example.com/",
+      "first_detected": "2024-06-01T00:00:00Z"
+    },
+    {
+      "hid": "HID-100003",
+      "vulnerability_name": "An unrecognised severity name with a usable level",
+      "cve_ids": [],
+      "cvss_base": 0,
+      "cvss_score": 0,
+      "severity_level": 4,
+      "severity": "severe",
+      "status": "open",
+      "asset_uuid": "asset-0002",
+      "detected_port": 0,
+      "url": ""
+    },
+    {
+      "hid": "HID-100004",
+      "vulnerability_name": "A fixed finding",
+      "severity": "medium",
+      "severity_level": 2,
+      "status": "fixed",
+      "asset_uuid": "asset-0002",
+      "url": "https://app.example.com/old",
+      "last_detected": "2024-05-01T00:00:00Z"
+    },
+    {
+      "hid": "HID-100005",
+      "vulnerability_name": "A finding on a label rather than a host",
+      "severity": "low",
+      "status": "open",
+      "asset_uuid": "asset-0003",
+      "url": "an internal service"
+    }
+  ]
+}

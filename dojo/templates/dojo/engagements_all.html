@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load filter_tags %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -12,7 +13,7 @@
                     <h3 class="has-filters">
                         Engagements
                         <div class="dropdown pull-right">
-                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
@@ -52,7 +53,7 @@
                                     <td class="nowrap">
                                         <div class="align-top">
                                             <div class="dropdown">
-                                                <a href="#" aria-label="More engagement options" class="dropdown-toggle pull-left" data-toggle="dropdown" id="dropdownMenuToggle" role="button">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+                                                <a href="#" aria-label="{% trans 'More engagement options' %}" class="dropdown-toggle pull-left" data-toggle="dropdown" id="dropdownMenuToggle" role="button">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuToggle" role="menu">
                                                     <li role="presentation">
                                                         <a class="" href="{% url 'view_engagement' e.id %}" role="menuitem">

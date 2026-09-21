@@ -47,7 +47,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 Wichtig:** Die gesamte Dashboards-API hängt von der Funktion für anpassbare Dashboards ab. Solange sie nicht aktiviert ist, liefert jeder Endpunkt `403 Dashboard V2 is not enabled.` – siehe [Anpassbare Dashboards aktivieren](../custom-dashboards/#enabling-customizable-dashboards).
+> **🔑 Wichtig:** Die gesamte Dashboards-API hängt von der Funktion für anpassbare Dashboards ab. Solange sie nicht aktiviert ist, liefert jeder Endpunkt `403 Dashboards 2.0 is not enabled.` – siehe [Anpassbare Dashboards aktivieren](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Sicherheitshinweis:** Ihr API-Token gewährt vollständigen Zugriff auf Ihre DefectDojo-Daten. Fügen Sie es niemals in einen Chat, einen Screenshot, ein Ticket oder eine committete Datei ein. Lesen Sie es aus einer Umgebungsvariable, rotieren Sie es, falls es jemals offengelegt wird, und beschränken Sie Tokens nach Möglichkeit auf Service-Konten.
 
@@ -305,6 +305,7 @@ Der vollständige Satz an `widget_data`-Aktionen:
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | Befunde, die kurz vor einer SLA-Verletzung stehen |
 | `recent_activity` | GET | `?model=`, `?limit=` | Feed der letzten Datensätze |
 | `saved_reports` | GET | `?limit=` | gespeicherte Berichtsvorlagen *(erfordert Reporting)* |
+| `root_causes` | POST | `limit?` | eingestufte Ursachen-Cluster *(erfordert Root-Ursachen-Korrelation)* |
 | `usage` | GET | — | Aufschlüsselung der Lizenznutzung *(erfordert Maintainer)* |
 
 ## Alles zusammenfügen: ein vollständiges Lifecycle-Skript

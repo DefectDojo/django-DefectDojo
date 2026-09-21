@@ -4,6 +4,7 @@ description: "Export findings and engagements as CSV or Excel"
 weight: 4
 audience: opensource
 aliases:
+  - "/open_source/exporting/"
   - /en/open_source/exporting
 ---
 

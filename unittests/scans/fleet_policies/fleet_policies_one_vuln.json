@@ -1,0 +1,23 @@
+{
+  "host": {
+    "id": 11,
+    "hostname": "laptop-11.example.com",
+    "computer_name": "Laptop 11",
+    "display_name": "laptop-11",
+    "platform": "darwin",
+    "os_version": "macOS 14.5",
+    "primary_ip": "10.0.0.11",
+    "policies": [
+      {
+        "id": 90,
+        "name": "Disk encryption enabled",
+        "query": "SELECT 1 FROM disk_encryption WHERE user_uuid IS NOT NULL AND filevault_status = 'on';",
+        "description": "Checks that FileVault is enabled on the startup volume.",
+        "resolution": "Turn on FileVault in System Settings, Privacy & Security.",
+        "platform": "darwin",
+        "critical": true,
+        "response": "fail"
+      }
+    ]
+  }
+}

@@ -25,7 +25,7 @@ class EnvironmentTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "New Environment").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("environment test")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Environment added successfully."))
 
@@ -35,7 +35,7 @@ class EnvironmentTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "environment test").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Edited environment test")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Environment updated successfully."))
 
@@ -43,7 +43,7 @@ class EnvironmentTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "dev_env")
         driver.find_element(By.LINK_TEXT, "Edited environment test").click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
+        self.click_submit(driver, "input.btn.btn-danger")
 
         self.assertTrue(self.is_success_message_present(text="Environment deleted successfully."))
 

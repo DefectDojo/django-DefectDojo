@@ -63,6 +63,38 @@
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeAllDropdowns(null);
     });
+
+    /* jQuery plugin surface. Templates call $(el).dropdown('toggle') from inline
+       onclick handlers, which bootstrap.min.js used to provide; without it jQuery
+       raises "$(...).dropdown is not a function" and the handler dies. Route the
+       call through the same open/close logic as a real click.
+
+       The receiver differs per call site: the toggle itself (#dropdownMenu2), the
+       .dropdown container (#test-pulldown), or the .dropdown-menu (#related_actions_N).
+       closest() matches the element itself as well as its ancestors, so one lookup
+       resolves all three to the element that carries .open.
+    */
+    if (typeof jQuery !== 'undefined') {
+        jQuery.fn.dropdown = function (action) {
+            return this.each(function () {
+                var parent = this.closest('.dropdown, .btn-group, .dropup');
+                if (!parent) return;
+                var isOpen = parent.classList.contains('open');
+                var open = action === 'show' ? true : (action === 'hide' ? false : !isOpen);
+                if (open === isOpen) return;
+                if (open) {
+                    closeAllDropdowns(parent);
+                    parent.classList.add('open');
+                    fireJQueryEvent(parent, 'show.bs.dropdown');
+                    fireJQueryEvent(parent, 'shown.bs.dropdown');
+                } else {
+                    parent.classList.remove('open');
+                    fireJQueryEvent(parent, 'hide.bs.dropdown');
+                    fireJQueryEvent(parent, 'hidden.bs.dropdown');
+                }
+            });
+        };
+    }
 })();
 
 /* ---- OS promo banner dismiss ----

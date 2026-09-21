@@ -1,0 +1,106 @@
+{
+  "date": "2026-08-08T02:15:39Z",
+  "repo": {
+    "name": "github.com/ossf/scorecard",
+    "commit": "40c1e35996730d4fdcbdb2e6a23917a2467e29b7"
+  },
+  "scorecard": {
+    "version": "v5.5.0",
+    "commit": "c395761df6afe1a69e476bc60a013a94bcbc153f"
+  },
+  "score": 9,
+  "checks": [
+    {
+      "name": "Maintained",
+      "score": 10,
+      "reason": "14 commit(s) and 0 issue activity found in the last 90 days -- score normalized to 10",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project is \"actively maintained\".",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#maintained"
+      }
+    },
+    {
+      "name": "Dependency-Update-Tool",
+      "score": 10,
+      "reason": "update tool detected",
+      "details": [
+        "Info: detected update tool: Dependabot: .github/dependabot.yml:1"
+      ],
+      "documentation": {
+        "short": "Determines if the project uses a dependency update tool.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#dependency-update-tool"
+      }
+    },
+    {
+      "name": "Vulnerabilities",
+      "score": 0,
+      "reason": "59 existing vulnerabilities detected",
+      "details": [
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2022-0635",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2022-0646",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5064",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5338",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5378",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5475",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5622",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5758",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4883",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4887",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5617",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5668",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5746",
+        "Warn: Project is vulnerable to: https://osv.dev/GHSA-hc8v-wwc9-vgxm",
+        "Warn: Project is vulnerable to: https://osv.dev/GHSA-qgq7-7hm3-q39j",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5841",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4858",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4859",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5264",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5381",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5662",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5710",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5158",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5005",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5006",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5013",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5014",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5015",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5016",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5017",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5018",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5019",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5020",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5021",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5023",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5033",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5932",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5025",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5026",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5027",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5028",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5029",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5030",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5942",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5024",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5970",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5490",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5597",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5074",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5336",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5496",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5693",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-4529",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5694",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5952",
+        "Warn: Project is vulnerable to: https://osv.dev/GHSA-wqqc-jjcq-vfxm",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5851",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5410",
+        "Warn: Project is vulnerable to: https://osv.dev/GO-2026-5052"
+      ],
+      "documentation": {
+        "short": "Determines if the project has open, known unfixed vulnerabilities.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#vulnerabilities"
+      }
+    }
+  ]
+}

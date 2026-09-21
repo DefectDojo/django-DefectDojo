@@ -11,7 +11,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -106,10 +106,9 @@ def webhook(request, secret=None):
             if parsed.get("webhookEvent") == "jira:issue_updated":
                 # xml examples at the end of file
                 jid = parsed["issue"]["id"]
-                # This may raise a 404, but it will be handled in the exception response
                 try:
                     jissue = JIRA_Issue.objects.get(jira_id=jid)
-                except JIRA_Instance.DoesNotExist:
+                except JIRA_Issue.DoesNotExist:
                     return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
                 # Add jira_key to context now that we have it
                 pghistory.context(jira_key=jissue.jira_key)
@@ -182,22 +181,9 @@ def webhook(request, secret=None):
                 if (error_response := check_for_and_create_comment(parsed)) is not None:
                     return error_response
 
-        except Exception as e:
-            # Check if the issue is originally a 404
-            if isinstance(e, Http404):
-                return webhook_responser_handler("debug", str(e))
-            # Try to get a little more information on the exact exception
-            try:
-                message = (
-                    f"Original Exception: {e}\n"
-                    f"jira webhook body parsed:\n{json.dumps(parsed, indent=4)}"
-                )
-            except Exception:
-                message = (
-                    f"Original Exception: {e}\n"
-                    f"jira webhook body :\n{request.body.decode('utf-8')}"
-                )
-            return webhook_responser_handler("debug", message)
+        except Exception:
+            logger.exception("Failed to process incoming JIRA webhook")
+            return webhook_responser_handler("debug", "Could not process the incoming JIRA webhook")
 
     return webhook_responser_handler("No logging here", "Success!")
 
@@ -262,7 +248,7 @@ def check_for_and_create_comment(parsed_json):
     jid = comment.get("self", "").split("/")[-3]
     try:
         jissue = JIRA_Issue.objects.get(jira_id=jid)
-    except JIRA_Instance.DoesNotExist:
+    except JIRA_Issue.DoesNotExist:
         return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
     logger.debug(f"Received issue comment for {jissue.jira_key}")
     logger.debug("jissue: %s", vars(jissue))
@@ -360,7 +346,7 @@ class NewJiraView(View):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Unable to authenticate. Please check credentials.",
+                    _("Unable to authenticate. Please check credentials."),
                     extra_tags="alert-danger")
                 return render(request, self.get_template(), {"jform": jform})
             # authentication successful
@@ -422,7 +408,7 @@ class NewJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "JIRA Configuration Successfully Created.",
+                _("JIRA Configuration Successfully Created."),
                 extra_tags="alert-success")
             create_notification(
                 event="jira_config_added",
@@ -467,7 +453,7 @@ class AdvancedJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "JIRA Configuration Successfully Created.",
+                _("JIRA Configuration Successfully Created."),
                 extra_tags="alert-success")
             create_notification(
                 event="jira_config_added",
@@ -521,7 +507,7 @@ class EditJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "JIRA Configuration Successfully Saved.",
+                _("JIRA Configuration Successfully Saved."),
                 extra_tags="alert-success")
             create_notification(
                 event="jira_config_edited",
@@ -586,7 +572,7 @@ class DeleteJiraView(View):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "JIRA Conf and relationships removed.",
+                        _("JIRA Conf and relationships removed."),
                         extra_tags="alert-success")
                     create_notification(
                         event="jira_config_deleted",

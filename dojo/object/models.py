@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext as _
-from tagulous.models import TagField
+from django_tagulous.models import TagField
 
 
 class Objects_Review(models.Model):

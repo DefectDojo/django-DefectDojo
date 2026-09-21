@@ -507,7 +507,7 @@ Notifications are reinforcement, not the mechanism: every state change is alread
 Risk Acceptance, in its Approvals tab and in the review queue, whether or not a message is sent or
 ever arrives. A send that fails is logged and does not undo the decision.
 
-### Rules Engine 2.0 conditions
+### Triage Engine conditions
 
 With both features enabled, a rule can condition on what an acceptance is doing, not just on the
 `Risk Accepted` flag:

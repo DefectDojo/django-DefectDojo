@@ -8,13 +8,11 @@ audience: pro
 weight: 4
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note : la modélisation des menaces est une fonctionnalité réservée à DefectDojo Pro et se trouve actuellement en BÊTA.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note : la modélisation des menaces est une fonctionnalité réservée à DefectDojo Pro.</span>
 
 La **modélisation des menaces** transforme la conception d'une fonctionnalité en un modèle de menaces revu. Vous fournissez la conception — texte collé, document de conception, et éventuellement un diagramme d'architecture — et DefectDojo produit les composants et les flux de données qu'elle décrit, les menaces qui pèsent sur eux, et les exigences de sécurité qui atténuent ces menaces. Les exigences peuvent ensuite être poussées dans DefectDojo sous forme de constatations, afin que le travail au stade de la conception passe par les mêmes mécanismes de triage, de SLA, de Jira et de reporting que tout le reste.
 
 Il s'agit de la capacité **pré-code** de Sensei. Là où [l'analyse et la correction](/sensei/about_sensei/) fonctionnent sur un dépôt qui existe déjà, la modélisation des menaces fonctionne sur la conception, avant même qu'il y ait du code à analyser.
-
-> **🔎 BÊTA :** la modélisation des menaces est en développement actif et est signalée **BÊTA** dans toute l'interface. Le comportement et les écrans peuvent changer d'une version à l'autre. Pendant la BÊTA, elle est activée par instance par DefectDojo — contactez votre représentant DefectDojo pour l'activer.
 
 > **📍 Où la trouver :** ouvrez **Threat Modeling** depuis la navigation de gauche, juste en dessous de Sensei.
 
@@ -22,13 +20,13 @@ Il s'agit de la capacité **pré-code** de Sensei. Là où [l'analyse et la corr
 
 - La fonctionnalité sous licence **Sensei**. La modélisation des menaces est livrée sous le même droit d'utilisation que l'analyse et la correction.
 - Un rôle global **Mainteneur** ou **Propriétaire**. Les utilisateurs qui ne l'ont pas ne voient pas la page.
-- Un produit auquel rattacher le modèle de menaces. Les instances utilisant la nomenclature V3 voient les produits appelés **assets** ; cette page utilise le terme *produit* partout, et l'interface suit la nomenclature configurée sur votre instance.
+- Un produit auquel rattacher le modèle de menaces. Les instances utilisant la nomenclature 3.0 voient les produits appelés **assets** ; cette page utilise le terme *produit* partout, et l'interface suit la nomenclature configurée sur votre instance.
 
 Rien n'est installé et aucun dépôt n'est connecté. La modélisation des menaces ne lit que la conception que vous fournissez.
 
 ## Générer un modèle de menaces
 
-Choisissez **New threat model**, sélectionnez le produit, donnez-lui un nom, et fournissez la conception sous la forme dont vous disposez :
+Choisissez **New Threat Model**, sélectionnez le produit, donnez-lui un nom, et fournissez la conception sous la forme dont vous disposez :
 
 - **Collez la description** directement, ou
 - **Téléversez un document de conception** — `.md`, `.markdown`, `.txt`, `.text` ou `.pdf`. L'extraction du texte à partir d'un PDF se fait au mieux ; si un PDF est essentiellement composé d'images, collez plutôt le texte.

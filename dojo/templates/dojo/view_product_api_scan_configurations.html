@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load display_tags %}
 {% load get_config_setting %}
 {% load static %}
@@ -15,7 +16,7 @@
 
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true" aria-label="Add API Scan Configuration">
+                            data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Add API Scan Configuration' %}">
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>

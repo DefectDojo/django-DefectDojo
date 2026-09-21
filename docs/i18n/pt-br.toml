@@ -1,0 +1,246 @@
+# Docs UI strings for pt-br.
+# custom keys (dd_* section below) are used by the DefectDojo layouts;
+# theme keys mirror node_modules/@thulite/doks-core/i18n/en.toml for
+# languages the theme does not ship.
+
+[404_text]
+other = "A página que você está procurando não existe ou foi movida."
+
+[404_title]
+other = "Página não encontrada :("
+
+[browse]
+other = "Navegar"
+
+[by]
+other = "por"
+
+[chapter_next]
+other = "Próximo"
+
+[chapter_previous]
+other = "Anterior"
+
+[edit_page]
+other = "Edite esta página no"
+
+[get_started]
+other = "Guia de exemplo"
+
+[home]
+other = "Início"
+
+[in]
+other = "em"
+
+[last_updated]
+other = "Última atualização em"
+
+[minute]
+one = "minuto"
+other = "minutos"
+
+[on_this_page]
+other = "Nesta página"
+
+[reading_time]
+other = "Tempo estimado de leitura"
+
+[search_loading]
+other = "Carregando índice de pesquisa…"
+
+[search_no_recent]
+other = "Nenhuma pesquisa recente"
+
+[search_no_results]
+other = "Nenhum resultado"
+
+[search_placeholder]
+other = "Pesquisar"
+
+[search_title]
+other = "Pesquisa"
+
+[video_unsupported]
+other = "Seu navegador não oferece suporte a vídeos incorporados, mas não se preocupe: você pode <a href=\"{{ .RelPermalink }}\">baixar o vídeo</a> e assisti-lo no seu player de vídeo favorito!"
+
+[nav_get_started]
+other = "Primeiros passos"
+
+[nav_import_data]
+other = "Importar dados"
+
+[nav_triage_findings]
+other = "Triagem de achados"
+
+[nav_model_assets]
+other = "Modele seus ativos"
+
+[nav_metrics_reports]
+other = "Métricas e relatórios"
+
+[nav_issue_tracking]
+other = "Rastreamento de issues"
+
+[nav_automation]
+other = "Automação"
+
+[nav_admin]
+other = "Administração"
+
+[nav_supported_tools]
+other = "Ferramentas compatíveis"
+
+[card_get_started_desc]
+other = "Instale o DefectDojo e conheça os conceitos principais."
+
+[card_import_data_desc]
+other = "Importe resultados de scans de 500+ ferramentas de segurança para o DefectDojo."
+
+[card_triage_desc]
+other = "Gerencie, desduplique e priorize achados de segurança."
+
+[card_assets_desc]
+other = "Organize produtos, engajamentos e sua hierarquia de ativos."
+
+[card_metrics_desc]
+other = "Acompanhe métricas de segurança com painéis e relatórios personalizados."
+
+[card_issue_tracking_desc]
+other = "Importe achados das suas ferramentas e envie-os para Jira, GitHub Issues e outros rastreadores."
+
+[card_automation_title]
+other = "Automação e API"
+
+[card_automation_desc]
+other = "Integre o DefectDojo ao seu pipeline de CI/CD com a REST API."
+
+[card_admin_title]
+other = "Administração"
+
+[card_admin_desc]
+other = "Configure usuários, permissões, ajustes do sistema e integrações."
+
+[card_tools_desc]
+other = "Navegue pela lista completa de scanners de segurança e integrações."
+
+[cta_community_heading]
+other = "Participe da comunidade Dojo"
+
+[cta_community_link]
+other = "Página da comunidade"
+
+[cta_support_heading]
+other = "Fale com o Suporte"
+
+[cta_support_text]
+other = "Precisa de ajuda? Usuários Pro podem enviar um e-mail para support@defectdojo.com"
+
+[cta_trial_link]
+other = "Cadastre-se para um teste"
+
+[footer_tagline]
+other = "A arma secreta da segurança - unifique e automatize o AppSec. Gestão de vulnerabilidades e DevSecOps de código aberto."
+
+[footer_heading_documentation]
+other = "Documentação"
+
+[footer_heading_community]
+other = "Comunidade"
+
+[footer_heading_company]
+other = "Empresa"
+
+[footer_heading_connect]
+other = "Conecte-se"
+
+[footer_link_get_started]
+other = "Primeiros passos"
+
+[footer_link_import_data]
+other = "Importar dados"
+
+[footer_link_supported_tools]
+other = "Ferramentas compatíveis"
+
+[footer_link_api]
+other = "API"
+
+[footer_link_community]
+other = "Comunidade"
+
+[footer_link_release_notes]
+other = "Notas de versão"
+
+[footer_link_pricing]
+other = "Preços"
+
+[footer_link_trust_center]
+other = "Central de Confiança"
+
+[footer_link_status]
+other = "Status"
+
+[footer_link_support]
+other = "Suporte"
+
+[footer_rights]
+other = "Todos os direitos reservados."
+
+[aria_search]
+other = "Pesquisar no site"
+
+[aria_nav_main]
+other = "Abrir o menu de navegação principal"
+
+[aria_nav_section]
+other = "Abrir o menu de navegação da seção"
+
+[aria_close]
+other = "Fechar"
+
+[aria_toggle_theme]
+other = "Alternar tema"
+
+[aria_version_select]
+other = "Selecionar versão da documentação"
+
+[aria_version_toggle]
+other = "Alternar menu de versões"
+
+[aria_nav_secondary]
+other = "Navegação secundária"
+
+[aria_nav_tertiary]
+other = "Navegação terciária"
+
+[aria_nav_quaternary]
+other = "Navegação quaternária"
+
+[aria_breadcrumb]
+other = "trilha de navegação"
+
+[version_opensource]
+other = "Código Aberto"
+
+[version_pro]
+other = "Pro"
+
+[hero_subtitle]
+other = "Documentação oficial das edições DefectDojo Pro e de código aberto, mantida pela DefectDojo, Inc. e pela comunidade de código aberto."
+
+[cta_community_text]
+other = "Confira eventos ao vivo e recursos futuros e conecte-se com outros profissionais de segurança em {{ .link }}."
+
+[cta_trial_text]
+other = "Pronto para migrar para o Pro? Solicite um orçamento à equipe da DefectDojo, Inc. {{ .link }}."
+
+[cta_trial_link_text]
+other = "aqui"
+
+[whats_new]
+other = "Novidades em {{ .release }}"
+
+[card_connectors_title]
+other = "Conectores"
+

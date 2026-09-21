@@ -1,5 +1,5 @@
 ---
-title: Global Locations Deduplication (Pro)
+title: Global Locations Deduplication
 description: Deduplizieren Sie Befunde anhand eines gemeinsamen Standorts (URL oder
   Abhängigkeit) über alle Produkte hinweg
 weight: 6

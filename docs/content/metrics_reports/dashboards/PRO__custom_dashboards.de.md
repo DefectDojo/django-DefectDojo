@@ -31,7 +31,7 @@ Anpassbare Dashboards sind standardmäßig deaktiviert. Ein Superuser kann sie u
 
 Sobald die Funktion aktiviert ist, zeigt die Seite **🏠 Home** Ihr anpassbares Dashboard an, und die [Dashboards-REST-API](../custom-dashboards-api/) wird verfügbar.
 
-> **🔑 Wichtig:** Solange die Funktion deaktiviert ist, behält die Startseite das bisherige Dashboard bei, und jeder `/api/v2/dashboards/`-Endpunkt gibt `403 Dashboard V2 is not enabled.` zurück. Das Aktivieren ändert **nicht** den Datenzugriff eines Benutzers — jedes Widget respektiert weiterhin die rollenbasierte Zugriffskontrolle von DefectDojo, sodass jeder Benutzer stets nur die Befunde, Assets und anderen Datensätze sieht, für die er berechtigt ist.
+> **🔑 Wichtig:** Solange die Funktion deaktiviert ist, behält die Startseite das bisherige Dashboard bei, und jeder `/api/v2/dashboards/`-Endpunkt gibt `403 Dashboards 2.0 is not enabled.` zurück. Das Aktivieren ändert **nicht** den Datenzugriff eines Benutzers — jedes Widget respektiert weiterhin die rollenbasierte Zugriffskontrolle von DefectDojo, sodass jeder Benutzer stets nur die Befunde, Assets und anderen Datensätze sieht, für die er berechtigt ist.
 
 ## Grundkonzepte
 
@@ -184,6 +184,7 @@ Rangierte Listen, Feeds und eingebettete Tabellen.
 | **SLA Burndown** | Befunde, die einer SLA-Überschreitung nahekommen, sortiert nach verbleibenden Tagen, mit Countdown-Badges. |
 | **My Work** | Ihre persönliche Warteschlange — Zuweisungen, Erwähnungen und ausstehende Risikoakzeptanz-Prüfungen. Immer auf den Betrachter eingegrenzt. |
 | **Saved Reports** | Ein-Klick-Zugriff auf Ihre gespeicherten Berichtsvorlagen. *Erfordert die Reporting-Funktion.* |
+| **Top Root Causes** | Die am höchsten eingestuften Ursachen-Cluster, mit der Anzahl der jeweils gruppierten Befunde, den betroffenen Assets sowie Priorität und Risikostufe. *Erfordert die Funktion Root-Ursachen-Korrelation.* |
 
 ### Static & Utility
 

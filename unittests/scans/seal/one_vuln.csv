@@ -1,0 +1,2 @@
+Library,Version,Ecosystem,Vulnerabilities,Can Seal,Sealed Version
+lodash,4.17.15,NPM,CVE-2021-23337,TRUE,4.17.15-sp1

@@ -455,6 +455,38 @@ class MigrateEndpointsToLocationsTest(TestCase):
             ["good-one.example.com", "good-two.example.com"],
         )
 
+    def test_summary_callback_reports_locations_and_failures(self):
+        # The Pro Locations migration suite passes summary_callback to learn the
+        # distinct-Location count (endpoints collapse onto shared URLs) and the
+        # per-endpoint failures, neither of which the (processed, total) progress
+        # hook can carry. Two endpoints share a host (one Location), one is unique
+        # (a second Location), and one is broken (fails, no Location).
+        self._make_endpoint("dup.example.com", [])
+        self._make_endpoint("dup.example.com", [])
+        self._make_endpoint("uniq.example.com", [])
+        broken = self._make_endpoint("broken.example.com", [])
+        Endpoint.objects.filter(pk=broken.pk).update(host="")
+
+        summaries = []
+        with self.assertLogs(
+            "dojo.management.commands.migrate_endpoints_to_locations",
+            level="ERROR",
+        ):
+            call_command(
+                "migrate_endpoints_to_locations",
+                batch_size=10,
+                progress_every=100,
+                summary_callback=summaries.append,
+                stdout=StringIO(),
+            )
+
+        self.assertEqual(len(summaries), 1, msg=f"summary_callback fired {len(summaries)} times")
+        summary = summaries[0]
+        self.assertEqual(summary["processed"], 4, msg=summary)
+        self.assertEqual(summary["total"], 4, msg=summary)
+        self.assertEqual(summary["locations"], 2, msg=f"expected 2 distinct locations: {summary}")
+        self.assertEqual([f["id"] for f in summary["failures"]], [broken.id], msg=summary)
+
     def test_failed_bulk_location_write_falls_back_per_endpoint(self):
         self._make_endpoint("first-bulk.example.com", [])
         self._make_endpoint("second-bulk.example.com", [])
@@ -462,12 +494,12 @@ class MigrateEndpointsToLocationsTest(TestCase):
         original = URL.bulk_get_or_create
         calls = []
 
-        def fail_first_chunk(locations):
+        def fail_first_chunk(locations, *, created_out=None):
             calls.append(len(locations))
             if len(calls) == 1:
                 msg = "simulated bulk location write failure"
                 raise RuntimeError(msg)
-            return original(locations)
+            return original(locations, created_out=created_out)
 
         stdout = StringIO()
         with (
@@ -497,7 +529,7 @@ class MigrateEndpointsToLocationsTest(TestCase):
     def test_inheritance_signal_is_suppressed_during_the_main_loop(self):
         # The per-Location post_save inheritance signal issues an OR-joined
         # query whose cost grows with LocationFindingReference, so the hot loop
-        # must not fire it; `_run_tag_inheritance` applies inheritance in bulk
+        # must not fire it; `_run_tag_inheritance_for_chunk` applies inheritance in bulk
         # once the reference rows exist.
         self.product.tags.add("product-inherited")
         self.product.enable_product_tag_inheritance = True
@@ -516,3 +548,218 @@ class MigrateEndpointsToLocationsTest(TestCase):
             [tag.name for tag in location.inherited_tags.all()],
             ["product-inherited"],
         )
+
+    def test_cancel_callback_stops_between_chunks(self):
+        # Three endpoints, one per chunk. The probe asks to cancel at the first
+        # chunk boundary, so the run stops with processed < total and the summary
+        # reports it as cancelled rather than completed. What committed before the
+        # cancel is persisted.
+        self._make_endpoint_with_status("first.example.com", active=True)
+        self._make_endpoint_with_status("second.example.com", active=True)
+        self._make_endpoint_with_status("third.example.com", active=True)
+
+        calls = []
+
+        def cancel():
+            calls.append(1)
+            return True  # cancel at the first boundary
+
+        summaries = []
+        self._run(batch_size=1, cancel_callback=cancel, summary_callback=summaries.append)
+
+        self.assertEqual(len(summaries), 1)
+        summary = summaries[0]
+        self.assertTrue(summary["cancelled"])
+        self.assertEqual(summary["total"], 3)
+        self.assertEqual(summary["processed"], 1)
+        # Only the chunk that committed before the cancel is persisted.
+        self.assertEqual(URL.objects.count(), 1)
+        self.assertEqual(LocationFindingReference.objects.count(), 1)
+
+    def test_rerun_after_cancel_converges(self):
+        for host in ("a.example.com", "b.example.com", "c.example.com"):
+            self._make_endpoint_with_status(host, active=True)
+
+        first = []
+        self._run(batch_size=1, cancel_callback=lambda: True, summary_callback=first.append)
+        self.assertTrue(first[0]["cancelled"])
+        self.assertEqual(first[0]["processed"], 1)
+        self.assertEqual(URL.objects.count(), 1)
+
+        # Re-running with no cancel finishes the migration and creates no
+        # duplicate rows for the chunk that already migrated.
+        second = []
+        self._run(summary_callback=second.append)
+        self.assertFalse(second[0]["cancelled"])
+        self.assertEqual(second[0]["processed"], 3)
+        self.assertEqual(URL.objects.count(), 3)
+        self.assertEqual(LocationFindingReference.objects.count(), 3)
+
+    def test_cancel_callback_that_raises_does_not_abort(self):
+        # A probe that raises (e.g. a transient DB error) must not stop the run:
+        # discarding a multi-hour migration over a failed flag check is worse than
+        # finishing it. The exception is logged and the run completes normally.
+        self._make_endpoint_with_status("resilient.example.com", active=True)
+
+        def boom():
+            msg = "db blip while checking cancel flag"
+            raise RuntimeError(msg)
+
+        summaries = []
+        with self.assertLogs(
+            "dojo.management.commands.migrate_endpoints_to_locations",
+            level="WARNING",
+        ):
+            self._run(batch_size=1, cancel_callback=boom, summary_callback=summaries.append)
+
+        self.assertFalse(summaries[0]["cancelled"])
+        self.assertEqual(summaries[0]["processed"], 1)
+        self.assertEqual(URL.objects.count(), 1)
+
+    def test_no_cancel_callback_reports_not_cancelled(self):
+        # The CLI path passes no cancel_callback and behaves exactly as before,
+        # reporting cancelled=False so the suite lands the run on "completed".
+        self._make_endpoint_with_status("plain-run.example.com", active=True)
+
+        summaries = []
+        self._run(summary_callback=summaries.append)
+
+        self.assertFalse(summaries[0]["cancelled"])
+        self.assertEqual(summaries[0]["processed"], 1)
+
+    def test_start_after_id_resumes_from_the_cursor(self):
+        first = self._make_endpoint("resume-first.example.com", ["a"])
+        second = self._make_endpoint("resume-second.example.com", ["b"])
+
+        stdout = self._run(start_after_id=first.id)
+
+        # Only the endpoint after the cursor migrated.
+        self.assertIn("Starting migration of 1", stdout)
+        self.assertFalse(URL.objects.filter(host="resume-first.example.com").exists())
+        self.assertTrue(URL.objects.filter(host="resume-second.example.com").exists())
+        self.assertIn(f"resuming after endpoint id {first.id}", stdout)
+
+        # A follow-up full run converges: the skipped endpoint migrates,
+        # the already-migrated one is reused.
+        self._run()
+        self.assertTrue(URL.objects.filter(host="resume-first.example.com").exists())
+        self.assertEqual(URL.objects.filter(host="resume-second.example.com").count(), 1)
+        self.assertEqual(second.id > first.id, True)
+
+    def test_progress_line_reports_resume_cursor(self):
+        endpoints = [
+            self._make_endpoint(f"cursor-{i}.example.com", []) for i in range(3)
+        ]
+
+        stdout = self._run(progress_every=1, batch_size=1)
+
+        last = max(endpoint.id for endpoint in endpoints)
+        self.assertIn(f"resume: --start-after-id {last}", stdout)
+
+    def test_inheritance_converges_for_location_shared_across_chunks(self):
+        # One URL shared by two endpoints in DIFFERENT products, forced into
+        # different chunks (batch_size=1). The per-chunk inheritance pass must
+        # still produce the union of both products' tags on the shared
+        # location, because the helper recomputes the full product set from
+        # the committed reference rows each time it runs.
+        self.product.tags.add("tag-product-one")
+        self.product.enable_product_tag_inheritance = True
+        self.product.save(update_fields=["enable_product_tag_inheritance"])
+
+        other_product = Product.objects.create(
+            name="Endpoint migration product two",
+            description="Test product two",
+            prod_type=self.product.prod_type,
+            enable_product_tag_inheritance=True,
+        )
+        other_product.tags.add("tag-product-two")
+
+        self._make_endpoint_with_status("shared-inherit.example.com", active=True)
+
+        other_engagement = Engagement.objects.create(
+            name="Endpoint migration engagement two",
+            product=other_product,
+            target_start=timezone.now().date(),
+            target_end=timezone.now().date(),
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="Endpoint migration test type")
+        other_test = Test.objects.create(
+            engagement=other_engagement,
+            test_type=test_type,
+            scan_type="Endpoint migration scan",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        other_finding = Finding.objects.create(
+            title="Finding in product two",
+            test=other_test,
+            severity="High",
+            numerical_severity="S1",
+            description="Test finding",
+            active=True,
+            verified=False,
+            reporter=self.reporter,
+        )
+        with Endpoint.allow_endpoint_init():
+            other_endpoint = Endpoint.objects.create(
+                protocol="https",
+                host="shared-inherit.example.com",
+                product=other_product,
+            )
+        Endpoint_Status.objects.create(
+            endpoint=other_endpoint,
+            finding=other_finding,
+            date=datetime.date(2024, 5, 17),
+            mitigated=False,
+        )
+
+        self._run(batch_size=1)
+
+        location = self._location_for("shared-inherit.example.com")
+        self.assertEqual(
+            sorted(tag.name for tag in location.inherited_tags.all()),
+            ["tag-product-one", "tag-product-two"],
+        )
+
+    def test_progress_callback_receives_checkpoint_id(self):
+        # The suite passes a 3-arg progress_callback so a lost run can resume from the last
+        # committed endpoint id. The initial 0-tick carries no cursor; the final tick's
+        # checkpoint is the max (last committed) endpoint id.
+        endpoints = [self._make_endpoint(f"cb-{i}.example.com", []) for i in range(3)]
+        records = []
+
+        def rec(processed, total, checkpoint_id=None):
+            records.append((processed, total, checkpoint_id))
+
+        self._run(progress_every=1, batch_size=1, progress_callback=rec)
+
+        self.assertEqual(records[0], (0, 3, None), msg=records)
+        last = max(endpoint.id for endpoint in endpoints)
+        self.assertEqual(records[-1][0], 3, msg=records)
+        self.assertEqual(records[-1][2], last, msg=records)
+
+    def test_summary_locations_counts_created_locations_only(self):
+        # ``locations`` is the count of Locations this run CREATED (a memory-bounded count,
+        # not a whole-run set of ids). A full rerun creates nothing, so it reports 0.
+        self._make_endpoint("rerun.example.com", [])
+        self._run()
+        summaries = []
+        self._run(summary_callback=summaries.append)
+        self.assertEqual(summaries[0]["locations"], 0, msg=summaries[0])
+
+    def test_bulk_get_or_create_created_out_appends_only_new(self):
+        # created_out receives only the instances this call created (absent beforehand),
+        # so a chunked backfill can sum a per-chunk count without a whole-run set.
+        def make(host):
+            return URL.from_parts(
+                protocol="https", user_info="", host=host,
+                port=None, path="", query="", fragment="",
+            )
+
+        URL.bulk_get_or_create([make("only-new.example.com")])  # pre-create one Location
+        created = []
+        saved = URL.bulk_get_or_create(
+            [make("only-new.example.com"), make("brand-new.example.com")], created_out=created,
+        )
+        self.assertEqual(len(saved), 2)
+        self.assertEqual([url.host for url in created], ["brand-new.example.com"])

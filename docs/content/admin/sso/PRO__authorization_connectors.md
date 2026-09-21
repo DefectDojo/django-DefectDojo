@@ -1,7 +1,7 @@
 ---
 title: "Authorization Connectors"
 description: "See every identity provider on one page: which are configured, which are enabled, and what protocol each one speaks"
-weight: 1
+weight: 10
 audience: pro
 ---
 

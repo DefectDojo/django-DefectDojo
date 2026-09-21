@@ -7,6 +7,7 @@ from django.db.models.deletion import RestrictedError
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
 from dojo.development_environment.models import Development_Environment
@@ -42,7 +43,7 @@ def add_dev_env(request):
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Environment added successfully.",
+                                 _("Environment added successfully."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("dev_env"))
     add_breadcrumb(title="Add Environment", top_level=False, request=request)
@@ -65,7 +66,7 @@ def edit_dev_env(request, deid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Environment updated successfully.",
+                _("Environment updated successfully."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("dev_env"))
     if request.method == "POST" and request.POST.get("delete_dev_env"):
@@ -77,7 +78,7 @@ def edit_dev_env(request, deid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Environment deleted successfully.",
+                    _("Environment deleted successfully."),
                     extra_tags="alert-success")
             except RestrictedError as err:
                 messages.add_message(request,

@@ -1,6 +1,8 @@
 ---
 title: "Invicti"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/invicti/"
 ---
 
 Vulnerabilities List - JSON report
@@ -127,7 +129,7 @@ Sample Invicti scans can be found [here](https://github.com/DefectDojo/django-De
 ## Default Deduplication Hashcode Fields
 
 By default, DefectDojo identifies duplicate Findings using these 
-[hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+[hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - description

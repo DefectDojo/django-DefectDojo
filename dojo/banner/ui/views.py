@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.banner.models import BannerConf
 from dojo.banner.ui.forms import LoginBanner
@@ -23,7 +24,7 @@ def configure_banner(request):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Banner updated successfully.",
+                _("Banner updated successfully."),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("configure_banner"))

@@ -3,6 +3,8 @@ title: "OWASP ASVS Benchmarks"
 description: "Benchmark an Asset against the OWASP Application Security Verification Standard"
 weight: 6
 audience: opensource
+aliases:
+  - "/asset_modelling/hierarchy/benchmarks/"
 ---
 
 DefectDojo supports benchmarking Assets against the [OWASP Application Security Verification Standard (ASVS)](https://owasp.org/www-project-application-security-verification-standard/), which provides a basis for testing web application technical security controls.

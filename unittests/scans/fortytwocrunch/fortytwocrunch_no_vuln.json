@@ -1,0 +1,12 @@
+{
+  "apiId": "api-0001",
+  "report": {
+    "index": [],
+    "score": 100,
+    "security": {"issues": {}},
+    "data": {"issues": {}},
+    "warnings": {"issues": {}},
+    "semanticErrors": {"issues": {}},
+    "validationErrors": {"issues": {}}
+  }
+}

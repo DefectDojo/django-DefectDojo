@@ -1,0 +1,416 @@
+{
+  "rule_results": [
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_instance.example",
+      "resource_type": "aws_instance",
+      "resource_tags": {},
+      "rule_description": "EC2 instances should not have a public IP association (IPv4). Publicly accessible EC2 instances are reachable over the internet even if you have protections such as NACLs or security groups. If these protections are accidentally removed your instances may be vulnerable to attack.",
+      "rule_id": "FG_R00271",
+      "rule_message": "",
+      "rule_name": "tf_aws_ec2_instance_no_public_ip",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00271.html",
+      "rule_result": "PASS",
+      "rule_severity": "Medium",
+      "rule_summary": "EC2 instances should not have a public IP association (IPv4)",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies and ACLs should not be configured for public read access. It is a security risk for a bucket to have an ACL or bucket policy that is configured for public read access, even if the bucket itself is not currently public. A bucket configured for public read access can potentially be made public, allowing any AWS user or anonymous user to access the data in it.",
+      "rule_id": "FG_R00279",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucket_config_public_read",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00279.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies and ACLs should not be configured for public read access",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 buckets should not be publicly readable. A bucket with a public ACL or bucket policy is exposed to the entire internet if all block public access settings are disabled at the resource and account level. This poses a critical security vulnerability, as any AWS user or anonymous user can access the data in the bucket.",
+      "rule_id": "FG_R00277",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucket_is_public",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00277.html",
+      "rule_result": "PASS",
+      "rule_severity": "Critical",
+      "rule_summary": "S3 buckets should not be publicly readable",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow all actions for all IAM principals and public users. S3 bucket policies - and access control policies in general - should not allow wildcard/all actions, except in very specific administrative situations. Allowing all principals to wildcard access is overly permissive.",
+      "rule_id": "FG_R00210",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowall",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00210.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow all actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow list actions for all IAM principals and public users. S3 bucket policies list actions enable users to enumerate information on an organization's S3 buckets and objects. Malicious actors may use this information to identify potential targets for hacks. Users should scope list actions only to users and roles that require this information - not all principals.",
+      "rule_id": "FG_R00211",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowlist",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00211.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow list actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_instance.example",
+      "resource_type": "aws_instance",
+      "resource_tags": {},
+      "rule_description": "EC2 instances should use IAM roles and instance profiles instead of IAM access keys to perform requests. By passing role information to an EC2 instance at launch, you can limit the risk of access key exposure and help prevent a malicious user from compromising the instance.",
+      "rule_id": "FG_R00253",
+      "rule_message": "",
+      "rule_name": "tf_aws_ec2_instance_profile",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00253.html",
+      "rule_result": "FAIL",
+      "rule_severity": "High",
+      "rule_summary": "EC2 instances should use IAM roles and instance profiles instead of IAM access keys to perform requests",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [
+        "CIS-AWS_v1.3.0_1.20",
+        "CIS-AWS_v1.4.0_2.1.5"
+      ],
+      "families": [
+        "CIS-AWS_v1.3.0",
+        "CIS-AWS_v1.4.0"
+      ],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 buckets should have all `block public access` options enabled. AWS's S3 Block Public Access feature has four settings: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, and RestrictPublicBuckets. All four settings should be enabled to help prevent the risk of a data breach.",
+      "rule_id": "FG_R00229",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_block_public_access",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00229.html",
+      "rule_result": "FAIL",
+      "rule_severity": "High",
+      "rule_summary": "S3 buckets should have all `block public access` options enabled",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket access logging should be enabled. Enabling server access logging provides detailed records for the requests that are made to a S3 bucket. This information is useful for security and compliance auditing purposes.",
+      "rule_id": "FG_R00274",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucket_access_logging",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00274.html",
+      "rule_result": "FAIL",
+      "rule_severity": "Medium",
+      "rule_summary": "S3 bucket access logging should be enabled",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [
+        "CIS-AWS_v1.3.0_3.11",
+        "CIS-AWS_v1.4.0_3.11"
+      ],
+      "families": [
+        "CIS-AWS_v1.3.0",
+        "CIS-AWS_v1.4.0"
+      ],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket object-level logging for read events should be enabled. Object-level S3 events (GetObject, DeleteObject, and PutObject) are not logged by default, though this is recommended from a security best practices perspective for buckets that contain sensitive data.",
+      "rule_id": "FG_R00355",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_cloudtrail_s3_data_logging_read",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00355.html",
+      "rule_result": "FAIL",
+      "rule_severity": "Low",
+      "rule_summary": "S3 bucket object-level logging for read events should be enabled",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [
+        "CIS-AWS_v1.3.0_3.10",
+        "CIS-AWS_v1.4.0_3.10"
+      ],
+      "families": [
+        "CIS-AWS_v1.3.0",
+        "CIS-AWS_v1.4.0"
+      ],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket object-level logging for write events should be enabled. Object-level S3 events (GetObject, DeleteObject, and PutObject) are not logged by default, though this is recommended from a security best practices perspective for buckets that contain sensitive data.",
+      "rule_id": "FG_R00354",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_cloudtrail_s3_data_logging_write",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00354.html",
+      "rule_result": "FAIL",
+      "rule_severity": "Low",
+      "rule_summary": "S3 bucket object-level logging for write events should be enabled",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [
+        "CIS-AWS_v1.3.0_2.1.1",
+        "CIS-AWS_v1.4.0_2.1.1"
+      ],
+      "families": [
+        "CIS-AWS_v1.3.0",
+        "CIS-AWS_v1.4.0"
+      ],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket server-side encryption should be enabled. Enabling server-side encryption (SSE) on S3 buckets at the object level protects data at rest and helps prevent the breach of sensitive information assets. Objects can be encrypted with S3 Managed Keys (SSE-S3), KMS Managed Keys (SSE-KMS), or Customer Provided Keys (SSE-C).",
+      "rule_id": "FG_R00099",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_encryption",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00099.html",
+      "rule_result": "FAIL",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket server-side encryption should be enabled",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [
+        "CIS-AWS_v1.3.0_2.1.2",
+        "CIS-AWS_v1.4.0_2.1.2"
+      ],
+      "families": [
+        "CIS-AWS_v1.3.0",
+        "CIS-AWS_v1.4.0"
+      ],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should only allow requests that use HTTPS. To protect data in transit, an S3 bucket policy should deny all HTTP requests to its objects and allow only HTTPS requests. HTTPS uses Transport Layer Security (TLS) to encrypt data, which preserves integrity and prevents tampering.",
+      "rule_id": "FG_R00100",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_https_access",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00100.html",
+      "rule_result": "FAIL",
+      "rule_severity": "Medium",
+      "rule_summary": "S3 bucket policies should only allow requests that use HTTPS",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket replication (cross-region or same-region) should be enabled. Cross-Region S3 replication can help with meeting compliance requirements, minimizing latency, and increasing operational efficiency. Same-Region S3 replication can help with aggregating logs and compliance with data sovereignty laws.",
+      "rule_id": "FG_R00275",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_replication",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00275.html",
+      "rule_result": "FAIL",
+      "rule_severity": "Medium",
+      "rule_summary": "S3 bucket replication (cross-region or same-region) should be enabled",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "terraform/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.data",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket versioning and lifecycle policies should be enabled. S3 bucket versioning and lifecycle policies are used to protect data availability and integrity. By enabling object versioning, data is protected from overwrites and deletions. Lifecycle policies ensure sensitive data is deleted when appropriate.",
+      "rule_id": "FG_R00101",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_versioning_lifecycle_enabled",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00101.html",
+      "rule_result": "FAIL",
+      "rule_severity": "Medium",
+      "rule_summary": "S3 bucket versioning and lifecycle policies should be enabled",
+      "source_location": [
+        {
+          "path": "terraform/main.tf",
+          "line": 11,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "filepaths": [
+      "work/tf/main.tf"
+    ],
+    "rule_results": {
+      "FAIL": 9,
+      "PASS": 5,
+      "WAIVED": 0
+    },
+    "severities": {
+      "Critical": 0,
+      "High": 3,
+      "Informational": 0,
+      "Low": 2,
+      "Medium": 4,
+      "Unknown": 0
+    }
+  }
+}

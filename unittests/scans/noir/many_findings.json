@@ -1,0 +1,88 @@
+{
+  "endpoints": [
+    {
+      "callees": [],
+      "url": "/api/login",
+      "method": "POST",
+      "internal": false,
+      "details": {
+        "code_paths": [
+          {
+            "path": "app/app.py",
+            "line": 4
+          }
+        ],
+        "technology": "python_flask"
+      },
+      "protocol": "http",
+      "kind": "",
+      "tags": [],
+      "params": [
+        {
+          "name": "username",
+          "value": "",
+          "param_type": "form",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "callees": [],
+      "url": "/api/users/<id>",
+      "method": "GET",
+      "internal": false,
+      "details": {
+        "code_paths": [
+          {
+            "path": "app/app.py",
+            "line": 9
+          }
+        ],
+        "technology": "python_flask"
+      },
+      "protocol": "http",
+      "kind": "",
+      "tags": [],
+      "params": [
+        {
+          "name": "id",
+          "value": "",
+          "param_type": "path",
+          "tags": [
+            {
+              "name": "idor",
+              "description": "This parameter may be vulnerable to Insecure Direct Object Reference (IDOR) attacks.",
+              "tagger": "Hunt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "callees": [],
+      "url": "/admin/delete",
+      "method": "DELETE",
+      "internal": false,
+      "details": {
+        "code_paths": [
+          {
+            "path": "app/app.py",
+            "line": 13
+          }
+        ],
+        "technology": "python_flask"
+      },
+      "protocol": "http",
+      "kind": "",
+      "tags": [
+        {
+          "name": "admin",
+          "description": "Administrative or privileged endpoint; high-value target for broken access control, privilege escalation, and forced browsing.",
+          "tagger": "Admin"
+        }
+      ],
+      "params": []
+    }
+  ],
+  "passive_results": []
+}

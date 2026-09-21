@@ -40,7 +40,7 @@ Copy the entire fenced block below and paste it into Claude, ChatGPT, or any oth
 
 ```text
 You are helping me build customizable dashboards in DefectDojo Pro using its
-REST API ("Dashboards V2" — layouts of widgets on a grid). Work carefully and
+REST API ("Dashboards 2.0" — layouts of widgets on a grid). Work carefully and
 pause for my approval before creating anything against my tenant.
 
 ================================================================================
@@ -64,7 +64,11 @@ It is created/updated under /api/v2/dashboards/ with these resources:
         POST {id}/clone/        copy a layout (fresh widget IDs)
         POST {id}/set_default/  make a layout my home-page default
         GET  shared/            list curated + team-shared templates
-        GET  for_current_user/  my layouts + my default_id (bootstrap)
+        GET  for_current_user/  my layouts (+ collaborative shared ones) + my default_id (bootstrap)
+        A shared layout with is_collaborative=true is one live dashboard anyone may
+        edit (widgets/layout/settings) and default to; flipping is_shared or
+        is_collaborative needs the Maintainer role, and only a shared layout can
+        be collaborative.
   /api/v2/dashboards/widget_catalog/  GET: every widget type + a config example
   /api/v2/dashboards/widget_data/<action>/  render a widget's data on demand
 
@@ -93,7 +97,7 @@ STEP 1 — DISCOVER (do this BEFORE designing anything; never invent values)
    Each widget entry has: type, label, category, description, data_endpoints,
    and a minimal known-good config_example. USE THESE config_examples as the
    starting point for each widget's config — do not guess the config shape.
-   There are 26 widget types in four categories: Numbers, Charts,
+   There are 27 widget types in four categories: Numbers, Charts,
    Lists & Feeds, Static & Utility.
 
 2. For any chart/leaderboard that groups data, fetch the valid dimensions:

@@ -1,0 +1,140 @@
+{
+  "value": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/example-rg/providers/Microsoft.Compute/virtualMachines/web-node-1/providers/Microsoft.Security/assessments/aaaa/subAssessments/sub-0001",
+      "name": "sub-0001",
+      "type": "Microsoft.Security/assessments/subAssessments",
+      "properties": {
+        "id": "finding-0001",
+        "displayName": "CVE-2000-0001",
+        "description": "A memory-safety flaw allows remote code execution.",
+        "impact": "An attacker who reaches the service can run code as the service account.",
+        "remediation": "Apply the vendor update through your patching process.",
+        "timeGenerated": "2024-07-01T12:00:00.0000000Z",
+        "status": {"code": "Unhealthy", "severity": "High", "cause": ""},
+        "resourceDetails": {
+          "ResourceProvider": "Microsoft.Compute",
+          "NativeResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/example-rg/providers/Microsoft.Compute/virtualMachines/web-node-1",
+          "ResourceName": "web-node-1",
+          "ResourceType": "virtualMachines",
+          "source": "Azure"
+        },
+        "additionalData": {
+          "assessedResourceType": "ServerVulnerabilityTvm",
+          "softwareName": "openssl",
+          "softwareVersion": "3.0.2",
+          "softwareVendor": "OpenSSL",
+          "recommendedVersion": "3.0.13",
+          "cvssV30Score": 9.8,
+          "vulnerabilityDetails": {
+            "cveId": "CVE-2000-0001",
+            "severity": "High",
+            "publishedDate": "2024-05-01T00:00:00Z",
+            "cvss": {
+              "2.0": {"base": 7.5, "cvssVectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P"},
+              "3.0": {"base": 9.8, "cvssVectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"}
+            },
+            "references": [
+              {"title": "CVE-2000-0001", "link": "https://nvd.example.com/vuln/detail/CVE-2000-0001"},
+              {"title": "Vendor advisory", "link": "https://vendor.example.com/advisory/1"}
+            ]
+          },
+          "cve": [{"title": "CVE-2000-0001", "severity": "High", "cvssVectorString": "CVSS:3.0/AV:N"}]
+        }
+      }
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/example-rg/providers/Microsoft.ContainerRegistry/registries/exampleacr/providers/Microsoft.Security/assessments/bbbb/subAssessments/sub-0002",
+      "properties": {
+        "id": "finding-0002",
+        "displayName": "CVE-2000-0002",
+        "description": "An integer overflow crashes the parser.",
+        "impact": "",
+        "remediation": "",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {"code": "Unhealthy", "severity": "medium"},
+        "resourceDetails": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/example-rg/providers/Microsoft.ContainerRegistry/registries/exampleacr",
+          "source": "Azure"
+        },
+        "additionalData": {
+          "assessedResourceType": "AzureContainerRegistryVulnerability",
+          "softwareDetails": {
+            "packageName": "libxml2",
+            "version": "2.9.13",
+            "fixedVersion": "2.9.14",
+            "fixStatus": "FixAvailable",
+            "vendor": "libxml2",
+            "category": "OS",
+            "osDetails": {"osPlatform": "linux", "osVersion": "debian-12"}
+          },
+          "artifactDetails": {
+            "repositoryName": "generic-app",
+            "registryHost": "exampleacr.azurecr.example.com",
+            "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+            "artifactType": "ContainerImage"
+          },
+          "vulnerabilityDetails": {
+            "cveId": "CVE-2000-0002",
+            "cvss": {"2.0": {"base": 5.0, "cvssVectorString": "AV:N/AC:L/Au:N/C:P/I:N/A:N"}},
+            "references": [{"title": "CVE-2000-0002", "link": "https://nvd.example.com/vuln/detail/CVE-2000-0002"}]
+          }
+        }
+      }
+    },
+    {
+      "id": "sub-0003",
+      "properties": {
+        "id": "finding-0003",
+        "displayName": "Machines should have a vulnerability assessment solution",
+        "description": "A posture recommendation, not a vulnerability.",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {"code": "Unhealthy", "severity": "Medium"},
+        "resourceDetails": {"ResourceName": "web-node-2"},
+        "additionalData": {"assessedResourceType": "GeneralVulnerability"}
+      }
+    },
+    {
+      "id": "sub-0004",
+      "properties": {
+        "id": "finding-0004",
+        "displayName": "CVE-2000-0004",
+        "description": "A finding Defender now reports as healthy.",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {"code": "Healthy", "severity": "High"},
+        "resourceDetails": {"ResourceName": "web-node-1"},
+        "additionalData": {
+          "assessedResourceType": "ServerVulnerabilityTvm",
+          "vulnerabilityDetails": {"cveId": "CVE-2000-0004"}
+        }
+      }
+    },
+    {
+      "id": "sub-0005",
+      "properties": {
+        "id": "finding-0005",
+        "displayName": "A future scanner's finding",
+        "description": "An unfamiliar resource type that does carry a CVE.",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {"code": "Unhealthy", "severity": "not a label"},
+        "resourceDetails": {"ResourceName": "web-node-3"},
+        "additionalData": {
+          "assessedResourceType": "SomeFutureVulnerabilityType",
+          "cve": "CVE-2000-0005"
+        }
+      }
+    },
+    {
+      "id": "sub-0006",
+      "properties": {
+        "id": "finding-0006",
+        "displayName": "An unfamiliar type with no CVE",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {"code": "Unhealthy", "severity": "Low"},
+        "resourceDetails": {"ResourceName": "web-node-4"},
+        "additionalData": {"assessedResourceType": "SomeFutureConfigurationCheck"}
+      }
+    }
+  ],
+  "nextLink": ""
+}

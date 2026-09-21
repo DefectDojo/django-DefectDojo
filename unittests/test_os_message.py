@@ -271,13 +271,12 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
         self.assertEqual(result["additional_banners"][0]["source"], "os")
         self.assertEqual(result["additional_banners"][1]["source"], "product_announcement")
 
-    def _authed_request(self, *, dismissed_hash="", ui_use_tailwind=True):
+    def _authed_request(self, *, dismissed_hash=""):
         request = RequestFactory().get("/")
         request.user = SimpleNamespace(
             is_authenticated=True,
             usercontactinfo=SimpleNamespace(
                 user_state_details={os_message.OS_MESSAGE_DISMISSED_KEY: dismissed_hash},
-                ui_use_tailwind=ui_use_tailwind,
             ),
         )
         return request

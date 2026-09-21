@@ -13,4 +13,6 @@ seo:
   robots: "" # custom robot tags (optional)
 pro-feature: true
 exclude_search: true
+aliases:
+  - "/en/customize_dojo/notifications/"
 ---

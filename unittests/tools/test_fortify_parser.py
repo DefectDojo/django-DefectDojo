@@ -163,6 +163,15 @@ class TestFortifyParser(DojoTestCase):
                 self.assertFalse(finding.false_p)
                 self.assertEqual("", finding.impact)
             with self.subTest(i=1):
+                # Present in audit.xml without suppressed="true" (audited but not suppressed).
+                # Regression guard: previously compute_status used `in related_data.suppressed`,
+                # which flipped every audited finding to false_p and closed the whole test on
+                # reimport.
+                finding = findings[1]
+                self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
+                self.assertTrue(finding.active)
+                self.assertFalse(finding.false_p)
+            with self.subTest(i=2):
                 finding = findings[2]
                 self.assertEqual("Build Misconfiguration - pom.xml: 1 (FF57412F-DD28-44DE-8F4F-0AD39620768C)", finding.title)
                 self.assertEqual("87E3EC5CC8154C006783CC461A6DDEEB", finding.unique_id_from_tool)

@@ -1,0 +1,23 @@
+{
+  "data": {
+    "cases": [
+      {
+        "caseId": "case-0001",
+        "caseLabel": "Unprotected personal data in a reporting database",
+        "policyName": "Personal data outside an approved store",
+        "policyDescription": "Personal data must only live in an approved, access-controlled store.",
+        "severityLevel": "critical",
+        "caseStatus": "open",
+        "dataSourceName": "reporting-db",
+        "dataSourceType": "PostgreSQL",
+        "sensitivityGroup": "Restricted",
+        "numberOfAffectedObjects": 412,
+        "remediationSteps": "Move the data to an approved store and revoke the broad read grant.",
+        "assignee": "data-owner",
+        "created_at": "2024-05-10T08:00:00Z",
+        "updated_at": "2024-06-02T14:30:00Z"
+      }
+    ],
+    "totalCount": 1
+  }
+}

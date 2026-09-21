@@ -12,6 +12,8 @@ seo:
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
 exclude_search: true
+aliases:
+  - "/en/customize_dojo/dashboards/"
 ---
 The Dashboard is the front page of DefectDojo — a summary of your team's performance and a launchpad for monitoring the areas that matter to you.
 

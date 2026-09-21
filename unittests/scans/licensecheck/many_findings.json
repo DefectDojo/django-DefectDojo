@@ -1,0 +1,120 @@
+{
+  "info": {
+    "program": "licensecheck",
+    "version": "2026.0.8",
+    "license": "MIT LICENSE"
+  },
+  "project_license": "NO LICENSE/ UNKNOWN LICENSE",
+  "packages": [
+    {
+      "name": "certifi",
+      "version": "2026.7.22",
+      "size": 247978,
+      "homePage": "https://github.com/certifi/python-certifi",
+      "license": "Mozilla Public License 2.0 _MPL 2.0_",
+      "licenseCompat": false,
+      "errorCode": 0,
+      "namever": "certifi-2026.7.22"
+    },
+    {
+      "name": "chardet",
+      "version": "7.5.1",
+      "size": 837498,
+      "homePage": "",
+      "license": "0BSD",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "chardet-7.5.1"
+    },
+    {
+      "name": "click",
+      "version": "8.4.2",
+      "size": 426857,
+      "homePage": "",
+      "license": "BSD-3-Clause",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "click-8.4.2"
+    },
+    {
+      "name": "flask",
+      "version": "3.1.3",
+      "size": 759004,
+      "homePage": "",
+      "license": "BSD-3-Clause",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "flask-3.1.3"
+    },
+    {
+      "name": "idna",
+      "version": "3.18",
+      "size": 325401,
+      "homePage": "",
+      "license": "BSD-3-Clause",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "idna-3.18"
+    },
+    {
+      "name": "itsdangerous",
+      "version": "2.2.0",
+      "size": 54410,
+      "homePage": "",
+      "license": "BSD License",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "itsdangerous-2.2.0"
+    },
+    {
+      "name": "jinja2",
+      "version": "3.1.6",
+      "size": 494554,
+      "homePage": "",
+      "license": "BSD License",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "jinja2-3.1.6"
+    },
+    {
+      "name": "markupsafe",
+      "version": "2.0.1",
+      "size": 75456,
+      "homePage": "https://palletsprojects.com/p/markupsafe/",
+      "license": "BSD License",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "markupsafe-2.0.1"
+    },
+    {
+      "name": "requests",
+      "version": "2.34.2",
+      "size": 232372,
+      "homePage": "",
+      "license": "Apache Software License",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "requests-2.34.2"
+    },
+    {
+      "name": "urllib3",
+      "version": "2.7.0",
+      "size": 428936,
+      "homePage": "",
+      "license": "MIT",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "urllib3-2.7.0"
+    },
+    {
+      "name": "werkzeug",
+      "version": "3.1.8",
+      "size": 875852,
+      "homePage": "",
+      "license": "BSD-3-Clause",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "werkzeug-3.1.8"
+    }
+  ]
+}

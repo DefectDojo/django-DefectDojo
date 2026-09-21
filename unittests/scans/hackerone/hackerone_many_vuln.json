@@ -1,0 +1,100 @@
+{
+  "data": [
+    {
+      "id": "1000001",
+      "type": "report",
+      "attributes": {
+        "title": "Stored XSS in the profile page",
+        "state": "triaged",
+        "vulnerability_information": "A stored cross-site scripting issue lets an attacker run script in another user's session.",
+        "created_at": "2026-07-10T09:00:00.000Z"
+      },
+      "relationships": {
+        "severity": {
+          "data": {
+            "id": "sev-1",
+            "type": "severity",
+            "attributes": {
+              "rating": "high",
+              "score": 7.6,
+              "cvss_vector_string": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:L/A:N"
+            }
+          }
+        },
+        "weakness": {
+          "data": {
+            "id": "weak-1",
+            "type": "weakness",
+            "attributes": {"external_id": "cwe-79", "name": "Cross-site Scripting (XSS) - Stored"}
+          }
+        },
+        "reporter": {
+          "data": {"id": "user-1", "type": "user", "attributes": {"username": "researcher-one"}}
+        }
+      }
+    },
+    {
+      "id": "1000002",
+      "type": "report",
+      "attributes": {
+        "title": "Rate limiting missing on the login endpoint",
+        "state": "new",
+        "vulnerability_information": "The login endpoint accepts unlimited attempts.",
+        "created_at": "2026-07-11T10:00:00.000Z"
+      },
+      "relationships": {
+        "severity": {
+          "data": {"attributes": {"rating": "medium", "score": 5.3, "cvss_vector_string": ""}}
+        },
+        "weakness": {
+          "data": {"attributes": {"external_id": "cwe-307", "name": "Improper Restriction of Authentication Attempts"}}
+        },
+        "reporter": {"data": {"attributes": {"username": "researcher-two"}}}
+      }
+    },
+    {
+      "id": "1000003",
+      "type": "report",
+      "attributes": {
+        "title": "Informative report with no severity",
+        "state": "informative",
+        "vulnerability_information": "",
+        "created_at": "2026-07-12T11:00:00.000Z"
+      },
+      "relationships": {
+        "severity": {"data": {"attributes": {"rating": "none", "score": 0}}},
+        "weakness": {"data": {"attributes": {"external_id": "", "name": ""}}},
+        "reporter": {"data": {"attributes": {"username": ""}}}
+      }
+    },
+    {
+      "id": "1000004",
+      "type": "report",
+      "attributes": {
+        "title": "Report with an unparseable weakness id",
+        "state": "triaged",
+        "vulnerability_information": "Details here.",
+        "created_at": "2026-07-13T12:00:00.000Z"
+      },
+      "relationships": {
+        "severity": {"data": {"attributes": {"rating": "CRITICAL", "score": 9.9}}},
+        "weakness": {"data": {"attributes": {"external_id": "capec-63", "name": "Some weakness"}}},
+        "reporter": {"data": {"attributes": {"username": "researcher-three"}}}
+      }
+    },
+    {
+      "id": "1000005",
+      "type": "report",
+      "attributes": {
+        "title": "Report with no relationships at all",
+        "state": "new",
+        "vulnerability_information": "Nothing linked.",
+        "created_at": "2026-07-14T13:00:00.000Z"
+      }
+    }
+  ],
+  "links": {
+    "self": "https://api.hackerone.com/v1/reports?page%5Bnumber%5D=1",
+    "next": ""
+  }
+}

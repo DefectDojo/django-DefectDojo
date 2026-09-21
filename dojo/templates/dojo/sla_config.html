@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load authorization_tags %}
 {% block content %}
@@ -12,7 +13,7 @@
                         <div class="dropdown pull-right">
                             {% if "dojo.add_sla_configuration"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" name="sla_dropdown" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true" aria-label="SLA configuration options">
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'SLA configuration options' %}">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>

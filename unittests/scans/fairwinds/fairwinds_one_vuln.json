@@ -1,0 +1,29 @@
+[
+  {
+    "ID": 5001,
+    "Title": "CVE-2000-0001 in openssl",
+    "Severity": 0.95,
+    "Category": "Security",
+    "ReportType": "trivy",
+    "EventType": "",
+    "Cluster": "generic-prod",
+    "ResourceKind": "Deployment",
+    "ResourceName": "generic-api",
+    "ResourceNamespace": "generic-app",
+    "ResourceContainer": "api",
+    "Description": "<p>The image ships a vulnerable openssl.</p>",
+    "Remediation": "Rebuild the image on a patched base.",
+    "Notes": "Raised by the platform team.",
+    "Fixed": false,
+    "FirstSeen": "2026-07-20T09:00:00Z",
+    "LastReportedAt": "2026-07-31T09:00:00Z",
+    "ImageName": "registry.example.com/generic-api",
+    "ImageTag": "1.4.0",
+    "ImageSHA": "sha256:aaaa1111",
+    "Tags": [
+      "owner/platform"
+    ],
+    "TicketLink": "",
+    "DeletedAt": null
+  }
+]

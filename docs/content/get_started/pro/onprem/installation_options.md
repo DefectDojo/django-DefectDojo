@@ -1,7 +1,9 @@
 ---
 title: "Self-Hosting DefectDojo Pro"
+description: "The self-hosted deployment models for DefectDojo Pro (Docker Compose and Kubernetes), what you need before you start, and how the rest of this section fits"
+draft: false
 date: 2021-02-02T20:46:29+01:00
-weight: 5
+weight: 1
 audience: pro
 ---
 
@@ -27,11 +29,16 @@ You will need a license file and the deployment tooling for your chosen model. D
 
 You will also need somewhere to run it, a PostgreSQL database it can reach, and a hostname that resolves to the deployment. The individual installation pages cover the specifics for each model.
 
+## Choose your deployment method
+
+The install and upgrade steps live in two sections, one per method:
+
+- **[Kubernetes (Helm)](/get_started/pro/onprem/kubernetes/)** — installing and upgrading with the Helm chart, plus deploying on OpenShift.
+- **[Docker Compose](/get_started/pro/onprem/docker_compose/)** — installing and upgrading with `dojo-compose-cli`, plus air-gapped installs and adding storage for uploaded files.
+
 ## What else is in this section
 
-The pages alongside this one cover the rest of the lifecycle. There is sizing guidance for choosing hardware, instructions for moving an existing open source instance into a self-hosted Pro deployment, and a procedure for installing where the target host has no route to the internet.
-
-For deployments already running, there are pages on upgrading, on backing up, on raising the limits that reject large scan uploads, and on expanding storage for uploaded files when a host runs short. Use the section navigation to browse them.
+The remaining pages apply to both methods: [hardware sizing](/get_started/pro/onprem/hardware_sizing/), [migrating from open source](/get_started/pro/onprem/migrating_from_open_source/), [upgrading](/get_started/pro/onprem/upgrading/), [FIPS mode](/get_started/pro/onprem/fips_mode/) (with a separate page for [FIPS on Amazon ECS / Fargate](/get_started/pro/onprem/fips_on_ecs_fargate/)), and [backing up](/get_started/pro/onprem/backing_up/). Raising upload size limits differs by method, so it lives in each section: [Kubernetes](/get_started/pro/onprem/kubernetes/upload_size_limits/) and [Docker Compose](/get_started/pro/onprem/docker_compose/upload_size_limits/).
 
 ## Questions
 

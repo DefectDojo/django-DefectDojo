@@ -107,7 +107,7 @@ Sample Burp Suite DAST Scan scans can be found [here](https://github.com/DefectD
 [Burp Suite DAST](https://portswigger.net/burp/dast)
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

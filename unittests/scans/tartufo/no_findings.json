@@ -1,0 +1,10 @@
+{
+  "scan_time": "2026-08-09T15:25:47.376139",
+  "project_path": "repo/",
+  "output_dir": null,
+  "excluded_paths": [],
+  "excluded_signatures": [],
+  "exclude_entropy_patterns": [],
+  "exclude_regex_patterns": [],
+  "found_issues": []
+}

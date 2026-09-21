@@ -2514,6 +2514,146 @@
   },
   {
     "fields": {
+      "display_order": 10,
+      "icon": "plug",
+      "name": "API",
+      "value": "web service"
+    },
+    "model": "dojo.product_platform",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "display_order": 20,
+      "icon": "desktop",
+      "name": "Desktop",
+      "value": "desktop"
+    },
+    "model": "dojo.product_platform",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "display_order": 30,
+      "icon": "shuffle",
+      "name": "Internet of Things",
+      "value": "iot"
+    },
+    "model": "dojo.product_platform",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "display_order": 40,
+      "icon": "mobile",
+      "name": "Mobile",
+      "value": "mobile"
+    },
+    "model": "dojo.product_platform",
+    "pk": 4
+  },
+  {
+    "fields": {
+      "display_order": 50,
+      "icon": "rectangle-list",
+      "name": "Web",
+      "value": "web"
+    },
+    "model": "dojo.product_platform",
+    "pk": 5
+  },
+  {
+    "fields": {
+      "display_order": 10,
+      "icon": "compass",
+      "name": "Construction",
+      "value": "construction"
+    },
+    "model": "dojo.product_lifecycle",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "display_order": 20,
+      "icon": "ship",
+      "name": "Production",
+      "value": "production"
+    },
+    "model": "dojo.product_lifecycle",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "display_order": 30,
+      "icon": "moon",
+      "name": "Retirement",
+      "value": "retirement"
+    },
+    "model": "dojo.product_lifecycle",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "display_order": 10,
+      "icon": "book",
+      "name": "Third Party Library",
+      "value": "third party library"
+    },
+    "model": "dojo.product_origin",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "display_order": 20,
+      "icon": "money-bill",
+      "name": "Purchased",
+      "value": "purchased"
+    },
+    "model": "dojo.product_origin",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "display_order": 30,
+      "icon": "suitcase",
+      "name": "Contractor Developed",
+      "value": "contractor"
+    },
+    "model": "dojo.product_origin",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "display_order": 40,
+      "icon": "home",
+      "name": "Internally Developed",
+      "value": "internal"
+    },
+    "model": "dojo.product_origin",
+    "pk": 4
+  },
+  {
+    "fields": {
+      "display_order": 50,
+      "icon": "code",
+      "name": "Open Source",
+      "value": "open source"
+    },
+    "model": "dojo.product_origin",
+    "pk": 5
+  },
+  {
+    "fields": {
+      "display_order": 60,
+      "icon": "globe",
+      "name": "Outsourced",
+      "value": "outsourced"
+    },
+    "model": "dojo.product_origin",
+    "pk": 6
+  },
+  {
+    "fields": {
       "async_updating": false,
       "business_criticality": "high",
       "created": null,
@@ -2524,10 +2664,10 @@
       "enable_simple_risk_acceptance": false,
       "external_audience": true,
       "internet_accessible": true,
-      "lifecycle": "production",
+      "lifecycle": 2,
       "name": "BodgeIt",
-      "origin": "internal",
-      "platform": "web",
+      "origin": 4,
+      "platform": 5,
       "prod_numeric_grade": 5,
       "prod_type": 2,
       "product_manager": [
@@ -2567,10 +2707,10 @@
       "enable_simple_risk_acceptance": false,
       "external_audience": false,
       "internet_accessible": false,
-      "lifecycle": "construction",
+      "lifecycle": 1,
       "name": "Internal CRM App",
-      "origin": "internal",
-      "platform": "web",
+      "origin": 4,
+      "platform": 5,
       "prod_numeric_grade": 51,
       "prod_type": 2,
       "product_manager": [
@@ -2605,10 +2745,10 @@
       "enable_simple_risk_acceptance": false,
       "external_audience": true,
       "internet_accessible": false,
-      "lifecycle": "production",
+      "lifecycle": 2,
       "name": "Apple Accounting Software",
-      "origin": "purchased",
-      "platform": "web",
+      "origin": 2,
+      "platform": 5,
       "prod_numeric_grade": 100,
       "prod_type": 3,
       "product_manager": [

@@ -76,7 +76,7 @@ Para entender la diferencia, resulta útil pensar en Import como el registro de 
 
 A modo de analogía: si fuera contador, podría usar Import para registrar un único recibo, mientras que usaría Reimport para llevar un libro contable continuo de gastos
 
-Ambos métodos también utilizan la Deduplicación de forma diferente: mientras que dos Tests Importados por separado dentro del mismo Producto identificarán y etiquetarán los Hallazgos duplicados de manera independiente, Reimport no creará ningún Hallazgo que identifique como [duplicado](/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport/) dentro del Test.
+Ambos métodos también utilizan la Deduplicación de forma diferente: mientras que dos Tests Importados por separado dentro del mismo Producto identificarán y etiquetarán los Hallazgos duplicados de manera independiente, Reimport no creará ningún Hallazgo que identifique como [duplicado](/triage_findings/finding_deduplication/avoid_excess_duplicates/) dentro del Test.
 
 En términos generales, si lo que necesita es un informe puntual, Import es el mejor método a utilizar. Si ejecuta e ingiere informes de una herramienta de forma continua, Reimport es el mejor método para mantener todo organizado.
 

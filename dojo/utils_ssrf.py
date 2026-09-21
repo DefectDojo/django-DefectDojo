@@ -53,8 +53,8 @@ def _check_ip(ip_str: str) -> None:
         raise SSRFError(msg)
 
 
-def _resolve_and_check(hostname: str, port: int) -> None:
-    """Resolve hostname and verify every returned address is publicly routable."""
+def _resolve_and_check(hostname: str, port: int) -> str:
+    """Resolve hostname, verify every returned address is publicly routable, and return one."""
     try:
         addr_infos = socket.getaddrinfo(
             hostname, port, socket.AF_UNSPEC, socket.SOCK_STREAM,
@@ -69,6 +69,8 @@ def _resolve_and_check(hostname: str, port: int) -> None:
 
     for _family, _type, _proto, _canon, sockaddr in addr_infos:
         _check_ip(sockaddr[0])
+
+    return addr_infos[0][4][0]
 
 
 def validate_url_for_ssrf(url: str) -> None:
@@ -107,22 +109,31 @@ def validate_url_for_ssrf(url: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# urllib3 connection subclasses — validation runs at socket-creation time.
-# Overriding _new_conn() (called immediately before the OS connect() syscall)
-# minimises the TOCTOU window to microseconds, making DNS rebinding attacks
-# impractical in practice.
+# urllib3 connection subclasses — the hostname is resolved once, every address
+# it returns is checked, and the socket is then opened against one of those
+# checked addresses. urllib3 never resolves the name a second time, so there is
+# no window in which the answer can change.
 # ---------------------------------------------------------------------------
 
-class _SSRFSafeHTTPConnection(urllib3.connection.HTTPConnection):
+class _SSRFSafePinnedConnection:
     def _new_conn(self) -> socket.socket:
-        _resolve_and_check(self._dns_host, self.port)
-        return super()._new_conn()
+        checked_address = _resolve_and_check(self._dns_host, self.port)
+        hostname = self._dns_host
+        self._dns_host = checked_address
+        try:
+            return super()._new_conn()
+        finally:
+            # urllib3 reads self.host for the Host header, TLS SNI and certificate
+            # verification after this returns, so put the hostname back.
+            self._dns_host = hostname
 
 
-class _SSRFSafeHTTPSConnection(urllib3.connection.HTTPSConnection):
-    def _new_conn(self) -> socket.socket:
-        _resolve_and_check(self._dns_host, self.port)
-        return super()._new_conn()
+class _SSRFSafeHTTPConnection(_SSRFSafePinnedConnection, urllib3.connection.HTTPConnection):
+    pass
+
+
+class _SSRFSafeHTTPSConnection(_SSRFSafePinnedConnection, urllib3.connection.HTTPSConnection):
+    pass
 
 
 class _SSRFSafeHTTPConnectionPool(urllib3.connectionpool.HTTPConnectionPool):
