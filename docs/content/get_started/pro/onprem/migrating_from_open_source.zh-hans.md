@@ -2,7 +2,7 @@
 title: 从开源版迁移到自托管 DefectDojo Pro
 description: 将您的开源 DefectDojo 数据库和媒体文件迁移到自托管的 DefectDojo Pro 部署中
 draft: false
-weight: 6
+weight: 3
 audience: pro
 ---
 

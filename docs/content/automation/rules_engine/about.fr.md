@@ -13,7 +13,7 @@ Le Moteur de règles de DefectDojo vous permet de créer des workflows personnal
 
 Le Moteur de règles n'est accessible que via l'[interface Pro](/get_started/about/ui_pro_vs_os/).
 
-**Vous cherchez l'éditeur de graphes ?** Le [Moteur de règles 2.0](/automation/rules_engine_2/about/) construit l'automatisation sous forme de graphes de nœuds visuels, et ajoute des embranchements, des actions sortantes telles que des tickets et des messages, des traces par exécution et un registre des livraisons. Les deux moteurs fonctionnent côte à côte, et les règles existantes peuvent être [converties vers l'autre moteur](/automation/rules_engine_2/converting_from_rules_engine/).
+**Vous cherchez l'éditeur de graphes ?** Le [Triage Engine](/automation/triage_engine/about/) construit l'automatisation sous forme de graphes de nœuds visuels, et ajoute des embranchements, des actions sortantes telles que des tickets et des messages, des traces par exécution et un registre des livraisons. Les deux moteurs fonctionnent côte à côte, et les règles existantes peuvent être [converties vers l'autre moteur](/automation/triage_engine/converting_from_rules_engine/).
 
 ## Activer le Moteur de règles
 

@@ -13,7 +13,7 @@ DefectDojo 的规则引擎允许您构建自定义工作流和批量操作，用
 
 规则引擎只能通过 [Pro UI](/get_started/about/ui_pro_vs_os/) 访问。
 
-**在寻找图形编辑器？** [规则引擎 2.0](/automation/rules_engine_2/about/) 以可视化节点图的形式构建自动化流程，并新增了分支、诸如工单和消息等出站操作、按运行记录的执行痕迹，以及投递台账。两套引擎并行运行，现有规则也可以[转换](/automation/rules_engine_2/converting_from_rules_engine/)到新引擎。
+**在寻找图形编辑器？** [Triage Engine](/automation/triage_engine/about/) 以可视化节点图的形式构建自动化流程，并新增了分支、诸如工单和消息等出站操作、按运行记录的执行痕迹，以及投递台账。两套引擎并行运行，现有规则也可以[转换](/automation/triage_engine/converting_from_rules_engine/)到新引擎。
 
 ## 启用规则引擎
 

@@ -6,7 +6,7 @@ weight: 4
 audience: pro
 ---
 
-**Disponibilité :** les connecteurs de messagerie sont une fonctionnalité bêta. Activez **Messaging Connectors** sur la page Feature Flags. Comme les alertes sont acheminées par des règles, **Rules Engine 2.0** doit également être activé.
+**Disponibilité :** les connecteurs de messagerie sont une fonctionnalité bêta. Activez **Messaging Connectors** sur la page Feature Flags. Comme les alertes sont acheminées par des règles, **Triage Engine** doit également être activé.
 
 Les connecteurs de messagerie envoient des alertes de DefectDojo vers un service de chat, une adresse e-mail ou un topic Amazon SNS. Ils se trouvent à côté des connecteurs de ticketing et de gestion des incidents sur la même page **Downstream Connectors**, et se configurent de la même manière : créez une connexion une fois, puis décidez ce qui doit lui être envoyé.
 
@@ -14,7 +14,7 @@ Les connecteurs de ticketing et les connecteurs de messagerie répondent à des 
 
 ## Ce que vous pouvez envoyer
 
-Les alertes sont acheminées par Rules Engine 2.0. Une règle détermine **quand** envoyer (un déclencheur), **quelles** Constatations sont éligibles (des conditions), et **où** le message est envoyé (un nœud de notification indiquant votre connexion et votre canal).
+Les alertes sont acheminées par Triage Engine. Une règle détermine **quand** envoyer (un déclencheur), **quelles** Constatations sont éligibles (des conditions), et **où** le message est envoyé (un nœud de notification indiquant votre connexion et votre canal).
 
 Cela signifie que les filtres disponibles pour une alerte sont les mêmes que ceux disponibles pour une règle : sévérité, périmètre, étiquettes, statut, et tout ce qu'une condition de règle peut exprimer. Plusieurs alertes différentes allant vers plusieurs canaux différents ne sont donc que plusieurs règles.
 
@@ -163,7 +163,7 @@ Un test réussi débloque également une connexion qui a été désactivée auto
 
 ## Créer une alerte
 
-Il existe deux façons d'y arriver. Toutes deux produisent la même chose : une règle Rules Engine 2.0.
+Il existe deux façons d'y arriver. Toutes deux produisent la même chose : une règle Triage Engine.
 
 ### La page des alertes
 
@@ -189,7 +189,7 @@ Les alertes sont des règles, elles peuvent donc aussi être ouvertes dans l'éd
 
 Le chemin complet, pour tout ce que le formulaire ne couvre pas.
 
-1. Allez dans **Automation > Rules Engine 2.0** et créez une règle.
+1. Allez dans **Automation > Triage Engine** et créez une règle.
 2. Ajoutez un déclencheur. Pour des alertes portant sur des Constatations nouvellement importées, utilisez le déclencheur d'événement Finding sur **created**. Les imports sont regroupés par lots, si bien qu'un import produit une seule alerte plutôt qu'une par Constatation.
 3. Ajoutez des conditions déterminant l'éligibilité, par exemple une sévérité minimale de Élevée.
 4. Ajoutez un nœud de message pour le fournisseur souhaité (**Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email**, ou **Publish to an SNS Topic**) et définissez :

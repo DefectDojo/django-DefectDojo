@@ -52,6 +52,7 @@ class StaticMethodFilters(FilterSet):
         field_name: str,
         help_text_header: str,
         context: dict,
+        model_field_name: str | None = None,
     ) -> None:
         """
         Create all the filters needed for a CharFilter.
@@ -62,49 +63,55 @@ class StaticMethodFilters(FilterSet):
         - Not Contains
         - Starts with
         - Ends with
+
+        ``field_name`` is the public query-parameter prefix. ``model_field_name``
+        is the ORM field the filter resolves against; it defaults to ``field_name``
+        and only needs to be supplied when the two differ (e.g. a public
+        ``created_at`` parameter backed by the model's ``created`` field).
         """
+        model_field = model_field_name or field_name
         return StaticMethodFilters.set_class_variables(
             context,
             {
                 f"{field_name}_exact": CharFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="iexact",
                     help_text=f"{help_text_header}: Exact Match",
                 ),
                 f"{field_name}_not_exact": CharFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="iexact",
                     help_text=f"{help_text_header}: Not Exact Match",
                     exclude=True,
                 ),
                 f"{field_name}_contains": CharFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="icontains",
                     help_text=f"{help_text_header}: Contains",
                 ),
                 f"{field_name}_not_contains": CharFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="icontains",
                     help_text=f"{help_text_header}: Not Contains",
                     exclude=True,
                 ),
                 f"{field_name}_starts_with": CharFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="istartswith",
                     help_text=f"{help_text_header}: Starts With",
                 ),
                 f"{field_name}_ends_with": CharFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="iendswith",
                     help_text=f"{help_text_header}: Ends With",
                 ),
                 f"{field_name}_includes": CharFieldInFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="in",
                     help_text=f"{help_text_header}: Included in List",
                 ),
                 f"{field_name}_not_includes": CharFieldInFilter(
-                    field_name=field_name,
+                    field_name=model_field,
                     lookup_expr="in",
                     help_text=f"{help_text_header}: Not Included in List",
                     exclude=True,
@@ -190,13 +197,22 @@ class StaticMethodFilters(FilterSet):
         field_name: str,
         help_text_header: str,
         context: dict,
+        model_field_name: str | None = None,
     ) -> None:
-        """Create a filter for setting datetime filters."""
+        """
+        Create a filter for setting datetime filters.
+
+        ``field_name`` is the public query-parameter name (it produces
+        ``<field_name>_after`` / ``<field_name>_before``). ``model_field_name``
+        is the ORM field the range resolves against; it defaults to ``field_name``
+        and only needs to be supplied when the two differ (e.g. a public
+        ``created_at`` parameter backed by the model's ``created`` field).
+        """
         return StaticMethodFilters.set_class_variables(
             context,
             {
                 field_name: DateTimeFromToRangeFilter(
-                    field_name=field_name,
+                    field_name=model_field_name or field_name,
                     help_text=f"{help_text_header}: DateTime Range Filter",
                 ),
             },
@@ -222,12 +238,23 @@ class StaticMethodFilters(FilterSet):
     @staticmethod
     def create_ordering_filters(
         context: dict,
-        field_names: Iterable[str],
+        field_names: Iterable[str | tuple[str, str]],
     ) -> None:
-        """Create an ordering filter for all fields in the dict."""
+        """
+        Create an ordering filter for all fields in the dict.
+
+        Each entry is either a string (the ORM field, exposed under the same
+        public name) or a ``(model_field, public_name)`` tuple for cases where
+        the query parameter differs from the ORM field (e.g. a public
+        ``created_at`` ordering key backed by the model's ``created`` field).
+        """
+        fields = [
+            field_name if isinstance(field_name, tuple) else (field_name, field_name)
+            for field_name in field_names
+        ]
         return StaticMethodFilters.set_class_variables(
             context,
-            {"ordering": OrderingFilter(fields=[(field_name, field_name) for field_name in field_names])},
+            {"ordering": OrderingFilter(fields=fields)},
         )
 
 
@@ -235,9 +262,11 @@ class CommonFilters(StaticMethodFilters):
 
     """Helpers for FilterSets to reduce copy/past code."""
 
+    # The public ``created_at``/``updated_at`` parameters resolve to the
+    # ``created``/``updated`` fields that BaseModel actually defines.
     StaticMethodFilters.create_integer_filters("id", "ID", locals())
-    StaticMethodFilters.create_datetime_filters("created_at", "Created At", locals())
-    StaticMethodFilters.create_datetime_filters("updated_at", "Updated At", locals())
+    StaticMethodFilters.create_datetime_filters("created_at", "Created At", locals(), model_field_name="created")
+    StaticMethodFilters.create_datetime_filters("updated_at", "Updated At", locals(), model_field_name="updated")
 
 
 def filter_timestamp(queryset, name, value):

@@ -19,6 +19,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.finding.queries import get_authorized_findings
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
 from dojo.labels import get_labels
 from dojo.metrics.utils import (
@@ -711,13 +712,14 @@ def view_engineer(request, eid):
 
     # ---------------
     # Base query-sets
-    reporter_findings = Finding.objects.filter(reporter=user)
+    authorized_findings = get_authorized_findings("view")
+    reporter_findings = authorized_findings.filter(reporter=user)
     if get_system_setting("enforce_verified_status", True) or get_system_setting(
         "enforce_verified_status_metrics", True,
     ):
         reporter_findings = reporter_findings.filter(verified=True)
 
-    closed_findings = Finding.objects.filter(mitigated_by=user)
+    closed_findings = authorized_findings.filter(mitigated_by=user)
     open_findings = (
         reporter_findings.filter(mitigated__isnull=True)
         .select_related("test__engagement__product__prod_type", "reporter")
@@ -732,7 +734,7 @@ def view_engineer(request, eid):
     open_month = reporter_findings.filter(date__gte=month_start, date__lt=month_end)
     closed_month = closed_findings.filter(mitigated__gte=month_start, mitigated__lt=month_end)
     accepted_month = (
-        Finding.objects.filter(
+        authorized_findings.filter(
             risk_acceptance__owner=user,
             risk_acceptance__created__gte=month_start,
             risk_acceptance__created__lt=month_end,
@@ -744,7 +746,7 @@ def view_engineer(request, eid):
     open_week = reporter_findings.filter(date__gte=week_start, date__lt=week_end)
     closed_week = closed_findings.filter(mitigated__gte=week_start, mitigated__lt=week_end)
     accepted_week = (
-        Finding.objects.filter(
+        authorized_findings.filter(
             risk_acceptance__owner=user,
             risk_acceptance__created__gte=week_start,
             risk_acceptance__created__lt=week_end,
@@ -767,8 +769,8 @@ def view_engineer(request, eid):
     findings_this_period(reporter_findings, 0, weekly_total_series, weekly_open_series, weekly_accepted_series)
 
     ras_owner_qs = Risk_Acceptance.objects.filter(owner=user)
-    _augment_series_with_accepted(monthly_accepted_series, ras_owner_qs, period="month", tz=tz)
-    _augment_series_with_accepted(weekly_accepted_series, ras_owner_qs, period="week", tz=tz)
+    _augment_series_with_accepted(monthly_accepted_series, ras_owner_qs, period="month", tz=tz, findings=authorized_findings)
+    _augment_series_with_accepted(weekly_accepted_series, ras_owner_qs, period="week", tz=tz, findings=authorized_findings)
 
     chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *monthly_open_series]
     a_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *monthly_accepted_series]
@@ -882,7 +884,7 @@ def _age_buckets(qs):
     )
 
 
-def _augment_series_with_accepted(series: list[list], ras_qs, *, period: str, tz):
+def _augment_series_with_accepted(series: list[list], ras_qs, *, period: str, tz, findings):
     """Mutate `series` in-place, adding per-severity counts for accepted findings."""
     if not series:  # no buckets to augment
         return
@@ -905,7 +907,7 @@ def _augment_series_with_accepted(series: list[list], ras_qs, *, period: str, tz
             end = start + timedelta(days=7)  # next Monday 00:00 (exclusive)
 
         accepted = (
-            Finding.objects.filter(
+            findings.filter(
                 risk_acceptance__owner=owner,
                 risk_acceptance__created__gte=start,
                 risk_acceptance__created__lt=end,

@@ -106,3 +106,12 @@ class TestTFSecParser(DojoTestCase):
             self.assertEqual(3, severities.get("High"))
             self.assertEqual(1, severities.get("Medium"))
             self.assertEqual(1, severities.get("Low"))
+
+    def test_parse_finding_with_null_provider(self):
+        """Verify the parser does not crash when rule_provider is null."""
+        with (get_unit_tests_scans_path("tfsec") / "finding_with_null_provider.json").open(encoding="utf-8") as testfile:
+            parser = TFSecParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            self.assertEqual("Custom rule without provider", findings[0].title)
+            self.assertEqual("custom-rule-001", findings[0].vuln_id_from_tool)

@@ -24,7 +24,7 @@ Jira 連携でよくある問題と、その対処方法を以下に示します
 
 DefectDojo の Jira 連携が「connection refused」「no route to host」、または一般的な TLS ハンドシェイクエラーのような接続エラーで失敗し、かつ認証情報自体は有効である場合、DefectDojo インスタンスがファイアウォールの内側にあり、送信トラフィックがフォワード HTTPS プロキシを経由する必要があるのかもしれません。
 
-オンプレミスの Pro 版デプロイメントでは、デプロイメント上に `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` 環境変数を設定してください。`dojo-compose-cli` はこれらを `uwsgi`、`celeryworker`、Connector の各コンテナに自動的に伝播します。設定手順の全体については [フォワード HTTPS プロキシの背後で DefectDojo を実行する](/onprem_deployment/forward_proxy/) を参照してください。
+オンプレミスの Pro 版デプロイメントでは、デプロイメント上に `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` 環境変数を設定してください。`dojo-compose-cli` はこれらを `uwsgi`、`celeryworker`、Connector の各コンテナに自動的に伝播します。設定手順の全体については [フォワード HTTPS プロキシの背後で DefectDojo を実行する](/get_started/pro/onprem/forward_proxy/) を参照してください。
 
 > Note: `HTTPS_PROXY` の設定は、DefectDojo からの **送信 (outbound)** トラフィックのみを構成します。Jira から DefectDojo への **受信 (inbound)** Webhook の配信には影響しません。そのケースについては、以下の [Jira issue の変更が DefectDojo の検出事項に反映されない](#changes-made-to-jira-issues-are-not-updating-findings-in-defectdojo) を参照してください。
 
