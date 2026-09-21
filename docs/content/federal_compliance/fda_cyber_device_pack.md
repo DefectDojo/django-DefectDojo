@@ -54,7 +54,7 @@ seven things about each component. DefectDojo records all seven:
 
 Unknown is a valid answer for the support facts and is reported as unknown. DefectDojo does not
 guess a support level or an end of support date. See
-[Working with SBOMs](../asset_modelling/locations/pro__working_with_sboms) for how imports supply
+[Working with SBOMs](../../asset_modelling/locations/pro__working_with_sboms) for how imports supply
 these and which value wins when more than one source has an opinion.
 
 ## The three lifecycle metrics
