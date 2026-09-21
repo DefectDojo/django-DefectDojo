@@ -15,7 +15,9 @@ DoD Assessment Methodology point weights.&lt;/p&gt;</description></item><item><t
 Resilience Act (CRA) and Digital Operational Resilience Act (DORA). A regulatory assessment
 collects the operational facts DefectDojo already holds, gives an assessor space to document the
 remaining evidence, and produces a dated evidence pack.&lt;/p&gt;</description></item><item><title>Control Coverage</title><link>https://docs.defectdojo.com/federal_compliance/control_coverage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/federal_compliance/control_coverage/</guid><description>&lt;p&gt;The control coverage view answers a simple question: which 800-53 controls do my scanners actually
-test, and where are the open weaknesses per control?&lt;/p&gt;</description></item><item><title>PCI DSS Evidence Packs</title><link>https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/</guid><description>&lt;p&gt;DefectDojo Pro includes an authored catalog for the PCI DSS v4.0.1 requirements that a
-vulnerability management programme answers. A PCI DSS assessment collects the operational facts
-DefectDojo already holds, gives an assessor space to record the rest, and produces a dated
-workbook in the wording a Report on Compliance uses.&lt;/p&gt;</description></item></channel></rss>
+test, and where are the open weaknesses per control?&lt;/p&gt;</description></item><item><title>FDA Cyber Device Evidence Pack</title><link>https://docs.defectdojo.com/federal_compliance/fda_cyber_device_pack/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/federal_compliance/fda_cyber_device_pack/</guid><description>&lt;p&gt;Section 524B of the Federal Food, Drug, and Cosmetic Act asks the manufacturer of a cyber device
+for four things: a plan to monitor and address vulnerabilities after release, updates on a
+justified cycle with a faster route for the severe ones, a software bill of materials, and the
+processes around all of it. DefectDojo already holds much of the underlying record. These features
+add the few facts it cannot infer, work out where each obligation stands, and produce the workbook
+and bill of materials an assessor reviews.&lt;/p&gt;</description></item></channel></rss>
