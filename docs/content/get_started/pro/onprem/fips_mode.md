@@ -31,7 +31,6 @@ Because enforcement happens **inside the container**, FIPS mode does not require
 | Initializer (`init`) | yes | OpenSSL FIPS Provider 3.1.2 |
 | Orchestration workers (`ddorch-workers`) | yes | OpenSSL FIPS Provider 3.1.2 |
 | nginx | yes | OpenSSL FIPS Provider 3.1.2 |
-| PSIRT advisory engine | yes | OpenSSL FIPS Provider 3.1.2 |
 | Connectors, Integrators, ddorch, MCP server | yes | Go Cryptographic Module v1.0.0 |
 | **Sensei** | **partial** | service binaries: Go Cryptographic Module v1.0.0. Bundled scanner toolchain: **not covered** |
 | **PostgreSQL / Redis (embedded)** | **no** | use external FIPS-compliant services |
@@ -101,10 +100,6 @@ x-dojo-vars: &dojoenv
 
 x-nginx-vars: &nginxenv
   DD_FIPS_MODE: "1"        # nginx
-  # ... existing settings
-
-x-psirt-vars: &psirtenv
-  DD_FIPS_MODE: "1"        # psirt
   # ... existing settings
 ```
 
