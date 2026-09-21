@@ -64,6 +64,19 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual(4.2, finding.cvssv3_score)
             self.assertEqual(True, finding.fix_available)
 
+    def test_vulnerabilityreport_service_excludes_volatile_replicaset_name(self):
+        # regression test: `service` must stay stable across redeploys, otherwise
+        # DefectDojo's close_old_findings can never match findings from a previous
+        # deploy generation and old findings are never closed (see issue #16026).
+        # The fixture's `trivy-operator.resource.name` label is a ReplicaSet-generated
+        # name ("nginx-deployment-965685897") and must NOT end up in `service`.
+        with sample_path("vulnerabilityreport_single_vuln.json").open(encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            finding = findings[0]
+            self.assertEqual("default/ReplicaSet/nginx", finding.service)
+            self.assertNotIn("nginx-deployment-965685897", finding.service)
+
     def test_vulnerabilityreport_many(self):
         with sample_path("vulnerabilityreport_many.json").open(encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
