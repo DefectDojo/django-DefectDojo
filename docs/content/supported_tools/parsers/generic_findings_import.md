@@ -8,7 +8,9 @@ aliases:
 
 Open-source and Pro users can use Generic Findings Import as a method to ingest JSON or CSV files into DefectDojo which are not already in the supported Tools list.
 
-Using Generic Findings Import creates a Test Type in your DefectDojo instance based on the optional `type` field in the report. The naming rules are:
+A file whose name ends in `.csv` is read as CSV; any other file is read as JSON. JSON supports many more fields than CSV. The [Parser Guide](../file/generic) lists every supported CSV column and JSON field with its data type and example values.
+
+A JSON report creates a Test Type in your DefectDojo instance based on the optional `type` field in the report. A CSV report always uses the Test Type **"Generic Findings Import"**. The naming rules for JSON are:
 
 - If no `type` field is provided (or it equals the scan type), the Test Type is simply **"Generic Findings Import"**. For example, this JSON content results in the Test Type "Generic Findings Import":
 
@@ -33,4 +35,4 @@ Using Generic Findings Import creates a Test Type in your DefectDojo instance ba
 
 DefectDojo Pro users can also consider using the [Universal Parser](../universal_parser), a tool which allows for highly customizable JSON, XML and CSV imports.
 
-For more information on supported parameters for Generic Findings Import, see the related [Parser Guide](../file/generic).
+For the full list of supported fields, their data types, and example reports, see the related [Parser Guide](../file/generic).
