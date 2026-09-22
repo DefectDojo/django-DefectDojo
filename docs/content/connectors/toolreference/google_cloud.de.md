@@ -24,10 +24,14 @@ Der Connector authentifiziert sich mit einem Google-**Service-Konto** und liest 
 2. Geben Sie im Feld **Parent Resource** die Wurzel der zu importierenden Hierarchie ein: `organizations/{id}` oder `folders/{id}`. Ein einzelnes Projekt ist keine Hierarchie, daher wird `projects/{id}` hier nicht akzeptiert — verwenden Sie für einen einzelnen Projekt-Geltungsbereich den Google-Cloud-SCC-Connector.
 3. Fügen Sie den vollständigen Inhalt der **JSON-Schlüssel**-Datei des Service-Kontos in das Feld **Service Account Key** ein.
 
-Jeder Ordner und jedes `ACTIVE`-Projekt unterhalb des übergeordneten Elements wird zu einem Eintrag. Der Eintrag jedes Projekts wird nach dessen **Projekt-ID** benannt, und seine Organisation in DefectDojo ist der Ordner, in dem es liegt (oder Ihre Google-Cloud-Organisation, wenn das Projekt direkt darunter liegt).
+Jeder `ACTIVE`-Ordner und jedes `ACTIVE`-Projekt unterhalb des übergeordneten Elements wird zu einem Eintrag. Der Eintrag jedes Projekts wird nach dessen **Projekt-ID** benannt, und seine Organisation in DefectDojo ist der Ordner, in dem es liegt (oder Ihre Google-Cloud-Organisation, wenn das Projekt direkt darunter liegt).
 
 Wird ein Projekt in Google Cloud gelöscht, wechselt es in den Status `DELETE_REQUESTED` und fällt aus dem Import heraus. Sein zugeordneter Eintrag wird daher beim nächsten Sync als `MISSING` markiert, statt entfernt zu werden — DefectDojo löscht niemals stillschweigend ein Asset. Dasselbe gilt für einen gelöschten Ordner.
+
+Sobald ein Eintrag zugeordnet ist, aktualisiert dieser Connector seine Metadaten nie. Wenn Sie in Google Cloud einen Ordner umbenennen oder ein Projekt in einen anderen Ordner verschieben, zeigt DefectDojo weiterhin den alten Namen oder den alten Ordner an.
 
 #### Zusammenspiel mit dem Google-Cloud-SCC-Connector
 
 Beide Connectors identifizieren ein Projekt auf dieselbe Weise und benennen sein Asset jeweils nach der Projekt-ID. Wenn Sie zuerst diesen Connector ausführen, landen SCC-Befunde auf den von ihm erstellten Assets; lief zuerst SCC, übernimmt dieser Connector diese Assets und ergänzt sie um die Ordnerhierarchie. Sie müssen nichts doppelt zuordnen.
+
+Für die Organisation gilt dieselbe Regel: Wenn dieser Connector das Asset erstellt, setzt er die Organisation auf den Ordner des Projekts. Erstellte der Google-Cloud-SCC-Connector das Asset zuerst, behält dieses Asset seine bestehende Organisation, und dieser Connector ergänzt es nur um die Ordnerhierarchie.

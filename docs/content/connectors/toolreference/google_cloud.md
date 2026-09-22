@@ -24,10 +24,14 @@ The connector authenticates with a Google **service account** and reads only hie
 2. In the **Parent Resource** field, enter the root of the hierarchy to import: `organizations/{id}` or `folders/{id}`. A single project is not a hierarchy, so `projects/{id}` is not accepted here — use the Google Cloud SCC connector for a single-project scope.
 3. Paste the full contents of the service-account **JSON key** file into the **Service Account Key** field.
 
-Every folder and every `ACTIVE` project beneath the parent becomes a Record. Each project's Record is named after its **project ID**, and its Organization in DefectDojo is the folder it sits in (or your Google Cloud organization, for a project that sits directly under it).
+Every `ACTIVE` folder and project beneath the parent becomes a Record. Each project's Record is named after its **project ID**, and its Organization in DefectDojo is the folder it sits in (or your Google Cloud organization, for a project that sits directly under it).
 
 A project you delete in Google Cloud moves to the `DELETE_REQUESTED` state and drops out of the import, so its mapped Record is flagged `MISSING` on the next Sync rather than removed — DefectDojo never silently deletes an Asset. The same applies to a folder you delete.
+
+Once a Record is mapped, this connector never refreshes its metadata. If you rename a folder or move a project to a different folder in Google Cloud, DefectDojo keeps showing the old name or the old folder.
 
 #### Working alongside the Google Cloud SCC connector
 
 Both connectors identify a project the same way, and both name its Asset after the project ID. So if you run this connector first, SCC findings land on the Assets it created; if SCC ran first, this connector adopts those Assets and adds the folder hierarchy around them. You do not need to map anything twice.
+
+The Organization follows the same rule: when this connector creates the Asset, it sets the Organization to the project's folder. When the Google Cloud SCC connector creates the Asset first, that Asset keeps its existing Organization, and this connector only adds the folder hierarchy around it.

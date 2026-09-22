@@ -24,10 +24,14 @@ Le connecteur s'authentifie avec un **compte de service** Google et ne lit que l
 2. Dans le champ **Parent Resource**, saisissez la racine de la hiérarchie à importer : `organizations/{id}` ou `folders/{id}`. Un seul projet n'est pas une hiérarchie, donc `projects/{id}` n'est pas accepté ici — utilisez le connecteur Google Cloud SCC pour un périmètre limité à un seul projet.
 3. Collez le contenu complet du fichier de **clé JSON** du compte de service dans le champ **Service Account Key**.
 
-Chaque dossier et chaque projet `ACTIVE` sous le parent devient un Record. Le Record de chaque projet est nommé d'après son **ID de projet**, et son organisation dans DefectDojo est le dossier dans lequel il se trouve (ou votre organisation Google Cloud, pour un projet situé directement en dessous).
+Chaque dossier `ACTIVE` et chaque projet `ACTIVE` sous le parent devient un Record. Le Record de chaque projet est nommé d'après son **ID de projet**, et son organisation dans DefectDojo est le dossier dans lequel il se trouve (ou votre organisation Google Cloud, pour un projet situé directement en dessous).
 
 Un projet que vous supprimez dans Google Cloud passe à l'état `DELETE_REQUESTED` et sort de l'import ; son Record mappé est donc marqué `MISSING` lors de la prochaine synchronisation plutôt que supprimé — DefectDojo ne supprime jamais silencieusement un actif. Il en va de même pour un dossier que vous supprimez.
+
+Une fois qu'un Record est mappé, ce connecteur ne met jamais à jour ses métadonnées. Si vous renommez un dossier ou déplacez un projet vers un autre dossier dans Google Cloud, DefectDojo continue d'afficher l'ancien nom ou l'ancien dossier.
 
 #### Fonctionnement avec le connecteur Google Cloud SCC
 
 Les deux connecteurs identifient un projet de la même manière, et tous deux nomment son actif d'après l'ID du projet. Ainsi, si vous exécutez ce connecteur en premier, les constatations SCC atterrissent sur les actifs qu'il a créés ; si SCC s'est exécuté en premier, ce connecteur adopte ces actifs et ajoute la hiérarchie de dossiers autour d'eux. Vous n'avez pas besoin de mapper quoi que ce soit deux fois.
+
+L'organisation suit la même règle : quand ce connecteur crée l'actif, il définit son organisation comme le dossier du projet. Quand le connecteur Google Cloud SCC crée l'actif en premier, cet actif conserve son organisation existante, et ce connecteur ajoute seulement la hiérarchie de dossiers autour de lui.

@@ -24,10 +24,14 @@ Google Cloudコネクタは**アセットコネクタ**です。Google Cloudの�
 2. **Parent Resource**フィールドに、インポートしたい階層のルートを入力します: `organizations/{id}`または`folders/{id}`。単一のprojectは階層ではないため、`projects/{id}`はここでは使用できません。単一projectのスコープにはGoogle Cloud SCCコネクタを使用してください。
 3. サービスアカウントの**JSONキー**ファイルの内容全体を**Service Account Key**フィールドに貼り付けます。
 
-parentの配下にあるすべてのfolderと、`ACTIVE`状態のすべてのprojectがRecordになります。各projectのRecordはその**project ID**にちなんで名付けられ、DefectDojoでのOrganizationは、そのprojectが属するfolder(folderの直下にある場合はGoogle Cloudのorganization)になります。
+parentの配下にある`ACTIVE`状態のすべてのfolderとprojectがRecordになります。各projectのRecordはその**project ID**にちなんで名付けられ、DefectDojoでのOrganizationは、そのprojectが属するfolder(folderの直下にある場合はGoogle Cloudのorganization)になります。
 
 Google Cloudでprojectを削除すると`DELETE_REQUESTED`状態になり、インポート対象から外れます。そのため、対応するRecordは削除されるのではなく、次回の同期時に`MISSING`としてフラグが付けられます。DefectDojoがアセットを黙って削除することはありません。folderを削除した場合も同様です。
+
+Recordが一度マッピングされると、このコネクタはそのメタデータを二度と更新しません。Google Cloudでfolderの名前を変更したり、projectを別のfolderに移動したりしても、DefectDojoには古い名前や古いfolderが表示されたままになります。
 
 #### Working alongside the Google Cloud SCC connector
 
 どちらのコネクタも同じ方法でprojectを識別し、どちらもそのアセットをproject IDにちなんで名付けます。そのため、このコネクタを先に実行した場合、SCCの検出事項はこのコネクタが作成したアセットに届きます。SCCを先に実行した場合は、このコネクタがそれらのアセットを引き継ぎ、folderの階層をその周りに追加します。二重にマッピングする必要はありません。
+
+Organizationについても同じ規則が適用されます。このコネクタがアセットを作成した場合、そのOrganizationはprojectが属するfolderになります。Google Cloud SCCコネクタが先にアセットを作成した場合は、そのアセットは既存のOrganizationを保持し、このコネクタはfolderの階層を追加するだけです。

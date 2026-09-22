@@ -24,10 +24,14 @@ El conector se autentica con una **cuenta de servicio** de Google y solo lee met
 2. En el campo **Parent Resource**, introduzca la raíz de la jerarquía que desea importar: `organizations/{id}` o `folders/{id}`. Un solo proyecto no es una jerarquía, por lo que `projects/{id}` no se acepta aquí — use el conector Google Cloud SCC para un alcance de un solo proyecto.
 3. Pegue el contenido completo del archivo de **clave JSON** de la cuenta de servicio en el campo **Service Account Key**.
 
-Cada carpeta y cada proyecto `ACTIVE` bajo el elemento padre se convierte en un Record. El Record de cada proyecto se nombra según su **ID de proyecto**, y su Organización en DefectDojo es la carpeta en la que se encuentra (o su organización de Google Cloud, si el proyecto se encuentra directamente debajo de ella).
+Cada carpeta `ACTIVE` y cada proyecto `ACTIVE` bajo el elemento padre se convierte en un Record. El Record de cada proyecto se nombra según su **ID de proyecto**, y su Organización en DefectDojo es la carpeta en la que se encuentra (o su organización de Google Cloud, si el proyecto se encuentra directamente debajo de ella).
 
 Un proyecto que elimina en Google Cloud pasa al estado `DELETE_REQUESTED` y deja de importarse, por lo que su Record asignado se marca como `MISSING` en la siguiente sincronización en lugar de eliminarse: DefectDojo nunca elimina un Activo de forma silenciosa. Lo mismo ocurre con una carpeta que elimina.
+
+Una vez asignado un Record, este conector nunca actualiza sus metadatos. Si cambia el nombre de una carpeta o mueve un proyecto a otra carpeta en Google Cloud, DefectDojo sigue mostrando el nombre antiguo o la carpeta antigua.
 
 #### Uso conjunto con el conector de Google Cloud SCC
 
 Ambos conectores identifican un proyecto de la misma manera, y ambos nombran su Activo según el ID del proyecto. Por eso, si ejecuta primero este conector, los hallazgos de SCC aterrizan en los Activos que creó; si SCC se ejecutó primero, este conector adopta esos Activos y añade la jerarquía de carpetas a su alrededor. No necesita mapear nada dos veces.
+
+La Organización sigue la misma regla: cuando este conector crea el Activo, establece su Organización como la carpeta del proyecto. Cuando el conector de Google Cloud SCC crea el Activo primero, ese Activo conserva su Organización existente, y este conector solo añade la jerarquía de carpetas a su alrededor.
