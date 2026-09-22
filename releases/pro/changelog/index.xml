@@ -7,7 +7,7 @@
 &lt;li&gt;&lt;strong&gt;(Compliance)&lt;/strong&gt; Certification control catalogs for ISO 27001, SOC 2, and NIS2, with a cross-framework evidence view.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;(Compliance)&lt;/strong&gt; Framework presets for UK Cyber Essentials and the Australian Essential Eight.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;(SLA)&lt;/strong&gt; Versioned vulnerability response policies, with a response-clock evaluation and incident escalation, plus a vulnerability response evidence API and export.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;(Sensei)&lt;/strong&gt; Dynamic Scanning (DAST): configure targets, verify ownership, launch Nuclei scans, and meter usage for billing.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(Sensei)&lt;/strong&gt; Dynamic Scanning (DAST): configure targets, verify ownership, launch scans, and meter usage for billing.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;(Sensei)&lt;/strong&gt; AI Agent Red Teaming, a new Sensei capability and engine mode for red-teaming AI agents.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;(Sensei)&lt;/strong&gt; Schedule hosted repository scans with attributed credentials, and track scan frequency with exportable cadence attestations.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;(Sensei)&lt;/strong&gt; Tier Advisor projects your annual processing volume and recommends a tier.&lt;/li&gt;
