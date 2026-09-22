@@ -13,7 +13,7 @@ El conector de Google Cloud es un **Asset Connector**: lee la jerarquía de recu
 El conector se autentica con una **cuenta de servicio** de Google y solo lee metadatos de la jerarquía: nombres, ids, estado del ciclo de vida y etiquetas de carpetas y proyectos. No lee el contenido de los recursos ni hallazgos.
 
 1. En Google Cloud, cree una cuenta de servicio; se recomienda una dedicada para DefectDojo.
-2. Otórguele el rol **Browser** (`roles/browser`) en la organización o carpeta que desea importar. Los dos permisos que realmente necesita son `resourcemanager.folders.list` y `resourcemanager.projects.list`, por lo que un rol personalizado que los incluya también funciona.
+2. Otórguele el rol **Browser** (`roles/browser`) en la organización o carpeta que desea importar. El recorrido de la jerarquía necesita `resourcemanager.folders.list` y `resourcemanager.projects.list`. Un rol personalizado debe incluir además `resourcemanager.folders.get` y `resourcemanager.organizations.get`; de lo contrario, el Asset de nivel superior recibe el nombre de su ID de recurso en lugar de su nombre visible.
 3. Otorgue el rol en la parte **superior** del alcance que configure. El conector recorre todo el subárbol, y una carpeta que no pueda leer hace que la sincronización falle en lugar de importar silenciosamente un inventario parcial.
 4. Cree una **clave JSON** para la cuenta de servicio y descárguela.
 5. Habilite la **Cloud Resource Manager API** (`cloudresourcemanager.googleapis.com`) en el proyecto propietario de la cuenta de servicio.

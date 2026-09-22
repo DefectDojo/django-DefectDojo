@@ -13,7 +13,7 @@ The Google Cloud connector is an **Asset Connector**: it reads your Google Cloud
 The connector authenticates with a Google **service account** and reads only hierarchy metadata: folder and project names, ids, lifecycle state and labels. It reads no resource contents and no findings.
 
 1. In Google Cloud, create a service account — a dedicated one for DefectDojo is recommended.
-2. Grant it the **Browser** role (`roles/browser`) at the organization or folder you want to import. The two permissions it actually needs are `resourcemanager.folders.list` and `resourcemanager.projects.list`, so a custom role carrying those works too.
+2. Grant it the **Browser** role (`roles/browser`) at the organization or folder you want to import. The hierarchy walk needs `resourcemanager.folders.list` and `resourcemanager.projects.list`. A custom role must also carry `resourcemanager.folders.get` and `resourcemanager.organizations.get`, or the top-level Asset is named after its resource id instead of its display name.
 3. Grant the role at the **top** of the scope you configure. The connector walks the whole subtree, and a folder it cannot read fails the sync rather than silently importing a partial inventory.
 4. Create a **JSON key** for the service account and download it.
 5. Enable the **Cloud Resource Manager API** (`cloudresourcemanager.googleapis.com`) on the project that owns the service account.

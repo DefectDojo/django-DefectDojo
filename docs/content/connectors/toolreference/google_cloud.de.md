@@ -13,7 +13,7 @@ Der Google-Cloud-Connector ist ein **Asset-Connector**: Er liest Ihre Google-Clo
 Der Connector authentifiziert sich mit einem Google-**Service-Konto** und liest nur Hierarchie-Metadaten: Namen, IDs, Lifecycle-Status und Labels von Ordnern und Projekten. Er liest keine Ressourceninhalte und keine Befunde.
 
 1. Erstellen Sie in Google Cloud ein Service-Konto — ein dediziertes für DefectDojo wird empfohlen.
-2. Gewähren Sie ihm die Rolle **Browser** (`roles/browser`) auf der Organisation oder dem Ordner, den Sie importieren möchten. Die beiden tatsächlich benötigten Berechtigungen sind `resourcemanager.folders.list` und `resourcemanager.projects.list`; eine benutzerdefinierte Rolle mit diesen beiden Berechtigungen funktioniert daher ebenfalls.
+2. Gewähren Sie ihm die Rolle **Browser** (`roles/browser`) auf der Organisation oder dem Ordner, den Sie importieren möchten. Für das Durchlaufen der Hierarchie werden `resourcemanager.folders.list` und `resourcemanager.projects.list` benötigt. Eine benutzerdefinierte Rolle muss zusätzlich `resourcemanager.folders.get` und `resourcemanager.organizations.get` enthalten, sonst wird das oberste Asset nach seiner Ressourcen-ID statt nach seinem Anzeigenamen benannt.
 3. Gewähren Sie die Rolle an der **obersten Stelle** des von Ihnen konfigurierten Geltungsbereichs. Der Connector durchläuft den gesamten Teilbaum, und ein Ordner, den er nicht lesen kann, lässt den Sync fehlschlagen, statt stillschweigend ein unvollständiges Inventar zu importieren.
 4. Erstellen Sie einen **JSON-Schlüssel** für das Service-Konto und laden Sie ihn herunter.
 5. Aktivieren Sie die **Cloud Resource Manager API** (`cloudresourcemanager.googleapis.com`) für das Projekt, dem das Service-Konto gehört.

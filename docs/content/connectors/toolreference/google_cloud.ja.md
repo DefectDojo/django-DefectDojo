@@ -13,7 +13,7 @@ Google Cloudコネクタは**アセットコネクタ**です。Google Cloudの�
 コネクタはGoogleの**サービスアカウント**で認証を行い、階層のメタデータ(folderとprojectの名前、id、ライフサイクルの状態、ラベル)のみを読み取ります。リソースの中身や検出事項は読み取りません。
 
 1. Google Cloudでサービスアカウントを作成します。DefectDojo専用のアカウントを作成することをお勧めします。
-2. インポートしたいorganizationまたはfolderに対して、**Browser**ロール(`roles/browser`)を付与します。実際に必要な権限は`resourcemanager.folders.list`と`resourcemanager.projects.list`の2つだけなので、これらを含むカスタムロールでも動作します。
+2. インポートしたいorganizationまたはfolderに対して、**Browser**ロール(`roles/browser`)を付与します。階層の走査には`resourcemanager.folders.list`と`resourcemanager.projects.list`が必要です。カスタムロールにはさらに`resourcemanager.folders.get`と`resourcemanager.organizations.get`も含めてください。含めない場合、最上位のAssetは表示名ではなくリソースIDで命名されます。
 3. 設定するスコープの**最上位**でロールを付与してください。コネクタはサブツリー全体を走査するため、読み取れないfolderが1つでもあると、部分的なインベントリを黙ってインポートするのではなく、同期が失敗します。
 4. サービスアカウントの**JSONキー**を作成してダウンロードします。
 5. サービスアカウントを所有するprojectで**Cloud Resource Manager API**(`cloudresourcemanager.googleapis.com`)を有効にします。
