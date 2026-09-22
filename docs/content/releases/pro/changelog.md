@@ -18,6 +18,58 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## September 2026: v3.3
 
+### September 22, 2026: v3.3.200
+
+New features:
+* **(Compliance)** New regulatory scope foundation with an EU-seeded profile, plus EU regulatory control catalogs, EU regulatory assessments, and exportable EU evidence packs.
+* **(Compliance)** PCI DSS compliance pack: scope and scope inventory, patch-clock SLAs (6.3.3), targeted risk analyses (12.3.1), quarterly scan and ASV evidence, a vulnerability-management control catalog, and a PCI DSS evidence workbook.
+* **(Compliance)** FDA cyber device packs: component support metadata, lifecycle metrics, SBOM export, and the Section 524B cyber device evidence pack.
+* **(Compliance)** CRA Article 14 reporting interface.
+* **(Compliance)** Certification control catalogs for ISO 27001, SOC 2, and NIS2, with a cross-framework evidence view.
+* **(Compliance)** Framework presets for UK Cyber Essentials and the Australian Essential Eight.
+* **(SLA)** Versioned vulnerability response policies, with a response-clock evaluation and incident escalation, plus a vulnerability response evidence API and export.
+* **(Sensei)** Dynamic Scanning (DAST): configure targets, verify ownership, launch Nuclei scans, and meter usage for billing.
+* **(Sensei)** AI Agent Red Teaming, a new Sensei capability and engine mode for red-teaming AI agents.
+* **(Sensei)** Schedule hosted repository scans with attributed credentials, and track scan frequency with exportable cadence attestations.
+* **(Sensei)** Tier Advisor projects your annual processing volume and recommends a tier.
+* **(Dashboards)** The Command Center dashboard scene, now the home page for every user.
+* **(PSIRT)** CSAF 2.0 / VEX advisory export, backported to the 3.3.x line.
+* **(Findings)** EPSS and CISA KEV threat-intelligence fields are editable on the Add/Edit Finding form.
+* **(Triage Engine)** Import-completion triggers, one per scan and one per group of scans.
+* **(Locations)** Container scanners now emit the scanned image as an Image location.
+* **(Licensing)** New endpoint-status and location-finding audit pages, plus a location-metering health metric.
+* **(Connectors)** Aqua Supply Chain imports non-default branches via per-branch scan ids, and enriches Supply Chain findings with reachability verdicts and friendly category tags.
+* **(Connectors)** Microsoft Defender adds a device-group import allowlist.
+* **(Connectors)** Azure DevOps applies your custom field mappings to work items.
+
+Enhancements:
+* **(Findings)** The finding SLA row now shows the SLA expiration date.
+* **(Connectors)** Aqua warns when a configured branch imports nothing beyond the defaults, and a branched sync tags the default-branch engagement.
+* **(Reporting)** Report chart blocks gain a Date Range window, and the Widget-block picker is populated.
+* **(Celery)** A finished task reports its peak memory when it nears the guard limit.
+* **(Performance)** EPSS enrichment gates changes at display precision and streams the nightly projection; the Location Map authorizes once per request and counts root groups correctly; product-grade recalculation is debounced per product.
+
+Bug fixes:
+* **(Connectors)** Fixes for slow validates (a WriteTimeout raised above the Django wait to stop TLS desync), Cycode auth split across its two hosts, a slow GitLab config save, NowSecure assessment-list 400s with surfaced HTTP errors, finding correlation on chunked syncs, single-label hosts in a Location URL, and Qualys finding title and vuln id aligned with the OSS parser.
+* **(Deduplication)** Matching Configuration lists every test type.
+* **(Triage Engine)** Rule-graph nodes saved without positions are laid out, and v1 float conditions carry EPSS-precision decimals.
+* **(Reporting)** A report keeps rendering when a saved column was renamed.
+* **(Compliance)** The POA&M sync no longer walks whole products on instances without a compliance profile.
+* **(Locations)** Bulk-update popovers stay open while picking a status, and the created_at/updated_at and location_type/location_value API filters resolve correctly.
+* **(Importers)** Scan retention is bounded so a large backlog cannot exceed the hard time limit, a scan import over the upload limit returns a clear 400, and a missing uploaded file returns 404 instead of 500.
+* **(Security)** Engineer metrics, and classic search and endpoint report reads of shared location tags, are scoped to the requester's authorized findings; the API token follows the forced-password-reset state; the classic confirm dialogs harden text rendering.
+* **(API)** The v3 notes list and the auto-create import permission check route through the shared helpers, and go-api auth errors carry the DRF error code.
+* **(Parsers)** Nuclei deduplicates protocol-less URLs, govulncheck tolerates OSV entries without aliases, and crash bugs are fixed in the KICS, AppSpider, KubeHunter, Terrascan, TFSec, and ZAP parsers.
+* **(Findings)** Finding-group list visibility is fixed for product members, and finding-group members stay inside the group's test.
+* **(i18n)** Dropped stray Russian text from the English "Search" strings.
+
+Behavior changes:
+* **(Triage Engine)** Rules Engine 2.0 is renamed Triage Engine across the UI.
+
+Upgrade notes:
+* **(PSIRT)** The retired PSIRT 1.0 Advisory Engine sidecar is removed from the deployment and release verification. PSIRT 1.0 was removed in 3.3.0; migrate any remaining sidecar data with `psirt_import_legacy`.
+* **(Deployment)** A new `DD_V3_ASSET_VERSIONS` chart value and compose environment variable enables per-source asset versions.
+
 ### September 14, 2026: v3.3.100
 
 New features:
