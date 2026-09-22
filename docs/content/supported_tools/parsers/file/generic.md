@@ -39,7 +39,7 @@ JSON supports far more fields than CSV (components, SAST data, tags, endpoint ob
 | `Title` | String (max 511 characters) | `SQL Injection in login form` | **Required.** |
 | `Description` | String | `User input reaches the query unescaped.` | **Required.** Can span several lines when enclosed in double quotes. |
 | `Severity` | One of `Critical`, `High`, `Medium`, `Low`, `Info` | `High` | **Required.** Case-sensitive. Any other value, including `high` or `Informational`, is imported as `Info` without an error. |
-| `CweId` | Integer | `89` | Must be a whole number in every row. `CWE-89` or an empty cell fails the import; leave the column out if you have no CWE. |
+| `CweId` | Integer | `89` | A whole number. An empty cell leaves the CWE unset. `CWE-89` or any other non-numeric value fails the import; use `CweIds` for labels. |
 | `CweIds` | List of CWEs | `"79, CWE-89 352"` | Several CWEs for one finding, separated by commas, spaces or line breaks. `79` and `CWE-79` are both accepted and duplicates are dropped. If `CweId` is empty or absent, the first entry becomes the primary CWE. |
 | `CVE` | String | `CVE-2024-3094` | Added to the finding's vulnerability IDs. |
 | `Vulnerability Id` | String | `GHSA-5mrr-rgp6-x4gr` | One extra vulnerability ID, added after `CVE`. Note the space in the column name. |
@@ -52,27 +52,24 @@ JSON supports far more fields than CSV (components, SAST data, tags, endpoint ob
 | `FalsePositive` | Boolean (see below) | `TRUE`, `FALSE` | Defaults to false. |
 | `Duplicate` | Boolean (see below) | `TRUE`, `FALSE` | Defaults to false. |
 | `IsMitigated` | Boolean (see below) | `TRUE`, `FALSE` | Defaults to false. |
-| `MitigatedDate` | Date and time | `2024-05-20`, `2024-05-20T14:30:00Z` | Parsed with dateutil. If the column is present, every row needs a value; an empty cell fails the import. |
-| `epss_score` | Decimal number, 0 to 1 | `0.97283` | The finding's [EPSS score](https://www.first.org/epss/). If the column is present, every row needs a number. |
-| `epss_percentile` | Decimal number, 0 to 1 | `0.99971` | The finding's [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins). If the column is present, every row needs a number. |
+| `MitigatedDate` | Date and time | `2024-05-20`, `2024-05-20T14:30:00Z` | Parsed with dateutil. An empty cell leaves the field unset. |
+| `epss_score` | Decimal number, 0 to 1 | `0.97283` | The finding's [EPSS score](https://www.first.org/epss/). An empty cell leaves the field unset. |
+| `epss_percentile` | Decimal number, 0 to 1 | `0.99971` | The finding's [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins). An empty cell leaves the field unset. |
 | `CVSSV3` | String (CVSS v3 vector) | `CVSS:3.1/AV:N/AC:L/…` | Must include the `CVSS:3.0/` or `CVSS:3.1/` prefix; a vector without it is ignored. See the example CSV for a full vector. The CVSS v3 score is calculated from the vector. |
+| `CVSSV3_score` | Decimal number, 0 to 10 | `9.8` | If `CVSSV3` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
 | `CVSSV4` | String (CVSS v4 vector) | `CVSS:4.0/AV:N/AC:L/…` | Must include the `CVSS:4.0/` prefix; a vector without it is ignored. See the example JSON for a full vector. |
-| `CVSSV4_score` | Decimal number, 0 to 10 | `9.3` | If `CVSSV4` holds a valid vector, the score calculated from the vector replaces this value. If the column is present, every row needs a number. |
-| `known_exploited` | Boolean (non-empty check) | `TRUE`, or leave empty | Listed in the Known Exploited Vulnerabilities catalog. See the warning below. |
-| `ransomware_used` | Boolean (non-empty check) | `TRUE`, or leave empty | Known to be used in ransomware campaigns. See the warning below. |
-| `fix_available` | Boolean (non-empty check) | `TRUE`, or leave empty | A fix exists. See the warning below. |
+| `CVSSV4_score` | Decimal number, 0 to 10 | `9.3` | If `CVSSV4` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
+| `known_exploited` | Boolean (see below) | `TRUE`, `FALSE` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to false. |
+| `ransomware_used` | Boolean (see below) | `TRUE`, `FALSE` | Known to be used in ransomware campaigns. Defaults to false. |
+| `fix_available` | Boolean (see below) | `TRUE`, `FALSE` | A fix exists. An empty cell leaves it unset (unknown). |
 | `fix_version` | String (max 100 characters) | `2.4.1` | Version that contains the fix. |
-| `kev_date` | Date | `2024-03-29` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Parsed with dateutil. If the column is present, every row needs a value. |
-
-There is no `CVSSV3_score` column. The CVSS v3 score comes from the `CVSSV3` vector.
+| `kev_date` | Date | `2024-03-29` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Parsed with dateutil. An empty cell leaves the field unset. |
 
 #### Boolean values in CSV
 
-`Active`, `Verified`, `FalsePositive`, `Duplicate` and `IsMitigated` are true when the value starts with `t` or `T` (`TRUE`, `True`, `true`, `t`). Every other value is false, including `yes`, `1` and an empty cell.
+`Active`, `Verified`, `FalsePositive`, `Duplicate`, `IsMitigated`, `known_exploited`, `ransomware_used` and `fix_available` are true when the value starts with `t` or `T` (`TRUE`, `True`, `true`, `t`). Every other value is false, including `yes` and `1`. An empty cell is false for the first five columns; for `known_exploited`, `ransomware_used` and `fix_available` it leaves the field at its default (false, false, and unknown).
 
-> **Warning:** `known_exploited`, `ransomware_used` and `fix_available` do not follow that rule. Any non-empty value is read as true, including `FALSE`. Leave the cell empty for false, or leave the column out.
-
-Cells in the numeric and date columns (`CweId`, `epss_score`, `epss_percentile`, `CVSSV4_score`, `MitigatedDate`, `kev_date`) cannot be left empty. If only some rows have a value, either fill in every row or move to JSON, where an omitted field is left unset.
+An empty cell in the numeric and date columns (`CweId`, `epss_score`, `epss_percentile`, `CVSSV3_score`, `CVSSV4_score`, `MitigatedDate`, `kev_date`) leaves that field unset, so rows can mix filled and empty cells. A value that is not a number or date, such as `N/A`, still fails the import.
 
 ### Example CSV
 
@@ -100,9 +97,25 @@ A JSON report is an object with a `findings` array and, optionally, report-level
 | `name` | String | `"Nightly scan"` | Accepted but not used. It does not rename the Test or the Test Type. |
 | `version` | String | `"1.2.0"` | Stored as the Test's version. |
 | `description` | String | `"Weekly authenticated scan"` | Stored as the Test's description. |
-| `static_tool` | Boolean | `true` | Marks the Test Type as a static analysis tool. |
-| `dynamic_tool` | Boolean | `false` | Marks the Test Type as a dynamic analysis tool. |
-| `soc` | Boolean | `true` | DefectDojo Pro only. Labels the Test Type as SOC rather than AppSec, which is how Priority Insights groups findings. Ignored by the open-source edition. |
+| `static_tool` | Boolean | `true` | Sets the Test Type's Static Tool flag. See [Test Type metadata](#test-type-metadata). |
+| `dynamic_tool` | Boolean | `false` | Sets the Test Type's Dynamic Tool flag. See [Test Type metadata](#test-type-metadata). |
+| `soc` | Boolean | `true` | DefectDojo Pro only. Labels the Test Type as SOC rather than AppSec. Ignored by the open-source edition. See [Test Type metadata](#test-type-metadata). |
+
+### Test Type metadata
+
+`static_tool`, `dynamic_tool` and `soc` describe the tool, not the report, so they are stored on the **Test Type** rather than on the Test. A CSV import never sets them.
+
+- **They apply to every Test of that Test Type.** A Test Type is shared across all Products, so the flags are instance-wide for that tool. Each import that includes a flag overwrites it, and the last import wins.
+- **An omitted flag keeps its current value.** `null` is treated the same as omitting the key. To clear a flag, send `false`.
+- **Set `type` before you set these flags.** A report without `type` imports into the built-in `Generic Findings Import` Test Type, so its flags change that Test Type for every generic import on the instance, including CSV imports. Give each tool its own `type` so its flags stay with that tool.
+- **Send JSON booleans.** `true` and `false` work. A quoted `"false"` is rejected and the whole import fails with a 400 error.
+
+What the flags drive:
+
+| Flag | Effect |
+|---|---|
+| `static_tool`, `dynamic_tool` | Stored on the Test Type and returned by the `/api/v2/test_types/` API. In DefectDojo Pro you can also filter Test Types and build reports on them, and a Test Type with `static_tool` set counts as static analysis evidence for compliance obligations. They do not change the static or dynamic flag on individual findings; set `static_finding` and `dynamic_finding` for that. |
+| `soc` | DefectDojo Pro only. Findings from a Test Type with `soc` set are grouped as SOC rather than AppSec, for example in Priority Insights. |
 
 ### Finding fields
 
