@@ -52,6 +52,12 @@ merge, and which tool pairs they fall between. A recommendation whose simulated 
 essentially zero is flagged rather than presented as confident, and one that would collapse
 unrelated findings onto a single hash is dropped before you ever see it.
 
+The cross-tool estimate compares findings the way deduplication will. Findings in Assets that
+share a cross-tool [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) are
+compared with each other, and an Engagement set to deduplicate only within itself is compared
+with nothing outside it. When pools shaped the estimate, the card says so. The model is told how many pools and pooled Assets exist, never
+their names.
+
 Applying a recommendation uses the same settings machinery and permissions as changing the
 setting by hand — applying a deduplication recommendation requires the Tuner edit permission,
 and creating a prioritization engine requires the engine permission. The Advisor grants no new
