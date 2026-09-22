@@ -114,7 +114,7 @@ A Chart also has a **Date Range** setting. Leave it on **All time** (the default
 | Severity of Findings Past SLA by Asset | Past-SLA findings per asset, broken out by severity |
 | Assets Tested Over Time | Count of distinct assets tested in each period |
 
-Charts appear in Block and Template previews and in the reports you generate, in both HTML and PDF output. Reports created through the [API](../report-builder-api/), and reports delivered automatically by a rule, include their charts as well.
+Charts appear in Block and Template previews and in the reports you generate, in both HTML and PDF output. Reports created through the [API](../report-builder-api/), and reports delivered automatically by a rule, include their charts as well. The CSV, Excel and JSON formats carry rows rather than a document, so a Chart Block is left out of those.
 
 > **💡 Tip:** A Chart block carries its filters like any other Block, so the same chart filtered two ways is two Blocks. Duplicate the Block and adjust the copy rather than editing one shared Block.
 
@@ -171,7 +171,31 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Generated Reports
 
-Running a Template produces a **Generated Report**: a persisted PDF or HTML file that you can download and re-run on demand. Each Generated Report is **frozen in time** — it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, re-run the Template.
+Running a Template produces a **Generated Report**: a persisted file that you can download and re-run on demand. Each Generated Report is **frozen in time**: it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, re-run the Template.
+
+A Generated Report comes in one of five formats, in two groups:
+
+| Format | Group | What it contains |
+|--------|-------|------------------|
+| HTML | Document | The whole Template, laid out: every Block, in order |
+| PDF | Document | The same, paginated for print and distribution |
+| CSV | Data | The rows of the Template's Tabular and Detail Blocks |
+| Excel | Data | The same rows, one worksheet per Block |
+| JSON | Data | The same rows, with each Block's columns and labels |
+
+The documents are what you send to a reader. The data formats are what you hand to a script, a spreadsheet, or a downstream system: they carry the rows a report is built from rather than the document built around them.
+
+**A data format includes only the Blocks that have rows:** Tabular and Detail Blocks. A Cover Page, a Chart, a Widget and the other Stock Blocks have nothing to put in a cell, so they are left out. The generate dialog names exactly which of your Template's Blocks will be included and which will be left out before you generate, and a Template with no Tabular or Detail Block at all cannot be generated as a data format.
+
+Within a data format, the shape follows the Template:
+
+- **CSV.** A Template with one data Block produces a plain CSV: a header row of your chosen column labels, then the rows. A Template with several data Blocks writes them one after another, each preceded by a `# <Block header>` comment line and separated by a blank line.
+- **Excel.** Each data Block becomes its own worksheet, named after the Block's header.
+- **JSON.** One object carrying the report's name and generation time, then a `blocks` array. Each Block lists its `columns` (the field path and the label you see in the UI) and its `rows`, keyed by field path so a consumer is not broken by a label being renamed.
+
+If a Block hits the row limit, the export says so: CSV and Excel add a trailing "rows omitted" line, and JSON carries an `omitted_rows` count per Block.
+
+> **💡 Tip:** Rules can generate a report too. A rule's **Generate a Report** action offers the same five formats, which is how a scheduled rule delivers a spreadsheet to a downstream system rather than a document somebody has to read. See the Triage Engine's [Node Reference](/automation/triage_engine/node_reference/).
 
 A Generated Report moves through these statuses as it is built:
 
@@ -228,7 +252,7 @@ In the Template editor, you select a Theme and arrange the Blocks in the order t
 
 ### Step 4: Generate and download
 
-When the Template is ready, generate the report. The generate dialog confirms the Template and lets you choose the output format — **HTML** or **PDF**.
+When the Template is ready, generate the report. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
 
 ![Generate report dialog](images/pro_generate_report_dialog.png)
 
