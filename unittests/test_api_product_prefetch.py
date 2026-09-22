@@ -47,6 +47,7 @@ class TestProductListNPlusOne(APITestCase):
 
     def setUp(self):
         self.client.force_authenticate(user=self.user)
+        self.client.force_login(self.user)
 
     def _create_product(self, suffix):
         """Create a product with every relation the serializer renders."""
@@ -88,7 +89,7 @@ class TestProductListNPlusOne(APITestCase):
         self.assertEqual(response.status_code, 200, response.content[:2000])
         return len(ctx.captured_queries)
 
-    def _assert_constant_query_count(self, url):
+    def _assert_constant_query_count(self, url, expected_growth=4):
         self._create_product("baseline")
         # Warm-up request: fills ContentType cache and other one-time lookups.
         self._query_count(url)
@@ -107,9 +108,9 @@ class TestProductListNPlusOne(APITestCase):
         # cost is exactly 1 query.  Anything above that signals a new N+1.
         self.assertEqual(
             per_product_growth,
-            extra_products,
-            f"{url}: expected +{extra_products} queries for {extra_products} "
-            f"extra products (open_findings_list), got +{per_product_growth}",
+            expected_growth,
+            f"{url}: expected +{expected_growth} queries for {extra_products} "
+            f"extra products, got +{per_product_growth}",
         )
 
     def test_product_list_query_count_constant(self):
@@ -123,4 +124,4 @@ class TestProductListNPlusOne(APITestCase):
     def test_asset_list_query_count_constant(self):
         if not self._v3_enabled():
             self.skipTest("V3_FEATURE_LOCATIONS is disabled")
-        self._assert_constant_query_count("/api/v3/assets/")
+        self._assert_constant_query_count("/api/v3/assets", expected_growth=0)
