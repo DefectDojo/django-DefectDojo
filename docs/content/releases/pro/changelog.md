@@ -28,7 +28,7 @@ New features:
 * **(Compliance)** Certification control catalogs for ISO 27001, SOC 2, and NIS2, with a cross-framework evidence view.
 * **(Compliance)** Framework presets for UK Cyber Essentials and the Australian Essential Eight.
 * **(SLA)** Versioned vulnerability response policies, with a response-clock evaluation and incident escalation, plus a vulnerability response evidence API and export.
-* **(Sensei)** Dynamic Scanning (DAST): configure targets, verify ownership, launch Nuclei scans, and meter usage for billing.
+* **(Sensei)** Dynamic Scanning (DAST): configure targets, verify ownership, launch scans, and meter usage for billing.
 * **(Sensei)** AI Agent Red Teaming, a new Sensei capability and engine mode for red-teaming AI agents.
 * **(Sensei)** Schedule hosted repository scans with attributed credentials, and track scan frequency with exportable cadence attestations.
 * **(Sensei)** Tier Advisor projects your annual processing volume and recommends a tier.
