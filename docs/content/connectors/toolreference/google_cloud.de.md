@@ -35,3 +35,5 @@ Sobald ein Eintrag zugeordnet ist, aktualisiert dieser Connector seine Metadaten
 Beide Connectors identifizieren ein Projekt auf dieselbe Weise und benennen sein Asset jeweils nach der Projekt-ID. Wenn Sie zuerst diesen Connector ausführen, landen SCC-Befunde auf den von ihm erstellten Assets; lief zuerst SCC, übernimmt dieser Connector diese Assets und ergänzt sie um die Ordnerhierarchie. Sie müssen nichts doppelt zuordnen.
 
 Für die Organisation gilt dieselbe Regel: Wenn dieser Connector das Asset erstellt, setzt er die Organisation auf den Ordner des Projekts. Erstellte der Google-Cloud-SCC-Connector das Asset zuerst, behält dieses Asset seine bestehende Organisation, und dieser Connector ergänzt es nur um die Ordnerhierarchie.
+
+Eine Ausnahme: SCC-Befunde, die zu keinem Projekt gehören, etwa Richtlinienbefunde auf Organisationsebene, landen auf einem separaten Asset. Der Google-Cloud-SCC-Connector erstellt dieses Asset für seine konfigurierte übergeordnete Ressource; es ist nicht das Organisations- oder Ordner-Asset, das dieser Connector erstellt. Wenn Sie beide Connectors ausführen, rechnen Sie mit einem zusätzlichen Asset für diese Befunde.

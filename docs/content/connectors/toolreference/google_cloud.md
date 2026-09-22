@@ -35,3 +35,5 @@ Once a Record is mapped, this connector never refreshes its metadata. If you ren
 Both connectors identify a project the same way, and both name its Asset after the project ID. So if you run this connector first, SCC findings land on the Assets it created; if SCC ran first, this connector adopts those Assets and adds the folder hierarchy around them. You do not need to map anything twice.
 
 The Organization follows the same rule: when this connector creates the Asset, it sets the Organization to the project's folder. When the Google Cloud SCC connector creates the Asset first, that Asset keeps its existing Organization, and this connector only adds the folder hierarchy around it.
+
+One exception: SCC findings that belong to no project, such as organization-level policy findings, land on a separate Asset. The Google Cloud SCC connector creates that Asset for its configured parent resource, and it is not the organization or folder Asset this connector creates. If you run both connectors, expect one extra Asset for those findings.

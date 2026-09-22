@@ -35,3 +35,5 @@ Una vez asignado un Record, este conector nunca actualiza sus metadatos. Si camb
 Ambos conectores identifican un proyecto de la misma manera, y ambos nombran su Activo según el ID del proyecto. Por eso, si ejecuta primero este conector, los hallazgos de SCC aterrizan en los Activos que creó; si SCC se ejecutó primero, este conector adopta esos Activos y añade la jerarquía de carpetas a su alrededor. No necesita mapear nada dos veces.
 
 La Organización sigue la misma regla: cuando este conector crea el Activo, establece su Organización como la carpeta del proyecto. Cuando el conector de Google Cloud SCC crea el Activo primero, ese Activo conserva su Organización existente, y este conector solo añade la jerarquía de carpetas a su alrededor.
+
+Una excepción: los hallazgos de SCC que no pertenecen a ningún proyecto, como los hallazgos de políticas a nivel de organización, aterrizan en un Activo separado. El conector de Google Cloud SCC crea ese Activo para su recurso principal configurado, y no es el Activo de organización o carpeta que crea este conector. Si ejecuta ambos conectores, espere un Activo adicional para esos hallazgos.
