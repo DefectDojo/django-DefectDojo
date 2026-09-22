@@ -13,7 +13,7 @@ Le connecteur Google Cloud est un **connecteur d'actifs (Asset Connector)** : il
 Le connecteur s'authentifie avec un **compte de service** Google et ne lit que les métadonnées de la hiérarchie : noms, ids, état du cycle de vie et labels des dossiers et projets. Il ne lit ni le contenu des ressources, ni les constatations.
 
 1. Dans Google Cloud, créez un compte de service — un compte dédié pour DefectDojo est recommandé.
-2. Accordez-lui le rôle **Browser** (`roles/browser`) au niveau de l'organisation ou du dossier que vous souhaitez importer. Le parcours de la hiérarchie nécessite `resourcemanager.folders.list` et `resourcemanager.projects.list`. Un rôle personnalisé doit aussi inclure `resourcemanager.folders.get` et `resourcemanager.organizations.get`, sinon l'Asset de premier niveau est nommé d'après son identifiant de ressource plutôt que son nom d'affichage.
+2. Accordez-lui le rôle **Browser** (`roles/browser`) au niveau de l'organisation ou du dossier que vous souhaitez importer. Le parcours de la hiérarchie nécessite `resourcemanager.folders.list` et `resourcemanager.projects.list`. Un rôle personnalisé doit aussi inclure `resourcemanager.folders.get` et `resourcemanager.organizations.get`, sinon l'Asset de premier niveau est nommé d'après son identifiant de ressource plutôt que son nom d'affichage. Si votre compte n'a pas d'organisation, il n'y a aucune ressource parente sur laquelle accorder le rôle : accordez `roles/browser` sur chaque projet à importer.
 3. Accordez le rôle au **sommet** du périmètre que vous configurez. Le connecteur parcourt tout le sous-arbre, et un dossier qu'il ne peut pas lire fait échouer la synchronisation au lieu d'importer silencieusement un inventaire partiel.
 4. Créez une **clé JSON** pour le compte de service et téléchargez-la.
 5. Activez l'**API Cloud Resource Manager** (`cloudresourcemanager.googleapis.com`) sur le projet propriétaire du compte de service.
@@ -21,7 +21,7 @@ Le connecteur s'authentifie avec un **compte de service** Google et ne lit que l
 #### Mappages du connecteur
 
 1. Laissez le champ **Location** à sa valeur par défaut `https://cloudresourcemanager.googleapis.com`, sauf si vous utilisez un point de terminaison non standard.
-2. Dans le champ **Parent Resource**, saisissez la racine de la hiérarchie à importer : `organizations/{id}` ou `folders/{id}`. Un seul projet n'est pas une hiérarchie, donc `projects/{id}` n'est pas accepté ici — utilisez le connecteur Google Cloud SCC pour un périmètre limité à un seul projet.
+2. Dans le champ **Parent Resource**, saisissez la racine de la hiérarchie à importer : `organizations/{id}` ou `folders/{id}`. Un seul projet n'est pas une hiérarchie, donc `projects/{id}` n'est pas accepté ici — utilisez le connecteur Google Cloud SCC pour un périmètre limité à un seul projet. Si votre compte n'a pas d'organisation, laissez le champ vide : le connecteur importe alors chaque projet que le compte de service peut lire, sous forme de liste plate sans hiérarchie de dossiers.
 3. Collez le contenu complet du fichier de **clé JSON** du compte de service dans le champ **Service Account Key**.
 
 Chaque dossier `ACTIVE` et chaque projet `ACTIVE` sous le parent devient un Record. Le Record de chaque projet est nommé d'après son **ID de projet**, et son organisation dans DefectDojo est le dossier dans lequel il se trouve (ou votre organisation Google Cloud, pour un projet situé directement en dessous).

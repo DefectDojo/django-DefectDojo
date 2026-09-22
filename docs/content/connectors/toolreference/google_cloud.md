@@ -13,7 +13,7 @@ The Google Cloud connector is an **Asset Connector**: it reads your Google Cloud
 The connector authenticates with a Google **service account** and reads only hierarchy metadata: folder and project names, ids, lifecycle state and labels. It reads no resource contents and no findings.
 
 1. In Google Cloud, create a service account — a dedicated one for DefectDojo is recommended.
-2. Grant it the **Browser** role (`roles/browser`) at the organization or folder you want to import. The hierarchy walk needs `resourcemanager.folders.list` and `resourcemanager.projects.list`. A custom role must also carry `resourcemanager.folders.get` and `resourcemanager.organizations.get`, or the top-level Asset is named after its resource id instead of its display name.
+2. Grant it the **Browser** role (`roles/browser`) at the organization or folder you want to import. The hierarchy walk needs `resourcemanager.folders.list` and `resourcemanager.projects.list`. A custom role must also carry `resourcemanager.folders.get` and `resourcemanager.organizations.get`, or the top-level Asset is named after its resource id instead of its display name. If your account has no organization, there is no parent to grant the role at: grant `roles/browser` on each project you want to import.
 3. Grant the role at the **top** of the scope you configure. The connector walks the whole subtree, and a folder it cannot read fails the sync rather than silently importing a partial inventory.
 4. Create a **JSON key** for the service account and download it.
 5. Enable the **Cloud Resource Manager API** (`cloudresourcemanager.googleapis.com`) on the project that owns the service account.
@@ -21,7 +21,7 @@ The connector authenticates with a Google **service account** and reads only hie
 #### Connector Mappings
 
 1. Leave the **Location** field at the default `https://cloudresourcemanager.googleapis.com` unless you use a non-standard endpoint.
-2. In the **Parent Resource** field, enter the root of the hierarchy to import: `organizations/{id}` or `folders/{id}`. A single project is not a hierarchy, so `projects/{id}` is not accepted here — use the Google Cloud SCC connector for a single-project scope.
+2. In the **Parent Resource** field, enter the root of the hierarchy to import: `organizations/{id}` or `folders/{id}`. A single project is not a hierarchy, so `projects/{id}` is not accepted here — use the Google Cloud SCC connector for a single-project scope. If your account has no organization, leave the field blank: the connector then imports every project the service account can read, as a flat list with no folder hierarchy.
 3. Paste the full contents of the service-account **JSON key** file into the **Service Account Key** field.
 
 Every `ACTIVE` folder and project beneath the parent becomes a Record. Each project's Record is named after its **project ID**, and its Organization in DefectDojo is the folder it sits in (or your Google Cloud organization, for a project that sits directly under it).

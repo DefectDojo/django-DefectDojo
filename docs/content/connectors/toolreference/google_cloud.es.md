@@ -13,7 +13,7 @@ El conector de Google Cloud es un **Asset Connector**: lee la jerarquía de recu
 El conector se autentica con una **cuenta de servicio** de Google y solo lee metadatos de la jerarquía: nombres, ids, estado del ciclo de vida y etiquetas de carpetas y proyectos. No lee el contenido de los recursos ni hallazgos.
 
 1. En Google Cloud, cree una cuenta de servicio; se recomienda una dedicada para DefectDojo.
-2. Otórguele el rol **Browser** (`roles/browser`) en la organización o carpeta que desea importar. El recorrido de la jerarquía necesita `resourcemanager.folders.list` y `resourcemanager.projects.list`. Un rol personalizado debe incluir además `resourcemanager.folders.get` y `resourcemanager.organizations.get`; de lo contrario, el Asset de nivel superior recibe el nombre de su ID de recurso en lugar de su nombre visible.
+2. Otórguele el rol **Browser** (`roles/browser`) en la organización o carpeta que desea importar. El recorrido de la jerarquía necesita `resourcemanager.folders.list` y `resourcemanager.projects.list`. Un rol personalizado debe incluir además `resourcemanager.folders.get` y `resourcemanager.organizations.get`; de lo contrario, el Asset de nivel superior recibe el nombre de su ID de recurso en lugar de su nombre visible. Si su cuenta no tiene organización, no hay un recurso principal en el que otorgar el rol: otorgue `roles/browser` en cada proyecto que desee importar.
 3. Otorgue el rol en la parte **superior** del alcance que configure. El conector recorre todo el subárbol, y una carpeta que no pueda leer hace que la sincronización falle en lugar de importar silenciosamente un inventario parcial.
 4. Cree una **clave JSON** para la cuenta de servicio y descárguela.
 5. Habilite la **Cloud Resource Manager API** (`cloudresourcemanager.googleapis.com`) en el proyecto propietario de la cuenta de servicio.
@@ -21,7 +21,7 @@ El conector se autentica con una **cuenta de servicio** de Google y solo lee met
 #### Asignaciones del conector
 
 1. Deje el campo **Location** con el valor predeterminado `https://cloudresourcemanager.googleapis.com`, salvo que utilice un endpoint no estándar.
-2. En el campo **Parent Resource**, introduzca la raíz de la jerarquía que desea importar: `organizations/{id}` o `folders/{id}`. Un solo proyecto no es una jerarquía, por lo que `projects/{id}` no se acepta aquí — use el conector Google Cloud SCC para un alcance de un solo proyecto.
+2. En el campo **Parent Resource**, introduzca la raíz de la jerarquía que desea importar: `organizations/{id}` o `folders/{id}`. Un solo proyecto no es una jerarquía, por lo que `projects/{id}` no se acepta aquí — use el conector Google Cloud SCC para un alcance de un solo proyecto. Si su cuenta no tiene organización, deje el campo en blanco: el conector importa entonces todos los proyectos que la cuenta de servicio puede leer, como una lista plana sin jerarquía de carpetas.
 3. Pegue el contenido completo del archivo de **clave JSON** de la cuenta de servicio en el campo **Service Account Key**.
 
 Cada carpeta `ACTIVE` y cada proyecto `ACTIVE` bajo el elemento padre se convierte en un Record. El Record de cada proyecto se nombra según su **ID de proyecto**, y su Organización en DefectDojo es la carpeta en la que se encuentra (o su organización de Google Cloud, si el proyecto se encuentra directamente debajo de ella).
