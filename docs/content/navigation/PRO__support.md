@@ -52,10 +52,10 @@ If enrolment is refused for any other reason, the log line names the credential 
 
 ## Airgapped instances
 
-An instance with no route off its network cannot use the support pages at all. Turn on the **Airgapped instance** feature flag under **Settings → Feature Flags**. Both pages then replace their content with a notice that says support tracking is not supported for airgapped instances, with the DefectDojo support address to write to instead. The rest of the menu stays usable. The flag takes effect on the next page load; no restart is needed.
+An instance with no route off its network cannot use the support pages at all. Turn on the **Airgapped instance** feature flag under **Settings → Feature Flags**. Both pages then open a dialog that says support tracking is not supported for airgapped instances, with the DefectDojo support address to write to instead. Its **Go back** button returns you to the page you came from. The flag takes effect on the next page load; no restart is needed.
 
-With the setting on, the instance makes no outbound support call and no documentation call. The notice appears as soon as the page loads. It does not wait for a call to time out first.
+With the setting on, the instance makes no outbound support call and no documentation call. The dialog opens as soon as the page loads. It does not wait for a call to time out first.
 
 ## Settings
 
-The support pages need no environment variables. The one switch, **Airgapped instance**, is a feature flag under **Settings → Feature Flags** (off by default). The notice address is `support@defectdojo.com`.
+The support pages need no environment variables. The one switch, **Airgapped instance**, is a feature flag under **Settings → Feature Flags** (off by default). The dialog address is `support@defectdojo.com`.
