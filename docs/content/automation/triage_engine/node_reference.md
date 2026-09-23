@@ -189,13 +189,40 @@ Two egress settings are built for these items. **Generate a Report** has a **Fin
 
 The shipped template **Report when a group of scans has landed** wires all of this: the group trigger, a report on `complete`, and an email naming the missing scans on `incomplete`.
 
+### On an Inbound Webhook
+
+`trigger.webhook`
+
+Runs when a [webhook receiver](../webhook_receivers/) records a delivery. The payload never travels in the event that wakes the rule: the trigger reads it from the receipt.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Webhook Receiver** | required | The receiver whose deliveries wake this rule. Only receivers the rule owner can see are offered. |
+| **Items From** | empty | A dot path to the object, or list of objects, that become items, for example `issues`. Empty makes the whole payload one item. A list becomes one item per element. |
+| **Fields** | empty | Named values read from each item into `webhook.fields.<name>`. Each row takes a path, a template or a fixed value, an optional transform, an optional type (`string`, `int`, `float`, `bool`, `datetime`, `string_list`, `severity`), a default, and whether it is required. A later row can read an earlier one. |
+| **Drop Items Missing a Required Field** | off | Skip an item whose required field has no value, instead of passing it on. |
+
+Each item carries the payload under `webhook`:
+
+```
+webhook.payload.*      the item's object, for example webhook.payload.issue.key
+webhook.root.*         the whole payload, when Items From picked something inside it
+webhook.fields.*       the named, typed fields
+webhook.headers.*      the request headers the receiver keeps
+webhook.receiver.*     id, label, slug and kind of the receiver
+ctx.receipt_id         the receipt this run came from
+ctx.item_index         the item's position when Items From is a list
+```
+
+A webhook item has no Finding yet, so a **Findings** node does nothing to it until **Find Findings by a Value** has found one. A value that does not fit its type becomes empty and is counted in the node's trace; it never fails the run.
+
 ## Logic
 
 ### If / Filter
 
 `filter.if`
 
-Routes each item down the **true** or the **false** branch, by conditions. This is the only node with two outputs, and it is how a graph branches.
+Routes each item down the **true** or the **false** branch, by conditions. It is how a graph branches.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -225,6 +252,32 @@ Keeps the first item per key and drops later ones carrying the same key. Scoped 
 | **Key Path** | `finding.hash_code` | The item path whose value identifies a duplicate. |
 
 A common use is `finding.component_name`, to notify once per affected component instead of once per Finding.
+
+### Find Findings by a Value
+
+`lookup.finding`
+
+Looks up the Findings a value names, such as a ticket key from a webhook, and passes them on. It has two outputs: **found** carries one item per Finding, and **not found** carries the items that named nothing, so a rule can alert on "this ticket is not linked to any Finding".
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Match By** | Downstream Connector Ticket | What the value identifies: a Downstream Connector ticket, a classic Jira issue (key or id), a Finding id, `unique_id_from_tool`, a hash code, or a tag. |
+| **Value** | required | The value to look up, for example `{{webhook.fields.issue_key}}`. |
+| **Fallback Value** | empty | Looked up instead when Value renders empty, for example `{{webhook.fields.issue_id}}`. |
+| **Connection** | empty | For a Downstream Connector ticket: only tickets this connection created. Set it whenever two connections could share ticket keys, such as two Jira sites. |
+| **Connector** | any | For a Downstream Connector ticket: only tickets of this connector type. |
+| **Include Finding Group Members** | on | A ticket for a Finding Group finds every Finding in the group. |
+| **Limit** | `1000` | The most Findings one run may find. Items past it go to **not found**. |
+
+The lookup runs with the rule owner's visibility: a Finding the owner cannot see is indistinguishable from one that does not exist. A classic Jira issue that is an engagement epic is reported as not found, as the classic webhook ignores epics too. Found items keep their `webhook` block and gain:
+
+```
+ctx.lookup_via                  finding, or finding_group when found through a group ticket
+ctx.lookup_value                the value that matched
+ctx.ticket_link_id              the Downstream Connector ticket that matched
+ctx.issue_tracker_mapping_id    its issue tracker mapping
+ctx.lookup_reason               on not found items: empty_value, no_match, engagement_epic or limit_reached
+```
 
 ## Findings
 
@@ -282,6 +335,39 @@ Adds a note to the Finding.
 | Setting | Notes |
 |---------|-------|
 | **Note** | The note text. Supports placeholders. |
+
+### Apply the Ticket's Status
+
+`finding.apply_status_mapping`
+
+Closes, reopens, false-positives or risk accepts each Finding to match its linked ticket. The ticket's state and close reason are read through four lists: **closed states**, **open states**, **false positive reasons** and **accepted risk reasons**. Each list comes from the ticket's own issue tracker mapping (**Coming Back From** on the connector's status mapping) where it is set, and from this node otherwise.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Ticket State** | required | The ticket's state, for example `{{webhook.fields.state}}`. |
+| **Close Reason** | empty | The ticket's close reason or resolution. |
+| **Use the Connector's Status Mapping** | on | Read the lists from the ticket's mapping where it sets them. |
+| **Closed States**, **Open States**, **False Positive Reasons**, **Accepted Risk Reasons** | empty | The lists to use when the mapping does not say. Comma separated, matched regardless of case. |
+| **Close Findings** | on | Apply closures. |
+| **Reopen Findings** | on | Reopen a closed Finding whose ticket is open again. |
+| **Also Reopen Finding Groups** | off | A ticket cannot say which member of a group should reopen, so this is off by default. |
+| **Note** | empty | Added to each Finding that changed. `{{ctx.ticket_status}}` is the status it moved to. |
+
+A close reason only ever classifies a closed state: false positive first, then accepted risk, then plain mitigation. A reopened ticket that still carries its old resolution reopens. Findings already in the target state are left alone.
+
+### Add a Ticket Comment as a Note
+
+`finding.add_ticket_comment`
+
+Adds a comment made on the linked ticket as a note on the Finding, once. A comment DefectDojo posted to the ticket itself is recognized by its comment id, or by its text while the id is still on its way, and skipped. A comment on a Finding Group's ticket is added to every Finding in the group.
+
+| Setting | Notes |
+|---------|-------|
+| **Comment ID** | The ticket system's id for the comment, for example `{{webhook.fields.comment_id}}`. |
+| **Comment Text** | The comment as the ticket system sent it. |
+| **Note** | The note to add, for example `({{webhook.fields.commenter}}): {{webhook.fields.comment_body}}`. |
+
+Notes this node adds are never pushed back to the ticket.
 
 ### Set Owners
 

@@ -131,6 +131,50 @@ A node with **One Message per Item** turned on produces one delivery row and one
 
 Past this ceiling the node records a **visible skip** saying how many items it did not send about. It does not fail the run, and it does not silently stop.
 
+## Webhook receivers
+
+These settings bound what a [webhook receiver](../webhook_receivers/) accepts.
+
+### `DD_RULES_V2_WEBHOOK_MAX_BODY_BYTES`
+
+**Default: 1048576 (1 MiB).**
+
+The largest body a receiver accepts. A larger delivery is refused and recorded as a rejected receipt. The gateway reads the same setting. When the gateway is on, nginx also caps the body in front of it through `DD_WEBHOOK_GATEWAY_MAX_BODY` (default `1m`), so raise both together.
+
+### `DD_RULES_V2_WEBHOOK_DEDUPE_WINDOW_SECONDS`
+
+**Default: 86400 (one day).**
+
+Without the gateway, how long a delivery id from the receiver's dedupe header is remembered, so a sender's retry is recorded once. With the gateway, the gateway deduplicates and this setting is unused.
+
+### `DD_RULES_V2_WEBHOOK_RATE_LIMIT`
+
+**Default: 600.**
+
+The most deliveries one receiver accepts per minute. Past it, a delivery is answered `429` with a `Retry-After` header, and the gateway retries it later.
+
+### `DD_RULES_V2_RECEIPT_RETENTION_DAYS`
+
+**Default: 180.**
+
+How many days a receipt is kept. `0` keeps receipts forever.
+
+### The webhook gateway
+
+The gateway runs as its own `webhook-gateway` service, stores every delivery in its own `whook` database, and delivers to DefectDojo over the internal network. DefectDojo creates the `whook` database on startup when its database account is allowed to.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| `DD_WEBHOOK_GATEWAY_MODE` | `whook` | `whook` puts the gateway in front of every receiver. `direct` has DefectDojo answer receiver URLs itself, with no durability during an outage. |
+| `DD_WEBHOOK_GATEWAY_URL` | `http://webhook-gateway:8080` | The gateway's admin address. |
+| `DD_WEBHOOK_GATEWAY_ADMIN_TOKEN` | empty | The token DefectDojo uses to configure the gateway. It must match the gateway's `WHOOK_ADMIN_TOKEN`, and the gateway refuses to start without one. |
+| `DD_WEBHOOK_GATEWAY_DELIVER_BASE_URL` | `https://nginx:7443` | Where the gateway delivers. It must be reachable from the gateway and must not be public. |
+| `DD_WEBHOOK_GATEWAY_MAX_ATTEMPTS` | `12` | Delivery attempts before the gateway gives up on an event. The wait starts at 2 seconds and triples each time, up to an hour, so twelve attempts cover about four and a half hours. |
+| `DD_WEBHOOK_GATEWAY_DATABASE_NAME` | `whook` | The gateway's database, on the same server as DefectDojo's. |
+| `WEBHOOK_GATEWAY_ENABLED` | varies | On the nginx and gateway containers: whether nginx routes receiver URLs to the gateway. Off, the gateway idles. |
+
+Every ten minutes DefectDojo reconciles the gateway with its receivers, so a gateway that lost its configuration recovers on its own. `manage.py reconcile_webhook_gateway` does the same on demand.
+
 ## Related settings
 
 Some Triage Engine nodes use system-wide integration configuration rather than their own:
