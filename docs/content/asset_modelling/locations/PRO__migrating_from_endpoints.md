@@ -36,6 +36,17 @@ python manage.py migrate_components_to_dependencies
 python manage.py migrate_findings_to_code_locations
 ```
 
+## Marking an item complete
+
+Each suite item carries a durable **completed** marker, so the page can state that a migration does not need to be run again. It is set two ways:
+
+- **Automatically**, when a run started here finishes successfully.
+- **Manually**, with **Mark as completed**, for a migration that finished another way: a management command from the list above, a database restore, or a fresh instance that never had Endpoints to carry forward.
+
+A completed item shows a **Completed** badge with who marked it and when, its **Run** button becomes **Run again** (the step stays idempotent, so re-running is always safe), and **Mark as not completed** clears the marker.
+
+Marking the three backfills complete also satisfies the identity rehash's precondition, so a manual mark unlocks the rehash exactly as a real run does. Mark a backfill by hand only when its data really is migrated: the UI asks you to confirm, because unlocking the rehash before the backfill has run would let it recompute identities against a half-migrated database.
+
 ## What the Endpoints Backfill Does
 
 For every existing Endpoint, the endpoints backfill will:
@@ -97,7 +108,23 @@ A few things behave differently from the original Endpoint API:
 
 - **Single status instead of flags.** Locations have one status at a time. If your code relied on a Finding being *both* `mitigated=True` *and* `false_positive=True` simultaneously on an Endpoint_Status, that is no longer representable — the migration picks the highest-priority flag (the order shown in the table above).
 - **`endpoint` field on Endpoint_Status.** The legacy `endpoint` field is reconstructed by looking up the matching Asset Reference. In rare cases where a Finding's Asset no longer matches its Location's Asset references, this field may be null.
+- **`mitigated` returned a date before 3.2.400.** On releases before 3.2.400 the `mitigated` field of `/api/v2/endpoint_status/` returned the record's creation date instead of a boolean. Because a date string is truthy, `mitigated_time` and `mitigated_by` answered as though every status was mitigated. From 3.2.400 the field is a boolean that is true only when the Location status is `Mitigated`. If you poll for mitigated statuses, upgrade before you trust this field.
 - **Pagination and ordering.** Available ordering fields on the read-compat shim are `host`, `product`, `id`, and `active_finding_count`. If your client orders by another field, switch to one of these or move to the new Locations endpoints.
+
+### If a Route Returns 410
+
+Any remaining `/api/v2/` path that reaches the old Endpoint data answers `HTTP 410 Gone` rather than a server error. The body is machine-readable, so your automation can branch on `code` instead of parsing the message:
+
+```json
+{
+  "code": "endpoint_api_sunset",
+  "message": "The Endpoint API is not available on instances with Locations enabled. Reads are served from Locations; writes are not available.",
+  "replacement": "/api/v2/location/",
+  "docs": "https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/"
+}
+```
+
+If you hit this on a read you expected to work, send us the request path. That response means we have a route left to convert, and it is a bug on our side, not on yours.
 
 ## Tags and Metadata
 

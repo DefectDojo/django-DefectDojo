@@ -2,7 +2,7 @@
 title: "Feed Findings"
 description: "Triage incoming advisories and read the tri-state answer to 'am I affected?'"
 draft: false
-weight: 6
+weight: 7
 pro-feature: true
 ---
 
@@ -48,6 +48,16 @@ Advisories still moving through the pipeline show it: an advisory waiting on
 enrichment has not yet been matched, because enrichment is what supplies the
 version ranges matching needs.
 
+### The Feed Rules column
+
+Where [Feed Rules](../feed-rules/) are configured, the queue carries their verdict:
+the score a rule gave the advisory, a star where one marked it a favourite, and any
+tags. The column sorts, and the queue filters on minimum score, favourites and tag.
+
+On a queue where nothing has matched yet, this is the only column carrying a
+judgement — which is what makes tens of thousands of advisories sortable rather
+than merely searchable.
+
 ## Verified and unverified matches
 
 A match tells you a component and an advisory correspond. **Verified** tells you
@@ -86,6 +96,11 @@ changes it.
   matters outlasts the rule that disagreed.
 - **Re-match** queues the advisory for another matching pass. Useful after an SBOM
   import or after correcting a component's version.
+- **Add to case** opens a case on the advisory, or attaches it to one already open.
+  This does **not** require the advisory to have matched anything: an advisory your
+  inventory could not answer for — no SBOM imported, a component the publisher
+  spells differently, or one that arrived an hour ago — is frequently the one most
+  worth investigating. Matches come along where they exist.
 - On a match: **confirm**, mark **false positive**, or leave notes. Everything
   else on a match is the engine's record of why it exists and is read-only.
 

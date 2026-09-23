@@ -7,7 +7,15 @@ from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.models import Finding, Risk_Acceptance, User
+from dojo.models import (
+    Dojo_Group_Member,
+    Finding,
+    Product_Member,
+    Product_Type_Member,
+    Risk_Acceptance,
+    Test,
+    User,
+)
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
@@ -28,6 +36,8 @@ class ViewEngineerMetricsTest(DojoTestCase):
 
         self.test_findings = []
         self.create_test_findings()
+        self.product = Test.objects.get(pk=3).engagement.product
+        self.product.authorized_users.add(self.user1.pk)
 
     def create_test_findings(self):
         """Create test findings with different severities and dates"""
@@ -306,3 +316,37 @@ class ViewEngineerMetricsTest(DojoTestCase):
 
         for key in required_keys:
             self.assertIn(key, context, f"Missing required context key: {key}")
+
+    def revoke_all_access(self, user, product):
+        """Strip every grant that could authorize `user` for `product`."""
+        Product_Member.objects.filter(user=user).delete()
+        Product_Type_Member.objects.filter(user=user).delete()
+        Dojo_Group_Member.objects.filter(user=user).delete()
+        product.authorized_users.clear()
+        product.prod_type.authorized_users.clear()
+        user.user_permissions.clear()
+        user.is_staff = False
+        user.is_superuser = False
+        user.save()
+        return User.objects.get(pk=user.pk)
+
+    def test_view_engineer_hides_findings_after_access_is_revoked(self):
+        finding = self.test_findings[0]
+
+        self.client.force_login(self.user1)
+        response = self.client.get(reverse("view_engineer", args=[self.user1.id]))
+        self.assertContains(response, finding.title)
+
+        user = self.revoke_all_access(self.user1, self.product)
+
+        finding.title = "Retitled After Revocation"
+        finding.severity = "Critical"
+        finding.save()
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("view_engineer", args=[user.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Retitled After Revocation")
+        self.assertNotContains(response, self.product.name)
+        self.assertEqual(response.context["critical_open_month"], 0)
+        self.assertEqual(response.context["open_month"].count(), 0)

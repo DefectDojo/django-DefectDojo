@@ -49,7 +49,7 @@ Assets will always include the following components:
 Optional Asset metadata includes: 
 
 - **Tags**
-- **Personnel information** (e.g., Asset Manager, Team Manager, Technical Contact, etc.)
+- **Personnel information** (e.g., Asset Manager, Team Manager, Technical Contact, etc.). Only active users can be assigned to these fields, in the UI and over the API. If a user is deactivated later, the assignment stays in place as a historical reference and continues to be readable, but that user cannot be assigned again until the account is reactivated. An update that re-sends the value already stored is still accepted.
 - **Regulations** (e.g., HIPAA, GLBA, OPPA, etc.)
 - **Business criticality**
 - **Platform** (e.g., API, Desktop, IoT, Mobile, Web, etc.)
@@ -177,4 +177,4 @@ Assets can be mapped directly to Jira Projects, which push the Asset’s Finding
 
 Because Findings inherit risk, priority, and ownership from their parent Asset, the Asset effectively determines the remediation context that flows into Jira tickets and Downstream Connector workflows.
 
-Importantly, Assets are also the primary determining factor in a Finding’s SLA characteristics. Therefore, the SLA of a Findings depends on the SLA configuration of its parent Asset. More information about SLA configurations can be found [here](/asset_modelling/os_hierarchy/os__sla_configuration/#main-content). 
+Importantly, Assets are also the primary determining factor in a Finding’s SLA characteristics. Therefore, the SLA of a Finding depends on the SLA configuration of its parent Asset. More information about SLA configurations can be found [here](/asset_modelling/os_hierarchy/os__sla_configuration/#main-content). 

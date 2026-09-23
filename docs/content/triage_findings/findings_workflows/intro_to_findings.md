@@ -74,6 +74,12 @@ Notes appear as a feed, newest first, and you can flip the order to oldest first
 
 Note entries support markdown, so you can use headings, **bold** and *italic* text, bullet and numbered lists, block quotes, tables, links, and fenced code blocks. The note editor is the same one used for a Finding's description, with a toolbar for the common formatting options. To read a note exactly as it was typed rather than as formatted text, use the toggle in the top right of the note body.
 
+### Adding images
+
+You can paste a screenshot from your clipboard straight into a note, drag an image file onto the editor, or pick one with the **Insert image** toolbar button. DefectDojo stores the image and shows it inline in the notes feed and in generated reports.
+
+This is not specific to notes: the same editor and the same image support are used by a Finding's description and its other markdown fields, and by descriptions across the rest of DefectDojo. See [The Markdown Editor](/navigation/pro__markdown_editor/) for the accepted formats, the size limit, who can see a stored image, and how unused images are cleaned up.
+
 ### Editing, deleting and history
 
 Every note carries an actions menu with **Edit**, **View History** and **Delete**, and each entry appears only when you are allowed to use it:

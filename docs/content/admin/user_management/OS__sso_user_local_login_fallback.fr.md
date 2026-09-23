@@ -1,5 +1,5 @@
 ---
-title: Réactiver la connexion pour les utilisateurs SSO (Open Source)
+title: Réactiver la connexion pour les utilisateurs SSO
 description: Donner un mot de passe local aux utilisateurs provisionnés via SSO après
   un passage à Open Source, où le SSO est une fonctionnalité réservée à Pro
 audience: opensource

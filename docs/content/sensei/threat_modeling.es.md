@@ -7,13 +7,11 @@ audience: pro
 weight: 4
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Threat Modeling es una función exclusiva de DefectDojo Pro y actualmente está en fase BETA.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Threat Modeling es una función exclusiva de DefectDojo Pro.</span>
 
 **Threat Modeling** convierte un diseño de funcionalidad en un modelo de amenazas revisado. Usted proporciona el diseño — texto pegado, un documento de diseño y, opcionalmente, un diagrama de arquitectura — y DefectDojo genera los componentes y flujos de datos que describe, las amenazas contra ellos, y los requisitos de seguridad que mitigan esas amenazas. Los requisitos luego pueden enviarse a DefectDojo como hallazgos, de modo que el trabajo en etapa de diseño fluye por la misma maquinaria de triaje, SLA, Jira e informes que todo lo demás.
 
 Esta es la capacidad **pre-code** de Sensei. Mientras que [escanear y corregir](/sensei/about_sensei/) funciona sobre un repositorio que ya existe, el modelado de amenazas funciona sobre el diseño, antes de que haya código que escanear.
-
-> **🔎 BETA:** Threat Modeling está en desarrollo activo y aparece etiquetado como **BETA** en toda la interfaz. El comportamiento y las pantallas pueden cambiar entre versiones. Durante la fase BETA se habilita por instancia desde DefectDojo — contacte a su representante de DefectDojo para activarlo.
 
 > **📍 Dónde encontrarlo:** abra **Threat Modeling** desde la navegación izquierda, justo debajo de Sensei.
 
@@ -21,13 +19,13 @@ Esta es la capacidad **pre-code** de Sensei. Mientras que [escanear y corregir](
 
 - La función con licencia **Sensei**. El modelado de amenazas se distribuye bajo el mismo derecho de uso que escanear y corregir.
 - Un rol global de **Maintainer** o **Owner**. Los usuarios que no lo tengan no verán la página.
-- Un producto al cual vincular el modelo de amenazas. Las instancias que usan la nomenclatura V3 ven los productos llamados **assets**; esta página dice *producto* en todo momento, y la interfaz sigue la nomenclatura que tenga configurada su instancia.
+- Un producto al cual vincular el modelo de amenazas. Las instancias que usan la nomenclatura 3.0 ven los productos llamados **assets**; esta página dice *producto* en todo momento, y la interfaz sigue la nomenclatura que tenga configurada su instancia.
 
 No se instala nada ni se conecta ningún repositorio. El modelado de amenazas solo lee el diseño que usted proporciona.
 
 ## Generar un modelo de amenazas
 
-Elija **New threat model**, seleccione el producto, asígnele un nombre y proporcione el diseño en el formato que tenga disponible:
+Elija **New Threat Model**, seleccione el producto, asígnele un nombre y proporcione el diseño en el formato que tenga disponible:
 
 - **Paste the description** directamente, o
 - **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` o `.pdf`. La extracción de texto desde PDF es best-effort; si un PDF es mayormente imágenes, pegue el texto en su lugar.

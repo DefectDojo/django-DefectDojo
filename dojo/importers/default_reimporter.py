@@ -38,8 +38,10 @@ from dojo.validators import clean_tags
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
-# Bound IN-list size when bulk-loading status fields for close_old_findings.
-_CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK = 1000
+# Bound IN-list size when bulk-loading rows for close_old_findings. Same bound as the
+# existence lookup in finding_helper, so every id list this file sends to the database is
+# chunked the same way.
+_CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK = finding_helper.FINDING_EXISTENCE_CHUNK
 
 
 class DefaultReImporterOptions(ImporterOptions):
@@ -809,6 +811,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         earlier in the reimport can be gone by the time we get here (a concurrent delete of
         findings, for example): there is no row to refresh, and such a finding must not be
         closed either, because saving it would re-insert the deleted row.
+
+        That existence check deliberately does not go through finding_helper.deleted_finding_ids
+        like the other callers holding finding references across a delete window. A missing
+        row is already the absence of a row in the refresh this method has to do anyway, so
+        asking the shared helper would buy consistency with a second round trip per chunk.
 
         This really should be fixed differently, but for now we at least optimize it to be done in bulk.
         """

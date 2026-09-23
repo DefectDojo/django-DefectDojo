@@ -1,7 +1,7 @@
 ---
 title: Self-Hosting von DefectDojo Pro
 date: 2021-02-02 20:46:29+01:00
-weight: 5
+weight: 1
 audience: pro
 ---
 

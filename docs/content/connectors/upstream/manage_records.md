@@ -9,6 +9,8 @@ aliases:
 
 Once you have run your first Discover operation, you should see a list of Mapped or Unmapped records on the **Manage Records and Operations** page.
 
+Each configured Connector's tile on the **Upstream Connectors** page shows how many of its records still need to be mapped. If any records need attention, the count is highlighted and a **Manage Records \& Operations** button appears directly on the tile. The page is always reachable from the tile's **Manage Configuration \> Manage Records \& Operations** menu as well.
+
 ## What's a Record?
 
 A Record is a connection between a DefectDojo **Asset** and a **Vendor\-Equivalent\-Product**. You can use your Records list to control the flow of data between your tool and DefectDojo.

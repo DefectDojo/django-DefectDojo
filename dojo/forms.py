@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from tagulous.forms import TagField
+from django_tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
 from dojo.github.ui.forms import (  # noqa: F401 -- backward compat
@@ -156,7 +156,7 @@ class MonthYearWidget(Widget):
         return data.get(name, None)
 
 
-from dojo.product_type.ui.forms import Add_Product_Type_AuthorizedUsersForm, Delete_Product_TypeForm, Product_TypeForm  # noqa: E402, F401, I001
+from dojo.product_type.ui.forms import Add_Product_Type_AuthorizedUsersForm, Delete_Product_TypeForm, Product_TypeForm  # noqa: E402, F401
 
 
 class Test_TypeForm(forms.ModelForm):

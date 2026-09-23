@@ -31,7 +31,7 @@ Los Paneles personalizables están desactivados de forma predeterminada. Un Supe
 
 Una vez activada, la página **🏠 Inicio** muestra su panel personalizable y queda disponible la [API REST de paneles](../custom-dashboards-api/).
 
-> **🔑 Important:** mientras la función esté desactivada, la página de inicio conserva el panel anterior y todos los endpoints `/api/v2/dashboards/` devuelven `403 Dashboard V2 is not enabled.` Activarla **no** cambia el acceso a los datos de nadie: cada widget sigue respetando el control de acceso basado en roles de DefectDojo, de modo que cada usuario solo ve los Hallazgos, Activos y demás registros que está autorizado a ver.
+> **🔑 Important:** mientras la función esté desactivada, la página de inicio conserva el panel anterior y todos los endpoints `/api/v2/dashboards/` devuelven `403 Dashboards 2.0 is not enabled.` Activarla **no** cambia el acceso a los datos de nadie: cada widget sigue respetando el control de acceso basado en roles de DefectDojo, de modo que cada usuario solo ve los Hallazgos, Activos y demás registros que está autorizado a ver.
 
 ## Conceptos fundamentales
 
@@ -184,6 +184,7 @@ Listas clasificadas, feeds y tablas incorporadas.
 | **SLA Burndown** | Hallazgos que se acercan al incumplimiento del SLA, clasificados por días restantes, con distintivos de cuenta regresiva. |
 | **My Work** | Su cola personal — asignaciones, menciones y revisiones de aceptación de riesgo pendientes. Siempre limitado al propio usuario. |
 | **Saved Reports** | Acceso con un clic a sus Plantillas de informe guardadas. *Requiere la función de Informes.* |
+| **Top Root Causes** | Los clústeres de causa raíz mejor clasificados, con el número de Hallazgos que agrupa cada uno, los Assets afectados y su prioridad y banda de riesgo. *Requiere la función Correlación de causa raíz.* |
 
 ### Estático y utilidades
 

@@ -8,7 +8,7 @@ aliases:
 >
 > The **SonarQube API Import** pull parser, and the **Tool Configuration** setup described below, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
 >
-> **Migrate to:** the [SonarQube connector](/connectors/upstream/toolreference/#sonarqube) (DefectDojo Pro), or import a SonarQube report as a [file](../../file/sonarqube) — file import is not affected by this deprecation.
+> **Migrate to:** the [SonarQube connector](/connectors/toolreference/sonarqube/) (DefectDojo Pro), or import a SonarQube report as a [file](../../file/sonarqube) — file import is not affected by this deprecation.
 
 All parsers that use API pull have common basic configuration steps, but with different values. Please, [read these steps](../) first.
 

@@ -1,7 +1,10 @@
 ---
 title: "DefectDojo Pro Changelog"
-description: "DefectDojo Changelog"
+description: "DefectDojo Pro Changelog"
 exclude_search: true
+outputs:
+  - "html"
+  - "rss"
 aliases:
   - "/en/changelog/changelog/"
   - "/changelog/pro_changelog/"
@@ -9,14 +12,169 @@ aliases:
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
+You can subscribe to these release notes with the [RSS feed](/releases/pro/changelog/index.xml).
+
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
+
+## September 2026: v3.3
+
+### September 14, 2026: v3.3.100
+
+New features:
+* **(Deduplication)** Added Dedupe Pools: group the Assets that should deduplicate against each other, choose where their originals collect, preview what a membership change would link, and re-run deduplication over the Findings already in scope with Apply Now.
+* **(Deduplication)** The three deduplication tuning pages are now one Matching Configuration page: every tool listed once, with its same-tool, cross-tool and reimport matching side by side, and every change previewed before it is saved.
+* **(Connectors)** New Palo Alto Cortex connector family, covering XDR, XSIAM, XSOAR, and Cloud.
+* **(Connectors)** Connector sync and discovery frequency is now configurable (6, 12, or 24 hours), with schedule times shown in your browser's local time.
+* **(Dashboards)** Collaborative shared dashboard layouts.
+* **(Editor)** The markdown editor now stores images you paste or drop into any markdown field.
+* **(Sensei)** Google Vertex AI is available as an on-prem LLM provider.
+* **(Sensei)** Keyless and delegated cloud authentication for Prowler scans and Sensei CSPM, using cloud federation or Connect DefectDojo Cloud.
+* **(Reporting)** Dashboards 2.0 widgets can now be reused as Report Builder blocks.
+* **(Rules Engine 2.0)** Date condition fields support relative-date operators.
+* **(Federal)** FedRAMP VDR, PAIN, and KEV-cap SLA fields are exposed in the Pro UI and REST API.
+* **(Qualys)** Opt-in endpoint creation from host identity.
+
+Enhancements:
+* **(Dashboards)** Duplicate a dashboard tile from its edit-mode chrome.
+* **(Connectors)** The Aqua Supply Chain Branch field accepts a comma-separated list and gains a per-branch deduplication toggle, and its placeholders now show the real default.
+* **(SSO)** Auth settings show callback and ACS URLs inline, with richer help text and corrected field labels.
+* **(Sensei)** The Threat Modeling and Advisor pages show the licensed per-run quotas.
+
+Bug fixes:
+* **(Connectors)** JFrog scopes each nested child image to its own latest build; Dependency-Track paginates project findings so large projects aren't truncated; YesWeHack maps every workflow state and falls back to the CVSS score for severity; GitHub Advanced Security 403 and 404 responses are treated as feature-disabled rather than token errors; a tool-reported finding status now survives a sync; and KEV/EPSS enrichment staging is isolated per connection to avoid concurrent-run collisions.
+* **(Findings)** You can now request a review from yourself.
+* **(Rules Engine)** "Clear Filters" now clears a rule's saved filters.
+* **(SSO)** Unconfigured social-login backends return you to the login form instead of a 500.
+* **(Assets)** Each personnel picker gets its own users list.
+* **(API)** A stored inactive contact stays readable, a new contact can no longer be assigned to an inactive user, and the finding API's SonarQube issue relation is read-only.
+* **(Dashboards)** The Top Root Causes widget is registered and receives its configuration.
+* **(Sensei)** GitHub App creation opens in a new tab, and the Targets "Last Scan" value aligns with the scan-run ledger while the Scan-now dialog stays responsive.
+* **(UI)** Table columns size to fit their headers so filter and sort controls stay reachable, and the Upstream menu item is a plain link while Field Mappings is unreleased.
+* **(Questionnaires)** Corrected the share note on the general questionnaire list.
+* **(JIRA)** Corrected the exception class the webhook lookups catch.
+* **(Reporting)** Removed a duplicate vulnerability reference prefetch in the finding report.
+* **(Parsers)** bundler-audit resets advisory fields so warnings can't inherit stale values.
+* **(Deduplication)** The endpoint rehash runs once per tool instead of once per finding.
+
+Behavior changes:
+* **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. An Asset in a Dedupe Pool replicates its false positives across the pool for same-tool matching. Instances using false-positive history across such Engagements see narrower replication than before. A pool may span Organizations, and both effects follow the pool: a duplicate mark or a replicated false positive originating in one Organization can change a Finding in another Organization that shares the pool.
+* **(Deduplication)** For an Asset in a Dedupe Pool, Global Component, Global Vulnerability ID and Global Locations matching is bounded to the pool rather than the whole instance.
+* **(Deduplication)** The three deduplication pages move off the Tuner permissions onto four Dedupe Pool permissions (view, add, edit, delete). Roles that held the Tuner permissions are carried over for those pages: Tuner edit maps to all four, Tuner view to view only. The Tuner permissions themselves are unchanged and still gate the other 14 Tuner sections (SSO, LDAP, SCIM, email, MFA and the rest).
+* **(Rules)** A new asset rule action, Assign to Dedupe Pool, pools an Asset or removes the rows a rule created; it never moves an Asset another pool holds, and the rule owner needs the Dedupe Pool edit permission.
+* **(Assets)** The Asset page gains a Dedupe Pool panel showing which pool the Asset matches within, per kind, with the pool change, subtree pooling and untoggle available in place.
+* **(Audit Log)** Dedupe pools, their memberships and the per-tool matching rows are tracked in the audit log.
+
+Upgrade notes:
+* **(Deduplication)** Pods may roll in either order relative to the migration. The upgrade copies the deduplication tuning into per-tool matching rows and retires the old tuning fields from the application, but leaves their columns in the database for this release. A pod still on the previous image keeps reading and writing those columns and behaves exactly as before until it is rolled; a pod on the new image reaches a database that has not migrated yet and matches without pools, reading the old tuning where it needs to, until the migration lands. The columns are removed by a later release, once no pod on the previous image can exist. Hold imports across the roll if you want no import to straddle the changeover; nothing fails if you do not.
+* **(Deduplication)** The migration is reversible. Rolling back to the previous node drops the new pool tables and restores the previous release's view of the settings; the tuning columns never left. Take a database backup before upgrading anyway, as ordinary upgrade hygiene.
+* **(Deduplication)** The matching rows the upgrade seeds carry no audit log entry: the migration writes them before it installs their audit triggers. Audit history for Matching Configuration starts with the first change made after the upgrade; the seeded state itself is what the Tuner held, and is not recorded as an event.
+* **(Deduplication)** The first nightly identity check after the upgrade may send a system notification saying the cross-tool identity changed for some tools. Those tools had cross-tool hash fields configured but no algorithm; the previous release treated that as Hash code, and the upgrade records Hash code explicitly, so the identity definition moved while the stored hashes did not. The rehash the notification suggests (`manage.py identity_drift --kind cross_tool --rehash`) is safe, recomputes the same values, and records the new baseline so the notice does not repeat.
+* **(Deployment)** A new `DD_V3_ASSET_ALIASES` chart value and compose environment variable enable per-source asset aliases; Sensei CSPM adds keyless and delegated cloud-auth boot gates.
+
+### September 9, 2026: v3.3.0
+
+New features:
+* **(Correlation)** Cross-domain finding correlation groups related findings into shared root causes. A finding's page now lists its root causes, root-cause blast radius feeds finding prioritization, and a new Top Root Causes dashboard widget plus a Product breakdown show where risk concentrates. Root causes cover CVE, component, resource, and endpoint types, hide CVE causes a component already covers, and are readable through a public read-only Root Cause API.
+* **(PSIRT)** PSIRT 2.0 is folded natively into DefectDojo Pro: native advisory feeds and a catalog, feed rules and rule templates, advisory-to-case conversion, and a dedicated PSIRT permission so an analyst does not need global maintainer.
+* **(Risk Acceptance)** Risk Acceptances 2.0 adds a reviewable lifecycle with a pending-review queue and a durable ledger. You can also choose to restore a finding to Verified when its risk acceptance expires.
+* **(Assets)** A rebuilt asset model adds asset versions with BOM snapshots and per-version SBOM/VEX export, per-source identity and aliases so connectors resolve assets by the vendor's id, typed asset kinds, typed relationship edges that distinguish direct from indirect vulnerabilities, and asset exposure and deployment context (including live reachability probing and business-criticality sync from the CMDB).
+* **(Organizations)** Organizations can now be non-exclusive: an asset can belong to multiple organizations with union-of-grants RBAC, membership-aware organization filters on the asset and finding lists, and roles that can be granted across an entire organization type.
+* **(Dashboards)** Dashboards 2.0 expands into the DefectDojo Command Center, with a published security-posture score.
+* **(Locations)** Endpoints continue their move to Locations: asset connectors can emit standalone location inventory, and a new Location Map draws an asset's locations as derived trees per location type.
+* **(Navigation)** Menu 2.0 now covers the whole sidebar, including a Sensei + AI section, a full-height sidebar rail with pinned pages, and server-backed shell preferences.
+* **(Sensei)** Added Sensei Advisor, which recommends settings changes and offers one-click fixes for mechanical deduplication-hygiene issues, with per-run license quotas for threat modeling and Advisor. The Sensei engine now ships in the on-prem compose bundles.
+* **(Connectors)** New Rapid7 InsightVM - Cloud Instance and Aqua Supply Chain connectors, plus a Wiz option to import Issues only. Connectors gain customer-defined field mappings (versioned and identity-safe, per scan type), a connector registry the UI reads from, per-record sync checkpoints so an interrupted sync resumes, and health notifications when a connector stops working or authenticates but sees no data.
+* **(Universal Parser)** Universal Parser field mappings can now be edited from a dedicated screen, with an impact warning attached.
+* **(Compliance)** Added DISA STIG checklist import (.ckl/.cklb) with a CCI to NIST 800-53 crosswalk.
+* **(Exporters)** Added a CycloneDX/SPDX SBOM and CycloneDX VEX export API, and the Pro UI now accepts .spdx files on import.
+* **(API)** Added API v3 (alpha) at `/api/v3-alpha/` with slim references, expansion, RBAC sub-resources, and the Pro importer. Custom Fields are now available on the token-authenticated `/api/v2` API.
+* **(Federal)** Added FIPS 140-3 image support (FedRAMP SC-13), PAIN-keyed FedRAMP VDR remediation deadlines, and a FedRAMP prioritization preset.
+* **(Rules Engine 2.0)** Rules can now trigger on scan absence, draw from a rule-template gallery, assign an SLA configuration or Risk Priority to assets, and condition on exploit evidence, reachability, and asset exposure.
+* **(Reporting)** Added a Location Count field on every entity and reorderable block fields in the Report Builder.
+* **(Assets)** Added checkbox bulk edit on the asset list (organization, SLA, engine, tags) and customer-editable platform, lifecycle, and origin dropdowns.
+* **(Integrations)** The Freshservice integration can push findings as ITIL Incidents or Problems per mapping, and MCP finding tools gained tag filtering.
+* **(Audit Log)** System Settings changes are now recorded in the audit log.
+
+Enhancements:
+* **(Connectors)** The JFrog, Tenable.io WAS, and Tenable VM connectors now stream findings per page instead of holding a whole sync in memory, and connectors report data-visibility warnings at config-test time. The Location URL is pre-filled for single-host tools.
+* **(UI)** A first pass of accessibility and readability foundations: a visible focus ring, AA-contrast muted text, a System theme option, comfortable reading line-height, and shared type tokens. Toggleable panels now expand from a click anywhere on the header, and locked dropdowns gained a copy button.
+* **(Deduplication)** Finding identity is now recorded in a signature ledger, versioned and bridged across formula changes, with a scheduled drift check that reports what moved; reimport can match on identity signatures.
+* **(Notifications)** Notifications now fan out to every organization an asset belongs to.
+* **(Reporting)** Report charts export as PNG so labels survive PDF rendering.
+* **(Importers)** Import and reimport bulk-create new findings, reducing per-finding overhead on large scans.
+
+Bug fixes:
+* **(Connectors)** Wiz now imports findings from tenants that use no Projects, the Microsoft Defender connector no longer fails a good sync during spool cleanup, and connector product descriptions are capped at the column limit.
+* **(Licensing)** A usage block now answers with 402 rather than a throttle status, and license enforcement no longer blocks authentication.
+* **(Importers)** Scan severities are accepted case-insensitively, `.spdx` files are accepted for import, concurrent imports no longer race on scan-directory creation, and edited tests keep their scan type so reimport matching survives.
+* **(Parsers)** Fortify now marks only suppressed FPR findings as false positive, Anchore Grype parses the CISA KEV date, and Xeol and Checkmarx One finding identity is deterministic.
+* **(UI)** The Components list no longer renders an empty body while its paginator counts every row, ECharts resolves theme tokens to concrete colors, and the New Issue Tracker Assignment dialog no longer closes when going full-screen.
+
+Notable changes:
+* **(UI)** The classic Bootstrap UI and the classic report engine have been retired; Menu 2.0 and the Pro Vue UI are now standard.
+* **(Operations)** The maintenance window feature has been removed.
 
 ## August 2026: v3.2
 
-### August 24, 2026: v3.2.300
+### August 31, 2026: v3.2.400
+
+New features:
+* **(Sensei)** Added a generic fix flow: you can now associate a repository with a finding inline, and a gap-closing wizard walks you through anything else Sensei needs before it can generate a fix. Finding file paths are also resolved against the repository tree before the fix is generated, so fixes land in the right file.
+* **(Sensei)** Scan-and-fix now includes a scanner for AI agent skills (Skillspector).
+* **(Engagements)** Added engagement checklists to the Pro UI.
+* **(Rules Engine 2.0)** Rules can now be conditioned on KEV (Known Exploited Vulnerabilities) listing and exploit evidence.
+* **(Navigation)** Added a searchable menu palette over the sidebar, opened with Cmd/Ctrl+K.
+* **(Correlation)** The Root Cause view now has a Root Cause Organization column, asset and organization filters, and per-organization drill-in.
+* **(Exporters)** The UI SBOM export now offers SPDX alongside CycloneDX.
 
 Enhancements:
+* **(Custom Fields)** Custom fields now render on the entity create and edit forms, and are configured like any other form field.
+* **(Connectors)** The Wiz, Microsoft Defender for Cloud, and CrowdStrike connectors now stream findings page by page rather than holding a whole sync in memory, so large syncs are faster and lighter.
+
+
+### August 24, 2026: v3.2.300
+
+New features:
+* **(Custom Fields)** Added typed Custom Fields: define your own fields across seven datatypes and attach them to six entity types. Custom field values are tracked in the audit log, and Rules Engine 2.0 rules can read and write them.
+* **(Rules Engine 2.0)** Rules can now work with Assets end to end, and a new asset provenance widget on the asset page layout shows which rule produced an asset.
+* **(Asset Hierarchy)** Rebuilt the Asset Hierarchy page on the Rules Engine 2.0 editor shell.
+* **(Connectors)** The GitHub Advanced Security connector can now import repository issues as a fourth finding family, under the new **GitHub: Issues** scan type. Pre-existing mappings are backfilled with the new subtype automatically.
+* **(Connectors)** The OpenVAS / Greenbone connector now supports GMP over SSH as a transport.
+
+Enhancements:
+* **(Deduplication)** The deduplication identity ledger is now enabled by default.
+* **(Connectors)** The Action1 connector now consolidates findings per organization, with machines recorded as endpoints, and each connector tile now counts only actively syncing records as mapped and surfaces unmapped records directly on the tile.
+* **(Locations)** The component and code backfills now run in batches, and stale-run reaping was moved off the poll, making the data-migration suite faster and lighter.
+* **(Operations)** DefectDojo now reports when a Celery task is routed to a queue that no worker consumes.
+* **(Sensei)** The scan-and-fix release image is smaller, with scanner installs split into per-ecosystem layers.
+* **(MCP)** The Pro MCP server now reports its version (with commit hash) via a CLI option.
+* **(Compliance)** The POA&M scheduled completion date is now derived from the finding's SLA.
+* **(Reporting)** The Risk Acceptance name is now offered as a finding report column.
+* **(Jira)** The custom fields JSON limit was raised from 200 to 1000.
+
+### August 18, 2026: v3.2.201
+
+New features:
+* **(Page Layouts)** The Risk Acceptance view page now uses a customizable widget grid, like the other View pages.
+* **(Sensei)** Added Amazon Bedrock as an on-prem LLM connection.
 * **(Locations)** The data-migration suite on the Feature Flags page can now be cancelled while a backfill is running. Cancelling stops the run at the next batch boundary and keeps everything migrated so far, so re-running the item resumes and converges on the same result. A run whose worker is lost is now detected and marked failed on its own, so a stuck suite becomes runnable again instead of blocking every item.
+* **(Endpoints)** Endpoints are now deprecated in favour of Locations.
+* **(Menu)** Classic-menu users are now warned that Menu 2.0 becomes the standard in 3.3.0.
+
+Enhancements:
+* **(CSPM)** Cloud Security Posture Management is now gated on the Sensei license rather than a separate feature flag.
+* **(Sensei)** Scan-and-fix scanner parallelism is now configurable, via `--max-parallel` / `MAX_PARALLEL` (and `sensei.maxParallel` in Helm).
+
+Bug fixes:
+* **(Authorization)** Import and reimport preview targets are now scoped to the caller's permissions, POA&M item findings are validated against the record's own product, and questionnaire expiration and question-set editing are checked against the response route and the questionnaire change permission.
+* **(Risk Acceptance)** A companion-less risk acceptance is now counted correctly, as active and as non-global, when filtering.
+* **(Reporting)** Report graph blocks that no browser captured are now drawn instead of failing silently, and the BETA badge that Menu 2.0 re-added after GA is gone.
+* **(Licensing)** License enforcement no longer blocks authentication.
+* **(Connectors)** The Action1 connector derives severity from the CVSS score when no severity bucket is usable, and a chunked sync now records one Import History row per sync.
+* **(Locations)** The endpoints-to-locations backfill now reports distinct locations and per-endpoint failures.
+* **(Dedupe)** Finding post-processing now retries on a transient DB deadlock.
+* **(UI)** The Advisor now renders with PrimeVue, and PSIRT and Field Mappings are nested correctly in the legacy sidebar.
+* **(Threat Model)** The schema-repair loop no longer deletes the prompt it is repairing.
 
 ### August 17, 2026: v3.2.200
 
@@ -261,7 +419,7 @@ Additional features:
 ### June 15, 2026: v3.0.0
 
 * **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
-* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic — API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
+* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic: API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
 * **(Authorization)** Open Source restores the **Authorized Users** panel on Product/Product Type detail under the legacy authorization model; Pro deployments retain full RBAC and are not impacted. See [Authorized Users panel replaces Members/Groups under legacy authorization](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
 * **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
 * **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
@@ -295,7 +453,7 @@ Additional features:
 * **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
 * **(Pro UI)** Anchor links now open in a new tab as expected, so following a reference no longer pulls you away from the page you were working on.
 * **(Pro UI)** Adding Findings to an existing Risk Acceptance works reliably again. A recent performance improvement caused the form to fail for some users; you can now resume managing accepted Findings without errors.
-* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default — forcing you to reorder columns every session.
+* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default, forcing you to reorder columns every session.
 * **(API)** Fixed a 500 error when fetching vulnerable endpoints (`GET /api/vue/endpoints/{id}/vulnerable/`), restoring reliable access to vulnerability data for an endpoint.
 
 ### May 4, 2026: v2.58.0
@@ -406,7 +564,7 @@ Additional features:
 ### Mar 5, 2026: v2.56.0
 
 * **(API)** Restricted Note Types are now accessible via the API.
-* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/connectors/upstream/toolreference/) for configuration instructions.
+* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/connectors/toolreference/upstream/) for configuration instructions.
 * **(SAML)** SAML settings now support optional group attributes, allowing configurations that don't provide group mappings to work without errors.
 * **(SMTP)** Fixed an issue where DefectDojo would attempt SMTP authentication even when no credentials were configured, which could cause email delivery failures.
 * **(Universal Parser)** The Universal Parser now falls back to `clevercsv` for non-standard or malformed CSV files, improving compatibility with edge-case scanner outputs.
@@ -772,7 +930,7 @@ Hotfix release - no significant feature changes.
 
 #### Apr 14, 2025: v2.45.1
 
-- **(Connectors)** Added a Connector for Wiz: see [tools reference](/connectors/upstream/toolreference/) for configuration instructions.
+- **(Connectors)** Added a Connector for Wiz: see [tools reference](/connectors/toolreference/upstream/) for configuration instructions.
 
 #### Apr 7, 2025: v2.45.0
 

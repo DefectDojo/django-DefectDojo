@@ -1,3 +1,5 @@
+import re
+from pathlib import Path
 from types import SimpleNamespace
 
 from django.conf import settings
@@ -103,3 +105,37 @@ class TestI18nConfiguration(SimpleTestCase):
 
     def test_locale_paths_point_at_dojo_locale(self):
         self.assertTrue(any(str(path).endswith("dojo/locale") for path in settings.LOCALE_PATHS))
+
+
+class TestEnglishSourceCatalog(SimpleTestCase):
+
+    """
+    English is the source language, so every msgstr in its catalog must be empty.
+
+    Regression guard for issue #15942, where the search string was wrongly
+    translated to Russian ("Поиск") in the English catalog and leaked into the UI.
+    """
+
+    def _catalog_path(self):
+        locale_dir = next(
+            (Path(p) for p in settings.LOCALE_PATHS if str(p).endswith("dojo/locale")),
+            Path(settings.LOCALE_PATHS[0]),
+        )
+        return locale_dir / "en" / "LC_MESSAGES" / "django.po"
+
+    def test_no_translated_strings_in_english_catalog(self):
+        path = self._catalog_path()
+        self.assertTrue(path.exists(), f"English catalog not found at {path}")
+        offenders = [
+            f"{path.name}:{lineno}: {line}"
+            for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1)
+            # Header entry uses a multi-line `msgstr ""`; only single-line
+            # non-empty msgstr values are real (incorrect) translations.
+            if re.match(r'^msgstr "..*"$', line)
+        ]
+        self.assertEqual(offenders, [], "English source catalog must not contain translated strings")
+
+    def test_no_fuzzy_entries_in_english_catalog(self):
+        path = self._catalog_path()
+        contents = path.read_text(encoding="utf-8")
+        self.assertNotIn("#, fuzzy", contents, "English source catalog must not contain fuzzy entries")

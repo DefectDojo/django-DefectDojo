@@ -183,7 +183,7 @@
                                         {% if V3_FEATURE_LOCATIONS %}
                                             <td>
                                                 <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.location }}" title="{{ endpoint.location }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.location|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
-                                                {% include "dojo/snippets/tags.html" with tags=endpoint.location.tags.all %}
+                                                {% include "dojo/snippets/tags.html" with tags=endpoint.location.readable_tags %}
                                             </td>
                                             <td>{{ endpoint.status }}</td>
                                             <td>{{ endpoint.created|date }}</td>
@@ -254,7 +254,7 @@
                                         {% if V3_FEATURE_LOCATIONS %}
                                             <td>
                                                 <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.location }}" title="{{ endpoint.location }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.location|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
-                                                {% include "dojo/snippets/tags.html" with tags=endpoint.location.tags.all %}
+                                                {% include "dojo/snippets/tags.html" with tags=endpoint.location.readable_tags %}
                                             </td>
                                             <td>{{ endpoint.get_status_display }}</td>
                                             <td>{{ endpoint.auditor }}</td>

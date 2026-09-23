@@ -7,7 +7,7 @@ toc_hide: true
 >
 > The **Cobalt.io API Import** pull parser, and the **Tool Configuration** setup described below, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
 >
-> **Migrate to:** the [Cobalt.io connector](/connectors/upstream/toolreference/#cobaltio) (DefectDojo Pro), or import a Cobalt.io report as a [file](../../file/cobalt) — file import is not affected by this deprecation.
+> **Migrate to:** the [Cobalt.io connector](/connectors/toolreference/cobalt_io/) (DefectDojo Pro), or import a Cobalt.io report as a [file](../../file/cobalt) — file import is not affected by this deprecation.
 
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
 

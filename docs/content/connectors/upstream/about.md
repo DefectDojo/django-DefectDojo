@@ -114,6 +114,10 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **OpenVAS / Greenbone**
 * **Orca Security**
 * **Ostorlab**
+* **Palo Alto Cortex Cloud**
+* **Palo Alto Cortex XDR**
+* **Palo Alto Cortex XSIAM**
+* **Palo Alto Cortex XSOAR**
 * **Parasoft DTP**
 * **Picus Security**
 * **PingCastle**
@@ -125,6 +129,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Qwiet AI**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **Red Hat Satellite**
 * **runZero**
 * **Scantist**
@@ -154,7 +159,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Zimperium**
 * **Zora**
 
-For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
+For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../../toolreference/upstream/) reference.
 
 Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Asset and Organization hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 

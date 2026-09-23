@@ -1,5 +1,5 @@
 ---
-title: Deduplication Tuning (Pro)
+title: Deduplication Tuning
 description: DefectDojo が重複した検出事項を識別および管理する方法を設定します
 weight: 4
 audience: pro

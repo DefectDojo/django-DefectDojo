@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from tagulous.forms import TagField
+from django_tagulous.forms import TagField
 
 from dojo.endpoint.models import Endpoint
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add

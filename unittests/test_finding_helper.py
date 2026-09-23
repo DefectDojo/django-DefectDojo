@@ -12,6 +12,7 @@ from rest_framework.test import APIClient
 
 from dojo.finding.helper import (
     POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES,
+    deleted_finding_ids,
     post_process_findings_batch,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
@@ -220,6 +221,79 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
                 # TODO: marking as false positive resets verified to False, possible bug / undesired behaviour?
                 (False, False, False, True, True, frozen_datetime, self.user_1, frozen_datetime),
             )
+
+
+@versioned_fixtures
+class TestDeletedFindingIds(DojoTestCase):
+
+    """
+    The one existence lookup every caller holding finding references across a delete window uses.
+
+    Importers buffer child rows and collect import-history candidates for a whole batch
+    before writing them, so a finding can be deleted while it is still referenced. Because
+    Django's foreign keys are DEFERRABLE INITIALLY DEFERRED, writing such a reference is
+    only rejected at COMMIT, so the reference has to be dropped before the write.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        # duplicate_finding is a self-FK with ON DELETE DO_NOTHING, so a fixture finding
+        # another one points at as its original cannot be deleted on its own. These tests
+        # are about the existence lookup, not about repairing that reference, so they work
+        # on findings nothing points at.
+        original_ids = set(
+            Finding.objects.exclude(duplicate_finding=None).values_list("duplicate_finding_id", flat=True),
+        )
+        self.findings = list(Finding.objects.exclude(id__in=original_ids).order_by("id")[:3])
+        self.assertEqual(3, len(self.findings), msg="fixture must supply at least 3 deletable findings")
+
+    def test_empty_input_costs_no_query(self):
+        with self.assertNumQueries(0):
+            self.assertEqual(set(), deleted_finding_ids([]))
+
+    def test_ids_that_are_none_are_ignored_and_cost_no_query(self):
+        """An unsaved finding has no row to be missing, so it is not a deleted one."""
+        with self.assertNumQueries(0):
+            self.assertEqual(set(), deleted_finding_ids([None, None]))
+
+    def test_all_live_findings_returns_empty_set(self):
+        live_ids = {finding.id for finding in self.findings}
+        with self.assertNumQueries(1):
+            self.assertEqual(set(), deleted_finding_ids(live_ids))
+
+    def test_returns_only_the_deleted_ids(self):
+        deleted_id = self.findings[0].id
+        surviving_ids = {finding.id for finding in self.findings[1:]}
+        Finding.objects.filter(id=deleted_id).delete()
+
+        self.assertEqual({deleted_id}, deleted_finding_ids({deleted_id, *surviving_ids}))
+
+    def test_an_id_that_never_existed_counts_as_deleted(self):
+        """A caller cannot tell the two apart and wants to skip the reference either way."""
+        never_existed = Finding.objects.order_by("-id").first().id + 1000
+
+        self.assertEqual({never_existed}, deleted_finding_ids({never_existed}))
+
+    def test_lookup_is_chunked_so_the_in_clause_stays_bounded(self):
+        """
+        An import's result set is unbounded, so the ids are asked about a chunk at a time.
+
+        Without this, a large scan puts every finding id it touched into a single IN clause.
+        """
+        live_ids = {finding.id for finding in self.findings}
+        with patch("dojo.finding.helper.FINDING_EXISTENCE_CHUNK", 2), self.assertNumQueries(2):
+            self.assertEqual(set(), deleted_finding_ids(live_ids))
+
+    def test_chunking_does_not_change_the_answer(self):
+        """Every chunk contributes its survivors, so a deleted id in any chunk is still reported."""
+        deleted_id = self.findings[1].id
+        all_ids = {finding.id for finding in self.findings}
+        Finding.objects.filter(id=deleted_id).delete()
+
+        with patch("dojo.finding.helper.FINDING_EXISTENCE_CHUNK", 1):
+            self.assertEqual({deleted_id}, deleted_finding_ids(all_ids))
 
 
 class TestSaveVulnerabilityIds(DojoTestCase):

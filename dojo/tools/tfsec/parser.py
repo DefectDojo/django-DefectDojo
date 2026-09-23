@@ -57,12 +57,9 @@ class TFSecParser:
 
             dupe_key = hashlib.sha256(
                 (
-                    rule_provider
-                    + rule_id
-                    + file
-                    + str(start_line)
-                    + str(end_line)
-                ).encode("utf-8"),
+                    f"{rule_provider or ''}|{rule_id or ''}"
+                    f"|{file or ''}|{start_line}|{end_line}"
+                ).encode(),
             ).hexdigest()
 
             if dupe_key in dupes:

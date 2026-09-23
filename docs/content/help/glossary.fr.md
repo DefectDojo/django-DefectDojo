@@ -66,7 +66,7 @@ Des intégrations gérées qui envoient les Constatations et les Groupes de Cons
 ## Universal Parser (Pro)
 Un moteur d'analyse généraliste utilisé par l'Universal Importer pour interpréter les données de scan entrantes. Il applique une logique cohérente de normalisation et de déduplication aux formats non pris en charge.
 ## Smart Upload (Pro)
-Un workflow d'ingestion intelligent qui détermine automatiquement comment les résultats de scan doivent être associés aux Actifs ou aux Engagements, réduisant la configuration manuelle lors de l'import.
+Un workflow d'ingestion intelligent qui détermine automatiquement comment les résultats de scan doivent être associés aux Actifs ou aux Engagements, réduisant la configuration manuelle lors de l'import. Lorsqu'un hôte analysé appartient à plusieurs Actifs, une copie de la Constatation est créée dans chaque Actif correspondant.
 ## Executive Insights (Pro)
 Des analyses de haut niveau, orientées métier, conçues pour un public dirigeant, mettant l'accent sur les tendances, l'exposition et la santé du programme plutôt que sur les Constatations individuelles.
 ## Priority Insights (Pro)

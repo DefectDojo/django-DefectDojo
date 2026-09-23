@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from rest_framework.relations import PrimaryKeyRelatedField
-from rest_framework.serializers import CharField
+from rest_framework.serializers import CharField, SerializerMethodField
 
 from dojo.api_helpers.serializers import BaseModelSerializer
 from dojo.api_v2.serializers import TagListSerializerField
@@ -38,8 +38,14 @@ class LocationSerializer(BaseModelSerializer):
 
     """Serializer for the Location model with serializers for the related objects."""
 
-    tags = TagListSerializerField(required=False)
-    inherited_tags = TagListSerializerField(required=False)
+    tags = SerializerMethodField()
+    inherited_tags = SerializerMethodField()
+
+    def get_tags(self, obj: Location) -> list[str]:
+        return sorted(tag.name for tag in obj.readable_tags)
+
+    def get_inherited_tags(self, obj: Location) -> list[str]:
+        return sorted(tag.name for tag in obj.readable_inherited_tags)
 
     class Meta:
 

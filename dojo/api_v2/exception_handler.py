@@ -9,10 +9,13 @@ from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_409_CONFLICT,
+    HTTP_410_GONE,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from rest_framework.views import exception_handler
 
+from dojo.endpoint.models import EndpointDeprecatedError
+from dojo.location.api.deprecation import sunset_body
 from dojo.models import System_Settings
 from dojo.product_announcements import ErrorPageProductAnnouncement
 
@@ -100,6 +103,17 @@ def custom_exception_handler(exc, context):
         # Matching the RestrictedError 409 above, no product announcement is
         # attached to a conflict response.
         response.data = {"message": UNIQUE_VIOLATION_RESPONSE_MESSAGE}
+    elif isinstance(exc, EndpointDeprecatedError):
+        # A v2 route reached the deprecated Endpoint model. Answer the documented
+        # sunset contract rather than the generic 500 below, and log at info: an
+        # expected, documented answer reads as an outage in error reporting.
+        # This branch only catches exceptions raised during DRF's dispatch.
+        logger.info(
+            "endpoint api sunset on %s",
+            (context or {}).get("request", "unknown request"),
+        )
+        response = Response(sunset_body())
+        response.status_code = HTTP_410_GONE
     elif response is None:
         if System_Settings.objects.get().api_expose_error_details:
             exception_message = str(exc.args[0])

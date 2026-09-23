@@ -122,6 +122,10 @@ env = environ.FileAwareEnv(
     # Celery silently discards it — it is never executed and no exception is raised. Does not
     # affect tasks that are already running. (0 = disabled, no limit)
     DD_CELERY_TASK_DEFAULT_EXPIRES=(int, 43200),   # default: 12 hours
+    # A product's grade is recalculated at most once per this many seconds: the first finding change
+    # in a window queues one calculate_grade task with this countdown, and later changes in the same
+    # window are no-ops. 0 queues a task for every change.
+    DD_PRODUCT_GRADE_DEBOUNCE_SECONDS=(int, 30),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
@@ -157,6 +161,7 @@ env = environ.FileAwareEnv(
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_DATA_UPLOAD_MAX_NUMBER_FIELDS=(int, 10240),  # Max number of GET/POST parameters in a request
     DD_MAX_ZIP_MEMBERS=(int, 1000),
     DD_MAX_ZIP_MEMBER_SIZE=(int, 512 * 1024 * 1024),  # 512 MB per member (uncompressed)
     DD_MAX_ZIP_TOTAL_SIZE=(int, 1 * 1024 * 1024 * 1024),  # 1 GB total (uncompressed)
@@ -259,7 +264,7 @@ env = environ.FileAwareEnv(
                                  ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
     # List of acceptable file types that can be (re)imported
     DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
-                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),
+                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl", ".spdx"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -897,7 +902,7 @@ INSTALLED_APPS = (
     "django_celery_results",
     "drf_spectacular",
     "drf_spectacular_sidecar",  # required for Django collectstatic discovery
-    "tagulous",
+    "django_tagulous",  # app_label stays "tagulous" (DB tables/static paths unaffected)
     "fontawesomefree",
     "django_filters",
     "auditlog",
@@ -1003,6 +1008,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
+PRODUCT_GRADE_DEBOUNCE_SECONDS = env("DD_PRODUCT_GRADE_DEBOUNCE_SECONDS")
 
 if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
     CELERY_TASK_TIME_LIMIT = env("DD_CELERY_TASK_TIME_LIMIT")
@@ -1215,6 +1221,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
     "JFrog Xray API Summary Artifact Scan": ["title", "description", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
+    # severity is deliberately excluded: the Seal CSV has no severity column today, so
+    # every finding gets the same default, and including it would fork all existing
+    # findings into duplicates once the CLI starts exporting a score
+    "Seal Security Scan": ["vulnerability_ids", "component_name", "component_version"],
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
@@ -1481,6 +1491,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # agree with that instead of falling through to the legacy field set, whose "description"
     # is what every result family assigns to "title" as well.
     "Checkmarx One Scan": ["unique_id_from_tool"],
+    "OPF Scan": ["title", "cwe", "severity", "description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1563,6 +1574,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
     "OpenReports": True,
+    "OPF Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1668,6 +1680,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Zimperium zScan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Group-IB ASM - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Aqua Supply Chain - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
@@ -1753,6 +1766,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # findings mitigated and re-created in one reimport of otherwise unchanged data).
     "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
+    "Seal Security Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
     "Github SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
@@ -1938,6 +1952,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # key is (title.lower(), severity). Xeol's severity is a function of the wall clock, so
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
+    "OPF Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -2087,7 +2102,9 @@ LOGGING = {
 DEFAULT_EXCEPTION_REPORTER_FILTER = "dojo.settings.exception_filter.CustomExceptionReporterFilter"
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+# Configurable so operators can raise it for instances that legitimately submit very large
+# scan imports (many form fields), mirroring DD_DATA_UPLOAD_MAX_MEMORY_SIZE above.
+DATA_UPLOAD_MAX_NUMBER_FIELDS = env("DD_DATA_UPLOAD_MAX_NUMBER_FIELDS")
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
@@ -2100,10 +2117,10 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 QUALYS_WAS_UNIQUE_ID = False
 
 SERIALIZATION_MODULES = {
-    "xml": "tagulous.serializers.xml_serializer",
-    "json": "tagulous.serializers.json",
-    "python": "tagulous.serializers.python",
-    "yaml": "tagulous.serializers.pyyaml",
+    "xml": "django_tagulous.serializers.xml_serializer",
+    "json": "django_tagulous.serializers.json",
+    "python": "django_tagulous.serializers.python",
+    "yaml": "django_tagulous.serializers.pyyaml",
 }
 
 # There seems to be no way just use the default and just leave out jquery, so we have to copy...

@@ -175,3 +175,47 @@ class TestDependencyTrackParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         self.assertIn("Audit Detail: Reviewed and confirmed vulnerable. Upgrade scheduled for next sprint.", findings[0].description)
+
+    def test_dependency_track_parser_finding_with_affected_versions(self):
+        with (get_unit_tests_scans_path("dependency_track") / "one_finding_with_affected_versions.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_picks_range_containing_component_version(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_multiple_affected_ranges.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The installed version 2.14.1 falls in the [2.0.0, 2.15.0) range, so the fix is 2.15.0,
+        # not the 3.2.0 from the unrelated [3.0.0, 3.2.0) range.
+        self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
+        self.assertNotIn("3.2.0", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_with_end_including_range(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_affected_range_end_including.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The range gives only versionEndIncluding (1.5.0 is the last affected version), so the exact
+        # fix cannot be named; the mitigation points at a version after it.
+        self.assertIn("Upgrade to a version after 1.5.0", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_ignores_exact_version_entry(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_exact_and_range_versions.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The exact-version entry (1.0.0, no bounds) must not swallow the finding; the fix comes from
+        # the range [2.0.0, 2.15.0) that the installed 2.14.1 actually falls in.
+        self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_with_unparseable_component_version(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_unparseable_component_version.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The component version does not parse, so no range can be compared; with a single affected
+        # range the fix is still unambiguous and is used as a fallback.
+        self.assertIn("Upgrade to 3.0.0 or later", findings[0].mitigation)

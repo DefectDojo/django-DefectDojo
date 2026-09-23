@@ -10,6 +10,7 @@ from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
+from dojo.tools.utils import drop_repeated_unique_ids
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,7 @@ class SarifParser:
         # for each runs we just aggregate everything
         for run in tree.get("runs", []):
             items.extend(self.__get_items_from_run(run))
-        return items
+        return drop_repeated_unique_ids(items)
 
     def get_tests(self, scan_type, handle):
         tree = json.load(handle)
@@ -117,7 +118,7 @@ class SarifParser:
                 parser_type=run["tool"]["driver"]["name"],
                 version=run["tool"]["driver"].get("version"),
             )
-            test.findings = self.__get_items_from_run(run)
+            test.findings = drop_repeated_unique_ids(self.__get_items_from_run(run))
             tests.append(test)
         return tests
 

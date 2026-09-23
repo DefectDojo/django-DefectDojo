@@ -1,9 +1,9 @@
-import tagulous
+import django_tagulous as tagulous
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from tagulous.forms import TagField
+from django_tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
 from dojo.finding.cwe import cwe_number, parse_cwes

@@ -1,7 +1,7 @@
 import logging
 
 from django import forms
-from tagulous.forms import TagField
+from django_tagulous.forms import TagField
 
 from dojo.location.models import Location
 from dojo.url.models import URL
@@ -25,7 +25,7 @@ class URLForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance is not None and hasattr(self.instance, "location"):
-            self.fields["tags"].initial = self.instance.location.tags.all()
+            self.fields["tags"].initial = self.instance.location.readable_tags
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))

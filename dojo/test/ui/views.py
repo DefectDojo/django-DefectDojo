@@ -803,6 +803,8 @@ def add_finding_from_template(request, tid, fid):
 
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
+    # This listing returns template content, a shared cross-product store
+    user_has_global_permission_or_403(request.user, "edit")
     templates = Finding_Template.objects.all()
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)

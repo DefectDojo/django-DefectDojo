@@ -51,26 +51,34 @@ Some features show a confirmation dialog before the change is applied. This happ
 
 Turning a feature off is normally just the reverse of turning it on. The exceptions are called out in [When a toggle is locked](#when-a-toggle-is-locked).
 
+### Restart Recommended
+
+A few features carry a **Restart Recommended** tag next to their name (a stronger **Restart Required** variant also exists). The tag means that part of the feature is decided when DefectDojo starts: the Classic UI pages, and some `/api/v2` route wiring, read their configuration once at boot. A toggle reaches the Pro UI right away, but those start-time surfaces only pick it up after the serving process restarts. A **Restart Recommended** feature still works in the Pro UI without a restart; the restart only reconciles the remaining surfaces.
+
+The tag is shown only while a restart is actually outstanding. Once the running server already reflects the flag's current value (because it has been restarted since you changed the flag), the tag disappears on your next page load. Turn a flag on and then back off without restarting and the tag clears too, because nothing is left to reconcile. There is nothing to dismiss: the tag tracks the real state of the running server, so a lingering tag means a restart is still pending, and its absence means the running server is already in sync.
+
 ### Organization / Asset Relabeling
 
 **Organization / Asset Relabeling** renames "Product Type" to "Organization" and "Product" to "Asset". It is on by default and toggles from this page like any other feature, but it is worth knowing which parts of DefectDojo it governs:
 
 * The **Pro UI** follows this toggle. The new labels appear on your next page load.
-* The **Classic UI** pages, their URLs, and generated reports take their naming from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting (also on by default), which is read when DefectDojo starts. This toggle does not change them, and restarting does not make it change them.
+* The **Classic UI** pages, their URLs, and generated reports take their naming when DefectDojo starts. They follow this toggle after the next restart, in either direction. You do not need to change a deployment setting: DefectDojo reads the stored toggle at start-up and applies it to those surfaces itself.
 
-The stored toggle was seeded from that deployment setting, so the two agree until you change one of them. If you turn relabeling off here and you also use the Classic UI, set `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=False` on your deployment and restart so both surfaces match. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), contact [DefectDojo Support](mailto:support@defectdojo.com) to have the deployment setting changed.
+Until you restart, the Classic UI keeps the naming the process started with, so it can disagree with the Pro UI for a while. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), contact [DefectDojo Support](mailto:support@defectdojo.com) if you need a restart scheduled.
 
-The feature carries a **Restart Recommended** tag on the Feature Flags page for this reason: the naming used outside the Pro UI is fixed when the process starts. Relabeling is cosmetic either way. Database models, field names, and API endpoints are unchanged, so existing automation keeps working. See [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/).
+The feature carries a **Restart Recommended** tag on the Feature Flags page for this reason: the naming used outside the Pro UI is fixed when the process starts. The tag shows only while a restart is still outstanding, and clears once you have restarted or toggled the flag back (see [Restart Recommended](#restart-recommended)). Relabeling is cosmetic either way. Database models, field names, and API endpoints are unchanged, so existing automation keeps working. See [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/).
+
+The `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting still exists, but only as the value the stored toggle was seeded from on upgrade and as a fallback when the database cannot be reached at start-up. Once the toggle has a stored value, the database owns it.
 
 ### Locations
 
 **Locations** replaces the legacy Endpoints model: with it on, imports create Location records and the UI and API surface Locations; with it off, imports create Endpoints. It is off by default and is enabled from this page like any other feature, but a few things are worth knowing:
 
 * The **Pro UI** and the **import pipeline** follow this toggle. After you enable Locations, new imports create Locations and the Locations pages appear on your next page load, without a restart.
-* The **Classic UI** pages and the `/api/v2` endpoint/location route wiring are decided from the `DD_V3_FEATURE_LOCATIONS` deployment setting when DefectDojo starts. This toggle does not change them, and restarting does not make it change them. If you use the Classic UI or depend on the `/api/v2` endpoint routes, set `DD_V3_FEATURE_LOCATIONS` to match and restart so every surface agrees. The stored toggle is seeded from that deployment setting on upgrade, so an instance that already ran with `DD_V3_FEATURE_LOCATIONS=True` comes up with the toggle already on (and locked), and the database owns the value from then on.
-* Enabling existing history is not automatic. Your existing data stays as it is until you run the **data-migration suite** that appears under this row once Locations is on: three backfills (endpoints, dependencies, and source-code locations) followed by an identity rehash that unlocks once all three finish. Each is superuser-run, shows progress, is safe to re-run, and can be cancelled while running (it stops at the next batch boundary and can be resumed). See [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/).
+* The **Classic UI** pages and the `/api/v2` endpoint/location route wiring are decided when DefectDojo starts. They follow this toggle after the next restart: the `/api/v2/location/` routes (and the `/api/v3/` API) are mounted and listed in the API documentation, and `/api/v2/endpoints/` is served read-compatibly from Locations. You do not need to change a deployment setting. Until you restart, those routes stay as they were when the process started, so `/api/v2/location/` answers 404 in the meantime. The stored toggle is seeded from the `DD_V3_FEATURE_LOCATIONS` deployment setting on upgrade, so an instance that already ran with `DD_V3_FEATURE_LOCATIONS=True` comes up with the toggle already on (and locked); from then on the database owns the value and the setting is only a fallback for when the database cannot be reached at start-up.
+* Enabling existing history is not automatic. Your existing data stays as it is until you run the **data-migration suite** that appears under this row once Locations is on: three backfills (endpoints, dependencies, and source-code locations) followed by an identity rehash that unlocks once all three finish. Each is superuser-run, shows progress, is safe to re-run, and can be cancelled while running (it stops at the next batch boundary and can be resumed). Each item can also be **marked complete**, automatically when a run here finishes or by hand for a migration you ran another way, so the page stops prompting you to run it. See [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/).
 
-Enabling Locations is **self-service and one-way**: once it is on, the toggle locks (shown as **Cannot Be Disabled**), because turning it back off would require reversing the endpoint-to-location data migration, which is not yet supported. The feature carries a **Restart Recommended** tag for the Classic UI / API reason above.
+Enabling Locations is **self-service and one-way**: once it is on, the toggle locks (shown as **Cannot Be Disabled**), because turning it back off would require reversing the endpoint-to-location data migration, which is not yet supported. The feature carries a **Restart Recommended** tag for the Classic UI / API reason above; as with any such feature, the tag clears once the server has been restarted (see [Restart Recommended](#restart-recommended)).
 
 ## When a toggle is locked
 
@@ -119,8 +127,8 @@ Most features are available on both installation types. The exceptions are:
 | Feature | Availability | How it is controlled |
 | --- | --- | --- |
 | Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Always on for Cloud instances, and not offered on-premise. No longer listed on the Feature Flags page. |
-| Locations | Both | Feature Flags page for the Pro UI and import pipeline; the Classic UI and `/api/v2` route wiring follow the `DD_V3_FEATURE_LOCATIONS` deployment setting. Enabling is self-service and one-way — once on, it cannot be turned back off. See [above](#locations) and [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
-| Organization / Asset Relabeling | Both | Feature Flags page for the Pro UI; the Classic UI, its URLs and generated reports follow the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting. See [above](#organization--asset-relabeling). |
+| Locations | Both | Feature Flags page. The Pro UI and import pipeline follow it right away; the Classic UI and `/api/v2` route wiring follow it after a restart. Enabling is self-service and one-way: once on, it cannot be turned back off. See [above](#locations) and [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
+| Organization / Asset Relabeling | Both | Feature Flags page. The Pro UI follows it right away; the Classic UI, its URLs and generated reports follow it after a restart. See [above](#organization--asset-relabeling). |
 
 Every other optional feature is toggled directly on the Feature Flags page on both Cloud and On-Premise instances.
 

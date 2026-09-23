@@ -31,7 +31,6 @@ from imagekit.processors import ResizeToFill
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.deduplication import (
     _fetch_fp_candidates_for_batch,
@@ -122,6 +121,7 @@ from dojo.utils import (
     redirect,
     redirect_to_return_url_or_else,
     reopen_external_issue,
+    schedule_product_grade,
     update_external_issue,
 )
 from dojo.vulnerability.queries import vulnerability_id_prefetch
@@ -1092,9 +1092,11 @@ class DeleteFinding(View):
     def process_form(self, request: HttpRequest, finding: Finding, context: dict):
         if context["form"].is_valid():
             product = finding.test.engagement.product
-            finding.delete(push_to_jira=context["form"].cleaned_data.get("push_to_jira"))
+            finding_helper.delete_finding_with_conflict_retry(
+                finding, push_to_jira=context["form"].cleaned_data.get("push_to_jira"),
+            )
             # Update the grade of the product async
-            dojo_dispatch_task(calculate_grade, product.id)
+            schedule_product_grade(product.id)
             # Add a message to the request that the finding was successfully deleted
             messages.add_message(
                 request,
@@ -1427,7 +1429,7 @@ def copy_finding(request, fid):
             test = form.cleaned_data.get("test")
             product = finding.test.engagement.product
             finding_copy = finding.copy(test=test)
-            dojo_dispatch_task(calculate_grade, product.id)
+            schedule_product_grade(product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1563,8 +1565,9 @@ def request_finding_review(request, fid):
         if form.is_valid():
             now = timezone.now()
             new_note = Notes()
+            # The note must stay public: the reviewers it is addressed to
+            # cannot read a private note (author and superusers only).
             new_note.entry = "Review Request: " + form.cleaned_data["entry"]
-            new_note.private = True
             new_note.author = request.user
             new_note.date = now
             new_note.save()
@@ -2721,7 +2724,8 @@ def _bulk_update_finding_groups(finds, form):
 
         if skipped:
             add_success_message_to_response(
-                f"Skipped {skipped} findings in group creation, findings already part of another group",
+                f"Skipped {skipped} findings in group creation, findings are already part of "
+                "another group or do not belong to the group's test",
             )
 
         # refresh findings from db
@@ -2751,7 +2755,8 @@ def _bulk_update_finding_groups(finds, form):
         if skipped:
             add_success_message_to_response(
                 f"Skipped {skipped} findings when adding to finding group {finding_group.name}, "
-                "findings already part of another group",
+                "findings are already part of another group or do not belong to the "
+                "group's test",
             )
 
         # refresh findings from db

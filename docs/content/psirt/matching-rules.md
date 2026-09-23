@@ -2,7 +2,7 @@
 title: "Matching Rules"
 description: "Write your own matching rules, and understand why some of them are refused"
 draft: false
-weight: 5
+weight: 6
 pro-feature: true
 ---
 
@@ -96,6 +96,47 @@ a group you own, which you can then edit, scope and enable. The copy is renamed 
 avoid colliding with the template, its loose conditions are paired automatically,
 and it starts out applying to every product so it is never born silently inert —
 narrow it from the scope control afterwards.
+
+### Start From a Template
+
+**Start From a Template** is the shortest route to a rule that works, and on a new
+instance it is the recommended one. The blank rule form invites the shape the trust
+layer refuses: "match anything called django" reads like the obvious rule and is
+exactly the one-sided keyword that cannot be enabled.
+
+Every template is labelled with what it needs:
+
+- **No SBOM needed** — the rule matches an asset directly from the advisory text.
+  These work on any instance, including one that has never imported an SBOM.
+- **Needs SBOM** — the rule matches a component in your dependency inventory. With
+  no SBOM imported it will not match anything, however well written.
+
+Templates that need no SBOM are listed first, because most instances have no
+inventory yet and a dependency rule there is silent rather than wrong.
+
+Each template asks for one term — a vendor, a piece of software, a component, or a
+package URL — and fills it in throughout the copy. **A template's rules ship
+switched off**, and the copy is only enabled when the term you supplied produces a
+rule that clears the same grading a hand-written rule has to clear. Supply a term
+too broad to enable (say, a vendor called "linux") and the copy is created stopped,
+with the usual explanation of why.
+
+## What to do when you have no SBOM
+
+A dependency-target rule matches a component in your inventory. With no inventory,
+it matches nothing — which looks identical to a rule that is simply not working,
+and is the most common reason people conclude matching is broken.
+
+Rules targeting an **asset** need no inventory at all. They compare the advisory
+text against the asset directly, so "any advisory mentioning Siemens" is expressible
+without importing anything. When your instance has no components loaded, the rule
+editor starts new rules on the asset target for that reason and says so beneath the
+selector.
+
+The three no-SBOM templates cover the usual shapes: an advisory naming a vendor you
+run, one naming a piece of software you run, and one carrying a CPE you publish.
+The CPE shape is the most precise of the three, because it compares identifiers
+rather than prose.
 
 ## Deleting a group
 

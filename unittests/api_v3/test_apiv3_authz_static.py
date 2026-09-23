@@ -74,6 +74,11 @@ OBJECTS_ALLOWLIST: dict[tuple[str, str], str] = {
     ("dojo/user/api_v3/routes.py", "Dojo_User.objects.filter"):
         "the RBAC scoping itself: the self-only fallback queryset for users lacking auth.view_user "
         "(line 100) and the username-uniqueness check AFTER the auth.add_user gate (line 181).",
+    ("dojo/product/api_v3/routes.py", "model.objects.filter"):
+        "resolves an editable attribute option (Product_Platform/Lifecycle/Origin) by its immutable "
+        "``value`` slug during an asset write; a global configuration lookup table with no per-user "
+        "authz scope (like Development_Environment), reached only AFTER the Product_Type_Add_Product / "
+        "Product_Edit gate -- not an object read.",
 }
 
 # --- Rule B: authorization primitives ---------------------------------------------------------

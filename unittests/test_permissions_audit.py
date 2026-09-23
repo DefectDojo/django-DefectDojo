@@ -13,9 +13,12 @@ Tests verify:
 9. Finding Templates exposure via find_template_to_apply (H1 #3577363)
 10. Jira Epic BFLA - Reader cannot trigger update_jira_epic (H1 #3577193)
 11. Risk Acceptance remove_finding: edit_mode guard + scoped finding lookup (PR #14633)
+12. Jira Epic dispatch: the request body cannot set dispatcher control kwargs (H1 #3949034)
+13. manage_files does not delete FileUpload rows outside the object in the URL (H1 #3972387)
 """
 import datetime
-from unittest import skip
+import uuid
+from unittest import mock, skip
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
@@ -29,6 +32,8 @@ from dojo.authorization.models import (
     Product_Type_Member,
     Role,
 )
+from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.jira import services as jira_services
 from dojo.models import (
     Answered_Survey,
     Benchmark_Category,
@@ -41,6 +46,7 @@ from dojo.models import (
     Engagement,
     Engagement_Presets,
     Engagement_Survey,
+    FileUpload,
     Finding,
     Finding_Template,
     Notes,
@@ -1325,6 +1331,41 @@ class TestJiraEpicBFLA(LegacyAuthMirrorMixin, DojoTestCase):
         # Writer has Engagement_Edit, so should pass permission check.
         self.assertEqual(response.status_code, 200)
 
+    def test_request_body_cannot_set_dispatch_kwargs(self):
+        """H1 #3949034: only the declared epic fields reach the dispatcher."""
+        superuser = Dojo_User.objects.create_user(
+            username="jira_epic_super",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+            is_superuser=True,
+        )
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-update-jira-epic", args=(self.engagement.id,))
+        with mock.patch("dojo.engagement.api.views.dojo_dispatch_task") as dispatch:
+            response = client.post(url, data={
+                "epic_name": "kept",
+                "async_user_id": superuser.pk,
+                "_pgh_context": {"id": str(uuid.uuid4()), "metadata": {"user": superuser.pk}},
+                "force_sync": True,
+            }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(dispatch.call_args.kwargs, {"epic_name": "kept"})
+
+    def test_dispatch_rejects_reserved_kwargs(self):
+        """H1 #3949034: the dispatcher refuses its own control kwargs from a caller."""
+        task = jira_services.get_epic_task("add_epic")
+        for key in ("async_user_id", "_pgh_context"):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                dojo_dispatch_task(task, self.engagement.id, **{key: 1})
+
+    def test_non_mapping_body_is_rejected(self):
+        """H1 #3949034: a JSON array body is a 400, not an unhandled 500."""
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-update-jira-epic", args=(self.engagement.id,))
+        response = client.post(url, data=[1, 2, 3], format="json")
+        self.assertEqual(response.status_code, 400)
+
 
 class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
 
@@ -1953,3 +1994,76 @@ class TestEngagementMovePermission(LegacyAuthMirrorMixin, DojoTestCase):
         self.assertIn(response.status_code, [200, 403])
         self.engagement.refresh_from_db()
         self.assertEqual(self.engagement.product, self.product_a)
+
+
+class TestManageFilesScopedCleanup(LegacyAuthMirrorMixin, DojoTestCase):
+
+    """
+    manage_files must only touch files belonging to the object in the URL.
+
+    Regression for H1 #3972387: after every successful POST the view deleted
+    every FileUpload not attached to an Engagement, Test or Finding. An upload
+    is unattached while it is in flight, because the API create and attach are
+    two statements, so a member of one product destroyed other products'
+    uploads.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.product_type = Product_Type.objects.create(name="ManageFiles Test PT")
+        cls.product = Product.objects.create(
+            name="ManageFiles Test Product",
+            description="Test",
+            prod_type=cls.product_type,
+        )
+        cls.member = Dojo_User.objects.create_user(
+            username="managefiles_member",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+        Product_Member.objects.create(
+            product=cls.product, user=cls.member, role=Role.objects.get(name="Writer"),
+        )
+        cls.engagement = Engagement.objects.create(
+            name="ManageFiles Engagement",
+            product=cls.product,
+            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="Semgrep JSON")
+        cls.test = Test.objects.create(
+            engagement=cls.engagement,
+            test_type=test_type,
+            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+        )
+        cls.finding = Finding.objects.create(
+            title="ManageFiles Finding",
+            test=cls.test,
+            severity="High",
+            numerical_severity="S1",
+            reporter=cls.member,
+            active=True,
+            verified=True,
+        )
+
+    def test_post_leaves_files_of_other_objects_alone(self):
+        in_flight = FileUpload.objects.create(
+            title="in-flight upload owned by another product",
+            file=SimpleUploadedFile("other-evidence.txt", b"other product evidence"),
+        )
+
+        client = Client()
+        client.login(username="managefiles_member", password="testTEST1234!@#$")  # noqa: S106
+        response = client.post(
+            reverse("manage_files", args=(self.finding.id, "Finding")),
+            data={
+                "form-TOTAL_FORMS": "0",
+                "form-INITIAL_FORMS": "0",
+                "form-MIN_NUM_FORMS": "0",
+                "form-MAX_NUM_FORMS": "10",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302, response.content)
+        self.assertTrue(FileUpload.objects.filter(pk=in_flight.pk).exists())

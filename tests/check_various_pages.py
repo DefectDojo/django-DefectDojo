@@ -2,6 +2,7 @@ import sys
 import unittest
 
 from base_test_class import BaseTestCase
+from product_test import WaitForPageLoad
 
 
 class VariousPagesTest(BaseTestCase):
@@ -16,8 +17,12 @@ class VariousPagesTest(BaseTestCase):
     def test_calendar_status(self):
         driver = self.driver
         driver.get(self.base_url + "calendar")
-        # click apply to see if this helps webdriver to catch the javascript errors we're seeing
-        self.click_submit(driver)
+        # click apply to see if this helps webdriver to catch the javascript errors we're seeing.
+        # The calendar filter is a plain GET form, so applying it navigates. Wait for
+        # that document: tearDown reads the browser console straight after this test,
+        # and on a half-loaded page it samples the wrong one.
+        with WaitForPageLoad(driver, timeout=30):
+            self.click_submit(driver)
 
     def test_finding_group_open_status(self):
         driver = self.driver

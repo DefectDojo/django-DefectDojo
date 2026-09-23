@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3>
+                        {{ label_plural }}
+                        <div class="dropdown pull-right">
+                            {% with add_perm="dojo.add_"|add:model_name %}
+                            {% if add_perm|has_configuration_permission:request %}
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Actions' %}">
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation">
+                                    <a href="{% url add_url %}">
+                                        <i class="fa-solid fa-plus"></i> New {{ label }} </a>
+                                </li>
+                            </ul>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </h3>
+                </div>
+            </div>
+            {% if options %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=options page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>{% trans "Label" %}</th>
+                            <th>{% trans "Value" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% with change_perm="dojo.change_"|add:model_name %}
+                        {% for option in options %}
+                            <tr>
+                                {% if change_perm|has_configuration_permission:request %}
+                                    <td><a href="{% url edit_url option.id %}">{% if option.icon %}<i class="{{ option.icon }}"></i> {% endif %}{{ option.name }}</a></td>
+                                {% else %}
+                                    <td>{% if option.icon %}<i class="{{ option.icon }}"></i> {% endif %}{{ option.name }}</td>
+                                {% endif %}
+                                <td><code>{{ option.value }}</code></td>
+                            </tr>
+                        {% endfor %}
+                        {% endwith %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=options page_size=True %}
+                </div>
+            {% else %}
+                <p class="text-center">{% blocktrans %}No {{ label_plural }} found.{% endblocktrans %}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

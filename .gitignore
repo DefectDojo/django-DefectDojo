@@ -158,6 +158,7 @@ MEMORY.md
 .claude/*
 !.claude/settings.json
 !.claude/hooks/
+!.claude/skills/
 .claude/settings.local.json
 CLAUDE.md
 CLAUDE.local.md

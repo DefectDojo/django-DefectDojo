@@ -19,7 +19,7 @@ from fieldsignals import pre_save_changed
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
-from dojo.db_utils import is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.cwe import finding_cwe_labels
@@ -53,10 +53,10 @@ from dojo.notifications.helper import create_notification
 from dojo.tools import tool_issue_updater
 from dojo.url.models import URL
 from dojo.utils import (
-    calculate_grade,
     close_external_issue,
     get_current_user,
     get_object_or_none,
+    schedule_product_grade,
     to_str_typed,
 )
 from dojo.vulnerability.manager import persist_for_finding
@@ -186,17 +186,42 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     new_state_finding.last_status_update = now
 
 
-def filter_finding_ids_by_existence(finding_ids):
-    """
-    Return the subset of the given ids that still exist in the database.
+# Bounds the IN clause of the existence lookup below. An import's result set is not
+# bounded by anything else, so without this a large scan asks the database about tens of
+# thousands of ids in one statement.
+FINDING_EXISTENCE_CHUNK = 1000
 
-    Centralized helper used by importers to avoid FK violations during
-    bulk_create -- e.g. a background async_dupe_delete task removing a finding
-    between when an importer collected it and when it writes a history record.
+
+def deleted_finding_ids(finding_ids) -> set[int]:
     """
+    Of the given finding ids, the ones whose row is no longer in the database.
+
+    The single place that answers "which of these findings are gone", for every caller
+    holding finding references across a window in which a finding can be deleted --
+    import history records, the child-row buffers flushed at an import batch boundary,
+    and anything else that would otherwise insert a dangling reference or re-save a
+    deleted row. Those references are only rejected at COMMIT (Django declares its
+    foreign keys DEFERRABLE INITIALLY DEFERRED), far from the code that wrote them, so
+    the check has to happen before the write rather than around it.
+
+    Returns the missing ids rather than the survivors: it is the smaller set, and every
+    caller wants it to skip work rather than to drive it. Costs one indexed primary-key
+    lookup per FINDING_EXISTENCE_CHUNK ids, and no query at all for an empty input.
+
+    Note for callers that already read rows for these findings: existence falls out of
+    any such read for free (see _sync_close_old_finding_status_fields, which learns it
+    from the refresh it needs anyway). Do not route those through here -- it buys
+    consistency with an extra round trip.
+    """
+    finding_ids = {finding_id for finding_id in finding_ids if finding_id is not None}
     if not finding_ids:
         return set()
-    return set(Finding.objects.filter(id__in=finding_ids).values_list("id", flat=True))
+    live_finding_ids: set[int] = set()
+    for chunk in batched(finding_ids, FINDING_EXISTENCE_CHUNK, strict=False):
+        live_finding_ids.update(
+            Finding.objects.filter(pk__in=chunk).values_list("pk", flat=True),
+        )
+    return finding_ids - live_finding_ids
 
 
 def can_edit_mitigated_data(user):
@@ -227,7 +252,10 @@ def create_finding_group(finds, finding_group_name):
         else:
             raise
 
-    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    available_findings = [
+        find for find in finds
+        if not find.finding_group_set.all() and find.test_id == finding_group.test_id
+    ]
     finding_group.findings.set(available_findings)
 
     added = len(available_findings)
@@ -238,7 +266,10 @@ def create_finding_group(finds, finding_group_name):
 def add_to_finding_group(finding_group, finds):
     added = 0
     skipped = 0
-    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    available_findings = [
+        find for find in finds
+        if not find.finding_group_set.all() and find.test_id == finding_group.test_id
+    ]
     finding_group.findings.add(*available_findings)
 
     # Now update the JIRA to add the finding to the finding group
@@ -439,9 +470,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-            dojo_dispatch_task(calculate_grade, finding.test.engagement.product.id)
+            schedule_product_grade(finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -558,9 +587,7 @@ def post_process_findings_batch(
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id, force_sync=force_sync)
+        schedule_product_grade(findings[0].test.engagement.product.id, force_sync=force_sync)
 
     # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
     jira_instance = None
@@ -642,6 +669,51 @@ def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug("finding delete: clearing found by")
     instance.found_by.clear()
+
+
+# Seconds before the first retry of a single-finding delete; doubled on each attempt.
+SINGLE_DELETE_RETRY_DELAY = 0.5
+SINGLE_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
+def delete_finding_with_conflict_retry(finding, **kwargs):
+    """
+    Delete one finding, retrying the delete-vs-import race that otherwise returns a 500.
+
+    A single-finding delete runs Django's collector, which clears the finding's
+    ``Test_Import_Finding_Action`` children before deleting the finding row. Those FK
+    constraints are ``DEFERRABLE INITIALLY DEFERRED``, so a concurrent import that commits a
+    new child row referencing this finding between the child clear and the transaction COMMIT
+    trips a foreign-key violation at commit time (SQLSTATE 23503). The reference is real but
+    transient: on a re-run the collector clears the newly-created child and the delete
+    completes. Deadlocks and serialization failures (40P01/40001) against a concurrent import
+    or the dedup job are retried the same way.
+
+    This mirrors the async cascade delete's ``_is_retryable_delete_conflict`` handling (see
+    ``dojo.utils.async_delete_task``) for the synchronous single-finding API/UI delete path,
+    which previously had no such protection and surfaced the race as an Internal Server Error.
+    Each attempt re-runs ``Finding.delete`` in a fresh transaction (there is no
+    ``ATOMIC_REQUESTS``), and the failed attempt has already rolled back, so the finding still
+    exists to be re-deleted. Any non-conflict error, and a conflict that survives every
+    attempt, is re-raised. ``kwargs`` (e.g. ``push_to_jira``) are forwarded to
+    ``Finding.delete``.
+    """
+    for attempt in range(SINGLE_DELETE_MAX_CONFLICT_RETRIES + 1):
+        try:
+            finding.delete(**kwargs)
+        except (OperationalError, IntegrityError) as exc:
+            retryable = is_transient_db_conflict(exc) or is_foreign_key_conflict(exc)
+            if not retryable or attempt == SINGLE_DELETE_MAX_CONFLICT_RETRIES:
+                raise
+            backoff = SINGLE_DELETE_RETRY_DELAY * (2 ** attempt)
+            logger.warning(
+                "delete_finding_with_conflict_retry: transient DB conflict deleting finding %s, "
+                "retry %d/%d in %.1fs: %s",
+                getattr(finding, "pk", None), attempt + 1, SINGLE_DELETE_MAX_CONFLICT_RETRIES, backoff, exc,
+            )
+            sleep(backoff)
+        else:
+            return
 
 
 @receiver(post_delete, sender=Finding)

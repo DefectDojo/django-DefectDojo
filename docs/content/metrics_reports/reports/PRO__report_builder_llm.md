@@ -26,7 +26,7 @@ export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 
    - **Executive Summary** — high-level posture; past-SLA, KEV, and asset inventory at a glance.
    - **POA&M (Plan of Action & Milestones)** — open findings with severity, due date, and recommended remediation, plus Critical detail and historical/closed findings.
-   - **Integrated Inventory Workbook** — assets (formerly Assets) in scope with criticality, platform, lifecycle, internet-accessibility, and finding counts.
+   - **Integrated Inventory Workbook** — assets (formerly Products) in scope with criticality, platform, lifecycle, internet-accessibility, and finding counts.
    - **Deviation Request (DRF) Package** — active risk acceptances, DR-tagged findings, and past-SLA candidates for new deviation requests.
    - **Engineering Findings Detail** — full per-finding write-ups (description, impact, mitigation, references).
    - **Compliance / Audit Snapshot** — assets plus risk acceptances plus KEV.

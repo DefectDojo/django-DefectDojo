@@ -18,7 +18,11 @@ weight: 1
 
 > **☁️ Beyond code — cloud posture (CSPM):** the same scan-and-fix flow applies to **cloud accounts**. Connect an AWS account, Azure subscription, or GCP project; Sensei scans it for misconfigurations, imports them as findings, and remediates them by an IaC pull request or a **reversible change to the live resource**. AppSec and CSPM share one hub, selected by a capability card. See [Cloud Security Posture (CSPM)](/sensei/cloud_posture/).
 
+> **🤖 Beyond code — AI agents:** the same hub can red-team a **deployed AI agent**. Point Sensei at your agent's endpoint and it runs an autonomous attacker that probes it multi-turn and imports each confirmed break — prompt injection, jailbreaks, data leakage, unsafe tool use — as a finding. See [AI Agent Red Teaming](/sensei/ai_agent_redteam/). (Beta.)
+
 > **🧠 Before the code exists:** Sensei also generates a threat model, attack paths and security requirements from a feature *design*, with no repository involved — see [Threat Modeling](/sensei/threat_modeling/).
+
+> **🤖 AI agent skills:** Sensei's scanning also covers **AI agent skills**: the `SKILL.md` definitions and helper scripts that coding agents load. When a DefectDojo-hosted scan runs on an onboarded repository that ships agent skills, Sensei statically analyzes them for prompt injection, data exfiltration, and other risky or malicious patterns, then imports the results as findings alongside the repository's code.
 
 > **🔎 BETA:** Sensei is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases.
 

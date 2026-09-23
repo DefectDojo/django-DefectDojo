@@ -2,7 +2,7 @@
 title: オープンソースからセルフホスト型DefectDojo Proへの移行
 description: オープンソース版DefectDojoのデータベースとメディアファイルをセルフホスト型DefectDojo Proのデプロイメントに移行する
 draft: false
-weight: 6
+weight: 3
 audience: pro
 ---
 

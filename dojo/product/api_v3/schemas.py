@@ -34,7 +34,7 @@ from dojo.product_type.api_v3.schemas import OrganizationSlim
 
 class AssetSlim(Schema):
     django_model: ClassVar = Product
-    SELECT_RELATED: ClassVar[tuple] = ("prod_type",)
+    SELECT_RELATED: ClassVar[tuple] = ("prod_type", "lifecycle")
     PREFETCH_RELATED: ClassVar[tuple] = ("tags",)
     EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
 
@@ -52,6 +52,12 @@ class AssetSlim(Schema):
         return to_ref(obj.prod_type)
 
     @staticmethod
+    def resolve_lifecycle(obj) -> str | None:
+        # lifecycle is a FK to the editable Product_Lifecycle table; the wire keeps the
+        # stable ``value`` string (matches API v2).
+        return obj.lifecycle.value if obj.lifecycle_id else None
+
+    @staticmethod
     def resolve_tags(obj) -> list[str]:
         return [t.name for t in obj.tags.all()]
 
@@ -66,7 +72,8 @@ class AssetDetail(AssetSlim):
     """Slim + the documented heavier read fields (§4.5). Retrieve returns detail; list returns slim."""
 
     # Detail fetch pulls the extra parent FKs so the ref resolvers below issue no extra queries.
-    SELECT_RELATED: ClassVar[tuple] = ("prod_type", "product_manager", "technical_contact", "team_manager")
+    SELECT_RELATED: ClassVar[tuple] = ("prod_type", "product_manager", "technical_contact", "team_manager",
+                                       "lifecycle", "platform", "origin")
     # Fixed joins for the user-role refs when a LIST ``?fields=`` opts up into them (§4.7 Part A). The
     # wire field ``asset_manager`` maps to the model FK ``product_manager`` (D11), so the join path is
     # declared here rather than derived from the wire name; added by the kernel only when requested.
@@ -84,6 +91,14 @@ class AssetDetail(AssetSlim):
     asset_manager: Ref | None
     technical_contact: Ref | None
     team_manager: Ref | None
+
+    @staticmethod
+    def resolve_platform(obj) -> str | None:
+        return obj.platform.value if obj.platform_id else None
+
+    @staticmethod
+    def resolve_origin(obj) -> str | None:
+        return obj.origin.value if obj.origin_id else None
 
     @staticmethod
     def resolve_asset_manager(obj) -> dict | None:

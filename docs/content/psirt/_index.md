@@ -25,6 +25,27 @@ PSIRT is a Pro feature in beta. It requires the **PSIRT** feature flag (which
 depends on **Locations**) and the **PSIRT Advisory Engine** license
 entitlement.
 
+### Migrating from the PSIRT 1.x sidecar
+
+Before 3.3.0, PSIRT was a separate service (the PSIRT Advisory Engine) served
+under `/psirt/` next to DefectDojo. DefectDojo Pro 3.3.0 replaced it with the
+module described here, running inside the main application. The old `/psirt/`
+URL redirects to the native pages on 3.3.x and is removed in 3.4.0; the
+separate service is no longer released.
+
+An existing sidecar database is carried into PSIRT 2.0 with a one-shot
+importer. Run it on a DefectDojo Pro instance with a connection string for
+the old `pae` database, first as a dry run and then with `--commit`:
+
+```bash
+python3 manage.py psirt_import_legacy --dsn postgresql://user:pass@host/pae
+python3 manage.py psirt_import_legacy --dsn postgresql://user:pass@host/pae --commit
+```
+
+The dry run performs the whole import inside a transaction and rolls it back,
+so its report reflects real constraints. Imported feed sources land disabled;
+enabling one presents its publisher's terms again.
+
 ### If you don't see PSIRT in the menu
 
 The PSIRT flag depends on **Locations**, and a flag with an unmet dependency is
@@ -36,6 +57,36 @@ first; it is environment-sourced, so it needs a restart to take effect.
 If the entries are visible but locked, that is the other gate: the licence.
 PSIRT needs the **PSIRT Advisory Engine** entitlement, and a locked entry
 explains what to ask for.
+
+## Who can use PSIRT
+
+Three things admit a user, and only one of them needs to be true:
+
+- the **PSIRT** configuration permission,
+- a global **Maintainer** or **Owner** role, or
+- superuser.
+
+**Prefer the configuration permission.** A global Maintainer role is write access
+to every asset in the instance, so granting it to give somebody PSIRT hands them
+the rest of the product as well. The PSIRT permission grants PSIRT and nothing
+else.
+
+It comes in two halves, assignable separately from **Settings → User Management**
+on a user or — more usefully — on a group:
+
+| Permission | Admits |
+|---|---|
+| **View PSIRT** | Reading every PSIRT surface: the advisory queue, exposure verdicts, cases, components, rules. |
+| **Change PSIRT** | Everything View admits, plus writing: suppressing advisories, authoring feed and matching rules, opening cases, publishing advisories. |
+
+View is genuinely read-only. An analyst who should see whether you are affected,
+without being able to suppress an advisory or publish one, gets View alone.
+
+The licence is checked *before* any of this and is not a permission: with no
+**PSIRT Advisory Engine** entitlement, PSIRT is closed to everyone including
+superusers.
+
+The permission appears in the picker only when the PSIRT feature flag is on.
 
 ## How it fits together
 

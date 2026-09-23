@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from dojo.api_v2.serializers import ProductMetaSerializer, TagListSerializerField
 from dojo.authorization.serializer_guards import (
+    ActiveUserContactGuardMixin,
     AuthorizedUsersMemberGuardMixin,
     ToolConfigurationUseGuardMixin,
 )
@@ -9,6 +10,9 @@ from dojo.models import (
     Dojo_User,
     Product,
     Product_API_Scan_Configuration,
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
 )
 from dojo.organization.api.serializers import RelatedOrganizationField
 from dojo.product.queries import get_authorized_products
@@ -27,7 +31,7 @@ class AssetAPIScanConfigurationSerializer(ToolConfigurationUseGuardMixin, serial
         exclude = ("product",)
 
 
-class AssetSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
+class AssetSerializer(ActiveUserContactGuardMixin, AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
@@ -40,13 +44,13 @@ class AssetSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializ
     enable_asset_tag_inheritance = serializers.BooleanField(source="enable_product_tag_inheritance", required=False, default=False)
     asset_managers = serializers.PrimaryKeyRelatedField(
         source="product_manager",
-        queryset=Dojo_User.objects.exclude(is_active=False),
+        queryset=Dojo_User.objects.all(),
         required=False, allow_null=True,
     )
     business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)
-    platform = serializers.ChoiceField(choices=Product.PLATFORM_CHOICES, allow_blank=True, allow_null=True, required=False)
-    lifecycle = serializers.ChoiceField(choices=Product.LIFECYCLE_CHOICES, allow_blank=True, allow_null=True, required=False)
-    origin = serializers.ChoiceField(choices=Product.ORIGIN_CHOICES, allow_blank=True, allow_null=True, required=False)
+    platform = serializers.SlugRelatedField(slug_field="value", queryset=Product_Platform.objects.all(), allow_null=True, required=False)
+    lifecycle = serializers.SlugRelatedField(slug_field="value", queryset=Product_Lifecycle.objects.all(), allow_null=True, required=False)
+    origin = serializers.SlugRelatedField(slug_field="value", queryset=Product_Origin.objects.all(), allow_null=True, required=False)
 
     class Meta:
         model = Product

@@ -4,8 +4,8 @@ import re
 import time
 from datetime import datetime
 
+import django_tagulous as tagulous
 import six
-import tagulous
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError

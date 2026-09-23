@@ -1,0 +1,8 @@
+Name: nokogiri
+Version: 1.15.2
+Criticality: Low
+URL: https://github.com/sparklemotion/nokogiri/security/advisories
+Title: Advisory reported without an assigned identifier
+Solution: upgrade to >= 1.16.0
+
+Vulnerabilities found!

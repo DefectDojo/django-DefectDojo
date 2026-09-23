@@ -35,11 +35,11 @@ If you're logged in to the Defect Dojo web UI, you do not need to provide the au
 ## Authentication
 
 The API uses header authentication with API key. The format of the
-header should be: :
+header should be:
 
     Authorization: Token <api.key>
 
-For example: :
+For example:
 
     Authorization: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff
 
@@ -108,7 +108,7 @@ Plan the change before making it: pick a window, ask token owners to rotate firs
 ## Sample Code
 
 Here are some simple python examples and their results produced against
-the `/users` endpoint: :
+the `/users` endpoint:
 
 {{< highlight python >}}
 import requests
@@ -124,7 +124,7 @@ for key, value in r.__dict__.items():
 {{< /highlight >}}
 
 This code will return the list of all the users defined in DefectDojo.
-The json object result looks like : :
+The json object result looks like:
 
 {{< highlight json >}}
     [
@@ -162,7 +162,7 @@ for key, value in r.__dict__.items():
   print('------------------')
 {{< /highlight >}}
 
-The json object result is: :
+The json object result is:
 
 {{< highlight json >}}
 [
@@ -230,7 +230,7 @@ Example for importing a scan result:
 | Wrapper                      | Status                   | Notes |
 | -----------------------------| ------------------------| ------------------------|
 | [Specific python wrapper](https://github.com/DefectDojo/defectdojo_api)      | working (2021-01-21)    | API Wrapper including scripts for continous CI/CD uploading. Is lagging behind a bit on latest API features as we plan to revamp the API wrapper |
-| [Openapi python wrapper](https://github.com/alles-klar/defectdojo-api-v2-client)       | | proof of concept only where we found out the the OpenAPI spec is not perfect yet |
+| [Openapi python wrapper](https://github.com/alles-klar/defectdojo-api-v2-client)       | | Proof of concept only where we found out the the OpenAPI spec is not perfect yet |
 | [Java library](https://github.com/secureCodeBox/defectdojo-client-java)                 | working (2021-08-30)    | Created by the kind people of [SecureCodeBox](https://github.com/secureCodeBox/secureCodeBox) |
 | [Image using the Java library](https://github.com/SDA-SE/defectdojo-client) | working (2021-08-30)    | |
 | [.Net/C# library](https://www.nuget.org/packages/DefectDojo.Api/)              | working (2021-06-08)    | |
@@ -306,7 +306,7 @@ When `auto_create_context` is `True`, the Organization, Asset and Engagement wil
 
 When `do_not_reactivate` is `True`, the importing/reimporting will ignore uploaded active findings and not reactivate previously closed findings, while still creating new findings if there are new ones. You will get a note on the finding to explain that it was not reactivated for that reason.
 
-A reimport will automatically select the latest test inside the provided engagement that satisifes the provided `scan_type` and (optionally) provided `test_title`.
+A reimport will automatically select the latest test inside the provided engagement that satisfies the provided `scan_type` and (optionally) provided `test_title`.
 
 If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Asset / Engagement.
 
