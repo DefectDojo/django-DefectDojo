@@ -12,6 +12,8 @@ All of these controls live in the table toolbar, above the list.
 
 Select the **Columns** button in the toolbar to open the column picker, then check or uncheck a column to show or hide it. Use the search box at the top of the picker to find a column by its header. A few structural columns (the selection checkbox and the row-action menu) are always present and are not listed in the picker.
 
+**Select All** and **Deselect All** at the top of the picker turn every listed column on or off in one click. To build a narrow view, select **Deselect All** and then check only the columns you want. When the search box holds text, both actions apply only to the columns that match the search, so you can, for example, search for "date" and select **Select All** to add every date column.
+
 ## Sorting columns
 
 Click a column header to sort the table by that column. The first click on a number, score, or date column (such as EPSS Score, CVSS, Risk, a finding count, or Created) sorts it highest or newest first. The first click on a text column (such as Title or Status) sorts it A to Z. Click the same header again to reverse the direction, and a third time to clear that sort.
