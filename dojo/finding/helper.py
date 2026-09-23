@@ -387,6 +387,20 @@ def group_findings_by(finds, finding_group_by_option):
     return affected_groups, grouped, skipped, groups_created
 
 
+def get_or_create_auto_finding_group(test, name, creator):
+    """
+    Auto grouping keeps one group per (test, name), whoever created it. Reuse the oldest
+    existing group, so a test that already holds same-name duplicates (from a raced import,
+    or from the old creator-scoped lookup) resolves to one group instead of raising
+    MultipleObjectsReturned. The creator is only recorded on a newly created group.
+    """
+    name = name[:255]
+    finding_group = Finding_Group.objects.filter(test=test, name=name).order_by("id").first()
+    if finding_group is not None:
+        return finding_group, False
+    return Finding_Group.objects.create(test=test, creator=creator, name=name), True
+
+
 def add_findings_to_auto_group(name, findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
@@ -394,7 +408,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 
         if create_finding_groups_for_all_findings or len(findings) > 1:
             # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
-            finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name[:255])
+            finding_group, created = get_or_create_auto_finding_group(test, name, creator)
             if created:
                 logger.debug("Created Finding Group %d:%s for test %d:%s", finding_group.id, finding_group, test.id, test)
                 # See if we have old findings in the same test that were created without a finding group
@@ -408,11 +422,10 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
             finding_group.findings.add(*findings)
         else:
             # Otherwise add to an existing finding group if it exists only
-            try:
-                finding_group = Finding_Group.objects.get(test=test, name=name)
-                if finding_group:
-                    finding_group.findings.add(*findings)
-            except:
+            finding_group = Finding_Group.objects.filter(test=test, name=name[:255]).order_by("id").first()
+            if finding_group is not None:
+                finding_group.findings.add(*findings)
+            else:
                 # See if we have old findings in the same test that were created without a finding group
                 # that match this new finding - then we can create a finding group
                 old_findings = Finding.objects.filter(test=test)
@@ -420,7 +433,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                 for f in old_findings:
                     f_group_name = get_group_by_group_name(f, group_by)
                     if f_group_name == name and f not in findings:
-                        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name[:255])
+                        finding_group, created = get_or_create_auto_finding_group(test, name, creator)
                         finding_group.findings.add(f)
                 if created:
                     finding_group.findings.add(*findings)
