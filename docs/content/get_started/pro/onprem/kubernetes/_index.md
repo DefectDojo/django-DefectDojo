@@ -2,7 +2,7 @@
 title: "Kubernetes (Helm)"
 description: "Self-hosting DefectDojo Pro on Kubernetes with the Helm chart"
 draft: false
-weight: 9
+weight: 10
 audience: pro
 ---
 

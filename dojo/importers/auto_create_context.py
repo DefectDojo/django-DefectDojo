@@ -141,7 +141,6 @@ class AutoCreateContextManager:
             if product_type_name and product.prod_type.name != product_type_name:
                 msg = (
                     "The fetched product has a conflict with the supplied product type name: "
-                    f"existing product type name - {product.prod_type.name} vs "
                     f"supplied product type name - {product_type_name}"
                 )
                 raise ValueError(msg)

@@ -314,7 +314,37 @@ Replace `theme_id` and each `block_id` with the IDs returned in the previous ste
 
 Generating a report is asynchronous: you create a run, poll its status, then download the file once it completes.
 
-**Start a run.** POST a `template_id` and a `file_format` of `pdf` or `html`:
+**Start a run.** POST a `template_id` and a `file_format`. Five are available:
+
+| `file_format` | What you get |
+|---------------|--------------|
+| `pdf` | The whole template, paginated |
+| `html` | The whole template, as a web page |
+| `csv` | The rows of the template's Tabular and Detail blocks |
+| `xlsx` | The same rows, one worksheet per block |
+| `json` | The same rows, with each block's columns and labels |
+
+`csv`, `xlsx` and `json` are the formats to automate against: they carry the rows a report is built from rather than the document built around them. They include **only** the template's Tabular and Detail blocks, since a cover page, a chart or a widget has nothing to put in a cell. A template with no Tabular or Detail block fails with that explanation in `error_message`.
+
+The `json` body is one object carrying the report's name and generation time, then a `blocks` array. Each block lists its `columns` (the field path plus the label) and its `rows`, keyed by field path:
+
+```json
+{
+  "report": {"template": "Quarterly Critical Report", "template_id": 5, "generated_at": "2026-09-22T06:43:52.465Z"},
+  "blocks": [
+    {
+      "name": "Critical Findings",
+      "header": "Critical Findings",
+      "model": "finding",
+      "columns": [{"path": "id", "label": "ID"}, {"path": "title", "label": "Title"}],
+      "rows": [{"id": 1, "title": "SQL injection in the login form"}],
+      "omitted_rows": 0
+    }
+  ]
+}
+```
+
+Keying rows by field path rather than by label is deliberate: a label can be renamed in the UI, a field path cannot.
 
 ```bash
 curl -s -X POST \
@@ -376,7 +406,7 @@ BASE_URL = os.environ.get(
     "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2",
 ).rstrip("/")
 TOKEN = os.environ["DD_IMPORTER_DOJO_API_TOKEN"]  # fail loudly if unset
-FILE_FORMAT = "pdf"  # "pdf" or "html"
+FILE_FORMAT = "pdf"  # "pdf", "html", "csv", "xlsx", or "json"
 
 
 def api_request(method, path, body=None, accept_json=True):

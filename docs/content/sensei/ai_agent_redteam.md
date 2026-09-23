@@ -5,7 +5,7 @@ draft: false
 audience: pro
 weight: 5
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature. AI Agent Red Teaming is currently in BETA and is gated behind the `agent_redteam` feature flag.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature. AI Agent Red Teaming is available on any instance whose license includes Sensei.</span>
 
 Sensei's capabilities share one hub. **AppSec** scans and fixes source-code repositories, **Cloud Security Posture (CSPM)** does the same for cloud accounts, and **AI Agent Red Teaming** does it for a **deployed AI agent**: point Sensei at your agent's endpoint, and it runs an autonomous attacker that talks to the agent through its normal interface, tries to make it misbehave, and imports each confirmed break as a DefectDojo finding.
 
@@ -22,7 +22,7 @@ Separately, a **runtime-check API** lets your own agent ask DefectDojo to vet a 
 
 ## Requirements
 
-- A **DefectDojo Pro** license that includes the **Sensei** feature, with an **agent-target quota** (`sensei_agent_target_limit`). While in beta, the capability is also gated behind the **`agent_redteam`** feature flag (**Settings > Feature Flags**).
+- A **DefectDojo Pro** license that includes the **Sensei** feature, with an **agent-target quota** (`sensei_agent_target_limit`). No feature flag is required.
 - An **AI provider configured** for the instance (the same AI Model Settings the rest of Sensei uses); the attacker is itself LLM-driven.
 - A **reachable agent endpoint**. The attacker makes outbound HTTP calls to it, so the endpoint must be reachable from the Sensei engine.
 - To **onboard** targets and **run scans**: a global **Maintainer** or **Owner** role.
@@ -123,7 +123,7 @@ AI Agent Red Teaming meters against the **agent-target quota** (`sensei_agent_ta
 
 ## Troubleshooting
 
-- **The AI Agents tab is not shown.** The capability is in beta and gated behind the `agent_redteam` feature flag. Enable it on **Settings > Feature Flags**.
+- **The AI Agents tab is not shown.** The capability requires a DefectDojo Pro license that includes the **Sensei** feature. If the tab is missing, confirm your license covers Sensei.
 - **"No agent-target quota is available."** Your license carries no `sensei_agent_target_limit`, or it is used up. Contact your DefectDojo administrator to raise it.
 - **A scan fails to reach the target.** The Sensei engine makes outbound HTTP calls to the target's base URL; confirm the endpoint is reachable from the engine and that the credential and auth header are correct.
 - **A scan errors on the LLM.** The attacker is LLM-driven, so a scan needs a working AI provider. Configure one under **AI Model Settings**.

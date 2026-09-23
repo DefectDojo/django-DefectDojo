@@ -10,7 +10,9 @@ Rapid7 InsightVM - Cloud Instanceコネクタは、**Rapid7 Insightプラット�
 
 #### 前提条件
 
-InsightVMを利用するInsightプラットフォームのアカウントと、プラットフォームの**APIキー**が必要です: [Rapid7 Insightプラットフォーム](https://insight.rapid7.com)で設定（歯車）メニュー > **API Keys** を開き、**User Key**（任意のロール）または**Organization Key**（プラットフォーム管理者）を生成します。表示された時点でキーをコピーしてください。キーは一度しか表示されません。
+InsightVMを利用するInsightプラットフォームのアカウントと、プラットフォーム管理者権限を持つプラットフォームの**APIキー**が必要です: [Rapid7 Insightプラットフォーム](https://insight.rapid7.com)で設定（歯車）メニュー > **API Keys** を開き、**Organization Key**、またはプラットフォーム管理者が所有する**User Key**を生成します。表示された時点でキーをコピーしてください。キーは一度しか表示されません。
+
+User Keyは所有者の権限を引き継ぎます。そのため、プラットフォーム管理者ではないユーザーのキーは、Cloud Integrations APIによって401エラーで拒否されます: `The supplied key does not have permission to perform this action.`
 
 また、Insight URLに表示されるプラットフォームの**リージョン**（例: `us`、`us2`、`us3`、`eu`、`ca`、`au`、`ap`）も必要です。
 
