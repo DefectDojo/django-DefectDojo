@@ -208,6 +208,8 @@ Next, build the content Blocks. The Blocks list shows all of your Blocks across 
 
 To create a data-driven Block, choose its type and configure it. The example below is a **Tabular** Block named for open findings: the Block Type is set to Tabular, a header is supplied, the Model is **Finding**, the selected fields are Severity, Title, Asset, Age (Days), and SLA Days Remaining, and the records are ordered by Numerical Severity in descending order. The selected fields appear as a numbered list under the field picker; drag them, or use the arrows, to set the column order without deselecting anything. Because filters live on the Block, the **Filter Entries** here scope exactly which records this Block will pull wherever it is used.
 
+A new Block starts with no filters, so it includes every record of the chosen Model. To narrow it, click **Add Filters** under **Filter Entries**: the Model's table opens inside the form, and the filters you apply in that table become the Block's filter entries. When you edit a Block that already has filter entries, the table is shown right away. Changing the Model clears the Block's filters and closes the table, because filters for one Model do not apply to another.
+
 ![Tabular block configuration](images/pro_report_block_new_tabular.png)
 
 You can **Preview** a Block to see how it will render with a Theme applied before you commit it to a Template. The preview below shows a styled cover page ("DefectDojo Security Report") picking up the Theme's colors and branding.
