@@ -79,7 +79,26 @@ The **Vulnerability Explorer** lists one row per vulnerability ID, with the same
 
 These values describe the vulnerability itself, so they are identical no matter how many Findings reference it. EPSS Score, EPSS Percentile, Known Exploited and KEV Date are all sortable, which makes this the fastest way to answer "which vulnerabilities in my environment are actually being exploited?" — sort by **EPSS Score** descending, or sort by **Known Exploited** to bring the catalog-listed CVEs to the top.
 
+Blank values always sort last, in both directions, so sorting by **EPSS Score** descending opens on the highest-scoring vulnerabilities rather than on the ones that have not been enriched yet. To sort by more than one column, hold Ctrl (Cmd on macOS) and click each additional column header. For example, sort by **Known Exploited** and then by **EPSS Score** to rank the catalog-listed vulnerabilities by exploit probability.
+
 Each row's **Total Findings** count links through to the Findings list filtered to that vulnerability, so you can go from "this CVE is KEV-listed" to "here is everything it affects" in one click.
+
+### Filtering the Vulnerability Explorer
+
+Every column except **Vulnerability ID** has a filter, opened from the funnel icon in its header:
+
+| Column | Filter |
+|---|---|
+| **Type**, **Severity** | Pick one or more values. A vulnerability matches if any of the picked values apply. |
+| **EPSS Score**, **EPSS Percentile** | Equals, Not Equals, Greater Than, Greater Than or Equal To, Less Than, Less Than or Equal To. Enter the value as the percentage the column shows (for example `10` for 10%). |
+| **Known Exploited**, **Ransomware Used** | Yes or No. Vulnerabilities that have not been enriched yet match neither. |
+| **KEV Date**, **First Seen**, **Last Seen** | On, Before, After, During (a date range), or Within (a recent window such as the past 30 days). |
+| **Total Findings**, **Assets Impacted**, **Engagements Impacted** | The number comparisons above, plus In List and Not In List. |
+| **Active Findings** | Whether inactive and duplicate Findings are counted. |
+
+Filters combine, so a vulnerability must match all of them to be listed. A filter such as **EPSS Score** greater than `0` also hides every vulnerability that has no EPSS score yet.
+
+The count and date filters apply to the values shown in the row, after the other filters have narrowed which Findings are counted. For example, filtering **Severity** to Critical and **Total Findings** to greater than `5` lists the vulnerabilities with more than five Critical Findings. The counts only ever include Findings you have access to.
 
 ## Telling "no data" apart from "not exploited"
 
