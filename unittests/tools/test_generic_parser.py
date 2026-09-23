@@ -857,3 +857,79 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         kept = [f for f in findings if f.unique_id_from_tool is not None]
         self.assertEqual(1, len(kept))
         self.assertEqual("dep-lodash-4.17.20", kept[0].unique_id_from_tool)
+
+
+# Regression: the generic CSV parser read "FALSE" as true for known_exploited /
+# ransomware_used / fix_available, never read CVSSV3_score, and aborted the whole
+# import on an empty numeric or date cell.
+class TestGenericCSVParserCellValues(DojoTestCase):
+
+    def parse(self, content):
+        return GenericParser().get_findings(TestFile("findings.csv", content), Test())
+
+    def test_kev_and_fix_booleans_follow_the_csv_boolean_rule(self):
+        content = """Date,Title,Description,Severity,known_exploited,ransomware_used,fix_available
+2024-05-01,true row,D,High,TRUE,True,t
+2024-05-01,false row,D,High,FALSE,False,f
+2024-05-01,empty row,D,High,,,
+"""
+        findings = {f.title: f for f in self.parse(content)}
+        expected = {
+            "true row": (True, True, True),
+            "false row": (False, False, False),
+            # an empty cell leaves the field unset: the model defaults are False, False, None
+            "empty row": (False, False, None),
+        }
+        for title, (known_exploited, ransomware_used, fix_available) in expected.items():
+            finding = findings[title]
+            with self.subTest(row=title):
+                self.assertEqual(known_exploited, finding.known_exploited, msg=f"known_exploited parsed as {finding.known_exploited!r}")
+                self.assertEqual(ransomware_used, finding.ransomware_used, msg=f"ransomware_used parsed as {finding.ransomware_used!r}")
+                self.assertEqual(fix_available, finding.fix_available, msg=f"fix_available parsed as {finding.fix_available!r}")
+
+    def test_cvssv3_score_column_is_parsed(self):
+        content = """Date,Title,Description,Severity,CVSSV3_score
+2024-05-01,with score,D,High,9.8
+2024-05-01,without score,D,High,
+"""
+        findings = {f.title: f for f in self.parse(content)}
+        with self.subTest(row="with score"):
+            self.assertEqual(9.8, findings["with score"].cvssv3_score)
+        with self.subTest(row="without score"):
+            self.assertIsNone(findings["without score"].cvssv3_score)
+
+    def test_empty_numeric_and_date_cells_are_skipped(self):
+        content = """Date,Title,Description,Severity,CweId,epss_score,epss_percentile,CVSSV4_score,MitigatedDate,kev_date
+2024-05-01,filled row,D,High,89,0.5,0.9,9.3,2024-05-20,2024-03-29
+2024-05-01,empty row,D,High,,,,,,
+"""
+        findings = {f.title: f for f in self.parse(content)}
+        filled, empty = findings["filled row"], findings["empty row"]
+        for field, filled_value, empty_value in [
+            ("cwe", 89, 0),
+            ("epss_score", 0.5, None),
+            ("epss_percentile", 0.9, None),
+            ("cvssv4_score", 9.3, None),
+            ("mitigated", datetime.datetime(2024, 5, 20), None),
+            ("kev_date", datetime.datetime(2024, 3, 29), None),
+        ]:
+            with self.subTest(field=field):
+                self.assertEqual(filled_value, getattr(filled, field))
+                self.assertEqual(empty_value, getattr(empty, field))
+
+    def test_fixture_with_filled_false_and_empty_cells(self):
+        with (get_unit_tests_scans_path("generic") / "generic_csv_empty_cells_and_booleans.csv").open(encoding="utf-8") as file:
+            findings = {f.title: f for f in GenericParser().get_findings(file, Test())}
+        self.assertEqual(4, len(findings))
+        for title, known_exploited, fix_available, cvssv3_score, cwe in [
+            ("All flags true", True, True, 9.8, 89),
+            ("All flags false", False, False, 6.1, 79),
+            ("All cells empty", False, None, None, 0),
+            ("Whitespace cells", False, None, None, 0),
+        ]:
+            finding = findings[title]
+            with self.subTest(row=title):
+                self.assertEqual(known_exploited, finding.known_exploited)
+                self.assertEqual(fix_available, finding.fix_available)
+                self.assertEqual(cvssv3_score, finding.cvssv3_score)
+                self.assertEqual(cwe, finding.cwe)
