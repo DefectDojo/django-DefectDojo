@@ -38,7 +38,7 @@ The install and upgrade steps live in two sections, one per method:
 
 ## What else is in this section
 
-The remaining pages apply to both methods: [hardware sizing](/get_started/pro/onprem/hardware_sizing/), [migrating from open source](/get_started/pro/onprem/migrating_from_open_source/), [upgrading](/get_started/pro/onprem/upgrading/), [FIPS mode](/get_started/pro/onprem/fips_mode/) (with a separate page for [FIPS on Amazon ECS / Fargate](/get_started/pro/onprem/fips_on_ecs_fargate/)), and [backing up](/get_started/pro/onprem/backing_up/). Raising upload size limits differs by method, so it lives in each section: [Kubernetes](/get_started/pro/onprem/kubernetes/upload_size_limits/) and [Docker Compose](/get_started/pro/onprem/docker_compose/upload_size_limits/).
+The remaining pages apply to both methods: [hardware sizing](/get_started/pro/onprem/hardware_sizing/), [migrating from open source](/get_started/pro/onprem/migrating_from_open_source/), [upgrading](/get_started/pro/onprem/upgrading/), [FIPS mode](/get_started/pro/onprem/fips_mode/) (with a separate page for [FIPS on Amazon ECS / Fargate](/get_started/pro/onprem/fips_on_ecs_fargate/)), [backing up](/get_started/pro/onprem/backing_up/), and [restoring](/get_started/pro/onprem/restoring/). Raising upload size limits differs by method, so it lives in each section: [Kubernetes](/get_started/pro/onprem/kubernetes/upload_size_limits/) and [Docker Compose](/get_started/pro/onprem/docker_compose/upload_size_limits/).
 
 ## Questions
 

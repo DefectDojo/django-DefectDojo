@@ -10,7 +10,9 @@ The Rapid7 InsightVM - Cloud Instance connector imports asset vulnerability find
 
 #### Prerequisites
 
-An Insight platform account with InsightVM, and a platform **API key**: in the [Rapid7 Insight platform](https://insight.rapid7.com), open the settings (gear) menu \> **API Keys** and generate a **User Key** (any role) or an **Organization Key** (platform admins). Copy the key when it is shown, because it is displayed only once.
+An Insight platform account with InsightVM, and a platform **API key** with platform administrator rights: in the [Rapid7 Insight platform](https://insight.rapid7.com), open the settings (gear) menu \> **API Keys** and generate an **Organization Key**, or a **User Key** that belongs to a platform administrator. Copy the key when it is shown, because it is displayed only once.
+
+A User Key inherits its owner's permissions, so a key from a user who is not a platform administrator is rejected by the Cloud Integrations API with a 401 error: `The supplied key does not have permission to perform this action.`
 
 You also need your platform **region**, visible in your Insight URL (for example `us`, `us2`, `us3`, `eu`, `ca`, `au`, or `ap`).
 

@@ -2,7 +2,7 @@
 title: 升级 DefectDojo Pro(本地部署)
 description: 使用 Helm chart 的自托管 DefectDojo Pro 部署所支持的升级流程
 draft: false
-weight: 5
+weight: 6
 audience: pro
 ---
 

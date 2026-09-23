@@ -10,7 +10,9 @@ Der Rapid7-InsightVM-Cloud-Instance-Connector importiert Asset-Schwachstellenbef
 
 #### Voraussetzungen
 
-Ein Insight-Platform-Konto mit InsightVM sowie ein Platform-**API-Schlüssel**: Öffnen Sie in der [Rapid7-Insight-Plattform](https://insight.rapid7.com) das Einstellungsmenü (Zahnrad) \> **API Keys** und generieren Sie einen **User Key** (beliebige Rolle) oder einen **Organization Key** (Platform-Admins). Kopieren Sie den Schlüssel, wenn er angezeigt wird: Er wird nur einmal angezeigt.
+Ein Insight-Platform-Konto mit InsightVM sowie ein Platform-**API-Schlüssel** mit Platform-Admin-Rechten: Öffnen Sie in der [Rapid7-Insight-Plattform](https://insight.rapid7.com) das Einstellungsmenü (Zahnrad) \> **API Keys** und generieren Sie einen **Organization Key** oder einen **User Key**, der einem Platform-Admin gehört. Kopieren Sie den Schlüssel, wenn er angezeigt wird: Er wird nur einmal angezeigt.
+
+Ein User Key übernimmt die Berechtigungen seines Besitzers. Der Schlüssel eines Benutzers ohne Platform-Admin-Rechte wird daher von der Cloud Integrations API mit einem 401-Fehler abgelehnt: `The supplied key does not have permission to perform this action.`
 
 Sie benötigen außerdem Ihre Platform-**Region**, sichtbar in Ihrer Insight-URL (zum Beispiel `us`, `us2`, `us3`, `eu`, `ca`, `au` oder `ap`).
 
