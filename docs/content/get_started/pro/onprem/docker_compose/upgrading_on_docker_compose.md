@@ -14,7 +14,7 @@ Each DefectDojo Pro release is a set of container images, deployment files, and 
 
 ## Before you upgrade
 
-Back up your database first, and read the release notes for every version between your current one and your target rather than only the target. See the [upgrade notes](/releases/os_upgrading/upgrading_guide/) and the [DefectDojo Pro Changelog](/releases/pro/changelog/).
+Back up first, as described in [Backing Up a Self-Hosted Deployment](/get_started/pro/onprem/backing_up/), and read the release notes for every version between your current one and your target rather than only the target. See the [upgrade notes](/releases/os_upgrading/upgrading_guide/) and the [DefectDojo Pro Changelog](/releases/pro/changelog/).
 
 Keep your own settings in `/opt/dojo/customizations/local_settings.py`. That file is yours and survives upgrades.
 
@@ -54,7 +54,7 @@ dojo-compose-cli deploy download
 dojo-compose-cli app start
 ```
 
-**Database migrations do not roll back.** Setting an older version restores the images and deployment files, but it does not reverse a schema migration the upgrade applied. If the upgrade migrated the database, restore from the backup you took before upgrading, or coordinate a manual migration reversal with DefectDojo support before you start the older version. If you are several releases behind, contact [support@defectdojo.com](mailto:support@defectdojo.com).
+**Database migrations do not roll back.** Setting an older version restores the images and deployment files, but it does not reverse a schema migration the upgrade applied. If the upgrade migrated the database, restore from the backup you took before upgrading (see [Restoring a Self-Hosted Deployment](/get_started/pro/onprem/restoring/)), or coordinate a manual migration reversal with DefectDojo support before you start the older version. If you are several releases behind, contact [support@defectdojo.com](mailto:support@defectdojo.com).
 
 ## Questions or support
 

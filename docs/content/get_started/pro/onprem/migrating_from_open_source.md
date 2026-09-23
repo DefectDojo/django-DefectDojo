@@ -34,6 +34,8 @@ Your restore host. You need a machine in the same network as the database, with 
 
 Free disk space. The source server needs room for the database dump and the compressed media archive before you move them.
 
+Your encryption keys. Record the `DD_CREDENTIAL_AES_256_KEY` and `DD_SECRET_KEY` values your open source instance runs with, and give Pro the same ones in Step 6. Tool Configuration credentials are encrypted with the credential key, and a Pro instance with a different key cannot read them.
+
 ## Step 1: Export your database
 
 The default Docker Compose configuration uses `defectdojo` as both the database username and the database name. These can be overridden, so check the `DD_DATABASE_URL` value in your `docker-compose.yml` or `.env` file. The default connection string is:
@@ -165,17 +167,30 @@ Update the database connection so Pro uses the database you just restored, then 
 
 {{< tabs "migrate-db-url" >}}
 {{< tab "Kubernetes" >}}
-Set the database URL in your Helm values and redeploy:
+Set the database connection and both keys in your Helm values and redeploy:
 
 ```yaml
-databaseUrl: postgresql://defectdojo:<app_db_password>@<db-endpoint>:5432/defectdojo
+database:
+  host: <db-endpoint>
+  port: "5432"
+  name: defectdojo
+  user: defectdojo
+  password: <app_db_password>   # or database.existingSecret
+dojo:
+  secretKey: <DD_SECRET_KEY from open source>
+  credentialAES256Key: <DD_CREDENTIAL_AES_256_KEY from open source>
 ```
+
+The [Kubernetes Migration Runbook](/get_started/pro/onprem/kubernetes/migration_runbook/) covers this step in more detail.
 {{< /tab >}}
 {{< tab "Compose" >}}
-Set the database URL in your deployment configuration and restart the stack. The exact configuration key and command depend on the version of `dojo-compose-cli` you were supplied, so follow the installation documentation that came with your license. The connection string takes this form:
+Set the database URL and both keys in the CLI's configuration, then start the stack:
 
-```text
-postgresql://defectdojo:<app_db_password>@<db-endpoint>:5432/defectdojo
+```bash
+sudo -E dojo-compose-cli environment add -k DD_DATABASE_URL -v 'postgres://defectdojo:<app_db_password>@<db-endpoint>:5432/defectdojo'
+sudo -E dojo-compose-cli environment add -k DD_SECRET_KEY -v '<DD_SECRET_KEY from open source>'
+sudo -E dojo-compose-cli environment add -k DD_CREDENTIAL_AES_256_KEY -v '<DD_CREDENTIAL_AES_256_KEY from open source>'
+sudo -E dojo-compose-cli app start
 ```
 {{< /tab >}}
 {{< /tabs >}}
@@ -187,7 +202,7 @@ Which Pro capabilities are available to your deployment depends on your license 
 Once the application is running against the restored database:
 
 1. Log in to your DefectDojo Pro deployment.
-2. Check that your Assets, Organizations, Engagements, Tests, and Findings are present. Assets and Organizations were called Assets and Organizations in open source.
+2. Check that your Assets, Organizations, Engagements, Tests, and Findings are present. In older open source versions, Assets and Organizations were called Products and Product Types.
 3. Download a representative uploaded file from the UI, for example an attachment on a Finding, Test, or Engagement, to confirm the media restore worked.
 4. Check that user accounts and groups are intact. SSO and other authentication settings usually have to be reconfigured for the new deployment.
 5. Report any discrepancies to your DefectDojo contact.

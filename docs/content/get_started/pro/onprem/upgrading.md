@@ -2,7 +2,7 @@
 title: "Upgrading DefectDojo Pro (On-Premise)"
 description: "Supported upgrade procedure for self-hosted DefectDojo Pro, on both the Helm chart and Docker Compose"
 draft: false
-weight: 5
+weight: 6
 audience: pro
 ---
 
@@ -26,7 +26,7 @@ Put your own customizations in `local_settings.py`, never in `pro_settings.py`. 
 ## Supported upgrade procedure
 
 1. Review the release notes for every version between your current version and your target version, not just the target itself. See the [DefectDojo Pro Changelog](/releases/pro/changelog/) and the version-specific [upgrade notes](/releases/os_upgrading/upgrading_guide/).
-2. Back up your database.
+2. Back up your database, and the rest of what [Backing Up a Self-Hosted Deployment](/get_started/pro/onprem/backing_up/) lists. If an upgrade has to be undone, [Restoring a Self-Hosted Deployment](/get_started/pro/onprem/restoring/) covers bringing that backup back.
 3. Follow the steps for your deployment method: [Kubernetes (Helm)](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) or [Docker Compose](/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose/). Do not change image tags independently of the release.
 
 If you have questions about upgrading your on-premise deployment, contact [support@defectdojo.com](mailto:support@defectdojo.com).
