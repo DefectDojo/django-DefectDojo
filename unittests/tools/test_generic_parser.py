@@ -916,3 +916,20 @@ class TestGenericCSVParserCellValues(DojoTestCase):
             with self.subTest(field=field):
                 self.assertEqual(filled_value, getattr(filled, field))
                 self.assertEqual(empty_value, getattr(empty, field))
+
+    def test_fixture_with_filled_false_and_empty_cells(self):
+        with (get_unit_tests_scans_path("generic") / "generic_csv_empty_cells_and_booleans.csv").open(encoding="utf-8") as file:
+            findings = {f.title: f for f in GenericParser().get_findings(file, Test())}
+        self.assertEqual(4, len(findings))
+        for title, known_exploited, fix_available, cvssv3_score, cwe in [
+            ("All flags true", True, True, 9.8, 89),
+            ("All flags false", False, False, 6.1, 79),
+            ("All cells empty", False, None, None, 0),
+            ("Whitespace cells", False, None, None, 0),
+        ]:
+            finding = findings[title]
+            with self.subTest(row=title):
+                self.assertEqual(known_exploited, finding.known_exploited)
+                self.assertEqual(fix_available, finding.fix_available)
+                self.assertEqual(cvssv3_score, finding.cvssv3_score)
+                self.assertEqual(cwe, finding.cwe)
