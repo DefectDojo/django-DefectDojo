@@ -19,6 +19,11 @@ from dojo.vulnerability.queries import vulnerability_id_prefetch
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
+# Candidates are streamed in chunks of this many findings rather than materialised in one go.
+# Each chunk is fetched through a server-side cursor and gets its own round of prefetch
+# queries, so neither the raw result set nor a single prefetch has to span every candidate.
+DEDUPE_CANDIDATE_CHUNK_SIZE = 1000
+
 
 def get_finding_models_for_deduplication(finding_ids):
     """
@@ -483,6 +488,27 @@ def find_candidates_for_deduplication_unique_id(test, findings, mode="deduplicat
     return existing_by_uid
 
 
+def _share_select_related_test(finding, shared):
+    """
+    Point a candidate at one shared Test (and Engagement / Test_Type) instance per id.
+
+    ``select_related("test", "test__engagement", "test__test_type")`` builds a fresh copy of
+    those rows for every candidate, so thousands of candidates from a handful of tests carry
+    thousands of identical Test and Engagement objects. ``prefetch_related`` already shares one
+    instance per id; this gives the joined relations the same treatment. Every value is
+    unchanged -- only duplicate copies of the same rows are dropped.
+    """
+    test = finding.test
+    canonical = shared.get(("test", test.pk))
+    if canonical is None:
+        engagement = shared.setdefault(("engagement", test.engagement_id), test.engagement)
+        test_type = shared.setdefault(("test_type", test.test_type_id), test.test_type)
+        test.engagement = engagement
+        test.test_type = test_type
+        canonical = shared.setdefault(("test", test.pk), test)
+    finding.test = canonical
+
+
 def find_candidates_for_deduplication_uid_or_hash(test, findings, mode="deduplication", service=None, *, candidate_qs=None):
     """
     Find candidates by unique_id_from_tool or hash_code. Works for both deduplication and reimport.
@@ -516,7 +542,11 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings, mode="deduplic
 
     existing_by_hash = {}
     existing_by_uid = {}
-    for ef in existing_qs:
+    shared_related = {}
+    # iterator() streams the candidates instead of caching the whole result set on the
+    # queryset; the maps below are the only place the candidates are kept.
+    for ef in existing_qs.iterator(chunk_size=DEDUPE_CANDIDATE_CHUNK_SIZE):
+        _share_select_related_test(ef, shared_related)
         if ef.hash_code is not None:
             existing_by_hash.setdefault(ef.hash_code, []).append(ef)
         if ef.unique_id_from_tool is not None:
