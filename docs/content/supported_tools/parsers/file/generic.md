@@ -33,37 +33,37 @@ JSON supports far more fields than CSV (components, SAST data, tags, endpoint ob
 
 ### Supported columns
 
-| Column | Data type | Example values | Notes |
-|---|---|---|---|
-| `Date` | Date | `2024-05-01`, `05/01/2024`, `2024-05-01T10:00:00Z` | **Required.** Parsed with [dateutil](https://dateutil.readthedocs.io/en/stable/parser.html), so most common formats work. Ambiguous dates such as `05/01/2024` are read month first (May 1). Any time of day is dropped. |
-| `Title` | String (max 511 characters) | `SQL Injection in login form` | **Required.** |
-| `Description` | String | `User input reaches the query unescaped.` | **Required.** Can span several lines when enclosed in double quotes. |
-| `Severity` | One of `Critical`, `High`, `Medium`, `Low`, `Info` | `High` | **Required.** Case-sensitive. Any other value, including `high` or `Informational`, is imported as `Info` without an error. |
-| `CweId` | Integer | `89` | A whole number. An empty cell leaves the CWE unset. `CWE-89` or any other non-numeric value fails the import; use `CweIds` for labels. |
-| `CweIds` | List of CWEs | `"79, CWE-89 352"` | Several CWEs for one finding, separated by commas, spaces or line breaks. `79` and `CWE-79` are both accepted and duplicates are dropped. If `CweId` is empty or absent, the first entry becomes the primary CWE. |
-| `CVE` | String | `CVE-2024-3094` | Added to the finding's vulnerability IDs. |
-| `Vulnerability Id` | String | `GHSA-5mrr-rgp6-x4gr` | One extra vulnerability ID, added after `CVE`. Note the space in the column name. |
-| `Url` | String (URL or host) | `https://app.example.com/login`, `app.example.com:8443` | One endpoint per row. The scheme is optional. To attach several URLs to one finding, repeat the row (see the merge rule above). |
-| `Mitigation` | String | `Use parameterized queries.` | Can span several lines when enclosed in double quotes. |
-| `Impact` | String | `An attacker can read the users table.` | Can span several lines when enclosed in double quotes. |
-| `References` | String | `https://owasp.org/Top10/` | Can span several lines when enclosed in double quotes. |
-| `Active` | Boolean (see below) | `TRUE`, `FALSE` | If the column is absent, findings are active. If the column is present, an empty cell makes the finding inactive. |
-| `Verified` | Boolean (see below) | `TRUE`, `FALSE` | Defaults to false. |
-| `FalsePositive` | Boolean (see below) | `TRUE`, `FALSE` | Defaults to false. |
-| `Duplicate` | Boolean (see below) | `TRUE`, `FALSE` | Defaults to false. |
-| `IsMitigated` | Boolean (see below) | `TRUE`, `FALSE` | Defaults to false. |
-| `MitigatedDate` | Date and time | `2024-05-20`, `2024-05-20T14:30:00Z` | Parsed with dateutil. An empty cell leaves the field unset. |
-| `epss_score` | Decimal number, 0 to 1 | `0.97283` | The finding's [EPSS score](https://www.first.org/epss/). An empty cell leaves the field unset. |
-| `epss_percentile` | Decimal number, 0 to 1 | `0.99971` | The finding's [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins). An empty cell leaves the field unset. |
-| `CVSSV3` | String (CVSS v3 vector) | `CVSS:3.1/AV:N/AC:L/…` | Must include the `CVSS:3.0/` or `CVSS:3.1/` prefix; a vector without it is ignored. See the example CSV for a full vector. The CVSS v3 score is calculated from the vector. |
-| `CVSSV3_score` | Decimal number, 0 to 10 | `9.8` | If `CVSSV3` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
-| `CVSSV4` | String (CVSS v4 vector) | `CVSS:4.0/AV:N/AC:L/…` | Must include the `CVSS:4.0/` prefix; a vector without it is ignored. See the example JSON for a full vector. |
-| `CVSSV4_score` | Decimal number, 0 to 10 | `9.3` | If `CVSSV4` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
-| `known_exploited` | Boolean (see below) | `TRUE`, `FALSE` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to false. |
-| `ransomware_used` | Boolean (see below) | `TRUE`, `FALSE` | Known to be used in ransomware campaigns. Defaults to false. |
-| `fix_available` | Boolean (see below) | `TRUE`, `FALSE` | A fix exists. An empty cell leaves it unset (unknown). |
-| `fix_version` | String (max 100 characters) | `2.4.1` | Version that contains the fix. |
-| `kev_date` | Date | `2024-03-29` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Parsed with dateutil. An empty cell leaves the field unset. |
+| Column | Type and examples | Notes |
+|---|---|---|
+| `Date` | Date<br>`2024-05-01`, `05/01/2024`, `2024-05-01T10:00:00Z` | **Required.** Parsed with [dateutil](https://dateutil.readthedocs.io/en/stable/parser.html), so most common formats work. Ambiguous dates such as `05/01/2024` are read month first (May 1). Any time of day is dropped. |
+| `Title` | String (max 511 characters)<br>`SQL Injection in login form` | **Required.** |
+| `Description` | String<br>`User input reaches the query unescaped.` | **Required.** Can span several lines when enclosed in double quotes. |
+| `Severity` | One of `Critical`, `High`, `Medium`, `Low`, `Info`<br>`High` | **Required.** Case-sensitive. Any other value, including `high` or `Informational`, is imported as `Info` without an error. |
+| `CweId` | Integer<br>`89` | A whole number. An empty cell leaves the CWE unset. `CWE-89` or any other non-numeric value fails the import; use `CweIds` for labels. |
+| `CweIds` | List of CWEs<br>`"79, CWE-89 352"` | Several CWEs for one finding, separated by commas, spaces or line breaks. `79` and `CWE-79` are both accepted and duplicates are dropped. If `CweId` is empty or absent, the first entry becomes the primary CWE. |
+| `CVE` | String<br>`CVE-2024-3094` | Added to the finding's vulnerability IDs. |
+| `Vulnerability Id` | String<br>`GHSA-5mrr-rgp6-x4gr` | One extra vulnerability ID, added after `CVE`. Note the space in the column name. |
+| `Url` | String (URL or host)<br>`https://app.example.com/login`, `app.example.com:8443` | One endpoint per row. The scheme is optional. To attach several URLs to one finding, repeat the row (see the merge rule above). |
+| `Mitigation` | String<br>`Use parameterized queries.` | Can span several lines when enclosed in double quotes. |
+| `Impact` | String<br>`An attacker can read the users table.` | Can span several lines when enclosed in double quotes. |
+| `References` | String<br>`https://owasp.org/Top10/` | Can span several lines when enclosed in double quotes. |
+| `Active` | Boolean (see below)<br>`TRUE`, `FALSE` | If the column is absent, findings are active. If the column is present, an empty cell makes the finding inactive. |
+| `Verified` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `FalsePositive` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `Duplicate` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `IsMitigated` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `MitigatedDate` | Date and time<br>`2024-05-20`, `2024-05-20T14:30:00Z` | Parsed with dateutil. An empty cell leaves the field unset. |
+| `epss_score` | Decimal number, 0 to 1<br>`0.97283` | The finding's [EPSS score](https://www.first.org/epss/). An empty cell leaves the field unset. |
+| `epss_percentile` | Decimal number, 0 to 1<br>`0.99971` | The finding's [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins). An empty cell leaves the field unset. |
+| `CVSSV3` | String (CVSS v3 vector)<br>`CVSS:3.1/AV:N/AC:L/…` | Must include the `CVSS:3.0/` or `CVSS:3.1/` prefix; a vector without it is ignored. See the example CSV for a full vector. The CVSS v3 score is calculated from the vector. |
+| `CVSSV3_score` | Decimal number, 0 to 10<br>`9.8` | If `CVSSV3` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
+| `CVSSV4` | String (CVSS v4 vector)<br>`CVSS:4.0/AV:N/AC:L/…` | Must include the `CVSS:4.0/` prefix; a vector without it is ignored. See the example JSON for a full vector. |
+| `CVSSV4_score` | Decimal number, 0 to 10<br>`9.3` | If `CVSSV4` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
+| `known_exploited` | Boolean (see below)<br>`TRUE`, `FALSE` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to false. |
+| `ransomware_used` | Boolean (see below)<br>`TRUE`, `FALSE` | Known to be used in ransomware campaigns. Defaults to false. |
+| `fix_available` | Boolean (see below)<br>`TRUE`, `FALSE` | A fix exists. An empty cell leaves it unset (unknown). |
+| `fix_version` | String (max 100 characters)<br>`2.4.1` | Version that contains the fix. |
+| `kev_date` | Date<br>`2024-03-29` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Parsed with dateutil. An empty cell leaves the field unset. |
 
 #### Boolean values in CSV
 
@@ -90,16 +90,16 @@ A JSON report is an object with a `findings` array and, optionally, report-level
 
 ### Report-level fields
 
-| Field | Data type | Example | Notes |
-|---|---|---|---|
-| `findings` | List of finding objects | `[{...}, {...}]` | The findings to import. If omitted, the report imports with no findings. |
-| `type` | String | `"Tool1"` | Sets the Test Type name. See [Test Type naming](#test-type-naming). |
-| `name` | String | `"Nightly scan"` | Accepted but not used. It does not rename the Test or the Test Type. |
-| `version` | String | `"1.2.0"` | Stored as the Test's version. |
-| `description` | String | `"Weekly authenticated scan"` | Stored as the Test's description. |
-| `static_tool` | Boolean | `true` | Sets the Test Type's Static Tool flag. See [Test Type metadata](#test-type-metadata). |
-| `dynamic_tool` | Boolean | `false` | Sets the Test Type's Dynamic Tool flag. See [Test Type metadata](#test-type-metadata). |
-| `soc` | Boolean | `true` | DefectDojo Pro only. Labels the Test Type as SOC rather than AppSec. Ignored by the open-source edition. See [Test Type metadata](#test-type-metadata). |
+| Field | Type and examples | Notes |
+|---|---|---|
+| `findings` | List of finding objects<br>`[{...}, {...}]` | The findings to import. If omitted, the report imports with no findings. |
+| `type` | String<br>`"Tool1"` | Sets the Test Type name. See [Test Type naming](#test-type-naming). |
+| `name` | String<br>`"Nightly scan"` | Accepted but not used. It does not rename the Test or the Test Type. |
+| `version` | String<br>`"1.2.0"` | Stored as the Test's version. |
+| `description` | String<br>`"Weekly authenticated scan"` | Stored as the Test's description. |
+| `static_tool` | Boolean<br>`true` | Sets the Test Type's Static Tool flag. See [Test Type metadata](#test-type-metadata). |
+| `dynamic_tool` | Boolean<br>`false` | Sets the Test Type's Dynamic Tool flag. See [Test Type metadata](#test-type-metadata). |
+| `soc` | Boolean<br>`true` | DefectDojo Pro only. Labels the Test Type as SOC rather than AppSec. Ignored by the open-source edition. See [Test Type metadata](#test-type-metadata). |
 
 ### Test Type metadata
 
@@ -121,66 +121,66 @@ What the flags drive:
 
 Every finding must have `title`, `severity` and `description`. A finding with a key that is not in this table stops the import with a `Not allowed fields are present` error naming the key, so check spelling carefully (for example `false_p`, not `false_positive`).
 
-| Field | Data type | Example | Notes |
-|---|---|---|---|
-| `title` | String (max 511 characters) | `"SQL Injection in login form"` | **Required.** |
-| `severity` | One of `Critical`, `High`, `Medium`, `Low`, `Info` | `"High"` | **Required.** Not case-sensitive: `"high"` and `"HIGH"` become `High`. `"Informational"`, `"info"` and `"None"` become `Info`. Any other value stops the import with an error. |
-| `description` | String | `"Line one\n\nLine two"` | **Required.** Use `\n` for line breaks. |
-| `date` | Date | `"2024-05-01"`, `"05/01/2024"`, `"2024-05-01T10:00:00Z"` | Parsed with [dateutil](https://dateutil.readthedocs.io/en/stable/parser.html), so most formats work. Ambiguous dates are read month first. Any time of day is dropped. Defaults to the day of the import. |
-| `cwe` | Integer | `89`, `"89"` | Only a number is accepted. `"CWE-89"` is not a number and is silently dropped, so use `cwes` if your tool emits labels. |
-| `cwes` | List of CWEs | `["CWE-79", 89]` | Several CWEs for one finding. Items may be numbers or `CWE-<n>` labels. If `cwe` is not set, the first entry becomes the primary CWE. |
-| `cve` | String (max 50 characters) | `"CVE-2024-3094"` | Added as the first vulnerability ID. |
-| `vulnerability_ids` | List of strings, or a single string | `["GHSA-5mrr-rgp6-x4gr", "OSV-2021-1234"]` | Added after `cve`. |
-| `epss_score` | Decimal number, 0 to 1 | `0.97283` | |
-| `epss_percentile` | Decimal number, 0 to 1 | `0.99971` | |
-| `cvssv3` | String (CVSS v3 vector) | `"CVSS:3.1/AV:N/AC:L/…"` | Include the `CVSS:3.x/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
-| `cvssv3_score` | Decimal number, 0 to 10 | `9.8` | If `cvssv3` holds a valid vector, the score calculated from the vector replaces this value. |
-| `cvssv4` | String (CVSS v4 vector) | `"CVSS:4.0/AV:N/AC:L/…"` | Include the `CVSS:4.0/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
-| `cvssv4_score` | Decimal number, 0 to 10 | `9.3` | If `cvssv4` holds a valid vector, the score calculated from the vector replaces this value. |
-| `mitigation` | String | `"Use parameterized queries."` | |
-| `impact` | String | `"An attacker can read the users table."` | |
-| `steps_to_reproduce` | String | `"1. Open /login\n2. Submit the form"` | |
-| `severity_justification` | String | `"Reachable without authentication."` | |
-| `references` | String | `"https://owasp.org/Top10/"` | A single string. Put several references on separate lines with `\n`. |
-| `active` | Boolean | `true` | Defaults to `true`. |
-| `verified` | Boolean | `false` | Defaults to `false`. |
-| `false_p` | Boolean | `false` | False positive. Defaults to `false`. |
-| `out_of_scope` | Boolean | `false` | Defaults to `false`. |
-| `risk_accepted` | Boolean | `false` | Defaults to `false`. |
-| `under_review` | Boolean | `false` | Defaults to `false`. |
-| `is_mitigated` | Boolean | `true` | Defaults to `false`. |
-| `mitigated` | Date and time | `"2024-05-20"`, `"2024-05-20T14:30:00Z"` | When the finding was mitigated. Parsed with dateutil. |
-| `thread_id` | Integer | `42` | |
-| `numerical_severity` | String | `"S1"` | Accepted but ignored. DefectDojo always derives it from `severity`. |
-| `param` | String | `"username"` | The vulnerable parameter. |
-| `payload` | String | `"' OR 1=1 --"` | |
-| `line` | Integer | `42`, `"42"` | Line number in `file_path`. |
-| `file_path` | String (max 4000 characters) | `"src/auth/login.py"` | Setting this marks a new finding as static (see `static_finding`). |
-| `component_name` | String (max 500 characters) | `"xz-utils"` | |
-| `component_version` | String (max 100 characters) | `"5.6.0"` | |
-| `static_finding` | Boolean | `true` | Defaults to `false`. When `file_path` is set, DefectDojo marks a new finding as static regardless of this value. |
-| `dynamic_finding` | Boolean | `false` | Defaults to `true`. When `file_path` is set, DefectDojo can override this value for a new finding. |
-| `scanner_confidence` | Integer | `3` | Confidence reported by the tool. |
-| `unique_id_from_tool` | String (max 500 characters) | `"a1b2c3d4"` | The tool's identifier for this finding. If the same value appears on more than one finding in a report, it is removed from all of them and those findings are deduplicated by hash code instead. |
-| `vuln_id_from_tool` | String (max 500 characters) | `"django.sqli"` | The tool's rule or check ID. |
-| `sast_source_object` | String (max 500 characters) | `"request.GET['username']"` | Where tainted data enters. |
-| `sast_sink_object` | String (max 500 characters) | `"cursor.execute"` | Where tainted data is used. |
-| `sast_source_line` | Integer | `12` | |
-| `sast_source_file_path` | String (max 4000 characters) | `"src/auth/views.py"` | |
-| `nb_occurences` | Integer | `3` | Number of times the finding occurred. Note the spelling (one `r`). |
-| `publish_date` | Date, `YYYY-MM-DD` only | `"2024-03-29"` | Date the vulnerability was published. Other formats, including a date with a time, stop the import. |
-| `service` | String (max 200 characters) | `"payments-api"` | |
-| `planned_remediation_date` | Date, `YYYY-MM-DD` only | `"2024-06-30"` | Other formats, including a date with a time, stop the import. |
-| `planned_remediation_version` | String (max 99 characters) | `"2.5.0"` | |
-| `effort_for_fixing` | String | `"Low"` | Intended values are `High`, `Medium` and `Low`. |
-| `kev_date` | Date, `YYYY-MM-DD` only | `"2024-03-29"` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Other formats, including a date with a time, stop the import. |
-| `known_exploited` | Boolean | `true` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to `false`. |
-| `ransomware_used` | Boolean | `false` | Known to be used in ransomware campaigns. Defaults to `false`. |
-| `fix_available` | Boolean | `true` | A fix exists. |
-| `fix_version` | String (max 100 characters) | `"5.6.2"` | Version that contains the fix. |
-| `tags` | List of strings | `["security", "pci"]` | |
-| `endpoints` | List of strings or objects | see [Endpoints](#endpoints) | |
-| `files` | List of objects | see [Attached files](#attached-files) | |
+| Field | Type and examples | Notes |
+|---|---|---|
+| `title` | String (max 511 characters)<br>`"SQL Injection in login form"` | **Required.** |
+| `severity` | One of `Critical`, `High`, `Medium`, `Low`, `Info`<br>`"High"` | **Required.** Not case-sensitive: `"high"` and `"HIGH"` become `High`. `"Informational"`, `"info"` and `"None"` become `Info`. Any other value stops the import with an error. |
+| `description` | String<br>`"Line one\n\nLine two"` | **Required.** Use `\n` for line breaks. |
+| `date` | Date<br>`"2024-05-01"`, `"05/01/2024"`, `"2024-05-01T10:00:00Z"` | Parsed with [dateutil](https://dateutil.readthedocs.io/en/stable/parser.html), so most formats work. Ambiguous dates are read month first. Any time of day is dropped. Defaults to the day of the import. |
+| `cwe` | Integer<br>`89`, `"89"` | Only a number is accepted. `"CWE-89"` is not a number and is silently dropped, so use `cwes` if your tool emits labels. |
+| `cwes` | List of CWEs<br>`["CWE-79", 89]` | Several CWEs for one finding. Items may be numbers or `CWE-<n>` labels. If `cwe` is not set, the first entry becomes the primary CWE. |
+| `cve` | String (max 50 characters)<br>`"CVE-2024-3094"` | Added as the first vulnerability ID. |
+| `vulnerability_ids` | List of strings, or a single string<br>`["GHSA-5mrr-rgp6-x4gr", "OSV-2021-1234"]` | Added after `cve`. |
+| `epss_score` | Decimal number, 0 to 1<br>`0.97283` |  |
+| `epss_percentile` | Decimal number, 0 to 1<br>`0.99971` |  |
+| `cvssv3` | String (CVSS v3 vector)<br>`"CVSS:3.1/AV:N/AC:L/…"` | Include the `CVSS:3.x/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
+| `cvssv3_score` | Decimal number, 0 to 10<br>`9.8` | If `cvssv3` holds a valid vector, the score calculated from the vector replaces this value. |
+| `cvssv4` | String (CVSS v4 vector)<br>`"CVSS:4.0/AV:N/AC:L/…"` | Include the `CVSS:4.0/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
+| `cvssv4_score` | Decimal number, 0 to 10<br>`9.3` | If `cvssv4` holds a valid vector, the score calculated from the vector replaces this value. |
+| `mitigation` | String<br>`"Use parameterized queries."` |  |
+| `impact` | String<br>`"An attacker can read the users table."` |  |
+| `steps_to_reproduce` | String<br>`"1. Open /login\n2. Submit the form"` |  |
+| `severity_justification` | String<br>`"Reachable without authentication."` |  |
+| `references` | String<br>`"https://owasp.org"` | A single string. Put several references on separate lines with `\n`. |
+| `active` | Boolean<br>`true` | Defaults to `true`. |
+| `verified` | Boolean<br>`false` | Defaults to `false`. |
+| `false_p` | Boolean<br>`false` | False positive. Defaults to `false`. |
+| `out_of_scope` | Boolean<br>`false` | Defaults to `false`. |
+| `risk_accepted` | Boolean<br>`false` | Defaults to `false`. |
+| `under_review` | Boolean<br>`false` | Defaults to `false`. |
+| `is_mitigated` | Boolean<br>`true` | Defaults to `false`. |
+| `mitigated` | Date and time<br>`"2024-05-20"`, `"2024-05-20T14:30:00Z"` | When the finding was mitigated. Parsed with dateutil. |
+| `thread_id` | Integer<br>`42` |  |
+| `numerical_severity` | String<br>`"S1"` | Accepted but ignored. DefectDojo always derives it from `severity`. |
+| `param` | String<br>`"username"` | The vulnerable parameter. |
+| `payload` | String<br>`"' OR 1=1 --"` |  |
+| `line` | Integer<br>`42`, `"42"` | Line number in `file_path`. |
+| `file_path` | String (max 4000 characters)<br>`"src/auth/login.py"` | Setting this marks a new finding as static (see `static_finding`). |
+| `component_name` | String (max 500 characters)<br>`"xz-utils"` |  |
+| `component_version` | String (max 100 characters)<br>`"5.6.0"` |  |
+| `static_finding` | Boolean<br>`true` | Defaults to `false`. When `file_path` is set, DefectDojo marks a new finding as static regardless of this value. |
+| `dynamic_finding` | Boolean<br>`false` | Defaults to `true`. When `file_path` is set, DefectDojo can override this value for a new finding. |
+| `scanner_confidence` | Integer<br>`3` | Confidence reported by the tool. |
+| `unique_id_from_tool` | String (max 500 characters)<br>`"a1b2c3d4"` | The tool's identifier for this finding. If the same value appears on more than one finding in a report, it is removed from all of them and those findings are deduplicated by hash code instead. |
+| `vuln_id_from_tool` | String (max 500 characters)<br>`"django.sqli"` | The tool's rule or check ID. |
+| `sast_source_object` | String (max 500 characters)<br>`"request.GET"` | Where tainted data enters. |
+| `sast_sink_object` | String (max 500 characters)<br>`"cursor.execute"` | Where tainted data is used. |
+| `sast_source_line` | Integer<br>`12` |  |
+| `sast_source_file_path` | String (max 4000 characters)<br>`"src/auth/views.py"` |  |
+| `nb_occurences` | Integer<br>`3` | Number of times the finding occurred. Note the spelling (one `r`). |
+| `publish_date` | Date, `YYYY-MM-DD` only<br>`"2024-03-29"` | Date the vulnerability was published. Other formats, including a date with a time, stop the import. |
+| `service` | String (max 200 characters)<br>`"payments-api"` |  |
+| `planned_remediation_date` | Date, `YYYY-MM-DD` only<br>`"2024-06-30"` | Other formats, including a date with a time, stop the import. |
+| `planned_remediation_version` | String (max 99 characters)<br>`"2.5.0"` |  |
+| `effort_for_fixing` | String<br>`"Low"` | Intended values are `High`, `Medium` and `Low`. |
+| `kev_date` | Date, `YYYY-MM-DD` only<br>`"2024-03-29"` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Other formats, including a date with a time, stop the import. |
+| `known_exploited` | Boolean<br>`true` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to `false`. |
+| `ransomware_used` | Boolean<br>`false` | Known to be used in ransomware campaigns. Defaults to `false`. |
+| `fix_available` | Boolean<br>`true` | A fix exists. |
+| `fix_version` | String (max 100 characters)<br>`"5.6.2"` | Version that contains the fix. |
+| `tags` | List of strings<br>`["security", "pci"]` |  |
+| `endpoints` | List of strings or objects | See [Endpoints](#endpoints). |
+| `files` | List of objects | See [Attached files](#attached-files). |
 
 #### Value rules
 
