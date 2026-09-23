@@ -32,7 +32,11 @@ from CISA KEV, Metasploit, Exploit-DB, Nuclei templates, and public proof-of-con
 tracking. When there&rsquo;s exploit evidence, the finding shows a <strong>Threat Intelligence</strong> card:</p><ul><li>an <strong>exploit-maturity</strong> badge — <em>None → PoC → Weaponized → Active in the wild</em></li><li>a <strong>threat score</strong> (0–100)</li><li><strong>evidence chips that link to the receipt</strong> — the KEV entry (with its listing date),
 used-in-ransomware, a Metasploit module, an Exploit-DB entry, a Nuclei template, and
 public proof-of-concept repositories</li><li>a plain-language line explaining <strong>why</strong> the finding&rsquo;s priority rose</li></ul><p>Beyond the card, the intelligence is a working surface across the app:</p><ul><li>an <strong>Exploit Maturity column</strong> on the findings list — sortable and filterable
-(for example, &ldquo;Weaponized or Active only&rdquo;)</li><li>an <strong>&ldquo;Urgent & Actively Exploited&rdquo;</strong> tile on the Priority Layout dashboard, counting
+(for example, &ldquo;Weaponized or Active only&rdquo;). Exploit Maturity is normally set by this
+feed, but it can also be <strong>set by hand</strong> in the Threat Intelligence panel of the Add and
+Edit Finding forms — useful when no feed covers a finding (for example, one with no CVE).
+On a finding that does reference an enriched CVE, the next sync overwrites the hand-set
+value; see <a href=/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields>Editing Findings</a>.</li><li>an <strong>&ldquo;Urgent & Actively Exploited&rdquo;</strong> tile on the Priority Layout dashboard, counting
 active Urgent-risk findings with in-the-wild exploitation — clicking through opens the
 exact filtered findings list</li><li>a <strong>notification event</strong> (<code>threat_intel_alert</code>) when an existing finding&rsquo;s CVE gains new
 exploit evidence, such as landing in CISA KEV or gaining a Metasploit module. Upgrades
