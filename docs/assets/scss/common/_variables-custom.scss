@@ -24,6 +24,11 @@ $dd-muted: #5c6a6e;
 $dd-border: #e8dfd2;
 
 // Bootstrap variable overrides
+// Type: the site pairs Inter with JetBrains Mono for labels, nav and footer meta
+$dd-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+$dd-dim-on-dark: #b8c0bd; // Dust 72% over Midnight
+$dd-hairline-dark: rgba(255, 248, 240, 0.18); // Dust 18%
+
 $primary: $dd-orange;
 $secondary: $dd-dusk;
 
