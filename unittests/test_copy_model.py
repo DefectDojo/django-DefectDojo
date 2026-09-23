@@ -7,7 +7,6 @@ from dojo.location.status import ProductLocationStatus
 from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
 from dojo.test.services import copy_test
 from dojo.url.models import URL
-from dojo.utils import calculate_grade
 
 from .dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
@@ -287,7 +286,7 @@ class TestCopyTestService(DojoTestCase):
     """Phase 2: the copy_test service holds the copy workflow extracted from the UI view."""
 
     @patch("dojo.test.services.create_notification")
-    @patch("dojo.test.services.dojo_dispatch_task")
+    @patch("dojo.test.services.schedule_product_grade")
     def test_copy_test_service(self, mock_dispatch, mock_notification):
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type("svc_pt_test")
@@ -399,7 +398,7 @@ class TestCopyEngagementService(DojoTestCase):
     """Phase 2: the copy_engagement service holds the copy workflow extracted from the UI view."""
 
     @patch("dojo.engagement.services.create_notification")
-    @patch("dojo.engagement.services.dojo_dispatch_task")
+    @patch("dojo.engagement.services.schedule_product_grade")
     def test_copy_engagement_service(self, mock_dispatch, mock_notification):
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type("svc_prod_type")
@@ -529,17 +528,13 @@ class TestMoveEngagementProduct(DojoTestCase):
         self.assertTrue(LocationProductReference.objects.filter(location=location, product=product_b).exists())
         self.assertFalse(LocationProductReference.objects.filter(location=location, product=product_a).exists())
 
-    @patch("dojo.engagement.services.dojo_dispatch_task")
-    def test_move_engagement_recomputes_grade_for_both_products(self, mock_dispatch):
+    @patch("dojo.engagement.services.schedule_product_grade")
+    def test_move_engagement_recomputes_grade_for_both_products(self, mock_schedule):
         # Moving findings between products changes both products' aggregate grade, so the
         # move must recompute the grade for the source and destination product.
         _user, product_a, product_b, engagement, _finding = self._setup()
         self._move(engagement, product_a, product_b)
-        graded_product_ids = {
-            call.args[1]
-            for call in mock_dispatch.call_args_list
-            if call.args and call.args[0] is calculate_grade
-        }
+        graded_product_ids = {call.args[0] for call in mock_schedule.call_args_list}
         self.assertIn(product_a.id, graded_product_ids)
         self.assertIn(product_b.id, graded_product_ids)
 

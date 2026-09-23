@@ -1,0 +1,20 @@
+{
+    "results": [
+        {
+            "rule_id": "custom-rule-001",
+            "rule_description": "Custom rule without provider",
+            "rule_provider": null,
+            "impact": "Test impact",
+            "resolution": "Test resolution",
+            "links": [],
+            "description": "Resource with null rule_provider",
+            "severity": "HIGH",
+            "status": "failed",
+            "location": {
+                "filename": "main.tf",
+                "start_line": 10,
+                "end_line": 15
+            }
+        }
+    ]
+}

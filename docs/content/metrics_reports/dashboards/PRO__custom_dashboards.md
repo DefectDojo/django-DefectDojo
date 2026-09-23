@@ -11,7 +11,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Customizable Dashboards (layouts, widgets, and the widget catalog) are a DefectDojo Pro feature. They are off by default — a superuser can turn them on from **Settings > Feature Flags** on both Cloud and On-Premise instances.</span>
 
-DefectDojo Pro Customizable Dashboards let each user assemble their own home page out of **widgets** — counts, charts, leaderboards, feeds, and notes — arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, publish them to your whole team, set one as your default landing page, and clone any layout (yours or a shared template) as a starting point.
+DefectDojo Pro Customizable Dashboards let each user assemble their own dashboards out of **widgets** (counts, charts, leaderboards, feeds, and notes) arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, publish them to your whole team, set one as the default that opens on the Dashboards page, and clone any layout (yours or a shared template) as a starting point. The home page itself is the [Command Center](../command-center/), which every user has and which links to these grids.
 
 ![A DefectDojo Pro customizable dashboard — the Default Dashboard layout.](images/pro_dashboard_v2_default.png)
 
@@ -19,7 +19,7 @@ DefectDojo Pro Customizable Dashboards let each user assemble their own home pag
 
 Open source DefectDojo has a single, built-in [Main Dashboard](../introduction_dashboard/) with a fixed set of summary cards and charts that a superuser can show or hide. It is the same for every user.
 
-DefectDojo Pro replaces that fixed page with **per-user customizable dashboards**. You choose which widgets appear, how they are filtered, and where they sit on the grid. You can build any number of named layouts, switch between them, share them with your team, and drive the whole system from the [REST API](../custom-dashboards-api/) or an [LLM](../custom-dashboards-llm/).
+DefectDojo Pro's home page is the [Command Center](../command-center/), and beside it Customizable Dashboards give each user **per-user customizable dashboards**. You choose which widgets appear, how they are filtered, and where they sit on the grid. You can build any number of named layouts, switch between them, share them with your team, and drive the whole system from the [REST API](../custom-dashboards-api/) or an [LLM](../custom-dashboards-llm/).
 
 > **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
 
@@ -27,9 +27,9 @@ DefectDojo Pro replaces that fixed page with **per-user customizable dashboards*
 
 Customizable Dashboards are off by default. A superuser can turn them on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
-Once it is enabled, the **🏠 Home** page shows your customizable dashboard and the [Dashboards REST API](../custom-dashboards-api/) becomes available.
+Once it is enabled, **Dashboards** appears in the sidebar under **Home** (the [Command Center](../command-center/)), opens your customizable dashboards, and the [Dashboards REST API](../custom-dashboards-api/) becomes available.
 
-> **🔑 Important:** While the feature is off, the home page keeps the previous dashboard and every `/api/v2/dashboards/` endpoint returns `403 Dashboards 2.0 is not enabled.` Turning it on does **not** change anyone's data access — every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
+> **🔑 Important:** While the feature is off, that sidebar entry reads **Dashboard** and opens the classic tile dashboard instead, and every `/api/v2/dashboards/` endpoint other than the Command Center's own returns `403 Dashboards 2.0 is not enabled.` Home is the Command Center either way. Turning it on does **not** change anyone's data access: every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
 
 ## Core concepts
 
@@ -61,9 +61,10 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 
 ### Sharing, cloning, and defaults
 
-- **Default** — one of your layouts is your **default**: the one that loads when you open the home page. You can change which layout is your default at any time.
+- **Default** — one of your layouts is your **default**: the one that loads when you open the Dashboards page. You can change which layout is your default at any time.
 - **Clone** — copy any layout (one of yours, or a shared template) into your own space as a fresh, independent starting point. Cloning gives the copy its own widgets, so editing the clone never touches the original.
-- **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout. Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
+- **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout (unless it is collaborative, below). Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
+- **Collaborative** — a Maintainer can mark a shared layout as **collaborative** from **Manage Layouts** (**Make Collaborative**, reversed with **Stop Collaborating**). A collaborative layout is one live dashboard rather than a template to copy: it appears in every user's layout picker, anyone can set it as their default, and anyone can add, remove, rearrange, or configure its widgets. Every change is saved to the same layout, so everyone using it sees it. Renaming, unsharing, deleting, and the collaborative setting itself stay with a Maintainer. If a layout stops being collaborative (or is unshared), users who had it as their default fall back to their own layouts. Edits are saved as they are made, so two people editing at the same moment can overwrite each other's change; the layout re-syncs from the server when you enter edit mode.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
 - **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults).
 
@@ -75,7 +76,7 @@ An administrator can enable **Restrict Layout Customization** (Settings, then UI
 
 ### The dashboard toolbar
 
-The toolbar across the top of the home page is where you switch layouts and manage them. It includes a **layout picker** (with badges that mark your default layout and any shared layouts/templates), and buttons to create a **New Layout**, open **Manage Layouts**, **Refresh** all widgets, and toggle **Edit** mode.
+The toolbar across the top of the Dashboards page is where you switch layouts and manage them. It includes a **layout picker** (with badges that mark your default layout, any shared layouts/templates, and collaborative layouts shared with you), and buttons to create a **New Layout**, open **Manage Layouts**, **Refresh** all widgets, and toggle **Edit** mode.
 
 ![The dashboard toolbar (highlighted): the layout picker, plus New Layout, Manage Layouts, Refresh, and Edit](images/pro_dashboard_v2_home.png)
 
@@ -87,10 +88,11 @@ Click **Edit** to unlock the dashboard. The grid becomes draggable and resizable
 
 ### Step 2: Add a widget
 
-In edit mode, click **Add Widget** to open the picker. It has two tabs:
+In edit mode, click **Add Widget** to open the picker. It has three tabs:
 
-- **By Type** — browse the catalog by category (Numbers, Charts, Lists & Feeds, Static & Utility). Each card shows the widget's name and a short description. Picking one adds it to the grid and opens its configuration dialog.
-- **From Catalog** — start from a pre-configured widget taken from one of the shared templates (for example, the "Findings by Severity" chart from the Default Dashboard). These come ready-configured, so they drop straight onto the grid.
+- **By Type**: browse the catalog by category (Numbers, Charts, Lists & Feeds, Static & Utility). Each card shows the widget's name and a short description. Picking one adds it to the grid and opens its configuration dialog.
+- **From Catalog**: start from a pre-configured widget taken from one of the shared templates (for example, the "Findings by Severity" chart from the Default Dashboard). These come ready-configured, so they drop straight onto the grid.
+- **From Reports**: start from a Chart or Widget block someone already built in the [Report Builder](../../reports/report-builder/). The widget lands configured the way that block is. This tab appears when Reporting is enabled and you can view report templates.
 
 ![The Add Widget dialog, By Type tab](images/pro_dashboard_v2_add_widget.png)
 
@@ -110,13 +112,23 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 ### Step 4: Arrange, then save
 
-Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, the duplicate icon to copy it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+
+Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
+
+### Putting a widget into a report
+
+Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go straight into a document you send out.
+
+Click the export icon on a widget and choose **Add to Report**. Name the block, optionally pick a report Template to append it to, and it is created carrying the widget's current filters. The action appears on widgets a report can draw, when Reporting is enabled and you have permission to add report templates.
+
+This **copies** the widget rather than linking to it. Editing the dashboard widget later does not change the report block, and the reverse is also true, so a shared dashboard never depends on who can see which report block.
 
 ### Managing layouts
 
 The **Manage Layouts** dialog (the gear button on the toolbar) is the hub for everything layout-level:
 
-- **Your Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own.
+- **Your Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts.
 - **Create New** — start a fresh, empty layout to build from scratch.
 - **Shared Templates** — browse curated and team-published layouts grouped by category, and click **Use Layout** to clone one into your own space.
 
@@ -133,7 +145,7 @@ DefectDojo ships four ready-to-use shared templates you can clone as a starting 
 | **Mitigation Layout** | A remediation-velocity board (closure trends, MTTR/MTTD, aging). |
 | **Tool Layout** | A scanner-effectiveness board built around test types and recent scan activity. |
 
-> **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it.
+> **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it. A **collaborative** layout is the exception by design: it is used live rather than copied, so edits made to it are visible to everyone. Take your own copy of a collaborative layout only when you want a private version that no longer follows the shared one.
 
 ### The empty state
 
@@ -187,6 +199,7 @@ Ranked lists, feeds, and embedded tables.
 | **SLA Burndown** | Findings approaching SLA breach, ranked by days remaining, with countdown badges. |
 | **My Work** | Your personal queue — assignments, mentions, and pending risk-acceptance reviews. Always scoped to the viewer. |
 | **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature.* |
+| **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
 
 ### Static & Utility
 

@@ -2,7 +2,7 @@
 title: 自托管 DefectDojo Pro 的硬件规模规划
 description: 关于为自托管 DefectDojo Pro 部署规划计算、内存和存储规模的一般性指南
 draft: false
-weight: 4
+weight: 2
 audience: pro
 ---
 

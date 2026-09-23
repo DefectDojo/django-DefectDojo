@@ -30,7 +30,7 @@ from dojo import __docs__, __version__
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
-from dojo.utils import calculate_grade, get_file_images, get_full_url, get_system_setting, prepare_for_view
+from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view, schedule_product_grade
 
 logger = logging.getLogger(__name__)
 
@@ -382,9 +382,7 @@ def product_grade(product):
     if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
         if not prod_numeric_grade or prod_numeric_grade is None:
-            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-            dojo_dispatch_task(calculate_grade, product.id)
+            schedule_product_grade(product.id)
         if prod_numeric_grade:
             if prod_numeric_grade >= system_settings.product_grade_a:
                 grade = "A"

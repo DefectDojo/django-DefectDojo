@@ -1,0 +1,17 @@
+{
+  "results": {
+    "violations": [
+      {
+        "rule_name": "testRule",
+        "description": "Test violation with null fields",
+        "rule_id": "test.rule.001",
+        "severity": "HIGH",
+        "category": "Security",
+        "resource_name": null,
+        "resource_type": null,
+        "file": "main.tf",
+        "line": 10
+      }
+    ]
+  }
+}

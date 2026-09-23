@@ -122,6 +122,10 @@ env = environ.FileAwareEnv(
     # Celery silently discards it — it is never executed and no exception is raised. Does not
     # affect tasks that are already running. (0 = disabled, no limit)
     DD_CELERY_TASK_DEFAULT_EXPIRES=(int, 43200),   # default: 12 hours
+    # A product's grade is recalculated at most once per this many seconds: the first finding change
+    # in a window queues one calculate_grade task with this countdown, and later changes in the same
+    # window are no-ops. 0 queues a task for every change.
+    DD_PRODUCT_GRADE_DEBOUNCE_SECONDS=(int, 30),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
@@ -157,6 +161,7 @@ env = environ.FileAwareEnv(
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_DATA_UPLOAD_MAX_NUMBER_FIELDS=(int, 10240),  # Max number of GET/POST parameters in a request
     DD_MAX_ZIP_MEMBERS=(int, 1000),
     DD_MAX_ZIP_MEMBER_SIZE=(int, 512 * 1024 * 1024),  # 512 MB per member (uncompressed)
     DD_MAX_ZIP_TOTAL_SIZE=(int, 1 * 1024 * 1024 * 1024),  # 1 GB total (uncompressed)
@@ -1003,6 +1008,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
+PRODUCT_GRADE_DEBOUNCE_SECONDS = env("DD_PRODUCT_GRADE_DEBOUNCE_SECONDS")
 
 if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
     CELERY_TASK_TIME_LIMIT = env("DD_CELERY_TASK_TIME_LIMIT")
@@ -2096,7 +2102,9 @@ LOGGING = {
 DEFAULT_EXCEPTION_REPORTER_FILTER = "dojo.settings.exception_filter.CustomExceptionReporterFilter"
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+# Configurable so operators can raise it for instances that legitimately submit very large
+# scan imports (many form fields), mirroring DD_DATA_UPLOAD_MAX_MEMORY_SIZE above.
+DATA_UPLOAD_MAX_NUMBER_FIELDS = env("DD_DATA_UPLOAD_MAX_NUMBER_FIELDS")
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")

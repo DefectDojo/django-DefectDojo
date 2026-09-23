@@ -18,6 +18,59 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## September 2026: v3.3
 
+### September 14, 2026: v3.3.100
+
+New features:
+* **(Deduplication)** Added Dedupe Pools: group the Assets that should deduplicate against each other, choose where their originals collect, preview what a membership change would link, and re-run deduplication over the Findings already in scope with Apply Now.
+* **(Deduplication)** The three deduplication tuning pages are now one Matching Configuration page: every tool listed once, with its same-tool, cross-tool and reimport matching side by side, and every change previewed before it is saved.
+* **(Connectors)** New Palo Alto Cortex connector family, covering XDR, XSIAM, XSOAR, and Cloud.
+* **(Connectors)** Connector sync and discovery frequency is now configurable (6, 12, or 24 hours), with schedule times shown in your browser's local time.
+* **(Dashboards)** Collaborative shared dashboard layouts.
+* **(Editor)** The markdown editor now stores images you paste or drop into any markdown field.
+* **(Sensei)** Google Vertex AI is available as an on-prem LLM provider.
+* **(Sensei)** Keyless and delegated cloud authentication for Prowler scans and Sensei CSPM, using cloud federation or Connect DefectDojo Cloud.
+* **(Reporting)** Dashboards 2.0 widgets can now be reused as Report Builder blocks.
+* **(Rules Engine 2.0)** Date condition fields support relative-date operators.
+* **(Federal)** FedRAMP VDR, PAIN, and KEV-cap SLA fields are exposed in the Pro UI and REST API.
+* **(Qualys)** Opt-in endpoint creation from host identity.
+
+Enhancements:
+* **(Dashboards)** Duplicate a dashboard tile from its edit-mode chrome.
+* **(Connectors)** The Aqua Supply Chain Branch field accepts a comma-separated list and gains a per-branch deduplication toggle, and its placeholders now show the real default.
+* **(SSO)** Auth settings show callback and ACS URLs inline, with richer help text and corrected field labels.
+* **(Sensei)** The Threat Modeling and Advisor pages show the licensed per-run quotas.
+
+Bug fixes:
+* **(Connectors)** JFrog scopes each nested child image to its own latest build; Dependency-Track paginates project findings so large projects aren't truncated; YesWeHack maps every workflow state and falls back to the CVSS score for severity; GitHub Advanced Security 403 and 404 responses are treated as feature-disabled rather than token errors; a tool-reported finding status now survives a sync; and KEV/EPSS enrichment staging is isolated per connection to avoid concurrent-run collisions.
+* **(Findings)** You can now request a review from yourself.
+* **(Rules Engine)** "Clear Filters" now clears a rule's saved filters.
+* **(SSO)** Unconfigured social-login backends return you to the login form instead of a 500.
+* **(Assets)** Each personnel picker gets its own users list.
+* **(API)** A stored inactive contact stays readable, a new contact can no longer be assigned to an inactive user, and the finding API's SonarQube issue relation is read-only.
+* **(Dashboards)** The Top Root Causes widget is registered and receives its configuration.
+* **(Sensei)** GitHub App creation opens in a new tab, and the Targets "Last Scan" value aligns with the scan-run ledger while the Scan-now dialog stays responsive.
+* **(UI)** Table columns size to fit their headers so filter and sort controls stay reachable, and the Upstream menu item is a plain link while Field Mappings is unreleased.
+* **(Questionnaires)** Corrected the share note on the general questionnaire list.
+* **(JIRA)** Corrected the exception class the webhook lookups catch.
+* **(Reporting)** Removed a duplicate vulnerability reference prefetch in the finding report.
+* **(Parsers)** bundler-audit resets advisory fields so warnings can't inherit stale values.
+* **(Deduplication)** The endpoint rehash runs once per tool instead of once per finding.
+
+Behavior changes:
+* **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. An Asset in a Dedupe Pool replicates its false positives across the pool for same-tool matching. Instances using false-positive history across such Engagements see narrower replication than before. A pool may span Organizations, and both effects follow the pool: a duplicate mark or a replicated false positive originating in one Organization can change a Finding in another Organization that shares the pool.
+* **(Deduplication)** For an Asset in a Dedupe Pool, Global Component, Global Vulnerability ID and Global Locations matching is bounded to the pool rather than the whole instance.
+* **(Deduplication)** The three deduplication pages move off the Tuner permissions onto four Dedupe Pool permissions (view, add, edit, delete). Roles that held the Tuner permissions are carried over for those pages: Tuner edit maps to all four, Tuner view to view only. The Tuner permissions themselves are unchanged and still gate the other 14 Tuner sections (SSO, LDAP, SCIM, email, MFA and the rest).
+* **(Rules)** A new asset rule action, Assign to Dedupe Pool, pools an Asset or removes the rows a rule created; it never moves an Asset another pool holds, and the rule owner needs the Dedupe Pool edit permission.
+* **(Assets)** The Asset page gains a Dedupe Pool panel showing which pool the Asset matches within, per kind, with the pool change, subtree pooling and untoggle available in place.
+* **(Audit Log)** Dedupe pools, their memberships and the per-tool matching rows are tracked in the audit log.
+
+Upgrade notes:
+* **(Deduplication)** Pods may roll in either order relative to the migration. The upgrade copies the deduplication tuning into per-tool matching rows and retires the old tuning fields from the application, but leaves their columns in the database for this release. A pod still on the previous image keeps reading and writing those columns and behaves exactly as before until it is rolled; a pod on the new image reaches a database that has not migrated yet and matches without pools, reading the old tuning where it needs to, until the migration lands. The columns are removed by a later release, once no pod on the previous image can exist. Hold imports across the roll if you want no import to straddle the changeover; nothing fails if you do not.
+* **(Deduplication)** The migration is reversible. Rolling back to the previous node drops the new pool tables and restores the previous release's view of the settings; the tuning columns never left. Take a database backup before upgrading anyway, as ordinary upgrade hygiene.
+* **(Deduplication)** The matching rows the upgrade seeds carry no audit log entry: the migration writes them before it installs their audit triggers. Audit history for Matching Configuration starts with the first change made after the upgrade; the seeded state itself is what the Tuner held, and is not recorded as an event.
+* **(Deduplication)** The first nightly identity check after the upgrade may send a system notification saying the cross-tool identity changed for some tools. Those tools had cross-tool hash fields configured but no algorithm; the previous release treated that as Hash code, and the upgrade records Hash code explicitly, so the identity definition moved while the stored hashes did not. The rehash the notification suggests (`manage.py identity_drift --kind cross_tool --rehash`) is safe, recomputes the same values, and records the new baseline so the notice does not repeat.
+* **(Deployment)** A new `DD_V3_ASSET_ALIASES` chart value and compose environment variable enable per-source asset aliases; Sensei CSPM adds keyless and delegated cloud-auth boot gates.
+
 ### September 9, 2026: v3.3.0
 
 New features:
@@ -366,7 +419,7 @@ Additional features:
 ### June 15, 2026: v3.0.0
 
 * **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
-* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic — API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
+* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic: API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
 * **(Authorization)** Open Source restores the **Authorized Users** panel on Product/Product Type detail under the legacy authorization model; Pro deployments retain full RBAC and are not impacted. See [Authorized Users panel replaces Members/Groups under legacy authorization](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
 * **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
 * **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
@@ -400,7 +453,7 @@ Additional features:
 * **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
 * **(Pro UI)** Anchor links now open in a new tab as expected, so following a reference no longer pulls you away from the page you were working on.
 * **(Pro UI)** Adding Findings to an existing Risk Acceptance works reliably again. A recent performance improvement caused the form to fail for some users; you can now resume managing accepted Findings without errors.
-* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default — forcing you to reorder columns every session.
+* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default, forcing you to reorder columns every session.
 * **(API)** Fixed a 500 error when fetching vulnerable endpoints (`GET /api/vue/endpoints/{id}/vulnerable/`), restoring reliable access to vulnerability data for an endpoint.
 
 ### May 4, 2026: v2.58.0

@@ -2,7 +2,7 @@ from datetime import date
 
 from dojo.models import Test
 from dojo.tools.trivy_operator.parser import TrivyOperatorParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 def sample_path(file_name):
@@ -213,3 +213,13 @@ class TestTrivyOperatorParser(DojoTestCase):
                 finding.mitigation,
             )
             self.assertEqual(["production"], finding.unsaved_tags)
+
+
+class TestTrivyOperatorParserImageLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_vulnerability_reports_carry_the_scanned_image(self):
+        with (get_unit_tests_scans_path("trivy_operator") / "all_reports_in_dict.json").open(encoding="utf-8") as test_file:
+            findings = TrivyOperatorParser().get_findings(test_file, Test())
+        expected = {"registry": "index.docker.io", "repository": "library/nginx", "digest": "", "tag": "alpine", "oci_source": "", "oci_revision": ""}
+        with_image = [f for f in findings if any(loc.type == "image" and loc.data == expected for loc in f.unsaved_locations)]
+        self.assertEqual(41, len(with_image))

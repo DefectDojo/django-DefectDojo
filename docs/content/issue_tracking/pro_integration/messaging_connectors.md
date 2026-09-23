@@ -5,7 +5,7 @@ weight: 4
 audience: pro
 ---
 
-**Availability:** Messaging Connectors are a beta feature. Enable **Messaging Connectors** on the Feature Flags page. Because alerts are routed by rules, **Rules Engine 2.0** must be enabled as well.
+**Availability:** Messaging Connectors are a beta feature. Enable **Messaging Connectors** on the Feature Flags page. Because alerts are routed by rules, **Triage Engine** must be enabled as well.
 
 Messaging Connectors send alerts from DefectDojo to a chat service, to an email address, or to an Amazon SNS topic. They sit beside the ticketing and incident-management connectors on the same **Downstream Connectors** page, and they are configured the same way: create a connection once, then decide what should be sent to it.
 
@@ -13,7 +13,7 @@ Ticketing connectors and messaging connectors answer different questions. A tick
 
 ## What you can send
 
-Alerts are routed by Rules Engine 2.0. A rule decides **when** to send (a trigger), **which** Findings qualify (conditions), and **where** the message goes (a notify node addressing your connection and channel).
+Alerts are routed by Triage Engine. A rule decides **when** to send (a trigger), **which** Findings qualify (conditions), and **where** the message goes (a notify node addressing your connection and channel).
 
 This means the filters available to an alert are the same ones available to a rule: severity, scope, tags, status, and anything else a rule condition can express. Several different alerts going to several different channels are simply several rules.
 
@@ -162,7 +162,7 @@ A successful test also clears a connection that has been automatically disabled 
 
 ## Create an alert
 
-There are two ways in. Both produce the same thing: a Rules Engine 2.0 rule.
+There are two ways in. Both produce the same thing: a Triage Engine rule.
 
 ### The alerts page
 
@@ -188,7 +188,7 @@ Alerts are rules, so they can also be opened in the rule editor from the same li
 
 The full route, for anything the form does not cover.
 
-1. Go to **Automation > Rules Engine 2.0** and create a rule.
+1. Go to **Automation > Triage Engine** and create a rule.
 2. Add a trigger. For alerts about newly imported Findings, use the Finding event trigger on **created**. Imports are batched, so one import produces one alert rather than one per Finding.
 3. Add conditions for what should qualify, for example a minimum severity of High.
 4. Add a message node for the vendor you want (**Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email**, or **Publish to an SNS Topic**) and set:

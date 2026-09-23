@@ -27,7 +27,7 @@ prove che hanno prodotto ciascun collegamento.
 
 ## Abilitare la Correlazione delle cause radice
 
-La Correlazione delle cause radice è in **Beta**, è controllata da un feature flag ed è **disattivata
+La Correlazione delle cause radice è controllata da un feature flag ed è **disattivata
 per impostazione predefinita**. Un superuser può attivarla da **Impostazioni > Feature Flags**, sia
 sulle istanze Cloud che On-Premise. Vedere [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
@@ -286,9 +286,9 @@ ticket a partire da esse, o tracciarle come metrica senza passare dall'interfacc
   euristica.
 
 Entrambi sono di sola lettura. Per ora la conferma, il rifiuto e il silenziamento vengono effettuati
-dall'interfaccia utente; queste operazioni non vengono deliberatamente pubblicate finché la
-funzionalità è in Beta, in modo che aggiungerle in seguito non possa interrompere nulla di ciò che è
-già stato costruito basandosi su di esse.
+dall'interfaccia utente; queste operazioni non vengono deliberatamente pubblicate per ora, in modo
+che aggiungerle in seguito non possa interrompere nulla di ciò che è già stato costruito basandosi
+su di esse.
 
 Filtri sull'elenco: `cause_type` (`exact` o `in`), `muted`, `identity_key` (`exact` o `icontains`) e
 `display_name__icontains`.

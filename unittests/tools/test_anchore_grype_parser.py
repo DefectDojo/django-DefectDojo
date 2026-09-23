@@ -2,7 +2,7 @@ from datetime import date
 
 from dojo.models import Finding, Test
 from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestAnchoreGrypeParser(DojoTestCase):
@@ -390,3 +390,15 @@ class TestAnchoreGrypeParser(DojoTestCase):
         finding_without_kev = next(f for f in findings if f.vuln_id_from_tool == "CVE-2021-45046")
         self.assertIsNone(finding_without_kev.kev_date)
         self.assertFalse(finding_without_kev.known_exploited)
+
+
+class TestAnchoreGrypeParserImageLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_image_source_attaches_the_manifest_digest_image(self):
+        with (get_unit_tests_scans_path("anchore_grype") / "many_vulns.json").open(encoding="utf-8") as test_file:
+            findings = AnchoreGrypeParser().get_findings(test_file, Test())
+        self.assertTrue(findings)
+        expected = {"registry": "", "repository": "python", "digest": "sha256:56e428bb95594df86c86d62aa7b6ca5827ecf23a2a1e933288cba950d394fdbf", "tag": "3.6", "oci_source": "", "oci_revision": ""}
+        for finding in findings:
+            images = [loc.data for loc in finding.unsaved_locations if loc.type == "image"]
+            self.assertEqual([expected], images)

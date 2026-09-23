@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OWASPZAPReport version="2.16.1" generated="Mon, 15 Sep 2026 10:00:00">
+    <site name="https://example.com" host="example.com" port="443" ssl="true">
+        <alerts>
+            <alertitem>
+                <pluginid>10049</pluginid>
+                <alertRef>10049</alertRef>
+                <alert>Non-Storable Content</alert>
+                <name>Non-Storable Content</name>
+                <riskcode>0</riskcode>
+                <confidence>2</confidence>
+                <riskdesc>Informational (Medium)</riskdesc>
+                <desc>The response is not storable.</desc>
+                <instances>
+                    <instance>
+                        <uri>https://example.com/api/health</uri>
+                        <method>GET</method>
+                        <param></param>
+                        <attack></attack>
+                        <evidence>no-store</evidence>
+                        <requestheader>GET https://example.com/api/health HTTP/1.1
+host: example.com
+</requestheader>
+                        <responseheader>HTTP/1.1 204 No Content
+Cache-Control: no-store
+</responseheader>
+                        <responsebody />
+                    </instance>
+                </instances>
+                <count>1</count>
+                <solution>Fix it.</solution>
+                <reference>https://example.com</reference>
+                <cweid>524</cweid>
+                <wascid>13</wascid>
+                <sourceid>3</sourceid>
+            </alertitem>
+        </alerts>
+    </site>
+</OWASPZAPReport>
