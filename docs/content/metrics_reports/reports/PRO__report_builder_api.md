@@ -360,6 +360,29 @@ curl -s -X POST \
 
 The response returns the new report `id` with `status` set to `pending`.
 
+**Fill in template variables.** A Template that uses [template variables](../report-builder/#template-variables) needs a value for each one. Ask the Template which it uses, then pass them as `variables`:
+
+```bash
+curl -s \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/report_templates/5/variables/"
+# {"variables": ["finding"]}
+
+curl -s -X POST \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/generated_reports/" \
+  -d '{
+    "template_id": 5,
+    "file_format": "pdf",
+    "variables": {"finding": 1234}
+  }'
+```
+
+`variables` takes `finding` (a finding ID), `asset` (an asset ID) and `vulnerability_id` (text such as `CVE-2024-12345`). A finding also supplies its own asset and primary vulnerability ID, so `{"finding": 1234}` satisfies a Template that uses all three. A missing variable, an unknown key, or a finding or asset the token's user cannot see returns `400` with the reason under `variables`. To generate one report per finding, loop over the findings and POST once for each.
+
 **Poll for status.** Retrieve the report until its `status` reaches a terminal state. The flow is `pending` → `processing` → `completed`. On `failed`, read `error_message` for the reason.
 
 ```bash
