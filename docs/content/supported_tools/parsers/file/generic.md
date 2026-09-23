@@ -131,16 +131,16 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
 | `cwes` | List of CWEs<br>`["CWE-79", 89]` | Several CWEs for one finding. Items may be numbers or `CWE-<n>` labels. If `cwe` is not set, the first entry becomes the primary CWE. |
 | `cve` | String (max 50 characters)<br>`"CVE-2024-3094"` | Added as the first vulnerability ID. |
 | `vulnerability_ids` | List of strings, or a single string<br>`["GHSA-5mrr-rgp6-x4gr", "OSV-2021-1234"]` | Added after `cve`. |
-| `epss_score` | Decimal number, 0 to 1<br>`0.97283` |  |
-| `epss_percentile` | Decimal number, 0 to 1<br>`0.99971` |  |
+| `epss_score` | Decimal number, 0 to 1<br>`0.97283` | The finding's [EPSS score](https://www.first.org/epss/): the estimated probability of exploitation in the next 30 days. |
+| `epss_percentile` | Decimal number, 0 to 1<br>`0.99971` | The finding's [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins) relative to all scored vulnerabilities. |
 | `cvssv3` | String (CVSS v3 vector)<br>`"CVSS:3.1/AV:N/AC:L/…"` | Include the `CVSS:3.x/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
 | `cvssv3_score` | Decimal number, 0 to 10<br>`9.8` | If `cvssv3` holds a valid vector, the score calculated from the vector replaces this value. |
 | `cvssv4` | String (CVSS v4 vector)<br>`"CVSS:4.0/AV:N/AC:L/…"` | Include the `CVSS:4.0/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
 | `cvssv4_score` | Decimal number, 0 to 10<br>`9.3` | If `cvssv4` holds a valid vector, the score calculated from the vector replaces this value. |
-| `mitigation` | String<br>`"Use parameterized queries."` |  |
-| `impact` | String<br>`"An attacker can read the users table."` |  |
-| `steps_to_reproduce` | String<br>`"1. Open /login\n2. Submit the form"` |  |
-| `severity_justification` | String<br>`"Reachable without authentication."` |  |
+| `mitigation` | String<br>`"Use parameterized queries."` | How to fix the issue. Use `\n` for line breaks. |
+| `impact` | String<br>`"An attacker can read the users table."` | What an attacker could do. Use `\n` for line breaks. |
+| `steps_to_reproduce` | String<br>`"1. Open /login\n2. Submit the form"` | How to confirm the issue. Use `\n` for line breaks. |
+| `severity_justification` | String<br>`"Reachable without authentication."` | Why the finding has its severity. |
 | `references` | String<br>`"https://owasp.org"` | A single string. Put several references on separate lines with `\n`. |
 | `active` | Boolean<br>`true` | Defaults to `true`. |
 | `verified` | Boolean<br>`false` | Defaults to `false`. |
@@ -150,14 +150,14 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
 | `under_review` | Boolean<br>`false` | Defaults to `false`. |
 | `is_mitigated` | Boolean<br>`true` | Defaults to `false`. |
 | `mitigated` | Date and time<br>`"2024-05-20"`, `"2024-05-20T14:30:00Z"` | When the finding was mitigated. Parsed with dateutil. |
-| `thread_id` | Integer<br>`42` |  |
+| `thread_id` | Integer<br>`42` | Defaults to `0`. |
 | `numerical_severity` | String<br>`"S1"` | Accepted but ignored. DefectDojo always derives it from `severity`. |
 | `param` | String<br>`"username"` | The vulnerable parameter. |
-| `payload` | String<br>`"' OR 1=1 --"` |  |
+| `payload` | String<br>`"' OR 1=1 --"` | The input that triggers the issue. |
 | `line` | Integer<br>`42`, `"42"` | Line number in `file_path`. |
 | `file_path` | String (max 4000 characters)<br>`"src/auth/login.py"` | Setting this marks a new finding as static (see `static_finding`). |
-| `component_name` | String (max 500 characters)<br>`"xz-utils"` |  |
-| `component_version` | String (max 100 characters)<br>`"5.6.0"` |  |
+| `component_name` | String (max 500 characters)<br>`"xz-utils"` | The affected package or library. A blank or whitespace-only value is stored as empty. With Locations enabled, together with `component_version` and `file_path` it also creates a dependency location on the finding. |
+| `component_version` | String (max 100 characters)<br>`"5.6.0"` | The affected version of `component_name`. A blank or whitespace-only value is stored as empty. |
 | `static_finding` | Boolean<br>`true` | Defaults to `false`. When `file_path` is set, DefectDojo marks a new finding as static regardless of this value. |
 | `dynamic_finding` | Boolean<br>`false` | Defaults to `true`. When `file_path` is set, DefectDojo can override this value for a new finding. |
 | `scanner_confidence` | Integer<br>`3` | Confidence reported by the tool. |
@@ -165,20 +165,20 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
 | `vuln_id_from_tool` | String (max 500 characters)<br>`"django.sqli"` | The tool's rule or check ID. |
 | `sast_source_object` | String (max 500 characters)<br>`"request.GET"` | Where tainted data enters. |
 | `sast_sink_object` | String (max 500 characters)<br>`"cursor.execute"` | Where tainted data is used. |
-| `sast_source_line` | Integer<br>`12` |  |
-| `sast_source_file_path` | String (max 4000 characters)<br>`"src/auth/views.py"` |  |
+| `sast_source_line` | Integer<br>`12` | Line number of `sast_source_object`. With Locations enabled, recorded on the finding's code location when `file_path` is set. |
+| `sast_source_file_path` | String (max 4000 characters)<br>`"src/auth/views.py"` | File that contains `sast_source_object`. With Locations enabled, recorded on the finding's code location when `file_path` is set. |
 | `nb_occurences` | Integer<br>`3` | Number of times the finding occurred. Note the spelling (one `r`). |
 | `publish_date` | Date, `YYYY-MM-DD` only<br>`"2024-03-29"` | Date the vulnerability was published. Other formats, including a date with a time, stop the import. |
-| `service` | String (max 200 characters)<br>`"payments-api"` |  |
+| `service` | String (max 200 characters)<br>`"payments-api"` | The service or application component the finding belongs to. If the import request sets a `service`, that value replaces this one, and close-old-findings only closes findings with the same service. |
 | `planned_remediation_date` | Date, `YYYY-MM-DD` only<br>`"2024-06-30"` | Other formats, including a date with a time, stop the import. |
-| `planned_remediation_version` | String (max 99 characters)<br>`"2.5.0"` |  |
+| `planned_remediation_version` | String (max 99 characters)<br>`"2.5.0"` | Version in which a fix is planned. |
 | `effort_for_fixing` | String<br>`"Low"` | Intended values are `High`, `Medium` and `Low`. |
 | `kev_date` | Date, `YYYY-MM-DD` only<br>`"2024-03-29"` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Other formats, including a date with a time, stop the import. |
 | `known_exploited` | Boolean<br>`true` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to `false`. |
 | `ransomware_used` | Boolean<br>`false` | Known to be used in ransomware campaigns. Defaults to `false`. |
 | `fix_available` | Boolean<br>`true` | A fix exists. |
 | `fix_version` | String (max 100 characters)<br>`"5.6.2"` | Version that contains the fix. |
-| `tags` | List of strings<br>`["security", "pci"]` |  |
+| `tags` | List of strings<br>`["security", "pci"]` | Each string becomes a tag on the finding. Must be a list; a single string is ignored. |
 | `endpoints` | List of strings or objects | See [Endpoints](#endpoints). |
 | `files` | List of objects | See [Attached files](#attached-files). |
 
