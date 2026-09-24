@@ -387,7 +387,9 @@ status band, **Exception Requested**, instead of **Active**:
 - Findings waiting on a decision carry an **Exception Requested** badge in Finding tables,
   alongside their real status — the Finding is still Active, and the badge says somebody is
   waiting.
-- Filter Findings on `has_pending_exception` to build that queue.
+- Finding tables offer an **Exception Requested** column, hidden by default: turn it on from the
+  column picker and filter it to Yes to build that queue directly in the table. The same filter is
+  available on the API as `has_pending_exception`.
 - Filter Risk Acceptances on `workflow_state=proposed&workflow_state=under_review` to see the
   requests waiting for a reviewer.
 
