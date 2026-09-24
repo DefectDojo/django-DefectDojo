@@ -63,6 +63,14 @@ With tracking enabled, reimport matching happens in two stages:
 
 When the same vulnerable package appears in **several manifests**, each manifest's finding is tracked independently: a version bump in one lockfile never swallows the finding from another.
 
+### Cloud resource findings
+
+Cloud resources match on their identifier alone: the ARN, resource URI, or Azure resource ID the provider assigned. There is no fuzzy match here, and that is on purpose. A cloud provider assigns that identifier once, when it creates the resource, and never changes it. A bucket is not renamed into a different bucket. Instead, the provider deletes it and creates a new one. That new bucket is a genuinely different resource, so it is correctly a different finding.
+
+Region, service, tags, and display name can all change. The resource itself stays the same. None of these fields take part in the match. A relabelled instance is still the same instance, so it keeps its findings.
+
+Two findings on two different cloud resources are never duplicates of each other. If an earlier import merged them, they stay separate after the next import.
+
 ### Severity re-scores
 
 Security tools re-score severities as their rule engines evolve. With tracking enabled, a tool-reported severity change does **not** split a finding's identity: the finding matches, and its severity is updated from the scan, unless a person has re-triaged the severity by hand, in which case the human's value always wins (see below).
