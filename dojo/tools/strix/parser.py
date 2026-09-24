@@ -7,7 +7,9 @@ from dojo.models import Finding
 
 
 class StrixParser:
-    """Parser for the vulnerabilities.json report of a Strix security run.
+
+    """
+    Parser for the vulnerabilities.json report of a Strix security run.
 
     Strix reports one entry per finding, and the set of keys varies by
     finding_class (code findings carry PoC and CVSS breakdowns, dependency
@@ -62,11 +64,7 @@ class StrixParser:
         if not isinstance(data, list):
             msg = f"Strix reports are a JSON array; got a {type(data).__name__}."
             raise TypeError(msg)
-        findings = []
-        for item in data:
-            if item:
-                findings.append(self._to_finding(item, test))
-        return findings
+        return [self._to_finding(item, test) for item in data if item]
 
     def _to_finding(self, item, test):
         dependency = item.get("dependency_metadata") or {}
@@ -99,11 +97,7 @@ class StrixParser:
         return finding
 
     def _severity(self, value):
-        severity = self.SEVERITIES.get(str(value).lower())
-        if severity is None:
-            msg = f"Unknown severity: {value}"
-            raise ValueError(msg)
-        return severity
+        return self.SEVERITIES.get(str(value).lower(), "Info")
 
     def _cwe(self, value):
         if not value:
