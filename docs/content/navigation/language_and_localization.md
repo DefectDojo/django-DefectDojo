@@ -39,6 +39,10 @@ has been verified, so they do not appear in the menu yet even where their transl
 **Translated**: menus, buttons, headings, form labels, help text, confirmation dialogs, table
 column headers and the messages DefectDojo shows you.
 
+Notifications are translated too, and in **your** language rather than the language of whoever
+caused them. If a colleague reading DefectDojo in German does something that notifies you, the
+email you receive is in the language you chose.
+
 **Not translated**, deliberately:
 
 - **Your data.** Finding titles, asset and organization names, descriptions, tags, notes and
@@ -69,5 +73,7 @@ notification.
 A user's language is stored on their profile, so you can set it for them from the user
 administration page in the same place you set their other contact details.
 
-Notifications, scheduled reports and other messages generated outside a browser session use the
-instance default rather than the recipient's language.
+A notification addressed to a person is written in that person's language, whichever language the
+event was triggered from. Destinations that are not a person use the instance default instead: a
+Slack or Microsoft Teams channel, a webhook, and the instance-wide notification email address are
+read by many people with different preferences, so one language has to be chosen for them.
