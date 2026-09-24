@@ -35,7 +35,7 @@ jobs:
         timeout-minutes: 10
         uses: manusa/actions-setup-minikube@b65276017fdec6f1e6498129fb740e34e260dc55 # v2.18.0
         with:
-          minikube version: 'v1.38.1' # renovate: datasource=github-releases depName=kubernetes/minikube
+          minikube version: 'v1.39.0' # renovate: datasource=github-releases depName=kubernetes/minikube
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
