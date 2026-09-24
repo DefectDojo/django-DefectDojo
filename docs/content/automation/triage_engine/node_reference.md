@@ -670,17 +670,25 @@ Recipients still control this through their own **Rules Engine Match** notificat
 
 `report.generate`
 
-Generates a report from a template, scoped to the Findings that reached this node, and can announce the download link.
+Generates a report from a template, scoped to the Findings that reached this node, or one report per Finding or per Asset, and can announce the download link.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
 | **Report Template** | none | Which template to generate from. Required. |
 | **Format** | `pdf` | `pdf`, `html`, `csv`, `xlsx` (Excel) or `json`. The data formats (`csv`, `xlsx`, `json`) carry only the template's Tabular and Detail blocks: a cover page, a chart or a widget has nothing to put in a cell and is left out. They are what a scheduled rule hands to a downstream system rather than to a reader. If the template has no Tabular or Detail block at all, the delivery fails with that reason in its error and no report is created, so look in the rule's deliveries rather than in Generated Reports. See [the Report Builder](/metrics_reports/reports/report-builder/). |
-| **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. |
+| **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. `each_finding` (One Report per Finding) and `each_asset` (One Report per Asset) generate a separate report for each Finding, or for each Asset the Findings belong to. |
 | **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. |
 | **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
-| **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. |
+| **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. With a per-item scope, `{{ctx.finding_title}}` or `{{ctx.asset_name}}` names what the report is about. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.
+
+**One report per Finding or per Asset.** Build a report template for a single Finding (or a single Asset) using [template variables](/metrics_reports/reports/report-builder/#template-variables), then pick `each_finding` or `each_asset`. Each report fills the template's variables from its own item: `each_finding` supplies the Finding, its Asset and its primary vulnerability ID; `each_asset` supplies the Asset. Each generated report is named after its template and item, for example `Single Finding: SQL Injection in Login Form (Payments Portal)`, so two reports on the same issue in different Assets stay distinct. A template with no variables is still scoped to the item, by pinning its Finding blocks to that Finding (or to that Asset's matched Findings) the way `batch_findings` does.
+
+A template that uses a variable the chosen scope cannot fill, such as `{{finding.id}}` with `batch_findings`, is refused when the rule is saved, with a message naming the variable and the scope that fills it. A Finding with no vulnerability ID is skipped, with a reason, when the template uses `{{vulnerability_id}}`.
+
+The per-item scopes follow the same per-item ceiling as every other per-item node ([`DD_RULES_V2_MAX_PER_ITEM_SENDS`](/automation/triage_engine/configuration/#per-finding-send-ceiling), 1000 per node per run by default): past it, the node records one skipped delivery saying how many Findings or Assets were left out. Every report is a file, so a rule that reports on many items fills storage accordingly; set **Delete Generated Reports After (Days)** to have old reports removed (see [Report retention](/metrics_reports/reports/report-builder/#report-retention)).
+
+To report on a single CVE, add a condition on the Finding's vulnerability ID before this node: `each_finding` then produces a report for every Finding with that CVE, `each_asset` one per affected Asset, and `batch_findings` one report covering them all.
 
 The announcement is recorded as its own delivery, separate from the report generation, so you can see the report succeed and the announcement fail independently.
