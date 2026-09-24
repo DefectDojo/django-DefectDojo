@@ -11,7 +11,7 @@ django-dbbackup==5.3.1
 django-environ==0.14.0
 django-filter==26.1
 django-htmx==1.29.0
-django-imagekit==6.1.0
+django-imagekit==6.1.1
 django-multiselectfield==1.0.1
 django-ninja==1.7.0  # API v3 framework (alpha); pulls pydantic v2 (already present transitively)
 django-polymorphic==4.11.7
