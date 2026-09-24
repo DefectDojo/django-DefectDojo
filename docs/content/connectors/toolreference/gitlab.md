@@ -19,6 +19,18 @@ You will need a Personal Access Token with the **read_api** scope. We recommend 
 
 Each project becomes a Record named after the project, grouped by its **namespace**. Projects that are pending deletion in GitLab (deleted by a user, but not yet purged by GitLab's background job) are excluded automatically, so deleting a project flags its Record as `MISSING` on the next Sync instead of leaving behind a renamed ghost asset.
 
+#### Excluding Archived Projects
+
+By default the connector imports archived projects along with active ones. To import only active projects, turn on **Exclude Archived Projects** under **Import Configuration** in the connector form. The setting can be changed after the connector is created.
+
+With the toggle on:
+
+- Archived projects are left out of Discover and Sync, so auto-mapping does not create anything for them.
+- A project that was already mapped before it was archived (or before you turned the toggle on) is flagged `MISSING` on the next Sync. Its mapping, and everything it already imported into DefectDojo, is kept.
+- An archived project that was never mapped disappears from the Records list.
+
+Turning the toggle back off brings archived projects back on the next Discover: a `MISSING` Record returns to `GOOD`, and a never-mapped project reappears as `NEW`.
+
 ## Downstream Connector
 
 The GitLab integration allows you to add issues to a [GitLab Project](https://docs.gitlab.com/ee/user/project/).
