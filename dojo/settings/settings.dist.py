@@ -1953,6 +1953,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
     "OPF Scan": DEDUPE_ALGO_HASH_CODE,
+    # Strix reports a stable per-finding id (verbatim into vuln_id_from_tool), so dedupe on it directly.
+    "Strix Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var
