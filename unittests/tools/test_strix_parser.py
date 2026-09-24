@@ -1,6 +1,6 @@
 import io
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.strix.parser import StrixParser
@@ -36,7 +36,7 @@ class TestStrixParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
         self.assertFalse(finding.static_finding)
         self.assertEqual(
-            datetime(2026, 9, 23, 7, 13, 47, tzinfo=timezone.utc),
+            datetime(2026, 9, 23, 7, 13, 47, tzinfo=UTC),
             finding.date,
         )
         self.assertEqual(4.3, finding.cvssv3_score)
@@ -113,8 +113,8 @@ class TestStrixParser(DojoTestCase):
         ]:
             self.assertEqual(expected, parser._severity(level))
 
-        with self.assertRaises(ValueError):
-            parser._severity("severe")
+        self.assertEqual("Info", parser._severity("severe"))
+        self.assertEqual("Info", parser._severity(None))
 
     def test_cwe_extraction(self):
         parser = StrixParser()
