@@ -58,6 +58,17 @@ Only problems your changes introduce stop a save. A preset's own default colors 
 
 The severity, risk, grade, and CVSS score colors are the same in light and dark mode. They are used on tags, charts, and gauges throughout the Pro UI. Each group has its own reset button.
 
+## Reports and exports
+
+Everything DefectDojo prints follows these settings, always in light mode because reports are printed on a white page:
+
+* **Metrics and dashboard PDF exports** use your light-mode colors, even when the person exporting works in dark mode.
+* **Report Builder charts** use your preset, your metric colors, and your light-mode text colors, whether the report is generated from the browser, through the API, or on a schedule.
+* **Reports with no theme selected** take their colors from your primary color and your light-mode text colors. The primary color is darkened where needed so headings and table headers stay readable on white.
+* **New report themes** start from those same colors, so you only change what should differ from the instance.
+
+Existing report themes keep the colors they were saved with.
+
 ## Automating appearance settings
 
 The same settings are available through the API as the `ui_color_theme` field of `/api/v2/system_settings/{id}/`. It is a partial object: include only what you want to customize, and send an empty object to return to the preset defaults. The API applies the same readability rule to text and surface colors stored together.
