@@ -6,11 +6,10 @@ on:
     branches:
       - master
       - dev
-      - bugfix
       - release/**
       - hotfix/**
     # No paths/paths-ignore here, ever. `Unit Tests Complete` below is a required
-    # check on bugfix, and a required check whose workflow never triggers sits as
+    # check on dev, and a required check whose workflow never triggers sits as
     # "Expected -- waiting for status to be reported" forever. A PR must pass its
     # required checks BEFORE it can enter the merge queue, so a trigger-level
     # docs/** filter left docs-only PRs unqueueable for anyone without ruleset
@@ -22,7 +21,7 @@ on:
   # point ever evaluates their union.
   #
   # The queue that emits these events is the "Merge Queue" ruleset (id 20466211),
-  # active on bugfix: SQUASH, ALLGREEN grouping, max 3 entries building, and it
+  # active on dev: SQUASH, ALLGREEN grouping, max 3 entries building, and it
   # requires `ruff-linting` and `Unit Tests Complete` on the merge group. Two
   # operational notes recorded here so they survive the people who know them:
   #

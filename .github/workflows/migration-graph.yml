@@ -32,7 +32,6 @@ on:
     branches:
       - master
       - dev
-      - bugfix
       - release/**
       - hotfix/**
   pull_request:

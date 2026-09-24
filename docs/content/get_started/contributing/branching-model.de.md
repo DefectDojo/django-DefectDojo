@@ -10,23 +10,25 @@ aliases:
 
 ## Reguläre Releases
 
-Das DefectDojo-Team strebt folgenden Rhythmus an:
+Alle Releases entstehen aus dem Branch `dev`. Das DefectDojo-Team strebt folgenden Rhythmus an:
 
 - Minor-Releases: mindestens einmal pro Monat, am ersten Montag des Monats.
-- Patch/Bugfix: Releases jede Woche am Montag.
-- Security-Releases: erfolgen je nach Schweregrad außerhalb unseres regulären Rhythmus.
+- Patch-Releases: jede Woche am Montag.
+- Security-Releases: können je nach Schweregrad außerhalb unseres regulären Rhythmus erfolgen. Auch sie entstehen aus `dev`.
 
-GitHub Actions sind die maßgebliche Quelle. Die Releases sind teilautomatisiert. Die Schritte für ein reguläres Release sind:
-1. Den Release-Branch aus `dev` oder `bugfix` erstellen und einen PR gegen `master` vorbereiten ([Details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-pr.yml))
+Es gibt keinen separaten Branch für Fehlerbehebungen und keinen Hotfix-Branch von `master`. Jeder Pull Request, ob Fehlerbehebung oder Feature, richtet sich gegen `dev`.
+
+GitHub Actions sind die maßgebliche Quelle. Die Releases sind teilautomatisiert. Die Schritte für jedes Release sind:
+1. Den Release-Branch aus `dev` erstellen und einen PR gegen `master` vorbereiten ([Details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-1-create-pr.yml))
 --> Ein Maintainer prüft den PR und merged ihn manuell
-1. Tag setzen, Draft-Release anlegen und Docker-Image bauen und pushen ([Details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-tag-docker.yml))
+1. Tag setzen, Draft-Release anlegen und Docker-Image bauen und pushen ([Details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-2-tag-docker-push.yml))
 --> Ein Maintainer überarbeitet die Notizen des Release-Drafters und veröffentlicht das Release
-1. Es wird ein PR erstellt, der `master` zurück in `dev` und `bugfix` merged, um die Branches wieder abzugleichen ([Details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-master-into-dev.yml))
+1. Es wird ein PR erstellt, der `master` zurück in `dev` merged, um die Branches wieder abzugleichen ([Details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-3-master-into-dev.yml))
 
 ## Security-Releases
 PRs zu Sicherheitsproblemen werden über [Security Advisories](https://github.com/DefectDojo/django-DefectDojo/security/advisories) abgewickelt. Diese bieten die Möglichkeit, nicht öffentlich am Code zu arbeiten, ohne Schwachstellen vorzeitig offenzulegen.
 
-## Release- und Hotfix-Modell
+## Release-Modell
 
 Die Diagramme wurden mit [plantUML](https://plantuml.com) erstellt. Einen webbasierten Editor für PlantUML finden Sie unter https://www.planttext.com.
 
@@ -38,7 +40,6 @@ Die Diagramme wurden mit [plantUML](https://plantuml.com) erstellt. Einen webbas
 @startuml
 
 participant "Dev Branch" as dev #LightBlue
-participant "BugFix Branch" as bugfix #LightGreen
 participant "Release Branch" as release #LightGoldenRodYellow
 participant "Master Branch" as master #LightSalmon
 
@@ -47,24 +48,14 @@ participant "Master Branch" as master #LightSalmon
 dev -> release: Create branch "release/2.x.0"
 release -> master: Merge
 note right: Official Release\n - Tag 2.x.0\n - Push 2.x.0 to DockerHub
-master --> bugfix: Merge master into bugfix to realign
 master --> dev: Merge master back into dev
 
-== Patch/BugFix Release (Weekly) ==
+== Patch Release (Weekly) ==
 
-bugfix -> release: Create branch "release/2.x.y"
+dev -> release: Create branch "release/2.x.y"
 release -> master: Merge
 note right: Official Release\n - Tag 2.x.y\n - Push 2.x.y to DockerHub
-master -> bugfix: Merge master back into bugfix to realign
-master --> dev: Merge master into dev to realign
-
-== Security Release (As Needed) ==
-
-master -> release: Create branch "release/2.x.y"
-release -> master: Merge
-note right: Official Release\n - Tag 2.x.y\n - Push 2.x.y to DockerHub
-master --> bugfix: Merge master into bugfix to realign
-master --> dev: Merge master into dev to realign
+master --> dev: Merge master back into dev
 
 @enduml
 ```

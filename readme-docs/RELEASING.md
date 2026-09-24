@@ -2,42 +2,26 @@
 
 ### Summary
 
-We have two types of releases:
+Every release is cut from the `dev` branch. There are two kinds, and they follow the same procedure:
 
-1. **Feature releases** - These are monthly releases created from the `dev` branch, via a new release branch, i.e. `release/x.y.z`. 
-2. **Bugfix releases** - These are weekly created from the `bugfix` branch, via a new release branch, i.e. `release/x.y.z`. 
+1. **Monthly minor releases** (`x.y.0`)
+2. **Weekly patch releases** (`x.y.100`, `x.y.200`, ...)
 
-Dependency updates and security patches go into the monthly releases. Urgent crirtical security patches will go into the bugfix releases.
+The release schedule decides which one is next. Dependency updates, bug fixes and security patches, urgent ones included, go into the next release from `dev`. There is no separate branch for bug fixes and no hotfix branch off `master`.
 
 The release process will then:
 
-- Create a PR to merge that release branch into `master`
-- Tag the release, Build the dockers images and Push them to Docker Hub
-- Merge the changes in `master` "back into dev" to make sure `dev` and `bugfix` is in sync again with `master`
+- Create a `release/x.y.z` branch from `dev` and a PR to merge it into `master` (`Release-1`)
+- Tag the release, build the docker images and push them to Docker Hub (`Release-2`)
+- Merge the changes in `master` back into `dev` so the two stay in sync (`Release-3`)
 
-The steps are identical for both release types, unless specified otherwise below.
+# Before you start
 
-# Creating and preparing the release branch
-
-### Feature release
-- Make sure the `dev` branch contains exactly that what you want to release. 
-- Create a new release branch from the `dev` branch:
-
-![image](https://user-images.githubusercontent.com/4426050/149572033-49a6c2a7-6c5b-4272-84e5-040c661598b4.png)
-
-### Bugfix release
-- Create a new branch from `master` which will receive the bugfix PRs for the release, i.e. `release/x.y.z`.
-
-![image](https://user-images.githubusercontent.com/4426050/149616927-d26b3812-f5ce-4bd3-a196-a72293dd9377.png)
-
-- Create bugfix PRs against the new release branch:
-- Merge the PRs
-
-### Always
+- Make sure the `dev` branch contains exactly what you want to release.
 - Make sure there's a section in [os_upgrading](../docs/content/releases/os_upgrading) about any specific instructions when upgrading to this new release.
 
 - Remove existing draft releases with the same version number
-Due to the release drafter being a non-perfect match for our git flow based release process, we have to delete any draft that has already been created by the release drafter if it has the same versio number. This is probably not needed if you're doing a bugfix release.
+The release drafter is not a perfect match for our release process, so delete any draft it has already created with the same version number.
 
 - Go to [Releases](https://github.com/DefectDojo/django-DefectDojo/releases) and delete any draft release that has the same version number as the release you are planning to release today.
 
@@ -49,9 +33,11 @@ If you do not delete any existing draft release, you will end up with multiple d
 
 # Creating the PR to merge into `master`
 
-Run the `Release-1: Create PR for master` action:
+Run the `Release-1: Create PR for master` action. Leave `from_branch` on `dev` (the only option) and enter the release version: `x.y.0` for a minor release, `x.y.100` / `x.y.200` / ... for a patch release.
 
 ![image](https://user-images.githubusercontent.com/4426050/149574288-a4056fb9-859c-413e-9f60-bc59894b0528.png)
+
+The action creates the `release/x.y.z` branch from `dev`, updates the version numbers in it, removes the `-dev` suffix from the helm chart version, and opens the PR against `master`.
 
 Verify the PR is created, and check if the commits in it make sense:
 
@@ -66,13 +52,13 @@ Go to the bottom of the lists of commits, click on the `Update versions in appli
 
 ![image](https://user-images.githubusercontent.com/4426050/149577123-572cc6dd-7bf3-44ad-af58-ab6e46905558.png)
 
-Ideally we wait until the test suite becomes green. If you're feeling brace, you can skip the waiting and instead wait for the tests to become green after merging into `master`.
+Ideally we wait until the test suite becomes green. If you're feeling brave, you can skip the waiting and instead wait for the tests to become green after merging into `master`.
 
 Merge into `master` by *creating a merge commit*. Do NOT squash the commits!
 
 ![image](https://user-images.githubusercontent.com/4426050/149577269-d51fe1ee-ba0d-4a9b-94e7-ec286954b5e2.png)
 
-Go to [GitHub Actions](https://github.com/DefectDojo/django-DefectDojo/actions) and pray for them to become green.
+Go to [GitHub Actions](https://github.com/DefectDojo/django-DefectDojo/actions) and check that the runs become green.
 
 # Make the release and push docker images
 
@@ -105,17 +91,17 @@ Verify the results:
 
 # Bring `dev` in sync with `master`
 
-To avoid merge conflicts and drigts between branches, we have to get `dev` back into sync with `master`. This step also bumps the version numbers if needed.
+To avoid merge conflicts and drift between branches, we have to get `dev` back into sync with `master`. This step also sets `dev` to the version of the next scheduled release, with a `-dev` suffix.
 
-Run the `Release-3: PR for merging master into dev` action.
+Run the `Release-3: PR for merging master into dev` action. Enter the version you just released and the next version for `dev` (`x.y.z-dev`).
 
 ![image](https://user-images.githubusercontent.com/4426050/149618563-05707161-7111-4ba9-ad18-6239f66c3aa5.png)
 
-Check the PR and versio number updates. For a fix version problably the version numbers are already correct on `dev`.
+Check the PR and the version number updates.
 
 ![image](https://user-images.githubusercontent.com/4426050/149618605-fd94b6a8-d348-4fc5-8eaf-92f23b1b54b7.png)
 
-Wait for the tests to complete. 
+Wait for the tests to complete.
 
 You can work on the release notes in the next step while waiting.
 
@@ -132,32 +118,11 @@ Because we have merged the release PR into master, the release draft has been tr
 
 ![image](https://user-images.githubusercontent.com/4426050/149619614-728736a4-e58f-4792-9b27-ead24ec07fc4.png)
 
-### Bugfix releases
-For bugfix releases the release drafter generates the correct release notes. These will contain the merged PRs since the previous release.
+Every release comes from `dev`, so the previous release is the right starting point for the notes: they list the PRs merged since then.
 
 ![image](https://user-images.githubusercontent.com/4426050/149619779-1d065baf-be09-41b7-a54c-b2676948a6cb.png)
 
-
-### Feature releases
-For features releases the release drafter will mess up if the **previous release was a bugfix release**. If the previous release was a feature release (x.y.0), the release notes will be generated correctly.
-
-For when the previous release was a bugfix release, i.e. 2.6.2:
-
-The release drafter does not look at releases or tags or branches. It just looks as the _date_ of the previous release and it will list all PRs merged since that date. So it will list all PRs merged since for example 2.6.2. This might miss PRs that have been merged _into dev_ between the release date of 2.6.0 and 2.6.2. To correct that, we have a fork of the release drafter that allows you to specify which release to use as the previous release. In this case we want all PRs listed that have been merged since 2.6.0.
-
-Run the `Release Drafter Valentijn` and specify the desired previous (feature) release to use:
-
-![image](https://user-images.githubusercontent.com/4426050/149619852-dc1dad77-b7b6-479d-8d9f-4ac1571ea92c.png)
-
-Output:
-
-![image](https://user-images.githubusercontent.com/4426050/149619893-3f8ce398-aec2-467e-bb66-e8efc8dc66d6.png)
-
-Release notes:
-
-![image](https://user-images.githubusercontent.com/4426050/149619906-f80b805a-67b2-4b3b-9ffb-8edfcf4b7e16.png)
-
-A tiny downside of this is that it will also lists PRs releases in 2.6.1 and 2.6.2, but I think that is acceptable.
+If the notes need to start from a different release, run the `Release Drafter (custom range)` action and set `filter-by-range` to that release, e.g. `3.1.0`. Use `dry-run` first to confirm where the changeset starts.
 
 As a finishing touch make sure the emoji in the release name is present. We have special emoji for security releases, see a previous security release:
 

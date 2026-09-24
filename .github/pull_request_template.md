@@ -22,8 +22,7 @@ Please update any documentation when needed in the [documentation folder](https:
 This checklist is for your information.
 
 - [ ] Make sure to rebase your PR against the very latest `dev`.
-- [ ] Features/Changes should be submitted against the `dev`.
-- [ ] Bugfixes should be submitted against the `bugfix` branch.
+- [ ] Submit all PRs, features and bug fixes alike, against the `dev` branch.
 - [ ] Give a meaningful name to your PR, as it may end up being used in the release notes.
 - [ ] Your code is Ruff compliant (see [ruff.toml](../ruff.toml)).
 - [ ] Your code is python 3.13 compliant.

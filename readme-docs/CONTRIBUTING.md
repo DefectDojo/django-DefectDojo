@@ -101,7 +101,7 @@ If you encounter a conflict in `dojo/db_migrations/max_migration.txt` during a r
 The following are things to consider before submitting a pull request to
 DefectDojo.
 
-0. Base your PR against the `dev` or `bugfix` branch, unless discussed otherwise with the maintainers
+0. Base your PR against the `dev` branch, unless discussed otherwise with the maintainers
 
 0. Make sure that the install is working properly.
 
@@ -111,7 +111,7 @@ DefectDojo.
 
 0. See [flake8 built-in commit hooks] on how to easily check for for pep8 with flake8 before comitting.
 
-0. Pull requests should be submitted to the `dev` or `bugfix` branch.
+0. Pull requests should be submitted to the `dev` branch. Bug fixes and features both go there.
 
 0. In dev branch, the code should be python 3.13 compliant.
 

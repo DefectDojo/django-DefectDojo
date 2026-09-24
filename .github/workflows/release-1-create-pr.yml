@@ -6,15 +6,14 @@ env:
 on:
   workflow_dispatch:
     inputs:
-      # the actual branch that can be chosen on the UI is made irrelevant by further steps
-      # because someone will forget one day to change it.
+      # Every release (weekly patch and monthly minor) is cut from dev. The input is kept
+      # so existing callers that pass `-f from_branch=dev` keep working.
       from_branch:
-        description: "Select branch to release from. Dev branch releases happen the first monday of the month. Otherwise, use bugfix."
+        description: "Branch to release from. All releases, weekly patches and monthly minors, come from dev."
         required: true
         type: choice
-        default: 'bugfix'
+        default: 'dev'
         options:
-          - bugfix
           - dev
       release_number:
         description: "Release version (x.y.z format)"
@@ -24,17 +23,11 @@ jobs:
   create_pr:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate proper bugfix branch release_number format is being used
-        if: ${{ inputs.from_branch == 'bugfix' }}
+      - name: Validate release_number format
         run: |
-          # Expect a valid x.y.z release_number with a 1-3 digit last octet
-          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.[0-9]\{1,3\}$"
-
-      - name: Validate proper dev branch release_number format is being used
-        if: ${{ inputs.from_branch == 'dev' }}
-        run: |
-          # Expect the last octet in release_number to not be 1-9
-          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.0$"
+          # Expect x.y.z with a 1-3 digit last octet: x.y.0 for a monthly minor,
+          # x.y.100 / x.y.200 / ... for a weekly patch
+          echo "${{ inputs.release_number }}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]{1,3}$'
 
       - id: Set-GitHub-org
         run: echo "GITHUB_ORG=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
@@ -54,7 +47,6 @@ jobs:
           git config --global user.email "${{ env.GIT_EMAIL }}"
 
       - name: Push branch
-        if: "!startsWith('${{ inputs.from_branch }}', 'release/')"
         run: git push origin HEAD:${NEW_BRANCH}
 
       - name: Checkout release branch
@@ -69,11 +61,11 @@ jobs:
           sed -ri 's/appVersion: ".*"/appVersion: "${{ inputs.release_number }}"/' helm/defectdojo/Chart.yaml
 
           if grep "\-dev" helm/defectdojo/Chart.yaml; then
-              echo "x.y.z-dev found in Chart.yaml, probably releasing a new minor version"
+              echo "x.y.z-dev found in Chart.yaml (the normal case for a release from dev)"
               echo "removing the -dev suffix"
               sed -e "s/\-dev//" -i helm/defectdojo/Chart.yaml
           else
-              echo "x.y.z without -dev found in Chart.yaml, probably releasing a new bug fix version"
+              echo "x.y.z without -dev found in Chart.yaml: the chart was already stripped, probably a manual re-release"
               CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
               NEW_CHART_VERSION=$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
               echo "bumping the chart version from $CURRENT_CHART_VERSION to $NEW_CHART_VERSION"

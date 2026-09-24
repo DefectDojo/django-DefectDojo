@@ -4,7 +4,6 @@ on:
     branches:
       - master
       - dev
-      - bugfix
       - release/**
       - hotfix/**
 
@@ -66,7 +65,7 @@ jobs:
       # x.y.z gets bumped automatically when doing a release
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=true
-        if: ${{ steps.list_changed.outputs.changed == 'true' && env.ct-branch != 'dev' && env.ct-branch != 'bugfix' }}
+        if: ${{ steps.list_changed.outputs.changed == 'true' && env.ct-branch != 'dev' }}
 
       # run all checks but version increment always when something changed
       - name: Run chart-testing (lint)
@@ -74,7 +73,7 @@ jobs:
         if: steps.list_changed.outputs.changed == 'true'
 
       - name: Check update of "artifacthub.io/changes" HELM annotation
-        if: ${{ steps.list_changed.outputs.changed == 'true' && !(startsWith(github.head_ref, 'master-into-dev/') || startsWith(github.head_ref, 'master-into-bugfix/')) }}
+        if: ${{ steps.list_changed.outputs.changed == 'true' && !startsWith(github.head_ref, 'master-into-dev/') }}
         run: |
           # fast fail if `git show` fails
           set -e
