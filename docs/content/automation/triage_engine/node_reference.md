@@ -351,7 +351,7 @@ Closes, reopens, false-positives or risk accepts each Finding to match its linke
 | **Close Findings** | on | Apply closures. |
 | **Reopen Findings** | on | Reopen a closed Finding whose ticket is open again. |
 | **Also Reopen Finding Groups** | off | A ticket cannot say which member of a group should reopen, so this is off by default. |
-| **Note** | empty | Added to each Finding that changed. `{{ctx.ticket_status}}` is the status it moved to. |
+| **Note** | empty | Added to each Finding that changed. `{{ctx.ticket_change}}` says what changed in words, such as "Closed as a false positive" or "Reopened", and `{{ctx.ticket_status}}` is its code. |
 
 A close reason only ever classifies a closed state: false positive first, then accepted risk, then plain mitigation. A reopened ticket that still carries its old resolution reopens. Findings already in the target state are left alone.
 

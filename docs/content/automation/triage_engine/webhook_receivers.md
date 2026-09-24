@@ -68,7 +68,7 @@ See the [Node Reference](../node_reference/) for **On an Inbound Webhook**, **Fi
 
 ## Authentication
 
-Every receiver URL carries a random 256-bit token, and a delivery whose token does not match is answered like an unknown URL. On top of the token, a receiver can require:
+Every receiver URL carries a random 256-bit token. With the webhook gateway in front, a delivery whose token does not match is answered `401` by the gateway and never stored. Without it, DefectDojo answers it like an unknown URL. On top of the token, a receiver can require:
 
 | Mode | The sender proves itself by |
 |------|-----------------------------|
