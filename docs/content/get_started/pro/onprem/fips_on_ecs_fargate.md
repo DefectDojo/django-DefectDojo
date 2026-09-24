@@ -2,7 +2,7 @@
 title: "FIPS 140-3 Mode on Amazon ECS / Fargate"
 description: "Running DefectDojo Pro FIPS images on Amazon ECS with the Fargate launch type"
 draft: false
-weight: 8
+weight: 9
 audience: pro
 ---
 

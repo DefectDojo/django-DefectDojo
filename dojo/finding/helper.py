@@ -387,6 +387,20 @@ def group_findings_by(finds, finding_group_by_option):
     return affected_groups, grouped, skipped, groups_created
 
 
+def get_or_create_auto_finding_group(test, name, creator):
+    """
+    Auto grouping keeps one group per (test, name), whoever created it. Reuse the oldest
+    existing group, so a test that already holds same-name duplicates (from a raced import,
+    or from the old creator-scoped lookup) resolves to one group instead of raising
+    MultipleObjectsReturned. The creator is only recorded on a newly created group.
+    """
+    name = name[:255]
+    finding_group = Finding_Group.objects.filter(test=test, name=name).order_by("id").first()
+    if finding_group is not None:
+        return finding_group, False
+    return Finding_Group.objects.create(test=test, creator=creator, name=name), True
+
+
 def add_findings_to_auto_group(name, findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
@@ -394,7 +408,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 
         if create_finding_groups_for_all_findings or len(findings) > 1:
             # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
-            finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name[:255])
+            finding_group, created = get_or_create_auto_finding_group(test, name, creator)
             if created:
                 logger.debug("Created Finding Group %d:%s for test %d:%s", finding_group.id, finding_group, test.id, test)
                 # See if we have old findings in the same test that were created without a finding group
@@ -408,11 +422,10 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
             finding_group.findings.add(*findings)
         else:
             # Otherwise add to an existing finding group if it exists only
-            try:
-                finding_group = Finding_Group.objects.get(test=test, name=name)
-                if finding_group:
-                    finding_group.findings.add(*findings)
-            except:
+            finding_group = Finding_Group.objects.filter(test=test, name=name[:255]).order_by("id").first()
+            if finding_group is not None:
+                finding_group.findings.add(*findings)
+            else:
                 # See if we have old findings in the same test that were created without a finding group
                 # that match this new finding - then we can create a finding group
                 old_findings = Finding.objects.filter(test=test)
@@ -420,7 +433,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                 for f in old_findings:
                     f_group_name = get_group_by_group_name(f, group_by)
                     if f_group_name == name and f not in findings:
-                        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name[:255])
+                        finding_group, created = get_or_create_auto_finding_group(test, name, creator)
                         finding_group.findings.add(f)
                 if created:
                     finding_group.findings.add(*findings)
@@ -1059,6 +1072,29 @@ def _resolve_surviving_root(start_id, parent_of_doomed):
     return current  # A surviving finding id, or None when the chain dead-ends.
 
 
+def lock_findings_for_delete(finding_ids):
+    """
+    Row-lock ``finding_ids`` FOR UPDATE, in id order, for the rest of the transaction.
+
+    Deduplication locks each original FOR KEY SHARE before it writes a duplicate link to
+    it (see dojo.finding.deduplication._drop_links_to_deleted_originals), and the two
+    locks conflict. Taken before resolve_inbound_duplicate_references reads the inbound
+    references, this makes that read final: a flush that already holds a lock on one of
+    these findings commits first, and its links are then visible to the read; a flush
+    that comes later waits for this delete to commit and then finds the original gone.
+
+    One statement ordered by id, like the dedup flush's lock, so the two cannot each hold
+    a row the other is waiting for.
+    """
+    return list(
+        Finding.objects
+        .select_for_update()
+        .filter(id__in=finding_ids)
+        .order_by("id")
+        .values_list("id", flat=True),
+    )
+
+
 def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     """
     Resolve ``duplicate_finding`` references into ``chunk_ids`` held by findings that survive.
@@ -1072,7 +1108,11 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     does. Resolving once up front leaves every chunk after the first exposed: each chunk
     commits separately, so a reference written after that one pass -- deduplication of a
     concurrent import landing on an original this run has selected but not yet reached --
-    survives into a later chunk's COMMIT. Run per chunk, no such window exists.
+    survives into a later chunk's COMMIT. Running per chunk only narrows that window to
+    this read and the chunk's COMMIT, so the chunk must be locked with
+    lock_findings_for_delete first: deduplication locks an original before linking to it,
+    so once the chunk is locked no new reference into it can be committed until the
+    delete has.
 
     Only findings outside ``delete_scope_ids`` are touched: a reference from one doomed
     finding to another goes away with the row that holds it.
@@ -1161,7 +1201,11 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     Inbound duplicate_finding references are resolved the same way and for the same
     reason -- see resolve_inbound_duplicate_references. Doing it here rather than in each
     caller covers every entry point to the chunked delete, not just the one that first
-    hit the constraint.
+    hit the constraint. The chunk's findings are row-locked immediately before that
+    (lock_findings_for_delete) so a concurrent dedup flush cannot add a reference after
+    it. Both run after the child and through rows are deleted, so dojo_finding rows are
+    still the last rows a chunk locks, as they were when only the final DELETE locked
+    them; the cascade does not read or write any duplicate_finding value.
 
     When order_desc is True, findings are processed highest id first (matches
     finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
@@ -1191,8 +1235,9 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
             try:
                 with transaction.atomic():
                     bulk_clear_finding_m2m(chunk_qs)
-                    resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
                     cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
+                    lock_findings_for_delete(chunk_ids)
+                    resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
                     execute_delete_sql(chunk_qs)
             except OperationalError as exc:
                 # A deadlock or serialization failure aborts and rolls the whole chunk

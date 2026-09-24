@@ -1,9 +1,16 @@
 from crum import impersonate
+from django.urls import reverse
 from django.utils.timezone import now
 
 from dojo.authorization.roles_permissions import Roles
+from dojo.location.api.endpoint_compat import V3EndpointStatusCompatibleFilterSet
+from dojo.location.api.filters import LocationFilter
 from dojo.location.models import Location, LocationProductReference
-from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
+from dojo.location.queries import (
+    annotate_location_counts_and_status,
+    get_authorized_location_finding_reference,
+    get_authorized_locations,
+)
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     Dojo_User,
@@ -30,6 +37,9 @@ VICTIM_FINDING_TAG = "joinscope-b-finding-tag"
 OWN_PRODUCT_NAME = "JoinScope Product A"
 OWN_PRODUCT_TAG = "joinscope-a-product-tag"
 OWN_FINDING_TAG = "joinscope-a-finding-tag"
+
+SHARED_HOST_NAME = "outwardscope-shared.example.com"
+OWN_HOST_NAME = "outwardscope-own.example.com"
 
 
 @skip_unless_v3
@@ -190,3 +200,154 @@ class TestLocationFilterJoinScoping(DojoTestCase):
             self._matches(self.alice, url__host_exact=SHARED_HOST), {self.shared.id})
         self.assertEqual(
             self._matches(self.alice, url__host_contains="joinscope-own"), {self.own.id})
+
+
+@skip_unless_v3
+@versioned_fixtures
+class TestLocationOutwardPredicateScoping(DojoTestCase):
+
+    """
+    The same outward-join primitive on the three consumers the filterset override
+    never reached: the REST Location list, the endpoint_status compatibility filter,
+    and the vulnerable-endpoint view body.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    @classmethod
+    def setUpTestData(cls):
+        prod_type, _ = Product_Type.objects.get_or_create(name="OutwardScope PT")
+        test_type, _ = Test_Type.objects.get_or_create(name="OutwardScope Scan")
+
+        def build(name):
+            product = Product.objects.create(name=name, description=name, prod_type=prod_type)
+            engagement = Engagement.objects.create(
+                product=product, name=f"{name} eng",
+                target_start=now().date(), target_end=now().date(),
+            )
+            test = Test.objects.create(
+                engagement=engagement, test_type=test_type,
+                target_start=now(), target_end=now(),
+            )
+            finding = Finding.objects.create(
+                test=test, title=f"{name} Finding", severity="High",
+                numerical_severity="S1", active=True, verified=True,
+                reporter=User.objects.filter(is_superuser=True).first(),
+            )
+            return product, finding
+
+        cls.product_a, cls.finding_a = build("OutwardScope Product A")
+        cls.product_b, cls.finding_b = build("OutwardScope Product B")
+
+        cls.alice = User.objects.create_user(
+            username="outwardscope_alice",
+            password="not-a-real-secret",  # noqa: S106 - test fixture user
+        )
+        cls.product_a.authorized_users.add(Dojo_User.objects.get(pk=cls.alice.pk))
+        Product_Member.objects.create(
+            product=cls.product_a, user=cls.alice, role=Role.objects.get(id=Roles.Reader))
+
+        cls.shared = URL.get_or_create_from_values(
+            protocol="https", host=SHARED_HOST_NAME, path="app").location
+        cls.shared.associate_with_product(cls.product_a)
+        cls.shared.associate_with_product(cls.product_b)
+        cls.shared.associate_with_finding(cls.finding_a, audit_time=now())
+        cls.shared.associate_with_finding(cls.finding_b, audit_time=now())
+
+        cls.own = URL.get_or_create_from_values(
+            protocol="https", host=OWN_HOST_NAME, path="x").location
+        cls.own.associate_with_product(cls.product_a)
+        cls.own.associate_with_finding(cls.finding_a, audit_time=now())
+
+        # The shared row is Mitigated for the caller's own product and Active only for
+        # the foreign one, so anything that lists it as vulnerable matched through B.
+        LocationProductReference.objects.filter(product=cls.product_a).update(
+            status=ProductLocationStatus.Active)
+        LocationProductReference.objects.filter(
+            location=cls.shared, product=cls.product_a).update(
+            status=ProductLocationStatus.Mitigated)
+        LocationProductReference.objects.filter(product=cls.product_b).update(
+            status=ProductLocationStatus.Active)
+
+        cls.ref_b_on_shared = LocationProductReference.objects.get(
+            location=cls.shared, product=cls.product_b)
+        cls.ref_a_on_shared = LocationProductReference.objects.get(
+            location=cls.shared, product=cls.product_a)
+        cls.admin = User.objects.filter(is_superuser=True).first()
+
+    # --- the REST Location list ---
+
+    def _api_matches(self, user, **params):
+        with impersonate(user):
+            base = get_authorized_locations(
+                "view", Location.objects.filter(id__in=[self.shared.id, self.own.id]), user)
+            return set(LocationFilter(params, queryset=base).qs.values_list("id", flat=True))
+
+    def test_api_list_never_answers_about_another_product(self):
+        for label, params in (
+            ("foreign product id", {"products__product_equals": self.product_b.id}),
+            ("foreign product id, list", {"products__product_includes": [self.product_b.id]}),
+            ("foreign finding id", {"findings__finding_equals": self.finding_b.id}),
+        ):
+            with self.subTest(label):
+                self.assertNotIn(self.shared.id, self._api_matches(self.alice, **params))
+
+    def test_api_list_still_answers_about_the_callers_own(self):
+        self.assertEqual(
+            self._api_matches(self.alice, products__product_equals=self.product_a.id),
+            {self.shared.id, self.own.id},
+        )
+        self.assertEqual(
+            self._api_matches(self.alice, findings__finding_equals=self.finding_a.id),
+            {self.shared.id, self.own.id},
+        )
+
+    def test_api_list_negation_does_not_hide_the_callers_row(self):
+        self.assertIn(
+            self.shared.id,
+            self._api_matches(self.alice, products__product_not_equals=self.product_b.id),
+        )
+
+    def test_api_list_superuser_still_sees_everything(self):
+        self.assertEqual(
+            self._api_matches(self.admin, products__product_equals=self.product_b.id),
+            {self.shared.id},
+        )
+
+    # --- the endpoint_status compatibility filter ---
+
+    def _endpoint_status_matches(self, user, reference_id):
+        with impersonate(user):
+            base = get_authorized_location_finding_reference("view", user=user)
+            filterset = V3EndpointStatusCompatibleFilterSet(
+                {"endpoint": str(reference_id)}, queryset=base)
+            return set(filterset.qs.values_list("id", flat=True))
+
+    def test_endpoint_status_filter_never_matches_a_foreign_reference(self):
+        self.assertEqual(self._endpoint_status_matches(self.alice, self.ref_b_on_shared.id), set())
+
+    def test_endpoint_status_filter_still_matches_the_callers_own_reference(self):
+        self.assertTrue(self._endpoint_status_matches(self.alice, self.ref_a_on_shared.id))
+
+    def test_endpoint_status_filter_superuser_still_sees_everything(self):
+        self.assertTrue(self._endpoint_status_matches(self.admin, self.ref_b_on_shared.id))
+
+    # --- the vulnerable endpoint list view ---
+
+    def _page(self, user, url):
+        self.client.force_login(user)
+        response = self.client.get(url, secure=True)
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode()
+
+    def test_vulnerable_page_excludes_a_row_only_another_product_calls_active(self):
+        body = self._page(self.alice, reverse("vulnerable_endpoints"))
+        self.assertIn(OWN_HOST_NAME, body)
+        self.assertNotIn(SHARED_HOST_NAME, body)
+
+    def test_vulnerable_hosts_page_excludes_it_too(self):
+        body = self._page(self.alice, reverse("vulnerable_endpoint_hosts"))
+        self.assertNotIn(SHARED_HOST_NAME, body)
+
+    def test_all_endpoints_page_still_lists_the_shared_row(self):
+        self.assertIn(SHARED_HOST_NAME, self._page(self.alice, reverse("endpoint")))
