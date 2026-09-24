@@ -9,7 +9,7 @@ DefectDojo Pro peut être déployé avec une cryptographie validée FIPS 140-3, 
 
 Le mode FIPS est livré sous la forme d'un **ensemble distinct d'images de conteneur**, identifiées par un suffixe de tag `-fips`. Les images standard restent inchangées : l'activation de FIPS est un choix explicite, jamais un comportement par défaut silencieux.
 
-Pour accéder aux images FIPS, contactez-nous à l'adresse [hello@defectdojo.com](mailto:hello@defectdojo.com).
+Les images FIPS sont publiées pour chaque version à partir de la **3.3.200**. Elles proviennent du même registre que les images standard, et les identifiants de registre fournis avec votre licence permettent déjà de les récupérer : il n'y a donc rien à demander ni à activer. Voir [Obtenir les images FIPS](#getting-the-fips-images).
 
 ## Ce que fournissent les images FIPS
 
@@ -29,50 +29,55 @@ Comme l'application des règles se fait **à l'intérieur du conteneur**, le mod
 | Initialiseur (`init`) | oui | OpenSSL FIPS Provider 3.1.2 |
 | Workers d'orchestration (`ddorch-workers`) | oui | OpenSSL FIPS Provider 3.1.2 |
 | nginx | oui | OpenSSL FIPS Provider 3.1.2 |
-| Moteur d'avis PSIRT | oui | OpenSSL FIPS Provider 3.1.2 |
 | Connecteurs, intégrateurs, ddorch, serveur MCP | oui | Go Cryptographic Module v1.0.0 |
 | **Sensei** | **partiel** | binaires du service : Go Cryptographic Module v1.0.0. Chaîne d'outils de scanners intégrée : **non couverte** |
 | **PostgreSQL / Redis (intégrés)** | **non** | utilisez des services externes conformes FIPS |
+| **Validateur OSCAL** | **non** | aucune variante FIPS ; laissez-le désactivé |
 
 **Sensei est un cas partiel qu'il vaut la peine de comprendre.** Ses propres binaires sont compilés à partir du module Go validé, de sorte que le TLS et les jetons de l'API de jobs sont couverts. L'image regroupe également une chaîne d'outils de scanners tiers polyglotte — Node (qui embarque son propre OpenSSL), Rust (rustls), Python, Ruby, et des binaires Go tiers que nous ne compilons pas — et plusieurs d'entre eux récupèrent des bases de données d'avis via TLS en utilisant leur propre cryptographie. Cette chaîne d'outils ne peut pas être ramenée sous un module validé unique ; elle n'est donc pas couverte et ne doit pas être présentée comme telle à un évaluateur.
 
-Les instances PostgreSQL/Redis intégrées n'ont aucune variante FIPS. Dans Kubernetes, le chart refuse de se générer si vous activez FIPS en même temps que Sensei ou les magasins de données intégrés ; le compromis est donc une décision explicite plutôt qu'une hypothèse implicite (voir [Garde-fous](#guard-rails)).
+Les instances PostgreSQL/Redis intégrées n'ont aucune variante FIPS. Dans Kubernetes, le chart refuse de se générer si vous activez FIPS en même temps que Sensei, les magasins de données intégrés ou le validateur OSCAL ; le compromis est donc une décision explicite plutôt qu'une hypothèse implicite (voir [Garde-fous](#guard-rails)).
+
+## Obtenir les images FIPS {#getting-the-fips-images}
+
+Chaque image disposant d'une variante FIPS est publiée à côté de son image standard, dans le même dépôt, avec le tag `<version>-fips` :
+
+```
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro/django:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro/nginx:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-connectors/connectors:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-integrators/integrators:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/ddorch/ddorch:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/go-dd-pro-mcp/mcp-server:<version>-fips
+```
+
+Les identifiants de registre fournis avec votre licence couvrent ces dépôts, comme pour les images standard. Rien ne doit être demandé ni activé sur votre compte.
+
+Sur Kubernetes et Docker Compose, vous n'écrivez pas ces tags vous-même : `fips.enabled` et `DD_FIPS_MODE` les sélectionnent. Vous en avez besoin directement lorsque vous écrivez votre propre déploiement, par exemple une définition de tâche Amazon ECS, ou lorsque vous mettez en miroir des images dans un registre privé.
+
+**linux/amd64 uniquement.** Le certificat du fournisseur OpenSSL FIPS Provider répertorie des environnements d'exploitation x86_64 ; les images FIPS sont donc publiées pour amd64 et non pour arm64. Un déploiement FIPS nécessite des nœuds amd64.
+
+**Signées.** Comme les images de version standard, chaque image FIPS est signée et porte des attestations SBOM aux formats SPDX et CycloneDX.
 
 ## Activation du mode FIPS — Docker Compose
 
-Deux changements : utiliser les images `-fips`, et définir `DD_FIPS_MODE`.
-
-**1. Pointez les tags d'image vers les variantes FIPS.** Dans votre fichier `.env` ou votre override compose :
+À partir de la version 3.3.300, une seule variable gère les deux aspects. `DD_FIPS_MODE` sélectionne l'image `-fips` de chaque service qui en possède une et active l'application des règles dans les conteneurs qui la vérifient, de sorte que les images et le paramètre ne peuvent pas se désynchroniser. Définissez-la avec la CLI, qui la conserve dans sa propre configuration afin qu'elle survive aux mises à niveau :
 
 ```bash
-DD_IMAGE_TAG=<version>-fips
+dojo-compose-cli environment add -k DD_FIPS_MODE -v 1
+dojo-compose-cli app pull-images
+dojo-compose-cli app restart
 ```
 
-**2. Définissez `DD_FIPS_MODE` dans les ancres d'environnement partagées.** Le fichier compose définit des blocs partagés que chaque service concerné fusionne, ce qui représente donc trois modifications plutôt qu'une par service :
+Pour désactiver le mode FIPS, supprimez la variable avec `dojo-compose-cli environment remove -k DD_FIPS_MODE` puis redémarrez. Ne la définissez pas à `0` : n'importe quelle valeur sélectionne les images FIPS.
 
-```yaml
-x-dojo-vars: &dojoenv
-  DD_FIPS_MODE: "1"        # dojo, dojo-import-scan, celerybeat, celeryworker, init, ddorch-workers
-  # ... existing settings
+Le cache Valkey intégré et Sensei conservent leurs images standard, car aucun des deux ne dispose d'une variante FIPS. En production, faites pointer DefectDojo vers un cache externe conforme FIPS (voir les notes de déploiement à la fin de cette page). Sensei ne s'exécute que si votre licence l'inclut, et il n'est que partiellement couvert, comme indiqué dans le tableau de couverture.
 
-x-nginx-vars: &nginxenv
-  DD_FIPS_MODE: "1"        # nginx
-  # ... existing settings
-
-x-psirt-vars: &psirtenv
-  DD_FIPS_MODE: "1"        # psirt
-  # ... existing settings
-```
-
-Puis recréez la pile :
-
-```bash
-docker compose up -d --force-recreate
-```
+**Sur la version 3.3.200.** Les fichiers de déploiement de la 3.3.200 sont antérieurs à `DD_FIPS_MODE` ; effectuez donc une mise à niveau vers la 3.3.300 ou une version ultérieure pour l'utiliser. Si vous avez besoin de FIPS en 3.3.200, modifiez plutôt `docker-compose.yml` dans votre répertoire d'installation : ajoutez `-fips` après `${version}` sur les lignes `x-nginx-image`, `x-django-image`, `x-connectors-image`, `x-integrators-image`, `x-ddorch-image` et `x-mcp-server-image`, ajoutez `DD_FIPS_MODE: "1"` aux blocs `x-dojo-vars` et `x-nginx-vars`, puis exécutez `dojo-compose-cli app restart`. Une mise à niveau remplace `docker-compose.yml`, ces modifications ne sont donc pas conservées.
 
 ## Activation du mode FIPS — Kubernetes (Helm)
 
-Définissez une seule valeur. Le chart sélectionne les variantes d'image `-fips` et définit `DD_FIPS_MODE` pour chaque pod :
+Nécessite DefectDojo Pro 3.3.200 ou une version ultérieure. Définissez une seule valeur. Le chart sélectionne les variantes d'image `-fips` et définit `DD_FIPS_MODE` pour chaque pod :
 
 ```yaml
 fips:
@@ -102,7 +107,7 @@ Si vous avez besoin de Sensei dans un environnement FIPS, activez-le délibéré
 `fips.validate: false` et documentez la chaîne d'outils de scanners intégrée comme
 non validée dans votre plan de sécurité système.
 
-### Garde-fous
+### Garde-fous {#guard-rails}
 
 Si `fips.enabled` est à true alors qu'un composant sans variante FIPS est également activé, **le chart refuse de se générer** et nomme les composants fautifs :
 
@@ -128,9 +133,23 @@ Si vous exécutez déjà DefectDojo Pro sur ECS, seuls deux éléments changent 
 <ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/defectdojo-pro-nginx:<VERSION>-fips
 ```
 
+DefectDojo publie ces images sous les noms `dojo-pro/django:<VERSION>-fips` et `dojo-pro/nginx:<VERSION>-fips` dans son registre, à partir de la version 3.3.200 (voir [Obtenir les images FIPS](#getting-the-fips-images)). Les identifiants de registre de votre licence permettent de les récupérer. Authentifiez Docker comme décrit dans [S'authentifier auprès du registre](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/#authenticate-to-the-registry), puis copiez les deux images dans ECR :
+
+```bash
+REGISTRY=us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro
+ECR=<ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com
+for image in django nginx; do
+  docker pull --platform linux/amd64 "${REGISTRY}/${image}:<VERSION>-fips"
+  docker tag "${REGISTRY}/${image}:<VERSION>-fips" "${ECR}/defectdojo-pro-${image}:<VERSION>-fips"
+  docker push "${ECR}/defectdojo-pro-${image}:<VERSION>-fips"
+done
+```
+
+Les images FIPS sont disponibles uniquement pour linux/amd64, c'est pourquoi les définitions de tâche ci-dessous définissent `cpuArchitecture` sur `X86_64`.
+
 **2. `DD_FIPS_MODE=1`** dans le bloc `environment` de chaque conteneur exécutant
 du code applicatif — uwsgi, celery worker, celery beat, l'initialiseur, les
-workers d'orchestration, nginx et psirt.
+workers d'orchestration et nginx.
 
 Le reste de cette section décrit un déploiement ECS complet avec FIPS activé pour les
 lecteurs partant de zéro.
@@ -292,7 +311,6 @@ Les deux conteneurs vivent dans une seule tâche afin que nginx puisse atteindre
         { "name": "DD_SITE_URL", "value": "https://<YOUR_HOSTNAME>" },
         { "name": "DD_MCP_HOST", "value": "127.0.0.1" },
         { "name": "DD_MCP_PORT", "value": "9142" },
-        { "name": "PSIRT_ENABLED", "value": "false" },
         { "name": "NGINX_METRICS_ENABLED", "value": "false" }
       ],
       "mountPoints": [
