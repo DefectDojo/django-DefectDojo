@@ -85,6 +85,13 @@ function _toTimePoints(data) {
 function _vals(data) {
     return (data || []).map(function (d) { return d[1]; });
 }
+function _sevVals(data, labels) {
+    var out = labels.map(function () { return 0; });
+    (data || []).forEach(function (d) {
+        if (d[0] >= 0 && d[0] < out.length) out[d[0]] = d[1];
+    });
+    return out;
+}
 
 /** Place Flot-style [[x, val], …] points into the category slots named by `ticks`.
  *
@@ -259,7 +266,6 @@ function _sevStackedBar(id, d1, d2, d3, d4, d5, ticks, opts) {
         },
     });
 }
-
 /** Pie / doughnut chart. items = [{label, value, color}, …] */
 function _pie(id, items, opts) {
     opts = opts || {};
