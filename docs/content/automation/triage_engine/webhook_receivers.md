@@ -99,7 +99,19 @@ The gateway is what makes a delivery durable before DefectDojo has seen it. Many
 
 The receiver's **Gateway** tab shows what the gateway holds for it: recent deliveries, where each one is in its retries, and any the gateway gave up on, with **Replay** for those. Turning a receiver off pauses delivery of new events; events that arrive while it is off can be replayed from this tab once it is on again.
 
-Operators configure the gateway with the settings in [Configuration](../configuration/#webhook-receivers). A deployment can also run without it, in which case DefectDojo answers the receiver URL itself and a delivery during an outage is lost unless the sender retries.
+The gateway is on by default in every DefectDojo Pro deployment. Operators configure it with the settings in [Configuration](../configuration/#webhook-receivers). A deployment can also run without it, in which case DefectDojo answers the receiver URL itself and a delivery during an outage is lost unless the sender retries.
+
+### Turning inbound webhooks off
+
+The **Inbound Webhooks** feature flag, under **Settings > Feature Flags**, is on by default. Turn it off to stop inbound webhook traffic at once, for example while you investigate a misbehaving sender:
+
+- Every receiver URL answers `503` with a `Retry-After` header, and nothing is recorded.
+- DefectDojo stops talking to the webhook gateway. Receivers saved in the meantime wait to register.
+- The **Receipts** and **Gateway** tabs show a warning that inbound webhooks are off, and the receivers list shows the gateway as **Turned Off**.
+
+Nothing already captured is lost. The gateway keeps each delivery and retries it for about four and a half hours, and senders that retry will try again. When you turn the flag back on, DefectDojo registers any waiting receivers right away. A delivery the gateway gave up on in the meantime is listed under **Dead Letters** on the **Gateway** tab, where **Replay** sends it again.
+
+Turning the Triage Engine off answers every receiver URL with `404` instead, whatever this flag says.
 
 ## Permissions
 

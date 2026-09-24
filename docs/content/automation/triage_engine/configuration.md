@@ -161,7 +161,9 @@ How many days a receipt is kept. `0` keeps receipts forever.
 
 ### The webhook gateway
 
-The gateway runs as its own `webhook-gateway` service, stores every delivery in its own `whook` database, and delivers to DefectDojo over the internal network. DefectDojo creates the `whook` database on startup when its database account is allowed to.
+The gateway runs as its own `webhook-gateway` service, stores every delivery in its own `whook` database, and delivers to DefectDojo over the internal network. It is on by default in the Docker Compose bundles and in the Helm chart (`webhookGateway.enabled`). DefectDojo creates the `whook` database on startup when its database account is allowed to (`CREATEDB`). If yours is not, create that database for the account before starting DefectDojo, or turn the gateway off.
+
+To stop inbound webhook traffic without redeploying, turn off the **Inbound Webhooks** feature flag. See [Turning inbound webhooks off](../webhook_receivers/#turning-inbound-webhooks-off).
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -171,7 +173,7 @@ The gateway runs as its own `webhook-gateway` service, stores every delivery in 
 | `DD_WEBHOOK_GATEWAY_DELIVER_BASE_URL` | `https://nginx:7443` | Where the gateway delivers. It must be reachable from the gateway and must not be public. |
 | `DD_WEBHOOK_GATEWAY_MAX_ATTEMPTS` | `12` | Delivery attempts before the gateway gives up on an event. The wait starts at 2 seconds and triples each time, up to an hour, so twelve attempts cover about four and a half hours. |
 | `DD_WEBHOOK_GATEWAY_DATABASE_NAME` | `whook` | The gateway's database, on the same server as DefectDojo's. |
-| `WEBHOOK_GATEWAY_ENABLED` | varies | On the nginx and gateway containers: whether nginx routes receiver URLs to the gateway. Off, the gateway idles. |
+| `WEBHOOK_GATEWAY_ENABLED` | `true` | On the nginx and gateway containers: whether nginx routes receiver URLs to the gateway. Off, the gateway idles. Set it together with `DD_WEBHOOK_GATEWAY_MODE`. |
 
 Every ten minutes DefectDojo reconciles the gateway with its receivers, so a gateway that lost its configuration recovers on its own. `manage.py reconcile_webhook_gateway` does the same on demand.
 
