@@ -93,7 +93,8 @@ Toolsets are enabled under **Settings → Feature Flags**, nested below the **MC
 | Toolset | Feature Flag | Also requires |
 |---------|--------------|---------------|
 | `core` | none — always on with the MCP Server | — |
-| `hierarchy` | **MCP: Asset Hierarchy** | the **Asset Hierarchy** feature |
+| `hierarchy` | **MCP: Asset Hierarchy** | the **Asset Hierarchy** feature — see [Asset Hierarchy Toolset](#asset-hierarchy-toolset) |
+| `reporting` | **MCP: Reporting** | the **Reporting** feature (the Report Builder) — see [Reporting Toolset](#reporting-toolset) |
 
 More toolsets appear in the Feature Flags menu as they are released. A toolset's flag only controls what the MCP Server offers: it does not change the REST API, and every tool call still runs with the permissions of the API token that connects.
 
@@ -105,6 +106,8 @@ Add a `toolsets` query parameter to the MCP endpoint URL. Names are comma-separa
 |--------------|---------------|
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp` | `core` only. Unchanged from earlier releases. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy` | `core` plus the Asset Hierarchy toolset. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=reporting` | `core` plus the Reporting toolset. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy,reporting` | `core` plus both named toolsets. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=all` | `core` plus every toolset enabled on the instance. Requires the `Authorization` header to be sent when connecting, because the server reads the instance's Feature Flags with your token to resolve `all`. |
 
 Any selection with a `toolsets` parameter also offers `get_instance_info`, a tool that reports the DefectDojo Pro version, which toolsets are enabled (`mcp_toolsets_enabled`), each Feature Flag's state, and whether the instance names its objects **Assets / Organizations** or **Products / Product Types**. Ask your assistant to call it when you are unsure which toolsets an instance provides.
@@ -811,6 +814,123 @@ finding_summary({
 
 ---
 
+## Asset Hierarchy Toolset
+
+The `hierarchy` toolset (`?toolsets=hierarchy`) lets an assistant explore and maintain the Organization/Asset hierarchy: which Organizations exist, which Assets sit under which parents, where findings roll up, and where the structure has gaps. It adds 12 tools (7 read, 5 write), 1 resource and 2 prompts on top of `core`.
+
+It is available when an administrator has enabled **MCP: Asset Hierarchy** under **Settings → Feature Flags** (which itself requires the **Asset Hierarchy** feature). Instances that still use the classic **Product Type / Product** wording see the same tools; the tool and argument names always say `organization` and `asset`, and `get_instance_info` reports which words the instance shows its users.
+
+> **⚠️ Write tools change DefectDojo immediately.** This toolset contains the MCP Server's first write tools. Each one performs exactly one DefectDojo REST write with your API token: DefectDojo's own permission checks and validation apply, and the MCP Server adds no preview, dry run, approval step or undo. The bundled workflow guide instructs the assistant to explore first, summarise what it found, and ask for your confirmation before any change. If your token can re-parent or create Assets in the REST API, the assistant can too.
+
+Every hierarchy tool accepts the optional `token` parameter, and every list tool pages with `limit` (1–100, default 25) and `offset`.
+
+### 🌳 Hierarchy Read Tools
+
+| Tool | What it returns | Key parameters |
+|------|-----------------|----------------|
+| `get_organizations` | Organizations, including their nesting under a parent Organization. | `name` (exact), `org_type` (`team`, `business_app`, `compliance_scope`, `portfolio`, `custom`), `parent_id` |
+| `get_organization_memberships` | Which Assets belong to an Organization, or which Organizations an Asset is in. `is_primary` marks the Asset's owning Organization. | `organization_id` and/or `asset_id` (at least one) |
+| `get_asset_placement` | One Asset's Organization, parent Asset, tags and all of its memberships in a single call. | `asset_id` |
+| `get_organization_type_roles` | Roles a user or group holds across every Organization of one type. Empty when the instance does not use type roles. | `org_type`, `role`, `user`, `group` |
+| `get_hierarchy_tree` | The parent/child tree around one Asset: `root`, `nodes`, `edges`, and the IDs of nodes that were cut off. | `root_id`, `direction` (`down` default, `up`, `both`), `depth` (1–10, default 3), `nodes_per_level` |
+| `get_structure_summary` | Health overview of the whole hierarchy: totals, orphan Assets (no parent and no children), duplicate names, and Organizations without Assets, each with capped examples. | `section` (`all`, `orphans`, `duplicates`, `organizations`), `limit` |
+| `get_node_stats` | Finding roll-up for one Asset and its subtree: direct and indirect finding counts, descendant count, per-severity breakdown. | `asset_id` |
+
+An Asset the token cannot see is reported as `not_found`. Trees are capped by `depth` and `nodes_per_level`; a node flagged `has_more_children` needs another `get_hierarchy_tree` call with that node as `root_id`.
+
+### ✏️ Hierarchy Write Tools
+
+| Tool | What it does in DefectDojo | Key parameters |
+|------|----------------------------|----------------|
+| `set_asset_parent` | Sets or clears the parent of 1–25 Assets, one update per Asset. `parent_id: null` detaches an Asset while it keeps its own children. | `asset_ids`, `parent_id` |
+| `remove_asset_parent` | Detaches one Asset from its parent and decides what happens to the Asset's children: `false` moves them under the former parent (closes the gap), `true` makes each child a root Asset (scatters them). | `asset_id`, `orphan_child_children` (required) |
+| `create_organization` | Creates an Organization, optionally nested under `parent_id` and typed with `org_type`. | `name`, `description`, `org_type`, `parent_id` |
+| `create_asset` | Creates an Asset in an Organization, optionally under a parent Asset and with tags. DefectDojo requires `description`. | `name`, `description`, `organization_id`, `parent_id`, `tags` |
+| `manage_organization_membership` | Adds an Asset to an additional Organization (`action=add`; the instance must allow non-exclusive memberships) or removes such a membership (`action=remove`). A primary membership cannot be removed. | `action`, `asset_id`, `organization_id`, `membership_id` |
+
+Every write tool answers with the same result envelope so the assistant can tell you exactly what happened:
+
+| `outcome` | Meaning |
+|-----------|---------|
+| `committed` | DefectDojo accepted the change (`status_code` 200/201/204, plus `object_id` and `url` where a row was created). |
+| `rejected` | DefectDojo refused it. `status_code` and `field_errors` carry DefectDojo's own answer (for example a 400 validation error, 403 permission denied, or 404 unknown ID). |
+| `partial` | Only for `set_asset_parent`: some Assets were updated and others rejected. Nothing is rolled back; `results` lists the outcome per Asset. |
+| `unknown` | The request left the MCP Server without a trustworthy answer (timeout or an upstream error). Check DefectDojo before retrying; the MCP Server never retries on its own. |
+
+Re-parenting an Asset or moving it between Organizations can change who can see it and its findings, because DefectDojo grants visibility through Organizations and through parent Assets. Ask the assistant to state the new audience before it applies such a change.
+
+### Hierarchy Resource and Prompts
+
+- **`mcp://resource/hierarchy/workflow-guide.md`** (Markdown) — the working method the assistant is expected to follow: learn the instance's vocabulary with `get_instance_info`, explore with the bounded read tools, summarise with IDs, propose, and change only after confirmation.
+- **`explore_hierarchy`** prompt — takes `organization_name_or_id`; explores that Organization's Asset hierarchy and reports what is there before proposing any change.
+- **`hierarchy_cleanup_review`** prompt — no arguments; reviews the whole hierarchy for orphan Assets, duplicate names and empty Organizations and proposes cleanup steps without applying them.
+
+### Example requests
+
+- "Run the hierarchy cleanup review and show me the orphaned Assets."
+- "Explore the `Payments` Organization and draw the Asset tree three levels deep."
+- "How many critical findings roll up to the `checkout-api` Asset and its children?"
+- "Move `checkout-web` and `checkout-mobile` under `checkout-api`. Tell me who gains visibility first, then do it when I confirm."
+- "Detach `legacy-gateway` from its parent but keep its children attached to the old parent."
+
+---
+
+## Reporting Toolset
+
+The `reporting` toolset (`?toolsets=reporting`) lets an assistant work with the Pro [Report Builder](../../reports/report-builder/): read the themes, blocks and templates that already exist, design and create new ones, run a template, and hand you the download link once DefectDojo has rendered the file. It adds 17 tools (6 read, 11 write), 3 resources and 3 prompts on top of `core`.
+
+It is available when an administrator has enabled **MCP: Reporting** under **Settings → Feature Flags** (which itself requires the **Reporting** feature). The toolset covers the Report Builder only; the classic report engine and its migration endpoints are not exposed. If you would rather drive the Report Builder with an LLM through the REST API and a generated script, see [Building Reports with an LLM](../../reports/report-builder-llm/); the MCP toolset does the same job without any code leaving the chat.
+
+> **⚠️ Write tools change DefectDojo immediately.** As with the hierarchy toolset, each write tool performs exactly one DefectDojo REST write with your API token and relays DefectDojo's answer. DefectDojo's permission checks apply — an organization member with the Writer role can run reports but not change report definitions, exactly as in the UI — and the MCP Server adds no preview, approval step or undo. The bundled workflow guide instructs the assistant to look up what exists, propose the design, and ask for your confirmation before any write.
+
+Every reporting tool accepts the optional `token` parameter, and every list tool pages with `limit` (1–100, default 25) and `offset`.
+
+### 📄 Reporting Read Tools
+
+| Tool | What it returns | Key parameters |
+|------|-----------------|----------------|
+| `get_report_catalog` | Themes, blocks and templates in one call, each as a bounded page projected to `id`, `name`, kind, `block_count`/`filter_count` and `updated`. Names are not unique, so the assistant checks here before creating anything. | `section` (`all` default, `themes`, `blocks`, `templates`), per-collection `*_limit` and `*_offset` |
+| `get_report_template` | One template. `summary` gives identity, theme and `block_count`; `blocks` adds the ordered block list; `full` returns the complete template as DefectDojo serializes it. | `template_id`, `include` (`summary` default, `blocks`, `full`) |
+| `get_report_block` | One block with its single configuration (`tabular`, `detail`, `chart`, `stock` or `widget`) and its filter entries. | `block_id` |
+| `get_report_field_options` | The field paths a tabular or detail block may show and the values it may sort by, per model, as this instance exposes them. | `model_choice` (optional) |
+| `get_generated_reports` | Report runs, newest first: `status`, `file_format`, who requested it and when, `error_message` for a failed run, and `download_url` once a run is `completed`. | `template_id`, `status` (`pending`, `processing`, `completed`, `failed`), `file_format`, `requested_by`, `requested_after` |
+| `get_generated_report` | One run by id — the tool the assistant polls after `generate_report`. | `report_id` |
+
+### ✏️ Reporting Write Tools
+
+| Tool | What it does in DefectDojo | Key parameters |
+|------|----------------------------|----------------|
+| `create_report_theme` / `update_report_theme` / `delete_report_theme` | Creates, changes or deletes a theme: five `#rrggbb` colours, `base_font_size` (8–16), `footer_text`, `show_page_numbers`. Only `name` is required on create. Templates that used a deleted theme render with default styling. | `theme_id`, `name`, colour fields |
+| `create_report_block` / `update_report_block` / `delete_report_block` | Creates, changes or deletes a block — the reusable unit templates are built from. `block_type` and its matching configuration are required on create: `tabular`/`detail` (`model_choice`, `fields`, `ordering`), `chart` (`chart_key`, `model_choice`, optional `date_range` in days) or `stock` (cover page, table of contents, page break, text block). `block_type` and a configuration's `model_choice` cannot change after creation. Image stock blocks and `widget` blocks are created in the Pro UI. | `block_id`, `name`, `block_type`, one `*_configuration`, `filter_entries` |
+| `create_report_template` / `update_report_template` / `delete_report_template` | Creates, changes or deletes a template: a name, optional `theme_id`, and the ordered blocks as `template_blocks_write` `[{block_id, order}]`. On update that list **replaces** the whole block list, so the assistant reads the template first and sends every block that stays. Deleting a template does not delete its blocks, its theme or reports already generated from it. | `template_id`, `name`, `theme_id`, `template_blocks_write` |
+| `duplicate_report_template` | Copies a template, including its theme and block list, as `<name> (Copy)`. | `template_id` |
+| `generate_report` | Starts one report run and returns at once with `job_id` and `status` (normally `pending`). Every call is a new run. | `template_id`, `file_format` (`pdf` or `html`), `name`, `runtime_filters` |
+
+Write tools answer with the same `outcome` envelope for the [Asset Hierarchy Toolset](#asset-hierarchy-toolset) (`committed`, `rejected`, `unknown`); `generate_report` additionally carries the new run's `status`.
+
+#### Reports are generated asynchronously
+
+DefectDojo renders reports in a background worker, so `generate_report` does not return a file. The assistant is told to call `get_generated_report` with the returned `job_id` every 10–30 seconds (for up to about 10 minutes) until `status` is `completed` or `failed`. A completed run carries `download_url`, a path on your DefectDojo instance (`/api/v2/generated_reports/<id>/download/`) that you open with your own DefectDojo credentials; a failed run carries `error_message`. No reporting tool returns the report's content, and there is no scheduling tool — recurring reports are set up in the DefectDojo Pro UI.
+
+### Reporting Resources and Prompts
+
+- **`mcp://resource/reporting/builder-schema.json`** (JSON) — the structure and allowed values of themes, blocks, templates and runs as the write tools accept them.
+- **`mcp://resource/reporting/chart-catalog.json`** (JSON) — every `chart_key` a chart block may use, its label, the `model_choice` it requires, and whether it is a time series.
+- **`mcp://resource/reporting/workflow-guide.md`** (Markdown) — the working method: look up before creating, build theme → blocks → template, generate, poll, then hand over the download link.
+- **`build_report_template`** prompt — takes `audience`, `scope_description` and an optional `file_format`; reads the resources and the catalog, proposes a theme, block list and template for that audience, and creates them in dependency order after you approve.
+- **`run_report`** prompt — takes `template_name_or_id` plus optional `timeframe` and `file_format`; resolves the template by exact name or id, summarises what it contains, generates it, polls to completion and returns the download link or the error.
+- **`check_report_run`** prompt — takes `template_name_or_id`; lists that template's recent runs with status, requester and download links without starting a new run.
+
+### Example requests
+
+- "Show me the report templates we already have and what blocks each one uses."
+- "Build a monthly executive PDF for the `Payments` Organization: cover page, severity-over-time chart, and a table of open Critical and High findings. Propose it first."
+- "Run the `Quarterly Compliance` template as HTML and give me the link when it's done."
+- "Did last night's `SOC 2 Evidence` report finish? If it failed, tell me why."
+- "Duplicate `Executive Summary`, rename the copy `Executive Summary — EMEA`, and add the `Assets by Region` block at the end."
+
+---
+
 ## Reference Resources
 
 The `core` toolset publishes 6 read-only JSON resources (MIME type `application/json`). They are reference material bundled with the MCP Server, not data from your DefectDojo instance, and are available without any tool call so an assistant can map findings to a standard or explain a regulatory obligation while it reports.
@@ -825,6 +945,8 @@ The `core` toolset publishes 6 read-only JSON resources (MIME type `application/
 | `cwe-to-owasp-top-10-2021` | `mcp://resource/cwe_to_owasp_2021_mapping.json` | Mapping of CWE to OWASP Top 10 (2021) |
 
 Ask your assistant to read a resource by URI (for example, "read `mcp://resource/cwe_to_owasp_2025_mapping.json` and group our open findings by OWASP category") when a report should cite a standard.
+
+Add-on toolsets publish their own resources alongside these: the `hierarchy` toolset adds `mcp://resource/hierarchy/workflow-guide.md` (see [Asset Hierarchy Toolset](#asset-hierarchy-toolset)) and the `reporting` toolset adds three under `mcp://resource/reporting/` (see [Reporting Toolset](#reporting-toolset)).
 
 ---
 
@@ -864,6 +986,8 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 **Output Format:** Executive-level HTML report with visual elements, statistics cards, and business risk focus.
 
 > **💡 Using Prompts:** To invoke a prompt, simply ask your AI assistant: "Create a SAST Review Report" or "Generate a Security Landscape Report using DefectDojo data"
+
+The `hierarchy` toolset adds two more prompts, `explore_hierarchy` and `hierarchy_cleanup_review`, described under [Asset Hierarchy Toolset](#asset-hierarchy-toolset); the `reporting` toolset adds `build_report_template`, `run_report` and `check_report_run`, described under [Reporting Toolset](#reporting-toolset). Unlike the two `core` prompts, most of these take arguments, which your client asks for when you invoke them.
 
 ---
 
@@ -1163,11 +1287,11 @@ Verify these items when experiencing connection issues:
 
 #### ❌ "toolset 'hierarchy' is not enabled on this DefectDojo Pro instance"
 
-**Cause:** The connection URL asks for a toolset whose Feature Flag is off, or the MCP Server itself is disabled.
+**Cause:** The connection URL asks for a toolset whose Feature Flag is off, or the MCP Server itself is disabled. The same message names `reporting` when that toolset's flag is off.
 
 **Solutions:**
 
-1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature)
+1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature)
 2. Or remove the toolset from the `toolsets` parameter and reconnect
 3. Ask your assistant to call `get_instance_info` to see which toolsets the instance has enabled
 
