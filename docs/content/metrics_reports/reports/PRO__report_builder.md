@@ -210,6 +210,12 @@ A Generated Report moves through these statuses as it is built:
 
 You can build this in the UI (below) or automate it with the [API](../report-builder-api/).
 
+### Report retention
+
+Generated Reports are kept until someone deletes them, unless an administrator sets a retention window. In **Settings > System Settings**, under Application Settings, **Delete Generated Reports After (Days)** removes completed and failed reports older than that many days, each night, together with their files. The default, **0**, keeps every report indefinitely, so nothing is deleted until the setting is changed.
+
+While a window is set, the Generated Reports page says how long reports are kept. Reports still being generated are never removed. A report is deleted a set number of days after it finished, not after it was last downloaded, so download anything you need to keep longer.
+
 ### Template variables
 
 A **template variable** is a blank in a Template that is filled in each time the report is generated. It lets you build one Template, such as a single-finding page or a per-CVE exposure report, and generate it for any finding, asset or CVE without editing its filters.
