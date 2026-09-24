@@ -30,12 +30,9 @@ Kunden/Pro-Benutzer können unser Team für Unterstützung jederzeit direkt per 
 
 ### Innerhalb von DefectDojo
 
-Sie können das Support-Team über die DefectDojo-App auf zwei Arten kontaktieren:
+Auf einer selbst gehosteten Instanz kann ein Superuser **Settings > Contact Support** in der linken Seitenleiste öffnen. Die Seite zeigt die Adresse, an die Sie schreiben können.
 
-1. durch Öffnen von **Cloud Manager > Contact Support** in der linken Seitenleiste
-2. über **{your-instance}.defectdojo.com/cloud_portal/support**.
-
-![image](images/contact_defectdojo_support.png)
+Auf DefectDojo Cloud verwenden Sie die E-Mail-Adresse oben oder das Cloud Portal unten.
 
 ### Über das Cloud Portal
 
