@@ -149,13 +149,35 @@ jobs:
       # no celery or initializer needed for unit tests
       # The database is migrated by this point on both paths -- restored from the
       # snapshot, or migrated by the step above -- so the entrypoint reuses it.
+      #
+      # The watchdog runs on the runner beside the tests and only reads from the
+      # containers. This job intermittently goes silent near the end of the
+      # parallel phase until the timeout below kills it, and the log alone cannot
+      # say why; the watchdog records stacks and database activity when output
+      # stalls, and the "Hang diagnostics" step prints them. See the script.
       - name: Unit tests
         timeout-minutes: 25
-        run: docker compose up --no-deps --exit-code-from uwsgi uwsgi
+        run: |
+          .github/scripts/unit-tests-hang-watchdog.sh "$RUNNER_TEMP/hang-diagnostics.txt" &
+          watchdog=$!
+          rc=0
+          docker compose up --no-deps --exit-code-from uwsgi uwsgi || rc=$?
+          kill "$watchdog" 2>/dev/null || true
+          exit "$rc"
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           DD_V3_FEATURE_LOCATIONS: ${{ inputs.v3_feature_locations }}
           DD_TEST_DB_MODE: reuse
+
+      - name: Hang diagnostics
+        if: always()
+        run: |
+          f="$RUNNER_TEMP/hang-diagnostics.txt"
+          if grep -q "dumping diagnostics" "$f" 2>/dev/null; then
+            cat "$f"
+          else
+            echo "No stall detected."
+          fi
 
       - name: Logs
         if: failure()
