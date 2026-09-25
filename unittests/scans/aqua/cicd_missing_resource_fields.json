@@ -1,0 +1,28 @@
+{
+    "resources": [
+        {
+            "resource": null,
+            "vulnerabilities": [
+                {
+                    "name": "CVE-2023-0004",
+                    "description": "Vuln on a node with null resource",
+                    "nvd_score": 7.0
+                }
+            ]
+        },
+        {
+            "resource": {
+                "format": "apk",
+                "name": "busybox",
+                "version": "1.30.1"
+            },
+            "vulnerabilities": [
+                {
+                    "name": "CVE-2023-0005",
+                    "description": "Vuln on a resource missing cpe and path",
+                    "nvd_score": 5.5
+                }
+            ]
+        }
+    ]
+}
