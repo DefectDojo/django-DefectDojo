@@ -11,8 +11,8 @@ weight: 24
 The DefectDojo plugin for Claude Code brings your vulnerability data into the
 terminal where your team already works. Your Pro instance already speaks MCP;
 the plugin teaches a coding agent what to do with it, and adds the operations
-the read-only [MCP Server](../mcp_server_pro/) does not cover, such as changing
-finding status and importing scans.
+the [MCP Server](../mcp_server_pro/)'s read-only `core` toolset does not cover,
+such as changing finding status and importing scans.
 
 If you want to connect a chat assistant such as Claude Desktop or claude.ai to
 DefectDojo, use the [MCP Server](../mcp_server_pro/) page instead. This page is
