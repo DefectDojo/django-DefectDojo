@@ -4,7 +4,7 @@ description: "How to set up the Jira Downstream Connector for DefectDojo"
 weight: 82
 audience: pro
 ---
-The Jira integration pushes DefectDojo Findings and Finding Groups to a Jira project as issues, keeps each issue's status in sync with the Finding, and links the Finding back to the created issue. Both Jira **Cloud** and **Data Center / Server** are supported. Jira Service Management is not supported.
+The Jira integration pushes DefectDojo Findings and Finding Groups to a Jira project as issues, keeps each issue's status in sync with the Finding, and links the Finding back to the created issue. With [two-way sync](#two-way-sync), Jira status changes and comments come back to the Finding too. Both Jira **Cloud** and **Data Center / Server** are supported. Jira Service Management is not supported.
 
 ### Choosing an authentication method
 
@@ -96,6 +96,17 @@ Statuses vary per project workflow, so these defaults are meant to be edited to 
 - **False Positive Mapping**: `Done`
 - **Risk Accepted Mapping**: `Done`
 
+#### Coming back from Jira
+
+When [two-way sync](#two-way-sync) is on, the status mapping also says what a Jira change means for the Finding. Each list is comma separated and matched regardless of case:
+
+- **Closed States**: status categories that close the Finding. Default `done`.
+- **Open States**: status categories that reopen a closed Finding. Default `new, indeterminate`.
+- **False Positive Reasons**: resolutions that close the Finding as a false positive.
+- **Accepted Risk Reasons**: resolutions that close the Finding as an accepted risk.
+
+A resolution in neither list closes the Finding as mitigated. Leave a list empty to use the receiver's defaults, which the migration from classic Jira fills in from your classic resolution mappings.
+
 ### Custom Fields (optional)
 
 You can map additional Jira fields — for example a required `resolution` on close, or `labels` — in the mapping's **Custom Fields** step. Each custom-field mapping has four parts:
@@ -109,9 +120,33 @@ You can map additional Jira fields — for example a required `resolution` on cl
 
 By default Jira issues use DefectDojo's built-in title and body. To customize them, attach a **Ticket Template** to the mapping in its **Ticket Template** step. A template defines four independently-optional pieces — the **Finding** summary and description, and the **Finding Group** summary and description. Any piece left blank falls back to the built-in default, so you can override just the title, just the body, or all four. Use **Test render** in the template editor to preview the rendered output against sample data — catching mistakes such as unknown placeholders or values that exceed a field's length limit — before saving. If a template is later deleted, the mappings that used it revert to the built-in defaults automatically.
 
+### Push notes as comments (optional)
+
+Turn on **Push Notes as Comments** on the mapping to post each new note on a linked Finding to its Jira issue as a comment, made by the connection's account.
+
+- Private notes are never posted.
+- The comment reads `(Author name): note text`.
+- A note on a grouped Finding goes to the Finding Group's issue.
+- A Finding with no issue yet gets no comment: a note never creates an issue.
+- Notes added by Triage Engine rules, including the ones two-way sync adds from Jira comments, are never sent back.
+- Editing or deleting a note does not change the comment.
+
+Posting comments needs no scope beyond `write:jira-work`. With granular scopes, add `write:comment:jira`.
+
+### Two-way sync
+
+The connector pushes to Jira. To have Jira talk back, open the connection and choose **Turn On Two-way Sync**. This creates a Triage Engine [webhook receiver](/automation/triage_engine/webhook_receivers/) bound to the connection, and the rule that acts on its deliveries:
+
+- An issue moving into a closed status category closes the linked Finding, as a false positive or an accepted risk when its resolution is in that list.
+- An issue moving back to an open category reopens the Finding.
+- A comment on the issue is added to the Finding as a note, once. Comments DefectDojo posted itself are recognized and skipped.
+
+The receiver's **Setup** tab gives the URL and the steps to create the webhook in Jira. Because the receiver is bound to one connection, two Jira sites with overlapping project keys never touch each other's Findings.
+
 ### How it works
 
 - **Create / Update / Delete:** creating pushes a new issue and records the link on the Finding; updating edits the existing issue; deleting a Finding force-closes its issue (nothing is deleted in Jira). Pushes can be manual ("Push to Integrator") or automatic per the Issue Tracker Assignment.
+- **Comment:** with **Push Notes as Comments** on, a new note on a Finding is added to its issue as a comment.
 - **Status reconciliation:** after creating (and on every update) DefectDojo reads the issue's current status and, if it differs from the mapped target, finds a single workflow transition that reaches it and applies it. If no such transition exists, the mapping records an error rather than failing silently. Any transition-scoped custom fields are sent with that transition.
 - **Ticket link:** the link surfaced on the Finding is `https://your-site.atlassian.net/browse/{ISSUE-KEY}` — always your public site URL, never the internal gateway.
 - **Token lifecycle (OAuth):** DefectDojo owns the whole flow — it performs the authorization-code exchange, stores the access and refresh tokens, and refreshes on demand before a push, persisting the new refresh token each time (Atlassian rotates it on every refresh).
