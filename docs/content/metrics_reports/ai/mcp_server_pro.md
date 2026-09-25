@@ -877,7 +877,7 @@ Re-parenting an Asset or moving it between Organizations can change who can see 
 
 ## Reporting Toolset
 
-The `reporting` toolset (`?toolsets=reporting`) lets an assistant work with the Pro [Report Builder](../../reports/report-builder/): read the themes, blocks and templates that already exist, design and create new ones, run a template, and hand you the download link once DefectDojo has rendered the file. It adds 17 tools (6 read, 11 write), 3 resources and 3 prompts on top of `core`.
+The `reporting` toolset (`?toolsets=reporting`) lets an assistant work with the Pro [Report Builder](../../reports/report-builder/): read the themes, blocks and templates that already exist, design and create new ones, run a template once or on a recurring schedule, and hand you the download link once DefectDojo has rendered the file. It adds 22 tools (8 read, 14 write), 3 resources and 3 prompts on top of `core`.
 
 It is available when an administrator has enabled **MCP: Reporting** under **Settings → Feature Flags** (which itself requires the **Reporting** feature). The toolset covers the Report Builder only; the classic report engine and its migration endpoints are not exposed. If you would rather drive the Report Builder with an LLM through the REST API and a generated script, see [Building Reports with an LLM](../../reports/report-builder-llm/); the MCP toolset does the same job without any code leaving the chat.
 
@@ -893,8 +893,10 @@ Every reporting tool accepts the optional `token` parameter, and every list tool
 | `get_report_template` | One template. `summary` gives identity, theme and `block_count`; `blocks` adds the ordered block list; `full` returns the complete template as DefectDojo serializes it. | `template_id`, `include` (`summary` default, `blocks`, `full`) |
 | `get_report_block` | One block with its single configuration (`tabular`, `detail`, `chart`, `stock` or `widget`) and its filter entries. | `block_id` |
 | `get_report_field_options` | The field paths a tabular or detail block may show and the values it may sort by, per model, as this instance exposes them. | `model_choice` (optional) |
-| `get_generated_reports` | Report runs, newest first: `status`, `file_format`, who requested it and when, `error_message` for a failed run, and `download_url` once a run is `completed`. | `template_id`, `status` (`pending`, `processing`, `completed`, `failed`), `file_format`, `requested_by`, `requested_after` |
+| `get_generated_reports` | Report runs, newest first: `status`, `file_format`, who requested it and when, `error_message` for a failed run, and `download_url` once a run is `completed`. | `template_id`, `status` (`pending`, `processing`, `completed`, `failed`), `file_format`, `requested_by`, `requested_after` (`YYYY-MM-DD`) |
 | `get_generated_report` | One run by id — the tool the assistant polls after `generate_report`. | `report_id` |
+| `get_report_content` | The plain-text rendition of a completed `pdf` or `html` report, so the assistant can summarise what the report says without downloading the file. Returns `content`, `truncated`, `total_bytes` and `returned_bytes`; `content` is `null` for other formats and for reports generated before your instance started writing text renditions. Available from DefectDojo Pro 3.3.300. | `report_id`, `max_bytes` (1–262144, default 65536) |
+| `get_report_schedules` | Report schedules — standing requests that generate a report from a template on a cron cadence — newest first, or one by id. Each carries its `template`, `file_format`, `runtime_filters`, `created_by`, and a `schedule` object from DefectDojo's scheduling service: `enabled`, `trigger_expression` (UTC cron), `trigger_expression_readable`, `next_run`, `last_run` and the `status` of the last run. Available from DefectDojo Pro 3.3.300. | `schedule_id`, `template_id`, `created_by`, `file_format` |
 
 ### ✏️ Reporting Write Tools
 
@@ -905,20 +907,36 @@ Every reporting tool accepts the optional `token` parameter, and every list tool
 | `create_report_template` / `update_report_template` / `delete_report_template` | Creates, changes or deletes a template: a name, optional `theme_id`, and the ordered blocks as `template_blocks_write` `[{block_id, order}]`. On update that list **replaces** the whole block list, so the assistant reads the template first and sends every block that stays. Deleting a template does not delete its blocks, its theme or reports already generated from it. | `template_id`, `name`, `theme_id`, `template_blocks_write` |
 | `duplicate_report_template` | Copies a template, including its theme and block list, as `<name> (Copy)`. | `template_id` |
 | `generate_report` | Starts one report run and returns at once with `job_id` and `status` (normally `pending`). Every call is a new run. | `template_id`, `file_format` (`pdf` or `html`), `name`, `runtime_filters` |
+| `schedule_report` | Creates a standing schedule that generates a report from a template on a cron cadence. Returns at once with the schedule id, `status: enabled` and the next run time; nothing is generated until the first tick. Every call creates another schedule, so the assistant lists existing ones first. | `template_id`, `file_format` (`pdf` or `html`), `cron`, `name`, `runtime_filters` |
+| `update_report_schedule` | Pauses or resumes a schedule (`enabled`), moves it to a new cadence (`cron`), or changes its `name`, `file_format` or `runtime_filters`. Fields not supplied keep their value. | `schedule_id` plus at least one of `enabled`, `cron`, `name`, `file_format`, `runtime_filters` |
+| `delete_report_schedule` | Deletes a schedule. No further reports are generated from it; the reports it already produced are kept. | `schedule_id` |
 
-Write tools answer with the same `outcome` envelope for the [Asset Hierarchy Toolset](#asset-hierarchy-toolset) (`committed`, `rejected`, `unknown`); `generate_report` additionally carries the new run's `status`.
+Write tools answer with the same `outcome` envelope for the [Asset Hierarchy Toolset](#asset-hierarchy-toolset) (`committed`, `rejected`, `unknown`); `generate_report` additionally carries the new run's `status`, and `schedule_report`/`update_report_schedule` carry the schedule's real state as `status` (`enabled` or `disabled`).
 
 #### Reports are generated asynchronously
 
-DefectDojo renders reports in a background worker, so `generate_report` does not return a file. The assistant is told to call `get_generated_report` with the returned `job_id` every 10–30 seconds (for up to about 10 minutes) until `status` is `completed` or `failed`. A completed run carries `download_url`, a path on your DefectDojo instance (`/api/v2/generated_reports/<id>/download/`) that you open with your own DefectDojo credentials; a failed run carries `error_message`. No reporting tool returns the report's content, and there is no scheduling tool — recurring reports are set up in the DefectDojo Pro UI.
+DefectDojo renders reports in a background worker, so `generate_report` does not return a file. The assistant is told to call `get_generated_report` with the returned `job_id` every 10–30 seconds (for up to about 10 minutes) until `status` is `completed` or `failed`. A completed run carries `download_url`, a path on your DefectDojo instance (`/api/v2/generated_reports/<id>/download/`) that you open with your own DefectDojo credentials; a failed run carries `error_message`. The MCP Server never proxies the file itself. To read what a completed `pdf` or `html` report says, the assistant calls `get_report_content`, which returns the bounded plain-text rendition DefectDojo writes next to the file (the same text as `/api/v2/generated_reports/<id>/content/`, described in [Automating Reports with the API](../../reports/report-builder-api/#step-3-run-the-report-and-download-the-result); capped at 256 KiB upstream and sliced by `max_bytes`). Calling it before the run has completed returns a not-found error that tells the assistant to keep polling `get_generated_report`.
+
+#### Recurring reports
+
+`schedule_report` creates a report schedule through `/api/v2/report_schedules/` (see [Automating Reports with the API](../../reports/report-builder-api/#step-4-run-a-report-on-a-schedule); DefectDojo Pro 3.3.300 or later). A few rules are worth knowing before you ask for one:
+
+- **The cadence is a five-field cron expression in UTC**, at most once an hour: the minute field must be a single value, so `0 6 * * 1` (06:00 UTC every Monday) is accepted and `*/15 * * * *` is rejected. The assistant translates "every weekday at 8" into cron for you; the response carries `trigger_expression_readable` and the `next_run` time so you can check its reading.
+- **Each run is generated as the schedule's creator** — the user whose token created it — with that user's visibility, and appears in `get_generated_reports` as an ordinary run requested by that user.
+- **A new schedule is always enabled.** To prepare one without running it yet, create it and then pause it with `update_report_schedule` and `enabled: false`; a paused schedule keeps its cadence until you resume it with `enabled: true`.
+- **Changing the cadence resumes a paused schedule**, even when `enabled: false` is sent in the same call, because DefectDojo re-registers the schedule with its scheduling service. The assistant is told to send the new `cron` first and pause again in a second call; the `status` in every response is the schedule's real state, so check it.
+- **Who may change a schedule.** Any organization member who can run the template can schedule it, but only the schedule's creator or a report administrator may update or delete it; anyone else receives a permission error.
+- **Deleting a schedule keeps its reports.** `delete_report_schedule` stops future runs; reports already generated stay in `get_generated_reports` until they are deleted.
+
+Report schedules have no page of their own in the DefectDojo Pro UI yet, so the MCP Server returns no `url` for one; `get_report_schedules` is the way to review them.
 
 ### Reporting Resources and Prompts
 
 - **`mcp://resource/reporting/builder-schema.json`** (JSON) — the structure and allowed values of themes, blocks, templates and runs as the write tools accept them.
 - **`mcp://resource/reporting/chart-catalog.json`** (JSON) — every `chart_key` a chart block may use, its label, the `model_choice` it requires, and whether it is a time series.
-- **`mcp://resource/reporting/workflow-guide.md`** (Markdown) — the working method: look up before creating, build theme → blocks → template, generate, poll, then hand over the download link.
+- **`mcp://resource/reporting/workflow-guide.md`** (Markdown) — the working method: look up before creating, build theme → blocks → template, generate, poll, read the text rendition with `get_report_content` when a summary is wanted, then hand over the download link; plus how to create, pause, move and delete a report schedule.
 - **`build_report_template`** prompt — takes `audience`, `scope_description` and an optional `file_format`; reads the resources and the catalog, proposes a theme, block list and template for that audience, and creates them in dependency order after you approve.
-- **`run_report`** prompt — takes `template_name_or_id` plus optional `timeframe` and `file_format`; resolves the template by exact name or id, summarises what it contains, generates it, polls to completion and returns the download link or the error.
+- **`run_report`** prompt — takes `template_name_or_id` plus optional `timeframe` and `file_format`; resolves the template by exact name or id, summarises what it contains, generates it, polls to completion, offers a summary of the text rendition, and returns the download link or the error.
 - **`check_report_run`** prompt — takes `template_name_or_id`; lists that template's recent runs with status, requester and download links without starting a new run.
 
 ### Example requests
@@ -927,7 +945,10 @@ DefectDojo renders reports in a background worker, so `generate_report` does not
 - "Build a monthly executive PDF for the `Payments` Organization: cover page, severity-over-time chart, and a table of open Critical and High findings. Propose it first."
 - "Run the `Quarterly Compliance` template as HTML and give me the link when it's done."
 - "Did last night's `SOC 2 Evidence` report finish? If it failed, tell me why."
+- "Summarise the key numbers in the latest `Executive Summary` PDF."
 - "Duplicate `Executive Summary`, rename the copy `Executive Summary — EMEA`, and add the `Assets by Region` block at the end."
+- "Generate the `Executive Summary` as PDF every Monday at 06:00 UTC. Which schedules already exist for that template?"
+- "Pause the weekly `SOC 2 Evidence` schedule until further notice."
 
 ---
 
