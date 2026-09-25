@@ -130,25 +130,36 @@ docker info
 
 ## Install DefectDojo
 
-Copy the CLI archive and your license file to the application host, into the same directory, and extract the CLI:
+Copy the CLI archive and your license file to the application host, into the same directory.
+
+Check the archive before you extract it. Each CLI release comes with a `checksums.txt` file listing the SHA-256 of every archive. With both files in the same directory:
+
+```bash
+sha256sum --check --ignore-missing checksums.txt
+```
+
+The archive's line should end in `OK`. If you received the archive without `checksums.txt`, ask [support@defectdojo.com](mailto:support@defectdojo.com) for the expected checksum and compare it with the output of `sha256sum dojo-compose-cli_*.tar.gz`.
+
+Then extract the CLI:
 
 ```bash
 tar -xzvf dojo-compose-cli_*.tar.gz
 ```
 
-Then run the installer from that directory:
+Choose a `DOJO_CLI_KEY` before you start. It is the encryption key for the configuration the CLI stores on disk, and every later command needs it, so store it somewhere safe. Export it in your shell and run the installer with `sudo -E`, which passes the variable through `sudo`:
 
 ```bash
-sudo ./dojo-compose-cli first-install
+export DOJO_CLI_KEY="<your-key>"
+sudo -E ./dojo-compose-cli first-install
 ```
+
+If the variable is not set, the installer asks for the key instead.
 
 The wizard prompts for the following.
 
 | Prompt | What it is |
 | --- | --- |
-| `DOJO_CLI_KEY` | An encryption key for configuration the CLI stores on disk. Choose it now and keep it, since later commands need it. |
-| DefectDojo Version | The release to install. |
-| Deploy Version | The deployment files to use. Set it to the same value as the version. |
+| DefectDojo Version | The release to install. The default is `latest`. Enter a specific release from the [DefectDojo Pro changelog](/releases/pro/changelog/) instead, so that you know exactly what you are running and upgrade on your own schedule. The deployment files follow this version automatically. |
 | Deploy Type | `separate-db` for a database on its own host, or `containerized-db` to run PostgreSQL in a container. |
 | Database Connection Type | Choose Single Line and supply the whole connection string. |
 | Database URL | `postgres://<user>:<password>@<host>:5432/dojodb`. It must begin with `postgres://` rather than `postgresql://`. |
@@ -157,7 +168,7 @@ The wizard prompts for the following.
 
 Two things worth knowing at the prompts. Supply the database connection as a single line rather than value by value, since the per-value path does not currently ask for the username. And if the password contains characters like `!`, `@`, or `#`, URL encode them in the connection string.
 
-The installer then pulls the images, starts the stack, creates a systemd service, and prints the generated admin credentials. **Save those credentials before you close the terminal. They are not shown again.**
+The installer then pulls the images, starts the stack, creates a systemd service, and prints the generated admin credentials. **Save those credentials before you close the terminal. They are not shown again.** If the printed password does not let you log in, or you lose it, set a new one with `sudo -E dojo-compose-cli app change-password` (see [Reset the admin password](#reset-the-admin-password)).
 
 Once it finishes, DefectDojo is available at the site URL you gave it.
 
@@ -238,7 +249,7 @@ If the file is missing or empty the container logs `No CA bundle found ...` inst
 If you lose the generated password, reset it from the application host. DefectDojo has to be running:
 
 ```bash
-dojo-compose-cli app change-password
+sudo -E dojo-compose-cli app change-password
 ```
 
 ## Upgrading
@@ -268,11 +279,14 @@ Upgrades are covered on their own page: see the [DefectDojo Pro Upgrade Guide (D
 | `register` | Authenticate to the container registry |
 | `update-binary` | Update the CLI itself |
 
-Most commands need `DOJO_CLI_KEY`, since the configuration is encrypted at rest. Export it for your session, or pass it through `sudo` with `sudo -E`:
+Most commands need `DOJO_CLI_KEY`, since the configuration is encrypted at rest. Export it for your session, then pass it through `sudo` with `sudo -E`:
 
 ```bash
 export DOJO_CLI_KEY="your-key"
+sudo -E dojo-compose-cli config print
 ```
+
+Without it, the CLI asks for the key each time.
 
 ## Questions or support
 
