@@ -52,13 +52,11 @@ Go to the bottom of the lists of commits, click on the `Update versions in appli
 
 ![image](https://user-images.githubusercontent.com/4426050/149577123-572cc6dd-7bf3-44ad-af58-ab6e46905558.png)
 
-Ideally we wait until the test suite becomes green. If you're feeling brave, you can skip the waiting and instead wait for the tests to become green after merging into `master`.
+Do not wait for CI. The release PR and the merge-back PR are merged as soon as they are conflict-free, to save time and runner cost. CI skips them on purpose: a pull request is skipped when its head branch starts with `release/` or `master-into-dev/` and it has the `release-management` label (both release actions add it), and a push is skipped when the branch has one of those prefixes or the commit is GitHub's merge commit for such a PR.
 
 Merge into `master` by *creating a merge commit*. Do NOT squash the commits!
 
 ![image](https://user-images.githubusercontent.com/4426050/149577269-d51fe1ee-ba0d-4a9b-94e7-ec286954b5e2.png)
-
-Go to [GitHub Actions](https://github.com/DefectDojo/django-DefectDojo/actions) and check that the runs become green.
 
 # Make the release and push docker images
 
@@ -101,9 +99,7 @@ Check the PR and the version number updates.
 
 ![image](https://user-images.githubusercontent.com/4426050/149618605-fd94b6a8-d348-4fc5-8eaf-92f23b1b54b7.png)
 
-Wait for the tests to complete.
-
-You can work on the release notes in the next step while waiting.
+No tests run on this PR (see above), so merge it as soon as it is conflict-free.
 
 Merge the `Release: Merge back x.y.z into dev from: master-into-dev/x.y.z-a.b.c-dev` PR by using a *Merge Commit*. Do NOT squash the commits.
 

@@ -8,6 +8,9 @@ on:
 
 jobs:
   deploy:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/* or master-into-dev/* AND the PR has release-management.
+    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Setup Hugo

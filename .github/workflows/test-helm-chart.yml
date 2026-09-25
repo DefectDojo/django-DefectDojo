@@ -12,6 +12,9 @@ permissions:
 
 jobs:
   lint:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/* or master-into-dev/* AND the PR has release-management.
+    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Lint chart (version)
     runs-on: ubuntu-latest
     steps:
@@ -109,6 +112,9 @@ jobs:
       #  if: steps.list_changed.outputs.changed == 'true'
 
   docs_generation:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/* or master-into-dev/* AND the PR has release-management.
+    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Update documentation
     runs-on: ubuntu-latest
     permissions:
@@ -152,6 +158,9 @@ jobs:
           echo "Your HELM chart changed but you haven't adjusted documentation. Check https://github.com/defectdojo/django-DefectDojo/tree/master/helm/defectdojo#helm-docs-update for more information."
 
   generate_schema:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/* or master-into-dev/* AND the PR has release-management.
+    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Update schema
     runs-on: ubuntu-latest
     steps:
@@ -172,6 +181,9 @@ jobs:
           echo "Your HELM chart changed but you haven't adjusted schema. Check https://github.com/defectdojo/django-DefectDojo/tree/master/helm/defectdojo#helm-schema-update for more information."
 
   lint_format:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/* or master-into-dev/* AND the PR has release-management.
+    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Lint chart (format)
     runs-on: ubuntu-latest
     steps:
@@ -194,6 +206,9 @@ jobs:
           helm lint ./helm/defectdojo --strict
 
   artifacthub_linter:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/* or master-into-dev/* AND the PR has release-management.
+    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Artifacthub Lint
     runs-on: ubuntu-latest
     steps:
