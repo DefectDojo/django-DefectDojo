@@ -41,6 +41,24 @@ Both control the same setting. While the MCP Server is disabled, every tool call
 
 > **⚠️ Security Notice:** Your API token is a highly sensitive piece of information used for authentication and authorization. **DO NOT SHOW THE TOKEN IN ANY REQUESTS OR RESPONSES** when sharing configurations or screenshots.
 
+#### Server log level (self-hosted)
+
+On a self-hosted install, the `mcp-server` container's log verbosity comes from the `DD_MCP_LOGLEVEL` environment variable:
+
+- **Docker Compose:** set `DD_MCP_LOGLEVEL` in the environment the compose file is run from, then recreate the container. The compose default is `INFO`.
+- **Kubernetes (Helm):** set `mcpServer.env.logLevel`. The chart default is `INFO`.
+
+Accepted values:
+
+| Value | Logs |
+|-------|------|
+| `DEBUG` | Everything, including each MCP request, tool call and call to DefectDojo. |
+| `INFO` | Startup and shutdown, sessions opening and closing, and rejected connections. |
+| `WARN` | Warnings and errors only. |
+| `ERROR` | Errors only. |
+
+An unrecognized value falls back to `DEBUG`, and the server logs a warning that names the variable and the accepted values.
+
 ### Connection Methods
 
 There are **two different ways** to connect to the DefectDojo MCP server, depending on which AI interface you're using:
@@ -95,10 +113,7 @@ Toolsets are enabled under **Settings → Feature Flags**, nested below the **MC
 | `core` | none — always on with the MCP Server | — |
 | `hierarchy` | **MCP: Asset Hierarchy** | the **Asset Hierarchy** feature — see [Asset Hierarchy Toolset](#asset-hierarchy-toolset) |
 | `reporting` | **MCP: Reporting** | the **Reporting** feature (the Report Builder) — see [Reporting Toolset](#reporting-toolset) |
-<<<<<<< Updated upstream
-=======
 | `dashboards` | **MCP: Dashboards 2.0** | the **Dashboards 2.0** feature ([Customizable Dashboards](../../dashboards/custom-dashboards/)) — see [Dashboards Toolset](#dashboards-toolset) |
->>>>>>> Stashed changes
 
 More toolsets appear in the Feature Flags menu as they are released. A toolset's flag only controls what the MCP Server offers: it does not change the REST API, and every tool call still runs with the permissions of the API token that connects.
 
@@ -111,12 +126,8 @@ Add a `toolsets` query parameter to the MCP endpoint URL. Names are comma-separa
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp` | `core` only. Unchanged from earlier releases. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy` | `core` plus the Asset Hierarchy toolset. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=reporting` | `core` plus the Reporting toolset. |
-<<<<<<< Updated upstream
-| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy,reporting` | `core` plus both named toolsets. |
-=======
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=dashboards` | `core` plus the Dashboards toolset. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy,reporting,dashboards` | `core` plus every named toolset. |
->>>>>>> Stashed changes
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=all` | `core` plus every toolset enabled on the instance. Requires the `Authorization` header to be sent when connecting, because the server reads the instance's Feature Flags with your token to resolve `all`. |
 
 Any selection with a `toolsets` parameter also offers `get_instance_info`, a tool that reports the DefectDojo Pro version, which toolsets are enabled (`mcp_toolsets_enabled`), each Feature Flag's state, and whether the instance names its objects **Assets / Organizations** or **Products / Product Types**. Ask your assistant to call it when you are unsure which toolsets an instance provides.
@@ -961,8 +972,6 @@ Report schedules have no page of their own in the DefectDojo Pro UI yet, so the 
 
 ---
 
-<<<<<<< Updated upstream
-=======
 ## Dashboards Toolset
 
 The `dashboards` toolset (`?toolsets=dashboards`) lets an assistant work with [Customizable Dashboards](../../dashboards/custom-dashboards/): list the dashboards you can see, read what is on one, render a widget's current numbers, explain why a widget shows what it shows, and design, create, edit, clone, share and delete dashboards for you. It adds 11 tools (6 read, 5 write), 2 resources and 2 prompts on top of `core`.
@@ -1019,7 +1028,6 @@ Sharing a dashboard or changing the shared default changes what every user of th
 
 ---
 
->>>>>>> Stashed changes
 ## Reference Resources
 
 The `core` toolset publishes 6 read-only JSON resources (MIME type `application/json`). They are reference material bundled with the MCP Server, not data from your DefectDojo instance, and are available without any tool call so an assistant can map findings to a standard or explain a regulatory obligation while it reports.
@@ -1035,11 +1043,7 @@ The `core` toolset publishes 6 read-only JSON resources (MIME type `application/
 
 Ask your assistant to read a resource by URI (for example, "read `mcp://resource/cwe_to_owasp_2025_mapping.json` and group our open findings by OWASP category") when a report should cite a standard.
 
-<<<<<<< Updated upstream
-Add-on toolsets publish their own resources alongside these: the `hierarchy` toolset adds `mcp://resource/hierarchy/workflow-guide.md` (see [Asset Hierarchy Toolset](#asset-hierarchy-toolset)) and the `reporting` toolset adds three under `mcp://resource/reporting/` (see [Reporting Toolset](#reporting-toolset)).
-=======
 Add-on toolsets publish their own resources alongside these: the `hierarchy` toolset adds `mcp://resource/hierarchy/workflow-guide.md` (see [Asset Hierarchy Toolset](#asset-hierarchy-toolset)), the `reporting` toolset adds three under `mcp://resource/reporting/` (see [Reporting Toolset](#reporting-toolset)), and the `dashboards` toolset adds `mcp://resource/dashboards/widget-schema.json` and `mcp://resource/dashboards/workflow-guide.md` (see [Dashboards Toolset](#dashboards-toolset)).
->>>>>>> Stashed changes
 
 ---
 
@@ -1080,11 +1084,7 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 
 > **💡 Using Prompts:** To invoke a prompt, simply ask your AI assistant: "Create a SAST Review Report" or "Generate a Security Landscape Report using DefectDojo data"
 
-<<<<<<< Updated upstream
-The `hierarchy` toolset adds two more prompts, `explore_hierarchy` and `hierarchy_cleanup_review`, described under [Asset Hierarchy Toolset](#asset-hierarchy-toolset); the `reporting` toolset adds `build_report_template`, `run_report` and `check_report_run`, described under [Reporting Toolset](#reporting-toolset). Unlike the two `core` prompts, most of these take arguments, which your client asks for when you invoke them.
-=======
 The `hierarchy` toolset adds two more prompts, `explore_hierarchy` and `hierarchy_cleanup_review`, described under [Asset Hierarchy Toolset](#asset-hierarchy-toolset); the `reporting` toolset adds `build_report_template`, `run_report` and `check_report_run`, described under [Reporting Toolset](#reporting-toolset); and the `dashboards` toolset adds `summarize_dashboard` and `build_dashboard`, described under [Dashboards Toolset](#dashboards-toolset). Unlike the two `core` prompts, most of these take arguments, which your client asks for when you invoke them.
->>>>>>> Stashed changes
 
 ---
 
@@ -1384,19 +1384,11 @@ Verify these items when experiencing connection issues:
 
 #### ❌ "toolset 'hierarchy' is not enabled on this DefectDojo Pro instance"
 
-<<<<<<< Updated upstream
-**Cause:** The connection URL asks for a toolset whose Feature Flag is off, or the MCP Server itself is disabled. The same message names `reporting` when that toolset's flag is off.
-
-**Solutions:**
-
-1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature)
-=======
 **Cause:** The connection URL asks for a toolset whose Feature Flag is off, or the MCP Server itself is disabled. The same message names `reporting` or `dashboards` when that toolset's flag is off.
 
 **Solutions:**
 
 1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature; for `dashboards`, **MCP: Dashboards 2.0**, which also needs the **Dashboards 2.0** feature)
->>>>>>> Stashed changes
 2. Or remove the toolset from the `toolsets` parameter and reconnect
 3. Ask your assistant to call `get_instance_info` to see which toolsets the instance has enabled
 
