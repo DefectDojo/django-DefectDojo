@@ -123,6 +123,12 @@ other = "Estado"
 [footer_link_support]
 other = "Soporte"
 
+[footer_link_privacy_policy]
+other = "Política de privacidad"
+
+[footer_link_cookie_settings]
+other = "Configuración de cookies"
+
 [footer_rights]
 other = "Todos los derechos reservados."
 

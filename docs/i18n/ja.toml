@@ -184,6 +184,12 @@ other = "ステータス"
 [footer_link_support]
 other = "サポート"
 
+[footer_link_privacy_policy]
+other = "プライバシーポリシー"
+
+[footer_link_cookie_settings]
+other = "Cookie 設定"
+
 [footer_rights]
 other = "無断複製・転載を禁じます。"
 
