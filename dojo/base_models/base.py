@@ -2,6 +2,7 @@ import contextlib
 import logging
 from typing import TypeVar
 
+from django.db import transaction
 from django.db.models import DateTimeField, Manager, Model, QuerySet
 from django.utils.translation import gettext_lazy as _
 
@@ -60,19 +61,24 @@ class BaseModelWithoutTimeMeta(Model):
             from dojo.location.feature import locations_enabled  # noqa: PLC0415
 
             skip_validation = not locations_enabled()
-        # Run the pre save logic, if enabled
-        self.pre_save_logic()
-        # Call the validations
-        if not skip_validation:
-            try:
-                self.full_clean()
-            except Exception:
-                self.print_all_fields()
-                raise
-        # Run the post save logic, if enabled
-        self.post_save_logic()
-        # Call the base save method to save the model to the database
-        super().save(*args, **kwargs)
+        # pre_save_logic() may commit related rows, so anything raised after it has to take
+        # those writes back out. Subclasses that do not override the hook have nothing to
+        # undo, and a savepoint on every save is measurable on the import path.
+        rolls_back = type(self).pre_save_logic is not BaseModelWithoutTimeMeta.pre_save_logic
+        with transaction.atomic() if rolls_back else contextlib.nullcontext():
+            # Run the pre save logic, if enabled
+            self.pre_save_logic()
+            # Call the validations
+            if not skip_validation:
+                try:
+                    self.full_clean()
+                except Exception:
+                    self.print_all_fields()
+                    raise
+            # Run the post save logic, if enabled
+            self.post_save_logic()
+            # Call the base save method to save the model to the database
+            super().save(*args, **kwargs)
 
     def pre_save_logic(self) -> None:
         """Allow for some pre save operations by other classes."""
