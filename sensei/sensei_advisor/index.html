@@ -53,7 +53,11 @@ rationale, the statistics that support it, and a <strong>simulated impact</stron
 of your real findings — for a cross-tool group, roughly how many finding pairs the change would
 merge, and which tool pairs they fall between. A recommendation whose simulated effect is
 essentially zero is flagged rather than presented as confident, and one that would collapse
-unrelated findings onto a single hash is dropped before you ever see it.</p><p>Applying a recommendation uses the same settings machinery and permissions as changing the
+unrelated findings onto a single hash is dropped before you ever see it.</p><p>The cross-tool estimate compares findings the way deduplication will. Findings in Assets that
+share a cross-tool <a href=/triage_findings/finding_deduplication/pro__dedupe_pools/>Dedupe Pool</a> are
+compared with each other, and an Engagement set to deduplicate only within itself is compared
+with nothing outside it. When pools shaped the estimate, the card says so. The model is told how many pools and pooled Assets exist, never
+their names.</p><p>Applying a recommendation uses the same settings machinery and permissions as changing the
 setting by hand — applying a deduplication recommendation requires the Tuner edit permission,
 and creating a prioritization engine requires the engine permission. The Advisor grants no new
 power; it drives the controls you already have.</p><h3 id=rehash-cost>Rehash cost<a href=#rehash-cost class=anchor aria-hidden=true>#</a></h3><p>Applying a cross-tool recommendation recomputes the cross-tool hash for every finding of the
