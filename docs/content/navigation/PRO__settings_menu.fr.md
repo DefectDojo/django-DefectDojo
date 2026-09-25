@@ -26,7 +26,7 @@ Settings est divisé en sept groupes, nommés d'après ce que vous cherchez à f
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
 | **Notifications** | Notification Events, Notification Webhooks |
 | **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status, et — sur DefectDojo Cloud — Message Portal, Firewall Rules, Maintenance Windows |
-| **License & Support** | License Manager, Version Manager, Contact Support |
+| **License & Support** | License Manager, Version Manager, Support, Contact Support |
 
 Vous ne voyez que les entrées que votre compte est autorisé à ouvrir, et un groupe disparaît entièrement lorsqu'aucune de ses pages ne vous est accessible.
 
@@ -68,7 +68,7 @@ Si vous êtes habitué à la disposition précédente :
 | Settings → Configuration → All Schedules | Settings → Operations → Schedules |
 | Settings → Pro Settings → Celery Status | Settings → Operations → Celery Status |
 | Settings → Cloud Manager → *(cloud pages)* | Settings → Operations |
-| Settings → License Manager / Version Manager / Contact Support | Settings → License & Support |
+| Settings → License Manager / Version Manager / Support / Contact Support | Settings → License & Support |
 
 Le groupe qui portait le nom de votre offre de licence — **Pro Settings** sur une instance Pro, **Enterprise Settings** sur une instance Enterprise — n'existe plus. Ses pages sont réparties entre System, Finding Workflow, Notifications et Operations.
 
