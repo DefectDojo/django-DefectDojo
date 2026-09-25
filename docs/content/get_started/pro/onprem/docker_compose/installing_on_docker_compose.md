@@ -202,12 +202,30 @@ Use `app restart` after changing any configuration, since it recreates the conta
 
 ## Replace the TLS certificate
 
-The installation ships a self-signed certificate so that the site works immediately. Replace it with your own by overwriting two files, keeping the names exactly as they are:
+The installation ships a placeholder certificate so that nginx can start. It is issued for a different hostname than yours, so browsers will reject it until you replace it with a certificate for your own hostname. Do this before users start logging in.
 
-- `/opt/dojo/certs/dojo.crt`
-- `/opt/dojo/certs/dojo.key`
+Replace it by overwriting two files, keeping the names exactly as they are:
 
-Then `dojo-compose-cli app restart` to pick them up.
+- `/opt/dojo/certs/dojo.crt`, your certificate followed by any intermediate certificates, in PEM format
+- `/opt/dojo/certs/dojo.key`, the matching private key, in PEM format and without a passphrase
+
+The nginx container runs as user ID 1002 with group 0 (`root`), not as `dojosrv`, so it reads the key through its group. Give the key group `root` and make it group-readable. A key owned by `dojosrv:dojosrv` with mode `0640` is unreadable to nginx, and nginx will not start:
+
+```bash
+sudo chown dojosrv:root /opt/dojo/certs/dojo.crt /opt/dojo/certs/dojo.key
+sudo chmod 0644 /opt/dojo/certs/dojo.crt
+sudo chmod 0640 /opt/dojo/certs/dojo.key
+```
+
+Then restart to pick them up, and confirm nginx came back:
+
+```bash
+sudo -E dojo-compose-cli app restart
+docker ps --filter name=nginx
+curl -sSI https://<your-hostname>/
+```
+
+`docker ps` should show the nginx container as `Up` rather than `Restarting`, and `curl` should complete the TLS handshake without a certificate error. If nginx is restarting, `docker logs nginx` usually names the file it could not read.
 
 ## Trusting an internal or private CA
 
