@@ -11,7 +11,7 @@ DefectDojo Pro carries two support pages. **Support** is where you file a reques
 
 ## Support requests
 
-**Support** (`/cloud/support`) holds a search box, a request form behind a link, and a list.
+Open **Support** from **Settings → Support**, or from **Settings → License & Support → Support** in the reorganized settings menu. It shows on cloud, self-hosted and airgapped instances. The page (`/ui/cloud/support`) holds a search box, a request form behind a link, and a list.
 
 The form takes four kinds of request:
 
@@ -26,7 +26,7 @@ Under the form, **My requests** lists everything your account has filed, with th
 
 ## Community requests
 
-**Community requests** (`/cloud/support/community`) lists the topics DefectDojo has published. Each row carries a title, a status and a vote button. Vote once per topic to say it matters to you. The count rises and the button locks. Completed topics (Shipped, Merged, Aged out) sit greyed out at the bottom of the board and no longer take votes. If DefectDojo decides not to pursue a topic, it leaves the board; a request you linked to it stays in **My requests**. When a topic you voted on changes status, DefectDojo e-mails the address on your DefectDojo user, provided it is at your organization's e-mail domain (the domain of your Cloud Portal account).
+**Community requests** (`/ui/cloud/support/community`) lists the topics DefectDojo has published. Each row carries a title, a status and a vote button. Vote once per topic to say it matters to you. The count rises and the button locks. Completed topics (Shipped, Merged, Aged out) sit greyed out at the bottom of the board and no longer take votes. If DefectDojo decides not to pursue a topic, it leaves the board; a request you linked to it stays in **My requests**. When a topic you voted on changes status, DefectDojo e-mails the address on your DefectDojo user, provided it is at your organization's e-mail domain (the domain of your Cloud Portal account).
 
 A request you file does not reach the board on its own. DefectDojo staff decide what to publish there.
 
@@ -42,11 +42,15 @@ A lookup that fails leaves the form reachable. The box shows no matches and you 
 
 ## Self-hosted instances
 
-A self-hosted instance enrols with DefectDojo using its own signed license rather than a portal secret. Enrolment happens on the first support call and needs no extra configuration.
+Support works the same way on a self-hosted instance. The instance enrols with DefectDojo using its own signed license rather than a portal secret. Enrolment happens on the first support call and needs no extra configuration.
 
-**One instance per license holds the enrolment at a time.** If a second instance running the same license enrols, it takes the enrolment over and the first instance can no longer reach DefectDojo. The instance that lost it writes an error to its log naming its own key, and it does not re-enrol on its own. Run one enrolled instance per license, and decide which one that is.
+The instance calls `cloud.defectdojo.com` for support requests and the community board, and `docs.defectdojo.com` for the documentation search. Allow outbound HTTPS to both. If the instance has no route off its network, turn on **Airgapped instance** instead (see below).
 
-An enrolment key that DefectDojo staff have revoked cannot be replaced by the instance. The instance logs the refusal and the support pages stay unavailable until staff clear the key.
+**One instance per license holds the enrolment.** The first instance to enrol keeps it. A second instance running the same license is refused: it writes an error to its log naming its own key, and its support pages stay unavailable. To move the enrolment, ask DefectDojo support to reset it, then open the support pages on the instance that must keep it. The next instance to make a support call enrols.
+
+A key that DefectDojo staff revoke stops working at once. The instance cannot replace it on its own, and its support pages stay unavailable until staff reset the enrolment.
+
+A connector request from a self-hosted instance cannot carry tool details or credentials, because DefectDojo accepts those only from a cloud instance. The form says so. Send the request, then e-mail the details to `support@defectdojo.com`.
 
 If enrolment is refused for any other reason, the log line names the credential the instance presented, so you know whether to check the license or the portal secret.
 

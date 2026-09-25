@@ -24,7 +24,7 @@ audience: pro
 | **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
 | **Notifications** | Notification Events, Notification Webhooks |
 | **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status,以及在 DefectDojo Cloud 上还包括 Message Portal, Firewall Rules, Maintenance Windows |
-| **License & Support** | License Manager, Version Manager, Contact Support |
+| **License & Support** | License Manager, Version Manager, Support, Contact Support |
 
 您只会看到自己账户有权限打开的条目,当某个分组中的所有页面您都无权访问时,该分组会完全消失。
 
@@ -66,7 +66,7 @@ audience: pro
 | Settings → Configuration → All Schedules | Settings → Operations → Schedules |
 | Settings → Pro Settings → Celery Status | Settings → Operations → Celery Status |
 | Settings → Cloud Manager → *(cloud pages)* | Settings → Operations |
-| Settings → License Manager / Version Manager / Contact Support | Settings → License & Support |
+| Settings → License Manager / Version Manager / Support / Contact Support | Settings → License & Support |
 
 以您的许可证套餐命名的分组——在 Pro 实例上为 **Pro Settings**,在 Enterprise 实例上为 **Enterprise Settings**——已不复存在。其中的页面已分散到 System、Finding Workflow、Notifications 和 Operations 各分组中。
 

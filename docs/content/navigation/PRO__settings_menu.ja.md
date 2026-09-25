@@ -24,7 +24,7 @@ Settingsは7つのグループに分かれており、システムのどの部�
 | **Configuration** | Environments、Regulations、Note Types、Test Types、CI/CD Infrastructure、Tool Types、Tool Configurations |
 | **Notifications** | Notification Events、Notification Webhooks |
 | **Operations** | Audit Logs、Usage Logs、Schedules、Celery Status、および — DefectDojo Cloudでは — Message Portal、Firewall Rules、Maintenance Windows |
-| **License & Support** | License Manager、Version Manager、Contact Support |
+| **License & Support** | License Manager、Version Manager、Support、Contact Support |
 
 表示されるのは、自分のアカウントに開く権限がある項目だけであり、そのグループ内のページが1つも利用できない場合、グループ自体が表示されなくなります。
 
@@ -66,7 +66,7 @@ Settingsは7つのグループに分かれており、システムのどの部�
 | Settings → Configuration → All Schedules | Settings → Operations → Schedules |
 | Settings → Pro Settings → Celery Status | Settings → Operations → Celery Status |
 | Settings → Cloud Manager → *(クラウド関連ページ)* | Settings → Operations |
-| Settings → License Manager / Version Manager / Contact Support | Settings → License & Support |
+| Settings → License Manager / Version Manager / Support / Contact Support | Settings → License & Support |
 
 ライセンスパッケージにちなんで名付けられていたグループ（Proインスタンスでは**Pro Settings**、Enterpriseインスタンスでは**Enterprise Settings**）は、もう存在しません。そのページは、System、Finding Workflow、Notifications、Operationsに分散配置されています。
 
