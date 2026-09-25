@@ -106,6 +106,14 @@ Allowlist by hostname rather than by address. The registry sits behind a content
 
 If the host reaches the internet through an outbound proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/). If it has no route to the internet at all, follow the air-gapped installation procedure in this section instead.
 
+### Inbound access
+
+Users only need to reach the application host on ports 80 and 443, which nginx serves. Allow those from your users' networks and nothing else.
+
+Plan for two more ports that the stack publishes on every interface of the host: `9142` for the MCP server and `9871` for the orchestration service. Unless you have a reason to reach them from elsewhere, block them from outside the host.
+
+Do this at your network firewall or security group, or in the `DOCKER-USER` iptables chain on the host. A host firewall such as `ufw` is not enough on its own: Docker writes its own rules for published ports, and those rules take effect ahead of `ufw`, so a `ufw deny` does not close a port Docker has published. See Docker's [packet filtering and firewalls](https://docs.docker.com/engine/network/packet-filtering-firewalls/) documentation for how to add rules to `DOCKER-USER`.
+
 ### Confirm the database is reachable
 
 Install the client tools and connect before going any further. A database problem is much easier to diagnose now than in the middle of the install:
@@ -305,6 +313,18 @@ sudo -E dojo-compose-cli config print
 ```
 
 Without it, the CLI asks for the key each time.
+
+## Troubleshooting
+
+### The systemd service keeps restarting
+
+If `journalctl -u defectdojo-compose` shows the service failing with a message that DefectDojo is already running, over and over, the unit is trying to start a stack that is already up. The application itself keeps running. To stop the repeated restarts, disable the unit:
+
+```bash
+sudo systemctl disable defectdojo-compose
+```
+
+Do not run `systemctl stop defectdojo-compose` while the unit is active. Its stop action runs `app stop`, which takes the containers down. With the unit disabled, the stack still comes back after a reboot, because Docker restarts the containers on its own under their restart policy.
 
 ## Questions or support
 
