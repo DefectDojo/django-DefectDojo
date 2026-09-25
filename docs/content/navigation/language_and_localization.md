@@ -31,8 +31,13 @@ page that is half translated. Languages still being worked on are not offered at
 English is always available and is the language a new account starts in, unless an administrator
 has set a different default for the instance.
 
-Right-to-left languages (Arabic, Hebrew, Persian, Urdu) are held back until the mirrored layout
-has been verified, so they do not appear in the menu yet even where their translations exist.
+Arabic, Hebrew, Persian and Urdu are written right to left. DefectDojo offers them, and the
+interface mirrors to match: the navigation, spacing and alignment flip, while identifiers that
+are read left to right whatever the surrounding language (a CVE number, a file path, a URL, a
+command) keep their own direction, because reversing those would change what they say.
+
+The Pro interface offers them once its own translations are complete, which is tracked
+separately from the open source ones.
 
 ## What is translated, and what is not
 
