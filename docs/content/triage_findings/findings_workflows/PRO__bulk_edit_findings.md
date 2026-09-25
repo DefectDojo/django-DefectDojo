@@ -34,6 +34,7 @@ The **Bulk Edit** button opens one form containing all of the field-level bulk a
 * **Review** — request or clear review on the selected Findings (see below).
 * **Push to Jira** — queue the selected Findings to push to Jira. Shown only when the Jira integration is enabled.
 * **Push to Connector** — dispatch the selected Findings to your configured connector. Shown only when that feature is enabled.
+* **Move or Copy** — move the selected Findings to another Test, or copy them there and leave the originals in place (see below).
 
 ### Replace Specific Tag
 
@@ -49,6 +50,71 @@ The **Review** action manages peer review across all selected Findings:
 * **Clear Review** — enter a **Review Note** (required) to take the selected Findings out of the *Under Review* state and clear their assigned reviewers.
 
 The reviewers you can choose from are the users with edit access to the selected Findings.
+
+### Move or Copy
+
+The **Move or Copy** section puts the selected Findings in another Test. The Test can be in the same Engagement, another Engagement, or another Asset. Use the **Move / Copy** toggle to choose:
+
+* **Move** reassigns the Findings to the destination Test. Use it to bring Findings recorded across several Tests together in one, or to send the Findings of a scan report that covers several domains to the Asset each belongs to.
+* **Copy** creates a copy of each Finding in the destination Test and leaves the original where it is.
+
+Choose the destination with the **Destination Asset**, **Engagement**, and **Test** dropdowns. Each narrows the next, so the Engagement list only offers Engagements in the Asset you picked, and the Test list only Tests in that Engagement. There are two ways to finish:
+
+* **Pick an existing Test.** The Findings are moved or copied into that Test.
+* **Pick only an Asset** and tick **Create a matching engagement and test if none exists.** DefectDojo mirrors each Finding's current Engagement and Test into the destination Asset, matching an Engagement by **name** and a Test by **test type and title**. An existing match is reused; only what is missing is created, and a created Engagement inherits the source Engagement's dates, lead and status.
+
+A selection can span several source Assets — each Finding is mirrored from its own Engagement and Test.
+
+To move or copy a single Finding, use **Move or Copy Finding** in its ⋮ menu, or in the gear menu on the Finding's own page. It offers the same toggle and destination fields, and offers **Move** only if you can edit the Finding.
+
+#### What a move changes
+
+Moving a Finding also updates the things that belong to its old position in the hierarchy:
+
+* Its **Endpoints** (or **Locations**) are re-homed onto the destination Asset, so they no longer point at the Asset it came from. An Endpoint shared with a Finding that stayed behind is left in place for that Finding.
+* It is removed from its **Finding Group**, because a group belongs to a single Test.
+* A **Risk Acceptance** belongs to a single Engagement. A Finding moved to another Test in the same Engagement stays accepted; a Finding moved to another Engagement is removed from its Risk Acceptance and becomes active again. Re-accept the risk in the destination Engagement if it still applies.
+* Its **SLA** dates are recalculated against the destination Asset's SLA configuration, which may change its due date. Its priority and the Asset grades are recalculated when it changes Asset.
+* **Deduplication** runs again in the destination's scope.
+* A **note** is added to each moved Finding recording where it came from and where it went.
+* A linked **Jira** issue stays linked to the moved Finding; the issue itself is not moved to another Jira project.
+
+#### What a copy carries
+
+A copy keeps the Finding's details, its notes (with their edit history; private notes stay private), its files (duplicated, with their original titles), its Endpoints or Locations (in the destination Asset), tags, reviewers, vulnerability IDs, CWEs, request/response pairs and custom field values. A note on the copy records which Finding it was copied from.
+
+A copy is not linked to Jira and is not added to a Finding Group. A copy of a risk-accepted Finding joins the same Risk Acceptance when it stays in the same Engagement; a copy in another Engagement is not accepted.
+
+An attachment whose stored file is missing is not copied, and the action says which one.
+
+A copy is deduplicated like any new Finding. With deduplication enabled, a copy in the same Asset as its original is marked a duplicate of the original, so to bring Findings together in one Test, move them rather than copy them.
+
+#### Permissions
+
+Moving requires edit permission on each Finding; copying requires only view permission. Both require permission to add Findings to the destination Test, or to the destination Asset when **Create a matching engagement and test** is ticked, and to add Engagements and Tests there when a matching one has to be created. The destination is checked before anything is moved or copied, so a destination you may not use changes nothing. Findings you cannot move or copy are skipped and listed when the action finishes.
+
+Bulk Edit itself needs edit permission on every selected Finding (see [Availability and skipped Findings](#availability-and-skipped-findings)), so to copy a Finding you can only view, use **Move or Copy Finding** in its ⋮ menu.
+
+#### Automating a move or copy
+
+The same actions are available in the public API for scripts and integrations:
+
+* `POST /api/v2/findings/{id}/move/` and `POST /api/v2/findings/{id}/copy/` for a single Finding.
+* `POST /api/v2/findings/bulk_move/` and `POST /api/v2/findings/bulk_copy/` for several, with the Finding IDs in `findings`.
+
+The request body names the destination, either as an existing Test or as an Asset (`destination_product`) with `create_missing`:
+
+```json
+{ "findings": [101, 102], "destination_test": 42 }
+```
+
+```json
+{ "destination_product": 7, "create_missing": true }
+```
+
+The response reports how many Findings were processed, why any were skipped (`skipped_messages`), what was created, and the IDs of the moved Findings or of the new copies (`finding_ids`). Authenticate with an API token, as for the rest of `/api/v2/`. The Pro UI calls an internal mirror of these actions under `/api/vue/`; always automate against the `/api/v2/` paths.
+
+A bulk request takes up to 1,000 Finding IDs. An ID that does not exist is skipped and listed, like one you may not act on.
 
 ## Risk Acceptance, Finding Group, Merge, and Delete
 
