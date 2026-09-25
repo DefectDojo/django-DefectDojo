@@ -6,12 +6,15 @@ from django.urls import reverse
 from dojo.location.models import Location
 from dojo.models import Dojo_User, Product, Product_Type
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, skip_unless_v3
 
 A_ADDR = "192.0.2.10"
 B_ADDR = "192.0.2.20"
 
 
+# The Location views and URL names only exist when V3_FEATURE_LOCATIONS is on at startup,
+# so overriding the setting per test is not enough.
+@skip_unless_v3
 @override_settings(V3_FEATURE_LOCATIONS=True, ENABLE_AUDITLOG=True)
 class LocationHistoryScopeTest(DojoTestCase):
 
