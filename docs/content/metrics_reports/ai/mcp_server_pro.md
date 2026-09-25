@@ -113,6 +113,7 @@ Toolsets are enabled under **Settings → Feature Flags**, nested below the **MC
 | `core` | none — always on with the MCP Server | — |
 | `hierarchy` | **MCP: Asset Hierarchy** | the **Asset Hierarchy** feature — see [Asset Hierarchy Toolset](#asset-hierarchy-toolset) |
 | `reporting` | **MCP: Reporting** | the **Reporting** feature (the Report Builder) — see [Reporting Toolset](#reporting-toolset) |
+| `dashboards` | **MCP: Dashboards 2.0** | the **Dashboards 2.0** feature ([Customizable Dashboards](../../dashboards/custom-dashboards/)) — see [Dashboards Toolset](#dashboards-toolset) |
 
 More toolsets appear in the Feature Flags menu as they are released. A toolset's flag only controls what the MCP Server offers: it does not change the REST API, and every tool call still runs with the permissions of the API token that connects.
 
@@ -125,7 +126,8 @@ Add a `toolsets` query parameter to the MCP endpoint URL. Names are comma-separa
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp` | `core` only. Unchanged from earlier releases. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy` | `core` plus the Asset Hierarchy toolset. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=reporting` | `core` plus the Reporting toolset. |
-| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy,reporting` | `core` plus both named toolsets. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=dashboards` | `core` plus the Dashboards toolset. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy,reporting,dashboards` | `core` plus every named toolset. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=all` | `core` plus every toolset enabled on the instance. Requires the `Authorization` header to be sent when connecting, because the server reads the instance's Feature Flags with your token to resolve `all`. |
 
 Any selection with a `toolsets` parameter also offers `get_instance_info`, a tool that reports the DefectDojo Pro version, which toolsets are enabled (`mcp_toolsets_enabled`), each Feature Flag's state, and whether the instance names its objects **Assets / Organizations** or **Products / Product Types**. Ask your assistant to call it when you are unsure which toolsets an instance provides.
@@ -970,6 +972,62 @@ Report schedules have no page of their own in the DefectDojo Pro UI yet, so the 
 
 ---
 
+## Dashboards Toolset
+
+The `dashboards` toolset (`?toolsets=dashboards`) lets an assistant work with [Customizable Dashboards](../../dashboards/custom-dashboards/): list the dashboards you can see, read what is on one, render a widget's current numbers, explain why a widget shows what it shows, and design, create, edit, clone, share and delete dashboards for you. It adds 11 tools (6 read, 5 write), 2 resources and 2 prompts on top of `core`.
+
+It is available when an administrator has enabled **MCP: Dashboards 2.0** under **Settings → Feature Flags** (which itself requires the **Dashboards 2.0** feature, described in [Enabling Customizable Dashboards](../../dashboards/custom-dashboards/#enabling-customizable-dashboards)). It requires DefectDojo Pro 3.3.300 or later, the release that made the dashboards endpoints available to API tokens under `/api/v2/dashboards/`. If you would rather drive dashboards with an LLM through the REST API and a generated script, see [Building Dashboards with an LLM](../../dashboards/custom-dashboards-llm/); the MCP toolset does the same job without any code leaving the chat.
+
+> **⚠️ Write tools change DefectDojo immediately.** As with the hierarchy and reporting toolsets, each write tool performs one DefectDojo REST write with your API token and relays DefectDojo's answer. DefectDojo's permission checks apply — sharing a dashboard needs the same permission as in the UI, and an instance whose administrator has locked dashboards to the designated defaults refuses edits the same way — and the MCP Server adds no preview, approval step or undo. The bundled workflow guide instructs the assistant to read the widget catalog, propose the dashboard, and ask for your confirmation before any write, and never to share a dashboard unless you ask.
+
+Every dashboards tool accepts the optional `token` parameter, and every list tool pages with `limit` (1–100, default 25) and `offset`.
+
+### 📊 Dashboards Read Tools
+
+| Tool | What it returns | Key parameters |
+|------|-----------------|----------------|
+| `get_dashboards` | The dashboards visible to your token, one page at a time. Each row carries `id`, `name`, `is_shared`, `is_default`, `is_owned`, `is_catalog`, `can_edit`, `can_manage`, `category`, `widget_count`, `updated_at` and a `url`. | `scope` (`all` default, `mine`, `shared`) |
+| `get_dashboard` | One dashboard. `summary` (default) gives identity, sharing/ownership/default flags, `widget_count` and `settings`; `widgets` adds each widget's `id`, `type`, `title`, `refresh_interval` and grid `position` without its configuration; `full` returns the complete layout document as DefectDojo serializes it, the form `update_dashboard`'s whole-document mode expects back. Never renders data. | `dashboard_id`, `include` (`summary` default, `widgets`, `full`) |
+| `get_widget_catalog` | Every widget type the instance knows (48 in 3.3.300): `type`, `label`, `category`, `description`, `config_example`, what it `requires` (feature flags, licensed features, permissions), `renderable`, `available` (true only when every feature flag the type needs is on) and `accepts_filters`. The assistant checks here before proposing a widget. | `category` (`numbers`, `charts`, `lists`, `static`) |
+| `get_widget_data` | Renders one widget with the same request the UI sends — either a widget saved on a dashboard (`dashboard_id` + `widget_id`) or an unsaved one (`widget_type` + `config`) — and returns its `data`, capped by `row_limit` and `series_limit` with a `truncation` note saying what was dropped. Static types (`table`, `favorites`, `section_break`, `markdown`, `quick_actions`) have no data. | `dashboard_id` + `widget_id`, or `widget_type` + `config`; `row_limit`, `series_limit` (1–100, default 25) |
+| `diagnose_widget` | Renders the widget as configured and once more with no filters, then reports `applied_filters`, both summaries, `ignored_filter_keys` (filter keys DefectDojo does not recognise for the widget's model — usually a misspelling) and `suggestions`. Only widget types that take filters can be diagnosed. | the same selectors as `get_widget_data` |
+| `get_exec_pack_schedules` | Your own executive posture pack e-mail schedules, oldest first: `name`, `enabled`, `cadence`, `weekday`, `day_of_month`, `hour_utc`, `window_days`, `file_format`, `last_run_at`, `last_report_id`. Read-only; schedules are created in the DefectDojo Pro UI and also require the Reporting feature and permission to generate reports. | — |
+
+A dashboard's `url` is the Dashboards page (`/ui/dashboard-v2`); DefectDojo Pro has no per-dashboard link, so pick the dashboard by name from the page's dropdown. Every render is bounded: a wide widget is trimmed to the caps and the `truncation` field says so, so the assistant reports what it saw rather than guessing at the rest.
+
+### ✏️ Dashboards Write Tools
+
+| Tool | What it does in DefectDojo | Key parameters |
+|------|----------------------------|----------------|
+| `create_dashboard` | Creates a dashboard from 1–50 widgets, each with a catalog `type`, `title`, `config` and `refresh_interval`. An optional `layout` places widgets on the 12-column grid; widgets without an entry are placed two per row below the others. Personal unless `is_shared` is true. DefectDojo validates every widget configuration and answers a 400 with `field_errors` when one is wrong. | `name`, `widgets`, `layout`, `settings`, `is_shared` |
+| `update_dashboard` | Changes a dashboard with one update. Whole-document mode replaces exactly the fields you send (`name`, `widgets` together with `layout`, `settings`, `is_shared`). `ops` mode takes 1–25 ordered operations — `add_widget`, `update_widget`, `remove_widget`, `move_widget`, `retitle_widget`, `rename` — which the assistant applies to the current document before saving, so a single widget can be changed without restating the rest. A concurrent edit in the UI between the read and the save is overwritten. | `dashboard_id`, then either the document fields or `ops` |
+| `clone_dashboard` | Copies a shared or catalog dashboard into your own, with fresh widget ids and never shared, as `name` or `Copy of <source name>`. | `dashboard_id`, `name` |
+| `manage_dashboard_sharing` | One action per call: `share` or `unshare` a dashboard, `set_my_default`, `set_shared_default` (the dashboard everyone lands on) or `clear_shared_default`. | `action`, `dashboard_id` |
+| `delete_dashboard` | Deletes a dashboard after reading its name, so the answer says which one went (`Deleted dashboard "<name>" (id N)`). DefectDojo refuses the starter template and dashboards you cannot manage. Cannot be undone. | `dashboard_id` |
+
+Write tools answer with the same `outcome` envelope as the [Asset Hierarchy Toolset](#asset-hierarchy-toolset) (`committed`, `rejected`, `unknown`). A `rejected` outcome carries DefectDojo's `status_code` and `field_errors`, so a misconfigured widget is reported field by field rather than silently dropped. After creating or changing a dashboard, the assistant is told to render every non-static widget once with `get_widget_data` and to report any that answer with a rejection, a disabled feature or a permission error.
+
+Sharing a dashboard or changing the shared default changes what every user of the instance sees. The workflow guide and the `build_dashboard` prompt only do either when you explicitly ask.
+
+### Dashboards Resources and Prompts
+
+- **`mcp://resource/dashboards/widget-schema.json`** (JSON) — every widget type with the configuration keys, allowed values and ranges DefectDojo accepts, plus the rules for the widget envelope, grid positions and dashboard settings. The assistant reads a type's entry before writing its configuration.
+- **`mcp://resource/dashboards/workflow-guide.md`** (Markdown) — the working method: discover the catalog, resolve dashboards by name, propose a small layout, confirm, create, render-check every widget, diagnose an empty one, and share only on request.
+- **`summarize_dashboard`** prompt — takes an optional `dashboard_name_or_id` (your default dashboard when blank); reads the dashboard, renders up to six of its widgets and summarises what they currently show, within a bounded number of calls.
+- **`build_dashboard`** prompt — takes `audience` and `focus`; reads the catalog and the widget schema, learns the instance's Organization/Asset wording, proposes a dashboard of four to eight widgets for that audience with every filter spelled out, creates it after you approve, render-checks each widget (diagnosing and fixing an empty one only after telling you), and hands you the URL. It mentions sharing but never shares unless you ask.
+
+### Example requests
+
+- "Which dashboards can I see, and which one is my default?"
+- "Summarise my `Executive Overview` dashboard — what are the numbers right now?"
+- "Why does the `Open Criticals — Payments` widget show zero? Diagnose it."
+- "Build a dashboard for the AppSec team focused on remediation velocity. Propose it first."
+- "Add a `Findings by severity` chart filtered to the `Payments` Organization to my `Triage` dashboard, top right."
+- "Clone the shared `Security Posture` dashboard so I can edit my own copy."
+- "Which posture pack e-mails do I have scheduled?"
+
+---
+
 ## Reference Resources
 
 The `core` toolset publishes 6 read-only JSON resources (MIME type `application/json`). They are reference material bundled with the MCP Server, not data from your DefectDojo instance, and are available without any tool call so an assistant can map findings to a standard or explain a regulatory obligation while it reports.
@@ -985,7 +1043,7 @@ The `core` toolset publishes 6 read-only JSON resources (MIME type `application/
 
 Ask your assistant to read a resource by URI (for example, "read `mcp://resource/cwe_to_owasp_2025_mapping.json` and group our open findings by OWASP category") when a report should cite a standard.
 
-Add-on toolsets publish their own resources alongside these: the `hierarchy` toolset adds `mcp://resource/hierarchy/workflow-guide.md` (see [Asset Hierarchy Toolset](#asset-hierarchy-toolset)) and the `reporting` toolset adds three under `mcp://resource/reporting/` (see [Reporting Toolset](#reporting-toolset)).
+Add-on toolsets publish their own resources alongside these: the `hierarchy` toolset adds `mcp://resource/hierarchy/workflow-guide.md` (see [Asset Hierarchy Toolset](#asset-hierarchy-toolset)), the `reporting` toolset adds three under `mcp://resource/reporting/` (see [Reporting Toolset](#reporting-toolset)), and the `dashboards` toolset adds `mcp://resource/dashboards/widget-schema.json` and `mcp://resource/dashboards/workflow-guide.md` (see [Dashboards Toolset](#dashboards-toolset)).
 
 ---
 
@@ -1026,7 +1084,7 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 
 > **💡 Using Prompts:** To invoke a prompt, simply ask your AI assistant: "Create a SAST Review Report" or "Generate a Security Landscape Report using DefectDojo data"
 
-The `hierarchy` toolset adds two more prompts, `explore_hierarchy` and `hierarchy_cleanup_review`, described under [Asset Hierarchy Toolset](#asset-hierarchy-toolset); the `reporting` toolset adds `build_report_template`, `run_report` and `check_report_run`, described under [Reporting Toolset](#reporting-toolset). Unlike the two `core` prompts, most of these take arguments, which your client asks for when you invoke them.
+The `hierarchy` toolset adds two more prompts, `explore_hierarchy` and `hierarchy_cleanup_review`, described under [Asset Hierarchy Toolset](#asset-hierarchy-toolset); the `reporting` toolset adds `build_report_template`, `run_report` and `check_report_run`, described under [Reporting Toolset](#reporting-toolset); and the `dashboards` toolset adds `summarize_dashboard` and `build_dashboard`, described under [Dashboards Toolset](#dashboards-toolset). Unlike the two `core` prompts, most of these take arguments, which your client asks for when you invoke them.
 
 ---
 
@@ -1326,11 +1384,11 @@ Verify these items when experiencing connection issues:
 
 #### ❌ "toolset 'hierarchy' is not enabled on this DefectDojo Pro instance"
 
-**Cause:** The connection URL asks for a toolset whose Feature Flag is off, or the MCP Server itself is disabled. The same message names `reporting` when that toolset's flag is off.
+**Cause:** The connection URL asks for a toolset whose Feature Flag is off, or the MCP Server itself is disabled. The same message names `reporting` or `dashboards` when that toolset's flag is off.
 
 **Solutions:**
 
-1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature)
+1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature; for `dashboards`, **MCP: Dashboards 2.0**, which also needs the **Dashboards 2.0** feature)
 2. Or remove the toolset from the `toolsets` parameter and reconnect
 3. Ask your assistant to call `get_instance_info` to see which toolsets the instance has enabled
 

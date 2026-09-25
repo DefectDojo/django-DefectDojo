@@ -216,3 +216,4 @@ Notes, shortcuts, and structure.
 
 - **[Automating Dashboards with the API](../custom-dashboards-api/)** — discover the widget catalog, create and update layouts, and render widget data over the REST API, with a complete script.
 - **[Building Dashboards with an LLM](../custom-dashboards-llm/)** — let an LLM design and build dashboards for you (the dashboards API was built with AI agents in mind).
+- **[MCP Server — Dashboards Toolset](../../ai/mcp_server_pro/#dashboards-toolset)** — connect an AI assistant to the MCP Server with `?toolsets=dashboards` to summarise, diagnose, build and share dashboards from the chat, with no script.
