@@ -214,6 +214,16 @@ class TestSnykParser(DojoTestCase):
                 findings[0].title,
             )
 
+    def test_snykParser_null_identifiers(self):
+        with (get_unit_tests_scans_path("snyk") / "single_project_null_identifiers.json").open(encoding="utf-8") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            # First finding has null identifiers — no CVE/CWE should be extracted
+            self.assertFalse(getattr(findings[0], "unsaved_vulnerability_ids", []))
+            # Second finding has empty identifiers — same result
+            self.assertFalse(getattr(findings[1], "unsaved_vulnerability_ids", []))
+
 
 class TestSnykParserImageLocations(DojoTestCase):
     @skip_unless_v3

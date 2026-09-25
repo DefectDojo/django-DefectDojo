@@ -139,3 +139,32 @@ Aqua severity (high) used for classification.
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
+
+    def test_aqua_parser_api_v2_with_missing_fields(self):
+        with (get_unit_tests_scans_path("aqua") / "api_v2_missing_fields.json").open(encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            # First result has null resource, second is missing cpe
+            self.assertEqual(2, len(findings))
+            self.assertEqual("CVE-2023-0001 - No resource name (No version) ", findings[0].title)
+            self.assertEqual("CVE-2023-0002 - libcrypto (1.0.2) ", findings[1].title)
+
+    def test_aqua_parser_api_v1_with_missing_fields(self):
+        with (get_unit_tests_scans_path("aqua") / "api_v1_missing_fields.json").open(encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            # First cve is missing file, second has a null name
+            self.assertEqual("CVE-2023-0003: None", findings[0].title)
+            self.assertEqual(["CVE-2023-0003"], findings[0].unsaved_vulnerability_ids)
+            self.assertEqual("None: /usr/lib/libssl.so", findings[1].title)
+            self.assertIsNone(findings[1].unsaved_vulnerability_ids)
+
+    def test_aqua_parser_cicd_with_missing_resource_fields(self):
+        with (get_unit_tests_scans_path("aqua") / "cicd_missing_resource_fields.json").open(encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            # First node has a null resource, second resource is missing cpe and path
+            self.assertEqual(2, len(findings))
+            self.assertEqual("CVE-2023-0004 - No resource name (No version) ", findings[0].title)
+            self.assertEqual("CVE-2023-0005 - busybox (1.30.1) ", findings[1].title)
