@@ -184,6 +184,12 @@ other = "Status"
 [footer_link_support]
 other = "Suporte"
 
+[footer_link_privacy_policy]
+other = "Política de privacidade"
+
+[footer_link_cookie_settings]
+other = "Configurações de cookies"
+
 [footer_rights]
 other = "Todos os direitos reservados."
 

@@ -1,12 +1,104 @@
 <!-- Insert scripts NOT needed by stylesheets here -->
-<!-- Start of Reo Javascript -->
-<script type="text/javascript">
-  !function(){var e,t,n;e="a92cfcfa51eca96",t=function(){Reo.init({clientID:"a92cfcfa51eca96"})},(n=document.createElement("script")).src="https://static.reo.dev/"+e+"/reo.js",n.defer=!0,n.onload=t,document.head.appendChild(n)}();
+{{/*
+  Analytics and marketing tags load only after the visitor consents through the
+  HubSpot cookie banner (portal 22466695, which holds the banner policy for
+  docs.defectdojo.com). defectdojo.com follows the same rule. Before consent,
+  only the HubSpot script runs, and it shows the banner. Development builds
+  (hugo server) skip all of this so local previews never load trackers.
+
+  If the docs.defectdojo.com banner policy is ever removed in HubSpot, the
+  HubSpot script reports consent as granted by default, so keep that policy
+  enabled.
+*/}}
+{{ if hugo.IsProduction -}}
+<script>
+  (function () {
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { window.dataLayer.push(arguments); }
+    window.gtag = window.gtag || gtag;
+
+    // Google Consent Mode v2: everything is denied until the visitor accepts.
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+      wait_for_update: 500
+    });
+
+    var loaded = { analytics: false, marketing: false };
+
+    function addScript(src, onload) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      if (onload) s.onload = onload;
+      document.head.appendChild(s);
+    }
+
+    // Same GA4 property defectdojo.com loads directly.
+    function loadAnalytics() {
+      if (loaded.analytics) return;
+      loaded.analytics = true;
+      addScript('https://www.googletagmanager.com/gtag/js?id=G-1WVHC6RCD2');
+      window.gtag('js', new Date());
+      window.gtag('config', 'G-1WVHC6RCD2', { anonymize_ip: true });
+    }
+
+    // The defectdojo.com tag container (Google Ads, LinkedIn Insight, Reddit,
+    // Apollo and GA4 events), plus Reo.
+    function loadMarketing() {
+      if (loaded.marketing) return;
+      loaded.marketing = true;
+      window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+      addScript('https://www.googletagmanager.com/gtm.js?id=GTM-5GRLWWW7');
+      addScript('https://static.reo.dev/a92cfcfa51eca96/reo.js', function () {
+        window.Reo.init({ clientID: 'a92cfcfa51eca96' });
+      });
+    }
+
+    // First-party cookies the tags above set: Google (_ga, _gid, _gcl_),
+    // Reddit (_rdt_), Reo (__sec_) and LinkedIn (li_, _li).
+    function clearCookies(pattern) {
+      var host = window.location.hostname;
+      var root = host.split('.').slice(-2).join('.');
+      document.cookie.split(';').forEach(function (pair) {
+        var name = pair.split('=')[0].trim();
+        if (!pattern.test(name)) return;
+        [host, '.' + root, ''].forEach(function (domain) {
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/' +
+            (domain ? '; domain=' + domain : '');
+        });
+      });
+    }
+
+    var _hsp = window._hsp = window._hsp || [];
+    _hsp.push(['addPrivacyConsentListener', function (consent) {
+      var categories = consent.categories || {};
+      var analytics = !!(consent.allowed || categories.analytics);
+      var marketing = !!(consent.allowed || categories.advertisement);
+
+      window.gtag('consent', 'update', {
+        analytics_storage: analytics ? 'granted' : 'denied',
+        ad_storage: marketing ? 'granted' : 'denied',
+        ad_user_data: marketing ? 'granted' : 'denied',
+        ad_personalization: marketing ? 'granted' : 'denied'
+      });
+
+      // A script that is already running cannot be unloaded, so a withdrawal
+      // clears the tags' cookies and reloads the page, which then starts with
+      // nothing loaded.
+      if ((loaded.analytics && !analytics) || (loaded.marketing && !marketing)) {
+        clearCookies(/^(_ga|_gid|_gcl_|_rdt_|__sec_|li_|_li)/);
+        window.location.reload();
+        return;
+      }
+      // Reo loaded here without consent before this change; drop its cookies.
+      if (!marketing) clearCookies(/^__sec_/);
+      if (analytics) loadAnalytics();
+      if (marketing) loadMarketing();
+    }]);
+  })();
 </script>
-<!-- End of Reo Javascript -->
-<script>function initApollo() {
-    var n = Math.random().toString(36).substring(7), o = document.createElement("script");
-    o.src = "https://assets.apollo.io/micro/website-tracker/tracker.iife.js?nocache=" + n, o.async = !0, o.defer = !0,
-      o.onload = function () { window.trackingFunctions.onLoad({ appId: "68ffca00b8c4dc001de5fec3" }) },
-      document.head.appendChild(o)
-  } initApollo();</script>
+<script id="hs-script-loader" async defer src="https://js.hs-scripts.com/22466695.js"></script>
+{{- end }}

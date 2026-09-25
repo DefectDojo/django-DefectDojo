@@ -184,6 +184,12 @@ other = "服务状态"
 [footer_link_support]
 other = "支持"
 
+[footer_link_privacy_policy]
+other = "隐私政策"
+
+[footer_link_cookie_settings]
+other = "Cookie 设置"
+
 [footer_rights]
 other = "保留所有权利。"
 

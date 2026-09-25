@@ -43,6 +43,10 @@
           <li><a href="https://trust.defectdojo.com" rel="noopener">{{ i18n "footer_link_trust_center" }}</a></li>
           <li><a href="https://status.defectdojo.com" rel="noopener">{{ i18n "footer_link_status" }}</a></li>
           <li><a href="mailto:support@defectdojo.com">{{ i18n "footer_link_support" }}</a></li>
+          <li><a href="https://defectdojo.com/privacy-policy" rel="noopener">{{ i18n "footer_link_privacy_policy" }}</a></li>
+          {{- if hugo.IsProduction }}
+          <li><button type="button" class="footer-link-button" onclick="(window._hsp = window._hsp || []).push(['showBanner'])">{{ i18n "footer_link_cookie_settings" }}</button></li>
+          {{- end }}
         </ul>
       </div>
 
