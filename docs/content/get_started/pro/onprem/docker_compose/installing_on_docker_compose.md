@@ -44,7 +44,13 @@ apt update
 apt -y install postgresql postgresql-contrib
 ```
 
-Create the databases and the application user. DefectDojo uses a second database for its orchestration service, so create both:
+Create the databases and the application user. DefectDojo uses a second database for its orchestration service, so create both. Open a `psql` session as the `postgres` superuser:
+
+```bash
+sudo -u postgres psql
+```
+
+Then run:
 
 ```sql
 CREATE USER dojodbusr;
@@ -78,6 +84,8 @@ Restart for both changes to take effect:
 ```bash
 systemctl restart postgresql
 ```
+
+PostgreSQL's stock settings are sized for a small machine. Before you load real data, raise the memory and connection settings to match the host, following [Tuning the database](/get_started/pro/onprem/hardware_sizing/#tuning-the-database) on the Hardware Sizing page.
 
 ## Prepare the application host
 
