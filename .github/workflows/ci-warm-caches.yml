@@ -11,13 +11,13 @@ name: "CI: Warm Caches"
 # Without a workflow like this one, caching the migrated database would therefore
 # do nothing at all for the first push of a new branch, which is most branches
 # most of the time. Something has to save an entry into a scope pull requests are
-# allowed to read, and only a run triggered from a release line can do that.
+# allowed to read, and only a run triggered from the dev branch can do that.
 #
 # Note what is deliberately absent: a `schedule:` trigger. Scheduled workflows
 # only ever run against the default branch, so a cron here would run with ref
-# refs/heads/master and warm the master scope -- not the release-line scopes this
-# is for. Eviction is handled instead by reads: GitHub drops an entry it has not
-# seen used for 7 days, and every pull request based on a release line reads this
+# refs/heads/master and warm the master scope -- not the dev scope this is
+# for. Eviction is handled instead by reads: GitHub drops an entry it has not
+# seen used for 7 days, and every pull request based on dev reads this
 # one, which keeps it alive without a timer.
 #
 # Warming the default-branch scope is worth doing too, since every run can read
@@ -27,7 +27,6 @@ name: "CI: Warm Caches"
 on:
   push:
     branches:
-      - bugfix
       - dev
     # Exactly the paths the snapshot key hashes -- anything else leaves the key
     # unchanged, so there would be nothing to warm.

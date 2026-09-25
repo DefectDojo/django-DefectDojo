@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 # Branch guard — makes the target release line explicit before any code lands.
 #
-# DefectDojo ships from three long-lived branches (see the "Branch Check" section
-# of AGENTS.md):
-#   bugfix  -> next PATCH release (fastest timeline)  <- bug fixes, regressions
-#   dev     -> next MINOR release                     <- features, refactors
-#   master  -> already released                       <- release / backport only
+# DefectDojo has two long-lived branches (see the "Branch Check" section of
+# AGENTS.md):
+#   dev     -> next release, weekly patch or monthly minor  <- all work: fixes, features
+#   master  -> already released                              <- release tasks only
 #
-# A fix based on `dev` cannot ship until the next minor release, which is the most
-# common way an urgent fix quietly misses the patch line. This hook reports the
-# branch before work starts, and hard-blocks edits while on `master`.
+# Every release is cut from `dev` and merged into `master`; there is no separate
+# patch branch and no hotfix path off `master`. This hook reports the branch before
+# work starts, and hard-blocks edits while on `master`.
 #
 # Three modes, all wired in .claude/settings.json:
 #   session   SessionStart: report the branch and its release line into context.
@@ -54,13 +53,12 @@ g rev-parse --git-dir >/dev/null || exit 0   # not a checkout, nothing to guard
 
 BRANCH="$(g symbolic-ref --quiet --short HEAD)"
 
-# Release line: patch | minor | released | detached | unknown. Topic branches are
-# classified by what they contain, not by their name — dev is checked first,
-# because dev contains bugfix once bugfix has been merged forward.
+# Release line: working | released | detached | unknown. Topic branches are
+# classified by what they contain, not by their name: a branch that contains
+# origin/dev is on the working line.
 line_of() {
     case "$BRANCH" in
-        bugfix) echo patch;    return ;;
-        dev)    echo minor;    return ;;
+        dev)    echo working;  return ;;
         master) echo released; return ;;
     esac
     if [ -z "$BRANCH" ]; then
@@ -71,9 +69,7 @@ line_of() {
         return
     fi
     if g merge-base --is-ancestor origin/dev HEAD; then
-        echo minor
-    elif g merge-base --is-ancestor origin/bugfix HEAD; then
-        echo patch
+        echo working
     else
         echo unknown
     fi
@@ -84,11 +80,10 @@ LINE="$(line_of)"
 if [ "$MODE" = "session" ]; then
     [ -z "$PY" ] && exit 0   # informational only; nothing to report without python3
     case "$LINE" in
-        patch)    DESC="ships in the next PATCH release (the fast line): bug fixes and regressions belong here, features do not" ;;
-        minor)    DESC="ships in the next MINOR release: features and refactors belong here, and a BUG FIX based here will NOT ship until that minor release" ;;
-        released) DESC="is already-released code: nothing belongs here except a release or backport task, and edits are BLOCKED until a human confirms" ;;
+        working)  DESC="is on the working line (dev) and ships in the next release, weekly patch or monthly minor: bug fixes and features both belong here" ;;
+        released) DESC="is already-released code: nothing belongs here except a release task, and edits are BLOCKED until a human confirms" ;;
         detached) DESC="is a detached HEAD, so the release line is unclear" ;;
-        *)        DESC="contains neither origin/bugfix nor origin/dev, so its base is stale or unmerged: run 'git fetch' and check the base before editing" ;;
+        *)        DESC="does not contain origin/dev, so its base is stale or unmerged: run 'git fetch' and check the base before editing" ;;
     esac
     "$PY" -c '
 import json, sys
@@ -98,7 +93,7 @@ print(json.dumps({"hookSpecificOutput": {
     "additionalContext": (
         "Branch check: this checkout is on branch " + branch + ", which " + desc + ". "
         "State the branch and its release line back to the user before editing files. "
-        "If the task is a bug fix sitting on the minor line, say so and offer to move it onto bugfix first."
+        "All work targets dev. If the branch is not on dev (or a topic branch containing origin/dev), say so and offer to move the work onto origin/dev first."
     ),
 }}))
 ' "${BRANCH:-detached HEAD}" "$DESC"
@@ -120,14 +115,14 @@ ACK_FILE="${ACK_DIR:-/nonexistent}/claude-branch-ack-${SESSION_ID}"
 
 if [ "$MODE" = "commit" ]; then ACTION="Committing"; else ACTION="Editing files"; fi
 
-REASON="BLOCKED: ${ACTION} is not allowed right now, because this checkout is on ${WHERE}, which holds already-released code. Bug fixes belong on \`bugfix\` (next patch release) and features on \`dev\` (next minor).
+REASON="BLOCKED: ${ACTION} is not allowed right now, because this checkout is on ${WHERE}, which holds already-released code. All work, bug fixes and features alike, belongs on \`dev\` (the next release).
 
 Do NOT retry, and do NOT work around this. Instead:
   1. Tell the user the checkout is on master and the change is blocked.
-  2. Ask them to confirm this work is genuinely intended for master (a release or a backport), and WAIT for their reply.
+  2. Ask them to confirm this work is genuinely intended for master (a release task), and WAIT for their reply.
   3. If they confirm, record it with:  touch '${ACK_FILE}'
      (that command prompts them for approval, which IS the confirmation) then continue.
-  4. If they do not confirm, move the work first:  git switch -c <branch-name> origin/bugfix
+  4. If they do not confirm, move the work first:  git switch -c <branch-name> origin/dev
 
 The ack lasts for this session only."
 

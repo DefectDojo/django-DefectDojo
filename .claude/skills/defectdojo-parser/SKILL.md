@@ -227,7 +227,7 @@ table** — they drift and get rejected in review.
 
 ## Notes
 
-- **New parser = a feature → targets `dev`**; a parser bugfix targets `bugfix`. Label the PR
+- **New parsers and parser fixes both target `dev`.** Label the PR
   `Import Scans`. Defer to `AGENTS.md` for the branch/milestone policy.
 - **New API parsers from the community are currently not accepted** (supportability) — flag
   this in review of an inbound API parser.
