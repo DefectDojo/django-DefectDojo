@@ -34,4 +34,4 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: "- kind: fixed\n  description: Raise the default uwsgi memory limit to 1Gi so the first login no longer OOM-kills the container\n"

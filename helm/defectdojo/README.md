@@ -674,7 +674,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.uwsgi.readinessProbe.successThreshold | int | `1` |  |
 | django.uwsgi.readinessProbe.timeoutSeconds | int | `5` |  |
 | django.uwsgi.resources.limits.cpu | string | `"2000m"` |  |
-| django.uwsgi.resources.limits.memory | string | `"512Mi"` |  |
+| django.uwsgi.resources.limits.memory | string | `"1Gi"` |  |
 | django.uwsgi.resources.requests.cpu | string | `"100m"` |  |
 | django.uwsgi.resources.requests.memory | string | `"256Mi"` |  |
 | django.uwsgi.startupProbe.enabled | bool | `true` | Enable startup checks on uwsgi container. |

@@ -193,6 +193,23 @@ jobs:
                   fi
               done
 
+      # The retry loops above tolerate a 502 and try again, so a uwsgi container that is
+      # killed and restarted after the readiness wait (for example by the OOM killer on the
+      # first password check) used to pass as long as the restarted container answered.
+      # Fail on any restart instead, so the "Failed Logs" step shows why it happened.
+      - name: Check django pod did not restart
+        timeout-minutes: 5
+        run: |-
+             kubectl get pods --selector=defectdojo.org/component=django
+             restarts=$(kubectl get pods --selector=defectdojo.org/component=django \
+               -o jsonpath='{range .items[*]}{range .status.containerStatuses[*]}{.restartCount}{"\n"}{end}{end}' \
+               | awk '{s+=$1} END {print s+0}')
+             if [[ "$restarts" -ne 0 ]]; then
+               echo "ERROR: django pod containers restarted $restarts time(s) during the test"
+               exit 1
+             fi
+             echo "No django container restarts"
+
       - name: Check of logs
         timeout-minutes: 10
         run: |-
@@ -216,3 +233,16 @@ jobs:
              kubectl logs deployment/defectdojo-django --all-pods=true --all-containers=true --tail=100
              echo "And all pod status one more time"
              kubectl get pods
+             echo "Container restarts and why the previous instance ended (OOMKilled means the memory limit was hit):"
+             kubectl get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .status.containerStatuses[*]}{"  "}{.name}{": restarts="}{.restartCount}{" lastState="}{.lastState.terminated.reason}{" exitCode="}{.lastState.terminated.exitCode}{" finishedAt="}{.lastState.terminated.finishedAt}{"\n"}{end}{end}'
+             echo "Describe of the django pods (probe failures, OOM kills and restarts are listed under Events):"
+             kubectl describe pods --selector=defectdojo.org/component=django
+             echo "Logs of the previous (terminated) django containers, if any:"
+             for pod in $(kubectl get pods --selector=defectdojo.org/component=django -o name); do
+               for container in uwsgi nginx; do
+                 echo "--- $pod/$container (previous)"
+                 kubectl logs "$pod" -c "$container" --previous --tail=100 || true
+               done
+             done
+             echo "Cluster events:"
+             kubectl get events --sort-by=.lastTimestamp

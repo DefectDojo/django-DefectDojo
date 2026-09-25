@@ -465,7 +465,11 @@ django:
         memory: 256Mi
       limits:
         cpu: 2000m
-        memory: 512Mi
+        # With the default 4 processes, warm uwsgi workers use roughly 500Mi, and every
+        # password check (login, token auth, basic auth) allocates about 100Mi more for
+        # Argon2 while it runs. A 512Mi limit OOM-kills the whole uwsgi container on the
+        # first login. Raise this further if you raise processes/threads.
+        memory: 1Gi
     appSettings:
       processes: 4
       threads: 4
