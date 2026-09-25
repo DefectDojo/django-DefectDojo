@@ -189,3 +189,94 @@ window.ddOffcanvas = Offcanvas;
         init();
     }
 })();
+
+// ---------------------------------------------------------------------------
+// Dot field: the lattice behind dark bands scatters on load and eases home.
+// Same motion as defectdojo.com's hero (22px lattice, 1.7s, staggered
+// cubic ease-out). Canvas is created here, so no inline script and no
+// external asset: CSP stays default-src 'self'. Reduced motion draws the
+// settled state directly. window.ddField.replay() re-runs the resolve.
+// ---------------------------------------------------------------------------
+(() => {
+  'use strict';
+
+  const hosts = document.querySelectorAll('[data-dd-field]');
+  if (!hosts.length || !window.HTMLCanvasElement) return;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const fields = [];
+
+  function makeField(host) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'dd-field';
+    canvas.setAttribute('aria-hidden', 'true');
+    const ctx = canvas.getContext && canvas.getContext('2d');
+    if (!ctx) return null;
+    host.insertBefore(canvas, host.firstChild);
+    host.classList.add('has-field');
+
+    const f = { host, canvas, ctx, dots: [], w: 0, h: 0, raf: null };
+
+    f.size = () => {
+      f.w = host.clientWidth;
+      f.h = host.clientHeight;
+      canvas.width = f.w * dpr;
+      canvas.height = f.h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    f.seed = () => {
+      f.dots.length = 0;
+      for (let y = 11; y < f.h; y += 22) {
+        for (let x = 11; x < f.w; x += 22) {
+          const a = Math.random() * Math.PI * 2;
+          const r = 60 + 220 * Math.random();
+          f.dots.push({ x, y, sx: x + Math.cos(a) * r, sy: y + Math.sin(a) * r, d: 0.45 * Math.random() });
+        }
+      }
+    };
+
+    f.draw = (p) => {
+      ctx.clearRect(0, 0, f.w, f.h);
+      ctx.fillStyle = 'rgba(255, 248, 240, 0.22)';
+      for (const o of f.dots) {
+        const t = Math.min(1, Math.max(0, (p - o.d) / 0.55));
+        const e = 1 - Math.pow(1 - t, 3);
+        ctx.beginPath();
+        ctx.arc(o.sx + (o.x - o.sx) * e, o.sy + (o.y - o.sy) * e, 1.1, 0, 6.2832);
+        ctx.fill();
+      }
+    };
+
+    f.resolve = () => {
+      if (f.raf) { cancelAnimationFrame(f.raf); f.raf = null; }
+      if (reduced) { f.draw(1); return; }
+      let t0 = null;
+      const tick = (ts) => {
+        if (t0 === null) t0 = ts;
+        const p = Math.min(1, (ts - t0) / 1700);
+        f.draw(p);
+        f.raf = p < 1 ? requestAnimationFrame(tick) : null;
+      };
+      f.raf = requestAnimationFrame(tick);
+    };
+
+    f.size();
+    f.seed();
+    f.resolve();
+    return f;
+  }
+
+  hosts.forEach((host) => { const f = makeField(host); if (f) fields.push(f); });
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => fields.forEach((f) => { f.size(); f.seed(); f.draw(1); }), 120);
+  });
+
+  window.ddField = {
+    replay() { fields.forEach((f) => { f.seed(); f.resolve(); }); },
+  };
+})();

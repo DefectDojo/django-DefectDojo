@@ -210,6 +210,39 @@ A Generated Report moves through these statuses as it is built:
 
 You can build this in the UI (below) or automate it with the [API](../report-builder-api/).
 
+### Report retention
+
+Generated Reports are kept until someone deletes them, unless an administrator sets a retention window. In **Settings > System Settings**, under Application Settings, **Delete Generated Reports After (Days)** removes completed and failed reports older than that many days, each night, together with their files. The default, **0**, keeps every report indefinitely, so nothing is deleted until the setting is changed.
+
+While a window is set, the Generated Reports page says how long reports are kept. Reports still being generated are never removed. A report is deleted a set number of days after it finished, not after it was last downloaded, so download anything you need to keep longer.
+
+### Template variables
+
+A **template variable** is a blank in a Template that is filled in each time the report is generated. It lets you build one Template, such as a single-finding page or a per-CVE exposure report, and generate it for any finding, asset or CVE without editing its filters.
+
+Three variables exist:
+
+| Variable | Tokens | Supplied as |
+|----------|--------|-------------|
+| Finding | `{{finding.id}}`, `{{finding.title}}`, `{{finding.severity}}` | a finding |
+| Asset | `{{asset.id}}`, `{{asset.name}}` | an asset, or taken from the finding |
+| Vulnerability ID | `{{vulnerability_id}}` | a vulnerability ID such as a CVE, or taken from the finding's primary one |
+
+Tokens can go in two places:
+
+- **Block filters.** Under **Variable Filters** in a Tabular, Detail or Graph Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical.
+- **Text.** A Block header, a cover page title, a text Block, a theme footer: type a token and it is replaced with the value when the report is generated, for example `Exposure Report for {{vulnerability_id}}`.
+
+A variable is filled in from wherever the report is generated:
+
+- the **Generate Report** dialog, and **Quick Export** with a Template chosen, ask for each variable the Template uses;
+- the API takes them as `variables` (see the [API guide](../report-builder-api/));
+- the Triage Engine's **Generate a Report** node fills them from each matched finding or asset (see [Generate a Report](/automation/triage_engine/node_reference/#generate-a-report)).
+
+A report can only be about a finding or asset its requester is allowed to see. A generation that is missing a variable its Template uses is refused with a message naming it, rather than silently reporting on everything. A Template preview shows tokens as written and shows a placeholder in place of any Block that filters on a variable.
+
+The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks take their filters from the widget's own settings and do not use variables.
+
 ## Building a report in the UI
 
 The following steps walk through building a report end to end: create a Theme, create the Blocks that hold your content, assemble them into a Template, and generate the final report.
@@ -254,7 +287,7 @@ In the Template editor, you select a Theme and arrange the Blocks in the order t
 
 ### Step 4: Generate and download
 
-When the Template is ready, generate the report. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
+When the Template is ready, generate the report. If the Template uses [template variables](#template-variables), the dialog first asks what the report is about: a finding, an asset or a vulnerability ID, only the ones the Template uses. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
 
 ![Generate report dialog](images/pro_generate_report_dialog.png)
 

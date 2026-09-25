@@ -9,7 +9,7 @@ DefectDojo Pro 可以部署为使用经 FIPS 140-3 验证的加密技术，适�
 
 FIPS 模式以**一套独立的容器镜像**形式发布，通过 `-fips` 标签后缀加以标识。标准镜像保持不变：启用 FIPS 是一项显式选择，绝不会成为静默的默认设置。
 
-如需获取 FIPS 镜像，请通过 [hello@defectdojo.com](mailto:hello@defectdojo.com) 联系我们。
+自 **3.3.200** 起，每个版本都会发布 FIPS 镜像。它们与标准镜像来自同一个注册表，您许可证中的注册表凭据已经可以拉取它们，因此无需申请或启用任何内容。参见[获取 FIPS 镜像](#getting-the-fips-images)。
 
 ## FIPS 镜像提供的内容
 
@@ -29,50 +29,55 @@ FIPS 模式以**一套独立的容器镜像**形式发布，通过 `-fips` 标�
 | 初始化程序（`init`） | yes | OpenSSL FIPS Provider 3.1.2 |
 | 编排工作节点（`ddorch-workers`） | yes | OpenSSL FIPS Provider 3.1.2 |
 | nginx | yes | OpenSSL FIPS Provider 3.1.2 |
-| PSIRT 公告引擎 | yes | OpenSSL FIPS Provider 3.1.2 |
 | Connectors、Integrators、ddorch、MCP 服务器 | yes | Go Cryptographic Module v1.0.0 |
 | **Sensei** | **partial** | 服务二进制文件：Go Cryptographic Module v1.0.0。捆绑的扫描器工具链：**not covered** |
 | **PostgreSQL / Redis（内嵌）** | **no** | 请使用符合 FIPS 要求的外部服务 |
+| **OSCAL 验证器** | **no** | 没有 FIPS 版本；请保持禁用 |
 
 **Sensei 是一个值得了解的部分覆盖案例。** 它自身的二进制文件基于经过验证的 Go 模块构建，因此作业 API 的 TLS 和令牌均已被覆盖。该镜像还捆绑了一套多语言的第三方扫描器工具链——Node（自带 OpenSSL）、Rust（rustls）、Python、Ruby，以及我们并未自行编译的第三方 Go 二进制文件——其中有几个组件会使用自己的加密技术通过 TLS 获取公告数据库。该工具链无法纳入单一的经验证模块之下，因此不在覆盖范围内，也不应向评估人员将其呈现为已覆盖。
 
-内嵌的 PostgreSQL/Redis 完全没有 FIPS 版本。在 Kubernetes 中，如果您在启用 FIPS 的同时启用 Sensei 或内嵌数据存储，chart 会拒绝渲染，因此这一权衡是一项明确的决定，而非默认假设（参见[护栏机制](#guard-rails)）。
+内嵌的 PostgreSQL/Redis 完全没有 FIPS 版本。在 Kubernetes 中，如果您在启用 FIPS 的同时启用 Sensei、内嵌数据存储或 OSCAL 验证器，chart 会拒绝渲染，因此这一权衡是一项明确的决定，而非默认假设（参见[护栏机制](#guard-rails)）。
+
+## 获取 FIPS 镜像 {#getting-the-fips-images}
+
+每个具有 FIPS 变体的镜像都与其标准镜像发布在同一个仓库中，标签为 `<version>-fips`：
+
+```
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro/django:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro/nginx:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-connectors/connectors:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-integrators/integrators:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/ddorch/ddorch:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/go-dd-pro-mcp/mcp-server:<version>-fips
+```
+
+您的许可证附带的注册表凭据涵盖这些仓库，与标准镜像相同。无需为您的账户申请或启用任何内容。
+
+在 Kubernetes 和 Docker Compose 上，您无需自行编写这些标签：`fips.enabled` 和 `DD_FIPS_MODE` 会选择它们。只有在您编写自己的部署（例如 Amazon ECS 任务定义），或将镜像同步到私有注册表时，才需要直接使用这些标签。
+
+**仅限 linux/amd64。** OpenSSL FIPS Provider 的证书列出的是 x86_64 运行环境，因此 FIPS 镜像仅针对 amd64 发布，不提供 arm64 版本。FIPS 部署需要 amd64 节点。
+
+**已签名。** 与标准发布镜像一样，每个 FIPS 镜像都经过签名，并附带 SPDX 和 CycloneDX 格式的 SBOM 证明。
 
 ## 启用 FIPS 模式 — Docker Compose
 
-需要进行两处更改：使用 `-fips` 镜像，并设置 `DD_FIPS_MODE`。
-
-**1. 将镜像标签指向 FIPS 变体。** 在您的 `.env` 或 compose 覆盖文件中：
+从 3.3.300 版本起，一个变量即可同时完成这两项工作。`DD_FIPS_MODE` 会为每个具有 FIPS 变体的服务选择其 `-fips` 镜像，并在检查该变量的容器中启用强制执行，因此镜像与设置不会出现不一致。请使用 CLI 设置该变量，CLI 会将其保存在自己的配置中，因此升级后该设置仍会保留：
 
 ```bash
-DD_IMAGE_TAG=<version>-fips
+dojo-compose-cli environment add -k DD_FIPS_MODE -v 1
+dojo-compose-cli app pull-images
+dojo-compose-cli app restart
 ```
 
-**2. 在共享环境锚点中设置 `DD_FIPS_MODE`。** compose 文件定义了每个相关服务都会合并的共享代码块，因此这是三处编辑，而不是每个服务各改一处：
+如需关闭 FIPS 模式，请使用 `dojo-compose-cli environment remove -k DD_FIPS_MODE` 移除该变量，然后重新启动。不要将其设置为 `0`：任何值都会选择 FIPS 镜像。
 
-```yaml
-x-dojo-vars: &dojoenv
-  DD_FIPS_MODE: "1"        # dojo, dojo-import-scan, celerybeat, celeryworker, init, ddorch-workers
-  # ... existing settings
+内嵌的 Valkey 缓存和 Sensei 保留其标准镜像，因为两者都没有 FIPS 变体。在生产环境中，请将 DefectDojo 指向符合 FIPS 要求的外部缓存（参见本页末尾的部署说明）。Sensei 仅在您的许可证包含它时才会运行，并且只获得部分覆盖，详见覆盖范围表。
 
-x-nginx-vars: &nginxenv
-  DD_FIPS_MODE: "1"        # nginx
-  # ... existing settings
-
-x-psirt-vars: &psirtenv
-  DD_FIPS_MODE: "1"        # psirt
-  # ... existing settings
-```
-
-然后重新创建堆栈：
-
-```bash
-docker compose up -d --force-recreate
-```
+**关于 3.3.200 版本。** 3.3.200 的部署文件早于 `DD_FIPS_MODE` 的引入，因此如需使用该变量，请升级到 3.3.300 或更高版本。如果您需要在 3.3.200 上使用 FIPS，请改为编辑安装目录中的 `docker-compose.yml`：在 `x-nginx-image`、`x-django-image`、`x-connectors-image`、`x-integrators-image`、`x-ddorch-image` 和 `x-mcp-server-image` 这几行的 `${version}` 之后添加 `-fips`，在 `x-dojo-vars` 和 `x-nginx-vars` 代码块中添加 `DD_FIPS_MODE: "1"`，然后运行 `dojo-compose-cli app restart`。升级会替换 `docker-compose.yml`，因此这些编辑不会保留下来。
 
 ## 启用 FIPS 模式 — Kubernetes（Helm）
 
-只需设置一个值。chart 会选择 `-fips` 镜像变体，并为每个 pod 设置 `DD_FIPS_MODE`：
+需要 DefectDojo Pro 3.3.200 或更高版本。只需设置一个值。chart 会选择 `-fips` 镜像变体，并为每个 pod 设置 `DD_FIPS_MODE`：
 
 ```yaml
 fips:
@@ -101,7 +106,7 @@ redis:
 如果您需要在 FIPS 环境中使用 Sensei，请通过设置
 `fips.validate: false` 有意识地启用它，并在您的系统安全计划中将捆绑的扫描器工具链记录为未经验证。
 
-### 护栏机制
+### 护栏机制 {#guard-rails}
 
 如果在启用了没有 FIPS 变体的组件的同时，`fips.enabled` 为 true，**chart 会拒绝渲染**，并指出具体的违规组件：
 
@@ -127,7 +132,21 @@ Fargate 是 ECS 的一种启动类型，而不是一项独立的服务：您需�
 <ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/defectdojo-pro-nginx:<VERSION>-fips
 ```
 
-**2.** 在每个运行应用代码的容器的 `environment` 代码块中设置 **`DD_FIPS_MODE=1`**——包括 uwsgi、celery worker、celery beat、初始化程序、编排工作节点、nginx 和 psirt。
+自 3.3.200 版本起，DefectDojo 在其注册表中以 `dojo-pro/django:<VERSION>-fips` 和 `dojo-pro/nginx:<VERSION>-fips` 的名称发布这些镜像（参见[获取 FIPS 镜像](#getting-the-fips-images)）。您许可证中的注册表凭据可以拉取它们。按照[向注册表进行身份验证](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/#authenticate-to-the-registry)中的说明对 Docker 进行身份验证，然后将两个镜像复制到 ECR：
+
+```bash
+REGISTRY=us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro
+ECR=<ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com
+for image in django nginx; do
+  docker pull --platform linux/amd64 "${REGISTRY}/${image}:<VERSION>-fips"
+  docker tag "${REGISTRY}/${image}:<VERSION>-fips" "${ECR}/defectdojo-pro-${image}:<VERSION>-fips"
+  docker push "${ECR}/defectdojo-pro-${image}:<VERSION>-fips"
+done
+```
+
+FIPS 镜像仅提供 linux/amd64 版本，因此下面的任务定义将 `cpuArchitecture` 设置为 `X86_64`。
+
+**2.** 在每个运行应用代码的容器（uwsgi、celery worker、celery beat、初始化程序、编排工作节点和 nginx）的 `environment` 代码块中设置 **`DD_FIPS_MODE=1`**。
 
 本节的其余部分提供了一份完整的、启用 FIPS 的 ECS 部署说明，供从零开始的读者参考。
 
@@ -284,7 +303,6 @@ aws ecs run-task --cluster <CLUSTER> --launch-type FARGATE \
         { "name": "DD_SITE_URL", "value": "https://<YOUR_HOSTNAME>" },
         { "name": "DD_MCP_HOST", "value": "127.0.0.1" },
         { "name": "DD_MCP_PORT", "value": "9142" },
-        { "name": "PSIRT_ENABLED", "value": "false" },
         { "name": "NGINX_METRICS_ENABLED", "value": "false" }
       ],
       "mountPoints": [
