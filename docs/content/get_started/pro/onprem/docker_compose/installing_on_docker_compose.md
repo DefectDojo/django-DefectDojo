@@ -44,7 +44,13 @@ apt update
 apt -y install postgresql postgresql-contrib
 ```
 
-Create the databases and the application user. DefectDojo uses a second database for its orchestration service, so create both:
+Create the databases and the application user. DefectDojo uses a second database for its orchestration service, so create both. Open a `psql` session as the `postgres` superuser:
+
+```bash
+sudo -u postgres psql
+```
+
+Then run:
 
 ```sql
 CREATE USER dojodbusr;
@@ -79,6 +85,8 @@ Restart for both changes to take effect:
 systemctl restart postgresql
 ```
 
+PostgreSQL's stock settings are sized for a small machine. Before you load real data, raise the memory and connection settings to match the host, following [Tuning the database](/get_started/pro/onprem/hardware_sizing/#tuning-the-database) on the Hardware Sizing page.
+
 ## Prepare the application host
 
 ### Outbound connectivity
@@ -97,6 +105,14 @@ In a restricted network, the application host needs outbound access to the follo
 Allowlist by hostname rather than by address. The registry sits behind a content delivery network, so its addresses vary by location and change over time.
 
 If the host reaches the internet through an outbound proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/get_started/pro/onprem/forward_proxy/). If it has no route to the internet at all, follow the air-gapped installation procedure in this section instead.
+
+### Inbound access
+
+Users only need to reach the application host on ports 80 and 443, which nginx serves. Allow those from your users' networks and nothing else.
+
+Plan for two more ports that the stack publishes on every interface of the host: `9142` for the MCP server and `9871` for the orchestration service. Unless you have a reason to reach them from elsewhere, block them from outside the host.
+
+Do this at your network firewall or security group, or in the `DOCKER-USER` iptables chain on the host. A host firewall such as `ufw` is not enough on its own: Docker writes its own rules for published ports, and those rules take effect ahead of `ufw`, so a `ufw deny` does not close a port Docker has published. See Docker's [packet filtering and firewalls](https://docs.docker.com/engine/network/packet-filtering-firewalls/) documentation for how to add rules to `DOCKER-USER`.
 
 ### Confirm the database is reachable
 
@@ -122,25 +138,36 @@ docker info
 
 ## Install DefectDojo
 
-Copy the CLI archive and your license file to the application host, into the same directory, and extract the CLI:
+Copy the CLI archive and your license file to the application host, into the same directory.
+
+Check the archive before you extract it. Each CLI release comes with a `checksums.txt` file listing the SHA-256 of every archive. With both files in the same directory:
+
+```bash
+sha256sum --check --ignore-missing checksums.txt
+```
+
+The archive's line should end in `OK`. If you received the archive without `checksums.txt`, ask [support@defectdojo.com](mailto:support@defectdojo.com) for the expected checksum and compare it with the output of `sha256sum dojo-compose-cli_*.tar.gz`.
+
+Then extract the CLI:
 
 ```bash
 tar -xzvf dojo-compose-cli_*.tar.gz
 ```
 
-Then run the installer from that directory:
+Choose a `DOJO_CLI_KEY` before you start. It is the encryption key for the configuration the CLI stores on disk, and every later command needs it, so store it somewhere safe. Export it in your shell and run the installer with `sudo -E`, which passes the variable through `sudo`:
 
 ```bash
-sudo ./dojo-compose-cli first-install
+export DOJO_CLI_KEY="<your-key>"
+sudo -E ./dojo-compose-cli first-install
 ```
+
+If the variable is not set, the installer asks for the key instead.
 
 The wizard prompts for the following.
 
 | Prompt | What it is |
 | --- | --- |
-| `DOJO_CLI_KEY` | An encryption key for configuration the CLI stores on disk. Choose it now and keep it, since later commands need it. |
-| DefectDojo Version | The release to install. |
-| Deploy Version | The deployment files to use. Set it to the same value as the version. |
+| DefectDojo Version | The release to install. The default is `latest`. Enter a specific release from the [DefectDojo Pro changelog](/releases/pro/changelog/) instead, so that you know exactly what you are running and upgrade on your own schedule. The deployment files follow this version automatically. |
 | Deploy Type | `separate-db` for a database on its own host, or `containerized-db` to run PostgreSQL in a container. |
 | Database Connection Type | Choose Single Line and supply the whole connection string. |
 | Database URL | `postgres://<user>:<password>@<host>:5432/dojodb`. It must begin with `postgres://` rather than `postgresql://`. |
@@ -149,7 +176,7 @@ The wizard prompts for the following.
 
 Two things worth knowing at the prompts. Supply the database connection as a single line rather than value by value, since the per-value path does not currently ask for the username. And if the password contains characters like `!`, `@`, or `#`, URL encode them in the connection string.
 
-The installer then pulls the images, starts the stack, creates a systemd service, and prints the generated admin credentials. **Save those credentials before you close the terminal. They are not shown again.**
+The installer then pulls the images, starts the stack, creates a systemd service, and prints the generated admin credentials. **Save those credentials before you close the terminal. They are not shown again.** If the printed password does not let you log in, or you lose it, set a new one with `sudo -E dojo-compose-cli app change-password` (see [Reset the admin password](#reset-the-admin-password)).
 
 Once it finishes, DefectDojo is available at the site URL you gave it.
 
@@ -183,12 +210,30 @@ Use `app restart` after changing any configuration, since it recreates the conta
 
 ## Replace the TLS certificate
 
-The installation ships a self-signed certificate so that the site works immediately. Replace it with your own by overwriting two files, keeping the names exactly as they are:
+The installation ships a placeholder certificate so that nginx can start. It is issued for a different hostname than yours, so browsers will reject it until you replace it with a certificate for your own hostname. Do this before users start logging in.
 
-- `/opt/dojo/certs/dojo.crt`
-- `/opt/dojo/certs/dojo.key`
+Replace it by overwriting two files, keeping the names exactly as they are:
 
-Then `dojo-compose-cli app restart` to pick them up.
+- `/opt/dojo/certs/dojo.crt`, your certificate followed by any intermediate certificates, in PEM format
+- `/opt/dojo/certs/dojo.key`, the matching private key, in PEM format and without a passphrase
+
+The nginx container runs as user ID 1002 with group 0 (`root`), not as `dojosrv`, so it reads the key through its group. Give the key group `root` and make it group-readable. A key owned by `dojosrv:dojosrv` with mode `0640` is unreadable to nginx, and nginx will not start:
+
+```bash
+sudo chown dojosrv:root /opt/dojo/certs/dojo.crt /opt/dojo/certs/dojo.key
+sudo chmod 0644 /opt/dojo/certs/dojo.crt
+sudo chmod 0640 /opt/dojo/certs/dojo.key
+```
+
+Then restart to pick them up, and confirm nginx came back:
+
+```bash
+sudo -E dojo-compose-cli app restart
+docker ps --filter name=nginx
+curl -sSI https://<your-hostname>/
+```
+
+`docker ps` should show the nginx container as `Up` rather than `Restarting`, and `curl` should complete the TLS handshake without a certificate error. If nginx is restarting, `docker logs nginx` usually names the file it could not read.
 
 ## Trusting an internal or private CA
 
@@ -230,7 +275,7 @@ If the file is missing or empty the container logs `No CA bundle found ...` inst
 If you lose the generated password, reset it from the application host. DefectDojo has to be running:
 
 ```bash
-dojo-compose-cli app change-password
+sudo -E dojo-compose-cli app change-password
 ```
 
 ## Upgrading
@@ -260,11 +305,26 @@ Upgrades are covered on their own page: see the [DefectDojo Pro Upgrade Guide (D
 | `register` | Authenticate to the container registry |
 | `update-binary` | Update the CLI itself |
 
-Most commands need `DOJO_CLI_KEY`, since the configuration is encrypted at rest. Export it for your session, or pass it through `sudo` with `sudo -E`:
+Most commands need `DOJO_CLI_KEY`, since the configuration is encrypted at rest. Export it for your session, then pass it through `sudo` with `sudo -E`:
 
 ```bash
 export DOJO_CLI_KEY="your-key"
+sudo -E dojo-compose-cli config print
 ```
+
+Without it, the CLI asks for the key each time.
+
+## Troubleshooting
+
+### The systemd service keeps restarting
+
+If `journalctl -u defectdojo-compose` shows the service failing with a message that DefectDojo is already running, over and over, the unit is trying to start a stack that is already up. The application itself keeps running. To stop the repeated restarts, disable the unit:
+
+```bash
+sudo systemctl disable defectdojo-compose
+```
+
+Do not run `systemctl stop defectdojo-compose` while the unit is active. Its stop action runs `app stop`, which takes the containers down. With the unit disabled, the stack still comes back after a reboot, because Docker restarts the containers on its own under their restart policy.
 
 ## Questions or support
 

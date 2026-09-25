@@ -181,14 +181,16 @@ Each item carries a fixed set of Finding fields. This list is a contract, so it 
 | Exploit evidence | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Text | `description`, `mitigation`, `impact` |
 | Status | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
-| Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
+| Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date`, `risk_acceptance_expiration_date` |
 | Location | `file_path`, `line`, `component_name`, `component_version`, `service` |
 | Classification | `cwe`, `vulnerability_ids`, `tags` |
 | Reachability | `reachability`, `reachability_confidence` |
 
 Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`, `internet_accessible`, `business_criticality`, `exposure`), `product_type` (`id`, `name`), and `ctx`.
 
-Dates are ISO-8601 strings. That is deliberate: it means `gt` and `lt` order them correctly as text, so `2026-07-28` is correctly greater than `2026-01-01`.
+Dates are ISO-8601 strings, and they are compared as dates rather than as text. Some of them (`date`, `sla_expiration_date`, `kev_date`, `kev_due_date`) hold a calendar day; the rest (`mitigated`, `last_status_update`, `risk_acceptance_expiration_date`) hold a moment, including a time of day.
+
+That difference does not change how you write the condition. Whenever the value you compare against is a calendar day, the comparison covers **the whole of that day**: `mitigated lte 2026-08-27` matches a Finding mitigated at 1pm on the 27th, and `mitigated gt 2026-08-27` does not. If you need finer than a day on a field that holds a time, write the value as a full ISO-8601 timestamp (`2026-08-27T13:00:00+00:00`) and it is compared to the second. Days are counted in UTC, which is also the clock the `N days` operators below use.
 
 `priority`, `risk` and `risk_score` come from Pro's prioritization. A Finding that has not been scored yet carries no value for them.
 
@@ -269,9 +271,28 @@ An **If / Filter** node holds a list of condition rows. Each row is a path, an o
 | `exists` | is set |
 | `not_exists` | is not set |
 
-The last four are **relative-date operators**, offered only on date fields (`date`, `mitigated`, `last_status_update`, `sla_expiration_date`, `kev_date`, `kev_due_date`, and any date custom field). Their value is a number of days, and they compare the field against today rather than against a fixed calendar date. This is what lets one rule say "more than 192 days old" and have it mean 192 days after *each* Finding's own date — a threshold no single calendar date can express, and one that would otherwise drift every day. Use `older_than_days` for age ("accept any Finding not remediated within 192 days"), `within_next_days` for an approaching deadline (`sla_expiration_date within_next_days 7`), and their siblings for the opposite direction. The comparison is by calendar day, so a time-of-day field like `mitigated` is matched on the day it happened.
+The last four are **relative-date operators**, offered only on date fields (`date`, `mitigated`, `last_status_update`, `sla_expiration_date`, `risk_acceptance_expiration_date`, `kev_date`, `kev_due_date`, and any date custom field). Their value is a number of days, and they compare the field against today rather than against a fixed calendar date. This is what lets one rule say "more than 192 days old" and have it mean 192 days after *each* Finding's own date: a threshold no single calendar date can express, and one that would otherwise drift every day. Use `older_than_days` for age ("accept any Finding not remediated within 192 days"), `within_next_days` for an approaching deadline (`sla_expiration_date within_next_days 7`), and their siblings for the opposite direction. The comparison is by calendar day, so a time-of-day field like `mitigated` is matched on the day it happened.
 
-Comparisons are **loose**. A number is tried first, and if that fails the values are compared as trimmed, case-insensitive text. So a condition written as `finding.severity eq high` matches a Finding whose severity is `High`, which is almost always what the author meant.
+Comparisons are **loose**. A number is tried first, then a date (see the note on dates above), and if neither fits the values are compared as trimmed, case-insensitive text. So a condition written as `finding.severity eq high` matches a Finding whose severity is `High`, which is almost always what the author meant.
+
+#### Operators follow the field's data type
+
+The editor offers each field only the operators its data type can answer, so a row that could never match is one you cannot write in the first place. This applies to built-in fields and [custom fields](#custom-fields) alike.
+
+| The field holds | What it offers | Value control |
+|-----------------|----------------|---------------|
+| Text | every operator | a text box |
+| A number | equality, list membership, ordering, presence | a number box |
+| A date | equality, ordering, presence, and the `N days` operators | a calendar picker, or a day count |
+| Yes / no | equality and presence | a true/false picker |
+| One of a fixed set | equality, list membership, presence | a picker over the field's own options |
+| A list of values | `has` / `not_has`, `contains` / `not_contains`, presence | a text box |
+
+A **list** field holds several values at once: `vulnerability_ids`, `tags`, and a multi-select custom field. `eq` is deliberately not offered for one, because it would compare the *whole list* against the single value you typed and so could never match; `has` is the operator that asks whether one of the entries is the value. See the multi-select note below, which works the same way.
+
+Two fields are the exception to "a fixed set cannot be ordered", because their values are codes that carry an order: `finding.exploit_maturity` (`0`, `10`, `20`, `30`) and `finding.numerical_severity` (`S0` to `S4`). Both keep the ordering operators, so `exploit_maturity gte 20` reads as "weaponized or worse".
+
+If a row in an existing rule shows its operator marked **unsupported**, that operator is not one the editor offers for that field. The row still runs exactly as it did, and the rule still saves; the label is there so you can decide whether it was doing what you meant.
 
 #### Custom fields
 
@@ -284,9 +305,7 @@ product.custom_fields.owner_team
 
 A rule over Findings reads the Finding's custom fields and a rule over Assets reads the Asset's; there is no cross-kind path. A record holding no value for a field reads as not set, so `exists` and `not_exists` are how you condition on a field being filled in at all. The same paths work as `{{ }}` placeholders in templates.
 
-The field's data type decides which operators the editor offers: numbers take equality, list membership and ordering, dates take equality and ordering (against a `YYYY-MM-DD` value), booleans take equality, and a single-select offers equality and list membership over the field's own options. Text fields keep the full operator list.
-
-A **multi-select** field holds several options at once, and two operators exist for exactly that. `has` (*includes*) matches when the compared option is one of the stored ones, whole and exact: a Finding holding only `gdpr-eu` is not matched by `has gdpr`, where `contains` would match on the fragment. `not_has` (*does not include*) is its negation.
+A **multi-select** field holds several options at once, so it is a list field like `tags` and takes the same operators. `has` (*includes*) matches when the compared option is one of the stored ones, whole and exact: a Finding holding only `gdpr-eu` is not matched by `has gdpr`, where `contains` would match on the fragment. `not_has` (*does not include*) is its negation.
 
 "Includes **any of** several options" is one **If / Filter** node with one `has` row per option and **Match** set to `any`. To combine that with conditions that must all hold, chain two **If / Filter** nodes: the any-of rows in the first (Match `any`), everything else in the second (Match `all`).
 

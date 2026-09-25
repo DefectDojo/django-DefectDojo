@@ -1,0 +1,5 @@
+Date,Title,CweId,Url,Severity,Description,epss_score,epss_percentile,CVSSV3,CVSSV3_score,CVSSV4,CVSSV4_score,known_exploited,ransomware_used,fix_available,fix_version,kev_date,IsMitigated,MitigatedDate
+2024-05-01,All flags true,89,https://app.example.com/login,High,Every optional cell is filled.,0.5,0.9,,9.8,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N,9.3,TRUE,True,t,2.4.1,2024-03-29,TRUE,2024-05-20
+2024-05-01,All flags false,79,https://app.example.com/search,Medium,FALSE must read as false.,0.1,0.2,CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N,6.1,,,FALSE,False,f,,2024-01-15,FALSE,
+2024-05-01,All cells empty,,,Low,Empty numeric and date cells are skipped.,,,,,,,,,,,,,
+2024-05-01,Whitespace cells,,,Info,Whitespace-only cells count as empty., , , , , , , , , , , , , 

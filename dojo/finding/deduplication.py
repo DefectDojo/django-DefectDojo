@@ -6,7 +6,7 @@ from operator import attrgetter
 
 import hyperlink
 from django.conf import settings
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
@@ -18,6 +18,11 @@ from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+# Candidates are streamed in chunks of this many findings rather than materialised in one go.
+# Each chunk is fetched through a server-side cursor and gets its own round of prefetch
+# queries, so neither the raw result set nor a single prefetch has to span every candidate.
+DEDUPE_CANDIDATE_CHUNK_SIZE = 1000
 
 
 def get_finding_models_for_deduplication(finding_ids):
@@ -483,6 +488,27 @@ def find_candidates_for_deduplication_unique_id(test, findings, mode="deduplicat
     return existing_by_uid
 
 
+def _share_select_related_test(finding, shared):
+    """
+    Point a candidate at one shared Test (and Engagement / Test_Type) instance per id.
+
+    ``select_related("test", "test__engagement", "test__test_type")`` builds a fresh copy of
+    those rows for every candidate, so thousands of candidates from a handful of tests carry
+    thousands of identical Test and Engagement objects. ``prefetch_related`` already shares one
+    instance per id; this gives the joined relations the same treatment. Every value is
+    unchanged -- only duplicate copies of the same rows are dropped.
+    """
+    test = finding.test
+    canonical = shared.get(("test", test.pk))
+    if canonical is None:
+        engagement = shared.setdefault(("engagement", test.engagement_id), test.engagement)
+        test_type = shared.setdefault(("test_type", test.test_type_id), test.test_type)
+        test.engagement = engagement
+        test.test_type = test_type
+        canonical = shared.setdefault(("test", test.pk), test)
+    finding.test = canonical
+
+
 def find_candidates_for_deduplication_uid_or_hash(test, findings, mode="deduplication", service=None, *, candidate_qs=None):
     """
     Find candidates by unique_id_from_tool or hash_code. Works for both deduplication and reimport.
@@ -516,7 +542,11 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings, mode="deduplic
 
     existing_by_hash = {}
     existing_by_uid = {}
-    for ef in existing_qs:
+    shared_related = {}
+    # iterator() streams the candidates instead of caching the whole result set on the
+    # queryset; the maps below are the only place the candidates are kept.
+    for ef in existing_qs.iterator(chunk_size=DEDUPE_CANDIDATE_CHUNK_SIZE):
+        _share_select_related_test(ef, shared_related)
         if ef.hash_code is not None:
             existing_by_hash.setdefault(ef.hash_code, []).append(ef)
         if ef.unique_id_from_tool is not None:
@@ -834,7 +864,9 @@ def _flush_duplicate_changes(modified_new_findings):
     in it loses its deduplication too, and the post-processing task fails. Links whose
     original no longer exists are therefore dropped here, immediately before the write
     and in the same transaction, leaving those findings exactly as they were for the
-    next import to match again.
+    next import to match again. The originals that do exist are row-locked until COMMIT
+    so a concurrent delete cannot remove one after the check (see
+    _drop_links_to_deleted_originals).
 
     Returns the list of findings actually written so callers perform follow-up
     processing (e.g. triggering prioritization) only on findings that were persisted.
@@ -853,7 +885,27 @@ def _flush_duplicate_changes(modified_new_findings):
 
 
 def _drop_links_to_deleted_originals(modified_new_findings):
-    """Return the subset of ``modified_new_findings`` whose duplicate_finding still exists."""
+    """
+    Return the subset of ``modified_new_findings`` whose duplicate_finding still exists.
+
+    Must run inside the flush's transaction: the existence check also locks the rows it
+    finds, and that lock is what keeps the answer true until COMMIT. A plain read would
+    leave a window between this check and COMMIT in which a concurrent delete (the
+    excess-duplicate task, a cascade, a user) removes an original and the deferred FK
+    then rejects the whole batch.
+
+    The lock is FOR KEY SHARE, the same lock Postgres itself takes on the referenced row
+    when it checks a foreign key. It conflicts only with DELETE (and key updates), so
+    concurrent imports that update these originals, or link other findings to them, are
+    not blocked. A row a concurrent transaction is deleting makes this read wait for that
+    transaction; once it commits, the row is not returned and its links are dropped.
+
+    The findings about to be written are locked in the same statement. The chunked bulk
+    delete locks its chunk with FOR UPDATE, also in id order, before resolving inbound
+    references (see resolve_inbound_duplicate_references). Taking every row this flush
+    touches in one ordered statement means the flush never holds one row the delete
+    wants while waiting for another the delete holds, which would be a deadlock.
+    """
     referenced_original_ids = {
         finding.duplicate_finding_id
         for finding in modified_new_findings
@@ -862,9 +914,15 @@ def _drop_links_to_deleted_originals(modified_new_findings):
     if not referenced_original_ids:
         return modified_new_findings
 
-    live_original_ids = set(
-        Finding.objects.filter(id__in=referenced_original_ids).values_list("id", flat=True),
-    )
+    ids_to_lock = sorted(referenced_original_ids | {finding.id for finding in modified_new_findings})
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"SELECT id FROM {connection.ops.quote_name(Finding._meta.db_table)} "
+            "WHERE id = ANY(%s) ORDER BY id FOR KEY SHARE",
+            [ids_to_lock],
+        )
+        locked_ids = {row[0] for row in cursor.fetchall()}
+    live_original_ids = referenced_original_ids & locked_ids
     deleted_original_ids = referenced_original_ids - live_original_ids
     if not deleted_original_ids:
         return modified_new_findings

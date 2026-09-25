@@ -7,234 +7,312 @@ aliases:
 
 Generic Findings Import can be used to import any report in CSV or JSON format.
 
-### Supported Attributes (CSV)
+### Choosing CSV or JSON
 
-- Date: Date of the finding in mm/dd/yyyy format.
-- Title: Title of the finding
-- CweId: Cwe identifier, must be an integer value.
-- Url: Url associated with the finding.
-- Severity: Severity of the finding. Must be one of Info, Low, Medium, High, or Critical.
-- Description: Description of the finding. Can be multiple lines if enclosed in double quotes.
-- Mitigation: Possible Mitigations for the finding. Can be multiple lines if enclosed in double quotes.
-- Impact: Detailed impact of the finding. Can be multiple lines if enclosed in double quotes.
-- References: References associated with the finding. Can be multiple lines if enclosed in double quotes.
-- Active: Indicator if the finding is active. Must be empty, TRUE or FALSE
-- Verified: Indicator if the finding has been verified. Must be empty, TRUE, or FALSE
-- FalsePositive: Indicator if the finding is a false positive. Must be TRUE, or FALSE.
-- Duplicate:Indicator if the finding is a duplicate. Must be TRUE, or FALSE
-- IsMitigated: Indicator if the finding is mitigated. Must be TRUE, or FALSE
-- MitigatedDate: Date the finding was mitigated in mm/dd/yyyy format or ISO format
-- epss_score: Finding [EPSS score](https://www.first.org/epss/)
-- epss_percentile: Finding [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins)
-- CVSSV3: CVSSv3 verctor of the finding
-- CVSSV3_score: CVSSv3 score of the finding
-- CVSSV4: CVSSv4 vector of the finding
-- CVSSV4_score: CVSSv4 score of the finding
-- known_exploited: Indicator if the finding is listed in Known Exploited List. Must be TRUE, or FALSE
-- ransomware_used: Indicator if the finding is used in Ransomware. Must be TRUE, or FALSE
-- fix_available: Indicator if fix available for the finding. Must be TRUE, or FALSE
-- fix_version: Version where fix is available. String value.
-- kev_date: Date the finding was added to Known Exploited Vulnerabilities list in mm/dd/yyyy format or ISO format.
+DefectDojo picks the format from the file name:
 
-The CSV expects a header row with the names of the attributes.
+- A file whose name ends in `.csv` (any case) is read as CSV.
+- Every other file is read as JSON, whatever its extension.
 
-Date fields are parsed using [dateutil.parse](https://dateutil.readthedocs.io/en/stable/parser.html) supporting a variety of formats such a YYYY-MM-DD or ISO-8601.
+JSON supports far more fields than CSV (components, SAST data, tags, endpoint objects, attached files, report metadata). Use JSON when you can.
 
-### Supported Attributes (JSON)
+## CSV format
 
-The list of supported fields in JSON format:
+### File rules
 
-- title: **Required.** String
-- severity: **Required.** One of the "Critical", "High", "Medium", "Low", "Info"
-- description: **Required.** String
-- date: Date
-- cwe: Int
-- cve: String
-- vulnerability_ids: List of Strings
-- epss_score: Float
-- epss_percentile: Float
-- cvssv3: String
-- cvssv3_score: Float
-- cvssv4: String
-- cvssv4_score: Float
-- mitigation: String
-- impact: String
-- steps_to_reproduce: String
-- severity_justification: String
-- references: String
-- active: Bool
-- verified: Bool
-- false_p: Bool
-- out_of_scope: Bool
-- risk_accepted: Bool
-- under_review: Bool
-- is_mitigated: Bool
-- thread_id: String
-- mitigated: Date
-- numerical_severity: Int
-- param: String
-- payload: String
-- line: Int
-- file_path: String
-- component_name: String
-- component_version: String
-- static_finding: Bool
-- dynamic_finding: Bool
-- scanner_confidence: Int
-- unique_id_from_tool: String
-- vuln_id_from_tool: String
-- sast_source_object: String
-- sast_sink_object: String
-- sast_source_line: Int
-- sast_source_file_path: String
-- nb_occurences: Int
-- publish_date: Date
-- service: String
-- planned_remediation_date: Date
-- planned_remediation_version: String
-- effort_for_fixing: One of the "High", "Medium", "Low"
-- tags: List of Strings
-- kev_date: Date
-- known_exploited: Bool
-- ransomware_used: Bool
-- fix_available: Bool
-- fix_version: String
+- The first row is a header row naming the columns. Column order does not matter.
+- Column names are case-sensitive and must match the names below exactly. `Title` works, `title` does not.
+- Values are separated by commas. Wrap a value in double quotes if it contains a comma or a line break, and write a literal double quote as two double quotes (`""`).
+- Save the file as UTF-8 without a byte order mark (BOM). Some spreadsheet tools add a BOM by default ("CSV UTF-8" in Excel). The BOM becomes part of the first column name, so DefectDojo no longer recognizes that column and the import fails.
+- Each row is one finding. Rows with the same `Severity`, `Title` and `Description` are merged into a single finding: their `Url` values are combined, their vulnerability IDs and CWEs are combined, and the finding's occurrence count goes up by one for each extra row. Use this to report one issue found at several URLs.
+- Columns not listed below are ignored.
 
-A numeric field may be given as a number or as a quoted number. A value that holds no
-number at all, such as a `"N/A"` placeholder for a line number the tool could not
-determine, is ignored and the field keeps its default.
+### Required columns
+
+`Date`, `Title`, `Description` and `Severity` must be present in the header, and every row needs a value for `Date`. A file missing one of these columns fails to import.
+
+### Supported columns
+
+| Column | Type and examples | Notes |
+|---|---|---|
+| `Date` | Date<br>`2024-05-01`, `05/01/2024`, `2024-05-01T10:00:00Z` | **Required.** Parsed with [dateutil](https://dateutil.readthedocs.io/en/stable/parser.html), so most common formats work. Ambiguous dates such as `05/01/2024` are read month first (May 1). Any time of day is dropped. |
+| `Title` | String (max 511 characters)<br>`SQL Injection in login form` | **Required.** |
+| `Description` | String<br>`User input reaches the query unescaped.` | **Required.** Can span several lines when enclosed in double quotes. |
+| `Severity` | One of `Critical`, `High`, `Medium`, `Low`, `Info`<br>`High` | **Required.** Case-sensitive. Any other value, including `high` or `Informational`, is imported as `Info` without an error. |
+| `CweId` | Integer<br>`89` | A whole number. An empty cell leaves the CWE unset. `CWE-89` or any other non-numeric value fails the import; use `CweIds` for labels. |
+| `CweIds` | List of CWEs<br>`"79, CWE-89 352"` | Several CWEs for one finding, separated by commas, spaces or line breaks. `79` and `CWE-79` are both accepted and duplicates are dropped. If `CweId` is empty or absent, the first entry becomes the primary CWE. |
+| `CVE` | String<br>`CVE-2024-3094` | Added to the finding's vulnerability IDs. |
+| `Vulnerability Id` | String<br>`GHSA-5mrr-rgp6-x4gr` | One extra vulnerability ID, added after `CVE`. Note the space in the column name. |
+| `Url` | String (URL or host)<br>`https://app.example.com/login`, `app.example.com:8443` | One endpoint per row. The scheme is optional. To attach several URLs to one finding, repeat the row (see the merge rule above). |
+| `Mitigation` | String<br>`Use parameterized queries.` | Can span several lines when enclosed in double quotes. |
+| `Impact` | String<br>`An attacker can read the users table.` | Can span several lines when enclosed in double quotes. |
+| `References` | String<br>`https://owasp.org/Top10/` | Can span several lines when enclosed in double quotes. |
+| `Active` | Boolean (see below)<br>`TRUE`, `FALSE` | If the column is absent, findings are active. If the column is present, an empty cell makes the finding inactive. |
+| `Verified` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `FalsePositive` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `Duplicate` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `IsMitigated` | Boolean (see below)<br>`TRUE`, `FALSE` | Defaults to false. |
+| `MitigatedDate` | Date and time<br>`2024-05-20`, `2024-05-20T14:30:00Z` | Parsed with dateutil. An empty cell leaves the field unset. |
+| `epss_score` | Decimal number, 0 to 1<br>`0.97283` | The finding's [EPSS score](https://www.first.org/epss/). An empty cell leaves the field unset. |
+| `epss_percentile` | Decimal number, 0 to 1<br>`0.99971` | The finding's [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins). An empty cell leaves the field unset. |
+| `CVSSV3` | String (CVSS v3 vector)<br>`CVSS:3.1/AV:N/AC:L/…` | Must include the `CVSS:3.0/` or `CVSS:3.1/` prefix; a vector without it is ignored. See the example CSV for a full vector. The CVSS v3 score is calculated from the vector. |
+| `CVSSV3_score` | Decimal number, 0 to 10<br>`9.8` | If `CVSSV3` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
+| `CVSSV4` | String (CVSS v4 vector)<br>`CVSS:4.0/AV:N/AC:L/…` | Must include the `CVSS:4.0/` prefix; a vector without it is ignored. See the example JSON for a full vector. |
+| `CVSSV4_score` | Decimal number, 0 to 10<br>`9.3` | If `CVSSV4` holds a valid vector, the score calculated from the vector replaces this value. An empty cell leaves the field unset. |
+| `known_exploited` | Boolean (see below)<br>`TRUE`, `FALSE` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to false. |
+| `ransomware_used` | Boolean (see below)<br>`TRUE`, `FALSE` | Known to be used in ransomware campaigns. Defaults to false. |
+| `fix_available` | Boolean (see below)<br>`TRUE`, `FALSE` | A fix exists. An empty cell leaves it unset (unknown). |
+| `fix_version` | String (max 100 characters)<br>`2.4.1` | Version that contains the fix. |
+| `kev_date` | Date<br>`2024-03-29` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Parsed with dateutil. An empty cell leaves the field unset. |
+
+#### Boolean values in CSV
+
+`Active`, `Verified`, `FalsePositive`, `Duplicate`, `IsMitigated`, `known_exploited`, `ransomware_used` and `fix_available` are true when the value starts with `t` or `T` (`TRUE`, `True`, `true`, `t`). Every other value is false, including `yes` and `1`. An empty cell is false for the first five columns; for `known_exploited`, `ransomware_used` and `fix_available` it leaves the field at its default (false, false, and unknown).
+
+An empty cell in the numeric and date columns (`CweId`, `epss_score`, `epss_percentile`, `CVSSV3_score`, `CVSSV4_score`, `MitigatedDate`, `kev_date`) leaves that field unset, so rows can mix filled and empty cells. A value that is not a number or date, such as `N/A`, still fails the import.
+
+### Example CSV
+
+```csv
+Date,Title,CweId,Url,Severity,Description,Mitigation,References,Active,Verified,CVE,CVSSV3
+2024-05-01,SQL Injection in login form,89,https://app.example.com/login,High,"The username parameter is concatenated into a SQL query.
+An attacker can bypass authentication.",Use parameterized queries.,https://owasp.org/Top10/A03_2021-Injection/,TRUE,FALSE,,CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+2024-05-01,SQL Injection in login form,89,https://app.example.com/admin/login,High,"The username parameter is concatenated into a SQL query.
+An attacker can bypass authentication.",Use parameterized queries.,https://owasp.org/Top10/A03_2021-Injection/,TRUE,FALSE,,CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+2024-05-02,Outdated xz-utils package,506,build.example.com,Critical,xz-utils 5.6.0 contains a backdoor.,Upgrade to 5.6.2 or later.,https://nvd.nist.gov/vuln/detail/CVE-2024-3094,TRUE,TRUE,CVE-2024-3094,CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H
+```
+
+The first two rows share a severity, title and description, so they import as one finding with two endpoints and an occurrence count of 2.
+
+## JSON format
+
+A JSON report is an object with a `findings` array and, optionally, report-level metadata.
+
+### Report-level fields
+
+| Field | Type and examples | Notes |
+|---|---|---|
+| `findings` | List of finding objects<br>`[{...}, {...}]` | The findings to import. If omitted, the report imports with no findings. |
+| `type` | String<br>`"Tool1"` | Sets the Test Type name. See [Test Type naming](#test-type-naming). |
+| `name` | String<br>`"Nightly scan"` | Accepted but not used. It does not rename the Test or the Test Type. |
+| `version` | String<br>`"1.2.0"` | Stored as the Test's version. |
+| `description` | String<br>`"Weekly authenticated scan"` | Stored as the Test's description. |
+| `static_tool` | Boolean<br>`true` | Sets the Test Type's Static Tool flag. See [Test Type metadata](#test-type-metadata). |
+| `dynamic_tool` | Boolean<br>`false` | Sets the Test Type's Dynamic Tool flag. See [Test Type metadata](#test-type-metadata). |
+| `soc` | Boolean<br>`true` | DefectDojo Pro only. Labels the Test Type as SOC rather than AppSec. Ignored by the open-source edition. See [Test Type metadata](#test-type-metadata). |
+
+### Test Type metadata
+
+`static_tool`, `dynamic_tool` and `soc` describe the tool, not the report, so they are stored on the **Test Type** rather than on the Test. A CSV import never sets them.
+
+- **They apply to every Test of that Test Type.** A Test Type is shared across all Products, so the flags are instance-wide for that tool. Each import that includes a flag overwrites it, and the last import wins.
+- **An omitted flag keeps its current value.** `null` is treated the same as omitting the key. To clear a flag, send `false`.
+- **Set `type` before you set these flags.** A report without `type` imports into the built-in `Generic Findings Import` Test Type, so its flags change that Test Type for every generic import on the instance, including CSV imports. Give each tool its own `type` so its flags stay with that tool.
+- **Send JSON booleans.** `true` and `false` work. A quoted `"false"` is rejected and the whole import fails with a 400 error.
+
+What the flags drive:
+
+| Flag | Effect |
+|---|---|
+| `static_tool`, `dynamic_tool` | Stored on the Test Type and returned by the `/api/v2/test_types/` API. In DefectDojo Pro you can also filter Test Types and build reports on them, and a Test Type with `static_tool` set counts as static analysis evidence for compliance obligations. They do not change the static or dynamic flag on individual findings; set `static_finding` and `dynamic_finding` for that. |
+| `soc` | DefectDojo Pro only. Findings from a Test Type with `soc` set are grouped as SOC rather than AppSec, for example in Priority Insights. |
+
+### Finding fields
+
+Every finding must have `title`, `severity` and `description`. A finding with a key that is not in this table stops the import with a `Not allowed fields are present` error naming the key, so check spelling carefully (for example `false_p`, not `false_positive`).
+
+| Field | Type and examples | Notes |
+|---|---|---|
+| `title` | String (max 511 characters)<br>`"SQL Injection in login form"` | **Required.** |
+| `severity` | One of `Critical`, `High`, `Medium`, `Low`, `Info`<br>`"High"` | **Required.** Not case-sensitive: `"high"` and `"HIGH"` become `High`. `"Informational"`, `"info"` and `"None"` become `Info`. Any other value stops the import with an error. |
+| `description` | String<br>`"Line one\n\nLine two"` | **Required.** Use `\n` for line breaks. |
+| `date` | Date<br>`"2024-05-01"`, `"05/01/2024"`, `"2024-05-01T10:00:00Z"` | Parsed with [dateutil](https://dateutil.readthedocs.io/en/stable/parser.html), so most formats work. Ambiguous dates are read month first. Any time of day is dropped. Defaults to the day of the import. |
+| `cwe` | Integer<br>`89`, `"89"` | Only a number is accepted. `"CWE-89"` is not a number and is silently dropped, so use `cwes` if your tool emits labels. |
+| `cwes` | List of CWEs<br>`["CWE-79", 89]` | Several CWEs for one finding. Items may be numbers or `CWE-<n>` labels. If `cwe` is not set, the first entry becomes the primary CWE. |
+| `cve` | String (max 50 characters)<br>`"CVE-2024-3094"` | Added as the first vulnerability ID. |
+| `vulnerability_ids` | List of strings, or a single string<br>`["GHSA-5mrr-rgp6-x4gr", "OSV-2021-1234"]` | Added after `cve`. |
+| `epss_score` | Decimal number, 0 to 1<br>`0.97283` | The finding's [EPSS score](https://www.first.org/epss/): the estimated probability of exploitation in the next 30 days. |
+| `epss_percentile` | Decimal number, 0 to 1<br>`0.99971` | The finding's [EPSS percentile](https://www.first.org/epss/articles/prob_percentile_bins) relative to all scored vulnerabilities. |
+| `cvssv3` | String (CVSS v3 vector)<br>`"CVSS:3.1/AV:N/AC:L/…"` | Include the `CVSS:3.x/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
+| `cvssv3_score` | Decimal number, 0 to 10<br>`9.8` | If `cvssv3` holds a valid vector, the score calculated from the vector replaces this value. |
+| `cvssv4` | String (CVSS v4 vector)<br>`"CVSS:4.0/AV:N/AC:L/…"` | Include the `CVSS:4.0/` prefix; the example JSON below has a full vector. An invalid vector is dropped with a warning in the logs. |
+| `cvssv4_score` | Decimal number, 0 to 10<br>`9.3` | If `cvssv4` holds a valid vector, the score calculated from the vector replaces this value. |
+| `mitigation` | String<br>`"Use parameterized queries."` | How to fix the issue. Use `\n` for line breaks. |
+| `impact` | String<br>`"An attacker can read the users table."` | What an attacker could do. Use `\n` for line breaks. |
+| `steps_to_reproduce` | String<br>`"1. Open /login\n2. Submit the form"` | How to confirm the issue. Use `\n` for line breaks. |
+| `severity_justification` | String<br>`"Reachable without authentication."` | Why the finding has its severity. |
+| `references` | String<br>`"https://owasp.org"` | A single string. Put several references on separate lines with `\n`. |
+| `active` | Boolean<br>`true` | Defaults to `true`. |
+| `verified` | Boolean<br>`false` | Defaults to `false`. |
+| `false_p` | Boolean<br>`false` | False positive. Defaults to `false`. |
+| `out_of_scope` | Boolean<br>`false` | Defaults to `false`. |
+| `risk_accepted` | Boolean<br>`false` | Defaults to `false`. |
+| `under_review` | Boolean<br>`false` | Defaults to `false`. |
+| `is_mitigated` | Boolean<br>`true` | Defaults to `false`. |
+| `mitigated` | Date and time<br>`"2024-05-20"`, `"2024-05-20T14:30:00Z"` | When the finding was mitigated. Parsed with dateutil. |
+| `thread_id` | Integer<br>`42` | Defaults to `0`. |
+| `numerical_severity` | String<br>`"S1"` | Accepted but ignored. DefectDojo always derives it from `severity`. |
+| `param` | String<br>`"username"` | The vulnerable parameter. |
+| `payload` | String<br>`"' OR 1=1 --"` | The input that triggers the issue. |
+| `line` | Integer<br>`42`, `"42"` | Line number in `file_path`. |
+| `file_path` | String (max 4000 characters)<br>`"src/auth/login.py"` | Setting this marks a new finding as static (see `static_finding`). |
+| `component_name` | String (max 500 characters)<br>`"xz-utils"` | The affected package or library. A blank or whitespace-only value is stored as empty. With Locations enabled, together with `component_version` and `file_path` it also creates a dependency location on the finding. |
+| `component_version` | String (max 100 characters)<br>`"5.6.0"` | The affected version of `component_name`. A blank or whitespace-only value is stored as empty. |
+| `static_finding` | Boolean<br>`true` | Defaults to `false`. When `file_path` is set, DefectDojo marks a new finding as static regardless of this value. |
+| `dynamic_finding` | Boolean<br>`false` | Defaults to `true`. When `file_path` is set, DefectDojo can override this value for a new finding. |
+| `scanner_confidence` | Integer<br>`3` | Confidence reported by the tool. |
+| `unique_id_from_tool` | String (max 500 characters)<br>`"a1b2c3d4"` | The tool's identifier for this finding. If the same value appears on more than one finding in a report, it is removed from all of them and those findings are deduplicated by hash code instead. |
+| `vuln_id_from_tool` | String (max 500 characters)<br>`"django.sqli"` | The tool's rule or check ID. |
+| `sast_source_object` | String (max 500 characters)<br>`"request.GET"` | Where tainted data enters. |
+| `sast_sink_object` | String (max 500 characters)<br>`"cursor.execute"` | Where tainted data is used. |
+| `sast_source_line` | Integer<br>`12` | Line number of `sast_source_object`. With Locations enabled, recorded on the finding's code location when `file_path` is set. |
+| `sast_source_file_path` | String (max 4000 characters)<br>`"src/auth/views.py"` | File that contains `sast_source_object`. With Locations enabled, recorded on the finding's code location when `file_path` is set. |
+| `nb_occurences` | Integer<br>`3` | Number of times the finding occurred. Note the spelling (one `r`). |
+| `publish_date` | Date, `YYYY-MM-DD` only<br>`"2024-03-29"` | Date the vulnerability was published. Other formats, including a date with a time, stop the import. |
+| `service` | String (max 200 characters)<br>`"payments-api"` | The service or application component the finding belongs to. If the import request sets a `service`, that value replaces this one, and close-old-findings only closes findings with the same service. |
+| `planned_remediation_date` | Date, `YYYY-MM-DD` only<br>`"2024-06-30"` | Other formats, including a date with a time, stop the import. |
+| `planned_remediation_version` | String (max 99 characters)<br>`"2.5.0"` | Version in which a fix is planned. |
+| `effort_for_fixing` | String<br>`"Low"` | Intended values are `High`, `Medium` and `Low`. |
+| `kev_date` | Date, `YYYY-MM-DD` only<br>`"2024-03-29"` | Date the vulnerability was added to the Known Exploited Vulnerabilities catalog. Other formats, including a date with a time, stop the import. |
+| `known_exploited` | Boolean<br>`true` | Listed in the Known Exploited Vulnerabilities catalog. Defaults to `false`. |
+| `ransomware_used` | Boolean<br>`false` | Known to be used in ransomware campaigns. Defaults to `false`. |
+| `fix_available` | Boolean<br>`true` | A fix exists. |
+| `fix_version` | String (max 100 characters)<br>`"5.6.2"` | Version that contains the fix. |
+| `tags` | List of strings<br>`["security", "pci"]` | Each string becomes a tag on the finding. Must be a list; a single string is ignored. |
+| `endpoints` | List of strings or objects | See [Endpoints](#endpoints). |
+| `files` | List of objects | See [Attached files](#attached-files). |
+
+#### Value rules
+
+- **Booleans** must be JSON `true` or `false`, not quoted strings. The parser does not convert `"true"` or `"false"`, and a quoted lowercase value such as `"false"` stops the import when the finding is saved.
+- **Numbers** (`cwe`, `line`, `thread_id`, `nb_occurences`, `scanner_confidence`, `sast_source_line`, `epss_score`, `epss_percentile`, `cvssv3_score`, `cvssv4_score`) may be given as a number or a quoted number (`42` or `"42"`). A value that holds no number, such as `"N/A"` for a line number the tool could not determine, is ignored and the field keeps its default. `true` and `false` are not treated as numbers.
+- **Dates**: `date` and `mitigated` accept most formats. `publish_date`, `planned_remediation_date` and `kev_date` accept only `YYYY-MM-DD` (or `YYYYMMDD`).
+
+#### Endpoints
+
+`endpoints` is a list. Each item is either a string or an object.
+
+- A string is a URL or a host. The scheme is optional: `"https://app.example.com:8443/login?next=1"`, `"app.example.com"`.
+- An object names the URL parts. Supported keys: `protocol` (string), `host` (string), `port` (integer), `path` (string), `query` (string), `fragment` (string).
+
+```JSON
+"endpoints": [
+    "app.example.com",
+    "https://app.example.com:8443/login?next=1",
+    {
+        "protocol": "https",
+        "host": "api.example.com",
+        "port": 443,
+        "path": "v1/users"
+    }
+]
+```
+
+#### Attached files
+
+`files` is a list of objects, each with a `title` (string) and `data` (the file's contents, Base64-encoded). The files are attached to the finding.
+
+The `title` must end in an extension the instance allows for uploads. By default these are `.txt`, `.pdf`, `.json`, `.xml`, `.csv`, `.yml`, `.png`, `.jpeg`, `.sarif`, `.xlsx`, `.doc`, `.html`, `.js`, `.nessus`, `.zip` and `.fpr`; administrators can change the list with the `DD_FILE_UPLOAD_TYPES` setting. A title with another extension (including `.jpg`) or no extension stops the import.
+
+```JSON
+"files": [
+    {
+        "title": "login-screenshot.png",
+        "data": "iVBORw0KGgoAAAANSUhEUgAABWgAAAK0CAIAAAARSkPJAAAAA3N<...>TkSuQmCC"
+    }
+]
+```
 
 ### Example JSON
 
 ```JSON
 {
+    "name": "Nightly scan",
+    "type": "Tool1",
+    "version": "1.2.0",
+    "description": "Authenticated scan of the staging environment",
     "findings": [
         {
-            "title": "test title with endpoints as dict",
-            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau",
-            "severity": "Medium",
-            "mitigation": "Some mitigation",
-            "date": "2021-01-06",
-            "cve": "CVE-2020-36234",
-            "cwe": 261,
-            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
-            "cvssv4": "CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
-            "cvssv4_score": 7.3,
-            "known_exploited": true,
-            "ransomware_used": true,
+            "title": "SQL Injection in login form",
+            "description": "The username parameter is concatenated into a SQL query.\n\nAn attacker can bypass authentication.",
+            "severity": "High",
+            "date": "2024-05-01",
+            "cwe": 89,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvssv4": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+            "mitigation": "Use parameterized queries.",
+            "references": "https://owasp.org/Top10/A03_2021-Injection/",
+            "param": "username",
+            "payload": "' OR 1=1 --",
+            "active": true,
+            "verified": false,
+            "unique_id_from_tool": "tool1-4f2a9c",
+            "endpoints": [
+                "https://app.example.com/login",
+                {
+                    "protocol": "https",
+                    "host": "app.example.com",
+                    "path": "admin/login"
+                }
+            ],
+            "tags": ["security", "pci"]
+        },
+        {
+            "title": "Hard-coded credentials",
+            "description": "A database password is committed to source control.",
+            "severity": "critical",
+            "cwes": ["CWE-798", "CWE-259"],
+            "file_path": "src/settings.py",
+            "line": 42,
+            "static_finding": true,
+            "dynamic_finding": false,
+            "vuln_id_from_tool": "generic.secrets.password",
+            "effort_for_fixing": "Low"
+        },
+        {
+            "title": "Backdoor in xz-utils",
+            "description": "xz-utils 5.6.0 and 5.6.1 contain malicious code.",
+            "severity": "Critical",
+            "cve": "CVE-2024-3094",
+            "vulnerability_ids": ["GHSA-rxwq-x6h5-x525"],
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+            "epss_score": 0.85,
+            "epss_percentile": 0.99,
+            "component_name": "xz-utils",
+            "component_version": "5.6.0",
             "fix_available": true,
-            "fix_version": "0.0.00",
-            "kev_date": "2024-05-01",
-            "file_path": "src/first.cpp",
-            "line": 13,
-            "vulnerability_ids": ["GHSA-5mrr-rgp6-x4gr", "OSV-2021-1234"],
-            "endpoints": [
-                {
-                    "host": "exemple.com"
-                }
-            ],
-            "tags": [
-                "security",
-                "myTag"
-            ],
+            "fix_version": "5.6.2",
+            "known_exploited": true,
+            "kev_date": "2024-04-01",
+            "publish_date": "2024-03-29"
         },
         {
-            "title": "test title with endpoints as strings",
-            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
-            "severity": "Critical",
-            "mitigation": "Some mitigation",
-            "date": "2021-01-06",
-            "cve": "CVE-2020-36235",
-            "cwe": 287,
-            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
-            "file_path": "src/two.cpp",
-            "line": 135,
-            "endpoints": [
-                "http://urlfiltering.paloaltonetworks.com/test-command-and-control",
-                "https://urlfiltering.paloaltonetworks.com:2345/test-pest"
-            ]
-        },
-        {
-            "title": "test title",
-            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
-            "severity": "Critical",
-            "mitigation": "Some mitigation",
-            "date": "2021-01-06",
-            "cve": "CVE-2020-36236",
-            "cwe": 287,
-            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
-            "file_path": "src/threeeeeeeeee.cpp",
-            "line": 1353
-        },
-        {
-            "title": "test title mitigated",
-            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
-            "severity": "Critical",
-            "mitigation": "Some mitigation",
-            "date": "2021-01-06",
-            "cve": "CVE-2020-36236",
-            "cwe": 287,
-            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
-            "file_path": "src/threeeeeeeeee.cpp",
-            "line": 1353,
-            "is_mitigated": true,
-            "mitigated": "2021-01-16"
-        },
-        {
-            "title": "test title mitigated ISO",
-            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
-            "severity": "Critical",
-            "mitigation": "Some mitigation",
-            "date": "2024-01-04T11:02:11Z",
-            "cve": "CVE-2020-36236",
-            "cwe": 287,
-            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
-            "file_path": "src/threeeeeeeeee.cpp",
-            "line": 1353,
-            "is_mitigated": true,
-            "mitigated": "2024-01-24T11:02:11Z"
-        }
-    ]
-}
-```
-
-This parser supports an attributes that accept files as Base64 strings. These files are attached to the respective findings.
-
-Example:
-
-```JSON
-{
-    "name": "My wonderful report",
-    "findings": [
-        {
-            "title": "Vuln with image",
-            "description": "Some very long description",
+            "title": "Reflected XSS in search",
+            "description": "The q parameter is echoed without encoding.",
             "severity": "Medium",
-            "files": [
-                {
-                    "title": "Screenshot from 2017-04-10 16-54-19.png",
-                    "data": "iVBORw0KGgoAAAANSUhEUgAABWgAAAK0CAIAAAARSkPJAAAAA3N<...>TkSuQmCC"
-                }
-            ]
+            "date": "2024-01-04T11:02:11Z",
+            "cwe": 79,
+            "is_mitigated": true,
+            "mitigated": "2024-01-24T11:02:11Z",
+            "endpoints": ["app.example.com/search"]
         }
     ]
 }
 ```
 
-This parser supports an attribute `name` and `type` to be able to define `TestType`. Based on this, you can define custom `HASHCODE_FIELDS` or `DEDUPLICATION_ALGORITHM` in the settings.
+### Test Type naming
 
-Example:
+The Test Type for a JSON import comes from the report's `type` field. A CSV import always uses the Test Type `Generic Findings Import`.
 
-```JSON
-{
-    "name": "My wonderful report",
-    "type": "My custom Test type",
-    "findings": [
-    ]
-}
-```
+| `type` value | Resulting Test Type |
+|---|---|
+| omitted, empty, or `"Generic Findings Import"` | `Generic Findings Import` |
+| `"Tool1"` | `Tool1 Scan (Generic Findings Import)` |
+| `"Tool1 (Generic Findings Import)"` | `Tool1 (Generic Findings Import)` (used as-is, so the suffix is never doubled) |
 
-The resulting Test Type name is derived from the `type` field: when `type` is omitted (or equals the scan type) the Test Type is `Generic Findings Import`; when `type` is provided it becomes `{type} Scan (Generic Findings Import)` (for the example above, `My custom Test type Scan (Generic Findings Import)`). A `type` that already ends with the `(Generic Findings Import)` suffix is used verbatim, so the suffix is never doubled.
+Each distinct `type` creates its own Test Type. Because deduplication settings are looked up by Test Type name, you can set custom `HASHCODE_FIELDS_PER_SCANNER` or `DEDUPLICATION_ALGORITHM_PER_PARSER` entries for a generic tool by using the resulting name as the key, for example `Tool1 Scan (Generic Findings Import)`.
+
+When you reimport into an existing Test, the report's `type` has to resolve to that Test's Test Type (or to plain `Generic Findings Import`). Otherwise the reimport is rejected with a `Test type mismatch` error.
 
 ### Sample Scan Data
 

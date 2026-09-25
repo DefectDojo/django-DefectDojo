@@ -91,7 +91,7 @@ kubectl -n <oss-ns> get secret <release>-defectdojo \
   -o jsonpath='{.data.DD_CREDENTIAL_AES_256_KEY}' | base64 -d; echo
 ```
 
-Set those exact values into the Pro secret. They map to `dojo.secretKey` and `dojo.credentialAES256Key` (note the casing). **Never regenerate either key during a migration**; the AES key decrypts every stored credential, and the upgrade re-encrypts them with it on first boot (see [KEY-2](#key-2)).
+Set those exact values into the Pro secret. They map to `dojo.secretKey` and `dojo.credentialAES256Key` (note the casing). **Never regenerate either key during a migration.** The AES key decrypts the Tool Configuration credentials that open source stored, and the upgrade re-encrypts them with it on first boot. The secret key signs sessions and, once you are on Pro, encrypts connector and integration credentials. See [KEY-2](#key-2).
 
 ### Before install — verify the signed release bundle
 
@@ -304,7 +304,7 @@ kubectl -n <oss-ns> get secret | grep defectdojo
 
 **Stored credentials unreadable after migration**
 
-**Cause.** `DD_CREDENTIAL_AES_256_KEY` was not carried over exactly, or was regenerated. Every stored tool/integration credential is encrypted with it, and the upgrade re-encrypts them with it on first boot. A changed key makes them permanently unreadable.
+**Cause.** `DD_CREDENTIAL_AES_256_KEY` was not carried over exactly, or was regenerated. The Tool Configuration credentials open source stored are encrypted with it, and the upgrade re-encrypts them with it on first boot. A changed key makes them permanently unreadable.
 
 **Fix / prevention.** Carry both keys over verbatim (step 5) and never regenerate them. You can confirm the key round-trips before cutover: a value encrypted on OSS decrypts on Pro to the same plaintext. If it does not, the key did not carry over correctly; stop and fix it before proceeding.
 
@@ -385,7 +385,7 @@ print('findings',Finding.objects.count())
 print('users',get_user_model().objects.count())"
 ```
 
-3. **Login and API token.** Log in with your OSS admin credentials (see [ADMIN-1](#admin-1)). An existing API token continues to work because `DD_SECRET_KEY` carried over.
+3. **Login and API token.** Log in with your OSS admin credentials (see [ADMIN-1](#admin-1)). An existing API token continues to work, since tokens are stored in the database you restored.
 
 4. **Media downloads.** Open a finding that had an attachment and download the file; confirm the bytes match (compare a checksum against the OSS copy).
 
