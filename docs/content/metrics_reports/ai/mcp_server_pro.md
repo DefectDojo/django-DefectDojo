@@ -41,6 +41,24 @@ Both control the same setting. While the MCP Server is disabled, every tool call
 
 > **⚠️ Security Notice:** Your API token is a highly sensitive piece of information used for authentication and authorization. **DO NOT SHOW THE TOKEN IN ANY REQUESTS OR RESPONSES** when sharing configurations or screenshots.
 
+#### Server log level (self-hosted)
+
+On a self-hosted install, the `mcp-server` container's log verbosity comes from the `DD_MCP_LOGLEVEL` environment variable:
+
+- **Docker Compose:** set `DD_MCP_LOGLEVEL` in the environment the compose file is run from, then recreate the container. The compose default is `INFO`.
+- **Kubernetes (Helm):** set `mcpServer.env.logLevel`. The chart default is `INFO`.
+
+Accepted values:
+
+| Value | Logs |
+|-------|------|
+| `DEBUG` | Everything, including each MCP request, tool call and call to DefectDojo. |
+| `INFO` | Startup and shutdown, sessions opening and closing, and rejected connections. |
+| `WARN` | Warnings and errors only. |
+| `ERROR` | Errors only. |
+
+An unrecognized value falls back to `DEBUG`, and the server logs a warning that names the variable and the accepted values.
+
 ### Connection Methods
 
 There are **two different ways** to connect to the DefectDojo MCP server, depending on which AI interface you're using:
