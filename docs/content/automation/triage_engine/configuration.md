@@ -169,13 +169,16 @@ To stop inbound webhook traffic without redeploying, turn off the **Inbound Webh
 |---------|---------|-------|
 | `DD_WEBHOOK_GATEWAY_MODE` | `whook` | `whook` puts the gateway in front of every receiver. `direct` has DefectDojo answer receiver URLs itself, with no durability during an outage. |
 | `DD_WEBHOOK_GATEWAY_URL` | `http://webhook-gateway:8080` | The gateway's admin address. |
-| `DD_WEBHOOK_GATEWAY_ADMIN_TOKEN` | empty | The token DefectDojo uses to configure the gateway. It must match the gateway's `WHOOK_ADMIN_TOKEN`, and the gateway refuses to start without one. |
+| `DD_WEBHOOK_GATEWAY_ADMIN_TOKEN` | empty | The token DefectDojo uses to configure the gateway. The DefectDojo and gateway containers read the same value, and the gateway refuses to start without one. |
+| `DD_WEBHOOK_GATEWAY_SECRET_KEY` | empty | The key the gateway encrypts stored receiver tokens with. Read by the gateway container only. |
 | `DD_WEBHOOK_GATEWAY_DELIVER_BASE_URL` | `https://nginx:7443` | Where the gateway delivers. It must be reachable from the gateway and must not be public. |
 | `DD_WEBHOOK_GATEWAY_MAX_ATTEMPTS` | `12` | Delivery attempts before the gateway gives up on an event. The wait starts at 2 seconds and triples each time, up to an hour, so twelve attempts cover about four and a half hours. |
 | `DD_WEBHOOK_GATEWAY_SCHEMA` | `whook` | The schema inside DefectDojo's database that holds the gateway's tables. DefectDojo creates it on startup. |
 | `WEBHOOK_GATEWAY_ENABLED` | `true` | On the nginx and gateway containers: whether nginx routes receiver URLs to the gateway. Off, the gateway idles. Set it together with `DD_WEBHOOK_GATEWAY_MODE`. |
 
 Every ten minutes DefectDojo reconciles the gateway with its receivers, so a gateway that lost its configuration recovers on its own. `manage.py reconcile_webhook_gateway` does the same on demand.
+
+Give each installation its own admin token and secret key. `dojo-compose-cli` generates both on deploy, and the Helm chart derives both per installation. An installation still running on the values in the Docker Compose bundles gets a warning at startup, from DefectDojo (system check `pro.W002`, for the token) and from the gateway (for both). Changing either is safe: deliveries may fail for up to ten minutes, until the next reconcile re-registers every receiver, and senders that retry deliver them then.
 
 ## Related settings
 
