@@ -145,7 +145,11 @@ class AquaParser:
 
     def get_item(self, resource, vuln, test):
         resource_name = resource.get("name", resource.get("path"))
-        resource_version = resource.get("version", "No version")
+        if resource_name is None:
+            resource_name = resource.get("path") or "No resource name"
+        resource_version = resource.get("version")
+        if resource_version is None:
+            resource_version = "No version"
         vulnerability_id = vuln.get("name", "No CVE")
         fix_available = False
         fix_version = vuln.get("fix_version", None)
@@ -242,8 +246,8 @@ class AquaParser:
         return finding
 
     def get_item_v2(self, item, test):
-        vulnerability_id = item["name"]
-        file_path = item["file"]
+        vulnerability_id = item.get("name")
+        file_path = item.get("file")
         url = item.get("url")
         severity = self.severity_of(float(item["score"]))
         description = item.get("description")
@@ -269,7 +273,8 @@ class AquaParser:
             mitigation=mitigation,
             fix_available=fix_available,
         )
-        finding.unsaved_vulnerability_ids = [vulnerability_id]
+        if vulnerability_id:
+            finding.unsaved_vulnerability_ids = [vulnerability_id]
         return finding
 
     def get_item_sensitive_data(self, resource, sensitive_item, test):
