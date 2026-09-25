@@ -39,13 +39,13 @@ on:
 jobs:
   migration-graph:
     # Release PRs and merge-backs are merged without waiting for CI. PR: a
-    # release/* or master-into-dev/* head AND the release-management label.
+    # release/merge-* head AND the release-management label.
     # Push: such a branch, or GitHub's merge commit for such a PR (a push has
     # no labels, so the branch name is the only signal).
     if: >-
       ${{ !(
-        (startsWith(github.event_name, 'pull_request') && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management'))
-        || (github.event_name == 'push' && (startsWith(github.ref_name, 'release/') || startsWith(github.ref_name, 'master-into-dev/') || (startsWith(github.event.head_commit.message, 'Merge pull request') && (contains(github.event.head_commit.message, '/release/') || contains(github.event.head_commit.message, '/master-into-dev/')))))
+        (startsWith(github.event_name, 'pull_request') && startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management'))
+        || (github.event_name == 'push' && (startsWith(github.ref_name, 'release/merge-') || (startsWith(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, '/release/merge-'))))
       ) }}
     name: Migration Graph Check
     runs-on: ubuntu-latest

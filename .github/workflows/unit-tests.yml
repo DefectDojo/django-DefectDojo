@@ -44,8 +44,8 @@ jobs:
   # hard gate: linting must pass before we spend any time building images or running tests
   ruff:
     # Release PRs and merge-backs are merged without waiting for CI. Skip when the
-    # head is release/* or master-into-dev/* AND the PR has release-management.
-    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     uses: ./.github/workflows/ruff.yml
     secrets: inherit
 
@@ -56,8 +56,8 @@ jobs:
   # queue always tests the complete matrix on the speculative merge commit.
   changes:
     # Release PRs and merge-backs are merged without waiting for CI. Skip when the
-    # head is release/* or master-into-dev/* AND the PR has release-management.
-    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     runs-on: ubuntu-latest
     outputs:
       docs_only: ${{ steps.filter.outputs.docs_only }}

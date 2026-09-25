@@ -39,7 +39,7 @@ jobs:
 
       - name: Create release branch
         run: |
-          echo "NEW_BRANCH=release/${{ inputs.release_number }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=release/merge-dev-into-master-${{ inputs.release_number }}" >> $GITHUB_ENV
 
       - name: Configure git
         run: |

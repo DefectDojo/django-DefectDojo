@@ -45,14 +45,14 @@ participant "Master Branch" as master #LightSalmon
 
 == Minor Release (Monthly) ==
 
-dev -> release: Create branch "release/2.x.0"
+dev -> release: Create branch "release/merge-dev-into-master-2.x.0"
 release -> master: Merge
 note right: Official Release\n - Tag 2.x.0\n - Push 2.x.0 to DockerHub
 master --> dev: Merge master back into dev
 
 == Patch Release (Weekly) ==
 
-dev -> release: Create branch "release/2.x.y"
+dev -> release: Create branch "release/merge-dev-into-master-2.x.y"
 release -> master: Merge
 note right: Official Release\n - Tag 2.x.y\n - Push 2.x.y to DockerHub
 master --> dev: Merge master back into dev

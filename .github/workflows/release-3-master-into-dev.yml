@@ -29,7 +29,7 @@ jobs:
 
       - name: Create merge back branch
         run: |
-          echo "NEW_BRANCH=master-into-dev/${{ inputs.release_number_new }}-${{ inputs.release_number_dev }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=release/merge-master-into-dev-${{ inputs.release_number_new }}" >> $GITHUB_ENV
 
       - name: Configure git
         run: |

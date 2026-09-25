@@ -11,7 +11,7 @@ The release schedule decides which one is next. Dependency updates, bug fixes an
 
 The release process will then:
 
-- Create a `release/x.y.z` branch from `dev` and a PR to merge it into `master` (`Release-1`)
+- Create a `release/merge-dev-into-master-x.y.z` branch from `dev` and a PR to merge it into `master` (`Release-1`)
 - Tag the release, build the docker images and push them to Docker Hub (`Release-2`)
 - Merge the changes in `master` back into `dev` so the two stay in sync (`Release-3`)
 
@@ -37,7 +37,7 @@ Run the `Release-1: Create PR for master` action. Leave `from_branch` on `dev` (
 
 ![image](https://user-images.githubusercontent.com/4426050/149574288-a4056fb9-859c-413e-9f60-bc59894b0528.png)
 
-The action creates the `release/x.y.z` branch from `dev`, updates the version numbers in it, removes the `-dev` suffix from the helm chart version, and opens the PR against `master`.
+The action creates the `release/merge-dev-into-master-x.y.z` branch from `dev`, updates the version numbers in it, removes the `-dev` suffix from the helm chart version, and opens the PR against `master`.
 
 Verify the PR is created, and check if the commits in it make sense:
 
@@ -52,7 +52,7 @@ Go to the bottom of the lists of commits, click on the `Update versions in appli
 
 ![image](https://user-images.githubusercontent.com/4426050/149577123-572cc6dd-7bf3-44ad-af58-ab6e46905558.png)
 
-Do not wait for CI. The release PR and the merge-back PR are merged as soon as they are conflict-free, to save time and runner cost. CI skips them on purpose: a pull request is skipped when its head branch starts with `release/` or `master-into-dev/` and it has the `release-management` label (both release actions add it), and a push is skipped when the branch has one of those prefixes or the commit is GitHub's merge commit for such a PR.
+Do not wait for CI. The release PR and the merge-back PR are merged as soon as they are conflict-free, to save time and runner cost. CI skips them on purpose: a pull request is skipped when its head branch starts with `release/merge-` and it has the `release-management` label (both release actions add it), and a push is skipped when the branch starts with `release/merge-` or the commit is GitHub's merge commit for such a PR. This is the same rule the other DefectDojo repositories use.
 
 Merge into `master` by *creating a merge commit*. Do NOT squash the commits!
 
@@ -101,7 +101,7 @@ Check the PR and the version number updates.
 
 No tests run on this PR (see above), so merge it as soon as it is conflict-free.
 
-Merge the `Release: Merge back x.y.z into dev from: master-into-dev/x.y.z-a.b.c-dev` PR by using a *Merge Commit*. Do NOT squash the commits.
+Merge the `Release: Merge back x.y.z into dev from: release/merge-master-into-dev-x.y.z` PR by using a *Merge Commit*. Do NOT squash the commits.
 
 ![image](https://user-images.githubusercontent.com/4426050/149618642-276fffca-7e6f-4c51-bd9b-52bb5628cb7b.png)
 

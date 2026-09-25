@@ -13,8 +13,8 @@ permissions:
 jobs:
   lint:
     # Release PRs and merge-backs are merged without waiting for CI. Skip when the
-    # head is release/* or master-into-dev/* AND the PR has release-management.
-    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Lint chart (version)
     runs-on: ubuntu-latest
     steps:
@@ -76,7 +76,7 @@ jobs:
         if: steps.list_changed.outputs.changed == 'true'
 
       - name: Check update of "artifacthub.io/changes" HELM annotation
-        if: ${{ steps.list_changed.outputs.changed == 'true' && !startsWith(github.head_ref, 'master-into-dev/') }}
+        if: ${{ steps.list_changed.outputs.changed == 'true' && !startsWith(github.head_ref, 'release/merge-master-into-dev-') }}
         run: |
           # fast fail if `git show` fails
           set -e
@@ -113,8 +113,8 @@ jobs:
 
   docs_generation:
     # Release PRs and merge-backs are merged without waiting for CI. Skip when the
-    # head is release/* or master-into-dev/* AND the PR has release-management.
-    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Update documentation
     runs-on: ubuntu-latest
     permissions:
@@ -159,8 +159,8 @@ jobs:
 
   generate_schema:
     # Release PRs and merge-backs are merged without waiting for CI. Skip when the
-    # head is release/* or master-into-dev/* AND the PR has release-management.
-    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Update schema
     runs-on: ubuntu-latest
     steps:
@@ -182,8 +182,8 @@ jobs:
 
   lint_format:
     # Release PRs and merge-backs are merged without waiting for CI. Skip when the
-    # head is release/* or master-into-dev/* AND the PR has release-management.
-    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Lint chart (format)
     runs-on: ubuntu-latest
     steps:
@@ -207,8 +207,8 @@ jobs:
 
   artifacthub_linter:
     # Release PRs and merge-backs are merged without waiting for CI. Skip when the
-    # head is release/* or master-into-dev/* AND the PR has release-management.
-    if: ${{ !((startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'master-into-dev/')) && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     name: Artifacthub Lint
     runs-on: ubuntu-latest
     steps:
