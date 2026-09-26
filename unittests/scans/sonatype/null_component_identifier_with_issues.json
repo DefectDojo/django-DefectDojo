@@ -1,0 +1,212 @@
+{
+  "components": [
+    {
+      "hash": "aaaa1",
+      "componentIdentifier": {
+        "format": "maven",
+        "coordinates": {
+          "artifactId": "okhttp",
+          "classifier": "",
+          "extension": "jar",
+          "groupId": "com.squareup.okhttp",
+          "version": "2.6.0"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "WEB-INF/lib/okhttp-2.6.0.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": [
+          {
+            "source": "cve",
+            "reference": "CVE-2016-2402",
+            "severity": 5.9,
+            "status": "Open",
+            "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-2402",
+            "threatCategory": "severe"
+          }
+        ]
+      }
+    },
+    {
+      "hash": "aaaa2",
+      "componentIdentifier": {
+        "format": "maven",
+        "coordinates": {
+          "artifactId": "commons-text",
+          "classifier": "",
+          "extension": "jar",
+          "groupId": "org.apache.commons",
+          "version": "1.9"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "WEB-INF/lib/commons-text-1.9.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": [
+          {
+            "source": "cve",
+            "reference": "CVE-2022-42889",
+            "severity": 5.9,
+            "status": "Open",
+            "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-42889",
+            "threatCategory": "severe"
+          }
+        ]
+      }
+    },
+    {
+      "hash": "aaaa3",
+      "componentIdentifier": {
+        "format": "maven",
+        "coordinates": {
+          "artifactId": "jackson-databind",
+          "classifier": "",
+          "extension": "jar",
+          "groupId": "com.fasterxml.jackson.core",
+          "version": "2.9.8"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "WEB-INF/lib/jackson-databind-2.9.8.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": [
+          {
+            "source": "cve",
+            "reference": "CVE-2019-12384",
+            "severity": 5.9,
+            "status": "Open",
+            "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-12384",
+            "threatCategory": "severe"
+          }
+        ]
+      }
+    },
+    {
+      "hash": "nullhash01",
+      "componentIdentifier": null,
+      "proprietary": false,
+      "matchState": "unknown",
+      "pathnames": [
+        "WEB-INF/lib/unknown-binary.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": [
+          {
+            "source": "cve",
+            "reference": "CVE-2099-0001",
+            "severity": 5.9,
+            "status": "Open",
+            "url": null,
+            "threatCategory": "severe"
+          }
+        ]
+      },
+      "displayName": "unknown-binary.jar"
+    }
+  ],
+  "matchSummary": {
+    "totalComponentCount": 4,
+    "knownComponentCount": 3
+  }
+}
