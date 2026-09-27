@@ -37,7 +37,7 @@ Complete the following steps in GitLab before configuring DefectDojo:
 In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **GitLab**, and fill in the form:
 
 - **GitLab OAuth Key** — enter your **Application ID**.
-- **GitLab OAuth Secret** — enter your **Secret**.
+- **GitLab OAuth Secret** — enter your **Secret**. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the application ID or the GitLab API URL.
 - **GitLab API URL** — the base URL of your GitLab instance, e.g. `https://gitlab.com` (must be a valid URL).
 
 Check **Enable GitLab OAuth** and submit the form. A **Login With GitLab** button will appear on the login page.

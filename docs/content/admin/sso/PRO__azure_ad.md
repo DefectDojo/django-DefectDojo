@@ -36,12 +36,12 @@ Complete the following steps in the Azure portal before configuring DefectDojo:
 In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Microsoft Entra ID**, and fill in the form. The field labels match the Entra portal:
 
 - **Application (client) ID** — the client ID from step 2.
-- **Client Secret** — the secret **Value** from step 3.
+- **Client Secret** — the secret **Value** from step 3. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or the tenant ID.
 - **Directory (tenant) ID** — the tenant ID from step 2.
 - **Application ID URI** — the resource DefectDojo reads additional information (such as group names) from. Defaults to `https://graph.microsoft.com` and is required; only change it if your group names live on a different API resource.
 - **Azure AD Groups Filter** — optionally, a regex that restricts which groups are imported (see [Group Mapping](#group-mapping)).
 
-Check **Enable Azure AD OAuth** and submit the form. (The Enable checkbox unlocks once the client ID and secret are filled in.) A **Login With Azure AD** button will appear on the login page.
+Check **Enable Azure AD OAuth** and submit the form. (The Enable checkbox unlocks once the client ID is filled in and a secret is entered or already saved.) A **Login With Azure AD** button will appear on the login page.
 
 Use **Validate Config** at any point to check the settings without saving them. It confirms the settings are complete, checks that the Entra discovery document is reachable for your tenant, and echoes the exact **redirect URI** to register at Entra.
 
