@@ -36,7 +36,10 @@ default) and an optional **API Base URL** to point at an on-prem or self-hosted 
 
 All secrets are **encrypted at rest** and are **write-only**: once saved, the form shows only
 whether a secret is set, never its value. Leave a secret field blank when saving to keep the
-stored value; type a new value to replace it.
+stored value; type a new value to replace it. The one exception is the **API Base URL**: a saved
+API key is kept only for the base URL it was saved with, so changing the base URL to a new
+gateway means entering the key again (clearing the base URL does not). **Test connection** follows
+the same rule.
 
 ### Claude (Anthropic) and OpenAI
 
