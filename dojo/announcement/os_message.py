@@ -50,6 +50,11 @@ def fetch_os_message():
         cache.set(CACHE_KEY, None, CACHE_SECONDS)
         return None
 
+    # The bucket serves text/markdown without a charset, so requests would fall
+    # back to ISO-8859-1 and mangle non-ASCII characters (e.g. "→" -> "â").
+    # The publisher always writes UTF-8.
+    response.encoding = "utf-8"
+
     if response.status_code != 200 or not response.text.strip():
         cache.set(CACHE_KEY, None, CACHE_SECONDS)
         return None

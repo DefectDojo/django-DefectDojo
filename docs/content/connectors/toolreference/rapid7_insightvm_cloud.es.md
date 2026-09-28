@@ -10,7 +10,9 @@ El conector de Rapid7 InsightVM - Cloud Instance importa hallazgos de vulnerabil
 
 #### Requisitos previos
 
-Una cuenta de la plataforma Insight con InsightVM, y una **API key** de la plataforma: en [Rapid7 Insight platform](https://insight.rapid7.com), abra el menú de configuración (el ícono de engranaje) > **API Keys** y genere una **User Key** (cualquier rol) o una **Organization Key** (administradores de la plataforma). Copie la clave cuando se muestre: solo se muestra una vez.
+Una cuenta de la plataforma Insight con InsightVM, y una **API key** de la plataforma con permisos de administrador de la plataforma: en [Rapid7 Insight platform](https://insight.rapid7.com), abra el menú de configuración (el ícono de engranaje) > **API Keys** y genere una **Organization Key**, o una **User Key** que pertenezca a un administrador de la plataforma. Copie la clave cuando se muestre: solo se muestra una vez.
+
+Una User Key hereda los permisos de su propietario, por lo que la Cloud Integrations API rechaza la clave de un usuario que no es administrador de la plataforma con un error 401: `The supplied key does not have permission to perform this action.`
 
 También necesitará la **región** de su plataforma, visible en su URL de Insight (por ejemplo, `us`, `us2`, `us3`, `eu`, `ca`, `au` o `ap`).
 

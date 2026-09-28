@@ -2327,6 +2327,11 @@ def merge_finding_product(request, pid):
             if form.is_valid():
                 finding_to_merge_into = form.cleaned_data["finding_to_merge_into"]
                 findings_to_merge = form.cleaned_data["findings_to_merge"]
+                if form.cleaned_data["finding_action"] == "delete":
+                    for finding_to_remove in findings_to_merge:
+                        user_has_permission_or_403(
+                            request.user, finding_to_remove, "delete",
+                        )
                 finding_descriptions = ""
                 finding_references = ""
                 notes_entry = ""

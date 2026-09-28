@@ -2,7 +2,7 @@
 title: "FIPS 140-3 Mode on Amazon ECS / Fargate"
 description: "Running DefectDojo Pro FIPS images on Amazon ECS with the Fargate launch type"
 draft: false
-weight: 8
+weight: 9
 audience: pro
 ---
 
@@ -20,9 +20,23 @@ If you already run DefectDojo Pro on ECS, only two things change:
 <ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/defectdojo-pro-nginx:<VERSION>-fips
 ```
 
+DefectDojo publishes these as `dojo-pro/django:<VERSION>-fips` and `dojo-pro/nginx:<VERSION>-fips` in its registry, from version 3.3.200 (see [Getting the FIPS images](/get_started/pro/onprem/fips_mode/#getting-the-fips-images)). Your license's registry credentials pull them. Authenticate Docker as described in [Authenticate to the Registry](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/#authenticate-to-the-registry), then copy both images into ECR:
+
+```bash
+REGISTRY=us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro
+ECR=<ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com
+for image in django nginx; do
+  docker pull --platform linux/amd64 "${REGISTRY}/${image}:<VERSION>-fips"
+  docker tag "${REGISTRY}/${image}:<VERSION>-fips" "${ECR}/defectdojo-pro-${image}:<VERSION>-fips"
+  docker push "${ECR}/defectdojo-pro-${image}:<VERSION>-fips"
+done
+```
+
+The FIPS images are linux/amd64 only, which is why the task definitions below set `cpuArchitecture` to `X86_64`.
+
 **2. `DD_FIPS_MODE=1`** in the `environment` block of every container running
 application code — uwsgi, celery worker, celery beat, the initializer, the
-orchestration workers, nginx and psirt.
+orchestration workers and nginx.
 
 The rest of this section is a complete FIPS-enabled ECS deployment for readers
 starting from nothing.
@@ -184,7 +198,6 @@ Both containers live in one task so nginx reaches uwsgi on `127.0.0.1`.
         { "name": "DD_SITE_URL", "value": "https://<YOUR_HOSTNAME>" },
         { "name": "DD_MCP_HOST", "value": "127.0.0.1" },
         { "name": "DD_MCP_PORT", "value": "9142" },
-        { "name": "PSIRT_ENABLED", "value": "false" },
         { "name": "NGINX_METRICS_ENABLED", "value": "false" }
       ],
       "mountPoints": [
