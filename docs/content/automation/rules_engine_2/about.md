@@ -29,11 +29,11 @@ Both engines run side by side. Turning on Rules Engine 2.0 does not disable or c
 
 Rules Engine 2.0 is in Beta and is off by default. A superuser turns it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
-Once the flag is on, a **Rules Engine 2.0** section appears in the sidebar with three pages:
+Once the flag is on, a **Triage Engine** group appears under **Act** in the sidebar with three pages (the original Rules Engine sits alongside them as **Classic Rules**):
 
 | Page | What it is for |
 |------|----------------|
-| **All Rules** | The rule list. Create, edit, enable, run and delete rules from here. |
+| **Rules** | The rule list. Create, edit, enable, run and delete rules from here. |
 | **Runs** | Every execution, with its per-node trace. |
 | **Deliveries** | The ledger of everything rules have sent outward. |
 
@@ -41,7 +41,7 @@ Once the flag is on, a **Rules Engine 2.0** section appears in the sidebar with 
 
 Access is governed by four global role permissions, shared with the original Rules Engine:
 
-* **Rule View** is required to see the sidebar section and everything under it.
+* **Rule View** is required to see the **Triage Engine** group in the sidebar and everything under it.
 * **Rule Add** is required to create a rule, including converting one from the original Rules Engine.
 * **Rule Edit** is required to change, enable, schedule, run, replay, or take ownership of an existing rule.
 * **Rule Delete** is required to delete a rule.

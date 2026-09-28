@@ -8,7 +8,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine 2.0 is a DefectDojo Pro-only feature.</span>
 
-Every outbound side effect a rule produces is one row in the delivery ledger. **Rules Engine 2.0 > Deliveries** lists them.
+Every outbound side effect a rule produces is one row in the delivery ledger. **Act > Triage Engine > Deliveries** lists them.
 
 The row is written **before** any network call happens, and it holds exactly what would be, or was, sent. That is what makes egress auditable rather than a log line you hope somebody kept, and it is why **Simulate** is not a separate code path: a simulated send is the same row with the dispatch step skipped.
 

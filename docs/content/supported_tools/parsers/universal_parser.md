@@ -34,7 +34,7 @@ The Universal Parser configuration is only available in the Pro UI, though you c
 
 ## Step 1: Creating a new Universal Parser
 
-You can create a new Universal Parser by clicking the "New Universal Parser" button in the navigation bar under the "Import" section, or from the link on the "Add Findings" page.
+You can create a new Universal Parser by opening **Connect > Import > Universal Parser** in the sidebar and selecting **New**, or from the link on the "Add Findings" page.
 
 ![image](images/universal_parser.png)
 
@@ -162,7 +162,7 @@ Each vendor may produce very different scan report formats, some of which will m
 You can edit the Test_Type associated with your Universal Parser to change:
 * Whether it is "active" or not. If not, it will not appear as an option in the "Scan Type" drop-down on the "Add Findings" page
 * Whether its findings should be marked "static" or "dynamic"
-* You can tweak the same-tool and cross-tool deduplication hash codes, as well as the reimport hash codes, for your Universal Parser under "Enterprise Settings". By default, only same-tool deduplication and reimport hash codes are populated, with the required values Title, Severity, and Description.
+* You can tweak the same-tool and cross-tool deduplication hash codes, as well as the reimport hash codes, for your Universal Parser under **Settings > Finding Workflow**. By default, only same-tool deduplication and reimport hash codes are populated, with the required values Title, Severity, and Description.
 
 ### Current limitations: editing and deleting a Universal Parser
 
@@ -170,7 +170,7 @@ A Universal Parser's lifecycle is **create-only**. The field-mapping configurati
 
 What you **can** do from the UI:
 
-* **Deactivate** a parser to hide it from the "Scan Type" drop-down on import. Open **Import → Universal Parser** in the sidebar to see all of your Universal Parsers, and toggle "Active" off (or edit the underlying Test_Type and uncheck "active"). Existing Tests already imported under this parser are unaffected.
+* **Deactivate** a parser to hide it from the "Scan Type" drop-down on import. Open **Connect > Import > Universal Parser** in the sidebar to see all of your Universal Parsers, and toggle "Active" off (or edit the underlying Test_Type and uncheck "active"). Existing Tests already imported under this parser are unaffected.
 * **Reactivate** a deactivated parser from the same screen.
 
 The current workaround for both cases is:
