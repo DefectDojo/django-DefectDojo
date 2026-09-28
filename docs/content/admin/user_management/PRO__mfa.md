@@ -31,7 +31,11 @@ Recovery codes are what let you get back in when you lose your phone, so store t
 
 ### Turning MFA off
 
-**Disable MFA** on the MFA Settings page turns it off for your own account. You only need to be logged in — you are not asked for a code to confirm.
+**Disable MFA** on the MFA Settings page turns it off for your own account. You are asked to confirm with a code first: either the current six-digit code from your authenticator app, or one of your unused recovery codes. Being logged in is not enough on its own.
+
+That is deliberate. Removing MFA also deletes your recovery codes, so an attacker who got hold of a logged-in session could otherwise strip the second factor and keep access to the account. Requiring the factor in order to remove it means they need your authenticator, not just your session.
+
+DefectDojo notifies you when MFA is removed from your account, so if it happens without you doing it, you will hear about it.
 
 If your administrator has made MFA mandatory, you will be prompted to set it up again on your next login.
 
@@ -62,16 +66,29 @@ There is no setting to exempt SSO users. If your identity provider already enfor
 Work through these in order:
 
 1. **Use a recovery code.** If the user still has their recovery codes, they enter one instead of an app code at login, then set MFA up again from scratch.
-2. **If they are still logged in somewhere,** they can go to **MFA Settings** and click **Disable MFA** without needing a code, then re-enroll.
-3. **Ask an administrator to clear their MFA.** With server access, an administrator can remove MFA from an account:
+2. **If they still have an unused recovery code,** they can go to **MFA Settings**, click **Disable MFA**, and enter that recovery code to confirm, then re-enroll. Being logged in is not sufficient by itself; disabling MFA requires a code.
+3. **Ask a Superuser to reset their MFA.** A Superuser can clear MFA from another user's account in the UI:
+
+   1. Go to **Users**, and open the user's action menu (either from their row in the list or from their user page).
+   2. Click **Reset MFA**, then confirm.
+
+   This removes the user's authenticator enrollment and all of their recovery codes. The user is notified that an administrator reset their MFA, and can then log in with just their password and enroll again. If MFA is required globally, they are sent to the setup screen on their next login.
+
+   **Reset MFA** is available to Superusers only. It is not offered on your own account: to remove your own MFA, use **Disable MFA** on the MFA Settings page, which asks for a code. If the user has no MFA set up, DefectDojo says so and changes nothing.
+
+   The same action is available in the API as `POST /api/v2/users/{id}/reset_mfa/`, authenticated as a Superuser. The response is `{"removed": true}`, or `{"removed": false}` if the user had no MFA to remove.
+
+4. **Clear MFA from the shell.** With server access, an administrator can also remove MFA from an account with a management command:
 
    ```
    python manage.py remove_mfa --username <username>
    ```
 
-   The command also accepts `--user-id` or `--email` instead of `--username` (exactly one is required; `--email` is case-insensitive). It asks for confirmation before making the change. The user can then log in with just their password and enroll again.
+   The command also accepts `--user-id` or `--email` instead of `--username` (exactly one is required; `--email` is case-insensitive). It asks for confirmation before making the change. This is useful when no Superuser can log in, for example when the only Superuser is the one who lost their device.
 
-   This is a shell command, so it needs access to the DefectDojo container or host. There is no equivalent button in the UI or endpoint in the API. On **DefectDojo Cloud**, contact [DefectDojo Support](mailto:support@defectdojo.com) to have it run.
+### Turning off Reset MFA
+
+**Reset MFA** is on by default. If your policy is that no administrator may remove another user's second factor, a Superuser can turn it off under **Settings \> Feature Flags** by switching off **Administrator MFA Reset**. The action then disappears from the user menu, and the API endpoint returns `403`. Users can still remove their own MFA from the MFA Settings page, and the `remove_mfa` shell command still works.
 
 Creating a replacement account is **not** necessary — clearing MFA preserves the user's existing permissions, history, and assignments.
 

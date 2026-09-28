@@ -41,13 +41,14 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db import OperationalError, transaction
+from django.db import IntegrityError, OperationalError, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.http import FileResponse, HttpResponseRedirect
+from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, reverse
 from django.utils import timezone
@@ -57,7 +58,7 @@ from django.utils.translation import gettext as _
 from kombu import Connection
 
 from dojo.celery import app
-from dojo.db_utils import is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.finding.queries import get_authorized_findings
 from dojo.github.services import (
     add_external_issue_github,
@@ -66,6 +67,7 @@ from dojo.github.services import (
     update_external_issue_github,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
@@ -1120,8 +1122,45 @@ def grade_product(crit, high, med, low):
     return max(health, 5)
 
 
+def grade_debounce_cache_key(product_id):
+    """The cache key that marks a grade recalculation as already queued for this product."""
+    return f"dojo_product_grade_pending:{product_id}"
+
+
+def schedule_product_grade(product_id, *, force_sync=False):
+    """
+    Queue a recalculation of the product's grade, at most once per debounce window.
+
+    Every finding save used to dispatch its own calculate_grade task, so a bulk operation queued one
+    task per finding for a value that only needs computing once per product per burst; on a large
+    import that was thousands of identical tasks competing with the import itself for the worker
+    pool. Here the first change in a window queues one task with a countdown of
+    PRODUCT_GRADE_DEBOUNCE_SECONDS and later changes in the window do nothing. The task drops the
+    marker as it starts, so a change that lands while it runs queues the follow-up it needs, and the
+    marker expires with the window, so a task the broker never delivered cannot block grading for good.
+
+    Only background dispatch is coalesced. A foreground recalculation (``force_sync``, or a user whose
+    profile blocks background execution) runs right away as before: its caller expects the grade when
+    the call returns, and there is no queue for it to flood. With the LocMem cache (no DD_CACHE_URL)
+    the window is per process, which coalesces less but never loses a recalculation.
+    """
+    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+    from dojo.decorators import we_want_async  # noqa: PLC0415 circular import
+
+    if force_sync:
+        return dojo_dispatch_task(calculate_grade, product_id, force_sync=True)
+    window = settings.PRODUCT_GRADE_DEBOUNCE_SECONDS
+    if window <= 0 or not we_want_async(func=calculate_grade):
+        return dojo_dispatch_task(calculate_grade, product_id)
+    if not cache.add(grade_debounce_cache_key(product_id), value=True, timeout=window):
+        logger.debug("grade recalculation for product %s is already queued", product_id)
+        return None
+    return dojo_dispatch_task(calculate_grade, product_id, countdown=window)
+
+
 @app.task
 def calculate_grade(product_id, *args, **kwargs):
+    cache.delete(grade_debounce_cache_key(product_id))
     product = get_object_or_none(Product, id=product_id)
     if not product:
         logger.warning("Product with id %s does not exist, skipping calculate_grade", product_id)
@@ -1177,9 +1216,7 @@ def calculate_grade_internal(product, *args, **kwargs):
 def perform_product_grading(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade:
-        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-        dojo_dispatch_task(calculate_grade, product.id)
+        schedule_product_grade(product.id)
 
 
 def get_celery_worker_status():
@@ -1316,7 +1353,7 @@ class Product_Tab:
     @cached_property
     def _active_endpoints(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return Endpoint.objects.filter(
                 product=self.product,
                 status_endpoint__mitigated=False,
@@ -1336,7 +1373,7 @@ class Product_Tab:
     @cached_property
     def endpoint_hosts_count(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return self._active_endpoints.values("host").distinct().count()
         return self._active_endpoints.values("url__host").distinct().count()
 
@@ -1470,7 +1507,7 @@ def redirect_to_return_url_or_else(request, or_else):
         return redirect(request, return_url.strip())
     if or_else:
         return redirect(request, or_else)
-    messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
+    messages.add_message(request, messages.ERROR, _("Unable to redirect anywhere."), extra_tags="alert-danger")
     return redirect(request, request.get_full_path())
 
 
@@ -1927,6 +1964,24 @@ ASYNC_DELETE_RETRY_DELAY = 5
 ASYNC_DELETE_MAX_CONFLICT_RETRIES = 3
 
 
+def _is_retryable_delete_conflict(exc):
+    """
+    Whether a delete failure is a lost concurrency race worth retrying.
+
+    Two shapes, both caused by another transaction touching the same rows while the
+    cascade delete runs, and both cleared by re-running the resumable body:
+
+    * a deadlock or serialization failure raised mid-cascade (``OperationalError``); and
+    * a foreign-key violation from an import committing a new child row -- e.g. a
+      ``Test_Import`` for a ``Test`` being deleted -- between the cascade step (which
+      cleared the old children) and the top-level ``obj.delete()`` (``IntegrityError``).
+
+    Any other DB error (a statement timeout, a unique violation, a dropped connection) is
+    not a lost race, so it is surfaced rather than retried.
+    """
+    return is_transient_db_conflict(exc) or is_foreign_key_conflict(exc)
+
+
 @app.task(bind=True)
 def async_delete_task(self, model_label, pk, **kwargs):
     """
@@ -1937,7 +1992,9 @@ def async_delete_task(self, model_label, pk, **kwargs):
     against each other. This retry is the backstop for the conflicts that ordering
     cannot rule out -- a delete overlapping an import, say -- because the aborted
     transaction's work is not wrong, only rolled back, and failing here would leave the
-    object partly deleted.
+    object partly deleted. That overlap has two shapes: a deadlock/serialization failure,
+    and a foreign-key violation when the import commits a new child row referencing a row
+    being deleted (see ``_is_retryable_delete_conflict``); both are retried the same way.
 
     Only applies to background execution: under eager execution Celery re-runs the body
     inline and ignores ``countdown``, which would retry into an unfinished conflicting
@@ -1949,8 +2006,8 @@ def async_delete_task(self, model_label, pk, **kwargs):
     retries = self.request.retries
     try:
         _async_delete_object(model_label, pk, is_retry=retries > 0)
-    except OperationalError as exc:
-        if not is_transient_db_conflict(exc):
+    except (OperationalError, IntegrityError) as exc:
+        if not _is_retryable_delete_conflict(exc):
             raise
         if self.request.is_eager:
             # Verified against celery 5.6.3: under apply() retry re-invokes the body
@@ -2020,7 +2077,12 @@ def log_user_login(sender, request, user, **kwargs):
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
+    # user can be None: Django's auth.logout() sends user_logged_out with user=None whenever the
+    # request has no authenticated user. This happens on an IdP-initiated SAML single-logout
+    # (POST /saml2/ls/) whose Django session has already expired -- djangosaml2 still calls
+    # auth.logout(request), so the signal fires with no user. Guard so logout cannot 500.
+    username = user.username if user is not None else "<anonymous>"
+    logger.info("logout user: %s via ip: %s", username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
@@ -2257,6 +2319,13 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
     # Clean the title by removing some problematic characters
     cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
+    # The database may reference a file that is no longer present on disk (e.g. media
+    # that was never persisted or was removed out of band). Reading file_object.file.size
+    # in that case raises a low-level FileNotFoundError that surfaces as an HTTP 500.
+    # Treat a missing file as a 404 so the caller gets a clean "not found" response.
+    if not Path(file_path).is_file():
+        msg = f"File {cleaned_file_name} could not be found on disk"
+        raise Http404(msg)
 
     return generate_file_response_from_file_path(
         file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
@@ -2269,11 +2338,19 @@ def generate_file_response_from_file_path(
     """Serve an local file in a uniformed way."""
     # Determine the file path
     path = Path(file_path)
-    file_path_without_extension = path.parent / path.stem
+    # Guard against a missing file on disk so callers that pass a raw path (e.g. the
+    # engagement threat model download) also get a clean 404 instead of a low-level
+    # FileNotFoundError bubbling up as an HTTP 500.
+    if not path.is_file():
+        msg = f"File {path.name} could not be found on disk"
+        raise Http404(msg)
     file_extension = path.suffix
-    # Determine the file name if not supplied
+    # Determine the file name if not supplied. path.stem is the final path component
+    # without its extension (the previous Path.rsplit call raised AttributeError, so this
+    # branch — reached e.g. by the engagement threat-model download, which passes no
+    # file_name — always 500'd).
     if file_name is None:
-        file_name = file_path_without_extension.rsplit("/")[-1]
+        file_name = path.stem
     # Determine the file size if not supplied
     if file_size is None:
         file_size = pathlib.Path(file_path).stat().st_size

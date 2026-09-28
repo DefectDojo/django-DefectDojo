@@ -31,6 +31,7 @@ class ApiRiskAcceptanceFilter(DojoFilter):
             "expiration_date_handled": ["exact", "gt", "lt", "gte", "lte"],
             "reactivate_expired": ["exact"],
             "restart_sla_expired": ["exact"],
+            "restore_verified_expired": ["exact"],
             "notes": ["exact"],
             "created": ["exact", "gt", "lt", "gte", "lte"],
             "updated": ["exact", "gt", "lt", "gte", "lte"],

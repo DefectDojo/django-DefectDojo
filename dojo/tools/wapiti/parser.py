@@ -3,8 +3,8 @@ import logging
 import re
 
 from defusedxml.ElementTree import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -91,7 +91,7 @@ class WapitiParser:
                 if cwes:
                     finding.unsaved_cwes = cwes
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [LocationData.url(url=url)]
                 else:
                     # TODO: Delete this after the move to Locations
@@ -108,7 +108,7 @@ class WapitiParser:
                 # check if dupes are present.
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         # TODO: Delete this after the move to Locations

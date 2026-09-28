@@ -1,6 +1,8 @@
 ---
 title: "Qualys Scan"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/qualys/"
 ---
 Qualys output files can be imported in API XML format. Qualys output
 files can be imported in WebGUI XML format.
@@ -21,7 +23,7 @@ A CSV formatted Qualys Scan Report can also be used. Ensure the following values
 Sample Qualys Scan scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/qualys).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

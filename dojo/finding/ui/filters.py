@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django import forms
-from django.conf import settings
 from django.db.models import Q
 from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
@@ -47,6 +46,7 @@ from dojo.finding.queries import (
 )
 from dojo.finding_group.queries import get_authorized_finding_groups_for_queryset
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
@@ -64,6 +64,7 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.product.queries import get_authorized_products
+from dojo.product_attributes.choices import lifecycle_value_choices
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
@@ -107,9 +108,10 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
     test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
+        field_name="test__engagement__product__lifecycle__value",
+        choices=lifecycle_value_choices,
         label=labels.ASSET_LIFECYCLE_LABEL)
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         location_status = MultipleChoiceFilter(
             field_name="locations__status",
             choices=FindingLocationStatus.choices,
@@ -902,7 +904,7 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label=labels.ORG_FILTERS_LABEL)
-    test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label=labels.ASSET_LIFECYCLE_LABEL)
+    test__engagement__product__lifecycle = MultipleChoiceFilter(field_name="test__engagement__product__lifecycle__value", choices=lifecycle_value_choices, label=labels.ASSET_LIFECYCLE_LABEL)
     test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
 

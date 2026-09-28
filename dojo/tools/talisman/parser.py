@@ -1,8 +1,7 @@
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -63,7 +62,7 @@ class TalismanParser:
                         severity=severity,
                     )
 
-                    if settings.V3_FEATURE_LOCATIONS and file_path:
+                    if locations_enabled() and file_path:
                         finding.unsaved_locations.append(
                             LocationData.code(file_path=file_path),
                         )

@@ -2,8 +2,7 @@ import csv
 import hashlib
 import io
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -111,7 +110,7 @@ class KiuwanParser:
                 if cwe.isdigit():
                     finding.cwe = int(cwe)
 
-            if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+            if locations_enabled() and finding.file_path:
                 line = findingdict["line_number"]
                 line = int(line) if line is not None and str(line).isdigit() else None
                 finding.unsaved_locations.append(

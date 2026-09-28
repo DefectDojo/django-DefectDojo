@@ -1,9 +1,18 @@
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 
-from dojo.authorization.serializer_guards import AuthorizedUsersMemberGuardMixin
-from dojo.models import DojoMeta, Product, Product_API_Scan_Configuration
-from dojo.tool_config.queries import get_authorized_tool_configurations
+from dojo.authorization.serializer_guards import (
+    ActiveUserContactGuardMixin,
+    AuthorizedUsersMemberGuardMixin,
+    ToolConfigurationUseGuardMixin,
+)
+from dojo.models import (
+    DojoMeta,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Lifecycle,
+    Product_Origin,
+    Product_Platform,
+)
 
 
 class ProductMetaSerializer(serializers.ModelSerializer):
@@ -12,43 +21,23 @@ class ProductMetaSerializer(serializers.ModelSerializer):
         fields = ("name", "value")
 
 
-class ProductAPIScanConfigurationSerializer(serializers.ModelSerializer):
+class ProductAPIScanConfigurationSerializer(ToolConfigurationUseGuardMixin, serializers.ModelSerializer):
     class Meta:
         model = Product_API_Scan_Configuration
         fields = "__all__"
 
-    def validate(self, data):
-        self._validate_tool_configuration_use(data)
-        return data
 
-    def _validate_tool_configuration_use(self, data):
-        """
-        Selecting a ``tool_configuration`` lets an import run authenticated
-        requests with the credential stored on it, so it is gated by the same
-        ``view_tool_configuration`` permission that guards the tool-configuration
-        views -- not just the product permission this endpoint already checks.
-
-        No-ops when the field is absent (replay-safe on PATCH), mirroring
-        dojo.authorization.api_permissions.check_update_permission.
-        """
-        if "tool_configuration" not in data:
-            return
-        tool_configuration = data.get("tool_configuration")
-        request = self.context.get("request")
-        request_user = getattr(request, "user", None)
-        if tool_configuration is not None and not get_authorized_tool_configurations(request_user).filter(pk=tool_configuration.pk).exists():
-            msg = "You do not have permission to use this tool configuration."
-            raise PermissionDenied(msg)
-
-
-class ProductSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
+class ProductSerializer(ActiveUserContactGuardMixin, AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
     business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)
-    platform = serializers.ChoiceField(choices=Product.PLATFORM_CHOICES, allow_blank=True, allow_null=True, required=False)
-    lifecycle = serializers.ChoiceField(choices=Product.LIFECYCLE_CHOICES, allow_blank=True, allow_null=True, required=False)
-    origin = serializers.ChoiceField(choices=Product.ORIGIN_CHOICES, allow_blank=True, allow_null=True, required=False)
+    # platform/lifecycle/origin are FKs to editable lookup tables. They are exposed over
+    # the API by their stable ``value`` string (SlugRelatedField), so existing clients
+    # and imports keep sending/receiving the same strings as before.
+    platform = serializers.SlugRelatedField(slug_field="value", queryset=Product_Platform.objects.all(), allow_null=True, required=False)
+    lifecycle = serializers.SlugRelatedField(slug_field="value", queryset=Product_Lifecycle.objects.all(), allow_null=True, required=False)
+    origin = serializers.SlugRelatedField(slug_field="value", queryset=Product_Origin.objects.all(), allow_null=True, required=False)
 
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 

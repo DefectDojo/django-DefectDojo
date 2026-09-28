@@ -48,3 +48,11 @@ class TestKubeHunterParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             self.validate_locations(findings)
+
+    def test_kubehunter_parser_without_vid(self):
+        """Verify the parser does not crash when vid is absent (vuln_id_from_tool is None)."""
+        with (get_unit_tests_scans_path("kubehunter") / "findings_without_vid.json").open(encoding="utf-8") as testfile:
+            parser = KubeHunterParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            self.assertIsNone(findings[0].vuln_id_from_tool)

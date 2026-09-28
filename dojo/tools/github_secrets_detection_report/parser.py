@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -139,7 +138,7 @@ class GithubSecretsDetectionReportParser:
             if first_location:
                 finding.file_path = first_location.get("path")
                 finding.line = first_location.get("start_line")
-                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                if locations_enabled() and finding.file_path:
                     finding.unsaved_locations.append(
                         LocationData.code(
                             file_path=finding.file_path,

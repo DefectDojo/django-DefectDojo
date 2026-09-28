@@ -1,0 +1,66 @@
+{
+  "issues": [
+    {
+      "id": 1001,
+      "createdAt": "2026-05-11T08:14:02.000Z",
+      "type": "vulnerability",
+      "vulnId": "FOSSA-2026-0001",
+      "title": "Prototype pollution in generic-lib",
+      "cve": "CVE-2000-0001",
+      "cvss": 9.8,
+      "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "severity": "critical",
+      "details": "A crafted payload can pollute Object.prototype and lead to remote code execution.",
+      "cveStatus": "PUBLISHED",
+      "published": "2026-05-01",
+      "cwes": [
+        "CWE-1321",
+        "CWE-20"
+      ],
+      "cpes": [
+        "cpe:2.3:a:example:generic-lib:1.2.3:*:*:*:*:*:*:*"
+      ],
+      "affectedVersionRanges": [
+        "<1.2.4"
+      ],
+      "patchedVersionRanges": [
+        ">=1.2.4"
+      ],
+      "references": [
+        {
+          "url": "https://example.com/advisories/cve-2000-0001",
+          "title": "Advisory"
+        },
+        "https://example.com/commit/abcdef1"
+      ],
+      "remediation": {
+        "partialFix": "1.2.4",
+        "partialFixDistance": "PATCH",
+        "completeFix": "2.0.0",
+        "completeFixDistance": "MAJOR"
+      },
+      "license": "",
+      "source": {
+        "id": "npm+generic-lib$1.2.3",
+        "name": "generic-lib",
+        "url": "https://example.com/packages/generic-lib",
+        "version": "1.2.3",
+        "packageManager": "npm"
+      },
+      "depths": {
+        "direct": 1,
+        "deep": 3
+      },
+      "statuses": {
+        "active": 1,
+        "ignored": 0
+      },
+      "projects": [
+        {
+          "id": "custom+1/generic-app",
+          "title": "generic-app"
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ from cvss import CVSS3
 from defusedxml import ElementTree
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.qualys import csv_parser
@@ -354,7 +355,7 @@ def parse_finding(host, tree):
             finding.cvssv3_score = temp.get("CVSS_value")
         finding.verified = True
         # manage endpoint/location
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             location = LocationData.url(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url(host=issue_row["ip_address"])
             finding.unsaved_locations = [location]
         else:

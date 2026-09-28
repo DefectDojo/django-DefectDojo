@@ -2,8 +2,8 @@ import json
 import re
 
 from cvss import CVSS3
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -211,7 +211,7 @@ def get_item_set(vulnerability):
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
 
-        if settings.V3_FEATURE_LOCATIONS and (dependency_info := get_dependency_info(component_name_with_version)):
+        if locations_enabled() and (dependency_info := get_dependency_info(component_name_with_version)):
             component_type, component_name, component_version = dependency_info
             purl_type = JFROG_XRAY_TYPE_TO_PURL.get(component_type.lower())
             if purl_type and component_name:

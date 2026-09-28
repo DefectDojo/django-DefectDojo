@@ -1,8 +1,7 @@
 import hashlib
 from dataclasses import dataclass
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -46,7 +45,7 @@ def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
     """Base setup and init for findings and auxiliary data"""
     finding = Finding(test=test, dynamic_finding=True, static_finding=False, severity="Info", nb_occurences=1, cwe=None)
     finding.unsaved_vulnerability_ids = []
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         finding._location_builder = _MutableLocationParts()
     else:
         # TODO: Delete this after the move to Locations
@@ -60,14 +59,14 @@ def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
 def get_location(finding: Finding):
     """Get the mutable location object for building up location data incrementally."""
     # TODO: Delete this after the move to Locations
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         return finding.unsaved_endpoints[0]
     return finding._location_builder
 
 
 def finalize_location(finding: Finding):
     """Convert the mutable location builder to a frozen LocationData and store in unsaved_locations."""
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         finding.unsaved_locations.append(finding._location_builder.to_location_data())
 
 
@@ -138,7 +137,7 @@ def deduplicate(dupes: dict[str, Finding], finding: Finding):
                 org.steps_to_reproduce += tmp
 
         # combine identical findings on different hosts into one with multiple hosts
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             location = finding.unsaved_locations[0]
             if location not in org.unsaved_locations:
                 org.unsaved_locations += finding.unsaved_locations

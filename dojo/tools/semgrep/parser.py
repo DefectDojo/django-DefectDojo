@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -91,7 +90,7 @@ class SemgrepParser:
                     nb_occurences=1,
                 )
 
-                if settings.V3_FEATURE_LOCATIONS and item["path"]:
+                if locations_enabled() and item["path"]:
                     finding.unsaved_locations.append(
                         LocationData.code(file_path=item["path"], line=item["start"]["line"]),
                     )

@@ -1,0 +1,23 @@
+{
+  "status": 200,
+  "body": [
+    {
+      "id": 700005,
+      "title": "A closed vulnerability",
+      "type": "sqli",
+      "status": "closed",
+      "threat": 5,
+      "domain": "api.example.com",
+      "path": "/v1/old"
+    },
+    {
+      "id": 700006,
+      "title": "A false positive",
+      "type": "xss",
+      "status": "falsepositive",
+      "threat": 4,
+      "domain": "api.example.com",
+      "path": "/v1/search"
+    }
+  ]
+}

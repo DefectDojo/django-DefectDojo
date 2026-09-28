@@ -13,6 +13,7 @@ from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from jira import JIRA
 from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
@@ -20,6 +21,7 @@ from requests.auth import HTTPBasicAuth
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
+from dojo.location.feature import locations_enabled
 from dojo.models import (
     Engagement,
     Finding,
@@ -760,7 +762,7 @@ def jira_description(obj, **kwargs):
     elif isinstance(obj, Finding_Group):
         kwargs["finding_group"] = obj
 
-    kwargs["V3_FEATURE_LOCATIONS"] = settings.V3_FEATURE_LOCATIONS
+    kwargs["V3_FEATURE_LOCATIONS"] = locations_enabled()
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
     max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
@@ -793,7 +795,7 @@ def jira_priority(obj):
 
 def jira_environment(obj):
     if isinstance(obj, Finding):
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             # TODO: Delete this after the move to Locations
             return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
         return "\n".join([str(location_ref.location) for location_ref in obj.locations.all()])
@@ -2003,7 +2005,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
-                                                "JIRA Project config stored successfully.",
+                                                _("JIRA Project config stored successfully."),
                                                 extra_tags="alert-success")
                         error = False
                         logger.debug("stored JIRA_Project successfully")
@@ -2017,7 +2019,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
         if error:
             messages.add_message(request,
                                     messages.ERROR,
-                                    "JIRA Project config not stored due to errors.",
+                                    _("JIRA Project config not stored due to errors."),
                                     extra_tags="alert-danger")
     return not error, jform
 
@@ -2071,7 +2073,7 @@ def process_jira_epic_form(request, engagement=None):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Push to JIRA for Epic queued succesfully, check alerts on the top right for errors",
+                        _("Push to JIRA for Epic queued succesfully, check alerts on the top right for errors"),
                         extra_tags="alert-success")
                 else:
                     error = True
@@ -2184,7 +2186,7 @@ def process_resolution_from_jira(
             finding.mitigated = jira_now
             finding.is_mitigated = True
             finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 for location_ref in finding.locations.all():
                     location_ref.location.disassociate_from_finding(finding)
             else:

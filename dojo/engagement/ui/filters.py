@@ -21,6 +21,7 @@ from dojo.models import (
     Test,
     Test_Type,
 )
+from dojo.product_attributes.choices import lifecycle_value_choices
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.user.queries import get_authorized_users
 
@@ -39,7 +40,8 @@ class EngagementDirectFilterHelper(FilterSet):
     target_start = DateRangeFilter()
     target_end = DateRangeFilter()
     test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
+        field_name="test__engagement__product__lifecycle__value",
+        choices=lifecycle_value_choices,
         label=labels.ASSET_LIFECYCLE_LABEL,
         null_label="Empty")
     o = OrderingFilter(
@@ -123,7 +125,8 @@ class EngagementFilterHelper(FilterSet):
     engagement__version = CharFilter(field_name="engagement__version", lookup_expr="icontains", label="Engagement version")
     engagement__test__version = CharFilter(field_name="engagement__test__version", lookup_expr="icontains", label="Test version")
     engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
+        field_name="engagement__product__lifecycle__value",
+        choices=lifecycle_value_choices,
         label=labels.ASSET_LIFECYCLE_LABEL,
         null_label="Empty")
     engagement__status = MultipleChoiceFilter(

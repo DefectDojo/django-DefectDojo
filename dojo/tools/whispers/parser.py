@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -116,7 +115,7 @@ class WhispersParser:
                 dynamic_finding=False,
                 test=test,
             )
-            if settings.V3_FEATURE_LOCATIONS and vuln.get("file"):
+            if locations_enabled() and vuln.get("file"):
                 finding.unsaved_locations.append(
                     LocationData.code(file_path=vuln.get("file"), line=int(vuln.get("line"))),
                 )

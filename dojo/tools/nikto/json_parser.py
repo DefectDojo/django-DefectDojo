@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -40,7 +39,7 @@ class NiktoJSONParser:
                 finding.description += "\n*This finding is marked as medium as there is a link to OSVDB*"
                 finding.severity = "Medium"
             # build the endpoint/location
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 location = LocationData.url(
                     host=host,
                     port=port,
@@ -60,7 +59,7 @@ class NiktoJSONParser:
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.description += "\n-----\n" + finding.description
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations

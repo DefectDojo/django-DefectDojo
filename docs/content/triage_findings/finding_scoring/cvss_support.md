@@ -2,6 +2,8 @@
 title: "CVSS Version Support"
 description: "Which CVSS versions DefectDojo stores, displays, and accepts on Findings"
 weight: 1
+aliases:
+  - "/triage_findings/cvss_support/"
 ---
 
 DefectDojo supports CVSS metadata on Findings, including the CVSS 4.0 standard.  This page describes which CVSS versions are stored end-to-end, where you can enter or view them, and what to expect from parser-side coverage.

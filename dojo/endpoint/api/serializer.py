@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError as RestFrameworkValidation
 from dojo.endpoint.models import Endpoint, Endpoint_Params, Endpoint_Status
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.importers.auto_create_context import AutoCreateContextManager
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.models import Product, get_current_date
 from dojo.utils import is_scan_file_too_large
@@ -220,7 +221,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
         try:
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 endpoint_meta_import(
                     file,
                     product,

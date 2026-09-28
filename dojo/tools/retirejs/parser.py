@@ -1,8 +1,7 @@
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -49,7 +48,7 @@ class RetireJsParser:
                         item.component_version = component_version
                         item.file_path = file_path
 
-                        if settings.V3_FEATURE_LOCATIONS and component_name and component_version:
+                        if locations_enabled() and component_name and component_version:
                             item.unsaved_locations.append(
                                 LocationData.dependency(purl_type="npm", name=component_name, version=component_version, file_path=file_path),
                             )
@@ -61,7 +60,7 @@ class RetireJsParser:
                             ).encode(), usedforsecurity=False,
                         ).hexdigest()
                         items[unique_key] = item
-                elif settings.V3_FEATURE_LOCATIONS and component_name and component_version:
+                elif locations_enabled() and component_name and component_version:
                     test.unsaved_metadata.append(
                         LocationData.dependency(purl_type="npm", name=component_name, version=component_version,
                                                 file_path=file_path),

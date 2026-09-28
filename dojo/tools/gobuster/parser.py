@@ -1,7 +1,6 @@
 import re
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -91,7 +90,7 @@ class GobusterParser:
             # Finding.__init__ creates unsaved_locations OR unsaved_endpoints depending on
             # V3_FEATURE_LOCATIONS, and only the matching importer reads it, so the location is
             # built and attached the way the nmap parser does it.
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(url=redirect.strip())]
             else:
                 # TODO: Delete this after the move to Locations

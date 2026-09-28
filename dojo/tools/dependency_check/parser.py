@@ -6,9 +6,9 @@ import re
 import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
-from django.conf import settings
 from packageurl import PackageURL
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -462,7 +462,7 @@ class DependencyCheckParser:
 
         finding.unsaved_tags = tags
 
-        if settings.V3_FEATURE_LOCATIONS and component_purl:
+        if locations_enabled() and component_purl:
             finding.unsaved_locations.append(
                 LocationData.dependency(purl=component_purl, file_path=dependency_filename),
             )
@@ -543,7 +543,7 @@ class DependencyCheckParser:
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
-                elif settings.V3_FEATURE_LOCATIONS:
+                elif locations_enabled():
                     # Collect product-level dependency locations
                     _, _, component_purl = self.get_component_name_and_version_from_dependency(
                         dependency,

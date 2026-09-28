@@ -1,0 +1,89 @@
+{
+  "status": 200,
+  "body": [
+    {
+      "id": 700001,
+      "wid": "wid-0001",
+      "title": "SQL injection in the reports endpoint",
+      "type": "sqli",
+      "template": "sqli_template",
+      "status": "active",
+      "threat": 5,
+      "clientid": 4321,
+      "method": "POST",
+      "domain": "api.example.com",
+      "path": "/v1/reports",
+      "parameter": "post_body|json_doc|hash|filter",
+      "description": "A request parameter reaches a database query. Related to CVE-2000-0002 and cve-2000-0002.",
+      "additional": "Validated against the running service. See CVE-2000-0001.",
+      "exploit_example": "POST /v1/reports with filter=1' OR '1'='1",
+      "detection_method": "active_verification",
+      "validated": true,
+      "validate_time": 1719792000,
+      "invalidate_time": 0,
+      "filter": [{"method": "POST", "domain": "api.example.com", "path": "/v1/reports", "parameter": "filter"}]
+    },
+    {
+      "id": 700002,
+      "title": "Weak JWT signature algorithm",
+      "type": "weak_jwt",
+      "status": "active",
+      "threat": "high",
+      "method": "GET",
+      "domain": "api.example.com",
+      "path": "/v1/profile",
+      "description": "The service accepts tokens signed with a weak algorithm.",
+      "exploit_example": "Forge a token using the none algorithm.",
+      "validate_time": 1717200000
+    },
+    {
+      "id": 0,
+      "wid": "wid-0003",
+      "title": "Information disclosure in an error page",
+      "type": "infoleak",
+      "status": "active",
+      "threat": 3,
+      "domain": "shop.example.com",
+      "path": "not-a-path",
+      "description": "A stack trace was returned to the client.",
+      "validate_time": 0
+    },
+    {
+      "id": 0,
+      "wid": "",
+      "type": "",
+      "title": "",
+      "status": "active",
+      "threat": null,
+      "domain": "legacy.example.com",
+      "path": "/old"
+    },
+    {
+      "id": 700005,
+      "title": "A closed vulnerability",
+      "type": "sqli",
+      "status": "closed",
+      "threat": 5,
+      "domain": "api.example.com",
+      "path": "/v1/old"
+    },
+    {
+      "id": 700006,
+      "title": "A false positive",
+      "type": "xss",
+      "status": "falsepositive",
+      "threat": 4,
+      "domain": "api.example.com",
+      "path": "/v1/search"
+    },
+    {
+      "id": 700007,
+      "title": "An unrecognised threat label",
+      "type": "misconfig",
+      "status": "active",
+      "threat": "severe",
+      "domain": "api.example.com",
+      "path": "/v1/config"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.labels import get_labels
 from dojo.object.models import Objects_Product
@@ -71,7 +72,7 @@ def edit_object(request, pid, ttid):
 
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Tracked File Successfully Updated.",
+                                 _("Tracked File Successfully Updated."),
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_objects", args=(pid,)))
     else:
@@ -97,7 +98,7 @@ def delete_object(request, pid, ttid):
         object_prod.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             "Tracked Files Deleted.",
+                             _("Tracked Files Deleted."),
                              extra_tags="alert-success")
         return HttpResponseRedirect(reverse("view_objects", args=(pid,)))
     tform = DeleteObjectsSettingsForm(instance=object_prod)

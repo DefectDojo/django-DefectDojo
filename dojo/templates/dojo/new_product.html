@@ -32,6 +32,10 @@
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {
+            $('#id_regulations').select2({
+                placeholder: 'Select applicable regulations',
+                width: '100%'
+            });
             $("textarea").each(function (index, elem) {
                 if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");

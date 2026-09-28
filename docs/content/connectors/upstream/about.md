@@ -114,6 +114,10 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **OpenVAS / Greenbone**
 * **Orca Security**
 * **Ostorlab**
+* **Palo Alto Cortex Cloud**
+* **Palo Alto Cortex XDR**
+* **Palo Alto Cortex XSIAM**
+* **Palo Alto Cortex XSOAR**
 * **Parasoft DTP**
 * **Picus Security**
 * **PingCastle**
@@ -125,6 +129,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Qwiet AI**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **Red Hat Satellite**
 * **runZero**
 * **Scantist**
@@ -154,7 +159,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Zimperium**
 * **Zora**
 
-For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
+For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../../toolreference/upstream/) reference.
 
 Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Asset and Organization hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
@@ -197,6 +202,8 @@ Once your **Record** mappings are set up, DefectDojo will start importing scan d
 
 When you're ready to add more tools to DefectDojo, you can easily rearrange your import mappings to something else. Multiple tools can be set up to import vulnerabilities to the same destination, and you can always reorganize your setup for a better fit without losing any work.
 
+Each Connector also decides how your tool's data becomes a DefectDojo Finding — which value becomes the Title, which becomes the Description, and so on. If you need to change one of those decisions, see [Connector Field Mappings](../connector_field_mappings/).
+
 ## My Connector isn't supported
 
 ### Request a connector from the UI (DefectDojo Pro Cloud)
@@ -219,3 +226,4 @@ Even without a connector, DefectDojo can still handle manual import for a wide r
 * Check out the **Upstream Connectors** page by switching to DefectDojo's **Pro UI** and opening **Connectors \> Upstream Connectors** under the **Import** header.
 * Follow our guide to [create your first Upstream Connector](../add_edit/).
 * Check out the process of [Running Operations](../manage_operations/) with your Connected security tools and see how they can be configured to import data.
+* Adjust how your tool's data maps onto DefectDojo fields with [Connector Field Mappings](../connector_field_mappings/).

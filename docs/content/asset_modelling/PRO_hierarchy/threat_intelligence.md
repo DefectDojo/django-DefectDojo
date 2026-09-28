@@ -25,7 +25,11 @@ tracking. When there's exploit evidence, the finding shows a **Threat Intelligen
 Beyond the card, the intelligence is a working surface across the app:
 
 * an **Exploit Maturity column** on the findings list — sortable and filterable
-  (for example, "Weaponized or Active only")
+  (for example, "Weaponized or Active only"). Exploit Maturity is normally set by this
+  feed, but it can also be **set by hand** in the Threat Intelligence panel of the Add and
+  Edit Finding forms — useful when no feed covers a finding (for example, one with no CVE).
+  On a finding that does reference an enriched CVE, the next sync overwrites the hand-set
+  value; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
 * an **"Urgent & Actively Exploited"** tile on the Priority Layout dashboard, counting
   active Urgent-risk findings with in-the-wild exploitation — clicking through opens the
   exact filtered findings list
@@ -74,6 +78,17 @@ The floor only ever raises — it never moves a finding down, and a finding that
 scores higher on its own is untouched. Because it applies to Priority, the Risk band and
 Risk score follow from it automatically, so every list, filter, chart and SLA calculation
 sees the same consistent number.
+
+Two boundaries worth knowing when you map an internal policy onto the floor:
+
+* The floor is driven by the finding's **exploit-maturity badge**: it applies exactly to
+  findings whose maturity shows **Active in the wild**, and to no others — lower rungs of
+  the evidence ladder (weaponized exploits, PoCs, detection templates) raise the weighted
+  score but never trigger the floor. The Exploit Maturity column on the findings list
+  therefore shows you, at any time, precisely the set of findings the floor governs.
+* The floor responds to exploitation *evidence*, not to probability scores. An EPSS score
+  by itself — however high — does not trigger the floor; EPSS contributes to the weighted
+  Priority calculation instead.
 
 ## Findings without a CVE
 

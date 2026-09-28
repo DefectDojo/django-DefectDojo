@@ -52,7 +52,7 @@ class TestProductAnnouncementSessionBanner(SimpleTestCase):
         ErrorPageProductAnnouncement(request=request)
         message = request.session["_product_banners"][0]["message"]
         self.assertIn("cloud.defectdojo.com", message)
-        self.assertIn("Try today for free", message)
+        self.assertIn("Get Pro from $100/mo", message)
 
     def test_session_error_is_swallowed(self):
         request = HttpRequest()

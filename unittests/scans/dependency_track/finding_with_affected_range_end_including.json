@@ -1,0 +1,47 @@
+{
+    "meta": {
+        "application": "Dependency-Track",
+        "version": "4.14.0",
+        "timestamp": "2026-01-01T00:00:00Z"
+    },
+    "findings": [
+        {
+            "component": {
+                "name": "example-lib",
+                "project": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4",
+                "purl": "pkg:maven/com.example/example-lib@1.5.0",
+                "uuid": "c8a65fcd-dbf4-41eb-b1ec-55e67c91b22b",
+                "version": "1.5.0"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-01-01 00:00:00.000"
+            },
+            "vulnerability": {
+                "uuid": "f8469ce4-019a-4482-8510-624dcf65f005",
+                "source": "NVD",
+                "vulnId": "CVE-2026-0001",
+                "severity": "HIGH",
+                "description": "Example vulnerability affecting example-lib up to and including 1.5.0.",
+                "aliases": [],
+                "affectedVersions": [
+                    {
+                        "identityType": "PURL",
+                        "identity": "pkg:maven/com.example/example-lib",
+                        "versionType": "RANGE",
+                        "versionStartIncluding": "1.0.0",
+                        "versionEndIncluding": "1.5.0",
+                        "uuid": "0f0dcf3b-0f38-4d3b-8f6c-9c0d5f0a1b2c"
+                    }
+                ]
+            },
+            "matrix": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4:c8a65fcd-dbf4-41eb-b1ec-55e67c91b22b:f8469ce4-019a-4482-8510-624dcf65f005"
+        }
+    ],
+    "project": {
+        "name": "test-app",
+        "uuid": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4",
+        "version": "1.0.0"
+    },
+    "version": "1.6"
+}

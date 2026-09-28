@@ -1,0 +1,42 @@
+{
+  "kind": "ClusterReport",
+  "apiVersion": "openreports.io/v1alpha1",
+  "metadata": {
+    "name": "merged"
+  },
+  "source": "",
+  "summary": {
+    "pass": 0,
+    "fail": 1,
+    "warn": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "results": [
+    {
+      "source": "kyverno",
+      "policy": "require-pod-hardening",
+      "rule": "require-run-as-non-root",
+      "category": "Pod Security",
+      "severity": "high",
+      "timestamp": {
+        "seconds": 1786375865,
+        "nanos": 0
+      },
+      "result": "fail",
+      "scored": true,
+      "resources": [
+        {
+          "kind": "Pod",
+          "namespace": "sample-ns",
+          "name": "sample-app",
+          "apiVersion": "v1"
+        }
+      ],
+      "message": "validation error: Containers must set runAsNonRoot to true. rule require-run-as-non-root failed at path /spec/containers/0/securityContext/",
+      "properties": {
+        "process": "background scan"
+      }
+    }
+  ]
+}

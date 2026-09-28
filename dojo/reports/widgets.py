@@ -3,7 +3,6 @@ import json
 from collections import OrderedDict
 
 from django import forms
-from django.conf import settings
 from django.forms import Widget
 from django.forms.utils import flatatt
 from django.http import QueryDict
@@ -18,6 +17,7 @@ from dojo.finding.ui.filters import (
     ReportFindingFilterWithoutObjectLookups,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Endpoint, Finding
@@ -370,7 +370,7 @@ class EndpointList(Widget):
                                  "request": self.request,
                                  "title": self.title,
                                  "extra_help": self.extra_help,
-                                 "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
+                                 "V3_FEATURE_LOCATIONS": locations_enabled(),
                                  })
         return mark_safe(html)
 
@@ -396,7 +396,7 @@ def report_widget_factory(
 
         if list(widget.keys())[0] == "endpoint-list":
             d = convert_to_querydict(widget.get(list(widget.keys())[0]))
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
                 endpoints = URLFilter(d, queryset=endpoints, user=request.user)
             else:

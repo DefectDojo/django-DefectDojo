@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -66,7 +65,7 @@ def get_item(vulnerability, test):
 
     finding.description = finding.description.strip()
 
-    if settings.V3_FEATURE_LOCATIONS and vulnerability["file"]:
+    if locations_enabled() and vulnerability["file"]:
         finding.unsaved_locations.append(
             LocationData.code(file_path=vulnerability["file"], line=vulnerability["line"]),
         )

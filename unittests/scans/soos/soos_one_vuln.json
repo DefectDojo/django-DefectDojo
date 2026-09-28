@@ -1,0 +1,26 @@
+{
+  "entries": [
+    {
+      "id": "issue-0001",
+      "title": "Prototype pollution in the example utility library",
+      "severity": "Critical",
+      "description": "A crafted key allows an attacker to modify the object prototype.",
+      "cve": "CVE-2000-0001",
+      "cwe": "CWE-1321",
+      "packageName": "example-utils",
+      "packageVersion": "4.17.20",
+      "fixedVersion": "4.17.21",
+      "remediation": "",
+      "fileName": "package-lock.json",
+      "line": 0,
+      "url": "",
+      "cvssScore": 9.8,
+      "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "references": "https://example.com/advisories/CVE-2000-0001",
+      "status": "Open",
+      "scanType": "sca",
+      "firstDetected": "2024-06-02T10:00:00Z"
+    }
+  ],
+  "total": 1
+}

@@ -2,8 +2,7 @@ import csv
 import hashlib
 import io
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -57,7 +56,7 @@ class PmdParser:
             finding.impact = "No impact provided"
             finding.mitigation = "No mitigation provided"
 
-            if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+            if locations_enabled() and finding.file_path:
                 line = row["Line"]
                 line = int(line) if line is not None and str(line).isdigit() else None
                 finding.unsaved_locations.append(

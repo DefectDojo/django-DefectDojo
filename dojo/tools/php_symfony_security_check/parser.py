@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -89,7 +88,7 @@ def get_item(dependency_name, dependency_version, advisory, test):
     if advisory["cve"]:
         finding.unsaved_vulnerability_ids = [advisory["cve"]]
 
-    if settings.V3_FEATURE_LOCATIONS and dependency_name:
+    if locations_enabled() and dependency_name:
         purl_string = f"pkg:composer/{dependency_name}/{dependency_version}"
         finding.unsaved_locations.append(LocationData.dependency(purl=purl_string))
 

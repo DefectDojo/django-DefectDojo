@@ -138,7 +138,7 @@
                                         {% endif %}
                                     </span>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="text-end">
                                         {{ finding.epss_score|format_epss }}
                                         /
                                         {{ finding.epss_percentile|format_epss }}
@@ -377,7 +377,7 @@
 
                         level = parseInt(openLevel);
 
-                        var anchor = titleText.trim().replace(/\s/g, "_");
+                        var anchor = titleText.trim().replace(/\s/g, "_").replace(/["'`<>]/g, "");
 
                         if(tags)
                         {

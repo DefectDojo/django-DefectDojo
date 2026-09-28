@@ -8,7 +8,7 @@ slug: report-builder-api
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Report Builder REST API (report themes, blocks, templates, and generated reports) is a DefectDojo Pro feature, currently in beta.</span>
 
-The Report Builder REST API lets you automate the same Themes, Blocks, and Templates you assemble by hand in the [Report Builder UI](../report-builder/) — and it goes one step further by letting you **run** a template and **download** the finished PDF or HTML. This guide walks the full lifecycle: authenticate, discover the field and filter vocabulary, create the building blocks, then generate and retrieve a report.
+The Report Builder REST API lets you automate the same Themes, Blocks, and Templates you assemble by hand in the [Report Builder UI](../report-builder/) — and it goes one step further by letting you **run** a template, **download** the finished PDF or HTML, or **read** its plain-text rendition. This guide walks the full lifecycle: authenticate, discover the field and filter vocabulary, create the building blocks, then generate and retrieve a report.
 
 > **Looking for a quick findings export instead?** If you only need a flat list of findings as JSON, HTML, CSV, or Excel — with no themes, blocks, or templates to set up — use the simpler `generate_report/` endpoint documented in [Generating Reports](/automation/api/api-v2-docs/#generating-reports). The Report Builder API described on this page is for building designed, multi\-section reports.
 
@@ -51,14 +51,15 @@ List endpoints are paginated with `limit` and `offset` query parameters.
 
 ## The reporting API at a glance
 
-Four resources make up the Report Builder API. Each supports the standard list (`GET`), create (`POST`), retrieve (`GET {id}/`), update (`PATCH {id}/`), and delete (`DELETE {id}/`) operations, plus a handful of custom actions.
+Five resources make up the Report Builder API. Each supports the standard list (`GET`), create (`POST`), retrieve (`GET {id}/`), update (`PATCH {id}/`), and delete (`DELETE {id}/`) operations, plus a handful of custom actions.
 
 | Resource | Path | What it is | Custom actions |
 |----------|------|------------|----------------|
 | Themes | `/report_themes/` | Colors, fonts, header/footer images, page numbers | — |
 | Blocks | `/report_blocks/` | A single piece of content: a cover page, a table, or a detail section | `field_options/`, `preview/`, `{id}/preview/`, `{id}/duplicate/` |
 | Templates | `/report_templates/` | An ordered list of blocks plus a theme | `{id}/duplicate/` |
-| Generated reports | `/generated_reports/` | A run of a template that produces a downloadable file | `{id}/download/` |
+| Generated reports | `/generated_reports/` | A run of a template that produces a downloadable file | `{id}/download/`, `{id}/content/` |
+| Report schedules | `/report_schedules/` | A standing request that runs a template on a cron cadence | — |
 
 Two more endpoints help you discover the vocabulary you need:
 
@@ -114,9 +115,9 @@ curl -s \
   > schema.json
 ```
 
-Then read the GET parameters for the entity you are filtering. For findings, look at `paths` → `/api/v2/findings/` → `get` → `parameters`. The analogous endpoints are `/api/v2/assets/` for **assets** (formerly Assets), `/api/v2/organizations/` for **organizations** (formerly Organizations), `/api/v2/engagements/`, `/api/v2/tests/`, `/api/v2/test_types/`, and `/api/v2/risk_acceptance/`. Each parameter `name` is a valid filter `field`.
+Then read the GET parameters for the entity you are filtering. For findings, look at `paths` → `/api/v2/findings/` → `get` → `parameters`. The analogous endpoints are `/api/v2/assets/` for **assets** (formerly Products), `/api/v2/organizations/` for **organizations** (formerly Product Types), `/api/v2/engagements/`, `/api/v2/tests/`, `/api/v2/test_types/`, and `/api/v2/risk_acceptance/`. Each parameter `name` is a valid filter `field`.
 
-> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Assets** and **Organizations** were formerly **Organizations**. The underlying filter field paths on findings still use the legacy `product` wording (for example, `test__engagement__product`), even though the entities are now Assets and Organizations.
+> **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The underlying filter field paths on findings still use the legacy `product` wording (for example, `test__engagement__product`), even though the entities are now Assets and Organizations.
 
 > **🔑 Important:** The server **silently drops** any `filter_entry` whose `field` is not a real GET parameter for that model. No error is raised — the filter simply does not exist on the saved block. Always GET the block back after creating it and compare the returned `filter_entries` to what you sent.
 
@@ -144,15 +145,15 @@ The tables below list verified, high-value filters. All values are sent as **sin
 | `tag` | `"DR"` | A single tag |
 | `tags` | `"kev,pci"` | Any-of (matches any listed tag) |
 | `tags__and` | `"kev,pci"` | All-of (must match every listed tag) |
-| `test__engagement__product` | `"42"` | Asset ID (Assets were formerly Assets) |
-| `test__engagement__product__prod_type` | `"3"` | Organization ID (formerly Organization) |
+| `test__engagement__product` | `"42"` | Asset ID (Assets were formerly Products) |
+| `test__engagement__product__prod_type` | `"3"` | Organization ID (formerly Product Type) |
 | `cve` | `"CVE-2024-12345"` | |
 | `cwe` | `"79"` | |
 | `date_after` | `"2025-12-31"` | |
 | `date_before` | `"2025-12-31"` | |
 | `planned_remediation_date_before` | `"2025-12-31"` | |
 
-**Asset filters** (Assets were formerly called Assets; these are the parameters on `/api/v2/assets/`)
+**Asset filters** (Assets were formerly called Products; these are the parameters on `/api/v2/assets/`)
 
 | Field | Example value | Notes |
 |-------|---------------|-------|
@@ -206,7 +207,15 @@ The response includes the new theme `id`. Header and footer images are optional 
 
 ### Create blocks
 
-A block has a `name`, a `block_type`, and a matching configuration object. The supported `block_type` values are `stock`, `tabular`, and `detail`. (A `chart` type exists in the data model but is not yet exposed through the API.)
+A block has a `name`, a `block_type`, and a matching configuration object. The supported `block_type` values are `stock`, `tabular`, `detail`, `chart`, and `widget`.
+
+A `chart` block takes a `chart_configuration` of `{"model_choice": ..., "chart_key": ...}`, where `chart_key` names one of the charts listed on the [Report Builder](../report-builder/) page. `model_choice` is the model that chart is built on (`finding`, `asset`, or `generic` for the portfolio-wide charts that take no filters) and must match the chart named by `chart_key`; a pairing that does not match is rejected with a `400` naming the model the chart requires.
+
+A `widget` block takes a `widget_configuration` of `{"widget_type": ..., "config": {...}}`. The `widget_type` is a dashboard widget type, and `config` is that widget's own configuration object in exactly the shape a dashboard layout stores it, validated by the same rules. `GET /report_blocks/widget_options/` lists the widget types a report can draw, each with the label, description, and how the report renders it. Filters belong inside `config`; `filter_entries` are not accepted on a widget block.
+
+Two endpoints return render-ready data for a widget block, which is useful for checking a configuration without generating a report: `POST /report_blocks/widget_data/` for a configuration you have not saved, and `POST /report_blocks/{id}/widget_data/` for a saved block. Both accept an optional `runtime_filters` object and echo back the effective configuration alongside the data.
+
+Creating or reconfiguring a `widget` block requires Customizable Dashboards to be enabled. Blocks saved earlier keep generating regardless.
 
 **A stock cover page.** Stock blocks hold fixed content. The `stock_type` is one of `cover_page`, `table_of_contents`, `page_break`, `image`, or `text_block`.
 
@@ -306,7 +315,37 @@ Replace `theme_id` and each `block_id` with the IDs returned in the previous ste
 
 Generating a report is asynchronous: you create a run, poll its status, then download the file once it completes.
 
-**Start a run.** POST a `template_id` and a `file_format` of `pdf` or `html`:
+**Start a run.** POST a `template_id` and a `file_format`. Five are available:
+
+| `file_format` | What you get |
+|---------------|--------------|
+| `pdf` | The whole template, paginated |
+| `html` | The whole template, as a web page |
+| `csv` | The rows of the template's Tabular and Detail blocks |
+| `xlsx` | The same rows, one worksheet per block |
+| `json` | The same rows, with each block's columns and labels |
+
+`csv`, `xlsx` and `json` are the formats to automate against: they carry the rows a report is built from rather than the document built around them. They include **only** the template's Tabular and Detail blocks, since a cover page, a chart or a widget has nothing to put in a cell. A template with no Tabular or Detail block fails with that explanation in `error_message`.
+
+The `json` body is one object carrying the report's name and generation time, then a `blocks` array. Each block lists its `columns` (the field path plus the label) and its `rows`, keyed by field path:
+
+```json
+{
+  "report": {"template": "Quarterly Critical Report", "template_id": 5, "generated_at": "2026-09-22T06:43:52.465Z"},
+  "blocks": [
+    {
+      "name": "Critical Findings",
+      "header": "Critical Findings",
+      "model": "finding",
+      "columns": [{"path": "id", "label": "ID"}, {"path": "title", "label": "Title"}],
+      "rows": [{"id": 1, "title": "SQL injection in the login form"}],
+      "omitted_rows": 0
+    }
+  ]
+}
+```
+
+Keying rows by field path rather than by label is deliberate: a label can be renamed in the UI, a field path cannot.
 
 ```bash
 curl -s -X POST \
@@ -321,6 +360,29 @@ curl -s -X POST \
 ```
 
 The response returns the new report `id` with `status` set to `pending`.
+
+**Fill in template variables.** A Template that uses [template variables](../report-builder/#template-variables) needs a value for each one. Ask the Template which it uses, then pass them as `variables`:
+
+```bash
+curl -s \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/report_templates/5/variables/"
+# {"variables": ["finding"]}
+
+curl -s -X POST \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/generated_reports/" \
+  -d '{
+    "template_id": 5,
+    "file_format": "pdf",
+    "variables": {"finding": 1234}
+  }'
+```
+
+`variables` takes `finding` (a finding ID), `asset` (an asset ID) and `vulnerability_id` (text such as `CVE-2024-12345`). A finding also supplies its own asset and primary vulnerability ID, so `{"finding": 1234}` satisfies a Template that uses all three. A missing variable, an unknown key, or a finding or asset the token's user cannot see returns `400` with the reason under `variables`. To generate one report per finding, loop over the findings and POST once for each.
 
 **Poll for status.** Retrieve the report until its `status` reaches a terminal state. The flow is `pending` → `processing` → `completed`. On `failed`, read `error_message` for the reason.
 
@@ -339,6 +401,112 @@ curl -s -L \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/generated_reports/7/download/" \
   -o report.pdf
 ```
+
+**Read the report as plain text (optional).** A `pdf` or `html` report also gets a plain-text rendition when it is generated, so automation (or an AI assistant) can read what a report says without downloading and parsing the file. The `content/` endpoint returns a bounded slice of that text as JSON:
+
+```bash
+curl -s \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/generated_reports/7/content/?max_bytes=65536"
+```
+
+```json
+{
+  "id": 7,
+  "status": "completed",
+  "file_format": "pdf",
+  "content_type": "text/plain",
+  "truncated": false,
+  "total_bytes": 4213,
+  "returned_bytes": 4213,
+  "content": "Quarterly Findings Report\nSeverity\tTitle\tAsset\nCritical\tSQL injection in the login form\tCustomer Portal\n..."
+}
+```
+
+A few rules keep this endpoint cheap to call, whatever the size of the underlying report:
+
+- The text is produced once, by the generation worker, from the rendered HTML — table rows come back as tab-separated lines, and headings and paragraphs as their own lines. It is capped at 256 KiB; a longer report is cut there and reported with `"truncated": true`.
+- `max_bytes` (default `65536`) limits how much of that text one call returns. Values above 256 KiB are clamped to it; `0`, a negative number or a non-integer returns `400`. `total_bytes` is the size of the whole rendition, `returned_bytes` what this response holds, and `truncated` is `true` whenever `content` is not the complete report text.
+- Like `download/`, the endpoint responds `404` until the run is `completed`.
+- `csv`, `xlsx` and `json` runs have no text rendition — their rows are already machine-readable through `download/` — so `content/` answers `200` with `"content": null` for them.
+
+## Step 4: Run a report on a schedule
+
+A report schedule is a standing version of the request in Step 3: the template, format and runtime filters to run, plus a cron cadence. DefectDojo's scheduling service generates a new report on every tick, and each one appears in `/generated_reports/` as an ordinary run, so the polling, download and `content/` calls above work unchanged. Report schedules are available from DefectDojo Pro 3.3.300.
+
+**Create a schedule.** POST the same `template_id`, `file_format` and optional `name` / `runtime_filters` you would send to `/generated_reports/`, plus a nested `schedule` object carrying the cadence:
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/report_schedules/" \
+  -d '{
+    "template_id": 5,
+    "file_format": "pdf",
+    "name": "Weekly executive summary",
+    "schedule": {"trigger_expression": "0 6 * * 1"}
+  }'
+```
+
+`schedule.trigger_expression` is a five-field cron expression (minute, hour, day of month, month, day of week) evaluated in **UTC**. A schedule may run at most once an hour: the minute field must be a single value, so `0 6 * * 1` (06:00 UTC every Monday) is accepted and `*/15 * * * *` is refused with `400` under `trigger_expression`. Any of the five `file_format` values is allowed.
+
+The response is the schedule with the scheduling service's view of it nested as `schedule`:
+
+```json
+{
+  "id": 3,
+  "name": "Weekly executive summary",
+  "template": {
+    "id": 5,
+    "name": "Executive Summary",
+    "description": "",
+    "created_by": "reporting-bot",
+    "created": "2026-09-23T03:15:56Z",
+    "updated": "2026-09-23T03:15:56Z",
+    "block_count": 4
+  },
+  "file_format": "pdf",
+  "runtime_filters": {},
+  "created_by": "reporting-bot",
+  "created": "2026-09-24T07:10:29Z",
+  "updated": "2026-09-24T07:10:29Z",
+  "schedule": {
+    "enabled": true,
+    "status": "S",
+    "trigger_expression": "0 6 * * 1",
+    "trigger_expression_readable": "At 06:00 AM, only on Monday",
+    "last_run": null,
+    "next_run": "2026-09-28T06:00:00Z"
+  }
+}
+```
+
+A few things to know about how schedules behave:
+
+- **Every run is generated as the schedule's creator.** `created_by` is the user whose token created the schedule, each run is requested by that user with that user's visibility, and `created_by` never changes — a PATCH by someone else does not move the schedule to them.
+- **A new schedule is always enabled.** To create one without running it yet, create it and then pause it (below).
+- **Registering a new cadence resumes the schedule**, even if the same PATCH also sends `"enabled": false`. To move a paused schedule and keep it paused, PATCH the cadence first and pause it in a second call. The `schedule.enabled` value in every response is the schedule's real state.
+- **Creating and registering are one transaction.** If the scheduling service cannot register the cadence, the request answers `503` and no schedule row is kept.
+
+**List, filter and read back.** `GET /report_schedules/` lists the schedules the caller may see, newest first; filter with `template`, `created_by`, `file_format` or `id`, and retrieve one with `GET /report_schedules/{id}/`. To see the reports a schedule has produced, list `/generated_reports/` with the same `template` and the creator as `requested_by`.
+
+**Pause, resume or change a schedule.** PATCH the report-side fields (`name`, `file_format`, `runtime_filters`) or a `schedule` object. `schedule` may carry only `enabled` to pause or resume without touching the cadence:
+
+```bash
+curl -s -X PATCH \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/report_schedules/3/" \
+  -d '{"schedule": {"enabled": false}}'
+```
+
+**Delete a schedule.** `DELETE /report_schedules/{id}/` answers `204` and stops future runs; the reports it already generated stay in `/generated_reports/`.
+
+Any organization member who may run a template may schedule it. Updating or deleting a schedule is limited to its creator and to users with the global permission to delete generated reports; anyone else receives `403`. As with every other Report Builder endpoint, the routes require the **Reporting** feature and answer `403` with `"code": "feature_disabled"` when it is off.
 
 ## Putting it together: a full lifecycle script
 
@@ -368,7 +536,7 @@ BASE_URL = os.environ.get(
     "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2",
 ).rstrip("/")
 TOKEN = os.environ["DD_IMPORTER_DOJO_API_TOKEN"]  # fail loudly if unset
-FILE_FORMAT = "pdf"  # "pdf" or "html"
+FILE_FORMAT = "pdf"  # "pdf", "html", "csv", "xlsx", or "json"
 
 
 def api_request(method, path, body=None, accept_json=True):

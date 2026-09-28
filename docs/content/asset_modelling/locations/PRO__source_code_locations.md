@@ -7,13 +7,15 @@ audience: pro
 
 **Source Code Locations** extend the Locations model to static analysis: alongside URLs (DAST) and Dependencies (SCA), a **Code** location describes where a SAST finding lives in source — identified by its **file path and line number**.
 
-> Source Code Locations require the Locations feature (Beta). To enable Locations on your instance, contact [support@defectdojo.com](mailto:support@defectdojo.com).
+> Source Code Locations require the Locations feature. You can enable Locations yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required.
 
 ## What They Model
 
 Every static finding that reports a file path gets a Code location. The location's canonical value is `path/to/file.py:42` (or just the file path when the tool reports no line). Like all Locations, code locations are shared objects: two findings at the same file and line reference the same location, and the location carries per-finding and per-asset reference statuses.
 
 Code locations are **scan-managed**: they are created and updated by imports and reimports, not by hand. There is no "New Source Code Location" action — the scanner is the source of truth for where code findings live.
+
+Findings that already existed before Locations was enabled get their code locations from a one-time **backfill**, not from a rescan. The *Findings to Code Locations* item in the [migration suite](/asset_modelling/locations/pro__migrating_from_endpoints/) (also runnable as `python manage.py migrate_findings_to_code_locations`) reads each Finding's `file_path`/`line` and creates the same Code location an import would, so your pre-feature static findings carry their source coordinate too. It is idempotent, so re-running it is safe.
 
 ## Where to Find Them
 

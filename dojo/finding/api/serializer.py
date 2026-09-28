@@ -26,6 +26,7 @@ from dojo.finding.helper import (
 from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
 from dojo.jira.api.serializers import JIRAIssueSerializer
+from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationFindingReference
 from dojo.location.queries import get_authorized_location_finding_reference
 from dojo.models import (
@@ -429,6 +430,8 @@ class FindingSerializer(serializers.ModelSerializer):
             "cve",
             "inherited_tags",
         )
+        # The related model is superuser-only; only the SonarQube importer assigns it.
+        read_only_fields = ("sonarqube_issue",)
 
     def get_fields(self):
         from dojo.api_v2.serializers import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
@@ -450,7 +453,7 @@ class FindingSerializer(serializers.ModelSerializer):
         # an empty queryset instead of raising on the AnonymousUser instance.
         if user is not None and not user.is_authenticated:
             user = None
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
                 many=True, required=False,
                 queryset=get_authorized_endpoints("view", user=user) if user else Endpoint.objects.none(),
@@ -559,7 +562,7 @@ class FindingSerializer(serializers.ModelSerializer):
             instance.found_by.clear()
 
         locations = None
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             locations = validated_data.pop("locations", None)
 
         instance = super().update(
@@ -574,7 +577,7 @@ class FindingSerializer(serializers.ModelSerializer):
             instance.unsaved_cwes = cwe_extras
             save_cwes(instance)
 
-        if settings.V3_FEATURE_LOCATIONS and locations is not None:
+        if locations_enabled() and locations is not None:
             for location_ref in instance.locations.all():
                 location_ref.location.disassociate_from_finding(instance)
             for location_ref in locations:
@@ -701,6 +704,8 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             "cve",
             "inherited_tags",
         )
+        # The related model is superuser-only; only the SonarQube importer assigns it.
+        read_only_fields = ("sonarqube_issue",)
         extra_kwargs = {
             "active": {"required": True},
             "verified": {"required": True},

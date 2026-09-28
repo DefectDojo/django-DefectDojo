@@ -5,4 +5,6 @@ draft: false
 weight: 1
 type: docs
 exclude_search: true
+aliases:
+  - "/en/working_with_findings/findings_workflows/"
 ---

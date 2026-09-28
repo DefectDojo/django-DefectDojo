@@ -51,6 +51,10 @@ def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES 
     # Next check if the note supplied is even attached to the object
     if obj.notes.filter(id=note.id).exists() is False:
         raise PermissionDenied
+    # A private note belongs to its author. Every note view funnels through
+    # here, so this is the one place the rule has to hold.
+    if note.private and note.author_id != request.user.pk and not request.user.is_superuser:
+        raise PermissionDenied
 
     return note, obj, obj.id, reverse_url
 
@@ -59,7 +63,7 @@ def delete_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid
     note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
     form = DeleteNoteForm(request.POST, instance=note)
 
-    if str(request.user) != note.author.username:
+    if note.author_id != request.user.pk:
         user_has_permission_or_403(request.user, obj, "delete")
 
     if form.is_valid():
@@ -80,18 +84,24 @@ def delete_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid
 def edit_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: int) -> HttpResponseRedirect:
     note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
-    if str(request.user) != note.author.username:
+    is_author = note.author_id == request.user.pk
+    if not is_author:
         user_has_permission_or_403(request.user, obj, "edit")
 
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
+    available_note_types = find_available_notetypes(obj, note) if note_type_activation else None
+
+    data = request.POST if request.method == "POST" else None
     if note_type_activation:
-        available_note_types = find_available_notetypes(obj, note)
+        form = TypedNoteForm(data, available_note_types=available_note_types, instance=note)
+    else:
+        form = NoteForm(data, instance=note)
+    if not is_author:
+        # Dropping the field keeps it out of cleaned_data, so construct_instance()
+        # leaves the stored value alone.
+        form.fields.pop("private", None)
 
     if request.method == "POST":
-        if note_type_activation:
-            form = TypedNoteForm(request.POST, available_note_types=available_note_types, instance=note)
-        else:
-            form = NoteForm(request.POST, instance=note)
         if form.is_valid():
             note = form.save(commit=False)
             note.edited = True
@@ -122,10 +132,6 @@ def edit_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: 
                             messages.SUCCESS,
                             _("Note was not succesfully edited."),
                             extra_tags="alert-danger")
-    elif note_type_activation:
-        form = TypedNoteForm(available_note_types=available_note_types, instance=note)
-    else:
-        form = NoteForm(instance=note)
 
     return render(
         request, "dojo/edit_note.html", {
@@ -139,7 +145,7 @@ def edit_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: 
 def note_history(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: int) -> HttpResponseRedirect:
     note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
-    if str(request.user) != note.author.username:
+    if note.author_id != request.user.pk:
         user_has_permission_or_403(request.user, obj, "view")
 
     history = note.history.all()

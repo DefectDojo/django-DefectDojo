@@ -19,7 +19,7 @@ from fieldsignals import pre_save_changed
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
-from dojo.db_utils import is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.cwe import finding_cwe_labels
@@ -31,6 +31,7 @@ from dojo.finding.deduplication import (
     get_finding_models_for_deduplication,
 )
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.location.utils import save_locations_to_add
@@ -52,10 +53,10 @@ from dojo.notifications.helper import create_notification
 from dojo.tools import tool_issue_updater
 from dojo.url.models import URL
 from dojo.utils import (
-    calculate_grade,
     close_external_issue,
     get_current_user,
     get_object_or_none,
+    schedule_product_grade,
     to_str_typed,
 )
 from dojo.vulnerability.manager import persist_for_finding
@@ -185,22 +186,42 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     new_state_finding.last_status_update = now
 
 
-def filter_findings_by_existence(findings):
-    """
-    Return only findings that still exist in the database (by id).
+# Bounds the IN clause of the existence lookup below. An import's result set is not
+# bounded by anything else, so without this a large scan asks the database about tens of
+# thousands of ids in one statement.
+FINDING_EXISTENCE_CHUNK = 1000
 
-    Centralized helper used by importers to avoid FK violations during
-    bulk_create.
+
+def deleted_finding_ids(finding_ids) -> set[int]:
     """
-    if not findings:
-        return []
-    candidate_ids = [finding.id for finding in findings if getattr(finding, "id", None)]
-    if not candidate_ids:
-        return []
-    existing_ids = set(
-        Finding.objects.filter(id__in=candidate_ids).values_list("id", flat=True),
-    )
-    return [finding for finding in findings if finding.id in existing_ids]
+    Of the given finding ids, the ones whose row is no longer in the database.
+
+    The single place that answers "which of these findings are gone", for every caller
+    holding finding references across a window in which a finding can be deleted --
+    import history records, the child-row buffers flushed at an import batch boundary,
+    and anything else that would otherwise insert a dangling reference or re-save a
+    deleted row. Those references are only rejected at COMMIT (Django declares its
+    foreign keys DEFERRABLE INITIALLY DEFERRED), far from the code that wrote them, so
+    the check has to happen before the write rather than around it.
+
+    Returns the missing ids rather than the survivors: it is the smaller set, and every
+    caller wants it to skip work rather than to drive it. Costs one indexed primary-key
+    lookup per FINDING_EXISTENCE_CHUNK ids, and no query at all for an empty input.
+
+    Note for callers that already read rows for these findings: existence falls out of
+    any such read for free (see _sync_close_old_finding_status_fields, which learns it
+    from the refresh it needs anyway). Do not route those through here -- it buys
+    consistency with an extra round trip.
+    """
+    finding_ids = {finding_id for finding_id in finding_ids if finding_id is not None}
+    if not finding_ids:
+        return set()
+    live_finding_ids: set[int] = set()
+    for chunk in batched(finding_ids, FINDING_EXISTENCE_CHUNK, strict=False):
+        live_finding_ids.update(
+            Finding.objects.filter(pk__in=chunk).values_list("pk", flat=True),
+        )
+    return finding_ids - live_finding_ids
 
 
 def can_edit_mitigated_data(user):
@@ -231,7 +252,10 @@ def create_finding_group(finds, finding_group_name):
         else:
             raise
 
-    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    available_findings = [
+        find for find in finds
+        if not find.finding_group_set.all() and find.test_id == finding_group.test_id
+    ]
     finding_group.findings.set(available_findings)
 
     added = len(available_findings)
@@ -242,7 +266,10 @@ def create_finding_group(finds, finding_group_name):
 def add_to_finding_group(finding_group, finds):
     added = 0
     skipped = 0
-    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    available_findings = [
+        find for find in finds
+        if not find.finding_group_set.all() and find.test_id == finding_group.test_id
+    ]
     finding_group.findings.add(*available_findings)
 
     # Now update the JIRA to add the finding to the finding group
@@ -360,6 +387,20 @@ def group_findings_by(finds, finding_group_by_option):
     return affected_groups, grouped, skipped, groups_created
 
 
+def get_or_create_auto_finding_group(test, name, creator):
+    """
+    Auto grouping keeps one group per (test, name), whoever created it. Reuse the oldest
+    existing group, so a test that already holds same-name duplicates (from a raced import,
+    or from the old creator-scoped lookup) resolves to one group instead of raising
+    MultipleObjectsReturned. The creator is only recorded on a newly created group.
+    """
+    name = name[:255]
+    finding_group = Finding_Group.objects.filter(test=test, name=name).order_by("id").first()
+    if finding_group is not None:
+        return finding_group, False
+    return Finding_Group.objects.create(test=test, creator=creator, name=name), True
+
+
 def add_findings_to_auto_group(name, findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
@@ -367,7 +408,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 
         if create_finding_groups_for_all_findings or len(findings) > 1:
             # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
-            finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name[:255])
+            finding_group, created = get_or_create_auto_finding_group(test, name, creator)
             if created:
                 logger.debug("Created Finding Group %d:%s for test %d:%s", finding_group.id, finding_group, test.id, test)
                 # See if we have old findings in the same test that were created without a finding group
@@ -381,11 +422,10 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
             finding_group.findings.add(*findings)
         else:
             # Otherwise add to an existing finding group if it exists only
-            try:
-                finding_group = Finding_Group.objects.get(test=test, name=name)
-                if finding_group:
-                    finding_group.findings.add(*findings)
-            except:
+            finding_group = Finding_Group.objects.filter(test=test, name=name[:255]).order_by("id").first()
+            if finding_group is not None:
+                finding_group.findings.add(*findings)
+            else:
                 # See if we have old findings in the same test that were created without a finding group
                 # that match this new finding - then we can create a finding group
                 old_findings = Finding.objects.filter(test=test)
@@ -393,7 +433,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                 for f in old_findings:
                     f_group_name = get_group_by_group_name(f, group_by)
                     if f_group_name == name and f not in findings:
-                        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name[:255])
+                        finding_group, created = get_or_create_auto_finding_group(test, name, creator)
                         finding_group.findings.add(f)
                 if created:
                     finding_group.findings.add(*findings)
@@ -443,9 +483,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-            dojo_dispatch_task(calculate_grade, finding.test.engagement.product.id)
+            schedule_product_grade(finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -460,6 +498,17 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_services.push(finding)
         elif finding.finding_group:
             jira_services.push(finding.finding_group)
+
+
+# post_process_findings_batch runs the status-changing dedup / false-positive-history
+# writes for a batch of findings. Two of these tasks racing on overlapping dojo_finding
+# rows -- concurrent imports or connector syncs into the same product -- can deadlock
+# (Postgres SQLSTATE 40P01 deadlock_detected): each holds a row the other needs and
+# Postgres aborts one participant. The aborted batch is not wrong, only rolled back, so
+# re-running it is safe. This mirrors bulk_delete_findings' backstop for the same class
+# of transient conflict on the same table.
+POST_PROCESS_BATCH_RETRY_DELAY = 0.5  # seconds before the first retry; doubled each attempt
+POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES = 3
 
 
 @app.task
@@ -502,25 +551,48 @@ def post_process_findings_batch(
 
     system_settings = System_Settings.objects.get()
 
-    # use list() to force a complete query execution and related objects to be loaded once
-    logger.debug(f"getting finding models for batch deduplication with: {len(finding_ids)} findings")
-    findings = get_finding_models_for_deduplication(finding_ids)
-    logger.debug(f"found {len(findings)} findings for batch deduplication")
+    # The status-changing dedup / false-positive-history writes below update dojo_finding
+    # rows and can deadlock against a concurrent batch touching the same rows (see the
+    # POST_PROCESS_BATCH_* notes above). Retry the whole write unit on a transient DB
+    # conflict; the findings are reloaded on each attempt so a retry acts on the state the
+    # winning transaction just committed. Only transient conflicts (deadlock /
+    # serialization failure) are retried -- anything else re-raises at once, as does a
+    # conflict that survives every attempt. The non-status-changing follow-ups (issue
+    # updater, product grading, JIRA push) run once, after this loop succeeds, so a retry
+    # never re-fires them.
+    findings = []
+    for attempt in range(POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES + 1):
+        try:
+            # use list() to force a complete query execution and related objects to be loaded once
+            logger.debug(f"getting finding models for batch deduplication with: {len(finding_ids)} findings")
+            findings = get_finding_models_for_deduplication(finding_ids)
+            logger.debug(f"found {len(findings)} findings for batch deduplication")
 
-    if not findings:
-        logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
-        return
+            if not findings:
+                logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
+                return
 
-    # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
-    if dedupe_option and system_settings.enable_deduplication:
-        dedupe_batch_of_findings(findings)
+            # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
+            if dedupe_option and system_settings.enable_deduplication:
+                dedupe_batch_of_findings(findings)
 
-    if system_settings.false_positive_history:
-        # Only perform false positive history if deduplication is disabled
-        if system_settings.enable_deduplication:
-            deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+            if system_settings.false_positive_history:
+                # Only perform false positive history if deduplication is disabled
+                if system_settings.enable_deduplication:
+                    deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+                else:
+                    do_false_positive_history_batch(findings)
+        except OperationalError as exc:
+            if not is_transient_db_conflict(exc) or attempt == POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES:
+                raise
+            backoff = POST_PROCESS_BATCH_RETRY_DELAY * (2 ** attempt)
+            logger.warning(
+                "post_process_findings_batch: transient DB conflict on %d finding(s), retry %d/%d in %.1fs: %s",
+                len(finding_ids), attempt + 1, POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES, backoff, exc,
+            )
+            sleep(backoff)
         else:
-            do_false_positive_history_batch(findings)
+            break
 
     # Non-status changing tasks
     if issue_updater_option:
@@ -528,9 +600,7 @@ def post_process_findings_batch(
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id, force_sync=force_sync)
+        schedule_product_grade(findings[0].test.engagement.product.id, force_sync=force_sync)
 
     # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
     jira_instance = None
@@ -612,6 +682,51 @@ def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug("finding delete: clearing found by")
     instance.found_by.clear()
+
+
+# Seconds before the first retry of a single-finding delete; doubled on each attempt.
+SINGLE_DELETE_RETRY_DELAY = 0.5
+SINGLE_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
+def delete_finding_with_conflict_retry(finding, **kwargs):
+    """
+    Delete one finding, retrying the delete-vs-import race that otherwise returns a 500.
+
+    A single-finding delete runs Django's collector, which clears the finding's
+    ``Test_Import_Finding_Action`` children before deleting the finding row. Those FK
+    constraints are ``DEFERRABLE INITIALLY DEFERRED``, so a concurrent import that commits a
+    new child row referencing this finding between the child clear and the transaction COMMIT
+    trips a foreign-key violation at commit time (SQLSTATE 23503). The reference is real but
+    transient: on a re-run the collector clears the newly-created child and the delete
+    completes. Deadlocks and serialization failures (40P01/40001) against a concurrent import
+    or the dedup job are retried the same way.
+
+    This mirrors the async cascade delete's ``_is_retryable_delete_conflict`` handling (see
+    ``dojo.utils.async_delete_task``) for the synchronous single-finding API/UI delete path,
+    which previously had no such protection and surfaced the race as an Internal Server Error.
+    Each attempt re-runs ``Finding.delete`` in a fresh transaction (there is no
+    ``ATOMIC_REQUESTS``), and the failed attempt has already rolled back, so the finding still
+    exists to be re-deleted. Any non-conflict error, and a conflict that survives every
+    attempt, is re-raised. ``kwargs`` (e.g. ``push_to_jira``) are forwarded to
+    ``Finding.delete``.
+    """
+    for attempt in range(SINGLE_DELETE_MAX_CONFLICT_RETRIES + 1):
+        try:
+            finding.delete(**kwargs)
+        except (OperationalError, IntegrityError) as exc:
+            retryable = is_transient_db_conflict(exc) or is_foreign_key_conflict(exc)
+            if not retryable or attempt == SINGLE_DELETE_MAX_CONFLICT_RETRIES:
+                raise
+            backoff = SINGLE_DELETE_RETRY_DELAY * (2 ** attempt)
+            logger.warning(
+                "delete_finding_with_conflict_retry: transient DB conflict deleting finding %s, "
+                "retry %d/%d in %.1fs: %s",
+                getattr(finding, "pk", None), attempt + 1, SINGLE_DELETE_MAX_CONFLICT_RETRIES, backoff, exc,
+            )
+            sleep(backoff)
+        else:
+            return
 
 
 @receiver(post_delete, sender=Finding)
@@ -957,6 +1072,32 @@ def _resolve_surviving_root(start_id, parent_of_doomed):
     return current  # A surviving finding id, or None when the chain dead-ends.
 
 
+def lock_findings_for_delete(finding_ids):
+    """
+    Row-lock ``finding_ids`` FOR UPDATE, in id order, for the rest of the transaction.
+
+    Deduplication locks each original FOR KEY SHARE before it writes a duplicate link to
+    it (see dojo.finding.deduplication._drop_links_to_deleted_originals), and Postgres
+    takes the same lock on the finding when it checks the deferred foreign key of any
+    other row that references it; both conflict with FOR UPDATE. Taken as the chunk's
+    first statement, before bulk_clear_finding_m2m, the cascade and
+    resolve_inbound_duplicate_references read anything, this makes those reads final: a
+    writer that already holds a lock on one of these findings commits first, and its rows
+    are then visible to them; a writer that comes later waits for this delete to commit
+    and then finds the finding gone.
+
+    One statement ordered by id, like the dedup flush's lock, so the two cannot each hold
+    a row the other is waiting for.
+    """
+    return list(
+        Finding.objects
+        .select_for_update()
+        .filter(id__in=finding_ids)
+        .order_by("id")
+        .values_list("id", flat=True),
+    )
+
+
 def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     """
     Resolve ``duplicate_finding`` references into ``chunk_ids`` held by findings that survive.
@@ -970,7 +1111,11 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     does. Resolving once up front leaves every chunk after the first exposed: each chunk
     commits separately, so a reference written after that one pass -- deduplication of a
     concurrent import landing on an original this run has selected but not yet reached --
-    survives into a later chunk's COMMIT. Run per chunk, no such window exists.
+    survives into a later chunk's COMMIT. Running per chunk only narrows that window to
+    this read and the chunk's COMMIT, so the chunk must be locked with
+    lock_findings_for_delete first: deduplication locks an original before linking to it,
+    so once the chunk is locked no new reference into it can be committed until the
+    delete has.
 
     Only findings outside ``delete_scope_ids`` are touched: a reference from one doomed
     finding to another goes away with the row that holds it.
@@ -1061,6 +1206,21 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     caller covers every entry point to the chunked delete, not just the one that first
     hit the constraint.
 
+    Clearing inside the chunk's transaction is not enough on its own: a concurrent
+    writer that commits a child or through row (a found_by row from an import, a
+    duplicate link from a dedup flush) after the clear and before the chunk's COMMIT
+    still leaves a reference the COMMIT rejects. So the first statement of each chunk
+    row-locks the chunk's findings FOR UPDATE (lock_findings_for_delete), before any
+    child, through or tag row is touched. Every row referencing a finding is checked
+    against it with FOR KEY SHARE on the dojo_finding row -- by Postgres when it checks
+    the deferred foreign key at the writer's COMMIT, or explicitly by the dedup flush --
+    and that conflicts with FOR UPDATE. A writer that committed before the lock is seen
+    by the clear that follows it; one that has not yet committed queues behind the
+    chunk and then finds the finding gone. Any writer of a row referencing a finding
+    can therefore serialize against this delete by taking FOR KEY SHARE on the
+    dojo_finding row in the same transaction as its insert; taking it before its other
+    row locks also keeps it from ever holding a row the chunk still has to take.
+
     When order_desc is True, findings are processed highest id first (matches
     finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
     duplicate chains delete children before parents.
@@ -1088,9 +1248,12 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
         for attempt in range(BULK_DELETE_MAX_CONFLICT_RETRIES + 1):
             try:
                 with transaction.atomic():
+                    # First statement of the chunk: see the docstring for why the lock has to
+                    # come before any child or through row is cleared.
+                    lock_findings_for_delete(chunk_ids)
                     bulk_clear_finding_m2m(chunk_qs)
-                    resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
                     cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
+                    resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
                     execute_delete_sql(chunk_qs)
             except OperationalError as exc:
                 # A deadlock or serialization failure aborts and rolls the whole chunk
@@ -1238,7 +1401,7 @@ def removeLoop(finding_id, counter):
 
 def add_locations(finding, form, *, replace=False):
     # TODO: Delete this after the move to Locations
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, finding.test.engagement.product)
         endpoint_ids = [endpoint.id for endpoint in added_endpoints]
 
@@ -1443,7 +1606,7 @@ def copy_template_fields_to_finding(
             product = finding.test.engagement.product
             for endpoint_url in endpoint_urls:
                 try:
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         saved_url = URL.create_location_from_value(endpoint_url)
                         saved_url.location.associate_with_finding(finding)
                     else:
@@ -1591,7 +1754,7 @@ def close_finding(
         note_date=mitigated_date,
     )
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Related locations
         for ref in finding.locations.all():
             ref.set_status(FindingLocationStatus.Mitigated, finding.mitigated_by, mitigated_date)

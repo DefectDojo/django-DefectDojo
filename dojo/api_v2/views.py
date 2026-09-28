@@ -51,6 +51,7 @@ from dojo.finding.ui.filters import (
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.jira import services as jira_services
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.location.queries import authorized_finding_references
 from dojo.location.status import FindingLocationStatus
@@ -658,7 +659,7 @@ def report_generate(request, obj, options):
                 Finding.objects.filter(test__engagement__product=product),
             ),
         )
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = _report_url_location_refs(product, user=request.user)
         else:
             # TODO: Delete this after the move to Locations
@@ -680,7 +681,7 @@ def report_generate(request, obj, options):
         )
         report_name = "Engagement Report: " + str(engagement)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = _report_url_location_refs(engagement.product, user=request.user)
         else:
             # TODO: Delete this after the move to Locations

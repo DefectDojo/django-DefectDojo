@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "example-legacy",
+    "Namespace": "example-ns",
+    "Kind": "Deployment",
+    "ApiVersion": "extensions/v1beta1",
+    "RuleSet": "Deprecated APIs removed in 1.16",
+    "ReplaceWith": "apps/v1",
+    "Since": "1.9.0"
+  }
+]

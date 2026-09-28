@@ -1,0 +1,7 @@
+{
+  "asset": {"id": "asset-0001", "name": "Generic Router"},
+  "assetVersion": {"id": "ver-0001", "name": "1.4.0", "relativeRiskScore": 0},
+  "data": {
+    "allFindings": []
+  }
+}

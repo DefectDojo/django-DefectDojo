@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def new_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == "POST":
-        tform = ToolProductSettingsForm(request.POST)
+        tform = ToolProductSettingsForm(request.POST, user=request.user)
         if tform.is_valid():
             # form.tool_type = tool_type
             new_prod = tform.save(commit=False)
@@ -34,7 +34,7 @@ def new_tool_product(request, pid):
             return HttpResponseRedirect(
                 reverse("all_tool_product", args=(pid, )))
     else:
-        tform = ToolProductSettingsForm()
+        tform = ToolProductSettingsForm(user=request.user)
     product_tab = Product_Tab(prod, title=_("Tool Configurations"), tab="settings")
     return render(request, "dojo/new_tool_product.html", {
         "tform": tform,
@@ -61,7 +61,7 @@ def edit_tool_product(request, pid, ttid):
         raise PermissionDenied
 
     if request.method == "POST":
-        tform = ToolProductSettingsForm(request.POST, instance=tool_product)
+        tform = ToolProductSettingsForm(request.POST, instance=tool_product, user=request.user)
         if tform.is_valid():
             tform.save()
             messages.add_message(
@@ -71,7 +71,7 @@ def edit_tool_product(request, pid, ttid):
                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("all_tool_product", args=(pid, )))
     else:
-        tform = ToolProductSettingsForm(instance=tool_product)
+        tform = ToolProductSettingsForm(instance=tool_product, user=request.user)
 
     product_tab = Product_Tab(product, title=_("Edit Product Tool Configuration"), tab="settings")
     return render(request, "dojo/edit_tool_product.html", {
@@ -95,7 +95,7 @@ def delete_tool_product(request, pid, ttid):
             _("Tool Product Successfully Deleted."),
             extra_tags="alert-success")
         return HttpResponseRedirect(reverse("all_tool_product", args=(pid, )))
-    tform = ToolProductSettingsForm(instance=tool_product)
+    tform = ToolProductSettingsForm(instance=tool_product, user=request.user)
 
     product_tab = Product_Tab(product, title=_("Delete Product Tool Configuration"), tab="settings")
 

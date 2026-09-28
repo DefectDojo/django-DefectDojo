@@ -1,0 +1,149 @@
+{
+  "page_total": 1,
+  "results": [
+    {
+      "id": 9001,
+      "severity": 30,
+      "definition": {
+        "id": "sql-injection",
+        "name": "SQL Injection",
+        "desc": "The application builds a database query from unvalidated input.",
+        "cwe_id": "CWE-89"
+      },
+      "fix": "Use parameterised queries instead of string concatenation.",
+      "evidence": "A single quote in the id parameter produced a database error.",
+      "url": "https://app.example.com/search?q=1",
+      "path": "/search",
+      "extra": "Confirmed against the staging target only.",
+      "state": "notfixed",
+      "cvss_score": 9.1,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "requests": [
+        {
+          "request": "  `GET /search?q=1 HTTP/1.1`  ",
+          "response": "  `HTTP/1.1 500 Internal Server Error`  "
+        }
+      ],
+      "parameter": "q",
+      "insertion_point": "url_query",
+      "method": "get"
+    },
+    {
+      "id": 9002,
+      "severity": 20,
+      "definition": {
+        "id": "missing-csp",
+        "name": "Missing Content-Security-Policy",
+        "desc": "No Content-Security-Policy header was returned.",
+        "cwe_id": "CWE-693"
+      },
+      "fix": "Add a Content-Security-Policy header.",
+      "evidence": "No CSP header present on the response.",
+      "url": "https://app.example.com/",
+      "path": "/",
+      "extra": "",
+      "state": "retesting",
+      "cvss_score": 5.3,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+      "requests": [],
+      "parameter": "",
+      "insertion_point": "",
+      "method": ""
+    },
+    {
+      "id": 9003,
+      "severity": 10,
+      "definition": {
+        "id": "cookie-no-httponly",
+        "name": "Cookie without HttpOnly flag",
+        "desc": "A cookie is set without the HttpOnly flag.",
+        "cwe_id": "CWE-1004"
+      },
+      "fix": "Set the HttpOnly flag on session cookies.",
+      "evidence": "Set-Cookie: session=... (no HttpOnly)",
+      "url": "https://app.example.com:8443/login",
+      "path": "/login",
+      "extra": "",
+      "state": "notfixed",
+      "cvss_score": 3.1,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+      "requests": [],
+      "parameter": "session",
+      "insertion_point": "json_body",
+      "method": "post"
+    },
+    {
+      "id": 9004,
+      "severity": 99,
+      "definition": {
+        "id": "unknown-definition",
+        "name": "An unrecognised finding",
+        "desc": "",
+        "cwe_id": "not-a-cwe"
+      },
+      "fix": "",
+      "evidence": "",
+      "url": "not a url at all",
+      "path": "",
+      "extra": "",
+      "state": "notfixed",
+      "cvss_score": 0,
+      "cvss_vector": "",
+      "requests": [],
+      "parameter": "",
+      "insertion_point": "graphql_variable",
+      "method": ""
+    },
+    {
+      "id": 9005,
+      "severity": 30,
+      "definition": {"id": "fixed-one", "name": "Already fixed", "desc": "", "cwe_id": "CWE-79"},
+      "fix": "",
+      "evidence": "",
+      "url": "https://app.example.com/old",
+      "path": "/old",
+      "extra": "",
+      "state": "fixed",
+      "cvss_score": 7.5,
+      "cvss_vector": "",
+      "requests": [],
+      "parameter": "",
+      "insertion_point": "",
+      "method": ""
+    },
+    {
+      "id": 9006,
+      "severity": 20,
+      "definition": {"id": "accepted-one", "name": "Accepted risk", "desc": "", "cwe_id": "CWE-16"},
+      "fix": "",
+      "evidence": "",
+      "url": "https://app.example.com/accepted",
+      "path": "/accepted",
+      "extra": "",
+      "state": "accepted",
+      "cvss_score": 5.0,
+      "cvss_vector": "",
+      "requests": [],
+      "parameter": "",
+      "insertion_point": "",
+      "method": ""
+    },
+    {
+      "id": 9007,
+      "severity": 20,
+      "definition": {"id": "invalid-one", "name": "Marked invalid", "desc": "", "cwe_id": "CWE-16"},
+      "fix": "",
+      "evidence": "",
+      "url": "https://app.example.com/invalid",
+      "path": "/invalid",
+      "extra": "",
+      "state": "invalid",
+      "cvss_score": 5.0,
+      "cvss_vector": "",
+      "requests": [],
+      "parameter": "",
+      "insertion_point": "",
+      "method": ""
+    }
+  ]
+}

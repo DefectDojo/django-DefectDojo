@@ -5,6 +5,7 @@ draft: false
 weight: 3
 audience: opensource
 aliases:
+  - "/open_source/contributing/branching-model/"
   - /en/open_source/contributing/branching-model
 ---
 ## Regular releases

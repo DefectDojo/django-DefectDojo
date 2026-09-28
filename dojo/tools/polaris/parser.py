@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -103,7 +102,7 @@ class PolarisParser:
             dynamic_finding=False,
             vuln_id_from_tool=check_id,
         )
-        if settings.V3_FEATURE_LOCATIONS and source:
+        if locations_enabled() and source:
             # Polaris names the manifest it read but never a line inside it.
             finding.unsaved_locations.append(LocationData.code(file_path=source))
         return finding

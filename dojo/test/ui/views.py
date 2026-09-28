@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from functools import reduce
 
 import pghistory
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
@@ -41,6 +40,7 @@ from dojo.forms import (
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
@@ -331,13 +331,13 @@ def copy_test(request, tid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Test Copied successfully.",
+                _("Test Copied successfully."),
                 extra_tags="alert-success")
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(engagement.id, )))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to copy test, please try again.",
+            _("Unable to copy test, please try again."),
             extra_tags="alert-danger")
 
     product_tab = Product_Tab(product, title="Copy Test", tab="engagements")
@@ -803,6 +803,8 @@ def add_finding_from_template(request, tid, fid):
 
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
+    # This listing returns template content, a shared cross-product store
+    user_has_global_permission_or_403(request.user, "edit")
     templates = Finding_Template.objects.all()
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
@@ -883,7 +885,7 @@ class ReImportScanResultsView(View):
         product_tab = Product_Tab(test.engagement.product, title=_("Re-upload a %s") % scan_type, tab="engagements")
         product_tab.setEngagement(test.engagement)
         # Get the import form with some initial data in place
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = Location.objects.filter(products__product__id=product_tab.product.id)
         else:
             # TODO: Delete this after the move to Locations

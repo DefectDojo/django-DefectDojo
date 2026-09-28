@@ -8,13 +8,13 @@
         <div class="container-fluid chosen-container side-by-side">
             <div class="row">
                 <div style="display: inline-block;">
-                    <select data-placeholder="Calendar type" id="caltype" class="chosen-select">
+                    <select data-placeholder="{% trans 'Calendar type' %}" id="caltype" class="chosen-select">
                         <option value="engagements">Engagements</option>
                         <option value="tests">Tests</option>
                     </select>
                 </div>
                 <div style="display: inline-block;">
-                    <select data-placeholder="All users" multiple id="lead" name="lead" class="chosen-select">
+                    <select data-placeholder="{% trans 'All users' %}" multiple id="lead" name="lead" class="chosen-select">
                         <option value="0">All users</option>
                         <option value="-1">Unassigned</option>
                         {% for u in users %}

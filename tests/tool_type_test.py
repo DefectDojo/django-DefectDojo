@@ -26,7 +26,7 @@ class ToolTypeTest(BaseTestCase):
         if len(description_fields) > 0:
             description_fields[0].clear()
             description_fields[0].send_keys("A test tool type for integration testing")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Tool Type Configuration Successfully Created")
@@ -40,7 +40,7 @@ class ToolTypeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Test Tool Type").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Edited Test Tool Type")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Tool Type Configuration Successfully Updated")

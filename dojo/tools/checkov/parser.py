@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -162,7 +161,7 @@ def get_item(vuln, test, check_type):
         static_finding=True,
         dynamic_finding=False,
     )
-    if settings.V3_FEATURE_LOCATIONS and file_path:
+    if locations_enabled() and file_path:
         finding.unsaved_locations.append(
             LocationData.code(file_path=file_path, line=source_line),
         )

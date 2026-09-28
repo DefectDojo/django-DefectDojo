@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -91,7 +90,7 @@ class ProgpilotParser:
                 find.file_path = vuln_file
             if vuln_cwe is not None:
                 find.cwe = int(vuln_cwe.split("CWE_")[1])
-            if settings.V3_FEATURE_LOCATIONS and find.file_path:
+            if locations_enabled() and find.file_path:
                 source_name_scalar = _first(source_name)
                 source_file_scalar = _first(source_file)
                 source_line_scalar = _first(source_line)

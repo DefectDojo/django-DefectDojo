@@ -1,0 +1,113 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000000",
+  "timestamp": "2026-01-15T10:04:11Z",
+  "creation_info": {
+    "name": "sbomqs",
+    "version": "v1.3.0",
+    "scoring_engine_version": "7",
+    "vendor": "Interlynk (support@interlynk.io)"
+  },
+  "files": [
+    {
+      "file_name": "sbom.json",
+      "spec": "cyclonedx",
+      "spec_version": "1.4",
+      "file_format": "json",
+      "avg_score": 3.389830508474576,
+      "num_components": 1,
+      "creation_time": "",
+      "gen_tool_name": "",
+      "gen_tool_version": "",
+      "scores": [
+        {
+          "category": "NTIA-minimum-elements",
+          "feature": "comp_with_name",
+          "score": 10,
+          "max_score": 10,
+          "description": "1/1 have names",
+          "ignored": false
+        },
+        {
+          "category": "NTIA-minimum-elements",
+          "feature": "comp_with_version",
+          "score": 10,
+          "max_score": 10,
+          "description": "1/1 have versions",
+          "ignored": false
+        },
+        {
+          "category": "NTIA-minimum-elements",
+          "feature": "comp_with_uniq_ids",
+          "score": 10,
+          "max_score": 10,
+          "description": "1/1 have unique ID's",
+          "ignored": false
+        },
+        {
+          "category": "NTIA-minimum-elements",
+          "feature": "comp_with_supplier",
+          "score": 0,
+          "max_score": 10,
+          "description": "0/1 have supplier names",
+          "ignored": false
+        },
+        {
+          "category": "NTIA-minimum-elements",
+          "feature": "sbom_creation_timestamp",
+          "score": 0,
+          "max_score": 10,
+          "description": "",
+          "ignored": false
+        },
+        {
+          "category": "NTIA-minimum-elements",
+          "feature": "sbom_authors",
+          "score": 0,
+          "max_score": 10,
+          "description": "doc has 0 authors",
+          "ignored": false
+        },
+        {
+          "category": "NTIA-minimum-elements",
+          "feature": "sbom_dependencies",
+          "score": 0,
+          "max_score": 10,
+          "description": "primary comp has 0 dependencies ",
+          "ignored": false
+        },
+        {
+          "category": "bsi-v1.1",
+          "feature": "comp_with_supplier",
+          "score": 0,
+          "max_score": 10,
+          "description": "0/1 have supplier names",
+          "ignored": false
+        },
+        {
+          "category": "bsi-v1.1",
+          "feature": "comp_with_licenses",
+          "score": 0,
+          "max_score": 10,
+          "description": "0/1 have compliant licenses",
+          "ignored": false
+        },
+        {
+          "category": "bsi-v1.1",
+          "feature": "comp_with_checksums_sha256",
+          "score": 0,
+          "max_score": 10,
+          "description": "0/1 have checksums",
+          "ignored": false
+        },
+        {
+          "category": "bsi-v1.1",
+          "feature": "comp_with_source_code_uri",
+          "score": 0,
+          "max_score": 10,
+          "description": "0/1 have source code URI",
+          "ignored": false
+        }
+      ]
+    }
+  ]
+}

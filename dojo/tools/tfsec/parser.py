@@ -1,8 +1,7 @@
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -58,12 +57,9 @@ class TFSecParser:
 
             dupe_key = hashlib.sha256(
                 (
-                    rule_provider
-                    + rule_id
-                    + file
-                    + str(start_line)
-                    + str(end_line)
-                ).encode("utf-8"),
+                    f"{rule_provider or ''}|{rule_id or ''}"
+                    f"|{file or ''}|{start_line}|{end_line}"
+                ).encode(),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -83,7 +79,7 @@ class TFSecParser:
                     vuln_id_from_tool=rule_id,
                     nb_occurences=1,
                 )
-                if settings.V3_FEATURE_LOCATIONS and file:
+                if locations_enabled() and file:
                     finding.unsaved_locations.append(
                         LocationData.code(file_path=file, line=start_line, end_line=end_line),
                     )

@@ -46,7 +46,7 @@
                 </h3>
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true" aria-label="Findings options">
+                                data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Findings options' %}">
                             <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
                         </button>
@@ -185,7 +185,7 @@
                                 </li>
                                 <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
                                     {% csrf_token %}
-                                    <input type="hidden" label="delete_finding" aria-label="delete_finding" name="id" value="{{ finding.id }}"/>
+                                    <input type="hidden" label="delete_finding" aria-label="{% trans 'delete_finding' %}" name="id" value="{{ finding.id }}"/>
                                     {% if system_settings.enable_jira and finding.has_jira_issue %}
                                         <label class="small">
                                             <input type="checkbox" name="push_to_jira" value="true"/>
@@ -209,7 +209,7 @@
                                 Alert: This Finding is under review and may not be 100% accurate.
                             </span>
                             {% if finding|has_object_permission:"edit" and clear_peer_review %}
-                                [<a title="Clear Review" class="text-primary" style="display: inline !important;"
+                                [<a title="{% trans 'Clear Review' %}" class="text-primary" style="display: inline !important;"
                                     href="{% url 'clear_finding_review' finding.id %}">Clear Review</a>]
                             {% endif %}
                         </th>
@@ -222,7 +222,7 @@
                                 <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
                                 Alert: Please review this finding to verify if the defect is remediated.
                             </span>
-                            [<a title="Review Finding for Closure" class="text-primary"
+                            [<a title="{% trans 'Review Finding for Closure' %}" class="text-primary"
                                 style="display: inline !important;"
                                 href="{% url 'defect_finding_review' finding.id %}">Review Finding for Closure</a>]
                         </th>
@@ -246,9 +246,9 @@
                         <th>Original</th>
                         {% endif %}
                         {% if duplicate_cluster and not finding.duplicate %}
-                            <th title="Findings that are marked as duplicate of this finding">Duplicates</th>
+                            <th title="{% trans 'Findings that are marked as duplicate of this finding' %}">Duplicates</th>
                         {% elif duplicate_cluster and finding.duplicate %}
-                            <th title="Findings that are also marked as duplicates of the same original finding">Duplicate Cluster</th>
+                            <th title="{% trans 'Findings that are also marked as duplicates of the same original finding' %}">Duplicate Cluster</th>
                         {% endif %}
                         <th>Type</th>
                         <th>Date discovered</th>
@@ -339,7 +339,7 @@
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                         <li>
                                             <a class="" href="{% url 'view_finding' finding.duplicate_finding.id %}">
-                                            <i class="fa-solid fa-bug" title="valentino"></i> {{ finding.duplicate_finding|finding_extended_title }}</i>
+                                            <i class="fa-solid fa-bug" title="{% trans 'valentino' %}"></i> {{ finding.duplicate_finding|finding_extended_title }}</i>
                                             </a>
                                         </li>
                                         </ul>
@@ -410,7 +410,7 @@
                                 </a>
                             {% endif %}
                             </td>
-                        <td class="text-right">
+                        <td class="text-end">
                         {% with finding|first_vulnerability_id as first_vulnerability_id %}
                         {% if first_vulnerability_id %}
                             {% if first_vulnerability_id|has_vulnerability_url %}
@@ -424,11 +424,11 @@
                         </td>
                         {% if finding.epss_score != None or finding.epss_percentile != None %}
                                 {% if finding.epss_score != None and finding.epss_percentile != None %}
-                                    <td class="text-right">{{ finding.epss_score|multiply:100|floatformat:"2" }}% / {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
+                                    <td class="text-end">{{ finding.epss_score|multiply:100|floatformat:"2" }}% / {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% elif finding.epss_score != None and finding.epss_percentile == None %}
-                                    <td class="text-right">{{ finding.epss_score|multiply:100|floatformat:"2" }}%</td>
+                                    <td class="text-end">{{ finding.epss_score|multiply:100|floatformat:"2" }}%</td>
                                 {% elif finding.epss_score == None and finding.epss_percentile != None %}
-                                    <td class="text-right">{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
+                                    <td class="text-end">{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% endif %}
                         {% endif %}
                         <td>
@@ -458,7 +458,7 @@
                 <th>Additional Vulnerability Ids</th>
             </tr>
             <tr>
-                <td class="text-right">
+                <td class="text-end">
                     {% for vulnerability_id in additional_vulnerability_ids %}
                         {% if vulnerability_id|has_vulnerability_url%}
                             <a target="_blank" href="{{ vulnerability_id|vulnerability_url }}">
@@ -604,7 +604,7 @@
                 <td>
                     <span>
                         {{ finding.get_file_path_with_link|safe }}
-                        <i class="fa-solid fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
+                        <i class="fa-solid fa-copy fa-align-right copytoclipboard" title="{% trans 'copy to clipboard' %}"
                         data-clipboard-text="{{finding.file_path}}"></i>
                     </span>
                 </td>
@@ -660,15 +660,15 @@
                         {% if finding.has_jira_issue %}
                             <a href="{{ finding | jira_issue_url }}"
                             target="_blank" title="{{ finding | jira_issue_url }}">{{ finding | jira_key }}</a>
-                            <i id="unlink_jira" class="fa-solid fa-trash" title="Unlink JIRA issue from this finding." hx-post="{% url 'finding_unlink_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" hx-confirm="Are you sure you want to unlink this JIRA issue?" style="cursor:pointer"></i>
-                            <i id="push_to_jira" class="fa-solid fa-share-from-square" title="Push finding data to linked JIRA issue." hx-post="{% url 'finding_push_to_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
+                            <i id="unlink_jira" class="fa-solid fa-trash" title="{% trans 'Unlink JIRA issue from this finding.' %}" hx-post="{% url 'finding_unlink_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" hx-confirm="Are you sure you want to unlink this JIRA issue?" style="cursor:pointer"></i>
+                            <i id="push_to_jira" class="fa-solid fa-share-from-square" title="{% trans 'Push finding data to linked JIRA issue.' %}" hx-post="{% url 'finding_push_to_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
                         {% else %}
                             {% if can_be_pushed_to_jira %}
                                 {% if not finding.has_jira_group_issue %}
                                 None
-                                <i id="push_to_jira" class="fa-solid fa-share-from-square" title="Create JIRA issue for this finding" hx-post="{% url 'finding_push_to_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
-                                {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
-                                    <i class="fa-solid fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                                <i id="push_to_jira" class="fa-solid fa-share-from-square" title="{% trans 'Create JIRA issue for this finding' %}" hx-post="{% url 'finding_push_to_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
+                                {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="{% trans 'Link existing JIRA issue to finding.' %}">
+                                    <i class="fa-solid fa-asterisk" title="{% trans 'Link existing JIRA issue to finding.' %}"></i>
                                 </a> {% endcomment %}
                                 {% endif %}
                             {% else %}
@@ -696,7 +696,7 @@
                 {% if 'is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
                     <td>
                         <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
-                        <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings." hx-post="{% url 'finding_group_push_to_jira' finding.finding_group.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
+                        <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="{% trans 'Update JIRA issue with current data from this group of findings.' %}" hx-post="{% url 'finding_group_push_to_jira' finding.finding_group.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
                     </td>
                 {% endif %}
                 {% if finding.effort_for_fixing %}
@@ -768,7 +768,7 @@
                         mentioned above.">
                     </i>
                     <span class="pull-right">
-                        <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters-wrapper" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                        <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters-wrapper" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         &nbsp;
                         <a data-toggle="collapse" href="#the-filters-wrapper"><i class="fa-solid fa-chevron-down"></i></a>
                     </span>
@@ -805,7 +805,7 @@
                         </i>
                         <div class="dropdown pull-right">
                             <button id="show-filters"
-                                    aria-label="Filters"
+                                    aria-label="{% trans 'Filters' %}"
                                     data-toggle="collapse"
                                     data-target="#import-history-filters"
                                     class="btn btn-primary toggle-filters">
@@ -896,10 +896,10 @@
     <!--Import activity end -->
 
     <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-            <div class="btn-group mr-2" role="group" aria-label="Second group">
+        <div class="btn-toolbar" role="toolbar" aria-label="{% trans 'Toolbar with button groups' %}">
+            <div class="btn-group me-2" role="group" aria-label="{% trans 'Second group' %}">
                 <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-label="Bulk Edit">
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-label="{% trans 'Bulk Edit' %}">
                     Bulk Edit
                     <span class="caret"></span>
                 </button>
@@ -958,8 +958,8 @@
                     </li>
                 </ul>
             </div>
-            <div class="btn-group mr-2" role="group">
-                <button type="button" class="btn btn-sm btn-primary remove-from-finding" data-toggle="tooltip" data-placement="bottom" title="Remove selected endpoints from this finding" aria-label="Remove selected endpoints from this finding">
+            <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-sm btn-primary remove-from-finding" data-toggle="tooltip" data-placement="bottom" title="{% trans 'Remove selected endpoints from this finding' %}" aria-label="{% trans 'Remove selected endpoints from this finding' %}">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -987,7 +987,7 @@
                             <h4>Files<span class="pull-right">
                             <a data-toggle="collapse" href="#add_feat_files">
                                 <i class="fa-solid fa-chevron-down"></i></a></span>
-                            <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
+                            <a title="{% trans 'Manage Files' %}" name="Manage Files" class="btn btn-sm btn-primary pull-right"
                                 href="{% url 'manage_files' oid=finding.id obj_type='Finding' %}">
                                 <span class="fa-solid fa-pen-to-square"></span></a>
                             </h4>
@@ -1000,7 +1000,7 @@
                                     {% url 'access_file' fid=file.id oid=finding.id obj_type='Finding' as image_url %}
                                     <a href="{{ image_url }}" target="_blank" download>
                                         {% if file|get_thumbnail %}
-                                            <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
+                                            <img src="{{ image_url }}" alt="{% trans 'thumbnail' %}" style="width:150px">
                                         {% else %}
                                             <span style="font-size: 50px;" class="fa-solid fa-file"></span>
                                         {% endif %}

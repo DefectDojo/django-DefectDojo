@@ -7,8 +7,8 @@ import sys
 
 from cpe import CPE
 from cvss import CVSS3
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding, Test
 from dojo.tools.locations import LocationData
 
@@ -277,7 +277,7 @@ class TenableCSVParser:
             protocol = protocol.lower() if protocol else None
             port = int(row.get("Port", row.get("asset.port", "")) or "0") or None
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 # Update the location
                 location = LocationData.url(url=host) if "://" in host else LocationData.url(protocol=protocol, host=host, port=port)
                 # Add the list to be processed later

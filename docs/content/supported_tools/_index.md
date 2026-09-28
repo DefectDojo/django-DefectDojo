@@ -14,6 +14,9 @@ cascade:
   _target:
     path: "/**"
 exclude_search: true
+aliases:
+  - "/en/connecting_your_tools"
+  - "/en/connecting_your_tools/"
 ---
 DefectDojo can parse data from 500+ security reports and counting.
 

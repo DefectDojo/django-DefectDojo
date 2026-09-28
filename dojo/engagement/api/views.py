@@ -346,11 +346,14 @@ class EngagementViewSet(
     )
     def update_jira_epic(self, request, pk=None):
         engagement = self.get_object()
+        serializer = api_v2_serializers.EngagementUpdateJiraEpicSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        epic_kwargs = serializer.validated_data
         try:
             if engagement.has_jira_issue:
                 task = jira_services.get_epic_task("update_epic")
                 if task:
-                    dojo_dispatch_task(task, engagement.id, **request.data)
+                    dojo_dispatch_task(task, engagement.id, **epic_kwargs)
                 response = Response(
                     {"info": "Jira Epic update query sent"},
                     status=status.HTTP_200_OK,
@@ -358,7 +361,7 @@ class EngagementViewSet(
             else:
                 task = jira_services.get_epic_task("add_epic")
                 if task:
-                    dojo_dispatch_task(task, engagement.id, **request.data)
+                    dojo_dispatch_task(task, engagement.id, **epic_kwargs)
                 response = Response(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,

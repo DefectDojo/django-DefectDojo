@@ -2,8 +2,8 @@ import re
 
 import html2text
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -118,7 +118,7 @@ class SpotbugsParser:
                     finding.line = int(source_extract.get("start"))
                     finding.sast_source_line = int(source_extract.get("start"))
 
-                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                if locations_enabled() and finding.file_path:
                     finding.unsaved_locations.append(
                         LocationData.code(
                             file_path=finding.file_path,

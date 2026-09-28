@@ -5,6 +5,7 @@ from datetime import datetime
 from defusedxml import ElementTree
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -247,7 +248,7 @@ class VeracodeXMLParser:
         if isinstance(sast_source_obj, str):
             finding.sast_source_object = sast_source_obj or None
 
-        if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+        if locations_enabled() and finding.file_path:
             finding.unsaved_locations.append(
                 LocationData.code(
                     file_path=finding.file_path,
@@ -271,7 +272,7 @@ class VeracodeXMLParser:
         finding.dynamic_finding = True
 
         url_host = xml_node.attrib.get("url")
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = [LocationData.url(url=url_host)]
         else:
             # TODO: Delete this after the move to Locations

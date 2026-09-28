@@ -2,8 +2,15 @@ import socket
 from unittest.mock import patch
 
 import requests
+import urllib3.connection
 
-from dojo.utils_ssrf import SSRFError, _SSRFSafeAdapter, make_ssrf_safe_session, validate_url_for_ssrf  # noqa: PLC2701
+from dojo.utils_ssrf import (
+    SSRFError,
+    _SSRFSafeAdapter,  # noqa: PLC2701
+    _SSRFSafeHTTPConnection,  # noqa: PLC2701
+    make_ssrf_safe_session,
+    validate_url_for_ssrf,
+)
 from unittests.dojo_test_case import DojoTestCase
 
 
@@ -73,3 +80,37 @@ class TestMakeSsrfSafeSession(DojoTestCase):
         session = make_ssrf_safe_session()
         self.assertIsInstance(session.get_adapter("http://example.com"), _SSRFSafeAdapter)
         self.assertIsInstance(session.get_adapter("https://example.com"), _SSRFSafeAdapter)
+
+
+class TestConnectionAddressPinning(DojoTestCase):
+
+    """The address the socket connects to must be the address that was checked."""
+
+    def _connect_with(self, addr_infos):
+        """Run _new_conn() and report the address urllib3 was handed."""
+        seen = {}
+
+        def capture(conn):
+            seen["dns_host"] = conn._dns_host
+
+        conn = _SSRFSafeHTTPConnection(host="example.com", port=80)
+        with patch("dojo.utils_ssrf.socket.getaddrinfo", side_effect=addr_infos), \
+             patch.object(urllib3.connection.HTTPConnection, "_new_conn", capture):
+            conn._new_conn()
+        return conn, seen["dns_host"]
+
+    def test_second_lookup_cannot_redirect_the_connection(self):
+        # A rebinding resolver answers public first, then loopback. Only the
+        # first answer is checked, so only the first answer may be used.
+        _conn, dns_host = self._connect_with([_addr_info("8.8.8.8"), _addr_info("127.0.0.1")])
+        self.assertEqual(dns_host, "8.8.8.8")
+
+    def test_hostname_restored_after_connecting(self):
+        conn, _dns_host = self._connect_with([_addr_info("8.8.8.8")])
+        self.assertEqual(conn.host, "example.com")
+
+    @patch("dojo.utils_ssrf.socket.getaddrinfo", return_value=_addr_info("127.0.0.1"))
+    def test_private_address_blocked_at_socket_creation(self, mock_getaddrinfo):
+        conn = _SSRFSafeHTTPConnection(host="rebind.invalid", port=80)
+        with self.assertRaisesRegex(SSRFError, "non-public address"):
+            conn._new_conn()

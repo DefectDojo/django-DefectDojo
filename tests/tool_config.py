@@ -33,7 +33,7 @@ class ToolConfigTest(BaseTestCase):
         # Check if form is prefieled
         self.assertEqual(driver.find_element(By.ID, "id_name").get_attribute("value"), "Edgescan")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Tool Type Configuration Successfully Created."))
         self.assertFalse(self.is_error_message_present())
@@ -61,7 +61,7 @@ class ToolConfigTest(BaseTestCase):
         # Choose Ath type
         Select(driver.find_element(By.ID, "id_authentication_type")).select_by_visible_text("API Key")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Tool Configuration successfully updated."))
         self.assertFalse(self.is_error_message_present())
@@ -85,7 +85,7 @@ class ToolConfigTest(BaseTestCase):
         driver.find_element(By.ID, "id_service_key_1").clear()
         driver.find_element(By.ID, "id_service_key_1").send_keys("service key")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="API Scan Configuration added successfully."))
         self.assertFalse(self.is_error_message_present())

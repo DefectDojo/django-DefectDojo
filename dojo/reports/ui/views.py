@@ -28,6 +28,7 @@ from dojo.finding.ui.filters import (
 )
 from dojo.finding.ui.views import BaseListFindings
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
@@ -94,7 +95,7 @@ class ReportBuilder(View):
         return filter_class(self.request.GET, queryset=findings)
 
     def get_endpoints(self, request: HttpRequest):
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
             filter_class = URLFilter
         else:
@@ -213,7 +214,7 @@ def report_findings(request):
 
 
 def report_endpoints(request):
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         endpoints = get_authorized_locations(Permissions.Location_View)
         endpoints = endpoints.filter(findings__status=FindingLocationStatus.Active).distinct()
         endpoints = URLFilter(request.GET, queryset=endpoints)
@@ -281,7 +282,7 @@ def test_report(request, tid):
 
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         endpoints = Location.objects.filter(
             products__product=product,
             findings__status=FindingLocationStatus.Active,
@@ -447,7 +448,7 @@ def generate_report(request, obj, *, host_view=False):
         ids = findings.qs.values_list("id", flat=True)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = Location.objects.prefetch_related("products__product").filter(products__product=product).distinct()
         else:
             # TODO: Delete this after the move to Locations
@@ -481,7 +482,7 @@ def generate_report(request, obj, *, host_view=False):
 
         ids = findings.qs.values_list("id", flat=True)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             endpoints = Location.objects.prefetch_related("products__product").filter(products__product=engagement.product).distinct()
         else:
             # TODO: Delete this after the move to Locations
@@ -670,7 +671,7 @@ def generate_report(request, obj, *, host_view=False):
         product_tab = Product_Tab(product, title=str(labels.ASSET_REPORT_LABEL), tab="findings")
     elif endpoints:
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             if host_view:
                 product_tab = Product_Tab(endpoint.product, title="Endpoint Host Report", tab="endpoints")
             else:
@@ -925,7 +926,7 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.name)
 
                 endpoint_value = ""
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     for location_ref in finding.locations.all():
                         endpoint_value += f"{location_ref.location}; "
                 else:
@@ -1097,7 +1098,7 @@ class ExcelExportView(View):
                 col_num += 1
 
                 endpoint_value = ""
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     for location_ref in finding.locations.all():
                         endpoint_value += f"{location_ref.location}; \n"
                 else:

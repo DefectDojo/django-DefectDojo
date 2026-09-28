@@ -3,6 +3,9 @@ title: "Risk Acceptances"
 description: "Leveraging Risk Acceptances in DefectDojo OS"
 audience: opensource
 weight: 2
+aliases:
+  - "/triage_findings/findings_workflows/risk_acceptances"
+  - "/triage_findings/findings_workflows/risk_acceptances/"
 ---
 
 **Risk Acceptances** are a special status that can be applied to Findings to formally document and operationalize the decision to acknowledge them without immediately remediating them.

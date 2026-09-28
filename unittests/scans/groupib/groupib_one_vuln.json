@@ -1,0 +1,29 @@
+{
+  "count": 1,
+  "items": [
+    {
+      "id": "issue-0001",
+      "companyName": "Generic Org",
+      "companyId": "company-1",
+      "status": "Detected",
+      "firstSeen": "2024-06-02T10:00:00Z",
+      "lastSeen": "2024-06-05T10:00:00Z",
+      "body": {
+        "category": "Vulnerability",
+        "type": "Exposed administrative interface",
+        "status": "Critical severity",
+        "reason": "The management console is reachable from the internet",
+        "asset": "admin.example.com",
+        "assetId": "asset-1",
+        "assetDiscovered": "2024-05-01",
+        "assetStatus": "Confirmed",
+        "descriptions": "The console accepted a connection from an external address.",
+        "context": "Discovered during external scanning.",
+        "alertMitreInfo": {
+          "T1595": "Active Scanning",
+          "T1190": "Exploit Public-Facing Application"
+        }
+      }
+    }
+  ]
+}

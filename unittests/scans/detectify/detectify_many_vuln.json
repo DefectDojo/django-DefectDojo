@@ -1,0 +1,124 @@
+{
+  "vulnerabilities": [
+    {
+      "uuid": "00000000-0000-4000-8000-000000000001",
+      "title": "Remote code execution via CVE-2000-0001",
+      "asset_token": "asset-0001",
+      "host": "app.example.com",
+      "location": "/api/upload",
+      "status": "active",
+      "severity": "critical",
+      "created_at": "2026-07-01T09:00:00Z",
+      "updated_at": "2026-07-01T09:00:00Z",
+      "scan_source": "surface-monitoring",
+      "scan_profile_token": "profile-0001",
+      "cvss_scores": {
+        "cvss_2_0": {"score": 9.0, "severity": "high", "vector": "AV:N/AC:L/Au:N/C:C/I:C/A:C"},
+        "cvss_3_0": {"score": 9.5, "severity": "critical", "vector": "CVSS:3.0/AV:N/AC:L"},
+        "cvss_3_1": {"score": 9.8, "severity": "critical", "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"}
+      },
+      "cwe": 502,
+      "definition": {
+        "title": "Insecure Deserialization",
+        "description": "The endpoint deserializes untrusted input.",
+        "risk": "An attacker can execute arbitrary code on the host."
+      },
+      "tags": [{"uuid": "tag-1", "name": "production"}, {"uuid": "tag-2", "name": "external"}],
+      "references": [
+        {"uuid": "ref-1", "name": "Advisory CVE-2000-0002", "source": "nvd",
+         "link": "https://example.com/advisories/cve-2000-0001"},
+        {"uuid": "ref-2", "name": "", "source": "", "link": "https://example.com/guidance"},
+        {"uuid": "ref-3", "name": "Vendor bulletin", "source": "", "link": ""}
+      ],
+      "request": {
+        "method": "POST",
+        "url": "https://app.example.com/api/upload",
+        "body": "{\"payload\":\"...\"}"
+      },
+      "response": {"status_code": 500, "body": "Internal Server Error"}
+    },
+    {
+      "uuid": "00000000-0000-4000-8000-000000000002",
+      "title": "",
+      "host": "shop.example.com",
+      "location": "/checkout",
+      "status": "accepted_risk",
+      "severity": "information",
+      "created_at": "2026-07-02T10:00:00Z",
+      "scan_source": "asset-monitoring",
+      "cvss_scores": {"cvss_3_0": {"score": 0, "severity": "", "vector": "CVSS:3.0/AV:N/AC:H"}},
+      "cwe": 0,
+      "definition": {"title": "Information Disclosure", "description": "", "risk": ""},
+      "tags": [],
+      "references": [],
+      "request": null,
+      "response": null
+    },
+    {
+      "uuid": "00000000-0000-4000-8000-000000000003",
+      "title": "",
+      "host": "",
+      "location": "https://legacy.example.com/old-path",
+      "status": "active",
+      "severity": "not-a-severity",
+      "created_at": "not-a-timestamp",
+      "scan_source": "",
+      "cvss_scores": null,
+      "cwe": 0,
+      "definition": null,
+      "tags": [{"uuid": "tag-3", "name": ""}],
+      "references": [],
+      "request": null,
+      "response": null
+    },
+    {
+      "uuid": "00000000-0000-4000-8000-000000000004",
+      "title": "A patched finding",
+      "host": "app.example.com",
+      "location": "/old",
+      "status": "patched",
+      "severity": "high",
+      "created_at": "2026-07-03T11:00:00Z",
+      "scan_source": "surface-monitoring",
+      "cwe": 79,
+      "definition": {"title": "Cross-site Scripting", "description": "", "risk": ""},
+      "tags": [],
+      "references": []
+    },
+    {
+      "uuid": "00000000-0000-4000-8000-000000000005",
+      "title": "A false positive",
+      "host": "app.example.com",
+      "location": "/fp",
+      "status": "false_positive",
+      "severity": "medium",
+      "created_at": "2026-07-04T12:00:00Z",
+      "scan_source": "surface-monitoring",
+      "cwe": 200,
+      "definition": {"title": "Information Disclosure", "description": "", "risk": ""},
+      "tags": [],
+      "references": []
+    },
+    {
+      "uuid": "00000000-0000-4000-8000-000000000006",
+      "title": "Low severity header issue",
+      "host": "api.example.com",
+      "location": "no-leading-slash",
+      "status": "active",
+      "severity": "low",
+      "created_at": "2026-07-05T13:00:00Z",
+      "scan_source": "surface-monitoring",
+      "cvss_scores": {"cvss_3_1": {"score": 3.1, "severity": "low", "vector": ""}},
+      "cwe": 693,
+      "definition": {"title": "Missing Security Header", "description": "No header returned.", "risk": ""},
+      "tags": [],
+      "references": [],
+      "request": null,
+      "response": null
+    }
+  ],
+  "current_marker": "",
+  "next_marker": "",
+  "has_more": false,
+  "total_vulnerabilities": 6
+}

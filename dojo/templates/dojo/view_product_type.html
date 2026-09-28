@@ -57,7 +57,7 @@
                         <h4 class="pull-left">{{ labels.ASSET_PLURAL_LABEL }}</h4>
                         <div class="dropdown pull-right">
                             <div class="btn-group">
-                                <button name="Show Filters" id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                                <button name="Show Filters" id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                                 {% if pt|has_object_permission:"add" %}
                                     <button name="Add Product" aria-label="{{ labels.ASSET_CREATE_LABEL }}" class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
                                                 <span class="fa-solid fa-bars"></span>
@@ -140,7 +140,7 @@
                             {% if pt|has_object_permission:"staff_only" %}
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddAuthorizedUsers"
-                                        data-toggle="dropdown" aria-expanded="true" aria-label="Add Authorized Users">
+                                        data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Add Authorized Users' %}">
                                     <span class="fa-solid fa-bars"></span>
                                     <span class="caret"></span>
                                 </button>
@@ -180,8 +180,10 @@
                                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownAuthorizedUserActions">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                                     <ul class="dropdown-menu">
                                                         <li>
+                                                            {# escapejs, not HTML escaping: this string is compiled as JavaScript, where an HTML entity decodes back into a quote. #}
+                                                            {% autoescape off %}{% blocktrans asvar remove_authorized_user_message with username=u.username %}Remove {{ username }} from authorized users?{% endblocktrans %}{% endautoescape %}
                                                             <a name="removeAuthorizedUser" href="#"
-                                                               onclick="if (confirm('{% blocktrans with username=u.username %}Remove {{ username }} from authorized users?{% endblocktrans %}')) { document.getElementById('remove-authorized-user-{{ u.id }}').submit(); } return false;">
+                                                               onclick="if (confirm('{{ remove_authorized_user_message|escapejs }}')) { document.getElementById('remove-authorized-user-{{ u.id }}').submit(); } return false;">
                                                                 <i class="fa-solid fa-trash"></i> {% trans "Remove" %}
                                                             </a>
                                                         </li>

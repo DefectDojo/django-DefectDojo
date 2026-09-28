@@ -1,8 +1,7 @@
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -152,7 +151,7 @@ class CargoAuditParser:
                     )
                     finding.unsaved_tags = tags
                     finding.unsaved_vulnerability_ids = vulnerability_ids
-                    if settings.V3_FEATURE_LOCATIONS and package_name:
+                    if locations_enabled() and package_name:
                         finding.unsaved_locations.append(
                             LocationData.dependency(purl_type="cargo", name=package_name, version=package_version),
                         )

@@ -68,13 +68,13 @@ if running DefectDojo in detached mode via `docker compose up -d`, obtain admin 
 
 ## Supported Installation Options
 
-* Pro - SaaS or self-hosted (via K8s or docker compose). [Speak to our team](https://defectdojo.com/contact) or [sign-up for SaaS directly](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1)
+* Pro - SaaS or self-hosted (via K8s or docker compose). [Speak to our team](https://defectdojo.com/contact) or [get Pro from $100/mo](https://cloud.defectdojo.com/onboarding?payg=1)
 * OS - [docker compose](readme-docs/DOCKER.md)
 
 
 ## Community, Getting Involved, and Updates
 
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/updated-dojo-chop.png" alt="Dojo" height="50"/>](https://community-defectdojo.tightknit.community/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/DefectDojo-logo.png" alt="DefectDojo" height="50"/>](https://community-defectdojo.tightknit.community/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/x_logo.jpg" alt="Twitter" height="50"/>](https://x.com/defectdojo)

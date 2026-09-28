@@ -10,7 +10,7 @@
     {% endblocktrans %}
 </div>
 
-<nav class="pull-right" aria-label="Pagination navigation">
+<nav class="pull-right" aria-label="{% trans 'Pagination navigation' %}">
     <ul class="pagination pagination-sm">
             {% if page.has_other_pages %}
                 {% for num in page|paginate:5 %}

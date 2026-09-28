@@ -1,0 +1,45 @@
+{
+  "images": [
+    {
+      "imageID": "img-0001",
+      "registry": "registry.example.com",
+      "repository": "generic-app",
+      "tag": "1.4.0",
+      "scan_result": "Fail",
+      "result": "Fail",
+      "resultTime": "2024-06-02T10:05:00Z"
+    },
+    {
+      "imageID": "img-0002",
+      "registry": "registry.example.com",
+      "repository": "generic-worker",
+      "tag": "2.0.0",
+      "scan_result": "Fail",
+      "result": "Fail",
+      "resultTime": "2024-06-02T10:06:00Z"
+    }
+  ],
+  "vulnerabilities": {
+    "img-0001": [
+      {
+        "id": "CVE-2000-0001",
+        "name": "Heap overflow in the example compression library",
+        "severity": "high",
+        "cvss3Score": 9.1,
+        "package_name": "example-compress",
+        "version": "1.2.3",
+        "fixVersions": ["1.2.4"]
+      }
+    ],
+    "img-0002": [
+      {
+        "id": "CVE-2000-0006",
+        "name": "Denial of service in the example parser",
+        "severity": "medium",
+        "cvss3Score": 5.3,
+        "package_name": "example-parse",
+        "version": "2.1.0"
+      }
+    ]
+  }
+}

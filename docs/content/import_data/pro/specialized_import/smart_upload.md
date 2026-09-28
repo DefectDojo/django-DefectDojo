@@ -18,7 +18,7 @@ Smart upload is a specialized importer that ingests reports from **infrastructur
 
 Smart Upload is unique in that it can split Findings from a scan file into separate Assets. This is relevant in an Infrastructure scanning context, where the Findings may apply to many different teams, have different implicit SLAs, or need to be included in separate reports due to where they were discovered in your infrastructure.
 
-Smart Upload handles this by sorting incoming findings based on the Endpoints discovered in the scan. At first, those Findings will need to be manually assigned, or directed into the correct Asset from an Unassigned Findings list. However, once a Finding has been assigned to an Asset, all subsequent Findings that share an Endpoint or Host will be sent to the same Asset.
+Smart Upload handles this by sorting incoming findings based on the Endpoints discovered in the scan. At first, those Findings will need to be manually assigned, or directed into the correct Asset from an Unassigned Findings list. However, once a Finding has been assigned to an Asset, all subsequent Findings that share an Endpoint or Host will be sent to the same Asset. If that Host is associated with more than one Asset, the Finding is sent to each of them (see [Findings that match more than one Asset](#findings-that-match-more-than-one-asset) below).
 
 ## Smart Upload menu options
 
@@ -56,3 +56,11 @@ Whenever a Finding is assigned to a New or Existing Asset, it will be placed in 
 ### Disregarded Findings
 
 If a Finding is Disregarded it will be removed from the Unassigned Findings list. However, the Finding will not be recorded in memory, so subsequent scan uploads may cause the Finding to appear in the Unassigned Findings list again.
+
+## Findings that match more than one Asset
+
+A single Host or Endpoint can belong to more than one Asset, for example a shared load balancer, or a host that two teams both track. When Smart Upload matches an incoming Finding's Host to multiple Assets, it does not choose one: it creates a copy of that Finding in **every** matching Asset, placing each copy in that Asset's own Smart Upload Engagement and Test.
+
+This is intentional. Each Asset keeps a complete picture of the vulnerabilities affecting the Hosts it owns, and reports, SLAs, and metrics for each Asset stay independent.
+
+Matching is based on the Host value discovered in the scan (the fully qualified domain name, falling back to the IP address), so any Asset that already owns that Host receives a copy of the Finding.

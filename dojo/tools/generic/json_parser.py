@@ -2,13 +2,14 @@ import base64
 import math
 
 import dateutil
-from django.conf import settings
 from django.core.files.base import ContentFile
 
 from dojo.finding.cwe import cwe_number
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
+from dojo.tools.utils import drop_repeated_unique_ids
 
 # Accepted fields that map to a numeric column on Finding, and the type they hold.
 NUMERIC_FIELDS = {
@@ -157,7 +158,7 @@ class GenericJSONParser:
 
             # manage endpoints
             if unsaved_locations:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     for location_item in unsaved_locations:
                         if isinstance(location_item, str):
                             if "://" in location_item:  # is the host full uri?
@@ -181,7 +182,7 @@ class GenericJSONParser:
                         else:
                             endpoint = Endpoint(**endpoint_item)
                         finding.unsaved_endpoints.append(endpoint)
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 component_name = item.get("component_name")
                 component_version = item.get("component_version")
                 file_path = item.get("file_path")
@@ -236,6 +237,12 @@ class GenericJSONParser:
                     finding.cwe = cwe_number(unsaved_cwes[0])
                 finding.unsaved_cwes = unsaved_cwes
             test_internal.findings.append(finding)
+        # The generic format hands unique_id_from_tool straight to callers' pipelines, and the
+        # shipped algorithm is hash-only, so classic matching never reads it. It is still
+        # recorded as a vendor identity by consumers that do (an operator-configured unique-id
+        # algorithm, Pro's identity ledger), so an id repeating inside one report is dropped
+        # rather than stored as if it named a single finding.
+        drop_repeated_unique_ids(test_internal.findings)
         return test_internal
 
     def _normalize_numeric_fields(self, item):

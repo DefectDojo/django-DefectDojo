@@ -4,8 +4,8 @@ import io
 import re
 
 from dateutil.parser import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -36,7 +36,7 @@ class _MutableLocationParts:
 def get_location(finding: Finding):
     """Get the mutable location object for building up location data incrementally."""
     # TODO: Delete this after the move to Locations
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         return finding.unsaved_endpoints[0]
     return finding._location_builder
 
@@ -321,7 +321,7 @@ class OpenVASCSVParser:
         for row_number, row in enumerate(reader):
             finding = Finding(test=test)
             finding.unsaved_vulnerability_ids = []
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding._location_builder = _MutableLocationParts()
             else:
                 # TODO: Delete this after the move to Locations
@@ -346,7 +346,7 @@ class OpenVASCSVParser:
                     finding.title = ""
                 if finding.description is None:
                     finding.description = ""
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations.append(finding._location_builder.to_location_data())
                 key = hashlib.sha256(
                     (

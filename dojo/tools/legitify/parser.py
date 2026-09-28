@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -53,6 +52,9 @@ class LegitifyParser:
                     if url:
                         locations.add(url)
             if is_finding:
+                # sorted(): locations is a set, so without this both the references text and the
+                # order of the locations/endpoints would depend on PYTHONHASHSEED
+                sorted_locations = sorted(locations)
                 remediation_steps = policy_info.get("remediationSteps", [])
                 fix_available = False
                 if remediation_steps:
@@ -62,17 +64,17 @@ class LegitifyParser:
                     dynamic_finding=False,
                     impact="\n".join(policy_info.get("threat", [])),
                     mitigation="\n".join(remediation_steps),
-                    references="\n".join(locations),
+                    references="\n".join(sorted_locations),
                     severity=self.severity_mapper(policy_info.get("severity", "LOW")),
                     static_finding=True,
                     title=f'{policy_info.get("namespace", "").capitalize()} | {policy_info.get("title", "")}',
                     vuln_id_from_tool=policy_info.get("policyName", None),
                     fix_available=fix_available,
                 )
-                if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations = [LocationData.url(url=url) for url in locations]
+                if locations_enabled():
+                    finding.unsaved_locations = [LocationData.url(url=url) for url in sorted_locations]
                 else:
                     # TODO: Delete this after the move to Locations
-                    finding.unsaved_endpoints = [Endpoint.from_uri(url) for url in locations]
+                    finding.unsaved_endpoints = [Endpoint.from_uri(url) for url in sorted_locations]
                 findings.append(finding)
         return findings

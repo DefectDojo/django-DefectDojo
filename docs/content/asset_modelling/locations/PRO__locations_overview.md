@@ -7,7 +7,7 @@ weight: 1
 
 **Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives — whether that's a URL, a software dependency from an **SBOM**, or, in the future, a **cloud resource ID**, **container image**, or **code repository**.
 
-Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Note that Locations cannot be turned back off once enabled.
+Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Enabling is one-way and takes effect for new imports right away; your existing history stays as it is until you run the [migration suite](/asset_modelling/locations/pro__migrating_from_endpoints/) that appears under the flag (endpoint, dependency, and source-code backfills, then an identity rehash). If you also use the Classic UI or depend on the `/api/v2` endpoint routes, restart DefectDojo after enabling: those surfaces are decided when DefectDojo starts, and they pick up the toggle on the next start. No deployment setting needs to change.
 
 ## Why Replace Endpoints?
 
@@ -22,8 +22,9 @@ Locations fix all three by introducing a **base `Location` object** with a typed
 - **URL Locations** — functional equivalent of the old Endpoints, with the same protocol/host/port/path/query/fragment fields.
 - **Dependency Locations** — software libraries identified by [Package URL (pURL)](https://github.com/package-url/purl-spec), used to model SBOM contents.
 - **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
+- **[Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)**: the container image a finding was found in, identified by registry, repository and digest, together with the assets that run it and the repository that built it. Scan-managed, behind its own flag.
 
-Future Location types under consideration include cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) and container images (registry/repository:tag and SHA256 fingerprints).
+Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and container images as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
 
 ## Key Concepts
 
@@ -74,7 +75,7 @@ Existing parsers have been updated to emit Location data when the feature flag i
 
 ## Where to Go Next
 
-- **Enable the feature** — contact [support@defectdojo.com](mailto:support@defectdojo.com) to turn Locations on for your instance.
+- **Enable the feature** — turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
 - **Migrate from Endpoints** — see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
 - **Day-to-day URL workflows** — see [Working with URLs](../pro__working_with_urls).
 - **SBOMs and dependencies** — see [Working with SBOMs](../pro__working_with_sboms).

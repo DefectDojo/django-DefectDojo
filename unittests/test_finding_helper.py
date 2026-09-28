@@ -5,11 +5,18 @@ from unittest.mock import patch
 
 from crum import impersonate
 from django.contrib.auth.models import User
+from django.db import OperationalError
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
+from dojo.finding.helper import (
+    POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES,
+    deleted_finding_ids,
+    post_process_findings_batch,
+    save_vulnerability_ids,
+    save_vulnerability_ids_template,
+)
 from dojo.models import Finding, Finding_Template, Test
 from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, versioned_fixtures
 
@@ -216,6 +223,79 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
             )
 
 
+@versioned_fixtures
+class TestDeletedFindingIds(DojoTestCase):
+
+    """
+    The one existence lookup every caller holding finding references across a delete window uses.
+
+    Importers buffer child rows and collect import-history candidates for a whole batch
+    before writing them, so a finding can be deleted while it is still referenced. Because
+    Django's foreign keys are DEFERRABLE INITIALLY DEFERRED, writing such a reference is
+    only rejected at COMMIT, so the reference has to be dropped before the write.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        # duplicate_finding is a self-FK with ON DELETE DO_NOTHING, so a fixture finding
+        # another one points at as its original cannot be deleted on its own. These tests
+        # are about the existence lookup, not about repairing that reference, so they work
+        # on findings nothing points at.
+        original_ids = set(
+            Finding.objects.exclude(duplicate_finding=None).values_list("duplicate_finding_id", flat=True),
+        )
+        self.findings = list(Finding.objects.exclude(id__in=original_ids).order_by("id")[:3])
+        self.assertEqual(3, len(self.findings), msg="fixture must supply at least 3 deletable findings")
+
+    def test_empty_input_costs_no_query(self):
+        with self.assertNumQueries(0):
+            self.assertEqual(set(), deleted_finding_ids([]))
+
+    def test_ids_that_are_none_are_ignored_and_cost_no_query(self):
+        """An unsaved finding has no row to be missing, so it is not a deleted one."""
+        with self.assertNumQueries(0):
+            self.assertEqual(set(), deleted_finding_ids([None, None]))
+
+    def test_all_live_findings_returns_empty_set(self):
+        live_ids = {finding.id for finding in self.findings}
+        with self.assertNumQueries(1):
+            self.assertEqual(set(), deleted_finding_ids(live_ids))
+
+    def test_returns_only_the_deleted_ids(self):
+        deleted_id = self.findings[0].id
+        surviving_ids = {finding.id for finding in self.findings[1:]}
+        Finding.objects.filter(id=deleted_id).delete()
+
+        self.assertEqual({deleted_id}, deleted_finding_ids({deleted_id, *surviving_ids}))
+
+    def test_an_id_that_never_existed_counts_as_deleted(self):
+        """A caller cannot tell the two apart and wants to skip the reference either way."""
+        never_existed = Finding.objects.order_by("-id").first().id + 1000
+
+        self.assertEqual({never_existed}, deleted_finding_ids({never_existed}))
+
+    def test_lookup_is_chunked_so_the_in_clause_stays_bounded(self):
+        """
+        An import's result set is unbounded, so the ids are asked about a chunk at a time.
+
+        Without this, a large scan puts every finding id it touched into a single IN clause.
+        """
+        live_ids = {finding.id for finding in self.findings}
+        with patch("dojo.finding.helper.FINDING_EXISTENCE_CHUNK", 2), self.assertNumQueries(2):
+            self.assertEqual(set(), deleted_finding_ids(live_ids))
+
+    def test_chunking_does_not_change_the_answer(self):
+        """Every chunk contributes its survivors, so a deleted id in any chunk is still reported."""
+        deleted_id = self.findings[1].id
+        all_ids = {finding.id for finding in self.findings}
+        Finding.objects.filter(id=deleted_id).delete()
+
+        with patch("dojo.finding.helper.FINDING_EXISTENCE_CHUNK", 1):
+            self.assertEqual({deleted_id}, deleted_finding_ids(all_ids))
+
+
 class TestSaveVulnerabilityIds(DojoTestCase):
 
     @patch("dojo.finding.helper.persist_for_finding")
@@ -329,3 +409,100 @@ class TestFindingVulnerabilityIdsAPI(DojoAPITestCase):
         # CVE is not in the response, so get it fromt the database
         # current behaviour is that the cve is taken from the first vulnerability_id...
         self.assertEqual("RHSA-000000", Finding.objects.get(id=finding_id).cve)
+
+
+class TestPostProcessFindingsBatchDeadlockRetry(DojoTestCase):
+
+    """
+    post_process_findings_batch runs the batch dedup / false-positive-history writes that
+    update dojo_finding rows. Two of these tasks racing on overlapping rows (concurrent
+    imports or connector syncs into the same product) can deadlock -- Postgres aborts one
+    with SQLSTATE 40P01. The aborted batch is only rolled back, not wrong, so it must be
+    retried rather than surfaced as a failed task. These tests exercise that retry with a
+    simulated deadlock so they need no real concurrency.
+    """
+
+    def _transient_conflict(self):
+        # Mimic how psycopg surfaces a deadlock: Django re-raises the driver error as its
+        # own OperationalError and keeps the driver exception -- the one carrying the
+        # SQLSTATE -- as __cause__. is_transient_db_conflict inspects both.
+        cause = Exception("deadlock detected")
+        cause.sqlstate = "40P01"  # deadlock_detected
+        exc = OperationalError("deadlock detected")
+        exc.__cause__ = cause
+        return exc
+
+    def _dedup_enabled_settings(self):
+        return mock.Mock(
+            enable_deduplication=True,
+            false_positive_history=False,
+            enable_product_grade=False,
+        )
+
+    @patch("dojo.finding.helper.sleep", return_value=None)
+    @patch("dojo.finding.helper.dedupe_batch_of_findings")
+    @patch("dojo.finding.helper.get_finding_models_for_deduplication")
+    @patch("dojo.finding.helper.System_Settings")
+    def test_retries_batch_dedupe_on_transient_deadlock(self, mock_ss, mock_get, mock_dedupe, mock_sleep):
+        mock_ss.objects.get.return_value = self._dedup_enabled_settings()
+        mock_get.return_value = [mock.Mock(id=1)]
+        # First two attempts deadlock, the third succeeds.
+        mock_dedupe.side_effect = [self._transient_conflict(), self._transient_conflict(), None]
+
+        # Must NOT raise: the batch retries until dedupe succeeds.
+        post_process_findings_batch(
+            [1],
+            dedupe_option=True,
+            issue_updater_option=False,
+            product_grading_option=False,
+            push_to_jira=False,
+        )
+
+        self.assertEqual(mock_dedupe.call_count, 3)
+        # Findings are reloaded on each attempt so a retry acts on freshly committed state.
+        self.assertEqual(mock_get.call_count, 3)
+
+    @patch("dojo.finding.helper.sleep", return_value=None)
+    @patch("dojo.finding.helper.dedupe_batch_of_findings")
+    @patch("dojo.finding.helper.get_finding_models_for_deduplication")
+    @patch("dojo.finding.helper.System_Settings")
+    def test_reraises_after_exhausting_retries(self, mock_ss, mock_get, mock_dedupe, mock_sleep):
+        mock_ss.objects.get.return_value = self._dedup_enabled_settings()
+        mock_get.return_value = [mock.Mock(id=1)]
+        # Every attempt deadlocks -> the conflict must surface after retries are exhausted.
+        mock_dedupe.side_effect = self._transient_conflict()
+
+        with self.assertRaises(OperationalError):
+            post_process_findings_batch(
+                [1],
+                dedupe_option=True,
+                issue_updater_option=False,
+                product_grading_option=False,
+                push_to_jira=False,
+            )
+
+        # Initial try + POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES retries.
+        self.assertEqual(mock_dedupe.call_count, POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES + 1)
+
+    @patch("dojo.finding.helper.sleep", return_value=None)
+    @patch("dojo.finding.helper.dedupe_batch_of_findings")
+    @patch("dojo.finding.helper.get_finding_models_for_deduplication")
+    @patch("dojo.finding.helper.System_Settings")
+    def test_non_transient_operational_error_not_retried(self, mock_ss, mock_get, mock_dedupe, mock_sleep):
+        mock_ss.objects.get.return_value = self._dedup_enabled_settings()
+        mock_get.return_value = [mock.Mock(id=1)]
+        # A non-deadlock OperationalError (no transient SQLSTATE) is a genuine failure and
+        # must propagate immediately, without wasting retries.
+        mock_dedupe.side_effect = OperationalError("statement timeout")
+
+        with self.assertRaises(OperationalError):
+            post_process_findings_batch(
+                [1],
+                dedupe_option=True,
+                issue_updater_option=False,
+                product_grading_option=False,
+                push_to_jira=False,
+            )
+
+        self.assertEqual(mock_dedupe.call_count, 1)
+        mock_sleep.assert_not_called()

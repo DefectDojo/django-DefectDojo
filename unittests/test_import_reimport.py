@@ -401,12 +401,15 @@ class ImportReimportMixin:
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
-        # reimported count must match count in veracode report
-        findings = self.get_test_findings_api(test_id, verified=True)
+        # reimport_scan_with_params() defaults verified=False, and this reimport does not
+        # override it, so the finding this reimport matches-and-closes inline picks up that
+        # explicit False (see process_matched_active_finding's `if self.verified is not
+        # None:`) rather than keeping the True it had from the initial import.
+        findings = self.get_test_findings_api(test_id, verified=False)
         self.assert_finding_count_json(1, findings)
 
-        # inversely, we should see no findings with verified=False
-        findings = self.get_test_findings_api(test_id, verified=False)
+        # inversely, we should see no findings with verified=True
+        findings = self.get_test_findings_api(test_id, verified=True)
         self.assert_finding_count_json(0, findings)
 
         # reimporting the exact same scan shouldn't create any notes, but there will be a new mitigated note

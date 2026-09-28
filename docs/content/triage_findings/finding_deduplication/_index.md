@@ -5,4 +5,6 @@ draft: false
 type: docs
 weight: 3
 exclude_search: true
+aliases:
+  - "/en/working_with_findings/finding_deduplication/"
 ---

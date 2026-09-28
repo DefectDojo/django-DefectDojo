@@ -1,6 +1,5 @@
-from django.conf import settings
-
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.utils import parse_cvss_data
 
@@ -61,7 +60,7 @@ class PTARTAssessmentParser:
         if unsaved_cwes:
             finding.unsaved_cwes = unsaved_cwes
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = ptart_tools.parse_locations_from_hit(hit)
         else:
             # TODO: Delete this after the move to Locations

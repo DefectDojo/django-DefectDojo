@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -161,10 +160,10 @@ class OSVScannerParser:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
                     if unsaved_cwes:
                         finding.unsaved_cwes = unsaved_cwes
-                    if settings.V3_FEATURE_LOCATIONS and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                    if locations_enabled() and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
                         finding.unsaved_locations.append(dep)
                     findings.append(finding)
-                if settings.V3_FEATURE_LOCATIONS and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                if locations_enabled() and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
                     test.unsaved_metadata.append(dep)
         return findings
 

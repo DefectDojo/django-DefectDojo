@@ -1,6 +1,8 @@
 ---
 title: "Anchore Grype"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/anchore_grype/"
 ---
 ### File Types
 DefectDojo parser accepts a .json file.
@@ -197,7 +199,7 @@ All properties are expected as strings and are required by the parser.
 Sample Grype scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_grype).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity
@@ -231,3 +233,5 @@ A typical case is a package installed at multiple paths in a container image (e.
 | `fix_version` | `vulnerability.fix.versions[0]` (or comma-joined if multiple) |
 | `cvssv3` | `vulnerability.cvss` or `relatedVulnerabilities[0].cvss` |
 | `epss_score` / `epss_percentile` | `vulnerability.epss` or `relatedVulnerabilities[0].epss` |
+| `kev_date` | `vulnerability.knownExploited[].dateAdded` (matched by CVE) |
+| `known_exploited` | `true` if `kev_date` is present, `false` otherwise |

@@ -1,0 +1,60 @@
+{
+  "certificates": [
+    {
+      "id": "cert-0002",
+      "fingerprint": "BB11CC22DD33EE44FF5500112233445566778899",
+      "subjectCN": ["legacy.example.com"],
+      "subjectAlternativeNamesByType": {"dNSName": ["legacy.example.com"]},
+      "issuerCN": ["Generic Issuing CA"],
+      "keyStrength": 1024,
+      "encryptionType": "RSA",
+      "signatureHashAlgorithm": "SHA-1",
+      "validityEnd": "2020-03-01T12:00:00Z",
+      "selfSigned": true
+    },
+    {
+      "id": "cert-0003",
+      "fingerprint": "CC11DD22EE33FF445500112233445566778899AA",
+      "subjectCN": [],
+      "subjectDN": "CN=internal.example.com,O=Generic Org",
+      "subjectAlternativeNamesByType": {},
+      "issuerCN": [],
+      "issuerDN": "CN=Generic Issuing CA",
+      "keyStrength": "256",
+      "encryptionType": "EC",
+      "signatureHashAlgorithm": "SHA384",
+      "validityEnd": "2099-06-01",
+      "selfSigned": false
+    },
+    {
+      "id": "cert-0004",
+      "fingerprint": "DD11EE22FF33445500112233445566778899AABB",
+      "subjectCN": ["healthy.example.com"],
+      "keyStrength": 2048,
+      "encryptionType": "RSA",
+      "signatureHashAlgorithm": "SHA256",
+      "validityEnd": "2099-01-01T00:00:00Z",
+      "selfSigned": false
+    },
+    {
+      "id": "cert-0005",
+      "subjectCN": ["no-expiry.example.com"],
+      "keyStrength": 0,
+      "encryptionType": "",
+      "signatureHashAlgorithm": "",
+      "validityEnd": "",
+      "selfSigned": false
+    },
+    {
+      "id": "cert-0006",
+      "fingerprint": "EE11FF224433445500112233445566778899AABB",
+      "subjectCN": ["md5.example.com"],
+      "keyStrength": 2048,
+      "encryptionType": "RSA",
+      "signatureAlgorithm": "md5WithRSAEncryption",
+      "validityEnd": "2099-01-01T00:00:00Z",
+      "selfSigned": false
+    }
+  ],
+  "count": 5
+}

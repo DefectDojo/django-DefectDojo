@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -35,7 +34,7 @@ class DrHeaderParser:
                     severity=severity,
                     static_finding=False)
         if url is not None:
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 find.unsaved_locations = [LocationData.url(url=url)]
             else:
                 # TODO: Delete this after the move to Locations

@@ -1,7 +1,6 @@
 import re
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -128,7 +127,7 @@ class AideParser:
             # AIDE compares a baseline against a live filesystem rather than reading source.
             dynamic_finding=True,
         )
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             # A path but never a line: AIDE tracks whole files.
             finding.unsaved_locations.append(LocationData.code(file_path=path))
         return finding

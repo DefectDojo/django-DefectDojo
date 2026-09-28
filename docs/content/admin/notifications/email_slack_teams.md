@@ -2,6 +2,7 @@
 title: "Set up Email, Slack or Teams notifications"
 description: "Set up Microsoft Teams to receive notifications"
 aliases:
+  - "/en/notifications/configure-a-slack-integration/"
   - /en/customize_dojo/notifications/email_slack_teams
 ---
 **You will need Superuser access to use the System Settings page, which is required to complete this process.**

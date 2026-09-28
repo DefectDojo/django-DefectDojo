@@ -3,8 +3,8 @@ __author__ = "feeltheajf"
 import json
 
 from dateutil import parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -114,7 +114,7 @@ class BrakemanParser:
                     date=find_date,
                     static_finding=True,
                 )
-                if settings.V3_FEATURE_LOCATIONS and item["file"]:
+                if locations_enabled() and item["file"]:
                     find.unsaved_locations.append(
                         LocationData.code(
                             file_path=item["file"],

@@ -2,8 +2,8 @@ import json
 import logging
 
 import dateutil.parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.spdx.helpers import (
@@ -46,7 +46,7 @@ class SpdxJSONParser:
         # recorded as location metadata on the test, NOT converted into findings. An inventoried
         # package is not a weakness, and manufacturing a finding per package would flood the product
         # with rows nobody can remediate.
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             for package in packages:
                 location = self._location_for(package)
                 if location:
@@ -165,7 +165,7 @@ class SpdxJSONParser:
         if report_date:
             finding.date = report_date
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             location = self._location_for(package)
             if location:
                 finding.unsaved_locations.append(location)

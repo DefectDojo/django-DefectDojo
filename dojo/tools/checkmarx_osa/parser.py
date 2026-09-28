@@ -2,8 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -35,7 +34,7 @@ class CheckmarxOsaParser:
             raise ValueError(msg)
         libraries_dict = self.get_libraries(tree)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             for library in libraries_dict.values():
                 if dep := self.dependency_info(library):
                     test.unsaved_metadata.append(dep)
@@ -97,7 +96,7 @@ class CheckmarxOsaParser:
             if vulnerability_id != "NC":
                 finding_item.unsaved_vulnerability_ids = [vulnerability_id]
 
-            if settings.V3_FEATURE_LOCATIONS and (dep := self.dependency_info(library)):
+            if locations_enabled() and (dep := self.dependency_info(library)):
                 finding_item.unsaved_locations.append(dep)
 
             items.append(finding_item)

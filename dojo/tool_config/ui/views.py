@@ -5,12 +5,13 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.decorators import deprecated_view
 from dojo.tool_config.factory import create_API
 from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_config.ui.forms import ToolConfigForm
-from dojo.utils import add_breadcrumb, dojo_crypto_encrypt, prepare_for_view
+from dojo.utils import add_breadcrumb, dojo_crypto_encrypt
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def new_tool_config(request):
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "Tool Configuration successfully updated.",
+                                     _("Tool Configuration successfully updated."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("tool_config"))
             except Exception as e:
@@ -53,12 +54,21 @@ def new_tool_config(request):
 @deprecated_view("Tool Configuration", removal_version="3.5.0", removal_date="November 2026")
 def edit_tool_config(request, ttid):
     tool_config = Tool_Configuration.objects.get(pk=ttid)
+    # Read before the form binds, which overwrites the instance in place.
+    stored = {field: getattr(tool_config, field) for field in ToolConfigForm.CREDENTIAL_FIELDS}
+    stored_url = tool_config.url
     if request.method == "POST":
         tform = ToolConfigForm(request.POST, instance=tool_config)
         if tform.is_valid():
             form_copy = tform.save(commit=False)
-            form_copy.password = dojo_crypto_encrypt(tform.cleaned_data["password"])
-            form_copy.ssh = dojo_crypto_encrypt(tform.cleaned_data["ssh"])
+            # A blank credential means "leave it as it is", but only while the URL
+            # is unchanged. Pairing a stored secret with a destination submitted in
+            # the same request would send it to a host of the editor's choosing.
+            reuse = form_copy.url == stored_url
+            submitted = tform.cleaned_data
+            form_copy.password = stored["password"] if reuse and not submitted["password"] else dojo_crypto_encrypt(submitted["password"])
+            form_copy.ssh = stored["ssh"] if reuse and not submitted["ssh"] else dojo_crypto_encrypt(submitted["ssh"])
+            form_copy.api_key = stored["api_key"] if reuse and not submitted["api_key"] else submitted["api_key"]
             try:
                 api = create_API(form_copy)
                 if api and hasattr(api, "test_connection"):
@@ -70,7 +80,7 @@ def edit_tool_config(request, ttid):
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "Tool Configuration successfully updated.",
+                                     _("Tool Configuration successfully updated."),
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("tool_config"))
             except Exception as e:
@@ -80,8 +90,6 @@ def edit_tool_config(request, ttid):
                                      str(e),
                                      extra_tags="alert-danger")
     else:
-        tool_config.password = prepare_for_view(tool_config.password)
-        tool_config.ssh = prepare_for_view(tool_config.ssh)
         tform = ToolConfigForm(instance=tool_config)
     add_breadcrumb(title="Edit Tool Configuration", top_level=False, request=request)
 

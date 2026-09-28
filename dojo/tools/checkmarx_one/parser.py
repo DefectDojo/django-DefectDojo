@@ -5,6 +5,7 @@ import re
 from dateutil import parser
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Test
 from dojo.tools.locations import LocationData
 
@@ -103,7 +104,7 @@ class CheckmarxOneParser:
                     )
                     # Add at tag indicating what kind of finding this is
                     finding.unsaved_tags = ["iac"]
-                    if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                    if locations_enabled() and finding.file_path:
                         finding.unsaved_locations.append(
                             LocationData.code(file_path=finding.file_path),
                         )
@@ -195,7 +196,7 @@ class CheckmarxOneParser:
                     finding.description += f"\n---\n{node_snippet}"
                 # Add at tag indicating what kind of finding this is
                 finding.unsaved_tags = ["sast"]
-                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                if locations_enabled() and finding.file_path:
                     finding.unsaved_locations.append(
                         LocationData.code(file_path=finding.file_path, line=finding.line),
                     )
@@ -234,7 +235,7 @@ class CheckmarxOneParser:
                 dynamic_finding=False,
                 **self.determine_state(result),
             )
-            if settings.V3_FEATURE_LOCATIONS and locations_uri:
+            if locations_enabled() and locations_uri:
                 finding.unsaved_locations.append(
                     LocationData.code(
                         file_path=locations_uri,
@@ -292,7 +293,7 @@ class CheckmarxOneParser:
             unique_id_from_tool=unique_id_from_tool,
             **self.determine_state(vulnerability),
         )
-        if settings.V3_FEATURE_LOCATIONS and file_path:
+        if locations_enabled() and file_path:
             finding.unsaved_locations.append(
                 LocationData.code(file_path=file_path),
             )
@@ -319,7 +320,7 @@ class CheckmarxOneParser:
             unique_id_from_tool=unique_id_from_tool,
             **self.determine_state(vulnerability),
         )
-        if settings.V3_FEATURE_LOCATIONS and file_path:
+        if locations_enabled() and file_path:
             finding.unsaved_locations.append(
                 LocationData.code(file_path=file_path),
             )

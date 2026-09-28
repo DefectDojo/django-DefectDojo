@@ -71,7 +71,9 @@ class BlackduckImporter(Importer):
         self, project_ids, security_issues, files=None,
     ):
         """Process findings per projects and return a BlackduckFinding object per the model"""
-        for project_id in project_ids:
+        # sorted(): project_ids is a set, so iterating it directly makes the order in which
+        # findings are produced depend on PYTHONHASHSEED
+        for project_id in sorted(project_ids):
             locations = set()
             if files is not None:
                 for file_entry in files[project_id]:
@@ -82,7 +84,7 @@ class BlackduckImporter(Importer):
 
                     # 4000 character limit on this field
                     total_len = len(full_path)
-                    for location in list(locations):
+                    for location in list(locations):  # set-order-ok: only sums lengths
                         # + 2 for the ", " that will be added.
                         total_len += len(location) + 2
                     if total_len < 4000:
@@ -95,7 +97,9 @@ class BlackduckImporter(Importer):
                 cve = self.get_cve(
                     security_issue_dict.get("Vulnerability id"),
                 ).upper()
-                location = ", ".join(locations)
+                # sorted(): locations is a set, and this string is stored as the finding's
+                # file_path, which must not reshuffle from one import to the next
+                location = ", ".join(sorted(locations))
 
                 yield BlackduckFinding(
                     cve,

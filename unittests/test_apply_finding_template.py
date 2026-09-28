@@ -690,3 +690,18 @@ class TestFindingTemplateCrossTenantReadAuthz(DojoTestCase):
         with impersonate(staff):
             result = views.choose_finding_template_options(request, tid=self.template.id, fid=self.own_finding.id)
         self.assertEqual(200, result.status_code)
+
+    def test_search_listing_denied(self):
+        request = FindingTemplateTestUtil.create_get_request(
+            self.attacker, f"/test/{self.test_a.id}/search")
+        with impersonate(self.attacker), self.assertRaises(PermissionDenied):
+            test_views.search(request, tid=self.test_a.id)
+
+    def test_search_listing_allows_global_edit(self):
+        staff = FindingTemplateTestUtil.create_user(is_staff=True)
+        request = FindingTemplateTestUtil.create_get_request(
+            staff, f"/test/{self.test_a.id}/search")
+        with impersonate(staff):
+            result = test_views.search(request, tid=self.test_a.id)
+        self.assertEqual(200, result.status_code)
+        self.assertIn(self.SECRET, result.content.decode())

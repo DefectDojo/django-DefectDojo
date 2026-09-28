@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '24.18.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
+          node-version: '24.19.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
       - name: Cache dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -34,6 +34,18 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Check front matter titles for (Pro) / (Open Source)
+        # Page titles must not hardcode the edition — that's what the
+        # `audience` front matter field is for.
+        run: |
+          set -euo pipefail
+          if grep -rEn --include='*.md' '^title:.*\((Pro|Open Source)\)' docs/content/; then
+            echo >&2
+            echo 'Found front matter titles hardcoding "(Pro)" or "(Open Source)".' >&2
+            echo 'Remove the suffix from the title and use the "audience" front matter field instead.' >&2
+            exit 1
+          fi
 
       - name: Test the build process
         env:

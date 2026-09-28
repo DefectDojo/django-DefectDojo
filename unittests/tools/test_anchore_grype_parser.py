@@ -1,6 +1,8 @@
+from datetime import date
+
 from dojo.models import Finding, Test
 from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestAnchoreGrypeParser(DojoTestCase):
@@ -366,3 +368,37 @@ class TestAnchoreGrypeParser(DojoTestCase):
             file_paths = {f.file_path for f in findings}
             self.assertIn("/usr/lib/x86_64-linux-gnu/libc.so.6", file_paths)
             self.assertIn("/lib/x86_64-linux-gnu/libc.so.6", file_paths)
+
+    def test_grype_kev_date_parsing(self):
+        """
+        Test that KEV (Known Exploited Vulnerabilities) dates are correctly parsed from Grype reports.
+        KEV dates should be converted from string format (YYYY-MM-DD) to Python date objects.
+        The file contains two findings: CVE-2021-44228 (has knownExploited) and CVE-2021-45046 (no knownExploited).
+        """
+        with (get_unit_tests_scans_path("anchore_grype") / "check_kev_date.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            findings = parser.get_findings(testfile, Test())
+
+        self.assertEqual(2, len(findings))
+
+        finding_with_kev = next(f for f in findings if f.vuln_id_from_tool == "CVE-2021-44228")
+        self.assertIsNotNone(finding_with_kev.kev_date)
+        self.assertIsInstance(finding_with_kev.kev_date, date)
+        self.assertEqual(date(2021, 12, 10), finding_with_kev.kev_date)
+        self.assertTrue(finding_with_kev.known_exploited)
+
+        finding_without_kev = next(f for f in findings if f.vuln_id_from_tool == "CVE-2021-45046")
+        self.assertIsNone(finding_without_kev.kev_date)
+        self.assertFalse(finding_without_kev.known_exploited)
+
+
+class TestAnchoreGrypeParserImageLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_image_source_attaches_the_manifest_digest_image(self):
+        with (get_unit_tests_scans_path("anchore_grype") / "many_vulns.json").open(encoding="utf-8") as test_file:
+            findings = AnchoreGrypeParser().get_findings(test_file, Test())
+        self.assertTrue(findings)
+        expected = {"registry": "", "repository": "python", "digest": "sha256:56e428bb95594df86c86d62aa7b6ca5827ecf23a2a1e933288cba950d394fdbf", "tag": "3.6", "oci_source": "", "oci_revision": ""}
+        for finding in findings:
+            images = [loc.data for loc in finding.unsaved_locations if loc.type == "image"]
+            self.assertEqual([expected], images)

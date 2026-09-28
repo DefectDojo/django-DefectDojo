@@ -4,8 +4,7 @@ import re
 from json.decoder import JSONDecodeError
 
 # import cvss.parser
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -46,7 +45,7 @@ class AuditJSParser:
             msg = "Invalid JSON format. Are you sure you used --json option ?"
             raise ValueError(msg)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             for dependency in data:
                 coordinates = dependency.get("coordinates")
                 if coordinates:
@@ -148,7 +147,7 @@ class AuditJSParser:
                         logger.debug("  %s: %r", field, value)
                     if vulnerability_id:
                         finding.unsaved_vulnerability_ids = [vulnerability_id]
-                    if settings.V3_FEATURE_LOCATIONS and file_path:
+                    if locations_enabled() and file_path:
                         finding.unsaved_locations.append(
                             LocationData.dependency(purl=file_path),
                         )
@@ -159,7 +158,7 @@ class AuditJSParser:
                         find = dupes[dupe_key]
                         if finding.description:
                             find.description += "\n" + finding.description
-                        if settings.V3_FEATURE_LOCATIONS:
+                        if locations_enabled():
                             find.unsaved_locations.extend(
                                 finding.unsaved_locations,
                             )

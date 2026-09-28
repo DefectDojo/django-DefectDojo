@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -59,7 +58,7 @@ class KubeLinterParser:
             dynamic_finding=False,
             vuln_id_from_tool=str(check),
         )
-        if settings.V3_FEATURE_LOCATIONS and file_path:
+        if locations_enabled() and file_path:
             # KubeLinter reports the manifest but never a line number, so the location is the file.
             finding.unsaved_locations.append(LocationData.code(file_path=file_path))
         return finding

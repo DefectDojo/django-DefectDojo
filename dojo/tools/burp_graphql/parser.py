@@ -3,8 +3,8 @@ import logging
 import re
 
 import html2text
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -58,7 +58,7 @@ class BurpGraphQLParser:
                 find.unsaved_cwes = cwes
 
             find.unsaved_req_resp = issue.get("Evidence")
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 find.unsaved_locations = issue.get("Locations")
             else:
                 # TODO: Delete this after the move to Locations
@@ -103,7 +103,7 @@ class BurpGraphQLParser:
             )
 
         url = issue["origin"] + issue["path"]
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding["Locations"].append(LocationData.url(url=url))
         else:
             # TODO: Delete this after the move to Locations
@@ -155,7 +155,7 @@ class BurpGraphQLParser:
             finding["Severity"] = "Info"
 
         url = issue["origin"] + issue["path"]
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding["Locations"] = [LocationData.url(url=url)]
         else:
             # TODO: Delete this after the move to Locations

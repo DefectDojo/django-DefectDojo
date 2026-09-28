@@ -1,0 +1,92 @@
+{
+  "exceptions": [],
+  "failures": [
+    {
+      "granularity": "RESOURCE",
+      "reason": "MyPolicy should not allow a wildcard (`*` or `?`) action",
+      "risk_value": "MEDIUM",
+      "rule": "GenericResourceWildcardPolicyRule",
+      "rule_mode": "BLOCKING",
+      "actions": null,
+      "resource_ids": [
+        "MyPolicy"
+      ],
+      "resource_types": [
+        "AWS::IAM::Policy"
+      ]
+    },
+    {
+      "granularity": "ACTION",
+      "reason": "MyPolicy has blacklisted IAM actions: ['iam:AddUserToGroup', 'iam:AttachGroupPolicy', 'iam:AttachRolePolicy', 'iam:AttachUserPolicy', 'iam:CreateAccessKey', 'iam:CreateLoginProfile', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:PutGroupPolicy', 'iam:PutRolePolicy', 'iam:PutUserPolicy', 'iam:SetDefaultPolicyVersion', 'iam:UpdateAssumeRolePolicy', 'iam:UpdateLoginProfile']",
+      "risk_value": "HIGH",
+      "rule": "PrivilegeEscalationRule",
+      "rule_mode": "BLOCKING",
+      "actions": [
+        "iam:AttachGroupPolicy",
+        "iam:AttachRolePolicy",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:AttachUserPolicy",
+        "iam:CreateAccessKey",
+        "iam:AddUserToGroup",
+        "iam:PutUserPolicy",
+        "iam:CreatePolicy",
+        "iam:UpdateLoginProfile",
+        "iam:SetDefaultPolicyVersion",
+        "iam:CreatePolicyVersion",
+        "iam:PutRolePolicy",
+        "iam:PutGroupPolicy",
+        "iam:CreateLoginProfile"
+      ],
+      "resource_ids": [
+        "MyPolicy"
+      ],
+      "resource_types": [
+        "AWS::IAM::Policy"
+      ]
+    },
+    {
+      "granularity": "RESOURCE",
+      "reason": "S3 Bucket MyBucket is required to contain a LifecycleConfiguration property",
+      "risk_value": "LOW",
+      "rule": "S3LifecycleConfigurationRule",
+      "rule_mode": "BLOCKING",
+      "actions": null,
+      "resource_ids": [
+        "MyBucket"
+      ],
+      "resource_types": [
+        "AWS::S3::Bucket"
+      ]
+    },
+    {
+      "granularity": "RESOURCE",
+      "reason": "S3 Bucket MyBucket is required to have object versioning enabled",
+      "risk_value": "LOW",
+      "rule": "S3ObjectVersioningRule",
+      "rule_mode": "BLOCKING",
+      "actions": null,
+      "resource_ids": [
+        "MyBucket"
+      ],
+      "resource_types": [
+        "AWS::S3::Bucket"
+      ]
+    },
+    {
+      "granularity": "ACTION",
+      "reason": "\"MyPolicy\" is using a wildcard resource in \"example\" allowing all actions",
+      "risk_value": "MEDIUM",
+      "rule": "WildcardResourceRule",
+      "rule_mode": "BLOCKING",
+      "actions": [
+        "*"
+      ],
+      "resource_ids": [
+        "MyPolicy"
+      ],
+      "resource_types": [
+        "AWS::IAM::Policy"
+      ]
+    }
+  ]
+}

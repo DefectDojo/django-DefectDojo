@@ -1,8 +1,7 @@
 import json
 import logging
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.utils import safe_read_all_zip
@@ -176,7 +175,7 @@ class MSDefenderParser:
             finding.unsaved_vulnerability_ids.append(vulnerability["cveId"])
 
         locations = []
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             if "computerDnsName" in machine and machine["computerDnsName"] is not None:
                 host = str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")
                 locations.append(LocationData.url(host=host))

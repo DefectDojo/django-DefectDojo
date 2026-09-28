@@ -1,0 +1,53 @@
+[
+  {
+    "object_name": "Deployment/apps/v1/example-ns/example-api",
+    "type_meta": {
+      "kind": "Deployment",
+      "apiVersion": "apps/v1"
+    },
+    "object_meta": {
+      "name": "example-api",
+      "namespace": "example-ns",
+      "creationTimestamp": null
+    },
+    "checks": [
+      {
+        "check": {
+          "name": "Stable version",
+          "id": "stable-version",
+          "target_type": "all",
+          "comment": "Checks if the object is using a deprecated apiVersion",
+          "optional": false
+        },
+        "grade": 10,
+        "skipped": false,
+        "comments": null
+      },
+      {
+        "check": {
+          "name": "Container Ephemeral Storage Request and Limit",
+          "id": "container-ephemeral-storage-request-and-limit",
+          "target_type": "Pod",
+          "comment": "Makes sure all pods have ephemeral-storage requests and limits set",
+          "optional": false
+        },
+        "grade": 1,
+        "skipped": false,
+        "comments": [
+          {
+            "path": "api",
+            "summary": "Ephemeral Storage limit is not set",
+            "description": "Resource limits are recommended to avoid resource DDOS. Set resources.limits.ephemeral-storage"
+          },
+          {
+            "path": "api",
+            "summary": "Ephemeral Storage request is not set",
+            "description": "Resource requests are recommended to make sure the application can start and run without crashing. Set resource.requests.ephemeral-storage"
+          }
+        ]
+      }
+    ],
+    "file_name": "manifests/deployment.yaml",
+    "file_row": 1
+  }
+]

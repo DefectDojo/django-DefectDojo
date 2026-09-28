@@ -1,0 +1,24 @@
+{
+  "artifacts": [
+    {
+      "id": "art-1",
+      "type": "npm",
+      "namespace": "@example-scope",
+      "name": "utils",
+      "version": "0.2.1",
+      "alerts": [
+        {
+          "key": "alert-1",
+          "type": "malware",
+          "severity": "critical",
+          "category": "supplyChainRisk",
+          "file": "package.json",
+          "props": {
+            "note": "obfuscated install script",
+            "confidence": "high"
+          }
+        }
+      ]
+    }
+  ]
+}

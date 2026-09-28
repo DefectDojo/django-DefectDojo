@@ -2,8 +2,7 @@ import hashlib
 import json
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -41,7 +40,7 @@ class GitlabDastParser:
             ).hexdigest()
 
             if item_key in items:
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     items[item_key].unsaved_locations.extend(
                         item.unsaved_locations,
                     )
@@ -135,7 +134,7 @@ class GitlabDastParser:
         location = vuln.get("location", {})
         if "hostname" in location and "path" in location:
             url_str = f"{location['hostname']}{location['path']}"
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(url=url_str)]
             else:
                 # TODO: Delete this after the move to Locations

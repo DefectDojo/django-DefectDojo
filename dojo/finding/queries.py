@@ -1,9 +1,10 @@
 import logging
 
-from django.conf import settings
 from django.db.models import Case, CharField, Count, Exists, F, Q, Value, When
 from django.db.models.functions import Concat
 from django.db.models.query import Prefetch, QuerySet
+
+from dojo.location.feature import locations_enabled
 
 try:
     from dojo.authorization.query_filters import get_auth_filter
@@ -86,7 +87,7 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
         prefetched_findings = prefetched_findings.prefetch_related("test_import_finding_action_set")
 
     # Endpoint counts using optimized subqueries
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Standard prefetches
         prefetched_findings = prefetched_findings.prefetch_related(
             "notes",

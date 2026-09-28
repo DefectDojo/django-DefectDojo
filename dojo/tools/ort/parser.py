@@ -2,8 +2,7 @@ import hashlib
 import json
 from typing import NamedTuple
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -163,7 +162,7 @@ how to fix : {model.rule_violation['how_to_fix']}"""
         static_finding=True,
     )
 
-    if settings.V3_FEATURE_LOCATIONS and model.pkg:
+    if locations_enabled() and model.pkg:
         if purl := model.pkg.get("purl"):
             finding.unsaved_locations.append(
                 LocationData.dependency(purl=purl),

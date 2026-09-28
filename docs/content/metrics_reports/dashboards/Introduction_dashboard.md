@@ -4,6 +4,7 @@ description: "Working with the front page of DefectDojo"
 weight: 1
 audience: opensource
 aliases:
+  - "/en/customize_dojo/dashboards/introduction_dashboard/"
   - /en/customize_dojo/dashboards/Introduction_dashboard
   - /en/customize_dojo/dashboards/pro_dashboards
 ---
@@ -16,7 +17,7 @@ The Dashboard is likely the first page you'll see when you open DefectDojo. It s
 </div>
 <div class="version-pro">
 
-> **💡 DefectDojo Pro:** In DefectDojo Pro, the home page is a fully **customizable dashboard** — you build it from widgets and arrange them yourself, rather than using the fixed layout described below. See **[Customizable Dashboards](../custom-dashboards/)** for the concepts and a UI walkthrough. The rest of this page describes the open-source Main Dashboard.
+> **💡 DefectDojo Pro:** In DefectDojo Pro, the home page is the **[Command Center](../command-center/)**: one composed screen of your sources, the flow of findings through dedupe and triage, the posture score, and the outcomes. Beside it, **[Customizable Dashboards](../custom-dashboards/)** let you build your own dashboards from widgets; while that feature is off, the sidebar's **Dashboard** entry opens the tile dashboard described below. The rest of this page describes the open-source Main Dashboard.
 
 </div>
 

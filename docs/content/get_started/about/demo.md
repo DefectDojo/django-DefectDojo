@@ -3,6 +3,8 @@ title: "Online Demo"
 description: "There is DefectDojo demo site running the latest officially released version"
 draft: false
 weight: 6
+aliases:
+  - "/en/open_source/installation/demo/"
 ---
 
 Two online demos are available for DefectDojo.  Both come pre-loaded with data and are fully functional, running the latest version of DefectDojo.

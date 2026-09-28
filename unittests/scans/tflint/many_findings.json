@@ -1,0 +1,115 @@
+{
+  "issues": [
+    {
+      "rule": {
+        "name": "terraform_unused_declarations",
+        "severity": "warning",
+        "link": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/v0.15.0/docs/rules/terraform_unused_declarations.md"
+      },
+      "message": "variable \"unused_var\" is declared but not used",
+      "range": {
+        "filename": "main.tf",
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 22
+        }
+      },
+      "callers": [],
+      "fixable": true,
+      "fixed": false
+    },
+    {
+      "rule": {
+        "name": "terraform_required_version",
+        "severity": "warning",
+        "link": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/v0.15.0/docs/rules/terraform_required_version.md"
+      },
+      "message": "terraform \"required_version\" attribute is required",
+      "range": {
+        "filename": "main.tf",
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      "callers": [],
+      "fixable": false,
+      "fixed": false
+    },
+    {
+      "rule": {
+        "name": "aws_instance_invalid_type",
+        "severity": "error",
+        "link": ""
+      },
+      "message": "\"t1.2xlarge\" is an invalid value as instance_type",
+      "range": {
+        "filename": "main.tf",
+        "start": {
+          "line": 8,
+          "column": 19
+        },
+        "end": {
+          "line": 8,
+          "column": 31
+        }
+      },
+      "callers": [],
+      "fixable": false,
+      "fixed": false
+    },
+    {
+      "rule": {
+        "name": "aws_instance_previous_type",
+        "severity": "warning",
+        "link": "https://github.com/terraform-linters/tflint-ruleset-aws/blob/v0.44.0/docs/rules/aws_instance_previous_type.md"
+      },
+      "message": "\"t1.2xlarge\" is previous generation instance type.",
+      "range": {
+        "filename": "main.tf",
+        "start": {
+          "line": 8,
+          "column": 19
+        },
+        "end": {
+          "line": 8,
+          "column": 31
+        }
+      },
+      "callers": [],
+      "fixable": false,
+      "fixed": false
+    },
+    {
+      "rule": {
+        "name": "terraform_required_providers",
+        "severity": "warning",
+        "link": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/v0.15.0/docs/rules/terraform_required_providers.md"
+      },
+      "message": "Missing version constraint for provider \"aws\" in `required_providers`",
+      "range": {
+        "filename": "main.tf",
+        "start": {
+          "line": 11,
+          "column": 1
+        },
+        "end": {
+          "line": 11,
+          "column": 32
+        }
+      },
+      "callers": [],
+      "fixable": false,
+      "fixed": false
+    }
+  ],
+  "errors": []
+}

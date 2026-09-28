@@ -1,5 +1,5 @@
 ---
-title: "Re-enabling login for SSO users (Open Source)"
+title: "Re-enabling login for SSO users"
 description: "Give SSO-provisioned users a local password after moving to Open Source, where SSO is a Pro-only feature"
 audience: opensource
 weight: 2
@@ -30,7 +30,7 @@ Run these steps from the Django shell inside the `uwsgi` container:
 docker compose exec -it uwsgi ./manage.py shell
 ```
 
-### Exmaple for a single user
+### Example for a single user
 
 ```python
 from dojo.user.models import Dojo_User, UserContactInfo
