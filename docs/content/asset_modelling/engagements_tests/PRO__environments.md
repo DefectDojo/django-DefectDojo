@@ -18,7 +18,7 @@ Notably, Environments do not affect Priority scoring or otherwise influence Defe
 
 ### Accessing Environments 
 
-Environments are accessible from the Configuration submenu in the sidebar.
+Environments are accessible from **Settings > Configuration > Environments** in the sidebar.
 
 ![image](images/proenvironments_ss1.png)
 

@@ -26,7 +26,7 @@ Beyond the card, the intelligence is a working surface across the app:
 
 * an **Exploit Maturity column** on the findings list — sortable and filterable
   (for example, "Weaponized or Active only")
-* an **"Urgent & Actively Exploited"** tile on the Priority Layout dashboard, counting
+* an **"Urgent & Actively Exploited"** tile on the Priority Insights dashboard (**Overview > Insights > Priority**), counting
   active Urgent-risk findings with in-the-wild exploitation — clicking through opens the
   exact filtered findings list
 * a **notification event** (`threat_intel_alert`) when an existing finding's CVE gains new
@@ -67,8 +67,8 @@ So there is a second, categorical rule. When threat intelligence reports **activ
 exploitation in the wild**, the finding's Priority is raised to at least the level of a
 configured Risk band, regardless of what the weighted calculation alone produced. It ships
 set to **Needs Action**; each Organization can raise it to Urgent, lower it, or clear it to
-switch the floor off, in Prioritization Engine settings under *Actively-Exploited Risk
-Floor*.
+switch the floor off, in Prioritization Engine settings
+(**Settings > Finding Workflow > Prioritization Engines**) under *Actively-Exploited Risk Floor*.
 
 The floor only ever raises — it never moves a finding down, and a finding that already
 scores higher on its own is untouched. Because it applies to Priority, the Risk band and

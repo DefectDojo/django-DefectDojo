@@ -137,9 +137,9 @@ The two version endpoints follow the same rule as the rest of the Asset surface:
 
 When Locations is enabled, the navigation exposes:
 
-- **Locations / Dependencies** — Global list of every Dependency across the instance, with pURL filters.
+- **Act > Explore > Attack Surface > Dependencies** — Global list of every Dependency across the instance, with pURL filters.
 - **Locations on an Asset/Asset** — Per-Asset view that shows both URLs and Dependencies, with the **Upload SBOM** action surfaced on the Dependencies tab.
-- **New Dependency** — Form to create a single library by entering its pURL components manually.
+- **New** on the Dependencies list — Form to create a single library by entering its pURL components manually.
 - **Findings detail** — A Finding that touches a library shows its Dependency Locations alongside any URL Locations, so you can see *"this CVE affects `log4j-core@2.14.1` on Asset 6 and Asset 9"* in one place.
 
 ## Exporting

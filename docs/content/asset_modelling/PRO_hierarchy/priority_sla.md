@@ -126,7 +126,7 @@ The Risk calculation itself cannot currently be adjusted directly. However, if [
 ## Priority Insights Dashboard
 
 Users can take an executive-level view of Priority and Risk in their environment using
-the Priority Insights Dashboard (Metrics > Priority Insights in the sidebar)
+the Priority Insights Dashboard (**Overview > Insights > Priority** in the sidebar)
 
 ![image](images/priority_dashboard.png)
 
@@ -160,7 +160,7 @@ DefectDojo Pro's Priority and Risk calculations can be adjusted, allowing you to
 
 ## Prioritization Engines
 
-Similar to SLA configurations, Prioritization Engines allow you to set the rules governing how Priority and Risk are calculated.
+Similar to SLA configurations, Prioritization Engines (**Settings > Finding Workflow > Prioritization Engines** in the sidebar) allow you to set the rules governing how Priority and Risk are calculated.
 
 ![image](images/priority_default.png)
 
@@ -275,7 +275,7 @@ You can use SLAs as a way to represent your organizations remediation policies. 
 
 * You can sort or filter Finding tables by SLA days.
 * SLA violations can be configured to trigger [Notifications](/admin/notifications/about_notifications/) to DefectDojo users assigned to the related Asset.
-* In **DefectDojo Pro**, SLA performance is also tracked on the [Executive Insights and Remediation](/metrics_reports/pro_metrics/pro__overview/) Metrics Dashboards.
+* In **DefectDojo Pro**, SLA performance is also tracked on the [Executive and Remediation Insights](/metrics_reports/pro_metrics/pro__overview/) dashboards under **Overview > Insights**.
 * SLA compliance can also be surfaced on a custom [dashboard](/metrics_reports/dashboards/custom-dashboards/) in **DefectDojo Pro** — for example with an SLA Burndown or a filtered Count widget.
 
 ### Mitigated Within SLA status
@@ -294,7 +294,7 @@ When an SLA for a given Finding is violated (the Finding is not Closed within th
 
 ## Managing SLA Configurations (Pro)
 
-In DefectDojo Pro, one or more SLA Configurations are managed under the **Configuration > Service Level Agreements** part of the sidebar.  You can create a **New Service Level Agreement** or work with existing SLA configurations from the **All Service Level Agreements** page.
+In DefectDojo Pro, one or more SLA Configurations are managed under **Settings > Finding Workflow > Service Level Agreements** in the sidebar.  You can create a new SLA configuration by selecting **New**, or work with existing SLA configurations from that page.
 
 ![image](images/pro_sla_risk.png)
 

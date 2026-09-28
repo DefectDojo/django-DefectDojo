@@ -22,9 +22,9 @@ When you create or upload a URL, DefectDojo parses it into the structured fields
 
 When the Locations feature is enabled, the navigation exposes:
 
-- **Locations / All** — A list of every Location across both URL and Dependency subtypes. Filter by type, status, Asset, Finding, or tag.
-- **Locations / URLs** — A scoped list of URL Locations only. This is the closest analogue to the old Endpoints page.
-- **New URL** — A form to create a single URL with structured fields, tags, and optional Asset/Finding associations.
+- **Act > Explore > Attack Surface > Locations** — A list of every Location across both URL and Dependency subtypes. Filter by type, status, Asset, Finding, or tag.
+- **Act > Explore > Attack Surface > URLs** — A scoped list of URL Locations only. This is the closest analogue to the old Endpoints page.
+- **New** on the URLs list — A form to create a single URL with structured fields, tags, and optional Asset/Finding associations.
 - **Locations on an Asset** — From any Asset, the **Locations** tab shows the URLs and Dependencies attached to that Asset, with status counts and quick actions.
 
 Common workflows from the Endpoints UI are preserved:

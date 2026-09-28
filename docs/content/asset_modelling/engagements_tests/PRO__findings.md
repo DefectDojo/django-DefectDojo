@@ -24,9 +24,9 @@ In addition to storing the vulnerability data and providing a remediation framew
 Overall, Findings are designed to work with the Asset Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
 
 ## Accessing Findings 
-Findings are accessible via the sidebar. The submenu provides access to Active and Mitigated Findings, All Findings (regardless of Open or Closed status), Finding Groups, Finding Templates, and the New Finding workflow. Individual Findings are also accessible from within the Test that contains them. 
+Findings are accessible from the sidebar under **Act > Explore > Findings**. The submenu provides access to **Active** and **Mitigated** Findings, **All** Findings (regardless of Open or Closed status), Finding **Groups**, **Risk Accepted** Findings and Finding **Templates**; new Findings are created with the **New** button at the top of a Findings list. Individual Findings are also accessible from within the Test that contains them. 
 
-[Risk Accepted Findings] (/triage_findings/findings_workflows/os__risk_acceptance/) are accessible from the **Risk Acceptances** section of the sidebar. 
+[Risk Accepted Findings](/triage_findings/findings_workflows/os__risk_acceptance/) are listed under **Act > Explore > Findings > Risk Accepted**; the Risk Acceptance records themselves are managed from **Act > Risk Acceptances** in the sidebar. 
 
 ![image](images/profindings_ss1.png)
 
@@ -42,7 +42,7 @@ Finding views contain a variety of tables to help interpret a Finding’s status
 - **Description**: The description of the Finding (added automatically depending on the type of Finding, or created manually). 
 - **Mitigation**: Suggested steps to mitigate.
 - **General Mitigation Policy**: The standardized mitigation policy for the selected Finding. 
-Mitigation policies can be found and edited in the sidebar under **Configuration** → **Mitigation Policies**.
+Mitigation policies can be found and edited in the sidebar under **Settings > Finding Workflow > Mitigation Policies**.
 - **Impact**: Potential impact of leaving the Finding unresolved.
 - **References**: URL to cross-reference the third-party scan tool’s specific description of the Finding. For example, References could be links to a relevant entry in a Finding catalog, or a single advisory URL. 
 - **Files**: Any files that have been added to contextualize the Finding. 
@@ -145,7 +145,7 @@ More information about Statuses can be found [here](/triage_findings/findings_wo
 ### Creating Findings 
 While most Findings are generated automatically through scan imports and integrations, DefectDojo also supports the manual creation of Findings. Manual Findings are useful for tracking vulnerabilities and security concerns identified through penetration testing, architecture reviews, compliance assessments, bug bounty programs, consultant engagements, or other activities that do not produce scanner output. 
 
-Findings can be manually added by either clicking **New Finding** within the **Findings** section of the sidebar, or by selecting **Add Finding** within the gear menu of the Test you wish to add the Finding to. 
+Findings can be manually added by either opening a Findings list (**Act > Explore > Findings**) and selecting **New**, or by selecting **Add Finding** within the gear menu of the Test you wish to add the Finding to. 
 
 ### Editing Findings 
 The ⋮ kebab menu next to Findings contains the following functions: 
@@ -177,7 +177,7 @@ To attach a file to a Finding, click **Add File** from within either the ⋮ keb
 The file will then appear in the Files section of the **Test Overview** table within the Finding’s view.
 
 #### Bulk Edit Findings 
-Findings can be edited in bulk from a Finding List, such as the table of All Findings accessible from the sidebar, or from the table of Findings within a specific Test.
+Findings can be edited in bulk from a Finding List, such as the table of All Findings (**Act > Explore > Findings > All** in the sidebar), or from the table of Findings within a specific Test.
 
 More information about how to bulk edit Findings can be found [here](/triage_findings/findings_workflows/editing_findings/#bulk-edit-findings). 
 
@@ -202,7 +202,7 @@ For example, a scan might produce 10 SQL injection Findings across different end
 A Finding Group does not replace the individual Findings. Each Finding still exists with its own severity, status, metadata, comments, and remediation history. A Finding Group simply provides an additional organizational layer above the Findings it contains.
 
 ### Accessing Finding Groups 
-Finding Groups can be accessed via the sidebar. The submenu provides access to Open and Closed Finding Groups as well as All Finding Groups (regardless of Open status).
+Finding Groups can be accessed from the sidebar under **Act > Explore > Findings > Groups**, which lists Open and Closed Finding Groups as well as All Finding Groups (regardless of Open status).
 
 ![image](images/profindings_ss1.png)
 
@@ -247,7 +247,7 @@ If a scan is imported that reveals 10 Findings that are not grouped and the same
 Finding Templates are most useful in situations where Users need to create manual Findings repeatedly and want to avoid re-entering the same supporting information each time.
 
 ### Accessing Finding Templates 
-Finding Templates are found within the Findings submenu in the sidebar. 
+Finding Templates are found in the sidebar under **Act > Explore > Findings > Templates**. 
 
 ![image](images/profindings_ss1.png)
 
