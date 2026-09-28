@@ -89,7 +89,7 @@ While the integration is disabled, there is no **Jira** entry under **Connect** 
 
 ### Enable the integration
 
-1. Navigate to **Settings > System > System Settings** from the DefectDojo sidebar. On instances still using the previous menu layout this sits under a group named after your license package — **Pro Settings** or **Enterprise Settings**. See [The Sidebar Menu](/navigation/pro__sidebar/).
+1. Navigate to **Settings > System > System Settings** from the DefectDojo sidebar.
 ​
 2. In the **Jira Integration Settings** section, check **Enable Jira Integration**.
 ​
@@ -139,7 +139,7 @@ Multiple Jira Spaces can be handled by a single Jira Instance connection, as lon
 
 1. Make sure **Enable Jira Integration** is checked in System Settings, as described in [Step 1](#step-1-enable-the-jira-integration-in-system-settings).  **Connect > Jira** does not appear in the sidebar until it is.
 
-2. Open **Connect > Jira** from the DefectDojo sidebar and select **New** to add a Jira Instance.
+2. Open **Connect > Jira** from the DefectDojo sidebar and select **New Jira Instance**.
 
 ![image](images/jira-instance-beta.png)
 

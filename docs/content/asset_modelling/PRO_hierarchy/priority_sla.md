@@ -294,7 +294,7 @@ When an SLA for a given Finding is violated (the Finding is not Closed within th
 
 ## Managing SLA Configurations (Pro)
 
-In DefectDojo Pro, one or more SLA Configurations are managed under **Settings > Finding Workflow > Service Level Agreements** in the sidebar.  You can create a new SLA configuration by selecting **New**, or work with existing SLA configurations from that page.
+In DefectDojo Pro, one or more SLA Configurations are managed under **Settings > Finding Workflow > Service Level Agreements** in the sidebar.  You can create a new SLA configuration by selecting **New Service Level Agreement**, or work with existing SLA configurations from that page.
 
 ![image](images/pro_sla_risk.png)
 

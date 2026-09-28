@@ -20,7 +20,7 @@ Risk Acceptances have their own entry in the sidebar, and risk-accepted Findings
     - This page includes a table of all Findings that have been risk accepted, whether through as a part of a Full Risk Acceptance object or using the Simple Risk Acceptance workflow. 
 - **Act > Risk Acceptances**
     - This page includes a table of all Full Risk Acceptance objects, arranged in chronological order.
-    - Clicking **New** on this page will start the workflow to create a Full Risk Acceptance object.  
+    - Clicking **New Risk Acceptance** on this page will start the workflow to create a Full Risk Acceptance object.  
 
 ![Risk acceptance sidebar](images/RA_image1.png)
 
@@ -58,13 +58,13 @@ If you don’t specify a date, the Default Risk Acceptance / Default Risk Accept
 #### How to Complete a Full Risk Acceptance
 
 A Full Risk Acceptance object can be made in three different ways:
-- Using the **New** button on the **Act > Risk Acceptances** page.
+- Using the **New Risk Acceptance** button on the **Act > Risk Acceptances** page.
 - Using the **Add Risk Acceptance** button on an individual Finding.
 - Clicking the **Risk Acceptance Actions** button that appears after selecting a Finding/multiple Findings from within a table.
 
 ##### New Risk Acceptance (Risk Acceptances page)
 
-Clicking **New** on the **Act > Risk Acceptances** page will open a page in which the User can establish the data and details associated with a new Full Risk Acceptance object. The second page will allow the User to filter and select the Findings to be added to that object.
+Clicking **New Risk Acceptance** on the **Act > Risk Acceptances** page will open a page in which the User can establish the data and details associated with a new Full Risk Acceptance object. The second page will allow the User to filter and select the Findings to be added to that object.
 
 ##### Add Risk Acceptance (Individual) 
 

@@ -34,7 +34,7 @@ The Universal Parser configuration is only available in the Pro UI, though you c
 
 ## Step 1: Creating a new Universal Parser
 
-You can create a new Universal Parser by opening **Connect > Import > Universal Parser** in the sidebar and selecting **New**, or from the link on the "Add Findings" page.
+You can create a new Universal Parser by opening **Connect > Import > Universal Parser** in the sidebar and selecting **New Universal Parser**, or from the link on the "Add Findings" page.
 
 ![image](images/universal_parser.png)
 

@@ -24,7 +24,7 @@ When the Locations feature is enabled, the navigation exposes:
 
 - **Act > Explore > Attack Surface > Locations** — A list of every Location across both URL and Dependency subtypes. Filter by type, status, Asset, Finding, or tag.
 - **Act > Explore > Attack Surface > URLs** — A scoped list of URL Locations only. This is the closest analogue to the old Endpoints page.
-- **New** on the URLs list — A form to create a single URL with structured fields, tags, and optional Asset/Finding associations.
+- **New URL** on the URLs list — A form to create a single URL with structured fields, tags, and optional Asset/Finding associations.
 - **Locations on an Asset** — From any Asset, the **Locations** tab shows the URLs and Dependencies attached to that Asset, with status counts and quick actions.
 
 Common workflows from the Endpoints UI are preserved:

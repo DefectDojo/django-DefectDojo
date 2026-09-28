@@ -12,7 +12,7 @@ A rule is built on a canvas. You drag nodes out of a palette, wire them together
 
 ## The editor
 
-Open **Act > Triage Engine > Rules** and select **New**, or open an existing rule to edit it.
+Open **Act > Triage Engine > Rules** and select **New Rule**, or open an existing rule to edit it.
 
 The palette is grouped into five categories, which is also the order items flow through a typical graph:
 

@@ -32,7 +32,7 @@ Rather than Deduplicating across an entire Asset, you can scope Deduplication to
 
 ### Open the Engagement form
 
-* **For a new Engagement:** open **Act > Explore > Engagements** in the sidebar and select **New**.
+* **For a new Engagement:** open **Act > Explore > Engagements** in the sidebar and select **New Engagement**.
 
 ![image](images/enabling_deduplication_within_an_engagement.png)
 

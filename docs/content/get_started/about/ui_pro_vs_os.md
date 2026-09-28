@@ -18,7 +18,7 @@ The Pro UI brings the following enhancements to DefectDojo:
 
 ## Switching To The Pro UI
 
-To access the Pro UI from the Classic UI, open your User Options menu from the top-right hand corner.  To switch back to the Classic UI, open the same User Options menu in the Pro UI by selecting your name (with the gear icon) at the bottom of the sidebar.
+To access the Pro UI from the Classic UI, open your User Options menu from the top-right hand corner. In the Pro UI, your user menu (your name at the bottom of the sidebar) holds your profile, API token and documentation links. Pages that only exist in the Classic UI are marked in the sidebar and open in a new tab.
 
 ![image](images/beta-classic-uis.png)
 

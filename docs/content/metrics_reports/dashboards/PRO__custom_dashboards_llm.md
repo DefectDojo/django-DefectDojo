@@ -16,7 +16,7 @@ This guide pairs with the [Dashboards API guide](../custom-dashboards-api/), whi
 
 ## Before you start
 
-1. **Get an API token.** In the DefectDojo Pro UI, go to **User Settings > API v2 Key** and copy the token. Then set it as an environment variable so the generated script can read it without the token ever appearing in chat:
+1. **Get an API token.** In the DefectDojo Pro UI, open the user menu (your name at the bottom of the sidebar), select **API v2 Token** and copy the token. Then set it as an environment variable so the generated script can read it without the token ever appearing in chat:
 
 ```shell
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>

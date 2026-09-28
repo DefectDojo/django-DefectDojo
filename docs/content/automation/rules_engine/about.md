@@ -47,7 +47,7 @@ Each Rule can apply one or more of these changes to a Finding when it is trigger
 Rules are automatically triggered when a Finding meets specific Filter conditions. For more information on Filters that can be used to create Rule Actions, see the [Filter Index](/navigation/pro__filter_index) page.
 
 ## Creating a New Rule
-In the [Pro UI](/get_started/about/ui_pro_vs_os/), open **Act > Triage Engine > Classic Rules** and select **New**.
+In the [Pro UI](/get_started/about/ui_pro_vs_os/), open **Act > Triage Engine > Classic Rules** and select **New Rule**.
 
 ![image](images/rules_engine_1.png)
 

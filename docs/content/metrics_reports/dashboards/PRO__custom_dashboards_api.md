@@ -16,7 +16,7 @@ This guide walks the full lifecycle: authenticate, discover the widget vocabular
 
 Every request authenticates with a personal API token sent in the `Authorization` header using the `Token` prefix (not `Bearer`).
 
-Get your token from the DefectDojo Pro UI under **User Settings > API v2 Key**. Store it in an environment variable so it never lands in your shell history or a committed script:
+Get your token from the DefectDojo Pro UI from the user menu (your name at the bottom of the sidebar) under **API v2 Token**. Store it in an environment variable so it never lands in your shell history or a committed script:
 
 ```bash
 export DD_IMPORTER_DOJO_API_TOKEN="YOUR_API_TOKEN"

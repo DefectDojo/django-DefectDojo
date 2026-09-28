@@ -24,7 +24,7 @@ In addition to storing the vulnerability data and providing a remediation framew
 Overall, Findings are designed to work with the Asset Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
 
 ## Accessing Findings 
-Findings are accessible from the sidebar under **Act > Explore > Findings**. The submenu provides access to **Active** and **Mitigated** Findings, **All** Findings (regardless of Open or Closed status), Finding **Groups**, **Risk Accepted** Findings and Finding **Templates**; new Findings are created with the **New** button at the top of a Findings list. Individual Findings are also accessible from within the Test that contains them. 
+Findings are accessible from the sidebar under **Act > Explore > Findings**. The submenu provides access to **Active** and **Mitigated** Findings, **All** Findings (regardless of Open or Closed status), Finding **Groups**, **Risk Accepted** Findings and Finding **Templates**; new Findings are created with the **New Finding** button at the top of a Findings list. Individual Findings are also accessible from within the Test that contains them. 
 
 [Risk Accepted Findings](/triage_findings/findings_workflows/os__risk_acceptance/) are listed under **Act > Explore > Findings > Risk Accepted**; the Risk Acceptance records themselves are managed from **Act > Risk Acceptances** in the sidebar. 
 
@@ -145,7 +145,7 @@ More information about Statuses can be found [here](/triage_findings/findings_wo
 ### Creating Findings 
 While most Findings are generated automatically through scan imports and integrations, DefectDojo also supports the manual creation of Findings. Manual Findings are useful for tracking vulnerabilities and security concerns identified through penetration testing, architecture reviews, compliance assessments, bug bounty programs, consultant engagements, or other activities that do not produce scanner output. 
 
-Findings can be manually added by either opening a Findings list (**Act > Explore > Findings**) and selecting **New**, or by selecting **Add Finding** within the gear menu of the Test you wish to add the Finding to. 
+Findings can be manually added by either opening a Findings list (**Act > Explore > Findings**) and selecting **New Finding**, or by selecting **Add Finding** within the gear menu of the Test you wish to add the Finding to. 
 
 ### Editing Findings 
 The ⋮ kebab menu next to Findings contains the following functions: 

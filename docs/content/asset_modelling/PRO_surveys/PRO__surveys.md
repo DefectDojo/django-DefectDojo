@@ -22,7 +22,7 @@ Users without Superuser status can still respond to Surveys that are shared with
 
 ## Accessing Surveys and Questions 
 
-Users with Superuser status can access Surveys and Questions from the sidebar under **Act > Explore > Surveys**. The submenu provides access to **Surveys** and **Questions**; new Surveys and Questions are created with the **New** button at the top of each list.
+Users with Superuser status can access Surveys and Questions from the sidebar under **Act > Explore > Surveys**. The submenu provides access to **Surveys** and **Questions**; new Surveys and Questions are created with the **New Survey** and **New Question** buttons on those pages.
 
 ![image](images/pq_ss1.png)
 
@@ -38,7 +38,7 @@ The view of All Questions includes a table of Questions that can be added to a S
 
 ### Create Survey Templates 
 
-Survey templates are created by opening **Act > Explore > Surveys > Surveys** and clicking the **New** button at the top of the All Surveys view. 
+Survey templates are created by opening **Act > Explore > Surveys > Surveys** and clicking the **New Survey** button at the top of the All Surveys view. 
 
 ![image](images/pq_ss2.png)
 
@@ -52,7 +52,7 @@ As a best practice, it is strongly recommended to avoid modifying or adding Ques
 
 ### Create Questions 
 
-Similar to Survey templates, Questions are created by opening **Act > Explore > Surveys > Questions** and clicking the **New** button at the top of the All Questions view. 
+Similar to Survey templates, Questions are created by opening **Act > Explore > Surveys > Questions** and clicking the **New Question** button at the top of the All Questions view. 
 
 #### Question Types 
 

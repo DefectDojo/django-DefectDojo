@@ -62,7 +62,7 @@ Beyond these built-in fields, an administrator can define typed **Custom Fields*
 
 ## Accessing Assets 
 
-Assets are accessible from the sidebar under **Act > Explore > Assets**. The submenu provides access to the [Asset Hierarchy](/asset_modelling/engagements_tests/pro__assets/#asset-nesting) (**Hierarchy**) and the full Asset list (**All**); new Assets are created with the **New** button at the top of the list.
+Assets are accessible from the sidebar under **Act > Explore > Assets**. The submenu provides access to the [Asset Hierarchy](/asset_modelling/engagements_tests/pro__assets/#asset-nesting) (**Hierarchy**) and the full Asset list (**All**); new Assets are created with the **New Asset** button at the top of the list.
 
 ![image](images/assets_ss1.png)
 
@@ -99,7 +99,7 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
 
 ### Create Assets 
 
-Assets are created from the **New** button at the top of the All Assets list (**Act > Explore > Assets > All**). 
+Assets are created from the **New Asset** button at the top of the All Assets list (**Act > Explore > Assets > All**). 
 
 ## Edit Assets 
 

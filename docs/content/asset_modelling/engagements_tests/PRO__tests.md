@@ -114,7 +114,7 @@ Tests can be automatically created when scan data is imported directly into an E
 
 In order to make a Test, an Engagement must be made to contain it, as well as an Asset that will contain that Engagement. Afterwards, there are several ways to create a Test: 
 
-- From the **New** button at the top of the Tests list (**Act > Explore > Tests**)
+- From the **New Test** button at the top of the Tests list (**Act > Explore > Tests**)
     - You will have to select the pre-existing Engagement to attribute the Test to when completing the New Test form. 
 
 ![image](images/tests_ss1.png)

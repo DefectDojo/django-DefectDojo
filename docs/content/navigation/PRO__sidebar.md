@@ -33,7 +33,7 @@ Move through results with the arrow keys, open one with **Enter**, and close the
 
 Three conventions run through the whole menu:
 
-- **There are no separate "New" entries.** Each list page has a **New** button that opens the create form, so the menu carries one entry per catalog instead of two. If your account can create a record but not list them, the menu entry takes you straight to the create form.
+- **There are no separate "New" entries.** Each list page has a **New** button (**New Asset**, **New Finding**, and so on) that opens the create form, so the menu carries one entry per catalog instead of two. If your account can create a record but not list them, the menu entry takes you straight to the create form.
 - **Nothing nests more than one level below a section.** Reaching a page is at most section, group, page.
 - **A feature occupies one entry, not one per screen.** PSIRT's nine pages, the Triage Engine's four and the record catalogs all sit behind a single entry each, instead of spreading across the menu.
 - **An entry is not repeated inside itself.** Where a group already names the thing, its entries do not name it again: **Findings** holds Active, Mitigated and All rather than "All Findings", and **Attack Surface** holds Endpoints and Hosts rather than "All Endpoints".
@@ -134,7 +134,7 @@ If you are used to the previous layout:
 | Manage > Risk Acceptances | Act > Risk Acceptances |
 | Manage > Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
 | Manage > Rules Engine and Rules Engine 2.0 | Act > Triage Engine |
-| Manage > *(any)* > New *(record)* | The **New** button on the matching list page |
+| Manage > *(any)* > New *(record)* | The **New** *(record)* button on the matching list page |
 | Dashboards > Home | Overview > Dashboards *(when Dashboards 2.0 is on)* |
 | Settings > *(top level)* > Feature Flags | Unchanged — still at the top level, below All Settings |
 | Settings > Pro Settings > System Settings | Settings > System > System Settings |

@@ -12,7 +12,7 @@ The admin who creates the account is responsible for delivering the initial cred
 ## Recommended workflow
 
 1. **Create the user account** in DefectDojo (Superuser only):
-   * Open **Settings > Users & Permissions > Users** and select **New**.
+   * Open **Settings > Users & Permissions > Users** and select **New User**.
    * Enter the new user's name and email address.
    * Set a temporary password.
    * Submit the form.

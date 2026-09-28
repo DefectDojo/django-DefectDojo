@@ -147,7 +147,7 @@ permission on **both** the Organization and the Asset.
 
 ## Accessing Organizations
 
-Organizations are accessible from the sidebar under **Act > Explore > Organizations**; new Organizations are created with the **New** button at the top of the list.
+Organizations are accessible from the sidebar under **Act > Explore > Organizations**; new Organizations are created with the **New Organization** button at the top of the list.
 
 ![image](images/org_ss1.png)
 
@@ -173,7 +173,7 @@ member Asset with the provenance of its membership (see
 
 ### Create Organizations 
 
-Organizations are created from the **New** button at the top of the All Organizations list (**Act > Explore > Organizations**). 
+Organizations are created from the **New Organization** button at the top of the All Organizations list (**Act > Explore > Organizations**). 
 
 ### Edit Organizations 
 
