@@ -25,6 +25,24 @@ The sidebar features a section for Risk Acceptances that includes three subsecti
 
 ![Risk acceptance sidebar](images/RA_image1.png)
 
+### Finding Risk Acceptances by host
+
+The **All Risk Acceptances** table includes a **Host** column listing the hosts covered by each
+Risk Acceptance's accepted Findings, and that column's filter narrows the table to the Risk
+Acceptances covering a given host. The filter matches on part of a host, so filtering on
+`example.com` returns every Risk Acceptance covering a subdomain of it.
+
+This answers the question that comes up when a host is being decommissioned, handed to another
+team, or reviewed in an audit: what has already been accepted here, and by whom. A Risk Acceptance
+covering several Findings on the same host lists that host once, and one covering Findings on
+several hosts lists each of them.
+
+The same filter is available on the API as `finding_host`:
+
+```
+GET /api/v2/risk_acceptance/?finding_host=api.example.com
+```
+
 ## Creating Risk Acceptances
 
 When a Finding is Risk Accepted, the following will occur:

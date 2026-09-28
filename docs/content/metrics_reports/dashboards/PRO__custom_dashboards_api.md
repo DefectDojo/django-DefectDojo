@@ -494,3 +494,4 @@ curl -s -X POST \
 
 - Build and arrange the same layouts interactively in the [Customizable Dashboards UI](../custom-dashboards/).
 - Let an LLM design and build dashboards for you with the [Dashboards LLM integration](../custom-dashboards-llm/).
+- Use the same endpoints through an AI assistant connected to the [MCP Server's Dashboards Toolset](../../ai/mcp_server_pro/#dashboards-toolset).

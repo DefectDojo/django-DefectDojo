@@ -39,8 +39,8 @@ class GenericCSVParser:
                 finding.active = self._convert_bool(row.get("Active"))
             if "IsMitigated" in row:
                 finding.is_mitigated = self._convert_bool(row.get("IsMitigated"))
-            if "MitigatedDate" in row:
-                finding.mitigated = parse(row["MitigatedDate"])
+            if mitigated_date := self._cell(row, "MitigatedDate"):
+                finding.mitigated = parse(mitigated_date)
             # manage mitigation
             if "Mitigation" in row:
                 finding.mitigation = row["Mitigation"]
@@ -70,8 +70,8 @@ class GenericCSVParser:
                         row["Vulnerability Id"],
                     ]
             # manage CWE
-            if "CweId" in row:
-                finding.cwe = int(row["CweId"])
+            if cwe_id := self._cell(row, "CweId"):
+                finding.cwe = int(cwe_id)
             # manage multiple CWEs (comma/space separated column), keeping the
             # primary on finding.cwe; the full set is persisted via unsaved_cwes.
             if row.get("CweIds"):
@@ -81,36 +81,37 @@ class GenericCSVParser:
                         finding.cwe = cwe_number(cwes[0])
                     finding.unsaved_cwes = cwes
 
-            if "epss_score" in row:
-                finding.epss_score = float(row["epss_score"])
+            if epss_score := self._cell(row, "epss_score"):
+                finding.epss_score = float(epss_score)
 
-            if "epss_percentile" in row:
-                finding.epss_percentile = float(row["epss_percentile"])
+            if epss_percentile := self._cell(row, "epss_percentile"):
+                finding.epss_percentile = float(epss_percentile)
 
             if "CVSSV3" in row:
                 cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
                 if len(cvss_objects) > 0:
                     finding.cvssv3 = cvss_objects[0].clean_vector()
 
+            # Finding.save() recalculates the score from a valid CVSSV3 vector, so this
+            # value only survives when the report has a score without a vector
+            if cvssv3_score := self._cell(row, "CVSSV3_score"):
+                finding.cvssv3_score = float(cvssv3_score)
+
             if "CVSSV4" in row:
                 cvss4_objects = cvss_parser.parse_cvss_from_text(row["CVSSV4"])
                 if len(cvss4_objects) > 0:
                     finding.cvssv4 = cvss4_objects[0].clean_vector()
 
-            if "CVSSV4_score" in row:
-                finding.cvssv4_score = float(row["CVSSV4_score"])
+            if cvssv4_score := self._cell(row, "CVSSV4_score"):
+                finding.cvssv4_score = float(cvssv4_score)
 
-            if "kev_date" in row:
-                finding.kev_date = parse(row["kev_date"])
+            if kev_date := self._cell(row, "kev_date"):
+                finding.kev_date = parse(kev_date)
 
-            if "known_exploited" in row:
-                finding.known_exploited = bool(row["known_exploited"])
-
-            if "ransomware_used" in row:
-                finding.ransomware_used = bool(row["ransomware_used"])
-
-            if "fix_available" in row:
-                finding.fix_available = bool(row["fix_available"])
+            # an empty cell leaves the model default in place (False, False, None)
+            for field in ("known_exploited", "ransomware_used", "fix_available"):
+                if value := self._cell(row, field):
+                    setattr(finding, field, self._convert_bool(value))
 
             if "fix_version" in row:
                 finding.fix_version = row["fix_version"]
@@ -157,6 +158,13 @@ class GenericCSVParser:
             else:
                 dupes[key] = finding
         return list(dupes.values())
+
+    def _cell(self, row, column):
+        """Return the stripped value of a column, or None when the column is absent or the cell is empty."""
+        value = row.get(column)
+        if value is None:
+            return None
+        return value.strip() or None
 
     def _convert_bool(self, val):
         return val.lower()[0:1] == "t"  # bool False by default
