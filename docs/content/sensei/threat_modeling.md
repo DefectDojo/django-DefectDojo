@@ -13,7 +13,7 @@ This is Sensei's **pre-code** capability. Where [scan-and-fix](/sensei/about_sen
 
 > **🔎 BETA:** Threat Modeling is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases. It is on by default; a superuser can switch it off, or back on, from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required.
 
-> **📍 Where to find it:** open **Threat Modeling** from the left-hand navigation, directly below Sensei.
+> **📍 Where to find it:** open **Sensei + AI > Threat Modeling** from the left-hand navigation, directly below Sensei.
 
 ## What you need
 

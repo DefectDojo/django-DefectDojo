@@ -24,7 +24,7 @@ weight: 1
 
 > **🔎 BETA:** Sensei is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases.
 
-> **📍 Where to find it:** open **Sensei** from the left-hand navigation.
+> **📍 Where to find it:** open **Sensei + AI > Sensei** from the left-hand navigation.
 
 ![Sensei hub](images/hub_overview.png)
 

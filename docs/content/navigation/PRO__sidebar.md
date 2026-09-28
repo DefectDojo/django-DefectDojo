@@ -16,7 +16,7 @@ Either way, **every page keeps the same URL**. Bookmarks, saved links and anythi
 | Section | What it holds |
 | --- | --- |
 | **Overview** | Dashboards, Insights, My Work, Reporting, Calendar |
-| **Sensei + AI** | AppSec, CSPM, Threat Modeling, MCP, AI Model Settings |
+| **Sensei + AI** | Sensei, CSPM, Threat Modeling, MCP, AI Model Settings |
 | **Connect** | Upstream, Downstream, Jira, Authorization, Diagnostics, Import |
 | **Act** | Triage Engine, Vulnerability Explorer, Root Causes, Risk Acceptances, PSIRT, Explore |
 | **Settings** | All Settings, plus the eight groups described under [The Settings section](#the-settings-section) |
@@ -42,7 +42,7 @@ Three conventions run through the whole menu:
 
 The AI capabilities sit together in their own section rather than being spread through the dashboards.
 
-**AppSec** is the Sensei code security capability, and was previously listed simply as **Sensei**. The page and its URL are unchanged. The name changed because Sensei now covers more than one capability, so the entries beside it name what each one does.
+**Sensei** opens the Sensei hub, the scan-and-fix capability that was previously listed under Dashboards. The page and its URL are unchanged.
 
 **CSPM** carries a gold `SOON` badge. Cloud security posture management is not available yet, so the entry does not open a page. Selecting it explains that the capability is on the way. Nothing needs enabling, and no license unlocks it early. The entry starts working when the capability ships.
 
@@ -76,7 +76,7 @@ Setup leads because nothing reaches the triage queue until there is an inventory
 
 The record catalogs, behind one entry: **Attack Surface**, Organizations, Assets, Engagements, Tests, Findings and Surveys.
 
-**Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the endpoint pages or the location pages depending on whether your instance uses Locations.
+**Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the location pages (Locations, URLs, Dependencies, Source Code) when your instance uses Locations, or the endpoint pages when it does not.
 
 ## Connect
 
@@ -90,20 +90,20 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 
 | Group | What it holds |
 | --- | --- |
-| **System** | System Settings, Appearance, Announcement Banner, Login Banner, E-mail |
+| **System** | System Settings, Appearance, Announcement Banner, Login Banner, and on on-premise instances, E-mail |
 | **UI Defaults** | Form Configuration, Layout Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
-| **Finding Workflow** | The three Deduplication pages, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
-| **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
-| **Notifications** | Notification Events, Notification Webhooks |
+| **Finding Workflow** | Dedupe Pools, Matching Configuration, Service Level Agreements, Prioritization Engines, Mitigation Policies. Some instances also list the earlier Same Tool, Cross Tool and Reimport Deduplication pages and Finding Enrichment |
+| **Configuration** | Environments, Platforms, Lifecycles, Origins, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
+| **Notifications** | Personal Notifications, System Notifications, Notification Template, Notification Webhooks |
 | **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal, Firewall Rules, Maintenance Windows |
-| **License & Support** | License Manager, Version Manager, Contact Support |
+| **License & Support** | License Manager, Contact Support, and on on-premise instances, Version Manager |
 
 **Feature Flags sits above the groups**, directly under All Settings, rather than inside any of them. It is the page administrators open most often, and it reads alongside All Settings: one lists what exists, the other controls what is switched on. It is still filed under System in the All Settings directory.
 
 ### All Settings
 
-The first entry in the section, **All Settings**, opens a directory of every settings page your account can reach, arranged in the same groups as the menu and searchable by name or by what the page does. Searching `deduplication` finds the three deduplication pages *and* System Settings, because System Settings holds deduplication options too.
+The first entry in the section, **All Settings**, opens a directory of every settings page your account can reach, arranged in the same groups as the menu and searchable by name or by what the page does. Searching `deduplication` finds the deduplication pages *and* System Settings, because System Settings holds deduplication options too.
 
 The last category, **Elsewhere in the app**, lists pages that configure DefectDojo but live in other sidebar sections: the authorization providers, Login and MFA settings, Jira instances, the Upstream and Downstream connectors, and the Universal Parser. Each tile is chipped with the section it belongs to.
 
@@ -121,43 +121,43 @@ If you are used to the previous layout:
 | Previously | Now |
 | --- | --- |
 | Dashboards | Overview |
-| Dashboards → Sensei | Sensei + AI → AppSec |
-| Dashboards → Threat Modeling / MCP / AI Model Settings | Sensei + AI |
-| Dashboards → PSIRT Feeds, and the eight other PSIRT entries | The PSIRT section |
-| Dashboards → Metrics | Overview → Insights |
-| Dashboards → Reporting → Report Templates → All / New | Overview → Reporting → Report Templates |
-| Import → *(whole section)* | Connect → Import *(last entry)* |
-| Import → Smart Upload → Add Findings | Connect → Import → Smart Upload |
+| Dashboards > Sensei | Sensei + AI > Sensei |
+| Dashboards > Threat Modeling / MCP / AI Model Settings | Sensei + AI |
+| Dashboards > PSIRT Feeds, and the eight other PSIRT entries | The PSIRT section |
+| Dashboards > Metrics | Overview > Insights |
+| Dashboards > Reporting > Report Templates > All / New | Overview > Reporting > Report Templates |
+| Import > *(whole section)* | Connect > Import *(last entry)* |
+| Import > Smart Upload > Add Findings | Connect > Import > Smart Upload |
 | Manage | Act |
-| Manage → Endpoints / Locations / Components | Act → Explore → Attack Surface |
-| Manage → Organizations / Assets / Engagements / Tests / Findings / Surveys | Act → Explore |
-| Manage → Risk Acceptances | Act → Risk Acceptances |
-| Manage → Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
-| Manage → Rules Engine and Rules Engine 2.0 | Act → Triage Engine |
-| Manage → *(any)* → New *(record)* | The **New** button on the matching list page |
-| Dashboards → Home | Overview → Dashboards *(when Dashboards 2.0 is on)* |
-| Settings → *(top level)* → Feature Flags | Unchanged — still at the top level, below All Settings |
-| Settings → Pro Settings → System Settings | Settings → System → System Settings |
-| Settings → Pro Settings → Appearance | Settings → System → Appearance |
-| Settings → Pro Settings → Banner Settings → Announcement Banner Settings | Settings → System → Announcement Banner |
-| Settings → Pro Settings → Banner Settings → Login Banner Settings | Settings → System → Login Banner |
-| Settings → Pro Settings → E-mail Settings | Settings → System → E-mail |
-| Settings → Users → All Users / New User | Settings → Users & Permissions → Users |
-| Settings → Users → All Groups / New Group | Settings → Users & Permissions → Groups |
-| Settings → Users → Roles | Settings → Users & Permissions → Roles |
-| Settings → Pro Settings → Deduplication Settings → *(three pages)* | Settings → Finding Workflow → Same Tool / Cross Tool / Reimport Deduplication |
-| Settings → Pro Settings → Finding Enrichment Settings | Settings → Finding Workflow → Finding Enrichment |
-| Settings → Configuration → Service Level Agreements | Settings → Finding Workflow → Service Level Agreements |
-| Settings → Configuration → Prioritization Engines | Settings → Finding Workflow → Prioritization Engines |
-| Settings → Configuration → Mitigation Policies | Settings → Finding Workflow → Mitigation Policies |
-| Settings → Configuration → *(reference-data catalogs)* | Settings → Configuration → *(unchanged)* |
-| Settings → Pro Settings → Notification Settings | Settings → Notifications |
-| Settings → Configuration → Audit Logs | Settings → Operations → Audit Logs |
-| Settings → Configuration → Usage log | Settings → Operations → Usage Logs |
-| Settings → Configuration → All Schedules | Settings → Operations → Schedules |
-| Settings → Pro Settings → Celery Status | Settings → Operations → Celery Status |
-| Settings → Cloud Manager → *(cloud pages)* | Settings → Operations |
-| Settings → License Manager / Version Manager / Contact Support | Settings → License & Support |
+| Manage > Endpoints / Locations / Components | Act > Explore > Attack Surface |
+| Manage > Organizations / Assets / Engagements / Tests / Findings / Surveys | Act > Explore |
+| Manage > Risk Acceptances | Act > Risk Acceptances |
+| Manage > Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
+| Manage > Rules Engine and Rules Engine 2.0 | Act > Triage Engine |
+| Manage > *(any)* > New *(record)* | The **New** button on the matching list page |
+| Dashboards > Home | Overview > Dashboards *(when Dashboards 2.0 is on)* |
+| Settings > *(top level)* > Feature Flags | Unchanged — still at the top level, below All Settings |
+| Settings > Pro Settings > System Settings | Settings > System > System Settings |
+| Settings > Pro Settings > Appearance | Settings > System > Appearance |
+| Settings > Pro Settings > Banner Settings > Announcement Banner Settings | Settings > System > Announcement Banner |
+| Settings > Pro Settings > Banner Settings > Login Banner Settings | Settings > System > Login Banner |
+| Settings > Pro Settings > E-mail Settings | Settings > System > E-mail |
+| Settings > Users > All Users / New User | Settings > Users & Permissions > Users |
+| Settings > Users > All Groups / New Group | Settings > Users & Permissions > Groups |
+| Settings > Users > Roles | Settings > Users & Permissions > Roles |
+| Settings > Pro Settings > Deduplication Settings > *(three pages)* | Settings > Finding Workflow > Same Tool / Cross Tool / Reimport Deduplication |
+| Settings > Pro Settings > Finding Enrichment Settings | Settings > Finding Workflow > Finding Enrichment |
+| Settings > Configuration > Service Level Agreements | Settings > Finding Workflow > Service Level Agreements |
+| Settings > Configuration > Prioritization Engines | Settings > Finding Workflow > Prioritization Engines |
+| Settings > Configuration > Mitigation Policies | Settings > Finding Workflow > Mitigation Policies |
+| Settings > Configuration > *(reference-data catalogs)* | Settings > Configuration > *(unchanged)* |
+| Settings > Pro Settings > Notification Settings | Settings > Notifications > Personal Notifications / System Notifications / Notification Template / Notification Webhooks |
+| Settings > Configuration > Audit Logs | Settings > Operations > Audit Logs |
+| Settings > Configuration > Usage log | Settings > Operations > Usage Logs |
+| Settings > Configuration > All Schedules | Settings > Operations > Schedules |
+| Settings > Pro Settings > Celery Status | Settings > Operations > Celery Status |
+| Settings > Cloud Manager > *(cloud pages)* | Settings > Operations |
+| Settings > License Manager / Version Manager / Contact Support | Settings > License & Support |
 
 The group that was named after your license package, **Pro Settings** on a Pro instance and **Enterprise Settings** on an Enterprise one, no longer exists. Its pages are distributed across System, Finding Workflow, Notifications and Operations.
 
