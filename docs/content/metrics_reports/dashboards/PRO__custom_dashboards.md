@@ -116,6 +116,8 @@ Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on
 
 Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
 
+A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its gear icon to leave the widget's title bar blank.
+
 ### Putting a widget into a report
 
 Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go straight into a document you send out.
