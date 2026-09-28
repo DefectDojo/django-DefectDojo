@@ -12,7 +12,7 @@ Deduplication Tuning is a DefectDojo Pro feature that gives you fine-grained con
 ## Deduplication Settings
 
 In DefectDojo Pro, you can access Deduplication Tuning through:
-**Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout)
+**Settings > Finding Workflow**
 
 ![image](images/deduplication_tuning.png)
 

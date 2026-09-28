@@ -19,7 +19,7 @@ Once the feature is enabled, **Global Component** will become available as an op
 
 ## Configuring Global Component Deduplication
 
-Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (see [The Sidebar Menu](/navigation/pro__sidebar/)).
 
 ### Same-Tool
 

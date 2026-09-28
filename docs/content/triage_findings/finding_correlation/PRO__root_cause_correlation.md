@@ -138,7 +138,7 @@ their clusters as they are triaged, so a Root Cause's counts always describe out
 
 ## Reading the Root Causes page
 
-Open **Root Causes** in the **Manage** section of the sidebar. The page lists every Root Cause
+Open **Act > Root Causes** in the sidebar. The page lists every Root Cause
 you have access to, ranked so the largest, riskiest ones come first.
 
 | Column | What it tells you |

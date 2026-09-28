@@ -10,7 +10,7 @@ Deduplication can be applied at an Asset\-wide level, or scoped more narrowly to
 
 ## Deduplication for Assets
 
-1. Navigate to the System Settings page: **Settings \> System \> ⚙️ System Settings** on the sidebar (**Settings \> Pro Settings \> System Settings** on instances still using the previous menu layout).
+1. Navigate to the System Settings page: **Settings > System > System Settings** on the sidebar.
 
 ![image](images/enabling_product-level_deduplication.png)
 
@@ -32,7 +32,7 @@ Rather than Deduplicating across an entire Asset, you can scope Deduplication to
 
 ### Open the Engagement form
 
-* **For a new Engagement:** open the **📥 Engagements** sub‑menu on the sidebar and click **\+ New Engagement**.
+* **For a new Engagement:** open **Act > Explore > Engagements** in the sidebar and select **New**.
 
 ![image](images/enabling_deduplication_within_an_engagement.png)
 

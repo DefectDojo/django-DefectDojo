@@ -5,7 +5,7 @@ audience: pro
 weight: 3
 ---
 
-In the DefectDojo Pro UI, Findings can be edited in bulk from any Finding List — the **All Findings** page, or the Findings list within a Test.
+In the DefectDojo Pro UI, Findings can be edited in bulk from any Finding List — the **All Findings** page (**Act > Explore > Findings > All** in the sidebar), or the Findings list within a Test.
 
 ## Selecting Findings for Bulk Edit
 

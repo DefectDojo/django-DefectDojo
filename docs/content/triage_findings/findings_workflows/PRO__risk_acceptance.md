@@ -15,13 +15,12 @@ DefectDojo Pro includes enhanced Risk Acceptance capabilities to scale risk mana
 
 ### Accessing Risk Accepted Findings
 
-The sidebar features a section for Risk Acceptances that includes three subsections in its dropdown menu: 
-- **Risk Accepted Findings**
-    - This section includes a table of all Findings that have been risk accepted, whether through as a part of a Full Risk Acceptance object or using the Simple Risk Acceptance workflow. 
-- **All Risk Acceptances**
-    - This section includes a table of all Full Risk Acceptance objects, arranged in chronological order.
-- **New Risk Acceptance**
-    - Clicking this option in the sidebar will start the workflow to create a Full Risk Acceptance object.  
+Risk Acceptances have their own entry in the sidebar, and risk-accepted Findings have their own Findings list: 
+- **Act > Explore > Findings > Risk Accepted**
+    - This page includes a table of all Findings that have been risk accepted, whether through as a part of a Full Risk Acceptance object or using the Simple Risk Acceptance workflow. 
+- **Act > Risk Acceptances**
+    - This page includes a table of all Full Risk Acceptance objects, arranged in chronological order.
+    - Clicking **New** on this page will start the workflow to create a Full Risk Acceptance object.  
 
 ![Risk acceptance sidebar](images/RA_image1.png)
 
@@ -59,13 +58,13 @@ If you don’t specify a date, the Default Risk Acceptance / Default Risk Accept
 #### How to Complete a Full Risk Acceptance
 
 A Full Risk Acceptance object can be made in three different ways:
-- Using the **New Risk Acceptance** button in the sidebar.
+- Using the **New** button on the **Act > Risk Acceptances** page.
 - Using the **Add Risk Acceptance** button on an individual Finding.
 - Clicking the **Risk Acceptance Actions** button that appears after selecting a Finding/multiple Findings from within a table.
 
-##### New Risk Acceptance (Sidebar)
+##### New Risk Acceptance (Risk Acceptances page)
 
-Clicking New Risk Acceptance from the sidebar will open a page in which the User can establish the data and details associated with a new Full Risk Acceptance object. The second page will allow the User to filter and select the Findings to be added to that object.
+Clicking **New** on the **Act > Risk Acceptances** page will open a page in which the User can establish the data and details associated with a new Full Risk Acceptance object. The second page will allow the User to filter and select the Findings to be added to that object.
 
 ##### Add Risk Acceptance (Individual) 
 
@@ -101,9 +100,9 @@ Once enabled, Simple Risk Acceptance can be run from the table of Findings withi
 
 #### How to Complete a Simple Risk Acceptance
 
-You can complete the Simple Risk Acceptance workflow from either the All Findings table (accessible from the sidebar) or from the table of Findings within a specific test. The workflow is identical between the two. 
+You can complete the Simple Risk Acceptance workflow from either the All Findings table (**Act > Explore > Findings > All** in the sidebar) or from the table of Findings within a specific test. The workflow is identical between the two. 
 
-Select the Findings you wish to Risk Accept and click the **Bulk Update Actions** button that appears at the top of the table. From there, select **Accept Risk** from the Simple Risk Acceptance Status dropdown. Because the Findings have been Simple Risk Accepted, there is no associated Full Risk Acceptance object. The Findings that were Risk Accepted are accessible from the **Risk Accepted Findings** menu in the sidebar.
+Select the Findings you wish to Risk Accept and click the **Bulk Update Actions** button that appears at the top of the table. From there, select **Accept Risk** from the Simple Risk Acceptance Status dropdown. Because the Findings have been Simple Risk Accepted, there is no associated Full Risk Acceptance object. The Findings that were Risk Accepted are accessible from **Act > Explore > Findings > Risk Accepted** in the sidebar.
 
 ![Risk Acceptance Actions in Table](images/RA_image4.png)
 
@@ -484,7 +483,7 @@ questions:
 | **Risk Acceptance Decided** | it is approved or rejected | whoever requested it |
 
 Both are ordinary notification events, so each user picks their own channels — alert, mail, Slack,
-Teams or **webhook** — under Notification Settings.
+Teams or **webhook** — under **Settings > Notifications > Personal Notifications**.
 
 Activation, expiry and reinstatement are deliberately silent here. They are not somebody waiting on
 somebody else, expiry already has its own long-standing notification, and mailing about every state
@@ -507,7 +506,7 @@ Notifications are reinforcement, not the mechanism: every state change is alread
 Risk Acceptance, in its Approvals tab and in the review queue, whether or not a message is sent or
 ever arrives. A send that fails is logged and does not undo the decision.
 
-### Rules Engine 2.0 conditions
+### Triage Engine conditions
 
 With both features enabled, a rule can condition on what an acceptance is doing, not just on the
 `Risk Accepted` flag:
