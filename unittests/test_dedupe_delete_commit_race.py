@@ -33,6 +33,7 @@ from django.db import IntegrityError, OperationalError, connection, connections,
 from django.test import SimpleTestCase
 from django.utils import timezone
 
+from dojo.db_utils import is_transient_db_conflict
 from dojo.finding import deduplication
 from dojo.finding import helper as finding_helper
 from dojo.finding.deduplication import _flush_duplicate_changes  # noqa: PLC2701
@@ -48,6 +49,7 @@ from dojo.models import (
     Test_Type,
     User,
 )
+from dojo.tags.utils import bulk_add_tags_to_instances
 
 logger = logging.getLogger(__name__)
 
@@ -435,3 +437,197 @@ class TestBulkDeleteRacesConcurrentDedupeFlush(_CommittedFindingsMixin, SimpleTe
 
         self.assertFalse(Finding.objects.filter(id__in=[repointed.id, original.id]).exists())
         self.assertNoDanglingDuplicateLinks()
+
+
+# Regression: the excess-duplicate delete task (async_dupe_delete) failed at COMMIT with
+# "update or delete on table dojo_finding violates foreign key constraint
+# dojo_finding_found_by_finding_id_..._fk_dojo_finding_id on table dojo_finding_found_by
+# Key (id)=(N) is still referenced from table dojo_finding_found_by" when a concurrent
+# import committed a found_by row for N after the chunk cleared N's M2M rows.
+class TestBulkDeleteRacesConcurrentM2MWriter(_CommittedFindingsMixin, SimpleTestCase):
+
+    """A chunk delete must not commit while a concurrent writer adds an M2M row into it."""
+
+    def _delete_while_adding_found_by(self, doomed_ids, target_finding_id):
+        """
+        Bulk delete ``doomed_ids`` while another transaction adds a found_by row to ``target_finding_id``.
+
+        The writer starts once the chunk has cleared its M2M through rows. The chunk then waits
+        until the writer has either committed or is blocked on a row the chunk holds, and only
+        then deletes and commits.
+        """
+        found_by_type = Test_Type.objects.create(name=f"Dedupe Race found_by {self.suffix}")
+        self.addCleanup(Test_Type.objects.filter(id=found_by_type.id).delete)
+        through = Finding.found_by.through
+        writer_pid = {}
+        writer_ready = threading.Event()
+        m2m_cleared = threading.Event()
+        writer_done = threading.Event()
+
+        def add_found_by_after_the_chunk_cleared_its_m2m():
+            writer_pid["pid"] = _backend_pid()
+            writer_ready.set()
+            try:
+                if not m2m_cleared.wait(WAIT_TIMEOUT_SECONDS):
+                    msg = "the chunk never cleared its M2M rows"
+                    raise AssertionError(msg)
+                with transaction.atomic():
+                    through.objects.create(finding_id=target_finding_id, test_type_id=found_by_type.id)
+            finally:
+                writer_done.set()
+
+        writer = _ConcurrentThread(add_found_by_after_the_chunk_cleared_its_m2m)
+        real_clear = finding_helper.bulk_clear_finding_m2m
+
+        def clear_then_let_the_writer_run(finding_qs):
+            result = real_clear(finding_qs)
+            m2m_cleared.set()
+            _wait_for(
+                lambda: writer_done.is_set() or _is_waiting_on_a_lock(writer_pid["pid"]),
+                "the concurrent writer to commit or block on the chunk",
+            )
+            return result
+
+        writer.start()
+        self.assertTrue(writer_ready.wait(WAIT_TIMEOUT_SECONDS), "the concurrent writer did not start")
+        with patch.object(finding_helper, "bulk_clear_finding_m2m", clear_then_let_the_writer_run):
+            try:
+                bulk_delete_findings(Finding.objects.filter(id__in=doomed_ids), order_desc=True)
+            except IntegrityError as exc:
+                self.fail(f"the chunk committed while an M2M row still pointed into it: {exc}")
+            finally:
+                m2m_cleared.set()
+        writer.join(WAIT_TIMEOUT_SECONDS)
+        self.assertFalse(writer.is_alive(), "the concurrent writer did not finish")
+        return writer, through
+
+    def test_found_by_row_written_after_the_m2m_clear_does_not_fail_the_chunk(self):
+        (doomed,) = self._create_findings("Race doomed found_by")
+
+        writer, through = self._delete_while_adding_found_by([doomed.id], doomed.id)
+
+        self.assertFalse(Finding.objects.filter(id=doomed.id).exists(), "the chunk must still be deleted")
+        self.assertFalse(
+            through.objects.filter(finding_id=doomed.id).exists(),
+            "no found_by row may survive for the deleted finding",
+        )
+        # The writer queued behind the chunk's row lock and then found its finding gone, so
+        # its own insert is the one rejected -- the only outcome consistent with the delete.
+        self.assertIsInstance(writer.error, IntegrityError, msg=f"writer outcome: {writer.error!r}")
+
+    def test_found_by_row_for_a_surviving_finding_is_kept(self):
+        """Control: an M2M write for a finding outside the chunk is unaffected."""
+        doomed, survivor = self._create_findings("Race control doomed found_by", "Race control survivor found_by")
+
+        writer, through = self._delete_while_adding_found_by([doomed.id], survivor.id)
+
+        self.assertIsNone(writer.error, msg=f"the unrelated writer must commit: {writer.error!r}")
+        self.assertFalse(Finding.objects.filter(id=doomed.id).exists())
+        self.assertTrue(through.objects.filter(finding_id=survivor.id).exists(), "the survivor keeps its found_by row")
+
+    def _delete_while_a_tag_writer_holds_the_tag_row(self, *, commit_after_the_chunks_deadlock_check):
+        """
+        Bulk delete two tagged findings while bulk_add_tags_to_instances holds their tag's count row.
+
+        bulk_add_tags_to_instances updates a tag's count row before its COMMIT, and only at
+        COMMIT does Postgres take FOR KEY SHARE on the finding for the new through row. The
+        chunk locks the finding first and then needs that tag row to decrement its count. The
+        writer commits only once the chunk is waiting on the tag row, so the two always form a
+        cycle, and Postgres breaks it by aborting one of them.
+
+        Postgres does not fix which one. A waiting backend runs the deadlock check once,
+        deadlock_timeout after it started waiting, and aborts itself if it finds a cycle. The
+        chunk starts waiting first, so when the writer reaches its COMMIT within
+        deadlock_timeout the chunk finds the cycle and is the victim. When the writer is later
+        than that (a slow or loaded machine), the chunk's one check ran before the cycle
+        existed, and the writer is the victim instead. ``commit_after_the_chunks_deadlock_check``
+        forces the second order; without it either can happen.
+
+        Returns ``(chunk_attempts, writer_error)`` after asserting what holds for both orders:
+        the chunk deletes, no tag through row survives, and the tag count stays consistent.
+        """
+        tagged_by_writer, already_tagged = self._create_findings("Race tag writer target", "Race tag writer peer")
+        finding_ids = [tagged_by_writer.id, already_tagged.id]
+        tag_name = f"race-{self.suffix}"
+        already_tagged.tags.add(tag_name)
+        tag_model = Finding.tags.tag_model
+        self.addCleanup(tag_model.objects.filter(name=tag_name).delete)
+        main_pid = _backend_pid()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT EXTRACT(EPOCH FROM current_setting('deadlock_timeout')::interval)")
+            deadlock_timeout = float(cursor.fetchone()[0])
+        writer_holds_tag_row = threading.Event()
+        chunk_started = threading.Event()
+
+        def tag_then_commit_once_the_chunk_waits():
+            with transaction.atomic():
+                bulk_add_tags_to_instances([tag_name], [Finding.objects.get(id=tagged_by_writer.id)])
+                writer_holds_tag_row.set()
+                _wait_for(
+                    lambda: chunk_started.is_set() and _is_waiting_on_a_lock(main_pid),
+                    "the chunk to wait on the tag row",
+                )
+                if commit_after_the_chunks_deadlock_check:
+                    # Past the chunk's single deadlock check, which found no cycle yet: from
+                    # here only the writer's own check can find it.
+                    time.sleep(deadlock_timeout * 2)
+
+        chunk_attempts = []
+        real_lock = finding_helper.lock_findings_for_delete
+
+        def count_chunk_attempts(chunk_ids):
+            chunk_attempts.append(list(chunk_ids))
+            return real_lock(chunk_ids)
+
+        writer = _ConcurrentThread(tag_then_commit_once_the_chunk_waits)
+        writer.start()
+        self.assertTrue(writer_holds_tag_row.wait(WAIT_TIMEOUT_SECONDS), "the concurrent tag writer did not start")
+        chunk_started.set()
+        with (
+            patch.object(finding_helper, "BULK_DELETE_RETRY_DELAY", 0.01),
+            patch.object(finding_helper, "lock_findings_for_delete", count_chunk_attempts),
+        ):
+            bulk_delete_findings(Finding.objects.filter(id__in=finding_ids))
+        writer.join(WAIT_TIMEOUT_SECONDS)
+        self.assertFalse(writer.is_alive(), "the concurrent tag writer did not finish")
+
+        writer_was_the_victim = writer.error is not None and is_transient_db_conflict(writer.error)
+        if writer.error is not None and not writer_was_the_victim:
+            raise writer.error
+        chunk_was_the_victim = len(chunk_attempts) > 1
+        self.assertNotEqual(
+            chunk_was_the_victim,
+            writer_was_the_victim,
+            f"exactly one side must be the deadlock victim (chunk attempts: {len(chunk_attempts)}, writer: {writer.error!r})",
+        )
+        self.assertFalse(Finding.objects.filter(id__in=finding_ids).exists(), "the chunk must still be deleted")
+        self.assertFalse(
+            Finding.tags.through.objects.filter(finding_id__in=finding_ids).exists(),
+            "no tag through row may survive for the deleted findings",
+        )
+        self.assertEqual(tag_model.objects.get(name=tag_name).count, 0, "the tag count matches its remaining uses")
+        return chunk_attempts, writer.error
+
+    def test_tag_writer_holding_a_tag_row_does_not_fail_the_chunk(self):
+        """
+        Lock order against the bulk tag writer, which is the one writer that does not follow it.
+
+        Usually the chunk is the deadlock victim and its conflict retry re-runs it after the
+        writer committed, so the writer's through row goes with the chunk. On a slow machine
+        the writer can be the victim instead (see the helper). Either way the chunk deletes and
+        the tag count stays consistent, and that is what is asserted here.
+        """
+        self._delete_while_a_tag_writer_holds_the_tag_row(commit_after_the_chunks_deadlock_check=False)
+
+    def test_tag_writer_aborted_as_the_deadlock_victim_leaves_the_chunk_to_finish(self):
+        """
+        The other order, forced: the writer commits after the chunk's deadlock check.
+
+        Postgres then aborts the writer, whose tag add rolls back, and the chunk takes the tag
+        row and commits on its first attempt, with no retry.
+        """
+        chunk_attempts, writer_error = self._delete_while_a_tag_writer_holds_the_tag_row(
+            commit_after_the_chunks_deadlock_check=True,
+        )
+        self.assertIsNotNone(writer_error, "the writer, not the chunk, must be the deadlock victim")
+        self.assertEqual(len(chunk_attempts), 1, "the chunk must not have needed a retry")

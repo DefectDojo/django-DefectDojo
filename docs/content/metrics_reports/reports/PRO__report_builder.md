@@ -29,15 +29,15 @@ The Report Builder is made of four pieces, each available as a REST resource und
 
 A **Theme** controls the visual style and branding of a report: the colors, the header and footer imagery, and the footer text. By defining a Theme once, you can apply consistent corporate branding to every report you produce.
 
-A Theme has the following settings:
+A Theme has the following settings. A new Theme starts from the colors set on the [Appearance](/admin/appearance/pro__appearance/) page, and a report with no Theme selected uses those same colors.
 
 | Setting | Purpose | Default |
 |---------|---------|---------|
 | Name | A label for the Theme | — |
-| Primary color | Main brand color | `#1e3a5f` |
-| Secondary color | Supporting brand color | `#4a90a4` |
-| Accent color | Highlight color | `#e67e22` |
-| Text color | Body text color | `#333333` |
+| Primary color | Main brand color: headings and table headers | Your instance's primary color, darkened where needed to stay readable on white |
+| Secondary color | Supporting brand color | Your instance's secondary text color |
+| Accent color | Highlight color: the cover bar and table of contents numbers | Your instance's primary color |
+| Text color | Body text color | Your instance's body text color |
 | Background color | Page background color | `#ffffff` |
 | Footer text | Text shown in the page footer | — |
 | Show page numbers | Whether to print page numbers | On |

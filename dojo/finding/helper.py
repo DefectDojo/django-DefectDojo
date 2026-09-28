@@ -1077,11 +1077,14 @@ def lock_findings_for_delete(finding_ids):
     Row-lock ``finding_ids`` FOR UPDATE, in id order, for the rest of the transaction.
 
     Deduplication locks each original FOR KEY SHARE before it writes a duplicate link to
-    it (see dojo.finding.deduplication._drop_links_to_deleted_originals), and the two
-    locks conflict. Taken before resolve_inbound_duplicate_references reads the inbound
-    references, this makes that read final: a flush that already holds a lock on one of
-    these findings commits first, and its links are then visible to the read; a flush
-    that comes later waits for this delete to commit and then finds the original gone.
+    it (see dojo.finding.deduplication._drop_links_to_deleted_originals), and Postgres
+    takes the same lock on the finding when it checks the deferred foreign key of any
+    other row that references it; both conflict with FOR UPDATE. Taken as the chunk's
+    first statement, before bulk_clear_finding_m2m, the cascade and
+    resolve_inbound_duplicate_references read anything, this makes those reads final: a
+    writer that already holds a lock on one of these findings commits first, and its rows
+    are then visible to them; a writer that comes later waits for this delete to commit
+    and then finds the finding gone.
 
     One statement ordered by id, like the dedup flush's lock, so the two cannot each hold
     a row the other is waiting for.
@@ -1201,11 +1204,22 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     Inbound duplicate_finding references are resolved the same way and for the same
     reason -- see resolve_inbound_duplicate_references. Doing it here rather than in each
     caller covers every entry point to the chunked delete, not just the one that first
-    hit the constraint. The chunk's findings are row-locked immediately before that
-    (lock_findings_for_delete) so a concurrent dedup flush cannot add a reference after
-    it. Both run after the child and through rows are deleted, so dojo_finding rows are
-    still the last rows a chunk locks, as they were when only the final DELETE locked
-    them; the cascade does not read or write any duplicate_finding value.
+    hit the constraint.
+
+    Clearing inside the chunk's transaction is not enough on its own: a concurrent
+    writer that commits a child or through row (a found_by row from an import, a
+    duplicate link from a dedup flush) after the clear and before the chunk's COMMIT
+    still leaves a reference the COMMIT rejects. So the first statement of each chunk
+    row-locks the chunk's findings FOR UPDATE (lock_findings_for_delete), before any
+    child, through or tag row is touched. Every row referencing a finding is checked
+    against it with FOR KEY SHARE on the dojo_finding row -- by Postgres when it checks
+    the deferred foreign key at the writer's COMMIT, or explicitly by the dedup flush --
+    and that conflicts with FOR UPDATE. A writer that committed before the lock is seen
+    by the clear that follows it; one that has not yet committed queues behind the
+    chunk and then finds the finding gone. Any writer of a row referencing a finding
+    can therefore serialize against this delete by taking FOR KEY SHARE on the
+    dojo_finding row in the same transaction as its insert; taking it before its other
+    row locks also keeps it from ever holding a row the chunk still has to take.
 
     When order_desc is True, findings are processed highest id first (matches
     finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
@@ -1234,9 +1248,11 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
         for attempt in range(BULK_DELETE_MAX_CONFLICT_RETRIES + 1):
             try:
                 with transaction.atomic():
+                    # First statement of the chunk: see the docstring for why the lock has to
+                    # come before any child or through row is cleared.
+                    lock_findings_for_delete(chunk_ids)
                     bulk_clear_finding_m2m(chunk_qs)
                     cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
-                    lock_findings_for_delete(chunk_ids)
                     resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
                     execute_delete_sql(chunk_qs)
             except OperationalError as exc:

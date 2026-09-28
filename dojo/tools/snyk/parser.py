@@ -246,21 +246,22 @@ class SnykParser:
 
         # manage CVE and CWE with idnitifiers
         cwe_references = ""
-        if "identifiers" in vulnerability:
-            if "CVE" in vulnerability["identifiers"]:
-                vulnerability_ids = vulnerability["identifiers"]["CVE"]
+        identifiers = vulnerability.get("identifiers") or {}
+        if identifiers:
+            if "CVE" in identifiers:
+                vulnerability_ids = identifiers["CVE"]
                 if vulnerability_ids:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
 
-            if "CWE" in vulnerability["identifiers"]:
-                cwes = vulnerability["identifiers"]["CWE"]
+            if "CWE" in identifiers:
+                cwes = identifiers["CWE"]
                 if cwes:
                     # Per the current json format, if several CWEs, take the
                     # first one.
                     finding.cwe = int(cwes[0].split("-")[1])
                     # Persist the full list of CWEs via the Finding_CWE relation
                     finding.unsaved_cwes = [int(c.split("-")[1]) for c in cwes]
-                    if len(vulnerability["identifiers"]["CWE"]) > 1:
+                    if len(identifiers["CWE"]) > 1:
                         cwe_references = ", ".join(cwes)
                 else:
                     finding.cwe = 1035
