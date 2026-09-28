@@ -191,3 +191,4 @@ A well-behaved model will:
 
 - See the [Dashboards API guide](../custom-dashboards-api/) for the raw resources, request shapes, and the full widget-data action reference.
 - Build and arrange dashboards by hand in the [Customizable Dashboards UI](../custom-dashboards/).
+- Prefer no script at all? The [MCP Server's Dashboards Toolset](../../ai/mcp_server_pro/#dashboards-toolset) gives an MCP-capable assistant the same discovery, build, render-check and sharing steps as tools, with your API token sent by the client rather than pasted into the chat.
