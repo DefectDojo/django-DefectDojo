@@ -24,7 +24,7 @@ Complete the following steps in the Azure portal before configuring DefectDojo:
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Azure AD**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **Microsoft Entra ID**, and fill in the form:
 
 - **Azure AD OAuth Key** — enter your **Application (client) ID**
 - **Azure AD OAuth Secret** — enter your **Client Secret**

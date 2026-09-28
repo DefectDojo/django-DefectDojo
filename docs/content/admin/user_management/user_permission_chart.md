@@ -62,27 +62,27 @@ The majority of Configuration Permissions give users access to certain pages in 
 
 | **Configuration Permission** | **View ☑️** | **Add ☑️** | **Edit ☑️** | **Delete ☑️** |
 | --- | --- | --- | --- | --- |
-| Credential Manager | Access the **⚙️Configuration \> Credential Manager** page | Add new entries to the Credential Manager | Edit Credential Manager entries | Delete Credential Manager entries |
-| Development Environments | n/a | Add new Development Environments to the 🗓️**Engagements \> Environments** list | Edit Development Environments in the 🗓️**Engagements \> Environments** list | Delete Development Environments from the **🗓️Engagements \> Environments** list |
-| Finding Templates¹ | Access the **Findings \> Finding Templates** page | Add a Finding Template | Edit a Finding Template | Delete a Finding Template |
-| Groups | Access the **👤Users \> Groups** page | Add a new User Group | Superuser only | Superuser only |
-| Jira Instances | Access the **⚙️Configuration \> JIRA page** | Add a new JIRA Configuration | Edit an existing JIRA Configuration | Delete a JIRA Configuration |
+| Credential Manager | Access the Credential Manager page | Add new entries to the Credential Manager | Edit Credential Manager entries | Delete Credential Manager entries |
+| Development Environments | n/a | Add new Development Environments to the **Settings > Configuration > Environments** list | Edit Development Environments in the **Settings > Configuration > Environments** list | Delete Development Environments from the **Settings > Configuration > Environments** list |
+| Finding Templates¹ | Access the **Act > Explore > Findings > Templates** page | Add a Finding Template | Edit a Finding Template | Delete a Finding Template |
+| Groups | Access the **Settings > Users & Permissions > Groups** page | Add a new User Group | Superuser only | Superuser only |
+| Jira Instances | Access the **Connect > Jira** page | Add a new JIRA Configuration | Edit an existing JIRA Configuration | Delete a JIRA Configuration |
 | Language Types |  |  |  |  |
-| Login Banner | n/a | n/a | Edit the login banner, located under **⚙️Configuration \> Login Banner** | n/a |
-| Announcements | n/a | n/a | Configure Announcements, located under  **⚙️Configuration \> Announcements** | n/a |
-| Note Types | Access the ⚙️Configuration \> Note Types page | Add a Note Type | Edit a Note Type | Delete a Note Type |
+| Login Banner | n/a | n/a | Edit the login banner, located under **Settings > System > Login Banner** | n/a |
+| Announcements | n/a | n/a | Configure Announcements, located under **Settings > System > Announcement Banner** | n/a |
+| Note Types | Access the **Settings > Configuration > Note Types** page | Add a Note Type | Edit a Note Type | Delete a Note Type |
 | Prioritization Engines | Access the Prioritization Engine configuration page | Add a new Prioritization Engine | Edit an existing Prioritization Engine | Delete a Prioritization Engine |
-| Organizations | n/a | Add a new Organization (under Assets \> Organization) | n/a | n/a |
-| Questionnaires | Access the **Questionnaires \> All Questionnaires** page | Add a new Questionnaire | Edit an existing Questionnaire | Delete a Questionnaire |
-| Questions | Access the **Questionnaires \> Questions** page | Add a new Question | Edit an existing Question | n/a |
-| Regulations | n/a | Add a Regulation to the **⚙️Configuration \> Regulations** page | Edit an existing Regulation | Delete a Regulation |
-| Rules Engine | Access the **Rules Engine 2.0** sidebar section and everything under it (All Rules, Runs, and Deliveries) | Create a rule, including converting one from the original Rules Engine | Change, enable, schedule, run, replay, or take ownership of an existing rule | Delete a rule |
-| Scheduling Service Schedule | Access the **Scheduling** page | Superuser only | Edit an existing Schedule (change trigger, enable/disable) | Delete a Schedule |
-| SLA Configuration | Access the **⚙️Configuration \> SLA Configuration** page | Add a new SLA Configuration | Edit an existing SLA Configuration | Delete an SLA Configuration |
-| Test Types | n/a | Add a new Test Type (under **Engagements \> Test Types**) | Edit an existing Test Type | n/a |
-| Tool Configuration | Access the **⚙️Configuration \> Tool Configuration** page | Add a new Tool Configuration | Edit an existing Tool Configuration | Delete a Tool Configuration |
-| Tool Types | Access the **⚙️Configuration \> Tool Types** page | Add a new Tool Type | Edit an existing Tool Type | Delete a Tool Type |
-| Users | Access the **👤Users \> Users** page | Add a new User to DefectDojo | Edit an existing User | Delete a User |
+| Organizations | n/a | Add a new Organization (under **Act > Explore > Organizations**) | n/a | n/a |
+| Questionnaires | Access the **Act > Explore > Surveys > Surveys** page | Add a new Questionnaire | Edit an existing Questionnaire | Delete a Questionnaire |
+| Questions | Access the **Act > Explore > Surveys > Questions** page | Add a new Question | Edit an existing Question | n/a |
+| Regulations | n/a | Add a Regulation to the **Settings > Configuration > Regulations** page | Edit an existing Regulation | Delete a Regulation |
+| Rules Engine | Access **Act > Triage Engine** and everything under it (Rules, Runs, and Deliveries) | Create a rule, including converting one from Classic Rules | Change, enable, schedule, run, replay, or take ownership of an existing rule | Delete a rule |
+| Scheduling Service Schedule | Access the **Settings > Operations > Schedules** page | Superuser only | Edit an existing Schedule (change trigger, enable/disable) | Delete a Schedule |
+| SLA Configuration | Access the **Settings > Finding Workflow > Service Level Agreements** page | Add a new SLA Configuration | Edit an existing SLA Configuration | Delete an SLA Configuration |
+| Test Types | n/a | Add a new Test Type (under **Settings > Configuration > Test Types**) | Edit an existing Test Type | n/a |
+| Tool Configuration | Access the **Settings > Configuration > Tool Configurations** page | Add a new Tool Configuration | Edit an existing Tool Configuration | Delete a Tool Configuration |
+| Tool Types | Access the **Settings > Configuration > Tool Types** page | Add a new Tool Type | Edit an existing Tool Type | Delete a Tool Type |
+| Users | Access the **Settings > Users & Permissions > Users** page | Add a new User to DefectDojo | Edit an existing User | Delete a User |
 
 1. Access to the Finding Templates page also requires the **Writer, Maintainer** or **Owner** Global Role for this user.
 

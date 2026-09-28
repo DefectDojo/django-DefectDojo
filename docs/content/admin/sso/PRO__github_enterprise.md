@@ -22,7 +22,7 @@ Complete the following steps in GitHub Enterprise before configuring DefectDojo:
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **GitHub Enterprise**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **GitHub Enterprise**, and fill in the form:
 
 - **GitHub Enterprise OAuth Key** — enter your **Client ID**
 - **GitHub Enterprise OAuth Secret** — enter your **Client Secret**

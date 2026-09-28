@@ -5,7 +5,7 @@ weight: 1
 audience: pro
 ---
 
-DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
+DefectDojo Pro supports SAML authentication, configured from **Connect > Authorization > Providers**. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
 
 ## ACS URL (Assertion Consumer Service)
 
@@ -22,7 +22,7 @@ A few things to know about this endpoint:
 
 ## Setup
 
-1. Open **Enterprise Settings > SAML Settings**.
+1. Open **Connect > Authorization > Providers** and select **SAML**.
 
    ![image](images/sso_betaui_1.png)
 
@@ -97,7 +97,7 @@ When a new user is created via SAML (or any social-auth provider) and is not add
 
 To give every newly provisioned SSO user a sensible baseline, configure a **Default group** + **Default group role** on the System Settings page:
 
-1. Open **⚙️ Configuration → System Settings** (Superuser only).
+1. Open **Settings > System > System Settings** (Superuser only).
 2. Set **Default group** to the [User Group](../../user_management/create_user_group/) that newly created users should join.
 3. Set **Default group role** to the role they should hold in that group (e.g. **Reader**).
 4. Optionally set **Default group email pattern** to a regex (e.g. `.*@yourcompany\.com$`) so the default group is only applied to users whose email matches.
@@ -118,7 +118,7 @@ DefectDojo Cloud does not have the same level of SAML customization as DefectDoj
 | **Username matching** | NameID only | NameID only (the `SAML_USE_NAME_ID_AS_USERNAME` env var applies to Open Source only, not Pro) |
 | **SAML assertion encryption** | Not currently supported | Not currently supported |
 | **SAML login logs** | Not available in the UI. Contact Support to request logs. | Available via application container logs (`docker logs dojo`) |
-| **Configuration method** | Enterprise Settings UI only | Enterprise Settings UI, Django Admin, or Django Shell |
+| **Configuration method** | Pro UI (**Connect > Authorization > Providers**) only | Pro UI (**Connect > Authorization > Providers**), Django Admin, or Django Shell |
 | **Environment variables** | Cannot be set by customers directly. Contact Support for changes. | Can be set via `dojo-compose-cli environment add` |
 
 If you need to match users on an attribute other than NameID (such as `uid` or `email`), configure your Identity Provider to send the desired value as the NameID rather than adjusting DefectDojo settings.

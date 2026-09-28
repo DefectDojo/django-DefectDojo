@@ -40,7 +40,7 @@ If you're running open-source DefectDojo and want SSO, you'll need to switch to 
 
 ## Supported SSO providers (DefectDojo Pro)
 
-DefectDojo Pro supports SAML and the following OAuth providers. Each guide walks through the provider-side setup and the corresponding configuration in the Pro **Enterprise Settings** UI.
+DefectDojo Pro supports SAML and the following OAuth providers. Each guide walks through the provider-side setup and the corresponding configuration under **Connect > Authorization > Providers** in the Pro UI.
 
 * **[Auth0](/admin/sso/pro__auth0/)**
 * **[Azure Active Directory](/admin/sso/pro__azure_ad/)**
@@ -63,7 +63,7 @@ SSO configuration in DefectDojo Pro can only be performed by a **Superuser**.
 
 ## Disabling Username / Password login
 
-Once SSO is configured in DefectDojo Pro, you may want to disable the traditional username/password login form. Uncheck **Allow Login via Username and Password** under **Enterprise Settings > Login Settings**.
+Once SSO is configured in DefectDojo Pro, you may want to disable the traditional username/password login form. Uncheck **Allow Login via Username and Password** under **Connect > Authorization > Login Settings**.
 
 ![image](images/pro_login_settings.png)
 

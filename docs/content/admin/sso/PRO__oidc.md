@@ -9,7 +9,7 @@ DefectDojo Pro supports login via a generic OpenID Connect (OIDC) provider. Open
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OIDC Settings**.
+In DefectDojo, go to **Connect > Authorization > Providers** and select **OpenID Connect**.
 
 ![image](images/oidc_pro.png)
 

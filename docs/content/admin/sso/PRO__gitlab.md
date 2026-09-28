@@ -23,7 +23,7 @@ Complete the following steps in GitLab before configuring DefectDojo:
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **GitLab**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **GitLab**, and fill in the form:
 
 - **GitLab OAuth Key** — enter your **Application ID**
 - **GitLab OAuth Secret** — enter your **Secret**

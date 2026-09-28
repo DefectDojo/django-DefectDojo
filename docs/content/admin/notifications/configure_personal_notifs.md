@@ -12,7 +12,7 @@ Personal Notifications are sent in addition to System\-Wide Notifications, and w
 
 System notifications are set by a DefectDojo Superuser and cannot be opted out of by an individual user.
 
-1. Start from the Notifications page (⚙️**Configuration \> Notifications** in the sidebar).
+1. Start from the Notifications page (**Settings > Notifications > Personal Notifications** in the Pro UI, or ⚙️**Configuration \> Notifications** in the Classic UI).
 2. From the **Scope** drop down menu, you can select which set of notifications you wish to edit.
 3. Select Personal Notifications.
 4. Check the notification method which you wish to use for each type of notification. You can select more than one.

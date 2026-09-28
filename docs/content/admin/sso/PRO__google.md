@@ -26,7 +26,7 @@ Complete the following steps in the Google Cloud Console before configuring Defe
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Google**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **Google**, and fill in the form:
 
 - **Google OAuth Key** — enter your **Client ID**
 - **Google OAuth Secret** — enter your **Client Secret Key**

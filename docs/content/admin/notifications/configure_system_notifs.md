@@ -7,7 +7,7 @@ aliases:
 ---
 DefectDojo has two different kinds of notifications: **Personal** (sent to a single account) and **System** (which are sent to all users).
 
-Both an account’s Personal Notifications and the global System Notifications can be configured from the same page: **⚙️Configuration \> Notifications** in the sidebar.
+In the Pro UI, System Notifications are configured from **Settings > Notifications > System Notifications**, and Personal Notifications from **Settings > Notifications > Personal Notifications**. In the Classic UI, both are configured from the same page: **⚙️Configuration \> Notifications** in the sidebar.
 
 ![image](images/Configure_System_&_Personal_Notifications.png)
 

@@ -7,7 +7,7 @@ audience: pro
 
 Authorization Connectors is one page listing every identity provider DefectDojo Pro supports, what state each one is in, and what protocol it speaks. Before it existed, each provider lived on its own settings form and there was no way to answer "what is set up on this instance?" without opening all of them.
 
-Authorization Connectors is a **DefectDojo Pro** feature. Find it under **Connect > Authorization**. Only a **Superuser** can view or change identity provider configuration.
+Authorization Connectors is a **DefectDojo Pro** feature. Find it under **Connect > Authorization > Providers**. Only a **Superuser** can view or change identity provider configuration.
 
 ![Authorization Connectors](images/authorization_connectors.png)
 
