@@ -16,11 +16,9 @@ The Pro UI brings the following enhancements to DefectDojo:
 - Access to new Pro features, including [Upstream Connectors](/connectors/upstream/about/), [Universal Importer](/import_data/pro/specialized_import/external_tools/), and [Pro Metrics](/metrics_reports/pro_metrics/pro__overview/) views.
 - Improved UI workflows: better filtering, dashboards, and navigation.
 
-## Switching To The Pro UI
+## The Pro UI is the default
 
-To access the Pro UI from the Classic UI, open your User Options menu from the top-right hand corner. In the Pro UI, your user menu (your name at the bottom of the sidebar) holds your profile, API token and documentation links. Pages that only exist in the Classic UI are marked in the sidebar and open in a new tab.
-
-![image](images/beta-classic-uis.png)
+From DefectDojo Pro 3.3 the Pro UI is the interface you land on after logging in, and the user-menu switch between the Pro UI and the Classic UI no longer exists. Your user menu (your name at the bottom of the sidebar) holds your profile, API token and documentation links. The few pages that still open in the Classic UI are marked in the sidebar and open in a new tab.
 
 ## Navigational Changes
 
