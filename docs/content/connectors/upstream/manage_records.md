@@ -9,7 +9,7 @@ aliases:
 
 Once you have run your first Discover operation, you should see a list of Mapped or Unmapped records on the **Manage Records and Operations** page.
 
-Each configured Connector's tile on the **Upstream Connectors** page shows how many of its records still need to be mapped. If any records need attention, the count is highlighted and a **Manage Records \& Operations** button appears directly on the tile. The page is always reachable from the tile's **Manage Configuration \> Manage Records \& Operations** menu as well.
+Each configured Connector's tile on the **Upstream Connectors** page shows how many of its records still need to be mapped. If any records need attention, the count is highlighted and a **Manage Records \& Operations** button appears directly on the tile. The page is always reachable from the tile's **Manage Configuration > Manage Records \& Operations** menu as well.
 
 ## What's a Record?
 
@@ -93,7 +93,7 @@ To learn more about Assets, Engagements and Tests, see our [Asset Hierarchy Over
 
 Each Record has an associated state to communicate how the Record is working.
 
-A connector's full records list is reached by opening the connector from **Connect \> Upstream** — the page is titled **All \<Connector\> Records**. Despite the name, it lists every Record belonging to **that one connector**, not every Record on the instance.
+A connector's full records list is reached by opening the connector from **Connect > Upstream** — the page is titled **All \<Connector\> Records**. Despite the name, it lists every Record belonging to **that one connector**, not every Record on the instance.
 
 That list can be **filtered by state** from the **State** column, and more than one state can be selected at a time. This is the fastest way to answer the questions that come up most often on a large connector fleet — *what is waiting for me to map?* (**New**) and *what has stopped reporting?* (**Missing** or **Error**) — without reading through every Record.
 
