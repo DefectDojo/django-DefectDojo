@@ -116,6 +116,19 @@ class TestFetchOsMessage(SimpleTestCase):
         self.assertEqual(cache.get(os_message.CACHE_KEY), body)
         mock_get.assert_called_once()
 
+    def test_body_decoded_as_utf8_without_charset_header(self):
+        body = "# Headline\n\n## Expanded Message\n\n[Compare plans →](https://example.com)\n"
+        response = requests.Response()
+        response.status_code = 200
+        response._content = body.encode("utf-8")
+        response.headers["Content-Type"] = "text/markdown"
+        # Mirror what the requests adapter does for a text/* type with no charset.
+        response.encoding = requests.utils.get_encoding_from_headers(response.headers)
+        with patch("dojo.announcement.os_message.requests.get", return_value=response):
+            result = os_message.fetch_os_message()
+        self.assertEqual(result, body)
+        self.assertIn("Compare plans →", os_message.parse_os_message(result)["expanded_html"])
+
     def test_404_caches_none(self):
         with patch("dojo.announcement.os_message.requests.get", return_value=_Resp(404, "not found")):
             result = os_message.fetch_os_message()

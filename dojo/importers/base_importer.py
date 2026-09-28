@@ -6,12 +6,14 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.db import DEFAULT_DB_ALIAS, DatabaseError, IntegrityError, connections, transaction
+from django.db import DEFAULT_DB_ALIAS, DatabaseError, IntegrityError, OperationalError, connections, transaction
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.db_utils import is_transient_db_conflict
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
@@ -67,6 +69,30 @@ class Parser:
         TODO This should be enforced in the future, but here is not the place
         TODO once this enforced, this stub class should be removed
         """
+
+
+def _lock_test_tag_rows(test, tag_names):
+    """
+    Lock, in ascending id order, every tag row ``test.tags.set(tag_names)`` is about to update.
+
+    That is the test's current tags (whose counts go down) and the existing tags among
+    ``tag_names`` (whose counts go up). Tags that do not exist yet are created by the set()
+    itself as new rows, which no other transaction can hold. FOR NO KEY UPDATE is the lock
+    the count UPDATE takes anyway, so this changes only when the locks are taken, not which.
+    """
+    manager = test.tags
+    tag_model = manager.tag_model
+    lookup = "name" if manager.tag_options.case_sensitive else "name__iexact"
+    rows = Q(pk__in=manager.all().values("pk"))
+    for name in tag_names:
+        rows |= Q(**{lookup: name})
+    return list(
+        tag_model.objects
+        .select_for_update(no_key=True)
+        .filter(rows)
+        .order_by("pk")
+        .values_list("pk", flat=True),
+    )
 
 
 class BaseImporter(ImporterOptions):
@@ -461,12 +487,38 @@ class BaseImporter(ImporterOptions):
         fail an import whose findings are already saved, so a write that still fails after
         every attempt is logged and swallowed -- the same way finding/endpoint tag writes
         already tolerate this race in add_tags_safe().
+
+        Tagulous' ``set()`` also updates each tag's reference count row one at a time, in
+        the order the tags were supplied, and the transaction holds each of those row locks
+        until it commits. Two imports writing an overlapping tag set in different orders
+        could each hold a row the other needed, and Postgres aborted one with ``deadlock
+        detected ... in relation "dojo_tagulous_test_tags"``. Every row the write will
+        update is therefore locked up front in ascending id order (see
+        _lock_test_tag_rows), the same ordering bulk_add_tags_to_instances and
+        bulk_remove_all_tags use for finding tags. A deadlock or serialization failure
+        that still happens against some other writer is retried like the IntegrityError;
+        any other OperationalError is raised.
         """
         test_id = getattr(self.test, "id", None)
+        tag_names = sorted(self.tags)
         for attempt in range(1, TEST_TAG_SET_MAX_ATTEMPTS + 1):
             try:
                 with transaction.atomic():
-                    self.test.tags.set(self.tags)
+                    _lock_test_tag_rows(self.test, tag_names)
+                    self.test.tags.set(tag_names)
+            except OperationalError as e:
+                if not is_transient_db_conflict(e):
+                    raise
+                if attempt < TEST_TAG_SET_MAX_ATTEMPTS:
+                    logger.warning(
+                        "Transient DB conflict setting tags on test %s (attempt %d/%d), retrying: %s",
+                        test_id, attempt, TEST_TAG_SET_MAX_ATTEMPTS, e,
+                    )
+                    continue
+                logger.error(
+                    "Failed to set tags on test %s after %d attempts; leaving tags unchanged: %s",
+                    test_id, TEST_TAG_SET_MAX_ATTEMPTS, e,
+                )
             except IntegrityError as e:
                 if attempt < TEST_TAG_SET_MAX_ATTEMPTS:
                     logger.warning(

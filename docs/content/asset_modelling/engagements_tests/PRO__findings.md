@@ -279,6 +279,8 @@ More information about DefectDojo’s Report Builder can be found [here](/metric
 ### Export Findings 
 Pages that show a list of Findings or a list of Engagements have a CSV and Excel export option at the top left. For Findings, there is also the option to perform a **Quick Export**.
 
+The CSV and Excel export dialog lets you choose which fields to include and which field to sort by. Findings exports can include **Priority**, **Risk** and **Risk Score**, the same values shown in the Findings table. **Export From Table Preference** selects them when the Risk and Priority columns are visible in the table, and carries a Risk or Priority sort from the table into the export. Risk is exported as its label (for example, Needs Action), so sort by Risk Score to order an export by risk.
+
 Selecting Quick Export opens a dialog with three choices:
 
 - **Template**: the report template to apply. This defaults to the standard Findings table, so you can export without choosing one.
