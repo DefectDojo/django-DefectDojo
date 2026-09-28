@@ -649,6 +649,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.strategy | object | `{}` |  |
 | django.terminationGracePeriodSeconds | int | `60` |  |
 | django.tolerations | list | `[]` |  |
+| django.uwsgi.appSettings.http | string | `"0.0.0.0:8081"` | uWSGI HTTP bind for Kubernetes liveness probes (DD_UWSGI_HTTP). Use "[::]:8081" on IPv6-only / dual-stack clusters so kubelet can reach the probe listener. |
 | django.uwsgi.appSettings.maxFd | int | `0` | Use this value to set the maximum number of file descriptors. If set to 0 will be detected by uwsgi e.g. 102400 |
 | django.uwsgi.appSettings.processes | int | `4` |  |
 | django.uwsgi.appSettings.threads | int | `4` |  |
