@@ -31,7 +31,7 @@ Customers/Pro Users can always email our team directly at [support@defectdojo.co
 
 You can contact the Support team through the DefectDojo App in two ways:
 
-1. by opening **Cloud Manager > Contact Support** from the left sidebar
+1. by opening **Settings > License & Support > Contact Support** from the left sidebar
 2. through **{your-instance}.defectdojo.com/cloud_portal/support**.
 
 ![image](images/contact_defectdojo_support.png)

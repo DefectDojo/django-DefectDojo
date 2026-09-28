@@ -5,7 +5,7 @@ audience: pro
 weight: 2
 ---
 
-The DefectDojo Pro UI has various Metrics dashboards to help visualize your current security posture. Each dashboard allows stakeholders at different levels of the organization to make informed decisions without needing to interpret raw data or navigate individual Findings. These dashboards include:
+The DefectDojo Pro UI has various Metrics dashboards to help visualize your current security posture. Open them from **Overview > Insights** in the sidebar. Each dashboard allows stakeholders at different levels of the organization to make informed decisions without needing to interpret raw data or navigate individual Findings. These dashboards include:
 * [Executive Insights](/metrics_reports/pro_metrics/pro__executive_insights/#main-content)
 * [Priority Insights](/metrics_reports/pro_metrics/pro__priority_insights/#main-content)
 * [Program Insights](/metrics_reports/pro_metrics/pro__program_insights/#main-content)
@@ -39,7 +39,7 @@ Each graph has a ⋮ kebab menu in the top right of each view with the following
 
 ### Access
 
-The Metrics section will only represent data from the Organizations and Assets that each User has the appropriate permissions to view. A User with access limited to a single Asset will only be able to see Metrics for that particular Asset, but if they don’t have access to the other Assets within the parent Organization, data from those other Assets won't be represented in Metrics. 
+The Insights section will only represent data from the Organizations and Assets that each User has the appropriate permissions to view. A User with access limited to a single Asset will only be able to see Metrics for that particular Asset, but if they don’t have access to the other Assets within the parent Organization, data from those other Assets won't be represented in Metrics. 
 
 ### Viewing Data Within Charts
 
