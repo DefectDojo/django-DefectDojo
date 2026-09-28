@@ -124,7 +124,7 @@ A **Widget** block puts a [Customizable Dashboards](../../dashboards/custom-dash
 
 The block type appears only while Customizable Dashboards is enabled, because everything that configures a widget lives there. A Widget block saved earlier keeps working and keeps generating if the feature is later turned off.
 
-Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type.
+Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type. The one exception is **Variable Filters**, shown below **Configure Widget**, which narrow the widget to the finding or asset a report is generated for (see [Template variables](#template-variables)).
 
 Not every widget can go in a report, and the picker lists only the ones that can. How each one is drawn depends on the widget:
 
@@ -230,7 +230,7 @@ Three variables exist:
 
 Tokens can go in two places:
 
-- **Block filters.** Under **Variable Filters** in a Tabular, Detail or Graph Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical.
+- **Block filters.** Under **Variable Filters** in a Tabular, Detail, Graph or Widget Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical. In a Widget Block, the rows offered follow what the widget counts (a Count widget set to Assets offers *Asset is the report's asset*), and a ticked row replaces the same filter set in the widget's own settings.
 - **Text.** A Block header, a cover page title, a text Block, a theme footer: type a token and it is replaced with the value when the report is generated, for example `Exposure Report for {{vulnerability_id}}`.
 
 A variable is filled in from wherever the report is generated:
@@ -241,7 +241,7 @@ A variable is filled in from wherever the report is generated:
 
 A report can only be about a finding or asset its requester is allowed to see. A generation that is missing a variable its Template uses is refused with a message naming it, rather than silently reporting on everything. A Template preview shows tokens as written and shows a placeholder in place of any Block that filters on a variable.
 
-The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks take their filters from the widget's own settings and do not use variables.
+The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks are not part of those exports, but a Template's variables are one set whatever the format, so an export still asks for a variable that only a Widget Block uses.
 
 ## Building a report in the UI
 
