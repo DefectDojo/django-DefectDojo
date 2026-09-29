@@ -1,0 +1,95 @@
+{
+  "data": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "app": {"id": "app-0001"},
+      "root_cause": {
+        "url": "https://app.example.com/search",
+        "parameter": "q",
+        "method": "GET"
+      },
+      "severity": "HIGH",
+      "status": "VERIFIED",
+      "first_discovered": "2024-07-01T12:00:00.000Z",
+      "last_discovered": "2024-07-15T12:00:00.000Z",
+      "newly_discovered": false,
+      "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+      "vulnerability_score": 6.1,
+      "insight_ui_url": "https://insight.example.com/vm/app-0001/vuln/11111111",
+      "variances": [
+        {
+          "id": "var-1",
+          "original_value": "test",
+          "module": {"id": "module-xss"},
+          "attack": {"id": "attack-1"},
+          "attack_value": "<script>alert(1)</script>",
+          "message": "The payload was reflected in the response.",
+          "proof": "<p>Reflected in the <b>body</b></p>",
+          "references": {
+            "owasp": "https://owasp.example.com/xss",
+            "cwe": "https://cwe.example.com/79"
+          }
+        },
+        {
+          "id": "var-2",
+          "module": {"id": "module-xss"},
+          "attack_value": "'\"><img src=x onerror=alert(1)>",
+          "message": "A second payload was reflected.",
+          "references": {"owasp": "https://owasp.example.com/xss"}
+        },
+        {"id": "var-3", "module": {"id": "module-xss"}, "message": "Third."},
+        {"id": "var-4", "module": {"id": "module-xss"}, "message": "Fourth."},
+        {"id": "var-5", "module": {"id": "module-xss"}, "message": "Fifth."}
+      ]
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "root_cause": {"url": "https://app.example.com/login", "method": "POST"},
+      "severity": "CRITICAL",
+      "status": "UNREVIEWED",
+      "first_discovered": "2024-06-01T00:00:00.000Z",
+      "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+      "vulnerability_score": 7.5,
+      "variances": [
+        {"id": "var-6", "module": {"id": "module-sqli"}, "message": "A database error was returned."}
+      ]
+    },
+    {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "root_cause": {"url": "https://app.example.com/admin"},
+      "severity": "not-an-enum",
+      "status": "VERIFIED",
+      "variances": [{"id": "var-7", "module": {"id": "module-unknown"}}]
+    },
+    {
+      "id": "44444444-4444-4444-4444-444444444444",
+      "root_cause": {"url": "https://app.example.com/old"},
+      "severity": "HIGH",
+      "status": "REMEDIATED",
+      "variances": [{"id": "var-8", "module": {"id": "module-xss"}}]
+    },
+    {
+      "id": "55555555-5555-5555-5555-555555555555",
+      "root_cause": {"url": "https://app.example.com/dupe"},
+      "severity": "MEDIUM",
+      "status": "DUPLICATE",
+      "variances": []
+    },
+    {
+      "id": "66666666-6666-6666-6666-666666666666",
+      "root_cause": {"url": "https://app.example.com/fp"},
+      "severity": "LOW",
+      "status": "FALSE_POSITIVE",
+      "variances": []
+    }
+  ],
+  "modules": [
+    {
+      "id": "module-xss",
+      "name": "Cross-Site Scripting (XSS)",
+      "description": "<p>The application reflects input into the response without encoding.</p><script>alert('x')</script>"
+    },
+    {"id": "module-sqli", "name": "SQL Injection", "description": "A parameter reaches a database query."}
+  ],
+  "metadata": {"index": 0, "size": 50, "total_data": 6, "total_pages": 1}
+}

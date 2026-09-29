@@ -12,7 +12,7 @@ Escapeの**APIキー**が必要です。これはEscapeアプリの**Settings �
 
 #### Connector Mappings
 
-1. **Location**フィールドを空欄のままにすると`https://public.escape.tech/v2`が使用されます。あるいは、EscapeのAPIホストを明示的に入力することもできます。
+1. **Location**フィールドには`https://public.escape.tech/v2`が自動入力されます。この値をそのまま使用するか、EscapeのAPIホストを明示的に入力してください。
 2. **Secret**フィールドにEscapeのAPIキーを入力します。
 3. 必要に応じて、インポートする検出事項を制限するために**Minimum Severity**を設定します。
 

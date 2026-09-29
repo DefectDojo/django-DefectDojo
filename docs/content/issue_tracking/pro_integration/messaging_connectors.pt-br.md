@@ -6,7 +6,7 @@ weight: 4
 audience: pro
 ---
 
-**Disponibilidade:** Messaging Connectors é um recurso beta. Habilite **Messaging Connectors** na página Feature Flags. Como os alertas são roteados por regras, o **Rules Engine 2.0** também precisa estar habilitado.
+**Disponibilidade:** Messaging Connectors é um recurso beta. Habilite **Messaging Connectors** na página Feature Flags. Como os alertas são roteados por regras, o **Triage Engine** também precisa estar habilitado.
 
 O Messaging Connectors envia alertas do DefectDojo para um serviço de chat, para um endereço de e-mail ou para um tópico do Amazon SNS. Ele fica ao lado dos conectores de ticketing e de gestão de incidentes na mesma página **Downstream Connectors**, e é configurado da mesma forma: crie uma conexão uma vez e depois decida o que deve ser enviado para ela.
 
@@ -14,7 +14,7 @@ Conectores de ticketing e conectores de mensagens respondem a perguntas diferent
 
 ## O que você pode enviar
 
-Os alertas são roteados pelo Rules Engine 2.0. Uma regra decide **quando** enviar (um gatilho), **quais** Achados se qualificam (condições) e **para onde** a mensagem vai (um nó de notificação endereçando sua conexão e canal).
+Os alertas são roteados pelo Triage Engine. Uma regra decide **quando** enviar (um gatilho), **quais** Achados se qualificam (condições) e **para onde** a mensagem vai (um nó de notificação endereçando sua conexão e canal).
 
 Isso significa que os filtros disponíveis para um alerta são os mesmos disponíveis para uma regra: severidade, escopo, tags, status e qualquer outra coisa que uma condição de regra possa expressar. Vários alertas diferentes indo para vários canais diferentes são simplesmente várias regras.
 
@@ -157,7 +157,7 @@ Um teste bem-sucedido também libera uma conexão que foi desabilitada automatic
 
 ## Criar um alerta
 
-Há duas formas de fazer isso. Ambas produzem a mesma coisa: uma regra do Rules Engine 2.0.
+Há duas formas de fazer isso. Ambas produzem a mesma coisa: uma regra do Triage Engine.
 
 ### A página de alertas
 
@@ -183,7 +183,7 @@ Alertas são regras, então também podem ser abertos no editor de regras a part
 
 O caminho completo, para qualquer coisa que o formulário não cubra.
 
-1. Acesse **Automation > Rules Engine 2.0** e crie uma regra.
+1. Acesse **Automation > Triage Engine** e crie uma regra.
 2. Adicione um gatilho. Para alertas sobre Achados recém-importados, use o gatilho de evento de Achado em **created**. As importações são feitas em lote, então uma importação produz um alerta, em vez de um por Achado.
 3. Adicione condições para o que deve se qualificar, por exemplo uma severidade mínima de Alto.
 4. Adicione um nó de mensagem para o fornecedor desejado (**Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email**, ou **Publish to an SNS Topic**) e defina:

@@ -29,15 +29,15 @@ The Report Builder is made of four pieces, each available as a REST resource und
 
 A **Theme** controls the visual style and branding of a report: the colors, the header and footer imagery, and the footer text. By defining a Theme once, you can apply consistent corporate branding to every report you produce.
 
-A Theme has the following settings:
+A Theme has the following settings. A new Theme starts from the colors set on the [Appearance](/admin/appearance/pro__appearance/) page, and a report with no Theme selected uses those same colors.
 
 | Setting | Purpose | Default |
 |---------|---------|---------|
 | Name | A label for the Theme | — |
-| Primary color | Main brand color | `#1e3a5f` |
-| Secondary color | Supporting brand color | `#4a90a4` |
-| Accent color | Highlight color | `#e67e22` |
-| Text color | Body text color | `#333333` |
+| Primary color | Main brand color: headings and table headers | Your instance's primary color, darkened where needed to stay readable on white |
+| Secondary color | Supporting brand color | Your instance's secondary text color |
+| Accent color | Highlight color: the cover bar and table of contents numbers | Your instance's primary color |
+| Text color | Body text color | Your instance's body text color |
 | Background color | Page background color | `#ffffff` |
 | Footer text | Text shown in the page footer | — |
 | Show page numbers | Whether to print page numbers | On |
@@ -50,7 +50,7 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Blocks
 
-A **Block** is a reusable unit of content. You build a Block once, configure what it shows, and then drop it into as many Templates as you like. There are four block types:
+A **Block** is a reusable unit of content. You build a Block once, configure what it shows, and then drop it into as many Templates as you like. There are five block types:
 
 | Block type | What it produces |
 |------------|------------------|
@@ -58,6 +58,7 @@ A **Block** is a reusable unit of content. You build a Block once, configure wha
 | **Tabular** | A table of records drawn from a single entity. |
 | **Detail** | A per-record layout, best for long-form fields that render as markdown (for example, description, impact, mitigation, and references). |
 | **Chart** | A single chart, chosen from the same catalog of charts used on the Insights dashboards. |
+| **Widget** | A dashboard widget, rendered in the report. Requires Customizable Dashboards. |
 
 A **Stock** block is configured by choosing one of five stock types, along with a title, subtitle, text content, or image as appropriate:
 
@@ -81,11 +82,17 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 
 The difference is presentation: a **Tabular** block lays the records out as a table of columns, which is ideal for summaries and inventories, while a **Detail** block renders one record at a time in a long-form layout that is best suited to markdown-rich fields like description, impact, mitigation, and references.
 
+Fields render in the order they are listed. Selecting a field adds it to the end of the list, and the **Fields** section of the block editor shows the selection as a numbered list you can rearrange: drag a field by its handle, or use the arrow buttons to move it up or down. Removing a field from that list deselects it. Columns in a Tabular block, and the label and value pairs in a Detail block, follow this order when the report is generated.
+
+When Locations are enabled, each of the Organization, Asset, Engagement, Test, and Finding entities offers a **Location Count** field. An Asset counts the locations it references directly and a Finding counts the locations attached to it. An Organization rolls up the distinct locations across its Assets, and an Engagement or Test counts the distinct locations touched by its Findings, so a host shared by several findings counts once. The counts respect the viewer's permissions, so a user who can only see some Assets in an Organization sees only those Assets' locations in its count.
+
 A **Chart** block draws one chart from the catalog below — the same charts the Insights dashboards use, so a figure in a report matches the figure your team already reads on screen. You choose the chart, and the chart decides what it can be filtered by:
 
 - Charts of findings expose the **Finding** filter, and the filter narrows the findings the chart counts.
 - Charts of assets expose the **Asset** filter, and the filter selects assets, scoping the chart to the findings belonging to them.
 - Portfolio-wide charts take no filter, because they summarize the whole instance by design.
+
+A Chart also has a **Date Range** setting. Leave it on **All time** (the default, and how every existing Chart behaves) to draw on the full history, or pick a trailing window (the last 30, 90, or 180 days, the last year, or the last two years) to limit the chart to findings from that period. It is the same date window the Insights dashboards apply, so a report chart and the matching dashboard chart cover the same span. The window is measured against each finding's **date** (when the finding was found), not when its scan was imported, so a time chart extends forward only as findings carrying newer dates arrive.
 
 | Chart | What it shows |
 |-------|---------------|
@@ -107,9 +114,48 @@ A **Chart** block draws one chart from the catalog below — the same charts the
 | Severity of Findings Past SLA by Asset | Past-SLA findings per asset, broken out by severity |
 | Assets Tested Over Time | Count of distinct assets tested in each period |
 
-Charts appear in Block and Template previews and in the reports you generate, in both HTML and PDF output. Reports created through the [API](../report-builder-api/), and reports delivered automatically by a rule, include their charts as well.
+Charts appear in Block and Template previews and in the reports you generate, in both HTML and PDF output. Reports created through the [API](../report-builder-api/), and reports delivered automatically by a rule, include their charts as well. The CSV, Excel and JSON formats carry rows rather than a document, so a Chart Block is left out of those.
 
 > **💡 Tip:** A Chart block carries its filters like any other Block, so the same chart filtered two ways is two Blocks. Duplicate the Block and adjust the copy rather than editing one shared Block.
+
+### Widget blocks
+
+A **Widget** block puts a [Customizable Dashboards](../../dashboards/custom-dashboards/) widget into a report. It is the same widget, configured by the same settings dialog you use on a dashboard, filters included, so a figure your team already reads on screen can go into the document you send out without being rebuilt.
+
+The block type appears only while Customizable Dashboards is enabled, because everything that configures a widget lives there. A Widget block saved earlier keeps working and keeps generating if the feature is later turned off.
+
+Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type.
+
+Not every widget can go in a report, and the picker lists only the ones that can. How each one is drawn depends on the widget:
+
+| Widget | Drawn as |
+|--------|----------|
+| Count | A headline number |
+| MTTR / MTTD | A pair of headline numbers, in days |
+| Gauge | A threshold-banded arc with the percentage in the middle |
+| Graph | A bar, line, area, pie, or doughnut chart, as configured |
+| Finding Velocity | A line chart of findings created against findings closed |
+| Vulnerability Aging | A bar chart of age bands, stacked by severity |
+| Priority Histogram | A bar chart of priority bands |
+| Portfolio Treemap | Area-proportional tiles |
+| Rate by Category | A table of per-category rates |
+| Top-N Leaderboard | A ranked table |
+| Scan Coverage | A table of coverage per window |
+
+Some widgets are left out on purpose. Widgets that are relative to whoever is looking (My Work, SLA Burndown, Recent Activity) would mean something different to every reader of the same PDF. License Usage requires the Maintainer role, which a report's readers need not have. KPI / Trend is covered by a Count block for its headline number. A Table widget is what a Tabular block already does, and a Markdown widget is what a Stock text block is for.
+
+Sankey, Sunburst, Risk Matrix, and Activity Heatmap cannot be drawn in a report yet.
+
+> **💡 Tip:** Widget blocks are drawn on the server in every case, so a Widget block looks the same whether you generated the report from the UI, through the API, or automatically from a rule. The Block preview shows exactly what the report will contain.
+
+### Moving a figure between a dashboard and a report
+
+The two features share one widget catalog, so a figure can start on either side and move to the other. Both directions **copy** rather than link: the copy is what the original was at that moment, and editing either one afterwards does not change the other.
+
+- **From a dashboard into a report.** Click the export icon on any widget that a report can draw and choose **Add to Report**. Name the block, optionally pick a Template to append it to, and it is created with the widget's current filters.
+- **From a report onto a dashboard.** Open the menu on a Chart or Widget block and choose **Add to Dashboard**, then pick which of your dashboards to add it to. You can also browse saved blocks from the dashboard side: in **Add Widget**, the **From Reports** tab lists your Chart and Widget blocks.
+
+A Chart block that carries its own filters has no faithful dashboard equivalent, because a dashboard Insights Plot widget is scoped by a date window rather than by a filter set. Those blocks are refused rather than being placed on a dashboard with a wider scope than the block they came from.
 
 > **💡 Tip:** Filters live on the Block, not on the Template. A Block carries its own filters with it, so reusing a Block reuses its filters identically everywhere it appears. If you need the same content but with a different filter, duplicate the Block and adjust the copy.
 
@@ -125,7 +171,31 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Generated Reports
 
-Running a Template produces a **Generated Report**: a persisted PDF or HTML file that you can download and re-run on demand. Each Generated Report is **frozen in time** — it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, re-run the Template.
+Running a Template produces a **Generated Report**: a persisted file that you can download and re-run on demand. Each Generated Report is **frozen in time**: it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, re-run the Template.
+
+A Generated Report comes in one of five formats, in two groups:
+
+| Format | Group | What it contains |
+|--------|-------|------------------|
+| HTML | Document | The whole Template, laid out: every Block, in order |
+| PDF | Document | The same, paginated for print and distribution |
+| CSV | Data | The rows of the Template's Tabular and Detail Blocks |
+| Excel | Data | The same rows, one worksheet per Block |
+| JSON | Data | The same rows, with each Block's columns and labels |
+
+The documents are what you send to a reader. The data formats are what you hand to a script, a spreadsheet, or a downstream system: they carry the rows a report is built from rather than the document built around them.
+
+**A data format includes only the Blocks that have rows:** Tabular and Detail Blocks. A Cover Page, a Chart, a Widget and the other Stock Blocks have nothing to put in a cell, so they are left out. The generate dialog names exactly which of your Template's Blocks will be included and which will be left out before you generate, and a Template with no Tabular or Detail Block at all cannot be generated as a data format.
+
+Within a data format, the shape follows the Template:
+
+- **CSV.** A Template with one data Block produces a plain CSV: a header row of your chosen column labels, then the rows. A Template with several data Blocks writes them one after another, each preceded by a `# <Block header>` comment line and separated by a blank line.
+- **Excel.** Each data Block becomes its own worksheet, named after the Block's header.
+- **JSON.** One object carrying the report's name and generation time, then a `blocks` array. Each Block lists its `columns` (the field path and the label you see in the UI) and its `rows`, keyed by field path so a consumer is not broken by a label being renamed.
+
+If a Block hits the row limit, the export says so: CSV and Excel add a trailing "rows omitted" line, and JSON carries an `omitted_rows` count per Block.
+
+> **💡 Tip:** Rules can generate a report too. A rule's **Generate a Report** action offers the same five formats, which is how a scheduled rule delivers a spreadsheet to a downstream system rather than a document somebody has to read. See the Triage Engine's [Node Reference](/automation/triage_engine/node_reference/).
 
 A Generated Report moves through these statuses as it is built:
 
@@ -139,6 +209,39 @@ A Generated Report moves through these statuses as it is built:
 > **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC) — users only ever see data they are authorized to view, even inside a report.
 
 You can build this in the UI (below) or automate it with the [API](../report-builder-api/).
+
+### Report retention
+
+Generated Reports are kept until someone deletes them, unless an administrator sets a retention window. In **Settings > System Settings**, under Application Settings, **Delete Generated Reports After (Days)** removes completed and failed reports older than that many days, each night, together with their files. The default, **0**, keeps every report indefinitely, so nothing is deleted until the setting is changed.
+
+While a window is set, the Generated Reports page says how long reports are kept. Reports still being generated are never removed. A report is deleted a set number of days after it finished, not after it was last downloaded, so download anything you need to keep longer.
+
+### Template variables
+
+A **template variable** is a blank in a Template that is filled in each time the report is generated. It lets you build one Template, such as a single-finding page or a per-CVE exposure report, and generate it for any finding, asset or CVE without editing its filters.
+
+Three variables exist:
+
+| Variable | Tokens | Supplied as |
+|----------|--------|-------------|
+| Finding | `{{finding.id}}`, `{{finding.title}}`, `{{finding.severity}}` | a finding |
+| Asset | `{{asset.id}}`, `{{asset.name}}` | an asset, or taken from the finding |
+| Vulnerability ID | `{{vulnerability_id}}` | a vulnerability ID such as a CVE, or taken from the finding's primary one |
+
+Tokens can go in two places:
+
+- **Block filters.** Under **Variable Filters** in a Tabular, Detail or Graph Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical.
+- **Text.** A Block header, a cover page title, a text Block, a theme footer: type a token and it is replaced with the value when the report is generated, for example `Exposure Report for {{vulnerability_id}}`.
+
+A variable is filled in from wherever the report is generated:
+
+- the **Generate Report** dialog, and **Quick Export** with a Template chosen, ask for each variable the Template uses;
+- the API takes them as `variables` (see the [API guide](../report-builder-api/));
+- the Triage Engine's **Generate a Report** node fills them from each matched finding or asset (see [Generate a Report](/automation/triage_engine/node_reference/#generate-a-report)).
+
+A report can only be about a finding or asset its requester is allowed to see. A generation that is missing a variable its Template uses is refused with a message naming it, rather than silently reporting on everything. A Template preview shows tokens as written and shows a placeholder in place of any Block that filters on a variable.
+
+The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks take their filters from the widget's own settings and do not use variables.
 
 ## Building a report in the UI
 
@@ -160,7 +263,9 @@ Next, build the content Blocks. The Blocks list shows all of your Blocks across 
 
 ![Blocks list](images/pro_report_blocks_list.png)
 
-To create a data-driven Block, choose its type and configure it. The example below is a **Tabular** Block named for open findings: the Block Type is set to Tabular, a header is supplied, the Model is **Finding**, the selected fields are Severity, Title, Asset, Age (Days), and SLA Days Remaining, and the records are ordered by Numerical Severity in descending order. Because filters live on the Block, the **Filter Entries** here scope exactly which records this Block will pull wherever it is used.
+To create a data-driven Block, choose its type and configure it. The example below is a **Tabular** Block named for open findings: the Block Type is set to Tabular, a header is supplied, the Model is **Finding**, the selected fields are Severity, Title, Asset, Age (Days), and SLA Days Remaining, and the records are ordered by Numerical Severity in descending order. The selected fields appear as a numbered list under the field picker; drag them, or use the arrows, to set the column order without deselecting anything. Because filters live on the Block, the **Filter Entries** here scope exactly which records this Block will pull wherever it is used.
+
+A new Block starts with no filters, so it includes every record of the chosen Model. To narrow it, click **Add Filters** under **Filter Entries**: the Model's table opens inside the form, and the filters you apply in that table become the Block's filter entries. When you edit a Block that already has filter entries, the table is shown right away. Changing the Model clears the Block's filters and closes the table, because filters for one Model do not apply to another.
 
 ![Tabular block configuration](images/pro_report_block_new_tabular.png)
 
@@ -182,7 +287,7 @@ In the Template editor, you select a Theme and arrange the Blocks in the order t
 
 ### Step 4: Generate and download
 
-When the Template is ready, generate the report. The generate dialog confirms the Template and lets you choose the output format — **HTML** or **PDF**.
+When the Template is ready, generate the report. If the Template uses [template variables](#template-variables), the dialog first asks what the report is about: a finding, an asset or a vulnerability ID, only the ones the Template uses. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
 
 ![Generate report dialog](images/pro_generate_report_dialog.png)
 

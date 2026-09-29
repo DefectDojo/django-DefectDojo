@@ -1,0 +1,88 @@
+{
+  "entries": [
+    {
+      "id": "issue-0001",
+      "title": "Prototype pollution in the example utility library",
+      "severity": "Critical",
+      "description": "A crafted key allows an attacker to modify the object prototype.",
+      "cve": "CVE-2000-0001",
+      "cwe": "CWE-1321",
+      "packageName": "example-utils",
+      "packageVersion": "4.17.20",
+      "fixedVersion": "4.17.21",
+      "remediation": "",
+      "fileName": "package-lock.json",
+      "line": 0,
+      "url": "",
+      "cvssScore": 9.8,
+      "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "references": "https://example.com/advisories/CVE-2000-0001",
+      "status": "Open",
+      "scanType": "sca",
+      "firstDetected": "2024-06-02T10:00:00Z"
+    },
+    {
+      "id": "issue-0002",
+      "title": "Reflected cross-site scripting",
+      "severity": "High",
+      "description": "",
+      "cve": "",
+      "cwe": "79",
+      "packageName": "",
+      "url": "https://app.example.com/search?q=1",
+      "cvssScore": 7.4,
+      "status": "Open",
+      "scanType": "dast",
+      "firstDetected": "2024-06-03T10:00:00Z"
+    },
+    {
+      "id": "issue-0003",
+      "title": "Hard-coded credential pattern",
+      "severity": "Medium",
+      "cwe": "not a cwe",
+      "fileName": "src/generic/config.py",
+      "line": 42,
+      "remediation": "Move the value into an environment variable.",
+      "status": "False positive",
+      "scanType": "sast",
+      "firstDetected": "2024-06-04T10:00:00Z"
+    },
+    {
+      "id": "issue-0004",
+      "title": "Outdated base image",
+      "severity": "Low",
+      "packageName": "example-base",
+      "packageVersion": "3.18",
+      "fixedVersion": "3.20",
+      "status": "Accepted",
+      "scanType": "csa",
+      "firstDetected": "2024-06-05T10:00:00Z"
+    },
+    {
+      "id": "issue-0005",
+      "title": "Licence not on the approved list",
+      "severity": "Unknown",
+      "packageName": "example-lib",
+      "status": "Resolved",
+      "scanType": "sbom",
+      "firstDetected": "2024-06-06T10:00:00Z"
+    },
+    {
+      "id": "issue-0006",
+      "title": "An issue from a scan type this parser does not know",
+      "severity": "a word SOOS does not use",
+      "status": "Something new",
+      "scanType": "iac",
+      "firstDetected": "not a timestamp"
+    },
+    {
+      "id": "issue-0007",
+      "title": "An issue with a URL DefectDojo cannot accept",
+      "severity": "Low",
+      "url": "not a url at all",
+      "status": "Ignored",
+      "scanType": "dast"
+    }
+  ],
+  "total": 7
+}

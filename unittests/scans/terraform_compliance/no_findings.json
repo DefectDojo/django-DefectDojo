@@ -1,0 +1,58 @@
+[
+  {
+    "description": "",
+    "elements": [
+      {
+        "description": "",
+        "id": "1",
+        "keyword": "Scenario",
+        "line": 3,
+        "name": "Postgres servers must enforce SSL",
+        "steps": [
+          {
+            "keyword": "Given",
+            "line": 4,
+            "name": "Given I have azurerm_postgresql_server defined",
+            "result": {
+              "duration": 43000,
+              "endtime": "2026-08-10 15:59:22.217234+00:00",
+              "starttime": "2026-08-10 15:59:22.217191+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then",
+            "line": 5,
+            "name": "Then it must contain ssl_enforcement_enabled",
+            "result": {
+              "duration": 66000,
+              "endtime": "2026-08-10 15:59:22.217320+00:00",
+              "starttime": "2026-08-10 15:59:22.217254+00:00",
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "And",
+            "line": 6,
+            "name": "And its value must be true",
+            "result": {
+              "duration": 34000,
+              "endtime": "2026-08-10 15:59:22.217373+00:00",
+              "starttime": "2026-08-10 15:59:22.217339+00:00",
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      }
+    ],
+    "id": "1",
+    "keyword": "Feature",
+    "line": 1,
+    "name": "Postgres server baseline",
+    "tags": [],
+    "type": "feature",
+    "uri": "features/pass.feature"
+  }
+]

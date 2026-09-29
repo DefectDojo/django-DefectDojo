@@ -5,25 +5,33 @@ weight: 6
 audience: pro
 ---
 
-Global Locations Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Assets** based purely on a **shared location**: a URL, or a dependency (identified by its Package URL). Two Findings that share a location of a selected type are treated as duplicates regardless of their title, severity, CWE, or vulnerability IDs — the location alone is the identity.
+Global Locations Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Assets** based purely on a **shared location**: a URL, or a dependency (identified by its Package URL). Two Findings that share a location of a selected type are treated as duplicates regardless of their title, severity, CWE, or vulnerability IDs: the location alone is the identity.
 
-It is the location-aware counterpart to [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/), applied to the DefectDojo Locations data model. Where Global Component matches only on a component name and version, Global Locations matches on the same dependency **by full Package URL** *and* on shared **URLs** — so it can deduplicate DAST/web Findings across Assets, which Global Component cannot.
+It is the location-aware counterpart to [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/), applied to the DefectDojo Locations data model. Where Global Component matches only on a component name and version, Global Locations matches on the same dependency **by full Package URL** *and* on shared **URLs**, so it can deduplicate DAST/web Findings across Assets, which Global Component cannot.
 
 Unlike the scoped algorithms, Global Locations matching is **not scoped to a single Asset or Engagement**. A Finding imported into Asset B can be marked as a duplicate of an older Finding in Asset A, even if the two Assets are unrelated.
 
 ## Requirements
 
-Global Locations is defined over the DefectDojo **Locations** data model and is only offered when the **Locations** feature is enabled. On instances where Locations is turned off, the Global Locations feature flag is shown as locked ("Requires Locations to be enabled") and the algorithm does not appear in the Tuner.
+Global Locations is defined over the DefectDojo **Locations** data model and is only offered when the **Locations** feature is enabled. On instances where Locations is turned off, the Global Locations feature flag is shown as locked ("Requires Locations to be enabled") and the algorithm is not offered on **Settings > Finding Workflow > Matching Configuration**.
 
 ## Enabling the Global Locations Algorithm
 
 Global Locations Deduplication is gated behind a feature flag and is **off by default**. Once Locations is enabled, a superuser can turn it on from **Settings > Feature Flags** on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
-Once the feature is enabled, **Global Locations** becomes available as an option in the **Deduplication Algorithm** dropdown for both Same Tool and Cross Tool Deduplication settings in the Tuner.
+Once the feature is enabled, **Global Locations** becomes available as an **Algorithm** for both Same tool and Cross tool on **Settings > Finding Workflow > Matching Configuration**.
 
 ## Configuring Global Locations Deduplication
 
-Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow** (**Settings > Pro Settings > Deduplication Settings** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
+
+> **A pooled Asset is bounded to its pool.** "Across all Assets" holds while an Asset is not in a
+> [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) for the matching kind
+> in question. Once it joins one, this algorithm matches its Findings only against that pool's
+> other members, not instance-wide. Pooling therefore narrows this algorithm rather than leaving
+> it untouched, which is worth knowing before creating a pool that happens to contain Assets
+> relying on it.
+
 
 When you select **Global Locations**, the Hash Code Fields selector is hidden (it does not apply) and a **Location Types** selector appears instead.
 
@@ -31,8 +39,8 @@ When you select **Global Locations**, the Hash Code Fields selector is hidden (i
 
 Choose which location types participate in matching:
 
-- **URLs** — two Findings match when they share a URL (compared on the configured endpoint fields, `DEDUPE_ALGO_ENDPOINT_FIELDS`).
-- **Dependencies** — two Findings match when they reference the same dependency, by full Package URL identity.
+- **URLs**: two Findings match when they share a URL (compared on the configured endpoint fields, `DEDUPE_ALGO_ENDPOINT_FIELDS`).
+- **Dependencies**: two Findings match when they reference the same dependency, by full Package URL identity.
 
 At least one type must be selected; both are selected by default. A tool configured for **URLs** only ignores shared dependencies, and a tool configured for **Dependencies** only ignores shared URLs.
 
@@ -40,11 +48,10 @@ At least one type must be selected; both are selected by default. A tool configu
 
 Use Same-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings from a single tool across multiple Assets by shared location.
 
-1. Open the **Same Tool Deduplication** tab.
-2. Select the tool from the **Security Tool** dropdown.
-3. Set the **Deduplication Algorithm** to **Global Locations**.
-4. Choose the **Location Types** to match on.
-5. Submit the form.
+1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same tool** cell.
+2. Set the **Algorithm** to **Global Locations**.
+3. Choose the **Location Types** to match on.
+4. Review the impact and confirm.
 
 ### Cross-Tool
 
@@ -52,8 +59,8 @@ Use Cross-Tool Deduplication with the Global Locations algorithm when you want t
 
 Cross-tool matching reads the importing tool's location-type selection, so configure Global Locations on **each** tool that should participate, with matching Location Types.
 
-1. Open the **Cross Tool Deduplication** tab.
-2. For each tool to include: select it from the **Security Tool** dropdown, set the algorithm to **Global Locations**, choose the Location Types, and submit.
+1. Open **Settings > Finding Workflow > Matching Configuration**.
+2. For each tool to include: select its **Cross tool** cell, set the **Algorithm** to **Global Locations**, choose the Location Types, review the impact and confirm.
 
 ## How Matching Works
 
@@ -62,9 +69,9 @@ A new Finding is marked as a duplicate of an existing Finding anywhere in the in
 - **A URL** whose configured endpoint fields (`DEDUPE_ALGO_ENDPOINT_FIELDS`) all match, **or**
 - **A dependency** with the same Package URL (an exact purl match, so `pkg:npm/timespan@2.3.0` does **not** match `pkg:npm/timespan@2.3.1`).
 
-The match is **strict and non-vacuous**: two Findings that have no locations of a selected type are **never** deduplicated (unlike scoped location matching, "both empty" is not a match). If endpoint-field comparison is disabled (`DEDUPE_ALGO_ENDPOINT_FIELDS = []`), URLs cannot establish a match at all — only a shared dependency can.
+The match is **strict and non-vacuous**: two Findings that have no locations of a selected type are **never** deduplicated (unlike scoped location matching, "both empty" is not a match). If endpoint-field comparison is disabled (`DEDUPE_ALGO_ENDPOINT_FIELDS = []`), URLs cannot establish a match at all: only a shared dependency can.
 
-Same-Tool matching stays within a single tool (test type). Cross-Tool matching crosses tools intentionally. The Engagement-scoped deduplication setting is ignored for this algorithm; matching is always global, and the `service` field still partitions deduplication as it does for the other global algorithms.
+Same-Tool matching stays within a single tool (test type). Cross-Tool matching crosses tools intentionally. The Engagement-scoped deduplication setting is ignored for this algorithm. Matching is instance-wide unless the Asset is in a dedupe pool for that matching kind, in which case it is bounded to the pool (see the callout above), and the `service` field still partitions deduplication as it does for the other global algorithms.
 
 ## Example
 
@@ -75,8 +82,8 @@ Assume Global Locations (both location types) is enabled on a DAST tool (Same To
 | 1 | DAST Finding at `https://shared.example.com/login` | Application 0 | 1 active Finding created |
 | 2 | Same URL, **different** vulnerability (title + severity) | Application 1 | 1 Finding created, marked as duplicate of the Application 0 Finding (location alone matches) |
 | 3 | Second DAST tool, same URL | Application 2 | 1 Finding created, marked as duplicate of the Application 0 Finding (cross-tool match) |
-| 4 | DAST Finding at `https://other.example.com/admin` | Application 3 | 1 active Finding created — different URL, no shared location |
-| 5 | Finding with no URL and no dependency | Application 4 | 1 active Finding created — no location to share |
+| 4 | DAST Finding at `https://other.example.com/admin` | Application 3 | 1 active Finding created (different URL, no shared location) |
+| 5 | Finding with no URL and no dependency | Application 4 | 1 active Finding created (no location to share) |
 
 Each duplicate Finding shows its original at the bottom of the Finding page in the duplicate chain.
 
@@ -89,7 +96,7 @@ Both are global (cross-Asset) algorithms that ignore the Engagement scope and ma
 | Matches on | Component **name + version** | A shared **location**: a URL and/or a dependency |
 | Dependency identity | Name and version | Full **Package URL** (type, namespace, name, version, qualifiers) |
 | URL / DAST Findings | Not matched | Matched (on the configured endpoint fields) |
-| Configurable | No | Yes — choose URLs, Dependencies, or both per tool |
+| Configurable | No | Yes: choose URLs, Dependencies, or both per tool |
 | Data model | Works with or without Locations | Requires **Locations** (Pro) |
 | Best for | SCA tools where a package name+version is the identity | Web/DAST tools and SCA under the Locations model, where the URL or exact dependency is the identity |
 
@@ -103,7 +110,7 @@ In that case, the Finding is visible and labelled as a duplicate, but the user w
 
 ## Reverting
 
-To stop using Global Locations for a given tool, open its Deduplication Settings and switch the algorithm back to one of the scoped options.
+To stop using Global Locations for a given tool, open **Settings > Finding Workflow > Matching Configuration**, select the tool's cell for the matching kind in question, and switch the algorithm back to one of the scoped options.
 
 For **Same Tool** Deduplication:
 
@@ -116,4 +123,4 @@ For **Cross Tool** Deduplication:
 - Hash Code
 - Disabled
 
-Changing the algorithm triggers a background recalculation of deduplication hashes for the tool's existing Findings.
+Changing the algorithm changes what the next import compares and recomputes nothing; existing duplicate links are left as they are. Changing a tool's hash fields (or, for Global Locations, its location types) is what triggers the background recalculation of that tool's stored hashes.

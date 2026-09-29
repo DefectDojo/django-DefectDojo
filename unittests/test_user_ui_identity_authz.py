@@ -1,4 +1,4 @@
-from crum import set_current_user
+from crum import get_current_user, impersonate
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 
@@ -28,7 +28,14 @@ class UserUIIdentityFieldAuthzTest(DojoTestCase):
         cls.target = Dojo_User.objects.create(username="ui_identity_target", email="target@example.com", is_active=True)
 
     def tearDown(self):
-        set_current_user(None)
+        # Regression: leaving a live user (or None) in crum's thread-local outranks
+        # request.user for the next request on this worker thread, so an unrelated
+        # API test later in the same process 404s on an object it is authorized for.
+        # crum's "unset" sentinel is False; anything else here is a leak.
+        self.assertIs(
+            get_current_user(_return_false=True), False,  # noqa: FBT003 crum's explicit "unset" sentinel
+            msg="test leaked a crum current-user override into the next test",
+        )
         super().tearDown()
 
     def _edit_data(self, **overrides):
@@ -39,27 +46,27 @@ class UserUIIdentityFieldAuthzTest(DojoTestCase):
     # form-level guard
 
     def test_form_blocks_delegate_changing_another_email(self):
-        set_current_user(self.delegate)
-        form = EditDojoUserForm(self._edit_data(email="attacker@evil.example"), instance=self.target)
-        self.assertFalse(form.is_valid())
+        with impersonate(self.delegate):
+            form = EditDojoUserForm(self._edit_data(email="attacker@evil.example"), instance=self.target)
+            self.assertFalse(form.is_valid())
         self.assertIn("email", form.errors)
 
     def test_form_blocks_delegate_changing_another_username(self):
-        set_current_user(self.delegate)
-        form = EditDojoUserForm(self._edit_data(username="hijacked"), instance=self.target)
-        self.assertFalse(form.is_valid())
+        with impersonate(self.delegate):
+            form = EditDojoUserForm(self._edit_data(username="hijacked"), instance=self.target)
+            self.assertFalse(form.is_valid())
         self.assertIn("username", form.errors)
 
     def test_form_allows_superuser_changing_another_email(self):
-        set_current_user(self.superuser)
-        form = EditDojoUserForm(self._edit_data(email="newby-admin@example.com"), instance=self.target)
-        self.assertTrue(form.is_valid(), form.errors)
+        with impersonate(self.superuser):
+            form = EditDojoUserForm(self._edit_data(email="newby-admin@example.com"), instance=self.target)
+            self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_allows_delegate_changing_own_email(self):
-        set_current_user(self.delegate)
-        data = {"username": self.delegate.username, "email": "mynew@example.com", "is_active": "on"}
-        form = EditDojoUserForm(data, instance=self.delegate)
-        self.assertTrue(form.is_valid(), form.errors)
+        with impersonate(self.delegate):
+            data = {"username": self.delegate.username, "email": "mynew@example.com", "is_active": "on"}
+            form = EditDojoUserForm(data, instance=self.delegate)
+            self.assertTrue(form.is_valid(), form.errors)
 
     # end-to-end: the reported PoC no longer changes the victim's email
 

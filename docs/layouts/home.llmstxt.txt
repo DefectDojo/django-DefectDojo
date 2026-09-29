@@ -1,0 +1,88 @@
+{{- /*
+  /llms.txt for docs.defectdojo.com, following https://llmstxt.org.
+  Built from the English page tree on every build, so new pages appear
+  automatically. Sections are listed in sidebar order and pages in weight
+  order. A top-level section missing from $order still appears, under its
+  own title, before Optional. The "en" section only holds legacy redirect
+  stubs and is skipped. Other languages get no llms.txt content.
+*/ -}}
+{{- if eq site.Language.Lang "en" -}}
+{{- $order := slice
+  (slice "get_started" "Get Started")
+  (slice "import_data" "Import Data")
+  (slice "triage_findings" "Triage Findings")
+  (slice "asset_modelling" "Model Your Assets")
+  (slice "connectors" "Connectors")
+  (slice "issue_tracking" "Issue Tracking")
+  (slice "metrics_reports" "Metrics and Reports")
+  (slice "sensei" "Sensei")
+  (slice "psirt" "PSIRT")
+  (slice "federal_compliance" "Federal Compliance")
+  (slice "automation" "Automation")
+  (slice "admin" "Admin")
+  (slice "navigation" "Navigating DefectDojo")
+  (slice "help" "Help")
+  (slice "supported_tools" "Supported Tools")
+-}}
+{{- $optional := slice "releases" "archived_docs" -}}
+{{- $skip := slice "en" -}}
+{{- $known := slice -}}
+{{- range $order }}{{ $known = $known | append (index . 0) }}{{ end -}}
+# DefectDojo Documentation
+
+> Official documentation for DefectDojo, a vulnerability management and application security posture management (ASPM) platform. It covers the free, open-source Community Edition and DefectDojo Pro, the commercial edition.
+
+Key facts:
+
+- DefectDojo is an OWASP Flagship Project. Community Edition is free under the BSD 3-Clause license and is self-hosted. DefectDojo Pro runs as a managed cloud service or self-hosted, including in air-gapped networks.
+- DefectDojo does not scan. It imports findings from 500+ security tools by file import, API or connector, and normalizes them into one data model of Assets, Engagements, Tests and Findings.
+- It deduplicates findings within a tool, across tools and across reimports, as described in {{ absURL "triage_findings/finding_deduplication/deduplication_across_tools/" }}
+- The remaining findings are tracked through remediation with SLAs, risk acceptance, reimports that close fixed findings, and ticketing integrations such as Jira.
+- DefectDojo Sensei is the AI layer in DefectDojo Pro.
+- Company website: https://defectdojo.com (its own llms.txt is https://defectdojo.com/llms.txt). Source code: https://github.com/DefectDojo/django-DefectDojo
+{{- range $order }}
+  {{- $heading := index . 1 }}
+  {{- with site.GetPage (printf "/%s" (index . 0)) }}
+    {{- if .RegularPagesRecursive }}
+{{ printf "\n## %s\n" $heading }}
+      {{- template "llms-walk" . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- range site.Sections.ByWeight }}
+  {{- if not (or (in $known .Section) (in $optional .Section) (in $skip .Section)) }}
+    {{- if .RegularPagesRecursive }}
+{{ printf "\n## %s\n" .Title }}
+      {{- template "llms-walk" . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+## Optional
+{{ range $optional }}
+  {{- with site.GetPage (printf "/%s" .) }}
+    {{- template "llms-walk" . }}
+  {{- end }}
+{{- end }}
+{{ end -}}
+
+{{- define "llms-walk" }}
+  {{- range .Pages.ByWeight }}
+    {{- if .IsSection }}
+      {{- template "llms-walk" . }}
+    {{- else if .IsPage }}
+      {{- template "llms-line" . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- define "llms-line" }}
+  {{- /* Drop decorative emoji prefixes; tag the edition the way page headings do. */}}
+  {{- $title := .Title | replaceRE `^[^\p{L}\p{N}(]+` "" | strings.TrimSpace }}
+  {{- with .Params.audience }}
+    {{- if and (eq . "pro") (not (findRE `\bPro\b` $title)) }}{{ $title = printf "%s (Pro)" $title }}
+    {{- else if and (eq . "opensource") (not (findRE `(?i)open.?source` $title)) }}{{ $title = printf "%s (Open Source)" $title }}{{ end }}
+  {{- end }}
+  {{- $desc := .Description | plainify | replaceRE `\s+` " " | strings.TrimSpace }}
+{{ printf "- [%s](%s)" $title .Permalink }}{{ with $desc }}: {{ . }}{{ end }}
+{{- end }}

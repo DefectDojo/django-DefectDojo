@@ -1,0 +1,41 @@
+{
+    "vulnerabilities": [
+        {
+            "id": "SNYK-TEST-0001",
+            "title": "Test Null Identifiers",
+            "packageName": "test-package",
+            "version": "1.0.0",
+            "severity": "high",
+            "cvssScore": 7.5,
+            "semver": {
+                "vulnerable": [
+                    "<2.0.0"
+                ]
+            },
+            "from": [
+                "my-project@1.0.0",
+                "test-package@1.0.0"
+            ],
+            "identifiers": null,
+            "description": "Finding with null identifiers field"
+        },
+        {
+            "id": "SNYK-TEST-0002",
+            "title": "Test Empty Identifiers",
+            "packageName": "another-package",
+            "version": "3.2.1",
+            "severity": "medium",
+            "cvssScore": 5.0,
+            "semver": {
+                "vulnerable": ">=1.0.0 <4.0.0"
+            },
+            "from": [
+                "my-project@1.0.0",
+                "another-package@3.2.1"
+            ],
+            "identifiers": {},
+            "description": "Finding with empty identifiers object"
+        }
+    ],
+    "packageManager": "npm"
+}

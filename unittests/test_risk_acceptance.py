@@ -207,6 +207,43 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         self.assertTrue(all(finding.sla_start_date == timezone.now().date() for finding in findings))
 
+    def test_expire_risk_acceptance_verified_not_restored_by_default(self):
+        # Behavioral guard: without restore_verified_expired, reactivating a finding on expiry
+        # must NOT touch its Verified flag. It reactivates but keeps whatever Verified it had.
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        # restore_verified_expired defaults to False; do not enable it.
+        finding_ids = list(ra.accepted_findings.values_list("id", flat=True))
+        Finding.objects.filter(id__in=finding_ids).update(verified=False)
+
+        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), {"id": ra.id})
+
+        reactivated = Finding.objects.filter(id__in=finding_ids)
+        self.assert_all_active_not_risk_accepted(reactivated)
+        self.assertTrue(
+            all(not finding.verified for finding in reactivated),
+            "Verified must stay unchanged on expiry when restore_verified_expired is off",
+        )
+
+    def test_expire_risk_acceptance_restores_verified_when_enabled(self):
+        # Behavioral guard: with restore_verified_expired on, findings that reactivate on expiry
+        # come back Active AND Verified (the "Active, Verified" state some metrics rely on).
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        ra.restore_verified_expired = True
+        ra.save()
+        finding_ids = list(ra.accepted_findings.values_list("id", flat=True))
+        Finding.objects.filter(id__in=finding_ids).update(verified=False)
+
+        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), {"id": ra.id})
+
+        reactivated = Finding.objects.filter(id__in=finding_ids)
+        self.assert_all_active_not_risk_accepted(reactivated)
+        self.assertTrue(
+            all(finding.verified for finding in reactivated),
+            "restore_verified_expired must mark reactivated findings Verified",
+        )
+
     def test_reinstate_risk_acceptance_findings_accepted(self):
         # first create an expired risk acceptance
         self.test_expire_risk_acceptance_findings_active()

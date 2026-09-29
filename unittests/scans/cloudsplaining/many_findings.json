@@ -1,0 +1,110 @@
+{
+  "customer_managed_policies": {
+    "InsecurePolicy": {
+      "PolicyName": "InsecurePolicy",
+      "PolicyId": "InsecurePolicy",
+      "Arn": "arn:aws:iam::012345678901:policy/InsecurePolicy",
+      "is_excluded": false,
+      "PrivilegeEscalation": [],
+      "DataExfiltration": [],
+      "ResourceExposure": [
+        "s3:PutObjectAcl"
+      ],
+      "CredentialsExposure": [],
+      "ServiceWildcard": [],
+      "InfrastructureModification": [
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ]
+    },
+    "ExcessivePermissions": {
+      "PolicyName": "ExcessivePermissions",
+      "PolicyId": "ExcessivePermissions",
+      "Arn": "arn:aws:iam::012345678901:policy/ExcessivePermissions",
+      "is_excluded": false,
+      "PrivilegeEscalation": [
+        {
+          "type": "EditExistingLambdaFunctionWithRole",
+          "actions": [
+            "lambda:updatefunctioncode"
+          ]
+        }
+      ],
+      "DataExfiltration": [
+        "s3:GetObject",
+        "secretsmanager:GetSecretValue"
+      ],
+      "ResourceExposure": [
+        "lambda:AddLayerVersionPermission",
+        "lambda:AddPermission",
+        "lambda:DisableReplication",
+        "lambda:EnableReplication",
+        "lambda:RemoveLayerVersionPermission",
+        "lambda:RemovePermission"
+      ],
+      "CredentialsExposure": [],
+      "ServiceWildcard": [
+        "lambda",
+        "s3",
+        "secretsmanager"
+      ],
+      "InfrastructureModification": [
+        "lambda:AddLayerVersionPermission",
+        "lambda:AddPermission",
+        "lambda:CreateAlias",
+        "lambda:CreateFunction",
+        "lambda:DeleteAlias",
+        "lambda:DeleteEventSourceMapping"
+      ]
+    }
+  },
+  "inline_policies": {
+    "e8bca32ff7d1f7990d71c64d95a04b7caa5aad5791f06f69db59653228c6853d": {
+      "PolicyName": "InlinePolicyForSecondGroup",
+      "PolicyId": "e8bca32ff7d1f7990d71c64d95a04b7caa5aad5791f06f69db59653228c6853d",
+      "is_excluded": false,
+      "PrivilegeEscalation": [],
+      "DataExfiltration": [
+        "s3:GetObject"
+      ],
+      "ResourceExposure": [
+        "s3:PutObjectAcl"
+      ],
+      "CredentialsExposure": [],
+      "ServiceWildcard": [],
+      "InfrastructureModification": [
+        "s3:GetObject",
+        "s3:PutObjectAcl"
+      ]
+    },
+    "d09fe3603cd65058b6e2d9817cf37093e83e98318a56ce1e29c8491ac989e57e": {
+      "PolicyName": "OverprivilegedEC2",
+      "PolicyId": "d09fe3603cd65058b6e2d9817cf37093e83e98318a56ce1e29c8491ac989e57e",
+      "is_excluded": false,
+      "PrivilegeEscalation": [
+        {
+          "type": "CreateAccessKey",
+          "actions": [
+            "iam:createaccesskey"
+          ]
+        }
+      ],
+      "DataExfiltration": [
+        "s3:GetObject",
+        "secretsmanager:GetSecretValue"
+      ],
+      "ResourceExposure": [
+        "iam:CreateAccessKey"
+      ],
+      "CredentialsExposure": [
+        "iam:CreateAccessKey"
+      ],
+      "ServiceWildcard": [],
+      "InfrastructureModification": [
+        "iam:CreateAccessKey",
+        "s3:GetObject",
+        "secretsmanager:GetSecretValue"
+      ]
+    }
+  }
+}

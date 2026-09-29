@@ -12,10 +12,10 @@ class ProductAnnouncementManager:
 
     """Base class for centralized helper methods"""
 
-    base_try_free = "Try today for free"
+    base_try_free = "Get Pro from $100/mo"
     base_contact_us = "email us at"
     base_email_address = "hello@defectdojo.com"
-    ui_try_free = f'<b><a href="https://cloud.defectdojo.com/accounts/onboarding/plg_step_1" target="_blank">{base_try_free}</a></b>'
+    ui_try_free = f'<b><a href="https://cloud.defectdojo.com/onboarding?payg=1" target="_blank">{base_try_free}</a></b>'
     ui_contact_us = f'{base_contact_us} <b><a href="mailto:{base_email_address}">{base_email_address}</a></b>'
     ui_outreach = f"{ui_try_free} or {ui_contact_us}."
     api_outreach = f"{base_try_free} or {base_contact_us} {base_email_address}"

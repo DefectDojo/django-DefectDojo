@@ -85,13 +85,6 @@ function _toTimePoints(data) {
 function _vals(data) {
     return (data || []).map(function (d) { return d[1]; });
 }
-function _sevVals(data, labels) {
-    var out = labels.map(function () { return 0; });
-    (data || []).forEach(function (d) {
-        if (d[0] >= 0 && d[0] < out.length) out[d[0]] = d[1];
-    });
-    return out;
-}
 
 /** Place Flot-style [[x, val], …] points into the category slots named by `ticks`.
  *
@@ -257,13 +250,16 @@ function _sevStackedBar(id, d1, d2, d3, d4, d5, ticks, opts) {
                     display: opts.showLegend === true,
                     position: 'top',
                     labels: { usePointStyle: true, boxWidth: 8 },
-datasets: [
-    { label: 'Critical', data: _sevVals(d1, labels), backgroundColor: SEV.critical },
-    { label: 'High',     data: _sevVals(d2, labels), backgroundColor: SEV.high },
-    { label: 'Medium',   data: _sevVals(d3, labels), backgroundColor: SEV.medium },
-    { label: 'Low',      data: _sevVals(d4, labels), backgroundColor: SEV.low },
-    { label: 'Info',     data: _sevVals(d5, labels), backgroundColor: SEV.info },
-],                },            },            scales                x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true } }                y: { stacked: true, beginAtZero: true, grid: { color: '#e5e7eb' } }            }        }, 
+                },
+            },
+            scales: {
+                x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true } },
+                y: { stacked: true, beginAtZero: true, grid: { color: '#e5e7eb' } },
+            },
+        },
+    });
+}
+
 /** Pie / doughnut chart. items = [{label, value, color}, …] */
 function _pie(id, items, opts) {
     opts = opts || {};

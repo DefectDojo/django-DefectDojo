@@ -15,7 +15,7 @@
                     <div class="dropdown pull-right">
                         <div class="btn-group">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                aria-label="Actions" data-toggle="dropdown" aria-expanded="true">
+                                aria-label="{% trans 'Actions' %}" data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa-solid fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
@@ -108,7 +108,7 @@
                     <h4 class="pull-left">{{ labels.ORG_USERS_LABEL }}</h4>
                     {% if request.user.is_staff %}
                     <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
+                        <button class="btn btn-primary dropdown-toggle" aria-label="{% trans 'Actions' %}" type="button" id="dropdownMenuAddProductTypeMember"
                             data-toggle="dropdown" aria-expanded="true">
                             <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
@@ -146,8 +146,10 @@
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownProductTypeActions">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             <li>
+                                                {# escapejs, not HTML escaping: this string is compiled as JavaScript, where an HTML entity decodes back into a quote. #}
+                                                {% autoescape off %}{% blocktrans asvar revoke_product_type_message with username=user.username pt=pt.name %}Revoke {{ username }} from {{ pt }}?{% endblocktrans %}{% endautoescape %}
                                                 <a name="revokeProductType" href="#"
-                                                   onclick="if (confirm('{% blocktrans with username=user.username pt=pt.name %}Revoke {{ username }} from {{ pt }}?{% endblocktrans %}')) { document.getElementById('revoke-product-type-{{ pt.id }}').submit(); } return false;">
+                                                   onclick="if (confirm('{{ revoke_product_type_message|escapejs }}')) { document.getElementById('revoke-product-type-{{ pt.id }}').submit(); } return false;">
                                                     <i class="fa-solid fa-trash"></i> {% trans "Revoke" %}
                                                 </a>
                                             </li>
@@ -176,7 +178,7 @@
                     <h4 class="pull-left">{{ labels.ASSET_USERS_ACCESS_LABEL }}</h4>
                     {% if request.user.is_staff %}
                     <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductMember"
+                        <button class="btn btn-primary dropdown-toggle" aria-label="{% trans 'Actions' %}" type="button" id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true">
                             <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
@@ -214,8 +216,9 @@
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownProductActions">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             <li>
+                                                {% autoescape off %}{% blocktrans asvar revoke_product_message with username=user.username product=p.name %}Revoke {{ username }} from {{ product }}?{% endblocktrans %}{% endautoescape %}
                                                 <a name="revokeProduct" href="#"
-                                                   onclick="if (confirm('{% blocktrans with username=user.username product=p.name %}Revoke {{ username }} from {{ product }}?{% endblocktrans %}')) { document.getElementById('revoke-product-{{ p.id }}').submit(); } return false;">
+                                                   onclick="if (confirm('{{ revoke_product_message|escapejs }}')) { document.getElementById('revoke-product-{{ p.id }}').submit(); } return false;">
                                                     <i class="fa-solid fa-trash"></i> {% trans "Revoke" %}
                                                 </a>
                                             </li>

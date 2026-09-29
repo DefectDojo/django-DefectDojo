@@ -1,6 +1,6 @@
 from dojo.models import Test
 from dojo.tools.snyk.parser import SnykParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestSnykParser(DojoTestCase):
@@ -213,3 +213,25 @@ class TestSnykParser(DojoTestCase):
                 "docker-image|sarim04/juiceshop@latest: CVE-2023-4039",
                 findings[0].title,
             )
+
+    def test_snykParser_null_identifiers(self):
+        with (get_unit_tests_scans_path("snyk") / "single_project_null_identifiers.json").open(encoding="utf-8") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            # First finding has null identifiers — no CVE/CWE should be extracted
+            self.assertFalse(getattr(findings[0], "unsaved_vulnerability_ids", []))
+            # Second finding has empty identifiers — same result
+            self.assertFalse(getattr(findings[1], "unsaved_vulnerability_ids", []))
+
+
+class TestSnykParserImageLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_container_projects_carry_the_image_without_a_digest(self):
+        with (get_unit_tests_scans_path("snyk") / "snykcontainer_issue_9270.json").open(encoding="utf-8") as test_file:
+            findings = SnykParser().get_findings(test_file, Test())
+        self.assertTrue(findings)
+        expected = {"registry": "", "repository": "sarim04/juiceshop", "digest": "", "tag": "latest", "oci_source": "", "oci_revision": ""}
+        for finding in findings:
+            images = [loc.data for loc in finding.unsaved_locations if loc.type == "image"]
+            self.assertEqual([expected], images)

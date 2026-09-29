@@ -1,7 +1,7 @@
 ---
 title: "SCIM Provisioning"
 description: "Provision and deprovision DefectDojo Pro users from your identity provider"
-weight: 19
+weight: 140
 audience: pro
 ---
 

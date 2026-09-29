@@ -11,6 +11,15 @@ from dojo.models import Finding
 
 
 def prefetch_related_findings_for_report(findings: QuerySet) -> QuerySet:
+    # This function is the single authority for the report's finding prefetch set. The caller may
+    # hand us a queryset that already carries its own prefetch_related lookups (the finding viewset's
+    # get_queryset prefetches vulnerability_references for the finding serializer, for example).
+    # Layering the report's own vulnerability_id_prefetch() on top of that would register the same
+    # relation twice with two different Prefetch querysets, which makes Django raise
+    # "'vulnerability_references' lookup was already seen with a different queryset" while the report
+    # serializer iterates the queryset -- surfacing as a 500 on report generation. Reset any inherited
+    # prefetches first so this function owns the complete, conflict-free set.
+    findings = findings.prefetch_related(None)
     return prefetch_for_findings(
         findings.prefetch_related(
             # Some of the fields are removed here because they are being

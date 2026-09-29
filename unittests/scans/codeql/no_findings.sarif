@@ -1,0 +1,392 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "organization": "GitHub",
+          "semanticVersion": "2.26.2",
+          "notifications": [
+            {
+              "id": "py/diagnostics/successfully-extracted-files",
+              "name": "py/diagnostics/successfully-extracted-files",
+              "shortDescription": {
+                "text": "Extracted Python files"
+              },
+              "fullDescription": {
+                "text": "Lists all Python files in the source code directory that were extracted."
+              },
+              "defaultConfiguration": {
+                "enabled": true
+              },
+              "properties": {
+                "tags": [
+                  "successfully-extracted-files"
+                ],
+                "description": "Lists all Python files in the source code directory that were extracted.",
+                "id": "py/diagnostics/successfully-extracted-files",
+                "kind": "diagnostic",
+                "name": "Extracted Python files"
+              }
+            },
+            {
+              "id": "py/diagnostics/extraction-warnings",
+              "name": "py/diagnostics/extraction-warnings",
+              "shortDescription": {
+                "text": "Python extraction warnings"
+              },
+              "fullDescription": {
+                "text": "List all extraction warnings for Python files in the source code directory."
+              },
+              "defaultConfiguration": {
+                "enabled": true
+              },
+              "properties": {
+                "description": "List all extraction warnings for Python files in the source code directory.",
+                "id": "py/diagnostics/extraction-warnings",
+                "kind": "diagnostic",
+                "name": "Python extraction warnings"
+              }
+            },
+            {
+              "id": "py/baseline/expected-extracted-files",
+              "name": "py/baseline/expected-extracted-files",
+              "shortDescription": {
+                "text": "Expected extracted files"
+              },
+              "fullDescription": {
+                "text": "Files appearing in the source archive that are expected to be extracted."
+              },
+              "defaultConfiguration": {
+                "enabled": true
+              },
+              "properties": {
+                "tags": [
+                  "expected-extracted-files",
+                  "telemetry"
+                ]
+              }
+            },
+            {
+              "id": "cli/file-coverage-baseline",
+              "name": "cli/file-coverage-baseline",
+              "shortDescription": {
+                "text": "File coverage baseline telemetry"
+              },
+              "fullDescription": {
+                "text": "File coverage baseline telemetry"
+              },
+              "defaultConfiguration": {
+                "enabled": true
+              }
+            },
+            {
+              "id": "cli/platform",
+              "name": "cli/platform",
+              "shortDescription": {
+                "text": "Platform"
+              },
+              "fullDescription": {
+                "text": "Platform"
+              },
+              "defaultConfiguration": {
+                "enabled": true
+              }
+            },
+            {
+              "id": "cli/sip-enablement",
+              "name": "cli/sip-enablement",
+              "shortDescription": {
+                "text": "macOS SIP enablement status"
+              },
+              "fullDescription": {
+                "text": "macOS SIP enablement status"
+              },
+              "defaultConfiguration": {
+                "enabled": true
+              }
+            }
+          ],
+          "rules": []
+        },
+        "extensions": [
+          {
+            "name": "codeql/python-queries",
+            "semanticVersion": "1.8.7+94101634db019b00637dd5cfe241f7e570da290d",
+            "locations": [
+              {
+                "uri": "file:///opt/codeql/qlpacks/codeql/python-queries/1.8.7/",
+                "description": {
+                  "text": "The QL pack root directory."
+                },
+                "properties": {
+                  "tags": [
+                    "CodeQL/LocalPackRoot"
+                  ]
+                }
+              },
+              {
+                "uri": "file:///opt/codeql/qlpacks/codeql/python-queries/1.8.7/qlpack.yml",
+                "description": {
+                  "text": "The QL pack definition file."
+                },
+                "properties": {
+                  "tags": [
+                    "CodeQL/LocalPackDefinitionFile"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "codeql/python-all",
+            "semanticVersion": "7.2.2+94101634db019b00637dd5cfe241f7e570da290d",
+            "locations": [
+              {
+                "uri": "file:///opt/codeql/qlpacks/codeql/python-queries/1.8.7/.codeql/libraries/codeql/python-all/7.2.2/",
+                "description": {
+                  "text": "The QL pack root directory."
+                },
+                "properties": {
+                  "tags": [
+                    "CodeQL/LocalPackRoot"
+                  ]
+                }
+              },
+              {
+                "uri": "file:///opt/codeql/qlpacks/codeql/python-queries/1.8.7/.codeql/libraries/codeql/python-all/7.2.2/qlpack.yml",
+                "description": {
+                  "text": "The QL pack definition file."
+                },
+                "properties": {
+                  "tags": [
+                    "CodeQL/LocalPackDefinitionFile"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "codeql/threat-models",
+            "semanticVersion": "1.0.54+94101634db019b00637dd5cfe241f7e570da290d",
+            "locations": [
+              {
+                "uri": "file:///opt/codeql/qlpacks/codeql/python-queries/1.8.7/.codeql/libraries/codeql/threat-models/1.0.54/",
+                "description": {
+                  "text": "The QL pack root directory."
+                },
+                "properties": {
+                  "tags": [
+                    "CodeQL/LocalPackRoot"
+                  ]
+                }
+              },
+              {
+                "uri": "file:///opt/codeql/qlpacks/codeql/python-queries/1.8.7/.codeql/libraries/codeql/threat-models/1.0.54/qlpack.yml",
+                "description": {
+                  "text": "The QL pack definition file."
+                },
+                "properties": {
+                  "tags": [
+                    "CodeQL/LocalPackDefinitionFile"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "invocations": [
+        {
+          "toolExecutionNotifications": [
+            {
+              "locations": [
+                {
+                  "physicalLocation": {
+                    "artifactLocation": {
+                      "uri": "app/safe.py",
+                      "uriBaseId": "%SRCROOT%",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
+              "message": {
+                "text": ""
+              },
+              "level": "none",
+              "descriptor": {
+                "id": "py/diagnostics/successfully-extracted-files",
+                "index": 0
+              },
+              "properties": {
+                "formattedMessage": {
+                  "text": ""
+                }
+              }
+            },
+            {
+              "locations": [
+                {
+                  "physicalLocation": {
+                    "artifactLocation": {
+                      "uri": "db/codeql-database.yml",
+                      "uriBaseId": "%SRCROOT%",
+                      "index": 1
+                    }
+                  }
+                }
+              ],
+              "message": {
+                "text": ""
+              },
+              "level": "none",
+              "descriptor": {
+                "id": "py/diagnostics/successfully-extracted-files",
+                "index": 0
+              },
+              "properties": {
+                "formattedMessage": {
+                  "text": ""
+                }
+              }
+            },
+            {
+              "locations": [
+                {
+                  "physicalLocation": {
+                    "artifactLocation": {
+                      "uri": "app/safe.py",
+                      "uriBaseId": "%SRCROOT%",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
+              "message": {
+                "text": ""
+              },
+              "level": "none",
+              "descriptor": {
+                "id": "py/baseline/expected-extracted-files",
+                "index": 2
+              },
+              "properties": {
+                "formattedMessage": {
+                  "text": ""
+                }
+              }
+            },
+            {
+              "message": {
+                "text": ""
+              },
+              "level": "none",
+              "timeUtc": "2026-08-10T15:53:04.919810Z",
+              "descriptor": {
+                "id": "cli/file-coverage-baseline",
+                "index": 3
+              },
+              "properties": {
+                "attributes": {
+                  "durationMilliseconds": 56
+                },
+                "visibility": {
+                  "statusPage": false,
+                  "telemetry": true
+                }
+              }
+            },
+            {
+              "message": {
+                "text": ""
+              },
+              "level": "none",
+              "timeUtc": "2026-08-10T15:53:04.920863Z",
+              "descriptor": {
+                "id": "cli/platform",
+                "index": 4
+              },
+              "properties": {
+                "attributes": {
+                  "arch": "aarch64",
+                  "name": "Mac OS X",
+                  "version": "26.5.2"
+                },
+                "visibility": {
+                  "statusPage": false,
+                  "telemetry": true
+                }
+              }
+            },
+            {
+              "message": {
+                "text": ""
+              },
+              "level": "none",
+              "timeUtc": "2026-08-10T15:53:04.929905Z",
+              "descriptor": {
+                "id": "cli/sip-enablement",
+                "index": 5
+              },
+              "properties": {
+                "attributes": {
+                  "isEnabled": true
+                },
+                "visibility": {
+                  "statusPage": false,
+                  "telemetry": true
+                }
+              }
+            }
+          ],
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "app/safe.py",
+            "uriBaseId": "%SRCROOT%",
+            "index": 0
+          }
+        },
+        {
+          "location": {
+            "uri": "db/codeql-database.yml",
+            "uriBaseId": "%SRCROOT%",
+            "index": 1
+          }
+        }
+      ],
+      "results": [],
+      "columnKind": "unicodeCodePoints",
+      "properties": {
+        "semmle.formatSpecifier": "sarifv2.1.0",
+        "metricResults": [
+          {
+            "rule": {
+              "id": "py/summary/lines-of-code",
+              "index": 48
+            },
+            "ruleId": "py/summary/lines-of-code",
+            "ruleIndex": 48,
+            "value": 6
+          },
+          {
+            "rule": {
+              "id": "py/summary/lines-of-user-code",
+              "index": 49
+            },
+            "ruleId": "py/summary/lines-of-user-code",
+            "ruleIndex": 49,
+            "value": 6,
+            "baseline": 6
+          }
+        ]
+      }
+    }
+  ]
+}

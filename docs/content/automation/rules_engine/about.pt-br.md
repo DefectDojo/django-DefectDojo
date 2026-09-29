@@ -13,7 +13,7 @@ O Rules Engine do DefectDojo permite construir workflows personalizados e açõe
 
 O Rules Engine só pode ser acessado através da [Pro UI](/get_started/about/ui_pro_vs_os/).
 
-**Procurando o editor de grafos?** O [Rules Engine 2.0](/automation/rules_engine_2/about/) constrói automações como grafos visuais de nós, e adiciona ramificações, ações de saída como tickets e mensagens, rastros por execução e um livro-razão de entregas. Os dois mecanismos funcionam lado a lado, e regras existentes podem ser [convertidas](/automation/rules_engine_2/converting_from_rules_engine/).
+**Procurando o editor de grafos?** O [Triage Engine](/automation/triage_engine/about/) constrói automações como grafos visuais de nós, e adiciona ramificações, ações de saída como tickets e mensagens, rastros por execução e um livro-razão de entregas. Os dois mecanismos funcionam lado a lado, e regras existentes podem ser [convertidas](/automation/triage_engine/converting_from_rules_engine/).
 
 ## Habilitando o Rules Engine
 

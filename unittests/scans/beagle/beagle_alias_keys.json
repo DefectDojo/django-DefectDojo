@@ -1,0 +1,28 @@
+{
+  "project_name": "Default project",
+  "application_name": "generic-app",
+  "url": "https://app.example.com/portal",
+  "generated_date": "not a date",
+  "approved_date": "12 Jan 2022",
+  "scan_items": [
+    {
+      "vulnerability_name": "Session cookie missing the Secure attribute",
+      "risk_level": "LOW",
+      "vulnerability_description": "A session cookie is set without the Secure attribute.",
+      "recommendations": "Set the Secure attribute on every session cookie.",
+      "cweid": 614,
+      "occurences": [
+        {
+          "status": "open",
+          "vulnerability": {"Method": "GET", "Url": "http://app.example.com/portal/signin"}
+        }
+      ]
+    },
+    {
+      "signature": "Directory listing enabled",
+      "risk_score": 5.3,
+      "detail": "The web server returns an index of the directory contents.",
+      "mitigation": "Disable automatic directory indexes."
+    }
+  ]
+}

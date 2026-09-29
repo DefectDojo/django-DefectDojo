@@ -8,8 +8,7 @@
           <img src="/svgs/logo-darkmode.svg" class="logo-darkmode" alt="DefectDojo" width="150" />
         </a>
         <p class="text-muted small">
-          Security's secret weapon - unify &amp; automate AppSec.<br>
-          Open-source vulnerability management &amp; DevSecOps.
+          Unified vulnerability management &amp; remediation.
         </p>
       </div>
 
@@ -44,6 +43,10 @@
           <li><a href="https://trust.defectdojo.com" rel="noopener">{{ i18n "footer_link_trust_center" }}</a></li>
           <li><a href="https://status.defectdojo.com" rel="noopener">{{ i18n "footer_link_status" }}</a></li>
           <li><a href="mailto:support@defectdojo.com">{{ i18n "footer_link_support" }}</a></li>
+          <li><a href="https://defectdojo.com/privacy-policy" rel="noopener">{{ i18n "footer_link_privacy_policy" }}</a></li>
+          {{- if hugo.IsProduction }}
+          <li><button type="button" class="footer-link-button" onclick="(window._hsp = window._hsp || []).push(['showBanner'])">{{ i18n "footer_link_cookie_settings" }}</button></li>
+          {{- end }}
         </ul>
       </div>
 
@@ -71,7 +74,7 @@
     <div class="footer-bottom">
       <div class="row align-items-center">
         <div class="col-md-6 text-center text-md-start">
-          <small class="text-muted">&copy; {{ now.Year }} DefectDojo, Inc. All rights reserved.</small>
+          <small class="text-muted">&copy; {{ now.Year }} DefectDojo Inc. All Rights Reserved.</small>
         </div>
         <div class="col-md-6 text-center text-md-end">
           <small class="text-muted">Built with <a href="https://gethyas.com/themes/doks/">Doks</a> and <a href="https://gohugo.io">Hugo</a></small>

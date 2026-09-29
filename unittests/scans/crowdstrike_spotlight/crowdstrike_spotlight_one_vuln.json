@@ -1,0 +1,72 @@
+{
+  "resources": [
+    {
+      "id": "spotlight-0000000000000000000000000000001",
+      "aid": "aid0000000000000000000000000000001",
+      "cid": "cid0000000000000000000000000000001",
+      "status": "open",
+      "created_timestamp": "2026-01-15T09:24:11Z",
+      "updated_timestamp": "2026-01-20T11:02:44Z",
+      "apps": [
+        {
+          "product_name_version": "OpenSSL 3.0.11",
+          "product_name_normalized": "OpenSSL",
+          "vendor_normalized": "openssl"
+        }
+      ],
+      "cve": {
+        "id": "CVE-2000-0001",
+        "base_score": 9.8,
+        "severity": "CRITICAL",
+        "exprt_rating": "HIGH",
+        "exploit_status": 60,
+        "remediation_level": "O",
+        "description": "A flaw in certificate verification allows an attacker to bypass validation.",
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "references": [
+          "https://example.com/advisories/cve-2000-0001"
+        ],
+        "vendor_advisory": [
+          "https://vendor.example.com/security/2000-0001"
+        ],
+        "cwes": [
+          "CWE-295",
+          "CWE-297"
+        ],
+        "spotlight_published_date": "2026-01-14T00:00:00Z",
+        "published_date": "2026-01-10T00:00:00Z",
+        "cisa_info": {
+          "is_cisa_kev": true,
+          "due_date": "2026-02-15",
+          "published_date": "2026-01-12"
+        }
+      },
+      "host_info": {
+        "hostname": "host01.example.com",
+        "local_ip": "10.0.0.11",
+        "machine_domain": "example.com",
+        "os_version": "Ubuntu 22.04",
+        "platform": "Linux",
+        "product_type_desc": "Server",
+        "tags": [
+          "env/production",
+          "team/platform"
+        ],
+        "asset_criticality": "Critical",
+        "internet_exposure": "Yes"
+      },
+      "remediation": {
+        "entities": [
+          {
+            "id": "remediation-0000000000000000000000000001",
+            "title": "Update OpenSSL",
+            "action": "Upgrade OpenSSL to 3.0.13 or later.",
+            "link": "https://example.com/remediation/openssl",
+            "reference": "VENDOR-SA-2026-0001",
+            "vendor_url": "https://vendor.example.com/downloads/openssl"
+          }
+        ]
+      }
+    }
+  ]
+}

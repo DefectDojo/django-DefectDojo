@@ -1,0 +1,33 @@
+{
+  "schema": {
+    "version": "preview"
+  },
+  "summary": {
+    "audited_packages": 13,
+    "vulnerabilities": 1,
+    "adverse_statuses": 0
+  },
+  "vulnerabilities": [
+    {
+      "dependency": {
+        "name": "click",
+        "version": "8.1.8"
+      },
+      "id": "PYSEC-2026-2132",
+      "display_id": "PYSEC-2026-2132",
+      "aliases": [
+        "CVE-2026-7246",
+        "GHSA-47fr-3ffg-hgmw"
+      ],
+      "summary": null,
+      "description": "Pallets Click, versions 8.3.2 and below, contain a command injection vulnerability in the click.edit() function, allowing attackers to pass arbitrary OS commands from an unprivileged account.",
+      "link": "https://access.redhat.com/errata/RHSA-2026:24761",
+      "fix_versions": [
+        "8.3.3"
+      ],
+      "published": "2026-04-30T14:16:36.433Z",
+      "modified": "2026-07-13T07:15:21.899333658Z"
+    }
+  ],
+  "adverse_statuses": []
+}

@@ -7,7 +7,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import app
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.models import (
     Dojo_User,
     Engagement,
@@ -83,10 +82,10 @@ def add_alerts(self, *args, **kwargs):
         # Lazy import: dojo.utils imports create_notification from this module's
         # sibling (helper.py) at top-of-file, so importing dojo.utils eagerly here
         # creates a circular import during Django startup.
-        from dojo.utils import calculate_grade  # noqa: PLC0415
+        from dojo.utils import schedule_product_grade  # noqa: PLC0415
         products = Product.objects.all()
         for product in products:
-            dojo_dispatch_task(calculate_grade, product.id)
+            schedule_product_grade(product.id)
 
 
 @app.task(bind=True)

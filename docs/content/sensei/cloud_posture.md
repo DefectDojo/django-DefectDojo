@@ -51,15 +51,104 @@ The **Cloud Accounts** list mirrors the AppSec repository list: the account iden
 
 ### Provider identity and scan credentials
 
+**A no-key method is the recommended way to authenticate a scan.** There is no key to create, store, or rotate, and no service-account-key org-policy exception. Which one depends on where DefectDojo runs: on a **self-hosted** install it is [Keyless authentication](#keyless-authentication-self-hosted-only) (your host's own identity); on **DefectDojo Cloud** it is [Connect DefectDojo Cloud](#connect-defectdojo-cloud-cloud-only) (DefectDojo Cloud's own per-tenant identity). The static credentials in the table below (a GCP service-account key, AWS access keys, an Azure service principal) are the **backup** you can use on any deployment.
+
 The scan credential should be **read-only** — Sensei only needs to *read* posture to scan. (Applying a *direct* fix uses a separate write credential; see [Fix in Cloud](#fix-in-cloud-direct-remediation).)
 
-| Provider | Account identity | Read-only scan credential |
+| Provider | Account identity | Read-only scan credential (backup) |
 |----------|------------------|---------------------------|
 | **AWS** | The 12-digit **account ID** (resource ARNs derive from it). | Access keys for a principal with `SecurityAudit` + `ViewOnlyAccess`. Base access keys are required; organization-wide scanning additionally assumes a role (`role_arn` / `organizations_role_arn`) on top of those keys. |
 | **Azure** | The **subscription ID**. | A **service principal** (client ID, client secret, tenant ID) with **Reader** + **Security Reader**, plus the Microsoft Graph read permissions Prowler needs (`Directory.Read.All`, `Policy.Read.All`, `UserAuthenticationMethod.Read.All`). |
 | **GCP** | The **project ID**. | A **service-account key** for an SA with `roles/viewer` + `roles/iam.securityReviewer`. |
 
 > **🔐 Credentials are encrypted at rest.** Every credential — connection or account, scan or write — is stored with DefectDojo's encrypted field storage. Enter it once; there is nothing to paste again.
+
+### Keyless authentication (self-hosted only)
+
+A long-lived key is a liability, and some organizations forbid creating exportable service-account keys at all. On a **self-hosted** DefectDojo you can authenticate a scan with your DefectDojo host's own workload identity instead, so there is no key to create, store, or rotate. Choose a no-key method when you onboard an account or a connection, and fill in the identifiers rather than pasting a key. You do not need to know the term "federation": pick the method labelled **recommended**, and the wizard shows a copy-paste setup script for it (see [The wizard writes the setup script](#the-wizard-writes-the-setup-script)).
+
+| Provider | Keyless method | What DefectDojo does | What you set up |
+|----------|----------------|----------------------|-----------------|
+| **GCP** | **Workload Identity Federation** | Authenticates with an `external_account` config whose token comes from the host's own identity. | A Workload Identity Pool and provider that trust your DefectDojo host's identity, the read-only scan roles granted to the federated principal, then paste the `external_account` config JSON. |
+| **GCP** | **Service-account impersonation** | The host's identity mints a short-lived token for a target service account; you enter only that SA's email, and no key is stored. | Grant your DefectDojo host's identity `roles/iam.serviceAccountTokenCreator` on the scan service account, and grant that SA the read-only scan roles. |
+| **GCP** | **Application Default Credentials** | Uses the host's ambient credentials directly (GKE Workload Identity or an attached GCE service account); nothing to enter. | Run DefectDojo with a workload identity that holds the read-only scan roles on the target project. |
+| **AWS** | **Web identity (OIDC)** | Assumes an IAM role with the host's projected OIDC token (for example EKS IRSA), with no access keys; you enter the role ARN and the token-file location. | An IAM OIDC identity provider trusting your cluster's issuer, and a role with a web-identity trust policy carrying the read-only scan permissions. |
+
+> **🔒 Keyless authentication is self-hosted only.** These methods authenticate as your DefectDojo instance's *own* identity. On DefectDojo Cloud that identity belongs to DefectDojo rather than to your tenant, so keyless methods are offered and accepted only on a self-hosted install, and only when the operator sets `SENSEI_ALLOW_AMBIENT_CLOUD_AUTH=true` on the Sensei engine (the Helm chart sets it for you on self-hosted values). On DefectDojo Cloud, use one of the scan credentials from the table above.
+
+#### The wizard writes the setup script
+
+When you pick a no-key method, the onboarding form shows a ready-to-run **gcloud** or **Terraform** snippet that grants DefectDojo read-only access, with a **Copy** button. The recommended GCP method — a read-only service account DefectDojo uses without a key — produces this (run it in Cloud Shell as a project owner):
+
+```bash
+PROJECT_ID=<PROJECT_ID>
+DEFECTDOJO_IDENTITY=<DEFECTDOJO_SERVICE_ACCOUNT_EMAIL>   # the identity DefectDojo runs as
+
+# 1) Create a read-only service account for DefectDojo to scan as
+gcloud iam service-accounts create defectdojo-cspm \
+  --project="$PROJECT_ID" --display-name="DefectDojo CSPM (read-only)"
+SCAN_SA="defectdojo-cspm@$PROJECT_ID.iam.gserviceaccount.com"
+
+# 2) Give it read-only access to the project
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SCAN_SA" --role="roles/viewer"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SCAN_SA" --role="roles/iam.securityReviewer"
+
+# 3) Let DefectDojo use this account without a key
+gcloud iam service-accounts add-iam-policy-binding "$SCAN_SA" \
+  --member="serviceAccount:$DEFECTDOJO_IDENTITY" \
+  --role="roles/iam.serviceAccountTokenCreator"
+
+echo "$SCAN_SA"   # paste this into "Target service account"
+```
+
+`<DEFECTDOJO_SERVICE_ACCOUNT_EMAIL>` is the identity DefectDojo itself runs as (its GKE Workload Identity or attached GCE service account). When DefectDojo runs in Google Cloud, the wizard **detects this automatically and fills it in** (it reads the runtime service account from the host metadata server); the placeholder only remains when it cannot be detected, in which case ask whoever installed DefectDojo. To scan a whole organization or folder, grant the same two read-only roles at that level instead of per project. The AWS "read-only role" method produces the equivalent Terraform (an IAM role with a web-identity trust policy plus `SecurityAudit` + `ViewOnlyAccess`); on AWS the wizard shows the account and identity DefectDojo runs as (from STS) as context.
+
+The credential is stored as a small JSON document. The onboarding form assembles it for you from the keyless fields; if you drive the API directly, the shapes are:
+
+```json
+// GCP service-account impersonation (no key)
+{"auth_method": "gcp_impersonation", "impersonate_service_account": "scan-sa@my-project.iam.gserviceaccount.com"}
+
+// GCP Application Default Credentials (host identity)
+{"auth_method": "gcp_ambient"}
+
+// GCP Workload Identity Federation: the standard external_account config
+{"type": "external_account", "audience": "//iam.googleapis.com/projects/.../locations/global/workloadIdentityPools/...", "...": "..."}
+
+// AWS web identity (no access keys)
+{"auth_method": "aws_web_identity",
+ "role_arn": "arn:aws:iam::123456789012:role/defectdojo-cspm",
+ "web_identity_token_source": {"type": "file", "path": "/var/run/secrets/eks.amazonaws.com/serviceaccount/token"}}
+```
+
+### Connect DefectDojo Cloud (cloud only)
+
+On **DefectDojo Cloud** you don't paste a key either. Instead you authorize DefectDojo Cloud's own identity to scan your account, scoped to your tenant. It is the recommended path on DefectDojo Cloud, and the inverse of keyless: keyless uses *your* host's identity (self-hosted only), while Connect DefectDojo Cloud uses *DefectDojo Cloud's* per-tenant identity (cloud only). Pick the method labelled **recommended** when you onboard an account or a connection; the wizard shows a copy-paste setup script that grants the trust.
+
+| Provider | Delegated method | What DefectDojo Cloud does | What you set up |
+|----------|------------------|----------------------------|-----------------|
+| **GCP** | **Connect DefectDojo Cloud** | DefectDojo Cloud's per-tenant identity impersonates your read-only scan service account; no key is stored. | Create a read-only scan service account and grant DefectDojo Cloud's identity `roles/iam.serviceAccountTokenCreator` on it; the wizard's script does both. |
+| **AWS** | **Connect DefectDojo Cloud** | DefectDojo Cloud assumes an IAM role you create, and only with a unique **external ID** that scopes the trust to your tenant; no access keys. | Create a read-only IAM role whose trust policy allows DefectDojo Cloud's principal to `sts:AssumeRole` **only** with your external ID (shown after you save), plus `SecurityAudit` + `ViewOnlyAccess`. |
+| **Azure** | **Connect DefectDojo Cloud** | DefectDojo Cloud's multi-tenant application authenticates against your Entra tenant with **Reader** on the subscription; no secret is stored. | Consent to the DefectDojo Cloud application in your tenant and assign it `Reader` on the subscription; the wizard's script does both. |
+
+> **🔒 Per-tenant isolation.** Delegated methods run as DefectDojo Cloud's own identity, scoped so one tenant can never reach another tenant's account: AWS requires your unique external ID on every role assumption, GCP uses a distinct per-tenant identity for the token-creator grant, and Azure is scoped to your tenant id. They are offered and accepted only on DefectDojo Cloud, and only when the operator sets `SENSEI_ALLOW_DELEGATED_CLOUD_AUTH=true` on the Sensei engine (the Helm chart sets it for you on DefectDojo Cloud values). On a self-hosted install, use [keyless authentication](#keyless-authentication-self-hosted-only) instead.
+
+For AWS, the **external ID is generated when you save the connection** and shown both in the form and in the setup script. Your role's trust policy must require exactly that value, which is what stops any other tenant from assuming your role. The wizard fills DefectDojo Cloud's own identity (the GCP service account, the AWS principal, the Azure application id) into the script automatically where it can.
+
+If you drive the API directly, the delegated blob shapes are:
+
+```json
+// GCP: DefectDojo Cloud impersonates your read-only scan service account
+{"auth_method": "gcp_delegated_impersonation", "impersonate_service_account": "scan-sa@my-project.iam.gserviceaccount.com"}
+
+// AWS: DefectDojo Cloud assumes your role. external_id is minted by the server, not supplied here
+{"auth_method": "aws_delegated_role", "role_arn": "arn:aws:iam::123456789012:role/DefectDojoCloudScan"}
+
+// Azure: your Entra tenant (and, optionally, subscription). The platform app is configured server-side
+{"auth_method": "azure_delegated", "tenant_id": "00000000-0000-0000-0000-000000000000"}
+```
 
 ## Scan a cloud account
 
@@ -133,3 +222,5 @@ CSPM meters against two quotas, both shown as cards at the top of the hub:
 - **The fix button shows "Fix" or "Configure Asset" on a cloud finding, not "Fix in Cloud."** The finding is not directly remediable — either the account has no write credential / remediation is not enabled, or the finding's check has no v1 direct action. It can still be fixed by an IaC pull request.
 - **A revert failed with a drift error.** The live resource changed out-of-band since the fix was applied, so the recorded prior state no longer matches. Reconcile the resource manually; Sensei refuses to overwrite an unexpected state.
 - **A direct fix says the credential lacks a permission.** The Apply Direct Fix dialog lists the permissions each action needs. Grant them to the account's write credential (not the read-only scan credential) and try again.
+- **Keyless authentication is not offered, or a keyless account will not scan.** Keyless methods (Workload Identity Federation, service-account impersonation, Application Default Credentials, AWS web identity) are self-hosted only. Confirm this is a self-hosted install, that the operator set `SENSEI_ALLOW_AMBIENT_CLOUD_AUTH=true` on the Sensei engine, and that the DefectDojo host's own identity is configured (a GKE/GCE workload identity or `GOOGLE_APPLICATION_CREDENTIALS` on GCP, a projected OIDC token on AWS) and granted the required access on the target (GCP: `roles/iam.serviceAccountTokenCreator` on the scan SA for impersonation; AWS: a role trust policy for web identity). On DefectDojo Cloud, use Connect DefectDojo Cloud (or a scan credential) instead.
+- **"Connect DefectDojo Cloud" is not offered, or a delegated account will not scan.** The delegated methods are DefectDojo Cloud only. Confirm this is a DefectDojo Cloud instance and that the operator set `SENSEI_ALLOW_DELEGATED_CLOUD_AUTH=true` on the Sensei engine. Then check the trust you granted (GCP: DefectDojo Cloud's identity has `roles/iam.serviceAccountTokenCreator` on your scan SA and the SA has the read-only roles; AWS: your role's trust policy allows DefectDojo Cloud's principal to `sts:AssumeRole` and requires exactly the external ID shown on the connection, which is the most common cause of failure; Azure: the DefectDojo Cloud application is consented in your tenant and holds `Reader` on the subscription). On a self-hosted install, use keyless authentication instead.

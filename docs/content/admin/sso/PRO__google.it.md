@@ -31,7 +31,7 @@ In DefectDojo, vai su **Enterprise Settings > OAuth Settings**, seleziona **Goog
 - **Google OAuth Key** — inserisci il tuo **Client ID**
 - **Google OAuth Secret** — inserisci la tua **Client Secret Key**
 - **Whitelisted Domains** — inserisci il dominio della tua organizzazione (ad es. `yourcompany.com`) per consentire l'accesso a qualsiasi utente con quel dominio
-- **Whitelisted E-mail Addresses** — in alternativa, inserisci indirizzi email specifici da consentire (ad es. `user1@yourcompany.com, user2@yourcompany.com`)
+- **Whitelisted Email Addresses** — in alternativa, inserisci indirizzi email specifici da consentire (ad es. `user1@yourcompany.com, user2@yourcompany.com`)
 
 Devi impostare almeno un dominio o indirizzo email in whitelist, altrimenti nessun utente potrà accedere tramite Google.
 

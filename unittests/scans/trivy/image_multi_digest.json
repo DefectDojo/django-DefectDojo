@@ -1,0 +1,37 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "ghcr.io/example/api:1.4.2",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.19.1"
+    },
+    "RepoTags": [
+      "ghcr.io/example/api:1.4.2"
+    ],
+    "RepoDigests": [
+      "ghcr.io/example/api@sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "ghcr.io/example/api@sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2"
+    ]
+  },
+  "Results": [
+    {
+      "Target": "ghcr.io/example/api:1.4.2 (alpine 3.19.1)",
+      "Class": "os-pkgs",
+      "Type": "alpine",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2024-0001",
+          "PkgName": "openssl",
+          "InstalledVersion": "3.1.4-r5",
+          "FixedVersion": "3.1.4-r6",
+          "Severity": "HIGH",
+          "Title": "openssl: example issue",
+          "Description": "A fabricated vulnerability for the image location test.",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-0001"
+        }
+      ]
+    }
+  ]
+}

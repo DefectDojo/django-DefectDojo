@@ -10,8 +10,8 @@ import django.utils.timezone
 import django_extensions.db.fields
 import dojo.models
 import multiselectfield.db.fields
-import tagulous.models.fields
-import tagulous.models.models
+import django_tagulous.models.fields
+import django_tagulous.models.models
 import logging
 
 logger = logging.getLogger(__name__)
@@ -2571,7 +2571,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_Product_tags',
@@ -2587,7 +2587,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_Finding_Template_tags',
@@ -2603,7 +2603,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_Finding_tags',
@@ -2619,7 +2619,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_Engagement_tags',
@@ -2635,7 +2635,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_Endpoint_tags',
@@ -2651,7 +2651,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_App_Analysis_tags',
@@ -2667,7 +2667,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.CreateModel(
             name='Tagulous_Objects_Product_tags',
@@ -2683,47 +2683,47 @@ class Migration(migrations.Migration):
                 'abstract': False,
                 'unique_together': {('slug',)},
             },
-            bases=(tagulous.models.models.BaseTagModel, models.Model),
+            bases=(django_tagulous.models.models.BaseTagModel, models.Model),
         ),
         migrations.AddField(
             model_name='app_analysis',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Enter a comma-separated tag string', to='dojo.Tagulous_App_Analysis_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Enter a comma-separated tag string', to='dojo.Tagulous_App_Analysis_tags'),
         ),
         migrations.AddField(
             model_name='endpoint',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Endpoint_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Endpoint_tags'),
         ),
         migrations.AddField(
             model_name='engagement',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Engagement_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Engagement_tags'),
         ),
         migrations.AddField(
             model_name='finding',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Finding_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Finding_tags'),
         ),
         migrations.AddField(
             model_name='finding_template',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Finding_Template_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Finding_Template_tags'),
         ),
         migrations.AddField(
             model_name='objects_product',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Objects_Product_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Objects_Product_tags'),
         ),
         migrations.AddField(
             model_name='product',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Product_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Product_tags'),
         ),
         migrations.AddField(
             model_name='test',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Test_tags'),
+            field=django_tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, force_lowercase=True, help_text='Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Test_tags'),
         ),
         migrations.AlterField(
             model_name='child_rule',

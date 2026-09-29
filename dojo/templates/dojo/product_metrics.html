@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load humanize %}
 {% load display_tags %}
 {% load static %}
@@ -13,10 +14,10 @@
               <h3 class="has-filters">
                   Metrics Overview
                 <div class="dropdown pull-right ">
-                    <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                    <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     {% if not V3_FEATURE_LOCATIONS %}
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                                data-toggle="dropdown" label="view_selector" aria-label="{% trans 'view_selector' %}" aria-expanded="true">
                             <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
                         </button>
@@ -48,11 +49,11 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-crosshairs fa-2x" aria-hidden="true"></i>
 
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">{{ verified_objs }}</span>
                                     <span>
                                         <a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                            title="Findings that are open/active and verified">
+                                            title="{% trans 'Findings that are open/active and verified' %}">
                                         Verified {{ view }}{{ verified_objs|pluralize}} <i class="fa-solid fa-circle-right" aria-hidden="true"></i></a>
                                     </span>
                                 </div>
@@ -93,11 +94,11 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-bug fa-2x" aria-hidden="true"></i>
 
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">{{ open_objs }}</span>
                                     <span>
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                            title="Findings that are open/active, but not (yet) verified">
+                                            title="{% trans 'Findings that are open/active, but not (yet) verified' %}">
                                             Open {{ view }}{{ open_objs|pluralize }}
                                             <i class="fa-solid fa-circle-right" aria-hidden="true"></i>
                                         </a>
@@ -140,11 +141,11 @@
                         <div class="row">
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-check fa-2x" aria-hidden="true"></i>
-                                <div class="pull-right text-right">
+                                <div class="pull-right text-end">
                                     <span class="fa-2x">{{ accepted_objs }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
-                                            title="Findings that have been accepted in a risk acceptance.">Risk Accepted
+                                            title="{% trans 'Findings that have been accepted in a risk acceptance.' %}">Risk Accepted
                                     {{ view }}s <i class="fa-solid fa-circle-right" aria-hidden="true"></i></a>
                                 </span>
                                 </div>
@@ -185,10 +186,10 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-fire-extinguisher fa-2x" aria-hidden="true"></i>
 
-                                <div class="text-right pull-right">
+                                <div class="text-end pull-right">
                                     <span class="fa-2x">{{ closed_objs }}</span>
                                     <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
-                                             title="Findings that are closed and mitigated.">Closed
+                                             title="{% trans 'Findings that are closed and mitigated.' %}">Closed
                                         {{ view }}{{ closed_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right" aria-hidden="true"></i></a>
                                     </span>
@@ -229,10 +230,10 @@
                         <div class="row">
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-fire-extinguisher fa-2x" aria-hidden="true"></i>
-                                <div class="text-right pull-right">
+                                <div class="text-end pull-right">
                                     <span class="fa-2x">{{ false_positive_objs }}</span>
                                     <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                             title="Findings that are marked as false postive.">False-postive
+                                             title="{% trans 'Findings that are marked as false postive.' %}">False-postive
                                         {{ view }}{{ false_positive_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right" aria-hidden="true"></i></a>
                                     </span>
@@ -273,11 +274,11 @@
                         <div class="row">
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-fire-extinguisher fa-2x" aria-hidden="true"></i>
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">{{ out_of_scope_objs }}</span>
                                     <span><a
                                             href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                            title="Findings that are marked as out of scope.">Out Of Scope
+                                            title="{% trans 'Findings that are marked as out of scope.' %}">Out Of Scope
                                         {{ view }}{{ out_of_scope_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right" aria-hidden="true"></i></a>
                                     </span>
@@ -319,10 +320,10 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-bullseye fa-2x" aria-hidden="true"></i>
 
-                                <div class="text-right pull-right">
+                                <div class="text-end pull-right">
                                     <span class="fa-2x">{{ all_objs }}</span>
                                     <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                            title="All findings.">Total
+                                            title="{% trans 'All findings.' %}">Total
                                         {{ view }}{{ all_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right" aria-hidden="true"></i></a>
                                     </span>
@@ -364,10 +365,10 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-bug fa-2x" aria-hidden="true"></i>
 
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">{{ inactive_objs }}</span>
                                     <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                            title="Findings that are not active but not mitigated for some reason">Inactive
+                                            title="{% trans 'Findings that are not active but not mitigated for some reason' %}">Inactive
                                             {{ view }}{{ view|pluralize }} <i class="fa-solid fa-circle-right"  aria-hidden="true"></i></a>
                                     </span>
                                 </div>
@@ -427,7 +428,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Open Day to Day by Severity
-                        <i title="Days are only displayed if findings are available." class="text-info fa-solid fa-circle-info"
+                        <i title="{% trans 'Days are only displayed if findings are available.' %}" class="text-info fa-solid fa-circle-info"
                             aria-hidden="true"></i>
                     </div>
                     <div class="panel-body text-center">
@@ -475,7 +476,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Open, Closed, and Risk Accepted Week to Week
-                        <i title="Weeks are only displayed if findings are available." class="text-info fa-solid fa-circle-info"
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}" class="text-info fa-solid fa-circle-info"
                             aria-hidden="true"></i>
                     </div>
                     <div class="panel-body">
@@ -516,7 +517,7 @@
             
                     </div>
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                             class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
@@ -527,7 +528,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Week to Week by Severity
-                        <i title="Weeks are only displayed if findings are available." class="text-info fa-solid fa-circle-info"
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}" class="text-info fa-solid fa-circle-info"
                             aria-hidden="true"></i>
                     </div>
                     <div class="panel-body">
@@ -571,7 +572,7 @@
                         </tbody>
                     </table>
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available." class="text-info fa-solid fa-circle-info" aria-hidden="true"></i>
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}" class="text-info fa-solid fa-circle-info" aria-hidden="true"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -581,7 +582,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Critical Week to Week
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                            class="text-info fa-solid fa-circle-info" aria-hidden="true"></i>
                     </div>
                     <div class="panel-body">
@@ -624,7 +625,7 @@
                         </tbody>
                     </table>
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                            class="text-info fa-solid fa-circle-info" aria-hidden="true"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
@@ -635,7 +636,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         High Week to Week
-                        <i title="Weeks are only displayed if findings are available." class="text-info fa-solid fa-circle-info"
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}" class="text-info fa-solid fa-circle-info"
                             aria-hidden="true"></i>
                     </div>
                     <div class="panel-body">
@@ -645,7 +646,7 @@
                         </div>
                     </div>
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                             class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
@@ -681,7 +682,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Medium Week to Week
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                            class="text-info fa-solid fa-circle-info" aria-hidden="true"></i>
                     </div>
                     <div class="panel-body">
@@ -725,7 +726,7 @@
                         </table>
                     </div>
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                            class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
@@ -772,7 +773,7 @@
                     </div>
             
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                             class="text-info fa-solid fa-circle-info"></i>
                         <small>Finding age of {{ open_objs|apnumber }} open
                             finding{{ open_objs|pluralize }}</small>
@@ -784,7 +785,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Weekly activity of findings reported
-                        <i title="Weeks are only displayed if findings are available." class="text-info fa-solid fa-circle-info"
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}" class="text-info fa-solid fa-circle-info"
                             aria-hidden="true"></i>
                     </div>
                     <div class="panel-body">
@@ -838,7 +839,7 @@
                  
                     </div>
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                             class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
@@ -849,7 +850,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Findings by Test Type
-                        <i title="Test Types shown only if available." class="text-info fa-solid fa-circle-info"
+                        <i title="{% trans 'Test Types shown only if available.' %}" class="text-info fa-solid fa-circle-info"
                             aria-hidden="true"></i>
                     </div>
                     <div class="panel-body">
@@ -886,7 +887,7 @@
                         </table>
                     </div>
                     <div class="panel-footer">
-                        <i title="Weeks are only displayed if findings are available."
+                        <i title="{% trans 'Weeks are only displayed if findings are available.' %}"
                             class="text-info fa-solid fa-circle-info" aria-hidden="true"></i>
                         <small>Test Types shown only if available.</small>
                     </div>

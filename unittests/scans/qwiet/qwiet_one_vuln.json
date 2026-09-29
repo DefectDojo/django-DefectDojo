@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "response": [
+    {
+      "id": "1",
+      "app": "generic-app",
+      "type": "vuln",
+      "category": "SQL Injection",
+      "owasp_category": "a03-injection",
+      "severity": "critical",
+      "title": "SQL Injection in ReportController",
+      "description": "A request parameter is concatenated into a database query.",
+      "internal_id": "sl/00000000-0000-4000-8000-000000000001",
+      "related_findings": [],
+      "details": {
+        "source_method": "com.example.web.ReportController.list",
+        "sink_method": "java.sql.Statement.executeQuery",
+        "file_locations": [
+          "src/main/java/com/example/web/ReportController.java:88",
+          "src/main/java/com/example/db/Reports.java:120"
+        ]
+      },
+      "tags": [
+        {
+          "key": "cwe_category",
+          "value": "CWE-89"
+        },
+        {
+          "key": "reachability",
+          "value": "reachable"
+        },
+        {
+          "key": "owasp_category",
+          "value": "a03-injection"
+        }
+      ]
+    }
+  ]
+}

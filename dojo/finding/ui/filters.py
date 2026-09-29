@@ -64,6 +64,7 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.product.queries import get_authorized_products
+from dojo.product_attributes.choices import lifecycle_value_choices
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
@@ -107,7 +108,8 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
     test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
+        field_name="test__engagement__product__lifecycle__value",
+        choices=lifecycle_value_choices,
         label=labels.ASSET_LIFECYCLE_LABEL)
     if locations_enabled():
         location_status = MultipleChoiceFilter(
@@ -902,7 +904,7 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label=labels.ORG_FILTERS_LABEL)
-    test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label=labels.ASSET_LIFECYCLE_LABEL)
+    test__engagement__product__lifecycle = MultipleChoiceFilter(field_name="test__engagement__product__lifecycle__value", choices=lifecycle_value_choices, label=labels.ASSET_LIFECYCLE_LABEL)
     test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
 

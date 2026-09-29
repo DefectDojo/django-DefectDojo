@@ -1,7 +1,7 @@
 import base64
 import logging
 
-import tagulous
+import django_tagulous as tagulous
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError

@@ -122,8 +122,13 @@ finishes one that was cancelled or interrupted.
 Once the feature is enabled, the legacy metadata endpoints are disabled for findings and assets: the
 `/api/v2/findings/{id}/metadata/` endpoint and the flat `/api/v2/metadata/` endpoint return **404** for
 those owners, and the `finding_meta` / `product_meta` / `asset_meta` fields on the v2 API return empty.
-Read and write custom field values through the `/api/vue/custom_field_values/` API instead. Endpoint and
-Location metadata is unaffected and still lives on the metadata endpoints.
+Read and write custom field values through the **`/api/v2/custom_fields/values/`** endpoint instead, and
+manage the field definitions through **`/api/v2/custom_fields/definitions/`**. Both use standard API-token
+authentication (the same `Authorization: Token <key>` header as the rest of the API) and are listed in the
+v2 Swagger UI under the **Custom Fields** tag. Values are owner-scoped and can be filtered to one object
+(for example `?finding={id}`): you can read a value wherever you can view its object and write one wherever
+you can edit it, while managing definitions requires the global Custom Field management permission. Endpoint
+and Location metadata is unaffected and still lives on the metadata endpoints.
 
 Metadata on **Endpoints** and **Locations** is a separate feature and is unchanged: it stays as
 free-form key/value metadata and is not part of the typed custom fields subsystem.

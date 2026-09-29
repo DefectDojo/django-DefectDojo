@@ -1,0 +1,16 @@
+{
+  "images": [
+    {
+      "imageID": "img-0001",
+      "registry": "registry.example.com",
+      "repository": "generic-app",
+      "tag": "1.4.0",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "scan_result": "Pass",
+      "result": "Pass",
+      "scanned": "2024-06-01T10:00:00Z",
+      "resultTime": "2024-06-01T10:05:00Z",
+      "vulnerabilities": []
+    }
+  ]
+}

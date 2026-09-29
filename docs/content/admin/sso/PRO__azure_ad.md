@@ -1,58 +1,82 @@
 ---
 title: "Azure Active Directory"
-description: "Configure Azure AD SSO and group mapping in DefectDojo Pro"
-weight: 5
+description: "Configure Azure AD / Microsoft Entra ID SSO and group mapping in DefectDojo Pro"
+weight: 60
 audience: pro
 ---
 
-DefectDojo Pro supports login via Azure Active Directory (Azure AD), including automatic User Group synchronization. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
+DefectDojo Pro supports login via Microsoft Entra ID (Azure Active Directory) over OAuth 2.0, including automatic User Group synchronization. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
+
+## Callback URL
+
+Entra ID needs the exact redirect URI DefectDojo listens on after a user authenticates. It is your DefectDojo base URL followed by `/complete/azuread-tenant-oauth2/`:
+
+```
+https://<your-instance>.cloud.defectdojo.com/complete/azuread-tenant-oauth2/
+```
+
+On-premise, replace the host with your own DefectDojo base URL, keeping the `/complete/azuread-tenant-oauth2/` path. Register this under **Authentication > Redirect URIs** as a **Web** platform URI.
 
 ## Prerequisites
 
 Complete the following steps in the Azure portal before configuring DefectDojo:
 
-1. [Register a new app](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) in Azure Active Directory.
+1. [Register a new app](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app) in Microsoft Entra ID.
 
-2. Note the following values from the registered app:
+2. Note the following from the registered app's **Overview**:
    - **Application (client) ID**
    - **Directory (tenant) ID**
-   - Under **Certificates & Secrets**, create a new **Client Secret** and note its value
-   - **Application ID URI**
 
-3. Under **Authentication > Redirect URIs**, add a **Web** type URI:
-   `https://your-instance.cloud.defectdojo.com/complete/azuread-tenant-oauth2/`
+3. Under **Certificates & secrets**, create a new **Client secret** and note its **Value** (not the secret ID).
+
+4. Under **Authentication > Redirect URIs**, add a **Web** platform URI set to the [Callback URL](#callback-url) above.
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Azure AD**, and fill in the form:
+In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Microsoft Entra ID**, and fill in the form. The field labels match the Entra portal:
 
-- **Azure AD OAuth Key** — enter your **Application (client) ID**
-- **Azure AD OAuth Secret** — enter your **Client Secret**
-- **Azure AD Resource** — defaults to `https://graph.microsoft.com/`. This is the URI DefectDojo uses to read additional information (such as group names) from the [Microsoft Graph Web API](https://docs.azure.cn/en-us/entra/identity-platform/security-best-practices-for-app-registration#application-id-uri). Only change this if your group names are stored on a different API resource.
-- **Azure AD Tenant ID** — enter your **Directory (tenant) ID**
-- **Azure AD Groups Filter** — optionally enter a regex string to restrict which User Groups are imported (see [Group Mapping](#group-mapping) below)
+- **Application (client) ID** — the client ID from step 2.
+- **Client Secret** — the secret **Value** from step 3.
+- **Directory (tenant) ID** — the tenant ID from step 2.
+- **Application ID URI** — the resource DefectDojo reads additional information (such as group names) from. Defaults to `https://graph.microsoft.com` and is required; only change it if your group names live on a different API resource.
+- **Azure AD Groups Filter** — optionally, a regex that restricts which groups are imported (see [Group Mapping](#group-mapping)).
 
-Check **Enable Azure AD OAuth** and submit the form. A **Login With Azure AD** button will appear on the login page.
+Check **Enable Azure AD OAuth** and submit the form. (The Enable checkbox unlocks once the client ID and secret are filled in.) A **Login With Azure AD** button will appear on the login page.
+
+Use **Validate Config** at any point to check the settings without saving them. It confirms the settings are complete, checks that the Entra discovery document is reachable for your tenant, and echoes the exact **redirect URI** to register at Entra.
 
 ## Group Mapping
 
-Group mapping allows DefectDojo to import [User Group](../../user_management/create_user_group/) membership from Azure AD. User Groups in DefectDojo govern Asset and Organization access via [RBAC](../../user_management/set_user_permissions/).
+Group mapping imports [User Group](../../user_management/create_user_group/) membership from Entra ID. User Groups in DefectDojo govern Asset and Organization access via [RBAC](../../user_management/set_user_permissions/).
 
-Check **Enable Azure AD OAuth Grouping** to activate this feature. On login, DefectDojo will match the user's Azure AD groups to existing DefectDojo groups. Any groups not found in DefectDojo will be created automatically.
+Check **Enable Azure AD OAuth Grouping** to activate it. On login, DefectDojo matches the user's Entra groups to existing DefectDojo groups; any group not found is created automatically and its members are given the **Reader** role on the group.
 
 To import only a subset of groups, enter a regex in the **Azure AD Groups Filter** field. For example:
 - `^team-.*` — matches any group starting with `team-`
 - `teamA|teamB|groupC` — matches specific named groups
 
-### Configuring Azure AD to send groups
+### Configuring Entra ID to send groups
 
-The Azure AD token must be configured to include group IDs. Without this, no group information will be present in the token.
+The token must be configured to include group IDs, or no group information reaches DefectDojo:
 
-To configure this:
-1. Add a [Group Claim](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims) in the Azure AD token configuration. If unsure which group type to select, choose **All Groups**.
+1. Add a [Group Claim](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims) in the app's **Token configuration**. If unsure which group type to select, choose **All groups**.
 2. Do **not** enable **Emit groups as role claims**.
-3. Update the application's API permissions to include `GroupMember.Read.All` or `Group.Read.All`. `GroupMember.Read.All` is recommended as it grants fewer permissions.
+3. Grant the app the `GroupMember.Read.All` (recommended) or `Group.Read.All` API permission so DefectDojo can resolve group IDs to names via the Microsoft Graph.
 
 ### Group Cleaning
 
-If **Enable Azure AD OAuth Group Cleaning** is enabled, DefectDojo groups created via Azure AD sync will be automatically removed when they have no remaining members. When a user is removed from a group in Azure AD, they are also removed from the corresponding group in DefectDojo.
+With **Enable Azure AD OAuth Group Cleaning** on, a DefectDojo group created by Azure AD sync is removed automatically once it has no remaining members, and a user removed from a group in Entra is removed from the corresponding DefectDojo group on their next login. Only Azure-AD-provisioned groups are affected; groups you created by hand, or that arrived from another provider, are never touched.
+
+## First login and default access
+
+New users are provisioned automatically on first login (when **Create User on Successful Login** is enabled under **Login Settings**), and existing users are matched by username. A user provisioned without any group membership lands with **no permissions**. To give every new SSO user a baseline, set a **Default group** and **Default group role** on the System Settings page — see [Default access for SSO-provisioned users](/admin/sso/pro__saml/#default-access-for-sso-provisioned-users).
+
+## Troubleshooting
+
+**No groups are created or assigned.** The token is not emitting group claims. Work through [Configuring Entra ID to send groups](#configuring-entra-id-to-send-groups) and confirm the API permission was granted admin consent.
+
+**Login fails immediately after the Microsoft prompt.** A redirect-URI mismatch — confirm the **Web** redirect URI is exactly the [Callback URL](#callback-url).
+
+**The client secret stops working after a while.** Entra client secrets expire. Create a new secret, update the **Client Secret** field, and save.
+
+**Start with Diagnostics.** Rejected sign-ins are recorded under **Connect > Diagnostics** with the reason each was refused. See [Authorization Connectors](/admin/sso/pro__authorization_connectors/) for the difference between what is configured and why a sign-in failed.

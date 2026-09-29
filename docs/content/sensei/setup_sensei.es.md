@@ -120,7 +120,7 @@ Para que DefectDojo reciba eventos de push, merge request y comentarios, agregue
 
 Deje habilitada la verificación SSL, haga clic en **Add webhook** y luego use **Test → Push events** para confirmar que DefectDojo responde con **HTTP 200**.
 
-Después de conectar, haga clic en **Choose projects** y continúe con [Seleccionar repositorios](#select-repositories); la incorporación, la configuración y el escaneo funcionan igual que con GitHub.
+Después de conectar, haga clic en **Choose Projects** y continúe con [Seleccionar repositorios](#select-repositories); la incorporación, la configuración y el escaneo funcionan igual que con GitHub.
 
 > **Equivalencias en GitLab:** donde esta guía dice *pull request*, GitLab usa un **merge request**; el **status check** del pull request se publica como un **commit status** de GitLab en el commit de cabecera del merge request.
 
@@ -179,7 +179,7 @@ Agregue un webhook a **cada** repositorio de Bitbucket (**Repository settings �
 - **Secret:** el secreto del webhook mostrado en la página (usado para la verificación HMAC-SHA256 `X-Hub-Signature`).
 - **Triggers:** **Repository push**, **Pull request** (created, updated, merged, declined) y **Pull request comment created** (para comentarios `/fix`).
 
-Después de conectar, haga clic en **Choose repositories** y continúe con [Seleccionar repositorios](#select-repositories).
+Después de conectar, haga clic en **Choose Repositories** y continúe con [Seleccionar repositorios](#select-repositories).
 
 > **Particularidades de Bitbucket:** los repositorios se identifican como `workspace/repo` (Cloud) o `PROJECTKEY/repo` (Server). El **status check** del pull request se publica como un **build status** de Bitbucket en el commit de cabecera. OAuth es el método recomendado porque funciona en el contexto del usuario (sin las peculiaridades de workspace/username) y se renueva automáticamente; las app passwords están obsoletas y no son compatibles.
 
@@ -215,7 +215,7 @@ Azure DevOps autentica sus **Service Hooks** con HTTP Basic, y usa **una subscri
 - **URL:** la URL del webhook mostrada en la pantalla de la conexión (`https://<your-defectdojo-host>/sensei/azure/webhooks`).
 - **Basic authentication username / password:** los valores mostrados en la página.
 
-Después de conectar, haga clic en **Choose repositories** y continúe con [Seleccionar repositorios](#select-repositories).
+Después de conectar, haga clic en **Choose Repositories** y continúe con [Seleccionar repositorios](#select-repositories).
 
 > **Particularidades de Azure DevOps:** los repositorios se identifican como `project/repo` (la organización se almacena en la conexión). El **status check** del pull request se publica como un **commit status** de Git en el commit de cabecera.
 

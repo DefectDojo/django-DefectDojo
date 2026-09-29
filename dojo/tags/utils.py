@@ -1,3 +1,14 @@
+"""
+Bulk tag operations for DefectDojo models.
+
+These deliberately bypass django-tagulous's per-instance TagField API (and its
+signal-driven count maintenance) to keep imports and bulk operations fast.
+django-tagulous 2.2.x added its own batch-tagging support upstream, but we
+keep maintaining this implementation ourselves rather than switching to it,
+since it's tailored to DefectDojo's needs (Product tag-inheritance exclusion,
+deterministic lock ordering to avoid deadlocks, minimal query counts).
+"""
+
 from __future__ import annotations
 
 import logging
@@ -5,7 +16,7 @@ from collections.abc import Iterable
 
 from django.conf import settings
 from django.db import models, transaction
-from tagulous.utils import parse_tags
+from django_tagulous.utils import parse_tags
 
 from dojo.models import Product  # local import to avoid circulars at import time
 

@@ -184,6 +184,7 @@ Elenchi classificati, feed e tabelle integrate.
 | **SLA Burndown** | Riscontri prossimi al superamento dello SLA, classificati per giorni rimanenti, con badge di conto alla rovescia. |
 | **My Work** | La tua coda personale — incarichi, menzioni e revisioni di accettazione del rischio in sospeso. Sempre delimitata all'utente che la visualizza. |
 | **Saved Reports** | Accesso con un clic ai tuoi Template di report salvati. *Richiede la funzionalità Reporting.* |
+| **Top Root Causes** | I cluster di cause radice con il punteggio più alto, con il numero di Riscontri raggruppati da ciascuno, gli Asset interessati e la relativa priorità e fascia di rischio. *Richiede la funzionalità Correlazione delle cause radice.* |
 
 ### Statici e utilità
 

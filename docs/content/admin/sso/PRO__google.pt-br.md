@@ -37,7 +37,7 @@ formulário:
 - **Google OAuth Secret** — insira sua **Client Secret Key**
 - **Whitelisted Domains** — insira o domínio da sua organização (por exemplo, `yourcompany.com`) para
   permitir que qualquer usuário com esse domínio faça login
-- **Whitelisted E-mail Addresses** — alternativamente, insira endereços de e-mail específicos para permitir
+- **Whitelisted Email Addresses** — alternativamente, insira endereços de e-mail específicos para permitir
   (por exemplo, `user1@yourcompany.com, user2@yourcompany.com`)
 
 É necessário definir pelo menos um domínio ou endereço de e-mail na lista de permissões, caso contrário
