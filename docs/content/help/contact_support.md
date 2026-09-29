@@ -38,9 +38,6 @@ You can contact the Support team through the DefectDojo App in two ways:
 
 ### Through the Cloud Portal
 
-You can also contact our support team through your Cloud Portal:
-
-1. by clicking on **Contact Us** (on the left sidebar)
-2. or via **<https://cloud.defectdojo.com/resources/contact>**.
+You can also contact our support team from the Cloud Manager at <https://cloud.defectdojo.com>. Select **Contact support** in the left sidebar, choose the subscription your request is about, add a subject and a message, and select **Send**.
 
 ![image](images/contact_defectdojo_support_2.png)
