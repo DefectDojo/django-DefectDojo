@@ -5,7 +5,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from dojo.models import Dojo_User, UserContactInfo
@@ -66,13 +65,33 @@ class UserSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_token_expiry(self, instance):
         """Effective expiry, including the instance-wide default, not just an explicit override."""
-        token = Token.objects.filter(user=instance).first()
-        return token_expires_at(token) if token else None
+        # Read the token through the reverse one-to-one so a select_related on the
+        # viewset queryset serves it without a per-row query. Point the token back
+        # at the already-loaded instance so token_expires_at() reuses the
+        # select_related usercontactinfo instead of re-fetching user + contact info.
+        token = getattr(instance, "auth_token", None)
+        if token is None:
+            return None
+        token.user = instance
+        return token_expires_at(token)
 
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_password_last_reset(self, instance):
         uci = getattr(instance, "usercontactinfo", None)
         return getattr(uci, "password_last_reset", None)
+
+    @property
+    def _allowed_configuration_permission_ids(self):
+        # The set of allowed configuration-permission ids is the same for every
+        # row, so resolve it once per serializer instead of running the same
+        # values_list query for each user in a list response.
+        if not hasattr(self, "_allowed_configuration_permission_ids_cache"):
+            self._allowed_configuration_permission_ids_cache = set(
+                self.fields[
+                    "configuration_permissions"
+                ].child_relation.queryset.values_list("id", flat=True),
+            )
+        return self._allowed_configuration_permission_ids_cache
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -80,13 +99,8 @@ class UserSerializer(serializers.ModelSerializer):
         # This will show only "configuration_permissions" even if user has also
         # other permissions
         all_permissions = set(ret["configuration_permissions"])
-        allowed_configuration_permissions = set(
-            self.fields[
-                "configuration_permissions"
-            ].child_relation.queryset.values_list("id", flat=True),
-        )
         ret["configuration_permissions"] = list(
-            all_permissions.intersection(allowed_configuration_permissions),
+            all_permissions.intersection(self._allowed_configuration_permission_ids),
         )
 
         return ret
