@@ -8,6 +8,12 @@ NOTIFICATIONS_ENV_DEFAULTS: dict[str, tuple] = {
     "DD_ALERT_REFRESH":                   (bool, True),
     "DD_DISABLE_ALERT_COUNTER":           (bool, False),
     "DD_MAX_ALERTS_PER_USER":             (int, 999),
+    # Caps how many findings notify_scan_added() lists per category (new/mitigated/
+    # reactivated/untouched, and their *_duplicate variants) in a scan_added
+    # notification. A report that touches thousands of findings should not template
+    # all of them into an email/webhook body -- the notification's finding_count
+    # still reflects the true total, only the listed rows are capped.
+    "DD_NOTIFICATION_SCAN_ADDED_MAX_FINDINGS": (int, 100),
 }
 
 _ENV_TO_SETTING = {
@@ -20,6 +26,7 @@ _ENV_TO_SETTING = {
     "DD_ALERT_REFRESH":                   "ALERT_REFRESH",
     "DD_DISABLE_ALERT_COUNTER":           "DISABLE_ALERT_COUNTER",
     "DD_MAX_ALERTS_PER_USER":             "MAX_ALERTS_PER_USER",
+    "DD_NOTIFICATION_SCAN_ADDED_MAX_FINDINGS": "NOTIFICATION_SCAN_ADDED_MAX_FINDINGS",
 }
 
 

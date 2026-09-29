@@ -1,68 +1,53 @@
 ---
 title: "Contact Sales"
-description: "How to request and work with a trial of DefectDojo Cloud"
+description: "How to start a DefectDojo Cloud subscription: pay as you go, or an annual plan through our sales team"
 draft: "false"
 weight: 6
 pro-feature: true
 aliases:
   - /en/about_defectdojo/request_a_trial
 ---
-If your team requires an on-premise DefectDojo installation, please connect with our Sales team by emailing → [hello@defectdojo.com](mailto:hello@defectdojo.com) . This trial setup process only applies to DefectDojo Cloud users.
+DefectDojo Cloud can be started in two ways:
 
-All DefectDojo plans include a free 2-week trial, which you can use to evaluate our software. DefectDojo Trial instances are fully-featured and can be immediately converted into paid instances by our team; no need to set everything up again, or reupload any data when your trial period ends.
+* **Pay as you go.** A monthly subscription billed to your card for what you process: a platform fee plus a per-finding rate, with Sensei AI billed per use. There is no annual commitment, and you can set a monthly spend limit. You check out with Stripe, and your instance is provisioned once checkout completes.
+* **Pre-Pay & Save, through our sales team.** An annual plan billed yearly, with capacity sized to your findings volume and pricing agreed with our team. Pre-paying for the year saves 40% or more compared with pay as you go.
 
-At the end of this process, you'll be put in touch with our Sales team who will follow up to receive your billing information and authorize your company's trial instance.
+If your team requires an on-premise DefectDojo installation, please connect with our Sales team by emailing [hello@defectdojo.com](mailto:hello@defectdojo.com). The steps below apply to DefectDojo Cloud.
 
-# **Requesting your Trial**
+# Starting a subscription
 
-In order to sign up for a trial, you'll need to create an account on our [Cloud Portal](https://defectdojo.com/pricing), and then select **New Subscription** in the sidebar.
-
-![image](images/request_a_trial_mg.png)
+Create an account on the [Cloud Portal](https://cloud.defectdojo.com), then click **New Subscription** in the sidebar. You can also open the wizard directly at <https://cloud.defectdojo.com/onboarding>.
 
 ## Step 1: Welcome
 
-The first step lists what you will be asked for. Select **Continue** to begin setting up your instance.
+Click **Continue** to begin setting up your instance.
 
-![image](images/request_a_trial.png)
+## Step 2: Enter your Company Information and create your Domain
 
-## Step 2: Enter your Company Information \& create your Domain
+Enter your company's **Name** and the **Server Label** you want to use with DefectDojo. A domain for your instance is created on our servers from these two values.
 
-Enter your company's **Company Name** and the **Server Label** you want to use with DefectDojo. Together they form the domain of your instance on our servers, which is previewed under **Expected Domain**. Select **Save Company Information** to continue.
+Normally, DefectDojo names your domain according to your company name. If you select **Include the server label in the domain**, the domain also carries the Server Label you chose. This approach may be preferred if you plan to use multiple DefectDojo instances (such as a Production instance and a Test instance). Please contact our Sales team at [hello@defectdojo.com](mailto:hello@defectdojo.com) if you require multiple instances.
 
-![image](images/request_a_trial_2.png)
+## Step 3: Choose how to buy
 
-With **Include the server label in the domain** checked, the domain is built from both the company name and the server label. This approach may be preferred if you plan to use multiple DefectDojo instances (such as a Production instance and a Test instance, for example). Please contact our Sales team → [hello@defectdojo.com](mailto:hello@defectdojo.com) if you require multiple instances.
+The Pricing Plans step shows two tiles.
 
-## Step 3: Choose a Pricing Plan
-
-Choose between two ways to get DefectDojo Pro:
-
-* **Pay As You Go** is billed monthly on usage, with no annual commitment. You can set an optional monthly spend limit; once a month's charges reach it, new findings stop being accepted until the next month.
-* **Pre-Pay & Save** is an annual plan sized to the number of findings you process each year, with volume discounts and Sensei AI included.
-
-![image](images/request_a_trial_5.png)
+* **Pay As You Go** is the self-serve plan. Expand **Full price list** to see every rate, and set an optional **Monthly spend limit**: once a month's charges reach the limit, new findings stop being accepted until the next month. You can change the limit at any time from your subscription page. Click **Choose pay as you go** to continue.
+* **Pre-Pay & Save** is the annual plan: billed yearly, with volume discounts when you pre-pay, capacity sized to your findings volume, custom agreement terms and an annual commitment. The smallest plan starts at 250,000 findings a year. Drag the slider to the volume you process and the card estimates the price to start from and what it saves against pay as you go; your final price is confirmed with our team. Click **Choose Pre-Pay** and our team takes it from there.
 
 ## Step 4: Select a Server Location
 
-On a Pre-Pay plan, choose the region where the server will be hosted by selecting a pin on the map: Tokyo, Sydney, Frankfurt, Los Angeles, Virginia or São Paulo. We recommend selecting the region geographically closest to the main DefectDojo team to reduce latency. Pay As You Go instances run in our shared Virginia region, so there is nothing to choose.
+Pre-pay plans let you choose where your instance is hosted. Pick the location closest to your team to reduce latency. Pay-as-you-go instances run in our shared US East region, so for them this step only tells you where the instance runs.
 
-![image](images/request_a_trial_3.png)
+## Step 5: Verification
 
-## Step 5: Review and Submit your Request
+Review the details of your request. Once submitted, only firewall rules can be changed by your team without assistance from Support. To contact Support, email [support@defectdojo.com](mailto:support@defectdojo.com) or follow the instructions in [this article](/help/contact_support/).
 
-We'll prompt you to look over your request one more time. Once submitted, only Firewall rules can be changed by your team without assistance from Support. To contact Support, please email [support@defectdojo.com](mailto:support@defectdojo.com) or follow the instructions in [this article](/help/contact_support/).
+Clicking either action agrees to DefectDojo's Master Subscription Agreement and Privacy Policy.
 
-![image](images/request_a_trial_6.png)
+* **Pay as you go:** click **Checkout With Stripe** to enter your billing details, or **Contact Sales** if you would rather talk to us first.
+* **Annual plans:** click **Contact Sales**. Our Sales team will be in touch to agree pricing and terms and to finalize your subscription.
 
-Proceeding with either button means accepting DefectDojo's Master Subscription Agreement. You can select **Checkout With Stripe** or **Contact Sales**.
+# Once your subscription is active
 
-* Checkout With Stripe will take you to a Stripe page where you can enter your billing information.
-* If you do not wish to enter your billing info at this time, you can select Contact Sales, and our Sales team will be in touch to help you finalize your trial subscription.
-
-## Firewall rules
-
-New instances start open to the public internet. Once your instance has been provisioned, you can restrict access to your own IP ranges from the subscription's **Firewall rules** section in the Cloud Manager. See [Using the Cloud Manager](/get_started/pro/cloud/using-cloud-manager/#changing-your-firewall-settings).
-
-# Once your trial has been approved
-
-Our Support team will send you a Welcome email with links and an initial password to access your DefectDojo instance. You can always reach out to [support@defectdojo.com](mailto:support@defectdojo.com) for DefectDojo Pro assistance once your trial begins.
+Our Support team sends a Welcome email with links and an initial password to access your DefectDojo instance. You can always reach out to [support@defectdojo.com](mailto:support@defectdojo.com) for DefectDojo Pro assistance.

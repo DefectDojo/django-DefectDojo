@@ -21,7 +21,7 @@ Findings, the cluster nodes those links roll up into, and the evidence that prod
 
 ## Enabling Root Cause Correlation
 
-Root Cause Correlation is in **Beta**, is gated behind a feature flag, and is **off by default**.
+Root Cause Correlation is gated behind a feature flag and is **off by default**.
 A superuser can turn it on from **Settings > Feature Flags** on both Cloud and On-Premise
 instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
@@ -43,6 +43,7 @@ two Findings genuinely name the same thing -- and one is a labelled heuristic.
 | **CVE** | reference the same CVE identifier | `CVE-2021-44228` | Exact |
 | **Resource** | name the same infrastructure object | `aws_s3_bucket.logs` | Exact |
 | **Endpoint** | report the same weakness class at the same URL | `CWE-79 at example.com/search` | Heuristic |
+| **Container Image** | were found in the same container image, identified by its digest (requires Container Image Locations) | `ghcr.io/example/api@sha256:...` | Exact |
 
 A Finding joins **every** cluster that applies to it, not just one. An SCA Finding for
 `log4j-core 2.14.1` carrying three CVEs joins four Root Causes: its component cluster and one
@@ -276,8 +277,8 @@ from them, or track them as a metric without going through the UI.
   evidence that links it and whether the match was exact or heuristic.
 
 Both are read-only. Confirming, rejecting and muting are done from the UI for now; those are
-deliberately not published while the feature is in Beta, so that adding them later cannot break
-anything you have already built against.
+deliberately not published yet, so that adding them later cannot break anything you have already
+built against.
 
 Filters on the list: `cause_type` (`exact` or `in`), `muted`, `identity_key` (`exact` or
 `icontains`) and `display_name__icontains`. Two membership filters scope the list the way the

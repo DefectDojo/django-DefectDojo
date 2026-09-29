@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "generator": "bomber",
+    "url": "https://github.com/devops-kung-fu/bomber",
+    "version": "0.5.1",
+    "provider": "osv",
+    "severityFilter": "",
+    "date": "2026-01-15T10:04:11.000000-00:00"
+  },
+  "files": [
+    {
+      "name": "sbom.json",
+      "sha256": "f33453de356a632082bf9830977100bbb8abe455c2784dbbb001240ad7c4fa06"
+    }
+  ],
+  "summary": {
+    "Unspecified": 0,
+    "Low": 0,
+    "Moderate": 0,
+    "High": 0,
+    "Critical": 1
+  },
+  "packages": [
+    {
+      "coordinates": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.4",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2018-14719",
+          "title": "Arbitrary Code Execution in jackson-databind",
+          "description": "FasterXML jackson-databind 2.x before 2.9.7, 2.8.11.3, and 2.7.9.5 might allow remote attackers to execute arbitrary code by leveraging failure to block the blaze-ds-opt and blaze-ds-core classes from polymorphic deserialization.",
+          "cve": "CVE-2018-14719",
+          "severity": "CRITICAL",
+          "epss": {}
+        }
+      ]
+    }
+  ]
+}

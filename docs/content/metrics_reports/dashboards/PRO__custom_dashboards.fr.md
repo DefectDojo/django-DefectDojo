@@ -184,6 +184,7 @@ Listes classées, flux et tableaux intégrés.
 | **SLA Burndown** | Les constatations proches du dépassement de leur SLA, classées par jours restants, avec des badges de compte à rebours. |
 | **My Work** | Votre file personnelle — affectations, mentions et révisions d'acceptation du risque en attente. Toujours limitée à la personne qui consulte le widget. |
 | **Saved Reports** | Un accès en un clic à vos modèles de rapport enregistrés. *Nécessite la fonctionnalité Rapports.* |
+| **Top Root Causes** | Les clusters de cause racine les mieux classés, avec le nombre de Constatations que chacun regroupe, les Assets concernés ainsi que leur priorité et leur niveau de risque. *Nécessite la fonctionnalité Corrélation de cause racine.* |
 
 ### Static & Utility
 

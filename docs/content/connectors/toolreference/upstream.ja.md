@@ -16,6 +16,8 @@ aliases:
 * **Location** \- 通常、ネットワーク内のツールの URL を指すフィールド
 * **Secret** \- 通常は API キー
 
+多くのツールは固定の API ホストを 1 つだけ公開します。その場合、コネクタを追加した時点で DefectDojo が **Location** を自動入力するため、このページから URL をコピーする必要はありません。入力済みの値はそのまま使用してください。セルフホスト環境や別リージョンなど、お使いのインスタンスが異なるホストを使う場合にのみ変更してください。
+
 ツールによっては、**Location** と **Secret** 以外にも追加の API 関連フィールドが必要になる場合があります。また、DefectDojo からの Connector 接続を受け入れるために、ツール側での設定変更が必要になることもあります。
 
 ![image](images/connectors_tool_reference.png)
@@ -91,6 +93,7 @@ Azure DevOps、Backstage、Bitbucket、GitHub、GitLab、Jira Service Management
 - [Quay](/connectors/toolreference/quay/)
 - [Rapid7 InsightAppSec](/connectors/toolreference/rapid7_insightappsec/)
 - [Rapid7 InsightVM](/connectors/toolreference/rapid7_insightvm/)
+- [Rapid7 InsightVM - Cloud Instance](/connectors/toolreference/rapid7_insightvm_cloud/)
 - [runZero](/connectors/toolreference/runzero/)
 - [Semgrep](/connectors/toolreference/semgrep/)
 - [ServiceNow CMDB](/connectors/toolreference/servicenow_cmdb/)

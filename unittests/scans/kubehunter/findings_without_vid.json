@@ -1,0 +1,24 @@
+{
+    "vulnerabilities": [
+        {
+            "vulnerability": "Exposed K8s Dashboard",
+            "hunter": "DashboardHunter",
+            "category": "Information Disclosure",
+            "location": "https://10.0.0.1:443",
+            "description": "The Kubernetes dashboard is exposed",
+            "evidence": "dashboard found",
+            "avd_reference": "https://avd.aquasec.com/kh/KHV001",
+            "severity": "high"
+        },
+        {
+            "vulnerability": "Access to API Server",
+            "hunter": "APIServerHunter",
+            "category": "Access Risk",
+            "location": "https://10.0.0.1:6443",
+            "description": "API server is accessible",
+            "evidence": "none",
+            "avd_reference": "https://avd.aquasec.com/kh/KHV002",
+            "severity": "medium"
+        }
+    ]
+}

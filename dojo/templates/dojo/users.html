@@ -20,7 +20,7 @@
                     <h3 class="has-filters">
                         {{ name }}
                         <div class="dropdown pull-right">
-                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "auth.add_user"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -83,7 +83,7 @@
                                         <td>
                                             <ul>
                                                 <li class="dropdown" style="list-style:none">
-                                                    <a href="#" aria-haspopup="true" aria-label="User options menu" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
+                                                    <a href="#" aria-haspopup="true" aria-label="{% trans 'User options menu' %}" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUser">
                                                         <li role="presentation">
                                                             <a class="" href="{% url 'view_user' u.id %}" id="viewUser" role="menuitem">

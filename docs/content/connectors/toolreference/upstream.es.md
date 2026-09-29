@@ -17,6 +17,8 @@ Al configurar un Conector para una herramienta compatible, deberá proporcionar 
 * **Location** \-un campo que generalmente hace referencia a la URL de su herramienta dentro de su red,
 * **Secret** \- generalmente, una clave de API.
 
+Muchas herramientas usan un único host de API fijo. Para esas, DefectDojo completa el campo **Location** cuando agrega el Conector, así que no necesita copiar la URL de esta página. Conserve el valor que aparece. Cámbielo solo si su instancia usa otro host, por ejemplo una instalación autoalojada o una región distinta.
+
 Algunas herramientas requerirán campos adicionales relacionados con la API además de **Location** y **Secret**. También pueden requerir que realice cambios de su lado para admitir un Conector entrante desde DefectDojo.
 
 ![imagen](images/connectors_tool_reference.png)
@@ -92,6 +94,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Asse
 - [Quay](/connectors/toolreference/quay/)
 - [Rapid7 InsightAppSec](/connectors/toolreference/rapid7_insightappsec/)
 - [Rapid7 InsightVM](/connectors/toolreference/rapid7_insightvm/)
+- [Rapid7 InsightVM - Cloud Instance](/connectors/toolreference/rapid7_insightvm_cloud/)
 - [runZero](/connectors/toolreference/runzero/)
 - [Semgrep](/connectors/toolreference/semgrep/)
 - [ServiceNow CMDB](/connectors/toolreference/servicenow_cmdb/)

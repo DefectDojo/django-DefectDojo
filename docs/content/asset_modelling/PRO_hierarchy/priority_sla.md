@@ -341,6 +341,151 @@ does not restart the countdown.  A long-open Finding that moves into a stricter 
 can therefore go into breach immediately; this is deliberate, as the time the Finding has
 already been open counts against the tighter deadline.
 
+## Vulnerability response policies
+
+Some frameworks do not let you choose your own remediation windows. They publish a table,
+and a deadline is whatever that table says for the combination of facts that describe the
+finding. FedRAMP is the clearest example: its 2026 rules set a maximum response time for
+every combination of potential agency impact, whether the affected asset is reachable from
+the internet, whether exploitation is credible, and which certification class the service
+holds.
+
+A **response policy** holds one published table as data. It records which standard it came
+from, which version of that standard, when that version took effect, and the vocabulary the
+standard grades impact in. Its rows are the individual cells of the table.
+
+Policies are optional. An SLA configuration with no policy attached behaves exactly as it
+always has, and attaching one is a deliberate choice made per SLA configuration.
+
+### Attaching a policy
+
+A response policy is selected on the SLA configuration, alongside the severity or risk days.
+Two fields matter:
+
+* The **Vulnerability Response Policy** field chooses which published table governs findings
+  under this SLA configuration. Leaving it empty keeps the existing behaviour.
+* The **Authorization Level** field states which authorization or certification level the
+  service holds under that standard. Most published tables give different deadlines to
+  different levels, so a policy produces no deadline at all until this is set. DefectDojo
+  logs a warning when a policy needs a level and none is set.
+
+DefectDojo ships the FedRAMP Vulnerability Detection and Response table for 2026. It is
+seeded on startup and is never attached to anything automatically.
+
+### How a deadline is composed
+
+A response policy tightens a deadline. It never extends one. The remediation date a finding
+ends up with is the earliest of:
+
+* the days allowed for its severity or its risk, from the SLA configuration
+* the CISA KEV due date, when capping by that date is enabled
+* the cell the response policy resolves the finding into
+
+Because every step takes the earliest date, attaching a policy can only bring a deadline
+forward. A finding whose policy cell is more generous than its severity window keeps the
+severity window.
+
+### The three facts a policy grades on
+
+Each finding carries three facts, and each one records where its value came from.
+
+**Adverse impact** is the standard's own rating of what the vulnerability would do to the
+organizations relying on the service. DefectDojo takes it from a value someone set by hand,
+then from a rule, then from the finding's existing impact rating where the policy uses the
+same vocabulary, and finally from a mapping out of severity that is configured on the policy
+itself. Severity is last on purpose. It describes the flaw rather than the consequences, so
+it is a starting point to correct rather than an answer.
+
+**Internet reachability** is whether the affected asset can be reached from outside. This is
+not the same question as reachability analysis, which asks whether vulnerable code can be
+reached inside an application. DefectDojo takes it from a value someone set by hand, then
+from the asset's exposure verdict, then from a configurable tag on the finding.
+
+**Credible exploitability** is whether exploitation is realistic rather than theoretical.
+DefectDojo takes it from a value someone set by hand, then from a CISA KEV listing, then from
+an EPSS score at or above the configured threshold, then from threat intelligence showing a
+weaponized exploit. A proof of concept on its own is not enough.
+
+A value set by hand is never replaced by a later recalculation. The same applies to a value
+set by a rule, because that is an automation the customer configured rather than one
+DefectDojo inferred.
+
+### Facts nobody has established
+
+Reachability can end up unknown. Nothing proves that an asset cannot be reached from the
+internet just because no evidence of exposure was found, so DefectDojo distinguishes "not
+established" from "established as not reachable". Only a person marking an asset as isolated
+settles the question in the negative.
+
+When a fact is unknown, DefectDojo resolves the finding as if it held whichever value the
+policy treats more urgently, and records that it did so. An unmeasured fact can never earn a
+finding more time.
+
+### The evaluation clock
+
+Publishing a deadline is only half of what these frameworks ask for. They also ask that every
+vulnerability be looked at quickly, and that you can show it was. A response policy therefore
+carries an evaluation window as well as a timeframe table, measured in days from the date the
+finding was detected, and different authorization levels usually get different windows.
+
+A finding counts as evaluated once somebody establishes one of the three facts. There is no
+separate confirmation step, because deciding that a finding is internet reachable, or rating its
+adverse impact, is the judgment the framework is asking for. DefectDojo records when that happened
+and, where a person did it rather than a rule, who.
+
+Findings whose window has passed without an evaluation appear in the unevaluated queue. Once a day
+DefectDojo sends one notification per asset listing how many of its findings are overdue. One per
+asset, not one per finding: a window measured in days will sometimes produce hundreds of overdue
+findings at once, and an alert for each would bury the thing it exists to raise. The notification
+goes to the asset's members and its organization's members.
+
+Only open findings are counted. A finding that was closed without ever being evaluated is worth
+knowing about in a report, but it is not something anyone can still act on, and leaving it in a
+daily queue would make the queue permanently dirty.
+
+### Rules can do the routine evaluations
+
+A window measured in days is hard to meet by hand across a large estate, so the rules engine has a
+**Set a vulnerability response fact** action. It sets one of the three facts, records that a rule
+was the source, and stamps the evaluation clock in the same step.
+
+The intended shape is a rule that answers the cases your scanners already have evidence for, so
+that the findings left for a person are the ones that need a judgment. A rule never overwrites a
+value somebody set by hand, and a rule running every night does not keep moving the recorded
+evaluation time on findings it has already seen.
+
+### Escalation
+
+Some frameworks treat a particular combination of facts as an incident rather than as a
+vulnerability, and expect it to be handled as one until it is brought back below that line. The
+condition is part of the policy, so it can differ between standards and between versions of the
+same standard.
+
+DefectDojo flags a finding that meets its policy's escalation condition and lists it in a separate
+queue. The flag clears on its own when the finding stops meeting the condition, which usually means
+its impact has been mitigated down a level. The record that it was escalated, and when, is kept
+after the flag clears, because the fact that it happened is part of what a reviewer asks about.
+
+There is no separate incident record to manage. A flag and a filtered view are what the frameworks
+actually require, and the process that follows an escalation already lives in whatever incident
+tooling you use.
+
+### Versions
+
+A new release of a standard arrives as a new policy rather than as an edit to the one already
+in use. Findings judged under an earlier release keep the version that produced their
+deadline, so an assessor can still be shown which published table a given date came from.
+Seeding never overwrites a policy that already exists, so any changes made to a shipped
+policy survive upgrades.
+
+Editing a policy, or any of its cells, recalculates the findings it governs, in the same way
+that changing the days on an SLA configuration does.
+
+The FedRAMP table DefectDojo ships reflects one published version of that standard. Confirm
+which version applies to your own authorization before relying on it, and note that the table
+publishes no deadline for the lowest impact rating, so findings at that rating keep their
+severity or risk window.
+
 ## Notes on SLAs
 
 * SLAs can be optionally restarted once a [Risk Accepted](/triage_findings/findings_workflows/pro__risk_acceptance/) Finding reactivates.  This is set when creating the Risk Acceptance by setting the **Restart SLA Expired** field.

@@ -1,0 +1,32 @@
+{
+  "listFindingsResults": [
+    {
+      "finding": {
+        "name": "organizations/000000000001/sources/000000000002/findings/aaaa1111",
+        "canonicalName": "projects/000000000003/sources/000000000002/findings/aaaa1111",
+        "category": "PUBLIC_BUCKET_ACL",
+        "state": "ACTIVE",
+        "mute": "UNDEFINED",
+        "severity": "HIGH",
+        "description": "The bucket grants access to allUsers.",
+        "externalUri": "https://console.example.com/storage/browser/generic-app-assets",
+        "eventTime": "2026-07-31T09:00:00Z",
+        "findingClass": "MISCONFIGURATION",
+        "resourceName": "//storage.googleapis.com/generic-app-assets"
+      },
+      "resource": {
+        "name": "//storage.googleapis.com/generic-app-assets",
+        "displayName": "generic-app-assets",
+        "type": "google.cloud.storage.Bucket",
+        "service": "storage.googleapis.com",
+        "cloudProvider": "GOOGLE_CLOUD_PLATFORM",
+        "gcpMetadata": {
+          "project": "//cloudresourcemanager.googleapis.com/projects/000000000003",
+          "projectDisplayName": "generic-app"
+        }
+      }
+    }
+  ],
+  "totalSize": 1,
+  "readTime": "2026-07-31T10:00:00Z"
+}

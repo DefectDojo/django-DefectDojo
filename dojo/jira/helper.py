@@ -13,6 +13,7 @@ from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from jira import JIRA
 from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
@@ -2004,7 +2005,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
-                                                "JIRA Project config stored successfully.",
+                                                _("JIRA Project config stored successfully."),
                                                 extra_tags="alert-success")
                         error = False
                         logger.debug("stored JIRA_Project successfully")
@@ -2018,7 +2019,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
         if error:
             messages.add_message(request,
                                     messages.ERROR,
-                                    "JIRA Project config not stored due to errors.",
+                                    _("JIRA Project config not stored due to errors."),
                                     extra_tags="alert-danger")
     return not error, jform
 
@@ -2072,7 +2073,7 @@ def process_jira_epic_form(request, engagement=None):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Push to JIRA for Epic queued succesfully, check alerts on the top right for errors",
+                        _("Push to JIRA for Epic queued succesfully, check alerts on the top right for errors"),
                         extra_tags="alert-success")
                 else:
                     error = True

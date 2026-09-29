@@ -84,6 +84,7 @@ Nous prenons actuellement en charge les Connecteurs en amont pour les outils sui
 * **Quay**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **runZero**
 * **Semgrep**
 * **ServiceNow CMDB**

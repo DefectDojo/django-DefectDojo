@@ -1,0 +1,346 @@
+[
+  {
+    "type": "issue",
+    "check_name": "name[play]",
+    "categories": [
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/name/",
+    "severity": "major",
+    "description": "All plays should be named.",
+    "fingerprint": "1f810a635a731ce0ab776f99884ee9ec3bd9a6c8d767039bc23dceae5599bb97",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 1,
+          "column": 3
+        }
+      }
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "command-instead-of-module",
+    "categories": [
+      "command-shell",
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/command-instead-of-module/",
+    "severity": "major",
+    "description": "apt-get used in place of apt-get module",
+    "fingerprint": "219638ff5230a2e6aa1b09a05d92fb3b5dedce4ba9b06080e30a5aefbceb1d91",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "lines": {
+        "begin": 3
+      }
+    },
+    "content": {
+      "body": "Task/Handler: install package"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "command-instead-of-shell",
+    "categories": [
+      "command-shell",
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/command-instead-of-shell/",
+    "severity": "major",
+    "description": "Use shell only when shell functionality is required.",
+    "fingerprint": "d17cf8537cc854175ebd94bac0097c7dbf3c7d6675f2b89504d72293d1478c08",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "lines": {
+        "begin": 3
+      }
+    },
+    "content": {
+      "body": "Task/Handler: install package"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "name[casing]",
+    "categories": [
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/name/",
+    "severity": "major",
+    "description": "All names should start with an uppercase letter.",
+    "fingerprint": "45fd4eb7e1b9a8a1eb765cc39a0362ddbde8590080002539db9b8dc326fb66d3",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 3,
+          "column": 13
+        }
+      }
+    },
+    "content": {
+      "body": "Task/Handler: install package"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "no-changed-when",
+    "categories": [
+      "command-shell",
+      "idempotency"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/no-changed-when/",
+    "severity": "major",
+    "description": "Commands should not change things if nothing needs doing.",
+    "fingerprint": "843076f8ab7d28fece1b1c122a5ac7900cb53ef5904b056c141de286c9ad592e",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "lines": {
+        "begin": 3
+      }
+    },
+    "content": {
+      "body": "Task/Handler: install package"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "fqcn[action-core]",
+    "categories": [
+      "formatting"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/fqcn/",
+    "severity": "major",
+    "description": "Use FQCN for builtin module actions (shell).",
+    "fingerprint": "98661f04fd4ba5a27c03755be7ca41b5057fb582e60eff6b0550924c932552ee",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 4,
+          "column": 7
+        }
+      }
+    },
+    "content": {
+      "body": "Use `ansible.builtin.shell` or `ansible.legacy.shell` instead."
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "name[casing]",
+    "categories": [
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/name/",
+    "severity": "major",
+    "description": "All names should start with an uppercase letter.",
+    "fingerprint": "d50ae6be74ff74ef142f8c562782418bbc0b30fb327a82797594f18a18c59210",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 5,
+          "column": 13
+        }
+      }
+    },
+    "content": {
+      "body": "Task/Handler: write config"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "no-changed-when",
+    "categories": [
+      "command-shell",
+      "idempotency"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/no-changed-when/",
+    "severity": "major",
+    "description": "Commands should not change things if nothing needs doing.",
+    "fingerprint": "31da02428dd21803d1d47b25ec94f9158da3656f4b66b31a87c247dd8cc3879a",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "lines": {
+        "begin": 5
+      }
+    },
+    "content": {
+      "body": "Task/Handler: write config"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "fqcn[action-core]",
+    "categories": [
+      "formatting"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/fqcn/",
+    "severity": "major",
+    "description": "Use FQCN for builtin module actions (command).",
+    "fingerprint": "6ff153fa7d13d6e584735ca43e4433dff9d5e74abb250e4c6bc63f8d05fb2a4b",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 6,
+          "column": 7
+        }
+      }
+    },
+    "content": {
+      "body": "Use `ansible.builtin.command` or `ansible.legacy.command` instead."
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "name[casing]",
+    "categories": [
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/name/",
+    "severity": "major",
+    "description": "All names should start with an uppercase letter.",
+    "fingerprint": "6d0d9351aa29510b8850c0c534588c409de6dfd4e1a769d4318e437387b5bd4f",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 7,
+          "column": 13
+        }
+      }
+    },
+    "content": {
+      "body": "Task/Handler: set permissions"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "fqcn[action-core]",
+    "categories": [
+      "formatting"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/fqcn/",
+    "severity": "major",
+    "description": "Use FQCN for builtin module actions (file).",
+    "fingerprint": "3806c9219e7827ede34958275c185e738745cfe0a5fb4bf26791cb7f4ea62a77",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 8,
+          "column": 7
+        }
+      }
+    },
+    "content": {
+      "body": "Use `ansible.builtin.file` or `ansible.legacy.file` instead."
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "yaml[octal-values]",
+    "categories": [
+      "formatting",
+      "yaml"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/yaml/",
+    "severity": "major",
+    "description": "Forbidden implicit octal value \"0777\"",
+    "fingerprint": "3ad7ab7bf45e7525497487fe78981906ee609b27029828a33a0268f045bbb490",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "lines": {
+        "begin": 10
+      }
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "name[casing]",
+    "categories": [
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/name/",
+    "severity": "major",
+    "description": "All names should start with an uppercase letter.",
+    "fingerprint": "0001658fb28b28596f77cc53952b70995cdf9b6918d78d12e36ba0b126dc5cfe",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 11,
+          "column": 13
+        }
+      }
+    },
+    "content": {
+      "body": "Task/Handler: fetch remote script"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "risky-file-permissions",
+    "categories": [
+      "unpredictability"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/risky-file-permissions/",
+    "severity": "major",
+    "description": "File permissions unset or incorrect.",
+    "fingerprint": "f629a53d3e57b10b2e530fd050e9adcb84d2e4c6d73bf681edc6d188c1963096",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "lines": {
+        "begin": 11
+      }
+    },
+    "content": {
+      "body": "Task/Handler: fetch remote script"
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "fqcn[action-core]",
+    "categories": [
+      "formatting"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/fqcn/",
+    "severity": "major",
+    "description": "Use FQCN for builtin module actions (get_url).",
+    "fingerprint": "9dda4095ea861bbe25b61e254d5bc96a25c47dfe9ee3340664f16fb350bd51bb",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 12,
+          "column": 7
+        }
+      }
+    },
+    "content": {
+      "body": "Use `ansible.builtin.get_url` or `ansible.legacy.get_url` instead."
+    }
+  },
+  {
+    "type": "issue",
+    "check_name": "yaml[truthy]",
+    "categories": [
+      "formatting",
+      "yaml"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/yaml/",
+    "severity": "major",
+    "description": "Truthy value should be one of [false, true]",
+    "fingerprint": "78619f54b42e674796e36c731338bb790c5de0c511f0afa7ff73c5a03d441758",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "lines": {
+        "begin": 15
+      }
+    }
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "schema": {
+    "version": "preview"
+  },
+  "summary": {
+    "audited_packages": 13,
+    "vulnerabilities": 0,
+    "adverse_statuses": 0
+  },
+  "vulnerabilities": [],
+  "adverse_statuses": []
+}

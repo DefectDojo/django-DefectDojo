@@ -12,7 +12,7 @@ You will need a Fairwinds Insights **organization** name and an **API token**. C
 
 #### Connector Mappings
 
-1. Leave the **Location** field blank to use `https://insights.fairwinds.com`, or enter your Insights host explicitly.
+1. Keep the pre-filled **Location**, `https://insights.fairwinds.com`, or enter your Insights host explicitly.
 2. Enter your Insights **Organization** name (the slug shown in your dashboard URL).
 3. Enter the Insights API token in the **Secret** field.
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.

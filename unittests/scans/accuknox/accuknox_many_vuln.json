@@ -1,0 +1,83 @@
+{
+  "count": 7,
+  "next": null,
+  "results": [
+    {
+      "finding_id": "af-0000000001",
+      "name": "CVE-2000-0001 in openssl",
+      "data_type": "container_image",
+      "risk_factor": "Critical",
+      "status": "active",
+      "description": "The image ships a vulnerable openssl.",
+      "solution": "Rebuild the image on a patched base.",
+      "asset_type": "image",
+      "asset_name": "registry.example.com/generic-api:1.4.0",
+      "cve": "CVE-2000-0001",
+      "package_name": "openssl",
+      "package_version": "3.0.11-1",
+      "date_discovered": "2026-07-20T09:00:00+0000",
+      "last_seen": "2026-07-31T09:00:00+0000",
+      "ignored": false
+    },
+    {
+      "id": "af-0000000002",
+      "title": "S3 bucket is publicly readable",
+      "data_type": "cloud_posture",
+      "severity": "High",
+      "finding_status": "in progress",
+      "details": "The bucket policy grants read to everyone.",
+      "remediation": "Remove the public grant.",
+      "resource_type": "s3_bucket",
+      "resource_name": "generic-app-assets",
+      "first_seen": "2026-07-21 10:00:00",
+      "present_on_date": "2026-07-31 10:00:00"
+    },
+    {
+      "uuid": "af-0000000003",
+      "vulnerability__name": "CVE-2000-0002 in curl",
+      "vulnerability__risk_factor": "medium",
+      "vulnerability__status": "fixed",
+      "vulnerability__description": "A flaw in URL parsing.",
+      "vulnerability__cve_id": "CVE-2000-0002",
+      "vulnerability__package_name": "curl",
+      "vulnerability__installed_version": "7.81.0-1",
+      "data_type": "container_image",
+      "asset_name": "registry.example.com/generic-worker:2.0.0",
+      "date_discovered": "2026-07-22"
+    },
+    {
+      "finding_id": "af-0000000004",
+      "name": "Terraform security group allows 0.0.0.0/0",
+      "data_type": "iac",
+      "risk_factor": "high",
+      "status": "accepted risk",
+      "description": "Ingress is open to the internet.",
+      "asset_type": "terraform",
+      "asset_name": "infra/main.tf"
+    },
+    {
+      "finding_id": "af-0000000005",
+      "name": "Duplicate of an earlier finding",
+      "data_type": "iac",
+      "risk_factor": "low",
+      "status": "duplicate",
+      "description": "Already reported."
+    },
+    {
+      "finding_id": "af-0000000006",
+      "name": "Possible misconfiguration",
+      "data_type": "cloud_posture",
+      "risk_factor": "not-a-risk-factor",
+      "status": "potential",
+      "description": "Needs confirmation.",
+      "ignored": "true"
+    },
+    {
+      "finding_id": "af-0000000007",
+      "data_type": "runtime",
+      "risk_factor": "",
+      "status": "",
+      "cve_ids": ["CVE-2000-0003", "CVE-2000-0004", "CVE-2000-0003"]
+    }
+  ]
+}

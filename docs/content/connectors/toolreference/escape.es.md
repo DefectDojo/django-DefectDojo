@@ -12,7 +12,7 @@ Necesitará una **API key** de Escape, creada en la aplicación de Escape en **S
 
 #### Asignaciones del conector
 
-1. Deje el campo **Location** en blanco para usar `https://public.escape.tech/v2`, o introduzca explícitamente el host de la API de Escape.
+1. Conserve el valor ya rellenado en **Location**, `https://public.escape.tech/v2`, o introduzca explícitamente el host de la API de Escape.
 2. Introduzca la clave de API de Escape en el campo **Secret**.
 3. De forma opcional, defina una **Minimum Severity** para limitar qué hallazgos se importan.
 

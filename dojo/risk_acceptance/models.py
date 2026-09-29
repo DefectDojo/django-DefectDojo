@@ -57,6 +57,7 @@ class Risk_Acceptance(models.Model):
     expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_("(readonly) When the risk acceptance expiration was handled (manually or by the daily job)."))
     reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name=_("Reactivate findings on expiration"), help_text=_("Reactivate findings when risk acceptance expires?"))
     restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name=_("Restart SLA on expiration"), help_text=_("When enabled, the SLA for findings is restarted when the risk acceptance expires."))
+    restore_verified_expired = models.BooleanField(default=False, null=False, verbose_name=_("Restore Verified on expiration"), help_text=_("When enabled, reactivated findings are also marked Verified when the risk acceptance expires. Only applies when 'Reactivate findings on expiration' is enabled."))
 
     notes = models.ManyToManyField("dojo.Notes", editable=False)
     created = models.DateTimeField(auto_now_add=True, null=False)

@@ -159,3 +159,144 @@ class TestNewFindingPersistSeam(DojoTestCase):
             return {f.cve for f in Finding.objects.filter(test=test) if f.cve}
 
         self.assertEqual(cve_set(stock_test), cve_set(buffered_test))
+
+    def test_new_items_holds_real_ids_even_for_a_deferred_write(self):
+        """
+        new_items must report the finding's real id, not a premature read of it.
+
+        process_finding_that_was_not_matched() queues each new finding; persist_new_findings()
+        writes the queued batch and hands the same objects back, written or not depending on
+        persist_new_finding(). A caller that reads finding.id right there -- rather than after
+        the batch's write is guaranteed to have happened -- captures None for a deferred
+        edition. That silently breaks any sync-wide bookkeeping keyed on new_items (for
+        example a chunked importer's seen-id set), which then cannot recognize the finding by
+        id and treats it as never having been reported.
+        """
+        test = self._empty_test("seam-ids-buffered")
+
+        importer = self._reimport(test, BufferingReImporter)
+
+        actual_ids = set(Finding.objects.filter(test=test).values_list("id", flat=True))
+        self.assertNotIn(None, importer.new_items, "a deferred write must not leave None in new_items")
+        self.assertEqual(set(importer.new_items), actual_ids)
+
+
+class TestReimportMatchCandidateOrdering(DojoTestCase):
+
+    """
+    match_finding_to_candidate_reimport() returns matches in a priority order, and the caller
+    reconciles matched_findings[0] while the remaining matches can be closed as stale. So the
+    ORDER is behaviour, not an implementation detail: change which finding is first and a
+    different existing finding gets reactivated while another is mitigated on the next reimport.
+
+    These tests pin that order for every deduplication algorithm. The interesting one is the
+    combined unique_id_from_tool_or_hash_code algorithm: it merges two separately-fetched
+    candidate lists (hash matches, then uid matches), and a plain merge is not globally
+    id-sorted -- an existing finding matched by hash would outrank a lower-id existing finding
+    matched by uid, silently flipping which finding wins. The seam refactor originally dropped
+    the historical id-sort to tolerate not-yet-persisted same-report candidates (pk=None); the
+    fix restores a deterministic, pk-tolerant order instead of dropping ordering entirely.
+    """
+
+    def setUp(self):
+        super().setUp()
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="match_order")
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        product, _ = Product.objects.get_or_create(
+            name="TestReimportMatchCandidateOrdering",
+            description="Test",
+            prod_type=product_type,
+        )
+        engagement = Engagement.objects.create(
+            name="Match Order",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        options = {
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "active": True,
+            "verified": False,
+            "scan_type": SCAN_TYPE,
+        }
+        with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open(encoding="utf-8") as scan:
+            test, _, _, _, _, _, _ = DefaultImporter(
+                close_old_findings=False, engagement=engagement, **options,
+            ).process_scan(scan)
+        self.importer = DefaultReImporter(close_old_findings=False, test=test, **options)
+
+    @staticmethod
+    def _incoming(*, hash_code=None, unique_id_from_tool=None, title="incoming", severity="High"):
+        """An unsaved incoming finding carrying only the keys the matcher reads."""
+        return Finding(title=title, severity=severity, hash_code=hash_code, unique_id_from_tool=unique_id_from_tool)
+
+    def _match(self, algorithm, incoming, **candidate_dicts):
+        self.importer.deduplication_algorithm = algorithm
+        return self.importer.match_finding_to_candidate_reimport(incoming, **candidate_dicts)
+
+    def test_combined_algorithm_orders_by_id_regardless_of_which_key_matched(self):
+        """
+        The regression this fix targets: an incoming finding matches a lower-id existing
+        finding by unique_id and a higher-id one by hash. matched_findings[0] must be the
+        lower-id finding, not whichever key was collected first.
+        """
+        by_hash = Finding(id=10)
+        by_uid = Finding(id=5)
+        result = self._match(
+            "unique_id_from_tool_or_hash_code",
+            self._incoming(hash_code="H", unique_id_from_tool="U"),
+            candidates_by_hash={"H": [by_hash]},
+            candidates_by_uid={"U": [by_uid]},
+        )
+        self.assertEqual([f.id for f in result], [5, 10])
+
+    def test_combined_algorithm_dedupes_a_finding_matched_by_both_keys(self):
+        """The same existing finding fetched under both keys is one object, returned once."""
+        shared = Finding(id=7, hash_code="H", unique_id_from_tool="U")
+        result = self._match(
+            "unique_id_from_tool_or_hash_code",
+            self._incoming(hash_code="H", unique_id_from_tool="U"),
+            candidates_by_hash={"H": [shared]},
+            candidates_by_uid={"U": [shared]},
+        )
+        self.assertEqual([f.id for f in result], [7])
+
+    def test_combined_algorithm_keeps_an_unsaved_same_report_candidate_last(self):
+        """
+        A same-report duplicate queued earlier this batch has no pk yet. It must sort after
+        every persisted candidate (and not raise, which a plain `.id` sort would).
+        """
+        existing = Finding(id=3)
+        same_report = Finding(title="queued this batch")  # pk is None
+        result = self._match(
+            "unique_id_from_tool_or_hash_code",
+            self._incoming(hash_code="H"),
+            candidates_by_hash={"H": [same_report, existing]},
+            candidates_by_uid=None,
+        )
+        self.assertEqual(result[0].pk, 3)
+        self.assertIsNone(result[-1].pk)
+
+    def test_single_key_algorithms_return_candidates_in_construction_order(self):
+        """
+        hash_code / unique_id_from_tool / legacy each read a single pre-ordered list
+        (existing by id, then same-report appended) and must return it untouched -- including
+        a trailing pk=None candidate.
+        """
+        ordered = [Finding(id=1), Finding(id=4), Finding(title="unsaved")]
+        self.assertEqual(
+            self._match("hash_code", self._incoming(hash_code="H"), candidates_by_hash={"H": ordered}),
+            ordered,
+        )
+        self.assertEqual(
+            self._match("unique_id_from_tool", self._incoming(unique_id_from_tool="U"), candidates_by_uid={"U": ordered}),
+            ordered,
+        )
+        self.assertEqual(
+            self._match("legacy", self._incoming(title="dup", severity="High"), candidates_by_key={("dup", "High"): ordered}),
+            ordered,
+        )

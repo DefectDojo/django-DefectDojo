@@ -1,0 +1,56 @@
+{
+  "asset": {"id": "asset-0001", "name": "Generic Router"},
+  "assetVersion": {"id": "ver-0001", "name": "1.4.0", "relativeRiskScore": 2.5},
+  "data": {
+    "allFindings": [
+      {
+        "_cursor": "cursor-1",
+        "id": "finding-0001",
+        "title": "Outdated TLS library in the firmware image",
+        "date": "2024-06-02T10:05:00Z",
+        "createdAt": "2024-06-01T09:00:00Z",
+        "updatedAt": "2024-06-03T11:00:00Z",
+        "severity": "critical",
+        "cvssScore": 9.8,
+        "cvssSeverity": "high",
+        "riskScore": 87.5,
+        "vulnIdFromTool": "FS-2024-0001",
+        "description": "The image bundles a TLS library with known remote code execution flaws.",
+        "category": "SBOM",
+        "subcategory": "Known vulnerability",
+        "sourceTypes": ["BINARY_ANALYSIS"],
+        "regression": false,
+        "affects": [{"id": "comp-1", "name": "example-tls", "version": "1.0.2k"}],
+        "currentStatus": {
+          "id": "status-1",
+          "status": "AFFECTED",
+          "justification": "",
+          "comment": "Confirmed present in the shipping build.",
+          "updatedAt": "2024-06-03T11:00:00Z"
+        },
+        "cwes": [{"id": "cwe-1", "cweId": "CWE-787", "name": "Out-of-bounds Write"}],
+        "cves": [
+          {
+            "id": "cve-1",
+            "cveId": "CVE-2000-0001",
+            "cvssScore": 9.8,
+            "epss": {"epssScore": 0.42, "epssPercentile": 0.97},
+            "cvssBaseMetricV3": {
+              "cvssv3": {
+                "baseScore": 9.8,
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              }
+            },
+            "exploitsInfo": {
+              "exploitProofOfConcept": true,
+              "reportedInTheWild": true,
+              "weaponized": true
+            }
+          }
+        ],
+        "origin": "FIRMWARE",
+        "test": {"id": "test-1", "tools": [{"id": "tool-1", "name": "Binary Analysis"}]}
+      }
+    ]
+  }
+}

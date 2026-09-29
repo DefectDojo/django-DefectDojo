@@ -77,10 +77,11 @@ Mitigation policies can be found and edited in the sidebar under **Settings > Fi
     - Unlike the Unique ID From Tool, this identifier is not unique to an individual Finding and may appear on many Findings that match the same detection rule. 
     - Unlike Vulnerability IDs, these identifiers are specific to the reporting tool and are not publicly standardized.
         - Example: `semgrep.rule.lang.security.sql-injection`
-- **EPSS Score / Percentile**: ESS score and percentile for the CVE.
+- **EPSS Score / Percentile**: EPSS score and percentile for the CVE.
 - **Known Exploited**: Whether there is confirmation that the vulnerability has been exploited. 
 - **Ransomware Used**: Whether ransomware was involved in the exploitation of the vulnerability. 
 - **KEV Date**: The date the Finding was added to the KEV catalog.
+    - The EPSS and KEV values are maintained by the [EPSS / KEV sync](/triage_findings/finding_scoring/epss_kev/). They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms; on a Finding that references a CVE, the next sync overwrites what was entered.
 - **Found By**: The type of tool that identified the vulnerability.
 - **CVSSv3 and CVSSv4 Vector and Score**: The CVSS3 and CVSS4 vector and score of the selected Finding.
 - **Integrator Tickets**: Third-party issue tracker ticket numbers associated with the Finding. 
@@ -277,6 +278,8 @@ More information about DefectDojo’s Report Builder can be found [here](/metric
 
 ### Export Findings 
 Pages that show a list of Findings or a list of Engagements have a CSV and Excel export option at the top left. For Findings, there is also the option to perform a **Quick Export**.
+
+The CSV and Excel export dialog lets you choose which fields to include and which field to sort by. Findings exports can include **Priority**, **Risk** and **Risk Score**, the same values shown in the Findings table. **Export From Table Preference** selects them when the Risk and Priority columns are visible in the table, and carries a Risk or Priority sort from the table into the export. Risk is exported as its label (for example, Needs Action), so sort by Risk Score to order an export by risk.
 
 Selecting Quick Export opens a dialog with three choices:
 

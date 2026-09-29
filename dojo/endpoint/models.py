@@ -14,7 +14,7 @@ from django.db.models import F, Q
 from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from tagulous.models import TagField
+from django_tagulous.models import TagField
 
 # get_current_date/get_current_datetime/copy_model_util are defined early in dojo.models,
 # before the re-export that loads this module — resolves despite partial circular load.
@@ -238,6 +238,11 @@ class Endpoint(models.Model):
 
     def get_absolute_url(self):
         return reverse("view_endpoint", args=[str(self.id)])
+
+    @property
+    def readable_tags(self):
+        """Mirror of ``Location.readable_tags``. An Endpoint belongs to one product, so all of them."""
+        return list(self.tags.all())
 
     @classmethod
     @contextlib.contextmanager

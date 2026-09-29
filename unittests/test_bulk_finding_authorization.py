@@ -133,3 +133,135 @@ class TestBulkFindingDeleteRequiresStaff(DojoTestCase):
             username="bulk_delete_staff", is_active=True, is_staff=True,
         )
         self.assertFalse(self._bulk_delete_as(staff))
+
+
+@versioned_fixtures
+class TestFindingGroupTestInvariant(DojoTestCase):
+
+    """
+    A finding group holds findings from its own test only, and the group page
+    shows a viewer the members they are authorized for. A group whose members
+    span two tests would otherwise hand every viewer of the anchor product the
+    findings of the other one.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.my_test = Test.objects.get(id=3)
+        self.my_product = self.my_test.engagement.product
+        self.other_finding = Finding.objects.exclude(
+            test__engagement__product=self.my_product,
+        ).first()
+        self.assertIsNotNone(self.other_finding)
+        self.my_finding = Finding.objects.filter(
+            test=self.my_test, finding_group__isnull=True,
+        ).first()
+        self.assertIsNotNone(self.my_finding)
+
+    def test_bulk_create_does_not_group_findings_from_another_test(self):
+        user = Dojo_User.objects.create(username="group_invariant", is_active=True)
+        self.my_product.authorized_users.add(user)
+        self.other_finding.test.engagement.product.authorized_users.add(user)
+        self.client.force_login(user)
+
+        response = self.client.post(reverse("finding_bulk_update_all"), {
+            "finding_to_update": [self.my_finding.id, self.other_finding.id],
+            "finding_group_create": "true",
+            "finding_group_create_name": "invariant_regression_group",
+        })
+        self.assertLess(response.status_code, 500)
+
+        group = Finding_Group.objects.filter(name="invariant_regression_group").first()
+        self.assertIsNotNone(group)
+        member_ids = list(group.findings.values_list("id", flat=True))
+        self.assertIn(self.my_finding.id, member_ids)
+        self.assertNotIn(
+            self.other_finding.id, member_ids,
+            msg="a finding from another test was grouped with the anchor test's findings",
+        )
+
+    def test_group_page_hides_members_the_viewer_cannot_access(self):
+        viewer = Dojo_User.objects.create(username="group_viewer", is_active=True)
+        self.my_product.authorized_users.add(viewer)
+        group = Finding_Group.objects.create(
+            name="invariant_display_group", test=self.my_test, creator=viewer,
+        )
+        group.findings.add(self.my_finding, self.other_finding)
+
+        self.client.force_login(viewer)
+
+        response = self.client.get(reverse("view_finding_group", args=(group.id,)))
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn(self.my_finding.title, body)
+        self.assertNotIn(
+            self.other_finding.title, body,
+            msg="the group page disclosed a finding outside the viewer's authorized products",
+        )
+
+
+@versioned_fixtures
+class TestMergeFindingDeleteRequiresStaff(DojoTestCase):
+
+    """
+    The merge route offers a destructive Finding Action. It must apply the
+    same delete policy the single delete view and the bulk route apply, while
+    leaving the non-destructive action available to a plain member.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.test = Test.objects.get(id=3)
+        self.product = self.test.engagement.product
+        findings = list(Finding.objects.filter(test=self.test)[:2])
+        self.assertEqual(len(findings), 2)
+        self.anchor, self.target = findings
+
+    def _merge_as(self, user, finding_action):
+        self.product.authorized_users.add(user)
+        self.client.force_login(user)
+        url = reverse("merge_finding_product", args=(self.product.id,))
+        query = f"?finding_to_update={self.anchor.id}&finding_to_update={self.target.id}"
+        response = self.client.post(url + query, {
+            "finding_to_merge_into": self.anchor.id,
+            "findings_to_merge": [self.target.id],
+            "finding_action": finding_action,
+        })
+        self.assertLess(response.status_code, 500)
+        return response
+
+    def test_member_cannot_delete_findings_through_the_merge_route(self):
+        member = Dojo_User.objects.create(
+            username="merge_delete_member", is_active=True, is_staff=False,
+        )
+        self.product.authorized_users.add(member)
+        self.assertTrue(user_has_permission(member, self.target, "edit"))
+        self.assertFalse(user_has_permission(member, self.target, "delete"))
+        self._merge_as(member, "delete")
+        self.assertTrue(
+            Finding.objects.filter(id=self.target.id).exists(),
+            msg="non-staff member deleted a finding through the merge route",
+        )
+
+    def test_member_can_still_merge_findings_inactive(self):
+        member = Dojo_User.objects.create(
+            username="merge_inactive_member", is_active=True, is_staff=False,
+        )
+        self._merge_as(member, "inactive")
+        self.target.refresh_from_db()
+        self.assertTrue(Finding.objects.filter(id=self.target.id).exists())
+        self.assertFalse(
+            self.target.active,
+            msg="the non-destructive merge action stopped working for a plain member",
+        )
+
+    def test_staff_can_still_delete_findings_through_the_merge_route(self):
+        staff = Dojo_User.objects.create(
+            username="merge_delete_staff", is_active=True, is_staff=True,
+        )
+        self._merge_as(staff, "delete")
+        self.assertFalse(Finding.objects.filter(id=self.target.id).exists())

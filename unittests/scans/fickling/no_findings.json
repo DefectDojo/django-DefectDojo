@@ -1,0 +1,5 @@
+{
+  "severity": "LIKELY_SAFE",
+  "analysis": "Warning: Fickling failed to detect any overtly unsafe code,but the pickle file may still be unsafe.Do not unpickle this file if it is from an untrusted source!\n\n",
+  "detailed_results": {}
+}

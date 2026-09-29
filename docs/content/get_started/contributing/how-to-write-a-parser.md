@@ -16,7 +16,7 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 - Checkout `dev` and make sure you're up to date with the latest changes.
 - It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name`.
 
-It is easiest to use the docker compose deployment as it has hot-reload capbility for uWSGI.
+It is easiest to use the docker compose deployment as it has hot-reload capability for uWSGI.
 Set up your environment to use the dev environment:
 
 `$ docker/setEnv.sh dev`
@@ -45,7 +45,7 @@ $ docker compose build --build-arg uid=1000
 
 ## Factory contract
 
-Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
+Parsers are loaded dynamically with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
 
 1. your parser **MUST** be in a sub-module of module `dojo.tools`
    - ex: `dojo.tools.my_tool.parser` module
@@ -59,7 +59,7 @@ Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded
    2. `def get_label_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (short label)
    3. `def get_description_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (long description)
    4. `def get_findings(self, file, test)` This function return a list of findings
-6. If your parser have more than 1 scan_type (for detailled mode) you **MUST** implement `def set_mode(self, mode)` method
+6. If your parser has more than 1 scan_type (for detailed mode) you **MUST** implement `def set_mode(self, mode)` method
 7. The parser instance is re-used over all imports performed for this scan_type, so do not store any data at class level
 
 Example:
@@ -177,7 +177,7 @@ Good example:
    some_list = data.get("key_of_the_list") or []
 ```
 
-The finale example guards against cases where `key_of_the_list` is present, but `null`.
+The final example guards against cases where `key_of_the_list` is present, but `null`.
 
 
 ### Parsing of CVSS vectors
@@ -257,7 +257,7 @@ Do not do something like this:
 
 By default a new parser uses the 'legacy' deduplication algorithm documented in [About Deduplication](/triage_findings/finding_deduplication/about_deduplication/)
 
-Please use a pre-defined deduplication algorithm where applicable. When using the `unique_id_from_tool` or `vuln_id_from_tool` fields in the hash code configuration, it's important that these are uqniue for the finding and constant over time across subsequent scans. If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
+Please use a pre-defined deduplication algorithm where applicable. When using the `unique_id_from_tool` or `vuln_id_from_tool` fields in the hash code configuration, it's important that these are unique for the finding and constant over time across subsequent scans. If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
 The values must be coming from the report directly and must not be something that is calculated by the parser internally.
 
 ## Unit tests
@@ -348,14 +348,13 @@ for finding in findings:
 ### Tests API Parsers
 
 Not only parser but also importer should be tested.
-`patch` method from `unittest.mock` is usualy usefull for simulating API responses.
-It is highly recommeded to use it.
-
+`patch` method from `unittest.mock` is usually useful for simulating API responses.
+It is highly recommended to use it.
 ## Other files that could be involved
 
 ### Change to the model
 
-In the event where you'd have to change the model, e.g. to increase a database column size to accomodate a longer string of data to be saved
+In the event where you'd have to change the model, e.g. to increase a database column size to accommodate a longer string of data to be saved
 * Change what you need in `dojo/models.py`
 * Create a new migration file in dojo/db_migrations by running and including as part of your PR
 
@@ -386,4 +385,4 @@ Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] w
 * A link to the relevant unit tests folder so that users can quickly navigate there from Documentation.
 * A link to the scanner itself - (e.g. GitHub or vendor link)
 
-Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md 77 
+Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md)

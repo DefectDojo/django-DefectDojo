@@ -1,18 +1,19 @@
+{% load i18n %}
 {% load navigation_tags %}
 {% load get_note_status %}
 {% load display_tags %}
 {% load static %}
 <tr>
     {% if similar_finding.duplicate_finding == finding_context %}
-        <td title="The finding on the top of this page is the original for this related finding">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
+        <td title="{% trans 'The finding on the top of this page is the original for this related finding' %}">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
     {% elif finding_context.duplicate_finding == similar_finding %}
-        <td title="The finding on the top of this page is a duplicate of this so called original finding">Original{% if finding_context == similar_finding %} (this){% endif %}</td>
+        <td title="{% trans 'The finding on the top of this page is a duplicate of this so called original finding' %}">Original{% if finding_context == similar_finding %} (this){% endif %}</td>
     {% elif similar_finding.duplicate and similar_finding.duplicate_finding == finding_context.duplicate_finding %}
-        <td title="This finding is a duplicate of the same original above">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
+        <td title="{% trans 'This finding is a duplicate of the same original above' %}">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
     {% elif not similar_finding.duplicate and similar_finding == finding_context %}
-        <td title="This finding is the original of the cluster">Original{% if finding_context == similar_finding %}(this){% endif %}</td>
+        <td title="{% trans 'This finding is the original of the cluster' %}">Original{% if finding_context == similar_finding %}(this){% endif %}</td>
     {% else %}
-        <td title="This finding shares fields values with the finding on this page because of which it looks similar">Similar</td>
+        <td title="{% trans 'This finding shares fields values with the finding on this page because of which it looks similar' %}">Similar</td>
     {% endif %}
     <td class="centered" data-order="{% severity_number_value similar_finding.severity %}">
         <span class="badge severity-{{ similar_finding.severity }}">
@@ -54,7 +55,7 @@
     {% if similar_finding.file_path %}
         <td title="{{similar_finding.file_path}}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}">
             {{ similar_finding.file_path|truncatechars_html:20 }}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}
-            <i class="fa-solid fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
+            <i class="fa-solid fa-copy fa-align-right copytoclipboard" title="{% trans 'copy full path to clipboard' %}"
             data-clipboard-text="{{similar_finding.file_path}}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}"></i></td>
     {% else %}
         <td></td>

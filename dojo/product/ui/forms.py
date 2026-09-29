@@ -1,6 +1,7 @@
 from django import forms
 from django.utils import timezone
 from django.utils.dates import MONTHS
+from django.utils.translation import gettext_lazy as _
 
 from dojo.labels import get_labels
 from dojo.models import (
@@ -28,7 +29,7 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    sla_configuration = forms.ModelChoiceField(label="SLA Configuration",
+    sla_configuration = forms.ModelChoiceField(label=_("SLA Configuration"),
                                         queryset=SLA_Configuration.objects.all(),
                                         required=True,
                                         initial="Default")
@@ -45,6 +46,12 @@ class ProductForm(forms.ModelForm):
         self.fields["enable_product_tag_inheritance"].help_text = labels.ASSET_TAG_INHERITANCE_ENABLE_HELP
         if prod_type_id := kwargs.get("instance", Product()).prod_type_id:  # we are editing existing instance
             self.fields["prod_type"].queryset |= Product_Type.objects.filter(pk=prod_type_id)  # even if user does not have permission for any other ProdType we need to add at least assign ProdType to make form submittable (otherwise empty list was here which generated invalid form)
+
+        # Same reason as prod_type above: a queryset that excludes the instance's
+        # own value renders it unselected, and saving then writes None.
+        for contact in ("product_manager", "technical_contact", "team_manager"):
+            if current_id := getattr(self.instance, f"{contact}_id", None):
+                self.fields[contact].queryset |= Dojo_User.objects.filter(pk=current_id)
 
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
@@ -76,7 +83,7 @@ class DeleteProductForm(forms.ModelForm):
 
 class Add_Product_AuthorizedUsersForm(forms.Form):
     users = forms.ModelMultipleChoiceField(
-        queryset=Dojo_User.objects.none(), required=True, label="Users",
+        queryset=Dojo_User.objects.none(), required=True, label=_("Users"),
     )
 
     def __init__(self, *args, product=None, **kwargs):
@@ -134,7 +141,7 @@ class ProductTagCountsForm(ProductCountsFormBase):
 class Product_API_Scan_ConfigurationForm(forms.ModelForm):
 
     tool_configuration = forms.ModelChoiceField(
-        label="Tool Configuration",
+        label=_("Tool Configuration"),
         queryset=Tool_Configuration.objects.none(),
         required=True,
     )

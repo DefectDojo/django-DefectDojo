@@ -26,13 +26,17 @@ You can also edit an existing Connector under the **Configured Connectors** head
 ​
 5. Set a **Label** for this connection to help you identify it in DefectDojo.  
 ​
-6. Schedule the Connector's automatic discovery and sync using the **Discovery Configuration** and **Synchronization Configuration** schedules. These can be changed later.  
+6. Schedule the Connector's automatic discovery and sync under the **Discovery Configuration** and **Synchronization Configuration** sections. For each, pick a **Frequency** (every 6, 12, or 24 hours) and a **Time**. At *Every 24 hours* the connector runs once a day at that time; at *Every 6 hours* or *Every 12 hours* the time sets when the first run of the day happens, and the connector repeats from there. Times are shown in your browser's local timezone. You can change any of this later.  
 ​
 7. Select whether you wish to **Enable Auto\-Mapping**. Enable Auto\-Mapping will create a new Asset in DefectDojo to store the data from this connector. Auto\-Mapping can be turned on or off at any time.  
 ​
 8. Click **Submit.**
 
 ![image](images/add_edit_connectors_3.png)
+
+## Checking that the connector can see your data
+
+When you submit, DefectDojo asks the tool what those credentials can actually see, and tells you the answer. If the account you connected has not been granted access to any projects, hosts, or repositories, or otherwise reports no data for your credentials, DefectDojo saves the connector and shows a No Data Visible warning. A new account that is actually empty is a valid setup, and the connector will start importing as soon as data appears. If data is present but fails to be recognized, check your tool's account permissions.
 
 ## Next Steps
 

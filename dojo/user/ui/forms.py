@@ -28,7 +28,7 @@ class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
         required=settings.REQUIRE_PASSWORD_ON_USER,
         validators=[validate_password],
-        help_text="")
+        help_text=_(""))
 
     class Meta:
         model = Dojo_User
@@ -89,6 +89,12 @@ class DeleteUserForm(forms.ModelForm):
 
 
 class UserContactInfoForm(forms.ModelForm):
+    language = forms.ChoiceField(
+        required=False,
+        choices=[("", _("Use instance default")), *settings.LANGUAGES],
+        label=_("Language"),
+        help_text=_("Preferred language for the DefectDojo UI."),
+    )
     reset_api_token = forms.BooleanField(
         required=False,
         label=_("Reset API token"),
@@ -101,7 +107,7 @@ class UserContactInfoForm(forms.ModelForm):
         # Swap order: password_last_reset before token_last_reset
         field_order = [
             "title", "phone_number", "cell_number", "twitter_username", "github_username",
-            "slack_username", "ui_use_tailwind", "block_execution", "deduplication_execution_mode", "force_password_reset", "reset_api_token",
+            "slack_username", "block_execution", "deduplication_execution_mode", "force_password_reset", "reset_api_token",
             "password_last_reset", "token_last_reset",
         ]
 
@@ -115,6 +121,12 @@ class UserContactInfoForm(forms.ModelForm):
             self.fields["password_last_reset"].disabled = True
         if "token_last_reset" in self.fields:
             self.fields["token_last_reset"].disabled = True
+        # token_expiry is a security control, not a preference: this form is reachable by any user
+        # for their own profile, and Meta.exclude only drops "user"/"slack_user_id", so leaving it
+        # enabled would let a user clear or extend their own token expiry. Setting it is reserved
+        # for superusers via /api/v2/user_contact_infos/.
+        if "token_expiry" in self.fields:
+            self.fields["token_expiry"].disabled = True
         # Do not expose force password reset if the current user does not have a password to reset
         if user is not None:
             if not user.has_usable_password():

@@ -1,0 +1,80 @@
+{
+  "assessment": {
+    "id": "assess-0002",
+    "appVersion": "4.0.1",
+    "buildNumber": "500",
+    "buildUploadedAt": "2024-06-05T14:30:00Z"
+  },
+  "app": {
+    "zdevAppId": "app-0002",
+    "name": "Generic Mobile App",
+    "bundleIdentifier": "com.example.genericapp",
+    "platform": "ios"
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "zScan",
+            "version": "1.0.0",
+            "rules": [
+              {
+                "id": "ZS_HARDCODED_SECRET",
+                "name": "HardcodedSecret",
+                "shortDescription": {"text": "A credential-shaped string is embedded in the binary"},
+                "helpUri": "https://example.com/rules/hardcoded-secret",
+                "properties": {"security-severity": "9.1",
+                               "tags": ["external/cwe/cwe-798", "secrets"]}
+              },
+              {
+                "id": "ZS_WEAK_CRYPTO",
+                "name": "WeakCryptography",
+                "shortDescription": {"text": "The app uses a broken cipher"},
+                "help": {"text": "Use AES-GCM instead."},
+                "properties": {"security-severity": "medium", "tags": ["external/cwe/cwe-327"]}
+              },
+              {
+                "id": "ZS_DEBUG_SYMBOLS",
+                "shortDescription": {"text": "Debug symbols are present in the release build"}
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "ZS_HARDCODED_SECRET",
+            "level": "error",
+            "message": {"text": "A credential-shaped string was found in the binary"},
+            "locations": [
+              {"physicalLocation": {"artifactLocation": {"uri": "Payload/GenericApp/Config.plist"},
+                                    "region": {"startLine": 12}}}
+            ],
+            "properties": {"tags": ["mobile"]}
+          },
+          {
+            "ruleId": "ZS_WEAK_CRYPTO",
+            "level": "warning",
+            "message": {"text": "DES is used to encrypt stored data"},
+            "locations": [
+              {"physicalLocation": {"artifactLocation": {"uri": "Payload/GenericApp/Crypto.m"},
+                                    "region": {"startLine": 88}}}
+            ],
+            "suppressions": [{"kind": "external", "justification": "Reviewed and accepted"}]
+          },
+          {
+            "ruleId": "ZS_DEBUG_SYMBOLS",
+            "level": "note",
+            "message": {"text": "Debug symbols are present"}
+          },
+          {
+            "ruleId": "ZS_HARDCODED_SECRET",
+            "kind": "pass",
+            "message": {"text": "Never imported: this check passed"}
+          }
+        ]
+      }
+    ]
+  }
+}

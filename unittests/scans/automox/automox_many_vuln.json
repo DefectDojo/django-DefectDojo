@@ -1,0 +1,99 @@
+{
+  "devices": [
+    {
+      "id": 1001,
+      "name": "generic-host-01",
+      "os_family": "Windows",
+      "os_name": "Windows Server",
+      "os_version": "2019",
+      "server_group_id": 21,
+      "organization_id": 5,
+      "connected": true
+    },
+    {
+      "id": "1002",
+      "name": "generic-host-02",
+      "os_family": "Linux",
+      "os_name": "Ubuntu",
+      "os_version": "22.04",
+      "server_group_id": 22,
+      "organization_id": 5,
+      "connected": true
+    }
+  ],
+  "packages": [
+    {
+      "id": 900001,
+      "server_id": 1001,
+      "installed": false,
+      "name": "example-runtime",
+      "display_name": "Example Runtime",
+      "version": "4.8.1",
+      "repo": "Vendor Update Catalog",
+      "cves": ["CVE-2000-0001"],
+      "cve_score": 8.8,
+      "severity": "CRITICAL",
+      "requires_reboot": true,
+      "create_time": "2024-05-13T18:02:45+0000"
+    },
+    {
+      "id": "900002",
+      "server_id": "1002",
+      "installed": false,
+      "name": "example-library",
+      "display_name": "",
+      "version": "1.2.3",
+      "repo": "distro-updates",
+      "cves": [],
+      "cve_score": "5.4",
+      "severity": "medium",
+      "requires_reboot": false,
+      "create_time": "2024-05-14T09:15:00Z"
+    },
+    {
+      "id": 900003,
+      "server_id": 9999,
+      "installed": true,
+      "name": "example-agent",
+      "display_name": "Example Agent",
+      "version": "",
+      "repo": "",
+      "cves": ["CVE-2000-0003", "  ", "CVE-2000-0004"],
+      "cve_score": "not a number",
+      "severity": "no_known_cves",
+      "requires_reboot": false,
+      "create_time": "not a timestamp"
+    },
+    {
+      "id": 900004,
+      "server_id": 1001,
+      "installed": false,
+      "name": "",
+      "display_name": "",
+      "version": "9.0",
+      "repo": "Vendor Update Catalog",
+      "cve_score": 0,
+      "severity": "",
+      "requires_reboot": false,
+      "create_time": "2024-06-01T00:00:00+02:00"
+    },
+    {
+      "id": 0,
+      "server_id": 1001,
+      "installed": false,
+      "name": "example-dropped",
+      "display_name": "Dropped, no usable id",
+      "version": "1.0",
+      "severity": "low"
+    },
+    {
+      "id": "not numeric",
+      "server_id": 1001,
+      "installed": false,
+      "name": "example-dropped-two",
+      "display_name": "Dropped, id is not a number",
+      "version": "1.0",
+      "severity": "low"
+    }
+  ]
+}

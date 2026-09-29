@@ -1,0 +1,148 @@
+{
+    "matches": [
+        {
+            "vulnerability": {
+                "id": "CVE-2021-44228",
+                "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+                "namespace": "nvd",
+                "severity": "Critical",
+                "urls": [
+                    "https://nvd.nist.gov/vuln/detail/CVE-2021-44228"
+                ],
+                "description": "Apache Log4j2 JNDI features do not protect against attacker controlled LDAP and other JNDI related endpoints.",
+                "cvss": [
+                    {
+                        "version": "3.1",
+                        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                        "metrics": {
+                            "baseScore": 10.0,
+                            "exploitabilityScore": 3.9,
+                            "impactScore": 6.0
+                        },
+                        "vendorMetadata": {}
+                    }
+                ],
+                "fix": {
+                    "versions": ["2.15.0"],
+                    "state": "fixed"
+                },
+                "advisories": [],
+                "epss": [
+                    {
+                        "cve": "CVE-2021-44228",
+                        "epss": "0.97565",
+                        "percentile": "1.00000"
+                    }
+                ],
+                "knownExploited": [
+                    {
+                        "cve": "CVE-2021-44228",
+                        "vendorProject": "Apache",
+                        "product": "Log4j",
+                        "vulnerabilityName": "Apache Log4j2 Remote Code Execution Vulnerability",
+                        "dateAdded": "2021-12-10",
+                        "shortDescription": "Apache Log4j2 contains a vulnerability where JNDI features do not protect against attacker-controlled LDAP and other JNDI related endpoints.",
+                        "requiredAction": "Apply updates per vendor instructions.",
+                        "dueDate": "2021-12-24",
+                        "notes": ""
+                    }
+                ]
+            },
+            "relatedVulnerabilities": [],
+            "matchDetails": [
+                {
+                    "matcher": "java-matcher",
+                    "searchedBy": {
+                        "namespace": "nvd",
+                        "package": {
+                            "name": "log4j-core",
+                            "version": "2.14.1"
+                        }
+                    },
+                    "found": {
+                        "versionConstraint": "< 2.15.0"
+                    }
+                }
+            ],
+            "artifact": {
+                "name": "log4j-core",
+                "version": "2.14.1",
+                "type": "java-archive",
+                "locations": [
+                    {
+                        "path": "/app/lib/log4j-core-2.14.1.jar"
+                    }
+                ],
+                "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+            }
+        },
+        {
+            "vulnerability": {
+                "id": "CVE-2021-45046",
+                "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
+                "namespace": "nvd",
+                "severity": "Critical",
+                "urls": [
+                    "https://nvd.nist.gov/vuln/detail/CVE-2021-45046"
+                ],
+                "description": "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations.",
+                "cvss": [
+                    {
+                        "version": "3.1",
+                        "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                        "metrics": {
+                            "baseScore": 9.0,
+                            "exploitabilityScore": 2.2,
+                            "impactScore": 6.0
+                        },
+                        "vendorMetadata": {}
+                    }
+                ],
+                "fix": {
+                    "versions": ["2.16.0"],
+                    "state": "fixed"
+                },
+                "advisories": []
+            },
+            "relatedVulnerabilities": [],
+            "matchDetails": [
+                {
+                    "matcher": "java-matcher",
+                    "searchedBy": {
+                        "namespace": "nvd",
+                        "package": {
+                            "name": "log4j-core",
+                            "version": "2.14.1"
+                        }
+                    },
+                    "found": {
+                        "versionConstraint": "< 2.16.0"
+                    }
+                }
+            ],
+            "artifact": {
+                "name": "log4j-api",
+                "version": "2.14.1",
+                "type": "java-archive",
+                "locations": [
+                    {
+                        "path": "/app/lib/log4j-api-2.14.1.jar"
+                    }
+                ],
+                "purl": "pkg:maven/org.apache.logging.log4j/log4j-api@2.14.1"
+            }
+        }
+    ],
+    "source": {
+        "type": "image",
+        "target": {
+            "userInput": "test-image:latest",
+            "imageID": "sha256:abc123"
+        }
+    },
+    "distro": {},
+    "descriptor": {
+        "name": "grype",
+        "version": "0.70.0"
+    }
+}

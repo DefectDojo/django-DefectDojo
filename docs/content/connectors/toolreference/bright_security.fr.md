@@ -12,7 +12,7 @@ Vous aurez besoin d'une **clé API** Bright, créée dans l'application Bright s
 
 #### Mappages du Connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://app.brightsec.com`, ou saisissez explicitement votre hôte Bright.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://app.brightsec.com`, ou saisissez explicitement votre hôte Bright.
 2. Saisissez la clé API Bright dans le champ **Secret**.
 3. Facultativement, définissez une **Minimum Severity** pour limiter les constatations importées.
 

@@ -1,5 +1,6 @@
 
 from django.conf import settings
+from django.core.exceptions import RequestDataTooBig, TooManyFieldsSent
 from django.db.models import Model
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -33,6 +34,10 @@ from dojo.models import (
     SLA_Configuration,
     Test,
 )
+
+# Imported from the leaf module (not dojo.models) to avoid a circular import during
+# dojo.models loading, matching how Location is imported above.
+from dojo.product_attributes.models import Product_Lifecycle, Product_Origin, Product_Platform
 
 
 def check_post_permission(
@@ -540,6 +545,19 @@ class UserHasImportPermission(permissions.BasePermission):
             converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
             converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
             converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
+        except (TooManyFieldsSent, RequestDataTooBig) as e:
+            # A very large scan import (too many form fields, or a body over the size limit)
+            # trips Django's DATA_UPLOAD_MAX_NUMBER_FIELDS / DATA_UPLOAD_MAX_MEMORY_SIZE guard
+            # while this permission check parses request.data. Surface it as a clear client
+            # error instead of letting the SuspiciousOperation escape as an opaque 400 that
+            # also pages on-call via error reporting.
+            msg = (
+                "The scan import request exceeded the server's upload limits "
+                "(too many form fields, or the request body is too large). Reduce the "
+                "number of fields in the request, or ask your administrator to increase "
+                "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS / DD_DATA_UPLOAD_MAX_MEMORY_SIZE."
+            )
+            raise ValidationError(msg) from e
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(e)
@@ -600,6 +618,19 @@ class UserHasMetaImportPermission(permissions.BasePermission):
             product = auto_create.get_target_product_if_exists(**converted_dict)
             if not product:
                 product = auto_create.get_target_product_by_id_if_exists(**converted_dict)
+        except (TooManyFieldsSent, RequestDataTooBig) as e:
+            # A very large scan import (too many form fields, or a body over the size limit)
+            # trips Django's DATA_UPLOAD_MAX_NUMBER_FIELDS / DATA_UPLOAD_MAX_MEMORY_SIZE guard
+            # while this permission check parses request.data. Surface it as a clear client
+            # error instead of letting the SuspiciousOperation escape as an opaque 400 that
+            # also pages on-call via error reporting.
+            msg = (
+                "The scan import request exceeded the server's upload limits "
+                "(too many form fields, or the request body is too large). Reduce the "
+                "number of fields in the request, or ask your administrator to increase "
+                "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS / DD_DATA_UPLOAD_MAX_MEMORY_SIZE."
+            )
+            raise ValidationError(msg) from e
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(e)
@@ -721,6 +752,19 @@ class UserHasReimportPermission(permissions.BasePermission):
             converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
             converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
             converted_dict["test"] = auto_create.get_target_test_if_exists(**converted_dict)
+        except (TooManyFieldsSent, RequestDataTooBig) as e:
+            # A very large scan import (too many form fields, or a body over the size limit)
+            # trips Django's DATA_UPLOAD_MAX_NUMBER_FIELDS / DATA_UPLOAD_MAX_MEMORY_SIZE guard
+            # while this permission check parses request.data. Surface it as a clear client
+            # error instead of letting the SuspiciousOperation escape as an opaque 400 that
+            # also pages on-call via error reporting.
+            msg = (
+                "The scan import request exceeded the server's upload limits "
+                "(too many form fields, or the request body is too large). Reduce the "
+                "number of fields in the request, or ask your administrator to increase "
+                "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS / DD_DATA_UPLOAD_MAX_MEMORY_SIZE."
+            )
+            raise ValidationError(msg) from e
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(e)
@@ -1107,6 +1151,38 @@ class UserHasDevelopmentEnvironmentPermission(BaseDjangoModelPermission):
     # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L93
     # It looks like view permission was explicitly not supported, so I assume
     # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductPlatformPermission(BaseDjangoModelPermission):
+    django_model = Product_Platform
+    # Reads are open to any authenticated user (the asset form and asset views need to
+    # render the option labels). Writes require the configuration permission.
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductLifecyclePermission(BaseDjangoModelPermission):
+    django_model = Product_Lifecycle
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductOriginPermission(BaseDjangoModelPermission):
+    django_model = Product_Origin
     request_method_permission_map = {
         "POST": "add",
         "PUT": "change",

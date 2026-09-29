@@ -1,8 +1,9 @@
+{% load i18n %}
 {% comment %}
 Reusable empty state component.
 
 Usage:
-  {% include "dojo/snippets/empty_state.html" with icon="magnifying-glass" title="No findings" message="There are no findings matching your criteria." action_url="/findings" action_text="View all findings" %}
+  {% include "dojo/snippets/empty_state.html" with icon="magnifying-glass" title="{% trans 'No findings' %}" message="There are no findings matching your criteria." action_url="/findings" action_text="View all findings" %}
 
 Parameters:
   icon         — FontAwesome icon name (without "fa-" prefix), e.g. "magnifying-glass"

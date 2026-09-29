@@ -1,0 +1,31 @@
+{
+  "totalItemsScanned": 1,
+  "totalSecretsFound": 1,
+  "results": {
+    "9346cf95d4513bb2861d1ecfc3e82421bd14cbd8": [
+      {
+        "id": "9346cf95d4513bb2861d1ecfc3e82421bd14cbd8",
+        "source": "testData/secrets/jwt.txt",
+        "ruleId": "37dfe666-1961-48f8-b618-fa6321c216d1",
+        "ruleName": "Jwt",
+        "ruleCategory": "General",
+        "startLine": 0,
+        "endLine": 0,
+        "lineContent": "TextExample eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMSIsIm5hbWUiOiJtb2NrTmFtZTEifQ.dummysignature1 TextExample eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMiIsIm5hbWUiOiJtb2NrTmFtZTIifQ.dummysignature2 TextExample",
+        "startColumn": 13,
+        "endColumn": 116,
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMSIsIm5hbWUiOiJtb2NrTmFtZTEifQ.dummysignature1",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Uncovered a JSON Web Token, which may lead to unauthorized access to web applications and sensitive user data.",
+        "extraDetails": {
+          "secretDetails": {
+            "name": "mockName1",
+            "sub": "mockSub1"
+          }
+        },
+        "severity": "High",
+        "cvssScore": 8.2
+      }
+    ]
+  }
+}

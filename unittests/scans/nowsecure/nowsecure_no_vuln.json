@@ -1,0 +1,41 @@
+{
+  "assessment": {
+    "ref": "aaaaaaaa-0000-4000-8000-000000000001",
+    "task": 900001,
+    "application": "bbbbbbbb-0000-4000-8000-000000000001",
+    "account": "example-account",
+    "group": "example-group",
+    "package": "com.example.genericapp",
+    "platform": "android",
+    "created": "2024-07-01T12:00:00Z",
+    "updated": "2024-07-01T12:45:00Z",
+    "task_status": "completed",
+    "status": {
+      "static": "completed",
+      "dynamic": "completed"
+    },
+    "binary": "cccccccc-0000-4000-8000-000000000001"
+  },
+  "findings": [
+    {
+      "affected": false,
+      "hidden": false,
+      "analysis_type": "static",
+      "category": "Data Storage",
+      "check_id": "keychain_accessibility",
+      "title": "A check that did not affect this app",
+      "severity": "medium",
+      "cvss": 5.3
+    },
+    {
+      "affected": true,
+      "hidden": true,
+      "analysis_type": "static",
+      "category": "Data Storage",
+      "check_id": "hidden_check",
+      "title": "A finding hidden in NowSecure",
+      "severity": "high",
+      "cvss": 7.1
+    }
+  ]
+}

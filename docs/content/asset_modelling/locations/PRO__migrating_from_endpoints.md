@@ -36,6 +36,17 @@ python manage.py migrate_components_to_dependencies
 python manage.py migrate_findings_to_code_locations
 ```
 
+## Marking an item complete
+
+Each suite item carries a durable **completed** marker, so the page can state that a migration does not need to be run again. It is set two ways:
+
+- **Automatically**, when a run started here finishes successfully.
+- **Manually**, with **Mark as completed**, for a migration that finished another way: a management command from the list above, a database restore, or a fresh instance that never had Endpoints to carry forward.
+
+A completed item shows a **Completed** badge with who marked it and when, its **Run** button becomes **Run again** (the step stays idempotent, so re-running is always safe), and **Mark as not completed** clears the marker.
+
+Marking the three backfills complete also satisfies the identity rehash's precondition, so a manual mark unlocks the rehash exactly as a real run does. Mark a backfill by hand only when its data really is migrated: the UI asks you to confirm, because unlocking the rehash before the backfill has run would let it recompute identities against a half-migrated database.
+
 ## What the Endpoints Backfill Does
 
 For every existing Endpoint, the endpoints backfill will:

@@ -195,3 +195,17 @@ class TestKICSParser(DojoTestCase):
                 self.assertEqual("Kubernetes", finding.component_name)
                 self.assertIsNotNone(finding.description)
                 self.assertEqual(1, finding.nb_occurences)
+
+    def test_parse_findings_with_null_fields(self):
+        """Verify the parser does not crash when expected_value is null."""
+        with (get_unit_tests_scans_path("kics") / "findings_with_null_fields.json").open(encoding="utf-8") as testfile:
+            parser = KICSParser()
+            findings = parser.get_findings(testfile, Test())
+            # 3 entries: 1 with null expected_value + 2 on same line but different query_id
+            self.assertEqual(3, len(findings))
+            # First finding should not crash despite null expected_value
+            self.assertEqual("Encryption: Test Rule With Null Expected Value", findings[0].title)
+            self.assertIsNone(findings[0].mitigation)
+            # The two same-line findings must remain distinct (different query_id)
+            titles = {f.title for f in findings[1:]}
+            self.assertEqual(2, len(titles))

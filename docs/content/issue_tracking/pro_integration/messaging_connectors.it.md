@@ -5,7 +5,7 @@ weight: 4
 audience: pro
 ---
 
-**Disponibilità:** i Connettori di messaggistica sono una funzionalità beta. Abilita **Messaging Connectors** nella pagina Feature Flags. Poiché gli avvisi vengono instradati tramite regole, è necessario abilitare anche **Rules Engine 2.0**.
+**Disponibilità:** i Connettori di messaggistica sono una funzionalità beta. Abilita **Messaging Connectors** nella pagina Feature Flags. Poiché gli avvisi vengono instradati tramite regole, è necessario abilitare anche **Triage Engine**.
 
 I Connettori di messaggistica inviano avvisi da DefectDojo a un servizio di chat, a un indirizzo email o a un topic Amazon SNS. Si trovano accanto ai connettori di ticketing e di gestione degli incidenti nella stessa pagina **Downstream Connectors** e si configurano allo stesso modo: si crea una connessione una sola volta, poi si decide cosa inviarle.
 
@@ -13,7 +13,7 @@ I connettori di ticketing e i connettori di messaggistica rispondono a esigenze 
 
 ## Cosa puoi inviare
 
-Gli avvisi vengono instradati da Rules Engine 2.0. Una regola decide **quando** inviare (un trigger), **quali** Riscontri sono idonei (condizioni) e **dove** arriva il messaggio (un nodo di notifica che indirizza la connessione e il canale).
+Gli avvisi vengono instradati da Triage Engine. Una regola decide **quando** inviare (un trigger), **quali** Riscontri sono idonei (condizioni) e **dove** arriva il messaggio (un nodo di notifica che indirizza la connessione e il canale).
 
 Questo significa che i filtri disponibili per un avviso sono gli stessi disponibili per una regola: gravità, ambito, tag, stato e qualsiasi altra cosa una condizione di regola possa esprimere. Più avvisi diversi indirizzati a più canali diversi sono semplicemente più regole.
 
@@ -162,7 +162,7 @@ Un test riuscito riabilita anche una connessione che era stata disattivata autom
 
 ## Creare un avviso
 
-Ci sono due modi per procedere. Entrambi producono lo stesso risultato: una regola di Rules Engine 2.0.
+Ci sono due modi per procedere. Entrambi producono lo stesso risultato: una regola di Triage Engine.
 
 ### La pagina degli avvisi
 
@@ -188,7 +188,7 @@ Gli avvisi sono regole, quindi possono anche essere aperti nell'editor delle reg
 
 Il percorso completo, per tutto ciò che il form non copre.
 
-1. Vai su **Automation > Rules Engine 2.0** e crea una regola.
+1. Vai su **Automation > Triage Engine** e crea una regola.
 2. Aggiungi un trigger. Per gli avvisi su Riscontri appena importati, usa il trigger evento Finding su **created**. Le importazioni sono raggruppate, quindi un'importazione produce un solo avviso invece di uno per ogni Riscontro.
 3. Aggiungi le condizioni per stabilire cosa deve qualificarsi, ad esempio una gravità minima Alta.
 4. Aggiungi un nodo messaggio per il fornitore desiderato (**Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email** o **Publish to an SNS Topic**) e imposta:

@@ -84,6 +84,7 @@ Actualmente admitimos Conectores ascendentes para las siguientes herramientas, c
 * **Quay**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Rapid7 InsightVM - Cloud Instance**
 * **runZero**
 * **Semgrep**
 * **ServiceNow CMDB**

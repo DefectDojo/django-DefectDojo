@@ -119,7 +119,7 @@ DefectDojo が push、マージリクエスト、コメントの各イベント�
 
 SSL 検証は有効なままにして **Add webhook** をクリックし、**Test → Push events** を使って DefectDojo が **HTTP 200** で応答することを確認します。
 
-接続後、**Choose projects** をクリックして [リポジトリの選択](#select-repositories) に進みます。オンボーディング、設定、スキャンは GitHub と同じように動作します。
+接続後、**Choose Projects** をクリックして [リポジトリの選択](#select-repositories) に進みます。オンボーディング、設定、スキャンは GitHub と同じように動作します。
 
 > **GitLab での対応表現:** このガイドで *pull request* と表記している箇所は、GitLab では **merge request** に相当します。プルリクエストの **status check** は、GitLab ではマージリクエストのヘッドコミットに対する **commit status** として投稿されます。
 
@@ -178,7 +178,7 @@ DefectDojo は認証情報を検証したうえで、リポジトリの一覧表
 - **Secret:** ページに表示される webhook シークレット(HMAC-SHA256 の `X-Hub-Signature` 検証に使用)。
 - **Triggers:** **Repository push**、**Pull request**(created、updated、merged、declined)、**Pull request comment created**(`/fix` コメント用)。
 
-接続後、**Choose repositories** をクリックして [リポジトリの選択](#select-repositories) に進みます。
+接続後、**Choose Repositories** をクリックして [リポジトリの選択](#select-repositories) に進みます。
 
 > **Bitbucket 固有の仕様:** リポジトリは `workspace/repo`(Cloud)または `PROJECTKEY/repo`(Server)の形式で指定します。プルリクエストの **status check** は、ヘッドコミットに対する Bitbucket の **build status** として投稿されます。OAuth はユーザーコンテキストで動作し(ワークスペース/ユーザー名に関する癖がなく)自動的に更新されるため推奨方式です。app password は非推奨であり、サポートされていません。
 
@@ -214,7 +214,7 @@ Azure DevOps は **Service Hooks** の認証に HTTP Basic を使用し、**イ�
 - **URL:** 接続画面に表示される webhook URL(`https://<your-defectdojo-host>/sensei/azure/webhooks`)。
 - **Basic authentication username / password:** ページに表示される値。
 
-接続後、**Choose repositories** をクリックして [リポジトリの選択](#select-repositories) に進みます。
+接続後、**Choose Repositories** をクリックして [リポジトリの選択](#select-repositories) に進みます。
 
 > **Azure DevOps 固有の仕様:** リポジトリは `project/repo` の形式で指定します(組織は接続側に保存されます)。プルリクエストの **status check** は、ヘッドコミットに対する Git の **commit status** として投稿されます。
 

@@ -34,11 +34,68 @@ The same base windows, further tightened by exploitability and exposure:
 **Credibly exploitable** means the finding is KEV-listed, or its EPSS score is at or above your
 threshold. **Internet-reachable** is signalled by a finding tag — `internet-reachable` by default.
 
-All the thresholds, tag names, and day counts are editable on the SLA configuration.
+All the thresholds, tag names, and day counts are editable on the SLA configuration, in the
+**FedRAMP VDR & PAIN Tiering** section of the SLA configuration form (create or edit an SLA
+configuration to reach it), or through the `/api/v2/sla_configurations/` API.
+
+Internet-reachability can also come from the computed asset exposure verdict rather than only a tag.
+Turn on **Use Asset Exposure for VDR Tiering** to include it. The two sources union, so enabling it
+can only tighten a deadline a tag already set, never loosen one.
 
 **FedRAMP VDR becomes mandatory on December 7, 2026.** FedRAMP's Vulnerability Detection and
 Response standard becomes mandatory for cloud service providers on that date. Adopting the VDR
 preset ahead of it is the recommended path.
+
+## Deadlines by Potential Agency Impact
+
+The three tiers above give every credibly exploitable, internet-reachable finding the same deadline,
+whatever the damage its exploitation would do. FedRAMP's published table does not: it crosses those
+same exploitability and reachability conditions with a **Potential Agency Impact N-rating** (PAIN),
+and the difference across ratings is large.
+
+Turn on **Use PAIN Ratings for VDR Deadlines** to switch from the three tiers to the full table:
+
+| PAIN rating | Exploitable **and** reachable | Exploitable only | Not credibly exploitable |
+| --- | --- | --- | --- |
+| N5 — debilitating effect on more than one agency | 2 days | 4 days | 16 days |
+| N4 — debilitating on one agency, or disruptive on several | 4 days | 8 days | 64 days |
+| N3 — disruptive effect on one agency | 16 days | 32 days | 128 days |
+| N2 — narrow customer effect | 48 days | 128 days | 192 days |
+
+Every cell is editable in that same **FedRAMP VDR & PAIN Tiering** section, once **Use PAIN Ratings
+for VDR Deadlines** is turned on. The shipped numbers are FedRAMP's published Class C values; providers
+holding a Class B or Class D certification change the numbers, not the shape.
+
+### Rating your findings
+
+PAIN is held per finding, and it is deliberately a person's judgment rather than something computed
+from scanner output: FedRAMP asks the provider to estimate the effect exploitation would have on the
+agencies using the service, and explicitly declines to prescribe a method for arriving at that.
+DefectDojo never derives a rating. Ratings are written by a Triage Engine rule using the **Set
+Potential Agency Impact** node, which is what makes the decision reviewable and auditable — there is
+no rating field on the finding form.
+
+Three consequences worth knowing before you turn this on:
+
+* **An unrated finding matches no cell, so it falls back to its base deadline.** That is not always
+  the same date it had before. Enabling PAIN deadlines **replaces** the three tiers rather than
+  combining with them, so a finding that was sitting on the 4-day tier moves *out* to its base window
+  until somebody rates it. Deadlines then tighten as you rate.
+* **N1 has no row, on purpose.** FedRAMP's table starts at N2, so a finding rated N1 carries no VDR
+  deadline and keeps the FedRAMP Rev 5 window. DefectDojo does not invent a row FedRAMP has not
+  published.
+* **A cell only ever caps the base window.** DefectDojo takes the shorter of the two, so a Critical
+  rated N2 gets its 30-day base SLA rather than the N2 cell's 48 days. Tiering can tighten a deadline
+  and never extend one.
+
+The date each rating was set is recorded as **PAIN Evaluated**, so reporting can show when each
+impact decision was made. The deadline itself still runs from the finding's SLA start date — its
+discovery date. Re-running a rule that assigns the same rating a finding already has does not move
+the evaluated date.
+
+For the FedRAMP requirement in full, a worked example, and how to assign ratings at scale, see
+[Potential Agency Impact (PAIN) Ratings](../pain_ratings). For the order to switch it on in, and what
+each deadline should read as you go, see [Setting Up PAIN Ratings](../pain_ratings_setup).
 
 ## Relationship to the ledger
 

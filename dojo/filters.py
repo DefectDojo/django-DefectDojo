@@ -3,8 +3,8 @@ import decimal
 import logging
 from datetime import datetime, timedelta
 
+import django_tagulous as tagulous
 import six
-import tagulous
 from django.apps import apps
 from django.db.models import Count, Exists, Min, OuterRef, Q
 from django.utils.timezone import now, tzinfo

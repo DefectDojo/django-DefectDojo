@@ -12,7 +12,7 @@ Vous aurez besoin d'une **API key** Escape, créée dans l'application Escape so
 
 #### Mappages du connecteur
 
-1. Laissez le champ **Location** vide pour utiliser `https://public.escape.tech/v2`, ou saisissez explicitement l'hôte de votre API Escape.
+1. Conservez la valeur pré\-remplie du champ **Location**, `https://public.escape.tech/v2`, ou saisissez explicitement l'hôte de votre API Escape.
 2. Saisissez la clé d'API Escape dans le champ **Secret**.
 3. Facultativement, définissez une **Minimum Severity** pour limiter les constatations importées.
 

@@ -1,0 +1,362 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Psalm",
+          "informationUri": "https://psalm.dev",
+          "version": "6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac",
+          "rules": [
+            {
+              "id": "75",
+              "name": "UnusedClass",
+              "shortDescription": {
+                "text": "UnusedClass"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/075",
+              "help": {
+                "markdown": "# UnusedClass\n\nEmitted when `--find-dead-code` is turned on and Psalm cannot find any uses of a\ngiven class.\n\nIf this class is used and part of the public API, annotate it with `@psalm-api`.\n\n```php\n<?php\n\nfinal class A {}\nfinal class B {}\n$a = new A();\n```\n",
+                "text": "# UnusedClass\n\nEmitted when `--find-dead-code` is turned on and Psalm cannot find any uses of a\ngiven class.\n\nIf this class is used and part of the public API, annotate it with `@psalm-api`.\n\n```php\n<?php\n\nfinal class A {}\nfinal class B {}\n$a = new A();\n```\n"
+              }
+            },
+            {
+              "id": "361",
+              "name": "ClassMustBeFinal",
+              "shortDescription": {
+                "text": "ClassMustBeFinal"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/361",
+              "help": {
+                "markdown": "# ClassMustBeFinal\n\nEmitted when a non-final, non-abstract class with no child classes is found.  \n\n```php\n<?php\n\nclass A {}\n```\n\n## Why this is bad\n\nNon-final classes are bad for multiple reasons:\n\n- They allow overriding non-final methods and properties, which can lead to unexpected behavior and bugs if implementation details are changed during inheritance of classes not explicitly part of the public API (marked using the `@api` attribute).  \n- A corollary of the above is that non-final classes increase the amount of code that must be covered by any backwards-compatibility promise.  \n  - In final classes, only public functions/properties/constants must be covered by the backwards compatibility promise.  \n  - In non-final classes, all private, protected and public functions/properties/constants must be covered by the backwards compatibility promise (private methods too, because changes to their code may not be compatible with overridden protected/public methods).\n- They are not optimized by Opcache and PHP itself, and thus are more expensive to use at runtime.  \n- Psalm type inference is more complex and not as exact for non-`final` classes.  \n\nIn general, the number of non-final classes in the codebase should be reduced as much as possible, both to speed up code execution and avoid unexpected bugs.  \n\n## How to fix\n\nRecommended, make the class `final`:    \n\n```php\n<?php\n\nfinal class A {}\n```\n\nThe above can also be automated using `vendor/bin/psalm --alter --issues=ClassMustBeFinal`.  \n\nIf inheritance should still be allowed, reduce the surface covered by the backwards compatibility promise by making the class abstract (containing **only** the logic that should be overridable), and move any non-overridable logic to a new `A` class:\n\n```php\n<?php\n\nabstract class A {}\n\nfinal class NewA extends A {}\n```\n\n**Note**: if non-`final` classes are needed for mocking in unit tests, simply use [dg/bypass-finals](https://packagist.org/packages/dg/bypass-finals) in your unit tests to allow mocking `final` classes.  \n\nAn alternative, not recommended for the [above reasons](#why-this-is-bad), is to make the class part of the public API of your library with `@api`.  ",
+                "text": "# ClassMustBeFinal\n\nEmitted when a non-final, non-abstract class with no child classes is found.  \n\n```php\n<?php\n\nclass A {}\n```\n\n## Why this is bad\n\nNon-final classes are bad for multiple reasons:\n\n- They allow overriding non-final methods and properties, which can lead to unexpected behavior and bugs if implementation details are changed during inheritance of classes not explicitly part of the public API (marked using the `@api` attribute).  \n- A corollary of the above is that non-final classes increase the amount of code that must be covered by any backwards-compatibility promise.  \n  - In final classes, only public functions/properties/constants must be covered by the backwards compatibility promise.  \n  - In non-final classes, all private, protected and public functions/properties/constants must be covered by the backwards compatibility promise (private methods too, because changes to their code may not be compatible with overridden protected/public methods).\n- They are not optimized by Opcache and PHP itself, and thus are more expensive to use at runtime.  \n- Psalm type inference is more complex and not as exact for non-`final` classes.  \n\nIn general, the number of non-final classes in the codebase should be reduced as much as possible, both to speed up code execution and avoid unexpected bugs.  \n\n## How to fix\n\nRecommended, make the class `final`:    \n\n```php\n<?php\n\nfinal class A {}\n```\n\nThe above can also be automated using `vendor/bin/psalm --alter --issues=ClassMustBeFinal`.  \n\nIf inheritance should still be allowed, reduce the surface covered by the backwards compatibility promise by making the class abstract (containing **only** the logic that should be overridable), and move any non-overridable logic to a new `A` class:\n\n```php\n<?php\n\nabstract class A {}\n\nfinal class NewA extends A {}\n```\n\n**Note**: if non-`final` classes are needed for mocking in unit tests, simply use [dg/bypass-finals](https://packagist.org/packages/dg/bypass-finals) in your unit tests to allow mocking `final` classes.  \n\nAn alternative, not recommended for the [above reasons](#why-this-is-bad), is to make the class part of the public API of your library with `@api`.  "
+              }
+            },
+            {
+              "id": "32",
+              "name": "MixedAssignment",
+              "shortDescription": {
+                "text": "MixedAssignment"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/032",
+              "help": {
+                "markdown": "# MixedAssignment\n\nEmitted when assigning an unannotated variable to a value for which Psalm\ncannot infer a type more specific than `mixed`.\n\n```php\n<?php\n\n$a = $GLOBALS['foo'];\n```\n\n## How to fix\n\nThe above example can be fixed in a few ways \u2013 by adding an `assert` call:\n\n```php\n<?php\n\n$a = $GLOBALS['foo'];\nassert(is_string($a));\n```\n\nor by adding an explicit cast:\n\n```php\n<?php\n\n$a = (string) $GLOBALS['foo'];\n```\n\nor by adding a docblock\n\n```php\n<?php\n\n/** @var string */\n$a = $GLOBALS['foo'];\n```\n",
+                "text": "# MixedAssignment\n\nEmitted when assigning an unannotated variable to a value for which Psalm\ncannot infer a type more specific than `mixed`.\n\n```php\n<?php\n\n$a = $GLOBALS['foo'];\n```\n\n## How to fix\n\nThe above example can be fixed in a few ways \u2013 by adding an `assert` call:\n\n```php\n<?php\n\n$a = $GLOBALS['foo'];\nassert(is_string($a));\n```\n\nor by adding an explicit cast:\n\n```php\n<?php\n\n$a = (string) $GLOBALS['foo'];\n```\n\nor by adding a docblock\n\n```php\n<?php\n\n/** @var string */\n$a = $GLOBALS['foo'];\n```\n"
+              }
+            },
+            {
+              "id": "34",
+              "name": "MixedPropertyFetch",
+              "shortDescription": {
+                "text": "MixedPropertyFetch"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/034",
+              "help": {
+                "markdown": "# MixedPropertyFetch\n\nEmitted when retrieving a property on a value for which Psalm cannot infer a type\n\n```php\n<?php\n\n/** @param mixed $a */\nfunction foo($a) : void {\n    echo $a->foo;\n}\n```\n",
+                "text": "# MixedPropertyFetch\n\nEmitted when retrieving a property on a value for which Psalm cannot infer a type\n\n```php\n<?php\n\n/** @param mixed $a */\nfunction foo($a) : void {\n    echo $a->foo;\n}\n```\n"
+              }
+            },
+            {
+              "id": "59",
+              "name": "MixedOperand",
+              "shortDescription": {
+                "text": "MixedOperand"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/059",
+              "help": {
+                "markdown": "# MixedOperand\n\nEmitted when Psalm cannot infer a type for an operand in any calculated expression\n\n```php\n<?php\n\necho $GLOBALS['foo'] + \"hello\";\n```\n\n## Why it\u2019s bad\n\nMixed operands can have fatal consequences, e.g. here:\n\n```php\n<?php\n\nfunction foo(mixed $m) {\n    echo $m . 'bar';\n}\n\nclass A {}\n\nfoo(new A()); // triggers fatal error\n```\n",
+                "text": "# MixedOperand\n\nEmitted when Psalm cannot infer a type for an operand in any calculated expression\n\n```php\n<?php\n\necho $GLOBALS['foo'] + \"hello\";\n```\n\n## Why it\u2019s bad\n\nMixed operands can have fatal consequences, e.g. here:\n\n```php\n<?php\n\nfunction foo(mixed $m) {\n    echo $m . 'bar';\n}\n\nclass A {}\n\nfoo(new A()); // triggers fatal error\n```\n"
+              }
+            },
+            {
+              "id": "138",
+              "name": "MixedReturnStatement",
+              "shortDescription": {
+                "text": "MixedReturnStatement"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/138",
+              "help": {
+                "markdown": "# MixedReturnStatement\n\nEmitted when Psalm cannot determine the type of a given return statement\n\n```php\n<?php\n\nfunction foo() : int {\n    return $GLOBALS['foo']; // emitted here\n}\n```\n",
+                "text": "# MixedReturnStatement\n\nEmitted when Psalm cannot determine the type of a given return statement\n\n```php\n<?php\n\nfunction foo() : int {\n    return $GLOBALS['foo']; // emitted here\n}\n```\n"
+              }
+            },
+            {
+              "id": "77",
+              "name": "UnusedVariable",
+              "shortDescription": {
+                "text": "UnusedVariable"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/077",
+              "help": {
+                "markdown": "# UnusedVariable\n\nEmitted when `--find-dead-code` is turned on and Psalm cannot find any references to a variable, once instantiated\n\n```php\n<?php\n\nfunction foo() : void {\n    $a = 5;\n    $b = 4;\n    echo $b;\n}\n```\n\nCan be suppressed by prefixing the variable name with an underscore:\n\n```php\n<?php\n\n$_a = 22;\n```\n",
+                "text": "# UnusedVariable\n\nEmitted when `--find-dead-code` is turned on and Psalm cannot find any references to a variable, once instantiated\n\n```php\n<?php\n\nfunction foo() : void {\n    $a = 5;\n    $b = 4;\n    echo $b;\n}\n```\n\nCan be suppressed by prefixing the variable name with an underscore:\n\n```php\n<?php\n\n$_a = 22;\n```\n"
+              }
+            },
+            {
+              "id": "56",
+              "name": "TypeDoesNotContainType",
+              "shortDescription": {
+                "text": "TypeDoesNotContainType"
+              },
+              "properties": {
+                "tags": [
+                  "maintainability"
+                ]
+              },
+              "helpUri": "https://psalm.dev/056",
+              "help": {
+                "markdown": "# TypeDoesNotContainType\n\nEmitted checking whether one value has a type or value that is impossible given its currently-known type\n\n```php\n<?php\n\n$a = \"hello\";\nif ($a === 5) {}\n```\n",
+                "text": "# TypeDoesNotContainType\n\nEmitted checking whether one value has a type or value that is impossible given its currently-known type\n\n```php\n<?php\n\n$a = \"hello\";\nif ($a === 5) {}\n```\n"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "75",
+          "message": {
+            "text": "Class Sample\\App\\Handler is never used"
+          },
+          "level": "error",
+          "rank": 98,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 5,
+                  "endLine": 5,
+                  "startColumn": 7,
+                  "endColumn": 14
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "361",
+          "message": {
+            "text": "Class Sample\\App\\Handler is never extended and is not part of the public API, and thus must be made final."
+          },
+          "level": "error",
+          "rank": 96,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 5,
+                  "endLine": 5,
+                  "startColumn": 7,
+                  "endColumn": 14
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "32",
+          "message": {
+            "text": "Unable to determine the type that $item is being assigned to"
+          },
+          "level": "note",
+          "rank": 97,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 18,
+                  "endLine": 18,
+                  "startColumn": 28,
+                  "endColumn": 33
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "32",
+          "message": {
+            "text": "Unable to determine the type that $sum is being assigned to"
+          },
+          "level": "note",
+          "rank": 97,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 19,
+                  "endLine": 19,
+                  "startColumn": 13,
+                  "endColumn": 17
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "34",
+          "message": {
+            "text": "Cannot fetch property on mixed var $item"
+          },
+          "level": "note",
+          "rank": 97,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 19,
+                  "endLine": 19,
+                  "startColumn": 21,
+                  "endColumn": 34
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "59",
+          "message": {
+            "text": "Right operand cannot be mixed"
+          },
+          "level": "note",
+          "rank": 97,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 19,
+                  "endLine": 19,
+                  "startColumn": 21,
+                  "endColumn": 34
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "138",
+          "message": {
+            "text": "Could not infer a return type"
+          },
+          "level": "note",
+          "rank": 97,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 21,
+                  "endLine": 21,
+                  "startColumn": 16,
+                  "endColumn": 20
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "77",
+          "message": {
+            "text": "$unused is never referenced or the value is not used"
+          },
+          "level": "error",
+          "rank": 98,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 27,
+                  "endLine": 27,
+                  "startColumn": 9,
+                  "endColumn": 16
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "56",
+          "message": {
+            "text": "string cannot be identical to int"
+          },
+          "level": "error",
+          "rank": 94,
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Handler.php"
+                },
+                "region": {
+                  "startLine": 32,
+                  "endLine": 32,
+                  "startColumn": 16,
+                  "endColumn": 25
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

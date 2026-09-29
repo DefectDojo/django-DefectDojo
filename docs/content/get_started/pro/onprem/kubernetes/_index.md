@@ -1,0 +1,9 @@
+---
+title: "Kubernetes (Helm)"
+description: "Self-hosting DefectDojo Pro on Kubernetes with the Helm chart"
+draft: false
+weight: 10
+audience: pro
+---
+
+Running DefectDojo Pro on Kubernetes with the DefectDojo Pro Helm chart, with `dojo-helm-cli` for registry access, pulling artifacts, deploying and diagnostics. These pages cover installing, upgrading, migrating from open source, deploying on OpenShift, and raising upload size limits.

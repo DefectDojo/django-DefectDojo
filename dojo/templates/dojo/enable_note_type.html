@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
     {{ block.super }}
     <h3> Disable Note Type {{ nt.name }}</h3>
@@ -6,7 +7,7 @@
         {% include "dojo/form_fields.html" with form=nt_form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input aria-label="Enable Note type" class="btn btn-success" name="enable_note_type" type="submit" value="Enable"/>
+                <input aria-label="{% trans 'Enable Note type' %}" class="btn btn-success" name="enable_note_type" type="submit" value="Enable"/>
             </div>
         </div>
     </form>

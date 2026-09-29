@@ -1,0 +1,61 @@
+{
+  "cases": [
+    {
+      "caseId": "case-0001",
+      "caseLabel": "Unprotected personal data in a reporting database",
+      "policyName": "Personal data outside an approved store",
+      "policyDescription": "Personal data must only live in an approved, access-controlled store.",
+      "severityLevel": "critical",
+      "caseStatus": "open",
+      "dataSourceName": "reporting-db",
+      "dataSourceType": "PostgreSQL",
+      "sensitivityGroup": "Restricted",
+      "numberOfAffectedObjects": 412,
+      "remediationSteps": "Move the data to an approved store and revoke the broad read grant.",
+      "assignee": "data-owner",
+      "created_at": "2024-05-10T08:00:00Z",
+      "updated_at": "2024-06-02T14:30:00Z"
+    },
+    {
+      "caseId": "case-0002",
+      "caseLabel": "",
+      "policyName": "Payment data in an object store",
+      "severityLevel": "HIGH",
+      "caseStatus": "remediated",
+      "dataSourceName": "generic-bucket",
+      "dataSourceType": "S3",
+      "sensitivityGroup": "Confidential",
+      "numberOfAffectedObjects": "37",
+      "remediationSteps": "",
+      "created_at": "2024-04-01T00:00:00Z"
+    },
+    {
+      "caseId": "case-0003",
+      "policyName": "",
+      "severityLevel": "not a level",
+      "caseStatus": "RESOLVED",
+      "dataSourceName": "",
+      "numberOfAffectedObjects": 0,
+      "created_at": "2024"
+    },
+    {
+      "caseId": "case-0004",
+      "caseLabel": "A case in an unfamiliar state",
+      "policyName": "Personal data in a log store",
+      "severityLevel": "low",
+      "caseStatus": "in review",
+      "dataSourceName": "log-store",
+      "dataSourceType": "Elasticsearch",
+      "numberOfAffectedObjects": -5,
+      "updated_at": "not a date at all"
+    },
+    {
+      "caseId": "",
+      "caseLabel": "Dropped, no case id",
+      "severityLevel": "critical",
+      "caseStatus": "open",
+      "dataSourceName": "generic-source"
+    }
+  ],
+  "totalCount": 5
+}

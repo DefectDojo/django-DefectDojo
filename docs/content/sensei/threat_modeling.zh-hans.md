@@ -6,13 +6,11 @@ audience: pro
 weight: 4
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">注意：威胁建模是 DefectDojo Pro 专属功能，目前处于 BETA 测试阶段。</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">注意：威胁建模是 DefectDojo Pro 专属功能。</span>
 
 **威胁建模**将功能设计转化为经过审阅的威胁模型。您提供设计内容——可以是粘贴的文本、设计文档，也可以再加上一份架构图——DefectDojo 便会生成其中所描述的组件和数据流、针对它们的威胁，以及缓解这些威胁的安全需求。随后可以将这些需求推送到 DefectDojo 中作为发现项，使设计阶段的工作与其他一切内容一样，流经相同的分诊、SLA、Jira 和报告机制。
 
 这是 Sensei 的**代码编写前**能力。[扫描并修复](/sensei/about_sensei/)针对的是已经存在的代码仓库，而威胁建模针对的是设计本身，在有代码可供扫描之前就已发挥作用。
-
-> **🔎 BETA：**威胁建模正在积极开发中，在界面中始终标记为 **BETA**。行为和界面可能会在不同版本之间发生变化。在 BETA 期间，该功能由 DefectDojo 按实例启用——请联系您的 DefectDojo 代表以开启此功能。
 
 > **📍 位置：**从左侧导航栏中打开**威胁建模**，位于 Sensei 正下方。
 

@@ -1,0 +1,18 @@
+{
+  "hosts": [
+    {
+      "id": 11,
+      "hostname": "laptop-11.example.com",
+      "platform": "darwin",
+      "os_version": "macOS 14.5",
+      "policies": [
+        {"id": 90, "name": "Disk encryption enabled", "critical": true, "response": "pass"},
+        {"id": 91, "name": "Screen lock after 15 minutes", "response": "pass"}
+      ],
+      "software": [
+        {"id": 501, "name": "Example Browser", "version": "120.0.2",
+         "vulnerabilities": [{"cve": "CVE-2000-0001", "cvss_score": 9.8}]}
+      ]
+    }
+  ]
+}

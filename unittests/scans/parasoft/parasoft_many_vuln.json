@@ -1,0 +1,57 @@
+{
+  "staticAnalysisViolations": [
+    {
+      "hash": "a1b2c3d4e5f60718",
+      "id": "v-900001",
+      "rule": "CERT_C-INT30-a",
+      "ruleCategory": "Integers",
+      "message": "Unsigned integer operation may wrap around",
+      "severity": 1,
+      "locFile": "src/generic/parser.c",
+      "locStartLine": 128,
+      "analyzerId": "com.parasoft.xtest.cpp.analyzer.static.pattern",
+      "language": "c"
+    },
+    {
+      "hash": "",
+      "id": "v-900002",
+      "rule": "CERT_C-STR31-a",
+      "ruleCategory": "Strings",
+      "message": "Buffer may overflow, see CVE-2000-0002 and CVE-2000-0001",
+      "severity": "2",
+      "locFile": "src/generic/strings.c",
+      "locStartLine": "64",
+      "analyzerId": "com.parasoft.xtest.cpp.analyzer.static.pattern",
+      "language": "c"
+    },
+    {
+      "hash": "",
+      "id": "",
+      "rule": "PB.NUM.CLP",
+      "ruleCategory": "Possible Bugs",
+      "message": "",
+      "severity": 3,
+      "locFile": "src/generic/util.java",
+      "locStartLine": 12,
+      "language": "java"
+    },
+    {
+      "rule": "",
+      "message": "A violation with no rule id",
+      "severity": 4,
+      "locFile": "src/generic/other.c",
+      "locStartLine": 1
+    },
+    {
+      "rule": "MISRA-1",
+      "message": "An informational violation",
+      "severity": 5,
+      "locFile": "src/generic/info.c"
+    },
+    {
+      "rule": "",
+      "message": "",
+      "severity": 0
+    }
+  ]
+}

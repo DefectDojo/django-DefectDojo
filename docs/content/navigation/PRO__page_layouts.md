@@ -114,4 +114,4 @@ Which widgets a page offers depends on the page, and **Add Widget** shows what i
 - **Feeds** present a running history in date order, such as notes on a record.
 - **Charts** plot the record's data, such as severity breakdowns and counts over time.
 
-Some widgets appear only when the feature behind them is available to you. For example, the **Automation History** widget on the Asset and Finding pages shows what the rules engine did to that record and why, so it is offered only when Rules Engine 2.0 is turned on and you hold Rule View.
+Some widgets appear only when the feature behind them is available to you. For example, the **Automation History** widget on the Asset and Finding pages shows what the rules engine did to that record and why, so it is offered only when Triage Engine is turned on and you hold Rule View.

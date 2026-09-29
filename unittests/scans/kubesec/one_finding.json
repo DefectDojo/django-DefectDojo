@@ -1,0 +1,19 @@
+[
+  {
+    "object": "Deployment/example-api.example-ns",
+    "valid": true,
+    "fileName": "manifests/deployment.yaml",
+    "message": "Failed with a score of -30 points",
+    "score": -30,
+    "scoring": {
+      "critical": [
+        {
+          "id": "Privileged",
+          "selector": "containers[] .securityContext .privileged == true",
+          "reason": "Privileged containers can allow almost completely unrestricted host access",
+          "points": -30
+        }
+      ]
+    }
+  }
+]

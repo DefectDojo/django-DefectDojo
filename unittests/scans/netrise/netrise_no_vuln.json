@@ -1,0 +1,13 @@
+{
+  "asset": {
+    "id": "artifact-0001",
+    "name": "generic-router-firmware-1.4.0.bin",
+    "vendor": "Generic Networks",
+    "product": "GN-1000",
+    "version": "1.4.0"
+  },
+  "vulnerabilities": {
+    "edges": [],
+    "pageInfo": {"endCursor": "", "hasNextPage": false}
+  }
+}

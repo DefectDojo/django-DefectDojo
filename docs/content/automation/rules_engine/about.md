@@ -12,7 +12,7 @@ DefectDojo's Rules Engine allows you to build custom workflows and bulk actions 
 
 Rules Engine can only be accessed through the [Pro UI](/get_started/about/ui_pro_vs_os/).
 
-**Looking for the graph editor?** [Rules Engine 2.0](/automation/rules_engine_2/about/) builds automation as visual node graphs, and adds branching, outbound actions such as tickets and messages, per-run traces and a delivery ledger. Both engines run side by side, and existing rules can be [converted across](/automation/rules_engine_2/converting_from_rules_engine/).
+**Looking for the graph editor?** [Triage Engine](/automation/triage_engine/about/) builds automation as visual node graphs, and adds branching, outbound actions such as tickets and messages, per-run traces and a delivery ledger. Both engines run side by side, and existing rules can be [converted across](/automation/triage_engine/converting_from_rules_engine/).
 
 ## Enabling Rules Engine
 

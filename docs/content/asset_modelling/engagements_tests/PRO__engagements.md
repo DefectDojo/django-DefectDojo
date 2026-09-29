@@ -98,6 +98,13 @@ Every Engagement must have the following fields defined:
 - Asset 
 - Status 
 
+When you start from an Asset — the gear icon, the “+ New Engagement” button, or a
+link that already names the Asset — the Asset field arrives filled in and locked, so
+it cannot be pointed at a different Asset by mistake. A locked field cannot be opened
+or selected with the mouse, so it carries a copy button on its right-hand edge that
+puts the value on your clipboard. The same applies anywhere a field is pre-filled from
+context, such as the Engagement and Scan Type fields when adding a Test.
+
 #### Engagement Statuses 
 
 Engagements can be tagged with different statuses upon creation. The status can also be changed afterward in the Engagement’s settings. 
