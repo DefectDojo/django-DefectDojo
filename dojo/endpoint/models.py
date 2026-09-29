@@ -239,6 +239,11 @@ class Endpoint(models.Model):
     def get_absolute_url(self):
         return reverse("view_endpoint", args=[str(self.id)])
 
+    @property
+    def readable_tags(self):
+        """Mirror of ``Location.readable_tags``. An Endpoint belongs to one product, so all of them."""
+        return list(self.tags.all())
+
     @classmethod
     @contextlib.contextmanager
     def allow_endpoint_init(cls):

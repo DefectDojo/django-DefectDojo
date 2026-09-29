@@ -418,3 +418,16 @@ class TestZapParser(DojoTestCase):
                         {"data":[{"item1":"[FEATURE_FLAG_1]","item2":true},{"item1":"[FEATURE_FLAG_2]","item2":true},{"item1":"[FEATURE_FLAG_3]","item2":true},{"item1":"[FEATURE_FLAG_4]","item2":true},{"item1":"[FEATURE_FLAG_5]","item2":true},{"item1":"[FEATURE_FLAG_6]","item2":true},{"item1":"[FEATURE_FLAG_7]","item2":true},{"item1":"[FEATURE_FLAG_8]","item2":true},{"item1":"[FEATURE_FLAG_9]","item2":true},{"item1":"[FEATURE_FLAG_10]","item2":true},{"item1":"[FEATURE_FLAG_11]","item2":true},{"item1":"[FEATURE_FLAG_12]","item2":true},{"item1":"[FEATURE_FLAG_13]","item2":false},{"item1":"[FEATURE_FLAG_14]","item2":false},{"item1":"[FEATURE_FLAG_15]","item2":false},{"item1":"[FEATURE_FLAG_16]","item2":true},{"item1":"[FEATURE_FLAG_17]","item2":true},{"item1":"[FEATURE_FLAG_18]","item2":true},{"item1":"[FEATURE_FLAG_19]","item2":true},{"item1":"[FEATURE_FLAG_20]","item2":true},{"item1":"[FEATURE_FLAG_21]","item2":true},{"item1":"[FEATURE_FLAG_22]","item2":true},{"item1":"[FEATURE_FLAG_23]","item2":false},{"item1":"[FEATURE_FLAG_24]","item2":false},{"item1":"[FEATURE_FLAG_25]","item2":false},{"item1":"[FEATURE_FLAG_26]","item2":true},{"item1":"[FEATURE_FLAG_27]","item2":false},{"item1":"[FEATURE_FLAG_28]","item2":true},{"item1":"[FEATURE_FLAG_29]","item2":true},{"item1":"[FEATURE_FLAG_30]","item2":false},{"item1":"[FEATURE_FLAG_31]","item2":true},{"item1":"[FEATURE_FLAG_32]","item2":true}],"isSuccess":true,"message":"Features retrieved successfully","reason":null,"code":"200","validation":null,"applicationId":null}
                             """
                 self.assertEqual(expected_response.strip(), response.strip())
+
+    def test_parse_xml_missing_body(self):
+        """Verify the parser does not crash when requestbody/responsebody tags are absent."""
+        with (get_unit_tests_scans_path("zap") / "zap_missing_body.xml").open(encoding="utf-8") as testfile:
+            parser = ZapParser()
+            findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
+            self.assertEqual(1, len(findings))
+            # Request should contain the header, response should not crash
+            self.assertEqual(1, len(findings[0].unsaved_req_resp))
+            req_resp = findings[0].unsaved_req_resp[0]
+            self.assertIn("GET https://example.com/api/health", req_resp["req"])
+            self.assertIn("HTTP/1.1 204 No Content", req_resp["resp"])

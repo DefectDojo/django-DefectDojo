@@ -4,7 +4,9 @@ import re
 from datetime import datetime
 from json.decoder import JSONDecodeError
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData, split_image_reference
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +32,7 @@ class AnchoreEnterpriseParser:
         items = []
         try:
             for checks in data:
-                for policies in checks.values():
+                for image_digest, policies in checks.items():
                     for images in policies.values():
                         for evaluation in images:
                             try:
@@ -81,6 +83,17 @@ class AnchoreEnterpriseParser:
                                         find.unsaved_vulnerability_ids = [
                                             vulnerability_id,
                                         ]
+                                    if locations_enabled():
+                                        parts = split_image_reference(row[1])
+                                        if parts.get("repository"):
+                                            find.unsaved_locations.append(
+                                                LocationData.image(
+                                                    registry=parts["registry"],
+                                                    repository=parts["repository"],
+                                                    digest=image_digest if str(image_digest).startswith("sha256:") else "",
+                                                    tag=parts["tag"],
+                                                ),
+                                            )
                                     items.append(find)
                             except (KeyError, IndexError) as err:
                                 msg = f"Invalid format: {err} key not found"

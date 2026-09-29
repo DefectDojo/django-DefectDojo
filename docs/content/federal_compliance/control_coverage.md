@@ -1,7 +1,7 @@
 ---
 title: "Control Coverage"
 description: "Which 800-53 controls your scanners test, and open weaknesses per control"
-weight: 7
+weight: 8
 audience: pro
 ---
 

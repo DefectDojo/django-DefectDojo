@@ -1,5 +1,4 @@
 #: dojo/forms.py
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -5539,10 +5538,8 @@ msgid "Regulation Successfully Updated."
 msgstr ""
 
 #: dojo/search/views.py
-#, fuzzy
-#| msgid "Search"
 msgid "Simple Search"
-msgstr "Поиск"
+msgstr ""
 
 #: dojo/sla_config/views.py
 msgid "SLA configuration Successfully Created."
@@ -5921,7 +5918,7 @@ msgstr ""
 #: dojo/templates_classic/base.html
 #: dojo/templates_classic/dojo/simple_search.html
 msgid "Search"
-msgstr "Поиск"
+msgstr ""
 
 #: dojo/templates/base.html
 msgid "Alerts"
@@ -8957,10 +8954,8 @@ msgid ""
 msgstr ""
 
 #: dojo/templates_classic/base.html
-#, fuzzy
-#| msgid "Search"
 msgid "simple_search"
-msgstr "Поиск"
+msgstr ""
 
 #: dojo/templates_classic/base.html
 msgid "OpenAPI v3 Docs"

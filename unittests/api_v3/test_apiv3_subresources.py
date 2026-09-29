@@ -2,7 +2,7 @@
 Generic notes / tags / files sub-resource tests for API v3 (§4.12, OS5).
 
 Covers the storage support matrix (notes/files: finding/engagement/test; tags: those + asset),
-note privacy (v2 parity: private notes are returned, not per-user filtered), parent-authorization
+note privacy (v2 parity: `private` is a per-user read filter), parent-authorization
 inheritance (404 unknown-or-unauthorized parent, 403 write), multipart upload + streamed download
 roundtrip, tag replace/append/delete semantics + normalization, the pagination envelope on the
 list endpoints, and the MANDATORY constant-query guarantee for the finding notes/tags/files lists.
@@ -105,17 +105,44 @@ class TestApiV3SubresourcesNotePrivacy(_SubResourceBase):
         match = next(n for n in listing["results"] if n["id"] == created["id"])
         self.assertTrue(match["private"])
 
-    def test_private_note_visible_to_other_authorized_user_v2_parity(self):
-        """v2 parity: the notes endpoint returns *all* notes; `private` is not a per-user read filter."""
+    def test_private_note_hidden_from_other_authorized_user(self):
+        """v2 parity: `private` is a per-user read filter, so only the author sees their own."""
         member = Dojo_User.objects.create_user(username="v3_note_member", password="x")  # noqa: S106
         self.finding.test.engagement.product.authorized_users.add(member)
-        created = self.client.post(
-            self.v3_url(f"findings/{self.finding.pk}/notes"),
-            {"entry": "private-but-visible", "private": True}, format="json",
-        ).json()
+        member_client = self.token_client(user=member)
 
-        member_view = self.get_json(f"findings/{self.finding.pk}/notes", client=self.token_client(user=member))
-        self.assertIn(created["id"], [n["id"] for n in member_view["results"]])
+        for resource, parent in self.note_file_parents:
+            with self.subTest(resource=resource):
+                private = self.client.post(
+                    self.v3_url(f"{resource}/{parent.pk}/notes"),
+                    {"entry": f"private on {resource}", "private": True}, format="json",
+                ).json()
+                public = self.client.post(
+                    self.v3_url(f"{resource}/{parent.pk}/notes"),
+                    {"entry": f"public on {resource}", "private": False}, format="json",
+                ).json()
+
+                member_view = self.get_json(f"{resource}/{parent.pk}/notes", client=member_client)
+                member_ids = [n["id"] for n in member_view["results"]]
+                self.assertNotIn(private["id"], member_ids)
+                self.assertIn(public["id"], member_ids)
+                self.assertNotIn(f"private on {resource}", str(member_view))
+
+                author_ids = [n["id"] for n in self.get_json(f"{resource}/{parent.pk}/notes")["results"]]
+                self.assertIn(private["id"], author_ids)
+
+    def test_private_note_hidden_from_member_count_and_pagination(self):
+        member = Dojo_User.objects.create_user(username="v3_note_counter", password="x")  # noqa: S106
+        self.finding.test.engagement.product.authorized_users.add(member)
+        before = self.get_json(f"findings/{self.finding.pk}/notes", client=self.token_client(user=member))["count"]
+
+        self.client.post(
+            self.v3_url(f"findings/{self.finding.pk}/notes"),
+            {"entry": "counted?", "private": True}, format="json",
+        )
+
+        after = self.get_json(f"findings/{self.finding.pk}/notes", client=self.token_client(user=member))
+        self.assertEqual(before, after["count"])
 
 
 class TestApiV3SubresourcesFiles(_SubResourceBase):

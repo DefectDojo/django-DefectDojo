@@ -18,11 +18,95 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## September 2026: v3.3
 
+### September 22, 2026: v3.3.200
+
+New features:
+* **(Compliance)** New regulatory scope foundation with an EU-seeded profile, plus EU regulatory control catalogs, EU regulatory assessments, and exportable EU evidence packs.
+* **(Compliance)** PCI DSS compliance pack: scope and scope inventory, patch-clock SLAs (6.3.3), targeted risk analyses (12.3.1), quarterly scan and ASV evidence, a vulnerability-management control catalog, and a PCI DSS evidence workbook.
+* **(Compliance)** FDA cyber device packs: component support metadata, lifecycle metrics, SBOM export, and the Section 524B cyber device evidence pack.
+* **(Compliance)** CRA Article 14 reporting interface.
+* **(Compliance)** Certification control catalogs for ISO 27001, SOC 2, and NIS2, with a cross-framework evidence view.
+* **(Compliance)** Framework presets for UK Cyber Essentials and the Australian Essential Eight.
+* **(SLA)** Versioned vulnerability response policies, with a response-clock evaluation and incident escalation, plus a vulnerability response evidence API and export.
+* **(Sensei)** Dynamic Scanning (DAST): configure targets, verify ownership, launch scans, and meter usage for billing.
+* **(Sensei)** AI Agent Red Teaming, a new Sensei capability and engine mode for red-teaming AI agents.
+* **(Sensei)** Schedule hosted repository scans with attributed credentials, and track scan frequency with exportable cadence attestations.
+* **(Sensei)** Tier Advisor projects your annual processing volume and recommends a tier.
+* **(Dashboards)** The Command Center dashboard scene, now the home page for every user.
+* **(PSIRT)** CSAF 2.0 / VEX advisory export, backported to the 3.3.x line.
+* **(Findings)** EPSS and CISA KEV threat-intelligence fields are editable on the Add/Edit Finding form.
+* **(Triage Engine)** Import-completion triggers, one per scan and one per group of scans.
+* **(Locations)** Container scanners now emit the scanned image as an Image location.
+* **(Licensing)** New endpoint-status and location-finding audit pages, plus a location-metering health metric.
+* **(Connectors)** Aqua Supply Chain imports non-default branches via per-branch scan ids, and enriches Supply Chain findings with reachability verdicts and friendly category tags.
+* **(Connectors)** Microsoft Defender adds a device-group import allowlist.
+* **(Connectors)** Azure DevOps applies your custom field mappings to work items.
+
+Enhancements:
+* **(Findings)** The finding SLA row now shows the SLA expiration date.
+* **(Connectors)** Aqua warns when a configured branch imports nothing beyond the defaults, and a branched sync tags the default-branch engagement.
+* **(Reporting)** Report chart blocks gain a Date Range window, and the Widget-block picker is populated.
+* **(Celery)** A finished task reports its peak memory when it nears the guard limit.
+* **(Performance)** EPSS enrichment gates changes at display precision and streams the nightly projection; the Location Map authorizes once per request and counts root groups correctly; product-grade recalculation is debounced per product.
+
+Bug fixes:
+* **(Connectors)** Fixes for slow validates (a WriteTimeout raised above the Django wait to stop TLS desync), Cycode auth split across its two hosts, a slow GitLab config save, NowSecure assessment-list 400s with surfaced HTTP errors, finding correlation on chunked syncs, single-label hosts in a Location URL, and Qualys finding title and vuln id aligned with the OSS parser.
+* **(Deduplication)** Matching Configuration lists every test type.
+* **(Triage Engine)** Rule-graph nodes saved without positions are laid out, and v1 float conditions carry EPSS-precision decimals.
+* **(Reporting)** A report keeps rendering when a saved column was renamed.
+* **(Compliance)** The POA&M sync no longer walks whole products on instances without a compliance profile.
+* **(Locations)** Bulk-update popovers stay open while picking a status, and the created_at/updated_at and location_type/location_value API filters resolve correctly.
+* **(Importers)** Scan retention is bounded so a large backlog cannot exceed the hard time limit, a scan import over the upload limit returns a clear 400, and a missing uploaded file returns 404 instead of 500.
+* **(Security)** Engineer metrics, and classic search and endpoint report reads of shared location tags, are scoped to the requester's authorized findings; the API token follows the forced-password-reset state; the classic confirm dialogs harden text rendering.
+* **(API)** The v3 notes list and the auto-create import permission check route through the shared helpers, and go-api auth errors carry the DRF error code.
+* **(Parsers)** Nuclei deduplicates protocol-less URLs, govulncheck tolerates OSV entries without aliases, and crash bugs are fixed in the KICS, AppSpider, KubeHunter, Terrascan, TFSec, and ZAP parsers.
+* **(Findings)** Finding-group list visibility is fixed for product members, and finding-group members stay inside the group's test.
+* **(i18n)** Dropped stray Russian text from the English "Search" strings.
+
+Behavior changes:
+* **(Triage Engine)** Rules Engine 2.0 is renamed Triage Engine across the UI.
+
+Upgrade notes:
+* **(PSIRT)** The retired PSIRT 1.0 Advisory Engine sidecar is removed from the deployment and release verification. PSIRT 1.0 was removed in 3.3.0; migrate any remaining sidecar data with `psirt_import_legacy`.
+* **(Deployment)** A new `DD_V3_ASSET_VERSIONS` chart value and compose environment variable enables per-source asset versions.
+
 ### September 14, 2026: v3.3.100
 
 New features:
 * **(Deduplication)** Added Dedupe Pools: group the Assets that should deduplicate against each other, choose where their originals collect, preview what a membership change would link, and re-run deduplication over the Findings already in scope with Apply Now.
 * **(Deduplication)** The three deduplication tuning pages are now one Matching Configuration page: every tool listed once, with its same-tool, cross-tool and reimport matching side by side, and every change previewed before it is saved.
+* **(Connectors)** New Palo Alto Cortex connector family, covering XDR, XSIAM, XSOAR, and Cloud.
+* **(Connectors)** Connector sync and discovery frequency is now configurable (6, 12, or 24 hours), with schedule times shown in your browser's local time.
+* **(Dashboards)** Collaborative shared dashboard layouts.
+* **(Editor)** The markdown editor now stores images you paste or drop into any markdown field.
+* **(Sensei)** Google Vertex AI is available as an on-prem LLM provider.
+* **(Sensei)** Keyless and delegated cloud authentication for Prowler scans and Sensei CSPM, using cloud federation or Connect DefectDojo Cloud.
+* **(Reporting)** Dashboards 2.0 widgets can now be reused as Report Builder blocks.
+* **(Rules Engine 2.0)** Date condition fields support relative-date operators.
+* **(Federal)** FedRAMP VDR, PAIN, and KEV-cap SLA fields are exposed in the Pro UI and REST API.
+* **(Qualys)** Opt-in endpoint creation from host identity.
+
+Enhancements:
+* **(Dashboards)** Duplicate a dashboard tile from its edit-mode chrome.
+* **(Connectors)** The Aqua Supply Chain Branch field accepts a comma-separated list and gains a per-branch deduplication toggle, and its placeholders now show the real default.
+* **(SSO)** Auth settings show callback and ACS URLs inline, with richer help text and corrected field labels.
+* **(Sensei)** The Threat Modeling and Advisor pages show the licensed per-run quotas.
+
+Bug fixes:
+* **(Connectors)** JFrog scopes each nested child image to its own latest build; Dependency-Track paginates project findings so large projects aren't truncated; YesWeHack maps every workflow state and falls back to the CVSS score for severity; GitHub Advanced Security 403 and 404 responses are treated as feature-disabled rather than token errors; a tool-reported finding status now survives a sync; and KEV/EPSS enrichment staging is isolated per connection to avoid concurrent-run collisions.
+* **(Findings)** You can now request a review from yourself.
+* **(Rules Engine)** "Clear Filters" now clears a rule's saved filters.
+* **(SSO)** Unconfigured social-login backends return you to the login form instead of a 500.
+* **(Assets)** Each personnel picker gets its own users list.
+* **(API)** A stored inactive contact stays readable, a new contact can no longer be assigned to an inactive user, and the finding API's SonarQube issue relation is read-only.
+* **(Dashboards)** The Top Root Causes widget is registered and receives its configuration.
+* **(Sensei)** GitHub App creation opens in a new tab, and the Targets "Last Scan" value aligns with the scan-run ledger while the Scan-now dialog stays responsive.
+* **(UI)** Table columns size to fit their headers so filter and sort controls stay reachable, and the Upstream menu item is a plain link while Field Mappings is unreleased.
+* **(Questionnaires)** Corrected the share note on the general questionnaire list.
+* **(JIRA)** Corrected the exception class the webhook lookups catch.
+* **(Reporting)** Removed a duplicate vulnerability reference prefetch in the finding report.
+* **(Parsers)** bundler-audit resets advisory fields so warnings can't inherit stale values.
+* **(Deduplication)** The endpoint rehash runs once per tool instead of once per finding.
 
 Behavior changes:
 * **(Deduplication)** False-positive history now follows deduplication scope. A Finding is compared against the Assets it deduplicates with, so an Engagement that deduplicates within itself only replicates false positives inside that Engagement. An Asset in a Dedupe Pool replicates its false positives across the pool for same-tool matching. Instances using false-positive history across such Engagements see narrower replication than before. A pool may span Organizations, and both effects follow the pool: a duplicate mark or a replicated false positive originating in one Organization can change a Finding in another Organization that shares the pool.
@@ -37,6 +121,7 @@ Upgrade notes:
 * **(Deduplication)** The migration is reversible. Rolling back to the previous node drops the new pool tables and restores the previous release's view of the settings; the tuning columns never left. Take a database backup before upgrading anyway, as ordinary upgrade hygiene.
 * **(Deduplication)** The matching rows the upgrade seeds carry no audit log entry: the migration writes them before it installs their audit triggers. Audit history for Matching Configuration starts with the first change made after the upgrade; the seeded state itself is what the Tuner held, and is not recorded as an event.
 * **(Deduplication)** The first nightly identity check after the upgrade may send a system notification saying the cross-tool identity changed for some tools. Those tools had cross-tool hash fields configured but no algorithm; the previous release treated that as Hash code, and the upgrade records Hash code explicitly, so the identity definition moved while the stored hashes did not. The rehash the notification suggests (`manage.py identity_drift --kind cross_tool --rehash`) is safe, recomputes the same values, and records the new baseline so the notice does not repeat.
+* **(Deployment)** A new `DD_V3_ASSET_ALIASES` chart value and compose environment variable enable per-source asset aliases; Sensei CSPM adds keyless and delegated cloud-auth boot gates.
 
 ### September 9, 2026: v3.3.0
 

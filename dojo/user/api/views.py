@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import GenericAPIView
@@ -19,6 +20,7 @@ from dojo.models import UserContactInfo
 from dojo.notifications.helper import create_notification
 from dojo.user.api.filters import ApiUserContactInfoFilter, ApiUserFilter
 from dojo.user.api.serializer import (
+    ForcedResetAuthTokenSerializer,
     RevokeApiTokenSerializer,
     UserContactInfoSerializer,
     UserProfileSerializer,
@@ -174,3 +176,7 @@ class UserProfileView(GenericAPIView):
             many=False,
         )
         return Response(serializer.data)
+
+
+class ForcedResetObtainAuthToken(ObtainAuthToken):
+    serializer_class = ForcedResetAuthTokenSerializer

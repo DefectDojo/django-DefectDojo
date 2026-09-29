@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VulnSummary>
+    <AppVersion>7.0.011.1</AppVersion>
+    <ScanName>DupeTest</ScanName>
+    <VulnList>
+        <Vuln>
+            <VulnType>Cross-Site Scripting</VulnType>
+            <VulnUrl>https://example.com/page1</VulnUrl>
+            <Description>XSS in page1</Description>
+            <Recommendation>Sanitize inputs</Recommendation>
+            <AttackScore>3-Medium</AttackScore>
+            <CweId>79</CweId>
+            <AttackList>
+                <AttackRequest>
+                    <Request>GET /page1</Request>
+                    <Response>200 OK</Response>
+                </AttackRequest>
+            </AttackList>
+        </Vuln>
+        <Vuln>
+            <VulnType>Cross-Site Scripting</VulnType>
+            <VulnUrl>https://example.com/page2</VulnUrl>
+            <Description>XSS in page2</Description>
+            <Recommendation>Sanitize inputs</Recommendation>
+            <AttackScore>3-Medium</AttackScore>
+            <CweId>79</CweId>
+            <AttackList>
+                <AttackRequest>
+                    <Request>GET /page2</Request>
+                    <Response>200 OK</Response>
+                </AttackRequest>
+            </AttackList>
+        </Vuln>
+    </VulnList>
+</VulnSummary>

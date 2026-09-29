@@ -68,24 +68,25 @@ holding a Class B or Class D certification change the numbers, not the shape.
 
 ### Rating your findings
 
-PAIN is set per finding, on the finding itself. It is deliberately a person's judgment rather than
-something computed from scanner output: FedRAMP asks the provider to estimate the effect exploitation
-would have on the agencies using the service, and explicitly declines to prescribe a method for
-arriving at that. A Triage Engine rule can propose a rating from evidence and route the finding for
-review — see the **Set Potential Agency Impact** node — but the confirmation is yours to make and
-defend.
+PAIN is held per finding, and it is deliberately a person's judgment rather than something computed
+from scanner output: FedRAMP asks the provider to estimate the effect exploitation would have on the
+agencies using the service, and explicitly declines to prescribe a method for arriving at that.
+DefectDojo never derives a rating. Ratings are written by a Triage Engine rule using the **Set
+Potential Agency Impact** node, which is what makes the decision reviewable and auditable — there is
+no rating field on the finding form.
 
-Two consequences worth knowing before you turn this on:
+Three consequences worth knowing before you turn this on:
 
-* **A finding with no rating keeps its base deadline.** Every finding that exists before you start
-  rating is unrated, so nothing is re-dated the moment you enable this. Deadlines tighten as you rate.
+* **An unrated finding matches no cell, so it falls back to its base deadline.** That is not always
+  the same date it had before. Enabling PAIN deadlines **replaces** the three tiers rather than
+  combining with them, so a finding that was sitting on the 4-day tier moves *out* to its base window
+  until somebody rates it. Deadlines then tighten as you rate.
 * **N1 has no row, on purpose.** FedRAMP's table starts at N2, so a finding rated N1 carries no VDR
   deadline and keeps the FedRAMP Rev 5 window. DefectDojo does not invent a row FedRAMP has not
   published.
-
-Enabling PAIN deadlines **replaces** the three tiers rather than combining with them. A finding rated
-N2 gets 48 days, not the 4-day tier it would have received without a rating — which is the point of
-rating it.
+* **A cell only ever caps the base window.** DefectDojo takes the shorter of the two, so a Critical
+  rated N2 gets its 30-day base SLA rather than the N2 cell's 48 days. Tiering can tighten a deadline
+  and never extend one.
 
 The date each rating was set is recorded as **PAIN Evaluated**, so reporting can show when each
 impact decision was made. The deadline itself still runs from the finding's SLA start date — its
@@ -93,7 +94,8 @@ discovery date. Re-running a rule that assigns the same rating a finding already
 the evaluated date.
 
 For the FedRAMP requirement in full, a worked example, and how to assign ratings at scale, see
-[Potential Agency Impact (PAIN) Ratings](../pain_ratings).
+[Potential Agency Impact (PAIN) Ratings](../pain_ratings). For the order to switch it on in, and what
+each deadline should read as you go, see [Setting Up PAIN Ratings](../pain_ratings_setup).
 
 ## Relationship to the ledger
 

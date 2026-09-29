@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from dojo.models import Dojo_User, UserContactInfo
 from dojo.user.authentication import token_expires_at
@@ -260,3 +261,15 @@ class RevokeApiTokenSerializer(serializers.Serializer):
             msg = "key may not be blank."
             raise serializers.ValidationError(msg)
         return value
+
+
+class ForcedResetAuthTokenSerializer(AuthTokenSerializer):
+
+    """Credential check that also refuses an account still owing a forced password reset."""
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if Dojo_User.force_password_reset(attrs["user"]):
+            msg = "A password reset is required before this account can obtain an API token."
+            raise serializers.ValidationError(msg, code="authorization")
+        return attrs

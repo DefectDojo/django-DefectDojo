@@ -20,6 +20,7 @@ from dojo.authorization.authorization import (
     user_has_permission_or_403,
 )
 from dojo.location.models import Location
+from dojo.location.queries import fully_authorized_locations
 from dojo.models import (
     Endpoint,
     Engagement,
@@ -44,6 +45,7 @@ def action_history(request, cid, oid):
     finding = None
     test = False
     object_value = None
+    aggregate_by_reference = True
 
     if ct.model == "product":
         user_has_permission_or_403(request.user, obj, "view")
@@ -69,6 +71,10 @@ def action_history(request, cid, oid):
         finding = object_value
     elif ct.model == "location":
         user_has_permission_or_403(request.user, obj, "view")
+        # Events on a globally deduplicated row carry no product, so the whole row has to
+        # be the caller's before any of its history is.
+        if not fully_authorized_locations(request.user).filter(pk=obj.pk).exists():
+            raise PermissionDenied
         object_value = Location.objects.get(id=obj.id)
         active_tab = "endpoints"
     # TODO: Delete this after the move to Locations
@@ -93,6 +99,9 @@ def action_history(request, cid, oid):
             raise PermissionDenied
     elif ct.model == "user":
         user_has_configuration_permission_or_403(request.user, "auth.view_user")
+        # A user is a foreign key on rows in every product, so aggregating by reference would
+        # serve those rows to anyone who may view users. Their own record is the history here.
+        aggregate_by_reference = False
     elif not request.user.is_superuser:
         raise PermissionDenied
 
@@ -118,7 +127,8 @@ def action_history(request, cid, oid):
     # Use custom DojoEvents proxy model — provides proper diff calculation and context fields.
     # references() returns events where any FK points to the object (including through models like tags/reviewers).
     # Events is a CTE that doesn't support select_related, but includes context data.
-    pghistory_history = DojoEvents.objects.references(obj).order_by("-pgh_created_at")
+    events = DojoEvents.objects.references(obj) if aggregate_by_reference else DojoEvents.objects.tracks(obj)
+    pghistory_history = events.order_by("-pgh_created_at")
 
     pghistory_filter = PgHistoryFilter(request.GET, queryset=pghistory_history)
     filtered_pghistory = pghistory_filter.qs

@@ -74,8 +74,14 @@ class Dojo_User(User):
 
     def disable_force_password_reset(self):
         if hasattr(self, "usercontactinfo"):
+            was_set = self.usercontactinfo.force_password_reset
             self.usercontactinfo.force_password_reset = False
             self.usercontactinfo.save()
+            if was_set:
+                # The API token is a second credential that the password change alone leaves alive.
+                from rest_framework.authtoken.models import Token  # noqa: PLC0415 circular import
+
+                Token.objects.filter(user_id=self.pk).delete()
 
     def enable_force_password_reset(self):
         if hasattr(self, "usercontactinfo"):

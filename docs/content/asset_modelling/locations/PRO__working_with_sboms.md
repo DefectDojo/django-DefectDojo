@@ -24,8 +24,44 @@ Every Dependency is uniquely identified by a pURL, decomposed into atomic fields
 | `artifact_hashes` *(optional)* | Fingerprints | SHA256 sums |
 | `license_expression` *(optional)* | SPDX license expression | `Apache-2.0`, `MIT` |
 | `file_path` *(optional)* | Where the library was found in the project | `package-lock.json` |
+| `supplier_name` *(optional)* | The manufacturer or supplier of this component version | `Example Supplier` |
+| `supplier_url` *(optional)* | A link supporting the supplier or support claim | `https://example.test/support` |
+| `support_level` *(optional)* | How the supplier supports this version | `actively_maintained`, `security_fixes_only`, `community_only`, `unsupported`, `end_of_life`, `unknown` |
+| `end_of_support_date` *(optional)* | The date after which the supplier no longer supports this version | `2030-01-01` |
+| `support_source` *(optional)* | Where the support facts came from | `import`, `manual`, `unknown` |
 
 This atomic decomposition is what makes pURL-based search useful: you can ask *"all `pypi` packages in the `django` namespace at version 4.x"* and DefectDojo can answer that without parsing a free-text string.
+
+## Supplier and Support Metadata
+
+Who supplies a component and how long they will support it are facts a bill of materials is often
+asked for and rarely carries. DefectDojo records them on the component, alongside where each fact
+came from.
+
+Unknown is a valid answer and is stored as unknown. DefectDojo never infers a support level or an
+end of support date from a version number, a release date or a project's activity. A fabricated
+support claim in a regulated bill of materials is a problem for whoever relies on it, so the only
+support facts recorded are the ones somebody supplied.
+
+An import reads these from the document where the format carries them. CycloneDX supplies the
+supplier from the component's supplier, publisher or author, in that order, and reads support
+level and end of support date from component properties. SPDX supplies the supplier from the
+supplier or originator field, and reads an end of support date from `validUntilDate` where the
+document has one. Anything absent stays unknown.
+
+### Which value wins
+
+A component's support facts can come from three places, and they resolve in this order:
+
+1. A per snapshot override, where a specific release carries a different support contract from the
+   component in general.
+2. The value recorded on the component itself, whether that came from an import or from somebody
+   editing it.
+3. Unknown.
+
+An edit made by hand survives later imports of the same component. Re-importing a document does
+not overwrite a support level somebody corrected, and `support_source` records which case applies,
+so a reviewer can tell an imported fact from an entered one.
 
 ## Owned-By vs Used-By
 

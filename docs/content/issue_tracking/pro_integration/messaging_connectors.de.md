@@ -6,7 +6,7 @@ weight: 4
 audience: pro
 ---
 
-**Verfügbarkeit:** Messaging-Connectors sind eine Beta-Funktion. Aktivieren Sie **Messaging Connectors** auf der Seite „Feature Flags“. Da Warnungen über Regeln weitergeleitet werden, muss außerdem **Rules Engine 2.0** aktiviert sein.
+**Verfügbarkeit:** Messaging-Connectors sind eine Beta-Funktion. Aktivieren Sie **Messaging Connectors** auf der Seite „Feature Flags“. Da Warnungen über Regeln weitergeleitet werden, muss außerdem **Triage Engine** aktiviert sein.
 
 Messaging-Connectors senden Warnungen von DefectDojo an einen Chatdienst, an eine E-Mail-Adresse oder an ein Amazon-SNS-Topic. Sie stehen neben den Ticketing- und Incident-Management-Connectors auf derselben Seite **Downstream Connectors** und werden auf dieselbe Weise konfiguriert: Sie erstellen einmal eine Verbindung und legen dann fest, was darüber gesendet werden soll.
 
@@ -14,7 +14,7 @@ Ticketing-Connectors und Messaging-Connectors beantworten unterschiedliche Frage
 
 ## Was Sie senden können
 
-Warnungen werden über die Rules Engine 2.0 weitergeleitet. Eine Regel legt fest, **wann** gesendet wird (ein Trigger), **welche** Befunde infrage kommen (Bedingungen) und **wohin** die Nachricht geht (ein Notify-Knoten, der Ihre Verbindung und Ihren Kanal adressiert).
+Warnungen werden über die Triage Engine weitergeleitet. Eine Regel legt fest, **wann** gesendet wird (ein Trigger), **welche** Befunde infrage kommen (Bedingungen) und **wohin** die Nachricht geht (ein Notify-Knoten, der Ihre Verbindung und Ihren Kanal adressiert).
 
 Das bedeutet, dass einer Warnung dieselben Filter zur Verfügung stehen wie einer Regel: Schweregrad, Geltungsbereich, Tags, Status und alles andere, was eine Regelbedingung ausdrücken kann. Mehrere unterschiedliche Warnungen an mehrere unterschiedliche Kanäle sind schlicht mehrere Regeln.
 
@@ -163,7 +163,7 @@ Ein erfolgreicher Test hebt außerdem eine automatisch deaktivierte Verbindung w
 
 ## Eine Warnung erstellen
 
-Es gibt zwei Wege dorthin. Beide führen zum selben Ergebnis: einer Regel der Rules Engine 2.0.
+Es gibt zwei Wege dorthin. Beide führen zum selben Ergebnis: einer Regel der Triage Engine.
 
 ### Die Seite „Warnungen“
 
@@ -189,7 +189,7 @@ Warnungen sind Regeln und lassen sich daher aus derselben Liste auch im Regeledi
 
 Der vollständige Weg für alles, was das Formular nicht abdeckt.
 
-1. Gehen Sie zu **Automation > Rules Engine 2.0** und erstellen Sie eine Regel.
+1. Gehen Sie zu **Automation > Triage Engine** und erstellen Sie eine Regel.
 2. Fügen Sie einen Trigger hinzu. Für Warnungen zu neu importierten Befunden verwenden Sie den Finding-Ereignis-Trigger bei **created**. Importe werden gebündelt, sodass ein Import eine Warnung erzeugt statt einer pro Befund.
 3. Fügen Sie Bedingungen dafür hinzu, was infrage kommen soll, zum Beispiel einen Mindest-Schweregrad von Hoch.
 4. Fügen Sie einen Nachrichtenknoten für den gewünschten Anbieter hinzu (**Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email** oder **Publish to an SNS Topic**) und legen Sie fest:

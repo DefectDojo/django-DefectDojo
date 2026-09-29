@@ -63,7 +63,7 @@
                                 {% if V3_FEATURE_LOCATIONS %}
                                     <td>
                                         <a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
-                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
+                                        {% include "dojo/snippets/tags.html" with tags=e.readable_tags %}
                                     </td>
                                     <td><a href="{% url 'all_findings' %}?endpoints={{ e.id }}&location_status=Active">{{ e.active_findings }}</a></td>
                                     <td><a href="{% url 'product' %}?endpoints={{ e.id }}&location_status=Active">{{ e.active_products }}</a></td>

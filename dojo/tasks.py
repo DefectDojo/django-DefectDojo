@@ -12,11 +12,10 @@ from django.db.models.functions import Coalesce
 
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import bulk_delete_findings, fix_loop_duplicates
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Finding, System_Settings
-from dojo.utils import calculate_grade
+from dojo.utils import schedule_product_grade
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -130,7 +129,7 @@ def _async_dupe_delete_impl():
         if system_settings.enable_product_grade:
             logger.info("performing batch product grading for %s products", len(affected_products))
             for product in affected_products:
-                dojo_dispatch_task(calculate_grade, product.id)
+                schedule_product_grade(product.id)
 
 
 @app.task(ignore_result=False, base=Task)

@@ -37,6 +37,15 @@ GET /api/v2/sbom/{asset_id}/?spec=spdx
 
 The response is a downloadable JSON document (`Content-Disposition: attachment`). Components carry their Package URL, group/namespace, version, artifact hashes (algorithms each specification supports), and — when the SBOM import recorded one — the license expression for this Asset's use of the component.
 
+Where a component records supplier and support facts, the export carries them too. CycloneDX
+writes the supplier as the component's `supplier` object, and the support facts as properties named
+`defectdojo:support_level` and `defectdojo:end_of_support_date`. SPDX writes the supplier as the
+package's supplier and the end of support date as `validUntilDate`.
+
+A component whose support level is unknown emits no support property at all. The document says
+nothing rather than saying unknown, because a consumer reading a property named support level
+should be reading a claim somebody made, not a placeholder.
+
 Without a `version`, the export describes the Asset's **current** inventory, and its `dependencies` section declares root → component edges only: the aggregate inventory is a set of libraries, not a graph.
 
 ### Exporting one release

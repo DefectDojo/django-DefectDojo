@@ -13,7 +13,7 @@ DefectDojoのRules Engineを使用すると、Findingやその他のオブジェ
 
 Rules Engineは[Pro UI](/get_started/about/ui_pro_vs_os/)からのみアクセスできます。
 
-**グラフエディタをお探しですか？** [Rules Engine 2.0](/automation/rules_engine_2/about/)は、自動化をビジュアルなノードグラフとして構築できるようにし、分岐、チケットやメッセージなどのアウトバウンドアクション、実行ごとのトレース、配信台帳を追加します。両エンジンは並行して稼働しており、既存のルールは[変換](/automation/rules_engine_2/converting_from_rules_engine/)することができます。
+**グラフエディタをお探しですか？** [Triage Engine](/automation/triage_engine/about/)は、自動化をビジュアルなノードグラフとして構築できるようにし、分岐、チケットやメッセージなどのアウトバウンドアクション、実行ごとのトレース、配信台帳を追加します。両エンジンは並行して稼働しており、既存のルールは[変換](/automation/triage_engine/converting_from_rules_engine/)することができます。
 
 ## Rules Engineの有効化
 

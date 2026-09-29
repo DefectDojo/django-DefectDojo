@@ -17,7 +17,6 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
 from dojo.endpoint.ui.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
@@ -35,13 +34,13 @@ from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
     add_error_message_to_response,
-    calculate_grade,
     get_page_items,
     get_period_counts,
     get_setting,
     get_system_setting,
     is_scan_file_too_large,
     redirect,
+    schedule_product_grade,
 )
 
 logger = logging.getLogger(__name__)
@@ -345,7 +344,7 @@ def endpoint_bulk_update_all(request, pid=None):
             product_calc = list(Product.objects.filter(endpoint__id__in=endpoints_to_update).distinct())
             endpoints.delete()
             for prod in product_calc:
-                dojo_dispatch_task(calculate_grade, prod.id)
+                schedule_product_grade(prod.id)
 
             if skipped_endpoint_count > 0:
                 add_error_message_to_response(f"Skipped deletion of {skipped_endpoint_count} endpoints because you are not authorized.")

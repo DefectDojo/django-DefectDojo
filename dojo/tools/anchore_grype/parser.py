@@ -7,7 +7,7 @@ from cvss.cvss3 import CVSS3
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
-from dojo.tools.locations import LocationData
+from dojo.tools.locations import LocationData, split_image_reference
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,7 @@ class AnchoreGrypeParser:
         logger.debug("file: %s", file)
         data = json.load(file)
         logger.debug("data: %s", data)
+        image_locations = self.image_locations(data.get("source") or {})
         dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
@@ -222,7 +223,52 @@ class AnchoreGrypeParser:
                         LocationData.dependency(purl=artifact_purl, file_path=file_path),
                     )
 
+        # Only touch unsaved_locations when there is an image to attach: with locations off a
+        # finding has no such attribute until a parser sets it.
+        for finding in dupes.values() if image_locations else []:
+            finding.unsaved_locations.extend(image_locations)
         return list(dupes.values())
+
+    def image_locations(self, source):
+        """
+        The scanned image as Image locations: one per repo digest when Grype recorded
+        them, else the manifest digest with the user's reference, else the reference alone.
+        """
+        if not locations_enabled() or source.get("type") != "image":
+            return []
+        target = source.get("target") or {}
+        tags = [tag for tag in (target.get("tags") or []) if tag]
+        user_input = target.get("userInput") or (tags[0] if tags else "")
+        reference = split_image_reference(user_input)
+        digests = [digest for digest in (target.get("repoDigests") or []) if digest]
+        locations = []
+        seen = set()
+        for digest_reference in digests:
+            parts = split_image_reference(digest_reference)
+            if not parts.get("repository") or parts["digest"] in seen:
+                continue
+            seen.add(parts["digest"])
+            locations.append(
+                LocationData.image(
+                    registry=parts["registry"],
+                    repository=parts["repository"],
+                    digest=parts["digest"],
+                    tag=parts["tag"] or (reference.get("tag", "") if reference.get("repository") == parts["repository"] else ""),
+                ),
+            )
+        if locations:
+            return locations
+        if not reference.get("repository"):
+            return []
+        manifest_digest = target.get("manifestDigest") or ""
+        return [
+            LocationData.image(
+                registry=reference["registry"],
+                repository=reference["repository"],
+                digest=manifest_digest if str(manifest_digest).startswith("sha256:") else "",
+                tag=reference["tag"],
+            ),
+        ]
 
     def _convert_severity(self, val):
         if val in {"Unknown", "Negligible"}:

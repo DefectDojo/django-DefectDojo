@@ -1,7 +1,7 @@
 
 from dojo.models import Test
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser, extract_vulnerability_id, search_filepath
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestAnchoreEnterpriseParser(DojoTestCase):
@@ -64,3 +64,18 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
         self.assertEqual("", file_path)
         file_path = search_filepath("test")
         self.assertEqual("", file_path)
+
+
+class TestAnchoreEnterpriseParserImageLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_policy_rows_carry_the_evaluated_image(self):
+        with (get_unit_tests_scans_path("anchore_enterprise") / "one_check.json").open(encoding="utf-8") as test_file:
+            findings = AnchoreEnterpriseParser().get_findings(test_file, Test())
+        self.assertEqual(1, len(findings))
+        images = [loc.data for loc in findings[0].unsaved_locations if loc.type == "image"]
+        self.assertEqual(
+            [
+                {"registry": "gcr.io", "repository": "jenkinsxio/builder-maven", "digest": "sha256:8fdd536f0caa79bb924b9c1b9451b49957322d1b07ab23def8c9a49448e5d462", "tag": "latest", "oci_source": "", "oci_revision": ""},
+            ],
+            images,
+        )

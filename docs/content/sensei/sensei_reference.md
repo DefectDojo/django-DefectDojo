@@ -114,3 +114,13 @@ Cloud accounts are the CSPM analog of onboarded repositories; the full flow is o
 - **A fixed finding keeps reappearing in new scans.** Also expected while the fix is outstanding, and it does not cost you extra fixes: Sensei links each reappearance back to the original and will not stage a second candidate or open a second pull request for it.
 
 > **🔎 Still in BETA:** Sensei is evolving quickly. If behavior doesn't match this guide, check the [Pro changelog](/releases/pro/changelog/) for recent changes.
+
+## Scheduling repository scans
+
+Enable the Scheduling Service and Scan Cadence Assurance flags. The Scheduling Service requires a working orchestration deployment. Configure a hosted repository with scanning enabled, a default branch, and an associated product, then open its Schedule section. The default recurring schedule runs at 00:00 UTC every Monday. Recurring runs must start on the hour, at least six hours apart, with at most four selected hours per day. Single-run schedules remain available through the shared scheduling form.
+
+The repository appears in All Schedules with type Sensei. In-repo CI repositories show an unavailable state; configure their schedules in the CI provider.
+
+Saving or changing a schedule records the acting user. Each run rechecks that the user is active and can import scans into the product, and uses that user's DefectDojo API token. It does not use the worker's shared token or fall back to a superuser. Failed identity checks produce a failed operation with an explanation and a product alert. An authorized user must save the schedule again to change its identity. Automatic retries of an existing run retain the original user and recheck permissions.
+
+Scheduled scans use the repository's default branch. When a scan is queued or running for the same repository, the operation is marked skipped and no duplicate is submitted. Successful dispatch records the Sensei scan-run ID in the scheduling operation result. The imported Test is what changes [scan cadence status](../scan_cadence_policies/) at the next evaluation.

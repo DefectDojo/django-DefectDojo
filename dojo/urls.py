@@ -6,7 +6,6 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import re_path
 from drf_spectacular.views import SpectacularSwaggerView
-from rest_framework.authtoken import views as tokenviews
 from rest_framework.routers import DefaultRouter
 
 from dojo import views
@@ -88,7 +87,7 @@ from dojo.tool_type.ui.urls import urlpatterns as tool_type_urls
 from dojo.url.api.urls import add_url_urls
 from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.user.api.urls import add_user_urls
-from dojo.user.api.views import RevokeApiTokenView, UserProfileView
+from dojo.user.api.views import ForcedResetObtainAuthToken, RevokeApiTokenView, UserProfileView
 from dojo.user.ui.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
@@ -220,7 +219,7 @@ api_v2_urls = [
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
     if settings.API_TOKENS_ENABLED and settings.API_TOKEN_AUTH_ENDPOINT_ENABLED:
         # Keyed on IP: API clients post JSON, which leaves request.POST empty.
-        token_auth_view = dojo_ratelimit(key="ip")(tokenviews.obtain_auth_token)
+        token_auth_view = dojo_ratelimit(key="ip")(ForcedResetObtainAuthToken.as_view())
         api_v2_urls += [
             re_path(
                 f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",

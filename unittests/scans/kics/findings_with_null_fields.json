@@ -1,0 +1,58 @@
+{
+    "queries": [
+        {
+            "query_name": "Test Rule With Null Expected Value",
+            "query_id": "q1-null-expected",
+            "query_url": "https://kics.io/",
+            "severity": "HIGH",
+            "platform": "Terraform",
+            "category": "Encryption",
+            "description": "Test finding with null expected_value",
+            "files": [
+                {
+                    "file_name": "main.tf",
+                    "line": 10,
+                    "issue_type": "MissingAttribute",
+                    "expected_value": null,
+                    "actual_value": "Resource is not encrypted"
+                }
+            ]
+        },
+        {
+            "query_name": "Rule A Same Line",
+            "query_id": "q2-rule-a",
+            "query_url": "https://kics.io/",
+            "severity": "MEDIUM",
+            "platform": "Terraform",
+            "category": "Best Practices",
+            "description": "First rule on line 20",
+            "files": [
+                {
+                    "file_name": "network.tf",
+                    "line": 20,
+                    "issue_type": "IncorrectValue",
+                    "expected_value": "value_a",
+                    "actual_value": "bad_a"
+                }
+            ]
+        },
+        {
+            "query_name": "Rule B Same Line",
+            "query_id": "q3-rule-b",
+            "query_url": "https://kics.io/",
+            "severity": "MEDIUM",
+            "platform": "Terraform",
+            "category": "Best Practices",
+            "description": "Second different rule on same line 20",
+            "files": [
+                {
+                    "file_name": "network.tf",
+                    "line": 20,
+                    "issue_type": "IncorrectValue",
+                    "expected_value": "value_a",
+                    "actual_value": "bad_b"
+                }
+            ]
+        }
+    ]
+}

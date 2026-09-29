@@ -6,14 +6,33 @@
 {{ end -}}
 <meta name="docsearch:audience" content="{{ .Params.audience | default " public" }}">
 <script>
-  // Stamp the stored docs edition (Open Source / Pro) on <html> before first
-  // paint. The sidebar edition menus and the .dd-version-seg control render
-  // their state from this attribute (see _custom.scss), so the page paints
-  // correct immediately — no hidden-then-revealed flicker. localStorage can
-  // throw in private-browsing/blocked-storage modes; fall back to the default.
-  try {
-    document.documentElement.dataset.ddVersion = localStorage.getItem('version') || 'opensource';
-  } catch (e) {
-    document.documentElement.dataset.ddVersion = 'opensource';
-  }
+  // Stamp the docs edition (Open Source / Pro) on <html> before first paint.
+  // The sidebar edition menus and the .dd-version-seg control render their
+  // state from this attribute (see _custom.scss), so the page paints correctly
+  // immediately, with no hidden-then-revealed flicker.
+  //
+  // A page carries its own audience ("pro" or "opensource" in front matter);
+  // general pages have none. When a page belongs to one edition, we switch the
+  // reader into that edition and persist it, so a deep link to a Pro page lands
+  // them in the Pro section (matching sidebar) rather than leaving the stored
+  // edition's nav around Pro content. General pages keep the stored preference.
+  // localStorage can throw in private-browsing/blocked-storage modes; fall back
+  // to the page's own edition, else the default.
+  (function () {
+    var pageAudience = "{{ .Params.audience | default "" }}";
+    var forced = pageAudience === 'pro' || pageAudience === 'opensource';
+    var version;
+    try {
+      if (forced) {
+        version = pageAudience;
+        localStorage.setItem('version', version);
+      } else {
+        version = localStorage.getItem('version') || 'opensource';
+      }
+    } catch (e) {
+      version = forced ? pageAudience : 'opensource';
+    }
+    document.documentElement.dataset.ddVersion = version;
+  })();
 </script>
+<meta name="theme-color" content="#003038">

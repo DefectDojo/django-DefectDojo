@@ -57,13 +57,11 @@ class KICSParser:
 
                 dupe_key = hashlib.sha256(
                     (
-                        platform
-                        + category
-                        + issue_type
-                        + file_name
-                        + expected_value
-                        + str(line_number)
-                    ).encode("utf-8"),
+                        f"{query.get('query_id', '')}|{platform or ''}"
+                        f"|{category or ''}|{issue_type or ''}"
+                        f"|{file_name or ''}|{expected_value or ''}"
+                        f"|{line_number}"
+                    ).encode(),
                 ).hexdigest()
 
                 if dupe_key in dupes:

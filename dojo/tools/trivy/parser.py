@@ -5,7 +5,7 @@ import logging
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
-from dojo.tools.locations import LocationData
+from dojo.tools.locations import LocationData, split_image_reference
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -175,7 +175,9 @@ class TrivyParser:
         cluster_name = data.get("ClusterName")
         if schema_version == 2:
             results = data.get("Results", [])
-            return self.get_result_items(test, results, artifact_name=artifact_name)
+            return self.get_result_items(
+                test, results, artifact_name=artifact_name, image_locations=self.image_locations(data),
+            )
         if cluster_name is not None:
             findings = []
             vulnerabilities = data.get("Vulnerabilities", [])
@@ -233,7 +235,44 @@ class TrivyParser:
         msg = "Schema of Trivy json report is not supported"
         raise ValueError(msg)
 
-    def get_result_items(self, test, results, service_name=None, artifact_name=""):
+    def image_locations(self, data):
+        """
+        One Image location per digest the scanned image is known by, else one tag-only
+        location, for a container_image scan. Empty for every other artifact type.
+        """
+        if not locations_enabled() or data.get("ArtifactType") != "container_image":
+            return []
+        metadata = data.get("Metadata") or {}
+        tags = [tag for tag in (metadata.get("RepoTags") or []) if tag]
+        digests = [digest for digest in (metadata.get("RepoDigests") or []) if digest]
+        tag_by_repository = {}
+        for tag_reference in tags:
+            parts = split_image_reference(tag_reference)
+            if parts.get("repository"):
+                tag_by_repository.setdefault((parts["registry"], parts["repository"]), parts["tag"])
+        locations = []
+        seen = set()
+        for reference in digests:
+            parts = split_image_reference(reference)
+            if not parts.get("repository") or parts["digest"] in seen:
+                continue
+            seen.add(parts["digest"])
+            locations.append(
+                LocationData.image(
+                    registry=parts["registry"],
+                    repository=parts["repository"],
+                    digest=parts["digest"],
+                    tag=parts["tag"] or tag_by_repository.get((parts["registry"], parts["repository"]), ""),
+                ),
+            )
+        if locations:
+            return locations
+        parts = split_image_reference(data.get("ArtifactName") or (tags[0] if tags else ""))
+        if not parts.get("repository"):
+            return []
+        return [LocationData.image(registry=parts["registry"], repository=parts["repository"], tag=parts["tag"])]
+
+    def get_result_items(self, test, results, service_name=None, artifact_name="", image_locations=None):
         items = []
         for target_data in results:
             if (
@@ -486,6 +525,10 @@ class TrivyParser:
                 finding.unsaved_tags = [tag for tag in (target_class,) if tag]
                 items.append(finding)
 
+        # Only touch unsaved_locations when there is an image to attach: with locations off a
+        # finding has no such attribute until a parser sets it.
+        for finding in items if image_locations else []:
+            finding.unsaved_locations.extend(image_locations)
         return items
 
     def get_lines_as_string_table(self, lines):

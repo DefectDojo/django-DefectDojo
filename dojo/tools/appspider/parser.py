@@ -80,7 +80,7 @@ class AppSpiderParser:
 
             if dupe_key in dupes:
                 orig_finding = dupes[dupe_key]
-                orig_finding.unsaved_request.extend(find.unsaved_req_resp)
+                orig_finding.unsaved_req_resp.extend(find.unsaved_req_resp)
                 if locations_enabled():
                     orig_finding.unsaved_locations.extend(find.unsaved_locations)
                 else:

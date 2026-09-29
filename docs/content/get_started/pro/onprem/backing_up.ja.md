@@ -2,7 +2,7 @@
 title: セルフホスト環境のバックアップ
 description: 取得すべき 4 つの要素、Compose および Kubernetes デプロイでそれぞれがどこに存在するか、そしてバックアップが実際に復元可能であることを確認する方法
 draft: false
-weight: 12
+weight: 4
 audience: pro
 ---
 
