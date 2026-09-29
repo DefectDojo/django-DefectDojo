@@ -35,3 +35,15 @@ Notes on **Track Scanned Branches**:
 - A branch that stops being scanned (merged or deleted) stops receiving updates: its engagement remains visible with its last-known findings, which you can review and close in bulk.
 - Turning the toggle off later is safe: per-branch engagements simply stop receiving imports and the default engagement resumes on the next sync.
 - Connectors reconcile state on the sync schedule. Branch tracking makes each sync complete across branches; it does not make data real-time between syncs.
+
+#### **Result States**
+
+By default, the connector imports findings in every Checkmarx result state except **Not Exploitable**. To import only findings in some states, fill in the optional **Result States** field.
+
+- Enter a comma-separated list, for example `CONFIRMED,URGENT`. Custom states also work, for example `DD_READY`.
+- Case and spaces do not matter. `dd ready`, `DD Ready` and `DD_READY` are the same state.
+- Leave the field blank to import every state.
+- The connector never imports **Not Exploitable** findings, even if you list that state.
+- The filter applies to SAST, SCA, IaC and DAST results. If your DAST results cannot carry a custom state, a list of only custom states imports no DAST findings.
+- If a finding leaves a listed state, the next sync closes it in DefectDojo.
+- If no finding has a listed state, the sync imports nothing and closes the findings that the connector imported before. Check the spelling against your Checkmarx custom states before you save.
