@@ -55,7 +55,12 @@ class CycloneDXXMLParser:
             # Collect product-level dependency locations for all components
             if locations_enabled() and component_purl:
                 test.unsaved_metadata.append(
-                    LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
+                    LocationData.dependency(
+                        purl=component_purl,
+                        artifact_hashes=component_hashes,
+                        license_expression=component_license,
+                        component_type=component.attrib.get("type", ""),
+                    ),
                 )
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(

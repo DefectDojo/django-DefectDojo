@@ -2,10 +2,18 @@ import datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.cyclonedx.parser import CycloneDXParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestCyclonedxParser(DojoTestCase):
+    @skip_unless_v3
+    def test_dependency_locations_carry_the_component_type(self):
+        with (get_unit_tests_scans_path("cyclonedx") / "log4j.json").open(encoding="utf-8") as file:
+            findings = CycloneDXParser().get_findings(file, Test())
+        location = findings[0].unsaved_locations[0]
+        self.assertEqual("dependency", location.type)
+        self.assertEqual("library", location.data["component_type"])
+
     def test_grype_report(self):
         with (get_unit_tests_scans_path("cyclonedx") / "grype_dd_1_14_1.xml").open(encoding="utf-8") as file:
             parser = CycloneDXParser()
