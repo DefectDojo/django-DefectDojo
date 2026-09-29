@@ -7,7 +7,13 @@ on:
       - 'docs/**'
     branches:
       - master
-      - bugfix
+      - dev
+
+# A master deploy and a dev deploy both publish to the gh-pages branch.
+# Queue them instead of letting them race.
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
 
 # Taken from https://github.com/marketplace/actions/hugo-setup#%EF%B8%8F-workflow-for-autoprefixer-and-postcss-cli
 # Both builds have to be one worflow as otherwise one publish will overwrite the other
