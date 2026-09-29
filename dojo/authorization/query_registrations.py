@@ -281,14 +281,14 @@ def _get_authorized_jira_projects(permission, user=None):
     if user is None or getattr(user, "is_anonymous", False):
         return JIRA_Project.objects.none()
     if _is_unrestricted(user, permission_to_action(permission)):
-        return JIRA_Project.objects.all()
+        return JIRA_Project.objects.all().order_by("id")
     authorized_products = _authorized_product_ids(user)
     authorized_product_types = _authorized_product_type_ids(user)
     return JIRA_Project.objects.filter(
         Q(product__id__in=authorized_products)
         | Q(product__prod_type__id__in=authorized_product_types)
         | Q(engagement__product__id__in=authorized_products),
-    ).distinct()
+    ).distinct().order_by("id")
 
 
 register_auth_filter("jira_link.get_authorized_jira_projects", _get_authorized_jira_projects)
@@ -299,13 +299,13 @@ def _get_authorized_jira_issues(permission):
     if user is None or getattr(user, "is_anonymous", False):
         return JIRA_Issue.objects.none()
     if _is_unrestricted(user, permission_to_action(permission)):
-        return JIRA_Issue.objects.all()
+        return JIRA_Issue.objects.all().order_by("id")
     authorized_products = _authorized_product_ids(user)
     return JIRA_Issue.objects.filter(
         Q(engagement__product__id__in=authorized_products)
         | Q(finding__test__engagement__product__id__in=authorized_products)
         | Q(finding_group__test__engagement__product__id__in=authorized_products),
-    )
+    ).order_by("id")
 
 
 register_auth_filter("jira_link.get_authorized_jira_issues", _get_authorized_jira_issues)

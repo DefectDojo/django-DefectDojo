@@ -127,7 +127,7 @@ Turn this on if you genuinely webhook to something on a private address, which a
 
 The most per-item sends a single egress node will record in one run.
 
-A node with **One Message per Item** turned on produces one delivery row and one queued task per item. Because a run has no item cap, a rule with a very broad scope and per-item sending on would otherwise mean an unbounded number of both. The ceiling is per node per run and counts items of either kind: a Finding rule's Findings and an Asset rule's Assets spend the same budget.
+A node with **One Message per Item** turned on, and **Generate a Report** with One Report per Finding or per Asset, produces one delivery row and one queued task per item. Because a run has no item cap, a rule with a very broad scope and per-item sending on would otherwise mean an unbounded number of both. The ceiling is per node per run and counts items of either kind: a Finding rule's Findings and an Asset rule's Assets spend the same budget.
 
 Past this ceiling the node records a **visible skip** saying how many items it did not send about. It does not fail the run, and it does not silently stop.
 

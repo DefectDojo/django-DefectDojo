@@ -200,3 +200,68 @@ class TestFindingGroupTestInvariant(DojoTestCase):
             self.other_finding.title, body,
             msg="the group page disclosed a finding outside the viewer's authorized products",
         )
+
+
+@versioned_fixtures
+class TestMergeFindingDeleteRequiresStaff(DojoTestCase):
+
+    """
+    The merge route offers a destructive Finding Action. It must apply the
+    same delete policy the single delete view and the bulk route apply, while
+    leaving the non-destructive action available to a plain member.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.test = Test.objects.get(id=3)
+        self.product = self.test.engagement.product
+        findings = list(Finding.objects.filter(test=self.test)[:2])
+        self.assertEqual(len(findings), 2)
+        self.anchor, self.target = findings
+
+    def _merge_as(self, user, finding_action):
+        self.product.authorized_users.add(user)
+        self.client.force_login(user)
+        url = reverse("merge_finding_product", args=(self.product.id,))
+        query = f"?finding_to_update={self.anchor.id}&finding_to_update={self.target.id}"
+        response = self.client.post(url + query, {
+            "finding_to_merge_into": self.anchor.id,
+            "findings_to_merge": [self.target.id],
+            "finding_action": finding_action,
+        })
+        self.assertLess(response.status_code, 500)
+        return response
+
+    def test_member_cannot_delete_findings_through_the_merge_route(self):
+        member = Dojo_User.objects.create(
+            username="merge_delete_member", is_active=True, is_staff=False,
+        )
+        self.product.authorized_users.add(member)
+        self.assertTrue(user_has_permission(member, self.target, "edit"))
+        self.assertFalse(user_has_permission(member, self.target, "delete"))
+        self._merge_as(member, "delete")
+        self.assertTrue(
+            Finding.objects.filter(id=self.target.id).exists(),
+            msg="non-staff member deleted a finding through the merge route",
+        )
+
+    def test_member_can_still_merge_findings_inactive(self):
+        member = Dojo_User.objects.create(
+            username="merge_inactive_member", is_active=True, is_staff=False,
+        )
+        self._merge_as(member, "inactive")
+        self.target.refresh_from_db()
+        self.assertTrue(Finding.objects.filter(id=self.target.id).exists())
+        self.assertFalse(
+            self.target.active,
+            msg="the non-destructive merge action stopped working for a plain member",
+        )
+
+    def test_staff_can_still_delete_findings_through_the_merge_route(self):
+        staff = Dojo_User.objects.create(
+            username="merge_delete_staff", is_active=True, is_staff=True,
+        )
+        self._merge_as(staff, "delete")
+        self.assertFalse(Finding.objects.filter(id=self.target.id).exists())

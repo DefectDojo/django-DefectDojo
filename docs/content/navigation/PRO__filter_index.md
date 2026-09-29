@@ -31,6 +31,15 @@ Note that **Before** and **After** are deliberately not mirror images of each ot
 
 > **Where this does not apply.** Only requests from the Pro UI carry your timezone. Anything that runs without a browser — the `/api/v2` REST API, scheduled reports, and the Rules Engine — falls back to the server's configured timezone (`DD_TIME_ZONE`, `UTC` unless your administrator changed it). If your browser timezone differs from the server's, a scheduled report and an on-screen filter using the same date can return slightly different rows. Exports started from a filtered table in the UI are not affected — they use your timezone, matching what you were looking at.
 
+## Selecting every match in a searchable list filter
+
+List filters whose options come from a search box, such as the Asset and Organization filters on the Findings, Engagements, Tests, and Endpoints tables, can hold thousands of options, so checking them one at a time is not practical. Type a search into the filter, and once the results load the filter offers **Select all N matching**, where N is the number of matching options. Selecting it filters the table to every option whose name contains the search text (case-insensitive), not just the options loaded on screen.
+
+- The selection appears as a single **All matching "text"** chip. Remove the chip, or select **Deselect all**, to go back to picking individual options.
+- While a match selection is active, the individual options are locked, because the selection covers every match rather than a list of picks.
+- The selection is stored as the search text, so a table URL or a saved table preference carries it compactly however many options match.
+- **Deselect all** also clears any options you picked one by one.
+
 ## How number filters are evaluated
 
 Numeric filters — including **Age** and **SLA** — offer a match operator alongside the value: **Equals**, **Not Equals**, **Greater Than**, **Greater Than or Equal To**, **Less Than**, **Less Than or Equal To**, **In List**, and **Not In List**. Entering a value without choosing an operator matches on **Equals**.

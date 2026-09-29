@@ -4,6 +4,7 @@ from django_filters import NumberFilter
 
 from dojo.api_helpers.filters import CommonFilters, StaticMethodFilters
 from dojo.location.api.tag_filters import create_readable_tag_filters
+from dojo.location.filter_scoping import OutwardRelationScopedFilterSet
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 
 
@@ -24,7 +25,7 @@ class AbstractedLocationFilter(StaticMethodFilters):
     )
 
 
-class LocationFilter(CommonFilters):
+class LocationFilter(OutwardRelationScopedFilterSet, CommonFilters):
 
     """Conglomerate of all Location filters."""
 

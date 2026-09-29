@@ -2,7 +2,7 @@
 title: "Docker Compose"
 description: "Self-hosting DefectDojo Pro on Docker Compose with dojo-compose-cli"
 draft: false
-weight: 10
+weight: 11
 audience: pro
 ---
 
