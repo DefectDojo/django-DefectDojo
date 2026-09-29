@@ -8,6 +8,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Exists, OuterRef
 from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -26,6 +27,7 @@ from dojo.forms import (
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.queries import (
     annotate_location_counts_and_status,
+    authorized_product_references,
     get_authorized_locations,
     locations_shared_outside,
     remove_location_references,
@@ -272,7 +274,15 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     )
     # Filter by active/vulnerable if requested
     if vulnerable:
-        locations = locations.filter(products__status=ProductLocationStatus.Active)
+        # A Location is shared, so ask only about the caller's own references.
+        locations = locations.filter(
+            Exists(
+                authorized_product_references(request.user).filter(
+                    location=OuterRef("pk"),
+                    status=ProductLocationStatus.Active,
+                ),
+            ),
+        )
     # Now apply the host/endpoint view specific filtering
     if host_view:
         # Host view: aggregate locations by host and annotate with findings/products counts and status

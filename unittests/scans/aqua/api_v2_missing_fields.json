@@ -1,0 +1,23 @@
+{
+    "result": [
+        {
+            "name": "CVE-2023-0001",
+            "description": "Test vulnerability without resource object",
+            "nvd_severity": "high",
+            "nvd_cvss3_score": 7.5,
+            "resource": null
+        },
+        {
+            "name": "CVE-2023-0002",
+            "description": "Test vulnerability with resource missing cpe",
+            "nvd_severity": "medium",
+            "nvd_cvss3_score": 5.0,
+            "resource": {
+                "format": "apk",
+                "name": "libcrypto",
+                "version": "1.0.2",
+                "path": "/usr/lib/libcrypto.so"
+            }
+        }
+    ]
+}

@@ -135,13 +135,13 @@ def locations_shared_outside(locations, products):
     return locations.filter(Exists(foreign_products) | Exists(foreign_findings))
 
 
-def readable_tag_locations(user=None):
+def fully_authorized_locations(user=None):
     """
-    Locations whose tag set is entirely the caller's to read.
+    Locations every one of whose references the caller is authorized for.
 
-    A Location row is deduplicated globally and its tag set is one field shared by every
-    product referencing it, with no record of which product contributed which tag. So the
-    set is only the caller's to read when they are authorized for every product on the row.
+    A Location row is deduplicated globally, so the fields and audit events hanging off it
+    are shared by every product referencing it, with no record of which product contributed
+    which. They are only the caller's to read when they are authorized for the whole row.
     """
     products = get_authorized_products(Permissions.Product_View, user=user)
     return Location.objects.exclude(
@@ -160,7 +160,7 @@ def readable_tag_locations(user=None):
 
 def location_tags_readable(location, user=None):
     """Whether the caller may read the shared tag set on ``location``."""
-    return readable_tag_locations(user).filter(pk=location.pk).exists()
+    return fully_authorized_locations(user).filter(pk=location.pk).exists()
 
 
 def readable_tag_match(location_field, user=None, **lookups):
@@ -171,7 +171,7 @@ def readable_tag_match(location_field, user=None, **lookups):
     which a bare ``.distinct()`` added to deduplicate a join would clear.
     """
     return Exists(
-        readable_tag_locations(user).filter(pk=OuterRef(location_field), **lookups),
+        fully_authorized_locations(user).filter(pk=OuterRef(location_field), **lookups),
     )
 
 
