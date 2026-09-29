@@ -1,0 +1,923 @@
+# DefectDojo Documentation
+
+> Official documentation for DefectDojo, a vulnerability management and application security posture management (ASPM) platform. It covers the free, open-source Community Edition and DefectDojo Pro, the commercial edition.
+
+Key facts:
+
+- DefectDojo is an OWASP Flagship Project. Community Edition is free under the BSD 3-Clause license and is self-hosted. DefectDojo Pro runs as a managed cloud service or self-hosted, including in air-gapped networks.
+- DefectDojo does not scan. It imports findings from 500+ security tools by file import, API or connector, and normalizes them into one data model of Assets, Engagements, Tests and Findings.
+- It deduplicates findings within a tool, across tools and across reimports, as described in https://docs.defectdojo.com/triage_findings/finding_deduplication/deduplication_across_tools/
+- The remaining findings are tracked through remediation with SLAs, risk acceptance, reimports that close fixed findings, and ticketing integrations such as Jira.
+- DefectDojo Sensei is the AI layer in DefectDojo Pro.
+- Company website: https://defectdojo.com (its own llms.txt is https://defectdojo.com/llms.txt). Source code: https://github.com/DefectDojo/django-DefectDojo
+
+## Get Started
+
+- [About DefectDojo](https://docs.defectdojo.com/get_started/about/about_defectdojo/)
+- [Feature comparison](https://docs.defectdojo.com/get_started/about/defectdojo_versions/)
+- [Frequently Asked Questions](https://docs.defectdojo.com/get_started/about/faq/): DefectDojo FAQ
+- [New User Checklist (Open Source)](https://docs.defectdojo.com/get_started/about/os__new_user_checklist/): Get Started With DefectDojo
+- [New User Checklist (Pro)](https://docs.defectdojo.com/get_started/about/pro__new_user_checklist/): Get Started With DefectDojo
+- [Pro UI Changes](https://docs.defectdojo.com/get_started/about/ui_pro_vs_os/): Working with different UIs in DefectDojo
+- [Online Demo](https://docs.defectdojo.com/get_started/about/demo/): There is DefectDojo demo site running the latest officially released version
+- [Using the Cloud Manager (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/using-cloud-manager/): Manage your subscription and account settings
+- [Connectivity Troubleshooting (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/connectivity-troubleshooting/): Reconnect to your DefectDojo Instance
+- [Set up an additional Cloud instance (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/additional-cloud-instance/): Add a test, dev, or other DefectDojo instance to your account
+- [Cloud Architecture (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/cloud-architecture/): How DefectDojo Cloud is deployed and isolated on Google Kubernetes Engine.
+- [Egress IP Addresses (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/egress-ip-addresses/): The outbound IP addresses DefectDojo Cloud connects from, for allowlisting in your external firewalls.
+- [Self-Hosting DefectDojo Pro](https://docs.defectdojo.com/get_started/pro/onprem/installation_options/): The self-hosted deployment models for DefectDojo Pro (Docker Compose and Kubernetes), what you need before you start, and how the rest of this section fits
+- [Hardware Sizing for Self-Hosted DefectDojo Pro](https://docs.defectdojo.com/get_started/pro/onprem/hardware_sizing/): General guidance for sizing compute, memory, and storage for a self-hosted DefectDojo Pro deployment
+- [Migrating from Open Source to Self-Hosted DefectDojo Pro](https://docs.defectdojo.com/get_started/pro/onprem/migrating_from_open_source/): Move your open source DefectDojo database and media files into a self-hosted DefectDojo Pro deployment
+- [Backing Up a Self-Hosted Deployment (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/backing_up/): The four things to capture, where each one lives for Compose and Kubernetes deployments, and how to confirm a backup can actually be restored
+- [Restoring a Self-Hosted Deployment (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/restoring/): Bring a backed-up DefectDojo Pro deployment back on the same host or a new one: configuration and keys, both databases, uploaded files, and the same pinned version, for Docker Compose and Kubernetes
+- [Upgrading DefectDojo Pro (On-Premise)](https://docs.defectdojo.com/get_started/pro/onprem/upgrading/): Supported upgrade procedure for self-hosted DefectDojo Pro, on both the Helm chart and Docker Compose
+- [Running DefectDojo Behind a Forward HTTPS Proxy (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/forward_proxy/): Configure DefectDojo Pro on-prem to reach Jira, SonarQube, and Connectors through an outbound HTTPS proxy
+- [FIPS 140-3 Mode (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/fips_mode/): Deploy DefectDojo Pro with FIPS 140-3 validated cryptography using the -fips container images, for FedRAMP SC-13 and similar requirements
+- [FIPS 140-3 Mode on Amazon ECS / Fargate (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/fips_on_ecs_fargate/): Running DefectDojo Pro FIPS images on Amazon ECS with the Fargate launch type
+- [DefectDojo Pro Installation Guide (Kubernetes / Helm)](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/installing_on_kubernetes/): Install DefectDojo Pro on Kubernetes using the Helm chart, covering infrastructure, secrets, and the install itself
+- [Installing on Kubernetes with dojo-helm-cli (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/installing_with_dojo_helm_cli/): Use dojo-helm-cli to pull the DefectDojo Pro Helm chart and images, validate a cluster, deploy, and collect diagnostics
+- [DefectDojo Pro Upgrade Guide (Kubernetes / Helm)](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/): Upgrade an existing DefectDojo Pro Helm release, including pulling the chart, running the upgrade, and rolling back
+- [Deploying DefectDojo Pro on OpenShift](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/openshift_deployment/): What is specific to OpenShift when deploying self-hosted DefectDojo Pro: security context constraints, Routes, and ReadWriteMany storage
+- [Kubernetes Migration Runbook & Troubleshooting (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/migration_runbook/): Step-by-step OSS to Pro migration on Kubernetes, a troubleshooting index keyed on the exact error text, and a post-migration verification checklist
+- [Upload Size Limits for Large Scan Files (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/upload_size_limits/): Why a large scan file fails to upload on Kubernetes, and which limit to raise in the Helm chart
+- [Installing on Docker Compose (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/installing_on_docker_compose/): Install self-hosted DefectDojo Pro on a single host using dojo-compose-cli, with PostgreSQL on a separate server
+- [DefectDojo Pro Upgrade Guide (Docker Compose)](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose/): Upgrade a self-hosted DefectDojo Pro deployment that runs on Docker Compose with dojo-compose-cli
+- [Installing DefectDojo Pro in an Air-Gapped Environment](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/air_gapped_install/): Stage the DefectDojo Pro install artifacts on a host with internet access, then move them into an air-gapped network
+- [Adding Storage for Uploaded Files (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/adding_storage_for_uploads/): Expand the storage available for uploaded files on a Docker Compose deployment without altering the deployment itself
+- [Upload Size Limits for Large Scan Files (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/upload_size_limits/): Why a large scan file fails to upload on Docker Compose, and which limit to raise
+- [Installation (Open Source)](https://docs.defectdojo.com/get_started/open_source/installation/): DefectDojo supports various installation options.
+- [System Architecture (Open Source)](https://docs.defectdojo.com/get_started/open_source/architecture/): The DefectDojo platform consists of several components that work together closely.
+- [Configuration (Open Source)](https://docs.defectdojo.com/get_started/open_source/configuration/): DefectDojo is highly configurable.
+- [Running in Production (Open Source)](https://docs.defectdojo.com/get_started/open_source/running-in-production/): For use in Production environments, performance tweaks and backups are recommended.
+- [Pro Features List](https://docs.defectdojo.com/get_started/pro/pro_features/): List of Pro Features in DefectDojo
+- [Contribute to Parsers (Open Source)](https://docs.defectdojo.com/get_started/contributing/how-to-write-a-parser/): How to contribute to parsers
+- [Parser Documentation Template (Open Source)](https://docs.defectdojo.com/get_started/contributing/parser-documentation-template/)
+- [Open-Source Branching & Releases](https://docs.defectdojo.com/get_started/contributing/branching-model/): How we create releases
+- [Amend Documentation (Open Source)](https://docs.defectdojo.com/get_started/contributing/documentation/): How to amend the documentation
+- [Common Use Cases](https://docs.defectdojo.com/get_started/common_use_cases/common_use_cases/): Use Cases and examples
+
+## Import Data
+
+- [Import Method Comparison](https://docs.defectdojo.com/import_data/import_intro/comparison/): Learn how to import data manually, through the API, or via a connector
+- [Reimport](https://docs.defectdojo.com/import_data/import_intro/reimport/): Learn how to import data manually, through the API, or via a connector
+- [Add Findings form (Pro)](https://docs.defectdojo.com/import_data/import_scan_files/pro__import_scan_ui/)
+- [Import Scan form (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/os__import_scan_ui/)
+- [Endpoint Meta Importer (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/endpoint_meta_importer/): Bulk-apply tags and custom fields to endpoints via CSV
+- [](https://docs.defectdojo.com/import_data/import_scan_files/os__create_findings_manually/)
+- [](https://docs.defectdojo.com/import_data/import_scan_files/pro__create_findings_manually/)
+- [Import from API](https://docs.defectdojo.com/import_data/import_scan_files/api_pipeline_modelling/)
+- [Universal Parser (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/universal_parser/)
+- [Universal Importer & DefectDojo-CLI (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/external_tools/): Import files to DefectDojo from the command line
+- [Infrastructure scans / Smart Upload (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/smart_upload/): Automatically route incoming Findings to the correct Asset
+- [DISA STIG Checklists (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/stig_checklists/): Import .ckl and .cklb checklists and track the open items as findings
+
+## Triage Findings
+
+- [Introduction to Findings](https://docs.defectdojo.com/triage_findings/findings_workflows/intro_to_findings/): The main workflow and vulnerability tracking system of DefectDojo
+- [Creating Findings Manually](https://docs.defectdojo.com/triage_findings/findings_workflows/create_findings_manually/): Track vulnerability information without using a scan tool
+- [Editing Findings](https://docs.defectdojo.com/triage_findings/findings_workflows/editing_findings/): Change a Finding’s Status, or add more metadata as you resolve an issue
+- [Finding Status Definitions](https://docs.defectdojo.com/triage_findings/findings_workflows/finding_status_definitions/): A quick reference to Finding status: Open, Verified, Accepted..
+- [Risk Acceptances (Open Source)](https://docs.defectdojo.com/triage_findings/findings_workflows/os__risk_acceptance/): Leveraging Risk Acceptances in DefectDojo OS
+- [Risk Acceptances (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__risk_acceptance/): Leveraging Risk Acceptances in DefectDojo Pro
+- [Attaching Files (Open Source)](https://docs.defectdojo.com/triage_findings/findings_workflows/os__add_files/): Upload screenshots, reports, or other supporting files to a Finding, Engagement, or Test in DefectDojo OS
+- [Attaching Files (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__add_files/): Upload screenshots, reports, or other supporting files to a Finding, Engagement, or Test in DefectDojo Pro
+- [Bulk Editing Findings (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__bulk_edit_findings/): Apply metadata changes, tags, notes, and review to many Findings at once in the DefectDojo Pro UI
+- [Mitigation Policies (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__mitigation_policy/): Standardize how Findings should be remediated with reusable, centrally managed Mitigation Policies
+- [Export Findings (Open Source)](https://docs.defectdojo.com/triage_findings/findings_workflows/exporting/): Export findings and engagements as CSV or Excel
+- [Peer Review & Claiming (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__peer_review/): Request a review from specific people, claim a review so others know it is being handled, and control who is eligible to be asked
+- [How DefectDojo Deduplicates Findings Across Security Tools](https://docs.defectdojo.com/triage_findings/finding_deduplication/deduplication_across_tools/): DefectDojo does not scan. It imports findings from 500+ security tools, normalizes them, and deduplicates them within a tool, across tools and across reimports, so each vulnerability reaches remediation as one active Finding.
+- [About Deduplication](https://docs.defectdojo.com/triage_findings/finding_deduplication/about_deduplication/): Deduplication fundamentals and key concepts
+- [Enabling Deduplication (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro_enabling_product_deduplication/): How to enable Deduplication at the Asset or Engagement level
+- [Similar Findings (Open Source)](https://docs.defectdojo.com/triage_findings/finding_deduplication/os__similar_findings/): Find related Findings on the View Finding page and manually link them as duplicates
+- [Similar Findings (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__similar_findings/): Find related Findings on the View Finding page and manually link them as duplicates
+- [Avoiding Excess Duplicates](https://docs.defectdojo.com/triage_findings/finding_deduplication/avoid_excess_duplicates/)
+- [Deduplication Tuning (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__deduplication_tuning/): Configure how DefectDojo identifies and manages duplicate findings
+- [Deduplication Tuning (Open Source)](https://docs.defectdojo.com/triage_findings/finding_deduplication/os__deduplication_tuning/): Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service
+- [Global Component Deduplication (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__global_component_deduplication/): Deduplicate Software Composition Analysis Findings by component name and version across all Assets
+- [Global Locations Deduplication (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__global_locations_deduplication/): Deduplicate Findings by shared location (URL or dependency) across all Assets
+- [Location Drift Matching (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__location_drift_matching/): Track findings as their locations change across reimports: line shifts, file renames, URL moves, and dependency version bumps no longer close and recreate findings
+- [False Positive History](https://docs.defectdojo.com/triage_findings/finding_deduplication/false_positive_history/): Automatically mark new Findings as false positive when a matching Finding was already triaged that way
+- [Dedupe Pools (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__dedupe_pools/): Group Assets so their Findings deduplicate against each other, per matching kind
+- [Root Cause Correlation (Pro)](https://docs.defectdojo.com/triage_findings/finding_correlation/pro__root_cause_correlation/): Group Findings that share a root cause -- the same vulnerable component, CVE, infrastructure resource, or weakness at a URL -- so one fix can be traced to every Finding it resolves
+- [CVSS Version Support](https://docs.defectdojo.com/triage_findings/finding_scoring/cvss_support/): Which CVSS versions DefectDojo stores, displays, and accepts on Findings
+- [EPSS / KEV (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/epss_kev/): How DefectDojo Pro enriches Findings with EPSS and CISA KEV data, when it syncs, and how it drives priority
+- [Reachability (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/reachability/): How DefectDojo Pro records whether a Finding's vulnerable code is actually reachable, and how that verdict adjusts priority
+- [Asset Exposure (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/asset_exposure/): How DefectDojo Pro records whether an asset is reachable from outside, whether a Finding is deployed in production, and how both adjust priority
+
+## Model Your Assets
+
+- [Organizations (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__organizations/): Understanding Organizations in DefectDojo OS
+- [Organizations (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__organizations/): Understanding Organizations in DefectDojo Pro
+- [Assets (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__assets/): Understanding Assets in DefectDojo OS
+- [Assets (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__assets/): Understanding Assets in DefectDojo Pro
+- [Engagements (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__engagements/): Understanding Engagements in DefectDojo OS
+- [Engagements (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__engagements/): Understanding Engagements in DefectDojo Pro
+- [Tests (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__tests/): Understanding Tests in DefectDojo OS
+- [Tests (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__tests/): Understanding Tests in DefectDojo Pro
+- [Findings (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__findings/): Understanding Findings in DefectDojo OS
+- [Findings (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__findings/): Understanding Findings in DefectDojo Pro
+- [Regulations (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__regulations/): Understanding Regulations in DefectDojo OS
+- [Regulations (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__regulations/): Understanding Regulations in DefectDojo Pro
+- [Environments (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__environments/): Understanding Environments in OS DefectDojo
+- [Environments (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__environments/): Understanding Environments in DefectDojo Pro
+- [PCI DSS Scope and Patch Clocks (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__pci_dss_scope/): Record PCI DSS scope per Asset, run the Requirement 6.3.3 patch clock, and export a scope inventory
+- [Calendar (Open Source)](https://docs.defectdojo.com/asset_modelling/engagements_tests/os__calendar/): How to use the Calendar in DefectDojo OS
+- [Calendar (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__calendar/): How to use the Calendar in DefectDojo Pro
+- [PCI DSS Scan and ASV Evidence (Pro)](https://docs.defectdojo.com/asset_modelling/engagements_tests/pro__pci_scan_evidence/): Record which tests are PCI scans, track the Requirement 11 quarterly and annual evidence, and export the grid an assessor asks for
+- [Questionnaires (Open Source)](https://docs.defectdojo.com/asset_modelling/os_questionnaires/os__questionnaires/): Understanding Questionnaires in OS DefectDojo
+- [Surveys (Pro)](https://docs.defectdojo.com/asset_modelling/pro_surveys/pro__surveys/): Understanding Surveys in DefectDojo Pro
+- [Tagging Objects (Open Source)](https://docs.defectdojo.com/asset_modelling/tags/os__tagging_objects/): Use Tags to create a new slice of your data model
+- [Tagging Objects (Pro)](https://docs.defectdojo.com/asset_modelling/tags/pro__tagging_objects-copy/): Use Tags to create a new slice of your data model
+- [Asset Hierarchy: Overview (Open Source)](https://docs.defectdojo.com/asset_modelling/os_hierarchy/os__asset_hierarchy/): Understand Organizations, Assets, Engagements, Tests and Findings
+- [SLA Configuration (Open Source)](https://docs.defectdojo.com/asset_modelling/os_hierarchy/os__sla_configuration/): Configure Service Level Agreements for different Assets
+- [Link Findings to source code (Open Source)](https://docs.defectdojo.com/asset_modelling/os_hierarchy/os__source-code-repositories/): Integration of repositories to navigate to the location of findings in the source code.
+- [OWASP ASVS Benchmarks (Open Source)](https://docs.defectdojo.com/asset_modelling/os_hierarchy/benchmarks/): Benchmark an Asset against the OWASP Application Security Verification Standard
+- [Asset Health Grade (Open Source)](https://docs.defectdojo.com/asset_modelling/os_hierarchy/os__asset_health_grade/): How DefectDojo calculates an Asset Health Grade
+- [Asset Hierarchy (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/asset_hierarchy/): DefectDojo Pro - Asset Hierarchy Overhaul
+- [Assign Priority, Risk and SLAs (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/): How DefectDojo ranks your Findings
+- [Threat Intelligence (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/threat_intelligence/): Exploit and threat evidence as a first-class input to Priority and Risk
+- [Framework Presets (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/framework_presets/): Apply a published scheme's patch windows and scan cadence as one preset, preview the plan first, and revert it later
+- [Asset Health Grade](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/asset_health_grade/): How DefectDojo calculates an Asset Health Grade
+- [Locations Overview (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__locations_overview/): What Locations are and why they replace Endpoints
+- [Migrating from Endpoints (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/): What happens when you migrate existing Endpoint data to Locations
+- [Working with URLs (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__working_with_urls/): Day-to-day use of URL Locations as the Endpoints replacement
+- [Working with SBOMs (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__working_with_sboms/): Manage software dependencies and SBOMs as Locations
+- [Source Code Locations (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__source_code_locations/): Code locations model where a static-analysis finding lives in source, and record its movement history as code evolves
+- [Exporting SBOMs and VEX (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__exporting_sboms_and_vex/): Export an Asset's dependency inventory as CycloneDX or SPDX, and its finding statuses as a CycloneDX VEX document
+- [Container Image Locations (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__container_image_locations/): Container Image locations model the image a finding was found in, identified by registry, repository and digest, and the assets that run it
+- [Components (Pro)](https://docs.defectdojo.com/asset_modelling/components/pro__components/): Tracking third-party libraries and software components in DefectDojo Pro
+- [Services](https://docs.defectdojo.com/asset_modelling/components/services/): Tracking Microservices
+- [Custom Fields (Pro)](https://docs.defectdojo.com/asset_modelling/pro__custom_fields/): Define typed custom fields per record type, fill them in on the forms and on each record, and turn them on as typed table columns
+- [Editable Platform, Lifecycle and Origin Lists (Pro)](https://docs.defectdojo.com/asset_modelling/pro__asset_attribute_options/): Customize the Platform, Lifecycle and Origin dropdown options on your assets
+
+## Connectors
+
+- [About Connectors](https://docs.defectdojo.com/connectors/about/): The unified home for Upstream and Downstream Connectors in the Pro UI
+- [Upstream Connectors](https://docs.defectdojo.com/connectors/upstream/about/): Seamlessly connect DefectDojo to your security tools suite
+- [Add or Edit Upstream Connectors](https://docs.defectdojo.com/connectors/upstream/add_edit/): Connect to a supported security tool
+- [Connector Field Mappings](https://docs.defectdojo.com/connectors/upstream/connector_field_mappings/): Change how a Connector's findings map onto DefectDojo fields, including what deduplication uses
+- [Location Inventory from Connectors](https://docs.defectdojo.com/connectors/upstream/location_inventory/): Let asset connectors populate Locations directly on their mapped asset
+- [Managing Operations](https://docs.defectdojo.com/connectors/upstream/manage_operations/): Check the status of your Connector's Discover & Sync Operations
+- [Managing Records](https://docs.defectdojo.com/connectors/upstream/manage_records/): Direct the flow of data from your tool into DefectDojo
+- [Downstream Connectors (Pro)](https://docs.defectdojo.com/connectors/downstream/about/)
+- [Jira (Legacy) (Pro)](https://docs.defectdojo.com/connectors/downstream/pro__jira_guide/): Work with the Jira integration
+- [Troubleshooting Jira errors (Legacy)](https://docs.defectdojo.com/connectors/downstream/troubleshooting_jira/): Fixing issues with a Jira integration
+- [Upstream Connectors Tool Reference (Pro)](https://docs.defectdojo.com/connectors/toolreference/upstream/): Our list of supported Connector tools, and how to set them up with DefectDojo
+- [Downstream Connectors Tool Reference (Pro)](https://docs.defectdojo.com/connectors/toolreference/downstream/): Detailed setup guides for Downstream Connectors
+- [AccuKnox (Pro)](https://docs.defectdojo.com/connectors/toolreference/accuknox/): How to set up the AccuKnox Upstream Connector for DefectDojo
+- [Action1 (Pro)](https://docs.defectdojo.com/connectors/toolreference/action1/): How to set up the Action1 Upstream Connector for DefectDojo
+- [Acunetix 360 (Pro)](https://docs.defectdojo.com/connectors/toolreference/acunetix_360/): How to set up the Acunetix 360 Upstream Connector for DefectDojo
+- [Akamai (Pro)](https://docs.defectdojo.com/connectors/toolreference/akamai/): How to set up the Akamai Upstream Connector for DefectDojo
+- [Akto (Pro)](https://docs.defectdojo.com/connectors/toolreference/akto/): How to set up the Akto Upstream Connector for DefectDojo
+- [Alert Logic (Pro)](https://docs.defectdojo.com/connectors/toolreference/alert_logic/): How to set up the Alert Logic Upstream Connector for DefectDojo
+- [Anchore Enterprise (Pro)](https://docs.defectdojo.com/connectors/toolreference/anchore_enterprise/): How to set up the Anchore Enterprise Upstream Connector for DefectDojo
+- [AppCheck (Pro)](https://docs.defectdojo.com/connectors/toolreference/appcheck/): How to set up the AppCheck Upstream Connector for DefectDojo
+- [Aqua Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/aqua_security/): How to set up the Aqua Security Upstream Connector for DefectDojo
+- [Aqua Supply Chain (Pro)](https://docs.defectdojo.com/connectors/toolreference/aqua_supply_chain/): How to set up the Aqua Supply Chain Upstream Connector for DefectDojo
+- [Automox (Pro)](https://docs.defectdojo.com/connectors/toolreference/automox/): How to set up the Automox Upstream Connector for DefectDojo
+- [Azure DevOps (Pro)](https://docs.defectdojo.com/connectors/toolreference/azure_devops/): How to set up the Azure DevOps Upstream Connector for DefectDojo
+- [Azure DevOps Boards (Pro)](https://docs.defectdojo.com/connectors/toolreference/azure_devops_boards/): How to set up the Azure DevOps Boards Downstream Connector for DefectDojo
+- [Backstage (Pro)](https://docs.defectdojo.com/connectors/toolreference/backstage/): How to set up the Backstage Upstream Connector for DefectDojo
+- [Beagle Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/beagle_security/): How to set up the Beagle Security Upstream Connector for DefectDojo
+- [BigID (Pro)](https://docs.defectdojo.com/connectors/toolreference/bigid/): How to set up the BigID Upstream Connector for DefectDojo
+- [Bitbucket (Pro)](https://docs.defectdojo.com/connectors/toolreference/bitbucket/): Upstream and Downstream Connector setup for Bitbucket
+- [Black Duck (Pro)](https://docs.defectdojo.com/connectors/toolreference/black_duck/): How to set up the Black Duck Upstream Connector for DefectDojo
+- [Black Duck Continuous Dynamic (Pro)](https://docs.defectdojo.com/connectors/toolreference/black_duck_continuous_dynamic/): How to set up the Black Duck Continuous Dynamic Upstream Connector for DefectDojo
+- [Bright Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/bright_security/): How to set up the Bright Security Upstream Connector for DefectDojo
+- [Bugcrowd (Pro)](https://docs.defectdojo.com/connectors/toolreference/bugcrowd/): How to set up the Bugcrowd Upstream Connector for DefectDojo
+- [Burp Suite Enterprise (Pro)](https://docs.defectdojo.com/connectors/toolreference/burp_suite_enterprise/): How to set up the Burp Suite Enterprise Upstream Connector for DefectDojo
+- [Calico Cloud (Pro)](https://docs.defectdojo.com/connectors/toolreference/calico_cloud/): How to set up the Calico Cloud Upstream Connector for DefectDojo
+- [Censys (Pro)](https://docs.defectdojo.com/connectors/toolreference/censys/): How to set up the Censys Upstream Connector for DefectDojo
+- [Checkmarx One (Pro)](https://docs.defectdojo.com/connectors/toolreference/checkmarx_one/): How to set up the Checkmarx One Upstream Connector for DefectDojo
+- [Chef Automate (Pro)](https://docs.defectdojo.com/connectors/toolreference/chef_automate/): How to set up the Chef Automate Upstream Connector for DefectDojo
+- [CI Fuzz (Pro)](https://docs.defectdojo.com/connectors/toolreference/ci_fuzz/): How to set up the CI Fuzz Upstream Connector for DefectDojo
+- [Cloudflare (Pro)](https://docs.defectdojo.com/connectors/toolreference/cloudflare/): How to set up the Cloudflare Upstream Connector for DefectDojo
+- [Cobalt.io (Pro)](https://docs.defectdojo.com/connectors/toolreference/cobalt_io/): How to set up the Cobalt.io Upstream Connector for DefectDojo
+- [Codacy (Pro)](https://docs.defectdojo.com/connectors/toolreference/codacy/): How to set up the Codacy Upstream Connector for DefectDojo
+- [Contrast (Pro)](https://docs.defectdojo.com/connectors/toolreference/contrast/): How to set up the Contrast Upstream Connector for DefectDojo
+- [Coverity (Pro)](https://docs.defectdojo.com/connectors/toolreference/coverity/): How to set up the Coverity Upstream Connector for DefectDojo
+- [CrowdStrike Falcon (Pro)](https://docs.defectdojo.com/connectors/toolreference/crowdstrike_falcon/): How to set up the CrowdStrike Falcon Upstream Connector for DefectDojo
+- [CyberArk Certificate Manager (Pro)](https://docs.defectdojo.com/connectors/toolreference/cyberark_certificate_manager/): How to set up the CyberArk Certificate Manager Upstream Connector for DefectDojo
+- [Cyberwatch (Pro)](https://docs.defectdojo.com/connectors/toolreference/cyberwatch/): How to set up the Cyberwatch Upstream Connector for DefectDojo
+- [CyCognito (Pro)](https://docs.defectdojo.com/connectors/toolreference/cycognito/): How to set up the CyCognito Upstream Connector for DefectDojo
+- [Datadog (Pro)](https://docs.defectdojo.com/connectors/toolreference/datadog/): How to set up the Datadog Upstream Connector for DefectDojo
+- [Deepfence ThreatMapper (Pro)](https://docs.defectdojo.com/connectors/toolreference/deepfence_threatmapper/): How to set up the Deepfence ThreatMapper Upstream Connector for DefectDojo
+- [DeepSource (Pro)](https://docs.defectdojo.com/connectors/toolreference/deepsource/): How to set up the DeepSource Upstream Connector for DefectDojo
+- [Dependency-Track (Pro)](https://docs.defectdojo.com/connectors/toolreference/dependency_track/): How to set up the Dependency-Track Upstream Connector for DefectDojo
+- [Detectify (Pro)](https://docs.defectdojo.com/connectors/toolreference/detectify/): How to set up the Detectify Upstream Connector for DefectDojo
+- [Docker Scout (Pro)](https://docs.defectdojo.com/connectors/toolreference/docker_scout/): How to set up the Docker Scout Upstream Connector for DefectDojo
+- [Dragos (Pro)](https://docs.defectdojo.com/connectors/toolreference/dragos/): How to set up the Dragos Upstream Connector for DefectDojo
+- [Edgescan (Pro)](https://docs.defectdojo.com/connectors/toolreference/edgescan/): How to set up the Edgescan Upstream Connector for DefectDojo
+- [Elastic Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/elastic_security/): How to set up the Elastic Security Upstream Connector for DefectDojo
+- [Endor Labs (Pro)](https://docs.defectdojo.com/connectors/toolreference/endor_labs/): How to set up the Endor Labs Upstream Connector for DefectDojo
+- [Escape (Pro)](https://docs.defectdojo.com/connectors/toolreference/escape/): How to set up the Escape Upstream Connector for DefectDojo
+- [Fairwinds Insights (Pro)](https://docs.defectdojo.com/connectors/toolreference/fairwinds_insights/): How to set up the Fairwinds Insights Upstream Connector for DefectDojo
+- [Finite State (Pro)](https://docs.defectdojo.com/connectors/toolreference/finite_state/): How to set up the Finite State Upstream Connector for DefectDojo
+- [Fleet (Pro)](https://docs.defectdojo.com/connectors/toolreference/fleet/): How to set up the Fleet Upstream Connector for DefectDojo
+- [Fortify (Pro)](https://docs.defectdojo.com/connectors/toolreference/fortify/): How to set up the Fortify Upstream Connector for DefectDojo
+- [FOSSA (Pro)](https://docs.defectdojo.com/connectors/toolreference/fossa/): How to set up the FOSSA Upstream Connector for DefectDojo
+- [Freshservice (Pro)](https://docs.defectdojo.com/connectors/toolreference/freshservice/): How to set up the Freshservice Downstream Connector for DefectDojo
+- [GitGuardian (Pro)](https://docs.defectdojo.com/connectors/toolreference/gitguardian/): How to set up the GitGuardian Upstream Connector for DefectDojo
+- [GitHub (Pro)](https://docs.defectdojo.com/connectors/toolreference/github/): Upstream and Downstream Connector setup for GitHub
+- [GitHub Advanced Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/github_advanced_security/): How to set up the GitHub Advanced Security Upstream Connector for DefectDojo
+- [GitLab (Pro)](https://docs.defectdojo.com/connectors/toolreference/gitlab/): Upstream and Downstream Connector setup for GitLab
+- [Google Artifact Analysis (Pro)](https://docs.defectdojo.com/connectors/toolreference/google_artifact_analysis/): How to set up the Google Artifact Analysis Upstream Connector for DefectDojo
+- [Google Cloud SCC (Pro)](https://docs.defectdojo.com/connectors/toolreference/google_cloud_scc/): How to set up the Google Cloud SCC Upstream Connector for DefectDojo
+- [Group-IB ASM (Pro)](https://docs.defectdojo.com/connectors/toolreference/group_ib_asm/): How to set up the Group-IB ASM Upstream Connector for DefectDojo
+- [HackerOne (Pro)](https://docs.defectdojo.com/connectors/toolreference/hackerone/): How to set up the HackerOne Upstream Connector for DefectDojo
+- [Halo Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/halo_security/): How to set up the Halo Security Upstream Connector for DefectDojo
+- [Harbor (Pro)](https://docs.defectdojo.com/connectors/toolreference/harbor/): How to set up the Harbor Upstream Connector for DefectDojo
+- [Have I Been Pwned (Pro)](https://docs.defectdojo.com/connectors/toolreference/have_i_been_pwned/): How to set up the Have I Been Pwned Upstream Connector for DefectDojo
+- [HCL AppScan (Pro)](https://docs.defectdojo.com/connectors/toolreference/hcl_appscan/): How to set up the HCL AppScan Upstream Connector for DefectDojo
+- [HiddenLayer (Pro)](https://docs.defectdojo.com/connectors/toolreference/hiddenlayer/): How to set up the HiddenLayer Upstream Connector for DefectDojo
+- [Holm Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/holm_security/): How to set up the Holm Security Upstream Connector for DefectDojo
+- [ImmuniWeb (Pro)](https://docs.defectdojo.com/connectors/toolreference/immuniweb/): How to set up the ImmuniWeb Upstream Connector for DefectDojo
+- [InsightCloudSec (Pro)](https://docs.defectdojo.com/connectors/toolreference/insightcloudsec/): How to set up the InsightCloudSec Upstream Connector for DefectDojo
+- [Intigriti (Pro)](https://docs.defectdojo.com/connectors/toolreference/intigriti/): How to set up the Intigriti Upstream Connector for DefectDojo
+- [Intruder (Pro)](https://docs.defectdojo.com/connectors/toolreference/intruder/): How to set up the Intruder Upstream Connector for DefectDojo
+- [IriusRisk (Pro)](https://docs.defectdojo.com/connectors/toolreference/iriusrisk/): How to set up the IriusRisk Upstream Connector for DefectDojo
+- [JFrog XRay (Pro)](https://docs.defectdojo.com/connectors/toolreference/jfrog_xray/): How to set up the JFrog XRay Upstream Connector for DefectDojo
+- [Jira (Pro)](https://docs.defectdojo.com/connectors/toolreference/jira/): How to set up the Jira Downstream Connector for DefectDojo
+- [JSM Assets (Pro)](https://docs.defectdojo.com/connectors/toolreference/jsm_assets/): How to set up the JSM Assets Upstream Connector for DefectDojo
+- [Klocwork (Pro)](https://docs.defectdojo.com/connectors/toolreference/klocwork/): How to set up the Klocwork Upstream Connector for DefectDojo
+- [Kubescape (Pro)](https://docs.defectdojo.com/connectors/toolreference/kubescape/): How to set up the Kubescape Upstream Connector for DefectDojo
+- [Lacework / FortiCNAPP (Pro)](https://docs.defectdojo.com/connectors/toolreference/lacework_forticnapp/): How to set up the Lacework / FortiCNAPP Upstream Connector for DefectDojo
+- [Linear (Pro)](https://docs.defectdojo.com/connectors/toolreference/linear/): How to set up the Linear Downstream Connector for DefectDojo
+- [Mend (Pro)](https://docs.defectdojo.com/connectors/toolreference/mend/): How to set up the Mend Upstream Connector for DefectDojo
+- [Microsoft Defender (Pro)](https://docs.defectdojo.com/connectors/toolreference/microsoft_defender/): How to set up the Microsoft Defender Upstream Connector for DefectDojo
+- [Microsoft Defender for Cloud (Pro)](https://docs.defectdojo.com/connectors/toolreference/microsoft_defender_for_cloud/): How to set up the Microsoft Defender for Cloud Upstream Connector for DefectDojo
+- [MobSF (Pro)](https://docs.defectdojo.com/connectors/toolreference/mobsf/): How to set up the MobSF Upstream Connector for DefectDojo
+- [NetRise (Pro)](https://docs.defectdojo.com/connectors/toolreference/netrise/): How to set up the NetRise Upstream Connector for DefectDojo
+- [NeuVector (Pro)](https://docs.defectdojo.com/connectors/toolreference/neuvector/): How to set up the NeuVector Upstream Connector for DefectDojo
+- [Nightfall AI (Pro)](https://docs.defectdojo.com/connectors/toolreference/nightfall_ai/): How to set up the Nightfall AI Upstream Connector for DefectDojo
+- [NowSecure (Pro)](https://docs.defectdojo.com/connectors/toolreference/nowsecure/): How to set up the NowSecure Upstream Connector for DefectDojo
+- [Nozomi Networks (Pro)](https://docs.defectdojo.com/connectors/toolreference/nozomi_networks/): How to set up the Nozomi Networks Upstream Connector for DefectDojo
+- [Nuclei (ProjectDiscovery Cloud) (Pro)](https://docs.defectdojo.com/connectors/toolreference/nuclei_projectdiscovery_cloud/): How to set up the Nuclei (ProjectDiscovery Cloud) Upstream Connector for DefectDojo
+- [OpenVAS / Greenbone (Pro)](https://docs.defectdojo.com/connectors/toolreference/openvas_greenbone/): How to set up the OpenVAS / Greenbone Upstream Connector for DefectDojo
+- [Opsgenie (Pro)](https://docs.defectdojo.com/connectors/toolreference/opsgenie/): How to set up the Opsgenie Downstream Connector for DefectDojo
+- [Orca Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/orca_security/): How to set up the Orca Security Upstream Connector for DefectDojo
+- [Ostorlab (Pro)](https://docs.defectdojo.com/connectors/toolreference/ostorlab/): How to set up the Ostorlab Upstream Connector for DefectDojo
+- [PagerDuty (Pro)](https://docs.defectdojo.com/connectors/toolreference/pagerduty/): How to set up the PagerDuty Downstream Connector for DefectDojo
+- [Palo Alto Cortex Cloud (Pro)](https://docs.defectdojo.com/connectors/toolreference/palo_alto_cortex_cloud/): How to set up the Palo Alto Cortex Cloud Upstream Connector for DefectDojo
+- [Palo Alto Cortex XDR (Pro)](https://docs.defectdojo.com/connectors/toolreference/palo_alto_cortex_xdr/): How to set up the Palo Alto Cortex XDR Upstream Connector for DefectDojo
+- [Palo Alto Cortex XSIAM (Pro)](https://docs.defectdojo.com/connectors/toolreference/palo_alto_cortex_xsiam/): How to set up the Palo Alto Cortex XSIAM Upstream Connector for DefectDojo
+- [Palo Alto Cortex XSOAR (Pro)](https://docs.defectdojo.com/connectors/toolreference/palo_alto_cortex_xsoar/): How to set up the Palo Alto Cortex XSOAR Upstream Connector for DefectDojo
+- [Parasoft DTP (Pro)](https://docs.defectdojo.com/connectors/toolreference/parasoft_dtp/): How to set up the Parasoft DTP Upstream Connector for DefectDojo
+- [Picus Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/picus_security/): How to set up the Picus Security Upstream Connector for DefectDojo
+- [PingCastle (Pro)](https://docs.defectdojo.com/connectors/toolreference/pingcastle/): How to set up the PingCastle Upstream Connector for DefectDojo
+- [Probely (Pro)](https://docs.defectdojo.com/connectors/toolreference/probely/): How to set up the Probely Upstream Connector for DefectDojo
+- [Promptfoo (Pro)](https://docs.defectdojo.com/connectors/toolreference/promptfoo/): How to set up the Promptfoo Upstream Connector for DefectDojo
+- [Prowler (Pro)](https://docs.defectdojo.com/connectors/toolreference/prowler/): How to set up the Prowler Upstream Connector for DefectDojo
+- [Qualys (Pro)](https://docs.defectdojo.com/connectors/toolreference/qualys/): How to set up the Qualys Upstream Connector for DefectDojo
+- [Quay (Pro)](https://docs.defectdojo.com/connectors/toolreference/quay/): How to set up the Quay Upstream Connector for DefectDojo
+- [Qwiet AI (Pro)](https://docs.defectdojo.com/connectors/toolreference/qwiet_ai/): How to set up the Qwiet AI Upstream Connector for DefectDojo
+- [Rapid7 InsightAppSec (Pro)](https://docs.defectdojo.com/connectors/toolreference/rapid7_insightappsec/): How to set up the Rapid7 InsightAppSec Upstream Connector for DefectDojo
+- [Rapid7 InsightVM (Pro)](https://docs.defectdojo.com/connectors/toolreference/rapid7_insightvm/): How to set up the Rapid7 InsightVM Upstream Connector for DefectDojo
+- [Rapid7 InsightVM - Cloud Instance (Pro)](https://docs.defectdojo.com/connectors/toolreference/rapid7_insightvm_cloud/): How to set up the Rapid7 InsightVM - Cloud Instance Upstream Connector for DefectDojo
+- [Red Hat Satellite (Pro)](https://docs.defectdojo.com/connectors/toolreference/red_hat_satellite/): How to set up the Red Hat Satellite Upstream Connector for DefectDojo
+- [runZero (Pro)](https://docs.defectdojo.com/connectors/toolreference/runzero/): How to set up the runZero Upstream Connector for DefectDojo
+- [Scantist (Pro)](https://docs.defectdojo.com/connectors/toolreference/scantist/): How to set up the Scantist Upstream Connector for DefectDojo
+- [Security Hub (Pro)](https://docs.defectdojo.com/connectors/toolreference/security_hub/): How to set up the Security Hub Upstream Connector for DefectDojo
+- [Semgrep (Pro)](https://docs.defectdojo.com/connectors/toolreference/semgrep/): How to set up the Semgrep Upstream Connector for DefectDojo
+- [ServiceDesk Plus (Pro)](https://docs.defectdojo.com/connectors/toolreference/servicedesk_plus/): How to set up the ServiceDesk Plus Downstream Connector for DefectDojo
+- [ServiceNow (Pro)](https://docs.defectdojo.com/connectors/toolreference/servicenow/): How to set up the ServiceNow Downstream Connector for DefectDojo
+- [ServiceNow CMDB (Pro)](https://docs.defectdojo.com/connectors/toolreference/servicenow_cmdb/): How to set up the ServiceNow CMDB Upstream Connector for DefectDojo
+- [ServiceNow SecOps (Pro)](https://docs.defectdojo.com/connectors/toolreference/servicenow_secops/): How to set up the ServiceNow SecOps Downstream Connector for DefectDojo
+- [Shodan (Pro)](https://docs.defectdojo.com/connectors/toolreference/shodan/): How to set up the Shodan Upstream Connector for DefectDojo
+- [Shortcut (Pro)](https://docs.defectdojo.com/connectors/toolreference/shortcut/): How to set up the Shortcut Downstream Connector for DefectDojo
+- [Snyk (Pro)](https://docs.defectdojo.com/connectors/toolreference/snyk/): How to set up the Snyk Upstream Connector for DefectDojo
+- [Socket (Pro)](https://docs.defectdojo.com/connectors/toolreference/socket/): How to set up the Socket Upstream Connector for DefectDojo
+- [SonarQube (Pro)](https://docs.defectdojo.com/connectors/toolreference/sonarqube/): How to set up the SonarQube Upstream Connector for DefectDojo
+- [Sonatype IQ (Pro)](https://docs.defectdojo.com/connectors/toolreference/sonatype_iq/): How to set up the Sonatype IQ Upstream Connector for DefectDojo
+- [SOOS (Pro)](https://docs.defectdojo.com/connectors/toolreference/soos/): How to set up the SOOS Upstream Connector for DefectDojo
+- [Sysdig Secure (Pro)](https://docs.defectdojo.com/connectors/toolreference/sysdig_secure/): How to set up the Sysdig Secure Upstream Connector for DefectDojo
+- [Tenable.io (Pro)](https://docs.defectdojo.com/connectors/toolreference/tenable_io/): How to set up the Tenable.io Upstream Connector for DefectDojo
+- [Tenable Web App Scanning (Pro)](https://docs.defectdojo.com/connectors/toolreference/tenable_web_app_scanning/): How to set up the Tenable Web App Scanning Upstream Connector for DefectDojo
+- [TruffleHog (Pro)](https://docs.defectdojo.com/connectors/toolreference/trufflehog/): How to set up the TruffleHog Upstream Connector for DefectDojo
+- [Trustwave Fusion (Pro)](https://docs.defectdojo.com/connectors/toolreference/trustwave_fusion/): How to set up the Trustwave Fusion Upstream Connector for DefectDojo
+- [Uptycs (Pro)](https://docs.defectdojo.com/connectors/toolreference/uptycs/): How to set up the Uptycs Upstream Connector for DefectDojo
+- [Vanta (Pro)](https://docs.defectdojo.com/connectors/toolreference/vanta/): How to set up the Vanta Upstream Connector for DefectDojo
+- [Veracode (Pro)](https://docs.defectdojo.com/connectors/toolreference/veracode/): How to set up the Veracode Upstream Connector for DefectDojo
+- [Vulnerability Manager Plus (Pro)](https://docs.defectdojo.com/connectors/toolreference/vulnerability_manager_plus/): How to set up the Vulnerability Manager Plus Upstream Connector for DefectDojo
+- [Wallarm (Pro)](https://docs.defectdojo.com/connectors/toolreference/wallarm/): How to set up the Wallarm Upstream Connector for DefectDojo
+- [Wazuh (Pro)](https://docs.defectdojo.com/connectors/toolreference/wazuh/): How to set up the Wazuh Upstream Connector for DefectDojo
+- [WebInspect Enterprise (Pro)](https://docs.defectdojo.com/connectors/toolreference/webinspect_enterprise/): How to set up the WebInspect Enterprise Upstream Connector for DefectDojo
+- [Wiz (Pro)](https://docs.defectdojo.com/connectors/toolreference/wiz/): How to set up the Wiz Upstream Connector for DefectDojo
+- [YesWeHack (Pro)](https://docs.defectdojo.com/connectors/toolreference/yeswehack/): How to set up the YesWeHack Upstream Connector for DefectDojo
+- [Zendesk (Pro)](https://docs.defectdojo.com/connectors/toolreference/zendesk/): How to set up the Zendesk Downstream Connector for DefectDojo
+- [Zimperium (Pro)](https://docs.defectdojo.com/connectors/toolreference/zimperium/): How to set up the Zimperium Upstream Connector for DefectDojo
+- [Zora (Pro)](https://docs.defectdojo.com/connectors/toolreference/zora/): How to set up the Zora Upstream Connector for DefectDojo
+- [Jira (Open Source)](https://docs.defectdojo.com/connectors/os_jira/os__jira_guide/): Work with the Jira integration
+- [Issue Tracking Integration](https://docs.defectdojo.com/connectors/issue_tracking/): Sync DefectDojo findings with your issue tracking system to streamline remediation and accountability.
+
+## Issue Tracking
+
+- [Messaging Connectors (Pro)](https://docs.defectdojo.com/issue_tracking/pro_integration/messaging_connectors/): Send alerts from DefectDojo to Slack, Microsoft Teams, email, or Amazon SNS.
+
+## Metrics and Reports
+
+- [DefectDojo Main Dashboard (Open Source)](https://docs.defectdojo.com/metrics_reports/dashboards/introduction_dashboard/): Working with the front page of DefectDojo
+- [My Work (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/pro__my_work/): A per-user queue of the Findings and Risk Acceptances waiting on you
+- [Customizable Dashboards (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards/): Build personalized dashboards in DefectDojo Pro from widgets arranged on a drag-and-drop grid
+- [Automating Dashboards with the API (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards-api/): Discover the widget catalog, create and update dashboard layouts, and render widget data via the DefectDojo Pro REST API
+- [Building Dashboards with an LLM (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards-llm/): Use Claude or another LLM to design, create, and set up DefectDojo Pro customizable dashboards via the API
+- [Command Center (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/command-center/): The DefectDojo Pro home page: posture score, instrumented pipeline funnel, honest coverage, TV mode, and the scheduled executive pack
+- [Posture Score (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/posture-score/): DefectDojo Pro's published, versioned security posture score: the scale, every weight, every formula, and the counterfactual semantics
+- [Pro Metrics Overview](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/): How to Leverage Metrics in DefectDojo Pro
+- [Executive Insights (Pro)](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__executive_insights/): How to Leverage Metrics in DefectDojo Pro
+- [Priority Insights (Pro)](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__priority_insights/): How to Leverage Metrics in DefectDojo Pro
+- [Program Insights (Pro)](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__program_insights/): How to Leverage Metrics in DefectDojo Pro
+- [Remediation Insights (Pro)](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__remediation_insights/): How to Leverage Metrics in DefectDojo Pro
+- [Tool Insights (Pro)](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__tool_insights/): How to Leverage Metrics in DefectDojo Pro
+- [Report Builder (Pro)](https://docs.defectdojo.com/metrics_reports/reports/report-builder/): Build custom, reusable reports in DefectDojo Pro with Themes, Blocks, and Templates
+- [Automating Reports with the API (Pro)](https://docs.defectdojo.com/metrics_reports/reports/report-builder-api/): Create themes, blocks, and templates, then run reports and download results via the DefectDojo Pro REST API
+- [Building Reports with an LLM (Pro)](https://docs.defectdojo.com/metrics_reports/reports/report-builder-llm/): Use Claude or another LLM to design, create, run, and download DefectDojo Pro reports via the API
+- [Using the Report Builder (Open Source)](https://docs.defectdojo.com/metrics_reports/reports/using-the-report-builder/): Build, run, and retrieve a custom report in open-source DefectDojo
+- [MCP Server (Pro)](https://docs.defectdojo.com/metrics_reports/ai/mcp_server_pro/): DefectDojo's MCP Server allows you to use LLMs with DefectDojo Pro
+- [Claude Code Plugin (Pro)](https://docs.defectdojo.com/metrics_reports/ai/claude_code_plugin/): Query, triage, import and report on DefectDojo Pro data from Claude Code
+
+## Sensei
+
+- [About Sensei (Pro)](https://docs.defectdojo.com/sensei/about_sensei/): What Sensei is and how DefectDojo-hosted scan-and-fix works
+- [Sensei (Open Source)](https://docs.defectdojo.com/sensei/os__sensei/): Sensei is a DefectDojo Pro feature
+- [Set Up Sensei (Pro)](https://docs.defectdojo.com/sensei/setup_sensei/): Connect GitHub, GitLab, Bitbucket, or Azure DevOps, and onboard a repository for hosted scanning
+- [AI Model Settings (Pro)](https://docs.defectdojo.com/sensei/ai_model_settings/): Choose and configure the LLM that DefectDojo-hosted Sensei scans and fixes use
+- [Fixing Findings with Sensei (Pro)](https://docs.defectdojo.com/sensei/fixing_findings/): Scan, triage auto-fix candidates, and open fix pull requests
+- [Cloud Security Posture (CSPM) (Pro)](https://docs.defectdojo.com/sensei/cloud_posture/): Onboard cloud accounts, scan them for misconfigurations, and remediate directly in the cloud or by IaC pull request
+- [AI Agent Red Teaming (Pro)](https://docs.defectdojo.com/sensei/ai_agent_redteam/): Onboard a deployed AI agent, attack it automatically to find where it breaks, and vet an agent's actions at runtime
+- [Sensei Advisor (Pro)](https://docs.defectdojo.com/sensei/sensei_advisor/): Let Sensei analyze your instance and recommend deduplication and prioritization settings you review and apply.
+- [Threat Modeling (Pro)](https://docs.defectdojo.com/sensei/threat_modeling/): Generate a threat model, attack paths and security requirements from a feature design, before the code exists
+- [Dynamic Scanning (DAST) (Pro)](https://docs.defectdojo.com/sensei/dynamic_scanning/): Point dynamic scans at a deployed environment of a repository Sensei already knows, once you have proven you own the domain.
+- [Sensei Reference (Pro)](https://docs.defectdojo.com/sensei/sensei_reference/): Statuses, row actions, quotas, and troubleshooting
+- [Tier Advisor (Pro)](https://docs.defectdojo.com/sensei/tier_advisor/): Project how many findings your instance will process in a year, and see which tier covers it.
+- [Scan cadence policies (Pro)](https://docs.defectdojo.com/sensei/scan_cadence_policies/): Measure scan frequency, investigate overdue assets, and export cadence evidence
+
+## PSIRT
+
+- [Advisory Feeds](https://docs.defectdojo.com/psirt/feeds/): Enable security advisory feeds for PSIRT: the shipped catalog, terms acceptance, and feed health.
+- [Import SBOM](https://docs.defectdojo.com/psirt/import-sbom/): Upload SBOMs for PSIRT matching without navigating to each product first.
+- [Components](https://docs.defectdojo.com/psirt/components/): The inventory PSIRT matches against, and the judgement you add to it
+- [Feed Rules](https://docs.defectdojo.com/psirt/feed-rules/): Score, tag, star and mute advisories from their own text, before anything touches your inventory
+- [Matching Rules](https://docs.defectdojo.com/psirt/matching-rules/): Write your own matching rules, and understand why some of them are refused
+- [Feed Findings](https://docs.defectdojo.com/psirt/feed-findings/): Triage incoming advisories and read the tri-state answer to 'am I affected?'
+- [Cases and SLA](https://docs.defectdojo.com/psirt/cases/): Group matches into work items, and track the triage obligation on them
+- [Advisories](https://docs.defectdojo.com/psirt/advisories/): Write, review, publish and revise your own security advisories
+- [PSIRT dashboard](https://docs.defectdojo.com/psirt/dashboard/): A shared dashboard template that answers "am I affected?" first
+- [SLA Policies](https://docs.defectdojo.com/psirt/sla-policies/): Tune how long each severity tier gets before a PSIRT clock warns and breaches
+- [PSIRT Settings](https://docs.defectdojo.com/psirt/settings/): Case-worthiness calibration, the "new" item window, and what counts as a material change
+- [CRA Article 14 Reporting (Pro)](https://docs.defectdojo.com/psirt/cra-article14-reporting/): Track the 24 hour, 72 hour and final report deadlines the Cyber Resilience Act sets for an actively exploited vulnerability or a severe incident
+
+## Federal Compliance
+
+- [Compliance Profile (Pro)](https://docs.defectdojo.com/federal_compliance/compliance_profile/): Enroll an Asset as a system and set the facts that appear on every deliverable
+- [The POA&M Ledger (Pro)](https://docs.defectdojo.com/federal_compliance/poam_ledger/): How POA&M items are created from findings, and the conventions the ledger follows
+- [ConMon Snapshots (Pro)](https://docs.defectdojo.com/federal_compliance/conmon_snapshots/): Monthly deliverables in FedRAMP Excel and OSCAL, and the optional OSCAL validation service
+- [Remediation Deadlines (Pro)](https://docs.defectdojo.com/federal_compliance/remediation_slas/): The FedRAMP Rev 5 and FedRAMP VDR SLA presets
+- [Potential Agency Impact (PAIN) Ratings (Pro)](https://docs.defectdojo.com/federal_compliance/pain_ratings/): Rate findings on FedRAMP's N-scale and drive remediation deadlines from the Class C matrix
+- [Setting Up PAIN Ratings (Pro)](https://docs.defectdojo.com/federal_compliance/pain_ratings_setup/): Turn on PAIN tiering, assign a first rating, and verify the deadlines the Class C matrix predicts
+- [CMMC Level 2 Assessments (Pro)](https://docs.defectdojo.com/federal_compliance/cmmc_assessments/): Score a self-assessment against NIST 800-171 Rev 2
+- [CRA and DORA Evidence Packs (Pro)](https://docs.defectdojo.com/federal_compliance/eu_evidence_packs/): Assess an Asset against authored EU regulatory catalogs and export its evidence
+- [Control Coverage (Pro)](https://docs.defectdojo.com/federal_compliance/control_coverage/): Which 800-53 controls your scanners test, and open weaknesses per control
+- [FDA Cyber Device Evidence Pack (Pro)](https://docs.defectdojo.com/federal_compliance/fda_cyber_device_pack/): Record a cyber device profile, track the section 524B lifecycle metrics, and export the evidence pack an assessor reviews
+- [PCI DSS Evidence Packs (Pro)](https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/): Assess a cardholder data environment against the PCI DSS vulnerability management requirements and export the workbook an assessor reviews
+
+## Automation
+
+- [DefectDojo API v2](https://docs.defectdojo.com/automation/api/api-v2-docs/): DefectDojo's API lets you automate tasks, e.g. uploading scan reports in CI/CD pipelines.
+- [DefectDojo API v3 (alpha)](https://docs.defectdojo.com/automation/api/api-v3-alpha-docs/): A new, parallel API mounted alongside v2 with refs/expand/fields, one list envelope, and a documented filter contract. Alpha — the contract may change.
+- [Languages and Lines of Code (Open Source)](https://docs.defectdojo.com/automation/api/languages/): Import language composition data for an Asset using the cloc tool
+- [Rate Limiting (Open Source)](https://docs.defectdojo.com/automation/api/rate_limiting/): Configure rate limiting on the login page to mitigate brute force attacks
+- [Notification Webhooks (Open Source)](https://docs.defectdojo.com/automation/api/notification_webhooks/): Send HTTP webhook notifications to an external server on DefectDojo events
+- [Rules Engine Automation (Pro)](https://docs.defectdojo.com/automation/rules_engine/about/): Working with Rules Engine Automation
+- [Scheduling Rules (Pro)](https://docs.defectdojo.com/automation/rules_engine/scheduling/): Automatically run Rules Engine rules on a recurring or one-time schedule
+- [About Triage Engine (Pro)](https://docs.defectdojo.com/automation/triage_engine/about/): What Triage Engine is, how to turn it on, and the concepts it is built from
+- [Building Rules (Pro)](https://docs.defectdojo.com/automation/triage_engine/building_rules/): The graph editor, triggers, scope, conditions and message templates
+- [Node Reference (Pro)](https://docs.defectdojo.com/automation/triage_engine/node_reference/): Every node Triage Engine ships with, and what each one does
+- [Runs (Pro)](https://docs.defectdojo.com/automation/triage_engine/runs/): How a rule executes, what a run records, and how cascading is bounded
+- [Deliveries (Pro)](https://docs.defectdojo.com/automation/triage_engine/deliveries/): The ledger of everything rules send outward, and how retries and replay work
+- [Converting from Rules Engine (Pro)](https://docs.defectdojo.com/automation/triage_engine/converting_from_rules_engine/): Move existing Rules Engine rules across to Triage Engine graphs
+- [Configuration (Pro)](https://docs.defectdojo.com/automation/triage_engine/configuration/): Deployment level settings for Triage Engine
+
+## Admin
+
+- [DefectDojo Admin Controls](https://docs.defectdojo.com/admin/admin_intro/intro/): Administrative controls for configuring, securing, and maintaining your DefectDojo instance.
+- [Feature Flags (Pro)](https://docs.defectdojo.com/admin/feature_flags/pro__feature_flags/): Turn optional DefectDojo Pro features on and off from the DefectDojo UI
+- [Appearance (Pro)](https://docs.defectdojo.com/admin/appearance/pro__appearance/): Choose a theme preset and customize the colors of the DefectDojo Pro UI
+- [Audit Logs (Open Source)](https://docs.defectdojo.com/admin/user_management/os__audit_logging/): Access audit logs for DefectDojo objects
+- [Audit Logs (Pro)](https://docs.defectdojo.com/admin/user_management/pro__audit_logging/): Access audit logs for DefectDojo objects
+- [Creating a new user (Open Source)](https://docs.defectdojo.com/admin/user_management/os__creating_new_users/): How to onboard a new user onto your DefectDojo instance
+- [Creating a new user (Pro)](https://docs.defectdojo.com/admin/user_management/pro__creating_new_users/): How to onboard a new user onto your DefectDojo instance
+- [Open-Source Permissions](https://docs.defectdojo.com/admin/user_management/os__authorized_users/): How access to Assets and Organizations is granted in open-source DefectDojo
+- [Permissions in DefectDojo (Pro)](https://docs.defectdojo.com/admin/user_management/about_perms_and_roles/): Summary of all DefectDojo Pro permission options, in detail
+- [Re-enabling login for SSO users (Open Source)](https://docs.defectdojo.com/admin/user_management/os__sso_user_local_login_fallback/): Give SSO-provisioned users a local password after moving to Open Source, where SSO is a Pro-only feature
+- [Resetting User Credentials in Bulk (Pro)](https://docs.defectdojo.com/admin/user_management/pro__resetting_user_credentials/): Rotate API tokens and force password resets for many users at once from the Users list
+- [Set a User's permissions (Pro)](https://docs.defectdojo.com/admin/user_management/set_user_permissions/): How to grant Roles & Permissions to a user, as well as superuser status
+- [Multi-Factor Authentication (MFA) (Pro)](https://docs.defectdojo.com/admin/user_management/pro__mfa/): Set up MFA on your own account, require it across your instance, and recover a user who has lost their device
+- [Set Permissions in Pro](https://docs.defectdojo.com/admin/user_management/pro_permissions_overhaul/): Overhaul, pro feature
+- [Share permissions: User Groups (Pro)](https://docs.defectdojo.com/admin/user_management/create_user_group/): Share and maintain permissions for many users in DefectDojo Pro
+- [Action permission charts (Pro)](https://docs.defectdojo.com/admin/user_management/user_permission_chart/): All DefectDojo Pro user permissions in detail
+- [Audit Logging](https://docs.defectdojo.com/admin/user_management/pro__audit_log_index/): Every create, update, and delete action DefectDojo records in its audit log, plus what is captured and how to configure retention.
+- [Custom RBAC Roles (Pro)](https://docs.defectdojo.com/admin/user_management/pro__custom_rbac_roles/): Build your own roles by choosing individual permissions, using the five built-in roles as clonable starting points
+- [Diagnostics (Pro)](https://docs.defectdojo.com/admin/diagnostics/pro__diagnostics/): Read the cross-subsystem ledger of integration attempts: what is recorded, how to filter it, how credentials are kept out, and who can see the technical detail
+- [About Notifications & 🔔 Alerts](https://docs.defectdojo.com/admin/notifications/about_notifications/): Learn about notifications, in-app alerts
+- [Set Personal Notifications](https://docs.defectdojo.com/admin/notifications/configure_personal_notifs/): Configure notifications for a personal account
+- [Set System-Wide Notifications](https://docs.defectdojo.com/admin/notifications/configure_system_notifs/): How to configure Personal & System notifications
+- [Set up Email, Slack or Teams notifications](https://docs.defectdojo.com/admin/notifications/email_slack_teams/): Set up Microsoft Teams to receive notifications
+- [Authorization Connectors (Pro)](https://docs.defectdojo.com/admin/sso/pro__authorization_connectors/): See every identity provider on one page: which are configured, which are enabled, and what protocol each one speaks
+- [Login Settings (Pro)](https://docs.defectdojo.com/admin/sso/pro__login_settings/): Control the DefectDojo login page: disable password login, auto-redirect to SSO, session length, and JIT user creation
+- [SAML Configuration (Pro)](https://docs.defectdojo.com/admin/sso/pro__saml/): Configure SAML in DefectDojo Pro
+- [OIDC (Pro)](https://docs.defectdojo.com/admin/sso/pro__oidc/): Configure OpenID Connect (OIDC) SSO in DefectDojo Pro
+- [Auth0 (Pro)](https://docs.defectdojo.com/admin/sso/pro__auth0/): Configure Auth0 SSO in DefectDojo Pro
+- [Azure Active Directory (Pro)](https://docs.defectdojo.com/admin/sso/pro__azure_ad/): Configure Azure AD / Microsoft Entra ID SSO and group mapping in DefectDojo Pro
+- [GitHub Enterprise (Pro)](https://docs.defectdojo.com/admin/sso/pro__github_enterprise/): Configure GitHub Enterprise SSO in DefectDojo Pro
+- [GitLab (Pro)](https://docs.defectdojo.com/admin/sso/pro__gitlab/): Configure GitLab SSO in DefectDojo Pro
+- [Google Auth (Pro)](https://docs.defectdojo.com/admin/sso/pro__google/): Configure Google OAuth in DefectDojo Pro
+- [KeyCloak (Pro)](https://docs.defectdojo.com/admin/sso/pro__keycloak/): Configure KeyCloak SSO in DefectDojo Pro
+- [Okta (Pro)](https://docs.defectdojo.com/admin/sso/pro__okta/): Configure Okta SSO in DefectDojo Pro
+- [Remote User (Header) Authentication (Pro)](https://docs.defectdojo.com/admin/sso/pro__remote_user/): Authenticate users from a trusted reverse proxy via request headers in DefectDojo Pro
+- [LDAP Authentication (Pro)](https://docs.defectdojo.com/admin/sso/pro__ldap/): Configure LDAP authentication in DefectDojo Pro
+- [SCIM Provisioning (Pro)](https://docs.defectdojo.com/admin/sso/pro__scim/): Provision and deprovision DefectDojo Pro users from your identity provider
+
+## Navigating DefectDojo
+
+- [Global Search (Pro)](https://docs.defectdojo.com/navigation/pro__global_search/): Search across Findings, Assets, related objects, and every menu destination from one dialog in DefectDojo Pro
+- [Filter Index](https://docs.defectdojo.com/navigation/pro__filter_index/): Reference for all filters in DefectDojo
+- [The Sidebar Menu (Pro)](https://docs.defectdojo.com/navigation/pro__sidebar/): How the DefectDojo Pro sidebar is organized, how to search it, pinning pages, collapsing it to an icon rail, the All Settings directory page, and how to switch between the current and previous layouts
+- [Menu Badges (Pro)](https://docs.defectdojo.com/navigation/pro__menu_badges/): What the SOON, NEW, BETA, LOCKED, LEGACY and DEPRECATED tags in the DefectDojo Pro sidebar mean, and what each one asks you to do
+- [Customizing Tables](https://docs.defectdojo.com/navigation/pro__table_customization/): Sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables
+- [Customizing Page Layouts (Pro)](https://docs.defectdojo.com/navigation/pro__page_layouts/): Arrange the widgets on DefectDojo Pro view pages, then save, share, or set a layout as the default
+- [Configuring Forms (Pro)](https://docs.defectdojo.com/navigation/pro__form_configuration/): Choose which fields the DefectDojo Pro create and edit forms show, which are required, and the order they appear in
+- [The Markdown Editor (Pro)](https://docs.defectdojo.com/navigation/pro__markdown_editor/): Format text, and paste or drag images directly into any DefectDojo Pro description, note, or other markdown field
+- [Language and Localization](https://docs.defectdojo.com/navigation/language_and_localization/): Choose the language DefectDojo's interface is shown in, and understand which languages are offered and what stays in English
+
+## Help
+
+- [Glossary](https://docs.defectdojo.com/help/glossary/)
+- [Contact Sales](https://docs.defectdojo.com/help/contact_sales/): How to start a DefectDojo Cloud subscription: pay as you go, or an annual plan through our sales team
+- [Contact Support](https://docs.defectdojo.com/help/contact_support/): For Pro users: support@defectdojo.com + other options
+
+## Supported Tools
+
+- [Universal Parser (Pro)](https://docs.defectdojo.com/supported_tools/parsers/universal_parser/)
+- [Using Generic Findings Import](https://docs.defectdojo.com/supported_tools/parsers/generic_findings_import/)
+- [2ms (too many secrets)](https://docs.defectdojo.com/supported_tools/parsers/file/two_ms/)
+- [42Crunch](https://docs.defectdojo.com/supported_tools/parsers/file/fortytwocrunch/)
+- [AccuKnox](https://docs.defectdojo.com/supported_tools/parsers/file/accuknox/)
+- [Action1](https://docs.defectdojo.com/supported_tools/parsers/file/action1/)
+- [Acunetix Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/acunetix/)
+- [AIDE](https://docs.defectdojo.com/supported_tools/parsers/file/aide/)
+- [Akto](https://docs.defectdojo.com/supported_tools/parsers/file/akto/)
+- [Alert Logic](https://docs.defectdojo.com/supported_tools/parsers/file/alertlogic/)
+- [Anchore Enterprise Policy Check](https://docs.defectdojo.com/supported_tools/parsers/file/anchore_enterprise/)
+- [Anchore Enterprise Vulnerability](https://docs.defectdojo.com/supported_tools/parsers/file/anchore_engine/)
+- [Anchore Grype](https://docs.defectdojo.com/supported_tools/parsers/file/anchore_grype/)
+- [AnchoreCTL Policies Report](https://docs.defectdojo.com/supported_tools/parsers/file/anchorectl_policies/)
+- [AnchoreCTL Vuln Report](https://docs.defectdojo.com/supported_tools/parsers/file/anchorectl_vulns/)
+- [Ansible Lint](https://docs.defectdojo.com/supported_tools/parsers/file/ansible_lint/)
+- [APKLeaks](https://docs.defectdojo.com/supported_tools/parsers/file/apkleaks/)
+- [AppCheck Web Application Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/appcheck_web_application_scanner/)
+- [AppSpider (Rapid7)](https://docs.defectdojo.com/supported_tools/parsers/file/appspider/)
+- [Aqua](https://docs.defectdojo.com/supported_tools/parsers/file/aqua/)
+- [Arachni Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/arachni/)
+- [AuditJS (OSSIndex)](https://docs.defectdojo.com/supported_tools/parsers/file/auditjs/)
+- [Automox](https://docs.defectdojo.com/supported_tools/parsers/file/automox/)
+- [AWS Inspector2 Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/aws_inspector2/)
+- [AWS Prowler Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/aws_prowler/)
+- [AWS Prowler V3](https://docs.defectdojo.com/supported_tools/parsers/file/aws_prowler_v3plus/)
+- [AWS Security Finding Format (ASFF)](https://docs.defectdojo.com/supported_tools/parsers/file/asff/)
+- [AWS Security Hub](https://docs.defectdojo.com/supported_tools/parsers/file/awssecurityhub/)
+- [Azure Security Center Recommendations Scan](https://docs.defectdojo.com/supported_tools/parsers/file/azure_security_center_recommendations/)
+- [Bandit](https://docs.defectdojo.com/supported_tools/parsers/file/bandit/)
+- [Beagle Security](https://docs.defectdojo.com/supported_tools/parsers/file/beagle/)
+- [Bearer CLI](https://docs.defectdojo.com/supported_tools/parsers/file/bearer_cli/)
+- [BigID](https://docs.defectdojo.com/supported_tools/parsers/file/bigid/)
+- [Binwalk](https://docs.defectdojo.com/supported_tools/parsers/file/binwalk/)
+- [Blackduck Binary Analysis](https://docs.defectdojo.com/supported_tools/parsers/file/blackduck_binary_analysis/)
+- [Blackduck Component Risk](https://docs.defectdojo.com/supported_tools/parsers/file/blackduck_component_risk/)
+- [Blackduck Hub](https://docs.defectdojo.com/supported_tools/parsers/file/blackduck/)
+- [bomber](https://docs.defectdojo.com/supported_tools/parsers/file/bomber/)
+- [Brakeman Scan](https://docs.defectdojo.com/supported_tools/parsers/file/brakeman/)
+- [Bright Security](https://docs.defectdojo.com/supported_tools/parsers/file/bright/)
+- [Bugcrowd](https://docs.defectdojo.com/supported_tools/parsers/file/bugcrowd/)
+- [Bundler-Audit](https://docs.defectdojo.com/supported_tools/parsers/file/bundler_audit/)
+- [Burp Dastardly](https://docs.defectdojo.com/supported_tools/parsers/file/burp_dastardly/)
+- [Burp REST API](https://docs.defectdojo.com/supported_tools/parsers/file/burp_api/)
+- [Burp Suite DAST GraphQL](https://docs.defectdojo.com/supported_tools/parsers/file/burp_graphql/)
+- [Burp Suite DAST Scan (formerly known as Burp Enterprise)](https://docs.defectdojo.com/supported_tools/parsers/file/burp_suite_dast/)
+- [Burp XML](https://docs.defectdojo.com/supported_tools/parsers/file/burp/)
+- [Calico Cloud Image Assurance](https://docs.defectdojo.com/supported_tools/parsers/file/calicocloud/)
+- [capa](https://docs.defectdojo.com/supported_tools/parsers/file/capa/)
+- [CargoAudit Scan](https://docs.defectdojo.com/supported_tools/parsers/file/cargo_audit/)
+- [cfn-lint](https://docs.defectdojo.com/supported_tools/parsers/file/cfn_lint/)
+- [cfn-nag](https://docs.defectdojo.com/supported_tools/parsers/file/cfn_nag/)
+- [CFRipper](https://docs.defectdojo.com/supported_tools/parsers/file/cfripper/)
+- [Checkmarx](https://docs.defectdojo.com/supported_tools/parsers/file/checkmarx/)
+- [Checkmarx CxFlow SAST](https://docs.defectdojo.com/supported_tools/parsers/file/checkmarx_cxflow_sast/)
+- [Checkmarx One Scan](https://docs.defectdojo.com/supported_tools/parsers/file/checkmarx_one/)
+- [Checkov Report](https://docs.defectdojo.com/supported_tools/parsers/file/checkov/)
+- [Chef Inspect Log](https://docs.defectdojo.com/supported_tools/parsers/file/chefinspect/)
+- [chkrootkit](https://docs.defectdojo.com/supported_tools/parsers/file/chkrootkit/)
+- [CISA ScubaGear](https://docs.defectdojo.com/supported_tools/parsers/file/scubagear/)
+- [CISA ScubaGoggles](https://docs.defectdojo.com/supported_tools/parsers/file/scubagoggles/)
+- [Clair Scan](https://docs.defectdojo.com/supported_tools/parsers/file/clair/)
+- [ClamAV](https://docs.defectdojo.com/supported_tools/parsers/file/clamav/)
+- [Cloudflare Insights](https://docs.defectdojo.com/supported_tools/parsers/file/cloudflare_insights/)
+- [CloudFormation Guard](https://docs.defectdojo.com/supported_tools/parsers/file/cloudformation_guard/)
+- [Cloudsplaining](https://docs.defectdojo.com/supported_tools/parsers/file/cloudsplaining/)
+- [Cloudsploit (AquaSecurity)](https://docs.defectdojo.com/supported_tools/parsers/file/cloudsploit/)
+- [Cobalt.io Scan](https://docs.defectdojo.com/supported_tools/parsers/file/cobalt/)
+- [Codacy](https://docs.defectdojo.com/supported_tools/parsers/file/codacy/)
+- [Codechecker Report native](https://docs.defectdojo.com/supported_tools/parsers/file/codechecker/)
+- [CodeQL](https://docs.defectdojo.com/supported_tools/parsers/file/codeql/)
+- [Composer Audit](https://docs.defectdojo.com/supported_tools/parsers/file/composer_audit/)
+- [Conftest](https://docs.defectdojo.com/supported_tools/parsers/file/conftest/)
+- [Contrast Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/contrast/)
+- [Coverity API](https://docs.defectdojo.com/supported_tools/parsers/file/coverity_api/)
+- [Coverity Scan JSON Report](https://docs.defectdojo.com/supported_tools/parsers/file/coverity_scan/)
+- [Cppcheck](https://docs.defectdojo.com/supported_tools/parsers/file/cppcheck/)
+- [Crashtest Security](https://docs.defectdojo.com/supported_tools/parsers/file/crashtest_security/)
+- [CredScan Report](https://docs.defectdojo.com/supported_tools/parsers/file/cred_scan/)
+- [CrowdStrike Falcon Spotlight](https://docs.defectdojo.com/supported_tools/parsers/file/crowdstrike_spotlight/)
+- [Crunch42 Scan](https://docs.defectdojo.com/supported_tools/parsers/file/crunch42/)
+- [CSAF](https://docs.defectdojo.com/supported_tools/parsers/file/csaf/)
+- [cwe_checker](https://docs.defectdojo.com/supported_tools/parsers/file/cwe_checker/)
+- [CyberArk Certificate Manager (Venafi)](https://docs.defectdojo.com/supported_tools/parsers/file/venafi/)
+- [Cyberwatch (Galeax)](https://docs.defectdojo.com/supported_tools/parsers/file/cyberwatch_galeax/)
+- [CycloneDX](https://docs.defectdojo.com/supported_tools/parsers/file/cyclonedx/)
+- [Cycognito](https://docs.defectdojo.com/supported_tools/parsers/file/cycognito/)
+- [Dalfox](https://docs.defectdojo.com/supported_tools/parsers/file/dalfox/)
+- [Datadog Cloud Security](https://docs.defectdojo.com/supported_tools/parsers/file/datadog/)
+- [DawnScanner](https://docs.defectdojo.com/supported_tools/parsers/file/dawnscanner/)
+- [debsecan](https://docs.defectdojo.com/supported_tools/parsers/file/debsecan/)
+- [Deepfence Threatmapper](https://docs.defectdojo.com/supported_tools/parsers/file/deepfence_threatmapper/)
+- [DeepSource](https://docs.defectdojo.com/supported_tools/parsers/file/deepsource/)
+- [Dependency Check](https://docs.defectdojo.com/supported_tools/parsers/file/dependency_check/)
+- [Dependency Track](https://docs.defectdojo.com/supported_tools/parsers/file/dependency_track/)
+- [Detect-secrets](https://docs.defectdojo.com/supported_tools/parsers/file/detect_secrets/)
+- [Detectify](https://docs.defectdojo.com/supported_tools/parsers/file/detectify/)
+- [DevSkim](https://docs.defectdojo.com/supported_tools/parsers/file/devskim/)
+- [Dirsearch](https://docs.defectdojo.com/supported_tools/parsers/file/dirsearch/)
+- [docker-bench-security Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/dockerbench/)
+- [dockerfile_lint](https://docs.defectdojo.com/supported_tools/parsers/file/dockerfile_lint/)
+- [Dockle Report](https://docs.defectdojo.com/supported_tools/parsers/file/dockle/)
+- [Dodgy](https://docs.defectdojo.com/supported_tools/parsers/file/dodgy/)
+- [Dotnet Vulnerable Packages](https://docs.defectdojo.com/supported_tools/parsers/file/dotnet_vulnerable/)
+- [Dragos](https://docs.defectdojo.com/supported_tools/parsers/file/dragos/)
+- [DrHeader](https://docs.defectdojo.com/supported_tools/parsers/file/drheader/)
+- [DSOP Scan](https://docs.defectdojo.com/supported_tools/parsers/file/dsop/)
+- [Edgescan](https://docs.defectdojo.com/supported_tools/parsers/file/edgescan/)
+- [Elastic Security CNVM](https://docs.defectdojo.com/supported_tools/parsers/file/elastic_security_cnvm/)
+- [Elastic Security Detections](https://docs.defectdojo.com/supported_tools/parsers/file/elastic_security_detections/)
+- [Elastic Security Posture](https://docs.defectdojo.com/supported_tools/parsers/file/elastic_security_posture/)
+- [Endor Labs](https://docs.defectdojo.com/supported_tools/parsers/file/endorlabs/)
+- [Escape](https://docs.defectdojo.com/supported_tools/parsers/file/escape/)
+- [ESLint](https://docs.defectdojo.com/supported_tools/parsers/file/eslint/)
+- [Fairwinds Insights](https://docs.defectdojo.com/supported_tools/parsers/file/fairwinds/)
+- [Falco](https://docs.defectdojo.com/supported_tools/parsers/file/falco/)
+- [ffuf](https://docs.defectdojo.com/supported_tools/parsers/file/ffuf/)
+- [Fickling](https://docs.defectdojo.com/supported_tools/parsers/file/fickling/)
+- [Finite State](https://docs.defectdojo.com/supported_tools/parsers/file/finitestate/)
+- [firmwalker](https://docs.defectdojo.com/supported_tools/parsers/file/firmwalker/)
+- [Flawfinder](https://docs.defectdojo.com/supported_tools/parsers/file/flawfinder/)
+- [Fleet Policies](https://docs.defectdojo.com/supported_tools/parsers/file/fleet_policies/)
+- [Fleet Vulnerabilities](https://docs.defectdojo.com/supported_tools/parsers/file/fleet_vulnerabilities/)
+- [Fortify](https://docs.defectdojo.com/supported_tools/parsers/file/fortify/)
+- [FOSSA](https://docs.defectdojo.com/supported_tools/parsers/file/fossa/)
+- [Garak (LLM vulnerability scanner)](https://docs.defectdojo.com/supported_tools/parsers/file/garak/)
+- [Generic Findings Import](https://docs.defectdojo.com/supported_tools/parsers/file/generic/)
+- [Ggshield](https://docs.defectdojo.com/supported_tools/parsers/file/ggshield/)
+- [GitGuardian](https://docs.defectdojo.com/supported_tools/parsers/file/gitguardian/)
+- [Github SAST Scan](https://docs.defectdojo.com/supported_tools/parsers/file/github_sast/)
+- [Github Secrets Detection Report](https://docs.defectdojo.com/supported_tools/parsers/file/github_secrets_detection_report/)
+- [Github Vulnerability Scan](https://docs.defectdojo.com/supported_tools/parsers/file/github_vulnerability/)
+- [GitLab API Fuzzing Report Scan](https://docs.defectdojo.com/supported_tools/parsers/file/gitlab_api_fuzzing/)
+- [GitLab Container Scan](https://docs.defectdojo.com/supported_tools/parsers/file/gitlab_container_scan/)
+- [GitLab DAST Report](https://docs.defectdojo.com/supported_tools/parsers/file/gitlab_dast/)
+- [GitLab Dependency Scanning Report](https://docs.defectdojo.com/supported_tools/parsers/file/gitlab_dep_scan/)
+- [GitLab SAST Report](https://docs.defectdojo.com/supported_tools/parsers/file/gitlab_sast/)
+- [GitLab Secret Detection Report](https://docs.defectdojo.com/supported_tools/parsers/file/gitlab_secret_detection_report/)
+- [Gitleaks](https://docs.defectdojo.com/supported_tools/parsers/file/gitleaks/)
+- [Gixy](https://docs.defectdojo.com/supported_tools/parsers/file/gixy/)
+- [Gobuster](https://docs.defectdojo.com/supported_tools/parsers/file/gobuster/)
+- [Google Cloud Artifact Vulnerability Scan](https://docs.defectdojo.com/supported_tools/parsers/file/gcloud_artifact_scan/)
+- [Google Cloud Security Command Center](https://docs.defectdojo.com/supported_tools/parsers/file/googlescc/)
+- [Gosec Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/gosec/)
+- [Govulncheck](https://docs.defectdojo.com/supported_tools/parsers/file/govulncheck/)
+- [Grant](https://docs.defectdojo.com/supported_tools/parsers/file/grant/)
+- [Group-IB ASM](https://docs.defectdojo.com/supported_tools/parsers/file/groupib/)
+- [GuardDog](https://docs.defectdojo.com/supported_tools/parsers/file/guarddog/)
+- [HackerOne](https://docs.defectdojo.com/supported_tools/parsers/file/hackerone/)
+- [HackerOne Cases](https://docs.defectdojo.com/supported_tools/parsers/file/h1/)
+- [Hadolint](https://docs.defectdojo.com/supported_tools/parsers/file/hadolint/)
+- [Halo Security](https://docs.defectdojo.com/supported_tools/parsers/file/halosecurity/)
+- [Harbor Vulnerability](https://docs.defectdojo.com/supported_tools/parsers/file/harbor_vulnerability/)
+- [HCL Appscan](https://docs.defectdojo.com/supported_tools/parsers/file/hcl_appscan/)
+- [HCL AppScan on Cloud SAST](https://docs.defectdojo.com/supported_tools/parsers/file/hcl_asoc_sast/)
+- [HiddenLayer](https://docs.defectdojo.com/supported_tools/parsers/file/hiddenlayer/)
+- [Holm Security](https://docs.defectdojo.com/supported_tools/parsers/file/holm_security/)
+- [Horusec](https://docs.defectdojo.com/supported_tools/parsers/file/horusec/)
+- [httpx](https://docs.defectdojo.com/supported_tools/parsers/file/httpx/)
+- [Humble Report](https://docs.defectdojo.com/supported_tools/parsers/file/humble/)
+- [HuskyCI Report](https://docs.defectdojo.com/supported_tools/parsers/file/huskyci/)
+- [Hydra](https://docs.defectdojo.com/supported_tools/parsers/file/hydra/)
+- [IBM AppScan DAST](https://docs.defectdojo.com/supported_tools/parsers/file/ibm_app/)
+- [Immuniweb Scan](https://docs.defectdojo.com/supported_tools/parsers/file/immuniweb/)
+- [Infer](https://docs.defectdojo.com/supported_tools/parsers/file/infer/)
+- [Intigriti](https://docs.defectdojo.com/supported_tools/parsers/file/intigriti/)
+- [Intruder](https://docs.defectdojo.com/supported_tools/parsers/file/intruder/)
+- [IntSights Report](https://docs.defectdojo.com/supported_tools/parsers/file/intsights/)
+- [Invicti](https://docs.defectdojo.com/supported_tools/parsers/file/invicti/)
+- [IriusRisk Threats Scan](https://docs.defectdojo.com/supported_tools/parsers/file/iriusrisk/)
+- [JFrog Xray API Summary Artifact Scan](https://docs.defectdojo.com/supported_tools/parsers/file/jfrog_xray_api_summary_artifact/)
+- [JFrog Xray On Demand Binary Scan](https://docs.defectdojo.com/supported_tools/parsers/file/jfrog_xray_on_demand_binary_scan/)
+- [JFrog XRay Unified](https://docs.defectdojo.com/supported_tools/parsers/file/jfrog_xray_unified/)
+- [JFrogXRay](https://docs.defectdojo.com/supported_tools/parsers/file/jfrogxray/)
+- [KICS Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/kics/)
+- [Kingfisher](https://docs.defectdojo.com/supported_tools/parsers/file/kingfisher/)
+- [Kiuwan Scanner (SAST)](https://docs.defectdojo.com/supported_tools/parsers/file/kiuwan/)
+- [Kiuwan Scanner (SCA i.e. "Insights")](https://docs.defectdojo.com/supported_tools/parsers/file/kiuwan_sca/)
+- [Klocwork](https://docs.defectdojo.com/supported_tools/parsers/file/klocwork/)
+- [KrakenD Audit Scan](https://docs.defectdojo.com/supported_tools/parsers/file/krakend_audit/)
+- [kube-bench Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/kubebench/)
+- [kube-no-trouble (kubent)](https://docs.defectdojo.com/supported_tools/parsers/file/kubent/)
+- [kube-score](https://docs.defectdojo.com/supported_tools/parsers/file/kube_score/)
+- [Kubeaudit Scan](https://docs.defectdojo.com/supported_tools/parsers/file/kubeaudit/)
+- [KubeEye](https://docs.defectdojo.com/supported_tools/parsers/file/kubeeye/)
+- [kubeHunter Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/kubehunter/)
+- [KubeLinter](https://docs.defectdojo.com/supported_tools/parsers/file/kubelinter/)
+- [Kubescape Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/kubescape/)
+- [kubesec](https://docs.defectdojo.com/supported_tools/parsers/file/kubesec/)
+- [Kyverno](https://docs.defectdojo.com/supported_tools/parsers/file/kyverno/)
+- [Lacework (FortiCNAPP)](https://docs.defectdojo.com/supported_tools/parsers/file/lacework/)
+- [Legitify](https://docs.defectdojo.com/supported_tools/parsers/file/legitify/)
+- [licensecheck](https://docs.defectdojo.com/supported_tools/parsers/file/licensecheck/)
+- [Lynis](https://docs.defectdojo.com/supported_tools/parsers/file/lynis/)
+- [ManageEngine Vulnerability Manager Plus](https://docs.defectdojo.com/supported_tools/parsers/file/vmanplus/)
+- [Masscan](https://docs.defectdojo.com/supported_tools/parsers/file/masscan/)
+- [Mayhem SARIF Reports](https://docs.defectdojo.com/supported_tools/parsers/file/mayhem/)
+- [Mend Scan](https://docs.defectdojo.com/supported_tools/parsers/file/mend/)
+- [Meterian Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/meterian/)
+- [Microfocus Webinspect Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/microfocus_webinspect/)
+- [Microsoft Defender for Cloud](https://docs.defectdojo.com/supported_tools/parsers/file/defender_for_cloud/)
+- [Mix Audit](https://docs.defectdojo.com/supported_tools/parsers/file/mix_audit/)
+- [MobSF Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/mobsf/)
+- [MobSF Scorecard Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/mobsf_scorecard/)
+- [ModelScan](https://docs.defectdojo.com/supported_tools/parsers/file/modelscan/)
+- [Mozilla Observatory Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/mozilla_observatory/)
+- [MS Defender Parser](https://docs.defectdojo.com/supported_tools/parsers/file/ms_defender/)
+- [n0s1 Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/n0s1/)
+- [Naabu](https://docs.defectdojo.com/supported_tools/parsers/file/naabu/)
+- [Nancy Scan](https://docs.defectdojo.com/supported_tools/parsers/file/nancy/)
+- [NetRise](https://docs.defectdojo.com/supported_tools/parsers/file/netrise/)
+- [Netsparker](https://docs.defectdojo.com/supported_tools/parsers/file/netsparker/)
+- [NeuVector (compliance)](https://docs.defectdojo.com/supported_tools/parsers/file/neuvector/)
+- [NeuVector (REST)](https://docs.defectdojo.com/supported_tools/parsers/file/neuvector_compliance/)
+- [Nexpose XML 2.0 (Rapid7)](https://docs.defectdojo.com/supported_tools/parsers/file/nexpose/)
+- [Nightfall AI](https://docs.defectdojo.com/supported_tools/parsers/file/nightfall/)
+- [Nikto](https://docs.defectdojo.com/supported_tools/parsers/file/nikto/)
+- [njsscan](https://docs.defectdojo.com/supported_tools/parsers/file/njsscan/)
+- [Nmap](https://docs.defectdojo.com/supported_tools/parsers/file/nmap/)
+- [Node Security Platform](https://docs.defectdojo.com/supported_tools/parsers/file/nsp/)
+- [Noir](https://docs.defectdojo.com/supported_tools/parsers/file/noir/)
+- [Nosey Parker](https://docs.defectdojo.com/supported_tools/parsers/file/noseyparker/)
+- [NowSecure](https://docs.defectdojo.com/supported_tools/parsers/file/nowsecure/)
+- [Nozomi Networks](https://docs.defectdojo.com/supported_tools/parsers/file/nozomi/)
+- [NPM Audit](https://docs.defectdojo.com/supported_tools/parsers/file/npm_audit/)
+- [NPM Audit Version 7+](https://docs.defectdojo.com/supported_tools/parsers/file/npm_audit_7_plus/)
+- [Nuclei](https://docs.defectdojo.com/supported_tools/parsers/file/nuclei/)
+- [Open Pentest Format (OPF)](https://docs.defectdojo.com/supported_tools/parsers/file/opf/)
+- [OpenReports](https://docs.defectdojo.com/supported_tools/parsers/file/openreports/)
+- [Openscap Vulnerability Scan](https://docs.defectdojo.com/supported_tools/parsers/file/openscap/)
+- [OpenSSF Scorecard](https://docs.defectdojo.com/supported_tools/parsers/file/ossf_scorecard/)
+- [OpenVAS Parser](https://docs.defectdojo.com/supported_tools/parsers/file/openvas/)
+- [OpenVEX](https://docs.defectdojo.com/supported_tools/parsers/file/openvex/)
+- [Orca Security Alerts](https://docs.defectdojo.com/supported_tools/parsers/file/orca_security/)
+- [ORT evaluated model Importer](https://docs.defectdojo.com/supported_tools/parsers/file/ort/)
+- [OssIndex Devaudit](https://docs.defectdojo.com/supported_tools/parsers/file/ossindex_devaudit/)
+- [Ostorlab](https://docs.defectdojo.com/supported_tools/parsers/file/ostorlab/)
+- [OSV Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/osv_scanner/)
+- [Outpost24 Scan](https://docs.defectdojo.com/supported_tools/parsers/file/outpost24/)
+- [OWASP Nettacker](https://docs.defectdojo.com/supported_tools/parsers/file/nettacker/)
+- [OWASP Threat Dragon](https://docs.defectdojo.com/supported_tools/parsers/file/threat_dragon/)
+- [Parasoft DTP](https://docs.defectdojo.com/supported_tools/parsers/file/parasoft/)
+- [PHP Security Audit v2](https://docs.defectdojo.com/supported_tools/parsers/file/php_security_audit_v2/)
+- [PHP Symfony Security Checker](https://docs.defectdojo.com/supported_tools/parsers/file/php_symfony_security_check/)
+- [PHPStan](https://docs.defectdojo.com/supported_tools/parsers/file/phpstan/)
+- [PICUS Scan](https://docs.defectdojo.com/supported_tools/parsers/file/picus/)
+- [PingCastle](https://docs.defectdojo.com/supported_tools/parsers/file/pingcastle/)
+- [pip-audit Scan](https://docs.defectdojo.com/supported_tools/parsers/file/pip_audit/)
+- [pip-licenses](https://docs.defectdojo.com/supported_tools/parsers/file/pip_licenses/)
+- [Pluto](https://docs.defectdojo.com/supported_tools/parsers/file/pluto/)
+- [PMapper](https://docs.defectdojo.com/supported_tools/parsers/file/pmapper/)
+- [PMD Scan](https://docs.defectdojo.com/supported_tools/parsers/file/pmd/)
+- [pnpm Audit](https://docs.defectdojo.com/supported_tools/parsers/file/pnpm_audit/)
+- [Polaris](https://docs.defectdojo.com/supported_tools/parsers/file/polaris/)
+- [Popeye](https://docs.defectdojo.com/supported_tools/parsers/file/popeye/)
+- [Probely](https://docs.defectdojo.com/supported_tools/parsers/file/probely/)
+- [Progpilot](https://docs.defectdojo.com/supported_tools/parsers/file/progpilot/)
+- [Promptfoo (LLM eval & red-teaming)](https://docs.defectdojo.com/supported_tools/parsers/file/promptfoo/)
+- [Prospector](https://docs.defectdojo.com/supported_tools/parsers/file/prospector/)
+- [Prowler Scan](https://docs.defectdojo.com/supported_tools/parsers/file/prowler/)
+- [Psalm](https://docs.defectdojo.com/supported_tools/parsers/file/psalm/)
+- [PTART Reports](https://docs.defectdojo.com/supported_tools/parsers/file/ptart/)
+- [PWN Security Automation Framework](https://docs.defectdojo.com/supported_tools/parsers/file/pwn_sast/)
+- [PyRIT](https://docs.defectdojo.com/supported_tools/parsers/file/pyrit/)
+- [Python Taint](https://docs.defectdojo.com/supported_tools/parsers/file/python_taint/)
+- [QARK](https://docs.defectdojo.com/supported_tools/parsers/file/qark/)
+- [Qualys Hacker Guardian Scan](https://docs.defectdojo.com/supported_tools/parsers/file/qualys_hacker_guardian/)
+- [Qualys Infrastructure Scan (WebGUI XML)](https://docs.defectdojo.com/supported_tools/parsers/file/qualys_infrascan_webgui/)
+- [Qualys Scan](https://docs.defectdojo.com/supported_tools/parsers/file/qualys/)
+- [Qualys VMDR](https://docs.defectdojo.com/supported_tools/parsers/file/qualys_vmdr/)
+- [Qualys Webapp Scan](https://docs.defectdojo.com/supported_tools/parsers/file/qualys_webapp/)
+- [Quark-Engine](https://docs.defectdojo.com/supported_tools/parsers/file/quark_engine/)
+- [Quay](https://docs.defectdojo.com/supported_tools/parsers/file/quay/)
+- [Qwiet AI](https://docs.defectdojo.com/supported_tools/parsers/file/qwiet/)
+- [Rapid7 InsightAppSec](https://docs.defectdojo.com/supported_tools/parsers/file/insightappsec/)
+- [Rapplex Scan](https://docs.defectdojo.com/supported_tools/parsers/file/rapplex/)
+- [Red Hat Satellite](https://docs.defectdojo.com/supported_tools/parsers/file/redhatsatellite/)
+- [Regula](https://docs.defectdojo.com/supported_tools/parsers/file/regula/)
+- [Retire.js](https://docs.defectdojo.com/supported_tools/parsers/file/retirejs/)
+- [ReversingLabs Spectra Assure](https://docs.defectdojo.com/supported_tools/parsers/file/reversinglabs_spectraassure/)
+- [Risk Recon API Importer](https://docs.defectdojo.com/supported_tools/parsers/file/risk_recon/)
+- [rkhunter](https://docs.defectdojo.com/supported_tools/parsers/file/rkhunter/)
+- [Rubocop Scan](https://docs.defectdojo.com/supported_tools/parsers/file/rubocop/)
+- [Ruff](https://docs.defectdojo.com/supported_tools/parsers/file/ruff/)
+- [Rusty Hog parser](https://docs.defectdojo.com/supported_tools/parsers/file/rusty_hog/)
+- [Safety](https://docs.defectdojo.com/supported_tools/parsers/file/safety/)
+- [SARIF](https://docs.defectdojo.com/supported_tools/parsers/file/sarif/)
+- [sbomqs](https://docs.defectdojo.com/supported_tools/parsers/file/sbomqs/)
+- [Scantist Scan](https://docs.defectdojo.com/supported_tools/parsers/file/scantist/)
+- [ScoutSuite](https://docs.defectdojo.com/supported_tools/parsers/file/scout_suite/)
+- [Seal Security](https://docs.defectdojo.com/supported_tools/parsers/file/seal/)
+- [Secretlint](https://docs.defectdojo.com/supported_tools/parsers/file/secretlint/)
+- [Semgrep JSON Report](https://docs.defectdojo.com/supported_tools/parsers/file/semgrep/)
+- [Semgrep Pro JSON Report](https://docs.defectdojo.com/supported_tools/parsers/file/semgrep_pro/)
+- [ShellCheck](https://docs.defectdojo.com/supported_tools/parsers/file/shellcheck/)
+- [SKF Scan](https://docs.defectdojo.com/supported_tools/parsers/file/skf/)
+- [Slither](https://docs.defectdojo.com/supported_tools/parsers/file/slither/)
+- [Snyk](https://docs.defectdojo.com/supported_tools/parsers/file/snyk/)
+- [Snyk Code](https://docs.defectdojo.com/supported_tools/parsers/file/snyk_code/)
+- [Snyk Issue API](https://docs.defectdojo.com/supported_tools/parsers/file/snyk_issue_api/)
+- [Socket](https://docs.defectdojo.com/supported_tools/parsers/file/socket/)
+- [Solar Appscreener Scan](https://docs.defectdojo.com/supported_tools/parsers/file/solar_appscreener/)
+- [SonarQube](https://docs.defectdojo.com/supported_tools/parsers/file/sonarqube/)
+- [Sonatype](https://docs.defectdojo.com/supported_tools/parsers/file/sonatype/)
+- [SOOS](https://docs.defectdojo.com/supported_tools/parsers/file/soos/)
+- [SPDX](https://docs.defectdojo.com/supported_tools/parsers/file/spdx/)
+- [SpotBugs](https://docs.defectdojo.com/supported_tools/parsers/file/spotbugs/)
+- [sqlmap](https://docs.defectdojo.com/supported_tools/parsers/file/sqlmap/)
+- [SSH Audit](https://docs.defectdojo.com/supported_tools/parsers/file/ssh_audit/)
+- [SSL Labs](https://docs.defectdojo.com/supported_tools/parsers/file/ssl_labs/)
+- [Sslscan](https://docs.defectdojo.com/supported_tools/parsers/file/sslscan/)
+- [Sslyze Scan](https://docs.defectdojo.com/supported_tools/parsers/file/sslyze/)
+- [StackHawk HawkScan](https://docs.defectdojo.com/supported_tools/parsers/file/stackhawk/)
+- [Staticcheck](https://docs.defectdojo.com/supported_tools/parsers/file/staticcheck/)
+- [Syft](https://docs.defectdojo.com/supported_tools/parsers/file/syft/)
+- [Sysdig Vulnerability Reports](https://docs.defectdojo.com/supported_tools/parsers/file/sysdig_cli/)
+- [Sysdig Vulnerability Reports](https://docs.defectdojo.com/supported_tools/parsers/file/sysdig_reports/)
+- [Talisman](https://docs.defectdojo.com/supported_tools/parsers/file/talisman/)
+- [Tartufo](https://docs.defectdojo.com/supported_tools/parsers/file/tartufo/)
+- [Tenable](https://docs.defectdojo.com/supported_tools/parsers/file/tenable/)
+- [terraform-compliance](https://docs.defectdojo.com/supported_tools/parsers/file/terraform_compliance/)
+- [Terrascan](https://docs.defectdojo.com/supported_tools/parsers/file/terrascan/)
+- [Testssl Scan](https://docs.defectdojo.com/supported_tools/parsers/file/testssl/)
+- [TFLint](https://docs.defectdojo.com/supported_tools/parsers/file/tflint/)
+- [TFSec](https://docs.defectdojo.com/supported_tools/parsers/file/tfsec/)
+- [Threagile](https://docs.defectdojo.com/supported_tools/parsers/file/threagile/)
+- [Threat Composer](https://docs.defectdojo.com/supported_tools/parsers/file/threat_composer/)
+- [Tracee](https://docs.defectdojo.com/supported_tools/parsers/file/tracee/)
+- [Trivy](https://docs.defectdojo.com/supported_tools/parsers/file/trivy/)
+- [Trivy Operator](https://docs.defectdojo.com/supported_tools/parsers/file/trivy_operator/)
+- [Trufflehog](https://docs.defectdojo.com/supported_tools/parsers/file/trufflehog/)
+- [Trufflehog3](https://docs.defectdojo.com/supported_tools/parsers/file/trufflehog3/)
+- [Trustwave](https://docs.defectdojo.com/supported_tools/parsers/file/trustwave/)
+- [Trustwave Fusion API Scan](https://docs.defectdojo.com/supported_tools/parsers/file/trustwave_fusion_api/)
+- [Twistlock](https://docs.defectdojo.com/supported_tools/parsers/file/twistlock/)
+- [Uptycs](https://docs.defectdojo.com/supported_tools/parsers/file/uptycs/)
+- [uv audit](https://docs.defectdojo.com/supported_tools/parsers/file/uv_audit/)
+- [Vanta](https://docs.defectdojo.com/supported_tools/parsers/file/vanta/)
+- [Veracode](https://docs.defectdojo.com/supported_tools/parsers/file/veracode/)
+- [Veracode SourceClear](https://docs.defectdojo.com/supported_tools/parsers/file/veracode_sca/)
+- [Visual Code Grepper (VCG)](https://docs.defectdojo.com/supported_tools/parsers/file/vcg/)
+- [Vuls](https://docs.defectdojo.com/supported_tools/parsers/file/vuls/)
+- [Wallarm](https://docs.defectdojo.com/supported_tools/parsers/file/wallarm/)
+- [Wapiti Scan](https://docs.defectdojo.com/supported_tools/parsers/file/wapiti/)
+- [Wazuh Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/wazuh/)
+- [Wfuzz JSON importer](https://docs.defectdojo.com/supported_tools/parsers/file/wfuzz/)
+- [WhatWeb](https://docs.defectdojo.com/supported_tools/parsers/file/whatweb/)
+- [Whispers](https://docs.defectdojo.com/supported_tools/parsers/file/whispers/)
+- [WhiteHat Sentinel](https://docs.defectdojo.com/supported_tools/parsers/file/whitehat_sentinel/)
+- [Wiz Scanner Parser](https://docs.defectdojo.com/supported_tools/parsers/file/wiz/)
+- [Wiz-cli Dir Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/wizcli_dir/)
+- [Wiz-cli IaC Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/wizcli_iac/)
+- [Wiz-cli Img Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/wizcli_img/)
+- [Wpscan Scanner](https://docs.defectdojo.com/supported_tools/parsers/file/wpscan/)
+- [Xanitizer](https://docs.defectdojo.com/supported_tools/parsers/file/xanitizer/)
+- [Xeol Parser](https://docs.defectdojo.com/supported_tools/parsers/file/xeol/)
+- [Xygeni](https://docs.defectdojo.com/supported_tools/parsers/file/xygeni/)
+- [YARA](https://docs.defectdojo.com/supported_tools/parsers/file/yara/)
+- [Yarn Audit](https://docs.defectdojo.com/supported_tools/parsers/file/yarn_audit/)
+- [YesWeHack](https://docs.defectdojo.com/supported_tools/parsers/file/yeswehack/)
+- [Zed Attack Proxy](https://docs.defectdojo.com/supported_tools/parsers/file/zap/)
+- [Zimperium zScan](https://docs.defectdojo.com/supported_tools/parsers/file/zimperium/)
+- [Zora Parser](https://docs.defectdojo.com/supported_tools/parsers/file/zora/)
+- [Blackduck API](https://docs.defectdojo.com/supported_tools/parsers/api/blackduck/)
+- [Bugcrowd API](https://docs.defectdojo.com/supported_tools/parsers/api/bugcrowd/)
+- [Cobalt.io API Import](https://docs.defectdojo.com/supported_tools/parsers/api/cobalt/)
+- [Edgescan](https://docs.defectdojo.com/supported_tools/parsers/api/edgescan/)
+- [SonarQube API Import](https://docs.defectdojo.com/supported_tools/parsers/api/sonarqube/)
+- [Vulners](https://docs.defectdojo.com/supported_tools/parsers/api/vulners/)
+
+## Optional
+
+- [Open Source Upgrading](https://docs.defectdojo.com/releases/os_upgrading/upgrading_guide/): Release specific upgrading instructions
+- [Upgrading to DefectDojo Version 3.3.200](https://docs.defectdojo.com/releases/os_upgrading/3.3.200/): In DefectDojo Pro, a restart now applies the Locations and Organization / Asset Relabeling toggles to the Classic UI and the /api/v2 route wiring. Those surfaces used to keep following the deployment environment variables no matter what the Feature Flags page said.
+- [Upgrading to DefectDojo Version 3.2.200](https://docs.defectdojo.com/releases/os_upgrading/3.2.200/): DefectDojo Pro can now enable Locations as a self-service, database-backed toggle on the Feature Flags page, and carry existing history forward with an in-app data-migration suite that backfills endpoint, dependency, and source-code locations before an identity rehash.
+- [Upgrading to DefectDojo Version 3.2.100](https://docs.defectdojo.com/releases/os_upgrading/3.2.100/): Notes marked private are now visible only to their author and to superusers.
+- [Upgrading to DefectDojo Version 3.3.x](https://docs.defectdojo.com/releases/os_upgrading/3.3/): Three parsers gain deduplication registrations, which changes the stored identity of their findings. Xeol Parser moves off the legacy hash so its identity stops depending on the wall clock; Checkmarx One Scan hashes the vendor id it already matches on; Checkmarx Scan detailed gains the same field list as its CxFlow sibling. Instances with the identity signature ledger enabled bridge these changes automatically; others should rehash the affected scan types after upgrading. Separately, SARIF-family parsers stop trusting fingerprints that repeat within a report, which stops unrelated findings from being merged; no rehash is needed for that change.
+- [Upgrading to DefectDojo Version 3.2.x](https://docs.defectdojo.com/releases/os_upgrading/3.2/): Vulnerability ids gain an autodetected type and a uniqueness constraint; findings can now carry multiple CWEs via a new Finding_CWE relationship. Migrations add the type column, de-duplicate vulnerability-id rows, add the uniqueness constraint, create the CWE table, and backfill it. The vulnerability id and CWE changes leave existing hash codes untouched; four split deduplication registrations are repaired, which changes the identity of Burp Suite DAST Scan findings, and the AWS Security Hub parser now sorts resource IDs, which is an identity change for findings that report more than one resource. The locations ingredient of the hash code is now sorted on both code paths, an identity change for multi-endpoint findings on installs running with DD_V3_FEATURE_LOCATIONS=False, and recomputing the hash code of a saved finding that has locations no longer raises an error. This release also deprecates the API-based (pull) parsers, the Tool Type / Tool Configuration feature, and the django-dbbackup integration, all scheduled for removal in 3.5.0.
+- [Upgrading to DefectDojo Version 3.0.200](https://docs.defectdojo.com/releases/os_upgrading/3.0.200/): Xygeni parser keys SAST/Secrets deduplication on uniqueHash; repeated secrets are aggregated into one finding.
+- [Upgrading to DefectDojo Version 3.0.100](https://docs.defectdojo.com/releases/os_upgrading/3.0.100/): Xygeni parser keeps repeated SAST/Secrets occurrences in the same file as distinct findings.
+- [Upgrading to DefectDojo Version 3.1.x](https://docs.defectdojo.com/releases/os_upgrading/3.1/): Blank Finding components are now normalized to NULL so component-less findings group together; JIRA project configurations now support multiple comma-separated components; Tool Configuration credentials are re-encrypted to AES-256-GCM; the JFrog Xray API Summary Artifact parser now sorts impact paths so findings deduplicate consistently across re-imports; a new optional DD_OS_MESSAGE_ENABLED setting controls the open-source promo banner; and a new deduplication execution mode controls how import/reimport deduplication is dispatched.
+- [Upgrading to DefectDojo Version 3.0.x](https://docs.defectdojo.com/releases/os_upgrading/3.0/): Locations and Asset/Organization labels are now enabled by default; Authorized Users panel replaces Members/Groups under legacy authorization; SSO providers move to DefectDojo Pro; removal of Questionnaire API Endpoints, Credential Manager, and Stub Findings; Dependency Check parser no longer emits separate findings for related dependencies; related file paths are now listed in the main finding's description.
+- [Upgrading to DefectDojo Version 2.58.x](https://docs.defectdojo.com/releases/os_upgrading/2.58/): Notification .tpl templates relocated under dojo/notifications/
+- [Upgrading to DefectDojo Version 2.57.x](https://docs.defectdojo.com/releases/os_upgrading/2.57/): Deprecation of Credential Manager and Stub Findings
+- [Upgrading to DefectDojo Version 2.56.4](https://docs.defectdojo.com/releases/os_upgrading/2.56.4/): JFrog Xray API Summary Artifact parser deduplication
+- [Upgrading to DefectDojo Version 2.56.x](https://docs.defectdojo.com/releases/os_upgrading/2.56/): Deprecation of Questionnaire API Endpoints
+- [Upgrading to DefectDojo Version 2.55.2](https://docs.defectdojo.com/releases/os_upgrading/2.55.2/): JIRA Reconciliation now also processes Finding Groups.
+- [Upgrading to DefectDojo Version 2.55.x](https://docs.defectdojo.com/releases/os_upgrading/2.55/): Authorization related optimizations
+- [Upgrading to DefectDojo Version 2.54.x](https://docs.defectdojo.com/releases/os_upgrading/2.54/): Removal of django-auditlog & Dropped support for DD_PARSER_EXCLUDE & Reimport performance improvements & Removal of Finding Template Matching
+- [Upgrading to DefectDojo Version 2.53.x](https://docs.defectdojo.com/releases/os_upgrading/2.53/): Helm chart: changes for initializer annotations + Replaced Redis with Valkey + HPA & PDB support + Batch Deduplication
+- [Upgrading to DefectDojo Version 2.52.x](https://docs.defectdojo.com/releases/os_upgrading/2.52/): Replaced Redis with Valkey & Helm chart changes & MobSF parser merge
+- [Upgrading to DefectDojo Version 2.51.x](https://docs.defectdojo.com/releases/os_upgrading/2.51/): Helm chart changes and Postgres major version updates.
+- [Upgrading to DefectDojo Version 2.50.x](https://docs.defectdojo.com/releases/os_upgrading/2.50/): Dropped support for time_zone in System settings.
+- [Upgrading to DefectDojo Version 2.49.x](https://docs.defectdojo.com/releases/os_upgrading/2.49/): No special instructions.
+- [Upgrading to DefectDojo Version 2.48.2](https://docs.defectdojo.com/releases/os_upgrading/2.48.2/): Tag invalid character cleanup
+- [Upgrading to DefectDojo Version 2.48.x](https://docs.defectdojo.com/releases/os_upgrading/2.48/): Better pushing to JIRA for Finding Groups
+- [Upgrading to DefectDojo Version 2.54.3](https://docs.defectdojo.com/releases/os_upgrading/2.54.3/): Trivy parser deduplication
+- [Upgrading to DefectDojo Version 2.47.x](https://docs.defectdojo.com/releases/os_upgrading/2.47/): Drop support for PostgreSQL-HA in HELM
+- [Upgrading to DefectDojo Version 2.46.x](https://docs.defectdojo.com/releases/os_upgrading/2.46/): Tag Formatting Changes + Import Payload Changes
+- [Upgrading to DefectDojo Version 2.45.x](https://docs.defectdojo.com/releases/os_upgrading/2.45/): No special instructions.
+- [Upgrading to DefectDojo Version 2.44.0](https://docs.defectdojo.com/releases/os_upgrading/2.44/): No special instructions.
+- [Upgrading to DefectDojo Version 2.44.1](https://docs.defectdojo.com/releases/os_upgrading/2.44.1/): No special instructions.
+- [Upgrading to DefectDojo Version 2.43.x](https://docs.defectdojo.com/releases/os_upgrading/2.43/): Disclaimer field renamed/split, removal of `dc-` scripts, audit log updates, and hash codes updates.
+- [Upgrading to DefectDojo Version 2.42.x](https://docs.defectdojo.com/releases/os_upgrading/2.42/): No special instructions.
+- [Upgrading to DefectDojo Version 2.41.x](https://docs.defectdojo.com/releases/os_upgrading/2.41/): No special instructions.
+- [Upgrading to DefectDojo Version 2.40.x](https://docs.defectdojo.com/releases/os_upgrading/2.40/): Breaking Change for Postgres 12.
+- [Upgrading to DefectDojo Version 2.39.x](https://docs.defectdojo.com/releases/os_upgrading/2.39/): Major upgrade of Postgres 16 to 17
+- [Upgrading to DefectDojo Version 2.38.x](https://docs.defectdojo.com/releases/os_upgrading/2.38/): Breaking Change for HELM deployments
+- [Upgrading to DefectDojo Version 2.37.x](https://docs.defectdojo.com/releases/os_upgrading/2.37/): Breaking Change for HELM deployments and MySQL / RabbitMQ users
+- [Upgrading to DefectDojo Version 2.36.x](https://docs.defectdojo.com/releases/os_upgrading/2.36/): Breaking Change for HELM deployments with PostgreSQL
+- [Upgrading to DefectDojo Version 2.35.x](https://docs.defectdojo.com/releases/os_upgrading/2.35/): Integrity checker announced
+- [Upgrading to DefectDojo Version 2.34.x](https://docs.defectdojo.com/releases/os_upgrading/2.34/): Breaking Change for AWS_Scout2.
+- [Upgrading to DefectDojo Version 2.33.x](https://docs.defectdojo.com/releases/os_upgrading/2.33/): breaking change
+- [Upgrading to DefectDojo Version 2.32.x](https://docs.defectdojo.com/releases/os_upgrading/2.32/): Breaking change for Removal of OpenAPI 2.0 Swagger
+- [Upgrading to DefectDojo Version 2.31.x](https://docs.defectdojo.com/releases/os_upgrading/2.31/): breaking change
+- [Upgrading to DefectDojo Version 2.30.x](https://docs.defectdojo.com/releases/os_upgrading/2.30/): Breaking Change for Auditlog.
+- [Upgrading to DefectDojo Version 2.29.x](https://docs.defectdojo.com/releases/os_upgrading/2.29/): No special instructions.
+- [Upgrading to DefectDojo Version 2.28.x](https://docs.defectdojo.com/releases/os_upgrading/2.28/): No special instructions.
+- [Upgrading to DefectDojo Version 2.27.x](https://docs.defectdojo.com/releases/os_upgrading/2.27/): No special instructions.
+- [Upgrading to DefectDojo Version 2.26.x](https://docs.defectdojo.com/releases/os_upgrading/2.26/): No special instructions.
+- [Upgrading to DefectDojo Version 2.25.x](https://docs.defectdojo.com/releases/os_upgrading/2.25/): No special instructions.
+- [Upgrading to DefectDojo Version 2.24.x](https://docs.defectdojo.com/releases/os_upgrading/2.24/): No special instructions.
+- [Upgrading to DefectDojo Version 2.23.x](https://docs.defectdojo.com/releases/os_upgrading/2.23/): breaking change
+- [Upgrading to DefectDojo Version 2.22.x](https://docs.defectdojo.com/releases/os_upgrading/2.22/): No special instructions.
+- [Upgrading to DefectDojo Version 2.21.x](https://docs.defectdojo.com/releases/os_upgrading/2.21/): No special instructions.
+- [Upgrading to DefectDojo Version 2.20.x](https://docs.defectdojo.com/releases/os_upgrading/2.20/): No special instructions.
+- [Upgrading to DefectDojo Version 2.19.x](https://docs.defectdojo.com/releases/os_upgrading/2.19/): breaking change
+- [Upgrading to DefectDojo Version 2.18.x](https://docs.defectdojo.com/releases/os_upgrading/2.18/): instructions for helm chart
+- [Upgrading to DefectDojo Version 2.17.x](https://docs.defectdojo.com/releases/os_upgrading/2.17/): No special instructions.
+- [Upgrading to DefectDojo Version 2.16.x](https://docs.defectdojo.com/releases/os_upgrading/2.16/): No special instructions.
+- [Upgrading to DefectDojo Version 2.15.x](https://docs.defectdojo.com/releases/os_upgrading/2.15/): No special instructions.
+- [Upgrading to DefectDojo Version 2.13.x](https://docs.defectdojo.com/releases/os_upgrading/2.13/): instructions for helm chart and others
+- [Upgrading to DefectDojo Version 2.12.x](https://docs.defectdojo.com/releases/os_upgrading/2.12/): breaking change
+- [Upgrading to DefectDojo Version 2.10.x](https://docs.defectdojo.com/releases/os_upgrading/2.10/): breaking change
+- [Upgrading to DefectDojo Version 2.9.x](https://docs.defectdojo.com/releases/os_upgrading/2.9/): breaking change for APIv2
+- [Upgrading to DefectDojo Version 2.8.x](https://docs.defectdojo.com/releases/os_upgrading/2.8/): breaking changes
+- [Upgrading to DefectDojo Version 2.7.x](https://docs.defectdojo.com/releases/os_upgrading/2.7/): breaking change
+- [Upgrading to DefectDojo Version 2.6.x](https://docs.defectdojo.com/releases/os_upgrading/2.6/): No special instructions.
+- [Upgrading to DefectDojo Version 2.5.x](https://docs.defectdojo.com/releases/os_upgrading/2.5/): legacy authorization removed
+- [Upgrading to DefectDojo Version 2.4.x (Security Release)](https://docs.defectdojo.com/releases/os_upgrading/2.4/): security Release
+- [Upgrading to DefectDojo Version 2.3.x](https://docs.defectdojo.com/releases/os_upgrading/2.3/): No special instructions.
+- [Upgrading to DefectDojo Version 2.2.x](https://docs.defectdojo.com/releases/os_upgrading/2.2/): No special instructions.
+- [Upgrading to DefectDojo Version 2.0.x](https://docs.defectdojo.com/releases/os_upgrading/2.0/): breaking changes
+- [Upgrading to DefectDojo Version 1.15.x](https://docs.defectdojo.com/releases/os_upgrading/1.15/): hashcode calculation logic has changed
+- [Upgrading to DefectDojo Version 1.14.x](https://docs.defectdojo.com/releases/os_upgrading/1.14/): hashcode calculation logic has changed
+- [Upgrading to DefectDojo Version 1.13.x](https://docs.defectdojo.com/releases/os_upgrading/1.13/): hashcode calculation logic has changed
+- [Upgrading to DefectDojo Version 1.12.x](https://docs.defectdojo.com/releases/os_upgrading/1.12/): security release
+- [Upgrading to DefectDojo Version 1.11.x](https://docs.defectdojo.com/releases/os_upgrading/1.11/): security release
+- [Upgrading to DefectDojo Version 1.10.x](https://docs.defectdojo.com/releases/os_upgrading/1.10/): security release + breaking changes
+- [Upgrading to DefectDojo Version 1.9.3](https://docs.defectdojo.com/releases/os_upgrading/1.9.3/): security release
+- [Upgrading to DefectDojo Version 1.8.0](https://docs.defectdojo.com/releases/os_upgrading/1.8.0/): fix buildwatson create_endpoint_status
+- [Upgrading to DefectDojo Version 1.7.0](https://docs.defectdojo.com/releases/os_upgrading/1.7.0/): multiple instructions
+- [Upgrading to DefectDojo Version 1.3.1](https://docs.defectdojo.com/releases/os_upgrading/1.3.1/): multiple instructions
+- [Upgrading to DefectDojo Version 1.2.9](https://docs.defectdojo.com/releases/os_upgrading/1.2.9/): multiple instructions
+- [Upgrading to DefectDojo Version 1.2.8](https://docs.defectdojo.com/releases/os_upgrading/1.2.8/): multiple instructions
+- [Upgrading to DefectDojo Version 1.2.4](https://docs.defectdojo.com/releases/os_upgrading/1.2.4/): multiple instructions
+- [Upgrading to DefectDojo Version 1.2.3](https://docs.defectdojo.com/releases/os_upgrading/1.2.3/): multiple instructions
+- [Upgrading to DefectDojo Version 1.2.2](https://docs.defectdojo.com/releases/os_upgrading/1.2.2/): multiple instructions
+- [Adding the dd-orch Database on Upgrade (Pro)](https://docs.defectdojo.com/releases/pro/ddorch-database/): Provisioning the dojodb-ddorch PostgreSQL database and pointing DefectDojo Pro at it on an existing self-hosted installation.
+- [DefectDojo Pro Changelog](https://docs.defectdojo.com/releases/pro/changelog/): DefectDojo Pro Changelog
+- [Google Sheets synchronisation](https://docs.defectdojo.com/archived_docs/google-sheets-sync/): Export finding details to Google Sheets and upload changes from Google Sheets.
+- [Defect Dojo Burp plugin](https://docs.defectdojo.com/archived_docs/burp-plugin/): Export findings directly from Burp to DefectDojo.
+
