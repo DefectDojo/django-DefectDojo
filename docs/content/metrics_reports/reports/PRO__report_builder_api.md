@@ -237,7 +237,7 @@ curl -s -X POST \
   }'
 ```
 
-**A tabular finding block with filters.** Tabular blocks render rows of a chosen model. `model_choice` is exactly one of `organization`, `asset`, `engagement`, `test`, `finding`, `test_type`, or `risk_acceptance`. The `fields` come from `field_options` (confirm each `path`), and `filter_entries` scope the rows.
+**A tabular finding block with filters.** Tabular blocks render rows of a chosen model. `model_choice` is one of `organization`, `asset`, `engagement`, `test`, `finding`, `test_type`, or `risk_acceptance`, plus `location`, `url`, `dependency` and `location_asset` when Locations are enabled. `location_asset` has one row per location and Asset pair (see [Reporting which Assets a location belongs to](../report-builder/#reporting-which-assets-a-location-belongs-to)). The `fields` come from `field_options` (confirm each `path`), and `filter_entries` scope the rows.
 
 ```bash
 curl -s -X POST \
