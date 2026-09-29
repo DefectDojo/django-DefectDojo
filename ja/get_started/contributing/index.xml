@@ -73,23 +73,24 @@
 &lt;/ol&gt;
 &lt;h3 id="フィールドマッピングの詳細"&gt;フィールドマッピングの詳細&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;作成される各検出事項について、パーサーが特定のデータをどのようにパースするかの詳細を記載してください。例:&lt;/em&gt;&lt;/p&gt;</description></item><item><title>オープンソースのブランチ運用とリリース</title><link>https://docs.defectdojo.com/ja/get_started/contributing/branching-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/contributing/branching-model/</guid><description>&lt;h2 id="定期リリース"&gt;定期リリース&lt;/h2&gt;
-&lt;p&gt;すべてのリリースは&lt;code&gt;dev&lt;/code&gt;ブランチから作成されます。DefectDojoチームは、以下のケイデンスを維持することを目指しています。&lt;/p&gt;
+&lt;p&gt;DefectDojoチームは、以下のケイデンスを維持することを目指しています。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;マイナーリリース: 毎月第1月曜日に少なくとも月1回。&lt;/li&gt;
-&lt;li&gt;パッチ: 毎週月曜日にリリース。&lt;/li&gt;
-&lt;li&gt;セキュリティリリース: 深刻度に応じて、通常のケイデンスとは別に実施されることがあります。これも&lt;code&gt;dev&lt;/code&gt;から作成されます。&lt;/li&gt;
+&lt;li&gt;パッチ/バグフィックス: 毎週月曜日にリリース。&lt;/li&gt;
+&lt;li&gt;セキュリティリリース: 深刻度に応じて、通常のケイデンスとは別に実施されます。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;バグ修正用の独立したブランチや、&lt;code&gt;master&lt;/code&gt;から分岐するホットフィックスブランチはありません。バグ修正も機能追加も、すべてのプルリクエストは&lt;code&gt;dev&lt;/code&gt;を対象とします。&lt;/p&gt;
-&lt;p&gt;GitHub Actionsが正となります。リリースは半自動化されています。リリースの手順は以下のとおりです。&lt;/p&gt;
+&lt;p&gt;GitHub Actionsが正となります。リリースは半自動化されています。定期リリースの手順は以下のとおりです。&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;&lt;code&gt;dev&lt;/code&gt;からリリースブランチを作成し、&lt;code&gt;master&lt;/code&gt;に対するPRを準備します(&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-1-create-pr.yml"&gt;詳細&lt;/a&gt;)
+&lt;li&gt;&lt;code&gt;dev&lt;/code&gt;または&lt;code&gt;bugfix&lt;/code&gt;からリリースブランチを作成し、&lt;code&gt;master&lt;/code&gt;に対するPRを準備します(&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-pr.yml"&gt;詳細&lt;/a&gt;)
 &amp;ndash;&amp;gt; メンテナーがPRを検証し、手動でマージします&lt;/li&gt;
-&lt;li&gt;タグ付け、ドラフトリリースの発行、Dockerのビルド+プッシュを行います(&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-2-tag-docker-push.yml"&gt;詳細&lt;/a&gt;)
+&lt;li&gt;タグ付け、ドラフトリリースの発行、Dockerのビルド+プッシュを行います(&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-tag-docker.yml"&gt;詳細&lt;/a&gt;)
 &amp;ndash;&amp;gt; メンテナーがrelease-drafterのノートを整えてリリースを公開します&lt;/li&gt;
-&lt;li&gt;ブランチを再整合させるため、&lt;code&gt;master&lt;/code&gt;を&lt;code&gt;dev&lt;/code&gt;にマージし直すPRが作成されます(&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-3-master-into-dev.yml"&gt;詳細&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;ブランチを再整合させるため、&lt;code&gt;master&lt;/code&gt;を&lt;code&gt;dev&lt;/code&gt;と&lt;code&gt;bugfix&lt;/code&gt;にマージし直すPRが作成されます(&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-master-into-dev.yml"&gt;詳細&lt;/a&gt;)&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h2 id="セキュリティリリース"&gt;セキュリティリリース&lt;/h2&gt;
-&lt;p&gt;セキュリティ問題に関連するPRは、&lt;a href="https://github.com/DefectDojo/django-DefectDojo/security/advisories"&gt;セキュリティアドバイザリ&lt;/a&gt;を通じて行われます。これにより、脆弱性を早期に公開することなく非公開でコードに取り組むことができます。&lt;/p&gt;</description></item><item><title>ドキュメントの修正</title><link>https://docs.defectdojo.com/ja/get_started/contributing/documentation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/contributing/documentation/</guid><description>&lt;p&gt;ドキュメントは&lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt;で構築されており、&lt;a href="https://getdoks.org/"&gt;Doks&lt;/a&gt;テーマの派生版を使用しています。&lt;/p&gt;
+&lt;p&gt;セキュリティ問題に関連するPRは、&lt;a href="https://github.com/DefectDojo/django-DefectDojo/security/advisories"&gt;セキュリティアドバイザリ&lt;/a&gt;を通じて行われます。これにより、脆弱性を早期に公開することなく非公開でコードに取り組むことができます。&lt;/p&gt;
+&lt;h2 id="リリースおよびホットフィックスのモデル"&gt;リリースおよびホットフィックスのモデル&lt;/h2&gt;
+&lt;p&gt;図は&lt;a href="https://plantuml.com"&gt;plantUML&lt;/a&gt;で作成されています。PlantUML用のWebベースエディタはhttps://www.planttext.com で見つかります。&lt;/p&gt;</description></item><item><title>ドキュメントの修正</title><link>https://docs.defectdojo.com/ja/get_started/contributing/documentation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/get_started/contributing/documentation/</guid><description>&lt;p&gt;ドキュメントは&lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt;で構築されており、&lt;a href="https://getdoks.org/"&gt;Doks&lt;/a&gt;テーマの派生版を使用しています。&lt;/p&gt;
 &lt;p&gt;Webサイトの静的ファイルはGitHub Actionsでビルドされ、gh-pagesブランチに公開されます。&lt;/p&gt;
 &lt;h2 id="ローカルプレビューの実行方法"&gt;ローカルプレビューの実行方法&lt;/h2&gt;
 &lt;ol&gt;
