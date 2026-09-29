@@ -49,6 +49,12 @@ concurrency:
   group: warm-caches-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Pull and tag images straight from Docker Hub, never through registry.defectdojo.com:
+  # the images CI built itself are tagged defectdojo/... (= docker.io/defectdojo/...), and CI
+  # pulls must not count as installs.
+  DD_IMAGE_REGISTRY: docker.io
+
 jobs:
   warm-migrated-db:
     name: Warm Migrated Database Snapshot

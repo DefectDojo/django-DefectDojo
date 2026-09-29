@@ -82,7 +82,7 @@ docker compose build nginx
 > **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
 
 ## Run with Docker Compose in release mode
-To run the application based on previously built image (or based on dockerhub images if none was locally built), run:
+To run the application based on previously built image (or based on the published images if none was locally built, see [Image registry](#image-registry)), run:
 
 ```zsh
 docker/setEnv.sh release
@@ -226,6 +226,21 @@ CONTAINER ID        IMAGE                                 COMMAND               
 aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
 ...
 ```
+
+## Image registry
+`docker-compose.yml` pulls the DefectDojo images through `registry.defectdojo.com`. It redirects every
+request to the same images on Docker Hub (`hub.docker.com/u/defectdojo`); no image is stored or changed
+there. Each pull is logged (time, image, tag, client and the requesting network) so the project can see where
+DefectDojo is installed.
+
+To pull straight from Docker Hub, or from your own mirror, set `DD_IMAGE_REGISTRY` before running Docker Compose:
+
+```zsh
+export DD_IMAGE_REGISTRY=docker.io            # Docker Hub
+export DD_IMAGE_REGISTRY=mirror.example.com   # or your own registry mirror
+```
+
+Images you build locally are tagged with the same name, so building and running works the same either way.
 
 ## Clean up Docker Compose
 
