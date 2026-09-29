@@ -230,7 +230,7 @@ Some mapping edits are riskier than others, and DefectDojo classifies each edit 
 * A **presentation-only** edit changes a field that does not take part in matching — `references`, `mitigation`, `impact` and similar. It applies immediately with no further consequences.
 * An **identity-relevant** edit changes a field that your deduplication configuration hashes. By default that is Title, Severity and Description, so remapping any of those falls in this category, as does mapping a vendor's own identifier into `unique_id_from_tool`. These edits change what a finding's identity is built from, which is why the configuration used to be frozen.
 
-Which fields count as identity-relevant depends on your own deduplication settings for that scan type, not on a fixed list, so it follows any change you make under **Enterprise Settings**.
+Which fields count as identity-relevant depends on your own deduplication settings for that scan type, not on a fixed list, so it follows any change you make under **Settings > Finding Workflow > Matching Configuration**.
 
 ### Editing from the UI
 
