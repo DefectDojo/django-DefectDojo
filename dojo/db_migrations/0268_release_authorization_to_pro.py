@@ -21,7 +21,10 @@ Five concerns folded into a single migration:
    ``Product_Type_Group`` (flattened through ``Dojo_Group_Member``), and
    ``Global_Role`` (Owner → ``is_superuser``, elevated → ``is_staff``)
    into legacy memberships and user-flag values. Idempotent — guarded on
-   the presence of ``dojo_role`` so fresh installs are a no-op. The RBAC
+   the presence of ``dojo_role`` so fresh installs are a no-op. The user
+   flags are only derived when the roles are released for good: while an
+   installed app keeps managing the role tables, global roles stay in
+   effect and the flags are left as they are. The RBAC
    tables themselves are NOT modified or dropped — they remain
    bit-for-bit so Pro can adopt them unchanged.
 
@@ -89,6 +92,20 @@ def _bulk_insert_pairs(through_model, obj_field, pairs, label):
         logger.info("0268 backfill: %s/%s %s pairs inserted", min(start + BATCH_SIZE, total), total, label)
 
 
+def _role_tables_kept_by_installed_app():
+    """True when an installed app other than dojo manages the role tables.
+
+    Read from the live app registry rather than migration state: which apps are installed is a
+    property of the deployment, not of the migration graph.
+    """
+    from django.apps import apps as installed_apps  # noqa: PLC0415
+
+    return any(
+        model._meta.app_label != "dojo" and model._meta.managed and model._meta.db_table == "dojo_global_role"
+        for model in installed_apps.get_models()
+    )
+
+
 def backfill_authorized_users(apps, schema_editor):
     """Translate RBAC rows into the legacy ``authorized_users`` M2M.
 
@@ -111,6 +128,10 @@ def backfill_authorized_users(apps, schema_editor):
                                             -> all group members.is_staff = True
       Global_Role(Reader)                   -> no global elevation
                                               (relies on per-product membership)
+
+    The Global_Role rows are only translated into flags when the roles stop being
+    used. When an installed app keeps managing the role tables, global roles remain
+    in effect there, so is_superuser / is_staff are left unchanged.
     """
     connection = schema_editor.connection
     if "dojo_role" not in connection.introspection.table_names():
@@ -160,7 +181,13 @@ def backfill_authorized_users(apps, schema_editor):
     _bulk_insert_pairs(Product_Type.authorized_users.through, "product_type_id", product_type_pairs, "product_type")
 
     # 3. Global_Role -> is_superuser / is_staff flags. Group-held global roles
-    # expand through the same in-memory group_members map.
+    # expand through the same in-memory group_members map. Skipped while an
+    # installed app keeps managing the role tables: the roles stay in effect.
+    if _role_tables_kept_by_installed_app():
+        logger.info("0268 backfill: role tables are managed by an installed app, user flags left unchanged")
+        logger.info("0268 backfill: complete")
+        return
+
     owner_user_ids = set(
         Global_Role.objects.filter(role__name="Owner", user__isnull=False).values_list("user_id", flat=True),
     )
