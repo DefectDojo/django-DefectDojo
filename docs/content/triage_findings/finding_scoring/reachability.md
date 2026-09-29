@@ -65,6 +65,21 @@ reachability that tools you may already run are producing:
 Coverage is normally partial, and that is expected. Tools that do not report
 reachability simply leave their Findings at **Unknown**.
 
+### Setting reachability by hand
+
+When no scanner or connector reports reachability, you can record a verdict
+yourself. The **Reachability** dropdown in the **Threat Intelligence** panel of the
+Add and Edit Finding forms (see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields))
+records a *manual* verdict source alongside any tool-reported ones.
+
+A manual verdict is not special-cased above scanners: it competes in the same
+resolution as every other source, so a **stronger scanner verdict still overrides
+it** — the value shown as **Resolved** beneath the dropdown is the winner across all
+sources, which may differ from what you chose. What is different is that a manual
+verdict is **never removed by the staleness sweep**, because a human judgment should
+not silently decay the way an unrefreshed scanner verdict does. Choose *No manual
+override* to remove it.
+
 Reachability describes the vulnerable code *inside* your application. For whether the
 asset itself can be reached from outside, and whether the code is deployed at all, see
 [Asset Exposure](../asset_exposure/). The two are independent and can be used together.

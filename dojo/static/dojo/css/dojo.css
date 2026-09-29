@@ -1025,6 +1025,27 @@ span.endpoint_product {
     margin-top: 8px;
 }
 
+/* The base CSS reset zeroes list markers and block margins, so markdown lists
+   and paragraphs in an expanded banner would otherwise render flush. */
+.banner-expanded p,
+.banner-expanded ul,
+.banner-expanded ol {
+    margin: 0 0 0.5em;
+}
+
+.banner-expanded ul,
+.banner-expanded ol {
+    padding-left: 1.5em;
+}
+
+.banner-expanded ul {
+    list-style: disc;
+}
+
+.banner-expanded ol {
+    list-style: decimal;
+}
+
 /* OS message banner dismiss (×): inline, grouped with the headline/caret
    (not floated into the empty right side). Scoped so it only affects the
    OS promo banner, which is the only banner carrying these classes. */

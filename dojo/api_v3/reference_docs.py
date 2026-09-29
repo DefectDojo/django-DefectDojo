@@ -26,6 +26,7 @@ the page shell renders but the script 404s — the same behaviour as every other
 """
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 from django.http import HttpResponse
@@ -38,6 +39,11 @@ if TYPE_CHECKING:
 # Path inside components/node_modules (a STATICFILES_DIRS entry); version pinned in package.json.
 SCALAR_STATIC_PATH = "@scalar/api-reference/dist/browser/standalone.js"
 
+# Scalar enables its hosted AI assistant ("Ask AI") by default. That is a third-party service, so
+# it is turned off to keep the page self-contained, for the same reason the bundle is not loaded
+# from a CDN.
+SCALAR_CONFIGURATION = json.dumps({"agent": {"disabled": True}})
+
 _PAGE = """<!doctype html>
 <html>
 <head>
@@ -49,7 +55,7 @@ _PAGE = """<!doctype html>
   <noscript>The interactive API reference requires JavaScript.
     The OpenAPI schema is at <a href="{openapi_url}">{openapi_url}</a>;
     Swagger UI is at <a href="{docs_url}">{docs_url}</a>.</noscript>
-  <script id="api-reference" data-url="{openapi_url}"></script>
+  <script id="api-reference" data-url="{openapi_url}" data-configuration='{configuration}'></script>
   <script src="{script_url}"></script>
 </body>
 </html>"""
@@ -61,4 +67,5 @@ def scalar_reference(request: HttpRequest) -> HttpResponse:
         openapi_url=reverse("api_v3:openapi-json"),
         docs_url=reverse("api_v3:openapi-view"),
         script_url=static(SCALAR_STATIC_PATH),
+        configuration=SCALAR_CONFIGURATION,
     ))

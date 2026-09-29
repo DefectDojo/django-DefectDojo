@@ -67,3 +67,18 @@ class TestDedupeConfigurationChecks(SimpleTestCase):
             "'Burp Suite DAST Scan'",
         )
         self.assertEqual(fields["Burp Suite DAST Scan"], fields["Burp Enterprise Scan"])
+
+    def test_tenable_scan_hashcode_excludes_dynamic_description(self):
+        """
+        Tenable's ``description`` field carries scan-run data -- timestamps, affected
+        hosts -- that differs between two scans of the very same vulnerability. Hashing
+        on it means the hash_code changes on every reimport, so the finding never
+        deduplicates against its own earlier occurrence. See issue #11994.
+        """
+        fields = settings.HASHCODE_FIELDS_PER_SCANNER["Tenable Scan"]
+        self.assertNotIn(
+            "description", fields,
+            "Tenable Scan hash_code must not include 'description': the field holds "
+            "dynamic per-scan data, not a stable property of the vulnerability, and "
+            "including it defeats deduplication across reimports",
+        )

@@ -10,7 +10,9 @@ Le connecteur Rapid7 InsightVM - Cloud Instance importe les constatations de vul
 
 #### Prérequis
 
-Un compte de la plateforme Insight avec InsightVM, et une **clé API** de plateforme : dans la [plateforme Rapid7 Insight](https://insight.rapid7.com), ouvrez le menu des paramètres (icône d'engrenage) \> **API Keys** et générez une **User Key** (n'importe quel rôle) ou une **Organization Key** (administrateurs de la plateforme). Copiez la clé lorsqu'elle s'affiche : elle n'est affichée qu'une seule fois.
+Un compte de la plateforme Insight avec InsightVM, et une **clé API** de plateforme disposant des droits d'administrateur de la plateforme : dans la [plateforme Rapid7 Insight](https://insight.rapid7.com), ouvrez le menu des paramètres (icône d'engrenage) \> **API Keys** et générez une **Organization Key**, ou une **User Key** appartenant à un administrateur de la plateforme. Copiez la clé lorsqu'elle s'affiche : elle n'est affichée qu'une seule fois.
+
+Une User Key hérite des autorisations de son propriétaire : la clé d'un utilisateur qui n'est pas administrateur de la plateforme est donc refusée par la Cloud Integrations API avec une erreur 401 : `The supplied key does not have permission to perform this action.`
 
 Vous avez également besoin de votre **région** de plateforme, visible dans votre URL Insight (par exemple `us`, `us2`, `us3`, `eu`, `ca`, `au`, ou `ap`).
 
