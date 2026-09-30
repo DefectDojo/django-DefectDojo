@@ -65,6 +65,8 @@ Choose the destination with the **Destination Asset**, **Engagement**, and **Tes
 
 A selection can span several source Assets — each Finding is mirrored from its own Engagement and Test.
 
+A move or copy from Bulk Edit runs in the background. When you submit, DefectDojo checks the destination and your permissions, queues the work, and reports that it was queued. The Findings appear in the destination Test when the move or copy finishes, which for a large selection can take a few minutes. Refresh the list to see them.
+
 To move or copy a single Finding, use **Move or Copy Finding** in its ⋮ menu, or in the gear menu on the Finding's own page. It offers the same toggle and destination fields, and offers **Move** only if you can edit the Finding.
 
 #### What a move changes
@@ -91,7 +93,7 @@ A copy is deduplicated like any new Finding. With deduplication enabled, a copy 
 
 #### Permissions
 
-Moving requires edit permission on each Finding; copying requires only view permission. Both require permission to add Findings to the destination Test, or to the destination Asset when **Create a matching engagement and test** is ticked, and to add Engagements and Tests there when a matching one has to be created. The destination is checked before anything is moved or copied, so a destination you may not use changes nothing. Findings you cannot move or copy are skipped and listed when the action finishes.
+Moving requires edit permission on each Finding; copying requires only view permission. Both require permission to add Findings to the destination Test, or to the destination Asset when **Create a matching engagement and test** is ticked, and to add Engagements and Tests there when a matching one has to be created. The destination is checked before anything is moved or copied, so a destination you may not use changes nothing. Findings you cannot move or copy are skipped and listed when you submit.
 
 Bulk Edit itself needs edit permission on every selected Finding (see [Availability and skipped Findings](#availability-and-skipped-findings)), so to copy a Finding you can only view, use **Move or Copy Finding** in its ⋮ menu.
 
@@ -112,7 +114,15 @@ The request body names the destination, either as an existing Test or as an Asse
 { "destination_product": 7, "create_missing": true }
 ```
 
-The response reports how many Findings were processed, why any were skipped (`skipped_messages`), what was created, and the IDs of the moved Findings or of the new copies (`finding_ids`). Authenticate with an API token, as for the rest of `/api/v2/`. The Pro UI calls an internal mirror of these actions under `/api/vue/`; always automate against the `/api/v2/` paths.
+The single-Finding actions run in the request. Their response (`200`) reports how many Findings were processed, why any were skipped (`skipped_messages`), what was created, and the ID of the moved Finding or of the new copy (`finding_ids`).
+
+The bulk actions queue the work instead. They check the destination and the selection, then answer `202` with what was queued, not the outcome:
+
+```json
+{ "operation": "move", "status": "queued", "queued": 2, "skipped_messages": [] }
+```
+
+`skipped_messages` lists the Findings left out when the request was queued. A Finding that is already in the destination Test is skipped by the background task, not reported here. To confirm the outcome, list the destination Test's Findings once the task has run. Authenticate with an API token, as for the rest of `/api/v2/`. The Pro UI calls an internal mirror of these actions under `/api/vue/`; always automate against the `/api/v2/` paths.
 
 A bulk request takes up to 1,000 Finding IDs. An ID that does not exist is skipped and listed, like one you may not act on.
 
