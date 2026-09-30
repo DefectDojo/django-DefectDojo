@@ -43,6 +43,7 @@ class CycloneDXXMLParser:
             component_purl = component.findtext(f"{namespace}purl")
             component_hashes = self._parse_component_hashes_xml(component, namespace)
             component_license = Cyclonedxhelper.extract_license_expression_xml(component, namespace)
+            component_type = component.attrib.get("type") or ""
             # save a ref
             if "bom-ref" in component.attrib:
                 bom_refs[component.attrib["bom-ref"]] = {
@@ -51,6 +52,7 @@ class CycloneDXXMLParser:
                     "purl": component_purl,
                     "hashes": component_hashes,
                     "license": component_license,
+                    "type": component_type,
                 }
             # Collect product-level dependency locations for all components
             if locations_enabled() and component_purl:
@@ -59,7 +61,7 @@ class CycloneDXXMLParser:
                         purl=component_purl,
                         artifact_hashes=component_hashes,
                         license_expression=component_license,
-                        component_type=component.attrib.get("type", ""),
+                        component_type=component_type,
                     ),
                 )
             # for each vulnerabilities add a finding
@@ -76,6 +78,7 @@ class CycloneDXXMLParser:
                     component_purl=component_purl,
                     component_hashes=component_hashes,
                     component_license=component_license,
+                    component_type=component_type,
                 )
                 findings.append(finding_vuln)
         # manage adhoc vulnerabilities
@@ -127,6 +130,7 @@ class CycloneDXXMLParser:
         component_purl=None,
         component_hashes=None,
         component_license="",
+        component_type="",
     ):
         ref = vulnerability.attrib["ref"]
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
@@ -152,6 +156,7 @@ class CycloneDXXMLParser:
             component_purl = bom.get("purl")
             component_hashes = bom.get("hashes")
             component_license = bom.get("license", "")
+            component_type = bom.get("type", "")
 
         severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
@@ -205,7 +210,12 @@ class CycloneDXXMLParser:
             finding.unsaved_vulnerability_ids = vulnerability_ids
         if locations_enabled() and component_purl:
             finding.unsaved_locations.append(
-                LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
+                LocationData.dependency(
+                    purl=component_purl,
+                    artifact_hashes=component_hashes,
+                    license_expression=component_license,
+                    component_type=component_type,
+                ),
             )
         return finding
 
@@ -278,6 +288,7 @@ class CycloneDXXMLParser:
             component_purl = bom_refs.get(ref.text, {}).get("purl") if ref is not None else None
             component_hashes = bom_refs.get(ref.text, {}).get("hashes") if ref is not None else {}
             component_license = bom_refs.get(ref.text, {}).get("license", "") if ref is not None else ""
+            component_type = bom_refs.get(ref.text, {}).get("type", "") if ref is not None else ""
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
@@ -338,7 +349,12 @@ class CycloneDXXMLParser:
                             finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
             if locations_enabled() and component_purl:
                 finding.unsaved_locations.append(
-                    LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=component_license),
+                    LocationData.dependency(
+                        purl=component_purl,
+                        artifact_hashes=component_hashes,
+                        license_expression=component_license,
+                        component_type=component_type,
+                    ),
                 )
             findings.append(finding)
         return findings

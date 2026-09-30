@@ -36,7 +36,7 @@ class CycloneDXJSONParser:
                             purl=component_purl,
                             artifact_hashes=component_hashes,
                             license_expression=license_expression,
-                            component_type=component_data.get("type", ""),
+                            component_type=component_data.get("type") or "",
                         ),
                     )
         # for each vulnerabilities create one finding by component affected
@@ -102,7 +102,7 @@ class CycloneDXJSONParser:
                                     purl=component_purl,
                                     artifact_hashes=component_hashes,
                                     license_expression=license_expression,
-                                    component_type=component_data.get("type", ""),
+                                    component_type=component_data.get("type") or "",
                                 ),
                             )
                         else:
@@ -112,7 +112,7 @@ class CycloneDXJSONParser:
                                     version=component_version,
                                     artifact_hashes=component_hashes,
                                     license_expression=license_expression,
-                                    component_type=component_data.get("type", ""),
+                                    component_type=component_data.get("type") or "",
                                 ),
                             )
                 if report_date:
