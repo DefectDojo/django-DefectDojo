@@ -33,7 +33,7 @@ jobs:
 
       - name: Setup Minikube
         timeout-minutes: 10
-        uses: manusa/actions-setup-minikube@b65276017fdec6f1e6498129fb740e34e260dc55 # v2.18.0
+        uses: manusa/actions-setup-minikube@001b9f30165b2a875b835ec5183ced75b94bc269 # v2.19.0
         with:
           minikube version: 'v1.38.1' # renovate: datasource=github-releases depName=kubernetes/minikube
           kubernetes version: ${{ matrix.k8s }}
