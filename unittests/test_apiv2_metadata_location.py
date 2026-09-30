@@ -28,7 +28,7 @@ class TestMetaSerializerLocation(DojoTestCase):
         cls.product_type = Product_Type.objects.create(name="Meta Loc PT")
         cls.product = Product.objects.create(name="Meta Loc Product", description="p", prod_type=cls.product_type)
         cls.location = URL.get_or_create_from_values(
-            protocol="https", host="meta-location.example.test", path=""
+            protocol="https", host="meta-location.example.test", path="",
         ).location
 
     def test_location_only_payload_is_valid(self):
@@ -44,7 +44,7 @@ class TestMetaSerializerLocation(DojoTestCase):
 
     def test_location_product_scope_is_persisted(self):
         serializer = MetaSerializer(
-            data={"location": self.location.id, "location_product": self.product.id, "name": "owner", "value": "ops"}
+            data={"location": self.location.id, "location_product": self.product.id, "name": "owner", "value": "ops"},
         )
         self.assertTrue(serializer.is_valid(), serializer.errors)
         row = serializer.save()
@@ -57,7 +57,7 @@ class TestMetaSerializerLocation(DojoTestCase):
 
     def test_location_product_without_a_location_is_rejected(self):
         serializer = MetaSerializer(
-            data={"product": self.product.id, "location_product": self.product.id, "name": "owner", "value": "ops"}
+            data={"product": self.product.id, "location_product": self.product.id, "name": "owner", "value": "ops"},
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("location_product", serializer.errors)
