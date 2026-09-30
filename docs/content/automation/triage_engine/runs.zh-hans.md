@@ -1,7 +1,7 @@
 ---
 title: 运行
 description: 规则如何执行、一次运行会记录哪些内容，以及级联如何被限制
-weight: 4
+weight: 5
 audience: pro
 aliases:
 - /zh-hans/automation/rules_engine_v2/runs/
