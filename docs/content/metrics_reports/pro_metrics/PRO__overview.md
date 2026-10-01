@@ -20,9 +20,11 @@ Before elaborating on each particular dashboard, there are some commonalities be
 
 ### Filtering
 
-All Metrics can be filtered by timeframe, Organization, Asset, and Tag. After adjusting the filter as desired, Apply Filter must be clicked in order for the filter to take effect. If you wish to export a PDF of all charts, tables, and graphs on the dashboard as currently filtered, click Export as PDF. 
+All Metrics can be filtered by timeframe, Organization, Asset, and Tag. After adjusting the filter as desired, Apply Filters must be clicked in order for the filter to take effect. If you wish to export a PDF of all charts, tables, and graphs on the dashboard as currently filtered, click Export as PDF. 
 
 The filtering timeframe is limited to the past year, but can otherwise be adjusted to include the past 7, 14, 30, 90, or 180 days.
+
+Each dashboard opens filtered to the past 90 days. DefectDojo remembers the timeframe you last applied on any Metrics dashboard, so the next time you open one from the menu it uses that timeframe instead. Clicking Clear Filters is remembered too: dashboards then open with no timeframe filter until you apply a new one. The timeframe is saved in your browser, so it applies per browser rather than following your account to another device. A bookmarked or shared link always keeps the timeframe written in its URL.
 
 Note that filter parameters are rendered in the URL, so you can bookmark multiple pages with various filter parameters.  This can be useful for quick reference, or for consistently generating a particular kind of report.
 
