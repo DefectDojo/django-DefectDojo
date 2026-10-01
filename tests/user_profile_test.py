@@ -66,7 +66,9 @@ class UserProfileTest(BaseTestCase):
             time.sleep(1)
             self.assertTrue(
                 self.is_success_message_present(text="API Key generated successfully")
-                or self.is_text_present_on_page(text="API"),
+            )
+            self.assertTrue(
+                self.is_text_present_on_page(text=r"Your current API key is\s+\S+")
             )
         else:
             self.assertTrue(self.is_text_present_on_page(text="API"))
