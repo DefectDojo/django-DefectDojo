@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "tool": "darkmoon",
+  "scan": {
+    "target": "https://demo.darkmoon.example.com",
+    "started_at": "2026-09-30T10:12:04Z",
+    "finished_at": "2026-09-30T10:17:02Z",
+    "campaign_id": "cmp-00000000"
+  },
+  "findings": []
+}
