@@ -159,10 +159,25 @@ class TestApiV3ExpandRbacCrossProduct(_TwoProductWorld):
         body = self.get_json(
             "findings", client=self.member_client(), data={"expand": "reporter", "limit": 250},
         )
-        # expand=reporter swaps the ref for the full UserSlim (keyed by `username`, §4.5).
+        # expand=reporter swaps the ref for the UserStub (keyed by `username`, §4.5).
         reporter_names = {row["reporter"]["username"] for row in body["results"] if row["reporter"]}
         self.assertNotIn(self.reporter_b.username, reporter_names)
         self.assertEqual({self.admin.username}, reporter_names)
+
+    def test_expand_user_relations_return_only_the_stub(self):
+        engagement = self.test_a.engagement
+        engagement.lead = self.admin
+        engagement.save()
+        client = self.member_client()
+        finding = self.get_json(
+            f"findings/{self.findings_a[0].id}", client=client, data={"expand": "reporter,test.lead,engagement.lead"},
+        )
+        test = self.get_json(f"tests/{self.test_a.id}", client=client, data={"expand": "lead"})
+        eng = self.get_json(f"engagements/{engagement.id}", client=client, data={"expand": "lead"})
+        stub = {"id", "username", "first_name", "last_name"}
+        for user in (finding["reporter"], finding["test"]["lead"], finding["engagement"]["lead"], test["lead"], eng["lead"]):
+            self.assertEqual(stub, set(user))
+            self.assertEqual(self.admin.id, user["id"])
 
     def test_include_counts_never_counts_other_product(self):
         body = self.get_json("findings", client=self.member_client(), data={"include": "counts"})
