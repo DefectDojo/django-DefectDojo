@@ -14,10 +14,10 @@ class _MutableLocationParts:
 
     """Mutable container for building location data incrementally before creating a frozen LocationData."""
 
-    def __init__(self):
-        self.host = ""
-        self.port = None
-        self.protocol = ""
+    def __init__(self, host="", port=None, protocol=""):
+        self.host = host
+        self.port = port
+        self.protocol = protocol
 
     def __str__(self):
         parts = []
@@ -149,7 +149,8 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        if not get_location(finding).host and column_value is not None:  # process only if host is not already defined (by field hostname)
+        if column_value is not None:
+            # IP address is always the primary/stable identifier
             # strip due to https://github.com/greenbone/gvmd/issues/2378
             get_location(finding).host = column_value.strip()
 
@@ -160,9 +161,9 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        if column_value:  # do not override IP if hostname is empty
-            # strip due to https://github.com/greenbone/gvmd/issues/2378
-            get_location(finding).host = column_value.strip()
+        if column_value:  # do not store empty hostname
+            # Store hostname for post-processing; IP is the primary host
+            finding._pending_hostname = column_value.strip()
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -341,6 +342,26 @@ class OpenVASCSVParser:
             if ip:
                 finding.description += f"\n**IP**: {ip}"
 
+            # Resolve pending hostname: if IP is primary and hostname differs, add secondary location
+            pending_hostname = getattr(finding, "_pending_hostname", "")
+            if pending_hostname:
+                current_host = get_location(finding).host
+                if not current_host:
+                    # No IP column was present; use hostname as primary
+                    get_location(finding).host = pending_hostname
+                elif pending_hostname != current_host:
+                    if locations_enabled():
+                        pass  # handled below when finalizing locations
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        finding.unsaved_endpoints.append(
+                            Endpoint(
+                                host=pending_hostname,
+                                port=get_location(finding).port,
+                                protocol=get_location(finding).protocol,
+                            ),
+                        )
+
             if finding is not None and row_number > 0:
                 if finding.title is None:
                     finding.title = ""
@@ -348,6 +369,15 @@ class OpenVASCSVParser:
                     finding.description = ""
                 if locations_enabled():
                     finding.unsaved_locations.append(finding._location_builder.to_location_data())
+                    # Also finalize hostname as secondary location
+                    if pending_hostname and pending_hostname != get_location(finding).host:
+                        finding.unsaved_locations.append(
+                            _MutableLocationParts(
+                                host=pending_hostname,
+                                port=finding._location_builder.port,
+                                protocol=finding._location_builder.protocol,
+                            ).to_location_data(),
+                        )
                 key = hashlib.sha256(
                     (
                         str(get_location(finding))

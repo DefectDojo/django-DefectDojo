@@ -21,6 +21,7 @@ class OpenVASXMLParser:
         for result in results:
             script_id = None
             loc_host = ""
+            loc_hostname = ""
             loc_port = None
             loc_protocol = ""
 
@@ -32,12 +33,11 @@ class OpenVASXMLParser:
                     title = title + "_" + field.text
                     description.append(f"**Hostname**: {field.text}")
                     if field.text:
-                        host_val = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
-                        loc_host = host_val
+                        loc_hostname = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
                 if field.tag == "host":
                     title = title + "_" + field.text
                     description.append(f"**Host**: {field.text}")
-                    if not loc_host and field.text:
+                    if field.text:
                         host_val = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
                         loc_host = host_val
                 if field.tag == "port":
@@ -61,6 +61,12 @@ class OpenVASXMLParser:
                 if field.tag == "description":
                     description.append(f"**Description**: {field.text}")
 
+            # IP address is always the primary/stable host identifier.
+            # If no IP is available, fall back to hostname.
+            if not loc_host and loc_hostname:
+                loc_host = loc_hostname
+                loc_hostname = ""
+
             finding = Finding(
                 title=str(title),
                 test=test,
@@ -74,9 +80,17 @@ class OpenVASXMLParser:
                 finding.unsaved_locations = [LocationData.url(
                     host=loc_host, port=loc_port, protocol=loc_protocol,
                 )]
+                if loc_hostname and loc_hostname != loc_host:
+                    finding.unsaved_locations.append(LocationData.url(
+                        host=loc_hostname, port=loc_port, protocol=loc_protocol,
+                    ))
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint(host=loc_host, port=loc_port, protocol=loc_protocol)]
+                if loc_hostname and loc_hostname != loc_host:
+                    finding.unsaved_endpoints.append(
+                        Endpoint(host=loc_hostname, port=loc_port, protocol=loc_protocol),
+                    )
             findings.append(finding)
         return findings
 

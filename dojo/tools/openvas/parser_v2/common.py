@@ -10,10 +10,10 @@ class _MutableLocationParts:
 
     """Mutable container for building location data incrementally before creating a frozen LocationData."""
 
-    def __init__(self):
-        self.host = ""
-        self.port = None
-        self.protocol = ""
+    def __init__(self, host="", port=None, protocol=""):
+        self.host = host
+        self.port = port
+        self.protocol = protocol
 
     def __str__(self):
         parts = []
@@ -68,6 +68,29 @@ def finalize_location(finding: Finding):
     """Convert the mutable location builder to a frozen LocationData and store in unsaved_locations."""
     if locations_enabled():
         finding.unsaved_locations.append(finding._location_builder.to_location_data())
+        # Also finalize any secondary locations (e.g. hostname alongside IP)
+        for secondary in getattr(finding, "_secondary_locations", []):
+            finding.unsaved_locations.append(secondary.to_location_data())
+
+
+def add_secondary_location(finding: Finding, hostname: str):
+    """
+    Add a second endpoint/location for the hostname when the primary already holds the IP.
+
+    The secondary location inherits the same port and protocol as the primary
+    so endpoint correlation groups both entries under the same service.
+    """
+    primary = get_location(finding)
+    if locations_enabled():
+        finding._secondary_locations = getattr(finding, "_secondary_locations", [])
+        finding._secondary_locations.append(
+            _MutableLocationParts(host=hostname, port=primary.port, protocol=primary.protocol),
+        )
+    else:
+        # TODO: Delete this after the move to Locations
+        finding.unsaved_endpoints.append(
+            Endpoint(host=hostname, port=primary.port, protocol=primary.protocol),
+        )
 
 
 def is_valid_severity(severity: str) -> bool:

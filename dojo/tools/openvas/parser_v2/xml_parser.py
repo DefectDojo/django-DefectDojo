@@ -7,6 +7,7 @@ from defusedxml import ElementTree
 from dojo.models import Finding
 from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
+    add_secondary_location,
     cleanup_openvas_text,
     deduplicate,
     finalize_location,
@@ -38,6 +39,14 @@ def get_findings_from_xml(file, test) -> list[Finding]:
         finding, aux_info = setup_finding(test)
         for element in result:
             parser.process_element(element, finding, aux_info)
+
+        pending_hostname = getattr(finding, "_pending_hostname", "")
+        if pending_hostname:
+            current_host = get_location(finding).host
+            if not current_host:
+                get_location(finding).host = pending_hostname
+            elif pending_hostname != current_host:
+                add_secondary_location(finding, pending_hostname)
 
         finalize_location(finding)
         postprocess_finding(finding, aux_info)
@@ -122,14 +131,15 @@ class XMLParserV2:
 
     def _handle_host(self, field):
         if field.text:
+            # IP address from <host> text is always the primary/stable identifier
+            ip_address = field.text.strip()
+            get_location(self.finding).host = ip_address
+
             hostname_field = field.find("hostname")
-            # default to hostname else ip
             if hostname_field is not None and hostname_field.text:
-                # strip due to https://github.com/greenbone/gvmd/issues/2378
-                get_location(self.finding).host = hostname_field.text.strip()
-            else:
-                # strip due to https://github.com/greenbone/gvmd/issues/2378
-                get_location(self.finding).host = field.text.strip()
+                hostname = hostname_field.text.strip()
+                if hostname and hostname != ip_address:
+                    self.finding._pending_hostname = hostname
 
     def _handle_port(self, field):
         if field.text:

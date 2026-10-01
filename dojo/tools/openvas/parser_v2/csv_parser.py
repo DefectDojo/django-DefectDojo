@@ -7,6 +7,7 @@ from dateutil.parser import parse as parse_date
 from dojo.models import Finding
 from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
+    add_secondary_location,
     cleanup_openvas_text,
     deduplicate,
     finalize_location,
@@ -38,6 +39,7 @@ def get_findings_from_csv(file, test) -> list[Finding]:
         for column_value, column_name in zip(row, column_names, strict=False):
             parser.process_column(column_name, column_value, finding, aux_info)
 
+        parser.finalize_hostname(finding)
         finalize_location(finding)
         postprocess_finding(finding, aux_info)
         deduplicate(dupes, finding)
@@ -110,14 +112,32 @@ class CSVParserV2:
         self.finding.vuln_id_from_tool = column_value
 
     def _handle_hostname(self, column_value: str):
-        # strip due to https://github.com/greenbone/gvmd/issues/2378
-        get_location(self.finding).host = column_value.strip()
+        # Store hostname; it will become a secondary location if IP is also present
+        self._pending_hostname = column_value.strip()
 
     def _handle_ip(self, column_value: str):
-        # fallback to ip if hostname is not aviable
-        if not get_location(self.finding).host:
-            # strip due to https://github.com/greenbone/gvmd/issues/2378
-            get_location(self.finding).host = column_value.strip()
+        # IP address is always the primary/stable identifier
+        get_location(self.finding).host = column_value.strip()
+
+    def finalize_hostname(self, finding: Finding):
+        """
+        Resolve deferred hostname after all columns are processed.
+
+        If IP is set as primary host and hostname differs, the hostname
+        is added as a secondary location. If no IP was provided, the
+        hostname becomes the primary host as a fallback.
+        """
+        hostname = getattr(self, "_pending_hostname", "")
+        self._pending_hostname = ""
+        if not hostname:
+            return
+
+        current_host = get_location(finding).host
+        if not current_host:
+            # No IP column was present; use hostname as primary
+            get_location(finding).host = hostname
+        elif hostname != current_host:
+            add_secondary_location(finding, hostname)
 
     def _handle_port(self, column_value: str):
         if column_value.isdigit():
