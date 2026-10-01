@@ -99,15 +99,14 @@ DefectDojo computes evidence only where it has suitable operational facts.
 | Asset business criticality | ICT asset classification |
 | Published PSIRT advisories | Public disclosure of fixed vulnerabilities |
 
-Optional regulatory profiles, cadence monitoring, reporting cases, and advisory exports can add
-more precise facts when those features are installed. If an optional source is absent, the result
-stays available for manual assessment and explains which evidence is missing. Other obligations
-are manual by design.
+Where DefectDojo holds no record for an obligation, the result stays unknown and its note names
+the evidence to record. Other obligations are manual by design.
 
 ### CRA rules
 
 The **evidence date** is the period end, or today if the period has not ended yet. Rules that
-look at the state of findings or components use that date.
+look at the state of findings or components use that date. Dates are compared in the server's
+time zone.
 
 | Obligation | Satisfied | Otherwise |
 | --- | --- | --- |
@@ -123,8 +122,8 @@ These extra facts are for the assessor and do not change the state.
 
 A PSIRT advisory counts toward VH-4 for an Asset when all three of these hold:
 
-* Its status is published or revised. Draft, review, approved, and superseded advisories do not
-  count.
+* Its status is published, revised, or superseded. Draft, review, and approved advisories do not
+  count, so in practice any advisory that has been published can count.
 * Its publication date falls inside the assessment period, including the start and end dates.
 * The Asset is one of its recipients, as listed in the advisory's **Recipients** panel. An Asset
   is **matched** when a live match in one of the advisory's cases names the Asset or a component
@@ -223,7 +222,7 @@ read them from `/api/v2/evidence_pack_artifacts/`. PDF output is not available.
 | VH-2 is not satisfied and `sla_configured` is false | The Asset's SLA configuration enforces no severity | Assign an SLA configuration that enforces at least one severity, then recompute |
 | VH-2 is partially satisfied | More than 5% of open findings are past SLA, or an expired risk acceptance is unhandled | Check `breach_percent` and `risk_acceptances_expired_unhandled` in the computed facts |
 | VH-3 is not satisfied although the Asset has tests | No test in the period matches the rule | Check the test type, title, and target end date against the VH-3 rule |
-| VH-4 is unknown | No advisory counts toward the Asset: none was published or revised, it was published outside the period, the Asset is not among its recipients or is excluded, or PSIRT is not enabled | Open the advisory and check its status, publication date, and **Recipients** panel, then recompute. If no disclosure was needed, record why in the narrative |
+| VH-4 is unknown | No advisory counts toward the Asset: none has been published, it was published outside the period, the Asset is not among its recipients or is excluded, or PSIRT is not enabled | Open the advisory and check its status, publication date, and **Recipients** panel, then recompute. If no disclosure was needed, record why in the narrative |
 | A pack stays pending or processing | Background task processing is not running | Check with your administrator |
 | **Evidence Pack Not Generated** | DefectDojo refused the request, for example because the assessment has no obligations | Read the message in the notification |
 | A pack shows old states | A pack is a frozen snapshot | Recompute, then generate a new pack. Check the snapshot's generated time |
