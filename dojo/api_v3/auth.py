@@ -45,7 +45,7 @@ class TokenAuth(APIKeyHeader):
         if len(parts) != 2 or parts[0].lower() != _TOKEN_PREFIX:
             return None
         try:
-            token = Token.objects.select_related("user").get(key=parts[1])
+            token = Token.objects.select_related("user", "user__usercontactinfo").get(key=parts[1])
         except Token.DoesNotExist:
             return None
         user = token.user
