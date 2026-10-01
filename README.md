@@ -59,9 +59,7 @@ if running DefectDojo in detached mode via `docker compose up -d`, obtain admin 
 * [Official Docs](https://docs.defectdojo.com/)
 * [REST APIs](https://docs.defectdojo.com/en/open_source/api-v2-docs/)
 * [Client APIs and Wrappers](https://docs.defectdojo.com/en/open_source/api-v2-docs/#clients--api-wrappers)
-* Authentication options:
-    * [OAuth2/SAML2](https://docs.defectdojo.com/en/open_source/archived_docs/integrations/social-authentication/)
-    * [LDAP](https://docs.defectdojo.com/en/open_source/ldap-authentication/)
+* Authentication: local accounts in Open Source. [SSO (SAML, OIDC, OAuth), LDAP, and MFA](https://docs.defectdojo.com/admin/sso/) are DefectDojo Pro features.
 * [Supported tools](https://docs.defectdojo.com/en/connecting_your_tools/parsers/)
 * [How to Write Documentation Locally](/docs/README.md)
 * [Development](readme-docs/DOCKER.md#run-with-docker-compose-in-development-mode-with-hot-reloading)

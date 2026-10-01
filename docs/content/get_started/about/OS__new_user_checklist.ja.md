@@ -24,5 +24,5 @@ DefectDojoの本質は、セキュリティデータをインポートし、整�
 
 ### Open-Sourceの機能
 - 組織でJiraを使用していますか? 取り込んだデータからJiraチケットを作成する方法については、[Jira integration](/connectors/os_jira/os__jira_guide/)をご覧ください。
-- 組織内の多くのユーザーとDefectDojoを共有する予定はありますか? [ユーザー管理](/admin/user_management/about_perms_and_roles/)のガイドを確認し、ロールベースアクセス制御(RBAC)を設定してください。
+- 組織内の多くのユーザーとDefectDojoを共有する予定はありますか? [オープンソース版の権限](/admin/user_management/os__authorized_users/)を参照して、各ProductとProduct Typeを誰が閲覧できるかを制御してください。
 - 自動化に取り組む準備はできていますか? [DefectDojo API](/import_data/import_scan_files/api_pipeline_modelling/)を使用して新しいデータを自動的にインポートし、堅牢なCI/CDパイプラインを構築する方法を学びましょう。

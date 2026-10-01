@@ -15,7 +15,7 @@ weight: 1
 | Core vulnerability management | ✔️ Import, track, and manage findings from 500+ security tools | ✔️ Everything in open-source, optimized for scale |
 | Finding deduplication | ✔️ Standard deduplication | ✔️ Advanced, configurable deduplication |
 | REST API | ✔️ Full REST API | ✔️ Full REST API |
-| Authentication & access control | ✔️ Local auth and basic RBAC | ✔️ SSO (SAML/OAuth), MFA, advanced RBAC |
+| Authentication & access control | ✔️ Local accounts and per-Asset access lists | ✔️ SSO (SAML, OIDC, OAuth), LDAP, MFA, role-based access control |
 | User interface | ✔️ Community UI | ✔️ Modern Pro UI with performance improvements |
 | Dashboards & reporting | ✔️ Basic dashboards and reports | ✔️ Advanced, customizable dashboards and executive reporting |
 | Automation & workflows | ❌ Not included | ✔️ Rules Engine and automated workflows |
