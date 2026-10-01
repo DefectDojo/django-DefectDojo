@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "tool": "darkmoon",
+  "scan": {
+    "target": "https://demo.darkmoon.example.com",
+    "started_at": "2026-09-30T10:12:04Z",
+    "finished_at": "2026-09-30T10:19:51Z",
+    "campaign_id": "cmp-11aa22bb"
+  },
+  "findings": [
+    {
+      "title": "Boolean-based blind SQL injection in product search",
+      "severity": "high",
+      "cvss_score": 8.6,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+      "category": "sql_injection",
+      "status": "exploited",
+      "description": "The `q` parameter of the product search is concatenated into a SQL query, allowing boolean-based blind injection that exfiltrates the users table.",
+      "endpoint": "https://demo.darkmoon.example.com/search?q=shoes",
+      "discovered_by_agent": "wordpress",
+      "remediation": "Use parameterised queries / prepared statements for all database access.",
+      "evidence_commands": [
+        "curl -s 'https://demo.darkmoon.example.com/search?q=shoes%27%20AND%201=1--'",
+        "curl -s 'https://demo.darkmoon.example.com/search?q=shoes%27%20AND%201=2--'"
+      ],
+      "evidence_explanation": "The two payloads returned different result sets, confirming injection, then the users table was enumerated character by character.",
+      "cve": "CVE-2026-55512",
+      "mitre_attack_id": "T1190",
+      "mitre_attack_name": "Exploit Public-Facing Application",
+      "iso27001_control": "A.8.28",
+      "node_id": "finding-0001",
+      "plugin_or_component": "search-controller"
+    }
+  ]
+}
