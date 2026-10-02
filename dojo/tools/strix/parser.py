@@ -74,7 +74,7 @@ class StrixParser:
 
         finding = Finding(
             test=test,
-            title=item.get("title"),
+            title=self._title(item),
             severity=self._severity(item.get("severity")),
             description=self._description(item, vector),
             impact=item.get("impact"),
@@ -102,6 +102,10 @@ class StrixParser:
 
     def _severity(self, value):
         return self.SEVERITIES.get(str(value).lower(), "Info")
+
+    def _title(self, item):
+        # Every field is optional, including the title, and a Finding without one fails to save.
+        return item.get("title") or (f"Strix finding {item['id']}" if item.get("id") else "Strix finding")
 
     def _cwe(self, value):
         if not value:

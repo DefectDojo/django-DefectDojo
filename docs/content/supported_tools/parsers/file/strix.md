@@ -15,7 +15,7 @@ To import Strix results into DefectDojo:
 2. Export or copy the resulting `vulnerabilities.json` report
 3. Upload the file to DefectDojo using the "Strix Scan" scan type
 
-The report is a JSON array with one object per finding. A wrapped shape (`{"vulnerabilities": [...]}`) is also accepted for forward compatibility. Every field is optional: the set of keys varies by `finding_class` (code findings carry PoC and CVSS data, dependency findings carry package metadata), so missing fields are left unset on the Finding rather than filled with placeholders. A report that is not a JSON array (or a wrapped one) is rejected with an error instead of silently importing zero findings; a legitimately empty array imports zero findings.
+The report is a JSON array with one object per finding. A wrapped shape (`{"vulnerabilities": [...]}`) is also accepted for forward compatibility. Every field is optional: the set of keys varies by `finding_class` (code findings carry PoC and CVSS data, dependency findings carry package metadata), so missing fields are left unset on the Finding rather than filled with placeholders; the one exception is `title`, which falls back to the report id (or a generic name) because a Finding without a title cannot be saved. A report that is not a JSON array (or a wrapped one) is rejected with an error instead of silently importing zero findings; a legitimately empty array imports zero findings.
 
 ## Default Deduplication Hashcode Fields
 

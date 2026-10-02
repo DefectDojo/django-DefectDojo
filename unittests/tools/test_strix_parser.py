@@ -166,6 +166,23 @@ class TestStrixParser(DojoTestCase):
         self.assertFalse(finding.fix_available)
         self.assertIsNone(finding.mitigation)
 
+    def test_finding_without_title_falls_back_to_the_id(self):
+        report = io.StringIO(json.dumps([{
+            "id": "vuln-0004",
+            "severity": "low",
+            "description": "No title in the report.",
+        }]))
+        finding = list(StrixParser().get_findings(report, Test()))[0]
+        self.assertEqual("Strix finding vuln-0004", finding.title)
+
+    def test_finding_without_title_or_id_gets_a_generic_title(self):
+        report = io.StringIO(json.dumps([{
+            "severity": "low",
+            "description": "Neither a title nor an id in the report.",
+        }]))
+        finding = list(StrixParser().get_findings(report, Test()))[0]
+        self.assertEqual("Strix finding", finding.title)
+
     def test_wrong_shape_is_rejected(self):
         with self.assertRaises(TypeError):
             list(StrixParser().get_findings(io.StringIO('{"run": "x"}'), Test()))
