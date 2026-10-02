@@ -4,7 +4,7 @@ disableAliases = false
 disableHugoGeneratorInject = true
 disableKinds = ["taxonomy", "term"]
 enableEmoji = true
-enableGitInfo = false
+enableGitInfo = true
 enableRobotsTXT = true
 languageCode = "en-US"
 pagerSize = 10
@@ -21,6 +21,12 @@ copyRight = "Copyright (c) 2020-2025 DefectDojo, Inc."
 [build.buildStats]
   enable = true
 
+# Last-modified dates come from each file's latest git commit (enableGitInfo),
+# falling back to front matter. The sitemap template emits them as <lastmod>.
+# The deploy workflow checks out full history (fetch-depth: 0) so git dates are real.
+[frontmatter]
+  lastmod = [":git", "lastmod", "modified", "date", "publishDate"]
+
 [outputs]
   home = ["HTML", "RSS", "searchIndex", "SITEMAP"]
   section = ["HTML", "RSS", "SITEMAP"]
@@ -28,6 +34,15 @@ copyRight = "Copyright (c) 2020-2025 DefectDojo, Inc."
 [outputFormats.searchIndex]
   mediaType = "application/json"
   baseName = "search-index"
+  isPlainText = true
+  notAlternative = true
+
+# /llms.txt (https://llmstxt.org): a plain-text index of the English docs for
+# AI assistants, generated from the page tree by layouts/home.llmstxt.txt.
+# Enabled for English only, under [en.outputs] in languages.toml.
+[outputFormats.llmstxt]
+  mediaType = "text/plain"
+  baseName = "llms"
   isPlainText = true
   notAlternative = true
 
