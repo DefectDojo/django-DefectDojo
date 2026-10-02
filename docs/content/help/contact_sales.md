@@ -10,7 +10,7 @@ aliases:
 DefectDojo Cloud can be started in two ways:
 
 * **Pay as you go.** A monthly subscription billed to your card for what you process: a platform fee plus a per-finding rate, with Sensei AI billed per use. There is no annual commitment, and you can set a monthly spend limit. You check out with Stripe, and your instance is provisioned once checkout completes.
-* **Pre-Pay & Save, through our sales team.** An annual plan billed yearly, with capacity sized to your findings volume and pricing agreed with our team. Pre-paying for the year saves 40% or more compared with pay as you go.
+* **Pre-Pay & Save, through our sales team.** An annual plan billed yearly, with capacity sized to your findings volume and pricing agreed with our team. Pre-paying for the year saves 48% or more compared with pay as you go.
 
 If your team requires an on-premise DefectDojo installation, please connect with our Sales team by emailing [hello@defectdojo.com](mailto:hello@defectdojo.com). The steps below apply to DefectDojo Cloud.
 
