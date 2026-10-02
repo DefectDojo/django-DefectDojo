@@ -35,10 +35,10 @@ Complete the following steps in your Auth0 dashboard before configuring DefectDo
 In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Auth0**, and fill in the form:
 
 - **Auth0 OAuth Key** — enter your **Client ID**.
-- **Auth0 OAuth Secret** — enter your **Client Secret**.
+- **Auth0 OAuth Secret** — enter your **Client Secret**. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or the Auth0 domain.
 - **Auth0 Domain** — enter your **Domain** (e.g. `your-tenant.us.auth0.com`).
 
-Check **Enable Auth0 OAuth** and submit the form. (The Enable checkbox unlocks once the key and secret are filled in.) A **Login With Auth0** button will appear on the login page.
+Check **Enable Auth0 OAuth** and submit the form. (The Enable checkbox unlocks once the key is filled in and a secret is entered or already saved.) A **Login With Auth0** button will appear on the login page.
 
 Use **Validate Config** at any point to check the settings without saving them. It confirms the settings are complete, fetches the Auth0 discovery document for your domain, and echoes the exact **redirect URI** to register at Auth0.
 
@@ -50,7 +50,7 @@ Auth0 login does not synchronize Auth0 roles or groups into DefectDojo groups. F
 
 ## Troubleshooting
 
-**The Auth0 login button does not appear.** Enable and save the provider; the Enable checkbox also requires the key and secret to be present first.
+**The Auth0 login button does not appear.** Enable and save the provider; the Enable checkbox also requires the key and a secret (entered or already saved) first.
 
 **Login fails immediately after the Auth0 prompt.** A callback-URL mismatch — confirm **Allowed Callback URLs** contains the exact [Callback URL](#callback-url), including the trailing slash.
 
