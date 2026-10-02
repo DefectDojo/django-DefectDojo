@@ -290,8 +290,8 @@ class FindingViewSet(
 
     def list(self, request, *args, **kwargs):
         """
-        ID-first list: sort and paginate on the narrow finding table, then
-        hydrate only the page's rows with select_related JOINs.
+        ID-first list: paginate on the narrow finding table (IDs only),
+        then hydrate only the page's rows with select_related JOINs.
 
         Without this, adding select_related to get_queryset() would force
         Postgres to join every finding to 7 related tables *before* it can
@@ -305,12 +305,18 @@ class FindingViewSet(
         )
         prefetcher = _Prefetcher(request=request)
 
-        # 1. Filter on the narrow queryset (no JOINs — fast sort + LIMIT).
+        # 1. Filter the queryset (includes annotations from ordering
+        #    filters, e.g. MultivaluedOrderingFilter's _ord_found_by).
         queryset = self.filter_queryset(self.get_queryset())
 
-        # 2. Paginate: applies ORDER BY + LIMIT/OFFSET on bare finding rows.
-        page = self.paginate_queryset(queryset)
-        if page is None:
+        # 2. Paginate on IDs only.  Strip prefetches so Postgres
+        #    sorts/limits on the narrow finding table without firing any
+        #    M2M IN-queries.  values_list keeps the SQL to
+        #    SELECT id FROM dojo_finding WHERE … ORDER BY … LIMIT 25.
+        page_ids = self.paginate_queryset(
+            queryset.prefetch_related(None).values_list("pk", flat=True),
+        )
+        if page_ids is None:
             # No pagination configured (unlikely in practice).
             serializer = self.get_serializer()
             results = []
@@ -318,28 +324,33 @@ class FindingViewSet(
                 results.append(serializer.to_representation(entry))
                 prefetcher._prefetch(entry, prefetch_params)
             response = Response(results)
-            response.data = {"prefetch": prefetcher.prefetched_data, "results": results}
+            response.data = {
+                "prefetch": prefetcher.prefetched_data,
+                "results": results,
+            }
             return response
 
-        # 3. Collect the page's PKs and re-fetch with select_related JOINs.
-        #    Only the page size (typically 25) rows get joined — trivially fast.
-        page_ids = [finding.pk for finding in page]
-        ordering = queryset.query.order_by or list(Finding._meta.ordering)
-        m2m_prefetches = (
-            _FINDING_LIST_PREFETCH_RELATED_LOCATIONS
-            if locations_enabled()
-            else _FINDING_LIST_PREFETCH_RELATED_ENDPOINTS
-        )
-        hydrated = (
-            Finding.objects.filter(pk__in=page_ids)
+        # 3. Hydrate from the viewset's own queryset so authorization,
+        #    annotations, and subclass prefetches carry through.
+        #    select_related JOINs only the page-size rows (typically 25).
+        #    No order_by — we sort in Python by page_ids position so the
+        #    exact pagination ordering is preserved (avoids tie-breaking
+        #    instability from a second ORDER BY on the same keys, and
+        #    avoids FieldError when MultivaluedOrderingFilter annotations
+        #    like _ord_found_by are in the ordering).
+        page_ids = list(page_ids)
+        hydrated_by_pk = {
+            f.pk: f
+            for f in self.get_queryset()
+            .filter(pk__in=page_ids)
             .select_related(*_FINDING_LIST_SELECT_RELATED)
-            .prefetch_related(*m2m_prefetches)
-            .order_by(*ordering)
-        )
+        }
+        # 4. Preserve the exact ordering the paginator produced.
+        page = [hydrated_by_pk[pk] for pk in page_ids if pk in hydrated_by_pk]
 
         serializer = self.get_serializer()
         results = []
-        for entry in hydrated:
+        for entry in page:
             results.append(serializer.to_representation(entry))
             prefetcher._prefetch(entry, prefetch_params)
 
