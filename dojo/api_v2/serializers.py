@@ -24,7 +24,7 @@ from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.location.feature import locations_enabled
-from dojo.location.models import Location
+from dojo.location.models import Location, LocationProductReference
 from dojo.location.queries import get_authorized_locations
 from dojo.models import (
     DEDUPLICATION_EXECUTION_MODE_CHOICES,
@@ -238,8 +238,11 @@ class MetaSerializer(serializers.ModelSerializer):
             endpoint = data.pop("endpoint", None)
             if endpoint is not None:
                 data["location"] = endpoint
-        if data.get("location_product") is not None and data.get("location") is None:
-            raise serializers.ValidationError({"location_product": "location_product only applies to location metadata."})
+        if (location_product := data.get("location_product")) is not None:
+            if (location := data.get("location")) is None:
+                raise serializers.ValidationError({"location_product": "location_product only applies to location metadata."})
+            if not LocationProductReference.objects.filter(location=location, product=location_product).exists():
+                raise serializers.ValidationError({"location_product": "The product does not reference this location."})
         DojoMeta(**data).clean()
         return data
 
