@@ -68,7 +68,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Image**
 - **Text block**
 
-**Tabular** and **Detail** blocks both pull live records from one entity. You pick the entity with a model choice, then select which fields to include and how to order the records. The model choice is exactly one of these seven entities:
+**Tabular** and **Detail** blocks both pull live records from one entity. You pick the entity with a model choice, then select which fields to include and how to order the records. The model choice is one of these entities:
 
 - **Organization**
 - **Asset**
@@ -77,6 +77,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Finding**
 - **Test type**
 - **Risk acceptance**
+- **Location** (only when Locations are enabled). A switch under the model choice picks what each row is: **Location** (every location, whatever its type), **URL**, **Dependency**, or **Location per Asset**.
 
 > **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. You may still encounter the legacy wording in some underlying field and filter names.
 
@@ -85,6 +86,22 @@ The difference is presentation: a **Tabular** block lays the records out as a ta
 Fields render in the order they are listed. Selecting a field adds it to the end of the list, and the **Fields** section of the block editor shows the selection as a numbered list you can rearrange: drag a field by its handle, or use the arrow buttons to move it up or down. Removing a field from that list deselects it. Columns in a Tabular block, and the label and value pairs in a Detail block, follow this order when the report is generated.
 
 When Locations are enabled, each of the Organization, Asset, Engagement, Test, and Finding entities offers a **Location Count** field. An Asset counts the locations it references directly and a Finding counts the locations attached to it. An Organization rolls up the distinct locations across its Assets, and an Engagement or Test counts the distinct locations touched by its Findings, so a host shared by several findings counts once. The counts respect the viewer's permissions, so a user who can only see some Assets in an Organization sees only those Assets' locations in its count.
+
+### Reporting which Assets a location belongs to
+
+DefectDojo stores each location once, so a single host or URL can belong to several Assets, and those Assets can sit in different Organizations. There are two ways to report on that link, and you can use either one in the same report.
+
+**Location per Asset** gives one row for each pairing of a location and an Asset. If three Assets reference a location, it appears on three rows. Each row carries the location's type and value, the Asset's name, the Organization's name, and the status of that link (**Active** or **Mitigated**), so you can filter to live links only. Use this for exports you want to sort, pivot, or match against another inventory such as a CMDB.
+
+**Location**, **URL**, and **Dependency** blocks also offer three columns that list the Assets on one row per location:
+
+- **Asset Names**: every Asset that references the location.
+- **Active Asset Names**: only the Assets whose link to the location is Active.
+- **Organization Names**: the distinct Organizations of those Assets, which can be fewer than the Assets.
+
+Names are sorted and separated by `; `. A location referenced by so many Assets that the list goes past 32,000 characters is cut off with `…`, which keeps each value inside the Excel cell limit. The Location per Asset block has no such limit, so use it for locations shared very widely.
+
+Both follow the viewer's permissions. The Assets and Organizations named are only the ones the person the report is generated for can see, the same rule the **Active** and **Total** Asset counts already follow.
 
 A **Chart** block draws one chart from the catalog below — the same charts the Insights dashboards use, so a figure in a report matches the figure your team already reads on screen. You choose the chart, and the chart decides what it can be filtered by:
 
