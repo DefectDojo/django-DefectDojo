@@ -1,0 +1,36 @@
+[
+  {
+    "id": "vuln-0001",
+    "title": "Legacy jobs.list handler bypasses task and queue permission filtering",
+    "severity": "medium",
+    "timestamp": "2026-09-23 07:13:47 UTC",
+    "description": "The legacy handler for `jobs.list` (registered at `min_version` \"1.0\", served for API versions below 2.1) returns raw job entries without the task and queue permission filtering that the 2.1+ handler applies.",
+    "impact": "An authenticated user can, within its own organization, learn the id and name of every task currently being executed by any organization job runner, including tasks in projects the caller cannot read.",
+    "target": "/workspace/sample-app",
+    "technical_analysis": "`server/services/jobs.py` registers two handlers for `jobs.list`. The legacy one returns `job_bll.get_all(org_id, ...)` entries directly, while `list_21` applies a `PermissionsFilter` for both `Task` and `Queue` references. `_get_endpoint` selects the handler whose `min_version` is the highest one not exceeding the requested version, so an authenticated user bypasses both filters by pinning an old API version in the URL.",
+    "poc_description": "1. As a `user`-role member of organization A, have another user start a task in a project the attacker has no read access to, executed by an organization job runner.\n2. Call `POST /v2.0/jobs.list` (explicitly requesting API version 2.0, which resolves to the legacy handler).\n3. The response lists every organization job runner with `task: {id, name}` of the restricted task, `queue`, and `queues` ids.",
+    "poc_script_code": "```python\n#!/usr/bin/env python3\nimport json\nimport requests\n\nBASE = \"http://<HOST>\"\nCREDS = (\"<ACCESS_KEY>\", \"<SECRET_KEY>\")\n\nresp = requests.post(f\"{BASE}/v2.0/jobs.list\", auth=CREDS, json={\"last_seen\": 3600}, timeout=30)\nresp.raise_for_status()\nlegacy = resp.json()[\"jobs\"]\nprint(json.dumps(legacy, indent=2))\n```",
+    "remediation_steps": "Apply the same `PermissionsFilter`-based redaction of task and queue references in the legacy `jobs.list` handler that the 2.1 handler already performs.",
+    "evidence": "Handler pair in `server/services/jobs.py`:\n\n```python\n@endpoint(\n    \"jobs.list\",\n    request_data_model=ListRequest,\n    response_data_model=ListResponse_v1_5,\n)\ndef list_all(call: APICall, org_id, request: ListRequest):\n    jobs = job_bll.get_all(org_id, request.last_seen)\n```",
+    "assumptions": "Assumes an authenticated `user`-role account in the same organization as the victim job runners/tasks.",
+    "counterevidence": "The leaked references do not by themselves unlock writes: `queues.enqueue`/`queues.update` re-validate via `QueueAccessValidator` and `ensure_permissions`, so the impact stays informational.",
+    "confidence": "medium",
+    "severity_change_conditions": "Evidence that API versions below 2.1 are rejected by deployment configuration would lower the severity further.",
+    "fix_effort": "low",
+    "cvss": 4.3,
+    "cvss_breakdown": {
+      "attack_vector": "N",
+      "attack_complexity": "L",
+      "privileges_required": "L",
+      "user_interaction": "N",
+      "scope": "U",
+      "confidentiality": "L",
+      "integrity": "N",
+      "availability": "N"
+    },
+    "cwe": "CWE-862",
+    "finding_class": "dynamic",
+    "agent_id": "c0fc9dfe",
+    "agent_name": "Platform Reviewer"
+  }
+]
