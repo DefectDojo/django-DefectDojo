@@ -124,6 +124,7 @@ def api_v2_key(request):
                                     messages.SUCCESS,
                                     _("API Key generated successfully."),
                                     extra_tags="alert-success")
+                return HttpResponseRedirect(reverse("api_v2_key"))
         else:
             raise PermissionDenied
     else:
