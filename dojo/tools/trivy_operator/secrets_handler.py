@@ -24,7 +24,9 @@ class TrivySecretsHandler:
         resource_kind = labels.get("trivy-operator.resource.kind", "")
         resource_name = labels.get("trivy-operator.resource.name", "")
         container_name = labels.get("trivy-operator.container.name", "")
-        service = f"{resource_namespace}/{resource_kind}/{resource_name}"
+        # resource_name changes every deploy (ReplicaSet-generated) — excluded so
+        # service stays stable and close_old_findings matches across redeploys.
+        service = f"{resource_namespace}/{resource_kind}"
         if container_name:
             service = f"{service}/{container_name}"
         for secret in secrets:
