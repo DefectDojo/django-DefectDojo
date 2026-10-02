@@ -214,6 +214,15 @@ class MetaSerializer(serializers.ModelSerializer):
         default=None,
         allow_null=True,
     )
+    # A Location is shared by every product that recorded the same value, so location
+    # metadata is scoped to one product. ``editable=False`` on the model keeps it out of
+    # ``ModelSerializer``'s generated fields, so it is declared here to be writable.
+    location_product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
     finding = serializers.PrimaryKeyRelatedField(
         queryset=Finding.objects.all(),
         required=False,
@@ -222,8 +231,15 @@ class MetaSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        if locations_enabled() and "endpoint" in data:
-            data["location"] = data.pop("endpoint")
+        if locations_enabled():
+            # Legacy clients name the location through ``endpoint``. The field defaults to
+            # None, so only an endpoint that was actually given may stand in for ``location``;
+            # popping unconditionally used to replace a real location with None.
+            endpoint = data.pop("endpoint", None)
+            if endpoint is not None:
+                data["location"] = endpoint
+        if data.get("location_product") is not None and data.get("location") is None:
+            raise serializers.ValidationError({"location_product": "location_product only applies to location metadata."})
         DojoMeta(**data).clean()
         return data
 
