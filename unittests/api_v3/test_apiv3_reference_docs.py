@@ -12,6 +12,7 @@ URL move carries them along).
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from django.templatetags.static import static
@@ -50,6 +51,14 @@ class TestApiV3ScalarReference(ApiV3TestCase):
         self.assertIn(f'data-url="{reverse("api_v3:openapi-json")}"', html)
         # Swagger (framework-bundled assets) remains linked for noscript.
         self.assertIn(reverse("api_v3:openapi-view"), html)
+
+    def test_hosted_ai_assistant_is_disabled(self):
+        # Scalar turns its hosted "Ask AI" assistant on by default; the page keeps it off so it
+        # never talks to a third-party service.
+        html = self._get().content.decode()
+        match = re.search(r"data-configuration='([^']*)'", html)
+        self.assertIsNotNone(match, "the Scalar script tag must carry a data-configuration")
+        self.assertTrue(json.loads(match.group(1))["agent"]["disabled"])
 
     def test_reference_page_is_not_an_api_operation(self):
         # A plain Django view: it must NOT appear in the OpenAPI schema (and therefore places no
