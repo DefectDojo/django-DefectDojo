@@ -21,12 +21,8 @@ For more information on Roles, please refer to our **Introduction To Roles** art
 
 ## The All Groups page
 
-From the sidebar, navigate to 👤**Users \> Groups** to see a list of all active and inactive user groups. 
+From the sidebar, navigate to **Settings > Users & Permissions > Groups** to see a list of all active and inactive user groups. From here, you can create, delete or view your individual Group pages.
 
-![image](images/Create_a_User_Group_for_shared_permissions.png)
-From here, you can create, delete or view your individual Group pages.
-
-For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users, the Pro UI's All Groups has a few additional options.
 * You can filter this table by Group Name, Description, Email Address, Global Role, as well as the total number of Users, Organizations, and Assets associated with the Group.
 * You can also adjust a Group's Permissions or other settings by clicking the "⋮" button next to the Group you wish to edit.
 
@@ -36,8 +32,6 @@ For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> 
 
 Viewing a group displays all Group information, such as ID, name, description, global role, etc. The Group Members, Organizations, and Assets associated with the group are also displayed. Additionally, configuration permissions tied to a Group can be updated directly from the “View Group” page.
 
-For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users, the Pro UI's Group View allows you to assign Configuration Permission adjustments in a slightly different way.
-
 ![image](images/group_view_pro_ui.png)
 
 * All configuration permissions are displayed in a dropdown which is grouped into subcategories. If the selection of configuration permissions is different from their current value, an “Update Configuration Permissions” button is displayed.
@@ -46,93 +40,99 @@ For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> 
 
 * Once a few additional permissions have been selected, the user will be asked to confirm they would like to update the permissions for the selected group before an update is made.
 
-## Create / Edit a User Group
+## Create a User Group
 
-1. Navigate to the 👤**Users \> Groups** page on the sidebar. You will see a list of all existing User Groups, including their Name, Description, Number of Users, Global Role (if applicable) and Email.  
-​
-![image](images/Create_a_User_Group_for_shared_permissions_2.png)
+1. Navigate to **Settings > Users & Permissions > Groups** on the sidebar.
 
-2. Click the **🛠️ button** next to the All Groups heading, and select **\+ New Group.**   
-​
-![image](images/Create_a_User_Group_for_shared_permissions_3.png)
-  
+2. Click **\+ New Group** above the table of existing Groups.
 
-3. This will take you to a page where you can create a new Group. Set the Name for this Group, and add a Description if you wish.  
-  
-You can also select a Global Role that you wish to apply to this Group, if you wish. Adding a Global Role to the Group will give all Group Members access to all DefectDojo data, along with a limited amount of edit access depending on the Global Role you choose. See our **Introduction To Roles** article for more information.
+3. In the **New Group** window, set the Name for this Group, and add a Description if you wish.
+
+   You can also select a Global Role that you wish to apply to this Group. Adding a Global Role to the Group will give all Group Members access to all DefectDojo data, along with a limited amount of edit access depending on the Global Role you choose. See our **Introduction To Roles** article for more information.
+
+4. Click **Submit**.
+
+![image](images/group_pro_new_group.png)
 
 The account that initially creates a Group will have an Owner Role for the Group by Default.
 
+To change a Group's Name, Description, email address or Global Role later, open the Group page, click the ⚙️ button in the top right corner, and select **Edit Group**.
+
 ### Set an email address to receive reports
 
-The Weekly Digest is a report on all Group-assigned Assets / Organizations. To have a weekly Digest sent out, enter the destination email address you wish to use on the Create / Edit Group form.  Group members will still receive notifications as usual.
+The Weekly Digest is a report on all Group-assigned Assets / Organizations. To have a weekly Digest sent out, enter the destination email address you wish to use in the **Email Address** field when you create or edit the Group.  Group members will still receive notifications as usual.
 
-### Viewing a Group Page
+## Manage a Group's Users
 
-Once you have created a Group, you can access it by selecting it in the menu listed under **Users \> Groups.**
+Group Membership is managed from the individual Group page, which you can select from the list in the **Settings > Users & Permissions > Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
 
-The Group Page can be customized with a **Description**.It features a list of all **Group Members,** as well as the assigned **Assets, Organizations**, and the associated **Role** associated with each of these**.**
+In order to view or edit a Group's Membership, a User must have the appropriate Configuration permissions enabled as well as Membership in the Group (or Superuser status).
 
-You can also see the Group’s **Configuration Permissions** listed here.
+Membership is managed from the Group's **Permissions** window:
 
-## Manage a Group’s Users
+1. On the Group page, click the ⚙️ button in the top right corner and select **Permissions**. This entry is hidden from Users who cannot add or remove Group Members.
 
-Group Membership is managed from the individual Group page, which you can select from the list in the **Users \> Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
+![image](images/group_pro_gear_menu.png)
 
-In order to view or edit a Group’s Membership, a User must have the appropriate Configuration permissions enabled as well as Membership in the Group (or Superuser status).
+2. The **Permissions for Group** window lists every current Member, along with the Role each one has in the Group.
 
-### **Add a User to a Group**
+![image](images/group_pro_permissions_dialog.png)
+
+### Add a User to a Group
 
 User Groups can have as many Users assigned as you wish. All Users in a Group will be given the associated Role on each Asset or Organization listed, but Users may also have Individual Roles which supersede the Group role.
 
-1. From the Group page, select **\+ Add Users** from the **☰** button at the edge of the **Members** heading.  
-​
-![image](images/Create_a_User_Group_for_shared_permissions_4.png)
+Users are added to a Group **one at a time**. To add several Users, repeat the steps below for each of them.
 
-2. This will take you to the **Add Some Group Members** screen. Open the Users drop\-down menu, and then check off each user that you wish to add to the Group.  
-​
-![image](images/Create_a_User_Group_for_shared_permissions_5.png)
+1. In the **Permissions for Group** window, open the **Select a User** drop\-down. Type in the search box to narrow the list, then choose the User you want to add.
 
-3. .Select the Group Role that you wish to assign these Users. This determines their ability to configure the Group.
+![image](images/group_pro_select_user.png)
+
+2. Open the **Select a Role** drop\-down and choose the Group Role to assign to this User. This determines their ability to configure the Group.
+
+3. Click **Add User**. The User appears in the Members table straight away, and the form is cleared so you can add the next one.
+
+![image](images/group_pro_add_user.png)
 
 Note that adding a member to a Group will not allow them access to their own Group page by default. This is a separate Configuration permission which must be enabled first.
 
-### **Edit or Delete a Member from a User Group**
+If you need to add a large number of Users, you can also create Group Members through the API. Send one `POST` request per User to the `dojo_group_members` endpoint, with the `group`, `user` and `role` of the new Member. The `role` is the numeric ID of the Role, which you can look up on the `roles` endpoint.
 
-1. From the Group page, select the ⋮ next to the Name of the User you wish to Edit or Delete from the Group.  
+### Edit or Remove a Member from a User Group
 
-**📝 Edit** will take you to the Edit Member screen, where you can change this user's Role (from Reader, Maintainer or Owner to a different choice).  
+In the **Members** table of the **Permissions for Group** window:
 
-**🗑️ Delete** removes a User's Membership altogether. It will not remove any contributions or changes the User has made to the Asset or Organization.
+* **Change a Role:** click the Role shown next to the User's name and select a different Role from the menu (for example, from Reader to Maintainer or Owner). The change is saved as soon as you pick the new Role.
+* **Remove a Member:** click the 🗑️ button at the end of the User's row. This removes a User's Membership altogether, and takes effect immediately, without a confirmation prompt. It will not remove any contributions or changes the User has made to the Asset or Organization.
 
-![image](images/Create_a_User_Group_for_shared_permissions_6.png) 
+## Manage a Group's Permissions
 
-## Manage a Group’s Permissions
+Note that only Superusers can edit a Group's permissions (Asset / Organization, or Configuration).
 
-Group Permissions are managed from the individual Group page, which you can select from the list in the **Users \> Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
+### Add Asset Roles or Organization Roles for a Group
 
-Note that only Superusers can edit a Group’s permissions (Asset / Organization, or Configuration).  
-​
-### **Add Asset Roles or Organization Roles for a Group**
+You can register a Group on as many Assets or Organizations as you wish, with a different Role on each. A Group is added to an Asset or Organization from that Asset or Organization, rather than from the Group page. The Group page lists the result, under the Organizations and Assets the Group can access.
 
-You can register as many Asset Roles or Organization Roles as you wish in each Group.
+1. Open the Asset or Organization you want the Group to have access to, click the ⚙️ button in the top right corner, and select **Permissions**.
 
-1. From the Group page, select **\+ Add Organizations**, or \+ **Add Asset** from the relevant heading (Organization Groups or Asset Groups).  
-​
-![image](images/Create_a_User_Group_for_shared_permissions_7.png)
+2. In the **Permissions** window, select the **Groups** tab at the top. The **Users** tab beside it is where individual Users are given a Role on the same Asset or Organization.
 
-2. This will take you to a **Register New Assets / Organizations** Page, where you can select an Asset or Organization to add from the drop\-down menu.
+3. Open the **Select a Group** drop\-down and choose the Group.
 
-![image](images/Create_a_User_Group_for_shared_permissions_8.png)
+4. Open the **Select a Role** drop\-down and choose the Role that you want all Group members to have regarding this particular Asset or Organization.
 
-3. Select the Role that you want all Group members to have regarding this particular Asset or Organization.
+5. Click **Add Group**.
+
+![image](images/group_pro_asset_groups.png)
 
 Groups cannot be assigned to Assets or Organizations without a Role. If you're not sure which Role you want a Group to have, Reader is a good 'default' option. This will keep your Asset state secure until you make your final decision about the Group Role.
 
-### **Assign Configuration Permissions to a Group**
+As with Group Members, a Group's Role on an Asset or Organization can be changed from the Role shown in its row, and the Group can be removed with the 🗑️ button.
 
-If you want the Members in your Group to access Configuration functions, and control certain aspects of DefectDojo, you can assign these responsibilities from the Group page. 
+> Depending on your instance's settings, Assets and Organizations may be labelled **Products** and **Product Types** in the interface. They are the same objects.
 
-Assign View, Add, Edit or Delete roles from the menu in the bottom\-right hand corner. Checking off a Configuration Permission will immediately give the Group access to this particular function.
+### Assign Configuration Permissions to a Group
 
-![image](images/Create_a_User_Group_for_shared_permissions_9.png)
+If you want the Members in your Group to access Configuration functions, and control certain aspects of DefectDojo, you can assign these responsibilities from the Group page, using the **Configuration Permissions** drop\-down described in [Viewing A Group](#viewing-a-group).
+
+Select the permissions you want from the drop\-down, click **Update Configuration Permissions**, and confirm the change.
