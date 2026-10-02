@@ -24,5 +24,5 @@ All diese Funktionen können automatisiert werden, und da DefectDojo über 500 T
 
 ### Open-Source-Funktionen
 - Verwendet Ihre Organisation Jira? Erfahren Sie, wie Sie unsere [Jira-Integration](/connectors/os_jira/os__jira_guide/) nutzen können, um Jira-Tickets aus den von Ihnen importierten Daten zu erstellen.
-- Erwarten Sie, DefectDojo mit vielen Benutzern in Ihrer Organisation zu teilen? Sehen Sie sich unsere Anleitungen zur [Benutzerverwaltung](/admin/user_management/about_perms_and_roles/) an und richten Sie eine rollenbasierte Zugriffskontrolle (RBAC) ein.
+- Erwarten Sie, DefectDojo mit vielen Benutzern in Ihrer Organisation zu teilen? Unter [Open-Source-Berechtigungen](/admin/user_management/os__authorized_users/) erfahren Sie, wie Sie steuern, wer welches Produkt und welchen Produkttyp sehen kann.
 - Bereit, in die Automatisierung einzusteigen? Erfahren Sie, wie Sie die [DefectDojo-API](/import_data/import_scan_files/api_pipeline_modelling/) verwenden, um automatisch neue Daten zu importieren, und bauen Sie eine robuste CI/CD-Pipeline auf.

@@ -24,5 +24,5 @@ DefectDojo 的核心理念是导入安全数据、对其进行组织，并将其
 
 ### 开源版功能
 - 您的组织使用 Jira 吗？了解如何使用我们的 [Jira 集成](/connectors/os_jira/os__jira_guide/)，根据您导入的数据创建 Jira 工单。
-- 您计划让组织内许多用户共同使用 DefectDojo 吗？请查阅我们的[用户管理](/admin/user_management/about_perms_and_roles/)指南，并设置基于角色的访问控制（RBAC）。
+- 您计划让组织内许多用户共同使用 DefectDojo 吗？请参阅[开源版权限](/admin/user_management/os__authorized_users/)，控制谁可以查看每个产品和产品类型。
 - 准备好深入了解自动化了吗？了解如何使用 [DefectDojo API](/import_data/import_scan_files/api_pipeline_modelling/) 自动导入新数据，并构建强大的 CI/CD 管道。

@@ -21,7 +21,7 @@ Regulations are accessible from within the Configuration submenu of the sidebar.
 
 ### Permissions
 
-All Users can view the list of existing Regulations, regardless of their global role.
+All Users can view the list of existing Regulations.
 
 However, the ability to create, edit, and delete Regulations is limited to Superusers. 
 
