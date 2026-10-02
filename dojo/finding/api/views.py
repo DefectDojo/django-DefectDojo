@@ -34,6 +34,7 @@ from dojo.api_v2 import (
 from dojo.api_v2 import (
     serializers as api_v2_serializers,
 )
+from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.api_v2.views import (
     DojoModelViewSet,
     get_request_boolean,
@@ -95,6 +96,51 @@ class FindingTemplatesViewSet(
 
     def get_queryset(self):
         return Finding_Template.objects.all().order_by("id")
+
+
+# FK/reverse-O2O relations that benefit from SQL JOINs (select_related).
+# Used only in the list() override where joins are applied to the already-sliced page,
+# not to the full queryset (which would force Postgres to join millions of rows before
+# sorting and applying LIMIT).
+_FINDING_LIST_SELECT_RELATED = (
+    "test",
+    "test__test_type",
+    "test__engagement",
+    "test__environment",
+    "test__engagement__product",
+    "test__engagement__product__prod_type",
+    "jira_issue",
+)
+
+# M2M / reverse-FK relations that must stay as prefetch_related (separate IN-queries).
+# Defined once so get_queryset() and list() stay in sync.
+_FINDING_LIST_PREFETCH_RELATED_LOCATIONS = (
+    "locations__location__url",
+    "reviewers",
+    "found_by",
+    notes_prefetch(),
+    "risk_acceptance_set",
+    "tags",
+    "finding_group_set",
+    "files",
+    "burprawrequestresponse_set",
+    "status_finding",
+    "finding_meta",
+)
+
+_FINDING_LIST_PREFETCH_RELATED_ENDPOINTS = (
+    "endpoints",
+    "reviewers",
+    "found_by",
+    notes_prefetch(),
+    "risk_acceptance_set",
+    "tags",
+    "finding_group_set",
+    "files",
+    "burprawrequestresponse_set",
+    "status_finding",
+    "finding_meta",
+)
 
 
 # Authorization: object-based
@@ -210,19 +256,9 @@ class FindingViewSet(
             findings = get_authorized_findings(
                 "view",
             ).prefetch_related(
-                "locations__location__url",
-                "reviewers",
-                "found_by",
-                notes_prefetch(),
-                "risk_acceptance_set",
+                *_FINDING_LIST_PREFETCH_RELATED_LOCATIONS,
                 "test",
-                "tags",
                 "jira_issue",
-                "finding_group_set",
-                "files",
-                "burprawrequestresponse_set",
-                "status_finding",
-                "finding_meta",
                 "test__test_type",
                 "test__engagement",
                 "test__environment",
@@ -234,19 +270,9 @@ class FindingViewSet(
             findings = get_authorized_findings(
                 "view",
             ).prefetch_related(
-                "endpoints",
-                "reviewers",
-                "found_by",
-                notes_prefetch(),
-                "risk_acceptance_set",
+                *_FINDING_LIST_PREFETCH_RELATED_ENDPOINTS,
                 "test",
-                "tags",
                 "jira_issue",
-                "finding_group_set",
-                "files",
-                "burprawrequestresponse_set",
-                "status_finding",
-                "finding_meta",
                 "test__test_type",
                 "test__engagement",
                 "test__environment",
@@ -255,12 +281,82 @@ class FindingViewSet(
             )
 
         # No blanket .distinct(): get_authorized_findings filters by a scalar product-id IN (no row
-        # multiplication), the prefetches above don't join, and ApiFindingFilter rewrites its to-many
-        # value filters (endpoints/found_by/reviewers/finding_group/risk_acceptance) as Exists() while
-        # ordering by to-many fields aggregates via MultivaluedOrderingFilter. Tag filters still apply
-        # DojoFilter.qs's tag-conditional distinct. A query-wide DISTINCT over the full wide-row finding
-        # result set forces an expensive sort/hash-aggregate on every list request, so it's dropped.
+        # multiplication), and ApiFindingFilter rewrites its to-many value filters
+        # (endpoints/found_by/reviewers/finding_group/risk_acceptance) as Exists() while ordering by
+        # to-many fields aggregates via MultivaluedOrderingFilter. Tag filters still apply
+        # DojoFilter.qs's tag-conditional distinct. The list() override applies select_related JOINs
+        # only to the already-paginated page, so this queryset stays narrow for sorting.
         return findings
+
+    def list(self, request, *args, **kwargs):
+        """
+        ID-first list: paginate on the narrow finding table (IDs only),
+        then hydrate only the page's rows with select_related JOINs.
+
+        Without this, adding select_related to get_queryset() would force
+        Postgres to join every finding to 7 related tables *before* it can
+        ORDER BY and LIMIT, which is catastrophic at scale (3M+ findings).
+        """
+        prefetch_params = request.GET.get("prefetch", "")
+        prefetch_params = (
+            prefetch_params.split(",")
+            if "," in prefetch_params
+            else request.GET.getlist("prefetch")
+        )
+        prefetcher = _Prefetcher(request=request)
+
+        # 1. Filter the queryset (includes annotations from ordering
+        #    filters, e.g. MultivaluedOrderingFilter's _ord_found_by).
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # 2. Paginate on IDs only.  Strip prefetches so Postgres
+        #    sorts/limits on the narrow finding table without firing any
+        #    M2M IN-queries.  values_list keeps the SQL to
+        #    SELECT id FROM dojo_finding WHERE … ORDER BY … LIMIT 25.
+        page_ids = self.paginate_queryset(
+            queryset.prefetch_related(None).values_list("pk", flat=True),
+        )
+        if page_ids is None:
+            # No pagination configured (unlikely in practice).
+            serializer = self.get_serializer()
+            results = []
+            for entry in queryset:
+                results.append(serializer.to_representation(entry))
+                prefetcher._prefetch(entry, prefetch_params)
+            response = Response(results)
+            response.data = {
+                "prefetch": prefetcher.prefetched_data,
+                "results": results,
+            }
+            return response
+
+        # 3. Hydrate from the viewset's own queryset so authorization,
+        #    annotations, and subclass prefetches carry through.
+        #    select_related JOINs only the page-size rows (typically 25).
+        #    No order_by — we sort in Python by page_ids position so the
+        #    exact pagination ordering is preserved (avoids tie-breaking
+        #    instability from a second ORDER BY on the same keys, and
+        #    avoids FieldError when MultivaluedOrderingFilter annotations
+        #    like _ord_found_by are in the ordering).
+        page_ids = list(page_ids)
+        hydrated_by_pk = {
+            f.pk: f
+            for f in self.get_queryset()
+            .filter(pk__in=page_ids)
+            .select_related(*_FINDING_LIST_SELECT_RELATED)
+        }
+        # 4. Preserve the exact ordering the paginator produced.
+        page = [hydrated_by_pk[pk] for pk in page_ids if pk in hydrated_by_pk]
+
+        serializer = self.get_serializer()
+        results = []
+        for entry in page:
+            results.append(serializer.to_representation(entry))
+            prefetcher._prefetch(entry, prefetch_params)
+
+        response = self.get_paginated_response(results)
+        response.data["prefetch"] = prefetcher.prefetched_data
+        return response
 
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":
