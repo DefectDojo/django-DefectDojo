@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ユーザー管理 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/admin/user_management/</link><description>Recent content in ユーザー管理 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Fri, 14 Aug 2026 20:41:29 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/admin/user_management/index.xml" rel="self" type="application/rss+xml"/><item><title>オープンソース版の権限</title><link>https://docs.defectdojo.com/ja/admin/user_management/os__authorized_users/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/user_management/os__authorized_users/</guid><description>&lt;p&gt;オープンソース版DefectDojoは、&lt;strong&gt;Authorized Users&lt;/strong&gt;（承認済みユーザー）モデルによって製品と製品タイプへのアクセスを制御します。各製品と各製品タイプには、そのレコードおよびその配下にあるデータを閲覧できる人を一覧表示するAuthorized Usersパネルがあります。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ユーザー管理 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/admin/user_management/</link><description>Recent content in ユーザー管理 on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Fri, 02 Oct 2026 21:49:02 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/admin/user_management/index.xml" rel="self" type="application/rss+xml"/><item><title>オープンソース版の権限</title><link>https://docs.defectdojo.com/ja/admin/user_management/os__authorized_users/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/user_management/os__authorized_users/</guid><description>&lt;p&gt;オープンソース版DefectDojoは、&lt;strong&gt;Authorized Users&lt;/strong&gt;（承認済みユーザー）モデルによって製品と製品タイプへのアクセスを制御します。各製品と各製品タイプには、そのレコードおよびその配下にあるデータを閲覧できる人を一覧表示するAuthorized Usersパネルがあります。&lt;/p&gt;
 &lt;p&gt;DefectDojo Proをお使いの場合、この記事はインストール環境には当てはまりません。Proではよりリッチなロールベースのシステムを使用しており、詳細は&lt;a href="../about_perms_and_roles/"&gt;DefectDojoにおける権限&lt;/a&gt;で説明しています。&lt;/p&gt;
 &lt;h2 id="アクセスの付与方法"&gt;アクセスの付与方法&lt;/h2&gt;
 &lt;p&gt;リストは2つあり、ユーザーはそのいずれか一方に含まれているだけでアクセス権を得られます。&lt;/p&gt;
@@ -80,7 +80,19 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;必要に応じて &lt;strong&gt;権限を割り当てます&lt;/strong&gt; — 製品/製品タイプのメンバーシップ、Configuration Permissions、Global Role、またはスーパーユーザーのステータスなどです。詳細は&lt;a href="../set_user_permissions/"&gt;ユーザーの権限を設定する&lt;/a&gt;を参照してください。何も割り当てられていない新規ユーザーは、いかなる製品や検出事項も閲覧できません。&lt;/p&gt;</description></item><item><title>DefectDojoにおける権限</title><link>https://docs.defectdojo.com/ja/admin/user_management/about_perms_and_roles/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/user_management/about_perms_and_roles/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;必要に応じて &lt;strong&gt;アクセス権を付与します&lt;/strong&gt;。ユーザーが必要とする各アセットまたは組織のAuthorized Usersリストにユーザーを追加するか、スタッフまたはスーパーユーザーとして設定します。詳細は&lt;a href="../os__authorized_users/"&gt;オープンソース版の権限&lt;/a&gt;を参照してください。何も割り当てられていない新規ユーザーは、いかなるアセットや検出事項も閲覧できません。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;認証情報を新規ユーザーへ帯域外で送付します&lt;/strong&gt;（メール、チームのチャットツール、あるいは普段秘密情報を共有している方法など）。含める内容は次のとおりです。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DefectDojoインスタンスのURL。&lt;/li&gt;
+&lt;li&gt;ユーザー名（通常はメールアドレス）。&lt;/li&gt;
+&lt;li&gt;先ほど設定した仮パスワード。&lt;/li&gt;
+&lt;li&gt;初回ログイン時にパスワードを変更すべき旨の注意書き。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;新規ユーザーがログインし、認証情報をローテーションします。&lt;/strong&gt; 次のいずれかの方法を取れます。&lt;/p&gt;</description></item><item><title>DefectDojoにおける権限</title><link>https://docs.defectdojo.com/ja/admin/user_management/about_perms_and_roles/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/admin/user_management/about_perms_and_roles/</guid><description>&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;DefectDojo Pro機能。&lt;/strong&gt; このページで説明しているメンバー/グループ/グローバルロールのRBACシステムは、DefectDojo Proの機能です。オープンソース版のDefectDojoは&lt;a href="../os__authorized_users/"&gt;認可済みユーザー&lt;/a&gt;モデルを使用しています。オープンソース版のアクセス制御についてはそちらのページを、エディション間を移行する場合は&lt;a href="https://docs.defectdojo.com/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization"&gt;3.0アップグレードノート&lt;/a&gt;を参照してください。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;DefectDojoで作業するユーザーのチームがいる場合、ユーザーが特定のデータにのみアクセスできるように、ロールベースアクセス制御(RBAC)を適切に設定することが重要です。セキュリティデータは非常にセンシティブであり、DefectDojoのアクセス制御オプションを使えば、各チームメンバーの情報アクセスを細かく指定できます。&lt;/p&gt;

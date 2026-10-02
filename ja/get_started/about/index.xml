@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DefectDojoについて on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/get_started/about/</link><description>Recent content in DefectDojoについて on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Tue, 18 Aug 2026 00:04:46 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojoについて</title><link>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DefectDojoについて on DefectDojo Documentation</title><link>https://docs.defectdojo.com/ja/get_started/about/</link><description>Recent content in DefectDojoについて on DefectDojo Documentation</description><generator>Hugo</generator><language>ja</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Fri, 02 Oct 2026 21:49:02 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/ja/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojoについて</title><link>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/ja/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
 &lt;p&gt;
 
 &lt;img
@@ -71,8 +71,8 @@
  &lt;/tr&gt;
  &lt;tr&gt;
  &lt;td&gt;認証とアクセス制御&lt;/td&gt;
- &lt;td&gt;✔️ ローカル認証と基本的なRBAC&lt;/td&gt;
- &lt;td&gt;✔️ SSO(SAML/OAuth)、MFA、高度なRBAC&lt;/td&gt;
+ &lt;td&gt;✔️ ローカルアカウントとアセットごとのアクセスリスト&lt;/td&gt;
+ &lt;td&gt;✔️ SSO(SAML、OIDC、OAuth)、LDAP、MFA、ロールベースアクセス制御&lt;/td&gt;
  &lt;/tr&gt;
  &lt;tr&gt;
  &lt;td&gt;ユーザーインターフェース&lt;/td&gt;
