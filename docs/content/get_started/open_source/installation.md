@@ -15,6 +15,8 @@ aliases:
 
 See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md>)
 
+The Compose file pulls DefectDojo's images through `registry.defectdojo.com` (run by DefectDojo, Inc.), which keeps them off your Docker Hub rate limits and logs each pull: the IP address is used to identify the organization and deleted within three days, and DefectDojo may reach out about its products or to ask for feedback. See [section 1.4 of the privacy policy](https://defectdojo.com/privacy-policy) for details and how to object, or set `DD_IMAGE_REGISTRY=docker.io` to pull straight from Docker Hub.
+
 ### SaaS (Includes Support & Supports the Project)
 
 [SaaS link](https://defectdojo.com/platform)
