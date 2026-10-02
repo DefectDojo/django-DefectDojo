@@ -86,6 +86,8 @@ Follow DefectDojo on [LinkedIn](https://www.linkedin.com/company/defectdojo), [Y
 
 Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for details and standards on contributing __before__ considering or submitting a pull request.
 
+Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Pro Edition
 
 [Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, risk-based vulnerability management, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
