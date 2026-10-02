@@ -19,11 +19,15 @@ The report is a JSON array with one object per finding. A wrapped shape (`{"vuln
 
 ## Default Deduplication Hashcode Fields
 
-Strix findings deduplicate using the [unique id from tool algorithm](/triage_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
-- vuln_id_from_tool (populated verbatim from the report's `id` field)
+- title
+- cwe
+- file_path
+- component_name
+- vulnerability ids
 
-The Strix `id` is unique per finding and stable across scans of the same codebase, so it is used directly rather than a hash of finding fields. No hashcode fields are registered for this scan type.
+Strix numbers findings per run (`vuln-0001`, `vuln-0002` and so on), so the same id can point at different issues in different runs and cannot drive deduplication; the report `id` is kept in `vuln_id_from_tool` for reference only. The fields above stay the same between runs of an unchanged codebase; `file_path`, `component_name` and `vulnerability_ids` are each populated only by some finding classes and empty on the others, so every finding class deduplicates on the subset it actually carries.
 
 ### Sample Scan Data
 
@@ -58,7 +62,7 @@ Sample Strix scans can be found in the [sample scan data folder](https://github.
 | cvss_breakdown         | cvssv3                    | Assembled into a CVSS:3.1 vector string, parsed into the `cvssv3` field, and shown next to the score in the description |
 | cwe                    | cwe                       | `CWE-<number>` extracted from the string                                 |
 | cve                    | unsaved_vulnerability_ids | Set as the finding's vulnerability reference                              |
-| id                     | vuln_id_from_tool         | Strix finding identifier, used verbatim; drives deduplication             |
+| id                     | vuln_id_from_tool         | Strix finding identifier, kept verbatim for reference; not used for deduplication |
 | timestamp              | date                      | Parsed finding date                                                      |
 | finding_class          | static_finding / dynamic_finding | `dynamic` marks a dynamic finding; anything else marks a static finding |
 | remediation_steps      | mitigation                | First part of the mitigation                                             |
@@ -85,7 +89,7 @@ Sample Strix scans can be found in the [sample scan data folder](https://github.
 | Finding Field   | Default Value | Notes                                                          |
 | --------------- | ------------- | -------------------------------------------------------------- |
 | active          | True          | Standard default for imported findings                          |
-| verified        | True          | Standard default for imported findings                          |
+| verified        | False         | Findings import as unverified until a tester verifies them              |
 | static_finding  | True          | Unless `finding_class` is `dynamic`                              |
 | dynamic_finding | True          | Only when `finding_class` is `dynamic`                          |
 | fix_available  | True          | When the report carries remediation_steps or a fix PR body      |
