@@ -5,6 +5,16 @@
 # deploy a containerized DefectDojo in a production environment, the
 # docker-compose.yml file is not intended for production use without first
 # customizing it to your particular situation.
+#
+# Images are pulled through registry.defectdojo.com (run by DefectDojo, Inc.) so that our images
+# don't count against your Docker Hub rate limits. Each pull is logged: time, image, Docker
+# client and IP address. The address is used to identify the organization or network, then
+# deleted within three days. The rest of the record is kept for up to 13 months. We use these
+# logs to see which organizations download DefectDojo, and we may reach out to them about our
+# products or to ask for feedback.
+# Prefer to pull from Docker Hub directly? Set DD_IMAGE_REGISTRY=docker.io (shell or .env).
+# To opt out of contact or have your data removed, email compliance@defectdojo.com.
+# Details: https://defectdojo.com/privacy-policy (section 1.4)
 ---
 services:
   nginx:

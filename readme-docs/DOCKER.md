@@ -228,12 +228,16 @@ aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"
 ```
 
 ## Image registry
-`docker-compose.yml` pulls the DefectDojo images through `registry.defectdojo.com`. It redirects every
-request to the same images on Docker Hub (`hub.docker.com/u/defectdojo`); no image is stored or changed
-there. Each pull is logged (time, image, tag, client and the requesting network) so the project can see where
-DefectDojo is installed.
+`docker-compose.yml` pulls the DefectDojo images through `registry.defectdojo.com`, run by DefectDojo, Inc.,
+so that our images don't count against your Docker Hub rate limits. No image is stored there: layers come
+straight from Docker Hub. Each pull is logged (time, image, Docker client and IP address). The address is used
+to identify the organization or network and then deleted within three days, and the rest of the record is
+kept for up to 13 months. DefectDojo uses these logs to see which organizations download DefectDojo and may
+reach out to them about its products or to ask for feedback. Details, including how to opt out of contact or
+have your data removed, are in section 1.4 of the [privacy policy](https://defectdojo.com/privacy-policy).
 
-To pull straight from Docker Hub, or from your own mirror, set `DD_IMAGE_REGISTRY` before running Docker Compose:
+To pull straight from Docker Hub, or from your own mirror, set `DD_IMAGE_REGISTRY` before running Docker
+Compose (in your shell or in `.env`):
 
 ```zsh
 export DD_IMAGE_REGISTRY=docker.io            # Docker Hub
