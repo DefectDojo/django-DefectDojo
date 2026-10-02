@@ -1,7 +1,7 @@
 ---
 title: "Node Reference"
 description: "Every node Triage Engine ships with, and what each one does"
-weight: 3
+weight: 4
 audience: pro
 aliases:
   - /automation/rules_engine_v2/node_reference/
@@ -189,13 +189,40 @@ Two egress settings are built for these items. **Generate a Report** has a **Fin
 
 The shipped template **Report when a group of scans has landed** wires all of this: the group trigger, a report on `complete`, and an email naming the missing scans on `incomplete`.
 
+### On an Inbound Webhook
+
+`trigger.webhook`
+
+Runs when a [webhook receiver](../webhook_receivers/) records a delivery. The payload never travels in the event that wakes the rule: the trigger reads it from the receipt.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Webhook Receiver** | required | The receiver whose deliveries wake this rule. Only receivers the rule owner can see are offered. |
+| **Items From** | empty | A dot path to the object, or list of objects, that become items, for example `issues`. Empty makes the whole payload one item. A list becomes one item per element. |
+| **Fields** | empty | Named values read from each item into `webhook.fields.<name>`. Each row takes a path, a template or a fixed value, an optional transform, an optional type (`string`, `int`, `float`, `bool`, `datetime`, `string_list`, `severity`), a default, and whether it is required. A later row can read an earlier one. |
+| **Drop Items Missing a Required Field** | off | Skip an item whose required field has no value, instead of passing it on. |
+
+Each item carries the payload under `webhook`:
+
+```
+webhook.payload.*      the item's object, for example webhook.payload.issue.key
+webhook.root.*         the whole payload, when Items From picked something inside it
+webhook.fields.*       the named, typed fields
+webhook.headers.*      the request headers the receiver keeps
+webhook.receiver.*     id, label, slug and kind of the receiver
+ctx.receipt_id         the receipt this run came from
+ctx.item_index         the item's position when Items From is a list
+```
+
+A webhook item has no Finding yet, so a **Findings** node does nothing to it until **Find Findings by a Value** has found one. A value that does not fit its type becomes empty and is counted in the node's trace; it never fails the run.
+
 ## Logic
 
 ### If / Filter
 
 `filter.if`
 
-Routes each item down the **true** or the **false** branch, by conditions. This is the only node with two outputs, and it is how a graph branches.
+Routes each item down the **true** or the **false** branch, by conditions. It is how a graph branches.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -225,6 +252,36 @@ Keeps the first item per key and drops later ones carrying the same key. Scoped 
 | **Key Path** | `finding.hash_code` | The item path whose value identifies a duplicate. |
 
 A common use is `finding.component_name`, to notify once per affected component instead of once per Finding.
+
+### Find Findings by a Value
+
+`lookup.finding`
+
+Looks up the Findings a value names, such as a ticket key from a webhook, and passes them on. It has two outputs: **found** carries one item per Finding, and **not found** carries the items that named nothing, so a rule can alert on "this ticket is not linked to any Finding".
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Match By** | Downstream Connector Ticket | What the value identifies: a Downstream Connector ticket, a classic Jira issue (key or id), a Finding id, `unique_id_from_tool`, a hash code, or a tag. |
+| **Value** | required | The value to look up, for example `{{webhook.fields.issue_key}}`. |
+| **Fallback Value** | empty | Looked up instead when Value renders empty or finds nothing, for example `{{webhook.fields.issue_id}}`. |
+| **Connection** | empty | For a Downstream Connector ticket: only tickets this connection created. Set it whenever two connections could share ticket keys, such as two Jira sites. The rule owner must be able to see the connection. |
+| **Require a Connection** | off | For a Downstream Connector ticket: fail the run instead of matching every connection's tickets when no connection is set. |
+| **Connector** | any | For a Downstream Connector ticket: only tickets of this connector type. |
+| **Jira Site** | empty | For a classic Jira issue: the Jira base URL the event came from, for example `{{webhook.fields.site}}`. Only issues of the classic Jira instance configured for that site match, so the instance's URL must be the site's base URL. |
+| **Include Finding Group Members** | on | A ticket or classic Jira issue for a Finding Group finds every Finding in the group. |
+| **Limit** | `1000` | The most Findings one run may find. Items past it go to **not found**. |
+
+The lookup runs with the rule owner's visibility: a Finding the owner cannot see is indistinguishable from one that does not exist. A ticket is matched by its key first and by the ticket system's numeric id only when the key finds nothing, and a classic Jira issue by its numeric id first. A classic Jira issue that is an engagement epic is reported as not found, as the classic webhook ignores epics too. With **Jira Site** set and several classic Jira instances, an event whose site matches none of them is reported as not found. Found items keep their `webhook` block and gain:
+
+```
+ctx.lookup_via                  finding, or finding_group when found through a group ticket
+ctx.lookup_value                the value that matched
+ctx.ticket_link_id              the Downstream Connector ticket that matched
+ctx.issue_tracker_mapping_id    its issue tracker mapping
+ctx.jira_issue_id               the classic Jira issue that matched
+ctx.jira_instance_id            its classic Jira instance
+ctx.lookup_reason               on not found items: empty_value, no_match, engagement_epic, other_jira_site or limit_reached
+```
 
 ## Findings
 
@@ -283,6 +340,45 @@ Adds a note to the Finding.
 |---------|-------|
 | **Note** | The note text. Supports placeholders. |
 
+### Apply the Ticket's Status
+
+`finding.apply_status_mapping`
+
+Closes, reopens, false-positives or risk accepts each Finding to match its linked ticket. The ticket's state and close reason are read through four lists: **closed states**, **open states**, **false positive reasons** and **accepted risk reasons**. Each list comes from the ticket's own issue tracker mapping (**Coming Back From** on the connector's status mapping) where it is set. For a classic Jira issue, the resolution lists come from its own classic Jira instance. Otherwise this node's lists apply. For Jira, the two state lists hold status category keys (`new`, `indeterminate`, `done`) and the reason lists hold resolution names.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Ticket State** | required | The ticket's state, for example `{{webhook.fields.state}}`. |
+| **Close Reason** | empty | The ticket's close reason or resolution. |
+| **Ticket Last Updated** | empty | The ticket's own last-modified time, for example `{{webhook.fields.updated}}`. An event older than the last one applied to the ticket is ignored. |
+| **Ticket Key** | empty | Names the ticket in a risk acceptance created from it. |
+| **Accepted By** | empty | Who a risk acceptance created from the ticket names as accepting it, for example the assignee. |
+| **Use the Connector's Status Mapping** | on | Read the lists from the ticket's mapping where it sets them. |
+| **Closed States**, **Open States**, **False Positive Reasons**, **Accepted Risk Reasons** | empty | The lists to use when the mapping does not say. Comma separated, matched regardless of case. |
+| **Close Findings** | on | Apply closures. |
+| **Reopen Findings** | on | Reopen a closed Finding whose ticket is open again. |
+| **Also Reopen Finding Groups** | off | A ticket cannot say which member of a group should reopen, so this is off by default. |
+| **Note** | empty | Added to each Finding that changed. `{{ctx.ticket_change}}` says what changed in words, such as "Closed as a false positive" or "Reopened", and `{{ctx.ticket_status}}` is its code. |
+
+A close reason only ever classifies a closed state: false positive first, then accepted risk, then plain mitigation. A reopened ticket that still carries its old resolution reopens. Findings already in the target state are left alone.
+
+An accepted risk works the way the classic Jira webhook does: it creates a full risk acceptance where the Finding's product allows one, a simple risk acceptance where only that is allowed, and otherwise closes the Finding as mitigated. Reopening or false-positiving a risk-accepted Finding removes its risk acceptance first. A status change is only made on a Finding the rule owner may edit (and, for a risk acceptance, may accept risk on).
+
+### Add a Ticket Comment as a Note
+
+`finding.add_ticket_comment`
+
+Adds a comment made on the linked ticket as a note on the Finding, once. A comment DefectDojo posted to the ticket itself is recognized by its comment id, or by its text while the id is still on its way, and skipped. A comment on a Finding Group's ticket is added to every Finding in the group.
+
+| Setting | Notes |
+|---------|-------|
+| **Comment ID** | The ticket system's id for the comment, for example `{{webhook.fields.comment_id}}`. |
+| **Comment Text** | The comment as the ticket system sent it. |
+| **Comment Author** | The author's identities, comma separated. For a classic Jira issue, a comment whose author is the classic Jira instance's user is DefectDojo's own and is skipped. |
+| **Note** | The note to add, for example `({{webhook.fields.commenter}}): {{webhook.fields.comment_body}}`. |
+
+Notes this node adds are never pushed back to the ticket.
+
 ### Set Owners
 
 `finding.set_owners`
@@ -328,8 +424,8 @@ so a person decides. They stay active and counted the whole time. With that feat
 review state to use, so they are simply left alone — never accepted, which is the point of the
 limit. A rule preview creates nothing, as with every other action.
 
-Two behaviours worth knowing: a severity the rule cannot recognise counts as *over* the limit (if it
-cannot be ranked it cannot be called safe), while a *limit* that cannot be recognised is ignored
+Two behaviors worth knowing: a severity the rule cannot recognize counts as *over* the limit (if it
+cannot be ranked it cannot be called safe), while a *limit* that cannot be recognized is ignored
 rather than blocking everything, because a rule that silently stops working is harder to notice than
 one that keeps going.
 
@@ -389,7 +485,7 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 
 The value is checked against the field's current definition when the rule is saved and again on every run, so a rule can never write a value the field's data type refuses. A text template that renders empty for a Finding leaves that Finding untouched (removal is the Clear node's job), setting a multi-select replaces the whole stored list, and Findings already holding the value are left alone.
 
-Three behaviours worth knowing:
+Three behaviors worth knowing:
 
 * **Scope is the boundary.** Like every Findings node, the write applies to every Finding the trigger produced under the rule owner's visibility.
 * **A custom field write is not a Finding save.** Nothing that follows a Finding save runs: no SLA recomputation, no deduplication, no re-prioritization. A custom field edited by hand on a Finding's page does not wake **On Finding Event** rules either. A write made by a rule does cascade: other rules see it as an `updated` event, and later nodes in the same run read the new value.
@@ -478,7 +574,7 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 | **Field** | Which custom field to write. One entry per Asset custom field defined on the instance. |
 | **Value** | Typed to the field. |
 
-Two behaviours of its own: Assets the rule owner may not edit are counted on the node trace as `skipped_unauthorized` rather than touched, and the write lands on the custom field value rather than the Asset row itself, so nothing that follows an Asset edit runs. A custom field edited by hand does not wake **On Asset Event** rules; a write made by a rule still cascades as an `updated` event.
+Two behaviors of its own: Assets the rule owner may not edit are counted on the node trace as `skipped_unauthorized` rather than touched, and the write lands on the custom field value rather than the Asset row itself, so nothing that follows an Asset edit runs. A custom field edited by hand does not wake **On Asset Event** rules; a write made by a rule still cascades as an `updated` event.
 
 ### Clear a Custom Field
 
