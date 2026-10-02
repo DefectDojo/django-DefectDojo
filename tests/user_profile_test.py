@@ -4,6 +4,7 @@ import unittest
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 class UserProfileTest(BaseTestCase):
@@ -59,19 +60,32 @@ class UserProfileTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "api/key-v2")
         time.sleep(1)
-        # Submit form to generate new key
+
         submit_btns = driver.find_elements(By.CSS_SELECTOR, "input.btn.btn-primary")
-        if len(submit_btns) > 0:
-            submit_btns[0].click()
-            time.sleep(1)
-            self.assertTrue(
-                self.is_success_message_present(text="API Key generated successfully")
-            )
-            self.assertTrue(
-                self.is_text_present_on_page(text=r"Your current API key is\s+\S+")
-            )
-        else:
-            self.assertTrue(self.is_text_present_on_page(text="API"))
+        self.assertTrue(len(submit_btns) > 0)
+
+        submit_btns[0].click()
+
+        WebDriverWait(driver, 10).until(
+            lambda d: d.current_url.endswith("/api/key-v2"),
+        )
+        self.assertTrue(
+            self.is_success_message_present(
+                text="API Key generated successfully",
+            ),
+        )
+        driver.get(self.base_url + "api/key-v2")
+        api_key_text = WebDriverWait(driver, 10).until(
+            lambda d: d.find_element(
+                By.XPATH,
+                "//p[contains(., 'Your current API key is')]",
+            ).text,
+        )
+
+        self.assertRegex(
+            api_key_text,
+            r"Your current API key is\s+[0-9a-f]{40}",
+        )
 
 
 def suite():
