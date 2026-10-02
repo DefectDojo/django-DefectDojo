@@ -45,6 +45,8 @@ The **Alpine** variants are built and published but are not covered by any autom
 
 See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md>)
 
+The Helm chart repo at `charts.defectdojo.com` is run by DefectDojo, Inc. and logs each request: the IP address is used to identify the organization and deleted within three days, and DefectDojo may reach out about its products or to ask for feedback. See [section 1.4 of the privacy policy](https://defectdojo.com/privacy-policy) for details and how to object, or add the repo from `https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts` instead.
+
 ### Local install with godojo
 
 See instructions in [README.md](<https://github.com/DefectDojo/godojo/blob/master/README.md>)
