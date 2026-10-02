@@ -48,7 +48,7 @@ class NoteTest(BaseTestCase):
             self.uncollapse_all(driver)
         text = driver.find_element(By.TAG_NAME, "body").text
         note_present = "Test public note" in text
-        private_status = "(will not appear in report)" in text
+        private_status = "(private to you)" in text
         pass_test = note_present and private_status
         if not pass_test:
             logger.info("Private note note created at the %s level", level)

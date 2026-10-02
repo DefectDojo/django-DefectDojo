@@ -1,0 +1,22 @@
+[
+  {
+    "name": "CWE676",
+    "version": "0.1",
+    "addresses": [
+      "4198741"
+    ],
+    "tids": [
+      "instr_0x00401155_2"
+    ],
+    "symbols": [
+      "FUN_00401126"
+    ],
+    "other": [
+      [
+        "dangerous_function",
+        "strcpy"
+      ]
+    ],
+    "description": "(Use of Potentially Dangerous Function) FUN_00401126 (4198741) -> strcpy"
+  }
+]

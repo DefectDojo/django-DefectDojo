@@ -1,0 +1,64 @@
+{
+  "value": [
+    {
+      "id": "sub-0003",
+      "properties": {
+        "id": "finding-0003",
+        "displayName": "Machines should have a vulnerability assessment solution",
+        "description": "A posture recommendation, not a vulnerability.",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {
+          "code": "Unhealthy",
+          "severity": "Medium"
+        },
+        "resourceDetails": {
+          "ResourceName": "web-node-2"
+        },
+        "additionalData": {
+          "assessedResourceType": "GeneralVulnerability"
+        }
+      }
+    },
+    {
+      "id": "sub-0004",
+      "properties": {
+        "id": "finding-0004",
+        "displayName": "CVE-2000-0004",
+        "description": "A finding Defender now reports as healthy.",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {
+          "code": "Healthy",
+          "severity": "High"
+        },
+        "resourceDetails": {
+          "ResourceName": "web-node-1"
+        },
+        "additionalData": {
+          "assessedResourceType": "ServerVulnerabilityTvm",
+          "vulnerabilityDetails": {
+            "cveId": "CVE-2000-0004"
+          }
+        }
+      }
+    },
+    {
+      "id": "sub-0006",
+      "properties": {
+        "id": "finding-0006",
+        "displayName": "An unfamiliar type with no CVE",
+        "timeGenerated": "2024-06-01T00:00:00.0000000Z",
+        "status": {
+          "code": "Unhealthy",
+          "severity": "Low"
+        },
+        "resourceDetails": {
+          "ResourceName": "web-node-4"
+        },
+        "additionalData": {
+          "assessedResourceType": "SomeFutureConfigurationCheck"
+        }
+      }
+    }
+  ],
+  "nextLink": ""
+}

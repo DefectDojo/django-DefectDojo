@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load humanize %}
 {% load display_tags %}
@@ -26,7 +27,7 @@
                         </span>
                     {% else %}
                         <span title="{{ endpoint }}">
-                            Endpoint: {{ endpoint|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %} -
+                            Endpoint: {{ endpoint|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %} -
                             {% if endpoint.mitigated %}
                                 Mitigated
                             {% elif endpoint.active_findings_count > 0 %}
@@ -45,7 +46,7 @@
                             <span><i class="fa-solid fa-chart-column"></i></span>
                         </button>
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true" aria-label="Endpoint options">
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Endpoint options' %}">
                                 <span class="fa-solid fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
@@ -102,7 +103,7 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-calendar-days fa-2x"></i>
 
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">&nbsp;</span>
                                     <span>
                                         Finding Age ({{ all_findings|length|apnumber }}
@@ -124,7 +125,7 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-bug fa-2x"></i>
 
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span class=" fa-2x">{{ all_findings|length }}</span>
                                     <span>
                                       {% if not host_view %}
@@ -151,7 +152,7 @@
                             <div class="col-xs-12">
                                 <i class="fa-solid fa-bug fa-2x"></i>
 
-                                <div class="pull-right inline-block text-right">
+                                <div class="pull-right inline-block text-end">
                                     <span>Opened findings count by month</span>
                                 </div>
                             </div>
@@ -185,7 +186,7 @@
                                       {% else %}
                                         <span style="color:LimeGreen" class="fa-solid fa-check"></span>
                                       {% endif %}
-                                      &nbsp;{{ item|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                      &nbsp;{{ item|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
                                 </td>
                             {% endfor %}
@@ -224,11 +225,11 @@
                     <div class="panel-heading">
                         <h4>Additional Information
                             <div class="btn-group pull-right">
-                                <a title="Edit Information" class="btn btn-sm btn-primary"
+                                <a title="{% trans 'Edit Information' %}" class="btn btn-sm btn-primary"
                                    href="{% url 'edit_endpoint_meta_data' endpoint.id %}">
                                     <span class="fa-solid fa-pen-to-square"></span>
                                 </a>
-                                <a title="Add Information" class="btn btn-sm btn-primary"
+                                <a title="{% trans 'Add Information' %}" class="btn btn-sm btn-primary"
                                    href="{% url 'add_endpoint_meta_data' endpoint.id %}">
                                     <span class="fa-solid fa-plus"></span>
                                 </a>

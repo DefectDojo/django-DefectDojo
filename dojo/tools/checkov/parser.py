@@ -1,6 +1,8 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class CheckovParser:
@@ -146,7 +148,7 @@ def get_item(vuln, test, check_type):
         severity = vuln["severity"].capitalize()
 
     references = vuln.get("guideline", "")
-    return Finding(
+    finding = Finding(
         title=title,
         test=test,
         description=description,
@@ -159,3 +161,8 @@ def get_item(vuln, test, check_type):
         static_finding=True,
         dynamic_finding=False,
     )
+    if locations_enabled() and file_path:
+        finding.unsaved_locations.append(
+            LocationData.code(file_path=file_path, line=source_line),
+        )
+    return finding

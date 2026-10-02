@@ -1,0 +1,67 @@
+Start timestamp: 2026-07-31 06:03:55 +0000 (AIDE 0.19.1)
+AIDE found differences between database and filesystem!!
+
+Summary:
+  Total number of entries:	5
+  Added entries:		2
+  Removed entries:		1
+  Changed entries:		2
+
+---------------------------------------------------
+Added entries:
+---------------------------------------------------
+
+f++++++++++++++++++: /watched/d.txt
+f++++++++++++++++++: /watched/e.txt
+
+---------------------------------------------------
+Removed entries:
+---------------------------------------------------
+
+f------------------: /watched/c.txt
+
+---------------------------------------------------
+Changed entries:
+---------------------------------------------------
+
+f > ... ....H      : /watched/a.txt
+f = p.. .....      : /watched/b.txt
+
+---------------------------------------------------
+Detailed information about changes:
+---------------------------------------------------
+
+File: /watched/a.txt
+ Size      : 13                               | 19
+ SHA256    : 0IFvw2s8tDLvDb9O4laQJmpbU1/cnvVk | 7z2AVyYP3Pw9Q5qqKNbobu/45ICLjfPA
+             djr25SQHGV0=                     | Lr7mm/77en4=
+
+File: /watched/b.txt
+ Perm      : -rw-r--r--                       | -rwxrwxrwx
+
+
+---------------------------------------------------
+The attributes of the (uncompressed) database(s):
+---------------------------------------------------
+
+/var/lib/aide/aide.db
+ SHA256    : xaeUDHmuL1yBcbgER0r0gQsdvGs5tr+j
+             QuUrDlqBCJo=
+ SHA512    : bXHXbXrwIw8VXlbvqvhTOPXWQ9LXjouS
+             iVqOMLe4ioVDJYrGm9JuVW2S8z+JIa0o
+             Et8uNOL72gLirJ1vCw8OIQ==
+ STRIBOG256: sqOt9gU3FPXfTbNxInXQ+IsKVYv0lnUP
+             pJotS9OdhbU=
+ STRIBOG512: 6HRy8PzAZoE606nR4m0tSfob9wozMdWn
+             frgTd5driOsGfrUGZ8A3vMlz3r/dLK2u
+             CX5lVTX+D8lbCyKwzdK8UA==
+ SHA512/256: 0HUmTPUiHwWZWkb/SOUCRz1AJv0inr5t
+             w77rC2uDsSM=
+ SHA3-256  : GC4cvCXmKfDTx/8hTl1Wpy8zOYyPjii3
+             79CdmfOdmUU=
+ SHA3-512  : M0iTl7tIgKxb56aDlST9H+GhzKhb1u2X
+             ke03RI96e1eQoutxdSHCGt7OzVvrzV1Q
+             jiJ+V+yW//vagUpEXpUAbA==
+
+
+End timestamp: 2026-07-31 06:03:55 +0000 (run time: 0m 0s)

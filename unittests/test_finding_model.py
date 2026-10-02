@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from html.parser import HTMLParser
 
 from crum import impersonate
 from django.utils.timezone import is_naive, now
@@ -6,6 +7,7 @@ from django.utils.timezone import is_naive, now
 from dojo.finding.helper import close_finding
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
+    Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -20,7 +22,18 @@ from dojo.models import (
     User,
 )
 from dojo.url.models import URL
+from dojo.utils import create_bleached_link
 from unittests.dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3, versioned_fixtures
+
+
+class _AnchorParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.hrefs = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self.hrefs.extend(value for name, value in attrs if name == "href")
 
 
 class TestFindingModelMixin:
@@ -74,6 +87,40 @@ class TestFindingModelMixin:
         )
         self.assertFalse(is_naive(self.finding.mitigated))
 
+    def test_close_finding_clears_open_review(self):
+        """
+        Closing must end an in-flight peer review, not just unflag it.
+
+        ``under_review`` was already cleared here, but the reviewers M2M and
+        ``review_requested_by`` were left behind. That combination is
+        unreachable in the UI — "Clear Review" is gated on ``under_review`` —
+        so the review could never be closed out, and anything listing findings
+        by reviewer kept showing the finding as outstanding work.
+        """
+        # Dojo_User, not User: Finding.reviewers targets dojo.Dojo_User, and
+        # ``.set()`` with a plain User raises "Field 'id' expected a number".
+        reviewer = Dojo_User.objects.create(username="close-finding-reviewer")
+        self.finding.under_review = True
+        self.finding.review_requested_by = self.user
+        self.finding.save()
+        self.finding.reviewers.set([reviewer])
+
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=None,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+        )
+
+        self.finding.refresh_from_db()
+        self.assertFalse(self.finding.under_review)
+        self.assertIsNone(self.finding.review_requested_by)
+        self.assertEqual(list(self.finding.reviewers.all()), [])
+
     def test_get_sast_source_file_path_with_link_no_file_path(self):
         finding = Finding()
         self.assertEqual(None, finding.get_sast_source_file_path_with_link())
@@ -95,7 +142,7 @@ class TestFindingModelMixin:
         finding.test = test
         finding.sast_source_file_path = "SastSourceFilePath"
         engagement.source_code_management_uri = "URL"
-        self.assertEqual('<a href="URL/SastSourceFilePath" target="_blank" title="SastSourceFilePath">SastSourceFilePath</a>', finding.get_sast_source_file_path_with_link())
+        self.assertEqual('<a href="URL/SastSourceFilePath" target="_blank" rel="noopener noreferrer" title="SastSourceFilePath">SastSourceFilePath</a>', finding.get_sast_source_file_path_with_link())
 
     def test_get_file_path_with_link_no_file_path(self):
         finding = Finding()
@@ -118,7 +165,7 @@ class TestFindingModelMixin:
         finding.test = test
         finding.file_path = "FilePath"
         engagement.source_code_management_uri = "URL"
-        self.assertEqual('<a href="URL/FilePath" target="_blank" title="FilePath">FilePath</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="URL/FilePath" target="_blank" rel="noopener noreferrer" title="FilePath">FilePath</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_github_no_scm_type_with_details_and_line(self):
         # checks that for github.com in uri dojo makes correct url to browse on github
@@ -133,7 +180,7 @@ class TestFindingModelMixin:
         finding.file_path = "some-folder/some-file.ext"
         finding.line = 5432
         engagement.source_code_management_uri = "https://github.com/some-test-account/some-test-repo"
-        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_github_with_scm_type_with_details_and_line(self):
         # checks that for github in custom field dojo makes correct url to browse on github
@@ -157,7 +204,7 @@ class TestFindingModelMixin:
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://github.com/some-test-account/some-test-repo"
-        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_public_project_with_no_details_and_line(self):
         # checks that for public bitbucket (bitbucket.org) in custom field
@@ -180,7 +227,7 @@ class TestFindingModelMixin:
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
-        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/master/some-folder/some-file.ext#lines-5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/master/some-folder/some-file.ext#lines-5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_public_project_with_commithash_and_line(self):
         # checks that for public bitbucket (bitbucket.org) in custom field  and existing commit hash in finding
@@ -204,7 +251,7 @@ class TestFindingModelMixin:
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
-        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/some-commit-hash/some-folder/some-file.ext#lines-5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/some-commit-hash/some-folder/some-file.ext#lines-5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_standalone_project_with_commithash_and_line(self):
         # checks that for standalone bitbucket in custom field  and existing commit hash in finding
@@ -228,7 +275,7 @@ class TestFindingModelMixin:
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://bb.example.com/scm/some-test-project/some-test-repo.git"
-        self.assertEqual('<a href="https://bb.example.com/projects/some-test-project/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-commit-hash#5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://bb.example.com/projects/some-test-project/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-commit-hash#5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_standalone_project_with_branchtag_and_line(self):
         # checks that for standalone bitbucket in custom field  and existing branch/tag in finding
@@ -252,7 +299,7 @@ class TestFindingModelMixin:
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://bb.example.com/scm/some-test-project/some-test-repo.git"
-        self.assertEqual('<a href="https://bb.example.com/projects/some-test-project/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-branch#5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://bb.example.com/projects/some-test-project/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-branch#5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_standalone_user_with_branchtag_and_line(self):
         # checks that for standalone bitbucket in custom field  and existing branch/tag in finding
@@ -277,7 +324,7 @@ class TestFindingModelMixin:
 
         engagement.source_code_management_uri = "https://bb.example.com/scm/~some-user/some-test-repo.git"
 
-        self.assertEqual('<a href="https://bb.example.com/users/some-user/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-branch#5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://bb.example.com/users/some-user/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-branch#5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_gitea_or_codeberg_project_with_no_details_and_line(self):
         # checks that for gitea and codeberg in custom field
@@ -300,7 +347,7 @@ class TestFindingModelMixin:
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
-        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/master/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/master/some-folder/some-file.ext#L5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_gitea_or_codeberg_project_with_commithash_and_line(self):
         # checks that for gitea and codeberg in custom field  and existing commit hash in finding
@@ -324,7 +371,7 @@ class TestFindingModelMixin:
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
-        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" rel="noopener noreferrer" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_xss_attack(self):
         test = Test()
@@ -334,7 +381,26 @@ class TestFindingModelMixin:
         finding.test = test
         finding.file_path = "<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>"
         engagement.source_code_management_uri = "<IMG SRC=javascript:alert('XSS')>"
-        self.assertEqual('<a href="&lt;IMG SRC=javascript:alert(\'XSS\')>/&lt;SCRIPT SRC=http://xss.rocks/xss.js>&lt;/SCRIPT>" target="_blank" title="&lt;SCRIPT SRC=http://xss.rocks/xss.js>&lt;/SCRIPT>">&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="&lt;IMG SRC=javascript:alert(&#x27;XSS&#x27;)&gt;/&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;" target="_blank" rel="noopener noreferrer" title="&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;">&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_does_not_inject_foreign_anchor(self):
+        # file_path attempts to close our anchor and open its own; expect one anchor, ours.
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        engagement.source_code_management_uri = "https://github.com/org/repo"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = 'app.py"></a><a href="https://evil.example/">click'
+        rendered = finding.get_file_path_with_link()
+        parser = _AnchorParser()
+        parser.feed(rendered)
+        self.assertEqual(len(parser.hrefs), 1)
+        self.assertNotIn("https://evil.example/", parser.hrefs)
+        self.assertNotIn("</a><a", rendered)
+
+    def test_create_bleached_link_drops_dangerous_scheme(self):
+        self.assertEqual("label", create_bleached_link("javascript:alert(1)", "label"))
 
     def test_get_references_with_links_no_references(self):
         finding = Finding()
@@ -348,32 +414,32 @@ class TestFindingModelMixin:
     def test_get_references_with_links_simple_url(self):
         finding = Finding()
         finding.references = "URL: https://www.example.com"
-        self.assertEqual('URL: <a href="https://www.example.com" target="_blank" title="https://www.example.com">https://www.example.com</a>', finding.get_references_with_links())
+        self.assertEqual('URL: <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" title="https://www.example.com">https://www.example.com</a>', finding.get_references_with_links())
 
     def test_get_references_with_links_url_with_port(self):
         finding = Finding()
         finding.references = "http://www.example.com:8080"
-        self.assertEqual('<a href="http://www.example.com:8080" target="_blank" title="http://www.example.com:8080">http://www.example.com:8080</a>', finding.get_references_with_links())
+        self.assertEqual('<a href="http://www.example.com:8080" target="_blank" rel="noopener noreferrer" title="http://www.example.com:8080">http://www.example.com:8080</a>', finding.get_references_with_links())
 
     def test_get_references_with_links_url_with_path(self):
         finding = Finding()
         finding.references = "URL https://www.example.com/path/part2 behind URL"
-        self.assertEqual('URL <a href="https://www.example.com/path/part2" target="_blank" title="https://www.example.com/path/part2">https://www.example.com/path/part2</a> behind URL', finding.get_references_with_links())
+        self.assertEqual('URL <a href="https://www.example.com/path/part2" target="_blank" rel="noopener noreferrer" title="https://www.example.com/path/part2">https://www.example.com/path/part2</a> behind URL', finding.get_references_with_links())
 
     def test_get_references_with_links_complicated_url_with_parameter(self):
         finding = Finding()
         finding.references = "URL:https://www.example.com/path?param1=abc&_param2=xyz"
-        self.assertEqual('URL:<a href="https://www.example.com/path?param1=abc&amp;_param2=xyz" target="_blank" title="https://www.example.com/path?param1=abc&amp;_param2=xyz">https://www.example.com/path?param1=abc&amp;_param2=xyz</a>', finding.get_references_with_links())
+        self.assertEqual('URL:<a href="https://www.example.com/path?param1=abc&amp;_param2=xyz" target="_blank" rel="noopener noreferrer" title="https://www.example.com/path?param1=abc&amp;_param2=xyz">https://www.example.com/path?param1=abc&amp;_param2=xyz</a>', finding.get_references_with_links())
 
     def test_get_references_with_links_two_urls(self):
         finding = Finding()
         finding.references = "URL1: https://www.example.com URL2: https://info.example.com"
-        self.assertEqual('URL1: <a href="https://www.example.com" target="_blank" title="https://www.example.com">https://www.example.com</a> URL2: <a href="https://info.example.com" target="_blank" title="https://info.example.com">https://info.example.com</a>', finding.get_references_with_links())
+        self.assertEqual('URL1: <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" title="https://www.example.com">https://www.example.com</a> URL2: <a href="https://info.example.com" target="_blank" rel="noopener noreferrer" title="https://info.example.com">https://info.example.com</a>', finding.get_references_with_links())
 
     def test_get_references_with_links_linebreak(self):
         finding = Finding()
         finding.references = "https://www.example.com\nhttps://info.example.com"
-        self.assertEqual('<a href="https://www.example.com" target="_blank" title="https://www.example.com">https://www.example.com</a>\n<a href="https://info.example.com" target="_blank" title="https://info.example.com">https://info.example.com</a>', finding.get_references_with_links())
+        self.assertEqual('<a href="https://www.example.com" target="_blank" rel="noopener noreferrer" title="https://www.example.com">https://www.example.com</a>\n<a href="https://info.example.com" target="_blank" rel="noopener noreferrer" title="https://info.example.com">https://info.example.com</a>', finding.get_references_with_links())
 
     def test_get_references_with_links_markdown(self):
         finding = Finding()

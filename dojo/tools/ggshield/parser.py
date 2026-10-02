@@ -3,7 +3,9 @@ import json
 
 from dateutil import parser
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GgshieldParser:
@@ -100,6 +102,15 @@ class GgshieldParser:
             static_finding=True,
             date=findings["commit_date"],
         )
+
+        if locations_enabled() and findings["file_path"]:
+            finding.unsaved_locations.append(
+                LocationData.code(
+                    file_path=findings["file_path"],
+                    line=line_start,
+                    end_line=line_end,
+                ),
+            )
 
         key = hashlib.md5(
             (

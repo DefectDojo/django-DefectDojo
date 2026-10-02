@@ -6,8 +6,11 @@ import textwrap
 import dateutil.parser
 from django.utils.translation import gettext as _
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
+from dojo.tools.utils import drop_repeated_unique_ids
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +107,7 @@ class SarifParser:
         # for each runs we just aggregate everything
         for run in tree.get("runs", []):
             items.extend(self.__get_items_from_run(run))
-        return items
+        return drop_repeated_unique_ids(items)
 
     def get_tests(self, scan_type, handle):
         tree = json.load(handle)
@@ -115,7 +118,7 @@ class SarifParser:
                 parser_type=run["tool"]["driver"]["name"],
                 version=run["tool"]["driver"].get("version"),
             )
-            test.findings = self.__get_items_from_run(run)
+            test.findings = drop_repeated_unique_ids(self.__get_items_from_run(run))
             tests.append(test)
         return tests
 
@@ -216,15 +219,34 @@ class SarifParser:
                 references=get_references(rule),
             )
 
+            if locations_enabled() and file_path:
+                end_line = None
+                if location and "physicalLocation" in location:
+                    end_line = location["physicalLocation"].get("region", {}).get("endLine")
+                finding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=file_path,
+                        line=line,
+                        end_line=end_line,
+                        snippet=get_snippet(location) or "",
+                    ),
+                )
+
             if "ruleId" in result:
                 finding.vuln_id_from_tool = result["ruleId"]
                 # for now we only support when the id of the rule is a CVE
                 if cve_try(result["ruleId"]):
                     finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
 
+            # Collect every CWE reported for this finding (union, order-preserving).
+            # finding.cwe keeps the existing primary choice (last extracted, per source
+            # precedence below); the full set is persisted via the Finding_CWE relation.
+            all_cwes = []
+
             # some time the rule id is here but the tool doesn't define it
             if rule is not None:
                 cwes_extracted = get_rule_cwes(rule)
+                all_cwes.extend(cwes_extracted)
                 if len(cwes_extracted) > 0:
                     finding.cwe = cwes_extracted[-1]
 
@@ -244,18 +266,25 @@ class SarifParser:
 
             # manage the case that some tools produce CWE as properties of the result
             cwes_properties_extracted = get_result_cwes_properties(result)
+            all_cwes.extend(cwes_properties_extracted)
             if len(cwes_properties_extracted) > 0:
                 finding.cwe = cwes_properties_extracted[-1]
 
             # manage the case that some tools produce CWE using taxa (official SARIF approach)
             cwes_taxa_extracted = get_result_cwes_taxa(result)
+            all_cwes.extend(cwes_taxa_extracted)
             if len(cwes_taxa_extracted) > 0:
                 finding.cwe = cwes_taxa_extracted[-1]
 
             # Get custom CWEs if available (uses inheritance)
             custom_cwes = self.get_finding_cwes(result)
+            all_cwes.extend(custom_cwes)
             if custom_cwes:
                 finding.cwe = custom_cwes[-1]  # Use the last CWE like other logic
+
+            # Persist the full, order-preserving set of CWEs via the Finding_CWE relation
+            if all_cwes:
+                finding.unsaved_cwes = list(dict.fromkeys(all_cwes))
 
             # manage fixes provided in the report
             if "fixes" in result:
@@ -266,8 +295,10 @@ class SarifParser:
             if run_date:
                 finding.date = run_date
 
-            # manage tags provided in the report and rule and remove duplicated
-            tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
+            # manage tags provided in the report and rule and remove duplicated.
+            # sorted(): a set has no order, so without it the stored tag order would depend on
+            # PYTHONHASHSEED and reshuffle on every import
+            tags = sorted(set(get_properties_tags(rule) + get_properties_tags(result)))
             tags = [s.removeprefix("external/cwe/") for s in tags]
             finding.unsaved_tags = tags
 
@@ -632,6 +663,9 @@ def get_fingerprints_hashes(values):
             key_method = key
             key_method_version = 0
         value = values[key]
+        # some tools (e.g. BlackDuck) wrap the hash as {"value": "<hash>"} instead of a plain string
+        if isinstance(value, dict):
+            value = value.get("value", "")
         if fingerprints.get(key_method):
             if fingerprints[key_method]["version"] < key_method_version:
                 fingerprints[key_method] = {

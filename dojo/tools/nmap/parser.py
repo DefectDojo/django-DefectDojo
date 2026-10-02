@@ -3,8 +3,8 @@ import datetime
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -68,7 +68,7 @@ class NmapParser:
                     "portid" in port_element.attrib
                     and port_element.attrib["portid"].isdigit()
                 ) else None
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     location = LocationData.url(
                         host=fqdn or ip, protocol=protocol, port=port,
                     )
@@ -140,7 +140,7 @@ class NmapParser:
                     if report_date:
                         find.date = report_date
 
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -206,7 +206,7 @@ class NmapParser:
                     vuln_id_from_tool=vuln_id,
                     nb_occurences=1,
                 )
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations
@@ -229,7 +229,7 @@ class NmapParser:
                         find.description += (
                             "\n-----\n\n" + finding.description
                         )  # fives '-' produces an horizontal line
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         # TODO: Delete this after the move to Locations

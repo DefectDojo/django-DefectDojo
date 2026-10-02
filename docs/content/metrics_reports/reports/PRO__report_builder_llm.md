@@ -37,7 +37,7 @@ export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 
 Copy the entire fenced block below and paste it into Claude, ChatGPT, or any other capable LLM. The prompt is self-contained — the model will ask you for your tenant URL, token environment variable, and report audiences, then walk you through discovery → design → create → verify → run → download.
 
-```
+```text
 You are helping me build, run, and download custom reports in DefectDojo Pro
 using its REST API and "Report Generator" (Themes / Blocks / Templates /
 Generated Reports).

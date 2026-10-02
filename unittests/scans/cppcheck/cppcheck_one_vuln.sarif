@@ -1,0 +1,60 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_single.c"
+                },
+                "region": {
+                  "endColumn": 26,
+                  "endLine": 8,
+                  "startColumn": 26,
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Array 'values[10]' accessed at index 10, which is out of bounds."
+          },
+          "ruleId": "arrayIndexOutOfBounds"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://cppcheck.sourceforge.io",
+          "name": "Cppcheck",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Array 'values[10]' accessed at index 10, which is out of bounds."
+              },
+              "help": {
+                "text": "Array 'values[10]' accessed at index 10, which is out of bounds."
+              },
+              "id": "arrayIndexOutOfBounds",
+              "properties": {
+                "precision": "high",
+                "security-severity": 9.9,
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Array 'values[10]' accessed at index 10, which is out of bounds."
+              }
+            }
+          ],
+          "semanticVersion": "2.17.1"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

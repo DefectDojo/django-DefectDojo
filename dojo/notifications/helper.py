@@ -197,19 +197,27 @@ class NotificationManagerHelpers:
         notification_type: str | None = None,
         **kwargs: dict,
     ) -> None:
-        # no try catch here, if this fails we need to show an error
+        # This is the last-resort error logger for every notification channel, so it must
+        # never raise: a failure to persist the Alert here would propagate out of the
+        # notification pipeline and abort whatever triggered it (e.g. a scan import). The
+        # persistence failure is logged and swallowed per superuser -- for instance when the
+        # dojo_alerts primary-key sequence reaches its maximum, every save() fails, and
+        # re-raising would take the import down with it.
         for user in Dojo_User.objects.filter(is_superuser=True):
-            alert = Alerts(
-                user_id=user,
-                url=kwargs.get("url", reverse("alerts")),
-                title=kwargs.get("title", "Notification issue")[:250],
-                description=kwargs.get("description", str(exception))[:2000],
-                icon="exclamation-triangle",
-                source=notification_type[:100] if notification_type else kwargs.get("source", "unknown")[:100],
-            )
-            # relative urls will fail validation
-            alert.clean_fields(exclude=["url"])
-            alert.save()
+            try:
+                alert = Alerts(
+                    user_id=user,
+                    url=kwargs.get("url", reverse("alerts")),
+                    title=kwargs.get("title", "Notification issue")[:250],
+                    description=kwargs.get("description", str(exception))[:2000],
+                    icon="exclamation-triangle",
+                    source=notification_type[:100] if notification_type else kwargs.get("source", "unknown")[:100],
+                )
+                # relative urls will fail validation
+                alert.clean_fields(exclude=["url"])
+                alert.save()
+            except Exception:
+                logger.exception("Unable to persist fallback Alert for user %s", user)
 
 
 class SlackNotificationManger(NotificationManagerHelpers):
@@ -527,7 +535,10 @@ class WebhookNotificationManger(NotificationManagerHelpers):
             "X-DefectDojo-Instance": settings.SITE_URL,
             "Accept": "application/json",
         }
-        if endpoint.header_name is not None:
+        # The model default for header_name is "" (not None), so endpoints created
+        # without a custom header via the API/ORM would add a header with an empty
+        # name here, which requests rejects with InvalidHeader.
+        if endpoint.header_name:
             headers[endpoint.header_name] = endpoint.header_value
         yaml_data = self._create_notification_message(
             event,
@@ -771,9 +782,15 @@ class NotificationManager(NotificationManagerHelpers):
         # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
         # kwargs.update({'user': user})
         applicable_notifications = user.applicable_notifications
-        if user.is_superuser:
-            # admin users get all system notifications
-            logger.debug("User %s is superuser", user)
+        if user.is_superuser and not applicable_notifications:
+            # Superusers are included as recipients even with no notification
+            # settings of their own, so fall back to the system defaults for them.
+            # A superuser who *has* configured their own settings keeps them: the
+            # merge below is a union, so folding the system row in would put its
+            # channels back over anything they had switched off. Events that are
+            # meant to override personal settings are handled by
+            # NOTIFICATIONS_SYSTEM_LEVEL_TRUMP on the recipients path instead.
+            logger.debug("User %s is superuser with no notification settings", user)
             applicable_notifications.append(self.system_notifications)
 
         notifications_set = Notifications.merge_notifications_list(
@@ -889,9 +906,14 @@ class NotificationManager(NotificationManagerHelpers):
 
 
 def process_tag_notifications(request, note, parent_url, parent_title):
-    regex = re.compile(r"(?:\A|\s)@(\w+)\b")
+    # Django usernames may contain "@ . + - _" in addition to word characters (see
+    # Django's username validators), so capture that whole set instead of only \w.
+    # The leading (?:\A|\s)@ anchor keeps email addresses written in prose from
+    # triggering, and trailing dots are stripped so a mention that ends a sentence
+    # ("thanks @alice.") still resolves to the username.
+    regex = re.compile(r"(?:\A|\s)@([\w.@+-]+)")
 
-    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
+    usernames_to_check = {un.lower().rstrip(".") for un in regex.findall(note.entry)}
 
     users_to_notify = [
         Dojo_User.objects.filter(username=username).get()
@@ -910,7 +932,7 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         title=f"{request.user} jotted a note",
         url=parent_url,
         icon="commenting",
-        recipients=users_to_notify,
+        recipients=[user.username for user in users_to_notify],
         requested_by=crum.get_current_user())
 
 

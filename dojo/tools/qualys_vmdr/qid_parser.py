@@ -1,5 +1,4 @@
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.qualys_vmdr.helpers import (
     build_description_qid,
@@ -48,7 +47,7 @@ class QualysVMDRQIDParser:
             dynamic_finding=False,
         )
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = parse_locations(
                 row.get("Asset IPV4", ""),
                 row.get("Asset IPV6", ""),

@@ -4,9 +4,18 @@ from dataclasses import dataclass
 
 import dateutil.parser
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
+
+
+def _to_int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 class _PathNode:
@@ -131,6 +140,18 @@ class CheckmarxCXFlowSastParser:
                         verified=self.is_verify(detail.state),
                         active=self.is_active(detail.state),
                     )
+                    if locations_enabled() and filename:
+                        finding.unsaved_locations.append(
+                            LocationData.code(
+                                file_path=filename,
+                                line=_to_int(detail.sink.line) if detail.sink is not None else None,
+                                snippet=(detail.sink.snippet if detail.sink is not None else "") or "",
+                                source_object=(detail.source.node_object if detail.source is not None else "") or "",
+                                sink_object=(detail.sink.node_object if detail.sink is not None else "") or "",
+                                source_file_path=(detail.source.file if detail.source is not None else "") or "",
+                                source_line=_to_int(detail.source.line) if detail.source is not None else None,
+                            ),
+                        )
 
                     findings.append(finding)
 

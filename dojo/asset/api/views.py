@@ -1,3 +1,8 @@
+from datetime import datetime
+from functools import partial
+
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
@@ -8,7 +13,7 @@ from rest_framework.response import Response
 import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
-from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
+from dojo.api_v2.views import DeprecationNoticeMixin, PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
 from dojo.asset.api import serializers
 from dojo.asset.api.filters import (
     ApiAssetFilter,
@@ -16,6 +21,7 @@ from dojo.asset.api.filters import (
 )
 from dojo.authorization import api_permissions as permissions
 from dojo.models import (
+    Finding,
     Product,
     Product_API_Scan_Configuration,
 )
@@ -23,14 +29,19 @@ from dojo.product.queries import (
     get_authorized_product_api_scan_configurations,
     get_authorized_products,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.utils import async_delete, get_setting
 
 
 # Authorization: object-based
+# Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
 @extend_schema_view(**schema_with_prefetch())
 class AssetAPIScanConfigurationViewSet(
+    DeprecationNoticeMixin,
     PrefetchDojoModelViewSet,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 11, 1)
     serializer_class = serializers.AssetAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -66,7 +77,34 @@ class AssetViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_products("view").distinct()
+        base_findings = Finding.objects.filter(
+            test__engagement__product_id=OuterRef("pk"),
+        )
+        count_subquery = partial(
+            build_count_subquery,
+            group_field="test__engagement__product_id",
+        )
+        return (
+            get_authorized_products("view")
+            .select_related(
+                "platform",
+                "lifecycle",
+                "origin",
+            )
+            .prefetch_related(
+                "tags",
+                "product_meta",
+                "authorized_users",
+                "regulations",
+            )
+            .annotate(
+                active_finding_count=Coalesce(
+                    count_subquery(base_findings.filter(active=True)),
+                    Value(0),
+                ),
+            )
+            .distinct()
+        )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

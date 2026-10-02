@@ -44,11 +44,10 @@ As the containers that organize testing activity, Engagements can store or track
 - Assignee / Lead
 - Associated Tests (e.g., scans, pen tests, manual tests, etc.)
 - Findings and Finding Types (e.g., active, mitigated, risk accepted, duplicate, etc.) 
-- Threat models or risk acceptance info
+- Threat models (if enabled)
 - Tags
 - Files and notes
 - Jira project settings
-- Environment details (e.g., staging vs. production)
 - Build IDs (if linked to CI/CD)
 - Historical data from past Tests within the Engagement 
 
@@ -66,7 +65,7 @@ Alternatively, Engagements within an Asset can be accessed in the window at the 
 
 Engagements sit below Assets and above Tests in the object hierarchy. As such, access to an Asset automatically grants access to all Engagements within that Asset. Engagements do not have independent access control lists.
 
-## Engagement Lifecycle 
+## Working with Engagements
 
 ### Create Engagements 
 
@@ -98,6 +97,13 @@ Every Engagement must have the following fields defined:
     - This will determine the Engagement’s appearance in the Calendar section
 - Asset 
 - Status 
+
+When you start from an Asset — the gear icon, the “+ New Engagement” button, or a
+link that already names the Asset — the Asset field arrives filled in and locked, so
+it cannot be pointed at a different Asset by mistake. A locked field cannot be opened
+or selected with the mouse, so it carries a copy button on its right-hand edge that
+puts the value on your clipboard. The same applies anywhere a field is pre-filled from
+context, such as the Engagement and Scan Type fields when adding a Test.
 
 #### Engagement Statuses 
 
@@ -133,7 +139,7 @@ Engagements are closed by selecting **Close Engagement** within the Engagement�
 
 Closing an Engagement does not change the status of the Findings within any of the Engagement’s Tests. Findings remain open, mitigated, or risk accepted according to their own lifecycle, and remain accessible for viewing and reporting.
 
-If the Engagement is linked to a Jira Epic (see **[Jira Integration: Enable Engagement Epic Mapping](/issue_tracking/jira/pro__jira_guide/#enable-engagement-epic-mapping)**), closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic in your connected Jira Space.
+If the Engagement is linked to a Jira Epic (see **[Jira Integration: Enable Engagement Epic Mapping](/connectors/downstream/pro__jira_guide/#enable-engagement-epic-mapping)**), closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic in your connected Jira Space.
 
 ### Reopen Engagements 
 
@@ -169,19 +175,60 @@ For auditing purposes, it is recommended to close any completed Engagements, rat
 | **Expire** | Visual warning only; optional auto-close; notifications | N/A |
 | **Delete** | Permanently removes Engagement, Tests, Findings, notes, files, and any Jira Epic mappings (Epics remain in Jira) | No |
 
+## Engagement Checklists
+
+A checklist records the review work a tester performed during an Engagement, across eight fixed
+security categories: Session, Encryption, Configuration, Authentication, Authorization, Data
+Input, Sensitive Data, and Other.
+
+Each category holds three things:
+
+- A **status**: Pass, Fail, or N/A. A category you have not looked at yet reads "Not Evaluated".
+- Any **Findings** that back up that status, linked from the Findings already in the Engagement.
+- A **note**, for the detail a status alone cannot carry.
+
+The checklist appears on the Engagement page. If the Engagement does not have one yet, the panel
+says so and offers to start one. The checklist is also available from the Engagement's settings
+menu, as **Complete Checklist** or **Edit Checklist**.
+
+### Filling in a Checklist
+
+Select **Complete Checklist** to open the form. You do not have to complete every category at
+once: a partial checklist saves, so you can record categories as the review progresses and return
+to it later. The Findings picker for each category is limited to the Findings in that Engagement,
+and to those you have permission to view.
+
+Once saved, the panel lists each category with its status, its note, and its linked Findings as
+chips you can select to open the Finding. The panel also shows who last saved the checklist and
+when.
+
+### Availability
+
+Checklists apply to **Interactive** Engagements only, because a checklist records testing a
+person performed. CI/CD Engagements collect automated scan results, so they do not offer one.
+
+Checklists can also be switched off for the whole instance. A superuser can clear **Enable
+checklists** in System Settings, which hides the checklist panel and its menu entry everywhere.
+
+### Permissions
+
+Viewing a checklist requires View permission on the Engagement. Creating or editing one requires
+Edit permission on the Engagement. Users without Edit permission see the checklist but are not
+offered the buttons to change it.
+
 ## Jira Integration
 
-Engagements can be linked to a connected Jira Space, allowing Findings within the Engagement to be pushed to Jira as Issues. For a complete guide to setting up Jira, see **[Connecting DefectDojo to Jira](/issue_tracking/jira/pro__jira_guide/)**.
+Engagements can be linked to a connected Jira Space, allowing Findings within the Engagement to be pushed to Jira as Issues. For a complete guide to setting up Jira, see **[Connecting DefectDojo to Jira](/connectors/downstream/pro__jira_guide/)**.
 
 ### Engagement Epic Mapping
 
-When **Enable Engagement Epic Mapping** is checked in a Product’s Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo’s Engagement → Findings hierarchy in Jira’s Epic → Issue structure.
+When **Enable Engagement Epic Mapping** is checked in an Asset’s Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo’s Engagement → Findings hierarchy in Jira’s Epic → Issue structure.
 
-For more information on this setting, see **[Enable Engagement Epic Mapping](/issue_tracking/jira/pro__jira_guide/#enable-engagement-epic-mapping)**.
+For more information on this setting, see **[Enable Engagement Epic Mapping](/connectors/downstream/pro__jira_guide/#enable-engagement-epic-mapping)**.
 
 ### Engagement-Level Jira Settings
 
-By default, Engagements inherit their Jira settings from their parent Asset (Product). However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
+By default, Engagements inherit their Jira settings from their parent Asset. However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
 
 - **Project Key** — route Findings to a different Jira Space
 - **Issue Template** — use a different template for Issues created from this Engagement
@@ -189,4 +236,4 @@ By default, Engagements inherit their Jira settings from their parent Asset (Pro
 - **Jira Labels** — tag Issues with Engagement-specific labels
 - **Default Assignee** — assign Issues to a different team member
 
-These settings are accessible from the **Edit Engagement** page. For more details, see **[Engagement-Level Jira Settings](/issue_tracking/jira/pro__jira_guide/#engagement-level-jira-settings)**.
+These settings are accessible from the **Edit Engagement** page. For more details, see **[Engagement-Level Jira Settings](/connectors/downstream/pro__jira_guide/#engagement-level-jira-settings)**.

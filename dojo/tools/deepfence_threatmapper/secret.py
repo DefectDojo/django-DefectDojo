@@ -1,4 +1,6 @@
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class DeepfenceThreatmapperSecret:
@@ -29,7 +31,7 @@ class DeepfenceThreatmapperSecret:
         description += f"**Content:** {Content}\n"
         description += f"**Signature:** {Signature}\n"
         if Name and Severity:
-            return Finding(
+            finding = Finding(
                 title=str(Name),
                 description=description,
                 file_path=Filename,
@@ -38,6 +40,11 @@ class DeepfenceThreatmapperSecret:
                 dynamic_finding=True,
                 test=test,
             )
+            if locations_enabled() and Filename:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=Filename, line=None),
+                )
+            return finding
         return None
 
     def _parse_new_format(self, row, headers, test):
@@ -61,7 +68,7 @@ class DeepfenceThreatmapperSecret:
         description += f"**Masked:** {Masked}\n"
         title = f"{Rule} in {Filename}" if Rule else "Secret Finding"
         if Severity:
-            return Finding(
+            finding = Finding(
                 title=title,
                 description=description,
                 file_path=Filename,
@@ -70,6 +77,11 @@ class DeepfenceThreatmapperSecret:
                 dynamic_finding=True,
                 test=test,
             )
+            if locations_enabled() and Filename:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=Filename, line=None),
+                )
+            return finding
         return None
 
     def severity(self, severity_input):

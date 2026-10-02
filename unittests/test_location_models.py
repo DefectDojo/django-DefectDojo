@@ -60,6 +60,45 @@ class TestURLModel(DojoTestCase):
         url = URL(host="127.0.0.1")
         self.assertEqual(url.host, "127.0.0.1")
 
+    # Regression: a bare (unbracketed) IPv6 endpoint -- infra scanners such as
+    # Tenable emit fe80::... -- raised ValidationError("No host provided") out of
+    # URL.from_value, which failed an entire connector reimport chunk. RFC 3986
+    # requires an IPv6 literal in a URL authority to be bracketed, so the parser now
+    # normalises a bare (or scheme-less bracketed) IPv6 host to //[...] before it
+    # reaches hyperlink.
+    def test_ipv6(self):
+        cases = [
+            # (input, expected host, expected port, expected protocol)
+            ("fe80::0250:56ff:febb:0000", "fe80::0250:56ff:febb:0000", None, ""),  # the reported bug
+            ("[fe80::1]", "fe80::1", None, ""),                                    # bracketed, no scheme
+            ("2001:db8::1", "2001:db8::1", None, ""),                              # bare, no scheme
+            ("http://[fe80::1]:8080/path", "fe80::1", 8080, "http"),              # already-schemed, unchanged
+        ]
+        for value, host, port, protocol in cases:
+            with self.subTest(value=value):
+                url = URL.from_value(value)
+                self.assertEqual(url.host, host, msg=f"{value!r} -> host={url.host!r}")
+                self.assertEqual(url.port, port, msg=f"{value!r} -> port={url.port!r}")
+                self.assertEqual(url.protocol, protocol, msg=f"{value!r} -> protocol={url.protocol!r}")
+
+        # A bracketed IPv6 host round-trips through str() with its brackets intact.
+        self.assertEqual(
+            str(URL.from_value("http://[fe80::1]:8080/path")),
+            "http://[fe80::1]:8080/path",
+        )
+
+        # A bare IPv6 host is canonicalised (compressed) at clean() time.
+        url = URL(host="fe80::0250:56ff:febb:0000")
+        url.full_clean()
+        self.assertEqual(url.host, "fe80::250:56ff:febb:0")
+
+    def test_host_with_port_is_not_treated_as_ipv6(self):
+        # Control: the bare-IPv6 normalisation must not disturb a scheme-relative
+        # host:port -- a single colon is not an IPv6 literal.
+        url = URL.from_value("//example.com:8080")
+        self.assertEqual(url.host, "example.com")
+        self.assertEqual(url.port, 8080)
+
     def test_less_standard_hosts(self):
         url = URL.from_value("http://123_server/")
         url.full_clean()
@@ -84,6 +123,29 @@ class TestURLModel(DojoTestCase):
         # unknown port
         url = URL.from_value("tcp://foo.bar/")
         self.assertIsNone(url.port)
+
+    # Regression: network/infra-scanner endpoints using udp/snmp/ipp/icmp
+    # protocols were rejected by URL validation ("<proto> is not a supported
+    # protocol"), so migrate_endpoints_to_locations silently dropped them —
+    # ~65% of endpoints on infra-scan-heavy instances.
+    def test_scanner_protocols_supported(self):
+        for protocol, expected_port in (
+            ("udp", None),
+            ("icmp", None),
+            ("snmp", 161),
+            ("ipp", 631),
+        ):
+            url = URL(protocol=protocol, host="foo.bar")
+            url.full_clean()  # must not raise
+            self.assertEqual(
+                url.port, expected_port,
+                msg=f"expected default port {expected_port} for {protocol!r}, got {url.port!r}",
+            )
+
+    def test_unsupported_protocol_still_rejected(self):
+        # Control: a genuinely unknown protocol must still fail validation.
+        url = URL(protocol="definitelynotaprotocol", host="foo.bar")
+        self.assertRaises(ValidationError, url.full_clean)
 
     def test_spacial_char(self):
         url = URL.from_value("http://foo.bar/beforeSpace%20afterSpace")

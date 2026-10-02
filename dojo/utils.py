@@ -16,36 +16,49 @@ from datetime import date, datetime, timedelta
 from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
+from urllib.parse import urlparse
 
-import bleach
 import crum
 import cvss
 import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+# OFB powers the legacy "AES.1" decryption path only. It has been moved to the
+# "decrepit" module and is being removed from primitives.ciphers.modes; import
+# it from its new home when available, falling back for older cryptography.
+try:
+    from cryptography.hazmat.decrepit.ciphers.modes import OFB
+except ImportError:  # cryptography that predates the decrepit modes module
+    from cryptography.hazmat.primitives.ciphers.modes import OFB
 from cvss import CVSS2, CVSS3, CVSS4
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import IntegrityError, OperationalError, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.http import FileResponse, HttpResponseRedirect
+from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, reverse
 from django.utils import timezone
+from django.utils.html import escape, format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from kombu import Connection
 
 from dojo.celery import app
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.finding.queries import get_authorized_findings
 from dojo.github.services import (
     add_external_issue_github,
@@ -54,6 +67,7 @@ from dojo.github.services import (
     update_external_issue_github,
 )
 from dojo.labels import get_labels
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import ProductLocationStatus
 from dojo.models import (
@@ -529,7 +543,7 @@ def get_period_counts(findings,
         try:
             closed_in_range_count = findings_closed.filter(
                 mitigated__date__range=[new_date, end_date]).count()
-        except:
+        except Exception:
             closed_in_range_count = findings_closed.filter(
                 mitigated_time__range=[new_date, end_date]).count()
 
@@ -540,7 +554,7 @@ def get_period_counts(findings,
             ]
             try:
                 risks_a = accepted_findings.filter(risk_acceptance__created__date__range=date_range)
-            except:
+            except Exception:
                 risks_a = accepted_findings.filter(date__range=date_range)
         else:
             risks_a = None
@@ -560,14 +574,14 @@ def get_period_counts(findings,
                 severity = finding.severity
                 active = finding.active
 #                risk_accepted = finding.risk_accepted TODO: in future release
-            except:
+            except Exception:
                 severity = finding.finding.severity
                 active = finding.finding.active
 #                risk_accepted = finding.finding.risk_accepted
 
             try:
                 f_time = datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=tz)
-            except:
+            except Exception:
                 f_time = finding.date
 
             if f_time <= end_date:
@@ -596,7 +610,7 @@ def get_period_counts(findings,
             for finding in risks_a:
                 try:
                     severity = finding.severity
-                except:
+                except Exception:
                     severity = finding.finding.severity
                 if severity == "Critical":
                     ra_crit_count += 1
@@ -960,11 +974,31 @@ def reopen_external_issue(finding_id, note, external_issue_provider, **kwargs):
 from dojo.notifications.helper import process_tag_notifications  # noqa: E402, F401  -- backward compat
 
 
+# ---------------------------------------------------------------------------
+# Legacy "AES.1" credential encryption: AES-256-OFB with null-byte padding.
+# Retained for backward-compatible decryption of values already stored in the
+# database. New values are written with the "AES.2" (AES-256-GCM) scheme below
+# via dojo_crypto_encrypt(); existing "AES.1" values upgrade lazily the next
+# time they are saved.
+#
+# REMOVAL TRACKING (legacy OFB path):
+# Migration 0272_reencrypt_tool_config_credentials_aes_gcm eagerly re-encrypts
+# every stored Tool_Configuration credential to "AES.2", so after it has run in
+# every environment there should be no "AES.1" values left in the database.
+# Once that migration is squashed/baked into the release floor (i.e. no upgrade
+# path can skip it) and any external integrations have been confirmed not to
+# persist their own "AES.1" values, the entire legacy path can be deleted:
+#   - encrypt() / decrypt() / _pad_string() / _unpad_string() below
+#   - the OFB import at the top of this module
+#   - the "AES.1" else-branch in prepare_for_view()
+#   - prepare_for_save() (only ever produced the "AES.1" format)
+# Do NOT remove any of the above until all stored secrets have been re-encrypted.
+# ---------------------------------------------------------------------------
 def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
@@ -974,7 +1008,7 @@ def encrypt(key, iv, plaintext):
 
 def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
+    cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
@@ -994,14 +1028,18 @@ def _unpad_string(value):
 
 
 def dojo_crypto_encrypt(plaintext):
+    # New values are encrypted with the modern "AES.2" (AES-256-GCM) scheme.
+    # AESGCM provides authenticated encryption (no separate padding needed) and
+    # uses the same key derived by get_db_key(), so it stays interoperable with
+    # the legacy "AES.1" decryption path. See prepare_for_view() for reads.
     data = None
     if plaintext:
-        key = None
         key = get_db_key()
-
-        iv = os.urandom(16)
-        data = prepare_for_save(
-            iv, encrypt(key, iv, plaintext.encode("utf-8")))
+        # GCM standard nonce length is 96 bits (12 bytes); never reuse a nonce
+        # with the same key, hence a fresh random nonce per encryption.
+        nonce = os.urandom(12)
+        ciphertext = AESGCM(key).encrypt(nonce, plaintext.encode("utf-8"), None)
+        data = "AES.2:" + binascii.b2a_hex(nonce).decode("utf-8") + ":" + binascii.b2a_hex(ciphertext).decode("utf-8")
 
     return data
 
@@ -1026,7 +1064,10 @@ def get_db_key():
 
 
 def prepare_for_view(encrypted_value):
-
+    # Reads both the modern "AES.2" (AES-256-GCM) format written by
+    # dojo_crypto_encrypt() and the legacy "AES.1" (AES-256-OFB) format. Any
+    # unrecognized prefix falls through to the legacy path so that values
+    # already stored in the database continue to decrypt unchanged.
     key = None
     decrypted_value = ""
     if encrypted_value is not NotImplementedError and encrypted_value is not None:
@@ -1034,13 +1075,19 @@ def prepare_for_view(encrypted_value):
         encrypted_values = encrypted_value.split(":")
 
         if len(encrypted_values) > 1:
-            iv = binascii.a2b_hex(encrypted_values[1])
-            value = encrypted_values[2]
-
+            scheme = encrypted_values[0]
             try:
-                decrypted_value = decrypt(key, iv, value)
-                decrypted_value = decrypted_value.decode("utf-8")
-            except UnicodeDecodeError:
+                iv = binascii.a2b_hex(encrypted_values[1])
+                value = encrypted_values[2]
+                if scheme == "AES.2":
+                    decrypted_value = AESGCM(key).decrypt(iv, binascii.a2b_hex(value), None).decode("utf-8")
+                else:
+                    # Legacy "AES.1" (AES-256-OFB) read path. Removable once
+                    # migration 0272 is guaranteed to have run everywhere and no
+                    # "AES.1" values remain -- see the REMOVAL TRACKING note on
+                    # the encrypt()/decrypt() block above.
+                    decrypted_value = decrypt(key, iv, value).decode("utf-8")
+            except (UnicodeDecodeError, InvalidTag, ValueError, IndexError):
                 decrypted_value = ""
 
     return decrypted_value
@@ -1075,8 +1122,45 @@ def grade_product(crit, high, med, low):
     return max(health, 5)
 
 
+def grade_debounce_cache_key(product_id):
+    """The cache key that marks a grade recalculation as already queued for this product."""
+    return f"dojo_product_grade_pending:{product_id}"
+
+
+def schedule_product_grade(product_id, *, force_sync=False):
+    """
+    Queue a recalculation of the product's grade, at most once per debounce window.
+
+    Every finding save used to dispatch its own calculate_grade task, so a bulk operation queued one
+    task per finding for a value that only needs computing once per product per burst; on a large
+    import that was thousands of identical tasks competing with the import itself for the worker
+    pool. Here the first change in a window queues one task with a countdown of
+    PRODUCT_GRADE_DEBOUNCE_SECONDS and later changes in the window do nothing. The task drops the
+    marker as it starts, so a change that lands while it runs queues the follow-up it needs, and the
+    marker expires with the window, so a task the broker never delivered cannot block grading for good.
+
+    Only background dispatch is coalesced. A foreground recalculation (``force_sync``, or a user whose
+    profile blocks background execution) runs right away as before: its caller expects the grade when
+    the call returns, and there is no queue for it to flood. With the LocMem cache (no DD_CACHE_URL)
+    the window is per process, which coalesces less but never loses a recalculation.
+    """
+    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+    from dojo.decorators import we_want_async  # noqa: PLC0415 circular import
+
+    if force_sync:
+        return dojo_dispatch_task(calculate_grade, product_id, force_sync=True)
+    window = settings.PRODUCT_GRADE_DEBOUNCE_SECONDS
+    if window <= 0 or not we_want_async(func=calculate_grade):
+        return dojo_dispatch_task(calculate_grade, product_id)
+    if not cache.add(grade_debounce_cache_key(product_id), value=True, timeout=window):
+        logger.debug("grade recalculation for product %s is already queued", product_id)
+        return None
+    return dojo_dispatch_task(calculate_grade, product_id, countdown=window)
+
+
 @app.task
 def calculate_grade(product_id, *args, **kwargs):
+    cache.delete(grade_debounce_cache_key(product_id))
     product = get_object_or_none(Product, id=product_id)
     if not product:
         logger.warning("Product with id %s does not exist, skipping calculate_grade", product_id)
@@ -1132,9 +1216,7 @@ def calculate_grade_internal(product, *args, **kwargs):
 def perform_product_grading(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade:
-        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-        dojo_dispatch_task(calculate_grade, product.id)
+        schedule_product_grade(product.id)
 
 
 def get_celery_worker_status():
@@ -1271,7 +1353,7 @@ class Product_Tab:
     @cached_property
     def _active_endpoints(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return Endpoint.objects.filter(
                 product=self.product,
                 status_endpoint__mitigated=False,
@@ -1291,7 +1373,7 @@ class Product_Tab:
     @cached_property
     def endpoint_hosts_count(self):
         # TODO: Delete this after the move to Locations
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             return self._active_endpoints.values("host").distinct().count()
         return self._active_endpoints.values("url__host").distinct().count()
 
@@ -1425,7 +1507,7 @@ def redirect_to_return_url_or_else(request, or_else):
         return redirect(request, return_url.strip())
     if or_else:
         return redirect(request, or_else)
-    messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
+    messages.add_message(request, messages.ERROR, _("Unable to redirect anywhere."), extra_tags="alert-danger")
     return redirect(request, request.get_full_path())
 
 
@@ -1488,15 +1570,18 @@ def get_current_request():
     return crum.get_current_request()
 
 
+ALLOWED_LINK_SCHEMES = {"http", "https", "mailto"}
+
+
 def create_bleached_link(url, title):
-    link = '<a href="'
-    link += url
-    link += '" target="_blank" title="'
-    link += title
-    link += '">'
-    link += title
-    link += "</a>"
-    return bleach.clean(link, tags={"a"}, attributes={"a": ["href", "target", "title"]})
+    # format_html escapes the values but does not block a javascript:/data: href.
+    scheme = urlparse(url).scheme.lower()
+    if scheme and scheme not in ALLOWED_LINK_SCHEMES:
+        return escape(title)
+    return format_html(
+        '<a href="{}" target="_blank" rel="noopener noreferrer" title="{}">{}</a>',
+        url, title, title,
+    )
 
 
 def get_object_or_none(klass, *args, **kwargs):
@@ -1577,7 +1662,21 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
+def default_mass_model_writer(model_type, batch, fields):
+    """Default mass_model_updater ``writer``: persist a batch via Django's bulk_update."""
+    if not batch:
+        return
+    model_type.objects.bulk_update(batch, fields)
+
+
+def _flush_mass_update(model_type, batch, fields, writer):
+    """Persist a batch via the supplied writer, else the default writer."""
+    if not batch:
+        return
+    (writer or default_mass_model_writer)(model_type, batch, fields)
+
+
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix="", *, skip_unchanged=True, writer=None):
     """
     Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
@@ -1586,6 +1685,16 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     was processed and continue from there on the next page. This is fast because
     it results in an index seek instead of executing the whole query again and skipping
     the first X items.
+
+    When ``fields`` is given:
+      - skip_unchanged (default True): rows whose tracked ``fields`` were not changed by
+        ``function`` are not written. The pre-``function`` value of each tracked field is
+        read with normal attribute access, so callers must ensure the tracked ``fields``
+        are loaded by the queryset (i.e. not excluded via ``.only()``/``.defer()``);
+        otherwise accessing a deferred tracked field issues a per-row query.
+      - writer (optional): a callable ``writer(model_type, batch, fields)`` used to persist
+        each batch instead of Django's ``bulk_update`` (e.g. a backend-specific fast path).
+        Defaults to ``bulk_update``.
     """
     # force ordering by id to make our paging work
     last_id = 0
@@ -1608,6 +1717,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     logger.debug("%s found %d models for mass update:", log_prefix, total_count)
 
     i = 0
+    written = 0
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.debug("pages to process: %d", total_pages)
@@ -1623,22 +1733,41 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
             i += 1
             last_id = model.id
 
+            # snapshot tracked fields before mutation; used to skip no-op writes.
+            # Read via normal attribute access so the real persisted value is compared
+            # (callers must load the tracked fields; see docstring).
+            before = None
+            if fields and skip_unchanged:
+                before = [getattr(model, f) for f in fields]
+
             function(model)
 
-            batch.append(model)
+            if fields and skip_unchanged and before is not None and all(
+                getattr(model, f) == old for f, old in zip(fields, before, strict=True)
+            ):
+                # nothing changed for this row -> no write needed
+                pass
+            else:
+                batch.append(model)
 
-            if (i > 0 and i % page_size == 0):
-                if fields:
-                    model_type.objects.bulk_update(batch, fields)
+            if fields and len(batch) >= page_size:
+                _flush_mass_update(model_type, batch, fields, writer)
+                written += len(batch)
                 batch = []
+            elif not fields and len(batch) >= page_size:
+                # function has side effects only; keep memory bounded
+                batch = []
+
+            if i > 0 and i % page_size == 0:
                 logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
         logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
-    if fields:
-        model_type.objects.bulk_update(batch, fields)
+    if fields and batch:
+        _flush_mass_update(model_type, batch, fields, writer)
+        written += len(batch)
     batch = []
-    logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
+    logger.info("%s%s out of %s models processed (%s written) ...", log_prefix, i, total_count, written)
 
 
 def to_str_typed(obj):
@@ -1725,8 +1854,7 @@ def _get_object_name(obj):
     return obj.__class__.__name__
 
 
-@app.task
-def async_delete_task(model_label, pk, **kwargs):
+def _async_delete_object(model_label, pk, *, is_retry=False):
     """
     Delete an object and all its related objects using the SQL cascade walker.
 
@@ -1738,8 +1866,11 @@ def async_delete_task(model_label, pk, **kwargs):
     efficient bottom-up SQL deletion of all FK-related tables. The top-level
     object is deleted via ORM obj.delete() to fire Django signals.
 
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    Steps 1-4 refetch or re-filter what they delete, so calling this again after a
+    failure in one of them resumes from whatever is left. Steps 5 and 6 are NOT
+    resumable: once the top-level obj.delete() commits, a re-invocation finds nothing
+    and returns early, so any post-delete work is skipped rather than redone. Pass
+    ``is_retry=True`` on a re-invocation so that case is logged as the anomaly it is.
     """
     from django.apps import apps  # noqa: PLC0415
 
@@ -1752,7 +1883,17 @@ def async_delete_task(model_label, pk, **kwargs):
     Model = apps.get_model(model_label)
     obj = Model.objects.filter(pk=pk).first()
     if obj is None:
-        logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
+        if is_retry:
+            # The top-level delete committed and the conflict came after it, so the
+            # object is gone and step 6 never ran. Louder than the first-call case:
+            # nothing is broken, but a product grade may now be stale.
+            logger.warning(
+                "ASYNC_DELETE: %s pk=%s already gone on a retry -- the delete itself "
+                "completed, but post-delete work (product grading) was not redone",
+                model_label, pk,
+            )
+        else:
+            logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
         return
 
     logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
@@ -1817,6 +1958,85 @@ def async_delete_task(model_label, pk, **kwargs):
     logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)
 
 
+# Seconds before the first retry; doubled on each subsequent attempt.
+ASYNC_DELETE_RETRY_DELAY = 5
+# How often to retry before reporting the conflict as a failure.
+ASYNC_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
+def _is_retryable_delete_conflict(exc):
+    """
+    Whether a delete failure is a lost concurrency race worth retrying.
+
+    Two shapes, both caused by another transaction touching the same rows while the
+    cascade delete runs, and both cleared by re-running the resumable body:
+
+    * a deadlock or serialization failure raised mid-cascade (``OperationalError``); and
+    * a foreign-key violation from an import committing a new child row -- e.g. a
+      ``Test_Import`` for a ``Test`` being deleted -- between the cascade step (which
+      cleared the old children) and the top-level ``obj.delete()`` (``IntegrityError``).
+
+    Any other DB error (a statement timeout, a unique violation, a dropped connection) is
+    not a lost race, so it is surfaced rather than retried.
+    """
+    return is_transient_db_conflict(exc) or is_foreign_key_conflict(exc)
+
+
+@app.task(bind=True)
+def async_delete_task(self, model_label, pk, **kwargs):
+    """
+    Celery entry point for cascade deletion, retrying transient DB conflicts.
+
+    Deterministic lock ordering in the tag bookkeeping (see
+    ``dojo.tags.utils.bulk_remove_all_tags``) is what stops these deletes deadlocking
+    against each other. This retry is the backstop for the conflicts that ordering
+    cannot rule out -- a delete overlapping an import, say -- because the aborted
+    transaction's work is not wrong, only rolled back, and failing here would leave the
+    object partly deleted. That overlap has two shapes: a deadlock/serialization failure,
+    and a foreign-key violation when the import commits a new child row referencing a row
+    being deleted (see ``_is_retryable_delete_conflict``); both are retried the same way.
+
+    Only applies to background execution: under eager execution Celery re-runs the body
+    inline and ignores ``countdown``, which would retry into an unfinished conflicting
+    transaction, so eager callers get the error instead.
+
+    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
+    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    """
+    retries = self.request.retries
+    try:
+        _async_delete_object(model_label, pk, is_retry=retries > 0)
+    except (OperationalError, IntegrityError) as exc:
+        if not _is_retryable_delete_conflict(exc):
+            raise
+        if self.request.is_eager:
+            # Verified against celery 5.6.3: under apply() retry re-invokes the body
+            # immediately and drops countdown, so retrying would just re-run the whole
+            # delete inside the caller's request while the winner may still be open.
+            logger.warning(
+                "ASYNC_DELETE: transient DB conflict on %s pk=%s running eagerly; "
+                "not retrying because eager retries ignore the backoff: %s",
+                model_label, pk, exc,
+            )
+            raise
+        if retries >= ASYNC_DELETE_MAX_CONFLICT_RETRIES:
+            logger.error(
+                "ASYNC_DELETE: giving up on %s pk=%s after %s transient DB conflict(s): %s",
+                model_label, pk, retries, exc,
+            )
+            raise
+        # Stagger tasks that deadlocked against each other so they do not collide
+        # again on the retry. The pk is a stable per-task offset, so no randomness
+        # is needed to spread them out.
+        backoff = ASYNC_DELETE_RETRY_DELAY * (2 ** retries)
+        countdown = backoff + backoff * (pk % 100) / 100
+        logger.warning(
+            "ASYNC_DELETE: transient DB conflict on %s pk=%s, retry %s/%s in %.1fs: %s",
+            model_label, pk, retries + 1, ASYNC_DELETE_MAX_CONFLICT_RETRIES, countdown, exc,
+        )
+        raise self.retry(exc=exc, countdown=countdown, max_retries=ASYNC_DELETE_MAX_CONFLICT_RETRIES)
+
+
 class async_delete:
 
     """
@@ -1857,7 +2077,12 @@ def log_user_login(sender, request, user, **kwargs):
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
+    # user can be None: Django's auth.logout() sends user_logged_out with user=None whenever the
+    # request has no authenticated user. This happens on an IdP-initiated SAML single-logout
+    # (POST /saml2/ls/) whose Django session has already expired -- djangosaml2 still calls
+    # auth.logout(request), so the signal fires with no user. Guard so logout cannot 500.
+    username = user.username if user is not None else "<anonymous>"
+    logger.info("logout user: %s via ip: %s", username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
@@ -2094,6 +2319,13 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
     # Clean the title by removing some problematic characters
     cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
+    # The database may reference a file that is no longer present on disk (e.g. media
+    # that was never persisted or was removed out of band). Reading file_object.file.size
+    # in that case raises a low-level FileNotFoundError that surfaces as an HTTP 500.
+    # Treat a missing file as a 404 so the caller gets a clean "not found" response.
+    if not Path(file_path).is_file():
+        msg = f"File {cleaned_file_name} could not be found on disk"
+        raise Http404(msg)
 
     return generate_file_response_from_file_path(
         file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
@@ -2106,11 +2338,19 @@ def generate_file_response_from_file_path(
     """Serve an local file in a uniformed way."""
     # Determine the file path
     path = Path(file_path)
-    file_path_without_extension = path.parent / path.stem
+    # Guard against a missing file on disk so callers that pass a raw path (e.g. the
+    # engagement threat model download) also get a clean 404 instead of a low-level
+    # FileNotFoundError bubbling up as an HTTP 500.
+    if not path.is_file():
+        msg = f"File {path.name} could not be found on disk"
+        raise Http404(msg)
     file_extension = path.suffix
-    # Determine the file name if not supplied
+    # Determine the file name if not supplied. path.stem is the final path component
+    # without its extension (the previous Path.rsplit call raised AttributeError, so this
+    # branch — reached e.g. by the engagement threat-model download, which passes no
+    # file_name — always 500'd).
     if file_name is None:
-        file_name = file_path_without_extension.rsplit("/")[-1]
+        file_name = path.stem
     # Determine the file size if not supplied
     if file_size is None:
         file_size = pathlib.Path(file_path).stat().st_size

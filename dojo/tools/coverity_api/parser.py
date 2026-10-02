@@ -1,7 +1,9 @@
 import json
 from datetime import datetime
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class CoverityApiParser:
@@ -63,6 +65,10 @@ class CoverityApiParser:
 
             if "displayFile" in issue:
                 finding.file_path = issue["displayFile"]
+                if locations_enabled() and finding.file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=finding.file_path, line=None),
+                    )
 
             if "occurrenceCount" in issue:
                 finding.nb_occurences = int(issue["occurrenceCount"])

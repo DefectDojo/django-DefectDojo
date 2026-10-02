@@ -1,6 +1,8 @@
 ---
 title: "OpenVAS Parser"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/openvas/"
 ---
 You can upload the results of an OpenVAS/Greenbone report in either .csv or .xml format.
 
@@ -20,7 +22,7 @@ Version 2 comes with a number of improvements:
 
 ### Deduplication Algorithm
 Default Deduplication Hashcode Fields:
-By default, DefectDojo Parser V2 identifies duplicate findings using the following [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo Parser V2 identifies duplicate findings using the following [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

@@ -1,7 +1,7 @@
 import logging
 
 from django import forms
-from tagulous.forms import TagField
+from django_tagulous.forms import TagField
 
 from dojo.location.models import Location
 from dojo.url.models import URL
@@ -25,7 +25,7 @@ class URLForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance is not None and hasattr(self.instance, "location"):
-            self.fields["tags"].initial = self.instance.location.tags.all()
+            self.fields["tags"].initial = self.instance.location.readable_tags
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
@@ -35,7 +35,13 @@ class URLForm(forms.ModelForm):
         url = super().save(commit=False)
         if commit:
             url = super().save(commit=True) if update_only else URL.get_or_create_from_object(url)
-            url.location.tags.set(self.cleaned_data["tags"])
+            # Replacing the shared tag set is only safe on an edit of a Location no other
+            # product references. The add path cannot tell: the reference it creates does not
+            # exist yet at this point.
+            if update_only and url.location.products.count() <= 1:
+                url.location.tags.set(self.cleaned_data["tags"])
+            else:
+                url.location.tags.add(*self.cleaned_data["tags"])
         return url
 
 

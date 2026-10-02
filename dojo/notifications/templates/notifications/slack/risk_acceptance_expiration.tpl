@@ -8,7 +8,7 @@
     {% trans "Risk Acceptance Will Expire Soon" %}
 {% endif %}
 
-{% blocktranslate trimmed with risk_url=risk_acceptance_url|full_url %}
+{% blocktranslate trimmed with risk_url=url|full_url %}
 Risk Acceptance can be viewed here: {{ risk_url }}
 {% endblocktranslate %}
 {% if system_settings.disclaimer_notifications and system_settings.disclaimer_notifications.strip %}

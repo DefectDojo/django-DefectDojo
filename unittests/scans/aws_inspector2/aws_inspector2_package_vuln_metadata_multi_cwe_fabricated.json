@@ -1,0 +1,350 @@
+{
+    "findings": [
+        {
+            "findingArn": "arn:aws:inspector2:us-west-2:123456789012:finding/00000000000000000000000000000013",
+            "awsAccountId": "123456789012",
+            "type": "CODE_VULNERABILITY",
+            "cwes": [
+                "CWE-117",
+                "CWE-93"
+            ],
+            "description": "User-provided inputs must be sanitized before they are logged. An attacker can use unsanitized input to break a log's integrity, forge log entries, or bypass log monitors.",
+            "title": "CWE-117,93 - Log injection",
+            "remediation": {
+                "recommendation": {
+                    "text": "You have a log statement that might use unsanitized input originating from HTTP requests or AWS Lambda sources. Depending on the context, this could result in:\n\n1. A log injection attack that breaks log integrity, forges log entries, or bypasses monitors that use the logs. To increase the security of your code, sanitize your inputs before logging them. [Learn more](https://cwe.mitre.org/data/definitions/117.html)\n\n2. A sensitive information leak that exposes users' credentials, private information, or identifying information to an attacker. To preserve privacy in your code, redact sensitive user information before logging it. [Learn more](https://cwe.mitre.org/data/definitions/532.html)"
+                }
+            },
+            "severity": "HIGH",
+            "firstObservedAt": "2026-02-18 12:01:00.079000+01:00",
+            "lastObservedAt": "2026-02-18 13:41:11.095000+01:00",
+            "updatedAt": "2026-02-18 13:41:11.095000+01:00",
+            "status": "ACTIVE",
+            "resources": [
+                {
+                    "type": "AWS_LAMBDA_FUNCTION",
+                    "id": "arn:aws:lambda:us-west-2:123456789012:function:web-user-manager-api-stage-healthCheck-EXAMPLE1ABCD:$LATEST",
+                    "partition": "aws",
+                    "region": "us-west-2",
+                    "tags": {
+                        "InspectorCodeExclusion": "None",
+                        "InspectorExclusion": "None",
+                        "aws:cloudformation:logical-id": "healthCheck",
+                        "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-west-2:123456789012:stack/web-user-manager-api-stage/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                        "aws:cloudformation:stack-name": "web-user-manager-api-stage",
+                        "deployed_at": "2026-02-18T12:38:52Z",
+                        "deployed_by": "user1@example.com",
+                        "env": "stage",
+                        "environment": "stage",
+                        "gitlab_ci_job": "1234567",
+                        "lambda:createdBy": "SAM",
+                        "owner_email": "user1@example.com",
+                        "project": "web-user-manager-api",
+                        "service": "web-user-manager-api",
+                        "team": "backend-team-web-user-manager"
+                    },
+                    "details": {
+                        "awsLambdaFunction": {
+                            "functionName": "web-user-manager-api-stage-healthCheck-EXAMPLE1ABCD",
+                            "runtime": "PYTHON_3_12",
+                            "codeSha256": "abc123def456ghi789jkl012mno345pqr678stu901vw==",
+                            "version": "$LATEST",
+                            "executionRoleArn": "arn:aws:iam::123456789012:role/web-user-manager-api-stage-LambdaExecutionRole-EXAMPLE12345",
+                            "layers": [
+                                "arn:aws:lambda:us-west-2:123456789012:layer:web-user-manager-api-stage:12",
+                                "arn:aws:lambda:us-west-2:123456789013:layer:opentelemetry-collector-amd64-0_19_0:1"
+                            ],
+                            "vpcConfig": {
+                                "subnetIds": [
+                                    "subnet-03709ee21c427acf6",
+                                    "subnet-0b6f7a6987b5e689d",
+                                    "subnet-0123c6fff46639b68"
+                                ],
+                                "securityGroupIds": [
+                                    "sg-0fd8fe5dae2694a95"
+                                ],
+                                "vpcId": "vpc-055aa15ae33f4297b"
+                            },
+                            "packageType": "ZIP",
+                            "architectures": [
+                                "X86_64"
+                            ],
+                            "lastModifiedAt": "2026-02-18 13:40:35.830000+01:00"
+                        }
+                    }
+                }
+            ],
+            "codeVulnerabilityDetails": {
+                "filePath": {
+                    "fileName": "api_client.py",
+                    "filePath": "src/project_api/service/api_client.py",
+                    "startLine": 268,
+                    "endLine": 268
+                },
+                "detectorTags": [
+                    "data-integrity",
+                    "injection",
+                    "security",
+                    "owasp-top10"
+                ],
+                "referenceUrls": [],
+                "ruleId": "python-log-injection",
+                "detectorId": "python/log-injection@v1.0",
+                "detectorName": "Log injection",
+                "cwes": [
+                    "CWE-117",
+                    "CWE-93"
+                ]
+            }
+        },
+        {
+            "findingArn": "arn:aws:inspector2:us-west-2:123456789012:finding/00000000000000000000000000000001",
+            "awsAccountId": "123456789016",
+            "type": "PACKAGE_VULNERABILITY",
+            "description": "Due to the design of the name constraint checking algorithm, the processing time of some inputs scale non-linearly with respect to the size of the certificate. This affects programs which validate arbitrary certificate chains.",
+            "title": "CVE-2025-58187 - go/stdlib",
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "severity": "HIGH",
+            "firstObservedAt": "2025-12-26 14:21:44.742000+01:00",
+            "lastObservedAt": "2026-03-13 22:38:57.161000+01:00",
+            "updatedAt": "2026-03-13 22:38:57.161000+01:00",
+            "status": "ACTIVE",
+            "resources": [
+                {
+                    "type": "AWS_LAMBDA_FUNCTION",
+                    "id": "arn:aws:lambda:us-west-2:123456789014:function:web-user-manager-api-stage-healthCheck-EXAMPLE1ABCD:$LATEST",
+                    "partition": "aws",
+                    "region": "us-west-2",
+                    "tags": {
+                        "InspectorCodeExclusion": "None",
+                        "InspectorExclusion": "None",
+                        "aws:cloudformation:logical-id": "healthCheck",
+                        "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-west-2:123456789015:stack/web-user-manager-api-stage/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                        "aws:cloudformation:stack-name": "stack name",
+                        "deployed_at": "2026-02-18T12:38:52Z",
+                        "deployed_by": "user1@example.com",
+                        "env": "stage",
+                        "environment": "stage",
+                        "gitlab_ci_job": "1234568",
+                        "lambda:createdBy": "DeployUser",
+                        "owner_email": "user2@example.com",
+                        "project": "web-user-manager-api",
+                        "service": "web-user-manager-api",
+                        "team": "backend-team-web-user-manager"
+                    },
+                    "details": {
+                        "awsLambdaFunction": {
+                            "functionName": "web-user-manager-api-stage-healthCheck-EXAMPLE1ABCD",
+                            "runtime": "PYTHON_3_12",
+                            "codeSha256": "abc123def456ghi789jkl012mno345pqr678stu901vw==",
+                            "version": "$LATEST",
+                            "executionRoleArn": "arn:aws:iam::123456789012:role/web-user-manager-api-stage-LambdaExecutionRole-EXAMPLE12345",
+                            "layers": [
+                                "arn:aws:lambda:us-west-2:123456789012:layer:web-user-manager-api-stage:12",
+                                "arn:aws:lambda:us-west-2:123456789013:layer:opentelemetry-collector-amd64-0_19_0:1"
+                            ],
+                            "vpcConfig": {
+                                "subnetIds": [
+                                    "subnet-03709ee21c427acf6",
+                                    "subnet-0b6f7a6987b5e689d",
+                                    "subnet-0123c6fff46639b68"
+                                ],
+                                "securityGroupIds": [
+                                    "sg-0fd8fe5dae2694a95"
+                                ],
+                                "vpcId": "vpc-055aa15ae33f4297b"
+                            },
+                            "packageType": "ZIP",
+                            "architectures": [
+                                "X86_64"
+                            ],
+                            "lastModifiedAt": "2026-02-18 13:40:35.830000+01:00"
+                        }
+                    }
+                }
+            ],
+            "inspectorScore": 7.5,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "scoreSource": "NVD",
+                    "cvssSource": "NVD",
+                    "version": "3.1",
+                    "score": 7.5,
+                    "scoringVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                    "adjustments": []
+                }
+            },
+            "packageVulnerabilityDetails": {
+                "vulnerabilityId": "CVE-2025-58187",
+                "vulnerablePackages": [
+                    {
+                        "name": "go/stdlib",
+                        "version": "1.24.4",
+                        "epoch": 0,
+                        "packageManager": "GENERIC",
+                        "filePath": "extensions/collector",
+                        "fixedInVersion": "1.25.3",
+                        "sourceLambdaLayerArn": "arn:aws:lambda:us-west-2:123456789013:layer:opentelemetry-collector-amd64-0_19_0:1"
+                    }
+                ],
+                "source": "NVD",
+                "cvss": [
+                    {
+                        "baseScore": 7.5,
+                        "scoringVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                        "version": "3.1",
+                        "source": "NVD"
+                    }
+                ],
+                "relatedVulnerabilities": [],
+                "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2025-58187",
+                "vendorSeverity": "HIGH",
+                "vendorCreatedAt": "2025-10-30 00:16:19+01:00",
+                "vendorUpdatedAt": "2026-01-29 17:02:27+01:00",
+                "referenceUrls": [
+                    "https://nvd.nist.gov/vuln/detail/CVE-2025-58187",
+                    "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI"
+                ]
+            },
+            "fixAvailable": "YES",
+            "exploitAvailable": "NO",
+            "epss": {
+                "score": 0.00013
+            }
+        },
+        {
+            "findingArn": "arn:aws:inspector2:us-west-2:123456789012:finding/00000000000000000000000000000002",
+            "awsAccountId": "123456789012",
+            "type": "PACKAGE_VULNERABILITY",
+            "description": "Requests is a HTTP library. Due to a URL parsing issue, Requests releases prior to 2.32.4 may leak .netrc credentials to third parties for specific maliciously-crafted URLs. Users should upgrade to version 2.32.4 to receive a fix. For older versions of Requests, use of the .netrc file can be disabled with `trust_env=False` on one's Requests Session.",
+            "title": "CVE-2024-47081 - requests",
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "severity": "MEDIUM",
+            "firstObservedAt": "2025-06-10 23:43:07.201000+02:00",
+            "lastObservedAt": "2026-03-07 23:40:17.655000+01:00",
+            "updatedAt": "2026-03-07 23:40:17.655000+01:00",
+            "status": "ACTIVE",
+            "resources": [
+                {
+                    "type": "AWS_LAMBDA_FUNCTION",
+                    "id": "arn:aws:lambda:us-west-2:123456789012:function:web-user-manager-api-stage-healthCheck-EXAMPLE1ABCD:$LATEST",
+                    "partition": "aws",
+                    "region": "us-west-2",
+                    "tags": {
+                        "InspectorCodeExclusion": "None",
+                        "InspectorExclusion": "None",
+                        "aws:cloudformation:logical-id": "healthCheck",
+                        "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-west-2:123456789012:stack/web-user-manager-api-stage/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                        "aws:cloudformation:stack-name": "web-user-manager-api-stage",
+                        "deployed_at": "2026-02-18T12:38:52Z",
+                        "deployed_by": "user2@example.com",
+                        "env": "stage",
+                        "environment": "stage",
+                        "gitlab_ci_job": "1234567",
+                        "lambda:createdBy": "SAM",
+                        "owner_email": "user1@example.com",
+                        "project": "web-user-manager-api",
+                        "service": "web-user-manager-api",
+                        "team": "backend-team-web-user-manager"
+                    },
+                    "details": {
+                        "awsLambdaFunction": {
+                            "functionName": "web-user-manager-api-stage-healthCheck-EXAMPLE1ABCD",
+                            "runtime": "PYTHON_3_12",
+                            "codeSha256": "abc123def456ghi789jkl012mno345pqr678stu901vw==",
+                            "version": "$LATEST",
+                            "executionRoleArn": "arn:aws:iam::123456789012:role/web-user-manager-api-stage-LambdaExecutionRole-EXAMPLE12345",
+                            "layers": [
+                                "arn:aws:lambda:us-west-2:123456789012:layer:web-user-manager-api-stage:12",
+                                "arn:aws:lambda:us-west-2:123456789013:layer:opentelemetry-collector-amd64-0_19_0:1"
+                            ],
+                            "vpcConfig": {
+                                "subnetIds": [
+                                    "subnet-03709ee21c427acf6",
+                                    "subnet-0b6f7a6987b5e689d",
+                                    "subnet-0123c6fff46639b68"
+                                ],
+                                "securityGroupIds": [
+                                    "sg-0fd8fe5dae2694a95"
+                                ],
+                                "vpcId": "vpc-055aa15ae33f4297b"
+                            },
+                            "packageType": "ZIP",
+                            "architectures": [
+                                "X86_64"
+                            ],
+                            "lastModifiedAt": "2026-02-18 13:40:35.830000+01:00"
+                        }
+                    }
+                }
+            ],
+            "inspectorScore": 5.3,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "scoreSource": "NVD",
+                    "cvssSource": "NVD",
+                    "version": "3.1",
+                    "score": 5.3,
+                    "scoringVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+                    "adjustments": []
+                }
+            },
+            "packageVulnerabilityDetails": {
+                "vulnerabilityId": "CVE-2024-47081",
+                "vulnerablePackages": [
+                    {
+                        "name": "requests",
+                        "version": "2.32.0",
+                        "epoch": 0,
+                        "packageManager": "PYTHON",
+                        "filePath": "python/requests-2.32.0.dist-info/METADATA",
+                        "fixedInVersion": "2.32.4",
+                        "sourceLambdaLayerArn": "arn:aws:lambda:us-west-2:123456789012:layer:web-user-manager-api-stage:12"
+                    },
+                    {
+                        "name": "requests",
+                        "version": "2.32.0",
+                        "epoch": 0,
+                        "packageManager": "PYTHON",
+                        "filePath": "requirements.txt",
+                        "fixedInVersion": "2.32.4"
+                    }
+                ],
+                "source": "NVD",
+                "cvss": [
+                    {
+                        "baseScore": 5.3,
+                        "scoringVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+                        "version": "3.1",
+                        "source": "NVD"
+                    }
+                ],
+                "relatedVulnerabilities": [],
+                "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2024-47081",
+                "vendorSeverity": "MEDIUM",
+                "vendorCreatedAt": "2025-06-09 20:15:24+02:00",
+                "vendorUpdatedAt": "2025-06-12 18:06:47+02:00",
+                "referenceUrls": [
+                    "https://seclists.org/fulldisclosure/2025/Jun/2",
+                    "https://nvd.nist.gov/vuln/detail/CVE-2024-47081",
+                    "https://github.com/psf/requests/commit/96ba401c1296ab1dda74a2365ef36d88f7d144ef",
+                    "https://github.com/psf/requests/pull/6965",
+                    "https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7"
+                ]
+            },
+            "fixAvailable": "YES",
+            "exploitAvailable": "NO",
+            "epss": {
+                "score": 0.00154
+            }
+        }
+    ]
+}

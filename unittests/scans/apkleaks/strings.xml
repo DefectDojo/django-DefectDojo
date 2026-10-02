@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">generic-app</string>
+    <string name="api_base">https://api.example.com/v1/</string>
+    <string name="metrics_endpoint">https://metrics.example.com/collect</string>
+    <string name="fallback_host">http://10.0.2.2:8080/debug</string>
+</resources>

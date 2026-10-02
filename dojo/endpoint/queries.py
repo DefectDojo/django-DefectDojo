@@ -7,11 +7,11 @@ from dojo.models import (
     Endpoint,
     Endpoint_Status,
 )
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_endpoints(permission, user=None):
     impl = get_auth_filter("endpoint.get_authorized_endpoints")
     if impl:
@@ -27,7 +27,7 @@ def get_authorized_endpoints_for_queryset(permission, queryset, user=None):
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_endpoint_status(permission, user=None):
     impl = get_auth_filter("endpoint.get_authorized_endpoint_status")
     if impl:

@@ -1,0 +1,34 @@
+{
+  "status": 200,
+  "body": [
+    {
+      "id": 700001,
+      "wid": "wid-0001",
+      "title": "SQL injection in the reports endpoint",
+      "type": "sqli",
+      "template": "sqli_template",
+      "status": "active",
+      "threat": 5,
+      "clientid": 4321,
+      "method": "POST",
+      "domain": "api.example.com",
+      "path": "/v1/reports",
+      "parameter": "post_body|json_doc|hash|filter",
+      "description": "A request parameter reaches a database query. Related to CVE-2000-0002 and cve-2000-0002.",
+      "additional": "Validated against the running service. See CVE-2000-0001.",
+      "exploit_example": "POST /v1/reports with filter=1' OR '1'='1",
+      "detection_method": "active_verification",
+      "validated": true,
+      "validate_time": 1719792000,
+      "invalidate_time": 0,
+      "filter": [
+        {
+          "method": "POST",
+          "domain": "api.example.com",
+          "path": "/v1/reports",
+          "parameter": "filter"
+        }
+      ]
+    }
+  ]
+}

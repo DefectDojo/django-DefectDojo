@@ -6,9 +6,9 @@ import re
 import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
-from django.conf import settings
 from packageurl import PackageURL
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -331,12 +331,16 @@ class DependencyCheckParser:
         mitigated = None
         is_Mitigated = False
         name = vulnerability.findtext(f"{namespace}name")
-        if vulnerability.find(f"{namespace}cwes") is not None:
-            cwe_field = vulnerability.find(f"{namespace}cwes").findtext(
-                f"{namespace}cwe",
-            )
+        cwe_fields = []
+        if (cwes_node := vulnerability.find(f"{namespace}cwes")) is not None:
+            cwe_fields = [
+                cwe_node.text for cwe_node in cwes_node.findall(f"{namespace}cwe") if cwe_node.text
+            ]
+            cwe_field = cwe_fields[0] if cwe_fields else None
         else:
             cwe_field = vulnerability.findtext(f"{namespace}cwe")
+            if cwe_field:
+                cwe_fields = [cwe_field]
 
         description = vulnerability.findtext(f"{namespace}description")
 
@@ -356,10 +360,13 @@ class DependencyCheckParser:
 
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
-        if cwe_field:
-            m = re.match(r"^(CWE-)?(\d+)", cwe_field)
+        parsed_cwes = []
+        for cwe_value in cwe_fields:
+            m = re.match(r"^(CWE-)?(\d+)", cwe_value)
             if m:
-                cwe = int(m.group(2))
+                parsed_cwes.append(int(m.group(2)))
+        if parsed_cwes:
+            cwe = parsed_cwes[0]
 
         (
             component_name,
@@ -450,9 +457,12 @@ class DependencyCheckParser:
             **self.get_severity_and_cvss_meta(vulnerability, namespace),
         )
 
+        if parsed_cwes:
+            finding.unsaved_cwes = parsed_cwes
+
         finding.unsaved_tags = tags
 
-        if settings.V3_FEATURE_LOCATIONS and component_purl:
+        if locations_enabled() and component_purl:
             finding.unsaved_locations.append(
                 LocationData.dependency(purl=component_purl, file_path=dependency_filename),
             )
@@ -533,7 +543,7 @@ class DependencyCheckParser:
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
-                elif settings.V3_FEATURE_LOCATIONS:
+                elif locations_enabled():
                     # Collect product-level dependency locations
                     _, _, component_purl = self.get_component_name_and_version_from_dependency(
                         dependency,

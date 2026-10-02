@@ -46,6 +46,31 @@ function success() {
     printf 'Success: %s test passed\n' "$1"
 }
 
+# One integration-test file occasionally fails on an environmental flake rather
+# than a real regression: a transient 404 while a just-enabled system setting
+# propagates across uwsgi workers, a Selenium timing hiccup, a slow first paint.
+# Those pass on an immediate re-run in the same stack. A single failed file calls
+# fail() (exit 1), which fails the job -- and in the merge queue that ejects the
+# PR. Give each file a second attempt before giving up so one flake does not sink
+# an otherwise-green change; a deterministic failure still loses every attempt and
+# fails. Set DD_INTEGRATION_TEST_ATTEMPTS=1 to opt out (e.g. when bisecting).
+INTEGRATION_TEST_ATTEMPTS="${DD_INTEGRATION_TEST_ATTEMPTS:-2}"
+
+function run_integration_test_file() {
+    local test_file="$1"
+    local attempt=1
+    while true; do
+        if python3 "$test_file"; then
+            return 0
+        fi
+        if [ "$attempt" -ge "$INTEGRATION_TEST_ATTEMPTS" ]; then
+            return 1
+        fi
+        printf '::warning::%s failed on attempt %s of %s; retrying\n' "$test_file" "$attempt" "$INTEGRATION_TEST_ATTEMPTS"
+        attempt=$((attempt + 1))
+    done
+}
+
 echo "IT FILENAME: $DD_INTEGRATION_TEST_FILENAME"
 if [[ -n "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     if [[ "$DD_INTEGRATION_TEST_FILENAME" == "openapi-validatator" ]]; then
@@ -57,13 +82,27 @@ if [[ -n "$DD_INTEGRATION_TEST_FILENAME" ]]; then
             fail "$test"
         fi
     else
-        test=$DD_INTEGRATION_TEST_FILENAME
-        echo "Running: $test"
-        if python3 "$DD_INTEGRATION_TEST_FILENAME"; then
-            success "$test"
-        else
-            fail "$test"
-        fi
+        # DD_INTEGRATION_TEST_FILENAME may name several files separated by
+        # whitespace; CI passes groups of files that share one compose stack.
+        # The unquoted expansion below is the split, which is safe because
+        # every value is a repo-relative path with no spaces in it.
+        #
+        # Files run in order and the first failure exits (fail() exits 1),
+        # exactly like the full-suite branch below: a test that fails can
+        # leave state behind that would make everything after it fail too,
+        # and one clean failure beats five cascading ones. The log names each
+        # file as it starts, so the failing file is always the last "Running:"
+        # line.
+        # shellcheck disable=SC2086
+        for test_file in $DD_INTEGRATION_TEST_FILENAME; do
+            test=$test_file
+            echo "Running: $test"
+            if run_integration_test_file "$test_file"; then
+                success "$test"
+            else
+                fail "$test"
+            fi
+        done
     fi
 
 else

@@ -53,5 +53,5 @@ Please note that this login method only works for the **Cloud Manager**, an admi
 ## I've lost access to my MFA codes
 
 * **For the Cloud Manager:** If you lose access to your MFA codes, or Authenticator App, please contact DefectDojo Support at [support@defectdojo.com](mailto:support@defectdojo.com).
-* **For a DefectDojo Instance:** It is not currently possible to remove MFA access from an account without an MFA code. The best option in this case is to create a new DefectDojo login, and re\-grant all necessary permissions to this account.
+* **For a DefectDojo Instance:** First try one of the **recovery codes** issued when MFA was set up — entered in place of the six\-digit code at login. If those are unavailable, an administrator with server access can clear MFA from the account using `python manage.py remove_mfa --username <username>`; the user then logs in with their password and re\-enrolls, keeping all existing permissions and history. On DefectDojo Cloud, contact Support to have that command run. See [Multi\-Factor Authentication](/admin/user_management/pro__mfa/#recovering-a-user-who-has-lost-their-mfa-device) for the full options.
 

@@ -1,5 +1,6 @@
 import datetime
 
+from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -542,6 +543,75 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[1])
 
+    def test_parse_multiple_cwes_json(self):
+        with (get_unit_tests_scans_path("generic") / "generic_report_multi_cwe_fabricated.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
+            self.assertEqual(3, len(findings))
+
+            # "cwes" set with no "cwe": the first entry becomes the primary,
+            # the full set (mixed int / "CWE-<n>" forms) is kept on unsaved_cwes.
+            finding = findings[0]
+            self.assertEqual(89, finding.cwe)
+            self.assertEqual([89, "CWE-79", 22], finding.unsaved_cwes)
+            self.assertEqual(
+                ["CWE-89", "CWE-79", "CWE-22"],
+                finding_cwe_labels(finding.cwe, finding.unsaved_cwes),
+            )
+
+            # explicit "cwe" is kept as the primary; "cwes" adds the extras.
+            finding = findings[1]
+            self.assertEqual(79, finding.cwe)
+            self.assertEqual([89, 200], finding.unsaved_cwes)
+            self.assertEqual(
+                ["CWE-79", "CWE-89", "CWE-200"],
+                finding_cwe_labels(finding.cwe, finding.unsaved_cwes),
+            )
+
+            # legacy single "cwe" is unchanged and sets no unsaved_cwes.
+            finding = findings[2]
+            self.assertEqual(22, finding.cwe)
+            self.assertIsNone(finding.unsaved_cwes)
+            self.assertEqual(
+                ["CWE-22"],
+                finding_cwe_labels(finding.cwe, finding.unsaved_cwes),
+            )
+
+    def test_parse_multiple_cwes_csv(self):
+        content = """Date,Title,CweId,CweIds,Severity,Description
+11/7/2015,Multi CWE row,79,"89, CWE-22",High,desc
+"""
+        file = TestFile("findings.csv", content)
+        parser = GenericParser()
+        findings = parser.get_findings(file, self.test)
+        self.validate_locations(findings)
+        finding = findings[0]
+        # CweId stays the primary; CweIds populates the full set (canonical form).
+        self.assertEqual(79, finding.cwe)
+        self.assertEqual(["CWE-89", "CWE-22"], finding.unsaved_cwes)
+        self.assertEqual(
+            ["CWE-79", "CWE-89", "CWE-22"],
+            finding_cwe_labels(finding.cwe, finding.unsaved_cwes),
+        )
+
+    def test_parse_multiple_cwes_without_primary_csv(self):
+        content = """Date,Title,CweIds,Severity,Description
+11/7/2015,CWE set only,"CWE-611, 918",High,desc
+"""
+        file = TestFile("findings.csv", content)
+        parser = GenericParser()
+        findings = parser.get_findings(file, self.test)
+        self.validate_locations(findings)
+        finding = findings[0]
+        # No CweId column: the first CweIds entry becomes the primary.
+        self.assertEqual(611, finding.cwe)
+        self.assertEqual(["CWE-611", "CWE-918"], finding.unsaved_cwes)
+        self.assertEqual(
+            ["CWE-611", "CWE-918"],
+            finding_cwe_labels(finding.cwe, finding.unsaved_cwes),
+        )
+
     def test_mitigated_csv_findings(self):
         with (get_unit_tests_scans_path("generic") / "generic_report3.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
@@ -661,6 +731,43 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                     "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
                 parser.get_findings(file, Test())
 
+    def test_parse_json_non_numeric_value_falls_back_to_default(self):
+        with (get_unit_tests_scans_path("generic") / "generic_non_numeric_fields.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            finding = findings[0]
+            self.assertIsNone(finding.line)
+            self.assertIsNone(finding.nb_occurences)
+            self.assertIsNone(finding.sast_source_line)
+            self.assertIsNone(finding.scanner_confidence)
+            self.assertIsNone(finding.cvssv3_score)
+            self.assertIsNone(finding.cvssv4_score)
+            self.assertIsNone(finding.epss_percentile)
+            self.assertIsNone(finding.epss_score)
+            self.assertEqual(0, finding.cwe)
+            self.assertEqual(0, finding.thread_id)
+
+    def test_parse_json_numeric_value_given_as_string_is_converted(self):
+        with (get_unit_tests_scans_path("generic") / "generic_non_numeric_fields.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            finding = findings[1]
+            self.assertEqual(42, finding.line)
+            self.assertEqual(79, finding.cwe)
+            self.assertEqual(0.5, finding.epss_score)
+
+    def test_parse_json_numeric_value_given_as_number_is_kept(self):
+        with (get_unit_tests_scans_path("generic") / "generic_non_numeric_fields.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            finding = findings[2]
+            self.assertEqual(42, finding.line)
+            self.assertEqual(79, finding.cwe)
+            self.assertEqual(0.5, finding.epss_score)
+
     def test_parse_csv_with_epss(self):
         with (get_unit_tests_scans_path("generic") / "generic_csv_with_epss.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
@@ -716,3 +823,113 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
 
             finding = findings[1]
             self.assertEqual("Test finding without fix_version", finding.title)
+
+    def test_parse_json_with_cve_and_vulnerability_ids(self):
+        with (get_unit_tests_scans_path("generic") / "generic_cve_and_vulnerability_ids.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(3, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[1])
+            self.assertEqual("OSV-2021-1234", finding.unsaved_vulnerability_ids[2])
+            for vid in finding.unsaved_vulnerability_ids:
+                self.assertIsInstance(vid, str)
+
+    def test_parse_json_repeated_unique_ids_are_dropped(self):
+        """
+        A unique id carried by several findings in one report is not an identity.
+
+        The shipped algorithm for this scan type is hash-only, so classic matching never
+        reads the field, but it is stored and consumed as a vendor identity by anything
+        that does (an operator-configured unique-id algorithm, Pro's identity ledger).
+        A repeated value would merge visibly different findings there, so it is dropped
+        at parse time; a genuinely unique id is kept.
+        """
+        with (get_unit_tests_scans_path("generic") / "generic_repeated_unique_ids.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+        self.assertEqual(4, len(findings))
+        dropped = [f for f in findings if f.unique_id_from_tool is None]
+        self.assertEqual(3, len(dropped))
+        kept = [f for f in findings if f.unique_id_from_tool is not None]
+        self.assertEqual(1, len(kept))
+        self.assertEqual("dep-lodash-4.17.20", kept[0].unique_id_from_tool)
+
+
+# Regression: the generic CSV parser read "FALSE" as true for known_exploited /
+# ransomware_used / fix_available, never read CVSSV3_score, and aborted the whole
+# import on an empty numeric or date cell.
+class TestGenericCSVParserCellValues(DojoTestCase):
+
+    def parse(self, content):
+        return GenericParser().get_findings(TestFile("findings.csv", content), Test())
+
+    def test_kev_and_fix_booleans_follow_the_csv_boolean_rule(self):
+        content = """Date,Title,Description,Severity,known_exploited,ransomware_used,fix_available
+2024-05-01,true row,D,High,TRUE,True,t
+2024-05-01,false row,D,High,FALSE,False,f
+2024-05-01,empty row,D,High,,,
+"""
+        findings = {f.title: f for f in self.parse(content)}
+        expected = {
+            "true row": (True, True, True),
+            "false row": (False, False, False),
+            # an empty cell leaves the field unset: the model defaults are False, False, None
+            "empty row": (False, False, None),
+        }
+        for title, (known_exploited, ransomware_used, fix_available) in expected.items():
+            finding = findings[title]
+            with self.subTest(row=title):
+                self.assertEqual(known_exploited, finding.known_exploited, msg=f"known_exploited parsed as {finding.known_exploited!r}")
+                self.assertEqual(ransomware_used, finding.ransomware_used, msg=f"ransomware_used parsed as {finding.ransomware_used!r}")
+                self.assertEqual(fix_available, finding.fix_available, msg=f"fix_available parsed as {finding.fix_available!r}")
+
+    def test_cvssv3_score_column_is_parsed(self):
+        content = """Date,Title,Description,Severity,CVSSV3_score
+2024-05-01,with score,D,High,9.8
+2024-05-01,without score,D,High,
+"""
+        findings = {f.title: f for f in self.parse(content)}
+        with self.subTest(row="with score"):
+            self.assertEqual(9.8, findings["with score"].cvssv3_score)
+        with self.subTest(row="without score"):
+            self.assertIsNone(findings["without score"].cvssv3_score)
+
+    def test_empty_numeric_and_date_cells_are_skipped(self):
+        content = """Date,Title,Description,Severity,CweId,epss_score,epss_percentile,CVSSV4_score,MitigatedDate,kev_date
+2024-05-01,filled row,D,High,89,0.5,0.9,9.3,2024-05-20,2024-03-29
+2024-05-01,empty row,D,High,,,,,,
+"""
+        findings = {f.title: f for f in self.parse(content)}
+        filled, empty = findings["filled row"], findings["empty row"]
+        for field, filled_value, empty_value in [
+            ("cwe", 89, 0),
+            ("epss_score", 0.5, None),
+            ("epss_percentile", 0.9, None),
+            ("cvssv4_score", 9.3, None),
+            ("mitigated", datetime.datetime(2024, 5, 20), None),
+            ("kev_date", datetime.datetime(2024, 3, 29), None),
+        ]:
+            with self.subTest(field=field):
+                self.assertEqual(filled_value, getattr(filled, field))
+                self.assertEqual(empty_value, getattr(empty, field))
+
+    def test_fixture_with_filled_false_and_empty_cells(self):
+        with (get_unit_tests_scans_path("generic") / "generic_csv_empty_cells_and_booleans.csv").open(encoding="utf-8") as file:
+            findings = {f.title: f for f in GenericParser().get_findings(file, Test())}
+        self.assertEqual(4, len(findings))
+        for title, known_exploited, fix_available, cvssv3_score, cwe in [
+            ("All flags true", True, True, 9.8, 89),
+            ("All flags false", False, False, 6.1, 79),
+            ("All cells empty", False, None, None, 0),
+            ("Whitespace cells", False, None, None, 0),
+        ]:
+            finding = findings[title]
+            with self.subTest(row=title):
+                self.assertEqual(known_exploited, finding.known_exploited)
+                self.assertEqual(fix_available, finding.fix_available)
+                self.assertEqual(cvssv3_score, finding.cvssv3_score)
+                self.assertEqual(cwe, finding.cwe)

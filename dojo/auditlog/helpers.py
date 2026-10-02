@@ -166,18 +166,43 @@ def process_events_for_display(events):
 # ---------------------------------------------------------------------------
 
 
+def _json_safe_metadata_value(value):
+    """
+    Coerce a pghistory context metadata value into something the JSON task
+    serializer can encode.
+
+    The context is injected into Celery task kwargs as ``_pgh_context`` and
+    serialized by kombu's JSON encoder at dispatch time. A stray model instance
+    in the metadata (e.g. a ``user`` set to a ``User`` object instead of its pk)
+    raises ``EncodeError: Object of type User is not JSON serializable`` and
+    aborts the whole task dispatch. Reduce model instances to their pk and
+    recurse into dict/list/tuple so nested values are covered too.
+    """
+    from django.db.models import Model  # noqa: PLC0415 -- avoid import cycle at app load
+
+    if isinstance(value, Model):
+        return value.pk
+    if isinstance(value, dict):
+        return {k: _json_safe_metadata_value(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe_metadata_value(v) for v in value]
+    return value
+
+
 def get_serializable_pghistory_context():
     """
     Capture the current pghistory context for passing to Celery tasks.
 
     Returns a JSON-serializable dict with context id and metadata,
-    or None if no context is active.
+    or None if no context is active. Metadata values are coerced to
+    JSON-safe types (model instances -> pk) so a non-serializable value in
+    the active context can never crash Celery task dispatch.
     """
     if hasattr(pghistory_runtime._tracker, "value"):
         ctx = pghistory_runtime._tracker.value
         return {
             "id": str(ctx.id),
-            "metadata": ctx.metadata.copy(),
+            "metadata": {k: _json_safe_metadata_value(v) for k, v in ctx.metadata.items()},
         }
     return None
 

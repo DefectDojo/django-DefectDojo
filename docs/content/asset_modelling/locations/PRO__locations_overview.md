@@ -7,7 +7,7 @@ weight: 1
 
 **Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives — whether that's a URL, a software dependency from an **SBOM**, or, in the future, a **cloud resource ID**, **container image**, or **code repository**.
 
-Locations are currently in **Beta** and will need to be enabled on your instance. To enable Locations on your instance, contact [support@defectdojo.com](mailto:support@defectdojo.com).
+Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Enabling is one-way and takes effect for new imports right away; your existing history stays as it is until you run the [migration suite](/asset_modelling/locations/pro__migrating_from_endpoints/) that appears under the flag (endpoint, dependency, and source-code backfills, then an identity rehash). If you also use the Classic UI or depend on the `/api/v2` endpoint routes, restart DefectDojo after enabling: those surfaces are decided when DefectDojo starts, and they pick up the toggle on the next start. No deployment setting needs to change.
 
 ## Why Replace Endpoints?
 
@@ -17,12 +17,14 @@ The original Endpoints model was built around URLs and IP addresses — it carri
 2. **Performance ceiling.** Per-Finding Endpoint_Status rows and the URL-shaped schema did not scale well at large customer volumes.
 3. **Components were second-class.** Software libraries lived only as denormalised fields on a Finding, so a library could not exist independently of a vulnerability — making true SBOM management impossible.
 
-Locations fix all three by introducing a **base `Location` object** with a typed payload, plus dedicated **subtypes** for each asset shape. The MVP ships two subtypes:
+Locations fix all three by introducing a **base `Location` object** with a typed payload, plus dedicated **subtypes** for each asset shape:
 
 - **URL Locations** — functional equivalent of the old Endpoints, with the same protocol/host/port/path/query/fragment fields.
 - **Dependency Locations** — software libraries identified by [Package URL (pURL)](https://github.com/package-url/purl-spec), used to model SBOM contents.
+- **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
+- **[Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)**: the container image a finding was found in, identified by registry, repository and digest, together with the assets that run it and the repository that built it. Scan-managed, behind its own flag.
 
-Future Location types under consideration include cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name), container images (registry/repository:tag and SHA256 fingerprints), and code repositories.
+Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and container images as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
 
 ## Key Concepts
 
@@ -39,12 +41,12 @@ A **subtype** (URL or Dependency) holds the structured fields specific to that k
 
 ### References
 
-Locations are not directly attached to Products or Findings. Instead, two **Reference** objects link them:
+Locations are not directly attached to Assets or Findings. Instead, two **Reference** objects link them:
 
 - **Asset References** — relationships the Location has to Assets (e.g. `libFoo` is *owned by* Asset 6, *used by* Asset 9). Each reference carries a status (`Active` or `Mitigated`) and an optional **relationship** ("Used By" or "Owned By").
 - **Finding References** — relationships the Location has to Findings. Each reference carries a richer status (`Active`, `Mitigated`, `False Positive`, `Risk Accepted`, `Out of Scope`) plus the auditor and audit time.
 
-This separation is what allows a library to exist on a Product *without* needing a Finding — a missing capability in the old Components model.
+This separation is what allows a library to exist on an Asset *without* needing a Finding — a missing capability in the old Components model.
 
 ### Auto-Association at Import Time
 
@@ -66,14 +68,14 @@ Existing parsers have been updated to emit Location data when the feature flag i
 | Endpoint → URL one-way migration command | Shipped |
 | Parser updates (URLs and dependencies) | Shipped for the major parsers |
 | SBOM upload (CycloneDX, SPDX v2/v3) | Shipped via `/api/v2/sbom-import/` |
-| Pro UI for Locations, URLs, Dependencies | Shipped (Beta) |
+| Pro UI for Locations, URLs, Dependencies | Shipped |
 | pURL search/filter | Shipped |
 | License tracking on dependencies | Partial (`license_expression` field) |
 | SWID Tag SBOM format | Not in MVP |
 
 ## Where to Go Next
 
-- **Enable the feature** — contact [support@defectdojo.com](mailto:support@defectdojo.com) to turn Locations on for your instance.
+- **Enable the feature** — turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
 - **Migrate from Endpoints** — see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
 - **Day-to-day URL workflows** — see [Working with URLs](../pro__working_with_urls).
 - **SBOMs and dependencies** — see [Working with SBOMs](../pro__working_with_sboms).

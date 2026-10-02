@@ -1,0 +1,23 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://openvex.dev/docs/public/vex-1111111111111111111111111111111111",
+  "author": "Example Org",
+  "role": "Document Creator",
+  "version": 1,
+  "timestamp": "2026-07-29T00:00:00Z",
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2024-10001"
+      },
+      "products": [
+        {
+          "@id": "pkg:apk/alpine/apk-tools@2.10.6-r0?arch=x86_64&distro=alpine-3.10.9"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "timestamp": "2026-07-29T00:00:00Z"
+    }
+  ]
+}

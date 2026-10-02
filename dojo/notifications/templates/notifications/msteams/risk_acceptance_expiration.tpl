@@ -1,4 +1,4 @@
-{% load i18n %}{% load display_tags %}{% url 'view_risk_acceptance' risk_acceptance.id as url %}
+{% load i18n %}{% load display_tags %}
 {
     "type": "message",
     "attachments": [

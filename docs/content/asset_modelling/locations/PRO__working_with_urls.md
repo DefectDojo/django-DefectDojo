@@ -26,11 +26,14 @@ When the Locations feature is enabled, the navigation exposes:
 - **Locations / URLs** — A scoped list of URL Locations only. This is the closest analogue to the old Endpoints page.
 - **New URL** — A form to create a single URL with structured fields, tags, and optional Asset/Finding associations.
 - **Locations on an Asset** — From any Asset, the **Locations** tab shows the URLs and Dependencies attached to that Asset, with status counts and quick actions.
+- **The Location page** — Click a Location's value in any list, or choose **View Location** from its row menu, to open the page for that Location. It is the counterpart of the old Endpoint page: the Location's type, value, tags and overall status; when it was first and last seen; each Asset that references it with the reference's status, relationship and first/last-seen dates; the **Metadata** recorded for it; and every Finding found there. Metadata is kept per Asset, because a Location is shared by every Asset that recorded the same value, so the box groups entries by Asset and only shows the Assets you can view. With **Location Edit** you can add, edit and remove entries from the box.
+
+![image](images/PRO_Location_Page.png)
 
 Common workflows from the Endpoints UI are preserved:
 
 - **Bulk status updates.** Select multiple URL Locations and apply a status (Active, Mitigated, False Positive, Risk Accepted, Out of Scope) to their Finding references in one action.
-- **Adding existing URLs to a Asset.** Use **Add Existing** on a Asset's Locations tab to link URLs already in the system rather than creating duplicates.
+- **Adding existing URLs to an Asset.** Use **Add Existing** on an Asset's Locations tab to link URLs already in the system rather than creating duplicates.
 - **Tags.** Tags applied to a URL Location propagate as inherited tags on the Findings that reference it, the same way Endpoint tags previously did.
 
 ## Status Model
@@ -60,7 +63,7 @@ Use these endpoints in place of the legacy Endpoint API:
 | Update a URL's tags or metadata | `PATCH /api/v2/urls/{id}/` |
 | List all Locations (URLs + Dependencies) | `GET /api/v2/location/?location_type=url` |
 | Link a URL to a Finding | `POST /api/v2/location_findings/` |
-| Link a URL to a Asset | `POST /api/v2/location_Assets/` |
+| Link a URL to an Asset | `POST /api/v2/location_products/` |
 | Update a Finding-link's status | `PATCH /api/v2/location_findings/{id}/` |
 | Remove a Finding-link | `DELETE /api/v2/location_findings/{id}/` |
 

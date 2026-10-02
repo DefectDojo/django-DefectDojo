@@ -1,11 +1,17 @@
+import hashlib
 import logging
 
 import bleach
 import markdown
 import requests
+from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
+
+# Key under UserContactInfo.user_state_details holding the hash of the most
+# recently dismissed open-source promo banner.
+OS_MESSAGE_DISMISSED_KEY = "os_message_dismissed_hash"
 
 BUCKET_URL = "https://storage.googleapis.com/defectdojo-os-messages-prod/open_source_message.md"
 CACHE_SECONDS = 3600
@@ -43,6 +49,11 @@ def fetch_os_message():
         logger.debug("os_message: fetch failed", exc_info=True)
         cache.set(CACHE_KEY, None, CACHE_SECONDS)
         return None
+
+    # The bucket serves text/markdown without a charset, so requests would fall
+    # back to ISO-8859-1 and mangle non-ASCII characters (e.g. "→" -> "â").
+    # The publisher always writes UTF-8.
+    response.encoding = "utf-8"
 
     if response.status_code != 200 or not response.text.strip():
         cache.set(CACHE_KEY, None, CACHE_SECONDS)
@@ -109,11 +120,17 @@ def parse_os_message(text):
 
 
 def get_os_banner():
+    if not settings.OS_MESSAGE_ENABLED:
+        return None
     try:
         text = fetch_os_message()
         if not text:
             return None
-        return parse_os_message(text)
+        banner = parse_os_message(text)
     except Exception:
         logger.debug("os_message: get_os_banner failed", exc_info=True)
         return None
+    else:
+        if banner:
+            banner["dismiss_token"] = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+        return banner

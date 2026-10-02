@@ -640,6 +640,36 @@ class JIRAWebhookTest(DojoTestCase):
 
         self.assertEqual(200, response.status_code, response.content[:1000])
 
+    def test_webhook_unlinked_issue_returns_the_not_linked_message(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+
+        # no JIRA_Issue row carries this id at all
+        body = json.loads(self.jira_issue_update_template_string)
+        body["issue"]["id"] = 999999
+
+        response = self.client.post(reverse("jira_web_hook_secret", args=(self.correct_secret, )),
+                                    body,
+                                    content_type="application/json")
+
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertEqual(b"JIRA issue 999999 is not linked to a DefectDojo Finding", response.content)
+
+    def test_webhook_failure_does_not_echo_the_request_body(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+
+        # "updated" is required by the handler, so dropping it forces the fall-through handler
+        body = json.loads(self.jira_issue_update_template_string)
+        body["issue"]["fields"].pop("updated")
+        body["canary"] = "DO-NOT-ECHO-THIS"
+
+        response = self.client.post(reverse("jira_web_hook_secret", args=(self.correct_secret, )),
+                                    body,
+                                    content_type="application/json")
+
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertNotIn(b"DO-NOT-ECHO-THIS", response.content)
+        self.assertNotIn(b"Original Exception", response.content)
+
     def test_webhook_issue_updated_extracts_comment(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
 

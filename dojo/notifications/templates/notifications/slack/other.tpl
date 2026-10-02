@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load display_tags %}
-{{ description|safe }}
+{{ description }}
 {% if url is not None %}
 {% blocktranslate trimmed with event_url=url|full_url %}
     More information on this event can be found here: {{ event_url }}

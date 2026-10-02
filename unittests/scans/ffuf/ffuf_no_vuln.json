@@ -1,0 +1,90 @@
+{
+  "commandline": "ffuf -u http://wave3target/FUZZ -w /work/empty-wordlist.txt -of json -o /work/out_clean.json -s",
+  "time": "2026-07-31T00:00:00Z",
+  "results": [],
+  "config": {
+    "auditlog": "",
+    "autocalibration": false,
+    "autocalibration_keyword": "FUZZ",
+    "autocalibration_perhost": false,
+    "autocalibration_strategies": [
+      "basic"
+    ],
+    "autocalibration_strings": [],
+    "colors": false,
+    "cmdline": "ffuf -u http://wave3target/FUZZ -w /work/empty-wordlist.txt -of json -o /work/out_clean.json -s",
+    "configfile": "",
+    "postdata": "",
+    "debuglog": "",
+    "delay": {
+      "value": "0.00"
+    },
+    "dirsearch_compatibility": false,
+    "encoders": [],
+    "extensions": [],
+    "fmode": "or",
+    "follow_redirects": false,
+    "headers": {},
+    "ignorebody": false,
+    "ignore_wordlist_comments": false,
+    "inputmode": "clusterbomb",
+    "cmd_inputnum": 100,
+    "inputproviders": [
+      {
+        "name": "wordlist",
+        "keyword": "FUZZ",
+        "value": "/work/empty-wordlist.txt",
+        "encoders": "",
+        "template": ""
+      }
+    ],
+    "inputshell": "",
+    "json": false,
+    "matchers": {
+      "IsCalibrated": false,
+      "Mutex": {},
+      "Matchers": {
+        "status": {
+          "value": "200-299,301,302,307,401,403,405,500"
+        }
+      },
+      "Filters": {},
+      "PerDomainFilters": {}
+    },
+    "mmode": "or",
+    "maxtime": 0,
+    "maxtime_job": 0,
+    "method": "GET",
+    "noninteractive": false,
+    "outputdirectory": "",
+    "outputfile": "/work/out_clean.json",
+    "outputformat": "json",
+    "OutputSkipEmptyFile": false,
+    "proxyurl": "",
+    "quiet": true,
+    "rate": 0,
+    "raw": false,
+    "recursion": false,
+    "recursion_depth": 0,
+    "recursion_strategy": "default",
+    "replayproxyurl": "",
+    "requestfile": "",
+    "requestproto": "https",
+    "scraperfile": "",
+    "scrapers": "all",
+    "sni": "",
+    "stop_403": false,
+    "stop_all": false,
+    "stop_errors": false,
+    "threads": 40,
+    "timeout": 10,
+    "url": "http://wave3target/FUZZ",
+    "verbose": false,
+    "wordlists": [
+      "/work/empty-wordlist.txt"
+    ],
+    "http2": false,
+    "client-cert": "",
+    "client-key": ""
+  }
+}

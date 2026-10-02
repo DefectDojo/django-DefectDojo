@@ -1,6 +1,8 @@
 ---
 title: "MS Defender Parser"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/ms_defender/"
 ---
 This parser helps to parse Microsoft Defender Findings and supports two types of imports:
 - You can import a JSON output file from the api/vulnerabilities/machinesVulnerabilities endpoint of Microsoft defender.
@@ -11,7 +13,7 @@ This parser helps to parse Microsoft Defender Findings and supports two types of
 Sample MS Defender Parser scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/ms_defender).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - title
 - description

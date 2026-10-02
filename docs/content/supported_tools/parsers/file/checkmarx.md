@@ -1,6 +1,8 @@
 ---
 title: "Checkmarx"
 toc_hide: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/checkmarx/"
 ---
 - `Checkmarx Scan`, `Checkmarx Scan detailed`: XML report from Checkmarx SAST (source code analysis)
 - `Checkmarx OSA`: json report from Checkmarx Open Source Analysis (dependencies analysis)
@@ -17,7 +19,7 @@ Data for SAST, SCA and KICS are supported.
 Sample Checkmarx scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/checkmarx).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/triage_findings/finding_deduplication/about_deduplication/):
 
 - cwe
 - severity

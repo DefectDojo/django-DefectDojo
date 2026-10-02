@@ -1,0 +1,42 @@
+{
+    "meta": {
+        "application": "Dependency-Track",
+        "version": "4.14.0",
+        "timestamp": "2026-01-01T00:00:00Z"
+    },
+    "findings": [
+        {
+            "component": {
+                "name": "log4j-core",
+                "project": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4",
+                "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1",
+                "uuid": "c8a65fcd-dbf4-41eb-b1ec-55e67c91b22b",
+                "version": "2.14.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-01-01 00:00:00.000"
+            },
+            "vulnerability": {
+                "uuid": "f8469ce4-019a-4482-8510-624dcf65f005",
+                "source": "NVD",
+                "vulnId": "CVE-2021-44228",
+                "severity": "CRITICAL",
+                "description": "Apache Log4j2 JNDI features do not protect against attacker-controlled LDAP.",
+                "aliases": []
+            },
+            "analysis": {
+                "state": "IN_TRIAGE",
+                "isSuppressed": false,
+                "detail": "Reviewed and confirmed vulnerable. Upgrade scheduled for next sprint."
+            },
+            "matrix": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4:c8a65fcd-dbf4-41eb-b1ec-55e67c91b22b:f8469ce4-019a-4482-8510-624dcf65f005"
+        }
+    ],
+    "project": {
+        "name": "test-app",
+        "uuid": "d38ebf15-96cd-4a01-9bca-7b49b5b0e7c4",
+        "version": "1.0.0"
+    },
+    "version": "1.3"
+}

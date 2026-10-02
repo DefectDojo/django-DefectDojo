@@ -36,3 +36,18 @@ class TestPopeyeParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(229, len(findings))
+
+    def test_popeye_parser_with_new_sections_format_has_findings(self):
+        testfile = (get_unit_tests_scans_path("popeye") / "popeye_new_format.json").open(encoding="utf-8")
+        parser = PopeyeParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+
+        self.assertEqual(1, len(findings))
+        self.assertEqual("Low", findings[0].severity)
+        self.assertEqual(
+            "pods test-namespace/6cff44dc94-d92km [POP-106] No resources requests/limits defined",
+            findings[0].title,
+        )
+        self.assertIn("**Sanitizer** : pods", findings[0].description)
+        self.assertEqual("POP-106", findings[0].vuln_id_from_tool)

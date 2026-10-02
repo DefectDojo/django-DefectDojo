@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.14.6-slim-trixie@sha256:63a4c7f612a00f92042cbdcc7cdc6a306f38485af0a200b9c89de7d9b1607d15 AS base
+FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -43,6 +43,15 @@ RUN \
   apt-get -y upgrade && \
   # ugly fix to install postgresql-client without errors
   mkdir -p /usr/share/man/man1 /usr/share/man/man7 && \
+  # ca-certificates + curl are needed to fetch the PostgreSQL APT (PGDG) signing key
+  apt-get -y install --no-install-recommends ca-certificates curl && \
+  # Debian trixie only ships postgresql-client-17, but the bundled PostgreSQL
+  # server is 18. pg_dump refuses to dump a server newer than itself, which
+  # breaks `manage.py dbbackup`, so pull the matching v18 client from PGDG.
+  install -d /usr/share/postgresql-common/pgdg && \
+  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc && \
+  echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+  apt-get -y update && \
   apt-get -y install --no-install-recommends \
     # libopenjp2-7 libjpeg62 are required by the pillow package
     libopenjp2-7 \
@@ -52,8 +61,9 @@ RUN \
     git \
     uuid-runtime \
     libpq-dev \
-    # only required for the dbshell (used by the initializer job)
-    postgresql-client \
+    # only required for the dbshell (used by the initializer job) and dbbackup;
+    # must match the server major version (18) for pg_dump to work
+    postgresql-client-18 \
     # libcurl4-openssl-dev is required for installing pycurl python package
     libcurl4-openssl-dev \
     && \
@@ -95,6 +105,19 @@ RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
+
+# Compile translation catalogs (.mo) into the image (the .mo files are gitignored
+# and generated at build). msgfmt is run directly so no Django settings/env are
+# needed; gettext is only required at build time, so install and purge it here.
+# Kept in the portable -exec form (not -execdir) so this stays identical to the
+# alpine Dockerfile, whose BusyBox find has no -execdir.
+RUN \
+  apt-get -y update && \
+  apt-get -y install --no-install-recommends gettext && \
+  find dojo/locale -name 'django.po' -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' _ {} \; && \
+  apt-get -y purge --auto-remove gettext && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists
 USER root
 RUN \
     addgroup --gid ${gid} ${appuser} && \

@@ -5,20 +5,22 @@ on:
     branches:
       - dev
       - master
-      - bugfix
       - release/*
 
 jobs:
   main:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: validate
-        uses: suzuki-shunsuke/github-action-renovate-config-validator@ee9f69e1f683ed0d08225086482b34fc9abe9300 # v2.1.0
+        uses: suzuki-shunsuke/github-action-renovate-config-validator@b850926b611b1f3d3fe3729776339c217834bf2c # v2.2.0
         with:
           strict: "true"
-          validator_version: 43.240.0 # renovate: datasource=github-releases depName=renovatebot/renovate
+          validator_version: 44.72.0 # renovate: datasource=github-releases depName=renovatebot/renovate

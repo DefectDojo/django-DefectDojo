@@ -35,7 +35,7 @@ While each method differs primarily in how scan data is parsed and ingested, the
 
 When no native parser exists for a given tool, [**Generic Findings Import**](/supported_tools/parsers/generic_findings_import) allows you to import findings using a standardized JSON or CSV schema, regardless of the original source. 
 
-DefectDojo parses the provided data, creates a new Test (or imports into an existing one), and attaches the Findings. A corresponding Test Type is also created in the format “`{Test Name}` (Generic Findings Import).”
+DefectDojo parses the provided data, creates a new Test (or imports into an existing one), and attaches the Findings. A corresponding Test Type is also created based on the report's optional `type` field: when `type` is omitted (or equals the scan type) the Test Type is “Generic Findings Import”; when `type` is provided it becomes “`{type}` Scan (Generic Findings Import)” (a `type` that already ends with the “(Generic Findings Import)” suffix is used verbatim).
 
 #### Universal Parser 
 
@@ -43,7 +43,7 @@ DefectDojo parses the provided data, creates a new Test (or imports into an exis
 
 #### Connectors 
 
-[**Connectors**](/import_data/pro/connectors/about_connectors) can be used to automatically ingest and organize vulnerability data from external tools via API calls. Once configured, a Connector fetches scan results, parses the data, and creates new Tests or updates existing Tests depending on its configuration. Findings are then attached to the corresponding Test.
+[**Connectors**](/connectors/upstream/about/) can be used to automatically ingest and organize vulnerability data from external tools via API calls. Once configured, a Connector fetches scan results, parses the data, and creates new Tests or updates existing Tests depending on its configuration. Findings are then attached to the corresponding Test.
 
 #### Test Creation Mechanism Comparison 
 
@@ -104,7 +104,7 @@ Tests can be accessed from various sections of the DefectDojo UI.
 
 ![image](images/tests_ss16.png)
 
-## Test Lifecycle 
+## Working with Tests 
 
 ### Create Tests
 
@@ -182,7 +182,9 @@ In order to add new data to an existing Test, open the Test you’re adding new 
 
 ![image](images/tests_ss21.png)
 
-While completing the Reimport Scan form, you’ll have the option to update metadata for the scan being reimported, including the version, branch tag, commit hash, and build ID. These changes are reflected in the Import History section of the Test View, which will also include the same metadata from prior scan imports. 
+While completing the Reimport Scan form, you’ll have the option to update metadata for the scan being reimported, including the version, branch tag, commit hash, and build ID. Note that Test metadata such as Environment can't be changed through a reimport pipeline.
+
+The updated metadata are reflected in the Import History section of the Test View, which will also include the same metadata from prior scan imports. 
 
 For example, in the below screenshot, the branch tag, build ID, commit hash, and version were all manually updated between the initial import and the subsequent reimport. 
 

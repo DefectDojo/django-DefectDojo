@@ -1,0 +1,94 @@
+{
+  "content": [
+    {
+      "host": {
+        "id": "asset-0001",
+        "name": "generic-plc-01",
+        "ip": ["10.10.0.11"],
+        "vendor": "Generic Controls",
+        "type": "PLC",
+        "is_ot": true,
+        "zone": {"id": "zone-1", "name": "Cell Zone A"},
+        "pera_level": 1,
+        "hardware": {"model": "GC-9000", "vendor": "Generic Controls",
+                     "firmware": {"version": "2.4.1"}}
+      },
+      "vulnerability": {
+        "id": "vuln-0001",
+        "report_id": "DRA-2024-0001",
+        "reference": "CVE-2000-0002 and CVE-2000-0001",
+        "enumeration": "CVE-2000-0001",
+        "title": "Unauthenticated command execution on the controller",
+        "summary": "The controller accepts control commands without authentication.",
+        "severity": 2,
+        "score": {"base": 9.8, "version": "3.1"},
+        "dragos_score": 8.5,
+        "mitigations": ["Segment the control network."],
+        "intel": {"active_exploit": true, "poc_exists": false, "remotely_exploitable": true}
+      }
+    },
+    {
+      "host": {
+        "id": "asset-0002",
+        "name": "",
+        "hostname": ["generic-hmi-02.plant.example.com"],
+        "ip": ["10.10.0.21"],
+        "type": "HMI",
+        "is_ot": true,
+        "zone": {"name": ""},
+        "pera_level": 0,
+        "hardware": {"model": "HMI-100", "vendor": "Generic HMI Works",
+                     "firmware": {"version": "5.0.0"}}
+      },
+      "vulnerability": {
+        "id": "vuln-0002",
+        "report_id": "DRA-2024-0002",
+        "reference": "",
+        "enumeration": "",
+        "title": "Default credentials on the operator panel",
+        "severity": "4",
+        "score": {"base": "0"},
+        "dragos_score": 6,
+        "mitigations": [],
+        "intel": {"active_exploit": false, "poc_exists": true, "remotely_exploitable": false}
+      }
+    },
+    {
+      "host": {
+        "id": "asset-0003",
+        "hostname": ["   "],
+        "ip": ["10.10.0.31"],
+        "is_ot": false,
+        "hardware": {"firmware": {}}
+      },
+      "vulnerability": {
+        "id": "vuln-0003",
+        "report_id": "",
+        "reference": "GHSA-aaaa-bbbb-cccc",
+        "enumeration": "",
+        "title": "",
+        "severity": 0,
+        "score": {"base": 0},
+        "dragos_score": 0,
+        "intel": {}
+      }
+    },
+    {
+      "host": {
+        "id": "asset-0004",
+        "hardware": {}
+      },
+      "vulnerability": {
+        "id": "vuln-0004",
+        "title": "A finding on an asset known only by its id",
+        "severity": 3,
+        "score": {},
+        "intel": {"active_exploit": false}
+      }
+    }
+  ],
+  "pageSize": 100,
+  "pageNumber": 0,
+  "totalCount": 4,
+  "totalPages": 1
+}

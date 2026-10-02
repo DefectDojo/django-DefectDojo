@@ -1,0 +1,162 @@
+{
+  "violations": [
+    {
+      "id": "vio_slack_pending",
+      "integration": "SLACK",
+      "createdAt": 1717200000,
+      "state": "PENDING",
+      "resourceLink": "https://app.example.com/violations/vio_slack_pending",
+      "policyNames": ["Payment card numbers in chat", "PII in chat"],
+      "risk": "MEDIUM",
+      "riskSource": "DETECTION_RULE",
+      "riskScore": 5,
+      "metadata": {
+        "slackMetadata": {
+          "location": "#general",
+          "locationType": "PUBLIC_CHANNEL",
+          "username": "example-user",
+          "messagePermalink": "https://slack.example.com/archives/C0000000000/p0000000000000000",
+          "workspaceName": "Example Workspace"
+        }
+      },
+      "userInfo": {"userEmail": "example-user@example.com"}
+    },
+    {
+      "id": "vio_gdrive_resolved",
+      "integration": "GDRIVE",
+      "createdAt": 1717200000,
+      "state": "RESOLVED",
+      "policyNames": ["Confidential documents"],
+      "risk": "LOW",
+      "metadata": {
+        "gdriveMetadata": {
+          "fileName": "quarter-notes.docx",
+          "fileType": "document",
+          "fileLink": "https://drive.example.com/file/d/0000000000",
+          "permissionSetting": "ANYONE_WITH_LINK",
+          "fileOwner": "example-owner",
+          "drive": "Shared drive"
+        }
+      },
+      "fileDetails": {
+        "fileName": "quarter-notes.docx",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "permalink": "https://drive.example.com/file/d/0000000000/view"
+      }
+    },
+    {
+      "id": "vio_github_public",
+      "integration": "GITHUB",
+      "createdAt": 1721001600,
+      "state": "ACTIVE",
+      "policyNames": ["Cloud credentials in source code"],
+      "risk": "LOW",
+      "riskScore": 2.5,
+      "riskSource": "POLICY",
+      "metadata": {
+        "githubMetadata": {
+          "organization": "example-org",
+          "repository": "public-sample",
+          "branchName": "main",
+          "filePath": "config/local.env",
+          "githubPermalink": "https://github.example.com/example-org/public-sample/blob/main/config/local.env",
+          "isRepoPrivate": false
+        }
+      }
+    },
+    {
+      "id": "vio_jira_expired",
+      "integration": "JIRA",
+      "createdAt": 1717200000,
+      "state": "EXPIRED",
+      "policyNames": [],
+      "risk": "NO_RISK",
+      "metadata": {
+        "jiraMetadata": {
+          "projectName": "PLATFORM",
+          "ticketNumber": "PLATFORM-1234",
+          "ticketLink": "https://jira.example.com/browse/PLATFORM-1234"
+        }
+      }
+    },
+    {
+      "id": "vio_zendesk_unknown_risk",
+      "integration": "ZENDESK",
+      "createdAt": 1717200000,
+      "state": "ACTIVE",
+      "policyNames": ["Support attachments"],
+      "risk": "SEVERE",
+      "metadata": {
+        "zendeskMetadata": {
+          "ticketTitle": "Cannot sign in",
+          "ticketID": "4321",
+          "ticketStatus": "open",
+          "location": "comment"
+        }
+      }
+    },
+    {
+      "id": "vio_notion_shared",
+      "integration": "NOTION",
+      "createdAt": 0,
+      "state": "",
+      "policyNames": ["Internal runbooks"],
+      "risk": "UNSPECIFIED",
+      "metadata": {
+        "notionMetadata": {
+          "workspaceName": "Example Workspace",
+          "pageTitle": "Deployment runbook",
+          "privatePageLink": "https://notion.example.com/Deployment-runbook-0000000000",
+          "sharedExternally": true
+        }
+      }
+    },
+    {
+      "id": "vio_teams_no_metadata",
+      "integration": "M365_TEAMS",
+      "createdAt": 1717200000,
+      "state": "ACTIVE",
+      "policyNames": ["Chat attachments"],
+      "risk": "HIGH"
+    }
+  ],
+  "findings": {
+    "vio_slack_pending": [
+      {
+        "id": "fnd_slack_1",
+        "confidence": "LIKELY",
+        "redactedSensitiveText": "4111****REDACTED****",
+        "subLocation": "message body",
+        "metadata": {"apiKeyMetaData": null}
+      }
+    ],
+    "vio_github_public": [
+      {
+        "id": "fnd_github_1",
+        "confidence": "VERY_LIKELY",
+        "redactedSensitiveText": "sk_live_****REDACTED****",
+        "redactedLocation": {"lineRange": {"start": 7, "end": 7}},
+        "metadata": {
+          "apiKeyMetaData": {"status": "SIGNATURE_VERIFIED", "kind": "STRIPE", "description": "Stripe secret key"}
+        }
+      },
+      {
+        "id": "fnd_github_2",
+        "confidence": "POSSIBLE",
+        "redactedSensitiveText": "ghp_****REDACTED****",
+        "redactedLocation": {"lineRange": {"start": 12, "end": 12}},
+        "metadata": {
+          "apiKeyMetaData": {"status": "UNVERIFIED", "kind": "GITHUB", "description": "GitHub token"}
+        }
+      }
+    ],
+    "vio_teams_no_metadata": [
+      {
+        "id": "fnd_teams_1",
+        "confidence": "LIKELY",
+        "redactedSensitiveText": "****REDACTED****",
+        "metadata": {"apiKeyMetaData": {"status": "EXPIRED", "kind": "UNSPECIFIED"}}
+      }
+    ]
+  }
+}

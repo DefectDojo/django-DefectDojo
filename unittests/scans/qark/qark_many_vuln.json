@@ -1,0 +1,73 @@
+[
+  {
+    "category": "file",
+    "severity": "WARNING",
+    "description": "Logs are detected. This may allow potential leakage of information from Android applications. Logs should never be compiled into an application except during development. Reference: https://developer.android.com/reference/android/util/Log.html",
+    "name": "Logging found",
+    "line_number": [
+      17,
+      7
+    ],
+    "file_object": "/qark/build_many/qark/fernflower/com/example/genericapp/MainActivity.java",
+    "apk_exploit_dict": null
+  },
+  {
+    "category": "file",
+    "severity": "WARNING",
+    "description": "Logs are detected. This may allow potential leakage of information from Android applications. Logs should never be compiled into an application except during development. Reference: https://developer.android.com/reference/android/util/Log.html",
+    "name": "Logging found",
+    "line_number": [
+      28,
+      9
+    ],
+    "file_object": "/qark/build_many/qark/cfr/com/example/genericapp/MainActivity.java",
+    "apk_exploit_dict": null
+  },
+  {
+    "category": "Manifest",
+    "severity": "WARNING",
+    "description": "The activity .MainActivity is exported, but not protected by any permissions. Failing to protect activity tags could leave them vulnerable to attack by malicious apps. The activity tags should be reviewed for vulnerabilities, such as injection and information leakage.",
+    "name": "Exported tags",
+    "line_number": null,
+    "file_object": "/qark/build_many/qark/AndroidManifest.xml",
+    "apk_exploit_dict": {
+      "exported_enum": null,
+      "tag_name": ".MainActivity",
+      "package_name": "com.example.genericapp",
+      "arguments": []
+    }
+  },
+  {
+    "category": "manifest",
+    "severity": "VULNERABILITY",
+    "description": "Since the minSdkVersion is less that 9, it is likely this application is vulnerable to TapJacking. QARK made no attempt to confirm, as the protection would have to be custom code, which is difficult for QARK to examine and understand properly. This vulnerability allows a malicious application to lay on top of this app, while letting the key strokes pass through to the application below. This can cause users to take unwanted actions, within the victim application, similar to Clickjacking on websites. Please select the appropriate options in the exploitation menus to verify manually using QARK's exploit APK. Note: The QARK proof-of-concept is transparent, but in real-world attacks, it would likely not be. This is done solely to aid in testing. For more information: https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf",
+    "name": "Tap Jacking possible",
+    "line_number": null,
+    "file_object": null,
+    "apk_exploit_dict": null
+  },
+  {
+    "category": "file",
+    "severity": "WARNING",
+    "description": "Logs are detected. This may allow potential leakage of information from Android applications. Logs should never be compiled into an application except during development. Reference: https://developer.android.com/reference/android/util/Log.html",
+    "name": "Logging found",
+    "line_number": [
+      18,
+      7
+    ],
+    "file_object": "/qark/build_many/qark/fernflower/com/example/genericapp/MainActivity.java",
+    "apk_exploit_dict": null
+  },
+  {
+    "category": "file",
+    "severity": "WARNING",
+    "description": "Logs are detected. This may allow potential leakage of information from Android applications. Logs should never be compiled into an application except during development. Reference: https://developer.android.com/reference/android/util/Log.html",
+    "name": "Logging found",
+    "line_number": [
+      27,
+      9
+    ],
+    "file_object": "/qark/build_many/qark/cfr/com/example/genericapp/MainActivity.java",
+    "apk_exploit_dict": null
+  }
+]

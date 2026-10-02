@@ -1,7 +1,6 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.sonatype.identifier import ComponentIdentifier
@@ -35,7 +34,7 @@ class SonatypeParser:
 
             for component in components:
                 if component["securityData"] is None or len(component["securityData"]["securityIssues"]) < 1:
-                    if settings.V3_FEATURE_LOCATIONS and (dep := get_dependency_from_component(component)):
+                    if locations_enabled() and (dep := get_dependency_from_component(component)):
                         test.unsaved_metadata.append(dep)
                 else:
                     for security_issue in component["securityData"]["securityIssues"]:
@@ -116,7 +115,7 @@ def get_finding(security_issue, component, test):
         vulnerability_id = security_issue.get("reference")
         finding.unsaved_vulnerability_ids = [vulnerability_id]
 
-    if settings.V3_FEATURE_LOCATIONS and (dep := get_dependency_from_component(component)):
+    if locations_enabled() and (dep := get_dependency_from_component(component)):
         finding.unsaved_locations.append(dep)
 
     return finding

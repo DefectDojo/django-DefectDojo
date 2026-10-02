@@ -13,6 +13,8 @@ seo:
     canonical: ""
     robots: ""
 exclude_search: true
+aliases:
+  - "/en/share_your_findings/pro_reports/"
 ---
 The Report Builder lets you turn DefectDojo data into polished, shareable reports — executive summaries, compliance snapshots, POA&M packages, engineering detail, and more — for audiences inside and outside your security team.
 

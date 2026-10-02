@@ -1,9 +1,9 @@
 import logging
 import re
 
-from django.conf import settings
 from lxml import etree, html
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -164,11 +164,15 @@ class BurpSuiteDASTParser:
             if header.lower() == "vulnerability classifications":
                 for item in data_list:
                     cleaned_item = item.split(":")[0]
-                    if (
-                        finding_details["cwe"] is None
-                        and (cwe_search := re.search(r"CWE-([0-9]*)", cleaned_item, re.IGNORECASE))
-                    ):
-                        finding_details["cwe"] = int(cwe_search.group(1))
+                    if cwe_search := re.search(r"CWE-([0-9]*)", cleaned_item, re.IGNORECASE):
+                        cwe = int(cwe_search.group(1))
+                        # First CWE stays the primary; collect all in cwes.
+                        if finding_details["cwe"] is None:
+                            finding_details["cwe"] = cwe
+                        if "cwes" not in finding_details:
+                            finding_details["cwes"] = [cwe]
+                        else:
+                            finding_details["cwes"].append(cwe)
                     if "vulnerability_ids" not in finding_details:
                         finding_details["vulnerability_ids"] = [cleaned_item]
                     else:
@@ -235,6 +239,7 @@ class BurpSuiteDASTParser:
             endpoints = finding_dict.pop("endpoints", [])
             request_response_pairs = finding_dict.pop("request_response_pairs", [])
             vulnerability_ids = finding_dict.pop("vulnerability_ids", [])
+            cwes = finding_dict.pop("cwes", [])
             # Crete the finding from the rest of the dict
             finding = Finding(
                 test=test,
@@ -248,7 +253,7 @@ class BurpSuiteDASTParser:
             )
             # Add the unsaved versions of the other things
             # Endpoints/Locations
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(url=endpoint) for endpoint in endpoints]
             else:
                 # TODO: Delete this after the move to Locations
@@ -261,6 +266,9 @@ class BurpSuiteDASTParser:
             ]
             # Vulnerability IDs
             finding.unsaved_vulnerability_ids = vulnerability_ids
+            # CWEs (primary stays on finding.cwe)
+            if cwes:
+                finding.unsaved_cwes = cwes
             # Add the finding to the final list
             findings.append(finding)
 

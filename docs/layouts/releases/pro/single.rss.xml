@@ -1,0 +1,58 @@
+{{- /*
+RSS feed for the Pro changelog: one <item> per release.
+
+The changelog is a single Markdown page, so the stock RSS template (which
+ranges over child pages) would produce an empty feed. This template instead
+splits the rendered page on its <h3> release headings and emits each release
+section as an item. It relies on the heading convention
+"### Month D, YYYY: vX.Y.Z" — an h3 without a leading date (e.g. a notice)
+is not treated as a release and is skipped.
+
+Applies to any page under /releases/pro that lists "rss" in its front matter
+`outputs`; only changelog.md does.
+*/ -}}
+{{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ .Title }}</title>
+    <link>{{ .Permalink }}</link>
+    <description>{{ .Description }}</description>
+    <language>{{ site.Language.LanguageCode }}</language>
+    {{ with site.Copyright }}<copyright>{{ . }}</copyright>{{ end }}
+    {{ with .OutputFormats.Get "RSS" }}<atom:link href="{{ .Permalink }}" rel="self" type="application/rss+xml" />{{ end }}
+    {{- $page := . }}
+    {{- $base := strings.TrimSuffix "/" site.BaseURL }}
+    {{- $limit := 20 }}
+    {{- $count := 0 }}
+    {{- range $chunk := after 1 (split .Content "<h3") }}
+      {{- if lt $count $limit }}
+        {{- /* $chunk starts mid-tag: ` id="...">Title...</h3><section html>` */}}
+        {{- $title := replaceRE `(?s)^[^>]*>([^<]*)<.*` "$1" $chunk | strings.TrimSpace }}
+        {{- if findRE `^[A-Za-z]+ \d{1,2}[\d/]*, \d{4}:` $title }}
+          {{- $count = add $count 1 }}
+          {{- $anchor := replaceRE `(?s)^[^>]*\bid="([^"]+)".*` "$1" $chunk }}
+          {{- $body := replaceRE `(?s)^.*?</h3>` "" $chunk }}
+          {{- /* the last release of a month is followed by the next month's <h2> */}}
+          {{- $body = index (split $body "<h2") 0 | strings.TrimSpace }}
+          {{- /* root-relative links don't resolve inside a feed reader */}}
+          {{- $body = replace $body "href=\"/" (printf "href=\"%s/" $base) }}
+          {{- $body = replace $body "src=\"/" (printf "src=\"%s/" $base) }}
+          {{- $day := replaceRE `^[A-Za-z]+ (\d{1,2}).*$` "$1" $title }}
+          {{- $month := substr (replaceRE `^([A-Za-z]+).*$` "$1" $title) 0 3 }}
+          {{- $year := replaceRE `^[A-Za-z]+ \d{1,2}[\d/]*, (\d{4}).*$` "$1" $title }}
+          {{- $pub := time.AsTime (printf "%02d %s %s" (int $day) $month $year) }}
+          {{- if eq $count 1 }}
+    <lastBuildDate>{{ $pub.Format "Mon, 02 Jan 2006 15:04:05 +0000" }}</lastBuildDate>
+          {{- end }}
+    <item>
+      <title>{{ $title }}</title>
+      <link>{{ $page.Permalink }}#{{ $anchor }}</link>
+      <guid>{{ $page.Permalink }}#{{ $anchor }}</guid>
+      <pubDate>{{ $pub.Format "Mon, 02 Jan 2006 15:04:05 +0000" }}</pubDate>
+      <description>{{ $body | transform.XMLEscape | safeHTML }}</description>
+    </item>
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  </channel>
+</rss>

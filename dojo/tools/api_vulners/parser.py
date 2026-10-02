@@ -2,8 +2,8 @@ import json
 import logging
 
 from cvss.cvss3 import CVSS3
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -78,7 +78,7 @@ class ApiVulnersParser:
                 else agentip,
             )
 
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(host=agentip)]
             else:
                 # TODO: Delete this after the move to Locations

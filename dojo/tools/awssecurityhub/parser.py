@@ -33,8 +33,11 @@ class AwsSecurityHubParser:
         test = ParserTest(
             name=self.ID, parser_type=self.ID, version="",
         )
-        test.description = "**AWS Accounts:** " + ", ".join(set(aws_acc)) + "\n"
-        test.description += "**Finding Origins:** " + ", ".join(set(prod)) + "\n"
+        # sorted(): set iteration order varies per process (PYTHONHASHSEED). This is the
+        # Test description rather than a Finding field, so it is not hashed, but leaving
+        # it unsorted reshuffles the text on every import.
+        test.description = "**AWS Accounts:** " + ", ".join(sorted(set(aws_acc))) + "\n"
+        test.description += "**Finding Origins:** " + ", ".join(sorted(set(prod))) + "\n"
         test.findings = self.get_items(data, report_date)
         return [test]
 

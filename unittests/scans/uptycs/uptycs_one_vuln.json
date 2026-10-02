@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "cve_list": ["CVE-2000-0001"],
+      "package_name": "example-tls",
+      "package_version": "1.0.2k-1",
+      "cvss_score": 9.8,
+      "os": "Ubuntu 22.04",
+      "upt_asset_id": "asset-0001",
+      "upt_hostname": "generic-host-01",
+      "upt_asset_group_name": "production-linux",
+      "upt_asset_group_id": "group-1"
+    }
+  ]
+}

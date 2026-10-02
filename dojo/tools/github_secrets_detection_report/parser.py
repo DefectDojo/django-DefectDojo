@@ -1,6 +1,8 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GithubSecretsDetectionReportParser:
@@ -136,6 +138,14 @@ class GithubSecretsDetectionReportParser:
             if first_location:
                 finding.file_path = first_location.get("path")
                 finding.line = first_location.get("start_line")
+                if locations_enabled() and finding.file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=finding.file_path,
+                            line=finding.line,
+                            end_line=first_location.get("end_line"),
+                        ),
+                    )
 
             # Set external URL
             if html_url:

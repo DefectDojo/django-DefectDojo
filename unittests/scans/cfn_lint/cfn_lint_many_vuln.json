@@ -1,0 +1,145 @@
+[
+  {
+    "Filename": "many.yaml",
+    "Id": "9936fd36-7bc7-7de3-9742-7fe3213c97f0",
+    "Level": "Warning",
+    "Location": {
+      "End": {
+        "ColumnNumber": 18,
+        "LineNumber": 4
+      },
+      "Path": [
+        "Parameters",
+        "UnusedParameter"
+      ],
+      "Start": {
+        "ColumnNumber": 3,
+        "LineNumber": 4
+      }
+    },
+    "Message": "Parameter UnusedParameter not used.",
+    "ParentId": null,
+    "Rule": {
+      "Description": "Making sure the parameters defined are used",
+      "Id": "W2001",
+      "ShortDescription": "Check if Parameters are Used",
+      "Source": "https://github.com/aws-cloudformation/cfn-lint"
+    }
+  },
+  {
+    "Filename": "many.yaml",
+    "Id": "8f3725b8-936c-1dcc-c1ca-c80d5f9a5dbf",
+    "Level": "Warning",
+    "Location": {
+      "End": {
+        "ColumnNumber": 15,
+        "LineNumber": 7
+      },
+      "Path": [
+        "Parameters",
+        "SecondUnused"
+      ],
+      "Start": {
+        "ColumnNumber": 3,
+        "LineNumber": 7
+      }
+    },
+    "Message": "Parameter SecondUnused not used.",
+    "ParentId": null,
+    "Rule": {
+      "Description": "Making sure the parameters defined are used",
+      "Id": "W2001",
+      "ShortDescription": "Check if Parameters are Used",
+      "Source": "https://github.com/aws-cloudformation/cfn-lint"
+    }
+  },
+  {
+    "Filename": "many.yaml",
+    "Id": "a6b6cd8c-1664-af95-f61b-1580d0fa3368",
+    "Level": "Error",
+    "Location": {
+      "End": {
+        "ColumnNumber": 23,
+        "LineNumber": 15
+      },
+      "Path": [
+        "Resources",
+        "ApplicationBucket",
+        "Properties",
+        "NotARealProperty"
+      ],
+      "Start": {
+        "ColumnNumber": 7,
+        "LineNumber": 15
+      }
+    },
+    "Message": "Additional properties are not allowed ('NotARealProperty' was unexpected)",
+    "ParentId": null,
+    "Rule": {
+      "Description": "Making sure that resources properties are properly configured",
+      "Id": "E3002",
+      "ShortDescription": "Resource properties are invalid",
+      "Source": "https://github.com/aws-cloudformation/cfn-lint/blob/main/docs/cfn-schema-specification.md#properties"
+    }
+  },
+  {
+    "Filename": "many.yaml",
+    "Id": "dc9ee408-0c7d-0f42-3674-68fdb193dc29",
+    "Level": "Warning",
+    "Location": {
+      "End": {
+        "ColumnNumber": 16,
+        "LineNumber": 20
+      },
+      "Path": [
+        "Resources",
+        "ApplicationQueue",
+        "Properties",
+        "QueueName",
+        "Fn::Sub"
+      ],
+      "Start": {
+        "ColumnNumber": 7,
+        "LineNumber": 20
+      }
+    },
+    "Message": "'Fn::Sub' isn't needed because there are no variables",
+    "ParentId": null,
+    "Rule": {
+      "Description": "Checks sub strings to see if a variable is defined.",
+      "Id": "W1020",
+      "ShortDescription": "Sub isn't needed if it doesn't have a variable defined",
+      "Source": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-sub.html"
+    }
+  },
+  {
+    "Filename": "many.yaml",
+    "Id": "d7cc5489-e399-5c86-8f38-5e54f24d17be",
+    "Level": "Error",
+    "Location": {
+      "End": {
+        "ColumnNumber": 10,
+        "LineNumber": 24
+      },
+      "Path": [
+        "Outputs",
+        "MissingAttribute",
+        "Value",
+        "Fn::GetAtt",
+        1
+      ],
+      "Start": {
+        "ColumnNumber": 5,
+        "LineNumber": 24
+      }
+    },
+    "Message": "'NoSuchAttribute' is not one of ['Arn', 'DomainName', 'DualStackDomainName', 'RegionalDomainName', 'MetadataTableConfiguration.S3TablesDestination.TableNamespace', 'MetadataTableConfiguration.S3TablesDestination.TableArn', 'MetadataConfiguration.Destination', 'MetadataConfiguration.JournalTableConfiguration.TableName', 'MetadataConfiguration.JournalTableConfiguration.TableArn', 'MetadataConfiguration.InventoryTableConfiguration.TableName', 'MetadataConfiguration.InventoryTableConfiguration.TableArn', 'MetadataConfiguration.AnnotationTableConfiguration.TableName', 'MetadataConfiguration.AnnotationTableConfiguration.TableArn', 'WebsiteURL'] in ['us-east-1']",
+    "ParentId": null,
+    "Rule": {
+      "Description": "Make sure that output values have a type of string",
+      "Id": "E6101",
+      "ShortDescription": "Validate that outputs values are a string",
+      "Source": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html"
+    }
+  }
+]

@@ -1,0 +1,61 @@
+{
+  "advisories": {
+    "1096465": {
+      "findings": [
+        {
+          "version": "1.2.0",
+          "paths": [
+            ".>minimist"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1096465,
+      "title": "Prototype Pollution in minimist",
+      "module_name": "minimist",
+      "vulnerable_versions": ">=1.0.0 <1.2.3",
+      "patched_versions": ">=1.2.3",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-vh95-rmgr-6w4m",
+      "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m"
+    },
+    "1097678": {
+      "findings": [
+        {
+          "version": "1.2.0",
+          "paths": [
+            ".>minimist"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1097678,
+      "title": "Prototype Pollution in minimist",
+      "module_name": "minimist",
+      "vulnerable_versions": ">=1.0.0 <1.2.6",
+      "patched_versions": ">=1.2.6",
+      "severity": "critical",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-xvch-5gv4-984h",
+      "url": "https://github.com/advisories/GHSA-xvch-5gv4-984h"
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 0,
+      "critical": 1
+    },
+    "dependencies": 1,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 1
+  }
+}

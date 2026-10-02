@@ -1,0 +1,33 @@
+{
+  "scan_time": "2026-08-09T15:25:47.376139",
+  "project_path": "repo/",
+  "output_dir": null,
+  "excluded_paths": [],
+  "excluded_signatures": [],
+  "exclude_entropy_patterns": [],
+  "exclude_regex_patterns": [],
+  "found_issues": [
+    {
+      "file_path": "config.py",
+      "matched_string": "REDACTED",
+      "signature": "fdfcf2d7fb475fc40787e0772b646f0ecebcb1d1ec4d5980a176507cd9ae5cfc",
+      "issue_type": "Regular Expression Match",
+      "issue_detail": "AWS API Key",
+      "commit_time": "2026-01-15 10:04:11",
+      "commit_message": "init\n",
+      "commit_hash": "7fab63536cb3e472f8741d0eee017150f3012063",
+      "branch": "main"
+    },
+    {
+      "file_path": "settings/prod.py",
+      "matched_string": "REDACTED",
+      "signature": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "issue_type": "High Entropy",
+      "issue_detail": "High Entropy String",
+      "commit_time": "2026-01-15 10:04:11",
+      "commit_message": "init\n",
+      "commit_hash": "deadbeefcafebabe0011223344556677",
+      "branch": "main"
+    }
+  ]
+}

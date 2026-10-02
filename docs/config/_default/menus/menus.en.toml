@@ -15,7 +15,12 @@
 
 [[main]]
   name = "Model Your Assets"
-  url = "/asset_modelling/pro_hierarchy/assets_organizations/"
+  url = "/asset_modelling/engagements_tests/os__assets/"
+  weight = 13
+
+[[main]]
+  name = "Connectors"
+  url = "/connectors/about/"
   weight = 13
 
 [[main]]
@@ -24,14 +29,70 @@
   weight = 14
 
 [[main]]
+  name = "Sensei"
+  # Sensei is Pro-only. Default to the Open Source "Pro feature" page; custom.js
+  # swaps this tab to the full guide (/sensei/about_sensei/) when Pro is selected.
+  url = "/sensei/os__sensei/"
+  weight = 14
+
+# Left-hand section sidebar for the Sensei chapter (the chapter is flat, so the
+# Doks subsection-based sidebar has nothing to render without this menu).
+# Entries are audience-filtered by the version toggle: the opensource page shows
+# in the OS view, the pro pages show in the Pro view.
+[[sidebar_sensei]]
+  name = "Sensei"
+  pageRef = "/sensei/OS__sensei"
+  weight = 0
+
+[[sidebar_sensei]]
+  name = "About Sensei"
+  pageRef = "/sensei/about_sensei"
+  weight = 1
+
+[[sidebar_sensei]]
+  name = "Set Up Sensei"
+  pageRef = "/sensei/setup_sensei"
+  weight = 2
+
+[[sidebar_sensei]]
+  name = "Fixing Findings with Sensei"
+  pageRef = "/sensei/fixing_findings"
+  weight = 3
+
+[[sidebar_sensei]]
+  name = "Sensei Reference"
+  pageRef = "/sensei/sensei_reference"
+  weight = 4
+
+# Left-hand section sidebar for the Releases chapter. Defining this menu
+# replaces the auto-generated releases tree, so it reproduces the two release
+# groups (each auto-expands to its child pages) and then adds the two Pro
+# on-prem upgrade guides so they are discoverable from this panel too. Entries
+# are audience-filtered by the version toggle via each referenced page's audience.
+[[sidebar_releases]]
+  name = "Open Source Upgrades"
+  pageRef = "/releases/os_upgrading"
+  weight = 0
+
+[[sidebar_releases]]
+  name = "Pro Upgrades"
+  pageRef = "/releases/pro"
+  weight = 1
+
+[[sidebar_releases]]
+  name = "Upgrade on Kubernetes (Helm)"
+  pageRef = "/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes"
+  weight = 2
+
+[[sidebar_releases]]
+  name = "Upgrade on Docker Compose"
+  pageRef = "/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose"
+  weight = 3
+
+[[main]]
   name = "Admin"
   url = "/admin/admin_intro/intro/"
   weight = 16
-
-[[main]]
-  name = "Issue Tracking"
-  url = "/issue_tracking/intro/intro/"
-  weight = 15
 
 [[main]]
   name = "Automation"

@@ -1,10 +1,9 @@
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
-from dojo.tools.utils import get_npm_cwe
+from dojo.tools.utils import get_npm_cwe, get_npm_cwes
 
 
 class YarnAuditParser:
@@ -59,8 +58,11 @@ class YarnAuditParser:
             childissue = child.get("Issue")
             childseverity = child.get("Severity")
             child_vuln_version = child.get("Vulnerable Versions")
-            child_tree_versions = ", ".join(set(child.get("Tree Versions")))
-            child_dependents = ", ".join(set(child.get("Dependents")))
+            # sorted(): set iteration order varies per process (PYTHONHASHSEED).
+            # "Yarn Audit Scan" declares hash fields that cover neither description nor
+            # component_version, so neither is hashed -- but both flap between imports.
+            child_tree_versions = ", ".join(sorted(set(child.get("Tree Versions"))))
+            child_dependents = ", ".join(sorted(set(child.get("Dependents"))))
             description += childissue + "\n"
             description += "**Vulnerable Versions:** " + child_vuln_version + "\n"
             description += "**Dependents:** " + child_dependents + "\n"
@@ -80,8 +82,8 @@ class YarnAuditParser:
             items.append(dojo_finding)
             if value is not None:
                 dojo_finding.component_name = value
-                if settings.V3_FEATURE_LOCATIONS:
-                    for version in set(child.get("Tree Versions")):
+                if locations_enabled():
+                    for version in sorted(set(child.get("Tree Versions"))):
                         dojo_finding.unsaved_locations.append(
                             LocationData.dependency(purl_type="npm", name=value, version=str(version)),
                         )
@@ -144,9 +146,11 @@ class YarnAuditParser:
                 dojo_finding.unsaved_vulnerability_ids = []
                 for cve in tree.get("advisories").get(element).get("cves"):
                     dojo_finding.unsaved_vulnerability_ids.append(cve)
-            if tree.get("advisories").get(element).get("cwe") != []:
-                dojo_finding.cwe = tree.get("advisories").get(element).get("cwe")[0].strip("CWE-")
-            if settings.V3_FEATURE_LOCATIONS and dojo_finding.component_name and dojo_finding.component_version:
+            advisory_cwes = tree.get("advisories").get(element).get("cwe")
+            if advisory_cwes != []:
+                dojo_finding.cwe = advisory_cwes[0].strip("CWE-")
+                dojo_finding.unsaved_cwes = advisory_cwes
+            if locations_enabled() and dojo_finding.component_name and dojo_finding.component_version:
                 dojo_finding.unsaved_locations.append(
                     LocationData.dependency(purl_type="npm", name=dojo_finding.component_name, version=dojo_finding.component_version),
                 )
@@ -179,6 +183,7 @@ class YarnAuditParser:
             if len(finding["paths"]) > 25:
                 paths += "\n  - ..... (list of paths truncated after 25 paths)"
         cwe = get_npm_cwe(item_node)
+        cwes = get_npm_cwes(item_node)
         dojo_finding = Finding(
             title=item_node["title"]
             + " - "
@@ -218,11 +223,13 @@ class YarnAuditParser:
             static_finding=True,
             dynamic_finding=False,
         )
+        if cwes:
+            dojo_finding.unsaved_cwes = cwes
         if len(item_node["cves"]) > 0:
             dojo_finding.unsaved_vulnerability_ids = []
             for vulnerability_id in item_node["cves"]:
                 dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
-        if settings.V3_FEATURE_LOCATIONS and item_node["module_name"]:
+        if locations_enabled() and item_node["module_name"]:
             dojo_finding.unsaved_locations.append(
                 LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=item_node["findings"][0]["version"], file_path=item_node["findings"][0]["paths"][0]),
             )

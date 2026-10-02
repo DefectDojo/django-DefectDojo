@@ -15,6 +15,8 @@ aliases:
 
 DefectDojo-CLI has the same functionality as Universal Importer, but also includes the ability to export Findings from DefectDojo to JSON or CSV.
 
+> **Naming:** The UI labels these objects **Assets** and **Organizations**. The CLI flags and environment variables keep the original names — `--product-name`, `--product-type-name`, `$DD_CLI_PRODUCT_NAME`.
+
 ## Installation
 
 1. Locate “External Tools” from your User Profile menu:
@@ -153,23 +155,23 @@ defectdojo-cli [global options] import <required flags> [optional flags]
 `import` can import Findings in two ways:
 
 **By ID:**
-* Create a Product (or use an existing product)
-* Create an Engagement inside the product
+* Create an Asset (or use an existing Asset)
+* Create an Engagement inside the Asset
 * Provide the id of the Engagement in the engagement parameter
 
 In this scenario, a new Test will be created inside the Engagement.
 
 **By Name:**
 
-* Create a Product (or use an existing product)
-* Create an Engagement inside the product
+* Create an Asset (or use an existing Asset)
+* Create an Engagement inside the Asset
 * Provide product-name
 * Provide engagement-name
 * Optionally provide product-type-name
 
 In this scenario, DefectDojo will look up the Engagement by the provided details.
 
-When using names you can let the importer automatically create Engagements, Products and Product-types by using `auto-create-context=true`.
+When using names you can let the importer automatically create Engagements, Assets and Organizations by using `auto-create-context=true`.
 You can use `deduplication-on-engagement` to restrict deduplication for imported Findings to the newly created Engagement.
 
 
@@ -216,13 +218,13 @@ defectdojo-cli import \
 * If set to true, the tags (from the option --tag) will be applied to the findings (default: false) `[$DD_CLI_APPLY_TAGS_FINDINGS]`
 
 `--auto-create-context, --acc`
-* If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
+* If set to true, the importer automatically creates Engagements, Assets, and Organizations (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
 
 `--close-old-findings, --cof`
 * If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the Findings for this Service will be closed. [$DD_CLI_CLOSE_OLD_FINDINGS]
 
 `--close-old-findings-product-scope, --cofps`
-* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
+* Select if --close-old-findings applies to **all** Findings of the same type in the Asset. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_CLI_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -237,10 +239,10 @@ defectdojo-cli import \
 * Dictates the lowest level severity that should be imported. Valid values are: Critical, High, Medium, Low, Info. (default: "Info") `[$DD_CLI_MINIMUM_SEVERITY]`
 
 `--product-name value, -p value`
-* The name of the Product to import findings into. `[$DD_CLI_PRODUCT_NAME]`
+* The name of the Asset to import findings into. `[$DD_CLI_PRODUCT_NAME]`
 
 `--product-type-name value, --pt value`
-* The name of the Product Type to import findings into. `[$DD_CLI_PRODUCT_TYPE_NAME]`
+* The name of the Organization to import findings into. `[$DD_CLI_PRODUCT_TYPE_NAME]`
 
 `--report-path value, -r value`
 * The path to the report to import. (required). `[$DD_CLI_REPORT_PATH]`
@@ -273,14 +275,14 @@ defectdojo-cli import \
 Use the `reimport` command to extend an existing Test with Findings from a new report in one of two ways:
 
 By ID:
-- Create a Product (or use an existing product)
-- Create an Engagement inside the product
+- Create an Asset (or use an existing Asset)
+- Create an Engagement inside the Asset
 - Import a scan report and find the id of the Test
 - Provide this in the test-id parameter
 
 By Names:
-- Create a Product (or use an existing product)
-- Create an Engagement inside the product
+- Create an Asset (or use an existing Asset)
+- Create an Engagement inside the Asset
 - Import a report which will create a Test
 - Provide product-name
 - Provide engagement-name
@@ -288,7 +290,7 @@ By Names:
 
 In this scenario, DefectDojo will look up the Test by the provided details. If no test-name is provided, the latest test inside the engagement will be chosen based on scan-type.
 
-When using names you can let the importer automatically create Engagements, Products and Product-types by using `auto-create-context=true`.
+When using names you can let the importer automatically create Engagements, Assets and Organizations by using `auto-create-context=true`.
 You can use `deduplication-on-engagement` to restrict deduplication for imported Findings to the newly created Engagement.
 
 #### Usage
@@ -341,13 +343,13 @@ example, x  Shows an example of required and optional flags for reimport operati
 * If set to true, the tags (from the option --tag) will be applied to the findings (default: false) `[$DD_CLI_APPLY_TAGS_FINDINGS]`
 
 `--auto-create-context, --acc`                 
-* If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
+* If set to true, the importer automatically creates Engagements, Assets, and Organizations (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
 
 `--close-old-findings, --cof`
 * If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the findings for this Service will be closed.[$DD_CLI_CLOSE_OLD_FINDINGS]
 
 `--close-old-findings-product-scope, --cofps`
-* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
+* Select if --close-old-findings applies to **all** Findings of the same type in the Asset. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`          
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_CLI_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -359,10 +361,10 @@ example, x  Shows an example of required and optional flags for reimport operati
 * Dictates the lowest level severity that should be imported. Valid values are: Critical, High, Medium, Low, Info. (default: "Info") `[$DD_CLI_MINIMUM_SEVERITY]`
 
 `--product-name value, -p value`                   
-* The name of the Product to import findings into. `[$DD_CLI_PRODUCT_NAME]`
+* The name of the Asset to import findings into. `[$DD_CLI_PRODUCT_NAME]`
 
 `--product-type-name value, --pt value`         
-* The name of the Product Type to import findings into. `[$DD_CLI_PRODUCT_TYPE_NAME]`
+* The name of the Organization to import findings into. `[$DD_CLI_PRODUCT_TYPE_NAME]`
 
 `--report-path value, -r value`                    
 * The path to the report to import. (required). `[$DD_CLI_REPORT_PATH]`
@@ -513,16 +515,16 @@ defectdojo-cli export \
 * Findings by outside or inside SLA status. `[$DD_CLI_FINDINGS_FILTERS_OUT_OF_SLA]`
 
 `--product-name value`
-* Findings by product name. `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_NAME]`
+* Findings by Asset name. `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_NAME]`
 
 `--product-name-contains value`
-* Findings by product name contains. `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_NAME_CONTAINS]`
+* Findings by Asset name contains. `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_NAME_CONTAINS]`
 
 `--product-type-ids value [ --product-type-ids value ]`
-* Findings by product type IDs. This flag can be used multiple times or as a comma-separated list. Could be combined with --product-type-names `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_TYPE_IDS]`
+* Findings by organization IDs. This flag can be used multiple times or as a comma-separated list. Could be combined with --product-type-names `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_TYPE_IDS]`
 
 `--product-type-names value [ --product-type-names value ]`
-* Findings by product type names. This flag can be used multiple times or as a comma-separated list. Could be combined with --product-type-ids `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_TYPE_NAMES]`
+* Findings by organization names. This flag can be used multiple times or as a comma-separated list. Could be combined with --product-type-ids `[$DD_CLI_FINDINGS_FILTERS_PRODUCT_TYPE_NAMES]`
 
 `--risk-accepted true|false`
 * Findings by risk accepted status. `[$DD_CLI_FINDINGS_FILTERS_RISK_ACCEPTED]`
@@ -649,22 +651,22 @@ universal-importer [global options] import <required flags> [optional flags]
 `import` can import Findings in two ways:
 
 **By ID:**
-* Create a Product (or use an existing product)
-* Create an Engagement inside the product
+* Create an Asset (or use an existing Asset)
+* Create an Engagement inside the Asset
 * Provide the id of the Engagement in the engagement parameter
 
 In this scenario a new Test will be created inside the Engagement.
 
 **By Name:**
-* Create a Product (or use an existing product)
-* Create an Engagement inside the product
+* Create an Asset (or use an existing Asset)
+* Create an Engagement inside the Asset
 * Provide product-name
 * Provide engagement-name
 * Optionally provide product-type-name
 
 In this scenario DefectDojo will look up the Engagement by the provided details.
 
-When using names you can let the importer automatically create Engagements, Products and Product-types by using `auto-create-context=true`.
+When using names you can let the importer automatically create Engagements, Assets and Organizations by using `auto-create-context=true`.
 You can use `deduplication-on-engagement` to restrict deduplication for imported Findings to the newly created Engagement.
 
 
@@ -714,13 +716,13 @@ universal-importer import \
 * If set to true, the tags (from the option --tag) will be applied to the findings (default: false) `[$DD_IMPORTER_APPLY_TAGS_FINDINGS]`
 
 `--auto-create-context, --acc`
-* If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
+* If set to true, the importer automatically creates Engagements, Assets, and Organizations (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
 
 `--close-old-findings, --cof`
 * If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the findings for this Service will be closed. [$DD_IMPORTER_CLOSE_OLD_FINDINGS]
 
 `--close-old-findings-product-scope, --cofps`
-* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
+* Select if --close-old-findings applies to **all** Findings of the same type in the Asset. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_IMPORTER_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -735,10 +737,10 @@ universal-importer import \
 * Dictates the lowest level severity that should be imported. Valid values are: Critical, High, Medium, Low, Info. (default: "Info") `[$DD_IMPORTER_MINIMUM_SEVERITY]`
 
 `--product-name value, -p value`
-* The name of the Product to import findings into. `[$DD_IMPORTER_PRODUCT_NAME]`
+* The name of the Asset to import findings into. `[$DD_IMPORTER_PRODUCT_NAME]`
 
 `--product-type-name value, --pt value`
-* The name of the Product Type to import findings into. `[$DD_IMPORTER_PRODUCT_TYPE_NAME]`
+* The name of the Organization to import findings into. `[$DD_IMPORTER_PRODUCT_TYPE_NAME]`
 
 `--report-path value, -r value`
 * The path to the report to import. (required). `[$DD_IMPORTER_REPORT_PATH]`
@@ -771,14 +773,14 @@ universal-importer import \
 Use the `reimport` command to extend an existing Test with Findings from a new report in one of two ways:
 
 By ID:
-- Create a Product (or use an existing product)
-- Create an Engagement inside the product
+- Create an Asset (or use an existing Asset)
+- Create an Engagement inside the Asset
 - Import a scan report and find the id of the Test
 - Provide this in the test-id parameter
 
 By Names:
-- Create a Product (or use an existing product)
-- Create an Engagement inside the product
+- Create an Asset (or use an existing Asset)
+- Create an Engagement inside the Asset
 - Import a report which will create a Test
 - Provide product-name
 - Provide engagement-name
@@ -786,7 +788,7 @@ By Names:
 
 In this scenario DefectDojo will look up the Test by the provided details. If no test-name is provided, the latest test inside the engagement will be chosen based on scan-type.
 
-When using names you can let the importer automatically create Engagements, Products and Product-types by using `auto-create-context=true`.
+When using names you can let the importer automatically create Engagements, Assets and Organizations by using `auto-create-context=true`.
 You can use `deduplication-on-engagement` to restrict deduplication for imported Findings to the newly created Engagement.
 
 #### Usage
@@ -838,13 +840,13 @@ example, x  Shows an example of required and optional flags for reimport operati
 * If set to true, the tags (from the option --tag) will be applied to the findings (default: false) `[$DD_IMPORTER_APPLY_TAGS_FINDINGS]`
 
 `--auto-create-context, --acc`                 
-* If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
+* If set to true, the importer automatically creates Engagements, Assets, and Organizations (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
 
 `--close-old-findings, --cof`
 * If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the Findings for this Service will be closed. [$DD_IMPORTER_CLOSE_OLD_FINDINGS]
 
 `--close-old-findings-product-scope, --cofps`
-* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
+* Select if --close-old-findings applies to **all** Findings of the same type in the Asset. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`          
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_IMPORTER_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -856,10 +858,10 @@ example, x  Shows an example of required and optional flags for reimport operati
 * Dictates the lowest level severity that should be imported. Valid values are: Critical, High, Medium, Low, Info. (default: "Info") `[$DD_IMPORTER_MINIMUM_SEVERITY]`
 
 `--product-name value, -p value`                   
-* The name of the Product to import findings into. `[$DD_IMPORTER_PRODUCT_NAME]`
+* The name of the Asset to import findings into. `[$DD_IMPORTER_PRODUCT_NAME]`
 
 `--product-type-name value, --pt value`         
-* The name of the Product Type to import findings into. `[$DD_IMPORTER_PRODUCT_TYPE_NAME]`
+* The name of the Organization to import findings into. `[$DD_IMPORTER_PRODUCT_TYPE_NAME]`
 
 `--report-path value, -r value`                    
 * The path to the report to import. (required). `[$DD_IMPORTER_REPORT_PATH]`

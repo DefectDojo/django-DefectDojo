@@ -2,8 +2,7 @@ import json
 import logging
 from itertools import groupby, islice
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -38,6 +37,23 @@ def load_govulncheck_stream(scan_file):
             msg = "Invalid JSON format"
             raise ValueError(msg)
         return data
+
+
+def raise_if_sarif(data):
+    """
+    Govulncheck can emit SARIF (``govulncheck -format sarif``). That format is
+    not handled by these parsers; the dedicated SARIF parser should be used
+    instead. Detect it and fail with a clear, actionable message rather than an
+    opaque KeyError or a silently empty result.
+    """
+    if isinstance(data, dict) and "runs" in data:
+        msg = (
+            "This looks like a SARIF report (it has a top-level 'runs' key). "
+            "The Govulncheck Scanner parser only accepts govulncheck's native "
+            "JSON output (govulncheck -format json). To import govulncheck SARIF "
+            "output (govulncheck -format sarif), use the 'SARIF' scan type instead."
+        )
+        raise ValueError(msg)
 
 
 class GovulncheckParser:
@@ -83,6 +99,11 @@ class GovulncheckParser:
                 if "introduced" in event:
                     return event["introduced"]
         return ""
+
+    def get_cve(self, osv):
+        # Go-only advisories may have no "aliases" at all, or an empty list
+        aliases = osv.get("aliases") or []
+        return aliases[0] if aliases else None
 
     def get_finding_trace_info(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract traces.
@@ -139,17 +160,19 @@ class GovulncheckParser:
             msg = "Invalid JSON format"
             raise ValueError(msg)
         else:
+            raise_if_sarif(data)
             if isinstance(data, dict):
                 if data["Vulns"]:
                     # Parsing for old govulncheck output format
                     list_vulns = data["Vulns"]
-                    for cve, elems in groupby(
-                        list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0],
+                    # Go-only advisories can come without any alias (CVE/GHSA); group those by OSV id
+                    for _, elems in groupby(
+                        list_vulns, key=lambda vuln: self.get_cve(vuln["OSV"]) or vuln["OSV"]["id"],
                     ):
                         elem_values = list(elems)
                         first_elem = list(islice(elem_values, 1))
                         d = {
-                            "cve": cve,
+                            "cve": self.get_cve(first_elem[0]["OSV"]),
                             "severity": SEVERITY,
                             "title": first_elem[0]["OSV"]["id"],
                             "component_name": first_elem[0]["OSV"]["affected"][0][
@@ -183,12 +206,16 @@ class GovulncheckParser:
                                     "imports"
                                 ][0]["symbols"],
                             )
-                        d["impact"] = "; ".join(impact) if impact else None
+                        # sorted(): both are sets, and iteration order of a set of
+                        # strings varies per process (PYTHONHASHSEED). description is
+                        # part of hash_code, so an unsorted join gives the same report a
+                        # different hash on every import.
+                        d["impact"] = "; ".join(sorted(impact)) if impact else None
                         d[
                             "description"
-                        ] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
+                        ] = f"Vulnerable functions: {'; '.join(sorted(vuln_methods))}"
                         finding = Finding(**d)
-                        if settings.V3_FEATURE_LOCATIONS and d["component_name"]:
+                        if locations_enabled() and d["component_name"]:
                             finding.unsaved_locations.append(
                                 LocationData.dependency(purl_type="golang", name=d["component_name"], version=d["component_version"]),
                             )
@@ -197,7 +224,7 @@ class GovulncheckParser:
                 # Parsing for new govulncheck output format
                 for elem in data:
                     if "osv" in elem:
-                        cve = elem["osv"]["aliases"][0]
+                        cve = self.get_cve(elem["osv"])
                         osv_data = elem["osv"]
                         affected_package = osv_data["affected"][0]["package"]
                         affected_ranges = osv_data["affected"][0]["ranges"]
@@ -219,8 +246,11 @@ class GovulncheckParser:
                             formatted_ranges.append(f"type {r['type']}: {'. '.join(event_pairs)}")
                         range_info = "\n ".join(formatted_ranges)
 
+                        # sorted(): a set of strings iterates in a different order in
+                        # every process (PYTHONHASHSEED), and this string goes into
+                        # description, which is hashed into hash_code.
                         vuln_functions = ", ".join(
-                            set(osv_data["affected"][0].get("ecosystem_specific", {}).get("imports", [{}])[0].get("symbols", [])),
+                            sorted(set(osv_data["affected"][0].get("ecosystem_specific", {}).get("imports", [{}])[0].get("symbols", []))),
                         )
 
                         description = (
@@ -271,7 +301,7 @@ class GovulncheckParser:
                         }
 
                         finding = Finding(**d)
-                        if settings.V3_FEATURE_LOCATIONS and component_name:
+                        if locations_enabled() and component_name:
                             finding.unsaved_locations.append(
                                 LocationData.dependency(purl_type="golang", name=component_name, version=affected_version, file_path=path),
                             )
@@ -352,6 +382,7 @@ class GovulncheckParserV2:
 
     def get_findings(self, scan_file, test):
         data = load_govulncheck_stream(scan_file)
+        raise_if_sarif(data)
         # The v2 parser only targets the new streaming format (a list of objects).
         if not isinstance(data, list):
             return []
@@ -443,7 +474,7 @@ class GovulncheckParserV2:
                 "unique_id_from_tool": f"{osv_id}:{module}",
             }
             finding = Finding(**d)
-            if settings.V3_FEATURE_LOCATIONS and module:
+            if locations_enabled() and module:
                 finding.unsaved_locations.append(
                     LocationData.dependency(purl_type="golang", name=module, version=version),
                 )

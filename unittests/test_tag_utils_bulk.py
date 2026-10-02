@@ -1,3 +1,6 @@
+from operator import itemgetter
+from unittest.mock import patch
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -5,7 +8,12 @@ from django.utils import timezone
 
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.tags.utils import bulk_add_tag_mapping, bulk_add_tags_to_instances, bulk_apply_parser_tags
+from dojo.tags.utils import (
+    bulk_add_tag_mapping,
+    bulk_add_tags_to_instances,
+    bulk_apply_parser_tags,
+    bulk_remove_all_tags,
+)
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
@@ -483,3 +491,215 @@ class BulkTagUtilsInheritanceTest(DojoAPITestCase):
             self.assertIn("custom-bulk", tags)
             # Ensure inherited tags did not get polluted by the new tag
             self.assertNotIn("custom-bulk", self._inherited_tags_list(f))
+
+
+class BulkRemoveAllTagsLockOrderTest(TestCase):
+
+    # Regression: bulk_remove_all_tags decremented tag counts one row per UPDATE in
+    # unordered aggregation order, so two concurrent cascade deletes touching an
+    # overlapping tag set could take the same row locks in opposite orders and deadlock
+    # (Postgres 40P01). The decrements must be issued in a deterministic tag-id order.
+
+    def setUp(self):
+        self.product_type = Product_Type.objects.create(name="PT-Lock-Order")
+        self.products = [
+            Product.objects.create(
+                name=f"Lock Order Product {i}", description="test", prod_type=self.product_type,
+            )
+            for i in range(3)
+        ]
+
+    def test_tag_count_decrements_are_issued_in_ascending_tag_id_order(self):
+        """
+        The decrement UPDATEs must be ordered, because their order is the lock order.
+
+        Tags are attached in an order unrelated to their ids so that "whatever order the
+        aggregate happens to return" and "ascending id" cannot coincide by luck.
+        """
+        for product in self.products:
+            product.tags = ["zeta-tag", "alpha-tag", "mid-tag"]
+            product.save()
+
+        tag_model = Product.tags.tag_model
+        tag_ids_by_name = dict(
+            tag_model.objects.filter(
+                name__in=["zeta-tag", "alpha-tag", "mid-tag"],
+            ).values_list("name", "pk"),
+        )
+        self.assertEqual(len(tag_ids_by_name), 3, "expected the three tags to exist")
+
+        locked_order = []
+        original_filter = tag_model.objects.filter
+
+        def record_filter(*args, **kwargs):
+            if "pk" in kwargs:
+                locked_order.append(kwargs["pk"])
+            return original_filter(*args, **kwargs)
+
+        with patch.object(tag_model.objects, "filter", side_effect=record_filter):
+            bulk_remove_all_tags(Product, Product.objects.filter(prod_type=self.product_type))
+
+        self.assertEqual(
+            len(locked_order), 3,
+            msg=f"expected one decrement per tag, got {locked_order}",
+        )
+        self.assertEqual(
+            locked_order, sorted(locked_order),
+            msg="tag rows must be locked in ascending id order so concurrent removals "
+                f"cannot deadlock; got {locked_order} "
+                f"(tag ids: {sorted(tag_ids_by_name.items(), key=itemgetter(1))})",
+        )
+
+
+class FindingDeleteTagLockOrderTest(TestCase):
+
+    # Regression: a single-object DELETE /api/v2/findings/{id}/ (Finding.delete())
+    # decremented tag counts through tagulous's per-object clear(), which issues one
+    # count UPDATE per tag in the manager's own order -- NOT the ascending tag-id order
+    # that bulk_remove_all_tags (#15486) and the add path (#15652) use. Because a count
+    # UPDATE takes a row lock, two concurrent single-finding deletes touching an
+    # overlapping tag set could take those tag-row locks in opposite orders and deadlock
+    # (Postgres 40P01, "while updating tuple ... in relation dojo_tagulous_finding_tags").
+    # Routing the delete through bulk_remove_all_tags gives every caller one shared lock
+    # order, so the cycle cannot form.
+
+    def setUp(self):
+        self.reporter = User.objects.create_user(username="finding-del-lock-user")
+        product_type = Product_Type.objects.create(name="PT-Finding-Del-Lock")
+        product = Product.objects.create(
+            name="Finding Del Lock Product", description="test", prod_type=product_type,
+        )
+        engagement = Engagement.objects.create(
+            name="E-Finding-Del-Lock", product=product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        test_type = Test_Type.objects.create(name="Finding Del Lock Test Type")
+        self.test = Test.objects.create(
+            title="T-Finding-Del-Lock", engagement=engagement, test_type=test_type,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+
+    def test_finding_delete_decrements_tag_counts_in_ascending_tag_id_order(self):
+        """
+        The decrement UPDATEs must be ordered, because their order is the lock order.
+
+        Tags are attached in an order unrelated to their ids so that the manager's own
+        iteration order and "ascending id" cannot coincide by luck.
+        """
+        finding = Finding.objects.create(
+            title="Finding Del Lock", severity="Low", test=self.test, reporter=self.reporter,
+        )
+        finding.tags = ["zeta-tag", "alpha-tag", "mid-tag"]
+        finding.save()
+
+        tag_model = Finding.tags.tag_model
+        our_tag_ids = set(
+            tag_model.objects.filter(
+                name__in=["zeta-tag", "alpha-tag", "mid-tag"],
+            ).values_list("pk", flat=True),
+        )
+        self.assertEqual(len(our_tag_ids), 3, "expected the three tags to exist")
+
+        locked_order = []
+        original_filter = tag_model.objects.filter
+
+        def record_filter(*args, **kwargs):
+            # Only the per-tag count UPDATEs (filter(pk=<tag id>).update(...)) take the
+            # row locks that can deadlock; ignore any other tag-model lookups.
+            if kwargs.get("pk") in our_tag_ids:
+                locked_order.append(kwargs["pk"])
+            return original_filter(*args, **kwargs)
+
+        with patch.object(tag_model.objects, "filter", side_effect=record_filter):
+            finding.delete(product_grading_option=False)
+
+        self.assertEqual(
+            len(locked_order), 3,
+            msg=f"expected one decrement per tag, got {locked_order}",
+        )
+        self.assertEqual(
+            locked_order, sorted(locked_order),
+            msg="tag rows must be locked in ascending id order so concurrent single-finding "
+                f"deletes cannot deadlock; got {locked_order} (tag ids: {sorted(our_tag_ids)})",
+        )
+
+
+class BulkAddTagsToInstancesLockOrderTest(TestCase):
+
+    # Regression (import deadlock): bulk_add_tags_to_instances issued the per-tag count
+    # UPDATE -- which locks that tag's row in dojo_tagulous_finding_tags and, inside an
+    # import, holds it until the surrounding transaction commits -- in caller-supplied
+    # tag order. Two concurrent imports adding an overlapping set of tags could take
+    # those row locks in opposite orders and deadlock (Postgres 40P01). This is the
+    # add-path twin of the bulk_remove_all_tags deadlock fixed in #15486; the count
+    # UPDATEs must be issued in a deterministic ascending tag-id order.
+
+    def setUp(self):
+        self.tag_model = Finding.tags.tag_model
+        self.reporter = User.objects.create_user(username="add-lock-order-user")
+        product_type = Product_Type.objects.create(name="PT-Add-Lock-Order")
+        product = Product.objects.create(
+            name="Add Lock Order Product", description="test", prod_type=product_type,
+        )
+        engagement = Engagement.objects.create(
+            name="E-Add-Lock-Order", product=product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        test_type = Test_Type.objects.create(name="Add Lock Order Test Type")
+        self.test = Test.objects.create(
+            title="T-Add-Lock-Order", engagement=engagement, test_type=test_type,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+
+    def _make_finding(self, title):
+        return Finding.objects.create(
+            title=title, severity="Low", test=self.test, reporter=self.reporter,
+        )
+
+    def test_tag_count_increments_are_issued_in_ascending_tag_id_order(self):
+        """
+        The count UPDATEs must be ordered, because their order is the lock order.
+
+        The three tags are created first, in an order deliberately unrelated to the
+        order they are later supplied to bulk_add_tags_to_instances, so that "supplied
+        order" and "ascending id" cannot coincide by luck.
+        """
+        # Create the tags first so their ids are fixed (zeta < alpha < mid by id).
+        seed = self._make_finding("F-seed")
+        for name in ("zeta-tag", "alpha-tag", "mid-tag"):
+            seed.tags.add(name)
+
+        tag_ids_by_name = dict(
+            self.tag_model.objects.filter(
+                name__in=["zeta-tag", "alpha-tag", "mid-tag"],
+            ).values_list("name", "pk"),
+        )
+        self.assertEqual(len(tag_ids_by_name), 3, "expected the three tags to exist")
+
+        # Fresh findings carrying none of these tags, so every tag produces a new
+        # relationship and therefore a count UPDATE.
+        findings = [self._make_finding(f"F-add-{i}") for i in range(3)]
+
+        locked_order = []
+        original_filter = self.tag_model.objects.filter
+
+        def record_filter(*args, **kwargs):
+            if "pk" in kwargs:
+                locked_order.append(kwargs["pk"])
+            return original_filter(*args, **kwargs)
+
+        # Supplied in an order that is NOT ascending id: alpha, then zeta, then mid.
+        supplied = ["alpha-tag", "zeta-tag", "mid-tag"]
+        with patch.object(self.tag_model.objects, "filter", side_effect=record_filter):
+            bulk_add_tags_to_instances(tag_or_tags=supplied, instances=findings)
+
+        self.assertEqual(
+            len(locked_order), 3,
+            msg=f"expected one count UPDATE per tag, got {locked_order}",
+        )
+        self.assertEqual(
+            locked_order, sorted(locked_order),
+            msg="tag rows must be locked in ascending id order so concurrent imports "
+                f"cannot deadlock; got {locked_order} "
+                f"(tag ids: {sorted(tag_ids_by_name.items(), key=itemgetter(1))})",
+        )

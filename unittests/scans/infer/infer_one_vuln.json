@@ -1,0 +1,50 @@
+[
+  {
+    "bug_type": "NULLPTR_DEREFERENCE",
+    "qualifier": "`values` could be null (null value originating from line 4) and is dereferenced.",
+    "severity": "ERROR",
+    "category": "Null pointer dereference",
+    "line": 5,
+    "column": 5,
+    "procedure": "main",
+    "procedure_start_line": 3,
+    "file": "deref.c",
+    "bug_trace": [
+      {
+        "level": 1,
+        "filename": "deref.c",
+        "line_number": 4,
+        "column_number": 19,
+        "description": "in call to `malloc (null case)` (modelled)"
+      },
+      {
+        "level": 1,
+        "filename": "deref.c",
+        "line_number": 4,
+        "column_number": 19,
+        "description": "is assigned to the null pointer"
+      },
+      {
+        "level": 1,
+        "filename": "deref.c",
+        "line_number": 4,
+        "column_number": 5,
+        "description": "assigned"
+      },
+      {
+        "level": 1,
+        "filename": "deref.c",
+        "line_number": 5,
+        "column_number": 5,
+        "description": "invalid access occurs here"
+      }
+    ],
+    "bug_trace_length": 4,
+    "bug_trace_max_depth": 1,
+    "key": "deref.c|main|NULLPTR_DEREFERENCE",
+    "node_key": "261ec623846dedc5c049df7199bce44a",
+    "hash": "191ed94d723e60c0f4a49926ff6954f7",
+    "bug_type_hum": "Null Dereference",
+    "extras": {}
+  }
+]

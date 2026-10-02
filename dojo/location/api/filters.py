@@ -3,14 +3,18 @@ from __future__ import annotations
 from django_filters import NumberFilter
 
 from dojo.api_helpers.filters import CommonFilters, StaticMethodFilters
+from dojo.location.api.tag_filters import create_readable_tag_filters
+from dojo.location.filter_scoping import OutwardRelationScopedFilterSet
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 
 
 class AbstractedLocationFilter(StaticMethodFilters):
     StaticMethodFilters.create_integer_filters("id", "ID", locals())
     StaticMethodFilters.create_char_filters("location__tags__name", "Tags", locals())
-    StaticMethodFilters.create_char_filters("location__created_at", "Created At", locals())
-    StaticMethodFilters.create_char_filters("location__updated_at", "Updated At", locals())
+    StaticMethodFilters.create_char_filters(
+        "location__created_at", "Created At", locals(), model_field_name="location__created")
+    StaticMethodFilters.create_char_filters(
+        "location__updated_at", "Updated At", locals(), model_field_name="location__updated")
     StaticMethodFilters.create_integer_filters("location__products__product", "Product ID", locals())
     StaticMethodFilters.create_integer_filters("location__findings__finding", "Finding ID", locals())
 
@@ -21,14 +25,14 @@ class AbstractedLocationFilter(StaticMethodFilters):
     )
 
 
-class LocationFilter(CommonFilters):
+class LocationFilter(OutwardRelationScopedFilterSet, CommonFilters):
 
     """Conglomerate of all Location filters."""
 
     # ordering (the order of the fields is enforced)
     CommonFilters.create_char_filters("location_type", "Location Type", locals())
     CommonFilters.create_char_filters("location_value", "Location Value", locals())
-    CommonFilters.create_char_filters("tags__name", "Tags", locals())
+    create_readable_tag_filters("Tags", locals())
     CommonFilters.create_integer_filters("products__product", "Product ID", locals())
     CommonFilters.create_integer_filters("findings__finding", "Finding ID", locals())
     CommonFilters.create_ordering_filters(
@@ -37,8 +41,8 @@ class LocationFilter(CommonFilters):
             "id",
             "location_type",
             "location_value",
-            "created_at",
-            "updated_at",
+            ("created", "created_at"),
+            ("updated", "updated_at"),
         ),
     )
 
@@ -48,19 +52,23 @@ class LocationProductReferenceFilter(CommonFilters):
     CommonFilters.create_integer_filters("product", "Product", locals())
     CommonFilters.create_char_filters("product__name", "Product Name", locals())
     CommonFilters.create_choice_filters("status", "Status", ProductLocationStatus.choices, locals())
-    CommonFilters.create_char_filters("location_type", "Location Type", locals())
-    CommonFilters.create_char_filters("location_value", "Location Value", locals())
+    # location_type / location_value live on the related Location model, not on the
+    # reference (through) model, so they must resolve through the location FK.
+    CommonFilters.create_char_filters(
+        "location_type", "Location Type", locals(), model_field_name="location__location_type")
+    CommonFilters.create_char_filters(
+        "location_value", "Location Value", locals(), model_field_name="location__location_value")
     CommonFilters.create_ordering_filters(
         locals(),
         (
             "id",
-            "location_type",
-            "location_value",
+            ("location__location_type", "location_type"),
+            ("location__location_value", "location_value"),
             "product",
             "product__name",
             "status",
-            "created_at",
-            "updated_at",
+            ("created", "created_at"),
+            ("updated", "updated_at"),
         ),
     )
 
@@ -70,18 +78,22 @@ class LocationFindingReferenceFilter(CommonFilters):
     CommonFilters.create_integer_filters("finding", "Finding", locals())
     CommonFilters.create_char_filters("finding__severity", "Finding Severity", locals())
     CommonFilters.create_choice_filters("status", "Status", FindingLocationStatus.choices, locals())
-    CommonFilters.create_char_filters("location_type", "Location Type", locals())
-    CommonFilters.create_char_filters("location_value", "Location Value", locals())
+    # location_type / location_value live on the related Location model, not on the
+    # reference (through) model, so they must resolve through the location FK.
+    CommonFilters.create_char_filters(
+        "location_type", "Location Type", locals(), model_field_name="location__location_type")
+    CommonFilters.create_char_filters(
+        "location_value", "Location Value", locals(), model_field_name="location__location_value")
     CommonFilters.create_ordering_filters(
         locals(),
         (
             "id",
-            "location_type",
-            "location_value",
+            ("location__location_type", "location_type"),
+            ("location__location_value", "location_value"),
             "finding",
             "finding__severity",
             "status",
-            "created_at",
-            "updated_at",
+            ("created", "created_at"),
+            ("updated", "updated_at"),
         ),
     )

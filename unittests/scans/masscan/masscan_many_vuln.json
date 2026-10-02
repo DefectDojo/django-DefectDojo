@@ -1,0 +1,9 @@
+[
+{   "ip": "172.29.0.3",   "timestamp": "1785522037", "ports": [ {"port": 8080, "proto": "tcp", "status": "open", "reason": "syn-ack", "ttl": 64} ] }
+,
+{   "ip": "172.29.0.3",   "timestamp": "1785522037", "ports": [ {"port": 3000, "proto": "tcp", "status": "open", "reason": "syn-ack", "ttl": 64} ] }
+,
+{   "ip": "172.29.0.3",   "timestamp": "1785522037", "ports": [ {"port": 8443, "proto": "tcp", "status": "open", "reason": "syn-ack", "ttl": 64} ] }
+,
+{   "ip": "172.29.0.3",   "timestamp": "1785522037", "ports": [ {"port": 80, "proto": "tcp", "status": "open", "reason": "syn-ack", "ttl": 64} ] }
+]

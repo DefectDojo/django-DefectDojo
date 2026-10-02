@@ -1,0 +1,32 @@
+{
+  "page_total": 1,
+  "results": [
+    {
+      "id": 9001,
+      "severity": 30,
+      "definition": {
+        "id": "sql-injection",
+        "name": "SQL Injection",
+        "desc": "The application builds a database query from unvalidated input.",
+        "cwe_id": "CWE-89"
+      },
+      "fix": "Use parameterised queries instead of string concatenation.",
+      "evidence": "A single quote in the id parameter produced a database error.",
+      "url": "https://app.example.com/search?q=1",
+      "path": "/search",
+      "extra": "Confirmed against the staging target only.",
+      "state": "notfixed",
+      "cvss_score": 9.1,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "requests": [
+        {
+          "request": "  `GET /search?q=1 HTTP/1.1`  ",
+          "response": "  `HTTP/1.1 500 Internal Server Error`  "
+        }
+      ],
+      "parameter": "q",
+      "insertion_point": "url_query",
+      "method": "get"
+    }
+  ]
+}

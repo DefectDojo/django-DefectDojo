@@ -1,0 +1,19 @@
+{
+  "findings": [],
+  "stats": {
+    "total": 259,
+    "critical": 37,
+    "validated": 167,
+    "unique_paths": 21,
+    "confidence_buckets": {
+      "High": 37,
+      "Medium": 222
+    },
+    "confidence_order": [
+      "High",
+      "Medium"
+    ],
+    "scan_date": "2025-11-25T15:37:41.863868-08:00",
+    "kingfisher_version": "1.68.0"
+  }
+}

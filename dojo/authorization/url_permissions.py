@@ -62,7 +62,7 @@ URL_PERMISSIONS = {
     "delete_api_scan_configuration": [("object", Product_API_Scan_Configuration, "delete", "pascid")],
 
     # -----------------------------------------------------------------------
-    # Engagement (dojo/engagement/views.py  ->  dojo/engagement/urls.py)
+    # Engagement (dojo/engagement/ui/views.py  ->  dojo/engagement/ui/urls.py)
     # -----------------------------------------------------------------------
     "edit_engagement": [("object", Engagement, "edit", "eid")],
     "delete_engagement": [("object", Engagement, "delete", "eid")],
@@ -289,6 +289,12 @@ URL_PERMISSIONS = {
     "view_empty_survey": [("config", "dojo.view_engagement_survey")],
     "delete_empty_questionnaire": [("config", "dojo.delete_engagement_survey")],
     "delete_general_questionnaire": [("config", "dojo.delete_engagement_survey")],
+    # Relinking an answered questionnaire to an engagement changes the
+    # questionnaire, so it requires the questionnaire-change permission. The
+    # views also verify the user can edit the source engagement (if any) before
+    # moving the answers out of it.
+    "engagement_empty_survey": [("config", "dojo.change_engagement_survey")],
+    "existing_engagement_empty_survey": [("config", "dojo.change_engagement_survey")],
 }
 
 
@@ -297,6 +303,10 @@ URL_PERMISSIONS = {
 # a "location_id" kwarg, so the URL-name -> check mapping needs to point
 # at the active route's model + kwarg for the middleware to apply the
 # right per-object check.
+# This mapping is built once at import, alongside the route wiring in dojo/urls.py,
+# so it stays on settings.V3_FEATURE_LOCATIONS rather than the runtime
+# dojo.location.feature accessor -- it must match whichever routes were mounted at
+# boot. See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     URL_PERMISSIONS.update({
         "view_endpoint":           [("object", Location, "view", "location_id")],

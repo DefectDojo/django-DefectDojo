@@ -50,6 +50,62 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             self.validate_locations(findings)
 
+    def test_multiple_resource_ids_are_sorted(self):
+        # A finding carrying several Resources is the only case that can expose an
+        # unordered join: a set of 0 or 1 elements has just one possible ordering.
+        # description feeds compute_hash_code_legacy(), so the order has to be stable.
+        with sample_path("config_multiple_resources.json").open(encoding="utf-8") as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(2, len(findings))
+            self.validate_locations(findings)
+
+            self.assertEqual(
+                "**Resource IDs:** "
+                "arn:aws:ec2:us-east-1:012345678912:security-group/sg-0aaa1111cccc2222b, "
+                "arn:aws:ec2:us-east-1:012345678912:security-group/sg-0fff2222bbbb1111a, "
+                "arn:aws:ec2:us-east-1:012345678912:vpc/vpc-0bbb3333dddd4444c",
+                self._resource_id_line(findings[0]),
+            )
+            self.assertEqual(
+                "**Resource IDs:** "
+                "arn:aws:s3:::alpha-artifacts-bucket, arn:aws:s3:::zeta-reports-bucket",
+                self._resource_id_line(findings[1]),
+            )
+
+    def test_multiple_resource_ids_do_not_follow_document_order(self):
+        # Guards the assertions above against a fix that merely drops set() and takes
+        # the report's own order: in this sample the two differ.
+        with sample_path("config_multiple_resources.json").open(encoding="utf-8") as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            for finding in findings:
+                arns = self._resource_id_line(finding).removeprefix("**Resource IDs:** ").split(", ")
+                self.assertEqual(sorted(arns), arns)
+            self.assertTrue(
+                self._resource_id_line(findings[1]).index("alpha-artifacts")
+                < self._resource_id_line(findings[1]).index("zeta-reports"),
+            )
+
+    def test_get_tests_description_is_sorted(self):
+        # Same unordered join in the Test description. Not hashed, but it reshuffled
+        # in the UI on every import.
+        with sample_path("config_multiple_resources.json").open(encoding="utf-8") as test_file:
+            tests = AwsSecurityHubParser().get_tests("AWS Security Hub Scan", test_file)
+            self.assertEqual(1, len(tests))
+            self.assertEqual(
+                "**AWS Accounts:** 001122334455, 012345678912\n"
+                "**Finding Origins:** Config, Security Hub\n",
+                tests[0].description,
+            )
+
+    @staticmethod
+    def _resource_id_line(finding):
+        return next(
+            line for line in finding.description.splitlines()
+            if line.startswith("**Resource IDs:**")
+        )
+
     def test_unique_id(self):
         with sample_path("config_one_finding.json").open(encoding="utf-8") as test_file:
             parser = AwsSecurityHubParser()

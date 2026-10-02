@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "informationUri": "https://cppcheck.sourceforge.io",
+          "name": "Cppcheck",
+          "rules": [],
+          "semanticVersion": "2.17.1"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

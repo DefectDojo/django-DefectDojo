@@ -1,0 +1,50 @@
+Start timestamp: 2026-07-31 06:03:55 +0000 (AIDE 0.19.1)
+AIDE found differences between database and filesystem!!
+
+Summary:
+  Total number of entries:	4
+  Added entries:		0
+  Removed entries:		0
+  Changed entries:		1
+
+---------------------------------------------------
+Changed entries:
+---------------------------------------------------
+
+f > ... ....H      : /watched/a.txt
+
+---------------------------------------------------
+Detailed information about changes:
+---------------------------------------------------
+
+File: /watched/a.txt
+ Size      : 4                                | 13
+ SHA256    : LIsI2lzmA5jh8Zrw5dzMdE3ydLgmq+WF | 0IFvw2s8tDLvDb9O4laQJmpbU1/cnvVk
+             6rpoxSVDSAY=                     | djr25SQHGV0=
+
+
+---------------------------------------------------
+The attributes of the (uncompressed) database(s):
+---------------------------------------------------
+
+/var/lib/aide/aide.db
+ SHA256    : hXOQx81ZuOL7tlWpYokUs4fhIHHz2pCx
+             YsUu+6NBO24=
+ SHA512    : k6aDG+RzpK7xJoKXNZAGY+2PRxhNDoCQ
+             7vxyQlVqTPDQjP/7jj2bodNai3CwC70H
+             wP5rcGR0R/UIG6KUO8j6XQ==
+ STRIBOG256: F07YwB+Og7MXeu+m6Ax/xAmtH1lL9BZH
+             IjHK7X25YsI=
+ STRIBOG512: k+ceJVDqu3LoFm8HPlhETNDb6JVCebsR
+             bMPfZXIHeaFIqvpDcCTU7eHKjvvhOmVM
+             S68QskAB+9BldrDu11sWEQ==
+ SHA512/256: YkvFvymCqIvHehkCtGWhPiAlOE73FEIv
+             /JULuthgCBE=
+ SHA3-256  : Zec1H+GYeUb0RAttdj+szgNEgXa4ZDKd
+             YvPkbft95U8=
+ SHA3-512  : xurxCGb/hwJDsmZQ8OHSv/xerJrpv1T6
+             lvTZ+NVz/rOZbJ7/cO6VEJqEmNQM8u7u
+             OwOBJskbcfYRrs2HMDkGnw==
+
+
+End timestamp: 2026-07-31 06:03:55 +0000 (run time: 0m 0s)

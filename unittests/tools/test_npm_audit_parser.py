@@ -52,6 +52,7 @@ class TestNpmAuditParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(6, len(findings))
             self.assertEqual(918, findings[0].cwe)
+            self.assertEqual([918, 1333], findings[0].unsaved_cwes)
 
     def test_npm_audit_parser_with_one_criticle_vuln_has_null_as_cwe(self):
         with (get_unit_tests_scans_path("npm_audit") / "cwe_null.json").open(encoding="utf-8") as testfile:

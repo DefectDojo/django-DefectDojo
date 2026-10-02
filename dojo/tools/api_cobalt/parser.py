@@ -2,8 +2,7 @@ import json
 import textwrap
 from datetime import datetime
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -94,7 +93,7 @@ class ApiCobaltParser:
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool,
             )
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = self.convert_locations(affected_targets)
             else:
                 # TODO: Delete this after the move to Locations

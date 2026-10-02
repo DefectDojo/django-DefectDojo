@@ -4,11 +4,11 @@ except ImportError:
     def get_auth_filter(key): return None
 
 from dojo.models import Finding_Group
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_finding_groups(permission, user=None):
     impl = get_auth_filter("finding_group.get_authorized_finding_groups")
     if impl:

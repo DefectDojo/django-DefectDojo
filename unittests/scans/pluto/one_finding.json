@@ -1,0 +1,21 @@
+{
+  "items": [
+    {
+      "name": "example-legacy",
+      "filePath": "manifests/deprecated.yaml",
+      "namespace": "example-ns",
+      "api": {
+        "version": "extensions/v1beta1",
+        "kind": "Deployment",
+        "deprecated-in": "v1.9.0",
+        "removed-in": "v1.16.0",
+        "replacement-api": "apps/v1",
+        "replacement-available-in": "v1.9.0",
+        "component": "k8s"
+      },
+      "deprecated": true,
+      "removed": true,
+      "replacementAvailable": true
+    }
+  ]
+}

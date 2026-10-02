@@ -2,6 +2,7 @@
 title: "Set up Email, Slack or Teams notifications"
 description: "Set up Microsoft Teams to receive notifications"
 aliases:
+  - "/en/notifications/configure-a-slack-integration/"
   - /en/customize_dojo/notifications/email_slack_teams
 ---
 **You will need Superuser access to use the System Settings page, which is required to complete this process.**
@@ -92,7 +93,7 @@ Once this process is complete, DefectDojo can send System\-wide notifications to
 
 #### Notes on System\-Wide Notifications in Slack:
 
-Slack cannot apply any RBAC rules to the Slack channel that you are creating, and will therefore be sharing notifications for the entire DefectDojo system. There is no method in DefectDojo to filter system\-wide Slack notifications to a Product Type, Product or Engagement.
+Slack cannot apply any RBAC rules to the Slack channel that you are creating, and will therefore be sharing notifications for the entire DefectDojo system. There is no method in DefectDojo to filter system\-wide Slack notifications to an Organization, Asset or Engagement.
 
 If you want to apply RBAC\-based filtering to your Slack messages, enabling personal notifications from Slack is a better option.
 
@@ -125,7 +126,7 @@ Please note that the old [Office Connector webhooks](https://learn.microsoft.com
 
 ### Notes on the Teams integration
 
-* Slack cannot apply any RBAC rules to the Teams channel that you are creating, and will therefore be sharing notifications for the entire DefectDojo system. There is no method in DefectDojo to filter system\-wide Teams notifications by a Product Type, Product or Engagement.
+* Slack cannot apply any RBAC rules to the Teams channel that you are creating, and will therefore be sharing notifications for the entire DefectDojo system. There is no method in DefectDojo to filter system\-wide Teams notifications by an Organization, Asset or Engagement.
 * DefectDojo cannot send personal notifications to users on Microsoft Teams.
 
 ## System-Wide Email Notifications Setup

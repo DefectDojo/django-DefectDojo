@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load display_tags %}
 {% load authorization_tags %}
 {% load get_config_setting %}
@@ -18,7 +19,7 @@
                 {% if product|has_object_permission:"add" %}
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true" aria-label="Add tracked files">
+                            data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Add tracked files' %}">
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>

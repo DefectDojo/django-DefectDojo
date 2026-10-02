@@ -6,4 +6,6 @@ chapter: true
 sidebar:
   collapsed: true
 exclude_search: true
+aliases:
+  - "/en/connecting_your_tools/parsers/file/"
 ---

@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from github import Auth, Github
 
 from dojo.github.models import GITHUB_Issue, GITHUB_PKey
+from dojo.location.feature import locations_enabled
 from dojo.models import Engagement, Product
 
 logger = logging.getLogger(__name__)
@@ -44,9 +45,9 @@ def reopen_external_issue_github(find, note, prod, eng):
         g_ctx = Github(auth=Auth.Token(github_product.git_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
-    except:
-        e = sys.exc_info()[0]
-        logger.error("cannot update finding in github: " + e)
+    except Exception as e:
+        logger.error("cannot update finding in github: %s", e)
+        return
 
     logger.info("Will close github issue " + g_issue.issue_id)
     issue.edit(state="open")
@@ -79,9 +80,9 @@ def close_external_issue_github(find, note, prod, eng):
         g_ctx = Github(auth=Auth.Token(github_product.git_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
-    except:
-        e = sys.exc_info()[0]
-        logger.error("cannot update finding in github: " + e)
+    except Exception as e:
+        logger.error("cannot update finding in github: %s", e)
+        return
 
     logger.info("Will close github issue " + g_issue.issue_id)
     issue.edit(state="closed")
@@ -160,4 +161,5 @@ def github_body(find):
     template = "issue-trackers/jira_full/jira-description.tpl"
     kwargs = {}
     kwargs["finding"] = find
+    kwargs["V3_FEATURE_LOCATIONS"] = locations_enabled()
     return render_to_string(template, kwargs)

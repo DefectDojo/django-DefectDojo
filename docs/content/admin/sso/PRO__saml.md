@@ -1,7 +1,7 @@
 ---
 title: "SAML Configuration"
 description: "Configure SAML in DefectDojo Pro"
-weight: 1
+weight: 30
 audience: pro
 ---
 
@@ -40,18 +40,16 @@ A few things to know about this endpoint:
 
 6. **Required Attributes** — specify the attributes DefectDojo requires from the SAML response.
 
-7. **Attribute Mapping** — map SAML attributes to DefectDojo user fields. Each mapping is written as `saml_attribute=dojo_field`, and multiple mappings are separated by commas. The left side is the attribute name from the SAML response; the right side is the DefectDojo user field.
+7. **Attribute Mapping** — map the attributes your IdP sends to the DefectDojo user fields they should populate. Each row pairs one **SAML Attribute** with one **DefectDojo Field**; use **Add Attribute Mapping** for additional rows and the bin icon to remove one.
 
-   Multiple attributes (typical case):
+   ![image](images/sso_saml_attribute_mapping.png)
 
-   ```
-   Email=email, UserName=username, Firstname=first_name, Lastname=last_name
-   ```
-
-   - Whitespace around the comma is ignored.
-   - The right-hand side must be a field on the DefectDojo `User` model — most commonly `email`, `username`, `first_name`, `last_name`.
-   - The left-hand side must match the attribute name your IdP actually emits. Some IdPs (e.g. Entra ID / Azure AD) send fully qualified claim URIs like `http://schemas.microsoft.com/identity/claims/emailaddress` instead of friendly names. If you are unsure what your IdP is sending, enable **Enable SAML Debugging** (see [Troubleshooting](#troubleshooting)) and inspect the assertion in the logs.
-   - At minimum, you should map the attribute that corresponds to `username`, since DefectDojo looks up users by username when matching SAML logins to existing accounts.
+   - **SAML Attribute** is free text and must match the attribute name your IdP actually emits. Some IdPs (e.g. Entra ID / Azure AD) send fully qualified claim URIs such as `http://schemas.microsoft.com/identity/claims/emailaddress` rather than friendly names. If you are not sure what your IdP sends, enable **Enable SAML Debugging** (see [Troubleshooting](#troubleshooting)) and inspect the assertion in the logs.
+   - **DefectDojo Field** is chosen from a list: **Username**, **First Name**, **Last Name** and **Email**.
+   - At minimum, map the attribute that corresponds to **Username**. DefectDojo looks users up by username when matching SAML logins to existing accounts.
+   - Mapping an attribute to **Email** is strongly recommended: DefectDojo uses the email address for notifications, and to match an incoming login to an existing account by email.
+   - The same attribute may feed more than one field — for example an email claim used for both **Email** and **Username**. The reverse is not allowed: each DefectDojo field may be mapped from only one attribute.
+   - A row with only one half filled in is rejected on save, and the offending cell is highlighted. Rows you add but never fill in are discarded rather than treated as errors.
 
 8. **Remote SAML Metadata** — the URL where your SAML Identity Provider metadata is hosted.
 
@@ -89,13 +87,13 @@ The value must match the attribute name your Identity Provider emits in the asse
 
 If group mapping appears to do nothing — users log in successfully but no groups are created or assigned — see [Troubleshooting → SAML group mapping does nothing](#saml-group-mapping-does-nothing--users-log-in-but-no-groups-are-assigned) below.
 
-If no group with a matching name exists, DefectDojo will automatically create one. Note that a newly created group will not have any permissions configured — those can be set later by a Superuser.
+If no group with a matching name exists, DefectDojo will automatically create one and assign its members the **Reader** role. Note that this Reader role governs the member's access *to the group itself* — it does not grant any access to underlying Assets, Organizations, or other organizational assets. Those permissions are configured separately, and a newly auto-created group still has none of them until a Superuser assigns the group a role on the relevant Assets or Organizations.
 
 To activate group mapping, check the **Enable Group Mapping** checkbox at the bottom of the form.
 
 ## Default access for SSO-provisioned users
 
-When a new user is created via SAML (or any social-auth provider) and is not added to any group via SAML Group Mapping, they will land on a DefectDojo instance with **no permissions**. They will see zero Product Types, zero Products, and zero Engagements when they log in — the dashboard will appear empty.
+When a new user is created via SAML (or any social-auth provider) and is not added to any group via SAML Group Mapping, they will land on a DefectDojo instance with **no permissions**. They will see zero Organizations, zero Assets, and zero Engagements when they log in — the dashboard will appear empty.
 
 To give every newly provisioned SSO user a sensible baseline, configure a **Default group** + **Default group role** on the System Settings page:
 

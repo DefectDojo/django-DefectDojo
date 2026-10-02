@@ -15,6 +15,7 @@ class TestBurpGraphQLParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             self.assertEqual("Finding", findings[0].title)
             self.assertEqual(79, findings[0].cwe)
+            self.assertEqual([79], findings[0].unsaved_cwes)
             self.assertIn("description 1", findings[0].description)
             self.assertIn("remediation 1", findings[0].mitigation)
             self.assertIn("issue description 1", findings[0].impact)
@@ -62,6 +63,9 @@ class TestBurpGraphQLParser(DojoTestCase):
             findings = parser.get_findings(test_file, Test())
             self.validate_locations(findings)
             self.assertEqual(1, len(findings))
+            # A single Burp issue_type can carry multiple CWE classifications
+            self.assertEqual(295, findings[0].cwe)
+            self.assertEqual([295, 326, 327], findings[0].unsaved_cwes)
 
     def test_burp_null_data(self):
         with (get_unit_tests_scans_path("burp_graphql") / "null_data.json").open(encoding="utf-8") as test_file:

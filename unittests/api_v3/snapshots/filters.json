@@ -1,0 +1,198 @@
+{
+  "asset": {
+    "model": "Product",
+    "orderings": [
+      "created",
+      "id",
+      "name",
+      "updated"
+    ],
+    "params": [
+      "created__gte",
+      "created__lte",
+      "id__in",
+      "name__icontains",
+      "organization",
+      "organization__in",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "name"
+    ]
+  },
+  "engagement": {
+    "model": "Engagement",
+    "orderings": [
+      "created",
+      "id",
+      "name",
+      "target_start",
+      "updated"
+    ],
+    "params": [
+      "asset",
+      "asset__in",
+      "created__gte",
+      "created__lte",
+      "engagement_type",
+      "id__in",
+      "lead",
+      "name__icontains",
+      "organization",
+      "status",
+      "target_end__gte",
+      "target_end__lte",
+      "target_start__gte",
+      "target_start__lte",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "name"
+    ]
+  },
+  "finding": {
+    "model": "Finding",
+    "orderings": [
+      "created",
+      "date",
+      "id",
+      "severity",
+      "title",
+      "updated"
+    ],
+    "params": [
+      "active",
+      "asset",
+      "asset__in",
+      "created__gte",
+      "created__lte",
+      "cwe",
+      "cwe__in",
+      "date__gte",
+      "date__lte",
+      "duplicate",
+      "engagement",
+      "false_p",
+      "id__in",
+      "is_mitigated",
+      "organization",
+      "out_of_scope",
+      "reporter",
+      "risk_accepted",
+      "severity",
+      "severity__in",
+      "tags__in",
+      "test",
+      "title__icontains",
+      "updated__gte",
+      "updated__lte",
+      "verified"
+    ],
+    "search_fields": [
+      "description",
+      "title"
+    ]
+  },
+  "location": {
+    "model": "Location",
+    "orderings": [
+      "id",
+      "name"
+    ],
+    "params": [
+      "asset",
+      "name__icontains",
+      "type"
+    ],
+    "search_fields": [
+      "location_value"
+    ]
+  },
+  "organization": {
+    "model": "Product_Type",
+    "orderings": [
+      "created",
+      "id",
+      "name",
+      "updated"
+    ],
+    "params": [
+      "created__gte",
+      "created__lte",
+      "id__in",
+      "name__icontains",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "name"
+    ]
+  },
+  "test": {
+    "model": "Test",
+    "orderings": [
+      "created",
+      "id",
+      "target_start",
+      "title",
+      "updated"
+    ],
+    "params": [
+      "asset",
+      "asset__in",
+      "created__gte",
+      "created__lte",
+      "engagement",
+      "engagement__in",
+      "environment",
+      "id__in",
+      "lead",
+      "organization",
+      "target_end__gte",
+      "target_end__lte",
+      "target_start__gte",
+      "target_start__lte",
+      "test_type",
+      "title__icontains",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "title"
+    ]
+  },
+  "user": {
+    "model": "Dojo_User",
+    "orderings": [
+      "date_joined",
+      "id",
+      "last_login",
+      "username"
+    ],
+    "params": [
+      "date_joined__gte",
+      "date_joined__lte",
+      "email__icontains",
+      "first_name__icontains",
+      "id__in",
+      "is_active",
+      "is_superuser",
+      "last_login__gte",
+      "last_login__lte",
+      "last_name__icontains",
+      "username__icontains"
+    ],
+    "search_fields": [
+      "email",
+      "first_name",
+      "last_name",
+      "username"
+    ]
+  }
+}

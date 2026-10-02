@@ -1,0 +1,23 @@
+{
+    "findings": [
+        {
+            "title": "Multiple CWEs finding",
+            "severity": "High",
+            "description": "finding carrying a CWE set (mixed int and CWE-<n> forms)",
+            "cwes": [89, "CWE-79", 22]
+        },
+        {
+            "title": "Primary CWE plus extra CWEs",
+            "severity": "Medium",
+            "description": "single primary cwe with additional cwes",
+            "cwe": 79,
+            "cwes": [89, 200]
+        },
+        {
+            "title": "Single CWE finding",
+            "severity": "Low",
+            "description": "legacy single cwe, no cwes list",
+            "cwe": 22
+        }
+    ]
+}

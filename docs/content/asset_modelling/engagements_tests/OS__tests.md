@@ -8,7 +8,7 @@ Organizations → Assets → Engagements → **TESTS** → Findings
 
 ## Overview
 
-A Test is a container for one or more scan executions, which are used to discover flaws in a Product. Tests are the final, most granular component of DefectDojo’s product hierarchy, serving as the container for the Findings that result from an execution of a security tool or manual assessment while also adding the context in which any such Findings were found (i.e., which tool reported it, when that tool was last run, etc.).
+A Test is a container for one or more scan executions, which are used to discover flaws in an Asset. Tests are the final, most granular component of DefectDojo’s Asset hierarchy, serving as the container for the Findings that result from an execution of a security tool or manual assessment while also adding the context in which any such Findings were found (i.e., which tool reported it, when that tool was last run, etc.).
 
 Examples of Tests include: 
 - Static Application Security Testing
@@ -37,7 +37,7 @@ While each method differs primarily in how scan data is parsed and ingested, the
 
 When no native parser exists for a given tool, **Generic Findings Import** allows you to import findings using a standardized JSON or CSV schema, regardless of the original source. 
 
-DefectDojo parses the provided data, creates a new Test (or imports into an existing one), and attaches the Findings. A corresponding Test Type is also created in the format “{Test Name} (Generic Findings Import).”
+DefectDojo parses the provided data, creates a new Test (or imports into an existing one), and attaches the Findings. A corresponding Test Type is also created based on the report's optional `type` field: when `type` is omitted (or equals the scan type) the Test Type is “Generic Findings Import”; when `type` is provided it becomes “{type} Scan (Generic Findings Import)” (a `type` that already ends with the “(Generic Findings Import)” suffix is used verbatim).
 
 |  | **Native Parsers** | **Generic Findings Import** | 
 |----------|---------------|------------------------|
@@ -73,11 +73,11 @@ This history provides traceability across multiple scan executions within the sa
 
 ### Permissions
 
-Multiple Tests can be stored within a single Engagement, and Engagements are stored within Products. As such, access to a Product automatically grants access to all Tests (and Engagements) within that Product. Tests do not have independent access control lists.
+Multiple Tests can be stored within a single Engagement, and Engagements are stored within Assets. As such, access to an Asset automatically grants access to all Tests (and Engagements) within that Asset. Tests do not have independent access control lists.
 
 ### Accessing Tests 
 
-While Tests exist as an independent object in DefectDojo OS, they do not have a specific section dedicated to them within the UI. As such, each Test is primarily accessible through the Product and/or Engagement that contains it.
+While Tests exist as an independent object in DefectDojo OS, they do not have a specific section dedicated to them within the UI. As such, each Test is primarily accessible through the Asset and/or Engagement that contains it.
 
 ### Test View 
 
@@ -91,7 +91,7 @@ The following settings are available within each Test view:
 - **Edit Test**
     - Permits the editing of Test data, such as title, schedule, environment, and other various details. 
 - **Copy Test**
-    - Duplicates a Test, along with all associated metadata and Findings, and allow it to be attributed to a different Engagement. 
+    - Duplicates a Test, along with all associated metadata and Findings, and allows it to be attributed to a different Engagement. 
 - **Re-Upload Scan**
     - Initiates the reimport process. More information on Reimporting is contained later in this article.
 - **Add Notes**
@@ -104,7 +104,7 @@ The following settings are available within each Test view:
 - **View History**
     - Opens a history of edits made to the Test for tracking, reporting, and auditing purposes.
 
-## Test Lifecycle
+## Working with Tests
 
 ### Create Tests 
 
@@ -114,12 +114,12 @@ Tests can be automatically created when scan data is imported directly into an E
 
 There are several ways to create a Test in the OS version:
 
-- Select a Product and click “Import Scan Results” from the Findings menu in the navigation bar 
+- Select an Asset and click “Import Scan Results” from the Findings menu in the navigation bar 
     - This will create an ad hoc Engagement to contain the Test
 
 ![image](images/tests_ss5.png)
 
-- Select an Engagement within a Product, click the dropdown menu in the Tests subsection, and click either “Add Tests” or  “Import Scan Results”
+- Select an Engagement within an Asset, click the dropdown menu in the Tests subsection, and click either “Add Tests” or  “Import Scan Results”
     - This will create the ensuing Test directly within the chosen Engagement
 
 ![image](images/tests_ss6.png)
@@ -210,9 +210,9 @@ In order to add new data to an existing Test, you can either click **Re-Upload S
 
 ![image](images/tests_ss10.png)
 
-While completing the Reimport Scan form, you’ll have the option to update metadata for the scan being reimported, including the version, branch tag, commit hash, and build ID. 
+While completing the Reimport Scan form, you’ll have the option to update metadata for the scan being reimported, including the version, branch tag, commit hash, and build ID. Note that Test metadata such as Environment can't be changed through a reimport pipeline.
 
-These changes are reflected in the Import History section of the Test View, which will also include the same metadata from prior scan imports.
+The updated metadata are reflected in the Import History section of the Test View, which will also include the same metadata from prior scan imports. 
 
 For example, in the below screenshot, the branch tag, build ID, commit hash, and version were all manually updated between the initial import and the subsequent reimport.
 

@@ -1,0 +1,10 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "1.2",
+    "title": "An advisory in the older CVRF-era schema",
+    "publisher": {"category": "vendor", "name": "Example Corp", "namespace": "https://example.com"},
+    "tracking": {"id": "EXAMPLE-2026-0003", "status": "final", "version": "1"}
+  },
+  "vulnerabilities": [{"cve": "CVE-2026-10099"}]
+}

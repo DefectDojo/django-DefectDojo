@@ -1,0 +1,13 @@
+{
+    "name": "Prisma Cloud",
+    "type": "Prisma Cloud (Generic Findings Import)",
+    "findings": [
+        {
+            "title": "Test Finding Prisma",
+            "description": "This is a test finding whose type already carries the scan-type suffix",
+            "severity": "High",
+            "active": true,
+            "verified": true
+        }
+    ]
+}

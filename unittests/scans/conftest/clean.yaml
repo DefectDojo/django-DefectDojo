@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generic-app
+  labels:
+    app.kubernetes.io/name: generic-app
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: server
+          image: registry.example.com/generic-app:1.4.2
+          resources:
+            limits:
+              memory: 256Mi

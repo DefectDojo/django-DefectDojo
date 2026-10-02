@@ -13,7 +13,7 @@ wait_for_database_to_be_reachable() {
             exit 1
         fi
     done
-    cat <<EOD | python manage.py shell
+    cat <<EOD | python manage.py shell --no-imports
 from django.db import connections
 connections['default'].cursor()
 EOD

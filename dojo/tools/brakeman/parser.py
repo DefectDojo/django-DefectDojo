@@ -4,7 +4,9 @@ import json
 
 from dateutil import parser
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class BrakemanParser:
@@ -112,6 +114,14 @@ class BrakemanParser:
                     date=find_date,
                     static_finding=True,
                 )
+                if locations_enabled() and item["file"]:
+                    find.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=item["file"],
+                            line=item["line"],
+                            snippet=item["code"] or "",
+                        ),
+                    )
 
                 dupes[dupe_key] = find
 

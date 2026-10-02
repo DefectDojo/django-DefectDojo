@@ -1,6 +1,7 @@
 from django.template import engines
 from django.utils.timezone import now
 
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.models import (
     Engagement,
     Finding,
@@ -171,6 +172,18 @@ class TestPdfReportTextWrapping(DojoTestCase):
 
         # Mitigation content should appear
         self.assertIn("Remove Debug Files From Public Directories", html)
+
+    def test_report_finding_table_includes_vulnerability_ids(self):
+        """Finding PDF reports should show vulnerability IDs in the finding table."""
+        finding = self._create_finding()
+        # Dual-write (legacy row + entity reference) so the report's flag-appropriate
+        # read resolves whether V3_FEATURE_VULNERABILITY_IDS is on (default) or off.
+        save_vulnerability_ids(finding, ["CVE-2026-12345"])
+
+        html = self._render_finding_report(Finding.objects.filter(pk=finding.pk))
+
+        self.assertIn("Vulnerability IDs", html)
+        self.assertIn("CVE-2026-12345", html)
 
     def test_long_unbroken_string_in_report_field(self):
         """

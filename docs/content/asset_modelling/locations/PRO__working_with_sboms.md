@@ -24,8 +24,44 @@ Every Dependency is uniquely identified by a pURL, decomposed into atomic fields
 | `artifact_hashes` *(optional)* | Fingerprints | SHA256 sums |
 | `license_expression` *(optional)* | SPDX license expression | `Apache-2.0`, `MIT` |
 | `file_path` *(optional)* | Where the library was found in the project | `package-lock.json` |
+| `supplier_name` *(optional)* | The manufacturer or supplier of this component version | `Example Supplier` |
+| `supplier_url` *(optional)* | A link supporting the supplier or support claim | `https://example.test/support` |
+| `support_level` *(optional)* | How the supplier supports this version | `actively_maintained`, `security_fixes_only`, `community_only`, `unsupported`, `end_of_life`, `unknown` |
+| `end_of_support_date` *(optional)* | The date after which the supplier no longer supports this version | `2030-01-01` |
+| `support_source` *(optional)* | Where the support facts came from | `import`, `manual`, `unknown` |
 
 This atomic decomposition is what makes pURL-based search useful: you can ask *"all `pypi` packages in the `django` namespace at version 4.x"* and DefectDojo can answer that without parsing a free-text string.
+
+## Supplier and Support Metadata
+
+Who supplies a component and how long they will support it are facts a bill of materials is often
+asked for and rarely carries. DefectDojo records them on the component, alongside where each fact
+came from.
+
+Unknown is a valid answer and is stored as unknown. DefectDojo never infers a support level or an
+end of support date from a version number, a release date or a project's activity. A fabricated
+support claim in a regulated bill of materials is a problem for whoever relies on it, so the only
+support facts recorded are the ones somebody supplied.
+
+An import reads these from the document where the format carries them. CycloneDX supplies the
+supplier from the component's supplier, publisher or author, in that order, and reads support
+level and end of support date from component properties. SPDX supplies the supplier from the
+supplier or originator field, and reads an end of support date from `validUntilDate` where the
+document has one. Anything absent stays unknown.
+
+### Which value wins
+
+A component's support facts can come from three places, and they resolve in this order:
+
+1. A per snapshot override, where a specific release carries a different support contract from the
+   component in general.
+2. The value recorded on the component itself, whether that came from an import or from somebody
+   editing it.
+3. Unknown.
+
+An edit made by hand survives later imports of the same component. Re-importing a document does
+not overwrite a support level somebody corrected, and `support_source` records which case applies,
+so a reviewer can tell an imported fact from an entered one.
 
 ## Owned-By vs Used-By
 
@@ -38,7 +74,7 @@ The same library can be `owned_by` one Asset and `used_by` several others, which
 
 ## Uploading an SBOM
 
-To populate Dependencies in bulk, upload an SBOM file against a Product. The endpoint is:
+To populate Dependencies in bulk, upload an SBOM file against an Asset. The endpoint is:
 
 ```
 POST /api/v2/sbom-import/
@@ -46,12 +82,13 @@ POST /api/v2/sbom-import/
 
 | Field | Description |
 | --- | --- |
-| `product` | The target Product (Asset) ID |
+| `product` | The target Asset ID |
 | `file` | The SBOM file |
 | `scan_type` | The SBOM format — see supported formats below |
-| `replace` *(optional)* | If `true`, stale Product associations not backed by an existing Finding reference are removed. Default: `false` (cumulative) |
+| `replace_dependencies` *(optional)* | If `true`, stale Asset associations not backed by an existing Finding reference are removed. Default: `false` (cumulative) |
+| `version` *(optional)* | The Asset version this SBOM describes, e.g. `5.2.0`. Requires Asset Versions — see [below](#asset-versions-and-bom-snapshots) |
 
-The importer parses the file, extracts `Dependency` records, deduplicates them against existing Locations (creating new ones as needed), and creates Asset References linking each Dependency to the Product. The Pro UI exposes the same upload flow — see the **Upload SBOM** action on a Product's Locations tab.
+The importer parses the file, extracts `Dependency` records, deduplicates them against existing Locations (creating new ones as needed), and creates Asset References linking each Dependency to the Asset. The Pro UI exposes the same upload flow — see the **Upload SBOM** action on an Asset's Locations tab.
 
 ### Supported Formats
 
@@ -66,7 +103,44 @@ SWID Tag format is not yet supported.
 
 By default, repeated uploads are **additive**: dependencies that already exist on the Asset are kept, new ones are added, and nothing is removed. This matches the typical workflow of incremental SBOM updates.
 
-Set `replace=true` to prune. When replace mode is on, after a successful import the importer removes Product associations that were not present in the new SBOM **and** are not currently referenced by an active Finding. References tied to active Findings are preserved even in replace mode, so you do not lose vulnerability context just because a new SBOM omits a package.
+Set `replace_dependencies=true` to prune. When replace mode is on, after a successful import the importer removes Asset associations that were not present in the new SBOM **and** are not currently referenced by an active Finding. References tied to active Findings are preserved even in replace mode, so you do not lose vulnerability context just because a new SBOM omits a package.
+
+## Asset Versions and BOM Snapshots
+
+An SBOM describes an Asset at a point in its release history — *the dependencies of Payments API 5.2.0* — but by default DefectDojo records only the Asset's current inventory. Re-uploading either accumulates forever or prunes, and *what shipped in 5.1?* is not a question the data can answer.
+
+Deployments that opt in to **Asset Versions** can bind each upload to a version. This behavior is managed by deployment configuration: set `DD_V3_ASSET_VERSIONS=True` (self-hosted) or contact support (cloud). It is off by default, and while it is off nothing described in this section is recorded — uploads behave exactly as above.
+
+A version is **metadata about an Asset, not another Asset**, and that distinction is the whole point. Modelling releases as child Assets copies every Finding into every release; one customer's 30,000 Findings became 360,000 that way. A Finding stays a single row on its Asset no matter how many versions mention it.
+
+### Binding an upload to a version
+
+Pass `version` to `POST /api/v2/sbom-import/`. The version is created on first sight, so there is no setup step.
+
+If you omit it, the document's own subject version is used — `metadata.component.version` in CycloneDX, the root package's version in SPDX. Most producers stamp it, so uploads usually bind correctly without you passing anything. Omitting `version` *and* uploading a document that declares none leaves the import on the unversioned stream, which is today's behavior.
+
+Versions carry **no ordering**. DefectDojo does not parse or compare version strings — package ecosystems disagree about what "newer" means — so nothing infers that 5.1 sits between 5.0 and 5.2. `released_at` on a version is an optional display and reporting hint.
+
+### Snapshots supersede rather than merge
+
+Each upload records a **BOM snapshot**: the components the document declared, the dependency relationships between them, and the document's own identity (specification, serial number, timestamp, and declared subject).
+
+Uploading again for the same version and format **supersedes** the previous snapshot — the newest one is what per-version reads return — and the superseded snapshots remain queryable as history. Nothing is deleted. Snapshots are scoped per format, so a CycloneDX document and an SPDX document for the same release supersede independently instead of clobbering each other.
+
+This is a separate axis from `replace_dependencies`, which still governs the Asset's aggregate dependency list. A snapshot answers *what did this document say*; the aggregate answers *what is on this Asset now*.
+
+Snapshots also preserve the BOM's **structure**. Each component records whether the document listed it as a direct dependency of its subject, and component → component relationships are recorded as declared, so a per-version export reproduces the graph instead of flattening it (see [Exporting SBOMs and VEX](../pro__exporting_sboms_and_vex/#exporting-one-release)). CycloneDX JSON and XML and SPDX 2 JSON carry full structure; SPDX XML, tag-value, and v3 record components only.
+
+### `found_in` and `fixed_in`
+
+Scan imports contribute the other half of the version story. When an import or reimport carries a `version` — the field `/api/v2/import-scan/` and `/api/v2/reimport-scan/` already accept — and Asset Versions is enabled:
+
+- Findings the import processes are recorded as **found_in** that version.
+- Findings the import mitigates because the scan no longer reports them are recorded as **fixed_in** that version. Previously that version reached the record only as prose inside the auto-close note.
+
+These claims are **additive and never withdrawn automatically**: an import that stops seeing a Finding does not un-say that an earlier version contained it. Because a Finding's mitigation timestamp is write-once while claims are per-version, a reopen-and-refix cycle appends a second `fixed_in` instead of rewriting the first. Re-importing the same version is a no-op.
+
+The claims are what makes [per-version VEX](../pro__exporting_sboms_and_vex/#vex-for-one-release) possible: they let one Finding report *resolved in 5.2* and *exploitable in 5.1* without existing twice.
 
 ## Findings That Reference Libraries
 
@@ -74,7 +148,7 @@ When a parser ingests a vulnerability tied to a library — for example, an SCA 
 
 1. Looks up an existing Dependency Location by pURL, or creates a new one.
 2. Creates a `LocationFindingReference` linking the Finding to the Dependency with status **Active**.
-3. Creates a `LocationProductReference` so the Dependency also appears on the parent Product, if it isn't already.
+3. Creates a `LocationProductReference` so the Dependency also appears on the parent Asset, if it isn't already.
 
 Because Findings and SBOM uploads share the same underlying Dependency objects, a Finding ingested *before* an SBOM upload will be retroactively visible in the SBOM view, and vice versa.
 
@@ -87,18 +161,26 @@ Because Findings and SBOM uploads share the same underlying Dependency objects, 
 | Create a Dependency manually | `POST /api/v2/dependencies/` |
 | List Dependency Locations | `GET /api/v2/location/?location_type=dependency` |
 | Link a Dependency to a Finding | `POST /api/v2/location_findings/` |
-| Link a Dependency to a Product (with `owned_by` / `used_by`) | `POST /api/v2/location_products/` |
+| Link a Dependency to an Asset (with `owned_by` / `used_by`) | `POST /api/v2/location_products/` |
+| List or create Asset versions | `GET` / `POST /api/v2/asset_versions/` |
+| Record a `found_in` / `fixed_in` claim by hand | `POST /api/v2/finding_version_affects/` |
 
 Filters on `/api/v2/dependencies/` include the pURL component fields, tags, and ordering on `name`, `version`, and active-finding count.
+
+The two version endpoints follow the same rule as the rest of the Asset surface: reading is open to anyone who can already see the Asset, while writing requires edit permission on it plus `DD_V3_ASSET_VERSIONS`. Neither offers an update action, deliberately — a version is a name that exported documents and claims already point at, so renaming one would silently rewrite the meaning of every document exported under it, and a claim is stated or withdrawn rather than edited into a different claim. Hand-recorded claims are marked as such, so they stay distinguishable from the ones imports write.
 
 ## In the Pro UI
 
 When Locations is enabled, the navigation exposes:
 
 - **Locations / Dependencies** — Global list of every Dependency across the instance, with pURL filters.
-- **Locations on a Product/Asset** — Per-Asset view that shows both URLs and Dependencies, with the **Upload SBOM** action surfaced on the Dependencies tab.
+- **Locations on an Asset/Asset** — Per-Asset view that shows both URLs and Dependencies, with the **Upload SBOM** action surfaced on the Dependencies tab.
 - **New Dependency** — Form to create a single library by entering its pURL components manually.
 - **Findings detail** — A Finding that touches a library shows its Dependency Locations alongside any URL Locations, so you can see *"this CVE affects `log4j-core@2.14.1` on Asset 6 and Asset 9"* in one place.
+
+## Exporting
+
+The inventory flows back out as well: an Asset's dependencies can be exported as a CycloneDX 1.6 or SPDX 2.3 SBOM, and its finding statuses as a CycloneDX VEX document. See [Exporting SBOMs and VEX](../pro__exporting_sboms_and_vex/).
 
 ## What's Not in the MVP
 

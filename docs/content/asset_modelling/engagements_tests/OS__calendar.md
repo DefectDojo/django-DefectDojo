@@ -1,11 +1,11 @@
 ---
 title: "Calendar"
-description: "How to use the Calendar in DefectDojo Pro"
+description: "How to use the Calendar in DefectDojo OS"
 audience: opensource
 weight: 9
 ---
 
-DefectDojo’s Calendar provides a centralized timeline view of all Engagements and Tests with defined start and end dates, allowing Users to quickly understand testing activity across Products, identify scheduling overlaps, and navigate directly to related objects. 
+DefectDojo’s Calendar provides a centralized timeline view of all Engagements and Tests with defined start and end dates, allowing Users to quickly understand testing activity across Assets, identify scheduling overlaps, and navigate directly to related objects. 
 
 When a User creates an Engagement or Test and defines start and end dates, a corresponding entry is automatically added to the Calendar. Entries appear on all dates from the defined start date through and inclusive of the defined end date. 
 
@@ -15,7 +15,7 @@ The Calendar page is accessible via the Calendar button in the sidebar.
 
 ![image](images/OSC_ss3.png)
 
-## Visiblity and Permissions 
+## Visibility and Permissions 
 
 ### Visibility 
 
@@ -50,12 +50,12 @@ Importantly, the Calendar itself is a read-only view. Dates must be modified wit
 The naming of entries in the Calendar varies slightly depending on the object type. 
 
 Engagement entries include: 
-- Product Name
+- Asset Name
 - Engagement Name
 - Testing Lead
 
 Test entries include:
-- Product Name
+- Asset Name
 - Engagement Name
 - Test Type 
 - Testing Lead

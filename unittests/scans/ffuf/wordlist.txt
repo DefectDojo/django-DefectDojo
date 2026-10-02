@@ -1,0 +1,10 @@
+admin
+login
+backup
+.git
+robots.txt
+index.html
+missing
+nothing-here
+secret
+config

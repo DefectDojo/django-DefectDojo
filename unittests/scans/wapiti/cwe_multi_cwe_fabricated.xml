@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<report type="security">
+   <report_infos>
+      <info name="generatorName">wapiti</info>
+      <info name="generatorVersion">Wapiti 3.0.4</info>
+      <info name="scope">folder</info>
+      <info name="dateOfScan">Sat, 27 Mar 2021 20:08:34 +0000</info>
+      <info name="target">https://example.org/</info>
+   </report_infos>
+   <vulnerabilities>
+      <vulnerability name="Weak credentials">
+         <description><![CDATA[The web application is using either default credentials or weak passwords that can be found in well-known passwords lists.]]></description>
+         <solution><![CDATA[Do not ship or deploy with any default credentials, particularly for admin users. Implement weak-password checks, such as testing new or changed passwords against a list of the top 10000 worst passwords.]]></solution>
+         <references>
+            <reference>
+               <title>CWE-798: Use of Hard-coded Credentials</title>
+               <url>https://cwe.mitre.org/data/definitions/798.html</url>
+            </reference>
+            <reference>
+               <title>CWE-521: Weak Password Requirements</title>
+               <url>https://cwe.mitre.org/data/definitions/521.html</url>
+            </reference>
+         </references>
+         <entries>
+            <entry>
+               <method>POST</method>
+               <path>/login</path>
+               <level>1</level>
+               <parameter>username=admin&amp;password=admin</parameter>
+               <info>Weak credentials detected</info>
+               <http_request><![CDATA[POST /login HTTP/1.1
+Host: example.org]]></http_request>
+               <curl_command><![CDATA[curl "https://example.org/login"]]></curl_command>
+            </entry>
+         </entries>
+      </vulnerability>
+   </vulnerabilities>
+   <anomalies/>
+   <additionals/>
+</report>

@@ -1,0 +1,28 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: generic-image
+DocumentNamespace: https://example.com/spdx/generic-image-1.0-0000000000
+Creator: Organization: Anchore, Inc
+Creator: Tool: syft-1.50.0
+Created: 2026-07-29T00:00:00Z
+
+PackageName: alpine-baselayout
+SPDXID: SPDXRef-Package-apk-alpine-baselayout-d4c11d42e7429ff9
+PackageVersion: 3.1.2-r0
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: GPL-2.0-only
+PackageSupplier: NOASSERTION
+ExternalRef: PACKAGE-MANAGER purl pkg:apk/alpine/alpine-baselayout@3.1.2-r0?arch=x86_64&distro=alpine-3.10.9
+ExternalRef: SECURITY cpe23Type cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.1.2-r0:*:*:*:*:*:*:*
+ExternalRef: SECURITY advisory https://example.com/advisories/CVE-2024-10001
+
+PackageName: alpine-keys
+SPDXID: SPDXRef-Package-apk-alpine-keys-0000000000000001
+PackageVersion: 2.1-r2
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageLicenseDeclared: MIT
+ExternalRef: PACKAGE-MANAGER purl pkg:apk/alpine/alpine-keys@2.1-r2?arch=x86_64&distro=alpine-3.10.9

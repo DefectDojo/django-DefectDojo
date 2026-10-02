@@ -1,0 +1,94 @@
+{
+  "items": [
+    {
+      "id": 40001,
+      "local_id": "GENERIC-2026-0001",
+      "title": "SQL injection on the search endpoint",
+      "scope": "app.example.com",
+      "end_point": "https://app.example.com/search",
+      "cvss": {
+        "criticity": "critical",
+        "score": 9.8,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+      },
+      "priority": {"name": "P1", "slug": "p1", "level": 1},
+      "bug_type": {
+        "name": "SQL Injection",
+        "slug": "sql-injection",
+        "description": "",
+        "category": {"name": "Injection"}
+      },
+      "status": {"workflow_state": "accepted", "title": "Accepted"},
+      "description_html": "The q parameter is concatenated into a SQL query.",
+      "technical_information_html": "Related to CVE-2000-0002.",
+      "impact": "An attacker can read the whole database.",
+      "created_at": "2026-07-20T09:00:00+0000"
+    },
+    {
+      "id": 40002,
+      "local_id": "GENERIC-2026-0002",
+      "title": "Resolved header issue",
+      "scope": "app.example.com",
+      "end_point": "",
+      "cvss": {"criticity": "", "score": 0, "vector": ""},
+      "priority": {"name": "Medium", "slug": "medium", "level": 3},
+      "bug_type": null,
+      "status": {"workflow_state": "resolved", "title": "Resolved"},
+      "description_html": "",
+      "impact": "",
+      "created_at": "2026-07-21 10:00:00"
+    },
+    {
+      "id": 40003,
+      "local_id": "",
+      "title": "",
+      "scope": "",
+      "end_point": "",
+      "cvss": {"criticity": "unknown-word", "score": 0, "vector": ""},
+      "priority": {"name": "not-a-level", "slug": "low", "level": 5},
+      "status": {"workflow_state": "wont_fix", "title": "Won't fix"},
+      "description_html": "",
+      "impact": "",
+      "created_at": "2026-07-22"
+    },
+    {
+      "id": 40004,
+      "local_id": "GENERIC-2026-0004",
+      "title": "Rejected report",
+      "scope": "shop.example.com",
+      "end_point": "",
+      "cvss": {"criticity": "low", "score": 2.0, "vector": "CVSS:3.1/AV:N"},
+      "status": {"workflow_state": "rejected", "title": "Rejected"},
+      "description_html": "",
+      "impact": "",
+      "created_at": "not-a-timestamp"
+    },
+    {
+      "id": 40005,
+      "local_id": "GENERIC-2026-0005",
+      "title": "Duplicate report",
+      "scope": "shop.example.com",
+      "cvss": {"criticity": "medium", "score": 5.0, "vector": ""},
+      "status": {"workflow_state": "duplicate", "title": "Duplicate"},
+      "created_at": "2026-07-24T09:00:00+0000"
+    },
+    {
+      "id": 40006,
+      "local_id": "GENERIC-2026-0006",
+      "title": "Out of scope report",
+      "scope": "shop.example.com",
+      "cvss": {"criticity": "high", "score": 7.0, "vector": ""},
+      "status": {"workflow_state": "out_of_scope", "title": "Out of scope"},
+      "created_at": "2026-07-25T09:00:00+0000"
+    },
+    {
+      "id": 40007,
+      "local_id": "GENERIC-2026-0007",
+      "title": "A brand new state YesWeHack added",
+      "scope": "shop.example.com",
+      "cvss": {"criticity": "low", "score": 1.0, "vector": ""},
+      "status": {"workflow_state": "some_new_state", "title": "New state"},
+      "created_at": "2026-07-26T09:00:00+0000"
+    }
+  ]
+}

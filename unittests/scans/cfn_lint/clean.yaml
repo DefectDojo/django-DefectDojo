@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A minimal, valid stack for generic-app.
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name of the application bucket.
+Resources:
+  ApplicationBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      VersioningConfiguration:
+        Status: Enabled
+Outputs:
+  BucketArn:
+    Description: ARN of the application bucket.
+    Value: !GetAtt ApplicationBucket.Arn

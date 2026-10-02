@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load filter_tags %}
+{% load i18n %}
 {% load humanize %}
 {% load display_tags %}
 {% load static %}
@@ -12,11 +14,11 @@
                 <h3 class="has-filters">
                     Components
                     <div class="dropdown pull-right">
-                        <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                        <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     </div>
                 </h3>
             </div>
-            <div id="the-filters" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
+            <div id="the-filters" class="is-filters panel-body collapse {% if filter.form|has_active_filters %}in{% endif %}">
                 {% include "dojo/filter_snippet.html" with form=filter.form %}
             </div>
         </div>
@@ -46,7 +48,7 @@
                         </td>
 
                         <td>{{result.component_version}} </td>
-                        <td class="text-right">
+                        <td class="text-end">
                             {% if result.active and result.component_name == none %}
                             <a href="{% url 'open_findings' %}?has_component=false"><b>{{ result.active }}</b></a>
                             {% elif result.active%}
@@ -55,7 +57,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td class="text-right">
+                        <td class="text-end">
                             {% if result.duplicate and result.component_name == none %}
                             <a href="{% url 'all_findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% elif result.duplicate %}
@@ -64,7 +66,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td class="text-right">
+                        <td class="text-end">
                             {% if result.total and result.component_name == none %}
                             <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.total }}</b></a>
                             {% elif result.total %}

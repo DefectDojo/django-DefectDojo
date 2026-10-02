@@ -118,7 +118,7 @@ To respond to a Survey, non-Superusers must have the link shared with them direc
 
 #### Enabling Anonymous Responses 
 
-By default, Surveys are only accessible by DefectDojo Users. To allow external parties to respond to DefectDojo Surveys, ensure the **Enable Anonymous Survey Responses** option has been toggled in the **System Settings**, which is found within the **Pro Settings** submenu within the sidebar.
+By default, Surveys are only accessible by DefectDojo Users. To allow external parties to respond to DefectDojo Surveys, ensure the **Enable Anonymous Survey Responses** option has been toggled in the **System Settings**, which is found under **Settings > System** in the sidebar (within the **Pro Settings** submenu on instances still using the previous menu layout).
 
 ![image](images/pq_ss6.png)
 

@@ -46,7 +46,7 @@ In the daily view, all currently active Engagements and Tests will appear chrono
 
 If set within the applicable Engagement/Test, the title of each entry in the daily calendar will include the following:
 - Status 
-- Product
+- Asset
 - Engagement
 - Test
 - Assignee 
@@ -57,6 +57,6 @@ The arrows on the left and right side of each entry indicate whether that partic
 
 For example, a Test that was made on the same day on which it’s being viewed will not have arrows on the left because that Test didn’t exist the day before. Conversely, a Test that ends on the same day on which it’s being viewed will not have arrows on the right because the entry won’t exist on the following day.
 
-For example, as the final Engagement in the screenshot below (**In Progress** Example Product A ▶ **Sample Engagement** (Unassigned)) is being viewed on the day it was created, and the Target End Date was set for the following day, no arrows are present on either the left or right side.
+For example, as the final Engagement in the screenshot below (**In Progress** Example Asset A ▶ **Sample Engagement** (Unassigned)) is being viewed on the day it was created, and the Target End Date was set for the following day, no arrows are present on either the left or right side.
 
 ![image](images/calendar2.png)

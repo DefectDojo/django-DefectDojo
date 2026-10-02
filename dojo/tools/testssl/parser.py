@@ -2,8 +2,7 @@ import csv
 import hashlib
 import io
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -74,7 +73,7 @@ class TestsslParser:
                 if "-" in row["cwe"]:
                     finding.cwe = int(row["cwe"].split("-")[1].strip())
                 # manage endpoint/location
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     port = int(row["port"]) if row.get("port") and row["port"].isdigit() else None
                     finding.unsaved_locations.append(
                         LocationData.url(host=row["fqdn/ip"].split("/")[0], port=port),
@@ -98,7 +97,7 @@ class TestsslParser:
                     ).encode("utf-8"),
                 ).hexdigest()
                 if dupe_key in dupes:
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         dupes[dupe_key].unsaved_locations.extend(
                             finding.unsaved_locations,
                         )

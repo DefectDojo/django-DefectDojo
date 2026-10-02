@@ -6,6 +6,7 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
+  - "/en/pro_reports/using-the-report-builder/"
   - /en/share_your_findings/pro_reports/working_with_generated_reports
   - /metrics_reports/reports/working_with_generated_reports
 ---
@@ -94,7 +95,7 @@ The Executive Summary widget is intended to summarize your report at a glance. I
 You can also **Include SLAs** in your executive summary. To add images, markup formatting, or anything beyond pure text, consider adding a **WYSIWYG Content widget** immediately after the executive summary.
 
 * You can only have a single Executive Summary for a given report.
-* If your report contains multiple SLA configurations (for example, you have Findings from separate Products which each have their own standards for SLA) each SLA configuration will be listed on the Executive Summary as a separate row.
+* If your report contains multiple SLA configurations (for example, you have Findings from separate Assets which each have their own standards for SLA) each SLA configuration will be listed on the Executive Summary as a separate row.
 
 ### Severities widget
 

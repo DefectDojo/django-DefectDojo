@@ -13,15 +13,17 @@ seo:
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
 exclude_search: true
+aliases:
+  - "/en/customize_dojo/user_management/"
 ---
 
 DefectDojo's user management surface is different in each edition. Pick the section that matches your installation.
 
 ## DefectDojo Open-Source
 
-Open-source DefectDojo uses the **Authorized Users** model: a user is given access to a Product or a Product Type by being added to that record's Authorized Users list. Superusers and staff can see everything.
+Open-source DefectDojo uses the **Authorized Users** model: a user is given access to an Asset or an Organization by being added to that record's Authorized Users list. Superusers and staff can see everything.
 
-* [Authorized Users](./os__authorized_users/) — how to grant access to Products and Product Types
+* [Authorized Users](./os__authorized_users/) — how to grant access to Assets and Organizations
 
 Authentication on open-source DefectDojo is local username/password plus the password-reset flow.
 
@@ -33,7 +35,9 @@ DefectDojo Pro uses a role-based system with Members, Groups, and Global Roles. 
 * [Set a User's Permissions](./set_user_permissions/) — assigning Roles, Global Roles, and Configuration Permissions
 * [Share permissions: User Groups](./create_user_group/) — assigning permissions to many users at once
 * [Set Permissions in Pro](./pro_permissions_overhaul/) — Pro-specific UI for managing Members and Permissions
-* [Action permission charts](./user_permission_chart/) — full reference of every permission for every Role
+* [Resetting user credentials in bulk](./pro__resetting_user_credentials/) — rotate API tokens and force password resets for many users at once
+* [Action permission charts](./user_permission_chart/) — full reference of every permission for every built-in Role
+* [Custom RBAC Roles](./pro__custom_rbac_roles/) — build your own roles by choosing individual permissions
 * [Single Sign-On](/admin/sso/) — SAML and OAuth setup for Pro
 
 ## Migrating between editions

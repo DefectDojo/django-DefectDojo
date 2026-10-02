@@ -1,7 +1,9 @@
 import hashlib
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class KICSParser:
@@ -10,6 +12,7 @@ class KICSParser:
 
     # table to match KICS severity to DefectDojo severity
     SEVERITY = {
+        "CRITICAL": "Critical",
         "HIGH": "High",
         "MEDIUM": "Medium",
         "LOW": "Low",
@@ -54,13 +57,11 @@ class KICSParser:
 
                 dupe_key = hashlib.sha256(
                     (
-                        platform
-                        + category
-                        + issue_type
-                        + file_name
-                        + expected_value
-                        + str(line_number)
-                    ).encode("utf-8"),
+                        f"{query.get('query_id', '')}|{platform or ''}"
+                        f"|{category or ''}|{issue_type or ''}"
+                        f"|{file_name or ''}|{expected_value or ''}"
+                        f"|{line_number}"
+                    ).encode(),
                 ).hexdigest()
 
                 if dupe_key in dupes:
@@ -81,5 +82,9 @@ class KICSParser:
                         nb_occurences=1,
                         references=query_url,
                     )
+                    if locations_enabled() and file_name:
+                        finding.unsaved_locations.append(
+                            LocationData.code(file_path=file_name, line=line_number),
+                        )
                     dupes[dupe_key] = finding
         return list(dupes.values())

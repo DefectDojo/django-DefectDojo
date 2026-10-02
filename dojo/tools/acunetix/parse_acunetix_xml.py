@@ -6,8 +6,8 @@ import html2text
 import hyperlink
 from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -148,7 +148,7 @@ class AcunetixXMLParser:
                         )
                 # manage the endpoint
                 url = hyperlink.parse(start_url)
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     finding.unsaved_locations.append(LocationData.url(
                         host=url.host,
                         port=url.port,
@@ -186,7 +186,7 @@ class AcunetixXMLParser:
                                 html2text.html2text(item.findtext("Details")),
                             )
                         )
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         find.unsaved_endpoints.extend(finding.unsaved_endpoints)

@@ -1,0 +1,47 @@
+[
+  {
+    "target": "http://wave3target/",
+    "http_status": 200,
+    "request_config": {
+      "headers": {
+        "User-Agent": "WhatWeb/0.5.5"
+      }
+    },
+    "plugins": {
+      "Country": {
+        "string": [
+          "RESERVED"
+        ],
+        "module": [
+          "ZZ"
+        ]
+      },
+      "HTML5": {},
+      "HTTPServer": {
+        "string": [
+          "nginx/1.31.3"
+        ]
+      },
+      "IP": {
+        "string": [
+          "172.29.0.2"
+        ]
+      },
+      "MetaGenerator": {
+        "string": [
+          "generic-app 1.4.2"
+        ]
+      },
+      "nginx": {
+        "version": [
+          "1.31.3"
+        ]
+      },
+      "Title": {
+        "string": [
+          "generic-app"
+        ]
+      }
+    }
+  }
+]

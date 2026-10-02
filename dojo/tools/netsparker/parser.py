@@ -6,6 +6,7 @@ from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
 from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -51,11 +52,13 @@ class NetsparkerParser:
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = html2text.html2text(item.get("Description", ""))
-            if "Cwe" in item["Classification"]:
+            unsaved_cwes = []
+            if item["Classification"].get("Cwe"):
                 try:
                     cwe = int(item["Classification"]["Cwe"].split(",")[0])
                 except Exception:
                     cwe = None
+                unsaved_cwes = [value.strip() for value in item["Classification"]["Cwe"].split(",") if value.strip()]
             else:
                 cwe = None
             sev = item["Severity"]
@@ -82,6 +85,8 @@ class NetsparkerParser:
                 cwe=cwe,
                 static_finding=True,
             )
+            if unsaved_cwes:
+                finding.unsaved_cwes = unsaved_cwes
             state = item.get("State", None)
             if state == "FalsePositive":
                 finding.active = False
@@ -107,7 +112,7 @@ class NetsparkerParser:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
             finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
             # manage endpoint/location
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 finding.unsaved_locations = [LocationData.url(url=url)]
             else:
                 # TODO: Delete this after the move to Locations
@@ -116,7 +121,7 @@ class NetsparkerParser:
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.unsaved_req_resp.extend(finding.unsaved_req_resp)
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     find.unsaved_locations.extend(finding.unsaved_locations)
                 else:
                     # TODO: Delete this after the move to Locations

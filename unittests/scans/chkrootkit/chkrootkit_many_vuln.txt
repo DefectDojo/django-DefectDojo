@@ -1,0 +1,8 @@
+WARNING: chkdirs: Possible LKM Trojan installed (or chkdirs failed):
+chkdirs: WARNING: Skipping unsupported filesystem (overlayfs): /tmp/
+chkdirs: WARNING: Skipping unsupported filesystem (overlayfs): /usr/share/
+chkdirs: WARNING: Skipping unsupported filesystem (overlayfs): /usr/bin/
+chkdirs: WARNING: Skipping unsupported filesystem (overlayfs): /usr/sbin/
+chkdirs: WARNING: Skipping unsupported filesystem (overlayfs): /lib/
+chkdirs: WARNING: Skipping unsupported filesystem (overlayfs): /usr/lib/
+

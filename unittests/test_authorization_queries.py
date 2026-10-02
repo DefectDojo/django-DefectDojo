@@ -8,6 +8,7 @@ for various user permission scenarios.
 from unittest.mock import patch
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.models import (
@@ -22,10 +23,10 @@ from dojo.authorization.models import (
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoint_status, get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.finding.queries import (
     get_authorized_findings,
     get_authorized_findings_for_queryset,
-    get_authorized_vulnerability_ids,
 )
 from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.location.models import LocationFindingReference, LocationProductReference
@@ -42,16 +43,17 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    FindingVulnerabilityReference,
     Product,
     Product_Type,
     Test,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.test.queries import get_authorized_tests
 from dojo.url.models import URL
+from dojo.vulnerability.queries import get_authorized_finding_vulnerability_references
 
 from .dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
@@ -238,14 +240,19 @@ class AuthorizationQueriesTestBase(DojoTestCase):
             },
         )
 
-        # Create vulnerability IDs
-        cls.vuln_id_1, _ = Vulnerability_Id.objects.get_or_create(
+        # Create vulnerability IDs (entity + ordered reference rows) and grab the
+        # reference objects used later in the authorized-queryset assertions.
+        save_vulnerability_ids(cls.finding_1, ["CVE-2024-0001"])
+        cls.finding_1.save()
+        cls.vuln_id_1 = FindingVulnerabilityReference.objects.get(
             finding=cls.finding_1,
-            vulnerability_id="CVE-2024-0001",
+            vulnerability__vulnerability_id="CVE-2024-0001",
         )
-        cls.vuln_id_2, _ = Vulnerability_Id.objects.get_or_create(
+        save_vulnerability_ids(cls.finding_2, ["CVE-2024-0002"])
+        cls.finding_2.save()
+        cls.vuln_id_2 = FindingVulnerabilityReference.objects.get(
             finding=cls.finding_2,
-            vulnerability_id="CVE-2024-0002",
+            vulnerability__vulnerability_id="CVE-2024-0002",
         )
 
         if settings.V3_FEATURE_LOCATIONS:
@@ -363,23 +370,25 @@ class TestGetAuthorizedFindings(AuthorizationQueriesTestBase):
 
 class TestGetAuthorizedVulnerabilityIds(AuthorizationQueriesTestBase):
 
-    """Tests for get_authorized_vulnerability_ids()"""
+    """Tests for get_authorized_finding_vulnerability_references()"""
 
     def test_superuser_gets_all_vulnerability_ids(self):
-        """Superuser should get all vulnerability IDs"""
-        vuln_ids = get_authorized_vulnerability_ids(Permissions.Finding_View, user=self.superuser)
+        """Superuser should get all vulnerability id references"""
+        vuln_ids = get_authorized_finding_vulnerability_references(Permissions.Finding_View, user=self.superuser)
         self.assertIn(self.vuln_id_1, vuln_ids)
         self.assertIn(self.vuln_id_2, vuln_ids)
 
     def test_user_no_permissions_gets_empty(self):
-        """User with no permissions should not get test vulnerability IDs"""
-        vuln_ids = get_authorized_vulnerability_ids(Permissions.Finding_View, user=self.user_no_perms)
+        """User with no permissions should not get test vulnerability id references"""
+        vuln_ids = get_authorized_finding_vulnerability_references(Permissions.Finding_View, user=self.user_no_perms)
         self.assertNotIn(self.vuln_id_1, vuln_ids)
         self.assertNotIn(self.vuln_id_2, vuln_ids)
 
     def test_user_product_member_gets_product_vulnerability_ids(self):
-        """User with product membership should get only that product's vulnerability IDs"""
-        vuln_ids = get_authorized_vulnerability_ids(Permissions.Finding_View, user=self.user_product_member)
+        """User with product membership should get only that product's vulnerability id references"""
+        vuln_ids = get_authorized_finding_vulnerability_references(
+            Permissions.Finding_View, user=self.user_product_member,
+        )
         self.assertIn(self.vuln_id_1, vuln_ids)
         self.assertNotIn(self.vuln_id_2, vuln_ids)
 
@@ -690,6 +699,20 @@ class TestGetAuthorizedFindingGroups(AuthorizationQueriesTestBase):
             test=cls.test_2,
             defaults={"creator": cls.superuser},
         )
+        cls.finding_group_1.findings.clear()
+        cls.finding_group_2.findings.clear()
+        cls.open_finding_group_1, _ = Finding_Group.objects.get_or_create(
+            name="Auth Test Open Finding Group 1",
+            test=cls.test_1,
+            defaults={"creator": cls.superuser},
+        )
+        cls.open_finding_group_1.findings.set([cls.finding_1])
+        cls.open_finding_group_2, _ = Finding_Group.objects.get_or_create(
+            name="Auth Test Open Finding Group 2",
+            test=cls.test_2,
+            defaults={"creator": cls.superuser},
+        )
+        cls.open_finding_group_2.findings.set([cls.finding_2])
 
     def test_superuser_gets_all_finding_groups(self):
         """Superuser should get all finding groups"""
@@ -707,6 +730,83 @@ class TestGetAuthorizedFindingGroups(AuthorizationQueriesTestBase):
         """User with product membership should get only that product's finding groups"""
         finding_groups = get_authorized_finding_groups(Permissions.Finding_Group_View, user=self.user_product_member)
         self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def _listed_finding_groups(self, user, view_name="all_finding_groups", query=None):
+        self.client.force_login(user)
+        response = self.client.get(reverse(view_name), query or {})
+        self.assertEqual(response.status_code, 200)
+        return list(response.context["finding_groups"].object_list)
+
+    def test_superuser_sees_all_finding_groups_in_list(self):
+        finding_groups = self._listed_finding_groups(self.superuser)
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertIn(self.finding_group_2, finding_groups)
+
+    def test_product_member_sees_authorized_finding_groups_in_list(self):
+        finding_groups = self._listed_finding_groups(self.user_product_member)
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_user_without_permissions_sees_no_finding_groups_in_list(self):
+        finding_groups = self._listed_finding_groups(self.user_no_perms)
+        self.assertNotIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_product_filter_includes_authorized_finding_group_without_findings(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_product_member,
+            query={"product": self.product_1.id},
+        )
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_engagement_filter_includes_authorized_finding_group_without_findings(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_product_member,
+            query={"engagement": self.engagement_1.id},
+        )
+        self.assertIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_product_filter_excludes_unauthorized_finding_groups(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_no_perms,
+            query={"product": self.product_1.id},
+        )
+        self.assertNotIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_engagement_filter_excludes_unauthorized_finding_groups(self):
+        finding_groups = self._listed_finding_groups(
+            self.user_no_perms,
+            query={"engagement": self.engagement_1.id},
+        )
+        self.assertNotIn(self.finding_group_1, finding_groups)
+        self.assertNotIn(self.finding_group_2, finding_groups)
+
+    def test_product_member_sees_authorized_open_finding_group(self):
+        finding_groups = self._listed_finding_groups(self.user_product_member, "open_finding_groups")
+        self.assertIn(self.open_finding_group_1, finding_groups)
+
+    def test_user_without_permissions_sees_no_open_finding_groups(self):
+        finding_groups = self._listed_finding_groups(self.user_no_perms, "open_finding_groups")
+        self.assertNotIn(self.open_finding_group_1, finding_groups)
+
+    def test_product_member_does_not_see_cross_product_open_finding_group(self):
+        finding_groups = self._listed_finding_groups(self.user_product_member, "open_finding_groups")
+        self.assertNotIn(self.open_finding_group_2, finding_groups)
+
+    def test_product_member_sees_authorized_closed_finding_group(self):
+        finding_groups = self._listed_finding_groups(self.user_product_member, "closed_finding_groups")
+        self.assertIn(self.finding_group_1, finding_groups)
+
+    def test_user_without_permissions_sees_no_closed_finding_groups(self):
+        finding_groups = self._listed_finding_groups(self.user_no_perms, "closed_finding_groups")
+        self.assertNotIn(self.finding_group_1, finding_groups)
+
+    def test_product_member_does_not_see_cross_product_closed_finding_group(self):
+        finding_groups = self._listed_finding_groups(self.user_product_member, "closed_finding_groups")
         self.assertNotIn(self.finding_group_2, finding_groups)
 
 

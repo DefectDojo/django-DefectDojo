@@ -1,7 +1,7 @@
 
 from django.test import TestCase
 
-from dojo.filters import FindingFilter
+from dojo.finding.ui.filters import FindingFilter
 from dojo.models import Test_Type
 from dojo.utils import get_visible_scan_types
 

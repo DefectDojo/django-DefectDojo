@@ -1,7 +1,9 @@
 import hashlib
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class TalismanParser:
@@ -59,6 +61,11 @@ class TalismanParser:
                         static_finding=True,
                         severity=severity,
                     )
+
+                    if locations_enabled() and file_path:
+                        finding.unsaved_locations.append(
+                            LocationData.code(file_path=file_path),
+                        )
 
                     key = hashlib.md5(
                         (

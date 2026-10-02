@@ -1,0 +1,133 @@
+{
+  "schema": {
+    "version": "preview"
+  },
+  "summary": {
+    "audited_packages": 13,
+    "vulnerabilities": 6,
+    "adverse_statuses": 0
+  },
+  "vulnerabilities": [
+    {
+      "dependency": {
+        "name": "click",
+        "version": "8.1.8"
+      },
+      "id": "PYSEC-2026-2132",
+      "display_id": "PYSEC-2026-2132",
+      "aliases": [
+        "CVE-2026-7246",
+        "GHSA-47fr-3ffg-hgmw"
+      ],
+      "summary": null,
+      "description": "Pallets Click, versions 8.3.2 and below, contain a command injection vulnerability in the click.edit() function, allowing attackers to pass arbitrary OS commands from an unprivileged account.",
+      "link": "https://access.redhat.com/errata/RHSA-2026:24761",
+      "fix_versions": [
+        "8.3.3"
+      ],
+      "published": "2026-04-30T14:16:36.433Z",
+      "modified": "2026-07-13T07:15:21.899333658Z"
+    },
+    {
+      "dependency": {
+        "name": "flask",
+        "version": "0.12"
+      },
+      "id": "GHSA-562c-5r94-xh97",
+      "display_id": "GHSA-562c-5r94-xh97",
+      "aliases": [
+        "CVE-2018-1000656",
+        "PYSEC-2018-66"
+      ],
+      "summary": "Flask is vulnerable to Denial of Service via incorrect encoding of JSON data",
+      "description": "The Pallets Project flask version Before 0.12.3 contains a CWE-20: Improper Input Validation vulnerability in flask that can result in Large amount of memory usage possibly leading to denial of service. This attack appear to be exploitable via Attacker provides JSON data in incorrect encoding. This vulnerability appears to have been fixed in 0.12.3.",
+      "link": "https://nvd.nist.gov/vuln/detail/CVE-2018-1000656",
+      "fix_versions": [
+        "0.12.3"
+      ],
+      "published": "2018-08-23T19:10:40Z",
+      "modified": "2025-02-21T05:29:40.872529Z"
+    },
+    {
+      "dependency": {
+        "name": "idna",
+        "version": "2.7"
+      },
+      "id": "GHSA-65pc-fj4g-8rjx",
+      "display_id": "GHSA-65pc-fj4g-8rjx",
+      "aliases": [
+        "CVE-2026-45409",
+        "PYSEC-2026-215"
+      ],
+      "summary": "Internationalized Domain Names in Applications (IDNA): Specially crafted inputs to idna.encode() can bypass CVE-2024-3651 fix",
+      "description": "This is the same issue as CVE-2024-3651, however the original remediation in 2024 was not a complete fix. Payloads such as `\"\\u0660\" * N` or `\"\\u30fb\" * N + \"\\u6f22\"` utilize the `valid_contexto` function prior to length rejection, and for high values of `N` will take a long time to process.\n\n### Impact\nA specially crafted argument to the `idna.encode()` function could consume significant resources. This may lead to a denial-of-service.\n\n### Patches\nStarting in version 3.14, the function rejects long inputs as soon as practicable prior to any further processing to minimize resource consumption. In version 3.15, this approach was extended to lesser used alternate functions (i.e. per-label conversions and codec support).\n\n### Workarounds\nDomain names cannot exceed 253 characters in length, if this length limit is enforced prior to passing the domain to the `idna.encode()` function it should no longer consume significant resources. This is triggered by arbitrarily large inputs that would not occur in normal usage, but may be passed to the library assuming there is no preliminary input validation by the higher-level application.",
+      "link": "https://nvd.nist.gov/vuln/detail/CVE-2026-45409",
+      "fix_versions": [
+        "3.15"
+      ],
+      "published": "2026-05-19T14:34:32Z",
+      "modified": "2026-07-08T17:45:15.021597323Z"
+    },
+    {
+      "dependency": {
+        "name": "jinja2",
+        "version": "2.10"
+      },
+      "id": "GHSA-462w-v97r-4m45",
+      "display_id": "GHSA-462w-v97r-4m45",
+      "aliases": [
+        "CVE-2019-10906",
+        "PYSEC-2019-217"
+      ],
+      "summary": "Jinja2 sandbox escape via string formatting",
+      "description": "In Pallets Jinja before 2.10.1, `str.format_map` allows a sandbox escape.\n\nThe sandbox is used to restrict what code can be evaluated when rendering untrusted, user-provided templates. Due to the way string formatting works in Python, the `str.format_map` method could be used to escape the sandbox.\n\nThis issue was previously addressed for the `str.format` method in Jinja 2.8.1, which discusses the issue in detail. However, the less-common `str.format_map` method was overlooked. This release applies the same sandboxing to both methods.\n\nIf you cannot upgrade Jinja, you can override the `is_safe_attribute` method on the sandbox and explicitly disallow the `format_map` method on string objects.",
+      "link": "https://nvd.nist.gov/vuln/detail/CVE-2019-10906",
+      "fix_versions": [
+        "2.10.1"
+      ],
+      "published": "2019-04-10T14:30:24Z",
+      "modified": "2024-09-24T21:03:59.802687Z"
+    },
+    {
+      "dependency": {
+        "name": "requests",
+        "version": "2.19.1"
+      },
+      "id": "GHSA-9hjg-9r4m-mvj7",
+      "display_id": "GHSA-9hjg-9r4m-mvj7",
+      "aliases": [
+        "CVE-2024-47081",
+        "PYSEC-2026-1872"
+      ],
+      "summary": "Requests vulnerable to .netrc credentials leak via malicious URLs",
+      "description": "### Impact\n\nDue to a URL parsing issue, Requests releases prior to 2.32.4 may leak .netrc credentials to third parties for specific maliciously-crafted URLs.\n\n### Workarounds\nFor older versions of Requests, use of the .netrc file can be disabled with `trust_env=False` on your Requests Session ([docs](https://requests.readthedocs.io/en/latest/api/#requests.Session.trust_env)).\n\n### References\nhttps://github.com/psf/requests/pull/6965\nhttps://seclists.org/fulldisclosure/2025/Jun/2",
+      "link": "https://nvd.nist.gov/vuln/detail/CVE-2024-47081",
+      "fix_versions": [
+        "2.32.4"
+      ],
+      "published": "2025-06-09T19:06:08Z",
+      "modified": "2026-07-07T17:56:56.234172558Z"
+    },
+    {
+      "dependency": {
+        "name": "urllib3",
+        "version": "1.23"
+      },
+      "id": "GHSA-2xpw-w6gg-jr37",
+      "display_id": "GHSA-2xpw-w6gg-jr37",
+      "aliases": [
+        "CVE-2025-66471",
+        "PYSEC-2026-1994"
+      ],
+      "summary": "urllib3 streaming API improperly handles highly compressed data",
+      "description": "### Impact\n\nurllib3's [streaming API](https://urllib3.readthedocs.io/en/2.5.0/advanced-usage.html#streaming-and-i-o) is designed for the efficient handling of large HTTP responses by reading the content in chunks, rather than loading the entire response body into memory at once.\n\nWhen streaming a compressed response, urllib3 can perform decoding or decompression based on the HTTP `Content-Encoding` header (e.g., `gzip`, `deflate`, `br`, or `zstd`). The library must read compressed data from the network and decompress it until the requested chunk size is met. Any resulting decompressed data that exceeds the requested amount is held in an internal buffer for the next read operation.\n\nThe decompression logic could cause urllib3 to fully decode a small amount of highly compressed data in a single operation. This can result in excessive resource consumption (high CPU usage and massive memory allocation for the decompressed data; CWE-409) on the client side, even if the application only requested a small chunk of data.\n\n\n### Affected usages\n\nApplications and libraries using urllib3 version 2.5.0 and earlier to stream large compressed responses or content from untrusted sources.\n\n`stream()`, `read(amt=256)`, `read1(amt=256)`, `read_chunked(amt=256)`, `readinto(b)` are examples of `urllib3.HTTPResponse` method calls using the affected logic unless decoding is disabled explicitly.\n\n\n### Remediation\n\nUpgrade to at least urllib3 v2.6.0 in which the library avoids decompressing data that exceeds the requested amount.\n\nIf your environment contains a package facilitating the Brotli encoding, upgrade to at least Brotli 1.2.0 or brotlicffi 1.2.0.0 too. These versions are enforced by the `urllib3[brotli]` extra in the patched versions of urllib3.\n\n\n### Credits\n\nThe issue was reported by @Cycloctane.\nSupplemental information was provided by @stamparm during a security audit performed by [7ASecurity](https://7asecurity.com/) and facilitated by [OSTIF](https://ostif.org/).",
+      "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-66471",
+      "fix_versions": [
+        "2.6.0"
+      ],
+      "published": "2025-12-05T18:15:54Z",
+      "modified": "2026-07-07T17:56:33.872074196Z"
+    }
+  ],
+  "adverse_statuses": []
+}

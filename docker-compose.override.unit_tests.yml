@@ -21,7 +21,27 @@ services:
       DD_DATABASE_PORT: ${DD_DATABASE_PORT:-5432}
       DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
       DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
-      DD_CELERY_BROKER_URL: 'sqla+sqlite:///dojo.celerydb.sqlite'
+      # In-memory broker, the same as docker-compose.override.unit_tests_cicd.yml. The
+      # sqla+sqlite transport goes through kombu's SQLAlchemy models, and under
+      # PYTHONWARNINGS=error SQLAlchemy 2.1's deprecation of the `noload` loader they
+      # use fails the first task dispatch in any test. settings.dist.py only builds
+      # the URL from the scheme and path when DD_CELERY_BROKER_URL is empty, and these
+      # two produce exactly "memory://".
+      DD_CELERY_BROKER_URL: ''
+      DD_CELERY_BROKER_SCHEME: 'memory'
+      DD_CELERY_BROKER_PATH: ''
+      # No Redis/valkey in unit tests -> default django cache is LocMemCache.
+      DD_CACHE_URL: ''
+      # Product grading is debounced through a cache marker with a wall-clock window
+      # (dojo.utils.schedule_product_grade). Under the test runner a dispatched grade task
+      # may never run, so a marker would outlive its test and silently skip grading for the
+      # next test whose product gets the same id, and it makes query counts depend on
+      # timing. 0 queues a task per change, as before; the debounce's own unit tests turn
+      # the window on explicitly.
+      DD_PRODUCT_GRADE_DEBOUNCE_SECONDS: '0'
+      # In-process singleton cache (dojo/caching.py) stays ON for deterministic
+      # assertNumQueries counts; reset per request (middleware) and per test.
+      DD_SETTINGS_CACHE_L1_TTL: '30'
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
   celerybeat: !reset
   celeryworker: !reset

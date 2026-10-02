@@ -1,0 +1,86 @@
+{
+  "count": 6,
+  "items": [
+    {
+      "id": "issue-0001",
+      "companyName": "Generic Org",
+      "companyId": "company-1",
+      "status": "Detected",
+      "firstSeen": "2024-06-02T10:00:00Z",
+      "lastSeen": "2024-06-05T10:00:00Z",
+      "body": {
+        "category": "Vulnerability",
+        "type": "Exposed administrative interface",
+        "status": "Critical severity",
+        "reason": "The management console is reachable from the internet",
+        "asset": "admin.example.com",
+        "assetId": "asset-1",
+        "assetDiscovered": "2024-05-01",
+        "assetStatus": "Confirmed",
+        "descriptions": "The console accepted a connection from an external address.",
+        "context": "Discovered during external scanning.",
+        "alertMitreInfo": {"T1595": "Active Scanning", "T1190": "Exploit Public-Facing Application"}
+      }
+    },
+    {
+      "id": "issue-0002",
+      "status": "Solved",
+      "firstSeen": "2024-05-20T08:00:00Z",
+      "body": {
+        "category": "Configuration",
+        "type": "Weak TLS configuration",
+        "status": "High severity",
+        "asset": "10.20.0.11:8443",
+        "descriptions": "TLS 1.0 was offered."
+      }
+    },
+    {
+      "id": "issue-0003",
+      "status": "False positive",
+      "firstSeen": "2024-05-21T08:00:00Z",
+      "body": {
+        "category": "Software",
+        "type": "Outdated software",
+        "status": "Medium severity",
+        "asset": "OpenSSL 1.0.2k",
+        "reason": "A version banner suggested an old release"
+      }
+    },
+    {
+      "id": "issue-0004",
+      "status": "Ignored",
+      "firstSeen": "2024-05-22T08:00:00Z",
+      "body": {
+        "category": "Exposure",
+        "type": "",
+        "status": "Low severity",
+        "reason": "A login form was found on a marketing host",
+        "asset": "https://www.example.com/login"
+      }
+    },
+    {
+      "id": "issue-0005",
+      "status": "Under review",
+      "firstSeen": "not a timestamp",
+      "body": {
+        "category": "",
+        "type": "",
+        "status": "a label Group-IB does not use",
+        "reason": "",
+        "asset": ""
+      }
+    },
+    {
+      "id": "issue-0006",
+      "status": "Detected",
+      "firstSeen": "2024-05-23T08:00:00Z",
+      "body": {
+        "category": "Exposure",
+        "type": "Directory listing enabled",
+        "status": "Info severity",
+        "asset": "files.example.com",
+        "alertMitreInfo": {}
+      }
+    }
+  ]
+}

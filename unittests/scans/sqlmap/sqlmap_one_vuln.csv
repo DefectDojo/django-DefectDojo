@@ -1,0 +1,2 @@
+Target URL,Place,Parameter,Technique(s),Note(s)
+http://wave3sqli:5000/item?id=1,GET,id,BTU,

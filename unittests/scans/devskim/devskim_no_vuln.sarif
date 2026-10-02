@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.6.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "devskim",
+          "fullName": "Microsoft DevSkim Command Line Interface",
+          "version": "1.0.90+fb2d676ce4",
+          "informationUri": "https://github.com/microsoft/DevSkim/"
+        }
+      },
+      "results": [],
+      "columnKind": "utf16CodeUnits"
+    }
+  ]
+}

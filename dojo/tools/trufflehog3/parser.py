@@ -1,7 +1,9 @@
 import hashlib
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class TruffleHog3Parser:
@@ -92,6 +94,11 @@ class TruffleHog3Parser:
                 static_finding=True,
                 nb_occurences=1,
             )
+            if locations_enabled() and file:
+                finding.unsaved_locations.append(
+                    # line is None: the scalar 0 above is a fake value for deduplication only
+                    LocationData.code(file_path=file),
+                )
             dupes[dupe_key] = finding
 
     def get_finding_current(self, json_data, test, dupes):
@@ -164,4 +171,8 @@ class TruffleHog3Parser:
                 static_finding=True,
                 nb_occurences=1,
             )
+            if locations_enabled() and file:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=file, line=line or None),
+                )
             dupes[dupe_key] = finding

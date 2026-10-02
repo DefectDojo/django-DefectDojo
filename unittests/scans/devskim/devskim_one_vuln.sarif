@@ -1,0 +1,132 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.6.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "devskim",
+          "fullName": "Microsoft DevSkim Command Line Interface",
+          "version": "1.0.90+fb2d676ce4",
+          "informationUri": "https://github.com/microsoft/DevSkim/",
+          "rules": [
+            {
+              "id": "DS126858",
+              "name": "WeakbrokenHashAlgorithm",
+              "fullDescription": {
+                "text": "Weak/Broken Hash Algorithm: A weak or broken hash algorithm was detected."
+              },
+              "help": {
+                "text": "Consider switching to use SHA-256 or SHA-512 instead.",
+                "markdown": "Consider switching to use SHA-256 or SHA-512 instead. Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS126858.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS126858.md) for additional guidance on this issue."
+              },
+              "shortDescription": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS126858.md",
+              "properties": {
+                "precision": "high",
+                "problem.severity": "error",
+                "DevSkimSeverity": "Critical",
+                "DevSkimConfidence": "High"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "DS126858",
+          "level": "error",
+          "message": {
+            "text": "Weak/Broken Hash Algorithm"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "hash.py"
+                },
+                "region": {
+                  "startLine": 5,
+                  "startColumn": 19,
+                  "endLine": 5,
+                  "endColumn": 22,
+                  "charOffset": 60,
+                  "charLength": 3,
+                  "snippet": {
+                    "text": "md5",
+                    "rendered": {
+                      "text": "md5",
+                      "markdown": "`md5`"
+                    }
+                  },
+                  "sourceLanguage": "python"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "hash.py"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 60,
+                        "charLength": 3
+                      },
+                      "insertedContent": {
+                        "text": "sha512"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "hash.py"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 60,
+                        "charLength": 3
+                      },
+                      "insertedContent": {
+                        "text": "sha256"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "tags": [
+              "Cryptography.BannedHashAlgorithm"
+            ],
+            "DevSkimSeverity": "Critical",
+            "DevSkimConfidence": "High"
+          }
+        }
+      ],
+      "columnKind": "utf16CodeUnits"
+    }
+  ]
+}

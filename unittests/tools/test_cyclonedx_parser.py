@@ -155,7 +155,8 @@ class TestCyclonedxParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.4", finding.component_version)
-                self.assertIn(finding.cwe, [184, 502])  # there is 2 CWE in the report
+                self.assertEqual(184, finding.cwe)  # primary is the first CWE in the report
+                self.assertEqual([184, 502], finding.unsaved_cwes)  # there are 2 CWE in the report
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
                     "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
@@ -186,6 +187,16 @@ class TestCyclonedxParser(DojoTestCase):
                 self.assertTrue(finding.is_mitigated)
                 self.assertFalse(finding.active)
 
+    def test_cyclonedx_multiple_cwes_xml(self):
+        """CycloneDX native 1.4 XML vulnerability block with more than one CWE"""
+        with (get_unit_tests_scans_path("cyclonedx") / "multiple_cwes_fabricated.xml").open(encoding="utf-8") as file:
+            parser = CycloneDXParser()
+            findings = list(parser.get_findings(file, Test()))
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(79, finding.cwe)  # primary is the first CWE in the report
+            self.assertEqual([79, 89], finding.unsaved_cwes)  # there are 2 CWE in the report
+
     def test_cyclonedx_1_4_json(self):
         """CycloneDX version 1.4 JSON format"""
         with (get_unit_tests_scans_path("cyclonedx") / "valid-vulnerability-1.4.json").open(encoding="utf-8") as file:
@@ -201,6 +212,8 @@ class TestCyclonedxParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.4", finding.component_version)
+                self.assertEqual(184, finding.cwe)  # primary is the first CWE in the report
+                self.assertEqual([184, 502], finding.unsaved_cwes)  # there are 2 CWE in the report
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
                     "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",

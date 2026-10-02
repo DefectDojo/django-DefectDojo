@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1032" role="img" aria-labelledby="ttl desc" font-family="'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif">
+  <title id="ttl">DefectDojo Cloud Kubernetes architecture with Sensei on Vertex AI</title>
+  <desc id="desc">Multi-tenant SaaS on Google Kubernetes Engine. Customers reach the platform via Google Cloud Load Balancing with managed TLS; scan results are uploaded inbound through the API. Each customer runs in its own Kubernetes namespace containing web/API, async processing, orchestration, integrations, an MCP server, Sensei AI remediation, and an in-namespace cache. The dedicated per-customer data plane holds a PostgreSQL database, a Cloud Storage bucket, and Vertex AI, through which Sensei runs in the customer's dedicated GCP project with per-customer credentials. Shared platform services include the container registry, secret manager, observability, and a shared cache of public EPSS/KEV enrichment data. Outbound connections cover email, ticketing, audit-log forwarding, and an optional customer-chosen AI provider.</desc>
+
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#94A3B8"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="1240" height="1032" fill="#F8FAFC"/>
+
+  <text x="40" y="46" font-size="26" font-weight="700" fill="#0F172A">DefectDojo Cloud — Kubernetes Architecture</text>
+  <text x="40" y="72" font-size="15" fill="#475569">Multi-tenant SaaS on Google Kubernetes Engine (GKE)</text>
+
+  <!-- Legend -->
+  <rect x="812" y="30" width="16" height="16" rx="3" fill="#EFF6FF" stroke="#60A5FA"/>
+  <text x="836" y="43" font-size="13" fill="#334155">Shared platform service</text>
+  <rect x="812" y="54" width="16" height="16" rx="3" fill="#F0FDFA" stroke="#14B8A6"/>
+  <text x="836" y="67" font-size="13" fill="#334155">Tenant workload (in-cluster)</text>
+  <rect x="812" y="78" width="16" height="16" rx="3" fill="#FFFBEB" stroke="#F59E0B"/>
+  <text x="836" y="91" font-size="13" fill="#334155">Dedicated per customer</text>
+
+  <!-- Inbound client -->
+  <rect x="40" y="104" width="210" height="54" rx="10" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="145" y="128" text-anchor="middle" font-size="15" font-weight="600" fill="#0F172A">Customers</text>
+  <text x="145" y="146" text-anchor="middle" font-size="11.5" fill="#64748B">Browser · API · CI · scan uploads</text>
+
+  <rect x="298" y="104" width="268" height="54" rx="10" fill="#EEF2FF" stroke="#818CF8"/>
+  <text x="432" y="128" text-anchor="middle" font-size="15" font-weight="600" fill="#3730A3">Cloud Load Balancing</text>
+  <text x="432" y="146" text-anchor="middle" font-size="12" fill="#4F46E5">HTTPS · Google-managed TLS</text>
+
+  <line x1="250" y1="131" x2="296" y2="131" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- ingress into web tier -->
+  <path d="M432,158 V200 H76 V440 H104" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- GCP platform boundary -->
+  <rect x="40" y="204" width="1160" height="600" rx="14" fill="#FFFFFF" stroke="#CBD5E1" stroke-dasharray="6 5"/>
+  <text x="60" y="230" font-size="15" font-weight="700" fill="#334155">Google Cloud Platform · DefectDojo Cloud</text>
+
+  <!-- Regional cluster -->
+  <rect x="64" y="252" width="752" height="528" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="84" y="280" font-size="15" font-weight="700" fill="#0F172A">Regional GKE cluster</text>
+  <text x="84" y="299" font-size="12" fill="#64748B">one of several — US · EU · APAC</text>
+  <rect x="470" y="262" width="326" height="30" rx="15" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="633" y="281" text-anchor="middle" font-size="12" fill="#475569">Autoscaling node pools · standard + high-mem</text>
+
+  <!-- namespace multiplicity -->
+  <rect x="112" y="356" width="680" height="396" rx="10" fill="#CCFBF1" opacity="0.35"/>
+  <rect x="100" y="344" width="680" height="396" rx="10" fill="#CCFBF1" opacity="0.55"/>
+
+  <!-- main namespace -->
+  <rect x="88" y="332" width="680" height="396" rx="10" fill="#F0FDFA" stroke="#14B8A6" stroke-width="1.5"/>
+  <text x="108" y="362" font-size="15" font-weight="700" fill="#0F766E">Customer namespace</text>
+  <rect x="290" y="348" width="146" height="20" rx="10" fill="#14B8A6"/>
+  <text x="363" y="362" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">one per customer</text>
+  <text x="108" y="384" font-size="12" fill="#0F766E" opacity="0.85">Isolated Kubernetes namespace</text>
+
+  <!-- row 1 -->
+  <rect x="108" y="398" width="192" height="84" rx="8" fill="#FFFFFF" stroke="#99F6E4"/>
+  <text x="124" y="426" font-size="13.5" font-weight="600" fill="#0F172A">Web &amp; API</text>
+  <text x="124" y="445" font-size="12" fill="#64748B">django</text>
+  <text x="124" y="462" font-size="12" fill="#64748B">nginx + uWSGI</text>
+
+  <rect x="324" y="398" width="192" height="84" rx="8" fill="#FFFFFF" stroke="#99F6E4"/>
+  <text x="340" y="426" font-size="13.5" font-weight="600" fill="#0F172A">Async processing</text>
+  <text x="340" y="445" font-size="12" fill="#64748B">Celery workers</text>
+  <text x="340" y="462" font-size="12" fill="#64748B">+ beat scheduler</text>
+
+  <rect x="540" y="398" width="192" height="84" rx="8" fill="#FFFFFF" stroke="#99F6E4"/>
+  <text x="556" y="426" font-size="13.5" font-weight="600" fill="#0F172A">Orchestration</text>
+  <text x="556" y="445" font-size="12" fill="#64748B">Workflow engine</text>
+  <text x="556" y="462" font-size="12" fill="#64748B">+ workers</text>
+
+  <!-- row 2 -->
+  <rect x="108" y="496" width="192" height="84" rx="8" fill="#FFFFFF" stroke="#99F6E4"/>
+  <text x="124" y="524" font-size="13.5" font-weight="600" fill="#0F172A">Integrations</text>
+  <text x="124" y="543" font-size="12" fill="#64748B">Connectors</text>
+  <text x="124" y="560" font-size="12" fill="#64748B">+ ticketing</text>
+
+  <rect x="324" y="496" width="192" height="84" rx="8" fill="#FFFFFF" stroke="#99F6E4"/>
+  <text x="340" y="524" font-size="13.5" font-weight="600" fill="#0F172A">MCP server</text>
+  <text x="340" y="543" font-size="12" fill="#64748B">AI interface</text>
+
+  <rect x="540" y="496" width="192" height="84" rx="8" fill="#FFFFFF" stroke="#99F6E4"/>
+  <text x="556" y="524" font-size="13.5" font-weight="600" fill="#0F172A">Sensei</text>
+  <text x="556" y="543" font-size="12" fill="#64748B">AI remediation through</text>
+  <text x="556" y="560" font-size="12" fill="#64748B">Google's Vertex Platform</text>
+
+  <!-- row 3 -->
+  <rect x="108" y="594" width="192" height="84" rx="8" fill="#FFFFFF" stroke="#99F6E4"/>
+  <text x="124" y="622" font-size="13.5" font-weight="600" fill="#0F172A">In-namespace cache</text>
+  <text x="124" y="641" font-size="12" fill="#64748B">Redis / Valkey</text>
+
+  <text x="330" y="632" font-size="12" fill="#64748B">Setup: initializer Job runs</text>
+  <text x="330" y="650" font-size="12" fill="#64748B">database migrations on each deploy</text>
+
+  <!-- egress from namespace -->
+  <path d="M428,728 V820" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- Dedicated per customer -->
+  <rect x="840" y="252" width="336" height="262" rx="12" fill="#FFFBEB" stroke="#F59E0B"/>
+  <text x="860" y="280" font-size="14" font-weight="700" fill="#B45309">Dedicated per customer</text>
+  <text x="860" y="298" font-size="12" fill="#92400E" opacity="0.85">isolated data plane</text>
+  <rect x="860" y="312" width="296" height="58" rx="8" fill="#FFFFFF" stroke="#FCD34D"/>
+  <text x="876" y="336" font-size="13" font-weight="600" fill="#78350F">Cloud SQL — PostgreSQL</text>
+  <text x="876" y="356" font-size="12" fill="#92400E">one database per customer</text>
+  <rect x="860" y="378" width="296" height="58" rx="8" fill="#FFFFFF" stroke="#FCD34D"/>
+  <text x="876" y="402" font-size="13" font-weight="600" fill="#78350F">Cloud Storage bucket</text>
+  <text x="876" y="422" font-size="12" fill="#92400E">media &amp; scans · gcsfuse CSI</text>
+  <rect x="860" y="444" width="296" height="62" rx="8" fill="#FFFFFF" stroke="#FCD34D"/>
+  <text x="876" y="468" font-size="13" font-weight="600" fill="#78350F">Vertex AI</text>
+  <text x="876" y="486" font-size="12" fill="#92400E">runs Sensei AI</text>
+  <text x="876" y="502" font-size="12" fill="#92400E">customer's own project &amp; credentials</text>
+
+  <path d="M768,420 H800 V341 H858" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M768,452 H820 V407 H858" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- Shared platform services -->
+  <rect x="840" y="530" width="336" height="270" rx="12" fill="#EFF6FF" stroke="#60A5FA"/>
+  <text x="860" y="558" font-size="14" font-weight="700" fill="#1D4ED8">Shared platform services</text>
+  <rect x="860" y="570" width="296" height="48" rx="8" fill="#FFFFFF" stroke="#BFDBFE"/>
+  <text x="876" y="590" font-size="13" font-weight="600" fill="#1E3A8A">Artifact Registry</text>
+  <text x="876" y="608" font-size="12" fill="#3B82F6">container images</text>
+  <rect x="860" y="626" width="296" height="48" rx="8" fill="#FFFFFF" stroke="#BFDBFE"/>
+  <text x="876" y="646" font-size="13" font-weight="600" fill="#1E3A8A">Secret Manager</text>
+  <text x="876" y="664" font-size="12" fill="#3B82F6">secrets &amp; keys</text>
+  <rect x="860" y="682" width="296" height="48" rx="8" fill="#FFFFFF" stroke="#BFDBFE"/>
+  <text x="876" y="702" font-size="13" font-weight="600" fill="#1E3A8A">Cloud Monitoring &amp; Logging</text>
+  <text x="876" y="720" font-size="12" fill="#3B82F6">metrics · logs · alerts</text>
+  <rect x="860" y="738" width="296" height="48" rx="8" fill="#FFFFFF" stroke="#BFDBFE"/>
+  <text x="876" y="758" font-size="13" font-weight="600" fill="#1E3A8A">Shared enrichment cache</text>
+  <text x="876" y="776" font-size="12" fill="#3B82F6">EPSS · KEV · public data</text>
+
+  <!-- Sensei to Vertex AI -->
+  <path d="M768,538 H812 V475 H858" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M768,610 H812 V650 H856" fill="none" stroke="#94A3B8" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+
+  <!-- Outbound connections -->
+  <rect x="64" y="820" width="1112" height="120" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="84" y="848" font-size="14" font-weight="700" fill="#334155">Outbound connections</text>
+  <text x="84" y="866" font-size="12" fill="#64748B">customer-configured · initiated by DefectDojo</text>
+  <rect x="84" y="876" width="250" height="48" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="100" y="898" font-size="13" font-weight="600" fill="#0F172A">Email (SMTP)</text>
+  <text x="100" y="915" font-size="12" fill="#64748B">notifications</text>
+  <rect x="358" y="876" width="250" height="48" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="374" y="898" font-size="13" font-weight="600" fill="#0F172A">Ticketing</text>
+  <text x="374" y="915" font-size="12" fill="#64748B">Jira · ServiceNow · …</text>
+  <rect x="632" y="876" width="250" height="48" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="648" y="898" font-size="13" font-weight="600" fill="#0F172A">Audit log</text>
+  <text x="648" y="915" font-size="12" fill="#64748B">forward to SIEM / log sink</text>
+  <rect x="906" y="876" width="250" height="48" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="922" y="898" font-size="13" font-weight="600" fill="#0F172A">Customer AI</text>
+  <text x="922" y="915" font-size="12" fill="#64748B">MCP · Anthropic · OpenAI · …</text>
+
+  <!-- Footer -->
+  <text x="40" y="966" font-size="12.5" fill="#475569">Isolation: each customer runs in its own namespace with a dedicated database, storage bucket, and cache — no customer data is shared between customers.</text>
+  <text x="40" y="988" font-size="12.5" fill="#475569">The only cross-customer shared data is public vulnerability enrichment (EPSS · KEV). Dedicated single-tenant clusters are available (not shown).</text>
+  <text x="40" y="1010" font-size="12.5" fill="#475569">Sensei runs through Google's Vertex Platform in each customer's dedicated GCP project with per-customer credentials — an external AI provider is used only if the customer configures one.</text>
+</svg>

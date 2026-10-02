@@ -21,7 +21,6 @@ from dojo.models import (
     Product_Type,
     Test,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.utils_watson_prefetch import (
     build_indexing_queryset,
@@ -49,11 +48,6 @@ class TestDeriveRelationPaths(DojoTestCase):
         select, _ = derive_relation_paths(Finding, self._adapter(Finding))
         self.assertIn("test__engagement__product", select)
         self.assertIn("jira_issue", select)
-
-    def test_vulnerability_id_paths(self):
-        """Vulnerability_Id stores finding__test__engagement__product__name."""
-        select, _ = derive_relation_paths(Vulnerability_Id, self._adapter(Vulnerability_Id))
-        self.assertIn("finding__test__engagement__product", select)
 
     def test_endpoint_paths(self):
         """Endpoint stores product__name — single FK hop."""

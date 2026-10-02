@@ -4,12 +4,27 @@ description: "Send HTTP webhook notifications to an external server on DefectDoj
 weight: 8
 audience: opensource
 aliases:
+  - "/en/open_source/notification_webhooks/"
+  - "/en/open_source/notification_webhooks/engagement_added/"
+  - "/en/open_source/notification_webhooks/ping/"
+  - "/en/open_source/notification_webhooks/scan_added/"
+  - "/open_source/notification_webhooks/"
+  - "/open_source/notification_webhooks/engagement_added/"
+  - "/open_source/notification_webhooks/how_to/"
+  - "/open_source/notification_webhooks/ping/"
+  - "/open_source/notification_webhooks/product_added"
+  - "/open_source/notification_webhooks/product_added/"
+  - "/open_source/notification_webhooks/scan_added/"
+  - "/open_source/notification_webhooks/test_added"
+  - "/open_source/notification_webhooks/test_added/"
   - /en/open_source/notification_webhooks/how_to
 ---
 
 **This is an experimental Open Source feature — behavior may change in future releases.**
 
 Webhooks are outbound HTTP requests sent from your DefectDojo instance to a user-defined server whenever specific events occur. 
+
+> **Naming:** The UI labels these objects **Assets** and **Organizations**. The API v2 wire surface keeps the original names — an Asset is `product` and an Organization is `product_type`. Endpoint paths, field names and event names are unchanged.
 
 ## Setup
 
@@ -37,7 +52,7 @@ X-DefectDojo-Instance: <base_url_of_dd_instance>
 
 ### product_type_added
 
-Fired when a new Product Type is created.
+Fired when a new Organization is created.
 
 **Header:**
 ```yaml
@@ -73,7 +88,7 @@ X-DefectDojo-Event: product_type_added
 
 ### product_added
 
-Fired when a new Product is created.
+Fired when a new Asset is created.
 
 **Header:**
 ```yaml

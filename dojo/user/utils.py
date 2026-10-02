@@ -14,6 +14,8 @@ class Permission_Helper:
         self.delete = kwargs.pop("delete", False)
 
     def display_name(self):
+        if self.name == "cicdinfrastructure":
+            return "CI/CD Infrastructure"
         if self.name == "bannerconf":
             return "Login Banner"
         if self.name == "github conf":
@@ -87,6 +89,7 @@ def get_configuration_permissions_fields():
 
     rules_permissions = []
     return [
+        Permission_Helper(name="cicdinfrastructure", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="development environment", app="dojo", add=True, change=True, delete=True),
         Permission_Helper(name="finding template", app="dojo", view=True, add=True, change=True, delete=True),
         *github_permissions,
@@ -115,3 +118,16 @@ def get_configuration_permissions_codenames():
         codenames.extend(permission_field.codenames())
 
     return codenames
+
+
+def user_may_delete_account(acting_user, target_user):
+    """
+    Whether acting_user is allowed to delete target_user.
+
+    is_superuser and is_staff are both reserved to superusers on the write path
+    (UserSerializer.validate), and in Open Source is_staff is an unconditional
+    authorization bypass, so deletion honours the same floor.
+    """
+    if acting_user.is_superuser:
+        return True
+    return not (target_user.is_superuser or target_user.is_staff)

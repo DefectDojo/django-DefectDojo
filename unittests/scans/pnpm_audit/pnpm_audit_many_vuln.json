@@ -1,0 +1,963 @@
+{
+  "advisories": {
+    "1090049": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1090049,
+      "title": "Axios vulnerable to Server-Side Request Forgery",
+      "module_name": "axios",
+      "vulnerable_versions": "<0.21.1",
+      "patched_versions": ">=0.21.1",
+      "severity": "moderate",
+      "cwe": "CWE-918",
+      "github_advisory_id": "GHSA-4w2v-q235-vp99",
+      "url": "https://github.com/advisories/GHSA-4w2v-q235-vp99"
+    },
+    "1095063": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1095063,
+      "title": "Remote code execution in handlebars when compiling templates",
+      "module_name": "handlebars",
+      "vulnerable_versions": "<4.7.7",
+      "patched_versions": ">=4.7.7",
+      "severity": "critical",
+      "cwe": "CWE-94",
+      "github_advisory_id": "GHSA-f2jv-r9rf-7988",
+      "url": "https://github.com/advisories/GHSA-f2jv-r9rf-7988"
+    },
+    "1096465": {
+      "findings": [
+        {
+          "version": "1.2.0",
+          "paths": [
+            ".>minimist"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1096465,
+      "title": "Prototype Pollution in minimist",
+      "module_name": "minimist",
+      "vulnerable_versions": ">=1.0.0 <1.2.3",
+      "patched_versions": ">=1.2.3",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-vh95-rmgr-6w4m",
+      "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m"
+    },
+    "1097678": {
+      "findings": [
+        {
+          "version": "1.2.0",
+          "paths": [
+            ".>minimist"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1097678,
+      "title": "Prototype Pollution in minimist",
+      "module_name": "minimist",
+      "vulnerable_versions": ">=1.0.0 <1.2.6",
+      "patched_versions": ">=1.2.6",
+      "severity": "critical",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-xvch-5gv4-984h",
+      "url": "https://github.com/advisories/GHSA-xvch-5gv4-984h"
+    },
+    "1097679": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1097679,
+      "title": "Axios Cross-Site Request Forgery Vulnerability",
+      "module_name": "axios",
+      "vulnerable_versions": ">=0.8.1 <0.28.0",
+      "patched_versions": ">=0.28.0",
+      "severity": "moderate",
+      "cwe": "CWE-352",
+      "github_advisory_id": "GHSA-wf5p-g6vw-rhxx",
+      "url": "https://github.com/advisories/GHSA-wf5p-g6vw-rhxx"
+    },
+    "1102326": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1102326,
+      "title": "axios Inefficient Regular Expression Complexity vulnerability",
+      "module_name": "axios",
+      "vulnerable_versions": "<0.21.2",
+      "patched_versions": ">=0.21.2",
+      "severity": "high",
+      "cwe": "CWE-400, CWE-1333",
+      "github_advisory_id": "GHSA-cph5-m8f7-6c5x",
+      "url": "https://github.com/advisories/GHSA-cph5-m8f7-6c5x"
+    },
+    "1102335": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1102335,
+      "title": "Prototype Pollution in handlebars",
+      "module_name": "handlebars",
+      "vulnerable_versions": "<4.7.7",
+      "patched_versions": ">=4.7.7",
+      "severity": "critical",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-765h-qjxv-5f44",
+      "url": "https://github.com/advisories/GHSA-765h-qjxv-5f44"
+    },
+    "1106913": {
+      "findings": [
+        {
+          "version": "4.17.15",
+          "paths": [
+            ".>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1106913,
+      "title": "Command Injection in lodash",
+      "module_name": "lodash",
+      "vulnerable_versions": "<4.17.21",
+      "patched_versions": ">=4.17.21",
+      "severity": "high",
+      "cwe": "CWE-77, CWE-94",
+      "github_advisory_id": "GHSA-35jh-r3h4-6jhm",
+      "url": "https://github.com/advisories/GHSA-35jh-r3h4-6jhm"
+    },
+    "1106920": {
+      "findings": [
+        {
+          "version": "4.17.15",
+          "paths": [
+            ".>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1106920,
+      "title": "Prototype Pollution in lodash",
+      "module_name": "lodash",
+      "vulnerable_versions": ">=3.7.0 <4.17.19",
+      "patched_versions": ">=4.17.19",
+      "severity": "high",
+      "cwe": "CWE-770, CWE-1321",
+      "github_advisory_id": "GHSA-p6mc-m468-83gw",
+      "url": "https://github.com/advisories/GHSA-p6mc-m468-83gw"
+    },
+    "1108258": {
+      "findings": [
+        {
+          "version": "4.17.15",
+          "paths": [
+            ".>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1108258,
+      "title": "Regular Expression Denial of Service (ReDoS) in lodash",
+      "module_name": "lodash",
+      "vulnerable_versions": ">=4.0.0 <4.17.21",
+      "patched_versions": ">=4.17.21",
+      "severity": "moderate",
+      "cwe": "CWE-400, CWE-1333",
+      "github_advisory_id": "GHSA-29mw-wpgm-hmr9",
+      "url": "https://github.com/advisories/GHSA-29mw-wpgm-hmr9"
+    },
+    "1111034": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1111034,
+      "title": "axios Requests Vulnerable To Possible SSRF and Credential Leakage via Absolute URL",
+      "module_name": "axios",
+      "vulnerable_versions": "<0.30.0",
+      "patched_versions": ">=0.30.0",
+      "severity": "high",
+      "cwe": "CWE-918",
+      "github_advisory_id": "GHSA-jr5f-v2jv-69x6",
+      "url": "https://github.com/advisories/GHSA-jr5f-v2jv-69x6"
+    },
+    "1115538": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115538,
+      "title": "Handlebars.js has JavaScript Injection via AST Type Confusion by tampering @partial-block",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.0.0 <=4.7.8",
+      "patched_versions": ">=4.7.9",
+      "severity": "high",
+      "cwe": "CWE-94, CWE-843",
+      "github_advisory_id": "GHSA-3mfm-83xf-c92r",
+      "url": "https://github.com/advisories/GHSA-3mfm-83xf-c92r"
+    },
+    "1115539": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115539,
+      "title": "Handlebars.js has JavaScript Injection via AST Type Confusion",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.0.0 <=4.7.8",
+      "patched_versions": ">=4.7.9",
+      "severity": "critical",
+      "cwe": "CWE-94, CWE-843",
+      "github_advisory_id": "GHSA-2w6w-674q-4c4q",
+      "url": "https://github.com/advisories/GHSA-2w6w-674q-4c4q"
+    },
+    "1115544": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115544,
+      "title": "Handlebars.js has Prototype Pollution Leading to XSS through Partial Template Injection",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.0.0 <4.7.9",
+      "patched_versions": ">=4.7.9",
+      "severity": "moderate",
+      "cwe": "CWE-79, CWE-1321",
+      "github_advisory_id": "GHSA-2qvq-rjwj-gvw9",
+      "url": "https://github.com/advisories/GHSA-2qvq-rjwj-gvw9"
+    },
+    "1115588": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115588,
+      "title": "Handlebars.js has a Prototype Method Access Control Gap via Missing __lookupSetter__ Blocklist Entry",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.6.0 <=4.7.8",
+      "patched_versions": ">=4.7.9",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-7rx3-28cr-v5wh",
+      "url": "https://github.com/advisories/GHSA-7rx3-28cr-v5wh"
+    },
+    "1115589": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115589,
+      "title": "Handlebars.js has a Property Access Validation Bypass in container.lookup",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.0.0 <=4.7.8",
+      "patched_versions": ">=4.7.9",
+      "severity": "low",
+      "cwe": "CWE-367",
+      "github_advisory_id": "GHSA-442j-39wm-28r2",
+      "url": "https://github.com/advisories/GHSA-442j-39wm-28r2"
+    },
+    "1115693": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115693,
+      "title": "Handlebars.js has JavaScript Injection via AST Type Confusion when passing an object as dynamic partial",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.0.0 <=4.7.8",
+      "patched_versions": ">=4.7.9",
+      "severity": "high",
+      "cwe": "CWE-94, CWE-843",
+      "github_advisory_id": "GHSA-xhpv-hc6g-r9c6",
+      "url": "https://github.com/advisories/GHSA-xhpv-hc6g-r9c6"
+    },
+    "1115694": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115694,
+      "title": "Handlebars.js has Denial of Service via Malformed Decorator Syntax in Template Compilation",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.0.0 <=4.7.8",
+      "patched_versions": ">=4.7.9",
+      "severity": "high",
+      "cwe": "CWE-754",
+      "github_advisory_id": "GHSA-9cx6-37pm-9jff",
+      "url": "https://github.com/advisories/GHSA-9cx6-37pm-9jff"
+    },
+    "1115806": {
+      "findings": [
+        {
+          "version": "4.17.15",
+          "paths": [
+            ".>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115806,
+      "title": "lodash vulnerable to Code Injection via `_.template` imports key names",
+      "module_name": "lodash",
+      "vulnerable_versions": ">=4.0.0 <=4.17.23",
+      "patched_versions": ">=4.17.24",
+      "severity": "high",
+      "cwe": "CWE-94",
+      "github_advisory_id": "GHSA-r5fr-rjxr-66jc",
+      "url": "https://github.com/advisories/GHSA-r5fr-rjxr-66jc"
+    },
+    "1115810": {
+      "findings": [
+        {
+          "version": "4.17.15",
+          "paths": [
+            ".>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115810,
+      "title": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+      "module_name": "lodash",
+      "vulnerable_versions": "<=4.17.23",
+      "patched_versions": ">=4.17.24",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-f23m-r3pf-42rh",
+      "url": "https://github.com/advisories/GHSA-f23m-r3pf-42rh"
+    },
+    "1116672": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1116672,
+      "title": "Axios has a NO_PROXY Hostname Normalization Bypass that Leads to SSRF",
+      "module_name": "axios",
+      "vulnerable_versions": "<0.31.0",
+      "patched_versions": ">=0.31.0",
+      "severity": "moderate",
+      "cwe": "CWE-441, CWE-918",
+      "github_advisory_id": "GHSA-3p68-rc4w-qgx5",
+      "url": "https://github.com/advisories/GHSA-3p68-rc4w-qgx5"
+    },
+    "1117465": {
+      "findings": [
+        {
+          "version": "4.7.6",
+          "paths": [
+            ".>handlebars"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117465,
+      "title": "Handlebars.js has JavaScript Injection in CLI Precompiler via Unescaped Names and Options",
+      "module_name": "handlebars",
+      "vulnerable_versions": ">=4.0.0 <=4.7.8",
+      "patched_versions": ">=4.7.9",
+      "severity": "high",
+      "cwe": "CWE-79, CWE-94, CWE-116",
+      "github_advisory_id": "GHSA-xjpj-3mr7-gcpf",
+      "url": "https://github.com/advisories/GHSA-xjpj-3mr7-gcpf"
+    },
+    "1117573": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117573,
+      "title": "Axios: Authentication Bypass via Prototype Pollution Gadget in `validateStatus` Merge Strategy",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "moderate",
+      "cwe": "CWE-287, CWE-1321",
+      "github_advisory_id": "GHSA-w9j2-pvgh-6h63",
+      "url": "https://github.com/advisories/GHSA-w9j2-pvgh-6h63"
+    },
+    "1117575": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117575,
+      "title": "Axios: Incomplete Fix for CVE-2025-62718 — NO_PROXY Protection Bypassed via RFC 1122 Loopback Subnet (127.0.0.0/8) in Axios 1.15.0",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "high",
+      "cwe": "CWE-183, CWE-441, CWE-918",
+      "github_advisory_id": "GHSA-pmwg-cvhr-8vh7",
+      "url": "https://github.com/advisories/GHSA-pmwg-cvhr-8vh7"
+    },
+    "1117579": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117579,
+      "title": "Axios: Null Byte Injection via Reverse-Encoding in AxiosURLSearchParams",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "low",
+      "cwe": "CWE-116, CWE-626",
+      "github_advisory_id": "GHSA-xhjh-pmcv-23jw",
+      "url": "https://github.com/advisories/GHSA-xhjh-pmcv-23jw"
+    },
+    "1117582": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117582,
+      "title": "Axios: no_proxy bypass via IP alias allows SSRF",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "moderate",
+      "cwe": "CWE-918",
+      "github_advisory_id": "GHSA-m7pr-hjqh-92cm",
+      "url": "https://github.com/advisories/GHSA-m7pr-hjqh-92cm"
+    },
+    "1117586": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117586,
+      "title": "Axios' HTTP adapter-streamed uploads bypass maxBodyLength when maxRedirects: 0",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "moderate",
+      "cwe": "CWE-770",
+      "github_advisory_id": "GHSA-5c9x-8gcm-mpgx",
+      "url": "https://github.com/advisories/GHSA-5c9x-8gcm-mpgx"
+    },
+    "1117588": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117588,
+      "title": "Axios: HTTP adapter streamed responses bypass maxContentLength",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "moderate",
+      "cwe": "CWE-770",
+      "github_advisory_id": "GHSA-vf2m-468p-8v99",
+      "url": "https://github.com/advisories/GHSA-vf2m-468p-8v99"
+    },
+    "1117590": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117590,
+      "title": "Axios: Prototype Pollution Gadgets - Response Tampering, Data Exfiltration, and Request Hijacking",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "high",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-pf86-5x62-jrwf",
+      "url": "https://github.com/advisories/GHSA-pf86-5x62-jrwf"
+    },
+    "1117592": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117592,
+      "title": "Axios: Header Injection via Prototype Pollution",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "high",
+      "cwe": "CWE-113, CWE-1321",
+      "github_advisory_id": "GHSA-6chq-wfr3-2hj9",
+      "url": "https://github.com/advisories/GHSA-6chq-wfr3-2hj9"
+    },
+    "1117594": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117594,
+      "title": "Axios: XSRF Token Cross-Origin Leakage via Prototype Pollution Gadget in `withXSRFToken` Boolean Coercion",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "moderate",
+      "cwe": "CWE-183, CWE-201",
+      "github_advisory_id": "GHSA-xx6v-rp6x-q39c",
+      "url": "https://github.com/advisories/GHSA-xx6v-rp6x-q39c"
+    },
+    "1117857": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1117857,
+      "title": "Axios is Vulnerable to Denial of Service via __proto__ Key in mergeConfig",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.30.2",
+      "patched_versions": ">=0.30.3",
+      "severity": "high",
+      "cwe": "CWE-754, CWE-1321",
+      "github_advisory_id": "GHSA-43fc-jf86-j433",
+      "url": "https://github.com/advisories/GHSA-43fc-jf86-j433"
+    },
+    "1119403": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1119403,
+      "title": "Axios has Unrestricted Cloud Metadata Exfiltration via Header Injection Chain",
+      "module_name": "axios",
+      "vulnerable_versions": "<0.31.0",
+      "patched_versions": ">=0.31.0",
+      "severity": "moderate",
+      "cwe": "CWE-113, CWE-444, CWE-918",
+      "github_advisory_id": "GHSA-fvcv-3m26-pcqx",
+      "url": "https://github.com/advisories/GHSA-fvcv-3m26-pcqx"
+    },
+    "1120124": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120124,
+      "title": "Axios: unbounded recursion in toFormData causes DoS via deeply nested request data",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.0",
+      "patched_versions": ">=0.31.1",
+      "severity": "moderate",
+      "cwe": "CWE-674",
+      "github_advisory_id": "GHSA-62hf-57xw-28j9",
+      "url": "https://github.com/advisories/GHSA-62hf-57xw-28j9"
+    },
+    "1120370": {
+      "findings": [
+        {
+          "version": "4.17.15",
+          "paths": [
+            ".>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120370,
+      "title": "Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions",
+      "module_name": "lodash",
+      "vulnerable_versions": ">=4.0.0 <=4.17.22",
+      "patched_versions": ">=4.17.23",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-xxjr-mmjv-4gpg",
+      "url": "https://github.com/advisories/GHSA-xxjr-mmjv-4gpg"
+    },
+    "1120546": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120546,
+      "title": "Axios: Regular Expression Denial of Service (ReDoS) via Cookie Name Injection",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.1",
+      "patched_versions": ">=0.31.2",
+      "severity": "high",
+      "cwe": "CWE-400, CWE-1333",
+      "github_advisory_id": "GHSA-hfxv-24rg-xrqf",
+      "url": "https://github.com/advisories/GHSA-hfxv-24rg-xrqf"
+    },
+    "1120644": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120644,
+      "title": "Axios: Proxy-Authorization Credential Leak to Origin Server Across HTTP-to-HTTPS Redirect in Axios Node.js HTTP Adapter",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.1",
+      "patched_versions": ">=0.31.2",
+      "severity": "high",
+      "cwe": "CWE-201",
+      "github_advisory_id": "GHSA-p92q-9vqr-4j8v",
+      "url": "https://github.com/advisories/GHSA-p92q-9vqr-4j8v"
+    },
+    "1120646": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120646,
+      "title": "Axios: Proxy-Authorization header leaks to redirect target when proxy is re-evaluated to direct connection",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.1",
+      "patched_versions": ">=0.31.2",
+      "severity": "high",
+      "cwe": "CWE-200",
+      "github_advisory_id": "GHSA-j5f8-grm9-p9fc",
+      "url": "https://github.com/advisories/GHSA-j5f8-grm9-p9fc"
+    },
+    "1120648": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120648,
+      "title": "axios Vulnerable to Credential Theft and Response Hijacking via Prototype Pollution Gadget in Config Merge",
+      "module_name": "axios",
+      "vulnerable_versions": ">=0.19.0 <0.31.1",
+      "patched_versions": ">=0.31.1",
+      "severity": "high",
+      "cwe": "CWE-94, CWE-1321",
+      "github_advisory_id": "GHSA-3g43-6gmg-66jw",
+      "url": "https://github.com/advisories/GHSA-3g43-6gmg-66jw"
+    },
+    "1120651": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120651,
+      "title": "axios has DoS & Header Injection via Prototype Pollution Read-Side Gadgets in axios merge functions",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.1",
+      "patched_versions": ">=0.31.2",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-898c-q2cr-xwhg",
+      "url": "https://github.com/advisories/GHSA-898c-q2cr-xwhg"
+    },
+    "1123825": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123825,
+      "title": "axios's shouldBypassProxy does not recognize IPv4-mapped IPv6 addresses, allowing NO_PROXY bypass (incomplete fix for CVE-2025-62718)",
+      "module_name": "axios",
+      "vulnerable_versions": "<=0.31.1",
+      "patched_versions": ">=0.31.2",
+      "severity": "high",
+      "cwe": "CWE-289, CWE-918",
+      "github_advisory_id": "GHSA-pjwm-pj3p-43mv",
+      "url": "https://github.com/advisories/GHSA-pjwm-pj3p-43mv"
+    },
+    "1123958": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123958,
+      "title": "Axios: Prototype pollution gadgets can alter axios request construction",
+      "module_name": "axios",
+      "vulnerable_versions": "<0.33.0",
+      "patched_versions": ">=0.33.0",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-mmx7-hfxf-jppx",
+      "url": "https://github.com/advisories/GHSA-mmx7-hfxf-jppx"
+    },
+    "1123972": {
+      "findings": [
+        {
+          "version": "0.21.0",
+          "paths": [
+            ".>axios"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123972,
+      "title": "Axios: Nested axios option objects can consume polluted prototype values",
+      "module_name": "axios",
+      "vulnerable_versions": ">=0.8.0 <0.33.0",
+      "patched_versions": ">=0.33.0",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-7q8q-rj6j-mhjq",
+      "url": "https://github.com/advisories/GHSA-7q8q-rj6j-mhjq"
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 2,
+      "moderate": 19,
+      "high": 18,
+      "critical": 4
+    },
+    "dependencies": 9,
+    "devDependencies": 0,
+    "optionalDependencies": 1,
+    "totalDependencies": 10
+  }
+}

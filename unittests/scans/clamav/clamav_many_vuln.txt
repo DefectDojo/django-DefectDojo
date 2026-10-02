@@ -1,0 +1,16 @@
+/scan/mixed/artifact-one.bin: Generic.Placeholder.Alpha.UNOFFICIAL FOUND
+/scan/mixed/artifact-three.bin: Generic.Placeholder.Gamma.UNOFFICIAL FOUND
+/scan/mixed/artifact-two.bin: Generic.Placeholder.Beta.UNOFFICIAL FOUND
+/scan/mixed/ordinary.bin: OK
+
+----------- SCAN SUMMARY -----------
+Known viruses: 3
+Engine version: 1.2.2
+Scanned directories: 1
+Scanned files: 4
+Infected files: 3
+Data scanned: 0.00 MB
+Data read: 0.00 MB (ratio 0.00:1)
+Time: 0.039 sec (0 m 0 s)
+Start Date: 2026:07:31 18:41:55
+End Date:   2026:07:31 18:41:55

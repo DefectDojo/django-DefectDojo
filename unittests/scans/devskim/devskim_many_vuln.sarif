@@ -1,0 +1,633 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.6.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "devskim",
+          "fullName": "Microsoft DevSkim Command Line Interface",
+          "version": "1.0.90+fb2d676ce4",
+          "informationUri": "https://github.com/microsoft/DevSkim/",
+          "rules": [
+            {
+              "id": "DS185832",
+              "name": "BannedCFunctionDetectedStrcpy",
+              "fullDescription": {
+                "text": "Banned C function detected (strcpy): strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
+              },
+              "help": {
+                "text": "Use strcpy_s or strlcpy if possible. If no safe function is viable, strcpy/strncpy should be proceeded by conditional checks to verify that the source string will fit in the destination with a null termnator.",
+                "markdown": "Use strcpy_s or strlcpy if possible. If no safe function is viable, strcpy/strncpy should be proceeded by conditional checks to verify that the source string will fit in the destination with a null termnator. Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS185832.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS185832.md) for additional guidance on this issue."
+              },
+              "shortDescription": {
+                "text": "strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS185832.md",
+              "properties": {
+                "precision": "high",
+                "problem.severity": "warning",
+                "DevSkimSeverity": "Important",
+                "DevSkimConfidence": "High"
+              }
+            },
+            {
+              "id": "DS154189",
+              "name": "BannedCFunctionDetected",
+              "fullDescription": {
+                "text": "Banned C function detected: These functions are historically error-prone and have been associated with a significant number of vulnerabilities. Most of these functions have safer alternatives, such as replacing 'strcpy' with 'strlcpy' or 'strcpy_s'."
+              },
+              "help": {
+                "text": "These functions are historically error-prone and have been associated with a significant number of vulnerabilities. Most of these functions have safer alternatives, such as replacing 'strcpy' with 'strlcpy' or 'strcpy_s'.",
+                "markdown": "Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS154189.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS154189.md) for additional guidance on this issue."
+              },
+              "shortDescription": {
+                "text": "These functions are historically error-prone and have been associated with a significant number of vulnerabilities. Most of these functions have safer alternatives, such as replacing 'strcpy' with 'strlcpy' or 'strcpy_s'."
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS154189.md",
+              "properties": {
+                "precision": "high",
+                "problem.severity": "warning",
+                "DevSkimSeverity": "Moderate",
+                "DevSkimConfidence": "High"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "DS189424",
+              "name": "ReviewEvalForUntrustedData",
+              "fullDescription": {
+                "text": "Review eval for untrusted data: If untrusted data (data from HTTP requests, user submitted files, etc.) is included in an eval statement it can allow an attacker to inject their own code."
+              },
+              "help": {
+                "text": "Edit the eval so that no untrusted data is included. If untrusted data is absolutely necessary a great deal of care should be taken to ensure it is properly escaped so that it cannot be executed. This is not as simple as just escaping quotes.",
+                "markdown": "Edit the eval so that no untrusted data is included. If untrusted data is absolutely necessary a great deal of care should be taken to ensure it is properly escaped so that it cannot be executed. This is not as simple as just escaping quotes. Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS189424.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS189424.md) for additional guidance on this issue."
+              },
+              "shortDescription": {
+                "text": "If untrusted data (data from HTTP requests, user submitted files, etc.) is included in an eval statement it can allow an attacker to inject their own code."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS189424.md",
+              "properties": {
+                "precision": "high",
+                "problem.severity": "recommendation",
+                "DevSkimSeverity": "ManualReview",
+                "DevSkimConfidence": "High"
+              }
+            },
+            {
+              "id": "DS126858",
+              "name": "WeakbrokenHashAlgorithm",
+              "fullDescription": {
+                "text": "Weak/Broken Hash Algorithm: A weak or broken hash algorithm was detected."
+              },
+              "help": {
+                "text": "Consider switching to use SHA-256 or SHA-512 instead.",
+                "markdown": "Consider switching to use SHA-256 or SHA-512 instead. Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS126858.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS126858.md) for additional guidance on this issue."
+              },
+              "shortDescription": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS126858.md",
+              "properties": {
+                "precision": "high",
+                "problem.severity": "error",
+                "DevSkimSeverity": "Critical",
+                "DevSkimConfidence": "High"
+              }
+            },
+            {
+              "id": "DS148264",
+              "name": "DoNotUseWeaknoncryptographicRandomNumberGenerators",
+              "fullDescription": {
+                "text": "Do not use weak/non-cryptographic random number generators: Use cryptographic random numbers generators for anything even close to a security function."
+              },
+              "help": {
+                "text": "Replacements depend on language.",
+                "markdown": "Replacements depend on language. Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS148264.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS148264.md) for additional guidance on this issue."
+              },
+              "shortDescription": {
+                "text": "Use cryptographic random numbers generators for anything even close to a security function."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS148264.md",
+              "properties": {
+                "precision": "high",
+                "problem.severity": "warning",
+                "DevSkimSeverity": "Important",
+                "DevSkimConfidence": "High"
+              }
+            },
+            {
+              "id": "DS181021",
+              "name": "BannedCFunctionDetectedGets",
+              "fullDescription": {
+                "text": "Banned C function detected (gets): gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
+              },
+              "help": {
+                "text": "Use gets_s or fgets if possible. fgets has different behavior from gets (may include newline for example), so care should be taken if it is used.",
+                "markdown": "Use gets_s or fgets if possible. fgets has different behavior from gets (may include newline for example), so care should be taken if it is used. Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS181021.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS181021.md) for additional guidance on this issue."
+              },
+              "shortDescription": {
+                "text": "gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS181021.md",
+              "properties": {
+                "precision": "high",
+                "problem.severity": "warning",
+                "DevSkimSeverity": "Important",
+                "DevSkimConfidence": "High"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "DS189424",
+          "level": "note",
+          "message": {
+            "text": "Review eval for untrusted data"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "render.js"
+                },
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 9,
+                  "endLine": 6,
+                  "endColumn": 25,
+                  "charOffset": 109,
+                  "charLength": 16,
+                  "snippet": {
+                    "text": "eval(expression)",
+                    "rendered": {
+                      "text": "eval(expression)",
+                      "markdown": "`eval(expression)`"
+                    }
+                  },
+                  "sourceLanguage": "javascript"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "Python.DangerousFunctionCall",
+              "JavaScript.DangerousFunctionCall",
+              "TypeScript.DangerousFunctionCall",
+              "PHP.DangerousFunctionCall"
+            ],
+            "DevSkimSeverity": "ManualReview",
+            "DevSkimConfidence": "High"
+          }
+        },
+        {
+          "ruleId": "DS126858",
+          "level": "error",
+          "message": {
+            "text": "Weak/Broken Hash Algorithm"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "crypto.py"
+                },
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 19,
+                  "endLine": 10,
+                  "endColumn": 23,
+                  "charOffset": 146,
+                  "charLength": 4,
+                  "snippet": {
+                    "text": "sha1",
+                    "rendered": {
+                      "text": "sha1",
+                      "markdown": "`sha1`"
+                    }
+                  },
+                  "sourceLanguage": "python"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "crypto.py"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 146,
+                        "charLength": 4
+                      },
+                      "insertedContent": {
+                        "text": "sha512"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "crypto.py"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 146,
+                        "charLength": 4
+                      },
+                      "insertedContent": {
+                        "text": "sha256"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "tags": [
+              "Cryptography.BannedHashAlgorithm"
+            ],
+            "DevSkimSeverity": "Critical",
+            "DevSkimConfidence": "High"
+          }
+        },
+        {
+          "ruleId": "DS148264",
+          "level": "error",
+          "message": {
+            "text": "Do not use weak/non-cryptographic random number generators"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "legacy.c"
+                },
+                "region": {
+                  "startLine": 16,
+                  "startColumn": 11,
+                  "endLine": 16,
+                  "endColumn": 16,
+                  "charOffset": 254,
+                  "charLength": 5,
+                  "snippet": {
+                    "text": "rand(",
+                    "rendered": {
+                      "text": "rand(",
+                      "markdown": "`rand(`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "Cryptography.PRNG.Weak"
+            ],
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High"
+          }
+        },
+        {
+          "ruleId": "DS154189",
+          "message": {
+            "text": "Banned C function detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "legacy.c"
+                },
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 4,
+                  "endLine": 12,
+                  "endColumn": 10,
+                  "charOffset": 199,
+                  "charLength": 6,
+                  "snippet": {
+                    "text": "printf",
+                    "rendered": {
+                      "text": "printf",
+                      "markdown": "`printf`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ],
+            "DevSkimSeverity": "Moderate",
+            "DevSkimConfidence": "High"
+          },
+          "level": "warning"
+        },
+        {
+          "ruleId": "DS181021",
+          "level": "error",
+          "message": {
+            "text": "Banned C function detected (gets)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "legacy.c"
+                },
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 4,
+                  "endLine": 11,
+                  "endColumn": 16,
+                  "charOffset": 181,
+                  "charLength": 12,
+                  "snippet": {
+                    "text": "gets(buffer)",
+                    "rendered": {
+                      "text": "gets(buffer)",
+                      "markdown": "`gets(buffer)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "legacy.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 181,
+                        "charLength": 12
+                      },
+                      "insertedContent": {
+                        "text": "gets_s(buffer, <size of buffer>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "legacy.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 181,
+                        "charLength": 12
+                      },
+                      "insertedContent": {
+                        "text": "fgets(buffer, <size of buffer>, stdin)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ],
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High"
+          }
+        },
+        {
+          "ruleId": "DS185832",
+          "level": "error",
+          "message": {
+            "text": "Banned C function detected (strcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "legacy.c"
+                },
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 4,
+                  "endLine": 6,
+                  "endColumn": 21,
+                  "charOffset": 110,
+                  "charLength": 17,
+                  "snippet": {
+                    "text": "strcpy(dest, src)",
+                    "rendered": {
+                      "text": "strcpy(dest, src)",
+                      "markdown": "`strcpy(dest, src)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "legacy.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 110,
+                        "charLength": 17
+                      },
+                      "insertedContent": {
+                        "text": "strcpy_s(dest, <size of dest>,  src)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "legacy.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 110,
+                        "charLength": 17
+                      },
+                      "insertedContent": {
+                        "text": "strlcpy(dest,  src, <size of dest>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ],
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High"
+          }
+        },
+        {
+          "ruleId": "DS126858",
+          "level": "error",
+          "message": {
+            "text": "Weak/Broken Hash Algorithm"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "crypto.py"
+                },
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 19,
+                  "endLine": 6,
+                  "endColumn": 22,
+                  "charOffset": 72,
+                  "charLength": 3,
+                  "snippet": {
+                    "text": "md5",
+                    "rendered": {
+                      "text": "md5",
+                      "markdown": "`md5`"
+                    }
+                  },
+                  "sourceLanguage": "python"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "crypto.py"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 72,
+                        "charLength": 3
+                      },
+                      "insertedContent": {
+                        "text": "sha512"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "A weak or broken hash algorithm was detected."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "crypto.py"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 72,
+                        "charLength": 3
+                      },
+                      "insertedContent": {
+                        "text": "sha256"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "tags": [
+              "Cryptography.BannedHashAlgorithm"
+            ],
+            "DevSkimSeverity": "Critical",
+            "DevSkimConfidence": "High"
+          }
+        }
+      ],
+      "columnKind": "utf16CodeUnits"
+    }
+  ]
+}

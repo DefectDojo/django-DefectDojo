@@ -2,8 +2,7 @@ import datetime
 import hashlib
 import json
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -152,7 +151,7 @@ class WpscanParser:
                     interesting_finding.get("confidence"),
                 ),
             )
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 location = LocationData.url(url=interesting_finding["url"])
                 finding.unsaved_locations = [location]
             else:

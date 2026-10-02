@@ -1,5 +1,6 @@
 
 from django.conf import settings
+from django.core.exceptions import RequestDataTooBig, TooManyFieldsSent
 from django.db.models import Model
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -16,9 +17,11 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_is_superuser_or_global_owner,
 )
+from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.location.models import Location
 from dojo.models import (
+    CICDInfrastructure,
     Development_Environment,
     Endpoint,
     Engagement,
@@ -31,6 +34,10 @@ from dojo.models import (
     SLA_Configuration,
     Test,
 )
+
+# Imported from the leaf module (not dojo.models) to avoid a circular import during
+# dojo.models loading, matching how Location is imported above.
+from dojo.product_attributes.models import Product_Lifecycle, Product_Origin, Product_Platform
 
 
 def check_post_permission(
@@ -238,7 +245,22 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 "post_permission": "edit",
             },
         },
+        # Location metadata is scoped to one product. Edit rights on a shared Location come
+        # from any product that references it, so the scoped product is checked on its own.
+        "location_product": {
+            "model": Product,
+            "permissions": {
+                "get_permission": "view",
+                "put_permission": "edit",
+                "delete_permission": "edit",
+                "post_permission": "edit",
+            },
+        },
         # TODO: Delete this after the move to Locations
+        # This permission table is built once at import to match the /api/v2 routes
+        # mounted at boot, so it stays on settings.V3_FEATURE_LOCATIONS rather than the
+        # runtime dojo.location.feature accessor. See dojo/location/feature.py and
+        # pro/features/relabel.py:14-28.
         "endpoint": {
             "model": Endpoint if not settings.V3_FEATURE_LOCATIONS else Location,
             "permissions": {
@@ -255,6 +277,8 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
             "GET": "get_permission",
             "POST": "post_permission",
             # PATCH is generally not used here, but this endpoint is sorta odd...
+            # ...it accepts PUT and PATCH alike, so both must authorize the target.
+            "PUT": "put_permission",
             "PATCH": "put_permission",
         }
         for request_method, permission_type in method_to_permission_map.items():
@@ -401,6 +425,15 @@ class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasEngagementFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
+    }
+
+
 class UserHasEngagementNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": "view",
@@ -419,9 +452,16 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        # The fourth argument is the POST permission, and it has to be given: without it
+        # check_object_permission passes None down to user_has_permission for every POST. This
+        # codebase happens to answer False to an unmapped permission, so it degrades to a 403 --
+        # but an authorization layer that treats "no permission named" as unimplemented raises
+        # instead, turning that into a 500. It went unnoticed because this viewset had no POST
+        # actions until expire and reinstate were added.
         return check_object_permission(
             request,
             obj,
+            "edit",
             "edit",
             "edit",
             "edit",
@@ -459,6 +499,15 @@ class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasFindingFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -507,6 +556,19 @@ class UserHasImportPermission(permissions.BasePermission):
             converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
             converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
             converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
+        except (TooManyFieldsSent, RequestDataTooBig) as e:
+            # A very large scan import (too many form fields, or a body over the size limit)
+            # trips Django's DATA_UPLOAD_MAX_NUMBER_FIELDS / DATA_UPLOAD_MAX_MEMORY_SIZE guard
+            # while this permission check parses request.data. Surface it as a clear client
+            # error instead of letting the SuspiciousOperation escape as an opaque 400 that
+            # also pages on-call via error reporting.
+            msg = (
+                "The scan import request exceeded the server's upload limits "
+                "(too many form fields, or the request body is too large). Reduce the "
+                "number of fields in the request, or ask your administrator to increase "
+                "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS / DD_DATA_UPLOAD_MAX_MEMORY_SIZE."
+            )
+            raise ValidationError(msg) from e
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(e)
@@ -567,6 +629,19 @@ class UserHasMetaImportPermission(permissions.BasePermission):
             product = auto_create.get_target_product_if_exists(**converted_dict)
             if not product:
                 product = auto_create.get_target_product_by_id_if_exists(**converted_dict)
+        except (TooManyFieldsSent, RequestDataTooBig) as e:
+            # A very large scan import (too many form fields, or a body over the size limit)
+            # trips Django's DATA_UPLOAD_MAX_NUMBER_FIELDS / DATA_UPLOAD_MAX_MEMORY_SIZE guard
+            # while this permission check parses request.data. Surface it as a clear client
+            # error instead of letting the SuspiciousOperation escape as an opaque 400 that
+            # also pages on-call via error reporting.
+            msg = (
+                "The scan import request exceeded the server's upload limits "
+                "(too many form fields, or the request body is too large). Reduce the "
+                "number of fields in the request, or ask your administrator to increase "
+                "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS / DD_DATA_UPLOAD_MAX_MEMORY_SIZE."
+            )
+            raise ValidationError(msg) from e
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(e)
@@ -688,6 +763,19 @@ class UserHasReimportPermission(permissions.BasePermission):
             converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
             converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
             converted_dict["test"] = auto_create.get_target_test_if_exists(**converted_dict)
+        except (TooManyFieldsSent, RequestDataTooBig) as e:
+            # A very large scan import (too many form fields, or a body over the size limit)
+            # trips Django's DATA_UPLOAD_MAX_NUMBER_FIELDS / DATA_UPLOAD_MAX_MEMORY_SIZE guard
+            # while this permission check parses request.data. Surface it as a clear client
+            # error instead of letting the SuspiciousOperation escape as an opaque 400 that
+            # also pages on-call via error reporting.
+            msg = (
+                "The scan import request exceeded the server's upload limits "
+                "(too many form fields, or the request body is too large). Reduce the "
+                "number of fields in the request, or ask your administrator to increase "
+                "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS / DD_DATA_UPLOAD_MAX_MEMORY_SIZE."
+            )
+            raise ValidationError(msg) from e
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(e)
@@ -775,6 +863,15 @@ class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasTestFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -1073,11 +1170,55 @@ class UserHasDevelopmentEnvironmentPermission(BaseDjangoModelPermission):
     }
 
 
+class UserHasProductPlatformPermission(BaseDjangoModelPermission):
+    django_model = Product_Platform
+    # Reads are open to any authenticated user (the asset form and asset views need to
+    # render the option labels). Writes require the configuration permission.
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductLifecyclePermission(BaseDjangoModelPermission):
+    django_model = Product_Lifecycle
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasProductOriginPermission(BaseDjangoModelPermission):
+    django_model = Product_Origin
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
 class UserHasRegulationPermission(BaseDjangoModelPermission):
     django_model = Regulation
     # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L104
     # It looks like view permission was explicitly not supported, so I assume
     # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasCICDInfrastructurePermission(BaseDjangoModelPermission):
+    django_model = CICDInfrastructure
+    # Reads are open to any authenticated user (engagement views surface CICD
+    # references and need to render them). Writes require elevated privileges.
     request_method_permission_map = {
         "POST": "add",
         "PUT": "change",
@@ -1251,11 +1392,21 @@ class UserHasConfigurationPermissionSuperuser(
 
 class LocationFindingReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the finding the reference is attached to and
+        # the location it points at. Authorizing only the finding would let a
+        # user attach a location they cannot otherwise see to their own finding.
         return check_post_permission(
             request,
             Finding,
             "finding",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -1270,16 +1421,29 @@ class LocationFindingReferencePermission(permissions.BasePermission):
             and check_update_permission(
                 request, obj, "edit", "finding",
             )
+            and check_update_permission(
+                request, obj, "view", "location",
+            )
         )
 
 
 class LocationProductReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the product the reference is attached to and
+        # the location it points at. Authorizing only the product would let a
+        # user attach a location they cannot otherwise see to their own product.
         return check_post_permission(
             request,
             Product,
             "product",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -1293,5 +1457,8 @@ class LocationProductReferencePermission(permissions.BasePermission):
             )
             and check_update_permission(
                 request, obj, "edit", "product",
+            )
+            and check_update_permission(
+                request, obj, "view", "location",
             )
         )

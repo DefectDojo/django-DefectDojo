@@ -1,0 +1,16 @@
+[
+  {
+    "id": 900010,
+    "server_id": 1001,
+    "installed": false,
+    "name": "example-runtime",
+    "display_name": "Example Runtime",
+    "version": "4.8.1",
+    "repo": "Vendor Update Catalog",
+    "cves": ["CVE-2000-0001"],
+    "cve_score": 8.8,
+    "severity": "high",
+    "requires_reboot": true,
+    "create_time": "2024-05-13T18:02:45+0000"
+  }
+]

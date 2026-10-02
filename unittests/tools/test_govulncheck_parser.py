@@ -136,6 +136,39 @@ class TestGovulncheckParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(201, len(findings))
 
+    def test_parse_advisories_without_aliases(self):
+        # Go-only advisories can have no CVE/GHSA alias, or an empty list of them
+        with (get_unit_tests_scans_path("govulncheck") / "no_aliases.json").open(encoding="utf-8") as testfile:
+            parser = GovulncheckParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
+            self.assertEqual(
+                ["GO-2022-1144", "GO-2022-1143", "GO-2022-0969"],
+                [finding.unique_id_from_tool for finding in findings],
+            )
+            self.assertEqual("CVE-2022-41717", findings[0].cve)
+            self.assertIsNone(findings[1].cve)
+            self.assertIsNone(findings[2].cve)
+
+    def test_parse_new_version_advisories_without_aliases(self):
+        with (get_unit_tests_scans_path("govulncheck") / "no_aliases_new_version.json").open(encoding="utf-8") as testfile:
+            parser = GovulncheckParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
+            self.assertEqual("CVE-2023-29403", findings[0].cve)
+            self.assertIsNone(findings[1].cve)
+            self.assertIsNone(findings[2].cve)
+            self.assertEqual("GO-2026-5932", findings[1].unique_id_from_tool)
+            self.assertEqual("GO-2026-5933", findings[2].unique_id_from_tool)
+
+    def test_parse_sarif_is_rejected(self):
+        # A govulncheck SARIF report uploaded to this scan type fails with a
+        # clear message pointing to the SARIF scan type (issue #15033 follow-up).
+        with self.assertRaises(ValueError) as exp, \
+          (get_unit_tests_scans_path("govulncheck") / "issue_15033_sarif.json").open(encoding="utf-8") as testfile:
+            GovulncheckParser().get_findings(testfile, Test())
+        self.assertIn("SARIF", str(exp.exception))
+
 
 class TestGovulncheckParserV2(DojoTestCase):
 
@@ -165,6 +198,17 @@ class TestGovulncheckParserV2(DojoTestCase):
             self.assertEqual(17, severities.count("Low"))
             self.assertEqual(26, severities.count("Info"))
 
+            # Pin the description output format: these exact surfaces are part of
+            # the parser's observable contract (users and downstream tooling read
+            # them), so changes to them must be deliberate, not incidental.
+            high = next(f for f in findings if f.severity == "High")
+            self.assertIn("**Reachability:** symbol (High severity)", high.description)
+            self.assertIn("**Traces:**", high.description)
+            low = next(f for f in findings if f.severity == "Low")
+            self.assertIn("**Reachability:** package (Low severity)", low.description)
+            info = next(f for f in findings if f.severity == "Info")
+            self.assertIn("**Reachability:** module (Info severity)", info.description)
+
             # Every finding maps to a vulnerable component.
             self.assertTrue(all(f.component_name for f in findings))
 
@@ -182,3 +226,11 @@ class TestGovulncheckParserV2(DojoTestCase):
             self.assertTrue(first.fix_available)
             self.assertEqual("v0.33.0", first.fix_version)
             self.assertEqual("https://pkg.go.dev/vuln/GO-2024-3333", first.url)
+
+    def test_parse_sarif_is_rejected(self):
+        # A govulncheck SARIF report uploaded to this scan type fails with a
+        # clear message pointing to the SARIF scan type (issue #15033 follow-up).
+        with self.assertRaises(ValueError) as exp, \
+          (get_unit_tests_scans_path("govulncheck") / "issue_15033_sarif.json").open(encoding="utf-8") as testfile:
+            GovulncheckParserV2().get_findings(testfile, Test())
+        self.assertIn("SARIF", str(exp.exception))

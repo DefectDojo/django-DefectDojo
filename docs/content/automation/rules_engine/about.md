@@ -12,6 +12,12 @@ DefectDojo's Rules Engine allows you to build custom workflows and bulk actions 
 
 Rules Engine can only be accessed through the [Pro UI](/get_started/about/ui_pro_vs_os/).
 
+**Looking for the graph editor?** [Triage Engine](/automation/triage_engine/about/) builds automation as visual node graphs, and adds branching, outbound actions such as tickets and messages, per-run traces and a delivery ledger. Both engines run side by side, and existing rules can be [converted across](/automation/triage_engine/converting_from_rules_engine/).
+
+## Enabling Rules Engine
+
+Rules Engine is in Beta and is off by default. A superuser can turn it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+
 Currently, Rules can only be created for Findings, however more object types will be supported in the future.
 
 Rules can be triggered manually from the **All Rules** page, or scheduled to run automatically on a recurring schedule.  When a rule is triggered, it will be applied to all existing Findings that match the filter conditions set.
@@ -55,11 +61,11 @@ You will see an All Findings table.  Using the All Findings Table, set the Filte
 
 The table will preview the list of existing Findings that you have filtered.
 
-For example, in this screenshot we are filtering for all Findings that are in 'Product One'.  Once we apply this filter (by clicking outside of the Filters menu), it will be added to our list of applicable Filters.
+For example, in this screenshot we are filtering for all Findings that are in 'Asset One'.  Once we apply this filter (by clicking outside of the Filters menu), it will be added to our list of applicable Filters.
 
 ![image](images/rules_engine_3.png)
 
-In the screenshot above, all Findings that are in the Product 'Product One' will have actions taken on them.
+In the screenshot above, all Findings that are in the Asset 'Asset One' will have actions taken on them.
 
 Once you have a set of Filters that you want to apply, Click the Next Button.
 

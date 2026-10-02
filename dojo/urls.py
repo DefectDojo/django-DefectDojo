@@ -6,26 +6,16 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import re_path
 from drf_spectacular.views import SpectacularSwaggerView
-from rest_framework.authtoken import views as tokenviews
 from rest_framework.routers import DefaultRouter
 
 from dojo import views
-from dojo.announcement.urls import urlpatterns as announcement_urls
+from dojo.announcement.api.urls import add_announcement_urls
+from dojo.announcement.ui.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
-    AnnouncementViewSet,
     AppAnalysisViewSet,
-    BurpRawRequestResponseViewSet,
     CeleryViewSet,
     ConfigurationPermissionViewSet,
-    DevelopmentEnvironmentViewSet,
     DojoMetaViewSet,
-    EndpointMetaImporterView,
-    EndpointStatusViewSet,
-    EndPointViewSet,
-    EngagementPresetsViewset,
-    EngagementViewSet,
-    FindingTemplatesViewSet,
-    FindingViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -34,38 +24,28 @@ from dojo.api_v2.views import (
     LanguageTypeViewSet,
     LanguageViewSet,
     NetworkLocationsViewset,
-    NotesViewSet,
-    NoteTypeViewSet,
-    ProductAPIScanConfigurationViewSet,
-    ProductTypeViewSet,
-    ProductViewSet,
-    RegulationsViewSet,
     ReImportScanView,
-    RiskAcceptanceViewSet,
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
     SonarqubeIssueViewSet,
-    SystemSettingsViewSet,
-    TestImportViewSet,
-    TestsViewSet,
-    TestTypesViewSet,
-    ToolConfigurationsViewSet,
-    ToolProductSettingsViewSet,
-    ToolTypesViewSet,
-    UserContactInfoViewSet,
-    UserProfileView,
-    UsersViewSet,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.asset.api.urls import add_asset_urls
 from dojo.asset.urls import urlpatterns as asset_urls
-from dojo.banner.urls import urlpatterns as banner_urls
-from dojo.benchmark.urls import urlpatterns as benchmark_urls
+from dojo.banner.ui.urls import urlpatterns as banner_urls
+from dojo.benchmark.ui.urls import urlpatterns as benchmark_urls
+from dojo.cicd_infrastructure.api.urls import add_cicd_infrastructure_urls
+from dojo.cicd_infrastructure.ui.urls import urlpatterns as cicd_infrastructure_urls
 from dojo.components.urls import urlpatterns as component_urls
-from dojo.development_environment.urls import urlpatterns as dev_env_urls
-from dojo.endpoint.urls import urlpatterns as endpoint_urls
-from dojo.engagement.urls import urlpatterns as eng_urls
-from dojo.finding.urls import urlpatterns as finding_urls
+from dojo.decorators import dojo_ratelimit
+from dojo.development_environment.api.urls import add_development_environment_urls
+from dojo.development_environment.ui.urls import urlpatterns as dev_env_urls
+from dojo.endpoint.api.urls import add_endpoint_urls, register_endpoint_meta_import
+from dojo.endpoint.ui.urls import urlpatterns as endpoint_urls
+from dojo.engagement.api.urls import add_engagement_urls
+from dojo.engagement.ui.urls import urlpatterns as eng_urls
+from dojo.finding.api.urls import add_finding_urls
+from dojo.finding.ui.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github.ui.urls import urlpatterns as github_urls
 from dojo.home.urls import urlpatterns as home_urls
@@ -73,27 +53,42 @@ from dojo.jira.urls import urlpatterns as jira_urls
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.urls import add_locations_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
-from dojo.note_type.urls import urlpatterns as note_type_urls
-from dojo.notes.urls import urlpatterns as notes_urls
+from dojo.note_type.api.urls import add_note_type_urls
+from dojo.note_type.ui.urls import urlpatterns as note_type_urls
+from dojo.notes.api.urls import add_notes_urls
+from dojo.notes.ui.urls import urlpatterns as notes_urls
 from dojo.notifications.api.urls import add_notifications_urls
 from dojo.notifications.ui.urls import urlpatterns as notifications_urls
-from dojo.object.urls import urlpatterns as object_urls
+from dojo.object.ui.urls import urlpatterns as object_urls
 from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
-from dojo.regulations.urls import urlpatterns as regulations
-from dojo.reports.urls import urlpatterns as reports_urls
+from dojo.product.api.urls import add_product_urls
+from dojo.product_attributes.api.urls import add_product_attribute_urls
+from dojo.product_attributes.ui.urls import urlpatterns as product_attribute_urls
+from dojo.product_type.api.urls import add_product_type_urls
+from dojo.regulations.api.urls import add_regulations_urls
+from dojo.regulations.ui.urls import urlpatterns as regulations
+from dojo.reports.ui.urls import urlpatterns as reports_urls
+from dojo.risk_acceptance.api.urls import add_risk_acceptance_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
-from dojo.survey.urls import urlpatterns as survey_urls
-from dojo.system_settings.urls import urlpatterns as system_settings_urls
-from dojo.test.urls import urlpatterns as test_urls
+from dojo.survey.ui.urls import urlpatterns as survey_urls
+from dojo.system_settings.api.urls import add_system_settings_urls
+from dojo.system_settings.ui.urls import urlpatterns as system_settings_urls
+from dojo.test.api.urls import add_test_urls
+from dojo.test.ui.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
-from dojo.tool_config.urls import urlpatterns as tool_config_urls
-from dojo.tool_product.urls import urlpatterns as tool_product_urls
-from dojo.tool_type.urls import urlpatterns as tool_type_urls
+from dojo.tool_config.api.urls import add_tool_config_urls
+from dojo.tool_config.ui.urls import urlpatterns as tool_config_urls
+from dojo.tool_product.api.urls import add_tool_product_urls
+from dojo.tool_product.ui.urls import urlpatterns as tool_product_urls
+from dojo.tool_type.api.urls import add_tool_type_urls
+from dojo.tool_type.ui.urls import urlpatterns as tool_type_urls
 from dojo.url.api.urls import add_url_urls
 from dojo.url.ui.urls import urlpatterns as url_patterns
-from dojo.user.urls import urlpatterns as user_urls
+from dojo.user.api.urls import add_user_urls
+from dojo.user.api.views import ForcedResetObtainAuthToken, RevokeApiTokenView, UserProfileView
+from dojo.user.ui.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -107,16 +102,13 @@ handler400 = "dojo.views.custom_bad_request_view"
 
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
-v2_api.register(r"announcements", AnnouncementViewSet, basename="announcement")
+v2_api = add_announcement_urls(v2_api)
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
-v2_api.register(r"development_environments", DevelopmentEnvironmentViewSet, basename="development_environment")
+v2_api = add_development_environment_urls(v2_api)
+v2_api = add_product_attribute_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   dojo_groups, dojo_group_members → pro/groups, pro/group_members
-v2_api.register(r"endpoint_meta_import", EndpointMetaImporterView, basename="endpointmetaimport")
-v2_api.register(r"engagements", EngagementViewSet, basename="engagement")
-v2_api.register(r"engagement_presets", EngagementPresetsViewset, basename="engagement_presets")
-v2_api.register(r"finding_templates", FindingTemplatesViewSet, basename="finding_template")
-v2_api.register(r"findings", FindingViewSet, basename="finding")
+v2_api = register_endpoint_meta_import(v2_api)
 # RBAC endpoint moved to Pro under legacy authorization: global_roles → pro/global_roles
 v2_api.register(r"import-languages", ImportLanguagesView, basename="importlanguages")
 v2_api.register(r"import-scan", ImportScanView, basename="importscan")
@@ -129,35 +121,37 @@ v2_api.register(r"languages", LanguageViewSet, basename="languages")
 v2_api.register(r"language_types", LanguageTypeViewSet, basename="language_type")
 v2_api.register(r"metadata", DojoMetaViewSet, basename="metadata")
 v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network_locations")
-v2_api.register(r"notes", NotesViewSet, basename="notes")
-v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
+v2_api = add_notes_urls(v2_api)
+v2_api = add_note_type_urls(v2_api)
 add_notifications_urls(v2_api)
-v2_api.register(r"products", ProductViewSet, basename="product")
-v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
+v2_api = add_product_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   product_groups, product_members → pro/product_groups, pro/product_members
-v2_api.register(r"product_types", ProductTypeViewSet, basename="product_type")
+v2_api = add_product_type_urls(v2_api)
+v2_api = add_engagement_urls(v2_api)
+v2_api = add_finding_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   product_type_members, product_type_groups → pro/product_type_members, pro/product_type_groups
-v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")
+v2_api = add_regulations_urls(v2_api)
 v2_api.register(r"reimport-scan", ReImportScanView, basename="reimportscan")
-v2_api.register(r"request_response_pairs", BurpRawRequestResponseViewSet, basename="request_response_pairs")
-v2_api.register(r"risk_acceptance", RiskAcceptanceViewSet, basename="risk_acceptance")
+v2_api = add_risk_acceptance_urls(v2_api)
 # RBAC endpoint moved to Pro under legacy authorization: roles → pro/roles
 v2_api.register(r"sla_configurations", SLAConfigurationViewset, basename="sla_configurations")
 v2_api.register(r"sonarqube_issues", SonarqubeIssueViewSet, basename="sonarqube_issue")
 v2_api.register(r"sonarqube_transitions", SonarqubeIssueTransitionViewSet, basename="sonarqube_issue_transition")
-v2_api.register(r"system_settings", SystemSettingsViewSet, basename="system_settings")
+v2_api = add_system_settings_urls(v2_api)
 v2_api.register(r"technologies", AppAnalysisViewSet, basename="app_analysis")
-v2_api.register(r"tests", TestsViewSet, basename="test")
-v2_api.register(r"test_types", TestTypesViewSet, basename="test_type")
-v2_api.register(r"test_imports", TestImportViewSet, basename="test_imports")
-v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
-v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
-v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
-v2_api.register(r"users", UsersViewSet, basename="user")
-v2_api.register(r"user_contact_infos", UserContactInfoViewSet, basename="usercontactinfo")
-# Add the location routes
+v2_api = add_test_urls(v2_api)
+v2_api = add_tool_config_urls(v2_api)
+v2_api = add_tool_product_urls(v2_api)
+v2_api = add_tool_type_urls(v2_api)
+v2_api = add_user_urls(v2_api)
+# Add the location routes.
+# Module-level route wiring: evaluated once at URLConf build time, so it stays on
+# settings.V3_FEATURE_LOCATIONS rather than the runtime dojo.location.feature
+# accessor. A stored-flag toggle cannot re-mount /api/v2 routes without a restart;
+# the Pro Feature Flag documents that this wiring is fixed at boot.
+# See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Locations
     v2_api = add_locations_urls(v2_api)
@@ -165,16 +159,17 @@ if settings.V3_FEATURE_LOCATIONS:
     v2_api.register(r"endpoints", V3EndpointCompatibleViewSet, basename="endpoint")
     v2_api.register(r"endpoint_status", V3EndpointStatusCompatibleViewSet, basename="endpoint_status")
 else:
-    v2_api.register(r"endpoints", EndPointViewSet, basename="endpoint")
-    v2_api.register(r"endpoint_status", EndpointStatusViewSet, basename="endpoint_status")
+    v2_api = add_endpoint_urls(v2_api)
 v2_api.register(r"celery", CeleryViewSet, basename="celery")
 # V3
 add_asset_urls(v2_api)
+add_cicd_infrastructure_urls(v2_api)
 add_organization_urls(v2_api)
 
 ur = []
 ur += asset_urls
 ur += dev_env_urls
+ur += product_attribute_urls
 ur += eng_urls
 ur += finding_urls
 ur += finding_group_urls
@@ -191,6 +186,7 @@ ur += github_urls
 ur += tool_type_urls
 ur += tool_config_urls
 ur += tool_product_urls
+ur += cicd_infrastructure_urls
 ur += sla_urls
 ur += system_settings_urls
 ur += notifications_urls
@@ -203,6 +199,9 @@ ur += component_urls
 ur += regulations
 ur += announcement_urls
 
+# Module-level Classic UI route wiring: fixed at URLConf build time on
+# settings.V3_FEATURE_LOCATIONS (a stored-flag toggle cannot re-mount these
+# without a restart). See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Location
     ur += url_patterns
@@ -214,17 +213,40 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/api-tokens/revoke/$".format(get_system_setting("url_prefix")), RevokeApiTokenView.as_view(), name="api-token-revoke"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
     if settings.API_TOKENS_ENABLED and settings.API_TOKEN_AUTH_ENDPOINT_ENABLED:
+        # Keyed on IP: API clients post JSON, which leaves request.POST empty.
+        token_auth_view = dojo_ratelimit(key="ip")(ForcedResetObtainAuthToken.as_view())
         api_v2_urls += [
             re_path(
                 f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
-                tokenviews.obtain_auth_token,
+                token_auth_view,
                 name="api-token-auth",
             ),
         ]
+
+# API v3 (alpha) -- mounted conditionally on V3_FEATURE_LOCATIONS (D5/§4.1). With the flag off the
+# whole /api/v3/ tree is absent. The prefix and version live in settings (single source).
+if getattr(settings, "V3_FEATURE_LOCATIONS", False):
+    from dojo.api_v3.api import api_v3
+    from dojo.api_v3.reference_docs import scalar_reference
+
+    api_v2_urls += [
+        # Scalar reference (CDN + SRI, §12) must be registered BEFORE the NinjaAPI catch-all
+        # prefix so /reference is not swallowed by the API's 404 handling.
+        re_path(
+            r"^{}{}/reference$".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            scalar_reference,
+            name="api_v3_reference",
+        ),
+        re_path(
+            r"^{}{}/".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            api_v3.urls,
+        ),
+    ]
 
 urlpatterns = []
 

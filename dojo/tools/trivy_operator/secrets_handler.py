@@ -1,4 +1,7 @@
+
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 TRIVY_SEVERITIES = {
     "CRITICAL": "Critical",
@@ -15,7 +18,7 @@ SECRET_DESCRIPTION_TEMPLATE = """{title}
 
 
 class TrivySecretsHandler:
-    def handle_secrets(self, labels, secrets, test):
+    def handle_secrets(self, labels, secrets, test, image=None):
         findings = []
         resource_namespace = labels.get("trivy-operator.resource.namespace", "")
         resource_kind = labels.get("trivy-operator.resource.kind", "")
@@ -55,6 +58,12 @@ class TrivySecretsHandler:
                 service=service,
                 fix_available=True,
             )
+            if locations_enabled() and secret_target:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=secret_target),
+                )
+            if image is not None:
+                finding.unsaved_locations.append(image)
             if resource_namespace:
                 finding.unsaved_tags = [resource_namespace]
             findings.append(finding)

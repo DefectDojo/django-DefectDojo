@@ -1,9 +1,10 @@
 import logging
 
-from django.conf import settings
 from django.db.models import Case, CharField, Count, Exists, F, Q, Value, When
 from django.db.models.functions import Concat
 from django.db.models.query import Prefetch, QuerySet
+
+from dojo.location.feature import locations_enabled
 
 try:
     from dojo.authorization.query_filters import get_auth_filter
@@ -17,15 +18,15 @@ from dojo.models import (
     Endpoint_Status,
     Finding,
     Test_Import_Finding_Action,
-    Vulnerability_Id,
 )
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_findings(permission, user=None):
     impl = get_auth_filter("finding.get_authorized_findings")
     if impl:
@@ -38,22 +39,6 @@ def get_authorized_findings_for_queryset(permission, queryset, user=None):
     if impl:
         return impl(permission, queryset, user=user)
     return Finding.objects.all().order_by("id") if queryset is None else queryset
-
-
-# Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
-def get_authorized_vulnerability_ids(permission, user=None):
-    impl = get_auth_filter("finding.get_authorized_vulnerability_ids")
-    if impl:
-        return impl(permission, user=user)
-    return Vulnerability_Id.objects.all()
-
-
-def get_authorized_vulnerability_ids_for_queryset(permission, queryset, user=None):
-    impl = get_auth_filter("finding.get_authorized_vulnerability_ids_for_queryset")
-    if impl:
-        return impl(permission, queryset, user=user)
-    return queryset
 
 
 def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=True):
@@ -102,7 +87,7 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
         prefetched_findings = prefetched_findings.prefetch_related("test_import_finding_action_set")
 
     # Endpoint counts using optimized subqueries
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Standard prefetches
         prefetched_findings = prefetched_findings.prefetch_related(
             "notes",
@@ -111,7 +96,7 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
             "status_finding",
             "finding_group_set",
             "finding_group_set__jira_issue",  # Include both variants
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
         base_status = LocationFindingReference.objects.prefetch_related("location__url").all()
         prefetched_findings = prefetched_findings.annotate(
@@ -147,7 +132,7 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
             "status_finding",
             "finding_group_set",
             "finding_group_set__jira_issue",  # Include both variants
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
         base_status = Endpoint_Status.objects.prefetch_related("endpoint")
         status = Case(

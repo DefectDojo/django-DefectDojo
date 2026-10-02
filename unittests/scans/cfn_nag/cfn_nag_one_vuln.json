@@ -1,0 +1,25 @@
+[
+  {
+    "filename": "./single.yaml",
+    "file_results": {
+      "failure_count": 0,
+      "violations": [
+        {
+          "id": "W48",
+          "name": "SqsQueueKmsMasterKeyIdRule",
+          "type": "WARN",
+          "message": "SQS Queue should specify KmsMasterKeyId property",
+          "logical_resource_ids": [
+            "ApplicationQueue"
+          ],
+          "line_numbers": [
+            5
+          ],
+          "element_types": [
+            "resource"
+          ]
+        }
+      ]
+    }
+  }
+]

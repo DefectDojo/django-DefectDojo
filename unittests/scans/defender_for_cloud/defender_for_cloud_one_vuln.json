@@ -1,0 +1,70 @@
+{
+  "value": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/example-rg/providers/Microsoft.Compute/virtualMachines/web-node-1/providers/Microsoft.Security/assessments/aaaa/subAssessments/sub-0001",
+      "name": "sub-0001",
+      "type": "Microsoft.Security/assessments/subAssessments",
+      "properties": {
+        "id": "finding-0001",
+        "displayName": "CVE-2000-0001",
+        "description": "A memory-safety flaw allows remote code execution.",
+        "impact": "An attacker who reaches the service can run code as the service account.",
+        "remediation": "Apply the vendor update through your patching process.",
+        "timeGenerated": "2024-07-01T12:00:00.0000000Z",
+        "status": {
+          "code": "Unhealthy",
+          "severity": "High",
+          "cause": ""
+        },
+        "resourceDetails": {
+          "ResourceProvider": "Microsoft.Compute",
+          "NativeResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/example-rg/providers/Microsoft.Compute/virtualMachines/web-node-1",
+          "ResourceName": "web-node-1",
+          "ResourceType": "virtualMachines",
+          "source": "Azure"
+        },
+        "additionalData": {
+          "assessedResourceType": "ServerVulnerabilityTvm",
+          "softwareName": "openssl",
+          "softwareVersion": "3.0.2",
+          "softwareVendor": "OpenSSL",
+          "recommendedVersion": "3.0.13",
+          "cvssV30Score": 9.8,
+          "vulnerabilityDetails": {
+            "cveId": "CVE-2000-0001",
+            "severity": "High",
+            "publishedDate": "2024-05-01T00:00:00Z",
+            "cvss": {
+              "2.0": {
+                "base": 7.5,
+                "cvssVectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+              },
+              "3.0": {
+                "base": 9.8,
+                "cvssVectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              }
+            },
+            "references": [
+              {
+                "title": "CVE-2000-0001",
+                "link": "https://nvd.example.com/vuln/detail/CVE-2000-0001"
+              },
+              {
+                "title": "Vendor advisory",
+                "link": "https://vendor.example.com/advisory/1"
+              }
+            ]
+          },
+          "cve": [
+            {
+              "title": "CVE-2000-0001",
+              "severity": "High",
+              "cvssVectorString": "CVSS:3.0/AV:N"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "nextLink": ""
+}

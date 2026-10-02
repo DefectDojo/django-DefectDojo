@@ -1,0 +1,94 @@
+[05:10:38] Running Rootkit Hunter version 1.4.6 on b64f79c15e86
+[05:10:38]
+[05:10:38] Info: Start date is Fri Jul 31 05:10:38 UTC 2026
+[05:10:38]
+[05:10:38] Checking configuration file and command-line options...
+[05:10:38] Info: Detected operating system is 'Linux'
+[05:10:38] Info: Found O/S name: Debian GNU/Linux 13 (trixie)
+[05:10:38] Info: Command line is /usr/bin/rkhunter --check --sk --nocolors --noappend-log --enable system_configs
+[05:10:38] Info: Environment shell is /bin/bash; rkhunter is using dash
+[05:10:38] Info: Using configuration file '/etc/rkhunter.conf'
+[05:10:38] Info: Installation directory is '/usr'
+[05:10:38] Info: Using language 'en'
+[05:10:38] Info: Using '/var/lib/rkhunter/db' as the database directory
+[05:10:38] Info: Using '/usr/share/rkhunter/scripts' as the support script directory
+[05:10:38] Info: Using '/usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/libexec /usr/local/libexec' as the command directories
+[05:10:38] Info: Using '/var/lib/rkhunter/tmp' as the temporary directory
+[05:10:38] Info: No mail-on-warning address configured
+[05:10:38] Info: X will be automatically detected
+[05:10:38] Info: Found the 'basename' command: /usr/bin/basename
+[05:10:38] Info: Found the 'diff' command: /usr/bin/diff
+[05:10:38] Info: Found the 'dirname' command: /usr/bin/dirname
+[05:10:38] Info: Found the 'file' command: /usr/bin/file
+[05:10:38] Info: Found the 'find' command: /usr/bin/find
+[05:10:38] Info: Found the 'ifconfig' command: /usr/sbin/ifconfig
+[05:10:38] Info: Found the 'ip' command: /usr/sbin/ip
+[05:10:38] Info: Found the 'ipcs' command: /usr/bin/ipcs
+[05:10:38] Info: Found the 'ldd' command: /usr/bin/ldd
+[05:10:38] Info: Found the 'lsattr' command: /usr/bin/lsattr
+[05:10:38] Info: Unable to find the 'lsmod' command
+[05:10:38] Info: Found the 'lsof' command: /usr/bin/lsof
+[05:10:38] Info: Found the 'mktemp' command: /usr/bin/mktemp
+[05:10:38] Info: Found the 'netstat' command: /usr/bin/netstat
+[05:10:38] Info: Found the 'numfmt' command: /usr/bin/numfmt
+[05:10:38] Info: Found the 'perl' command: /usr/bin/perl
+[05:10:38] Info: Found the 'pgrep' command: /usr/bin/pgrep
+[05:10:38] Info: Found the 'ps' command: /usr/bin/ps
+[05:10:38] Info: Found the 'pwd' command: /usr/bin/pwd
+[05:10:39] Info: Found the 'readlink' command: /usr/bin/readlink
+[05:10:39] Info: Found the 'stat' command: /usr/bin/stat
+[05:10:39] Info: Found the 'strings' command: /usr/bin/strings
+[05:10:39] Info: Enabled tests are: local_host system_configs system_configs_ssh system_configs_syslog
+[05:10:39] Info: Disabled tests are: apps deleted_files hidden_ports hidden_procs packet_cap_apps suspscan
+[05:10:39] Info: Found kernel symbols file '/proc/kallsyms'
+[05:10:39] Info: Using syslog for some logging - facility/priority level is 'authpriv.warning'.
+[05:10:39] Info: Found the 'logger' command: /usr/bin/logger
+[05:10:39] Info: Using 'date' to process epoch second times
+[05:10:39] Info: Locking is not being used
+[05:10:39]
+[05:10:39] Starting system checks...
+[05:10:39]
+[05:10:39] Info: Test 'system_commands' disabled at users request.
+[05:10:39]
+[05:10:39] Info: Test 'rootkits' disabled at users request.
+[05:10:39]
+[05:10:39] Info: Test 'network' disabled at users request.
+[05:10:39]
+[05:10:39] Info: Starting test name 'local_host'
+[05:10:39] Checking the local host...
+[05:10:39]
+[05:10:39] Info: Test 'startup_files' disabled at users request.
+[05:10:39]
+[05:10:39] Info: Test 'group_accounts' disabled at users request.
+[05:10:39]
+[05:10:39] Info: Starting test name 'system_configs'
+[05:10:40] Performing system configuration file checks
+[05:10:40]
+[05:10:40] Info: Starting test name 'system_configs_ssh'
+[05:10:40]   Checking for an SSH configuration file          [ Not found ]
+[05:10:40]
+[05:10:40] Info: Starting test name 'system_configs_syslog'
+[05:10:40]   Checking for a running system logging daemon    [ Warning ]
+[05:10:40] Warning: No running system logging daemon has been found.
+[05:10:40] Info: Found a systemd configuration file: /etc/systemd/journald.conf
+[05:10:40]   Checking for a system logging configuration file [ Found ]
+[05:10:40]
+[05:10:40] Info: Test 'filesystem' disabled at users request.
+[05:10:40]
+[05:10:40] Info: Test 'apps' disabled at users request.
+[05:10:40]
+[05:10:40] System checks summary
+[05:10:40] =====================
+[05:10:40]
+[05:10:40] File properties checks...
+[05:10:40] All checks skipped
+[05:10:40]
+[05:10:40] Rootkit checks...
+[05:10:40] All checks skipped
+[05:10:40]
+[05:10:40] Applications checks...
+[05:10:40] All checks skipped
+[05:10:40]
+[05:10:40] The system checks took: 1 second
+[05:10:41]
+[05:10:41] Info: End date is Fri Jul 31 05:10:41 UTC 2026

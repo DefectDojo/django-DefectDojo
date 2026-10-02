@@ -6,13 +6,14 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
+from django.core.cache import cache
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from jira import JIRA
 from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
@@ -20,6 +21,7 @@ from requests.auth import HTTPBasicAuth
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
+from dojo.location.feature import locations_enabled
 from dojo.models import (
     Engagement,
     Finding,
@@ -157,6 +159,12 @@ def is_keep_in_sync_with_jira(obj: Finding | Finding_Group, prefetched_jira_inst
     if jira_issue_exists and (jira_instance := prefetched_jira_instance or get_jira_instance(obj)) is not None:
         return jira_instance.finding_jira_sync
     return False
+
+
+def is_delete_sync_allowed(finding, push_to_jira=None):
+    if push_to_jira is not None:
+        return is_push_to_jira(finding, push_to_jira_parameter=push_to_jira)
+    return bool(is_keep_in_sync_with_jira(finding) or is_push_all_issues(finding))
 
 
 # checks if a finding can be pushed to JIRA
@@ -512,10 +520,13 @@ def jira_get_resolution_id(jira, issue, status):
     return resolution_id
 
 
-def jira_transition(jira, issue, transition_id):
+def jira_transition(jira, issue, transition_id, fields=None):
     try:
         if issue and transition_id:
-            jira.transition_issue(issue, transition_id)
+            if fields:
+                jira.transition_issue(issue, transition_id, fields=fields)
+            else:
+                jira.transition_issue(issue, transition_id)
             return True
     except JIRAError as jira_error:
         logger.debug("error transitioning jira issue " + issue.key + " " + str(jira_error))
@@ -583,6 +594,52 @@ def get_jira_comments(finding):
         issue = jira_get_issue(project, j_issue)
         return issue.fields.comment.comments
     return None
+
+
+def _jira_config_failure_ttl():
+    """Seconds to remember a project/issue-type level Jira failure. 0 disables the behavior."""
+    return getattr(settings, "JIRA_CONFIG_FAILURE_CACHE_TTL", 300)
+
+
+def _jira_config_failure_cache_key(jira_instance, project_key, issuetype_name):
+    return f"jira_config_failure:{jira_instance.id}:{project_key}:{issuetype_name}"
+
+
+def note_jira_config_failure(jira_instance, project_key, issuetype_name, exception, message):
+    """
+    Remember that this Jira project / issue type is currently unusable.
+
+    A misconfiguration (project key renamed or archived, Create Issue permission revoked,
+    issue type dropped from the project's scheme) fails identically for every object in an
+    import. Without this, a single import repeats the same doomed metadata call, error log
+    and user notification once per finding - hundreds of times, for minutes, with no chance
+    of a different outcome.
+
+    Only failures that cannot resolve themselves inside the cache window are recorded, so a
+    timeout or a Jira-side 5xx still lets the next object retry normally. A status of None is
+    what DefectDojo itself raises when Jira returns no matching project or issue type.
+    """
+    ttl = _jira_config_failure_ttl()
+    if not ttl:
+        return
+
+    if exception is not None and getattr(exception, "status_code", None) not in {None, 400, 401, 403, 404}:
+        return
+
+    cache.set(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name), message, ttl)
+
+
+def get_jira_config_failure(jira_instance, project_key, issuetype_name):
+    """Return the remembered failure message for this Jira project / issue type, if any."""
+    if not _jira_config_failure_ttl():
+        return None
+
+    return cache.get(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name))
+
+
+def clear_jira_config_failure(jira_instance, project_key, issuetype_name):
+    """Forget a remembered failure, so a fixed configuration recovers immediately."""
+    cache.delete(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name))
 
 
 def log_jira_generic_alert(title, description):
@@ -705,6 +762,7 @@ def jira_description(obj, **kwargs):
     elif isinstance(obj, Finding_Group):
         kwargs["finding_group"] = obj
 
+    kwargs["V3_FEATURE_LOCATIONS"] = locations_enabled()
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
     max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
@@ -737,7 +795,7 @@ def jira_priority(obj):
 
 def jira_environment(obj):
     if isinstance(obj, Finding):
-        if not settings.V3_FEATURE_LOCATIONS:
+        if not locations_enabled():
             # TODO: Delete this after the move to Locations
             return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
         return "\n".join([str(location_ref.location) for location_ref in obj.locations.all()])
@@ -752,7 +810,14 @@ def jira_environment(obj):
     return ""
 
 
-def push_to_jira(obj, *args, **kwargs) -> tuple[str, bool]:
+def push_to_jira(obj, *args, **kwargs):
+    """
+    Push an object to Jira, in the foreground or via a Celery worker.
+
+    Returns a (success, message) tuple when the push ran in the foreground, and
+    an AsyncResult when it was queued -- callers must not assume either shape.
+    Pass force_sync=True if you need the tuple, or use interpret_push_result.
+    """
     if obj is None:
         msg = "Cannot push None to JIRA"
         raise ValueError(msg)
@@ -789,7 +854,11 @@ def push_finding_to_jira(finding_id, *args, **kwargs) -> tuple[str, bool]:
 
 @app.task
 def push_finding_group_to_jira(finding_group_id, *args, **kwargs) -> tuple[str, bool]:
-    finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
+    # Prefetch the group's findings: the JIRA helpers below (jira_description,
+    # jira_priority, get_sla_deadline, get_labels, ...) each call
+    # finding_group.findings.all(), which would otherwise re-query per call and
+    # N+1 on dojo_finding_group_findings (Sentry DJANGO-42P8).
+    finding_group = get_object_or_none(Finding_Group.objects.prefetch_related("findings"), id=finding_group_id)
     if not finding_group:
         message = f"Finding_Group with id {finding_group_id} does not exist, skipping push_finding_group_to_jira"
         logger.warning(message)
@@ -867,7 +936,12 @@ def prepare_jira_issue_fields(
     }
 
     if component_name:
-        fields["components"] = [{"name": component_name}]
+        # The component field holds a comma-separated list of component names, so split it
+        # into the list of components Jira expects ([{"name": "A"}, {"name": "B"}]). A single
+        # value without commas yields a single component. (SC-13173)
+        components = [{"name": name.strip()} for name in component_name.split(",") if name.strip()]
+        if components:
+            fields["components"] = components
 
     if custom_fields:
         fields.update(custom_fields)
@@ -916,6 +990,13 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
     if not jira_instance:
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_add_message(message, None, obj)
+
+    # An earlier object already proved this project / issue type is misconfigured. Skip quietly
+    # (the first failure was logged and notified) instead of repeating it for every object in
+    # the import; the retry happens once the remembered failure expires.
+    if remembered_failure := get_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type):
+        logger.debug("skipping jira push for %d: %s", obj.id, remembered_failure)
+        return False, remembered_failure
 
     obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
@@ -984,6 +1065,7 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         return failure_to_add_message(message, e, obj)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        note_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type, e, message)
         return failure_to_add_message(message, e, obj)
     # Create a new issue in Jira with the fields set in the last step
     try:
@@ -997,6 +1079,8 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         j_issue.save()
         jira.issue(new_issue.id)
         logger.info("Created the following jira issue for %d:%s", obj.id, to_str_typed(obj))
+        # The configuration works, so a previously remembered failure is stale.
+        clear_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type)
     except Exception as e:
         message = f"Failed to create jira issue with the following payload: {fields} - {e}"
         return failure_to_add_message(message, e, obj)
@@ -1082,6 +1166,11 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_update_message(message, None, obj)
 
+    # See add_jira_issue: skip quietly while this project / issue type is known-broken.
+    if remembered_failure := get_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type):
+        logger.debug("skipping jira update for %d: %s", obj.id, remembered_failure)
+        return False, remembered_failure
+
     j_issue = obj.jira_issue
     try:
         JIRAError.log_to_tempfile = False
@@ -1126,6 +1215,7 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
             issuetype_fields=issuetype_fields)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        note_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type, e, message)
         return failure_to_update_message(message, e, obj)
 
     # Update the status in jira FIRST, before applying the other field
@@ -1139,7 +1229,7 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
     # transitioning first, every webhook that fires during this sync sees
     # the intended post-transition state.
     try:
-        push_status_to_jira(obj, jira_instance, jira, issue)
+        push_status_to_jira(obj, jira_instance, jira, issue, jira_project=jira_project)
     except Exception as e:
         message = f"Failed to update the jira issue status - {e}"
         return failure_to_update_message(message, e, obj)
@@ -1235,10 +1325,13 @@ def issue_from_jira_is_active(issue_from_jira):
     return not issue_status_category_is_done(statusCategoryKey)
 
 
-def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
+def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False, jira_project=None):
     if not jira_instance:
         logger.warning("Cannot push status to JIRA for %d:%s - jira_instance is None", obj.id, to_str_typed(obj))
         return False
+
+    if jira_project is None:
+        jira_project = get_jira_project(obj)
 
     status_list = _safely_get_obj_status_for_jira(obj)
     issue_closed = False
@@ -1248,7 +1341,8 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     if not updated and any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Resolved")
-            updated = jira_transition(jira, issue, jira_instance.close_status_key)
+            updated = jira_transition(jira, issue, jira_instance.close_status_key,
+                                      fields=jira_project.close_transition_fields if jira_project else None)
         else:
             logger.debug("Jira issue already Resolved")
             updated = False
@@ -1257,7 +1351,8 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     if not issue_closed and any(item in status_list for item in OPEN_STATUS):
         if not issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Active (Reopen)")
-            updated = jira_transition(jira, issue, jira_instance.open_status_key)
+            updated = jira_transition(jira, issue, jira_instance.open_status_key,
+                                      fields=jira_project.reopen_transition_fields if jira_project else None)
         else:
             logger.debug("Jira issue already Active")
             updated = False
@@ -1266,6 +1361,86 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
         obj.jira_issue.jira_change = timezone.now()
         obj.jira_issue.save()
     return updated
+
+
+def close_jira_issue_for_deleted_finding(finding, push_to_jira=None) -> tuple[bool | None, str]:
+    logger.debug("queueing linked Jira issue close for deleted finding %d", finding.id)
+
+    if not is_jira_enabled():
+        return False, "JIRA integration is not enabled."
+
+    if not finding.has_jira_issue:
+        return False, f"Finding {finding.id} has no linked JIRA issue."
+
+    if not is_delete_sync_allowed(finding, push_to_jira=push_to_jira):
+        return False, f"Finding {finding.id} is not configured to sync deleted findings to JIRA."
+
+    if not is_jira_configured_and_enabled(finding):
+        message = (
+            f"Finding {finding.id} cannot close its linked JIRA issue "
+            "because JIRA is not configured or enabled."
+        )
+        logger.debug(message)
+        return False, message
+
+    jira_issue = get_jira_issue(finding)
+    if not jira_issue:
+        return False, f"Finding {finding.id} has no local JIRA issue record."
+
+    jira_project = get_jira_project(jira_issue)
+    if not jira_project or not jira_project.jira_instance:
+        return False, f"Finding {finding.id} has no JIRA instance for its linked issue."
+
+    dojo_dispatch_task(
+        close_deleted_finding_jira_issue,
+        jira_issue.jira_id,
+        jira_project.jira_instance.id,
+        finding.id,
+    )
+    return True, f"Jira issue {jira_issue.jira_key} close queued."
+
+
+@app.task
+def close_deleted_finding_jira_issue(jira_id, jira_instance_id, finding_id, **_kwargs) -> tuple[bool | None, str]:
+    jira_instance = get_object_or_none(JIRA_Instance, id=jira_instance_id)
+    if not jira_instance:
+        message = f"JIRA instance {jira_instance_id} is not available for issue {jira_id}."
+        logger.warning(message)
+        return False, message
+
+    try:
+        JIRAError.log_to_tempfile = False
+        jira = get_jira_connection(jira_instance)
+        if not jira:
+            message = f"JIRA connection could not be established for issue {jira_id}."
+            logger.warning(message)
+            return False, message
+        issue = jira.issue(jira_id)
+    except Exception as e:
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
+        logger.exception(message)
+        return False, message
+
+    if not issue_from_jira_is_active(issue):
+        logger.debug("Jira issue %s is already resolved", jira_id)
+        return False, f"Jira issue {jira_id} is already resolved."
+
+    updated = jira_transition(jira, issue, jira_instance.close_status_key)
+    if updated:
+        jira.add_comment(
+            jira_id,
+            f"DefectDojo finding {finding_id} was deleted. This Jira issue was closed automatically.",
+        )
+        return True, f"Jira issue {jira_id} closed successfully."
+
+    return updated, f"Jira issue {jira_id} was not closed."
+
+
+def reassign_jira_issue_to_finding(jira_issue, finding):
+    jira_issue.finding = finding
+    jira_issue.finding_group = None
+    jira_issue.engagement = None
+    jira_issue.save(update_fields=["finding", "finding_group", "engagement"])
 
 
 # gets the metadata for the provided issue type in the provided jira project
@@ -1420,6 +1595,8 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
                 req_url = jira_instance.url + "/rest/api/latest/issue/" + \
                     jissue.jira_id + "/transitions"
                 json_data = {"transition": {"id": jira_instance.close_status_key}}
+                if jira_project.close_transition_fields:
+                    json_data["fields"] = jira_project.close_transition_fields
                 r = requests.post(
                     url=req_url,
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
@@ -1661,6 +1838,26 @@ def add_simple_jira_comment(jira_instance, jira_issue, comment):
     return True
 
 
+def add_simple_jira_comment_async(jira_id, jira_instance_id, comment):
+    return dojo_dispatch_task(add_simple_jira_comment_by_id, jira_id, jira_instance_id, comment)
+
+
+@app.task
+def add_simple_jira_comment_by_id(jira_id, jira_instance_id, comment, **_kwargs):
+    jira_instance = get_object_or_none(JIRA_Instance, id=jira_instance_id)
+    if not jira_instance:
+        logger.warning("JIRA instance %s is not available for issue %s", jira_instance_id, jira_id)
+        return False
+
+    try:
+        jira = get_jira_connection(jira_instance)
+        jira.add_comment(jira_id, comment)
+    except Exception as e:
+        log_jira_generic_alert("Jira Add Comment Error", str(e))
+        return False
+    return True
+
+
 def jira_already_linked(finding, jira_issue_key, jira_id) -> Finding | None:
     jira_issues = JIRA_Issue.objects.filter(jira_id=jira_id, jira_key=jira_issue_key).exclude(engagement__isnull=False)
     jira_issues = jira_issues.exclude(finding=finding)
@@ -1808,7 +2005,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
-                                                "JIRA Project config stored successfully.",
+                                                _("JIRA Project config stored successfully."),
                                                 extra_tags="alert-success")
                         error = False
                         logger.debug("stored JIRA_Project successfully")
@@ -1822,9 +2019,28 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
         if error:
             messages.add_message(request,
                                     messages.ERROR,
-                                    "JIRA Project config not stored due to errors.",
+                                    _("JIRA Project config not stored due to errors."),
                                     extra_tags="alert-danger")
     return not error, jform
+
+
+def interpret_push_result(result) -> tuple[bool, str | None]:
+    """
+    Normalise a push_to_jira return value into (success, message).
+
+    push_to_jira returns whatever dojo_dispatch_task returns, and that differs
+    per dispatch path: the task's own (success, message) tuple when it runs in
+    the foreground, but an AsyncResult when it is handed to a Celery worker.
+    A queued push has not reported a result yet, so treat it as success --
+    failures inside the worker surface as alerts, not as a return value.
+
+    Callers must not test the raw return value for truthiness: a populated
+    (False, message) tuple and an AsyncResult are both truthy, so a failed push
+    reads as a successful one.
+    """
+    if isinstance(result, tuple):
+        return result
+    return True, None
 
 
 # return True if no errors
@@ -1849,13 +2065,15 @@ def process_jira_epic_form(request, engagement=None):
                 epic_priority = None
                 if jira_epic_form.cleaned_data.get("epic_priority"):
                     epic_priority = jira_epic_form.cleaned_data.get("epic_priority")
-                success, message = push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority)
+                success, message = interpret_push_result(
+                    push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority),
+                )
                 if success:
                     logger.debug("Push to JIRA for Epic queued successfully")
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Push to JIRA for Epic queued succesfully, check alerts on the top right for errors",
+                        _("Push to JIRA for Epic queued succesfully, check alerts on the top right for errors"),
                         extra_tags="alert-success")
                 else:
                     error = True
@@ -1941,8 +2159,7 @@ def process_resolution_from_jira(
                     logger.debug(f"Creating risk acceptance for finding linked to {jira_issue.jira_key}.")
                     # loads the expiration from the system setting "Risk acceptance form default days" as otherwise
                     # the acceptance will never expire
-                    risk_acceptance_form_default_days = get_system_setting("risk_acceptance_form_default_days", 90)
-                    expiration_date_from_system_settings = timezone.now() + relativedelta(days=risk_acceptance_form_default_days)
+                    expiration_date_from_system_settings = ra_helper.default_expiration_date()
                     ra = Risk_Acceptance.objects.create(
                         accepted_by=assignee_name,
                         owner=finding.reporter,
@@ -1969,7 +2186,7 @@ def process_resolution_from_jira(
             finding.mitigated = jira_now
             finding.is_mitigated = True
             finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 for location_ref in finding.locations.all():
                     location_ref.location.disassociate_from_finding(finding)
             else:

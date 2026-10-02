@@ -1,0 +1,53 @@
+"""Pure helpers for CWE identifiers (no model imports, safe to import anywhere)."""
+
+
+def cwe_number(value) -> int | None:
+    """
+    ``"CWE-79"`` / ``"79"`` / ``79`` -> ``79`` (positive int, case-insensitive); anything else -> ``None``.
+
+    CWE numbers are positive, so ``0`` (Finding.cwe's "unset" sentinel) and non-numeric input -> ``None``.
+    """
+    if value is None:
+        return None
+    token = str(value).strip().upper().removeprefix("CWE-")
+    if not token.isdigit():
+        return None
+    number = int(token)
+    # Finding_CWE.cwe stores the "CWE-<n>" label in a varchar(11), so n is bounded to 7 digits.
+    # Reject anything larger here (clean None -> 400/skip) instead of 500-ing at insert.
+    if number <= 0 or number > 9_999_999:
+        return None
+    return number
+
+
+def cwe_label(value) -> str | None:
+    """``79`` / ``"79"`` / ``"CWE-79"`` -> ``"CWE-79"`` (canonical, case-insensitive); invalid -> ``None``."""
+    number = cwe_number(value)
+    return f"CWE-{number}" if number is not None else None
+
+
+def parse_cwes(text: str | None) -> list[str]:
+    """
+    Parse CWEs from user text (one per line or comma-separated) into canonical ``CWE-<n>`` labels.
+
+    Accepts ``89`` or ``CWE-89`` (case-insensitive); ignores anything non-numeric; deduplicates.
+    """
+    result: list[str] = []
+    for token in (text or "").replace(",", "\n").split():
+        label = cwe_label(token)
+        if label is not None and label not in result:
+            result.append(label)
+    return result
+
+
+def finding_cwe_labels(cwe, unsaved_cwes=None) -> list[str]:
+    """Canonical ``CWE-<n>`` labels for a finding: the primary ``cwe`` first, then extras, deduplicated."""
+    labels: list[str] = []
+    primary = cwe_label(cwe)
+    if primary is not None:
+        labels.append(primary)
+    for extra in unsaved_cwes or []:
+        label = cwe_label(extra)
+        if label is not None:
+            labels.append(label)
+    return list(dict.fromkeys(labels))

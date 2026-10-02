@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.models import Endpoint
+from dojo.endpoint.models import Endpoint
 from dojo.notifications.helper import create_notification
 from dojo.pghistory_models import DojoEvents
 

@@ -1,6 +1,6 @@
 from defusedxml import ElementTree
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -48,7 +48,7 @@ class FortifyXMLParser:
                     finding.unsaved_req_resp = []
                     finding.unsaved_req_resp.append({"req": "", "resp": str(raw_response)})
                 if host:
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         finding.unsaved_locations = [LocationData.url(host=host, port=port)]
                     else:
                         # TODO: Delete this after the move to Locations
@@ -141,19 +141,30 @@ class FortifyXMLParser:
                 issue["Category"], issue["FileName"], issue["LineStart"],
             )
             if title not in dupes:
-                items.append(
-                    Finding(
-                        title=title,
-                        severity=issue["Friority"],
-                        file_path=issue["FilePath"],
-                        line=int(issue["LineStart"]),
-                        static_finding=True,
-                        test=test,
-                        description=self.format_description(issue, cat_meta),
-                        mitigation=self.format_mitigation(issue, cat_meta),
-                        unique_id_from_tool=issue_key,
-                    ),
+                finding = Finding(
+                    title=title,
+                    severity=issue["Friority"],
+                    file_path=issue["FilePath"],
+                    line=int(issue["LineStart"]),
+                    static_finding=True,
+                    test=test,
+                    description=self.format_description(issue, cat_meta),
+                    mitigation=self.format_mitigation(issue, cat_meta),
+                    unique_id_from_tool=issue_key,
                 )
+                if locations_enabled() and issue["FilePath"]:
+                    source = issue.get("Source") or {}
+                    source_line = source.get("LineStart")
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=issue["FilePath"],
+                            line=int(issue["LineStart"]),
+                            snippet=issue["Snippet"] if issue["Snippet"] != "n/a" else "",
+                            source_file_path=source.get("FilePath") or "",
+                            source_line=int(source_line) if source_line and str(source_line).isdigit() else None,
+                        ),
+                    )
+                items.append(finding)
                 dupes.add(title)
         return items
 

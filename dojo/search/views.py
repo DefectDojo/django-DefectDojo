@@ -1,23 +1,26 @@
-import itertools
 import logging
 import re
 import shlex
 
 from django.conf import settings
 from django.db.models import Q
+from django.http import HttpResponseGone
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 from watson import search as watson
 
+from dojo.authorization.authorization import user_has_global_permission
 from dojo.endpoint.queries import get_authorized_endpoints
-from dojo.endpoint.views import prefetch_for_endpoints
+from dojo.endpoint.ui.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
-from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids, prefetch_for_findings
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
+from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
-from dojo.location.queries import get_authorized_locations, prefetch_for_locations
-from dojo.models import Engagement, Finding, Finding_Template, Languages, Product, Test
-from dojo.product.queries import get_authorized_app_analysis, get_authorized_products
+from dojo.location.feature import locations_enabled
+from dojo.location.models import Location
+from dojo.location.queries import get_authorized_locations, prefetch_for_locations, readable_tag_match
+from dojo.models import Engagement, Finding, Finding_Template, Product, Test
+from dojo.product.queries import get_authorized_app_analysis, get_authorized_languages, get_authorized_products
 from dojo.test.queries import get_authorized_tests
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting, get_words_for_field
 
@@ -67,6 +70,12 @@ def simple_search(request):
     operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
     """
+    if not settings.WATSON_SEARCH_ENABLED:
+        # Legacy watson-backed search is retired: return 410 rather than query
+        # models that are no longer registered with watson. Pro overrides this
+        # route with a redirect to its native search UI.
+        return HttpResponseGone("Legacy search has been disabled.")
+
     tests = None
     findings = None
     finding_templates = None
@@ -90,6 +99,11 @@ def simple_search(request):
     findings_filter = None
     title_words = None
     component_words = None
+    # Only the GET branch below fills these in, but every request reaches the render
+    # call at the end -- including the HEAD and OPTIONS requests that monitoring and
+    # link-preview bots send, which CSRF does not turn away.
+    generic = None
+    activetab = "generic"
 
     # if request.method == 'GET' and "query" in request.GET:
     if request.method == "GET":
@@ -107,8 +121,6 @@ def simple_search(request):
                           "not-tag" in operators or "not-test-tag" in operators or "not-engagement-tag" in operators or "not-product-tag" in operators or \
                           "not-tags" in operators or "not-test-tags" in operators or "not-engagement-tags" in operators or "not-product-tags" in operators
 
-            search_vulnerability_ids = "vulnerability_id" in operators or not operators
-
             search_finding_id = "id" in operators
             search_findings = "finding" in operators or search_finding_id or search_tags or not operators
 
@@ -125,14 +137,20 @@ def simple_search(request):
             authorized_tests = get_authorized_tests("view")
             authorized_engagements = get_authorized_engagements("view")
             authorized_products = get_authorized_products("view")
-            if settings.V3_FEATURE_LOCATIONS:
+            if locations_enabled():
                 authorized_endpoints = get_authorized_locations("view")
             else:
                 # TODO: Delete this after the move to Locations
                 authorized_endpoints = get_authorized_endpoints("view")
-            authorized_finding_templates = Finding_Template.objects.all()
+            authorized_finding_templates = (
+                Finding_Template.objects.all()
+                if user_has_global_permission(request.user, "edit")
+                else Finding_Template.objects.none()
+            )
             authorized_app_analysis = get_authorized_app_analysis("view")
-            authorized_vulnerability_ids = get_authorized_vulnerability_ids("view")
+            authorized_languages = get_authorized_languages("view")
+            # The legacy Vulnerability_Id watson index was removed (entity-only cutover), so classic
+            # search no longer has a vulnerability-id lane. The Vue global search covers vuln ids.
 
             # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 
@@ -142,7 +160,6 @@ def simple_search(request):
             products = authorized_products
             endpoints = authorized_endpoints
             app_analysis = authorized_app_analysis
-            vulnerability_ids = authorized_vulnerability_ids
 
             findings_filter = None
             title_words = None
@@ -154,7 +171,10 @@ def simple_search(request):
                 logger.debug("searching finding id")
 
                 findings = authorized_findings
-                findings = findings.filter(id=operators["id"][0])
+                finding_id = operators["id"][0]
+                # ids come straight from the query string, so anything that is not a
+                # plain number would blow up the queryset instead of finding nothing.
+                findings = findings.filter(id=finding_id) if finding_id.isdigit() else findings.none()
 
             elif search_findings:
                 logger.debug("searching findings")
@@ -218,7 +238,11 @@ def simple_search(request):
                 tagged_tests = authorized_tests.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
                 tagged_engagements = authorized_engagements.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
                 tagged_products = authorized_products.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
-                tagged_endpoints = authorized_endpoints.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
+                if locations_enabled():
+                    L1, L2, L3, L4 = location_tag_queries(tag, tags, not_tag, not_tags)
+                    tagged_endpoints = authorized_endpoints.filter(L1 | L2).exclude(L3 | L4).distinct()[:max_results].prefetch_related("tags")
+                else:
+                    tagged_endpoints = authorized_endpoints.filter(Q1 | Q2).exclude(Q3 | Q4).distinct()[:max_results].prefetch_related("tags")
             else:
                 tagged_findings = None
                 tagged_finding_templates = None
@@ -293,9 +317,9 @@ def simple_search(request):
 
                 endpoints = authorized_endpoints
                 endpoints = apply_tag_filters(endpoints, operators)
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     endpoints = endpoints.filter(Q(url__host__icontains=keywords_query) | Q(url__path__icontains=keywords_query) | Q(url__protocol__icontains=keywords_query) | Q(url__query__icontains=keywords_query) | Q(url__fragment__icontains=keywords_query))
-                    endpoints = prefetch_for_locations(endpoints)
+                    endpoints = prefetch_for_locations(endpoints, user=request.user)
                 else:
                     endpoints = endpoints.filter(Q(host__icontains=keywords_query) | Q(path__icontains=keywords_query) | Q(protocol__icontains=keywords_query) | Q(query__icontains=keywords_query) | Q(fragment__icontains=keywords_query))
                     endpoints = prefetch_for_endpoints(endpoints)
@@ -306,7 +330,7 @@ def simple_search(request):
             if search_languages:
                 logger.debug("searching languages")
 
-                languages = Languages.objects.filter(language__language__icontains=keywords_query)
+                languages = authorized_languages.filter(language__language__icontains=keywords_query)
                 languages = languages.prefetch_related("product", "product__tags")
                 languages = languages[:max_results]
             else:
@@ -321,26 +345,13 @@ def simple_search(request):
             else:
                 app_analysis = None
 
-            if search_vulnerability_ids:
-                logger.debug("searching vulnerability_ids")
-
-                vulnerability_ids = authorized_vulnerability_ids
-                vulnerability_ids = apply_vulnerability_id_filter(vulnerability_ids, operators)
-                if keywords_query:
-                    watson_results = watson.filter(vulnerability_ids, keywords_query)
-                    vulnerability_ids = vulnerability_ids.filter(id__in=[watson.id for watson in watson_results])
-                vulnerability_ids = vulnerability_ids.prefetch_related("finding__test__engagement__product", "finding__test__engagement__product__tags")
-                vulnerability_ids = vulnerability_ids[:max_results]
-            else:
-                vulnerability_ids = None
-
             if keywords_query:
                 logger.debug("searching generic")
                 logger.debug("going generic with: %s", keywords_query)
                 generic = watson.search(keywords_query, models=(
                     authorized_findings, authorized_tests, authorized_engagements,
                     authorized_products, authorized_endpoints,
-                    authorized_finding_templates, authorized_vulnerability_ids, authorized_app_analysis)) \
+                    authorized_finding_templates, authorized_app_analysis)) \
                     .prefetch_related("object")[:max_results]
             else:
                 generic = None
@@ -362,14 +373,22 @@ def simple_search(request):
 
         add_breadcrumb(title=_("Simple Search"), top_level=True, request=request)
 
-        activetab = "findings" if findings \
-            else "products" if products \
-                else "engagements" if engagements else \
-                    "tests" if tests else \
-                         "endpoint" if endpoints else \
-                            "tagged" if tagged_results else \
-                                "vulnerability_ids" if vulnerability_ids else \
-                                    "generic"
+        # The tab to open on load: the first facet that has results. Every name here has
+        # to be one the template knows how to map to a pane, otherwise it falls through to
+        # the "no pane opens" case and the results area looks empty until the visitor
+        # clicks a tab themselves.
+        activetab = next((name for name, results in (
+            ("findings", findings),
+            ("products", products),
+            ("engagements", engagements),
+            ("tests", tests),
+            ("endpoints", endpoints),
+            ("tagged", tagged_results),
+            ("vulnerability_ids", vulnerability_ids),
+            ("finding_templates", finding_templates),
+            ("languages", languages),
+            ("technologies", app_analysis),
+        ) if results), "generic")
 
     response = render(request, "dojo/simple_search.html", {
         "clean_query": original_clean_query,
@@ -415,7 +434,14 @@ def parse_search_query(clean_query):
     operators = {}  # operator:parameter formatted in searchquery, i.e. tag:php
     keywords = []  # just keywords to search on
 
-    query_parts = shlex.split(clean_query)
+    try:
+        query_parts = shlex.split(clean_query)
+    except ValueError:
+        # shlex raises on an unbalanced quote, which a visitor types the moment they
+        # start wrapping a phrase in quotes. Fall back to a plain whitespace split so
+        # they get results for what they typed so far instead of a 500.
+        logger.debug("could not shlex-split query, falling back to a whitespace split: %s", clean_query)
+        query_parts = clean_query.split()
 
     for query_part in query_parts:
         if ":" in query_part:
@@ -456,7 +482,42 @@ def vulnerability_id_fix(keyword):
     return keyword
 
 
+def location_tag_queries(tag, tags, not_tag, not_tags):
+    """The four tag predicates of ``simple_search``, matched over readable tag sets only."""
+    def match(**lookups):
+        return readable_tag_match("pk", **lookups)
+    return (
+        match(tags__name__contains=tag) if tag else Q(),
+        match(tags__name__in=tags) if tags else Q(),
+        match(tags__name__contains=not_tag) if not_tag else Q(),
+        match(tags__name__in=not_tags) if not_tags else Q(),
+    )
+
+
+def apply_location_tag_filters(qs, operators):
+    """
+    The Location branch of :func:`apply_tag_filters`.
+
+    A Location row is shared by every product referencing it and so is its tag set, so a
+    filter joining the tag relation directly matches through other products' tags and turns
+    a substring lookup into an oracle over a set the page withholds. These run the same
+    predicate the templates render, so a filter never matches on a withheld value.
+    """
+    if "tag" in operators:
+        qs = qs.filter(readable_tag_match("pk", tags__name__contains=",".join(operators["tag"])))
+    if "tags" in operators:
+        qs = qs.filter(readable_tag_match("pk", tags__name__in=operators["tags"]))
+    if "not-tag" in operators:
+        qs = qs.exclude(readable_tag_match("pk", tags__name__contains=",".join(operators["not-tag"])))
+    if "not-tags" in operators:
+        qs = qs.exclude(readable_tag_match("pk", tags__name__in=operators["not-tags"]))
+    return qs
+
+
 def apply_tag_filters(qs, operators, *, skip_relations=False):
+    if qs.model is Location:
+        return apply_location_tag_filters(qs, operators)
+
     tag_filters = {"tag": ""}
 
     if qs.model == Finding:
@@ -522,28 +583,10 @@ def apply_tag_filters(qs, operators, *, skip_relations=False):
 
 def apply_endpoint_filter(qs, operators):
     if "endpoint" in operators:
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             qs = qs.filter(locations__location__url__host__contains=",".join(operators["endpoint"]))
         else:
             qs = qs.filter(endpoints__host__contains=",".join(operators["endpoint"]))
-
-    return qs
-
-
-def apply_vulnerability_id_filter(qs, operators):
-    if "vulnerability_id" in operators:
-        value = operators["vulnerability_id"]
-
-        # possible value:
-        # ['CVE-2020-6754]
-        # ['CVE-2020-6754,CVE-2018-7489']
-        # or when entered multiple times:
-        # ['CVE-2020-6754,CVE-2018-7489', 'CVE-2020-1234']
-
-        # so flatten like mad:
-        vulnerability_ids = list(itertools.chain.from_iterable([vulnerability_id.split(",") for vulnerability_id in value]))
-        logger.debug("vulnerability_id filter: %s", vulnerability_ids)
-        qs = qs.filter(Q(vulnerability_id__in=vulnerability_ids))
 
     return qs
 

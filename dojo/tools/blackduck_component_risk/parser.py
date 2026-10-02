@@ -1,6 +1,5 @@
 # Author: apipia, wheelsvt
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -38,7 +37,7 @@ class BlackduckComponentRiskParser:
         """
         components, securities, sources = self.import_data(filename)
         # Collect product-level dependency locations for all components
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             for component in components.values():
                 origin = component.get("Origin name", "").lower().split(",")[0]
                 purl_type = BLACKDUCK_ORIGIN_TO_PURL.get(origin)

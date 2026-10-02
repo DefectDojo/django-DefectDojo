@@ -1,0 +1,13 @@
+/scan/targets/artifact-one.bin: Generic.Placeholder.Alpha.UNOFFICIAL FOUND
+
+----------- SCAN SUMMARY -----------
+Known viruses: 3
+Engine version: 1.2.2
+Scanned directories: 0
+Scanned files: 1
+Infected files: 1
+Data scanned: 0.00 MB
+Data read: 0.00 MB (ratio 0.00:1)
+Time: 0.024 sec (0 m 0 s)
+Start Date: 2026:07:31 18:41:55
+End Date:   2026:07:31 18:41:55

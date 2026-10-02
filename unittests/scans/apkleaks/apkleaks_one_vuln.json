@@ -1,0 +1,11 @@
+{
+  "package": "com.example.genericapp",
+  "results": [
+    {
+      "name": "LinkFinder",
+      "matches": [
+        "\"http://schemas.android.com/apk/res/android\""
+      ]
+    }
+  ]
+}

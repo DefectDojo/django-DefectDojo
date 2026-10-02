@@ -1,0 +1,306 @@
+{
+    "advisories": {
+        "guzzlehttp/guzzle": [
+            {
+                "advisoryId": "PKSA-fy2t-3c5f-827y",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": "<7.15.1",
+                "title": "Guzzle: URI fragments disclosed in redirect Referer headers",
+                "cve": null,
+                "link": "https://github.com/advisories/GHSA-h95v-h523-3mw8",
+                "reportedAt": "2026-07-20T23:28:36+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-h95v-h523-3mw8"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-qxvb-2bpp-dnk6",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": "<7.15.1",
+                "title": "Guzzle: Host-only cookie scope is not preserved",
+                "cve": null,
+                "link": "https://github.com/advisories/GHSA-wm3w-8rrp-j577",
+                "reportedAt": "2026-07-20T23:27:49+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-wm3w-8rrp-j577"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-bbs6-q5q9-f3t4",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": "<7.15.1",
+                "title": "Guzzle: Unbounded response cookies risk denial of service",
+                "cve": null,
+                "link": "https://github.com/advisories/GHSA-f283-ghqc-fg79",
+                "reportedAt": "2026-07-20T23:27:02+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-f283-ghqc-fg79"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-bcdd-5xc7-gwfb",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": "<7.12.3",
+                "title": "Guzzle: Cookie Disclosure and Injection via IP-Address Domains",
+                "cve": "CVE-2026-59883",
+                "link": "https://github.com/advisories/GHSA-g446-98w2-8p5w",
+                "reportedAt": "2026-07-20T22:00:09+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-g446-98w2-8p5w"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-pwsk-hy21-4gby",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": "<7.14.2",
+                "title": "Guzzle: Proxy-Authorization headers can be sent to origin servers",
+                "cve": null,
+                "link": "https://github.com/advisories/GHSA-94pj-82f3-465w",
+                "reportedAt": "2026-07-20T21:46:02+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-94pj-82f3-465w"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-93qv-9n9h-6k6p",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": "<7.12.1",
+                "title": "Dot-only cookie domains match all hosts",
+                "cve": "CVE-2026-55767",
+                "link": "https://github.com/guzzle/guzzle/security/advisories/GHSA-cwxw-98qj-8qjx",
+                "reportedAt": "2026-06-18T14:12:49+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-cwxw-98qj-8qjx"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/guzzle/CVE-2026-55767.yaml"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-k22t-f949-t9g6",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": "<7.12.1",
+                "title": "Silent HTTPS proxy downgrade to cleartext",
+                "cve": "CVE-2026-55568",
+                "link": "https://github.com/guzzle/guzzle/security/advisories/GHSA-wpwq-4j6v-78m3",
+                "reportedAt": "2026-06-18T14:12:49+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-wpwq-4j6v-78m3"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/guzzle/CVE-2026-55568.yaml"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-yfw5-9gnj-n2c7",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": ">=7,<7.4.5|>=4,<6.5.8",
+                "title": "Change in port should be considered a change in origin",
+                "cve": "CVE-2022-31091",
+                "link": "https://github.com/guzzle/guzzle/security/advisories/GHSA-q559-8m2m-g699",
+                "reportedAt": "2022-06-20T22:16:07+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-q559-8m2m-g699"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/guzzle/CVE-2022-31091.yaml"
+                    }
+                ],
+                "severity": "high"
+            },
+            {
+                "advisoryId": "PKSA-k1b4-kshy-xgbh",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": ">=7,<7.4.5|>=4,<6.5.8",
+                "title": "CURLOPT_HTTPAUTH option not cleared on change of origin",
+                "cve": "CVE-2022-31090",
+                "link": "https://github.com/guzzle/guzzle/security/advisories/GHSA-25mq-v84q-4j7r",
+                "reportedAt": "2022-06-20T22:16:07+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-25mq-v84q-4j7r"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/guzzle/CVE-2022-31090.yaml"
+                    }
+                ],
+                "severity": "high"
+            },
+            {
+                "advisoryId": "PKSA-2z36-j4q9-rsfy",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": ">=7,<7.4.4|>=4,<6.5.7",
+                "title": "Fix failure to strip Authorization header on HTTP downgrade",
+                "cve": "CVE-2022-31043",
+                "link": "https://github.com/guzzle/guzzle/security/advisories/GHSA-w248-ffj2-4v5q",
+                "reportedAt": "2022-06-09T21:36:50+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-w248-ffj2-4v5q"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/guzzle/CVE-2022-31043.yaml"
+                    }
+                ],
+                "severity": "high"
+            },
+            {
+                "advisoryId": "PKSA-fvw5-9t6n-nwvr",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": ">=7,<7.4.4|>=4,<6.5.7",
+                "title": "Failure to strip the Cookie header on change in host or HTTP downgrade",
+                "cve": "CVE-2022-31042",
+                "link": "https://github.com/guzzle/guzzle/security/advisories/GHSA-f2wf-25xc-69c9",
+                "reportedAt": "2022-06-09T21:36:50+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-f2wf-25xc-69c9"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/guzzle/CVE-2022-31042.yaml"
+                    }
+                ],
+                "severity": "high"
+            },
+            {
+                "advisoryId": "PKSA-6d8m-6kgw-18zr",
+                "packageName": "guzzlehttp/guzzle",
+                "affectedVersions": ">=7,<7.4.3|>=4,<6.5.6",
+                "title": "Cross-domain cookie leakage",
+                "cve": "CVE-2022-29248",
+                "link": "https://github.com/guzzle/guzzle/security/advisories/GHSA-cwmx-hcrq-mhc3",
+                "reportedAt": "2022-05-25T13:19:12+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-cwmx-hcrq-mhc3"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/guzzle/CVE-2022-29248.yaml"
+                    }
+                ],
+                "severity": "high"
+            }
+        ],
+        "guzzlehttp/psr7": [
+            {
+                "advisoryId": "PKSA-vznr-tgp9-fd7d",
+                "packageName": "guzzlehttp/psr7",
+                "affectedVersions": "<2.12.3",
+                "title": "guzzlehttp/psr7: Host Confusion via Weak URI Host Validation",
+                "cve": "CVE-2026-59882",
+                "link": "https://github.com/advisories/GHSA-c2w2-prh8-qm98",
+                "reportedAt": "2026-07-21T18:35:25+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-c2w2-prh8-qm98"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-7qs6-zvnz-h66r",
+                "packageName": "guzzlehttp/psr7",
+                "affectedVersions": "<2.12.1",
+                "title": "CRLF injection in HTTP start-line serialization",
+                "cve": "CVE-2026-55766",
+                "link": "https://github.com/guzzle/psr7/security/advisories/GHSA-vm85-hxw5-5432",
+                "reportedAt": "2026-06-18T09:49:37+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-vm85-hxw5-5432"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/psr7/CVE-2026-55766.yaml"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-gm5x-j3mz-71n9",
+                "packageName": "guzzlehttp/psr7",
+                "affectedVersions": "<2.10.2",
+                "title": "CRLF injection via URI host component",
+                "cve": "CVE-2026-49214",
+                "link": "https://github.com/guzzle/psr7/security/advisories/GHSA-hq7v-mx3g-29hw",
+                "reportedAt": "2026-05-25T22:58:15+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-hq7v-mx3g-29hw"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/psr7/CVE-2026-49214.yaml"
+                    }
+                ],
+                "severity": "medium"
+            },
+            {
+                "advisoryId": "PKSA-jj5t-2zs1-dcfm",
+                "packageName": "guzzlehttp/psr7",
+                "affectedVersions": "<2.10.2",
+                "title": "Host confusion via authority reinterpretation",
+                "cve": "CVE-2026-48998",
+                "link": "https://github.com/guzzle/psr7/security/advisories/GHSA-34xg-wgjx-8xph",
+                "reportedAt": "2026-05-25T22:58:15+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-34xg-wgjx-8xph"
+                    },
+                    {
+                        "name": "FriendsOfPHP/security-advisories",
+                        "remoteId": "guzzlehttp/psr7/CVE-2026-48998.yaml"
+                    }
+                ],
+                "severity": "medium"
+            }
+        ]
+    },
+    "abandoned": [],
+    "filter": []
+}

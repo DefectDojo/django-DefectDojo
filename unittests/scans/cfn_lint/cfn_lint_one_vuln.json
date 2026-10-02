@@ -1,0 +1,29 @@
+[
+  {
+    "Filename": "single.yaml",
+    "Id": "021c48aa-9dc9-c7a5-7467-45e43ac99998",
+    "Level": "Warning",
+    "Location": {
+      "End": {
+        "ColumnNumber": 18,
+        "LineNumber": 7
+      },
+      "Path": [
+        "Parameters",
+        "UnusedParameter"
+      ],
+      "Start": {
+        "ColumnNumber": 3,
+        "LineNumber": 7
+      }
+    },
+    "Message": "Parameter UnusedParameter not used.",
+    "ParentId": null,
+    "Rule": {
+      "Description": "Making sure the parameters defined are used",
+      "Id": "W2001",
+      "ShortDescription": "Check if Parameters are Used",
+      "Source": "https://github.com/aws-cloudformation/cfn-lint"
+    }
+  }
+]

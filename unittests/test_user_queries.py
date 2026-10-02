@@ -89,25 +89,40 @@ class TestUserQueries(DojoTestCase):
 
     @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_global_permission_legacy(self, mock_current_user):
-        # Legacy: Global_Role(role=Reader) is inert. The user has no
-        # is_staff / is_superuser flag, so only their own row is returned.
+        # Carrier Global_Role(role=Reader) is inert in OS. Without any
+        # authorized_users membership the user sees only superusers (always
+        # surfaced, matching 2.58.4).
         mock_current_user.return_value = self.global_permission_user
 
         self.assertQuerySetEqual(
-            Dojo_User.objects.filter(pk=self.global_permission_user.pk),
+            Dojo_User.objects.filter(is_superuser=True).order_by("first_name", "last_name"),
             get_authorized_users(Permissions.Product_View),
         )
 
     @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_regular_legacy(self, mock_current_user):
-        # Legacy: per-product RBAC role is inert. A non-staff non-superuser
-        # only sees themselves.
+        # Carrier Product_Member / Product_Type_Member are inert in OS. Without
+        # any authorized_users membership the user sees only superusers.
         mock_current_user.return_value = self.regular_user
 
         self.assertQuerySetEqual(
-            Dojo_User.objects.filter(pk=self.regular_user.pk),
+            Dojo_User.objects.filter(is_superuser=True).order_by("first_name", "last_name"),
             get_authorized_users(Permissions.Product_View),
         )
+
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_user_collaborators_via_authorized_users(self, mock_current_user):
+        # v2 parity: a non-staff user sees co-members of the products/types
+        # they are authorized on (via authorized_users), plus superusers.
+        self.product_1.authorized_users.add(self.regular_user)
+        self.product_1.authorized_users.add(self.product_user)
+        mock_current_user.return_value = self.regular_user
+
+        users = get_authorized_users(Permissions.Product_View)
+        self.assertIn(self.regular_user, users)
+        self.assertIn(self.product_user, users)
+        self.assertIn(self.admin_user, users)
+        self.assertNotIn(self.invisible_user, users)
 
 
 class TestGetAuthorizedUsersForProductType(DojoTestCase):
@@ -185,16 +200,18 @@ class TestGetAuthorizedUsersForProductType(DojoTestCase):
         self.assertIn(self.user_global_reader, users)
 
     @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_non_staff_caller_sees_none(self, mock_get_current_user):
-        # Legacy: a non-staff non-superuser caller can't enumerate users
-        # for a product_type — including users with explicit memberships.
+    def test_non_staff_caller_sees_only_superusers(self, mock_get_current_user):
+        # OS: carrier Product_Type_Member is inert. A non-staff caller without
+        # authorized_users membership sees only superusers (2.58.4 parity).
         mock_get_current_user.return_value = self.user_product_type_member
         users = get_authorized_users_for_product_type(
             Dojo_User.objects.all(),
             self.product_type,
             Permissions.Product_Type_View,
         )
-        self.assertEqual(users.count(), 0)
+        self.assertIn(self.superuser, users)
+        self.assertNotIn(self.user_product_type_member, users)
+        self.assertNotIn(self.user_no_perms, users)
 
     @patch("dojo.authorization.query_registrations.get_current_user")
     def test_anonymous_caller_sees_none(self, mock_get_current_user):
@@ -311,14 +328,18 @@ class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
         self.assertIn(self.user_global_reader, users)
 
     @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_non_staff_caller_sees_none(self, mock_get_current_user):
+    def test_non_staff_caller_sees_only_superusers(self, mock_get_current_user):
+        # OS: carrier Product_Member is inert. A non-staff caller without
+        # authorized_users membership sees only superusers (2.58.4 parity).
         mock_get_current_user.return_value = self.user_product_member
         users = get_authorized_users_for_product_and_product_type(
             None,
             self.product,
             Permissions.Product_View,
         )
-        self.assertEqual(users.count(), 0)
+        self.assertIn(self.superuser, users)
+        self.assertNotIn(self.user_product_member, users)
+        self.assertNotIn(self.user_no_perms, users)
 
     @patch("dojo.authorization.query_registrations.get_current_user")
     def test_anonymous_caller_sees_none(self, mock_get_current_user):
@@ -344,3 +365,54 @@ class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
         )
         for user in users:
             self.assertTrue(user.is_active)
+
+
+class TestGetAuthorizedUsersViaAuthorizedUsers(DojoTestCase):
+
+    """
+    OS authorized_users-based resolution for the product / product-type user
+    queries (regression test for issue #15062 — empty Testing Lead selector).
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.product_type = Product_Type.objects.create(name="AU Test PT")
+        cls.product = Product.objects.create(
+            name="AU Test Product", description="t", prod_type=cls.product_type,
+        )
+
+        cls.product_member = Dojo_User.objects.create(username="au_product_member", is_active=True)
+        cls.product_type_member = Dojo_User.objects.create(username="au_pt_member", is_active=True)
+        cls.unrelated = Dojo_User.objects.create(username="au_unrelated", is_active=True)
+        # Superuser not in any authorized_users — must still surface (2.58.4 parity).
+        cls.superuser = Dojo_User.objects.create(username="au_superuser", is_active=True, is_superuser=True)
+
+        # The "authorized users" sections the reporter used in the UI.
+        cls.product.authorized_users.add(cls.product_member)
+        cls.product_type.authorized_users.add(cls.product_type_member)
+
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_product_and_product_type_returns_authorized_users(self, mock_get_current_user):
+        # #15062: a non-staff user authorized on the product (via authorized_users)
+        # must get a non-empty list so they can pick a Testing Lead. The list
+        # contains users authorized directly on the product and via its type,
+        # plus superusers (2.58.4 parity).
+        mock_get_current_user.return_value = self.product_member
+        users = get_authorized_users_for_product_and_product_type(
+            None, self.product, Permissions.Product_View,
+        )
+        self.assertIn(self.product_member, users)
+        self.assertIn(self.product_type_member, users)
+        self.assertIn(self.superuser, users)
+        self.assertNotIn(self.unrelated, users)
+
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_product_type_returns_authorized_users(self, mock_get_current_user):
+        mock_get_current_user.return_value = self.product_type_member
+        users = get_authorized_users_for_product_type(
+            None, self.product_type, Permissions.Product_Type_View,
+        )
+        self.assertIn(self.product_type_member, users)
+        self.assertIn(self.superuser, users)
+        self.assertNotIn(self.product_member, users)
+        self.assertNotIn(self.unrelated, users)

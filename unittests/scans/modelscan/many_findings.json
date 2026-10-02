@@ -1,0 +1,41 @@
+{
+  "summary": {
+    "total_issues_by_severity": {
+      "LOW": 0,
+      "MEDIUM": 0,
+      "HIGH": 1,
+      "CRITICAL": 1
+    },
+    "total_issues": 2,
+    "input_path": "models",
+    "absolute_path": "/srv/models",
+    "modelscan_version": "0.8.8",
+    "timestamp": "2026-01-15T10:04:11.000000",
+    "scanned": {
+      "total_scanned": 2,
+      "scanned_files": [
+        "model_d.pkl",
+        "model_a.pkl"
+      ]
+    }
+  },
+  "issues": [
+    {
+      "description": "Use of unsafe operator 'open' from module 'webbrowser'",
+      "operator": "open",
+      "module": "webbrowser",
+      "source": "model_d.pkl",
+      "scanner": "modelscan.scanners.PickleUnsafeOpScan",
+      "severity": "HIGH"
+    },
+    {
+      "description": "Use of unsafe operator 'system' from module 'posix'",
+      "operator": "system",
+      "module": "posix",
+      "source": "model_a.pkl",
+      "scanner": "modelscan.scanners.PickleUnsafeOpScan",
+      "severity": "CRITICAL"
+    }
+  ],
+  "errors": []
+}
