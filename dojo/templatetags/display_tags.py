@@ -21,7 +21,7 @@ from django.db.models import Case, IntegerField, Sum, Value, When
 from django.template.defaultfilters import stringfilter
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import escape
+from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
@@ -564,7 +564,7 @@ def tracked_object_type(current_object):
 
 
 def icon(name, tooltip):
-    return '<i class="fa-solid fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+    return format_html('<i class="fa-solid fa-{} has-popover" data-trigger="hover" data-placement="bottom" data-content="{}"></i>', name, tooltip)
 
 
 def not_specified_icon(tooltip):
@@ -613,7 +613,7 @@ def _option_icon(option):
     if not option:
         return ""
     if option.icon:
-        return mark_safe(icon(option.icon, option.name))
+        return icon(option.icon, option.name)
     return option.name
 
 
