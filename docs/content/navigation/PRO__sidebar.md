@@ -51,6 +51,8 @@ Three conventions run through the whole menu:
 
 Hover any page row (in the sidebar, in a collapsed-rail flyout, or in a Global Search result) and a pin appears at its end; on touch screens the pin always shows. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
 
+A page pinned from inside a group keeps the group's name and icon, since the entry's own name often leans on the group it came from: pinning **All** from **Findings** shows **Findings › All**, so it cannot be mistaken for the **All** under Assets. When the sidebar is too narrow, the group name shortens first and the page name stays whole; hover the row to see its full location. Pages that sit directly in a section, such as **My Work**, show just their name.
+
 Pins are stored per user on the server, so they survive a browser reset and follow you across machines. When the **Restrict Layout Customization** switch is on (see [UI Defaults](#ui-defaults)), pins count as layout customization: only superusers can change them, and everyone else sees their existing pins read-only.
 
 ## Your preferences follow you
