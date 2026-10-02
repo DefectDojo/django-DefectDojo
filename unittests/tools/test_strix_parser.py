@@ -40,6 +40,7 @@ class TestStrixParser(DojoTestCase):
             finding.date,
         )
         self.assertEqual(4.3, finding.cvssv3_score)
+        self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
         self.assertTrue(finding.fix_available)
 
         self.assertIn("**Target:** /workspace/sample-app", finding.description)
@@ -97,6 +98,7 @@ class TestStrixParser(DojoTestCase):
         self.assertIsNone(finding.file_path)
         self.assertIsNone(finding.steps_to_reproduce)
         self.assertIsNone(finding.cvssv3_score)
+        self.assertIsNone(finding.cvssv3)
         self.assertTrue(finding.fix_available)
         self.assertNotIn("## Evidence", finding.description)
         self.assertNotIn("**Confidence:**", finding.description)

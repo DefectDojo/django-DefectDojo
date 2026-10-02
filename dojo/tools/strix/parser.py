@@ -4,6 +4,7 @@ import re
 from dateutil import parser
 
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 
 class StrixParser:
@@ -69,12 +70,13 @@ class StrixParser:
     def _to_finding(self, item, test):
         dependency = item.get("dependency_metadata") or {}
         code_location = (item.get("code_locations") or [{}])[0] or {}
+        vector = self._cvss_vector(item.get("cvss_breakdown"))
 
         finding = Finding(
             test=test,
             title=item.get("title"),
             severity=self._severity(item.get("severity")),
-            description=self._description(item),
+            description=self._description(item, vector),
             impact=item.get("impact"),
             steps_to_reproduce=self._steps_to_reproduce(item),
             mitigation=self._mitigation(item),
@@ -89,6 +91,8 @@ class StrixParser:
             dynamic_finding=item.get("finding_class") == "dynamic",
             fix_available=bool(item.get("remediation_steps") or item.get("fix_pr_body")),
         )
+        if cvss_data := parse_cvss_data(vector):
+            finding.cvssv3 = cvss_data.get("cvssv3")
         if item.get("cve"):
             finding.unsaved_vulnerability_ids = [item["cve"]]
         cvss = item.get("cvss")
@@ -121,7 +125,7 @@ class StrixParser:
             metrics.append(f"{abbrev}:{value}")
         return "CVSS:3.1/" + "/".join(metrics)
 
-    def _description(self, item):
+    def _description(self, item, vector):
         parts = []
         if item.get("description"):
             parts.append(item["description"])
@@ -131,7 +135,6 @@ class StrixParser:
             parts.append(f"**Confidence:** {item['confidence']}")
         cvss = item.get("cvss")
         if cvss is not None:
-            vector = self._cvss_vector(item.get("cvss_breakdown"))
             parts.append(f"**CVSS:** {cvss} ({vector})" if vector else f"**CVSS:** {cvss}")
         for heading, key in self.DESCRIPTION_SECTIONS:
             if item.get(key):

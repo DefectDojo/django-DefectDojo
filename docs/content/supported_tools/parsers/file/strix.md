@@ -55,7 +55,7 @@ Sample Strix scans can be found in the [sample scan data folder](https://github.
 | target                 | description               | Included as a "**Target:**" line in the description                      |
 | confidence             | description               | Included as a "**Confidence:**" line in the description                  |
 | cvss                   | cvssv3_score              | Numeric CVSS score, set when the value is a number                       |
-| cvss_breakdown         | cvssv3 vector             | Assembled into a CVSS:3.1 vector string shown next to the score          |
+| cvss_breakdown         | cvssv3                    | Assembled into a CVSS:3.1 vector string, parsed into the `cvssv3` field, and shown next to the score in the description |
 | cwe                    | cwe                       | `CWE-<number>` extracted from the string                                 |
 | cve                    | unsaved_vulnerability_ids | Set as the finding's vulnerability reference                              |
 | id                     | vuln_id_from_tool         | Strix finding identifier, used verbatim; drives deduplication             |
