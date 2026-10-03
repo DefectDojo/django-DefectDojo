@@ -7,6 +7,7 @@ from defusedxml import ElementTree
 from dojo.models import Finding
 from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
+    add_secondary_location,
     cleanup_openvas_text,
     deduplicate,
     finalize_location,
@@ -122,14 +123,15 @@ class XMLParserV2:
 
     def _handle_host(self, field):
         if field.text:
+            # IP address from <host> text is always the primary/stable identifier
+            ip_address = field.text.strip()
+            get_location(self.finding).host = ip_address
+
             hostname_field = field.find("hostname")
-            # default to hostname else ip
             if hostname_field is not None and hostname_field.text:
-                # strip due to https://github.com/greenbone/gvmd/issues/2378
-                get_location(self.finding).host = hostname_field.text.strip()
-            else:
-                # strip due to https://github.com/greenbone/gvmd/issues/2378
-                get_location(self.finding).host = field.text.strip()
+                hostname = hostname_field.text.strip()
+                if hostname and hostname != ip_address:
+                    add_secondary_location(self.finding, hostname)
 
     def _handle_port(self, field):
         if field.text:

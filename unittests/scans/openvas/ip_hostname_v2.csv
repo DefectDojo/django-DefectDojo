@@ -1,0 +1,4 @@
+IP,Hostname,Port,Port Protocol,CVSS,Severity,NVT Name,NVT OID,Summary,Specific Result,Solution,QoD,Timestamp
+192.0.2.10,host01.example.com,443,tcp,7.5,High,Test Vulnerability With Both IP and Hostname,1.3.6.1.4.1.25623.1.0.100001,Test vulnerability,Test result,Update to latest version.,80,2026-01-15T10:00:00+00:00
+192.0.2.11,,443,tcp,5.0,Medium,Test Vulnerability With IP Only,1.3.6.1.4.1.25623.1.0.100002,Test vulnerability IP only,Test result IP only,Update to latest version.,70,2026-01-15T10:00:00+00:00
+192.0.2.12,192.0.2.12,80,tcp,3.0,Low,Test Vulnerability With Same IP and Hostname,1.3.6.1.4.1.25623.1.0.100003,Test vulnerability same host,Test result same host,Update to latest version.,90,2026-01-15T10:00:00+00:00

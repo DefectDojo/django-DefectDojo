@@ -55,9 +55,10 @@ class TestOpenVASParserV2(DojoTestCase):
         self.assertEqual(finding.unsaved_vulnerability_ids[1], "CVE-2025-48823")
         self.assertEqual(93, len(finding.unsaved_vulnerability_ids))
 
-        # location tests
-        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
-        self.assertEqual("server99", self.get_unsaved_locations(finding)[0].host)
+        # location tests — IP is primary, hostname is secondary (GH-16002)
+        self.assertEqual(2, len(self.get_unsaved_locations(finding)))
+        self.assertEqual("10.99.99.99", self.get_unsaved_locations(finding)[0].host)
+        self.assertEqual("server99", self.get_unsaved_locations(finding)[1].host)
         # this is example data normaly tested finding does not include this
         self.assertEqual(42, self.get_unsaved_locations(finding)[0].port)
         self.assertEqual("tcp", self.get_unsaved_locations(finding)[0].protocol)
@@ -95,11 +96,16 @@ class TestOpenVASParserV2(DojoTestCase):
         self.assertEqual(f_xml.unsaved_vulnerability_ids, f_csv.unsaved_vulnerability_ids)
 
         # ensure same location parsing behaviour
-        xml_location = self.get_unsaved_locations(f_xml)[0]
-        csv_location = self.get_unsaved_locations(f_csv)[0]
-        self.assertEqual(xml_location.host, csv_location.host)
-        self.assertEqual(xml_location.protocol, csv_location.protocol)
-        self.assertEqual(xml_location.port, csv_location.port)
+        self.assertEqual(
+            len(self.get_unsaved_locations(f_xml)),
+            len(self.get_unsaved_locations(f_csv)),
+        )
+        for xml_loc, csv_loc in zip(
+            self.get_unsaved_locations(f_xml), self.get_unsaved_locations(f_csv), strict=True,
+        ):
+            self.assertEqual(xml_loc.host, csv_loc.host)
+            self.assertEqual(xml_loc.protocol, csv_loc.protocol)
+            self.assertEqual(xml_loc.port, csv_loc.port)
 
     def test_openvas_csv_report_combined_findings(self):
         """Ensure findings combinding behaviour"""
@@ -120,6 +126,77 @@ class TestOpenVASParserV2(DojoTestCase):
         with openvas_open("many_vuln.xml") as f:
             findings = self.setup_openvas_v2_test(f)
             self.assertEqual(44, len(findings))
+
+    def test_openvas_xml_ip_and_hostname_preserved(self):
+        """Regression test for GH-16002: IP must be primary host, hostname as secondary location."""
+        with openvas_open("ip_hostname_v2.xml") as f:
+            findings = self.setup_openvas_v2_test(f)
+
+        self.assertEqual(3, len(findings))
+
+        # Result 1: Both IP and hostname present — expect 2 locations
+        f1 = findings[0]
+        locations = self.get_unsaved_locations(f1)
+        self.assertEqual(2, len(locations), "Both IP and FQDN should be preserved as separate locations")
+        self.assertEqual("192.0.2.10", locations[0].host)
+        self.assertEqual("host01.example.com", locations[1].host)
+        self.assertEqual(443, locations[0].port)
+        self.assertEqual(443, locations[1].port)
+        self.assertEqual("tcp", locations[0].protocol)
+        self.assertEqual("tcp", locations[1].protocol)
+
+        # Result 2: IP only, empty hostname — expect 1 location
+        f2 = findings[1]
+        locations = self.get_unsaved_locations(f2)
+        self.assertEqual(1, len(locations))
+        self.assertEqual("192.0.2.11", locations[0].host)
+
+        # Result 3: hostname equals IP — no duplicate, expect 1 location
+        f3 = findings[2]
+        locations = self.get_unsaved_locations(f3)
+        self.assertEqual(1, len(locations))
+        self.assertEqual("192.0.2.12", locations[0].host)
+
+    def test_openvas_csv_ip_and_hostname_preserved(self):
+        """Regression test for GH-16002: CSV IP must be primary host, hostname as secondary location."""
+        with openvas_open("ip_hostname_v2.csv") as f:
+            findings = self.setup_openvas_v2_test(f)
+
+        self.assertEqual(3, len(findings))
+
+        # Result 1: Both IP and hostname present — expect 2 locations
+        f1 = findings[0]
+        locations = self.get_unsaved_locations(f1)
+        self.assertEqual(2, len(locations), "Both IP and FQDN should be preserved as separate locations")
+        self.assertEqual("192.0.2.10", locations[0].host)
+        self.assertEqual("host01.example.com", locations[1].host)
+
+        # Result 2: IP only, empty hostname — expect 1 location
+        f2 = findings[1]
+        locations = self.get_unsaved_locations(f2)
+        self.assertEqual(1, len(locations))
+        self.assertEqual("192.0.2.11", locations[0].host)
+
+        # Result 3: hostname equals IP — no duplicate, expect 1 location
+        f3 = findings[2]
+        locations = self.get_unsaved_locations(f3)
+        self.assertEqual(1, len(locations))
+        self.assertEqual("192.0.2.12", locations[0].host)
+
+    def test_openvas_ip_hostname_csv_xml_parity(self):
+        """Ensure IP/hostname preservation is consistent between XML and CSV parsers."""
+        with openvas_open("ip_hostname_v2.csv") as f:
+            findings_csv = self.setup_openvas_v2_test(f)
+        with openvas_open("ip_hostname_v2.xml") as f:
+            findings_xml = self.setup_openvas_v2_test(f)
+
+        self.assertEqual(len(findings_csv), len(findings_xml))
+        for f_csv, f_xml in zip(findings_csv, findings_xml, strict=True):
+            csv_locs = self.get_unsaved_locations(f_csv)
+            xml_locs = self.get_unsaved_locations(f_xml)
+            self.assertEqual(len(csv_locs), len(xml_locs))
+            for csv_loc, xml_loc in zip(csv_locs, xml_locs, strict=True):
+                self.assertEqual(csv_loc.host, xml_loc.host)
 
 
 # V1 Parser tests
