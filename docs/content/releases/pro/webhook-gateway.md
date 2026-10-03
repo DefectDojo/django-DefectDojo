@@ -31,7 +31,7 @@ The ECS task definitions do not include the gateway. They set `DD_WEBHOOK_GATEWA
 
 ## The database schema and role
 
-The gateway keeps its tables in a schema of its own, `whook` by default (`DD_WEBHOOK_GATEWAY_SCHEMA`), inside DefectDojo's database. It logs in with a role of its own, `defectdojo_webhook_gateway` by default (`DD_WEBHOOK_GATEWAY_DB_ROLE`), which owns that schema and can use nothing else of DefectDojo's.
+The gateway keeps its tables in a schema of its own, `whook` by default (`DD_WEBHOOK_GATEWAY_SCHEMA`), inside DefectDojo's database. It logs in with a role of its own, named after DefectDojo's database by default (`<database>_webhook_gateway`, set with `DD_WEBHOOK_GATEWAY_DB_ROLE`), which owns that schema and can use nothing else of DefectDojo's. Because PostgreSQL roles belong to the whole server, each installation on a shared server gets its own role, and DefectDojo never changes a role that was created for another database.
 
 On startup, DefectDojo creates both when they are missing, using DefectDojo's own database user:
 
@@ -41,9 +41,9 @@ On startup, DefectDojo creates both when they are missing, using DefectDojo's ow
 When DefectDojo's user may do neither, have a database administrator run the following once, with your database name and a password of your choosing, connected to DefectDojo's database:
 
 ```sql
-CREATE ROLE defectdojo_webhook_gateway LOGIN PASSWORD '<password>';
-GRANT CONNECT ON DATABASE <database> TO defectdojo_webhook_gateway;
-CREATE SCHEMA IF NOT EXISTS whook AUTHORIZATION defectdojo_webhook_gateway;
+CREATE ROLE <database>_webhook_gateway LOGIN PASSWORD '<password>';
+GRANT CONNECT ON DATABASE <database> TO <database>_webhook_gateway;
+CREATE SCHEMA IF NOT EXISTS whook AUTHORIZATION <database>_webhook_gateway;
 ```
 
 Then set `DD_WEBHOOK_GATEWAY_DB_PASSWORD` to that password in the deployment's environment, so DefectDojo hands the gateway the same one. To keep the gateway on DefectDojo's own credentials instead, set `DD_WEBHOOK_GATEWAY_DB_ROLE` to an empty value and create only the schema:
@@ -91,7 +91,7 @@ Because the derived secrets follow `DD_SECRET_KEY`, an installation still runnin
     \dt whook.*
     ```
 
-    lists the gateway's tables once it has started. `\du defectdojo_webhook_gateway` shows its role.
+    lists the gateway's tables once it has started. `\du *_webhook_gateway` shows its role.
 
 4. **DefectDojo can reach it.** In DefectDojo, open **Triage Engine > Webhook Receivers**. The top of the list shows the gateway as **Healthy**. **Unreachable** means DefectDojo cannot reach the gateway container, **Not Started** means its schema is missing, and **Turned Off** means the **Inbound Webhooks** feature flag is off.
 
@@ -125,7 +125,7 @@ A release without the gateway does not need anything the gateway added, but thre
 
     ```sql
     DROP SCHEMA whook CASCADE;
-    DROP ROLE defectdojo_webhook_gateway;
+    DROP ROLE <database>_webhook_gateway;
     ```
 
 On a release without webhook receivers, their URLs answer `404`, and senders retry for their own retry window.
