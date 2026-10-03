@@ -1,6 +1,7 @@
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
@@ -42,12 +43,16 @@ class TestListQueryCountTest(APITestCase):
         self.admin = Dojo_User.objects.get(username="admin")
 
     def _create_tests(self, count, prefix):
+        # Use timezone-aware datetimes: Test.target_start/target_end are
+        # DateTimeFields and a naive value raises a RuntimeWarning under
+        # USE_TZ (treated as an error in CI).
+        now = timezone.now()
         for i in range(count):
             test = Test.objects.create(
                 engagement=self.engagement,
                 test_type=self.test_type,
-                target_start=self.engagement.target_start,
-                target_end=self.engagement.target_end,
+                target_start=now,
+                target_end=now,
             )
             # Tags and a finding group are both serialized per test, so they
             # exercise the prefetches the fix adds.
