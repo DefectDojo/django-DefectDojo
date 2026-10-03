@@ -69,7 +69,7 @@ Cloud resources match on their identifier alone: the ARN, resource URI, or Azure
 
 Region, service, tags, and display name can all change. The resource itself stays the same. None of these fields take part in the match. A relabelled instance is still the same instance, so it keeps its findings.
 
-Two findings on two different cloud resources are never duplicates of each other. If an earlier import merged them, they stay separate after the next import.
+With Locations enabled, the **Hash Code** and **Unique ID From Tool or Hash Code** algorithms do not mark two findings as duplicates when they sit on two different cloud resources, even if the rest of their identity matches. A finding with no cloud resource is not affected, and still deduplicates as before. The check applies when findings are compared: findings that an earlier import already marked as duplicates stay marked, and a later import does not split them.
 
 ### Severity re-scores
 
