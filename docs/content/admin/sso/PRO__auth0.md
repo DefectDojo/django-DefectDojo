@@ -32,7 +32,7 @@ Complete the following steps in your Auth0 dashboard before configuring DefectDo
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Auth0**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **Auth0**, and fill in the form:
 
 - **Auth0 OAuth Key** — enter your **Client ID**.
 - **Auth0 OAuth Secret** — enter your **Client Secret**. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or the Auth0 domain.

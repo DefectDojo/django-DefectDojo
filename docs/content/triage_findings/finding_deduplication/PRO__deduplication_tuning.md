@@ -12,7 +12,7 @@ Deduplication Tuning is a DefectDojo Pro feature that gives you fine-grained con
 
 ## Matching Configuration
 
-In DefectDojo Pro, matching is configured at **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout), beside [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/) in the same group.
+In DefectDojo Pro, matching is configured at **Settings > Finding Workflow > Matching Configuration**, beside [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/) in the same group.
 
 This page replaced three separate pages (Same Tool Deduplication, Cross Tool Deduplication and Reimport Deduplication). Bookmarks to those pages redirect here. Instead of picking a tool from a dropdown on one of three pages, every tool is listed once with a column for each of the three matching kinds:
 

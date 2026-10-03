@@ -16,7 +16,7 @@ In short, Audit Logs provide a centralized record of important events that helps
 
 ### Accessing Audit Logs
 
-Audit Logs are accessible via the sidebar within the Configurations submenu. 
+Audit Logs are accessible from the sidebar under **Settings > Operations > Audit Logs**. 
 
 ![image](images/auditlogs_ss2.png)
 

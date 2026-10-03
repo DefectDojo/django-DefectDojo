@@ -97,7 +97,7 @@ classifies every mapping change before applying it:
   default, as does writing `unique_id_from_tool`.
 
 Which fields are identity-relevant follows **your** deduplication settings for that scan type
-under **Enterprise Settings**, not a fixed list, so it tracks any change you make there.
+under **Settings > Finding Workflow > Matching Configuration**, not a fixed list, so it tracks any change you make there.
 
 ### Do not map a vulnerability ID straight into `unique_id_from_tool`
 

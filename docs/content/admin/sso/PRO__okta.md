@@ -39,7 +39,7 @@ Complete the following steps in Okta before configuring DefectDojo:
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Okta**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **Okta**, and fill in the form:
 
 - **Okta OAuth Key** — enter your **Client ID**.
 - **Okta OAuth Secret** — enter your **Client Secret**. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or the Okta API URL.

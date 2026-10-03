@@ -106,7 +106,7 @@ When a brand new user is created in DefectDojo — whether manually, via SAML / 
 
 If you want every newly provisioned user to receive a baseline level of access automatically — for example, "every new SSO user should be a Reader on a particular group" — you can configure a **Default group** on the System Settings page.
 
-1. Open **⚙️ Configuration → System Settings** (Superuser only).
+1. Open **Settings > System > System Settings** (Superuser only).
 2. Set **Default group** to the [User Group](../create_user_group/) that newly created users should join.
 3. Set **Default group role** to the role they should hold in that group (e.g. **Reader**).
 4. Optionally set **Default group email pattern** to a regex (e.g. `.*@yourcompany\.com$`) so the default group is only applied to users whose email matches.

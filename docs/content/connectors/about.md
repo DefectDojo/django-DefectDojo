@@ -27,10 +27,10 @@ If you think of DefectDojo as the hub of your security data, Upstream Connectors
 
 ## Where to find Connectors
 
-In the Pro UI sidebar, open the **Connectors** group under the **Import** header:
+In the Pro UI sidebar, open the **Connect** section:
 
-* **Connectors > Upstream Connectors** — replaces the old **API Connectors** entry (previously under Import).
-* **Connectors > Downstream Connectors** — replaces the old **Integrations** entry (previously under Settings). This direction is currently in **Beta**.
+* **Connect > Upstream** opens the **Upstream Connectors** page — it replaces the old **API Connectors** entry (previously under Import).
+* **Connect > Downstream** opens the **Downstream Connectors** page — it replaces the old **Integrations** entry (previously under Settings). This direction is currently in **Beta**.
 
 Old bookmarks and deep links keep working: the legacy **API Connectors** and **Integrations** URLs automatically redirect to the new **Upstream Connectors** and **Downstream Connectors** pages.
 
@@ -39,7 +39,7 @@ Old bookmarks and deep links keep working: the legacy **API Connectors** and **I
 * **Upstream Connectors** is visible to users with a Global Role of Reader or higher.
 * **Downstream Connectors** is visible to superusers only, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances.
 
-The **Connectors** group appears in the sidebar if at least one of the two pages is visible to you.
+The **Upstream** and **Downstream** entries under **Connect** each appear in the sidebar only when that page is visible to you.
 
 ## The Connectors pages
 
