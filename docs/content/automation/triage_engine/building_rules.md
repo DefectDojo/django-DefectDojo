@@ -147,6 +147,22 @@ A path that does not resolve produces no value rather than an error.
 
 An Asset rule reads its items the same way, through `product.*`, `product_type.*` and `ctx.*` paths. `ctx.changed_fields` carries the names of the fields an update changed, and the insert menu only offers paths the rule's items actually carry.
 
+### Referring to webhook data
+
+A rule started by **On an Inbound Webhook** reads the delivery through `webhook.*` paths. Once **Find Findings by a Value** has found a Finding, the item also carries every `finding.*` path above, and the `webhook` block stays with it.
+
+```
+webhook.payload.issue.key       a value in the item's object
+webhook.root.webhookEvent       a value in the whole payload
+webhook.fields.state            a named field the trigger read
+webhook.headers.x-event-type    a header the receiver keeps
+webhook.receiver.label          the receiver
+ctx.receipt_id                  the receipt the run came from
+ctx.ticket_link_id              the ticket a lookup matched
+```
+
+The receiver's **Sample Payload** tab lists every path in its sample, and the insert menu offers them in the rule editor. See [Webhook Receivers](../webhook_receivers/).
+
 ### Conditioning on an exception
 
 With [Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled,

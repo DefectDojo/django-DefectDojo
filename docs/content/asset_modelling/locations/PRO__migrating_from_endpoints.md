@@ -130,4 +130,6 @@ If you hit this on a read you expected to work, send us the request path. That r
 
 Tags applied to Endpoints become tags on the Location object (not on the URL subtype). Tag-based filters in the legacy API continue to match.
 
-Endpoint metadata is re-pointed at the Location during migration. Existing automations that read metadata via `/api/v2/endpoint_meta/` should continue to work; new metadata should be written through the Location endpoints.
+Endpoint metadata is re-pointed at the Location during migration, scoped to the Asset the Endpoint belonged to. It is shown in the **Metadata** box on the Location page (open a Location from any list), grouped by Asset, where it can also be added, edited and removed. Existing automations that read metadata via `/api/v2/endpoint_meta/` should continue to work; new metadata should be written through the Location endpoints.
+
+Custom Fields does not replace Location metadata: the Custom Fields feature covers Findings, Assets, Organizations, Engagements, Tests and Risk Acceptances, and leaves Location metadata untouched whether the flag is on or off.

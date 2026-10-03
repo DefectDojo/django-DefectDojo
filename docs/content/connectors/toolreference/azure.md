@@ -37,7 +37,7 @@ Management group access is granted separately from subscription access, and many
 
 #### Connector Mappings
 
-1. Enter `https://management.azure.com` in the **Location URL** field.
+1. Keep the pre-filled **Location URL**, `https://management.azure.com`, or enter your sovereign cloud's Resource Manager URL.
 2. Enter the **Tenant ID**, **Client ID**, and **Client Secret** from the app registration.
 3. Leave **Login URL** blank. Set it only for a sovereign cloud (for example `https://login.microsoftonline.us`), where the Location URL changes too.
 

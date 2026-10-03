@@ -58,6 +58,7 @@ Wir unterstützen derzeit Upstream-Connectors für die folgenden Tools, weitere 
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
+* **Google Cloud**
 * **Google Cloud Security Command Center**
 * **Group-IB ASM**
 * **HackerOne**
@@ -103,7 +104,7 @@ Wir unterstützen derzeit Upstream-Connectors für die folgenden Tools, weitere 
 
 Schritt-für-Schritt-Anleitungen zur Einrichtung für jedes Tool finden Sie in der Referenz [Tool-spezifische Connector-Einrichtung](../../toolreference/upstream/).
 
-Die meisten Connectors importieren **Befunde**. Einige wenige sind **Asset Connectors**, die stattdessen Ihr **Asset-Inventar** importieren — sie bauen und pflegen Ihre Produkt- (Asset-) und Produkttyp- (Organisations-) Hierarchie, statt Befunde zu importieren: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets** und **ServiceNow CMDB**. (**runZero** ist in erster Linie ein Asset Connector, kann aber optional auch Schwachstellen als Befunde importieren.)
+Die meisten Connectors importieren **Befunde**. Einige wenige sind **Asset Connectors**, die stattdessen Ihr **Asset-Inventar** importieren — sie bauen und pflegen Ihre Produkt- (Asset-) und Produkttyp- (Organisations-) Hierarchie, statt Befunde zu importieren: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Google Cloud**, **Jira Service Management Assets** und **ServiceNow CMDB**. (**runZero** ist in erster Linie ein Asset Connector, kann aber optional auch Schwachstellen als Befunde importieren.)
 
 Diese Verbindungen bieten eine Integration mit DefectDojo in API-Geschwindigkeit und können verwendet werden, um Schwachstellendaten aus dem Tool automatisch zu erfassen und zu organisieren.
 
