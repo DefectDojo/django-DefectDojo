@@ -15,6 +15,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
+from dojo.file_uploads.models import FileUpload
 from dojo.models import Dojo_User, Engagement, Finding, Product, Test, User
 from dojo.notes.models import Notes
 
@@ -182,15 +183,12 @@ class TestApiV3SubresourcesFiles(_SubResourceBase):
         self.assertEqual("application/problem+json", response["Content-Type"])
         self.assertIn("file", response.json()["fields"])
 
-    def test_duplicate_title_is_400(self):
-        payload = {"title": "os5 dup title", "file": _txt()}
-        first = self.client.post(self.v3_url(f"findings/{self.finding.pk}/files"), payload, format="multipart")
-        self.assertEqual(201, first.status_code)
-        dup = self.client.post(
-            self.v3_url(f"tests/{self.test.pk}/files"),
-            {"title": "os5 dup title", "file": _txt()}, format="multipart",
-        )
-        self.assertEqual(400, dup.status_code, dup.content[:400])
+    def test_duplicate_title_is_accepted(self):
+        for url in (f"findings/{self.finding.pk}/files", f"tests/{self.test.pk}/files"):
+            for title in ("os5 dup title", ""):
+                response = self.client.post(self.v3_url(url), {"title": title, "file": _txt()}, format="multipart")
+                self.assertEqual(201, response.status_code, response.content[:400])
+        self.assertEqual(2, FileUpload.objects.filter(title="os5 dup title").count())
 
     def test_download_missing_file_is_404(self):
         response = self.client.get(self.v3_url(f"findings/{self.finding.pk}/files/9999999/download"))
