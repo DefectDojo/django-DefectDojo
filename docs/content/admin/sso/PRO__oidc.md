@@ -17,7 +17,7 @@ Fill in the form:
 
 1. **Endpoint** — the base URL of your OIDC provider. Do not include `/.well-known/openid-configuration`.
 2. **Client ID** — your OIDC client ID.
-3. **Client Secret** — your OIDC client secret.
+3. **Client Secret** — your OIDC client secret. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or the endpoint.
 4. Optionally configure **Claim Mapping** and **Group Mapping** — see below.
 5. Check **Enable OIDC**.
 

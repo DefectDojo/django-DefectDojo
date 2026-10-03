@@ -36,7 +36,7 @@ Assets können je nach den Anforderungen Ihrer Organisation noch granularer werd
 - „ExampleAsset 1.0" verwendet völlig andere Softwarekomponenten als „ExampleAsset 2.0", und beide Versionen werden von Ihrem Unternehmen aktiv unterstützt.
 - Das Team, das an „ExampleAsset Version A" arbeitet, unterscheidet sich vom Asset-Team, das an „ExampleAsset Version B" arbeitet, und benötigt daher unterschiedliche Sicherheitsberechtigungen.
 
-Sie können diese Varianten zwar auch als Engagements innerhalb eines einzigen Assets abbilden, RBAC lässt sich jedoch nur auf Ebene von Assets oder Organizations festlegen, was den Zugriff der Benutzer auf das jeweilige Engagement (sowie die Tests und Befunde innerhalb dieser Engagements) einschränken kann, wenn sie so organisiert sind. Weitere Informationen zu RBAC und Berechtigungen in DefectDojo finden Sie [hier](/admin/user_management/about_perms_and_roles/).
+Sie können diese Varianten zwar auch als Engagements innerhalb eines einzigen Assets abbilden, Berechtigungen lassen sich jedoch nur auf Ebene von Assets oder Organizations vergeben, was den Zugriff der Benutzer auf das jeweilige Engagement (sowie die Tests und Befunde innerhalb dieser Engagements) einschränken kann, wenn sie so organisiert sind. Weitere Informationen finden Sie unter [Open-Source-Berechtigungen](/admin/user_management/os__authorized_users/).
 
 ## Asset-Daten
 
@@ -69,11 +69,11 @@ Assets sind über die Seitenleiste zugänglich. Das Untermenü bietet außerdem 
 
 ### Berechtigungen
 
-Auf Assets können Role-Based-Access-Control-Regeln (RBAC) angewendet werden, die die Möglichkeit der Teammitglieder einschränken, sie anzuzeigen und mit ihnen zu interagieren.
+Der Zugriff auf ein Asset wird über die Liste der [Authorized Users](/admin/user_management/os__authorized_users/) gewährt, die festlegt, wer es anzeigen und mit ihm interagieren kann.
 
 Berechtigungen werden nach unten vererbt, das heißt, der Zugriff auf ein Asset gewährt automatisch Zugriff auf alle Objekte innerhalb dieses Assets (z. B. Engagements, Tests und Befunde).
 
-Weitere Informationen zu Benutzerrollen finden Sie in unserem [Artikel zur Einführung in Rollen](/admin/user_management/about_perms_and_roles/).
+Weitere Informationen finden Sie unter [Open-Source-Berechtigungen](/admin/user_management/os__authorized_users/).
 
 ## Asset-Ansicht
 
