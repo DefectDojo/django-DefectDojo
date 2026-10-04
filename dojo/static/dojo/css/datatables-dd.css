@@ -7,12 +7,12 @@
 
 /* -- DataTables CSS variables -------------------------------- */
 :root {
-  --dt-row-selected: 79, 70, 229;           /* dd-primary-500 */
+  --dt-row-selected: 0, 95, 115;            /* dd-interactive-700 (Dusk) */
   --dt-row-selected-text: 255, 255, 255;
-  --dt-row-selected-link: 67, 56, 202;      /* dd-primary-600 */
-  --dt-row-stripe: 0, 0, 0;
-  --dt-row-hover: 0, 0, 0;
-  --dt-column-ordering: 0, 0, 0;
+  --dt-row-selected-link: 0, 75, 92;        /* dd-interactive-800 */
+  --dt-row-stripe: 185, 168, 136;          /* warm Dust line, so stripes stay in the brand neutrals */
+  --dt-row-hover: 0, 95, 115;               /* Dusk, matching the .table-hover tint */
+  --dt-column-ordering: 185, 168, 136;
   --dt-header-align-items: center;
 }
 
@@ -39,7 +39,7 @@ table.dataTable thead > tr > th.dt-orderable-asc:hover,
 table.dataTable thead > tr > th.dt-orderable-desc:hover,
 table.dataTable thead > tr > td.dt-orderable-asc:hover,
 table.dataTable thead > tr > td.dt-orderable-desc:hover {
-  outline: 2px solid rgba(79, 70, 229, 0.08);
+  outline: 2px solid rgba(0, 95, 115, 0.08);
   outline-offset: -2px;
   border-radius: 2px;
 }
@@ -89,12 +89,12 @@ table.dataTable thead > tr > td.dt-ordering-desc span.dt-column-order:after {
 table.dataTable thead > tr > th.dt-ordering-asc span.dt-column-order:before,
 table.dataTable thead > tr > td.dt-ordering-asc span.dt-column-order:before {
   opacity: 0.7;
-  color: var(--color-dd-primary-500, #4f46e5);
+  color: var(--color-dd-interactive-700, #005f73);
 }
 table.dataTable thead > tr > th.dt-ordering-desc span.dt-column-order:after,
 table.dataTable thead > tr > td.dt-ordering-desc span.dt-column-order:after {
   opacity: 0.7;
-  color: var(--color-dd-primary-500, #4f46e5);
+  color: var(--color-dd-interactive-700, #005f73);
 }
 /* Disabled sort directions hidden */
 table.dataTable thead > tr > th.sorting_desc_disabled span.dt-column-order:after,
@@ -249,8 +249,8 @@ div.dt-container div.dt-search input {
 }
 div.dt-container div.dt-search input:focus {
   outline: none;
-  border-color: var(--color-dd-primary-400, #818cf8);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: var(--color-dd-interactive-700, #005f73);
+  box-shadow: 0 0 0 3px rgba(0, 95, 115, 0.12);
 }
 
 /* -- DT pagination ------------------------------------------- */
@@ -283,11 +283,11 @@ div.dt-container div.dt-paging button.dt-paging-button {
 }
 div.dt-container div.dt-paging button.dt-paging-button:hover:not(.current):not(.disabled) {
   background-color: var(--color-surface-2, #f8fafc);
-  border-color: var(--color-dd-primary-300, #a5b4fc);
+  border-color: var(--color-dd-interactive-300, #72b9c6);
 }
 div.dt-container div.dt-paging button.dt-paging-button.current {
-  background-color: var(--color-dd-primary-500, #4f46e5);
-  border-color: var(--color-dd-primary-500, #4f46e5);
+  background-color: var(--color-dd-interactive-700, #005f73);
+  border-color: var(--color-dd-interactive-700, #005f73);
   color: white;
   font-weight: 600;
 }
@@ -321,14 +321,14 @@ div.dt-container .dt-button {
 }
 div.dt-container .dt-button:hover {
   background-color: var(--color-surface-2, #f8fafc);
-  border-color: var(--color-dd-primary-300, #a5b4fc);
+  border-color: var(--color-dd-interactive-300, #72b9c6);
 }
 div.dt-container .dt-button:active {
-  background-color: var(--color-dd-primary-50, #eef2ff);
+  background-color: var(--color-dd-interactive-50, #ecf6f8);
 }
 div.dt-container .dt-button.active {
-  background-color: var(--color-dd-primary-500, #4f46e5);
-  border-color: var(--color-dd-primary-500, #4f46e5);
+  background-color: var(--color-dd-interactive-700, #005f73);
+  border-color: var(--color-dd-interactive-700, #005f73);
   color: white;
 }
 
