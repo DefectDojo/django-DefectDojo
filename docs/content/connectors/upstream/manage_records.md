@@ -47,12 +47,22 @@ Auto-Mapping resolves each Record in a fixed order, and stops at the first answe
 Vendor-Equivalent Product. Once a Connector has mapped that identifier once, it recognises it
 on every later Discover — so renaming the project in the tool, or in DefectDojo, no longer
 loses the Mapping or creates a duplicate Asset.
-2. **The name.** If the Connector has not seen the identifier before, it looks for an Asset
+2. **The container image repository.** If the Record describes a container image repository,
+it maps to the Asset that repository already resolves to, whichever Connector (or person)
+recorded it first. Two tools reporting the same repository under different names therefore
+share one Asset. See
+[Container image repositories](/asset_modelling/engagements_tests/pro__assets/#container-image-repositories-the-oci-namespace).
+3. **The name.** If the Connector has not seen the identifier before, it looks for an Asset
 whose name matches. When one is found, the Record is mapped to it and the identifier is
 recorded, so step 1 answers from then on.
-3. **A new Asset.** If neither matches, DefectDojo creates one.
+4. **A new Asset.** If nothing matches, DefectDojo creates one.
 
-Step 1 requires the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
+Steps 2 to 4 record the tool's identifier, and steps 3 and 4 also record the repository, so
+step 1 (and, for other tools, step 2) answers from then on. A Record already known by its
+identifier stays on its Asset even when its repository resolves elsewhere: DefectDojo shows
+that as a repository conflict on both Assets rather than moving its Findings.
+
+Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
 Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
 nothing about existing Mappings: the first Discover after it is turned on records identifiers
 for the Records you already have, and later runs use them.
@@ -73,12 +83,22 @@ Auto-Mapping resolves each Record in a fixed order, and stops at the first answe
 Vendor-Equivalent Product. Once a Connector has mapped that identifier once, it recognises it
 on every later Discover — so renaming the project in the tool, or in DefectDojo, no longer
 loses the Mapping or creates a duplicate Product.
-2. **The name.** If the Connector has not seen the identifier before, it looks for a Product
+2. **The container image repository.** If the Record describes a container image repository,
+it maps to the Product that repository already resolves to, whichever Connector (or person)
+recorded it first. Two tools reporting the same repository under different names therefore
+share one Product. See
+[Container image repositories](/asset_modelling/engagements_tests/pro__assets/#container-image-repositories-the-oci-namespace).
+3. **The name.** If the Connector has not seen the identifier before, it looks for a Product
 whose name matches. When one is found, the Record is mapped to it and the identifier is
 recorded, so step 1 answers from then on.
-3. **A new Product.** If neither matches, DefectDojo creates one.
+4. **A new Product.** If nothing matches, DefectDojo creates one.
 
-Step 1 requires the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
+Steps 2 to 4 record the tool's identifier, and steps 3 and 4 also record the repository, so
+step 1 (and, for other tools, step 2) answers from then on. A Record already known by its
+identifier stays on its Product even when its repository resolves elsewhere: DefectDojo shows
+that as a repository conflict on both Products rather than moving its Findings.
+
+Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
 Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
 nothing about existing Mappings: the first Discover after it is turned on records identifiers
 for the Records you already have, and later runs use them.
