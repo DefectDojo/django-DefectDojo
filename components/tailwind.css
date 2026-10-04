@@ -384,13 +384,15 @@
     @apply w-full text-sm text-left border-collapse;
   }
   .table th {
-    /* Column headers in the brand label face: JetBrains Mono, uppercase,
-       tracked, in the faint ink. */
-    @apply px-3 py-2.5 bg-surface-2 font-mono font-medium uppercase tracking-[0.06em]
-           text-text-faint border-b-2 border-border text-left text-[0.72rem] sticky top-0 z-10;
+    /* Column headers in the brand label face: JetBrains Mono, lightly
+       tracked, in the faint ink. The header text keeps the case it is
+       written in (no text-transform), so the rendered label matches the
+       template, which is what UI tests and link-text lookups read. */
+    @apply px-3 py-2.5 bg-surface-2 font-mono font-medium tracking-[0.02em]
+           text-text-faint border-b-2 border-border text-left text-xs sticky top-0 z-10;
   }
-  /* Tracking pulls a connected script's letters apart, and these scripts
-     have no case to transform, so they keep their natural spacing. */
+  /* Tracking pulls a connected script's letters apart, so these scripts
+     keep their natural spacing. */
   :lang(ar, fa, he, ur) .table th,
   :lang(ar, fa, he, ur) h6 {
     letter-spacing: normal;
