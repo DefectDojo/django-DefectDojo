@@ -19,8 +19,8 @@
 
 &lt;img
  src="https://docs.defectdojo.com/images/request_a_trial_mg.png"
- width="620"
- height="638"
+ width="528"
+ height="2100"
  decoding="async"
  fetchpriority="auto"
  loading="lazy"
@@ -33,8 +33,8 @@
 
 &lt;img
  src="https://docs.defectdojo.com/images/request_a_trial.png"
- width="968"
- height="606"
+ width="2832"
+ height="2100"
  decoding="async"
  fetchpriority="auto"
  loading="lazy"
@@ -47,8 +47,8 @@
 
 &lt;img
  src="https://docs.defectdojo.com/images/request_a_trial_2.png"
- width="942"
- height="882"
+ width="2832"
+ height="2100"
  decoding="async"
  fetchpriority="auto"
  loading="lazy"
