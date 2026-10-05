@@ -1,9 +1,9 @@
 import json
 import logging
 
-from dateutil import parser as date_parser
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -36,6 +36,11 @@ class DarkmoonParser:
         "informational": "Info",
     }
 
+    # Darkmoon statuses that mean the finding is no longer open. Darkmoon keeps
+    # the finding in the report with one of these statuses once it has been
+    # fixed, so they are imported as inactive and mitigated rather than active.
+    MITIGATED_STATUSES = {"remediated", "resolved", "closed", "fixed"}
+
     def get_scan_types(self):
         return ["Darkmoon Scan"]
 
@@ -53,16 +58,12 @@ class DarkmoonParser:
     def get_findings(self, file, test):
         data = json.load(file)
 
-        # Accept either a bare list of findings or an object wrapping them.
-        if isinstance(data, list):
-            raw_findings = data
-        else:
-            raw_findings = data.get("findings") or []
+        # Darkmoon writes each campaign's findings as a bare JSON array
+        # (vulnerabilities/<campaign_id>.json). Also accept an object that
+        # wraps them under "findings" for convenience.
+        raw_findings = data if isinstance(data, list) else (data.get("findings") or [])
 
-        findings = []
-        for item in raw_findings:
-            findings.append(self._build_finding(item, test))
-        return findings
+        return [self._build_finding(item, test) for item in raw_findings]
 
     def _build_finding(self, item, test):
         title = item.get("title") or "Darkmoon finding"
@@ -74,8 +75,13 @@ class DarkmoonParser:
 
         status = str(item.get("status", "")).lower()
         exploited = status == "exploited"
+        mitigated = status in self.MITIGATED_STATUSES
 
-        description = self._build_description(item, status)
+        evidence = item.get("evidence")
+        if not isinstance(evidence, dict):
+            evidence = {}
+
+        description = self._build_description(item, status, evidence)
 
         finding = Finding(
             title=title,
@@ -84,12 +90,20 @@ class DarkmoonParser:
             description=description,
             static_finding=False,
             dynamic_finding=True,
+        )
+
+        if mitigated:
+            # remediated / resolved / closed / fixed: Darkmoon confirmed the
+            # issue and later saw it fixed, so import it inactive + mitigated.
+            finding.active = False
+            finding.verified = True
+            finding.is_mitigated = True
+        else:
             # An exploited finding has been proven with a working exploit, so it
             # is both active and verified; everything else is reported active
             # and left for triage.
-            active=True,
-            verified=exploited,
-        )
+            finding.active = True
+            finding.verified = exploited
 
         if item.get("remediation"):
             finding.mitigation = item.get("remediation")
@@ -120,23 +134,26 @@ class DarkmoonParser:
         if component:
             finding.component_name = component
 
-        if item.get("node_id"):
-            finding.vuln_id_from_tool = str(item.get("node_id"))
-
-        # Reproduction evidence.
-        steps = self._build_steps_to_reproduce(item)
+        # Reproduction evidence lives in the nested "evidence" object.
+        steps = self._build_steps_to_reproduce(evidence)
         if steps:
             finding.steps_to_reproduce = steps
-        if item.get("raw_request"):
-            finding.unsaved_request = item.get("raw_request")
-        if item.get("raw_response"):
-            finding.unsaved_response = item.get("raw_response")
+        if evidence.get("raw_request"):
+            finding.unsaved_request = evidence.get("raw_request")
+        if evidence.get("raw_response"):
+            finding.unsaved_response = evidence.get("raw_response")
 
-        # Endpoint (Darkmoon is a dynamic/DAST-style tool).
+        # Endpoint (Darkmoon is a dynamic/DAST-style tool). Darkmoon sometimes
+        # records a bare path like "/api/login" with no host; DefectDojo
+        # endpoints/locations need a host, so those are skipped.
         endpoint_uri = item.get("endpoint")
-        if endpoint_uri:
+        if endpoint_uri and not str(endpoint_uri).startswith("/"):
             try:
-                finding.unsaved_endpoints = [Endpoint.from_uri(endpoint_uri)]
+                if locations_enabled():
+                    finding.unsaved_locations = [LocationData.url(url=endpoint_uri)]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [Endpoint.from_uri(endpoint_uri)]
             except Exception:
                 logger.debug("Could not parse endpoint %s", endpoint_uri)
 
@@ -144,7 +161,7 @@ class DarkmoonParser:
 
         return finding
 
-    def _build_description(self, item, status):
+    def _build_description(self, item, status, evidence):
         parts = []
         if item.get("description"):
             parts.append(item.get("description"))
@@ -169,21 +186,23 @@ class DarkmoonParser:
             parts.append(f"**MITRE ATT&CK:** {mitre}")
         if item.get("iso27001_control"):
             parts.append(f"**ISO 27001 control:** {item.get('iso27001_control')}")
-        if item.get("evidence_explanation"):
-            parts.append(f"**Evidence:** {item.get('evidence_explanation')}")
+        if evidence.get("explanation"):
+            parts.append(f"**Evidence:** {evidence.get('explanation')}")
 
         return "\n\n".join(parts)
 
-    def _build_steps_to_reproduce(self, item):
+    def _build_steps_to_reproduce(self, evidence):
         parts = []
-        commands = item.get("evidence_commands") or []
+        commands = evidence.get("commands") or []
         if isinstance(commands, str):
             commands = [commands]
         if commands:
             parts.append("**Commands:**\n```\n" + "\n".join(commands) + "\n```")
-        logs = item.get("evidence_logs")
+        logs = evidence.get("logs") or []
+        if isinstance(logs, str):
+            logs = [logs]
         if logs:
-            parts.append("**Logs:**\n```\n" + logs + "\n```")
+            parts.append("**Logs:**\n```\n" + "\n".join(logs) + "\n```")
         return "\n\n".join(parts)
 
     def _build_tags(self, item, status):
