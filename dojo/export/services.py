@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db.models import Count, Q
 
 from dojo import __version__
+from dojo.export import rows
 from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationFindingReference
 from dojo.models import (
@@ -154,23 +155,16 @@ def _file_owner(upload: FileUpload) -> tuple[str, int]:
     return "none", 0
 
 
-def _stored_size(field_file) -> int:
-    try:
-        return field_file.size if field_file else 0
-    except Exception:
-        return 0
-
-
 def _file_stats(max_file_bytes: int) -> tuple[int, list[dict]]:
     total, oversized = 0, []
     for upload in FileUpload.objects.order_by("id").iterator(chunk_size=500):
-        size = _stored_size(upload.file)
+        size = rows.stored_size(upload.file) or 0
         total += size
         if size > max_file_bytes:
             owner, owner_id = _file_owner(upload)
             oversized.append({"id": upload.id, "title": upload.title, "size": size, "owner": owner, "owner_id": owner_id})
     for acceptance in Risk_Acceptance.objects.exclude(path="").order_by("id").iterator(chunk_size=500):
-        size = _stored_size(acceptance.path)
+        size = rows.stored_size(acceptance.path) or 0
         total += size
         if size > max_file_bytes:
             oversized.append({

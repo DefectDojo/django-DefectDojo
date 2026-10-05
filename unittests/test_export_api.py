@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo import __version__
+from dojo.export import rows
 from dojo.location.feature import locations_enabled
 from dojo.models import (
     Dojo_User,
@@ -148,3 +149,73 @@ class ExportManifestContentTest(DojoTestCase):
                 "non_url_locations",
             ],
         )
+
+
+@versioned_fixtures
+class ExportRowsTest(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def test_product_row_uses_names_and_usernames(self):
+        product = Product.objects.order_by("id").first()
+        product.product_manager = Dojo_User.objects.get(username="admin")
+        product.save()
+        row = rows.product_row(product)
+        self.assertEqual(row["name"], product.name)
+        self.assertEqual(row["prod_type"]["name"], product.prod_type.name)
+        self.assertEqual(row["product_manager"], "admin")
+        self.assertEqual(row["sla_configuration"], product.sla_configuration.name)
+        self.assertNotIn("id", row)
+
+    def test_engagement_row_has_every_scalar_column(self):
+        engagement = Engagement.objects.order_by("id").first()
+        row = rows.engagement_row(engagement, max_file_bytes=1024)
+        for name in ("name", "description", "target_start", "target_end", "status", "engagement_type",
+                     "build_id", "commit_hash", "branch_tag", "source_code_management_uri",
+                     "deduplication_on_engagement", "created"):
+            self.assertIn(name, row)
+        self.assertEqual(row["lead"], engagement.lead.username if engagement.lead else None)
+        self.assertEqual(row["notes"], [rows.note_row(note) for note in engagement.notes.all()])
+
+    def test_test_row_names_its_lookups(self):
+        test = Test.objects.order_by("id").first()
+        row = rows.test_row(test, max_file_bytes=1024)
+        self.assertEqual(row["test_type"], test.test_type.name)
+        self.assertEqual(row["scan_type"], test.scan_type)
+        self.assertEqual(row["environment"], test.environment.name if test.environment else None)
+
+    def test_note_row_keeps_author_and_privacy(self):
+        note = Notes.objects.order_by("id").first()
+        self.assertEqual(
+            rows.note_row(note),
+            {
+                "id": str(note.id),
+                "entry": note.entry,
+                "date": note.date.isoformat(),
+                "author": note.author.username,
+                "private": note.private,
+                "edited": note.edited,
+                "editor": note.editor.username if note.editor else None,
+                "edit_time": note.edit_time.isoformat() if note.edit_time else None,
+                "note_type": note.note_type.name if note.note_type else None,
+            },
+        )
+
+    def test_file_row_lists_a_small_file_without_its_bytes(self):
+        upload = FileUpload(title="small")
+        upload.file.save("small.txt", ContentFile(b"hello"), save=True)
+        row = rows.file_row(upload.id, upload.title, upload.file, max_file_bytes=1024)
+        self.assertEqual((row["id"], row["title"], row["size"]), (str(upload.id), "small", 5))
+        self.assertNotIn("omitted", row)
+
+    def test_file_row_skips_big_files(self):
+        upload = FileUpload(title="big")
+        upload.file.save("big.txt", ContentFile(b"hello"), save=True)
+        row = rows.file_row(upload.id, upload.title, upload.file, max_file_bytes=4)
+        self.assertEqual(row["omitted"], "too_large")
+
+    def test_file_row_marks_missing_file(self):
+        upload = FileUpload(title="gone")
+        upload.file.save("gone.txt", ContentFile(b"x"), save=True)
+        upload.file.storage.delete(upload.file.name)
+        row = rows.file_row(upload.id, upload.title, upload.file, max_file_bytes=1024)
+        self.assertEqual(row["omitted"], "missing")
