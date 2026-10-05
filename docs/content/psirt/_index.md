@@ -96,6 +96,11 @@ Two pages are configuration rather than workflow:
 - **[PSIRT Settings](settings/)** — the case-worthiness calibration, the "new"
   item window, and which upstream changes count as material.
 
+All of it is also reachable from an AI assistant: the
+**[MCP Server's PSIRT Toolset](../metrics_reports/ai/mcp_server_pro/#psirt-toolset)**
+(`?toolsets=psirt`) exposes the queue, rules, cases and authored advisories as
+tools, under the same permissions as the pages above.
+
 You do not need all of it. Feeds plus an inventory is enough to start getting
 answers; rules, cases and SLAs are for teams that want the workflow around them,
 and advisory publishing is for teams that ship software to customers who need to
