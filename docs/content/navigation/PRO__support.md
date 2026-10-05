@@ -1,6 +1,6 @@
 ---
 title: "Support"
-description: "Filing a support request from DefectDojo Pro, the documentation and community search above the form, the community board, and the settings that cover self-hosted and airgapped instances"
+description: "Filing a support request from DefectDojo Pro, the documentation and community search above the form, the community board, and the settings that cover self-hosted and airgapped instances or turn the pages off"
 weight: 11
 audience: pro
 ---
@@ -11,7 +11,7 @@ DefectDojo Pro carries two support pages. **Support** is where you file a reques
 
 ## Support requests
 
-Open **Support** from **Settings → Support**, or from **Settings → License & Support → Support** in the reorganized settings menu. It shows on cloud, self-hosted and airgapped instances. The page (`/ui/cloud/support`) holds a search box, a request form behind a link, and a list.
+Open **Support** from **Settings → Support**, or from **Settings → License & Support → Support** in the reorganized settings menu. It shows on cloud, self-hosted and airgapped instances while the **Support** feature flag is on, which it is by default. The page (`/ui/cloud/support`) holds a search box, a request form behind a link, and a list.
 
 The form takes four kinds of request:
 
@@ -62,6 +62,18 @@ An instance with no route off its network cannot use the support pages at all. T
 
 With the setting on, the instance makes no outbound support call and no documentation call. The dialog opens as soon as the page loads. It does not wait for a call to time out first.
 
+## Turning the support pages off
+
+To remove the support pages from an instance, a superuser turns off the **Support** feature flag under **Settings → Feature Flags**. With it off:
+
+- both **Support** menu entries are hidden, and opening `/ui/cloud/support` or `/ui/cloud/support/community` shows a Not Found page;
+- the **Request a Connector** tiles on the connector pages are hidden, because they open the Support page;
+- the instance sends nothing to DefectDojo's support service: no requests, votes, board reads, documentation lookups or enrolment.
+
+Turning the flag back on restores the pages, and **My requests** shows everything the account filed before. The flag takes effect on the next page load; no restart is needed.
+
+Use **Airgapped instance** rather than this flag when the instance should keep its support pages but cannot reach DefectDojo. Users then see the support address to write to instead of a missing page.
+
 ## Settings
 
-The support pages need no environment variables. The one switch, **Airgapped instance**, is a feature flag under **Settings → Feature Flags** (off by default). The dialog address is `support@defectdojo.com`.
+The support pages need no environment variables. Two feature flags under **Settings → Feature Flags** control them: **Support** (on by default) shows or removes the pages, and **Airgapped instance** (off by default) replaces them with the support address. The dialog address is `support@defectdojo.com`.
