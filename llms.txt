@@ -459,7 +459,7 @@ Key facts:
 - [Customizing Tables](https://docs.defectdojo.com/navigation/pro__table_customization/): Sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables
 - [Customizing Page Layouts (Pro)](https://docs.defectdojo.com/navigation/pro__page_layouts/): Arrange the widgets on DefectDojo Pro view pages, then save, share, or set a layout as the default
 - [Configuring Forms (Pro)](https://docs.defectdojo.com/navigation/pro__form_configuration/): Choose which fields the DefectDojo Pro create and edit forms show, which are required, and the order they appear in
-- [Support (Pro)](https://docs.defectdojo.com/navigation/pro__support/): Filing a support request from DefectDojo Pro, the documentation and community search above the form, the community board, and the settings that cover self-hosted and airgapped instances
+- [Support (Pro)](https://docs.defectdojo.com/navigation/pro__support/): Filing a support request from DefectDojo Pro, the documentation and community search above the form, the community board, and the settings that cover self-hosted and airgapped instances or turn the pages off
 - [The Markdown Editor (Pro)](https://docs.defectdojo.com/navigation/pro__markdown_editor/): Format text, and paste or drag images directly into any DefectDojo Pro description, note, or other markdown field
 - [Language and Localization](https://docs.defectdojo.com/navigation/language_and_localization/): Choose the language DefectDojo's interface is shown in, and understand which languages are offered and what stays in English
 
@@ -844,6 +844,7 @@ Key facts:
 ## Optional
 
 - [Open Source Upgrading](https://docs.defectdojo.com/releases/os_upgrading/upgrading_guide/): Release specific upgrading instructions
+- [Upgrading to DefectDojo Version 3.5.x](https://docs.defectdojo.com/releases/os_upgrading/3.5/): No special instructions.
 - [Upgrading to DefectDojo Version 3.3.200](https://docs.defectdojo.com/releases/os_upgrading/3.3.200/): In DefectDojo Pro, a restart now applies the Locations and Organization / Asset Relabeling toggles to the Classic UI and the /api/v2 route wiring. Those surfaces used to keep following the deployment environment variables no matter what the Feature Flags page said.
 - [Upgrading to DefectDojo Version 3.4.x](https://docs.defectdojo.com/releases/os_upgrading/3.4/): No special instructions.
 - [Upgrading to DefectDojo Version 3.2.200](https://docs.defectdojo.com/releases/os_upgrading/3.2.200/): DefectDojo Pro can now enable Locations as a self-service, database-backed toggle on the Feature Flags page, and carry existing history forward with an in-app data-migration suite that backfills endpoint, dependency, and source-code locations before an identity rehash.
