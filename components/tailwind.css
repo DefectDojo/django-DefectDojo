@@ -280,8 +280,9 @@
   .card-header, .panel-heading {
     @apply px-5 py-3.5 border-b border-border bg-surface-2 font-semibold text-sm text-text rounded-t-lg;
   }
+  /* Same horizontal inset as the header, so body content lines up with the title */
   .card-body, .panel-body {
-    @apply p-4;
+    @apply px-5 py-4;
   }
   .card-footer, .panel-footer {
     @apply px-4 py-3 border-t border-border bg-surface-2 rounded-b-lg;

@@ -352,6 +352,23 @@ div.dt-container > div.dt-search {
   margin-left: 0.75rem;
 }
 
+/* A table inside a card: inset the control row and the info/paging rows
+   from the card's border, matching the card header's padding. */
+.panel div.dt-container > div.dt-buttons {
+  margin: 0.75rem 0 0.75rem 1.25rem;
+}
+.panel div.dt-container > div.dt-length,
+.panel div.dt-container > div.dt-search {
+  margin-block: 0.75rem;
+}
+.panel div.dt-container > div.dt-buttons ~ div.dt-search:last-of-type {
+  margin-inline-end: 1.25rem;
+}
+.panel div.dt-container > div.dt-info,
+.panel div.dt-container > div.dt-paging {
+  padding: 0.75rem 1.25rem;
+}
+
 /* -- DT processing spinner ----------------------------------- */
 div.dt-processing {
   position: absolute;

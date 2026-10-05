@@ -118,8 +118,12 @@ h3 {
 
 /* A row of cards is spaced by the cards' own bottom margin; the extra
    row offset above would make the gap between card rows uneven. */
-.row:has(> [class*="col-"] > .panel:first-child) {
+.row:has(> :is(.panel, .card, .stat-card, .row):first-child),
+.row:has(> [class*="col-"] > :is(.panel, .card, .stat-card, .row):first-child) {
     margin-top: 0;
+    /* Cards that wrap onto another line are spaced by their own margin;
+       the grid's row gap on top of it would double the space. */
+    row-gap: 0;
 }
 
 form.filters {
@@ -563,9 +567,10 @@ form ul#id_accepted_findings input {
 
 /* Removed: .pagination base rules — now in tailwind.css */
 
+/* Inside a card, the count / page size row shares the card's 1.25rem inset. */
 .pagination-in-panel {
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: 0;
+    padding: 0.75rem 1.25rem 0;
 }
 
 #risk_acceptance table form {
@@ -1390,8 +1395,50 @@ span.endpoint_product {
 /* One gap between every card: stacked cards in a column, and cards in
    consecutive rows, sit 1rem apart. */
 .panel,
-.card {
+.card,
+.stat-card {
     margin-bottom: 1rem;
+}
+
+/* Stat cards in a row fill their column, so a card whose label wraps
+   does not leave the others short with uneven space beneath them. */
+.row > [class*="col-"]:has(> .stat-card) {
+    display: flex;
+    flex-direction: column;
+}
+
+.row > [class*="col-"] > .stat-card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-card > .stat-card-link {
+    margin-top: auto;
+}
+
+/* The "Showing entries" / page size row around a list's table card:
+   centered on one line, with a gap before the card it introduces. */
+.clearfix:has(> .pagination) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.clearfix:has(> .pagination)::before,
+.clearfix:has(> .pagination)::after {
+    display: none;
+}
+
+.clearfix:has(> .pagination) {
+    margin-bottom: 0.75rem;
+}
+
+.clearfix > .pagination:not(nav .pagination) {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
 }
 
 .panel-heading h2,
@@ -1449,6 +1496,32 @@ span.endpoint_product {
     margin-inline-start: auto;
 }
 
+/* Buttons grouped on the trailing side of a card header sit an even
+   0.5rem apart, instead of whatever whitespace the template left. */
+.panel-heading .pull-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* A header that is bare text (no heading element) reads as a card title too. */
+.panel-default > .panel-heading:not(:has(h1, h2, h3, h4, h5, h6, .row, form)) {
+    font-size: 1.0625rem;
+    font-weight: 700;
+}
+
+/* Big-number tiles (icon, count, link): keep the icon apart from the count. */
+.panel-heading > .row > [class*="col-"]:has(> .fa-2x) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.panel-heading > .row > [class*="col-"] > .fa-2x {
+    color: var(--color-text-muted);
+}
+
 /* A title that is not floated left fills the row, so its own trailing
    controls can reach the edge. */
 .panel-heading > .clearfix > :is(h1, h2, h3, h4, h5):not(.pull-left) {
@@ -1471,7 +1544,7 @@ span.endpoint_product {
 
 .panel-default > .panel-heading {
     color: var(--color-text);
-    font-size: 14px;
+    font-size: 0.875rem;
     background-color: var(--color-surface-2);
     border-color: var(--color-border);
 }
