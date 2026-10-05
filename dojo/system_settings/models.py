@@ -1,3 +1,5 @@
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -42,6 +44,13 @@ class System_Settings(models.Model):
     # will be set to random / uuid by initializer so null needs to be True
     jira_webhook_secret = models.CharField(max_length=64, blank=False, null=True, verbose_name=_("JIRA Webhook URL"),
                                            help_text=_("Secret needed in URL for incoming JIRA Webhook"))
+
+    instance_id = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        verbose_name=_("Instance ID"),
+        help_text=_("Stable id of this DefectDojo instance. Exports use it to tell instances apart."),
+    )
 
     jira_choices = (("Critical", "Critical"),
                     ("High", "High"),
