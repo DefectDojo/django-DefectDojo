@@ -15,6 +15,7 @@ from rest_framework.test import APIRequestFactory
 from rest_framework.views import APIView
 
 import dojo
+import dojo.urls  # noqa: F401 -- loads every viewset module, so every DeprecationNoticeMixin subclass exists
 from dojo.api_v2.views import DeprecationNoticeMixin
 from dojo.decorators import deprecated_view
 from dojo.deprecations import (
@@ -183,6 +184,24 @@ class TestDeprecationHeaders(SimpleTestCase):
 HAND_TYPED_SCHEDULE = re.compile(
     r"removal_version=|removal_date=|end_of_life_date\s*=|will be removed (in|by) (DefectDojo )?v?\d|removal planned for \d",
 )
+
+
+def mixin_subclasses(cls):
+    for sub in cls.__subclasses__():
+        yield sub
+        yield from mixin_subclasses(sub)
+
+
+class TestEveryDeprecationKeyIsDeclared(SimpleTestCase):
+    def test_a_mixin_subclass_never_names_an_undeclared_key(self):
+        offenders = []
+        for cls in mixin_subclasses(DeprecationNoticeMixin):
+            if cls.__module__.startswith("unittests."):
+                continue
+            key = getattr(cls, "deprecation", "")
+            if key and get_deprecation(key) is None:
+                offenders.append(f"{cls.__module__}.{cls.__qualname__}: deprecation={key!r}")
+        self.assertEqual([], offenders, "A typo here sends no deprecation header and fails silently.")
 
 
 class TestNoHandTypedSchedule(SimpleTestCase):
