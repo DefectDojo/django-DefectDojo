@@ -2,7 +2,7 @@
 title: Esecuzioni
 description: Come viene eseguita una regola, cosa registra un'esecuzione e come viene
   limitata la propagazione a cascata
-weight: 4
+weight: 5
 audience: pro
 aliases:
 - /it/automation/rules_engine_v2/runs/

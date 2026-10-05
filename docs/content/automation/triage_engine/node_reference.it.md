@@ -1,7 +1,7 @@
 ---
 title: Riferimento dei nodi
 description: Tutti i nodi inclusi in Triage Engine, e cosa fa ciascuno
-weight: 3
+weight: 4
 audience: pro
 aliases:
 - /it/automation/rules_engine_v2/node_reference/

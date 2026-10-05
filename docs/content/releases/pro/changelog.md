@@ -16,6 +16,16 @@ You can subscribe to these release notes with the [RSS feed](/releases/pro/chang
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## October 2026: v3.4
+
+### October 5, 2026: v3.4.0
+
+New features:
+* **(Triage Engine)** Webhook receivers let Jira and other tools send changes back to DefectDojo, and the Jira Downstream Connector gains two-way sync and Push Notes as Comments.
+
+Upgrade notes:
+* **(Deployment)** Self-hosted Docker Compose deployments, and Helm deployments with `webhookGateway.enabled`, run a new webhook gateway service in front of webhook receivers, with its own schema and database role inside DefectDojo's database. Please see [additional instructions](/releases/pro/webhook-gateway) for more details.
+
 ## September 2026: v3.3
 
 ### September 22, 2026: v3.3.200

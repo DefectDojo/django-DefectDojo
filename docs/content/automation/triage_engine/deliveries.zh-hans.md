@@ -1,7 +1,7 @@
 ---
 title: 投递记录
 description: 记录规则所有对外发送内容的台账，以及重试和重放机制的工作原理
-weight: 5
+weight: 6
 audience: pro
 aliases:
 - /zh-hans/automation/rules_engine_v2/deliveries/

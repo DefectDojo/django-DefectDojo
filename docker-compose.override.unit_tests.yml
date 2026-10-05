@@ -21,7 +21,15 @@ services:
       DD_DATABASE_PORT: ${DD_DATABASE_PORT:-5432}
       DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
       DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
-      DD_CELERY_BROKER_URL: 'sqla+sqlite:///dojo.celerydb.sqlite'
+      # In-memory broker, the same as docker-compose.override.unit_tests_cicd.yml. The
+      # sqla+sqlite transport goes through kombu's SQLAlchemy models, and under
+      # PYTHONWARNINGS=error SQLAlchemy 2.1's deprecation of the `noload` loader they
+      # use fails the first task dispatch in any test. settings.dist.py only builds
+      # the URL from the scheme and path when DD_CELERY_BROKER_URL is empty, and these
+      # two produce exactly "memory://".
+      DD_CELERY_BROKER_URL: ''
+      DD_CELERY_BROKER_SCHEME: 'memory'
+      DD_CELERY_BROKER_PATH: ''
       # No Redis/valkey in unit tests -> default django cache is LocMemCache.
       DD_CACHE_URL: ''
       # Product grading is debounced through a cache marker with a wall-clock window

@@ -58,6 +58,7 @@ DefectDojo 允许用户构建复杂的 API 集成，并让用户完全掌控其�
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
+* **Google Cloud**
 * **Google Cloud Security Command Center**
 * **Group-IB ASM**
 * **HackerOne**
@@ -103,7 +104,7 @@ DefectDojo 允许用户构建复杂的 API 集成，并让用户完全掌控其�
 
 有关每种工具的具体设置步骤，请参见[工具专属连接器设置](../toolreference/)参考文档。
 
-大多数连接器导入的是**发现项**。也有少数是**资产连接器（Asset Connectors）**，它们导入的是您的**资产清单**，而不是发现项——用于构建并维护您的 Product（资产）与 Product Type（组织）层级结构：**Azure DevOps**、**Backstage**、**Bitbucket**、**GitHub**、**GitLab**、**Jira Service Management Assets** 以及 **ServiceNow CMDB**。（**runZero** 主要是一个资产连接器，但也可以选择将漏洞作为发现项导入。）
+大多数连接器导入的是**发现项**。也有少数是**资产连接器（Asset Connectors）**，它们导入的是您的**资产清单**，而不是发现项——用于构建并维护您的 Product（资产）与 Product Type（组织）层级结构：**Azure DevOps**、**Backstage**、**Bitbucket**、**GitHub**、**GitLab**、**Google Cloud**、**Jira Service Management Assets** 以及 **ServiceNow CMDB**。（**runZero** 主要是一个资产连接器，但也可以选择将漏洞作为发现项导入。）
 
 这些连接可为 DefectDojo 提供 API 速度的集成能力，能够自动摄取并组织来自该工具的漏洞数据。
 

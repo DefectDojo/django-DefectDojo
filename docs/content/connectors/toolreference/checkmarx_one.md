@@ -47,3 +47,15 @@ By default, the connector imports findings in every Checkmarx result state excep
 - The filter applies to SAST, SCA, IaC and DAST results. If your DAST results cannot carry a custom state, a list of only custom states imports no DAST findings.
 - If a finding leaves a listed state, the next sync closes it in DefectDojo.
 - If no finding has a listed state, the sync imports nothing and closes the findings that the connector imported before. Check the spelling against your Checkmarx custom states before you save.
+
+#### **Tagging findings with the Checkmarx scan ID**
+
+Each Checkmarx One finding's **Unique ID From Tool** is its Checkmarx result hash. A result hash alone does not locate a finding in Checkmarx; you also need the ID of a scan that contains it. Turn on **Tag Findings With Scan ID** to record that scan ID on the findings the connector imports.
+
+When the toggle is on, every finding a sync imports (SAST, SCA, KICS and DAST) is tagged `scan-id:<scan id>`, where the ID is the Checkmarx scan the connector pulled the finding from. With **Track Scanned Branches** on, each branch's findings carry the ID of that branch's own scan. You can filter findings by the tag, or read it through the API together with Unique ID From Tool.
+
+Notes:
+
+- The toggle is **off by default**, and turning it on does not change deduplication: the scan ID is only a tag. It is never added to Unique ID From Tool or the description.
+- **The tag records the scan in which DefectDojo first imported the finding.** A later sync that matches an existing finding keeps that finding's tags, so the tag is not replaced with each new scan ID. That scan contains the finding, so it still locates the finding in Checkmarx, unless Checkmarx's data retention has since deleted the scan.
+- Findings already in DefectDojo when you turn the toggle on do not get the tag. Only findings created by later syncs do.
