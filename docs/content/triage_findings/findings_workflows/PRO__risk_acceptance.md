@@ -518,7 +518,7 @@ risk_acceptance:
     to_state: "approved"
     actor: "someone"
     reason: "the compensating control is adequate"
-    url_ui: "https://your-instance/ui/risk_acceptance/42"
+    url_ui: "https://your-instance/ui/risk-acceptance/42"
 ```
 
 Notifications are reinforcement, not the mechanism: every state change is already visible on the
