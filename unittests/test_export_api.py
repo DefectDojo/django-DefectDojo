@@ -1,16 +1,18 @@
 import base64
+import datetime
 import uuid
 
 from django.core.files.base import ContentFile
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo import __version__
 from dojo.export import rows
 from dojo.location.feature import locations_enabled
-from dojo.location.models import LocationFindingReference
+from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     BurpRawRequestResponse,
     Dojo_User,
@@ -295,6 +297,14 @@ class ExportFindingRowEndpointModeTest(DojoTestCase):
         self.assertEqual(entry["type"], "url")
         self.assertEqual(entry["status"], "Mitigated")
         self.assertEqual(entry["actor"], "admin")
+        self.assertEqual(entry["date"], status.date.isoformat())
+
+    def test_risk_accepted_outranks_false_positive(self):
+        status = Endpoint_Status.objects.order_by("id").first()
+        Endpoint_Status.objects.filter(pk=status.pk).update(risk_accepted=True, false_positive=True)
+        row = rows.finding_row(status.finding, max_file_bytes=1024)
+        entry = next(item for item in row["locations"] if item["value"] == str(status.endpoint))
+        self.assertEqual(entry["status"], "RiskAccepted")
 
 
 @override_settings(V3_FEATURE_LOCATIONS=True)
@@ -303,7 +313,19 @@ class ExportFindingRowLocationsModeTest(DojoTestCase):
 
     def test_location_reference_keeps_its_status(self):
         reference = LocationFindingReference.objects.order_by("id").first()
-        LocationFindingReference.objects.filter(pk=reference.pk).update(status="FalsePositive")
+        created_at = datetime.datetime(2024, 3, 14, 23, 30, tzinfo=datetime.UTC)
+        LocationFindingReference.objects.filter(pk=reference.pk).update(
+            status="FalsePositive", created=created_at,
+        )
         row = rows.finding_row(reference.finding, max_file_bytes=1024)
         entry = next(item for item in row["locations"] if item["value"] == str(reference.location))
         self.assertEqual(entry["status"], "FalsePositive")
+        expected_date = timezone.localdate(created_at, timezone.get_default_timezone())
+        self.assertEqual(entry["date"], expected_date.isoformat())
+
+    def test_non_url_location_is_not_exported(self):
+        reference = LocationFindingReference.objects.order_by("id").first()
+        package = Location.objects.create(location_type="package", location_value="pkg:npm/demo@1.0.0")
+        LocationFindingReference.objects.create(location=package, finding=reference.finding)
+        row = rows.finding_row(reference.finding, max_file_bytes=1024)
+        self.assertNotIn("pkg:npm/demo@1.0.0", [item["value"] for item in row["locations"]])

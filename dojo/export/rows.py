@@ -5,9 +5,11 @@ from pathlib import Path
 from uuid import UUID
 
 from django.db import models
+from django.utils import timezone
 
 from dojo.location.feature import locations_enabled
 from dojo.location.status import FindingLocationStatus
+from dojo.url.models import URL
 
 
 def plain(value):
@@ -123,9 +125,9 @@ FINDING_USER_FIELDS = (
     "defect_review_requested_by",
 )
 ENDPOINT_STATUS_FLAGS = (
+    ("risk_accepted", FindingLocationStatus.RiskAccepted),
     ("false_positive", FindingLocationStatus.FalsePositive),
     ("out_of_scope", FindingLocationStatus.OutOfScope),
-    ("risk_accepted", FindingLocationStatus.RiskAccepted),
     ("mitigated", FindingLocationStatus.Mitigated),
 )
 
@@ -163,11 +165,12 @@ def location_rows(finding) -> list[dict]:
                 "type": reference.location.location_type,
                 "value": str(reference.location),
                 "status": str(reference.status),
-                "date": plain(reference.created),
+                "date": plain(timezone.localdate(reference.created, timezone.get_default_timezone())),
                 "status_date": plain(reference.audit_time),
                 "actor": username(reference.auditor),
             }
             for reference in finding.locations.all()
+            if reference.location.location_type == URL.LOCATION_TYPE
         ]
     return [
         {
