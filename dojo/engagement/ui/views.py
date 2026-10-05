@@ -42,6 +42,7 @@ from openpyxl.styles import Font
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.endpoint.queries import get_import_form_endpoints
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import (
@@ -85,13 +86,12 @@ from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
-from dojo.location.models import Location
+from dojo.location.queries import get_import_form_locations
 from dojo.location.utils import save_locations_to_add
 from dojo.models import (
     Check_List,
     Development_Environment,
     Dojo_User,
-    Endpoint,
     Engagement,
     Finding,
     Note_Type,
@@ -807,10 +807,10 @@ class ImportScanResultsView(View):
         product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
 
         if locations_enabled():
-            endpoints = Location.objects.filter(products__product_id=product_tab.product.id)
+            endpoints = get_import_form_locations(product_tab.product, user)
         else:
             # TODO: Delete this after the move to Locations
-            endpoints = Endpoint.objects.filter(product__id=product_tab.product.id)
+            endpoints = get_import_form_endpoints(product_tab.product, user)
 
         # Get the import form with some initial data in place
         form = self.get_form(
