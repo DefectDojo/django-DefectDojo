@@ -116,7 +116,7 @@
                 <div class="panel-heading tight">
                     <div class="clearfix">
                         <h3 {% if not critical_prods %}class="has-filters" {% endif %}>
-                            {{ name }}
+                            <i class="fa-solid fa-chart-column dd-card-icon" aria-hidden="true"></i>{{ name }}
                             {% comment %} {% if not critical_prods %}
                                 <div class="dropdown pull-right"></div>
                             {% endif %} {% endcomment %}
@@ -222,7 +222,7 @@
                                 <div aria-describedby="opened_per_month_2-description" aria-labelledby="opened-per-month-title" id="opened_per_month_2" role="img" tabindex="0">
                                 </div>
                                 <div class="sr-only">
-                                    <h3 id="opened-per-month-title">{% trans "Open bug count by month" %}</h3>
+                                    <h3 id="opened-per-month-title"><i class="fa-solid fa-chart-line dd-card-icon" aria-hidden="true"></i>{% trans "Open bug count by month" %}</h3>
                                     <p id="opened-per-month-description">
                                         {% trans "This line chart represents the number of open bugs over time, categorized by severity.
                                         The x-axis represents months, while the y-axis represents the number of open bugs.

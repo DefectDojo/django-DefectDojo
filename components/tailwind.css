@@ -943,11 +943,18 @@
   }
 
   /* ---- Filter UI components ---- */
+  /* A card title row: title (and any help icon) on the leading side, the
+     pull-right button group always last, on the trailing edge. */
   .has-filters {
-    @apply flex justify-between items-center;
+    @apply flex items-center gap-2;
   }
+  .has-filters > .pull-right {
+    order: 99;
+    margin-inline-start: auto;
+  }
+  /* Same horizontal inset as a plain header, so titles line up card to card */
   .panel-heading.tight, .card-header.tight {
-    @apply px-3 py-1.5;
+    @apply px-5 py-1.5;
   }
   .filter-set {
     @apply block;

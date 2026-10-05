@@ -116,6 +116,12 @@ h3 {
     margin-top: 5px;
 }
 
+/* A row of cards is spaced by the cards' own bottom margin; the extra
+   row offset above would make the gap between card rows uneven. */
+.row:has(> [class*="col-"] > .panel:first-child) {
+    margin-top: 0;
+}
+
 form.filters {
     margin-top: 0px;
     padding: 0px 5px 5px;
@@ -525,20 +531,27 @@ form ul#id_accepted_findings input {
     color: var(--color-severity-critical-text);
 }
 
+/* SLA badges: the same tint, ink and ring as the severity tags. Green is
+   inside the SLA, red is overdue, orange is remediated late, blue is
+   remediated on time. */
 .age-red {
-    background-color: var(--color-severity-critical-text);
+    background-color: var(--color-severity-critical-bg);
+    color: var(--color-severity-critical-text);
 }
 
 .age-green {
-    background-color: green;
+    background-color: var(--color-green-100);
+    color: var(--color-green-800);
 }
 
 .age-blue {
-    background-color: blue;
+    background-color: var(--color-severity-low-bg);
+    color: var(--color-severity-low-text);
 }
 
 .age-orange {
-    background-color: #EE7600;
+    background-color: var(--color-severity-high-bg);
+    color: var(--color-severity-high-text);
 }
 
 .dojo-search {
@@ -1371,7 +1384,14 @@ span.endpoint_product {
 }
 
 .panel-default {
-    border: 1px solid #dddedf;
+    border: 1px solid var(--color-border);
+}
+
+/* One gap between every card: stacked cards in a column, and cards in
+   consecutive rows, sit 1rem apart. */
+.panel,
+.card {
+    margin-bottom: 1rem;
 }
 
 .panel-heading h2,
@@ -1380,6 +1400,59 @@ span.endpoint_product {
 .panel-heading h5 {
 	margin-top: 0;
 	margin-bottom: 0;
+}
+
+/* Card heading icon: a fixed-width box one line tall, so the glyph sits
+   centered on the heading's text line and every heading's text starts at
+   the same offset. */
+.dd-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25em;
+    height: 1lh;
+    vertical-align: top;
+    margin-inline-end: 0.5rem;
+    /* Font Awesome pins line-height to 1; take the heading's instead, so
+       1lh is the heading's line box and the glyph centers on its text. */
+    line-height: inherit;
+    color: var(--color-text-muted);
+}
+
+/* In a flex title row the row's gap already separates icon and title. */
+.has-filters > .dd-card-icon {
+    margin-inline-end: 0;
+}
+
+/* One heading size for every card title, whatever level the template used. */
+.panel-heading :is(h1, h2, h3, h4, h5) {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+/* A card header holding a title and a button row: center the title against
+   the buttons and push the buttons to the trailing edge. */
+.panel-heading > .clearfix {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panel-heading > .clearfix::before,
+.panel-heading > .clearfix::after {
+    display: none;
+}
+
+.panel-heading > .clearfix > .pull-right {
+    margin-inline-start: auto;
+}
+
+/* A title that is not floated left fills the row, so its own trailing
+   controls can reach the edge. */
+.panel-heading > .clearfix > :is(h1, h2, h3, h4, h5):not(.pull-left) {
+    flex: 1 1 auto;
 }
 
 .panel-heading .btn {
@@ -1584,6 +1657,12 @@ a.template-popover:hover {
     border-color: #ddd;
 }
 
+/* The Page Break widget's title is a block in the report; keep it on the
+   icon's line in the builder. */
+.panel-available-widget .panel-heading .report-page-break {
+    display: inline;
+}
+
 .panel-available-widget .panel-heading {
     background-color: #f5f5f5;
     border-color: #ddd;
@@ -1771,6 +1850,27 @@ div.tags .label {
 .tag-label:active {
     color: white;
     text-decoration: none;
+}
+
+/* Item tags (findings, tests, engagements ...): grey outlined chips. */
+.tag-label.tag-color,
+.tag-label.tag-color:link,
+.tag-label.tag-color:visited {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--color-gray-300);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: 9999px;
+    padding: 0 0.5em;
+    margin: 0 0.125rem 0.125rem 0;
+}
+
+.tag-label.tag-color:hover,
+.tag-label.tag-color:focus {
+    border-color: var(--color-dd-interactive-700);
+    color: var(--color-dd-interactive-700);
 }
 
 .tag-label:visited {
