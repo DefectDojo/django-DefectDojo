@@ -2,7 +2,7 @@
 <div class="panel panel-available-widget" data-multiple="{{ multiple }}">
     <div class="panel-heading" title="{% trans 'Click and drag to move' %}" data-toggle="tooltip">
         <div class="clearfix">
-            <h5 class="pull-left">{{ title }}</h5>
+            <h5 class="pull-left">{% if title == "Report Options" %}<i class="fa-solid fa-sliders dd-card-icon" aria-hidden="true"></i>{% elif title == "Cover Page" %}<i class="fa-solid fa-file dd-card-icon" aria-hidden="true"></i>{% elif title == "Table Of Contents" %}<i class="fa-solid fa-list-ol dd-card-icon" aria-hidden="true"></i>{% else %}<i class="fa-solid fa-pen-to-square dd-card-icon" aria-hidden="true"></i>{% endif %}{{ title }}</h5>
             <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>
         </div>
     </div>

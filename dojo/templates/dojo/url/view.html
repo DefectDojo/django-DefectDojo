@@ -21,9 +21,9 @@
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
                     {% if host_view %}
-                        <span title="{{ host }}">Host: {{ host|url_shortener }}</span>
+                        <i class="fa-solid fa-server dd-card-icon" aria-hidden="true"></i><span title="{{ host }}">Host: {{ host|url_shortener }}</span>
                     {% else %}
-                        <span title="{{ location }}">
+                        <i class="fa-solid fa-sitemap dd-card-icon" aria-hidden="true"></i><span title="{{ location }}">
                             Endpoint: {{ location|url_shortener }}
                             {% if location.host_validation_failure %}
                                 <span data-toggle="tooltip"
@@ -165,7 +165,7 @@
         <div class="panel panel-default table-responsive">
             {% if host_view %}
                 <div class="panel-heading">
-                    <h4>Endpoints ({{ mitigated_location_count }} / {{ location_count }} Mitigated Endpoints)</h4>
+                    <h4><i class="fa-solid fa-sitemap dd-card-icon" aria-hidden="true"></i>Endpoints ({{ mitigated_location_count }} / {{ location_count }} Mitigated Endpoints)</h4>
                 </div>
                 {% if locations %}
                     {% colgroup locations into 3 cols as grouped_items %}
@@ -203,7 +203,7 @@
                 {% endif %}
             {% else %}
                 <div class="panel-heading">
-                    <h4>Host</h4>
+                    <h4><i class="fa-solid fa-server dd-card-icon" aria-hidden="true"></i>Host</h4>
                 </div>
                 <div id="vuln_endpoints" class="panel-body table-responsive">
                     <a data-toggle="tooltip"
@@ -217,7 +217,7 @@
         {% if not host_view and location.readable_tags %}
             <div class="panel panel-default tags">
                 <div class="panel-heading">
-                    <h4>Tags</h4>
+                    <h4><i class="fa-solid fa-tags dd-card-icon" aria-hidden="true"></i>Tags</h4>
                 </div>
                 <div class="tags panel-body">{% include "dojo/snippets/tags.html" with tags=location.readable_tags %}</div>
             </div>
@@ -228,7 +228,7 @@
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
                             <h4>
-                                Additional Information
+                                <i class="fa-solid fa-circle-info dd-card-icon" aria-hidden="true"></i>Additional Information
                                 <div class="btn-group pull-right">
                                     <a title="{% trans 'Edit Information' %}"
                                        class="btn btn-sm btn-primary"
@@ -260,7 +260,7 @@
         {% endif %}
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Open Findings ({{ active_findings_count }} / {{ all_findings_count }} Active Findings)</h4>
+                <h4><i class="fa-solid fa-bug dd-card-icon" aria-hidden="true"></i>Open Findings ({{ active_findings_count }} / {{ all_findings_count }} Active Findings)</h4>
             </div>
             {% if findings %}
                 <div class="clearfix pagination-in-panel">
