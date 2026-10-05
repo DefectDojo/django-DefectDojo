@@ -1,7 +1,7 @@
 ---
 title: "Deliveries"
 description: "The ledger of everything rules send outward, and how retries and replay work"
-weight: 5
+weight: 6
 audience: pro
 aliases:
   - /automation/rules_engine_v2/deliveries/

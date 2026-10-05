@@ -275,6 +275,80 @@ Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created, 
 Identity card and the **Type** field appear only when it is on; existing aliases stay readable
 whether it is on or off.
 
+### Container image repositories (the `oci` namespace)
+
+A container image repository is often reported by more than one tool: a cloud security service
+sees it in your cloud account, a registry scanner sees it in the registry, a runtime agent sees
+it where it runs. Each tool names it its own way, so matching by name would give you one Asset
+per tool. Connectors that describe a repository therefore also report the repository reference
+itself, and DefectDojo records it as a **Repository** alias in the shared `oci` namespace. Every
+Connector that reports the same repository resolves to the Asset that alias names, so the
+repository ends up as one Asset with every tool's Findings on it.
+
+Repository references are compared in one normalized form, `<registry-host>/<repository-path>`,
+whichever spelling a tool used:
+
+| Reported as | Recorded as |
+| --- | --- |
+| `https://GHCR.io/Acme/API:1.4.2` | `ghcr.io/acme/api` |
+| `nginx`, `nginx:1.25`, `index.docker.io/library/nginx` | `docker.io/library/nginx` |
+| `bitnami/redis:7` | `docker.io/bitnami/redis` |
+| `registry.example.com:443/team/app@sha256:...` | `registry.example.com/team/app` |
+| `registry.example.com:5000/team/app` | `registry.example.com:5000/team/app` |
+| `arn:aws:ecr:us-east-1:123456789012:repository/payments` | `123456789012.dkr.ecr.us-east-1.amazonaws.com/payments` |
+
+Tags, digests, schemes and default ports are dropped, the registry host and path are lowercased,
+and Docker Hub is always `docker.io`, with official images under `library/`. A value that is not
+a valid repository reference is ignored, and that Record is matched as if it carried none.
+
+You can declare a repository yourself from **Add Identity**: choose the **OCI Registry**
+namespace and the **Repository** type. What you type is normalized the same way, so
+`https://Docker.io/nginx:1.25` is saved as `docker.io/library/nginx`. A repository you declare
+is user-asserted, so it wins over anything a Connector would otherwise decide: every Connector
+that reports that repository maps its Record to your Asset.
+
+#### When two sources disagree
+
+A Record that a Connector has already mapped stays where it is. If such a Record starts
+reporting a repository whose alias names a different Asset, or if you map a Record by hand to a
+different Asset than its repository's alias names, DefectDojo does not move the Record or its
+Findings, and does not re-point the alias. It records a **repository conflict** instead.
+
+Conflicts appear at the top of the Asset Identity card, on both Assets involved, naming the
+repository, the Record and its Connector, and the two Assets. (If you cannot view the other
+Asset, the card says so without naming it.) To settle one, either:
+
+- remap the Record onto the Asset the repository resolves to, choosing **Move** so its Findings
+travel with it (see [Managing Records](/connectors/upstream/manage_records/)); or
+- withdraw the repository alias, and declare it on the right Asset if the old one was wrong.
+
+The conflict disappears as soon as the two agree; there is nothing to clear by hand.
+
+#### Backfilling repository aliases
+
+Assets mapped before repository identity existed have no `oci` aliases yet. The
+`backfill_oci_aliases` management command reads the repository reference on every mapped
+Connector Record and reports what it would do, without changing anything:
+
+```
+python manage.py backfill_oci_aliases            # dry run: report only
+python manage.py backfill_oci_aliases --apply    # record the aliases
+```
+
+For each repository it finds:
+
+- **one Asset**: the alias is recorded for that Asset (with `--apply`);
+- **two or more Assets**: reported as a repository those Assets share, and nothing is recorded.
+Recording one would decide which Asset the others belong to, which is a merge, and merging is
+left to you: remap the Records onto one Asset with **Move**;
+- **an existing alias**: Records on other Assets are reported as conflicts, exactly as the Asset
+Identity card shows them.
+
+`--connector-config <id>` limits the run to one Connector configuration, and `--json` prints
+the report as JSON. The command never merges Assets or moves Records, and running it again
+only records what is still missing. It works whether or not `DD_V3_ASSET_ALIASES` is on, so you
+can run it before turning identity on.
+
 ## Asset Versions
 
 Most Assets ship in versions: releases, tags, image builds. A **version** records one of those

@@ -132,7 +132,7 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 | **Configuration** | Environments, Platforms, Lifecycles, Origins, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
 | **Notifications** | Personal Notifications, System Notifications, Notification Template, Notification Webhooks |
 | **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal, Firewall Rules, Maintenance Windows |
-| **License & Support** | License Manager, Contact Support, and on on-premise instances, Version Manager |
+| **License & Support** | License Manager, Support, and on on-premise instances, Version Manager |
 
 **Feature Flags sits above the groups**, directly under All Settings, rather than inside any of them. It is the page administrators open most often, and it reads alongside All Settings: one lists what exists, the other controls what is switched on. It is still filed under System in the All Settings directory.
 
@@ -192,7 +192,7 @@ If you are used to the previous layout:
 | Settings > Configuration > All Schedules | Settings > Operations > Schedules |
 | Settings > Pro Settings > Celery Status | Settings > Operations > Celery Status |
 | Settings > Cloud Manager > *(cloud pages)* | Settings > Operations |
-| Settings > License Manager / Version Manager / Contact Support | Settings > License & Support |
+| Settings > License Manager / Version Manager / Support | Settings > License & Support |
 
 The group that was named after your license package, **Pro Settings** on a Pro instance and **Enterprise Settings** on an Enterprise one, no longer exists. Its pages are distributed across System, Finding Workflow, Notifications and Operations.
 

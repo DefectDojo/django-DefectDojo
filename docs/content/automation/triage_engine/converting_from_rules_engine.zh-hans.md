@@ -1,7 +1,7 @@
 ---
 title: 从 Rules Engine 转换
 description: 将现有的 Rules Engine 规则迁移为 Triage Engine 的图
-weight: 6
+weight: 7
 audience: pro
 aliases:
 - /zh-hans/automation/rules_engine_v2/converting_from_rules_engine/

@@ -1,7 +1,7 @@
 ---
 title: Rules Engine からの移行
 description: 既存の Rules Engine のルールを Triage Engine のグラフへ移行する
-weight: 6
+weight: 7
 audience: pro
 aliases:
 - /ja/automation/rules_engine_v2/converting_from_rules_engine/
