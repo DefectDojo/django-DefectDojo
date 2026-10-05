@@ -1,8 +1,10 @@
 import base64
 import datetime
+import json
 import uuid
 
 from django.core.files.base import ContentFile
+from django.db.models import Count
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -10,7 +12,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo import __version__
-from dojo.export import rows
+from dojo.export import rows, services
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
@@ -329,3 +331,169 @@ class ExportFindingRowLocationsModeTest(DojoTestCase):
         LocationFindingReference.objects.create(location=package, finding=reference.finding)
         row = rows.finding_row(reference.finding, max_file_bytes=1024)
         self.assertNotIn("pkg:npm/demo@1.0.0", [item["value"] for item in row["locations"]])
+
+
+def ndjson(response):
+    body = b"".join(response.streaming_content).decode()
+    return [json.loads(line) for line in body.splitlines() if line]
+
+
+@versioned_fixtures
+class ExportProductStreamTest(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.client = token_client("admin")
+        self.product = Product.objects.annotate(n=Count("engagement__test__finding")).order_by("-n").first()
+
+    def page(self, **params):
+        response = self.client.get(reverse("export-products", kwargs={"product_id": self.product.id}), params)
+        self.assertEqual(response.status_code, 200, getattr(response, "content", b"")[:500])
+        self.assertEqual(response["Content-Type"], "application/x-ndjson")
+        return ndjson(response)
+
+    def walk(self, cursor="", **params):
+        lines = []
+        for _ in range(500):
+            page = self.page(cursor=cursor, **params)
+            self.assertEqual(page[0]["kind"], "header")
+            lines.extend(page[1:-1])
+            if page[-1]["kind"] == "end":
+                return lines, page[-1]["counts"]
+            self.assertEqual(page[-1]["kind"], "page")
+            cursor = page[-1]["next"]
+        self.fail("export never reached its end line")
+        return None
+
+    def ids(self, lines, kind):
+        return [line["id"] for line in lines if line["kind"] == kind]
+
+    def test_one_page_holds_the_whole_small_product(self):
+        lines, counts = self.walk()
+        findings = Finding.objects.filter(test__engagement__product=self.product, duplicate=False)
+        self.assertEqual(sorted(self.ids(lines, "finding")), sorted(findings.values_list("id", flat=True)))
+        self.assertEqual(counts["findings"], findings.count())
+        self.assertEqual(self.ids(lines, "product"), [self.product.id])
+        self.assertEqual(
+            sorted(self.ids(lines, "engagement")),
+            sorted(Engagement.objects.filter(product=self.product).values_list("id", flat=True)),
+        )
+
+    def test_small_pages_give_the_same_findings(self):
+        full, _ = self.walk()
+        paged, _ = self.walk(limit=2)
+        self.assertEqual(self.ids(paged, "finding"), self.ids(full, "finding"))
+        self.assertEqual(len(self.ids(paged, "finding")), len(set(self.ids(paged, "finding"))))
+
+    def test_every_test_appears_even_without_findings(self):
+        engagement = Engagement.objects.filter(product=self.product).first()
+        empty = Test.objects.create(
+            engagement=engagement,
+            test_type=Test.objects.first().test_type,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        lines, _ = self.walk()
+        self.assertIn(empty.id, self.ids(lines, "test"))
+
+    def test_duplicates_are_skipped_by_default(self):
+        finding = Finding.objects.filter(test__engagement__product=self.product).order_by("id").first()
+        Finding.objects.filter(pk=finding.pk).update(duplicate=True)
+        lines, _ = self.walk()
+        self.assertNotIn(finding.id, self.ids(lines, "finding"))
+        lines, _ = self.walk(include_duplicates="true")
+        self.assertIn(finding.id, self.ids(lines, "finding"))
+
+    def test_cursor_survives_deleted_test(self):
+        page, cursor, state = self.page(limit=1), "", None
+        while page[-1]["kind"] == "page":
+            cursor = page[-1]["next"]
+            state = json.loads(base64.urlsafe_b64decode(cursor))
+            if state["p"] == "tests" and state["t"]:
+                break
+            page = self.page(limit=1, cursor=cursor)
+        self.assertIsNotNone(state, "the fixture product needs more than one object line")
+        Test.objects.filter(pk=state["t"]).delete()
+        follow = self.page(limit=1000, cursor=cursor)
+        self.assertEqual(follow[-1]["kind"], "end")
+
+    def test_one_line_pages_give_the_same_findings(self):
+        full, _ = self.walk()
+        paged, _ = self.walk(limit=1)
+        self.assertEqual(self.ids(paged, "finding"), self.ids(full, "finding"))
+        self.assertEqual(self.ids(paged, "test"), self.ids(full, "test"))
+
+    def test_finding_added_during_the_walk_is_neither_sent_nor_counted(self):
+        first = self.page(limit=1)
+        self.assertEqual(first[-1]["kind"], "page")
+        added = Finding(
+            test=Test.objects.get(pk=self.ids(first, "test")[-1]),
+            title="added during the walk",
+            severity="High",
+            reporter=Dojo_User.objects.get(username="admin"),
+        )
+        added.save(dedupe_option=False)
+        rest, counts = self.walk(cursor=first[-1]["next"], limit=1)
+        sent = self.ids(first, "finding") + self.ids(rest, "finding")
+        self.assertNotIn(added.id, sent)
+        self.assertEqual(len(sent), counts["findings"])
+
+    def test_a_page_of_findings_runs_a_fixed_number_of_queries(self):
+        test = Test.objects.filter(engagement__product=self.product).annotate(n=Count("finding")).order_by("-n").first()
+        high = Finding.objects.order_by("-id").values_list("id", flat=True).first()
+        cursor = services.Cursor(services.TESTS, test_id=test.id, high=high)
+        options = services.ExportOptions(limit=test.n, include_duplicates=True)
+        with self.assertNumQueries(18):
+            lines = [json.loads(line) for line in services.product_page(self.product, cursor, options)]
+        self.assertEqual(len(self.ids(lines, "finding")), test.n)
+
+    def test_groups_and_risk_acceptances_come_last(self):
+        test = Test.objects.filter(engagement__product=self.product).order_by("id").first()
+        finding = Finding.objects.filter(test=test, duplicate=False).order_by("id").first()
+        admin = Dojo_User.objects.get(username="admin")
+        group = Finding_Group.objects.create(name="group", test=test, creator=admin)
+        group.findings.add(finding)
+        acceptance = Risk_Acceptance.objects.create(name="accepted", owner=admin)
+        acceptance.accepted_findings.add(finding)
+        test.engagement.risk_acceptance.add(acceptance)
+        lines, counts = self.walk(limit=1)
+        self.assertEqual([line["kind"] for line in lines[-2:]], ["finding_group", "risk_acceptance"])
+        self.assertEqual(lines[-2]["data"]["finding_ids"], [finding.id])
+        self.assertEqual(lines[-1]["data"]["accepted_finding_ids"], [finding.id])
+        self.assertEqual(lines[-1]["data"]["engagement_ids"], [test.engagement_id])
+        self.assertEqual((counts["finding_groups"], counts["risk_acceptances"]), (1, 1))
+
+    def test_bad_requests_are_rejected(self):
+        url = reverse("export-products", kwargs={"product_id": self.product.id})
+        self.assertEqual(self.client.get(url, {"cursor": "not-a-cursor"}).status_code, 400)
+        self.assertEqual(self.client.get(url, {"limit": "0"}).status_code, 400)
+        missing = reverse("export-products", kwargs={"product_id": 999999})
+        self.assertEqual(self.client.get(missing).status_code, 404)
+        self.assertEqual(token_client("user1").get(url).status_code, 403)
+
+
+@versioned_fixtures
+class ExportFileDownloadTest(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def upload(self):
+        upload = FileUpload(title="capture")
+        upload.file.save("capture.txt", ContentFile(b"hello"), save=True)
+        return upload
+
+    def test_file_bytes_download(self):
+        response = token_client("admin").get(reverse("export-files", kwargs={"file_id": self.upload().id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/octet-stream")
+        self.assertEqual(b"".join(response.streaming_content), b"hello")
+
+    def test_risk_acceptance_proof_download(self):
+        acceptance = Risk_Acceptance.objects.create(name="proof test", owner=Dojo_User.objects.get(username="admin"))
+        acceptance.path.save("proof.pdf", ContentFile(b"%PDF-"), save=True)
+        response = token_client("admin").get(reverse("export-proof", kwargs={"acceptance_id": acceptance.id}))
+        self.assertEqual(b"".join(response.streaming_content), b"%PDF-")
+
+    def test_missing_file_is_404_and_users_are_refused(self):
+        self.assertEqual(token_client("admin").get(reverse("export-files", kwargs={"file_id": 999999})).status_code, 404)
+        self.assertEqual(token_client("user1").get(reverse("export-files", kwargs={"file_id": self.upload().id})).status_code, 403)
