@@ -28,7 +28,7 @@ Supported Downstream Connectors:
 
 ## Opening the Downstream Connectors page
 
-The Downstream Connectors page can be found under **Import > Connectors > Downstream Connectors** in the sidebar.
+The Downstream Connectors page can be found under **Connect > Downstream** in the sidebar.
 
 ![image](images/integrators_3.png)
 

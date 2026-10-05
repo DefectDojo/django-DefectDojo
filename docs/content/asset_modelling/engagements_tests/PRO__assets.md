@@ -64,7 +64,7 @@ Beyond these built-in fields, an administrator can define typed **Custom Fields*
 
 ## Accessing Assets 
 
-Assets are accessible via the sidebar. The submenu provides access to the [Asset Hierarchy](/asset_modelling/engagements_tests/pro__assets/#asset-nesting) and All Assets, as well as the option to create a new Asset.
+Assets are accessible from the sidebar under **Act > Explore > Assets**. The submenu provides access to the [Asset Hierarchy](/asset_modelling/engagements_tests/pro__assets/#asset-nesting) (**Hierarchy**) and the full Asset list (**All**); new Assets are created with the **New Asset** button at the top of the list.
 
 ![image](images/assets_ss1.png)
 
@@ -101,10 +101,7 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
 
 ### Create Assets 
 
-There are two ways to create Assets: 
-
-- From the **New Asset** option in the side menu
-- From the **New Asset** button at the top of the All Assets list 
+Assets are created from the **New Asset** button at the top of the All Assets list (**Act > Explore > Assets > All**). 
 
 ## Edit Assets 
 
@@ -332,7 +329,7 @@ rather than edited, and nothing is inferred between them: a Finding found in 5.0
 
 DefectDojo supports parent-child relationship between two Assets within the same Organization. This can be configured during Asset creation or in the Asset’s settings. 
 
-You can visualize the structure of Assets in DefectDojo and change relationships using the **Asset Hierarchy** option in the sidebar.
+You can visualize the structure of Assets in DefectDojo and change relationships using **Act > Explore > Assets > Hierarchy** in the sidebar.
 
 After selecting the Assets to be visualized from the corresponding table, click **View Asset Hierarchy** to generate a flow chart of the relationship between the chosen Assets, if any.
 

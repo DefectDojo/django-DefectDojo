@@ -33,7 +33,7 @@ Complete the following steps in the Azure portal before configuring DefectDojo:
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Microsoft Entra ID**, and fill in the form. The field labels match the Entra portal:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **Microsoft Entra ID**, and fill in the form. The field labels match the Entra portal:
 
 - **Application (client) ID** — the client ID from step 2.
 - **Client Secret** — the secret **Value** from step 3. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or the tenant ID.

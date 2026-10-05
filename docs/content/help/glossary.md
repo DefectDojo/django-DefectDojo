@@ -58,7 +58,7 @@ A flexible ingestion mechanism that allows scan data to be imported without a to
 ## DefectDojo-CLI (Pro)
 A command-line interface used to interact with DefectDojo programmatically. The CLI is commonly used in CI/CD pipelines to automate scan uploads and object management.
 ## Connectors (Pro)
-The unified area of the Pro UI (under Import) for every tool DefectDojo talks to. Upstream Connectors pull findings in from scanners; Downstream Connectors push findings out to issue trackers.
+The unified area of the Pro UI (under Connect) for every tool DefectDojo talks to. Upstream Connectors pull findings in from scanners; Downstream Connectors push findings out to issue trackers.
 ## Upstream Connectors / API Connectors (Pro)
 Prebuilt, managed connectors that pull findings and asset inventory into DefectDojo from external scanners and security tools via their APIs, reducing the need for custom scripting. Formerly called API Connectors.
 ## Downstream Connectors (Pro)

@@ -108,7 +108,7 @@ Email needs no credential. DefectDojo sends through the mail server this instanc
    - **Instance Label**: a label that tells this connection apart from others.
 4. Save.
 
-Saving fails if this instance has no mail server or no sender address configured, because nothing sent over the connection would leave the building. Configure SMTP under **Settings > System Settings** first.
+Saving fails if this instance has no mail server or no sender address configured, because nothing sent over the connection would leave the building. Configure SMTP under **Settings > System > System Settings** first.
 
 Recipients are set on the alert, not on the connection, so one Email connection serves every alert. An email destination takes up to 50 addresses; past that, use a distribution address.
 
@@ -188,7 +188,7 @@ Alerts are rules, so they can also be opened in the rule editor from the same li
 
 The full route, for anything the form does not cover.
 
-1. Go to **Automation > Triage Engine** and create a rule.
+1. Go to **Act > Triage Engine > Rules** and select **New Rule** to create a rule.
 2. Add a trigger. For alerts about newly imported Findings, use the Finding event trigger on **created**. Imports are batched, so one import produces one alert rather than one per Finding.
 3. Add conditions for what should qualify, for example a minimum severity of High.
 4. Add a message node for the vendor you want (**Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email**, or **Publish to an SNS Topic**) and set:

@@ -51,7 +51,7 @@ Complete the following steps in your KeyCloak realm before configuring DefectDoj
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **KeyCloak**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **Keycloak**, and fill in the form:
 
 - **KeyCloak OAuth Key** — enter your client ID (from step 1).
 - **KeyCloak OAuth Secret** — enter the client secret (from step 5). After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID, the authorization URL or the access token URL.

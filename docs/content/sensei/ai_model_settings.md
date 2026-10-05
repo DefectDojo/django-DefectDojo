@@ -12,7 +12,7 @@ your own CI), it needs an LLM. **AI Model Settings** is where you choose that mo
 its credentials, once, instance-wide — the hosted worker uses this configuration instead of any
 per-repository secret.
 
-You reach it from the sidebar under **Sensei + AI → AI Model Settings**. You need a global
+You reach it from the sidebar under **Sensei + AI > AI Model Settings**. You need a global
 **Maintainer** or **Owner** role to change it.
 
 > **On-premise only.** This page exists only on **on-premise** ("local") deployments, where you

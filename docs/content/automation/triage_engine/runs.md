@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-A **run** is one execution of one rule. Every run is recorded, whether it succeeded or failed, and every node inside it leaves a trace. **Triage Engine > Runs** lists them.
+A **run** is one execution of one rule. Every run is recorded, whether it succeeded or failed, and every node inside it leaves a trace. **Act > Triage Engine > Runs** lists them.
 
 ## What a run records
 
