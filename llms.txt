@@ -40,6 +40,7 @@ Key facts:
 - [Deploying DefectDojo Pro on OpenShift](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/openshift_deployment/): What is specific to OpenShift when deploying self-hosted DefectDojo Pro: security context constraints, Routes, and ReadWriteMany storage
 - [Kubernetes Migration Runbook & Troubleshooting (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/migration_runbook/): Step-by-step OSS to Pro migration on Kubernetes, a troubleshooting index keyed on the exact error text, and a post-migration verification checklist
 - [Upload Size Limits for Large Scan Files (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/upload_size_limits/): Why a large scan file fails to upload on Kubernetes, and which limit to raise in the Helm chart
+- [Sandbox Mode (self-hosted) (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/sandbox_mode/): Turn on the DefectDojo Pro sandbox on a self-hosted instance with one setting, and what it creates in your database
 - [Installing on Docker Compose (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/installing_on_docker_compose/): Install self-hosted DefectDojo Pro on a single host using dojo-compose-cli, with PostgreSQL on a separate server
 - [DefectDojo Pro Upgrade Guide (Docker Compose)](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose/): Upgrade a self-hosted DefectDojo Pro deployment that runs on Docker Compose with dojo-compose-cli
 - [Installing DefectDojo Pro in an Air-Gapped Environment](https://docs.defectdojo.com/get_started/pro/onprem/docker_compose/air_gapped_install/): Stage the DefectDojo Pro install artifacts on a host with internet access, then move them into an air-gapped network
@@ -136,7 +137,11 @@ Key facts:
 - [Asset Health Grade (Open Source)](https://docs.defectdojo.com/asset_modelling/os_hierarchy/os__asset_health_grade/): How DefectDojo calculates an Asset Health Grade
 - [Asset Hierarchy (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/asset_hierarchy/): DefectDojo Pro - Asset Hierarchy Overhaul
 - [Assign Priority, Risk and SLAs (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/): How DefectDojo ranks your Findings
+- [Plan your hierarchy (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/plan_your_hierarchy/): Decide how Organizations and Assets should map to your teams, systems and reports, with a copyable LLM prompt that drafts the tree for you
+- [Change plans: review every change before it happens (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/change_plans/): Build a plan of hierarchy changes from operations or a CSV file, review the full diff, then apply it as one change and undo it if needed
 - [Threat Intelligence (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/threat_intelligence/): Exploit and threat evidence as a first-class input to Priority and Risk
+- [You can reorganize later (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/reorganize_later/): What changes, and what stays put, when you move Assets between Organizations, change their parents, or re-map Connector Records
+- [Finish onboarding: Assets that need attention (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/finish_onboarding/): Find the Assets a connector left unplaced or that lack priority data, fix them in bulk, and know when onboarding is complete
 - [Framework Presets (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/framework_presets/): Apply a published scheme's patch windows and scan cadence as one preset, preview the plan first, and revert it later
 - [Asset Health Grade](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/asset_health_grade/): How DefectDojo calculates an Asset Health Grade
 - [Locations Overview (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__locations_overview/): What Locations are and why they replace Endpoints
@@ -225,6 +230,7 @@ Key facts:
 - [GitHub Advanced Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/github_advanced_security/): How to set up the GitHub Advanced Security Upstream Connector for DefectDojo
 - [GitLab (Pro)](https://docs.defectdojo.com/connectors/toolreference/gitlab/): Upstream and Downstream Connector setup for GitLab
 - [Google Artifact Analysis (Pro)](https://docs.defectdojo.com/connectors/toolreference/google_artifact_analysis/): How to set up the Google Artifact Analysis Upstream Connector for DefectDojo
+- [Google Cloud (Pro)](https://docs.defectdojo.com/connectors/toolreference/google_cloud/): How to set up the Google Cloud Upstream Connector for DefectDojo
 - [Google Cloud SCC (Pro)](https://docs.defectdojo.com/connectors/toolreference/google_cloud_scc/): How to set up the Google Cloud SCC Upstream Connector for DefectDojo
 - [Group-IB ASM (Pro)](https://docs.defectdojo.com/connectors/toolreference/group_ib_asm/): How to set up the Group-IB ASM Upstream Connector for DefectDojo
 - [HackerOne (Pro)](https://docs.defectdojo.com/connectors/toolreference/hackerone/): How to set up the HackerOne Upstream Connector for DefectDojo
@@ -310,6 +316,7 @@ Key facts:
 - [Zendesk (Pro)](https://docs.defectdojo.com/connectors/toolreference/zendesk/): How to set up the Zendesk Downstream Connector for DefectDojo
 - [Zimperium (Pro)](https://docs.defectdojo.com/connectors/toolreference/zimperium/): How to set up the Zimperium Upstream Connector for DefectDojo
 - [Zora (Pro)](https://docs.defectdojo.com/connectors/toolreference/zora/): How to set up the Zora Upstream Connector for DefectDojo
+- [Microsoft Azure (Pro)](https://docs.defectdojo.com/connectors/toolreference/azure/): How to set up the Microsoft Azure Upstream Connector for DefectDojo
 - [Jira (Open Source)](https://docs.defectdojo.com/connectors/os_jira/os__jira_guide/): Work with the Jira integration
 - [Issue Tracking Integration](https://docs.defectdojo.com/connectors/issue_tracking/): Sync DefectDojo findings with your issue tracking system to streamline remediation and accountability.
 
@@ -395,6 +402,7 @@ Key facts:
 - [Scheduling Rules (Pro)](https://docs.defectdojo.com/automation/rules_engine/scheduling/): Automatically run Rules Engine rules on a recurring or one-time schedule
 - [About Triage Engine (Pro)](https://docs.defectdojo.com/automation/triage_engine/about/): What Triage Engine is, how to turn it on, and the concepts it is built from
 - [Building Rules (Pro)](https://docs.defectdojo.com/automation/triage_engine/building_rules/): The graph editor, triggers, scope, conditions and message templates
+- [Webhook Receivers (Pro)](https://docs.defectdojo.com/automation/triage_engine/webhook_receivers/): Let other tools talk back to DefectDojo: receive webhooks, find the Findings they are about, and act on them
 - [Node Reference (Pro)](https://docs.defectdojo.com/automation/triage_engine/node_reference/): Every node Triage Engine ships with, and what each one does
 - [Runs (Pro)](https://docs.defectdojo.com/automation/triage_engine/runs/): How a rule executes, what a run records, and how cascading is bounded
 - [Deliveries (Pro)](https://docs.defectdojo.com/automation/triage_engine/deliveries/): The ledger of everything rules send outward, and how retries and replay work
@@ -440,6 +448,7 @@ Key facts:
 - [Remote User (Header) Authentication (Pro)](https://docs.defectdojo.com/admin/sso/pro__remote_user/): Authenticate users from a trusted reverse proxy via request headers in DefectDojo Pro
 - [LDAP Authentication (Pro)](https://docs.defectdojo.com/admin/sso/pro__ldap/): Configure LDAP authentication in DefectDojo Pro
 - [SCIM Provisioning (Pro)](https://docs.defectdojo.com/admin/sso/pro__scim/): Provision and deprovision DefectDojo Pro users from your identity provider
+- [Sandbox (Pro)](https://docs.defectdojo.com/admin/sandbox/pro__sandbox/): Practice on sample data in a copy of DefectDojo Pro that never reaches production
 
 ## Navigating DefectDojo
 
@@ -450,6 +459,7 @@ Key facts:
 - [Customizing Tables](https://docs.defectdojo.com/navigation/pro__table_customization/): Sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables
 - [Customizing Page Layouts (Pro)](https://docs.defectdojo.com/navigation/pro__page_layouts/): Arrange the widgets on DefectDojo Pro view pages, then save, share, or set a layout as the default
 - [Configuring Forms (Pro)](https://docs.defectdojo.com/navigation/pro__form_configuration/): Choose which fields the DefectDojo Pro create and edit forms show, which are required, and the order they appear in
+- [Support (Pro)](https://docs.defectdojo.com/navigation/pro__support/): Filing a support request from DefectDojo Pro, the documentation and community search above the form, the community board, and the settings that cover self-hosted and airgapped instances
 - [The Markdown Editor (Pro)](https://docs.defectdojo.com/navigation/pro__markdown_editor/): Format text, and paste or drag images directly into any DefectDojo Pro description, note, or other markdown field
 - [Language and Localization](https://docs.defectdojo.com/navigation/language_and_localization/): Choose the language DefectDojo's interface is shown in, and understand which languages are offered and what stays in English
 
@@ -835,6 +845,7 @@ Key facts:
 
 - [Open Source Upgrading](https://docs.defectdojo.com/releases/os_upgrading/upgrading_guide/): Release specific upgrading instructions
 - [Upgrading to DefectDojo Version 3.3.200](https://docs.defectdojo.com/releases/os_upgrading/3.3.200/): In DefectDojo Pro, a restart now applies the Locations and Organization / Asset Relabeling toggles to the Classic UI and the /api/v2 route wiring. Those surfaces used to keep following the deployment environment variables no matter what the Feature Flags page said.
+- [Upgrading to DefectDojo Version 3.4.x](https://docs.defectdojo.com/releases/os_upgrading/3.4/): No special instructions.
 - [Upgrading to DefectDojo Version 3.2.200](https://docs.defectdojo.com/releases/os_upgrading/3.2.200/): DefectDojo Pro can now enable Locations as a self-service, database-backed toggle on the Feature Flags page, and carry existing history forward with an in-app data-migration suite that backfills endpoint, dependency, and source-code locations before an identity rehash.
 - [Upgrading to DefectDojo Version 3.2.100](https://docs.defectdojo.com/releases/os_upgrading/3.2.100/): Notes marked private are now visible only to their author and to superusers.
 - [Upgrading to DefectDojo Version 3.3.x](https://docs.defectdojo.com/releases/os_upgrading/3.3/): Three parsers gain deduplication registrations, which changes the stored identity of their findings. Xeol Parser moves off the legacy hash so its identity stops depending on the wall clock; Checkmarx One Scan hashes the vendor id it already matches on; Checkmarx Scan detailed gains the same field list as its CxFlow sibling. Instances with the identity signature ledger enabled bridge these changes automatically; others should rehash the affected scan types after upgrading. Separately, SARIF-family parsers stop trusting fingerprints that repeat within a report, which stops unrelated findings from being merged; no rehash is needed for that change.
@@ -919,6 +930,7 @@ Key facts:
 - [Upgrading to DefectDojo Version 1.2.4](https://docs.defectdojo.com/releases/os_upgrading/1.2.4/): multiple instructions
 - [Upgrading to DefectDojo Version 1.2.3](https://docs.defectdojo.com/releases/os_upgrading/1.2.3/): multiple instructions
 - [Upgrading to DefectDojo Version 1.2.2](https://docs.defectdojo.com/releases/os_upgrading/1.2.2/): multiple instructions
+- [Adding the Webhook Gateway on Upgrade (Pro)](https://docs.defectdojo.com/releases/pro/webhook-gateway/): What an existing self-hosted DefectDojo Pro installation gets with the webhook gateway, what a database administrator may need to run, how to verify it, and how to roll it back.
 - [Adding the dd-orch Database on Upgrade (Pro)](https://docs.defectdojo.com/releases/pro/ddorch-database/): Provisioning the dojodb-ddorch PostgreSQL database and pointing DefectDojo Pro at it on an existing self-hosted installation.
 - [DefectDojo Pro Changelog](https://docs.defectdojo.com/releases/pro/changelog/): DefectDojo Pro Changelog
 - [Google Sheets synchronisation](https://docs.defectdojo.com/archived_docs/google-sheets-sync/): Export finding details to Google Sheets and upload changes from Google Sheets.

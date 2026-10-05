@@ -94,7 +94,9 @@ is what customers describe as their Active numbers being polluted).</p><p>With R
 status band, <strong>Exception Requested</strong>, instead of <strong>Active</strong>:</p><ul><li>The Finding is not hidden and not suppressed. Its own status is still Active.</li><li>Charts and status splits show <strong>Exception Requested</strong> as its own slice, so the total still adds up
 and you can see how much work is sitting in a queue waiting on a decision.</li><li>Findings waiting on a decision carry an <strong>Exception Requested</strong> badge in Finding tables,
 alongside their real status — the Finding is still Active, and the badge says somebody is
-waiting.</li><li>Filter Findings on <code>has_pending_exception</code> to build that queue.</li><li>Filter Risk Acceptances on <code>workflow_state=proposed&amp;workflow_state=under_review</code> to see the
+waiting.</li><li>Finding tables offer an <strong>Exception Requested</strong> column, hidden by default: turn it on from the
+column picker and filter it to Yes to build that queue directly in the table. The same filter is
+available on the API as <code>has_pending_exception</code>.</li><li>Filter Risk Acceptances on <code>workflow_state=proposed&amp;workflow_state=under_review</code> to see the
 requests waiting for a reviewer.</li></ul><p>When the acceptance is activated, its Findings become Risk Accepted as normal. When it is rejected,
 they simply stay Active.</p><h3 id=the-record-of-what-was-accepted>The record of what was accepted<a href=#the-record-of-what-was-accepted class=anchor aria-hidden=true>#</a></h3><p>DefectDojo has always tracked which Findings a Risk Acceptance covers as a live membership list, and
 Findings leave that list for ordinary reasons: the acceptance expires, or a re-import stops seeing

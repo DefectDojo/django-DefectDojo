@@ -19,19 +19,20 @@
 &lt;p&gt;数据字段总数： &lt;em&gt;安全工具导出文件中包含的字段总数。&lt;/em&gt;
 已解析的数据字段数： &lt;em&gt;已解析到 DefectDojo 发现项中的字段总数。&lt;/em&gt;
 未解析的数据字段数： &lt;em&gt;未解析到 DefectDojo 发现项中的字段总数。&lt;/em&gt;&lt;/p&gt;</description></item><item><title>开源分支与发布流程</title><link>https://docs.defectdojo.com/zh-hans/get_started/contributing/branching-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/contributing/branching-model/</guid><description>&lt;h2 id="常规发布"&gt;常规发布&lt;/h2&gt;
-&lt;p&gt;DefectDojo 团队致力于保持以下发布节奏：&lt;/p&gt;
+&lt;p&gt;所有版本都从 &lt;code&gt;dev&lt;/code&gt; 分支发布。DefectDojo 团队致力于保持以下发布节奏：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;次要版本（Minor）：每月至少一次，于每月的第一个星期一发布。&lt;/li&gt;
-&lt;li&gt;补丁/缺陷修复（Patch/Bugfix）：每周一发布。&lt;/li&gt;
-&lt;li&gt;安全发布（Security）：根据严重程度，在常规节奏之外发布。&lt;/li&gt;
+&lt;li&gt;补丁（Patch）：每周一发布。&lt;/li&gt;
+&lt;li&gt;安全发布（Security）：可能根据严重程度在常规节奏之外发布，同样从 &lt;code&gt;dev&lt;/code&gt; 发布。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;GitHub Actions 是权威依据。发布流程是半自动化的。常规发布的步骤如下：&lt;/p&gt;
+&lt;p&gt;没有单独的缺陷修复分支，也没有从 &lt;code&gt;master&lt;/code&gt; 分出的热修复分支。所有 PR，无论是缺陷修复还是新功能，都以 &lt;code&gt;dev&lt;/code&gt; 为目标分支。&lt;/p&gt;
+&lt;p&gt;GitHub Actions 是权威依据。发布流程是半自动化的。每次发布的步骤如下：&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;从 &lt;code&gt;dev&lt;/code&gt; 或 &lt;code&gt;bugfix&lt;/code&gt; 创建发布分支，并准备一个针对 &lt;code&gt;master&lt;/code&gt; 的 PR（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-pr.yml"&gt;详情&lt;/a&gt;）
+&lt;li&gt;从 &lt;code&gt;dev&lt;/code&gt; 创建发布分支，并准备一个针对 &lt;code&gt;master&lt;/code&gt; 的 PR（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-1-create-pr.yml"&gt;详情&lt;/a&gt;）
 &amp;ndash;&amp;gt; 维护者验证并手动合并该 PR&lt;/li&gt;
-&lt;li&gt;打标签、发布草稿版本并构建/推送 Docker 镜像（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-tag-docker.yml"&gt;详情&lt;/a&gt;）
+&lt;li&gt;打标签、发布草稿版本并构建/推送 Docker 镜像（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-2-tag-docker-push.yml"&gt;详情&lt;/a&gt;）
 &amp;ndash;&amp;gt; 维护者整理 release-drafter 生成的发布说明并发布该版本&lt;/li&gt;
-&lt;li&gt;创建一个将 &lt;code&gt;master&lt;/code&gt; 合并回 &lt;code&gt;dev&lt;/code&gt; 和 &lt;code&gt;bugfix&lt;/code&gt; 的 PR，以重新对齐各分支（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-master-into-dev.yml"&gt;详情&lt;/a&gt;）&lt;/li&gt;
+&lt;li&gt;创建一个将 &lt;code&gt;master&lt;/code&gt; 合并回 &lt;code&gt;dev&lt;/code&gt; 的 PR，以重新对齐各分支（&lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/release-3-master-into-dev.yml"&gt;详情&lt;/a&gt;）&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h2 id="安全发布"&gt;安全发布&lt;/h2&gt;
 &lt;p&gt;与安全问题相关的 PR 通过&lt;a href="https://github.com/DefectDojo/django-DefectDojo/security/advisories"&gt;安全公告&lt;/a&gt;完成，该机制可让团队私下处理代码，而不会过早披露漏洞。&lt;/p&gt;</description></item><item><title>编辑文档</title><link>https://docs.defectdojo.com/zh-hans/get_started/contributing/documentation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/contributing/documentation/</guid><description>&lt;p&gt;本文档使用 &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt; 构建，并使用 &lt;a href="https://getdoks.org/"&gt;Doks&lt;/a&gt; 主题的一个变体。&lt;/p&gt;

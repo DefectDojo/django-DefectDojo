@@ -26,7 +26,16 @@ continuously: <strong>am I vulnerable to this new advisory?</strong> It ingests 
 advisories from the publishers you choose, matches them against your software
 inventory, and turns confirmed exposure into DefectDojo findings.</p><p>PSIRT is a Pro feature in beta. It requires the <strong>PSIRT</strong> feature flag (which
 depends on <strong>Locations</strong>) and the <strong>PSIRT Advisory Engine</strong> license
-entitlement.</p><h3 id=if-you-dont-see-psirt-in-the-menu>If you don&rsquo;t see PSIRT in the menu</h3><p>The PSIRT flag depends on <strong>Locations</strong>, and a flag with an unmet dependency is
+entitlement.</p><h3 id=migrating-from-the-psirt-1x-sidecar>Migrating from the PSIRT 1.x sidecar</h3><p>Before 3.3.0, PSIRT was a separate service (the PSIRT Advisory Engine) served
+under <code>/psirt/</code> next to DefectDojo. DefectDojo Pro 3.3.0 replaced it with the
+module described here, running inside the main application. The old <code>/psirt/</code>
+URL redirects to the native pages on 3.3.x and is removed in 3.4.0; the
+separate service is no longer released.</p><p>An existing sidecar database is carried into PSIRT 2.0 with a one-shot
+importer. Run it on a DefectDojo Pro instance with a connection string for
+the old <code>pae</code> database, first as a dry run and then with <code>--commit</code>:</p><div class=expressive-code><figure class="frame is-terminal not-content"><figcaption class=header><span class=title></span></figcaption><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>python3 manage.py psirt_import_legacy --dsn postgresql://user:pass@host/pae
+</span></span><span class=line><span class=cl>python3 manage.py psirt_import_legacy --dsn postgresql://user:pass@host/pae --commit</span></span></code></pre></div></figure></div><p>The dry run performs the whole import inside a transaction and rolls it back,
+so its report reflects real constraints. Imported feed sources land disabled;
+enabling one presents its publisher&rsquo;s terms again.</p><h3 id=if-you-dont-see-psirt-in-the-menu>If you don&rsquo;t see PSIRT in the menu</h3><p>The PSIRT flag depends on <strong>Locations</strong>, and a flag with an unmet dependency is
 forced off — so with Locations disabled, PSIRT is off no matter how its own
 switch is set, and none of its pages are reachable. Settings → Feature Flags
 says so on the PSIRT row (&ldquo;Requires Locations to be enabled&rdquo;). Enable Locations
