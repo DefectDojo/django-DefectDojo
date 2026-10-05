@@ -11,7 +11,7 @@ Pools are for the case where the same thing is genuinely deployed in several pla
 
 A pool may span Organizations, and everything a pool does crosses that boundary with it: a Finding in one Organization can be marked a duplicate of a Finding in another, and a false positive recorded in one Organization is replicated to matching Findings in the others that share the pool. You only ever see the members you have access to, and a member you cannot read is shown as a placeholder rather than hidden, so a pool never looks smaller than it is.
 
-Find pools at **Settings \> Finding Workflow \> Dedupe Pools** (**Settings \> Pro Settings \> Deduplication Settings \> Dedupe Pools** on instances still using the previous menu layout). Matching Configuration sits beside it in the same group.
+Find pools at **Settings > Finding Workflow > Dedupe Pools**. Matching Configuration sits beside it in the same group.
 
 ## Pools vs. the global algorithms
 

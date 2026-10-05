@@ -2,7 +2,7 @@
 title: Entregas
 description: El registro de todo lo que las reglas envían hacia afuera, y cómo funcionan
   los reintentos y la repetición
-weight: 5
+weight: 6
 audience: pro
 aliases:
 - /es/automation/rules_engine_v2/deliveries/

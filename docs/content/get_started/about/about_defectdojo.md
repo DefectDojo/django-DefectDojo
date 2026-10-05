@@ -35,7 +35,7 @@ DefectDojo has smart features to enhance and tune the results from your security
 - Track and report on security Findings in context
 - Enforce SLAs in context
 - Handle False Positives, Risk Acceptances and other triage decisions
-- Distill duplicates using DefectDojo's deduplication algorithm
+- Distill duplicates within and across tools using DefectDojo's [deduplication algorithms](/triage_findings/finding_deduplication/deduplication_across_tools/)
 - Integrate with external Project Tracking software.
 - Provide metrics/reports across repositories and development branches using CI/CD integration.
 - Coordinate traditional Pen test management.

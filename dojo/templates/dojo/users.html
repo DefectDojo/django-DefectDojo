@@ -18,7 +18,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        {{ name }}
+                        <i class="fa-solid fa-users dd-card-icon" aria-hidden="true"></i>{{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "auth.add_user"|has_configuration_permission:request %}

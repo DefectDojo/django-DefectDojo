@@ -21,7 +21,7 @@ For more information on Roles, please refer to our **Introduction To Roles** art
 
 ## The All Groups page
 
-From the sidebar, navigate to 👤**Users \> Groups** to see a list of all active and inactive user groups. 
+From the sidebar, navigate to **Settings > Users & Permissions > Groups** to see a list of all active and inactive user groups. 
 
 ![image](images/Create_a_User_Group_for_shared_permissions.png)
 From here, you can create, delete or view your individual Group pages.
@@ -48,7 +48,7 @@ For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> 
 
 ## Create / Edit a User Group
 
-1. Navigate to the 👤**Users \> Groups** page on the sidebar. You will see a list of all existing User Groups, including their Name, Description, Number of Users, Global Role (if applicable) and Email.  
+1. Navigate to the **Settings > Users & Permissions > Groups** page on the sidebar. You will see a list of all existing User Groups, including their Name, Description, Number of Users, Global Role (if applicable) and Email.  
 ​
 ![image](images/Create_a_User_Group_for_shared_permissions_2.png)
 
@@ -69,7 +69,7 @@ The Weekly Digest is a report on all Group-assigned Assets / Organizations. To h
 
 ### Viewing a Group Page
 
-Once you have created a Group, you can access it by selecting it in the menu listed under **Users \> Groups.**
+Once you have created a Group, you can access it by selecting it in the list under **Settings > Users & Permissions > Groups**.
 
 The Group Page can be customized with a **Description**.It features a list of all **Group Members,** as well as the assigned **Assets, Organizations**, and the associated **Role** associated with each of these**.**
 
@@ -77,7 +77,7 @@ You can also see the Group’s **Configuration Permissions** listed here.
 
 ## Manage a Group’s Users
 
-Group Membership is managed from the individual Group page, which you can select from the list in the **Users \> Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
+Group Membership is managed from the individual Group page, which you can select from the list in the **Settings > Users & Permissions > Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
 
 In order to view or edit a Group’s Membership, a User must have the appropriate Configuration permissions enabled as well as Membership in the Group (or Superuser status).
 
@@ -109,7 +109,7 @@ Note that adding a member to a Group will not allow them access to their own Gro
 
 ## Manage a Group’s Permissions
 
-Group Permissions are managed from the individual Group page, which you can select from the list in the **Users \> Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
+Group Permissions are managed from the individual Group page, which you can select from the list in the **Settings > Users & Permissions > Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
 
 Note that only Superusers can edit a Group’s permissions (Asset / Organization, or Configuration).  
 ​

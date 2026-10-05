@@ -71,7 +71,8 @@
         {% endblock %}
         <link rel="stylesheet" href="{% static "jquery-ui/dist/themes/flick/jquery-ui.min.css" %}">
         <link rel="stylesheet" href="{% static "flatpickr/dist/flatpickr.min.css" %}">
-        <link rel="shortcut icon" type="image/png" href="{% static "dojo/img/favicon.png" %}"/>
+        <link rel="icon" type="image/svg+xml" href="{% static "dojo/img/favicon.svg" %}"/>
+        <link rel="alternate icon" type="image/png" href="{% static "dojo/img/favicon.png" %}"/>
         <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
         <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
         {% block dojo_css %}
@@ -88,36 +89,60 @@
                 --dd-sidebar-width: 14rem;
                 --dd-topbar-height: 3.5rem;
             }
+            /* Sidebar: the brand app frame. Dust ground, Midnight ink, teal-grey
+               support tones; hover lifts to the raised Dust step. */
             #dd-sidebar {
                 scrollbar-width: thin;
-                scrollbar-color: rgba(255,255,255,0.2) transparent;
-                background: var(--color-dd-primary-900);  /* Fuji Blue Hue 04 — deepest brand blue */
+                scrollbar-color: var(--color-border-strong) transparent;
+                background: var(--color-frame);
+                color: var(--color-text);
+                border-inline-end: 1px solid var(--color-border);
             }
             /* Override dojo.css 'a' color inside sidebar */
             #dd-sidebar a,
             #dd-sidebar button {
-                color: #C6DDF2;  /* Fuji Blue Hue 01 — light on dark */
+                color: var(--color-text);
+                font-size: 0.95rem;
+                font-weight: 500;
                 text-decoration: none;
+                border-radius: 0.5rem;
+                margin-inline: 0.5rem;
             }
             #dd-sidebar a:hover,
             #dd-sidebar button:hover {
-                color: #fff;
-                background: rgba(255,255,255,0.1);
+                color: var(--color-text);
+                background: var(--color-surface-3);
+            }
+            #dd-sidebar nav i.fa-solid {
+                font-size: 1.05rem;
+                color: var(--color-text-muted);
+            }
+            #dd-sidebar nav i.fa-chevron-right {
+                font-size: 0.7rem;
             }
             /* Sub-nav items (inside expandable sections) */
             #dd-sidebar div[x-data] > div a {
-                color: var(--color-dd-primary-200);  /* Fuji Blue Hue 02 — medium light */
+                color: var(--color-text-muted);
                 font-size: 0.875rem;
+                font-weight: 400;
             }
             #dd-sidebar div[x-data] > div a:hover {
-                color: #fff;
+                color: var(--color-text);
             }
             #dd-sidebar div[x-data] > div {
-                background: rgba(0,0,0,0.15);
+                background: transparent;
             }
             /* Logo area */
             #dd-sidebar .dd-logo-bar {
-                background: #002a4d;  /* Deeper than sidebar for visual separation */
+                background: var(--color-frame);
+                border-bottom: 1px solid var(--color-border);
+            }
+            #dd-sidebar .dd-logo-bar a {
+                margin-inline: 0;
+                border-radius: 0;
+            }
+            #dd-sidebar .dd-logo-bar a:hover {
+                background: transparent;
             }
             /* Override dojo.css #page-wrapper rules since we use a new layout */
             #page-wrapper { margin: 0 !important; padding: 0 !important; }
@@ -145,7 +170,7 @@
 
     <body x-data="{ mobileMenu: false }"
           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-          class="bg-gray-50 antialiased">
+          class="bg-ground text-text antialiased">
 
         {% block pre_wrapper %}
         {% endblock pre_wrapper %}
@@ -154,14 +179,13 @@
         {% if request.user.is_authenticated %}
             <!-- ===== Sidebar ===== -->
             <aside id="dd-sidebar"
-                   class="fixed inset-y-0 start-0 z-50 w-[var(--dd-sidebar-width)] bg-dd-primary-800 text-white overflow-y-auto flex flex-col">
+                   class="fixed inset-y-0 start-0 z-50 w-[var(--dd-sidebar-width)] bg-frame text-text overflow-y-auto flex flex-col">
 
                 <!-- Logo -->
-                <div class="flex items-center h-[var(--dd-topbar-height)] px-4 bg-dd-primary-900 flex-shrink-0">
+                <div class="dd-logo-bar flex items-center h-[var(--dd-topbar-height)] px-4 flex-shrink-0">
                     {% block header_logo %}
-                        <a href="{% url 'home' %}" class="flex items-center gap-2 min-w-0">
-                            <img src="{% static "dojo/img/favicon.png" %}" alt="{% trans 'DefectDojo' %}" class="w-8 h-8 flex-shrink-0">
-                            <span class="text-lg font-semibold text-white truncate">DefectDojo</span>
+                        <a href="{% url 'home' %}" class="flex items-center min-w-0">
+                            <img src="{% static "dojo/img/logo.svg" %}" alt="{% trans 'DefectDojo' %}" class="h-5 w-auto max-w-full">
                         </a>
                     {% endblock %}
                 </div>
@@ -170,7 +194,7 @@
                 <nav class="flex-1 py-3 space-y-0.5" aria-label="{% trans 'Main navigation' %}">
                     {% block sidebar-items %}
                     <!-- Dashboard -->
-                    <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                    <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-2 transition-colors">
                         <i class="fa-solid fa-gauge w-5 text-center flex-shrink-0"></i>
                         <span class="truncate">{% trans "Dashboard" %}</span>
                     </a>
@@ -178,19 +202,19 @@
                     <!-- Products -->
                     <div x-data="{ open: false }">
                         <a href="{% url 'product' %}" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-list-ul w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{{ labels.ASSET_PLURAL_LABEL }}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
-                            <a href="{% url 'product' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ASSET_ALL_LABEL }}</a>
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
+                            <a href="{% url 'product' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ASSET_ALL_LABEL }}</a>
                             {% if request.user|can_add_product %}
-                                <a href="{% url 'new_product' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ASSET_CREATE_LABEL }}</a>
+                                <a href="{% url 'new_product' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ASSET_CREATE_LABEL }}</a>
                             {% endif %}
-                            <a href="{% url 'product_type' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ORG_ALL_LABEL }}</a>
+                            <a href="{% url 'product_type' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ORG_ALL_LABEL }}</a>
                             {% if "add"|has_global_permission %}
-                                <a href="{% url 'add_product_type' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ORG_CREATE_LABEL }}</a>
+                                <a href="{% url 'add_product_type' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ORG_CREATE_LABEL }}</a>
                             {% endif %}
                         </div>
                     </div>
@@ -198,45 +222,45 @@
                     <!-- Engagements -->
                     <div x-data="{ open: false }">
                         <a href="{% url 'engagement' %}" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-inbox w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Engagements" %}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
-                            <a href="{% url 'active_engagements' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Active Engagements" %}</a>
-                            <a href="{% url 'all_engagements' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Engagements" %}</a>
-                            <a href="{% url 'engagements_all' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ASSET_ENGAGEMENTS_BY_LABEL }}</a>
-                            <a href="{% url 'test_type' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Test Types" %}</a>
-                            <a href="{% url 'dev_env' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Environments" %}</a>
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
+                            <a href="{% url 'active_engagements' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Active Engagements" %}</a>
+                            <a href="{% url 'all_engagements' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "All Engagements" %}</a>
+                            <a href="{% url 'engagements_all' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ASSET_ENGAGEMENTS_BY_LABEL }}</a>
+                            <a href="{% url 'test_type' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Test Types" %}</a>
+                            <a href="{% url 'dev_env' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Environments" %}</a>
                         </div>
                     </div>
 
                     <!-- Findings (Finding Groups folded in) -->
                     <div x-data="{ open: false }">
                         <a href="{% url 'open_findings' %}" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-bug w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Findings" %}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
-                            <a href="{% url 'open_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Open Findings" %}</a>
-                            <a href="{% url 'all_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Findings" %}</a>
-                            <a href="{% url 'closed_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Closed Findings" %}</a>
-                            <a href="{% url 'accepted_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Risk Accepted Findings" %}</a>
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
+                            <a href="{% url 'open_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Open Findings" %}</a>
+                            <a href="{% url 'all_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "All Findings" %}</a>
+                            <a href="{% url 'closed_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Closed Findings" %}</a>
+                            <a href="{% url 'accepted_findings' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Risk Accepted Findings" %}</a>
                             {% if "view"|has_global_permission %}
-                                <a href="{% url 'templates' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Finding Templates" %}</a>
+                                <a href="{% url 'templates' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Finding Templates" %}</a>
                             {% endif %}
                             <div style="margin:.25rem 1rem; border-top:1px solid rgba(255,255,255,0.1);"></div>
-                            <a href="{% url 'open_finding_groups' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Open Findings Groups" %}</a>
-                            <a href="{% url 'all_finding_groups' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Findings Groups" %}</a>
-                            <a href="{% url 'closed_finding_groups' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Closed Findings Groups" %}</a>
+                            <a href="{% url 'open_finding_groups' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Open Findings Groups" %}</a>
+                            <a href="{% url 'all_finding_groups' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "All Findings Groups" %}</a>
+                            <a href="{% url 'closed_finding_groups' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Closed Findings Groups" %}</a>
                         </div>
                     </div>
 
                     <!-- Components -->
-                    <a href="{% url 'components' %}" id="product_component_view" class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                    <a href="{% url 'components' %}" id="product_component_view" class="flex items-center gap-3 px-4 py-2 transition-colors">
                         <i class="fa-solid fa-table-cells-large w-5 text-center flex-shrink-0"></i>
                         <span class="truncate">{% trans "Components" %}</span>
                     </a>
@@ -244,18 +268,18 @@
                     <!-- Endpoints -->
                     <div x-data="{ open: false }">
                         <a href="{% url 'endpoint' %}" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-sitemap w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Endpoints" %}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
-                            <a href="{% url 'endpoint' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Endpoints" %}</a>
-                            <a href="{% url 'endpoint_host' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Hosts" %}</a>
-                            <a href="{% url 'vulnerable_endpoints' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Vulnerable Endpoints" %}</a>
-                            <a href="{% url 'vulnerable_endpoint_hosts' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Vulnerable Hosts" %}</a>
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
+                            <a href="{% url 'endpoint' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "All Endpoints" %}</a>
+                            <a href="{% url 'endpoint_host' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "All Hosts" %}</a>
+                            <a href="{% url 'vulnerable_endpoints' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Vulnerable Endpoints" %}</a>
+                            <a href="{% url 'vulnerable_endpoint_hosts' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Vulnerable Hosts" %}</a>
                             {% if request.user.is_superuser %}
-                                <a href="{% url 'endpoint_migrate' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Migrate Endpoints" %}</a>
+                                <a href="{% url 'endpoint_migrate' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Migrate Endpoints" %}</a>
                             {% endif %}
                         </div>
                     </div>
@@ -264,13 +288,13 @@
                     {% block reports_tab %}
                     <div x-data="{ open: false }">
                         <a href="{% url 'report_builder' %}" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-file-lines w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Reports" %}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
-                            <a href="{% url 'report_builder' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Report Builder" %}</a>
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
+                            <a href="{% url 'report_builder' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Report Builder" %}</a>
                         </div>
                     </div>
                     {% endblock %}
@@ -278,19 +302,19 @@
                     <!-- Metrics -->
                     <div x-data="{ open: false }">
                         <a href="{% url 'metrics' %}?date=5&view=dashboard" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-chart-column w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Metrics" %}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
-                            <a href="{% url 'metrics' %}?date=5&view=dashboard" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Metrics Dashboard" %}</a>
-                            <a href="{% url 'critical_product_metrics' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ASSET_METRICS_CRITICAL_LABEL }}</a>
-                            <a href="{% url 'metrics_product_type' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ORG_METRICS_LABEL }}</a>
-                            <a href="{% url 'product_type_counts' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ORG_METRICS_COUNTS_LABEL }}</a>
-                            <a href="{% url 'product_tag_counts' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{{ labels.ASSET_METRICS_TAG_COUNTS_LABEL }}</a>
-                            <a href="{% url 'simple_metrics' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Simple Metrics" %}</a>
-                            <a href="{% url 'engineer_metrics' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Engineer Metrics" %}</a>
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
+                            <a href="{% url 'metrics' %}?date=5&view=dashboard" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Metrics Dashboard" %}</a>
+                            <a href="{% url 'critical_product_metrics' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ASSET_METRICS_CRITICAL_LABEL }}</a>
+                            <a href="{% url 'metrics_product_type' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ORG_METRICS_LABEL }}</a>
+                            <a href="{% url 'product_type_counts' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ORG_METRICS_COUNTS_LABEL }}</a>
+                            <a href="{% url 'product_tag_counts' %}" class="block py-1.5 ps-12 pe-4 text-sm">{{ labels.ASSET_METRICS_TAG_COUNTS_LABEL }}</a>
+                            <a href="{% url 'simple_metrics' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Simple Metrics" %}</a>
+                            <a href="{% url 'engineer_metrics' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Engineer Metrics" %}</a>
                         </div>
                     </div>
 
@@ -298,14 +322,14 @@
                     {% if "auth.view_user"|has_configuration_permission:request %}
                     <div x-data="{ open: false }">
                         <a href="{% url 'users' %}" @click.prevent="open = !open" id="id_user_menu"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-user w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Users" %}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
                             {% if "auth.view_user"|has_configuration_permission:request %}
-                                <a href="{% url 'users' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Users" %}</a>
+                                <a href="{% url 'users' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Users" %}</a>
                             {% endif %}
                             {# Pro restores the Groups link by overriding this block. #}
                             {% block groups_submenu_link %}{% endblock %}
@@ -315,7 +339,7 @@
 
                     <!-- Calendar -->
                     {% if system_settings.enable_calendar %}
-                    <a href="{% url 'engagement_calendar' %}" class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                    <a href="{% url 'engagement_calendar' %}" class="flex items-center gap-3 px-4 py-2 transition-colors">
                         <i class="fa-solid fa-calendar-days w-5 text-center flex-shrink-0"></i>
                         <span class="truncate">{% trans "Calendar" %}</span>
                     </a>
@@ -326,17 +350,17 @@
                         {% if "dojo.view_engagement_survey"|has_configuration_permission:request or "dojo.view_question"|has_configuration_permission:request %}
                         <div x-data="{ open: false }">
                             <a href="#" @click.prevent="open = !open"
-                               class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                               class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                                 <i class="fa-solid fa-house-medical-flag w-5 text-center flex-shrink-0"></i>
                                 <span class="flex-1 truncate">{% trans "Questionnaires" %}</span>
                                 <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                             </a>
-                            <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
+                            <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
                                 {% if "dojo.view_engagement_survey"|has_configuration_permission:request %}
-                                    <a href="{% url 'questionnaire' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Questionnaires" %}</a>
+                                    <a href="{% url 'questionnaire' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "All Questionnaires" %}</a>
                                 {% endif %}
                                 {% if "dojo.view_question"|has_configuration_permission:request %}
-                                    <a href="{% url 'questions' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Questions" %}</a>
+                                    <a href="{% url 'questions' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "All Questions" %}</a>
                                 {% endif %}
                             </div>
                         </div>
@@ -346,47 +370,47 @@
                     <!-- Configuration -->
                     <div x-data="{ open: false }">
                         <a href="#" @click.prevent="open = !open" id="menu_configuration"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                           class="flex items-center gap-3 px-4 py-2 transition-colors cursor-pointer">
                             <i class="fa-solid fa-gear w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Configuration" %}</span>
                             <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
                         </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
+                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden">
                             {% if "dojo.change_announcement"|has_configuration_permission:request %}
-                                <a href="{% url 'configure_announcement' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Announcement" %}</a>
+                                <a href="{% url 'configure_announcement' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Announcement" %}</a>
                             {% endif %}
                             {% if system_settings.enable_github and "dojo.view_github_conf"|has_configuration_permission:request %}
-                                <a href="{% url 'github' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "GitHub" %}</a>
+                                <a href="{% url 'github' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "GitHub" %}</a>
                             {% endif %}
                             {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:request %}
-                                <a href="{% url 'jira' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "JIRA" %}</a>
+                                <a href="{% url 'jira' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "JIRA" %}</a>
                             {% endif %}
                             {% if "dojo.change_bannerconf"|has_configuration_permission:request %}
-                                <a href="{% url 'configure_banner' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Login Banner" %}</a>
+                                <a href="{% url 'configure_banner' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Login Banner" %}</a>
                             {% endif %}
                             {% if "dojo.view_note_type"|has_configuration_permission:request %}
-                                <a href="{% url 'note_type' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Note Types" %}</a>
+                                <a href="{% url 'note_type' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Note Types" %}</a>
                             {% endif %}
-                            <a href="{% url 'notifications' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Notifications" %}</a>
+                            <a href="{% url 'notifications' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Notifications" %}</a>
                             {% if system_settings.enable_webhooks_notifications and "dojo.view_notification_webhooks"|has_configuration_permission:request %}
-                                <a href="{% url 'notification_webhooks' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Notification Webhooks" %}</a>
+                                <a href="{% url 'notification_webhooks' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Notification Webhooks" %}</a>
                             {% endif %}
-                            <a href="{% url 'regulations' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Regulations" %}</a>
+                            <a href="{% url 'regulations' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Regulations" %}</a>
                             {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission:request %}
-                                <a href="{% url 'sla_config' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "SLA Configuration" %}</a>
+                                <a href="{% url 'sla_config' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "SLA Configuration" %}</a>
                             {% endif %}
                             {% if request.user.is_superuser %}
-                                <a href="{% url 'system_settings' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "System Settings" %}</a>
-                                <a href="{% url 'celery_status' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Celery Status" %}</a>
+                                <a href="{% url 'system_settings' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "System Settings" %}</a>
+                                <a href="{% url 'celery_status' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Celery Status" %}</a>
                             {% endif %}
                             {% if "dojo.view_tool_configuration"|has_configuration_permission:request %}
-                                <a href="{% url 'tool_config' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Tool Configuration" %}</a>
+                                <a href="{% url 'tool_config' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Tool Configuration" %}</a>
                             {% endif %}
                             {% if "dojo.view_tool_type"|has_configuration_permission:request %}
-                                <a href="{% url 'tool_type' %}" class="block py-1.5 ps-12 pe-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Tool Type" %}</a>
+                                <a href="{% url 'tool_type' %}" class="block py-1.5 ps-12 pe-4 text-sm">{% trans "Tool Type" %}</a>
                             {% endif %}
                             {% if "dojo.view_cicdinfrastructure"|has_configuration_permission:request %}
-                                <a href="{% url 'cicd_infrastructure' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "CI/CD Infrastructure" %}</a>
+                                <a href="{% url 'cicd_infrastructure' %}" class="block py-1.5 pl-12 pr-4 text-sm">{% trans "CI/CD Infrastructure" %}</a>
                             {% endif %}
                         </div>
                     </div>
@@ -394,7 +418,7 @@
                     {% endblock sidebar-items %}
 
                     {% block support-tab %}
-                    <a href="{% url 'support' %}" class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                    <a href="{% url 'support' %}" class="flex items-center gap-3 px-4 py-2 transition-colors">
                         <i class="fa-solid fa-level-up w-5 text-center flex-shrink-0"></i>
                         <span class="truncate">{% trans "Upgrade" %}</span>
                     </a>
@@ -414,12 +438,12 @@
 
             {% if request.user.is_authenticated %}
             <!-- ===== Topbar ===== -->
-            <header class="sticky top-0 z-30 bg-white border-b border-gray-200 h-[var(--dd-topbar-height)] flex items-center px-4 gap-4 flex-shrink-0">
+            <header class="sticky top-0 z-30 bg-frame border-b border-border h-[var(--dd-topbar-height)] flex items-center px-4 gap-4 flex-shrink-0">
                 <!-- Search -->
                 <form id="custom_search_form" method="get" action="{% url 'simple_search' %}" class="ms-auto w-full max-w-md">
                     <div class="flex">
                         <input id="simple_search" type="text" name="query" value="{{ clean_query }}"
-                               class="flex-1 rounded-s-md border border-e-0 border-gray-300 px-3 py-1.5 text-sm focus:border-dd-primary-400 focus:ring-dd-primary-400"
+                               class="flex-1 rounded-s-md border border-e-0 border-gray-300 px-3 py-1.5 text-sm bg-white focus:border-dd-interactive-700 focus:ring-dd-interactive-700"
                                placeholder="{% trans "Search" %}..." aria-label="{% trans 'Search' %}">
                         <button id="simple_search_submit" type="submit" class="btn btn-primary rounded-s-none" aria-label="{% trans 'Search' %}">
                             <i class="fa-solid fa-magnifying-glass"></i>
@@ -442,7 +466,7 @@
                                   {% else %}
                                   hx-get="{% url 'alertcount_text' %}" hx-trigger="load" hx-swap="innerHTML"
                                   {% endif %}
-                                  class="absolute -top-0.5 -end-0.5 inline-flex items-center justify-center rounded-full text-xs font-bold w-5 h-5 {% if alert_count %}bg-red-500 text-white{% else %}bg-green-500 text-white{% endif %}">{{ alert_count }}</span>
+                                  class="absolute -top-0.5 -end-0.5 inline-flex items-center justify-center rounded-full text-xs font-bold w-5 h-5 {% if alert_count %}bg-red-700 text-white{% else %}bg-green-700 text-white{% endif %}">{{ alert_count }}</span>
                         </button>
                         <div id="alerts-dropdown"
                              x-show="alertsOpen" x-transition
@@ -960,20 +984,20 @@
             <!-- Footer -->
             <div id="footer-wrapper">
             {% block footer %}
-                <footer class="border-t border-gray-200 bg-white py-8 mt-8">
+                <footer class="border-t border-border bg-frame py-8 mt-8">
                     <div class="text-center text-sm text-gray-500">
                         <p>
                             <a href="{% url 'home' %}">
-                                <img src="{% static "dojo/img/chop.png" %}" alt="{% trans "DefectDojo Chop" %}" style="height:45px;width:auto;display:inline-block"/>
+                                <img src="{% static "dojo/img/symbol.svg" %}" alt="{% trans "DefectDojo Chop" %}" style="height:40px;width:auto;display:inline-block"/>
                             </a>
                         </p>
                         <p class="mt-2">{% dojo_version %} ({% dojo_current_hash %})</p>
                         <p>
-                            Detailed DefectDojo documentation can be found in our <a href="{% dojo_docs_url %}" class="text-blue-600 hover:underline">GitHub Pages</a>.
+                            Detailed DefectDojo documentation can be found in our <a href="{% dojo_docs_url %}" class="text-dd-interactive-700 hover:underline">GitHub Pages</a>.
                         </p>
                         <p>
-                            DefectDojo is licensed under the <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md" class="text-blue-600 hover:underline">3-Clause BSD License</a>.
-                            | <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE" class="text-blue-600 hover:underline">Dependencies Notice.</a>
+                            DefectDojo is licensed under the <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md" class="text-dd-interactive-700 hover:underline">3-Clause BSD License</a>.
+                            | <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE" class="text-dd-interactive-700 hover:underline">Dependencies Notice.</a>
                         </p>
                         <p>&copy; 2015-{% now "Y" %} DefectDojo, Inc. All rights reserved. DefectDojo is trademark of DefectDojo, Inc.</p>
                     </div>

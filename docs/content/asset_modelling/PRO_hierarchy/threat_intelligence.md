@@ -30,7 +30,7 @@ Beyond the card, the intelligence is a working surface across the app:
   Edit Finding forms — useful when no feed covers a finding (for example, one with no CVE).
   On a finding that does reference an enriched CVE, the next sync overwrites the hand-set
   value; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
-* an **"Urgent & Actively Exploited"** tile on the Priority Layout dashboard, counting
+* an **"Urgent & Actively Exploited"** tile on the Priority Insights dashboard (**Overview > Insights > Priority**), counting
   active Urgent-risk findings with in-the-wild exploitation — clicking through opens the
   exact filtered findings list
 * a **notification event** (`threat_intel_alert`) when an existing finding's CVE gains new

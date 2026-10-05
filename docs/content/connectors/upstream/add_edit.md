@@ -12,13 +12,13 @@ The process for adding and configuring an Upstream Connector is similar, regardl
 Before you begin this process, we recommend checking our [Tool-Specific Reference](../../toolreference/upstream/) to find the API resources for the tool you're trying to connect.
 
 1. If you haven't already, start by **switching to the Pro UI** in DefectDojo.
-2. From the left\-side menu, open the **Connectors** group nested under the **Import** header, and click **Upstream Connectors**.
+2. From the left\-side menu, open **Connect > Upstream**.
 ​
 ![image](images/add_edit_connectors.png)
 
 3. Choose a new Connector you want to add to DefectDojo in **Available Connectors**, and click the **Add Configuration** button on the tool's tile. You can use the **Search Connectors** box to filter each section by tool name, or the **All / Asset / Finding** toggle in the page header to filter by connector type.  
 ​  
-You can also edit an existing Connector under the **Configured Connectors** header. Click **Manage Configuration \> Edit Configuration** for the Configured Connector you want to Edit.  
+You can also edit an existing Connector under the **Configured Connectors** header. Click **Manage Configuration > Edit Configuration** for the Configured Connector you want to Edit.  
 ​
 ![image](images/add_edit_connectors_2.png)
 

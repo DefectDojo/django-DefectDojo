@@ -18,26 +18,20 @@ O administrador que cria a conta é responsável por entregar as credenciais ini
    * Defina uma senha temporária.
    * Envie o formulário.
 
-2. **Atribua as permissões** conforme apropriado — associação a Produto/Tipo de Produto, Permissões de Configuração, Papel Global ou status de Superusuário. Veja [Definir as permissões de um usuário](../set_user_permissions/) para mais detalhes. Um novo usuário sem nenhuma atribuição não conseguirá ver nenhum Produto ou Achado.
+2. **Conceda acesso** conforme apropriado. Adicione o usuário à lista de Usuários Autorizados de cada Ativo ou Organização de que ele precisa, ou marque-o como membro da equipe (staff) ou superusuário. Veja [Permissões do Open Source](../os__authorized_users/) para mais detalhes. Um novo usuário sem nenhuma atribuição não conseguirá ver nenhum Ativo ou Achado.
 
 3. **Envie as credenciais ao novo usuário por um canal separado** (por e-mail, pela ferramenta de chat da sua equipe, ou da forma como você costuma compartilhar segredos). Inclua:
    * A URL da instância do DefectDojo.
    * O nome de usuário (normalmente o e-mail dele).
    * A senha temporária que você acabou de definir.
-   * Uma observação de que ele deve trocar a senha e ativar o MFA (se a sua instância usar MFA) no primeiro login.
+   * Uma observação de que ele deve trocar a senha no primeiro login.
 
 4. **O novo usuário faz login e troca a credencial.** Ele pode:
    * Fazer login com a senha temporária e depois trocá-la pelo menu de perfil, ou
    * Usar o link **Esqueci minha senha** na página de login para definir uma senha diretamente, sem usar a temporária. A senha temporária ainda é necessária para que o registro inicial da conta exista, mas o usuário não precisa memorizá-la se usar o fluxo de redefinição de senha.
 
-5. **O novo usuário configura o MFA** pelo menu de perfil. Recomendamos fortemente exigir MFA para todos os usuários em instâncias que não estejam atrás de um SSO.
+## Usuários que entraram com SSO
 
-## Usuários de SSO
+O DefectDojo open source oferece suporte apenas a contas locais. SSO (SAML, OIDC, OAuth), LDAP e MFA estão disponíveis no [DefectDojo Pro](/admin/sso/).
 
-Se a sua instância estiver configurada com [SSO](../configure_sso/), o fluxo é diferente — os usuários normalmente são criados no primeiro login a partir do Provedor de Identidade, e você só precisa conceder a eles associação a grupos ou papéis depois.
-
-Se você migrou para o DefectDojo open source (onde o SSO é exclusivo do Pro) e os usuários de SSO existentes não conseguem mais fazer login, veja [Reativando o login para usuários de SSO](../os__sso_user_local_login_fallback/).
-
-## Recuperando-se de um token de MFA perdido
-
-Se um usuário perder o acesso ao dispositivo de MFA, veja a [seção de recuperação de MFA](/get_started/pro/cloud/connectivity-troubleshooting/#ive-lost-access-to-my-mfa-codes) do guia de solução de problemas de conectividade. Atualmente não há como remover o MFA de uma conta sem um código de MFA — a solução alternativa é criar uma nova conta para o usuário e conceder novamente as mesmas permissões.
+Se você atualizou para o DefectDojo open source 3.x e os usuários de SSO existentes não conseguem mais fazer login, veja [Reativando o login para usuários de SSO](../os__sso_user_local_login_fallback/).

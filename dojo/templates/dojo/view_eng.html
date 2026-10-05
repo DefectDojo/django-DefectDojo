@@ -18,7 +18,7 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">
-                            Description
+                            <i class="fa-solid fa-align-left dd-card-icon" aria-hidden="true"></i>Description
                         </h4>
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -117,7 +117,7 @@
                             <div class="panel-heading">
                                 <div class="clearfix">
                                     <h4 class="pull-left">
-                                        Engagement Presets <small>{{ eng.preset.title|truncatechars_html:60 }}</small>
+                                        <i class="fa-solid fa-sliders dd-card-icon" aria-hidden="true"></i>Engagement Presets <small>{{ eng.preset.title|truncatechars_html:60 }}</small>
                                     </h4>
                                     {% if eng.product|has_object_permission:"edit" %}
                                         <div class="dropdown pull-right">
@@ -196,7 +196,7 @@
                         <div class="panel-heading">
                             <div class="clearfix">
                                 <h4>
-                                    Tests ({{tests.paginator.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
+                                    <i class="fa-solid fa-flask dd-card-icon" aria-hidden="true"></i>Tests ({{tests.paginator.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
                                     <div class="dropdown pull-right">
                                         <button id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -378,7 +378,7 @@
                 <div id="risk" class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4> Risk Acceptance
+                            <h4> <i class="fa-solid fa-handshake dd-card-icon" aria-hidden="true"></i>Risk Acceptance
                                 {% if eng.product.enable_full_risk_acceptance %}
                                     {% if eng|has_object_permission:"edit" %}
                                         <a title="{% trans 'Add Risk Acceptance...' %}" class="pull-right btn btn-sm btn-primary"
@@ -469,7 +469,7 @@
             {% block global_risk_acceptances %}{% endblock %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Additional Features<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat">
+                    <h4><i class="fa-solid fa-puzzle-piece dd-card-icon" aria-hidden="true"></i>Additional Features<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat">
                         <i class="fa-solid fa-chevron-down"></i></a></span>
                     </h4>
                 </div>
@@ -477,7 +477,7 @@
                     {% if eng.engagement_type == "Interactive" and system_settings.enable_checklists %}
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h4> Checklist<span class="pull-right">
+                                <h4> <i class="fa-solid fa-list-check dd-card-icon" aria-hidden="true"></i>Checklist<span class="pull-right">
                                     &nbsp;
                                     <a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
                                     <i class="fa-solid fa-chevron-down"></i></a></span>
@@ -547,7 +547,7 @@
                     {% if system_settings.enable_questionnaires %}
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h4>Questionnaires<span class="pull-right">
+                                <h4><i class="fa-solid fa-clipboard-list dd-card-icon" aria-hidden="true"></i>Questionnaires<span class="pull-right">
                                     &nbsp;
                                     <a name="collapsible" data-toggle="collapse" href="#add_feat_survey">
                                     <i class="fa-solid fa-chevron-down"></i></a></span>
@@ -588,7 +588,7 @@
                     {% endif %}
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4>Notes<span class="pull-right">
+                            <h4><i class="fa-solid fa-note-sticky dd-card-icon" aria-hidden="true"></i>Notes<span class="pull-right">
                                 <a name="collapsible" data-toggle="collapse" href="#add_feat_notes">
                                 <i class="fa-solid fa-chevron-down"></i></a></span>
                             </h4>
@@ -607,7 +607,7 @@
                             {% endif %}
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h4>Note Log<span class="pull-right">
+                                    <h4><i class="fa-solid fa-clock-rotate-left dd-card-icon" aria-hidden="true"></i>Note Log<span class="pull-right">
                                         <a data-toggle="collapse" href="#add_feat_note_log">
                                         <i class="fa-solid fa-chevron-{% if notes %}up{%else%}down{%endif%}"></i></a></span>
                                     </h4>
@@ -682,7 +682,7 @@
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4>Files<span class="pull-right">
+                            <h4><i class="fa-solid fa-paperclip dd-card-icon" aria-hidden="true"></i>Files<span class="pull-right">
                                 &nbsp;
                                 <a data-toggle="collapse" href="#add_feat_files">
                                 <i class="fa-solid fa-chevron-down"></i></a></span>
@@ -720,7 +720,7 @@
         <div class="col-md-4">
             <div class="panel panel-default-secondary">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>
+                    <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw dd-card-icon" aria-hidden="true"></span>
                         {% if eng.name %}
                             {{ eng.name }}
                         {% else %}
@@ -874,7 +874,7 @@
                 <div>
                     <div class="panel panel-default-secondary">
                         <div class="panel-heading">
-                            <h3 class="panel-title"><span class="fa-solid fa-server" aria-hidden="true"></span>
+                            <h3 class="panel-title"><span class="fa-solid fa-server dd-card-icon" aria-hidden="true"></span>
                                 CI/CD Engagement Details
                             </h3>
                         </div>
