@@ -1,4 +1,6 @@
+import re
 from datetime import date
+from pathlib import Path
 from unittest.mock import patch
 
 from django.contrib import messages
@@ -8,8 +10,12 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
 from django.test import RequestFactory, SimpleTestCase
 from django.utils import translation
+from rest_framework.response import Response
+from rest_framework.test import APIRequestFactory
+from rest_framework.views import APIView
 
 import dojo
+from dojo.api_v2.views import DeprecationNoticeMixin
 from dojo.decorators import deprecated_view
 from dojo.deprecations import (
     Deprecation,
@@ -147,3 +153,46 @@ class TestDeprecatedView(SimpleTestCase):
         for view, key in expected.items():
             with self.subTest(view=view.__name__):
                 self.assertEqual(key, getattr(view, "deprecation", None))
+
+
+class ToolTypeProbe(DeprecationNoticeMixin, APIView):
+    authentication_classes = ()
+    permission_classes = ()
+    deprecation = "tool_type"
+
+    def get(self, request):
+        return Response({})
+
+
+class UndeclaredProbe(ToolTypeProbe):
+    deprecation = "no_such_feature"
+
+
+class TestDeprecationHeaders(SimpleTestCase):
+    def test_a_declared_feature_sends_both_headers_from_the_calendar(self):
+        response = ToolTypeProbe.as_view()(APIRequestFactory().get("/"))
+        self.assertEqual("True", response["X-Deprecated"])
+        self.assertEqual("2026-11-02T00:00:00", response["X-End-Of-Life-Date"])
+
+    def test_an_undeclared_key_sends_no_header(self):
+        response = UndeclaredProbe.as_view()(APIRequestFactory().get("/"))
+        self.assertFalse(response.has_header("X-Deprecated"))
+        self.assertFalse(response.has_header("X-End-Of-Life-Date"))
+
+
+HAND_TYPED_SCHEDULE = re.compile(
+    r"removal_version=|removal_date=|end_of_life_date\s*=|will be removed (in|by) (DefectDojo )?v?\d|removal planned for \d",
+)
+
+
+class TestNoHandTypedSchedule(SimpleTestCase):
+    def test_only_the_registry_names_a_removal_release(self):
+        root = Path(dojo.__file__).parent
+        offenders = []
+        for path in sorted([*root.rglob("*.py"), *root.rglob("*.html")]):
+            if path.name == "deprecations.py" or "db_migrations" in path.parts:
+                continue
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+                if HAND_TYPED_SCHEDULE.search(line):
+                    offenders.append(f"{path.relative_to(root.parent)}:{number}")
+        self.assertEqual([], offenders, "Declare the deprecation in dojo/deprecations.py and read it by key.")
