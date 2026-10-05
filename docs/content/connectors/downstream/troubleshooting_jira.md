@@ -16,7 +16,7 @@ If there is no Jira menu in the sidebar, no Jira section on the Asset / Engageme
 Check **Enable Jira Integration** on the System Settings page:
 
 * Open Source: ⚙️ **Configuration \> System Settings**, then check **Enable JIRA integration**.  A **Jira webhook secret** is also required before the form will save, so click the 🔄 icon to generate one.  See the [Jira Integration Guide](/connectors/os_jira/os__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
-* Pro: **\<Your Edition\> Settings \> System Settings**, then check **Enable Jira Integration** under **Jira Integration Settings**.  See the [Jira Integration Guide](/connectors/downstream/pro__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
+* Pro: **Settings > System > System Settings**, then check **Enable Jira Integration** under **Jira Integration Settings**.  See the [Jira Integration Guide](/connectors/downstream/pro__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
 
 If the setting is already enabled and you still can't see the Jira menu, your user may be missing the **View Jira Instance** Configuration Permission, which is also required for the menu to appear.  It can be assigned directly on the User page or through a User Group.  See [About Permissions and Roles](/admin/user_management/about_perms_and_roles/#configuration-permissions).
 
@@ -122,6 +122,49 @@ This error message can appear when attempting to add a created Jira configuratio
     * For comments, the `comment.self` URL contains the numeric `{{issue.id}}` in its `.../issue/<id>/comment/...` segment, and both `body` and `updateAuthor` are present.
     * If comments aren't appearing, check **loop prevention**: DefectDojo skips a comment when its author matches the Jira account DefectDojo uses to post comments. Run the Automation rule as a different Jira user if you want those comments ingested.
     * Use Automation's payload preview to confirm the smart values resolve as expected — their names can vary between Jira instances.
+
+## Two-way sync: changes from Jira are not reaching Findings
+
+This section is about [two-way sync](/connectors/toolreference/jira/#two-way-sync) for the Jira Downstream Connector, where Jira posts to a Triage Engine [webhook receiver](/automation/triage_engine/webhook_receivers/). The receiver keeps a **receipt** for every delivery it gets, so start from its **Receipts** tab (**Triage Engine > Webhook Receivers**, then the receiver).
+
+**There is no receipt at all.** The delivery never reached the receiver:
+
+* Check that the receiver is enabled, and that the **Inbound Webhooks** feature flag and the Triage Engine are on. While either is off, DefectDojo refuses every delivery with `503` and records nothing.
+* Compare the URL in Jira's webhook with the one on the receiver's **Setup** tab, character for character. A URL with a wrong or old token (for example after **Rotate Token**) is answered `404`, exactly like a URL that does not exist, and nothing is recorded. With the webhook gateway in front, that `404` comes from the gateway.
+* Jira Cloud only delivers to a URL with a certificate from a globally trusted authority.
+* A sender that exceeds the rate limit on receiver URLs is answered `429` and retries later.
+
+**The receipt is Rejected.** The reason says why:
+
+* **Authentication Failed**: the signature did not match. The secret in Jira's webhook must be the secret saved on the receiver. A Jira Data Center version that offers no webhook secret cannot sign: switch the receiver to **URL Token Only**.
+* **Body Too Large**: raise `DD_RULES_V2_WEBHOOK_MAX_BODY_BYTES` for the whole deployment (see [Configuration](/automation/triage_engine/configuration/#dd_rules_v2_webhook_max_body_bytes)).
+* **Unsupported Content Type** or **Invalid JSON**: the sender must post JSON with `Content-Type: application/json`, which Jira's own webhooks do.
+
+**The receipt says No Listeners.** No enabled rule listens to the receiver. Open its **Rules** tab and enable the rule. If the rule was detached, it is an ordinary rule now: enable it in the rule editor, or choose **Regenerate** on the receiver.
+
+**The receipt says Dispatch Failed.** DefectDojo recorded the delivery but its task queue refused it, usually during a broker outage. DefectDojo tries again every 15 minutes, a limited number of times, and the sender is told to retry. **Replay** on the receipt sends it into the rules again.
+
+**The receipt says Dispatched, but the Finding did not change.** Open the rule's run in **Runs** and look at its trace:
+
+* **Find Findings by a Value** sent the item to **not found**. `no_match` means the issue is not linked to a Finding through this receiver's connection. `other_jira_site` means the issue is linked through the classic Jira integration, but no classic Jira instance's URL matches the Jira site the event came from: set the instance's URL to the site's base URL.
+* The Finding is one the receiver's owner cannot edit. Changes are made as the owner.
+* The issue's status category is in neither **Closing Status Categories** nor **Reopening Status Categories** on the connector's status mapping, or a grouped Finding would have to reopen while **Also Reopen Finding Groups** is off.
+* The event is older than one already applied to the issue, so it was ignored.
+* For comments: **Add Jira Comments as Notes** is off, the comment is one DefectDojo posted itself, or its author is in **Also Ignore Comments From**.
+
+**Checking the webhook gateway.** Where the gateway is deployed, the top of the receivers list shows its state:
+
+* **Unreachable**: DefectDojo cannot reach the gateway. Check that the `webhook-gateway` container is running and healthy.
+* **Not Started**: the gateway's database schema is missing, because DefectDojo's database user may not create it. A database administrator has to create it; the statements are in [Configuration](/automation/triage_engine/configuration/#database-role-and-schema).
+* **Turned Off**: the **Inbound Webhooks** feature flag is off.
+
+A receiver listed as not registered with the gateway yet can be registered from its **Gateway** tab with **Sync Now**, or for every receiver at once with `manage.py reconcile_webhook_gateway`. DefectDojo also does this every ten minutes and whenever a worker starts.
+
+The receiver's **Gateway** tab shows every delivery the gateway captured for it and where each one is in its retries. A delivery DefectDojo could not take is retried for about four and a half hours, then listed under **Dead Letters**. DefectDojo replays dead letters by itself once it or the gateway recovers, and **Replay** sends one again by hand. Deliveries that arrived while the receiver was off are never delivered on their own: replay them from this tab once it is on again.
+
+If every delivery keeps failing and DefectDojo's log says a gateway delivery "carried a signature that does not verify", DefectDojo and the gateway are running with different secrets, usually after `DD_SECRET_KEY` changed and only one side restarted. Restart DefectDojo, its workers and the gateway together (see [Changing the secret key or the gateway secrets](/automation/triage_engine/configuration/#changing-the-secret-key-or-the-gateway-secrets)). The deliveries are retried meanwhile, so nothing is lost if this is fixed within the retry window.
+
+**Notes are not reaching Jira.** Check that **Push Notes as Comments** is on for the issue tracker mapping, that the note is not private, and that the Finding already has a Jira issue. A mapping that cannot post records an integration error saying why, for example a `403` from Jira naming a missing scope, or a go-integrators version that cannot post comments yet.
 
 ## Jira Epics aren't being created
 

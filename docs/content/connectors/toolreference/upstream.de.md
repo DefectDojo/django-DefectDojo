@@ -34,7 +34,7 @@ Die meisten Connectors importieren **Befunde** aus einem Sicherheitstool. **Asse
 * **Discover** und **Sync** gleichen beide die Asset-Liste ab. Neue Assets erscheinen als `NEW`-Einträge; sobald sie zugeordnet sind (automatisch, wenn Auto-Mapping aktiviert ist), erstellt DefectDojo das Produkt und ordnet es einem vom Tool abgeleiteten Produkttyp zu — zum Beispiel dem GitLab-Namespace oder dem Azure-DevOps-Projekt.
 * Wird ein Asset später upstream entfernt (zum Beispiel ein gelöschtes Repository), wird sein zugeordneter Eintrag beim nächsten Sync als `MISSING` markiert, damit Ihr Team ihn prüfen kann. DefectDojo löscht niemals stillschweigend ein Produkt.
 
-Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Assets und ServiceNow CMDB sind Asset-Connectors. runZero ist in erster Linie ein Asset-Connector, kann aber optional auch Schwachstellen als Befunde importieren. Alle anderen unten aufgeführten Connectors importieren Befunde.
+Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Google Cloud, Jira Service Management Assets und ServiceNow CMDB sind Asset-Connectors. runZero ist in erster Linie ein Asset-Connector, kann aber optional auch Schwachstellen als Befunde importieren. Alle anderen unten aufgeführten Connectors importieren Befunde.
 
 # **Unterstützte Connectors**
 
@@ -68,6 +68,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Asse
 - [GitHub](/connectors/toolreference/github/#upstream-connector)
 - [GitHub Advanced Security](/connectors/toolreference/github_advanced_security/)
 - [GitLab](/connectors/toolreference/gitlab/#upstream-connector)
+- [Google Cloud](/connectors/toolreference/google_cloud/)
 - [Google Cloud Security Command Center](/connectors/toolreference/google_cloud_scc/)
 - [Group-IB ASM](/connectors/toolreference/group_ib_asm/)
 - [HackerOne](/connectors/toolreference/hackerone/)

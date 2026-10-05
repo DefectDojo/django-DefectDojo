@@ -102,7 +102,7 @@ This header indicates the actions taken by an Import/Reimport.
 
 ## Reimport Deduplication
 
-Reimport decides whether an incoming item matches an existing Finding using **[Reimport Deduplication](/triage_findings/finding_deduplication/about_deduplication/)** settings. This is separate from “Same Tool Deduplication” and “Cross Tool Deduplication,” which operate after Findings exist.
+Reimport decides whether an incoming item matches an existing Finding using **[Reimport Deduplication](/triage_findings/finding_deduplication/about_deduplication/)** settings. This is separate from “Same Tool Deduplication” and “Cross Tool Deduplication,” which operate after Findings exist. [How DefectDojo Deduplicates Findings Across Security Tools](/triage_findings/finding_deduplication/deduplication_across_tools/) explains how the two steps fit together.
 
 If you are seeing Reimport close old Findings and create new Findings when only a minor attribute changes (for example, a line number shift), tune **Reimport Deduplication** for that tool to use stable identifiers that ignore those attributes (such as Unique ID From Tool).
 

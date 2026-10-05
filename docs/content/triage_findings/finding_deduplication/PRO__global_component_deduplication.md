@@ -19,7 +19,7 @@ Once the feature is enabled, **Global Component** becomes available as an **Algo
 
 ## Configuring Global Component Deduplication
 
-Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration**.
 
 > **A pooled Asset is bounded to its pool.** "Across all Assets" holds while an Asset is not in a
 > [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) for the matching kind

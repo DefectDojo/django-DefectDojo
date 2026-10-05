@@ -1,7 +1,7 @@
 ---
 title: 配信
 description: ルールが外部へ送信するすべてを記録する台帳と、再試行および再送の仕組み
-weight: 5
+weight: 6
 audience: pro
 aliases:
 - /ja/automation/rules_engine_v2/deliveries/

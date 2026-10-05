@@ -4,7 +4,7 @@
 {% load authorization_tags %}
 <div class="panel panel-default table-responsive">
     <div class="panel-heading">
-        <h4>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
+        <h4><i class="fa-solid fa-note-sticky dd-card-icon" aria-hidden="true"></i>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
                 class="fa-solid fa-chevron-up"></i></a></span></h4>
     </div>
     {% if object|has_object_permission:"add" %}

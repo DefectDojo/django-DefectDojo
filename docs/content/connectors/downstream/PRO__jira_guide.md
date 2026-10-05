@@ -25,7 +25,7 @@ DefectDojo's Jira integration can be used to push Finding data to one or more Ji
 
 DefectDojo Pro can convert an existing classic Jira setup into Downstream Connector configuration for you, rather than making you rebuild it by hand.
 
-**Where to find it:** go to **Connect \> Downstream** to open the **Downstream Connectors** page, and use the **Classic Jira Migration** card. Click **Migrate from classic Jira**, then confirm.
+**Where to find it:** go to **Connect > Downstream** to open the **Downstream Connectors** page, and use the **Classic Jira Migration** card. Click **Migrate from classic Jira**, then confirm.
 
 The card only appears if there is classic Jira configuration to migrate, or a previous run to report — so an instance that never used classic Jira will not see it. Once everything has been migrated the card remains but the button is disabled, because there is nothing left to do.
 
@@ -43,6 +43,7 @@ The one exception is **Engagement epics**. The Downstream Connector has no conce
 * **Severity mappings** and **status mappings** (your open and close transition keys) are carried across.
 * Each **Jira Project** configuration becomes an issue tracker mapping, keeping its project key and issue type, and stays assigned to the same Asset or Engagement.
 * **Push All Issues** is preserved: projects that had it enabled keep pushing automatically.
+* **Push Notes** becomes **Push Notes as Comments** on the mapping. Private notes are still never posted.
 * **Custom fields**, **close/reopen transition fields**, **component**, **default assignee**, and **labels** are converted to field mappings. Where you used *Add Vulnerability Id as a Jira label*, that becomes a label mapping too.
 * A **custom issue template** directory becomes a ticket template. The stock templates are not copied, because the connector already ships equivalents.
 
@@ -50,9 +51,9 @@ The one exception is **Engagement epics**. The Downstream Connector has no conce
 
 These are reported as warnings on the migration run — they do not stop it. Look for the *"things the connector cannot carry over"* list in the results.
 
-* **Jira → DefectDojo reverse sync.** This is the important one. The Downstream Connector does not sync changes *back* from Jira, so resolution mappings that apply Risk Acceptance or False Positive from a Jira resolution are not migrated. **If you rely on reverse sync, leave the classic Jira instance configured** — the migration does not remove it.
+* **Jira → DefectDojo reverse sync is not switched on for you.** The connector syncs back from Jira through [two-way sync](/connectors/toolreference/jira/#two-way-sync), which needs a new webhook in Jira pointing at a Triage Engine receiver, so the migration cannot turn it on. Each migrated connection carries a warning saying so. Your classic resolution mappings are carried over to the connector's status mapping, under **Coming Back From Jira**, so two-way sync treats a resolution the way classic Jira did. **Until you turn two-way sync on, leave the classic Jira webhook in place** if you rely on it: the migration does not remove it.
 * **Engagement Epic Mapping** — the connector has no epic concept.
-* **Push Notes**, **SLA notification comments**, and **risk acceptance expiration comments** — the connector does not post these to Jira.
+* **SLA notification comments** and **risk acceptance expiration comments**: the connector does not post these to Jira.
 * Custom fields named `summary`, `description`, `project`, `issuetype` or `status` — these are reserved by the connector, and a field mapping using one is skipped.
 * Custom field values longer than 512 characters — skipped rather than truncated.
 * A Jira Project attached to neither an Asset nor an Engagement produces no assignment.
@@ -83,17 +84,17 @@ Setting Up Jira requires the following steps:
 
 The Jira integration is off by default, and while it is off DefectDojo hides every other Jira control in the interface.  This is the first thing to configure: none of the steps below are available until it is enabled.
 
-While the integration is disabled, there is no **Jira Instances** entry in the sidebar, so there is nowhere to add a Jira Instance:
+While the integration is disabled, there is no **Jira** entry under **Connect** in the sidebar, so there is nowhere to add a Jira Instance:
 
 ![image](images/jira-menu-hidden-pro.png)
 
 ### Enable the integration
 
-1. Navigate to **Settings \> System \> System Settings** from the DefectDojo sidebar. On instances still using the previous menu layout this sits under a group named after your license package — **Pro Settings** or **Enterprise Settings**. See [The Sidebar Menu](/navigation/pro__sidebar/).
+1. Navigate to **Settings > System > System Settings** from the DefectDojo sidebar.
 ​
 2. In the **Jira Integration Settings** section, check **Enable Jira Integration**.
 ​
-3. Click **Submit**.  **Jira Instances** appears in the sidebar immediately, without reloading the page:
+3. Click **Submit**.  **Connect > Jira** appears in the sidebar immediately, without reloading the page:
 
 ![image](images/jira-enable-system-settings-pro.png)
 
@@ -101,7 +102,7 @@ While the integration is disabled, there is no **Jira Instances** entry in the s
 
 Enabling **Enable Jira Integration** is what makes the rest of the Jira interface appear.  With it turned on you get:
 
-* the **Jira Instances** menu, where Jira Instances are added and edited
+* the **Connect > Jira** entry, which opens the **Jira Instances** page where Jira Instances are added and edited
 * the **Jira Project Settings** page on the Asset ⚙️ menu, and the Jira settings on Engagements
 * the **Push to Jira** actions on Findings and Finding Groups, the Jira fields on the Finding and bulk edit forms, and the Jira columns on the Asset, Engagement, Finding and Finding Group lists (including CSV exports)
 
@@ -137,9 +138,9 @@ Multiple Jira Spaces can be handled by a single Jira Instance connection, as lon
 
 ### Add a Jira Instance
 
-1. Make sure **Enable Jira Integration** is checked in System Settings, as described in [Step 1](#step-1-enable-the-jira-integration-in-system-settings).  The **Jira Instances** menu does not appear on the sidebar until it is.
+1. Make sure **Enable Jira Integration** is checked in System Settings, as described in [Step 1](#step-1-enable-the-jira-integration-in-system-settings).  **Connect > Jira** does not appear in the sidebar until it is.
 
-2. Navigate to the  **Enterprise Settings \> Jira Instances \> + New Jira Instance**  page from the DefectDojo sidebar.
+2. Open **Connect > Jira** from the DefectDojo sidebar and select **New Jira Instance**.
 
 ![image](images/jira-instance-beta.png)
 
@@ -308,7 +309,7 @@ If enabled, Jira comments will populate on the associated Finding in DefectDojo,
 
 If enabled, any Issue which breaches DefectDojo's Service Level Agreement rules will have comments added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
 
-Service Level Agreements can be configured under **Configuration \> SLA Configuration** in DefectDojo and assigned to each Asset.
+Service Level Agreements can be configured under **Settings > Finding Workflow > Service Level Agreements** in DefectDojo and assigned to each Asset.
 
 #### Send Risk Acceptance Expiration Notifications As Comment
 
@@ -332,7 +333,7 @@ The Jira integration allows for bidirectional sync via webhook. DefectDojo recei
 
 ### Locating your Jira Webhook URL
 
-Your Jira Webhook is located on the System Settings form under **Jira Integration Settings**: **Enterprise Settings \> System Settings** from the sidebar.
+Your Jira Webhook is located on the System Settings form under **Jira Integration Settings**: **Settings > System > System Settings** from the sidebar.
 
 You also need to check **Enable Jira Web Hook** on the same page before DefectDojo will process incoming Jira notifications.  Incoming webhooks are ignored if either that box or **Enable Jira Integration** (see [Step 1](#step-1-enable-the-jira-integration-in-system-settings)) is unchecked.
 
@@ -368,7 +369,7 @@ DefectDojo's webhook endpoint accepts any HTTP `POST` with `Content-Type: applic
 
 The same prerequisites as the system webhook apply:
 
-* **Enable JIRA integration** and **Enable JIRA web hook** are both checked on the ⚙️ **Configuration \> System Settings** page.
+* **Enable JIRA integration** and **Enable JIRA web hook** are both checked on the **Settings > System > System Settings** page.
 * A non-empty **Jira webhook secret** is set on that page. The secret may only contain the characters `A-Z`, `a-z`, `0-9`, `_` and `-`.
 * The Finding (or Finding Group) is already linked to the Jira issue. If the issue isn't linked to a DefectDojo Finding, the request is still accepted (HTTP `200`) but no action is taken.
 
@@ -443,7 +444,7 @@ The smart values shown above (`{{issue.id}}`, `{{issue.status.statusCategory.key
 
 #### Test 1: Do Findings successfully push to Jira?
 
-In order to test that the Jira integration is working properly, you can add a new blank Finding to the Asset associated with Jira in DefectDojo. **Asset \> Findings \> Add New Finding.**
+In order to test that the Jira integration is working properly, you can add a new blank Finding to the Asset associated with Jira in DefectDojo. **Asset > Findings > Add New Finding.**
 
 Add whatever title severity and description you wish, and then click "Finished". The Finding should appear as an Issue in Jira with all of the relevant metadata.
 
@@ -782,4 +783,4 @@ You can now add these custom fields to the associated DefectDojo Asset, in the J
 
 Now, when you create a new Finding in the Jira\-associated Asset, Jira will automatically create all of these Custom Fields in Jira according to the JSON block contained within. These Custom Fields will be created with the default ("change\-me\-please", etc.) values.
 
-Within the Asset on DefectDojo, navigate to the Findings \> Add New Finding page. Make sure the Finding is both Active and Verified to ensure that it pushes to Jira, and then confirm on the Jira side that the Custom Fields are successfully created without any inconsistencies.
+Within the Asset on DefectDojo, navigate to the Findings > Add New Finding page. Make sure the Finding is both Active and Verified to ensure that it pushes to Jira, and then confirm on the Jira side that the Custom Fields are successfully created without any inconsistencies.

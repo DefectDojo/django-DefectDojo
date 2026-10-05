@@ -10,6 +10,8 @@ The CrowdStrike Falcon connector imports **Spotlight vulnerabilities** and **EDR
 
 A Falcon **API client** (Client ID and secret), created in the Falcon console under **Support \> API Clients and Keys**. Grant it the scopes for the data you want to import: **Hosts: Read** (required, for host discovery), **Vulnerabilities (Spotlight): Read** (for Spotlight findings), and **Alerts: Read** (for EDR detections). The two finding types are independent — if the client lacks a scope, that finding type is skipped rather than failing the sync, so a client without **Alerts: Read** still imports Spotlight vulnerabilities.
 
+Create the API client in the CID that holds the hosts you want to import. If you use Falcon Flight Control, create it in the child CID the hosts belong to rather than in the parent CID. When you save the connector, DefectDojo reports how many hosts the client can see, and a client whose CID has no hosts is saved with a No Data Visible warning.
+
 #### Connector Mappings
 
 1. Enter your Falcon cloud's API base URL in the **Location** field, matching your console region — for example `https://api.crowdstrike.com` (US\-1), `https://api.us-2.crowdstrike.com` (US\-2), `https://api.eu-1.crowdstrike.com` (EU\-1), or `https://api.laggar.gcw.crowdstrike.com` (US\-GOV\-1).

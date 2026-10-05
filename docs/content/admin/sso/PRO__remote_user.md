@@ -9,7 +9,7 @@ aliases:
 
 DefectDojo Pro can authenticate users from headers set by a **trusted reverse proxy** in front of DefectDojo — the pattern usually called *remote user* or *header* authentication. The proxy authenticates the user (against your IdP, Kerberos, mTLS, an access proxy, and so on) and passes the resulting identity to DefectDojo in a request header. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
 
-Unlike the other providers in this section, remote-user auth is **configured with environment variables, not in the Enterprise Settings UI**, and it puts no button on the login page — the proxy decides who is authenticated.
+Unlike the other providers in this section, remote-user auth is **configured with environment variables, not under Connect > Authorization**, and it puts no button on the login page — the proxy decides who is authenticated.
 
 > **Security warning — only enable this behind a proxy you control that overwrites the header on every request.** DefectDojo trusts the configured header outright. If a client can reach DefectDojo directly, or the proxy forwards a client-supplied copy of the header, anyone can impersonate any user by sending that header. Always terminate the proxy in front of DefectDojo, strip the header from inbound client requests, and restrict `DD_AUTH_REMOTEUSER_TRUSTED_PROXY` to the proxy's address.
 

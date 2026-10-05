@@ -10,6 +10,12 @@ on:
           type: boolean
           default: false
 
+env:
+  # Pull and tag images straight from Docker Hub, never through registry.defectdojo.com:
+  # the images CI built itself are tagged defectdojo/... (= docker.io/defectdojo/...), and CI
+  # pulls must not count as installs.
+  DD_IMAGE_REGISTRY: docker.io
+
 jobs:
   unit_tests:
     name: Rest Framework Unit Tests

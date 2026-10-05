@@ -2,7 +2,7 @@
 title: Execuções
 description: Como uma regra é executada, o que uma execução registra e como o encadeamento
   é limitado
-weight: 4
+weight: 5
 audience: pro
 aliases:
 - /pt-br/automation/rules_engine_v2/runs/

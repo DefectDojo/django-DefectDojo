@@ -36,7 +36,7 @@ aliases:
 - “ExampleAsset 1.0”与“ExampleAsset 2.0”使用的软件组件完全不同，且贵公司仍在积极维护这两个版本。
 - 负责“ExampleAsset version A”的团队与负责“ExampleAsset version B”的资产团队不同，因此需要分配不同的安全权限。
 
-虽然您也可以选择将这些差异表示为单个资产内的不同测试活动，但基于角色的访问控制（RBAC）只能在资产或组织级别设置，如果按这种方式组织，可能会限制用户访问相应测试活动（以及这些测试活动中的测试和发现项）的权限。有关 DefectDojo 中 RBAC 和权限的更多信息，请点击[此处](/admin/user_management/about_perms_and_roles/)。
+虽然您也可以选择将这些差异表示为单个资产内的不同测试活动，但访问权限只能在资产或组织级别授予，如果按这种方式组织，可能会限制用户访问相应测试活动（以及这些测试活动中的测试和发现项）的权限。有关更多信息，请参阅[开源版权限](/admin/user_management/os__authorized_users/)。
 
 ## 资产数据
 
@@ -69,11 +69,11 @@ aliases:
 
 ### 权限
 
-资产可以应用基于角色的访问控制（RBAC）规则，从而限制团队成员查看和操作这些资产的能力。
+对资产的访问权限通过其[已授权用户](/admin/user_management/os__authorized_users/)列表授予，该列表限制了谁可以查看和操作该资产。
 
 权限会向下级联，这意味着对某个资产的访问权限会自动授予对该资产内所有对象（例如测试活动、测试和发现项）的访问权限。
 
-有关用户角色的更多信息，请参阅我们的[角色介绍文章](/admin/user_management/about_perms_and_roles/)。
+有关更多信息，请参阅[开源版权限](/admin/user_management/os__authorized_users/)。
 
 ## 资产视图
 

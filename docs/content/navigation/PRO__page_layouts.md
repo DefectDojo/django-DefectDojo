@@ -115,3 +115,5 @@ Which widgets a page offers depends on the page, and **Add Widget** shows what i
 - **Charts** plot the record's data, such as severity breakdowns and counts over time.
 
 Some widgets appear only when the feature behind them is available to you. For example, the **Automation History** widget on the Asset and Finding pages shows what the rules engine did to that record and why, so it is offered only when Triage Engine is turned on and you hold Rule View.
+
+The record cards at the top of the Asset page (**Organization Memberships**, **Asset Identity**, **Exposure** and **Regulatory**) and the **Member Assets** table at the top of the Organization page are widgets as well. The shipped layouts place them first, and layouts saved before they were widgets have them added at the top, above their own widgets, so nothing that was on the page goes missing. Like any widget you can move, resize or remove them. Each one is shown only while the feature behind it is turned on.

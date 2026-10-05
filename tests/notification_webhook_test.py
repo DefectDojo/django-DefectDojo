@@ -57,7 +57,12 @@ class NotificationWebhookTest(BaseTestCase):
         driver.get(self.base_url + "system_settings")
         webhook_checkbox = driver.find_element(By.ID, "id_enable_webhooks_notifications")
         if not webhook_checkbox.is_selected():
-            webhook_checkbox.click()
+            # The checkbox sits low on a long form. A plain click can land on the footer
+            # without raising, and the form then saves with webhooks still disabled (see
+            # click_centered()). Check the box took before submitting so a lost click
+            # fails here, not in the next test as a 404 on the webhook list.
+            self.click_centered(driver, webhook_checkbox)
+        self.assertTrue(webhook_checkbox.is_selected(), "enable_webhooks_notifications did not toggle on")
         self.click_submit(driver)
 
         self.wait_for_alert()
@@ -68,19 +73,15 @@ class NotificationWebhookTest(BaseTestCase):
     def test_list_webhooks_page_loads(self):
         driver = self.driver
         # This page is gated on enable_webhooks_notifications, which the previous
-        # test just turned on. That setting is served from the per-request L1
-        # settings cache (dojo/caching.py), which has no cross-worker tier: a
-        # worker thread self-heals only at its next request boundary, so the
-        # enabling POST and this GET landing on different uwsgi workers can
-        # briefly leave the new value invisible here, and
-        # NotificationWebhooksView.check_webhooks_enabled() then raises Http404
-        # for that window. Retry the load until the real list renders so the
-        # propagation window is absorbed instead of failing the test, and accept
-        # console errors for this one page-load check: the transient 404s logged
-        # during the window are expected, and the heading assertion below is the
-        # real guard. Assert on "Notification Webhook List" -- text only the
-        # actual list page emits -- not a bare "Webhook", which the base
-        # template's sidebar "Notification Webhooks" link matches even on a 404.
+        # test turned on and now confirms before saving. The settings L1 cache is
+        # reset at the start of every request (dojo/middleware.py), so a GET reads
+        # the saved value; a 404 that persists here means the setting was never
+        # saved, not a stale cache. The short retry is a cheap guard only, and
+        # console errors are accepted for this page-load check because the
+        # heading assertion below is the real guard. Assert on "Notification
+        # Webhook List" -- text only the actual list page emits -- not a bare
+        # "Webhook", which the base template's sidebar "Notification Webhooks"
+        # link matches even on a 404.
         self.accept_javascript_errors = True
         for _ in range(10):
             driver.get(self.base_url + "notifications/webhooks")
@@ -152,7 +153,8 @@ class NotificationWebhookTest(BaseTestCase):
         driver.get(self.base_url + "system_settings")
         webhook_checkbox = driver.find_element(By.ID, "id_enable_webhooks_notifications")
         if webhook_checkbox.is_selected():
-            webhook_checkbox.click()
+            self.click_centered(driver, webhook_checkbox)
+        self.assertFalse(webhook_checkbox.is_selected(), "enable_webhooks_notifications did not toggle off")
         self.click_submit(driver)
 
         self.wait_for_alert()

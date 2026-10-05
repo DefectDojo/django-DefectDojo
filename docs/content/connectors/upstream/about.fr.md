@@ -58,6 +58,7 @@ Nous prenons actuellement en charge les Connecteurs en amont pour les outils sui
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
+* **Google Cloud**
 * **Google Cloud Security Command Center**
 * **Group-IB ASM**
 * **HackerOne**
@@ -103,7 +104,7 @@ Nous prenons actuellement en charge les Connecteurs en amont pour les outils sui
 
 Pour des instructions de configuration étape par étape pour chaque outil, consultez la référence [Configuration des connecteurs par outil](../../toolreference/upstream/).
 
-La plupart des connecteurs importent des **constatations**. Certains sont des **Connecteurs d'actifs** qui importent plutôt votre **inventaire d'actifs** — en construisant et en maintenant votre hiérarchie Produit (Actif) et Type de produit (Organisation) au lieu d'importer des constatations : **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets**, et **ServiceNow CMDB**. (**runZero** est principalement un Connecteur d'actifs, mais peut aussi, en option, importer des vulnérabilités sous forme de constatations.)
+La plupart des connecteurs importent des **constatations**. Certains sont des **Connecteurs d'actifs** qui importent plutôt votre **inventaire d'actifs** — en construisant et en maintenant votre hiérarchie Produit (Actif) et Type de produit (Organisation) au lieu d'importer des constatations : **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Google Cloud**, **Jira Service Management Assets**, et **ServiceNow CMDB**. (**runZero** est principalement un Connecteur d'actifs, mais peut aussi, en option, importer des vulnérabilités sous forme de constatations.)
 
 Ces connexions fournissent une intégration à la vitesse de l'API avec DefectDojo, et peuvent être utilisées pour ingérer et organiser automatiquement les données de vulnérabilités provenant de l'outil.
 

@@ -245,6 +245,17 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 "post_permission": "edit",
             },
         },
+        # Location metadata is scoped to one product. Edit rights on a shared Location come
+        # from any product that references it, so the scoped product is checked on its own.
+        "location_product": {
+            "model": Product,
+            "permissions": {
+                "get_permission": "view",
+                "put_permission": "edit",
+                "delete_permission": "edit",
+                "post_permission": "edit",
+            },
+        },
         # TODO: Delete this after the move to Locations
         # This permission table is built once at import to match the /api/v2 routes
         # mounted at boot, so it stays on settings.V3_FEATURE_LOCATIONS rather than the
