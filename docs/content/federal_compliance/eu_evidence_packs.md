@@ -22,9 +22,12 @@ EU Evidence Packs depends on Compliance, so it stays off while Compliance is off
 
 ![The EU Evidence Packs feature flag switched on](images/24-eu-evidence-packs-feature-flag.png)
 
-Anyone who can view an Asset can open its assessments and download its evidence packs. Starting an
-assessment, recomputing evidence, saving a review, and generating a pack require edit permission
-on the Asset. Users without it do not see those buttons.
+Anyone who can view an Asset can open its assessments, download its evidence packs, and download
+the files attached to its obligations. Starting an assessment, recomputing evidence, saving a
+review, attaching or removing a file, and generating a pack require edit permission on the Asset.
+Users without it do not see those buttons. An assessment that covers more than one Asset needs
+view permission on every Asset it covers to be opened, and edit permission on every one of them
+to be changed.
 
 ## Included catalogs
 
@@ -171,10 +174,28 @@ when. To return to the automated state, clear **Keep manual override** and selec
 
 ![An override kept after a recompute](images/34-override-kept-after-recompute.png)
 
-Attachments are listed in the Evidence view and exported in the evidence pack when an obligation
-has them, but you cannot add an attachment from the assessment in the current release. Some
-obligation notes ask you to attach a document. Record a reference to it in the **Assessor
-narrative** instead, such as the document title, version, date, and where it is stored.
+### Supporting files
+
+Some obligation notes ask you to attach a document, such as a vulnerability disclosure policy or
+a penetration test report. Attach it in the obligation's **Evidence** view, under
+**Supporting files**:
+
+1. Select **Attach a File** and choose the file. DefectDojo uploads it straight away and lists it
+   with its size and who added it.
+2. To download a file, select its title. Files are always downloaded, never opened in the
+   browser.
+3. To remove a file, select the trash icon beside it and confirm. Removing a file deletes it.
+
+The file types allowed are the ones set by `DD_FILE_UPLOAD_TYPES` plus common image types. The
+default size limit is 10 MB per file; an administrator can change it with
+`DD_OBLIGATION_ATTACHMENT_MAX_BYTES`, in bytes. Each file belongs to one obligation. Deleting the
+obligation's result, the assessment, or the Asset deletes its files too. DefectDojo records the
+file's SHA-256 digest when it is uploaded, and keeps an audit record of every file that is
+attached or removed, with who did it and when.
+
+For automation, the same operations are available on `/api/v2/obligation_results/<id>/attachments/`:
+`GET` lists the files, `POST` with a multipart `file` (and an optional `title`) attaches one,
+`GET <file id>/download/` downloads one, and `DELETE <file id>/` removes one.
 
 ## Generate an evidence pack
 
@@ -196,10 +217,16 @@ The pack contains two downloadable artifacts:
   assessment status, and the number of obligations in each state. Each obligation family has its
   own sheet with the obligation, title, citation, status, evidence mode, automated status,
   assessor narrative, and override reason. A **Raw Evidence** sheet adds the computed evidence and
-  attachments for every obligation, and a **Shared Evidence** sheet appears when evidence is shared
-  with other frameworks.
+  the supporting files for every obligation, each listed by title with its full SHA-256 digest,
+  and a **Shared Evidence** sheet appears when evidence is shared with other frameworks.
 * An OSCAL 1.0.4 assessment-results JSON document. DefectDojo validates it against the vendored
-  NIST schema before making it available, and the link is marked **(schema validated)**.
+  NIST schema before making it available, and the link is marked **(schema validated)**. Each
+  supporting file is a back-matter resource carrying its SHA-256 hash, referenced as relevant
+  evidence from its obligation's observation.
+
+The pack does not contain the files themselves. The digest lets a reviewer confirm that a file
+they were given is the one that was assessed. A file attached after a pack was generated, or
+removed from the obligation, does not change that pack.
 
 ![The workbook Cover sheet](images/36-workbook-cover-sheet.png)
 
@@ -213,7 +240,7 @@ read them from `/api/v2/evidence_pack_artifacts/`. PDF output is not available.
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | No **EU Evidence** tab and no **Regulatory assessments** section | **EU Evidence Packs** or **Compliance** is off | Enable both in Feature Flags |
-| No **Start Assessment**, **Recompute Evidence**, **Generate Evidence Pack**, or **Save Review** | You can view the Asset but not edit it | Ask for a role with edit permission on the Asset |
+| No **Start Assessment**, **Recompute Evidence**, **Generate Evidence Pack**, **Save Review**, or **Attach a File** | You can view the Asset but not edit it | Ask for a role with edit permission on the Asset |
 | Every obligation is unknown | Evidence has not been recomputed successfully yet | Select **Recompute Evidence** and wait for **Evidence Recomputed** |
 | **Evidence Not Recomputed** | The recompute request failed | Open the browser's Network tab, recompute again, and check the status of the `recompute/` request. 403: a feature flag is off or you lack edit permission. 500: a server error, so check the application logs for a traceback. 502 or 504: a proxy or app server timeout, so raise the timeout for large Assets |
 | Facts say **Automated evidence is unavailable** | That obligation's computation raised an error | Check the application logs for "Evidence satisfier for" and the obligation id |
@@ -226,7 +253,8 @@ read them from `/api/v2/evidence_pack_artifacts/`. PDF output is not available.
 | A pack stays pending or processing | Background task processing is not running | Check with your administrator |
 | **Evidence Pack Not Generated** | DefectDojo refused the request, for example because the assessment has no obligations | Read the message in the notification |
 | A pack shows old states | A pack is a frozen snapshot | Recompute, then generate a new pack. Check the snapshot's generated time |
-| There is no way to attach a file | Attachments cannot be added from the assessment | Record the evidence reference in the **Assessor narrative** |
+| **File Not Attached** saying the type cannot be attached | The file's extension is not in the allowed list | Convert the file to an allowed type, or ask an administrator to add the extension to `DD_FILE_UPLOAD_TYPES` |
+| **File Not Attached** saying the file is larger than the limit | The file exceeds the attachment size limit (10 MB by default) | Reduce the file, or ask an administrator to raise `DD_OBLIGATION_ATTACHMENT_MAX_BYTES` |
 
 ## Related pages
 
