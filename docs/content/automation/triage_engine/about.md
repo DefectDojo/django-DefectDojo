@@ -121,7 +121,8 @@ Runs and deliveries are both kept for 180 days by default, then pruned. The prod
 ## Where to go next
 
 * [Building Rules](../building_rules/) covers the editor, triggers, scope, conditions and templates.
-* [Node Reference](../node_reference/) documents all 41 nodes.
+* [Webhook Receivers](../webhook_receivers/) covers inbound webhooks and two-way sync with Downstream Connectors.
+* [Node Reference](../node_reference/) documents all 47 nodes.
 * [Runs](../runs/) covers execution, traces, cascading and limits.
 * [Deliveries](../deliveries/) covers channels, statuses, retries and replay.
 * [Converting from Rules Engine](../converting_from_rules_engine/) covers moving existing rules across.

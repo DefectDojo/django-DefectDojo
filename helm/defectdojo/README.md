@@ -15,15 +15,25 @@ The tests cover the deployment on the lastest [kubernetes version](https://kuber
 
 ## Helm chart
 
-Starting with version 1.14.0, a helm chart will be pushed onto the `helm-charts` branch during the release process. Don't look for a chart museum, we're leveraging the "raw" capabilities of GitHub at this time.
+Starting with version 1.14.0, a helm chart is published to the `helm-charts` branch during the release process.
 
 To use it, you can add our repo.
 
 ```
-$ helm repo add defectdojo 'https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts'
+$ helm repo add defectdojo 'https://charts.defectdojo.com'
 
 $ helm repo update
 ```
+
+`charts.defectdojo.com` is run by DefectDojo, Inc. It serves the chart index and sends chart downloads on to GitHub,
+where the charts are published. Each request is logged: time, chart and version, Helm client and IP address. The
+address is used to identify the organization or network, then deleted within three days. The rest of the record is
+kept for up to 13 months. We use these logs to see which organizations download DefectDojo, and we may reach out to
+them about our products or to ask for feedback.
+Prefer to use GitHub directly? Add the repo from `https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts`
+instead (repos already added that way keep working).
+To opt out of contact or have your data removed, email compliance@defectdojo.com.
+Details: [privacy policy, section 1.4](https://defectdojo.com/privacy-policy)
 
 You should now be able to see the chart.
 
@@ -511,7 +521,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.9.55-dev](https://img.shields.io/badge/Version-1.9.55--dev-informational?style=flat-square) ![AppVersion: 3.4.0-dev](https://img.shields.io/badge/AppVersion-3.4.0--dev-informational?style=flat-square)
+![Version: 1.9.55](https://img.shields.io/badge/Version-1.9.55-informational?style=flat-square) ![AppVersion: 3.4.0](https://img.shields.io/badge/AppVersion-3.4.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -525,7 +535,7 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/cloudpirates | valkey | 0.25.8 |
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.25.11 |
 | oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | 16.7.27 |
 
 ## Values
