@@ -175,7 +175,7 @@ To stop inbound webhook traffic without redeploying, turn off the **Inbound Webh
 | `DD_WEBHOOK_GATEWAY_DELIVER_BASE_URL` | `https://nginx:7443` | Where the gateway delivers. It must be reachable from the gateway and must not be public. |
 | `DD_WEBHOOK_GATEWAY_MAX_ATTEMPTS` | `12` | Delivery attempts before the gateway gives up on an event and keeps it as a dead letter. The wait starts at 2 seconds and triples each time, up to an hour, so twelve attempts cover about four and a half hours. |
 | `DD_WEBHOOK_GATEWAY_SCHEMA` | `whook` | The schema inside DefectDojo's database that holds the gateway's tables. DefectDojo's initializer and the gateway both read it, so set it once for the whole deployment. Empty skips creating it, for a deployment that creates it itself. |
-| `DD_WEBHOOK_GATEWAY_DB_ROLE` | `defectdojo_webhook_gateway` | The gateway's own database login role. Empty (not unset) has the gateway use DefectDojo's database credentials instead. |
+| `DD_WEBHOOK_GATEWAY_DB_ROLE` | `auto` | The gateway's own database login role. `auto` names it after DefectDojo's database (`<database>_webhook_gateway`), so installations that share one PostgreSQL server never share a role. Set a name to choose it yourself. Empty (not unset) has the gateway use DefectDojo's database credentials instead. |
 | `DD_WEBHOOK_GATEWAY_ADMIN_TOKEN` | derived | The token DefectDojo uses to configure the gateway. |
 | `DD_WEBHOOK_GATEWAY_SECRET_KEY` | derived | The key the gateway encrypts stored receiver tokens with. |
 | `DD_WEBHOOK_GATEWAY_DELIVERY_SECRET` | derived | The key the gateway signs its deliveries to DefectDojo with. |
@@ -204,13 +204,14 @@ DefectDojo's initializer creates the gateway's login role (`DD_WEBHOOK_GATEWAY_D
 
 - Creating the role needs `CREATEROLE` on DefectDojo's database user. Without it, the gateway uses DefectDojo's credentials, confined to its schema by `search_path` only, and the initializer logs the statements a database administrator can run to give it a role of its own.
 - Creating the schema needs `CREATE` on DefectDojo's database. Without it, the initializer logs the exact `CREATE SCHEMA` (or `GRANT`) statement to run, the gateway refuses to start and prints the same statement, and the receivers list shows the gateway as **Not Started**.
+- PostgreSQL roles belong to the whole server, not to one database, so the initializer marks the role it creates with a comment naming DefectDojo's database. It never changes the password of, or grants anything to, an existing role marked for a different database (or not marked at all), which may belong to another installation on the same server. It uses such a role as it is only when the role already accepts the configured password; otherwise the gateway uses DefectDojo's credentials and the initializer logs why.
 
 The statements, with your own database, user and password:
 
 ```sql
-CREATE ROLE defectdojo_webhook_gateway LOGIN PASSWORD '<password>';
-GRANT CONNECT ON DATABASE <database> TO defectdojo_webhook_gateway;
-CREATE SCHEMA IF NOT EXISTS whook AUTHORIZATION defectdojo_webhook_gateway;
+CREATE ROLE <database>_webhook_gateway LOGIN PASSWORD '<password>';
+GRANT CONNECT ON DATABASE <database> TO <database>_webhook_gateway;
+CREATE SCHEMA IF NOT EXISTS whook AUTHORIZATION <database>_webhook_gateway;
 ```
 
 Then set `DD_WEBHOOK_GATEWAY_DB_PASSWORD` to that password. Without a dedicated role, `CREATE SCHEMA IF NOT EXISTS whook AUTHORIZATION <DefectDojo's database user>;` is enough.
