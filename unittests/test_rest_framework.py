@@ -2907,9 +2907,9 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0. The DeprecationNoticeMixin
-        # must run in finalize_response, which only happens if it precedes the base
-        # viewset in the MRO (see dojo/api_v2/views.py:DeprecationNoticeMixin).
+        # The DeprecationNoticeMixin must run in finalize_response, which only
+        # happens if it precedes the base viewset in the MRO (see
+        # dojo/api_v2/views.py:DeprecationNoticeMixin).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
