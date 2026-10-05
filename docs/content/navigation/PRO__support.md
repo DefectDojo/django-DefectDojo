@@ -58,9 +58,11 @@ If enrolment is refused for any other reason, the log line names the credential 
 
 ## Airgapped instances
 
-An instance with no route off its network cannot use the support pages at all. Turn on the **Airgapped instance** feature flag under **Settings → Feature Flags**. Both pages then open a dialog that says support tracking is not supported for airgapped instances, with the DefectDojo support address to write to instead. Its **Go back** button returns you to the page you came from. The flag takes effect on the next page load; no restart is needed.
+An instance with no route off its network cannot use the support pages at all. Turn on the **Airgapped instance** feature flag under **Settings → Feature Flags**, or set `DD_AIRGAPPED=True` on the deployment. Both pages then open a dialog that says support tracking is not supported for airgapped instances, with the DefectDojo support address to write to instead. Its **Go back** button returns you to the page you came from. The flag takes effect on the next page load; no restart is needed.
 
 With the setting on, the instance makes no outbound support call and no documentation call. The dialog opens as soon as the page loads. It does not wait for a call to time out first.
+
+The same setting stops the instance's other outbound calls too (the version check, external tools, announcements, threat intelligence downloads and diagnostics). See [Running an Airgapped Instance](/get_started/pro/onprem/airgapped/).
 
 ## Turning the support pages off
 
@@ -76,4 +78,4 @@ Use **Airgapped instance** rather than this flag when the instance should keep i
 
 ## Settings
 
-The support pages need no environment variables. Two feature flags under **Settings → Feature Flags** control them: **Support** (on by default) shows or removes the pages, and **Airgapped instance** (off by default) replaces them with the support address. The dialog address is `support@defectdojo.com`.
+The support pages need no environment variables. Two feature flags under **Settings → Feature Flags** control them: **Support** (on by default) shows or removes the pages, and **Airgapped instance** (off by default) replaces them with the support address. `DD_AIRGAPPED=True` turns **Airgapped instance** on from the deployment and locks it on. The dialog address is `support@defectdojo.com`.
