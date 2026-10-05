@@ -81,6 +81,7 @@ Both create Locations on their identity hash and upsert their references, so the
 
 - It does **not** delete the original Endpoint or Endpoint_Status rows. They remain in the database to back the read-only legacy API. They are not used by the new UI or by imports after the feature is enabled.
 - It does **not** modify your Findings. The backfills only *read* the `component_*` and `file_path`/`line` fields; they add Locations and references alongside, leaving the Finding rows untouched.
+- It does **not** convert cloud resources into Cloud Resource Locations. Endpoints often recorded things that are not web addresses at all, such as container references and AWS ARNs. Every one of those migrates as a URL Location, the same as any other Endpoint. DefectDojo cannot reliably tell a resource identifier stuffed into a host field from a genuine hostname. Guessing wrong can change a Finding's identity. To model those resources properly, import the account through a cloud connector. The connector reads the provider's own resource identifier. It creates a Cloud Resource Location from that identifier.
 
 ## Endpoint API After Migration
 
