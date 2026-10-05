@@ -262,6 +262,8 @@ Permissions are the same as editing each Asset on its own: you need edit permiss
 
 To reorganize more than 500 Assets, send several requests. Each one is applied as a single change, so a failed request never leaves a reorganization half done.
 
+**To see what a bulk update will change before it writes anything**, add `"dry_run": true` to the request: nothing is written, and the response lists every field change, every descendant that would move along, every parent link that would be removed and every refused Asset. For reorganizations larger than 500 Assets, or ones you want reviewed, applied and possibly undone as one change, use a [change plan](../change_plans/).
+
 ## Suggested edges from container evidence
 
 When [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/) are enabled, DefectDojo can notice a deployment relationship nobody has drawn: an image whose repository belongs to one asset is seen running in another, and no **deploys to** edge joins the two. Each such pair appears as a **suggested edge** on the hierarchy page, with the images as evidence.
