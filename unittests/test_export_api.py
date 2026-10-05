@@ -2,9 +2,11 @@ import base64
 import datetime
 import json
 import uuid
+from unittest.mock import patch
 
 from django.core.files.base import ContentFile
 from django.db.models import Count
+from django.db.models.fields.files import FieldFile
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -46,6 +48,13 @@ class InstanceIdTest(DojoTestCase):
         row.save()
 
         self.assertEqual(System_Settings.objects.get().instance_id, first)
+
+    def test_export_reads_the_stored_instance_id_or_fails(self):
+        stored = str(System_Settings.objects.get(no_cache=True).instance_id)
+        self.assertEqual([services.instance_id(), services.instance_id()], [stored, stored])
+        System_Settings.objects.all().delete()
+        with self.assertRaises(System_Settings.DoesNotExist):
+            services.instance_id()
 
 
 def token_client(username):
@@ -444,7 +453,7 @@ class ExportProductStreamTest(DojoTestCase):
         high = Finding.objects.order_by("-id").values_list("id", flat=True).first()
         cursor = services.Cursor(services.TESTS, test_id=test.id, high=high)
         options = services.ExportOptions(limit=test.n, include_duplicates=True)
-        with self.assertNumQueries(18):
+        with self.assertNumQueries(19):
             lines = [json.loads(line) for line in services.product_page(self.product, cursor, options)]
         self.assertEqual(len(self.ids(lines, "finding")), test.n)
 
@@ -488,11 +497,36 @@ class ExportFileDownloadTest(DojoTestCase):
         self.assertEqual(response["Content-Type"], "application/octet-stream")
         self.assertEqual(b"".join(response.streaming_content), b"hello")
 
-    def test_risk_acceptance_proof_download(self):
+    def acceptance(self):
         acceptance = Risk_Acceptance.objects.create(name="proof test", owner=Dojo_User.objects.get(username="admin"))
         acceptance.path.save("proof.pdf", ContentFile(b"%PDF-"), save=True)
-        response = token_client("admin").get(reverse("export-proof", kwargs={"acceptance_id": acceptance.id}))
+        return acceptance
+
+    def test_risk_acceptance_proof_download(self):
+        response = token_client("admin").get(reverse("export-proof", kwargs={"acceptance_id": self.acceptance().id}))
         self.assertEqual(b"".join(response.streaming_content), b"%PDF-")
+
+    def test_file_gone_from_storage_is_404(self):
+        upload = self.upload()
+        upload.file.storage.delete(upload.file.name)
+        response = token_client("admin").get(reverse("export-files", kwargs={"file_id": upload.id}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_proof_gone_from_storage_is_404(self):
+        acceptance = self.acceptance()
+        acceptance.path.storage.delete(acceptance.path.name)
+        response = token_client("admin").get(reverse("export-proof", kwargs={"acceptance_id": acceptance.id}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_storage_errors_other_than_a_missing_file_are_not_hidden(self):
+        upload = self.upload()
+        with (
+            patch.object(FieldFile, "open", side_effect=PermissionError("denied")),
+            self.assertLogs("dojo.api_v2.exception_handler", level="ERROR"),
+            self.assertLogs("django.request", level="ERROR"),
+        ):
+            response = token_client("admin").get(reverse("export-files", kwargs={"file_id": upload.id}))
+            self.assertEqual(response.status_code, 500)
 
     def test_missing_file_is_404_and_users_are_refused(self):
         self.assertEqual(token_client("admin").get(reverse("export-files", kwargs={"file_id": 999999})).status_code, 404)

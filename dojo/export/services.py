@@ -61,7 +61,7 @@ USER_REFERENCES = (
 
 
 def instance_id() -> str:
-    return str(System_Settings.objects.get().instance_id)
+    return str(System_Settings.objects.values_list("instance_id", flat=True).get())
 
 
 def referenced_user_ids() -> set[int]:

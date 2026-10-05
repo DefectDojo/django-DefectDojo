@@ -42,7 +42,7 @@ class FileDownloadRenderer(BaseRenderer):
     render_style = "binary"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        return json.dumps(data).encode()
+        return json.dumps(data, cls=DjangoJSONEncoder).encode()
 
 
 def file_response(field_file):
@@ -51,7 +51,7 @@ def file_response(field_file):
         raise NotFound(msg)
     try:
         handle = field_file.open("rb")
-    except Exception as error:
+    except FileNotFoundError as error:
         raise NotFound(msg) from error
     return FileResponse(
         handle, as_attachment=True, filename=Path(field_file.name).name, content_type="application/octet-stream",
