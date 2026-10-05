@@ -1310,6 +1310,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
     errors = False
 
     if request.method == "POST":
+        # The page itself only needs view access; changing the risk acceptance needs edit.
+        user_has_permission_or_403(request.user, risk_acceptance, "edit")
         # deleting before instantiating the form otherwise django messes up and we end up with an empty path value
         if len(request.FILES) > 0:
             logger.debug("new proof uploaded")
