@@ -1,6 +1,8 @@
+import base64
 import uuid
 
 from django.core.files.base import ContentFile
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -8,18 +10,25 @@ from rest_framework.test import APIClient
 from dojo import __version__
 from dojo.export import rows
 from dojo.location.feature import locations_enabled
+from dojo.location.models import LocationFindingReference
 from dojo.models import (
+    BurpRawRequestResponse,
     Dojo_User,
+    DojoMeta,
+    Endpoint_Status,
     Engagement,
     FileUpload,
     Finding,
+    Finding_CWE,
     Finding_Group,
+    FindingVulnerabilityReference,
     Notes,
     Product,
     Product_Type,
     Risk_Acceptance,
     System_Settings,
     Test,
+    Vulnerability,
 )
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
@@ -219,3 +228,82 @@ class ExportRowsTest(DojoTestCase):
         upload.file.storage.delete(upload.file.name)
         row = rows.file_row(upload.id, upload.title, upload.file, max_file_bytes=1024)
         self.assertEqual(row["omitted"], "missing")
+
+
+@versioned_fixtures
+class ExportFindingRowTest(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def finding(self):
+        return Finding.objects.order_by("id").first()
+
+    def test_finding_row_has_every_scalar_column(self):
+        finding = self.finding()
+        row = rows.finding_row(finding, max_file_bytes=1024)
+        expected = {
+            field.name
+            for field in Finding._meta.concrete_fields
+            if not field.is_relation and field.name not in rows.FINDING_SKIP
+        }
+        self.assertEqual(set(row["fields"]), expected)
+        self.assertEqual(row["hash_code"], finding.hash_code)
+        self.assertEqual(row["users"]["reporter"], finding.reporter.username)
+
+    def test_finding_row_keeps_null_columns(self):
+        finding = self.finding()
+        Finding.objects.filter(pk=finding.pk).update(cwe=None, line=None, file_path=None)
+        finding.refresh_from_db()
+        fields = rows.finding_row(finding, max_file_bytes=1024)["fields"]
+        self.assertIsNone(fields["cwe"])
+        self.assertIsNone(fields["line"])
+        self.assertIsNone(fields["file_path"])
+
+    def test_finding_row_carries_side_data(self):
+        finding = self.finding()
+        finding.tags = "alpha, beta"
+        finding.save()
+        DojoMeta.objects.create(finding=finding, name="team", value="payments")
+        BurpRawRequestResponse.objects.create(
+            finding=finding,
+            burpRequestBase64=base64.b64encode(b"GET / HTTP/1.1"),
+            burpResponseBase64=base64.b64encode(b"HTTP/1.1 200 OK"),
+        )
+        vulnerability = Vulnerability.objects.create(vulnerability_id="CVE-2024-0001")
+        FindingVulnerabilityReference.objects.create(finding=finding, vulnerability=vulnerability)
+        Finding_CWE.objects.create(finding=finding, cwe="CWE-79")
+        row = rows.finding_row(finding, max_file_bytes=1024)
+        self.assertEqual(row["tags"], ["alpha", "beta"])
+        self.assertEqual(row["meta"], [{"name": "team", "value": "payments"}])
+        pair = row["request_response"][0]
+        self.assertEqual(base64.b64decode(pair["request_b64"]), b"GET / HTTP/1.1")
+        self.assertEqual(base64.b64decode(pair["response_b64"]), b"HTTP/1.1 200 OK")
+        self.assertEqual(row["vulnerability_ids"], ["CVE-2024-0001"])
+        self.assertEqual(row["cwes"], ["CWE-79"])
+
+
+@override_settings(V3_FEATURE_LOCATIONS=False)
+class ExportFindingRowEndpointModeTest(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def test_endpoint_status_maps_to_a_location_status(self):
+        status = Endpoint_Status.objects.order_by("id").first()
+        Endpoint_Status.objects.filter(pk=status.pk).update(
+            mitigated=True, mitigated_by=Dojo_User.objects.get(username="admin"),
+        )
+        row = rows.finding_row(status.finding, max_file_bytes=1024)
+        entry = next(item for item in row["locations"] if item["value"] == str(status.endpoint))
+        self.assertEqual(entry["type"], "url")
+        self.assertEqual(entry["status"], "Mitigated")
+        self.assertEqual(entry["actor"], "admin")
+
+
+@override_settings(V3_FEATURE_LOCATIONS=True)
+class ExportFindingRowLocationsModeTest(DojoTestCase):
+    fixtures = ["dojo_testdata_locations.json"]
+
+    def test_location_reference_keeps_its_status(self):
+        reference = LocationFindingReference.objects.order_by("id").first()
+        LocationFindingReference.objects.filter(pk=reference.pk).update(status="FalsePositive")
+        row = rows.finding_row(reference.finding, max_file_bytes=1024)
+        entry = next(item for item in row["locations"] if item["value"] == str(reference.location))
+        self.assertEqual(entry["status"], "FalsePositive")

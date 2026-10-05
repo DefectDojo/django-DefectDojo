@@ -6,6 +6,9 @@ from uuid import UUID
 
 from django.db import models
 
+from dojo.location.feature import locations_enabled
+from dojo.location.status import FindingLocationStatus
+
 
 def plain(value):
     if isinstance(value, datetime | date):
@@ -108,4 +111,99 @@ def test_row(test, max_file_bytes: int) -> dict:
         "tags": tag_names(test),
         "notes": [note_row(note) for note in test.notes.all()],
         "files": [file_row(upload.id, upload.title, upload.file, max_file_bytes) for upload in test.files.all()],
+    }
+
+
+FINDING_SKIP = frozenset({"id", "created", "updated", "hash_code"})
+FINDING_USER_FIELDS = (
+    "reporter",
+    "mitigated_by",
+    "last_reviewed_by",
+    "review_requested_by",
+    "defect_review_requested_by",
+)
+ENDPOINT_STATUS_FLAGS = (
+    ("false_positive", FindingLocationStatus.FalsePositive),
+    ("out_of_scope", FindingLocationStatus.OutOfScope),
+    ("risk_accepted", FindingLocationStatus.RiskAccepted),
+    ("mitigated", FindingLocationStatus.Mitigated),
+)
+
+
+def finding_prefetch() -> list[str]:
+    paths = [
+        "tags",
+        "reviewers",
+        "found_by",
+        "notes__author",
+        "notes__editor",
+        "notes__note_type",
+        "files",
+        "vulnerability_references__vulnerability",
+        "finding_cwe_set",
+        "finding_meta",
+        "burprawrequestresponse_set",
+    ]
+    if locations_enabled():
+        return [*paths, "locations__location", "locations__auditor"]
+    return [*paths, "status_finding__endpoint", "status_finding__mitigated_by"]
+
+
+def _endpoint_status(status) -> str:
+    for flag, value in ENDPOINT_STATUS_FLAGS:
+        if getattr(status, flag):
+            return str(value)
+    return str(FindingLocationStatus.Active)
+
+
+def location_rows(finding) -> list[dict]:
+    if locations_enabled():
+        return [
+            {
+                "type": reference.location.location_type,
+                "value": str(reference.location),
+                "status": str(reference.status),
+                "date": plain(reference.created),
+                "status_date": plain(reference.audit_time),
+                "actor": username(reference.auditor),
+            }
+            for reference in finding.locations.all()
+        ]
+    return [
+        {
+            "type": "url",
+            "value": str(status.endpoint),
+            "status": _endpoint_status(status),
+            "date": plain(status.date),
+            "status_date": plain(status.mitigated_time),
+            "actor": username(status.mitigated_by),
+        }
+        for status in finding.status_finding.all()
+    ]
+
+
+def finding_row(finding, max_file_bytes: int) -> dict:
+    return {
+        "fields": scalar_fields(finding, skip=FINDING_SKIP),
+        "created": plain(finding.created),
+        "updated": plain(finding.updated),
+        "hash_code": finding.hash_code,
+        "duplicate_finding_id": finding.duplicate_finding_id,
+        "users": {name: username(getattr(finding, name)) for name in FINDING_USER_FIELDS},
+        "tags": tag_names(finding),
+        "vulnerability_ids": list(finding.vulnerability_ids),
+        "cwes": list(finding.cwes),
+        "reviewers": sorted(user.username for user in finding.reviewers.all()),
+        "found_by": sorted(test_type.name for test_type in finding.found_by.all()),
+        "locations": location_rows(finding),
+        "request_response": [
+            {
+                "request_b64": bytes(pair.burpRequestBase64).decode(),
+                "response_b64": bytes(pair.burpResponseBase64).decode(),
+            }
+            for pair in finding.burprawrequestresponse_set.all()
+        ],
+        "notes": [note_row(note) for note in finding.notes.all()],
+        "files": [file_row(upload.id, upload.title, upload.file, max_file_bytes) for upload in finding.files.all()],
+        "meta": [{"name": meta.name, "value": meta.value} for meta in finding.finding_meta.all()],
     }

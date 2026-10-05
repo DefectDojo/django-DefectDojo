@@ -41,7 +41,7 @@ NOT_EXPORTED = [
 ]
 
 USER_REFERENCES = (
-    (Finding, ("reporter", "mitigated_by", "last_reviewed_by", "review_requested_by", "defect_review_requested_by")),
+    (Finding, rows.FINDING_USER_FIELDS),
     (Notes, ("author", "editor")),
     (Engagement, ("lead",)),
     (Test, ("lead",)),
