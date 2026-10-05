@@ -51,3 +51,11 @@ Once you have created your IAM user and assigned it the necessary permissions us
 3. Enter a matching **Secret Key** in the **Secret Key** field.
 
 DefectDojo can pull Findings from more than one region using Security Hub's **cross\-region aggregation** feature. If [cross\-region aggregation](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html) is enabled, you should supply the API endpoint for your "**Aggregation Region**". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account ID and the region name.
+
+#### Compliance Tags
+
+Each Finding is tagged with the compliance requirements Security Hub relates its control to, for
+example `nist.800-53.r5:ac-2(1)` or `pci_dss_v4.0.1/2.2.4`. DefectDojo Pro reads these tags to map
+the Finding to NIST 800-53 and PCI DSS controls (see
+[Control Coverage](/federal_compliance/control_coverage/)). The same requirements are still listed
+under **Compliance details** in the Finding's description.

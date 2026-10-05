@@ -15,12 +15,24 @@ test, and where are the open weaknesses per control?
 Many scanners already emit control references, and DefectDojo extracts them into control mappings
 automatically. Among others:
 
-* **Prowler** writes NIST 800-53 control lists into finding references.
+* **Prowler** writes NIST 800-53 control lists into finding references, whether its report is
+  imported as a file or comes from a Sensei cloud posture scan. Prowler's own `ac_2_1` spelling of
+  AC-2(1) is read too.
 * **Tenable** plugins carry 800-53 cross-references.
 * **InSpec** and **MITRE SAF** profiles tag their checks with `nist` identifiers.
+* **Wazuh SCA** tags each failed check with the controls it covers, such as `nist_800_53:AC.2`.
+* The **AWS Security Hub** and **Wiz** connectors tag findings with the requirements their checks
+  map to, such as `nist.800-53.r5:ac-2(1)`.
 
 Extraction is grounded in the imported catalog, so an identifier the catalog does not recognize
 never produces a mapping.
+
+The same sources also carry PCI DSS requirements (Wazuh's `pci_dss_4.0:2.2.4`, Prowler's
+`PCI-4.0` list), which map to the bundled PCI DSS catalog and show in its coverage and
+[PCI DSS assessments](../pci_evidence_packs/). Only references that name PCI DSS version 4 are
+read: version 3.2.1 numbers the same requirements differently, so a `pci_dss_3.2.1` reference is
+skipped rather than mapped to the wrong requirement. PCI DSS mappings never appear on a FedRAMP
+POA&M item, which cites 800-53 controls only.
 
 Findings that carry no control references of their own are attributed to the default scan controls
 on the Compliance Profile — see [Compliance Profile](../compliance_profile).
