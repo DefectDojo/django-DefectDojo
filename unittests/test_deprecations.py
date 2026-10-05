@@ -1,10 +1,16 @@
 from datetime import date
 from unittest.mock import patch
 
-from django.test import SimpleTestCase
+from django.contrib import messages
+from django.contrib.messages import get_messages
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpResponse
+from django.test import RequestFactory, SimpleTestCase
 from django.utils import translation
 
 import dojo
+from dojo.decorators import deprecated_view
 from dojo.deprecations import (
     Deprecation,
     active_deprecations,
@@ -12,6 +18,9 @@ from dojo.deprecations import (
     overdue_deprecations,
     register_deprecation,
 )
+from dojo.product.ui import views as product_views
+from dojo.tool_config.ui import views as tool_config_views
+from dojo.tool_type.ui import views as tool_type_views
 
 UPGRADING_3_2 = "https://docs.defectdojo.com/releases/os_upgrading/3.2/"
 
@@ -95,3 +104,46 @@ class TestOpenSourceDeclarations(SimpleTestCase):
         with translation.override("de"):
             message = get_deprecation("tool_type").message()
         self.assertTrue(message.startswith("Tool Types are deprecated"), message)
+
+
+def ok_view(request):
+    return HttpResponse("ok")
+
+
+class TestDeprecatedView(SimpleTestCase):
+    def shown(self, method):
+        request = getattr(RequestFactory(), method)("/tool_type")
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        deprecated_view("tool_type")(ok_view)(request)
+        return [(message.level, message.message, message.extra_tags) for message in get_messages(request)]
+
+    def test_a_get_shows_the_declared_warning(self):
+        self.assertEqual(
+            [(messages.WARNING, get_deprecation("tool_type").message(), "alert-warning")],
+            self.shown("get"),
+        )
+
+    def test_a_post_shows_nothing_so_the_redirect_does_not_repeat_it(self):
+        self.assertEqual([], self.shown("post"))
+
+    def test_an_undeclared_key_fails_at_import(self):
+        with self.assertRaises(ImproperlyConfigured):
+            deprecated_view("no_such_feature")
+
+    def test_every_deprecated_classic_view_names_its_declaration(self):
+        expected = {
+            tool_type_views.new_tool_type: "tool_type",
+            tool_type_views.edit_tool_type: "tool_type",
+            tool_type_views.tool_type: "tool_type",
+            tool_config_views.new_tool_config: "tool_configuration",
+            tool_config_views.edit_tool_config: "tool_configuration",
+            tool_config_views.tool_config: "tool_configuration",
+            product_views.add_api_scan_configuration: "api_scan_configuration",
+            product_views.view_api_scan_configurations: "api_scan_configuration",
+            product_views.edit_api_scan_configuration: "api_scan_configuration",
+            product_views.delete_api_scan_configuration: "api_scan_configuration",
+        }
+        for view, key in expected.items():
+            with self.subTest(view=view.__name__):
+                self.assertEqual(key, getattr(view, "deprecation", None))
