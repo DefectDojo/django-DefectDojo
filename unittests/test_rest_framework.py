@@ -2750,7 +2750,6 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
@@ -2783,7 +2782,6 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
@@ -2966,7 +2964,6 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
