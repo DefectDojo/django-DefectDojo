@@ -44,6 +44,7 @@ from dojo.endpoint.api.urls import add_endpoint_urls, register_endpoint_meta_imp
 from dojo.endpoint.ui.urls import urlpatterns as endpoint_urls
 from dojo.engagement.api.urls import add_engagement_urls
 from dojo.engagement.ui.urls import urlpatterns as eng_urls
+from dojo.export.api.urls import add_export_urls
 from dojo.finding.api.urls import add_finding_urls
 from dojo.finding.ui.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
@@ -161,6 +162,7 @@ if settings.V3_FEATURE_LOCATIONS:
 else:
     v2_api = add_endpoint_urls(v2_api)
 v2_api.register(r"celery", CeleryViewSet, basename="celery")
+v2_api = add_export_urls(v2_api)
 # V3
 add_asset_urls(v2_api)
 add_cicd_infrastructure_urls(v2_api)
