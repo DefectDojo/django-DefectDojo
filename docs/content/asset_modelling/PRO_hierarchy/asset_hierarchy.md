@@ -15,7 +15,7 @@ The two pieces below are separate, and are controlled by different means.
 
 ### Asset Hierarchy
 
-**Asset Hierarchy** enables parent/child relationships between Assets. The hierarchy is viewed and managed from the **Product** tab in the navigation.
+**Asset Hierarchy** enables parent/child relationships between Assets. The hierarchy is viewed and managed from **Act > Explore > Assets > Hierarchy** in the sidebar.
 
 Asset Hierarchy is generally available and on for every instance, Cloud and On-Premise. There is nothing to enable, and it is no longer listed on the Feature Flags page.
 
@@ -106,7 +106,7 @@ The Parent Asset could contain Engagements representing CI/CD results, internal 
 
 ## Visualizing Assets - Hierarchy
 
-You can visualize the structure of Assets in DefectDojo, and change relationships using the Asset Hierarchy option in the menu.
+You can visualize the structure of Assets in DefectDojo, and change relationships using **Act > Explore > Assets > Hierarchy** in the sidebar.
 
 ![image](images/asset_hierarchy.png)
 

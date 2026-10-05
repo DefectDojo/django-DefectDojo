@@ -13,7 +13,7 @@ A rule is built on a canvas. You drag nodes out of a palette, wire them together
 
 ## Starting a rule
 
-From **Triage Engine > All Rules** there are two ways to begin.
+From **Act > Triage Engine > Rules** there are two ways to begin.
 
 **From Template** opens a gallery of rules that ship with DefectDojo, grouped into packs. Each card
 says what the rule is for, which nodes its graph contains, and what you have to configure before it

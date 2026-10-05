@@ -60,7 +60,7 @@ class LocationFindingReferenceViewSet(PrefetchDojoModelViewSet):
 
     def get_queryset(self) -> QuerySet[LocationFindingReference]:
         """Return the queryset of LocationFindingReferences."""
-        return get_authorized_location_finding_reference("view")
+        return get_authorized_location_finding_reference("view").select_related("location")
 
 
 class LocationProductReferenceViewSet(PrefetchDojoModelViewSet):
@@ -78,4 +78,4 @@ class LocationProductReferenceViewSet(PrefetchDojoModelViewSet):
 
     def get_queryset(self) -> QuerySet[LocationProductReference]:
         """Return the queryset of LocationProductReferences."""
-        return get_authorized_location_product_reference("view")
+        return get_authorized_location_product_reference("view").select_related("location")

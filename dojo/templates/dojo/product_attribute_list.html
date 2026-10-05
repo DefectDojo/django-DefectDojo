@@ -8,7 +8,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3>
-                        {{ label_plural }}
+                        <i class="fa-solid fa-list dd-card-icon" aria-hidden="true"></i>{{ label_plural }}
                         <div class="dropdown pull-right">
                             {% with add_perm="dojo.add_"|add:model_name %}
                             {% if add_perm|has_configuration_permission:request %}

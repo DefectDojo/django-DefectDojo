@@ -33,11 +33,12 @@ class SonatypeParser:
             components = sonatype_report["components"]
 
             for component in components:
-                if component["securityData"] is None or len(component["securityData"]["securityIssues"]) < 1:
+                security_issues = (component.get("securityData") or {}).get("securityIssues") or []
+                if not security_issues:
                     if locations_enabled() and (dep := get_dependency_from_component(component)):
                         test.unsaved_metadata.append(dep)
                 else:
-                    for security_issue in component["securityData"]["securityIssues"]:
+                    for security_issue in security_issues:
                         finding = get_finding(security_issue, component, test)
                         findings.append(finding)
 
@@ -47,11 +48,13 @@ class SonatypeParser:
 def get_dependency_from_component(component):
     if purl := component.get("packageUrl"):
         return LocationData.dependency(purl=purl)
-    if "componentIdentifier" in component:
-        comp_format = component["componentIdentifier"]["format"]
+    # "componentIdentifier" is null when Sonatype could not identify the component
+    component_identifier = component.get("componentIdentifier") or {}
+    comp_format = component_identifier.get("format")
+    coords = component_identifier.get("coordinates")
+    if comp_format and coords:
         purl_type = SONATYPE_FORMAT_TO_PURL.get(comp_format.lower())
         if purl_type:
-            coords = component["componentIdentifier"]["coordinates"]
             version = coords.get("version", "")
             namespace = ""
 
@@ -77,13 +80,13 @@ def get_finding(security_issue, component, test):
 
     severity = get_severity(security_issue)
     threat_category = security_issue.get("threatCategory", "CVSS vector not provided. ").title()
-    status = security_issue["status"]
-    reference = security_issue["url"]
+    status = security_issue.get("status")
+    reference = security_issue.get("url")
 
     identifier = ComponentIdentifier(component)
-    title = f"{security_issue['reference']} - {identifier.component_id}"
+    title = f"{security_issue.get('reference', '')} - {identifier.component_id}"
 
-    finding_description = f"Hash {component['hash']}\n\n"
+    finding_description = f"Hash {component['hash']}\n\n" if component.get("hash") else ""
     finding_description += identifier.component_id
     finding_description = finding_description.strip()
 
@@ -108,7 +111,7 @@ def get_finding(security_issue, component, test):
             finding.cvssv3 = cvss_data.get("cvssv3")
             finding.cvssv3_score = cvss_data.get("cvssv3_score")
 
-    if "pathnames" in component:
+    if component.get("pathnames") is not None:
         finding.file_path = " ".join(component["pathnames"])[:1000]
 
     if security_issue.get("source") == "cve":

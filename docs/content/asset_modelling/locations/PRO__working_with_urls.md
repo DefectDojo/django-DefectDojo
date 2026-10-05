@@ -22,9 +22,9 @@ When you create or upload a URL, DefectDojo parses it into the structured fields
 
 When the Locations feature is enabled, the navigation exposes:
 
-- **Locations / All** — A list of every Location across both URL and Dependency subtypes. Filter by type, status, Asset, Finding, or tag.
-- **Locations / URLs** — A scoped list of URL Locations only. This is the closest analogue to the old Endpoints page.
-- **New URL** — A form to create a single URL with structured fields, tags, and optional Asset/Finding associations.
+- **Act > Explore > Attack Surface > Locations** — A list of every Location across both URL and Dependency subtypes. Filter by type, status, Asset, Finding, or tag.
+- **Act > Explore > Attack Surface > URLs** — A scoped list of URL Locations only. This is the closest analogue to the old Endpoints page.
+- **New URL** on the URLs list — A form to create a single URL with structured fields, tags, and optional Asset/Finding associations.
 - **Locations on an Asset** — From any Asset, the **Locations** tab shows the URLs and Dependencies attached to that Asset, with status counts and quick actions.
 - **The Location page** — Click a Location's value in any list, or choose **View Location** from its row menu, to open the page for that Location. It is the counterpart of the old Endpoint page: the Location's type, value, tags and overall status; when it was first and last seen; each Asset that references it, in a table you can search, sort and filter by Asset, status, relationship, and first or last seen date; its **Custom Fields**; and every Finding found there.
 - **Custom Fields on a Location** — The name and value pairs the Endpoint page called metadata appear in the same **Custom Fields** card the Endpoint page uses. A Location is shared by every Asset that recorded the same value, so a field can belong to one Asset. The card shows the Asset under each value, adds the Asset to a tab's name when two Assets use the same field name, and only shows fields for Assets you can view. Add a field with the **+** on the card or **Add Custom Field** in the Location's menu, and choose the Asset it belongs to, or none. Edit or delete a field from its gear menu. Changing a field needs edit permission on the Location, and on its Asset when the field belongs to one.
