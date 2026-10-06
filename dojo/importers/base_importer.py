@@ -13,6 +13,7 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.db_utils import is_transient_db_conflict
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.importers.options import ImporterOptions
@@ -39,7 +40,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Test_Type,
 )
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import async_create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
@@ -1373,45 +1374,43 @@ class BaseImporter(ImporterOptions):
 
         max_findings = settings.NOTIFICATION_SCAN_ADDED_MAX_FINDINGS
 
-        def _hydrate(ids):
-            # duplicate is re-read fresh here, so unlike the old in-memory instances
-            # there is no separate write-back needed to keep template logic correct.
+        def _capped(ids):
+            # The capped, severity-ordered slice the notification lists, as ids: the
+            # worker loads the findings, so the request never builds the message.
             if not ids:
                 return []
             return list(
                 Finding.objects.filter(id__in=ids)
-                .only("id", "title", "severity", "numerical_severity", "duplicate")
-                .order_by("numerical_severity")[:max_findings],
+                .order_by("numerical_severity")
+                .values_list("id", flat=True)[:max_findings],
             )
-
-        new_findings = _hydrate(new_findings)
-        findings_mitigated = _hydrate(findings_mitigated)
-        findings_reactivated = _hydrate(findings_reactivated)
-        findings_untouched = _hydrate(findings_untouched)
-        findings_new_duplicate = _hydrate(findings_new_duplicate_ids)
-        findings_reactivated_duplicate = _hydrate(findings_reactivated_duplicate_ids)
-        findings_untouched_duplicate = _hydrate(findings_untouched_duplicate_ids)
 
         title = (
             f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
         )
 
-        create_notification(
+        # Dispatched like every other notification, so the fan-out to recipients (one
+        # alert, mail, Slack message... per user) runs in the worker, not in the import
+        # request. Under block_execution it still runs inline, as before.
+        dojo_dispatch_task(
+            async_create_notification,
             event="scan_added_empty" if updated_count == 0 else "scan_added",
             title=title,
-            findings_new=new_findings,
-            findings_mitigated=findings_mitigated,
-            findings_reactivated=findings_reactivated,
             finding_count=updated_count,
-            test=test,
-            engagement=test.engagement,
-            product=test.engagement.product,
-            findings_untouched=findings_untouched,
+            test_id=test.id,
+            engagement_id=test.engagement_id,
+            product_id=test.engagement.product_id,
             # Findings deduplicated during post-processing, split by their import action.
             # Populated only once deduplication has completed (sync / async_wait).
-            findings_new_duplicate=findings_new_duplicate,
-            findings_reactivated_duplicate=findings_reactivated_duplicate,
-            findings_untouched_duplicate=findings_untouched_duplicate,
+            finding_ids={
+                "findings_new": _capped(new_findings),
+                "findings_mitigated": _capped(findings_mitigated),
+                "findings_reactivated": _capped(findings_reactivated),
+                "findings_untouched": _capped(findings_untouched),
+                "findings_new_duplicate": _capped(findings_new_duplicate_ids),
+                "findings_reactivated_duplicate": _capped(findings_reactivated_duplicate_ids),
+                "findings_untouched_duplicate": _capped(findings_untouched_duplicate_ids),
+            },
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )

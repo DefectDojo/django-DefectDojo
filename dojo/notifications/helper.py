@@ -10,6 +10,7 @@ import yaml
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage
+from django.db import transaction
 from django.db.models import Count, Prefetch, Q, QuerySet
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
@@ -37,6 +38,9 @@ from dojo.user.queries import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Rows per INSERT when a notification's in-app alerts are written together.
+ALERT_BULK_CREATE_BATCH_SIZE = 1000
 
 
 labels = get_labels()
@@ -203,6 +207,12 @@ class NotificationManagerHelpers:
         # persistence failure is logged and swallowed per superuser -- for instance when the
         # dojo_alerts primary-key sequence reaches its maximum, every save() fails, and
         # re-raising would take the import down with it.
+        #
+        # One INSERT for every superuser rather than one per superuser: a channel that
+        # fails for each recipient calls this once per recipient, so a per-superuser
+        # write (plus the foreign-key probe clean_fields ran for each) made a channel
+        # outage cost recipients x superusers queries.
+        alerts = []
         for user in Dojo_User.objects.filter(is_superuser=True):
             try:
                 alert = Alerts(
@@ -213,11 +223,18 @@ class NotificationManagerHelpers:
                     icon="exclamation-triangle",
                     source=notification_type[:100] if notification_type else kwargs.get("source", "unknown")[:100],
                 )
-                # relative urls will fail validation
-                alert.clean_fields(exclude=["url"])
-                alert.save()
+                # relative urls will fail validation; the user was just read from the database
+                alert.clean_fields(exclude=["url", "user_id"])
+                alerts.append(alert)
             except Exception:
-                logger.exception("Unable to persist fallback Alert for user %s", user)
+                logger.exception("Unable to build fallback Alert for user %s", user)
+        if not alerts:
+            return
+        try:
+            with transaction.atomic():
+                Alerts.objects.bulk_create(alerts, batch_size=ALERT_BULK_CREATE_BATCH_SIZE)
+        except Exception:
+            logger.exception("Unable to persist fallback Alerts for %s superusers", len(alerts))
 
 
 class SlackNotificationManger(NotificationManagerHelpers):
@@ -591,6 +608,12 @@ class AlertNotificationManger(NotificationManagerHelpers):
 
     """Manger for alert notifications and their helpers."""
 
+    #: When a NotificationManager fans one notification out to many recipients it
+    #: hands every alert manager the same list, collects the built alerts in it and
+    #: writes them with one bulk INSERT at the end. None (a manager built on its own)
+    #: writes each alert as it is built.
+    alert_buffer: list | None = None
+
     def send_alert_notification(
         self,
         event: str,
@@ -625,7 +648,10 @@ class AlertNotificationManger(NotificationManagerHelpers):
             # LIMIT 1`` round-trip every ForeignKey.validate would issue
             # is pure overhead at fan-out time.
             alert.clean_fields(exclude=["url", "user_id"])
-            alert.save()
+            if self.alert_buffer is not None:
+                self.alert_buffer.append(alert)
+            else:
+                alert.save()
         except Exception as exception:
             logger.exception("Unable to create Alert Notification")
             self._log_alert(
@@ -645,6 +671,33 @@ class NotificationManager(NotificationManagerHelpers):
         NotificationManagerHelpers.__init__(self, *args, **kwargs)
 
     def create_notification(self, event: str | None = None, **kwargs: dict) -> None:
+        # Every recipient's in-app alert is collected while the notification fans out and
+        # written in one bulk INSERT at the end, instead of one INSERT per recipient. A
+        # nested call on the same manager joins the outer batch.
+        if getattr(self, "_alert_buffer", None) is not None:
+            self._create_notification(event, **kwargs)
+            return
+        self._alert_buffer = []
+        try:
+            self._create_notification(event, **kwargs)
+        finally:
+            pending, self._alert_buffer = self._alert_buffer, None
+            self._flush_alerts(pending, kwargs)
+
+    def _flush_alerts(self, alerts: list, kwargs: dict) -> None:
+        if not alerts:
+            return
+        try:
+            # A savepoint, so a failed INSERT leaves the caller's transaction usable for
+            # the fallback alert below and for whatever the caller does next.
+            with transaction.atomic():
+                Alerts.objects.bulk_create(alerts, batch_size=ALERT_BULK_CREATE_BATCH_SIZE)
+        except Exception as exception:
+            logger.exception("Unable to create %s Alert Notifications", len(alerts))
+            details = {key: kwargs[key] for key in ("title", "url") if kwargs.get(key) is not None}
+            self._log_alert(exception, "Alert Notification", description=str(exception), **details)
+
+    def _create_notification(self, event: str | None = None, **kwargs: dict) -> None:
         # Process the notifications for a given list of recipients
         if kwargs.get("recipients") is not None:
             recipients = kwargs.get("recipients", [])
@@ -677,11 +730,7 @@ class NotificationManager(NotificationManagerHelpers):
     def _process_recipients(self, event: str | None = None, **kwargs: dict) -> None:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug("creating notifications for recipients: %s", kwargs["recipients"])
-        for recipient_notifications in Notifications.objects.filter(
-            user__username__in=kwargs["recipients"],
-            user__is_active=True,
-            product=None,
-        ):
+        for recipient_notifications in self._get_recipient_notifications(kwargs["recipients"]):
             if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
                 # merge the system level notifications with the personal level
                 # this allows for system to trump the personal
@@ -703,6 +752,14 @@ class NotificationManager(NotificationManagerHelpers):
                     notifications=recipient_notifications,
                     **kwargs,
                 )
+
+    def _get_recipient_notifications(self, recipients: list) -> QuerySet[Notifications]:
+        """The global Notifications rows of the named, active recipients, with their user loaded."""
+        return Notifications.objects.filter(
+            user__username__in=recipients,
+            user__is_active=True,
+            product=None,
+        ).select_related("user")
 
     def _process_objects(self, **kwargs: dict) -> None:
         """Extract the product and product type from the kwargs."""
@@ -816,7 +873,9 @@ class NotificationManager(NotificationManagerHelpers):
         if alert_type == "webhooks":
             return WebhookNotificationManger(**kwargs)
         if alert_type == "alert":
-            return AlertNotificationManger(**kwargs)
+            manager = AlertNotificationManger(**kwargs)
+            manager.alert_buffer = getattr(self, "_alert_buffer", None)
+            return manager
 
         msg = f"Unsupported alert type: {alert_type}"
         raise TypeError(msg)
@@ -858,8 +917,11 @@ class NotificationManager(NotificationManagerHelpers):
         # task body. Dispatching inner Celery tasks would require JSON-serializable kwargs, but
         # callers pass model instances (finding/test/engagement/product/...) and refetching every
         # one of them per channel would multiply DB queries; running synchronously avoids both.
+        # They go straight to this manager's channel helpers with the recipient already loaded:
+        # going through the send_*_notification task bodies re-read the user and rebuilt a
+        # whole manager (system notifications row, system settings) per recipient per channel.
         if not alert_only:
-            user_id = getattr(notifications.user, "id", None)
+            user = notifications.user
             if self.system_settings.enable_slack_notifications and "slack" in getattr(
                 notifications,
                 event,
@@ -867,7 +929,7 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending Slack Notification")
                 try:
-                    send_slack_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("slack").send_slack_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send Slack notification for event %s", event)
 
@@ -878,7 +940,7 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending MSTeams Notification")
                 try:
-                    send_msteams_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("msteams").send_msteams_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send MSTeams notification for event %s", event)
 
@@ -889,7 +951,7 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending Mail Notification")
                 try:
-                    send_mail_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("mail").send_mail_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send Mail notification for event %s", event)
 
@@ -900,7 +962,7 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending Webhooks Notification")
                 try:
-                    send_webhooks_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("webhooks").send_webhooks_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send Webhooks notification for event %s", event)
 
