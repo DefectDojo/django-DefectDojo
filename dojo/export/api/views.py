@@ -99,6 +99,11 @@ class ExportViewSet(viewsets.ViewSet):
                              description="Most object lines on one page (1 to 5000)."),
             OpenApiParameter("include_duplicates", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False),
             MAX_FILE_BYTES_PARAMETER,
+            OpenApiParameter("max_pair_bytes", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False,
+                             description="Budget per finding for its request and response pairs, in bytes of "
+                                         "base64 text: 0 to 67108864, default 16777216. The export keeps pairs in "
+                                         "id order until one does not fit. It leaves out that pair and every later "
+                                         "pair, and request_response_omitted counts them."),
         ],
         responses={(200, "application/x-ndjson"): OpenApiTypes.STR},
         summary="Export one product",
@@ -121,6 +126,9 @@ class ExportViewSet(viewsets.ViewSet):
             limit=int_param(request, "limit", services.DEFAULT_PAGE_LIMIT, 1, services.MAX_PAGE_LIMIT),
             max_file_bytes=int_param(
                 request, "max_file_bytes", services.DEFAULT_MAX_FILE_BYTES, 0, services.MAX_FILE_BYTES_LIMIT,
+            ),
+            max_pair_bytes=int_param(
+                request, "max_pair_bytes", services.DEFAULT_MAX_PAIR_BYTES, 0, services.MAX_PAIR_BYTES_LIMIT,
             ),
             include_duplicates=request.query_params.get("include_duplicates", "false").lower() == "true",
         )

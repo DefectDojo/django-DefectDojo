@@ -34,6 +34,8 @@ from dojo.models import (
 EXPORT_API_VERSION = 1
 DEFAULT_MAX_FILE_BYTES = 10 * 1024 * 1024
 MAX_FILE_BYTES_LIMIT = 64 * 1024 * 1024
+DEFAULT_MAX_PAIR_BYTES = 16 * 1024 * 1024
+MAX_PAIR_BYTES_LIMIT = 64 * 1024 * 1024
 
 NOT_EXPORTED = [
     "api_tokens",
@@ -279,6 +281,7 @@ class Cursor:
 class ExportOptions:
     limit: int = DEFAULT_PAGE_LIMIT
     max_file_bytes: int = DEFAULT_MAX_FILE_BYTES
+    max_pair_bytes: int = DEFAULT_MAX_PAIR_BYTES
     include_duplicates: bool = False
 
 
@@ -357,7 +360,8 @@ def _walk_tests(product, cursor: Cursor, options: ExportOptions, budget: _Budget
             }), counted=False)
         last_id = after
         findings = _findings(test, after, cursor.high, options)[: budget.room()]
-        for index, finding in enumerate(findings.iterator(chunk_size=200)):
+        paired = rows.with_pairs(findings.iterator(chunk_size=200), options.max_pair_bytes)
+        for index, (finding, pairs, pairs_omitted) in enumerate(paired):
             if index and budget.full():
                 budget.stop(Cursor(TESTS, test_id=test.id, after=last_id, high=cursor.high))
                 return
@@ -365,7 +369,7 @@ def _walk_tests(product, cursor: Cursor, options: ExportOptions, budget: _Budget
                 "kind": "finding",
                 "id": finding.id,
                 "test_id": test.id,
-                "data": rows.finding_row(finding, options.max_file_bytes),
+                "data": rows.finding_row(finding, options.max_file_bytes, pairs, pairs_omitted),
             }))
             last_id = finding.id
 

@@ -5,10 +5,13 @@ from pathlib import Path
 from uuid import UUID
 
 from django.db import models
+from django.db.models import Prefetch
+from django.db.models.functions import Length
 from django.utils import timezone
 
 from dojo.location.feature import locations_enabled
 from dojo.location.status import FindingLocationStatus
+from dojo.models import BurpRawRequestResponse
 from dojo.url.models import URL
 
 
@@ -132,7 +135,10 @@ ENDPOINT_STATUS_FLAGS = (
 )
 
 
-def finding_prefetch() -> list[str]:
+PAIR_BATCH_FINDINGS = 200
+
+
+def finding_prefetch() -> list[str | Prefetch]:
     paths = [
         "tags",
         "reviewers",
@@ -144,11 +150,56 @@ def finding_prefetch() -> list[str]:
         "vulnerability_references__vulnerability",
         "finding_cwe_set",
         "finding_meta",
-        "burprawrequestresponse_set",
+        Prefetch(
+            "burprawrequestresponse_set",
+            queryset=BurpRawRequestResponse.objects.only("id", "finding")
+            .annotate(size=Length("burpRequestBase64") + Length("burpResponseBase64"))
+            .order_by("id"),
+            to_attr="pair_sizes",
+        ),
     ]
     if locations_enabled():
         return [*paths, "locations__location", "locations__auditor"]
     return [*paths, "status_finding__endpoint", "status_finding__mitigated_by"]
+
+
+def _kept_pair_ids(pair_sizes, max_pair_bytes: int) -> tuple[list[int], int]:
+    kept, total = [], 0
+    for pair in pair_sizes:
+        if not max_pair_bytes or total + pair.size > max_pair_bytes:
+            break
+        kept.append(pair.id)
+        total += pair.size
+    return kept, total
+
+
+def _load_pairs(batch):
+    ids = [pair_id for _, kept, _ in batch for pair_id in kept]
+    content = {
+        pair_id: (request, response)
+        for pair_id, request, response in BurpRawRequestResponse.objects.filter(id__in=ids).values_list(
+            "id", "burpRequestBase64", "burpResponseBase64",
+        )
+    }
+    for finding, kept, omitted in batch:
+        pairs = [content.pop(pair_id) for pair_id in kept if pair_id in content]
+        yield finding, [
+            {"request_b64": bytes(request).decode(), "response_b64": bytes(response).decode()}
+            for request, response in pairs
+        ], omitted
+
+
+def with_pairs(findings, max_pair_bytes: int):
+    """Yield each finding with its kept request and response pairs and the count of pairs left out."""
+    batch, batch_bytes = [], 0
+    for finding in findings:
+        kept, size = _kept_pair_ids(finding.pair_sizes, max_pair_bytes)
+        if batch and (batch_bytes + size > max_pair_bytes or len(batch) == PAIR_BATCH_FINDINGS):
+            yield from _load_pairs(batch)
+            batch, batch_bytes = [], 0
+        batch.append((finding, kept, len(finding.pair_sizes) - len(kept)))
+        batch_bytes += size
+    yield from _load_pairs(batch)
 
 
 def _endpoint_status(status) -> str:
@@ -185,7 +236,7 @@ def location_rows(finding) -> list[dict]:
     ]
 
 
-def finding_row(finding, max_file_bytes: int) -> dict:
+def finding_row(finding, max_file_bytes: int, pairs: list[dict], pairs_omitted: int) -> dict:
     return {
         "fields": scalar_fields(finding, skip=FINDING_SKIP),
         "created": plain(finding.created),
@@ -199,13 +250,8 @@ def finding_row(finding, max_file_bytes: int) -> dict:
         "reviewers": sorted(user.username for user in finding.reviewers.all()),
         "found_by": sorted(test_type.name for test_type in finding.found_by.all()),
         "locations": location_rows(finding),
-        "request_response": [
-            {
-                "request_b64": bytes(pair.burpRequestBase64).decode(),
-                "response_b64": bytes(pair.burpResponseBase64).decode(),
-            }
-            for pair in finding.burprawrequestresponse_set.all()
-        ],
+        "request_response": pairs,
+        "request_response_omitted": pairs_omitted,
         "notes": [note_row(note) for note in finding.notes.all()],
         "files": [file_row(upload.id, upload.title, upload.file, max_file_bytes) for upload in finding.files.all()],
         "meta": [{"name": meta.name, "value": meta.value} for meta in finding.finding_meta.all()],

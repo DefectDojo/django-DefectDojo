@@ -1,13 +1,16 @@
 import base64
 import datetime
 import json
+import re
 import uuid
 from unittest.mock import patch
 
 from django.core.files.base import ContentFile
+from django.db import connection
 from django.db.models import Count
 from django.db.models.fields.files import FieldFile
 from django.test import override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -61,6 +64,26 @@ def token_client(username):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.get(user__username=username).key)
     return client
+
+
+def finding_row(finding):
+    finding = Finding.objects.prefetch_related(*rows.finding_prefetch()).get(pk=finding.pk)
+    [(finding, pairs, omitted)] = rows.with_pairs([finding], services.DEFAULT_MAX_PAIR_BYTES)
+    return rows.finding_row(finding, 1024, pairs, omitted)
+
+
+def add_pair(finding, text):
+    return BurpRawRequestResponse.objects.create(finding=finding, burpRequestBase64=text, burpResponseBase64=text)
+
+
+def pair_reads(queries):
+    reads = []
+    for query in queries.captured_queries:
+        sql = re.sub(r"LENGTH\([^)]*\)", "", query["sql"])
+        if "burpRequestBase64" in sql or "burpResponseBase64" in sql:
+            match = re.search(r'"dojo_burprawrequestresponse"\."id" IN \(([^)]*)\)', sql)
+            reads.append({int(pair_id) for pair_id in re.findall(r"\d+", match.group(1))} if match else sql)
+    return reads
 
 
 @versioned_fixtures
@@ -252,7 +275,7 @@ class ExportFindingRowTest(DojoTestCase):
 
     def test_finding_row_has_every_scalar_column(self):
         finding = self.finding()
-        row = rows.finding_row(finding, max_file_bytes=1024)
+        row = finding_row(finding)
         expected = {
             field.name
             for field in Finding._meta.concrete_fields
@@ -266,7 +289,7 @@ class ExportFindingRowTest(DojoTestCase):
         finding = self.finding()
         Finding.objects.filter(pk=finding.pk).update(cwe=None, line=None, file_path=None)
         finding.refresh_from_db()
-        fields = rows.finding_row(finding, max_file_bytes=1024)["fields"]
+        fields = finding_row(finding)["fields"]
         self.assertIsNone(fields["cwe"])
         self.assertIsNone(fields["line"])
         self.assertIsNone(fields["file_path"])
@@ -284,12 +307,13 @@ class ExportFindingRowTest(DojoTestCase):
         vulnerability = Vulnerability.objects.create(vulnerability_id="CVE-2024-0001")
         FindingVulnerabilityReference.objects.create(finding=finding, vulnerability=vulnerability)
         Finding_CWE.objects.create(finding=finding, cwe="CWE-79")
-        row = rows.finding_row(finding, max_file_bytes=1024)
+        row = finding_row(finding)
         self.assertEqual(row["tags"], ["alpha", "beta"])
         self.assertEqual(row["meta"], [{"name": "team", "value": "payments"}])
         pair = row["request_response"][0]
         self.assertEqual(base64.b64decode(pair["request_b64"]), b"GET / HTTP/1.1")
         self.assertEqual(base64.b64decode(pair["response_b64"]), b"HTTP/1.1 200 OK")
+        self.assertEqual(row["request_response_omitted"], 0)
         self.assertEqual(row["vulnerability_ids"], ["CVE-2024-0001"])
         self.assertEqual(row["cwes"], ["CWE-79"])
 
@@ -303,7 +327,7 @@ class ExportFindingRowEndpointModeTest(DojoTestCase):
         Endpoint_Status.objects.filter(pk=status.pk).update(
             mitigated=True, mitigated_by=Dojo_User.objects.get(username="admin"),
         )
-        row = rows.finding_row(status.finding, max_file_bytes=1024)
+        row = finding_row(status.finding)
         entry = next(item for item in row["locations"] if item["value"] == str(status.endpoint))
         self.assertEqual(entry["type"], "url")
         self.assertEqual(entry["status"], "Mitigated")
@@ -313,7 +337,7 @@ class ExportFindingRowEndpointModeTest(DojoTestCase):
     def test_risk_accepted_outranks_false_positive(self):
         status = Endpoint_Status.objects.order_by("id").first()
         Endpoint_Status.objects.filter(pk=status.pk).update(risk_accepted=True, false_positive=True)
-        row = rows.finding_row(status.finding, max_file_bytes=1024)
+        row = finding_row(status.finding)
         entry = next(item for item in row["locations"] if item["value"] == str(status.endpoint))
         self.assertEqual(entry["status"], "RiskAccepted")
 
@@ -328,7 +352,7 @@ class ExportFindingRowLocationsModeTest(DojoTestCase):
         LocationFindingReference.objects.filter(pk=reference.pk).update(
             status="FalsePositive", created=created_at,
         )
-        row = rows.finding_row(reference.finding, max_file_bytes=1024)
+        row = finding_row(reference.finding)
         entry = next(item for item in row["locations"] if item["value"] == str(reference.location))
         self.assertEqual(entry["status"], "FalsePositive")
         expected_date = timezone.localdate(created_at, timezone.get_default_timezone())
@@ -338,7 +362,7 @@ class ExportFindingRowLocationsModeTest(DojoTestCase):
         reference = LocationFindingReference.objects.order_by("id").first()
         package = Location.objects.create(location_type="package", location_value="pkg:npm/demo@1.0.0")
         LocationFindingReference.objects.create(location=package, finding=reference.finding)
-        row = rows.finding_row(reference.finding, max_file_bytes=1024)
+        row = finding_row(reference.finding)
         self.assertNotIn("pkg:npm/demo@1.0.0", [item["value"] for item in row["locations"]])
 
 
@@ -450,12 +474,69 @@ class ExportProductStreamTest(DojoTestCase):
 
     def test_a_page_of_findings_runs_a_fixed_number_of_queries(self):
         test = Test.objects.filter(engagement__product=self.product).annotate(n=Count("finding")).order_by("-n").first()
+        for finding in Finding.objects.filter(test=test):
+            add_pair(finding, base64.b64encode(b"a" * 30))
         high = Finding.objects.order_by("-id").values_list("id", flat=True).first()
         cursor = services.Cursor(services.TESTS, test_id=test.id, high=high)
         options = services.ExportOptions(limit=test.n, include_duplicates=True)
-        with self.assertNumQueries(19):
+        with self.assertNumQueries(20):
             lines = [json.loads(line) for line in services.product_page(self.product, cursor, options)]
         self.assertEqual(len(self.ids(lines, "finding")), test.n)
+        self.assertTrue(all(line["data"]["request_response"] for line in lines if line["kind"] == "finding"))
+
+    def findings_without_pairs(self):
+        BurpRawRequestResponse.objects.all().delete()
+        return list(Finding.objects.filter(test__engagement__product=self.product, duplicate=False).order_by("id")[:2])
+
+    def finding_data(self, **params):
+        lines, _ = self.walk(**params)
+        return {line["id"]: line["data"] for line in lines if line["kind"] == "finding"}
+
+    def test_pairs_past_the_budget_are_left_out_as_a_prefix(self):
+        finding = self.findings_without_pairs()[0]
+        texts = [base64.b64encode(char * size) for char, size in ((b"a", 30), (b"b", 300), (b"c", 30))]
+        for text in texts:
+            add_pair(finding, text)
+        sent = [{"request_b64": text.decode(), "response_b64": text.decode()} for text in texts]
+        for budget, kept in ((79, 0), (80, 1), (879, 1), (880, 2), (960, 3)):
+            with self.subTest(max_pair_bytes=budget):
+                data = self.finding_data(max_pair_bytes=budget)[finding.id]
+                self.assertEqual(data["request_response"], sent[:kept])
+                self.assertEqual(data["request_response_omitted"], 3 - kept)
+
+    def test_a_zero_pair_budget_leaves_out_every_pair(self):
+        first, second = self.findings_without_pairs()
+        add_pair(first, base64.b64encode(b"a" * 30))
+        add_pair(second, b"")
+        data = self.finding_data(max_pair_bytes=0)
+        self.assertEqual([data[first.id]["request_response"], data[second.id]["request_response"]], [[], []])
+        omitted = {finding_id: row["request_response_omitted"] for finding_id, row in data.items()}
+        self.assertEqual(omitted, {finding_id: 1 if finding_id in {first.id, second.id} else 0 for finding_id in data})
+
+    def test_the_default_pair_budget_is_16_mib(self):
+        self.assertEqual(services.ExportOptions().max_pair_bytes, 16 * 1024 * 1024)
+        with patch.object(services, "product_page", wraps=services.product_page) as product_page:
+            self.page()
+        self.assertEqual(product_page.call_args.args[2].max_pair_bytes, 16 * 1024 * 1024)
+
+    def test_a_bad_pair_budget_is_rejected(self):
+        url = reverse("export-products", kwargs={"product_id": self.product.id})
+        for value in ("lots", "-1", "67108865"):
+            with self.subTest(max_pair_bytes=value), self.assertLogs("django.request", level="WARNING"):
+                self.assertEqual(self.client.get(url, {"max_pair_bytes": value}).status_code, 400)
+        for value in ("0", "67108864"):
+            self.assertEqual(self.page(max_pair_bytes=value)[-1]["kind"], "end")
+
+    def test_left_out_pairs_are_never_read(self):
+        first, second = self.findings_without_pairs()
+        kept = add_pair(first, base64.b64encode(b"a" * 30))
+        add_pair(first, base64.b64encode(b"b" * 300))
+        add_pair(first, base64.b64encode(b"c" * 30))
+        later = add_pair(second, base64.b64encode(b"d" * 30))
+        with CaptureQueriesContext(connection) as queries:
+            data = self.finding_data(max_pair_bytes=100)
+        self.assertEqual([data[first.id]["request_response_omitted"], data[second.id]["request_response_omitted"]], [2, 0])
+        self.assertCountEqual(pair_reads(queries), [{kept.id}, {later.id}])
 
     def test_groups_and_risk_acceptances_come_last(self):
         test = Test.objects.filter(engagement__product=self.product).order_by("id").first()
