@@ -11,12 +11,12 @@ The Jira integration pushes DefectDojo Findings and Finding Groups to a Jira pro
 Set **Jira Deployment** first, then pick an **Authentication Method**:
 
 **Jira Cloud**
-- **API Token (email + token)** — HTTP Basic auth using an Atlassian account email and an [API token](https://id.atlassian.com/manage-profile/security/api-tokens). Calls go directly to your site URL.
-- **OAuth 2.0 (recommended)** — a one-time browser consent; DefectDojo obtains and refreshes the tokens for you.
+- **API Token (Email + Token)** — HTTP Basic auth using an Atlassian account email and an [API token](https://id.atlassian.com/manage-profile/security/api-tokens). Calls go directly to your site URL.
+- **OAuth 2.0 (Recommended)** — a one-time browser consent; DefectDojo obtains and refreshes the tokens for you.
 - **Service Account Token** — a scoped API token created for an Atlassian [service account](https://support.atlassian.com/user-management/docs/manage-api-tokens-for-service-accounts/).
 
 **Jira Data Center / Server**
-- **Personal Access Token (recommended)**
+- **Personal Access Token (Recommended)**
 - **Username + Password**
 
 > **How Cloud auth reaches Jira:** OAuth 2.0 and Service Account both authenticate as a Bearer token against Atlassian's gateway — `https://api.atlassian.com/ex/jira/{cloudId}` — which is a *different host* than your `https://your-site.atlassian.net` site URL. DefectDojo uses the gateway for every API call but always builds the ticket link shown on a Finding from your **site URL**, so the link a user clicks is a normal, browsable `.../browse/{ISSUE-KEY}` link. (API Token and Data Center auth call the site URL directly, so there is no split.)
@@ -36,7 +36,7 @@ Create a dedicated app in the [Atlassian developer console](https://developer.at
 3. Under **Permissions**, add the **Jira platform REST API** and grant the scopes listed below. Note: `offline_access` is *not* listed here — it is a standard OAuth scope DefectDojo requests in the authorization URL, not something you add on this screen.
 4. Under **Authorization**, next to **OAuth 2.0 (3LO)** click **Configure** and set the **Callback URL** to `https://<your-defectdojo-host>/integrators/jira/oauth/callback` — it must match your DefectDojo site URL exactly. Enabling this is what turns on the authorization-code grant and refresh tokens; skipping it causes the `grant_type is not enabled` / `Client is not allowed to use offline_access` errors.
 5. Copy the **Client ID** and **Client Secret** into the DefectDojo form and **Submit** to save the connection.
-6. Click **Connect with Jira** and approve the consent screen. Atlassian redirects back to DefectDojo, which stores the tokens and resolves your `cloudId` automatically. A "Connected" indicator appears when it succeeds.
+6. Click **Connect With Jira** and approve the consent screen. Atlassian redirects back to DefectDojo, which stores the tokens and resolves your `cloudId` automatically. A "Connected" indicator appears when it succeeds.
 
 > The callback host is your DefectDojo `SITE_URL`. Atlassian must be able to redirect the browser there, and the value must match what DefectDojo sends exactly — so use the real hostname your users reach DefectDojo at, not a value only reachable from inside the network.
 
@@ -145,7 +145,7 @@ Posting comments also needs a go-integrators version that provides it. Until one
 
 ### Two-way sync
 
-The connector pushes to Jira. To have Jira talk back, open the connection and choose **Turn On Two-way Sync**. This creates a Triage Engine [webhook receiver](/automation/triage_engine/webhook_receivers/) bound to the connection, and the rule that acts on its deliveries:
+The connector pushes to Jira. To have Jira talk back, open the connection and choose **Turn On Two-Way Sync**. This creates a Triage Engine [webhook receiver](/automation/triage_engine/webhook_receivers/) bound to the connection, and the rule that acts on its deliveries:
 
 - An issue moving into a closed status category closes the linked Finding, as a false positive or an accepted risk when its resolution is in that list.
 - An issue moving back to an open category reopens the Finding.

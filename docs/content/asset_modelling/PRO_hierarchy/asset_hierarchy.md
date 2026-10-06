@@ -189,7 +189,7 @@ You can reorganize at any time: an Asset can move to another Organization from t
 
 When an Asset moves to another Organization, every Asset below it (its children, their children, and so on) moves to the same Organization, and the parent/child links inside that subtree are kept. Moving `webapp-backend` from the earlier example to another Organization takes `database` and `api` with it.
 
-To move an Asset on its own, uncheck **Move children along** in the bulk menu, or send `"move_children": false` to the [bulk update API](#bulk-updates-through-the-api). The children then stay in the original Organization: their link to the moved Asset is removed and each one becomes a top-level Asset there.
+To move an Asset on its own, uncheck **Move Children Along** in the bulk menu, or send `"move_children": false` to the [bulk update API](#bulk-updates-through-the-api). The children then stay in the original Organization: their link to the moved Asset is removed and each one becomes a top-level Asset there.
 
 Moving a child is an edit of that child, so taking a subtree along needs edit permission on every Asset in it. If you cannot edit one of them, the move is refused and nothing changes; move the Asset without its children instead, or ask someone who can edit the whole subtree.
 

@@ -22,7 +22,7 @@ Both editions are supported, and the connector normalizes them so the same rules
 
 1. Enter your Certificate Manager URL in the **Location** field — `https://api.venafi.cloud` (or your region's host) for cloud, or your Trust Protection Platform host for self\-hosted.
 2. Set **Edition** to `cloud` or `tpp`. It defaults to `cloud`.
-3. For the **cloud** edition, enter the SaaS API key in **API Key (cloud)** and leave the `tpp` fields blank.
+3. For the **cloud** edition, enter the SaaS API key in **API Key (Cloud)** and leave the `tpp` fields blank.
 4. For the **tpp** edition, enter the **Client ID (tpp)**, **Username (tpp)** and **Password (tpp)**, and leave the cloud API key blank.
 5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 

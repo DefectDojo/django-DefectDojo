@@ -14,11 +14,11 @@ Once an Upstream Connector is set up, it will run two Operations on a recurring 
 
 Both of these Operations are managed on the Operations page of a Connector. The table will also track past runs of these Operations so that you can ensure your Connector is up to date.
 
-To access a Connector's Operations Page, open **Manage Records & Operations** for the Connector you wish to work with, and then switch to the **</\> Operations From (tool)** tab.
+To access a Connector's Operations Page, open **Manage Records and Operations** for the Connector you wish to work with, and then switch to the **</\> Operations From (tool)** tab.
 
 ![image](images/operations_discover.png)
 
-The **Manage Records & Operations** page can also be used to handle Records; which are the individual Asset mappings of your connected tool.  See [Managing Records](../manage_records) for more information.
+The **Manage Records and Operations** page can also be used to handle Records; which are the individual Asset mappings of your connected tool.  See [Managing Records](../manage_records) for more information.
 
 ## The Operations Page
 
@@ -41,11 +41,11 @@ The **Upstream Connectors** page flags this on the Connector's tile:
 
 ![image](images/connector_visibility_warning.png)
 
-* **Connected, but nothing is visible** means the last operation succeeded and the tool reported
+* **Connected, but Nothing Visible** means the last operation succeeded and the tool reported
   no data at all for these credentials. This almost always means the account is missing a grant
   in the tool rather than in DefectDojo. Hover the warning to see what to grant for that
   specific tool.
-* **All *n* records are missing from the tool** means the Connector previously saw data and no
+* **All *n* Records Missing From the Tool** means the Connector previously saw data and no
   longer does. Records that disappear from the tool are kept and marked **Missing** rather than
   deleted, so your mappings survive. Common causes are a revoked permission, a rotated
   credential with a narrower scope, or projects deleted in the tool.

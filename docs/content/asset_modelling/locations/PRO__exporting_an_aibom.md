@@ -11,7 +11,7 @@ An **AI bill of materials (AIBOM)** lists the AI components in an Asset: coding 
 
 ## From the Asset Page
 
-On an Asset, open **Locations > Export SBOM & VEX** and choose **AI bill of materials (AIBOM)** as the export type. The format is CycloneDX 1.6. The file downloads as `<asset>-aibom.cdx.json`.
+On an Asset, open **Locations > Export SBOM & VEX** and choose **AI Bill of Materials (AIBOM)** as the export type. The format is CycloneDX 1.6. The file downloads as `<asset>-aibom.cdx.json`.
 
 ## From the API
 

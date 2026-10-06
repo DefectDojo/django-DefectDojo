@@ -222,7 +222,7 @@ To manually perform Finding Group actions:
 4. Click the corresponding action you wish to complete.
     - **Add to New Finding Group**: Creates a new Finding Group that includes the selected Findings.
     - **Add to Existing Finding Group**: Adds the selected Findings to a preexisting Finding Group.
-    - **Remove from Finding Group**: Removes the selected Findings from any Finding Groups they were previously a part of.
+    - **Remove From Finding Group**: Removes the selected Findings from any Finding Groups they were previously a part of.
 5. Click **Submit**.
 
 Note that grouping will be disabled unless every selected finding is editable, ungrouped, and in the same Test. 
@@ -232,7 +232,7 @@ Further, note that the only possible action when selecting Findings from the All
 #### Automatic Finding Groups 
 When importing a scan, the **Group By** feature within the collapsible **Optional Fields** menu can automatically create Finding Groups based on a chosen grouping method. This is useful when a scanner produces many related Findings that should be managed together.
 
-The adjoining **Create Finding Groups for all Findings** checkbox performs two functions: 
+The adjoining **Create Finding Groups for All Findings** checkbox performs two functions: 
 - **Checked**: Creates a Finding Group for every imported Finding, even if that Finding is the only member of the group.
 - **Unchecked**: Creates Finding Groups only when there are actually multiple Findings to group together.
 

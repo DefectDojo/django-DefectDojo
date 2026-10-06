@@ -17,15 +17,15 @@ The hub's toggle selects which **view** you are looking at:
 - **Auto-fix Candidates** — findings staged for approval.
 - **Scan Activity** — the ledger of every scan and fix run.
 
-If an administrator enabled in-repo CI scanning, the Repositories view also offers a **Scanning** choice between **DefectDojo-hosted** and **In-repo CI**. This selects where scans run for the repositories listed; it is not a separate view, so auto-fix candidates and scan activity always cover every onboarded repository regardless of where its scans run. With CI mode off (the default) there is nothing to choose and the control is not shown.
+If an administrator enabled in-repo CI scanning, the Repositories view also offers a **Scanning** choice between **DefectDojo-hosted** and **In-Repo CI**. This selects where scans run for the repositories listed; it is not a separate view, so auto-fix candidates and scan activity always cover every onboarded repository regardless of where its scans run. With CI mode off (the default) there is nothing to choose and the control is not shown.
 
 ## Scan a repository
 
-Scans import findings into an engagement named after the branch. You can trigger a scan on demand from the Sensei hub: open a repository's row actions and choose **Scan now**.
+Scans import findings into an engagement named after the branch. You can trigger a scan on demand from the Sensei hub: open a repository's row actions and choose **Scan Now**.
 
 ![Scan with Sensei dialog](images/scan_dialog.png)
 
-Pick the branch to scan (it defaults to the repository's default branch) and choose **Start scan**. In DefectDojo-hosted mode, scans also run automatically when a pull request is opened.
+Pick the branch to scan (it defaults to the repository's default branch) and choose **Start Scan**. In DefectDojo-hosted mode, scans also run automatically when a pull request is opened.
 
 ## The Sensei column on findings
 
@@ -47,8 +47,8 @@ Sensei fixes a finding by opening a pull request, so it needs to know which repo
 
 There are two ways to supply it:
 
-- **From a connection:** pick a repository from a source-control connection you already have.
-- **Enter manually:** paste the repository's URL and an access token. Sensei reads the provider and repository name from the link, so this is how you fix a repository Sensei has no connection for.
+- **From a Connection:** pick a repository from a source-control connection you already have.
+- **Enter Manually:** paste the repository's URL and an access token. Sensei reads the provider and repository name from the link, so this is how you fix a repository Sensei has no connection for.
 
 The link is remembered, so the next fix on the same Asset goes straight to the pull request. A repository you link this way is **fix-only**: it is available for fixes but does not start scanning until you enable it (see [Repositories linked at fix time](#repositories-linked-at-fix-time)).
 
@@ -68,7 +68,7 @@ Paste a link to the file (a GitHub, GitLab, Bitbucket, or Azure DevOps permalink
 
 ### Open the pull request
 
-Once Sensei has a repository and a file, the **Fix with Sensei** dialog confirms the base branch the pull request should target. Choose the branch, then click **Fix**.
+Once Sensei has a repository and a file, the **Fix With Sensei** dialog confirms the base branch the pull request should target. Choose the branch, then click **Fix**.
 
 ![Fix with Sensei dialog](images/fix_with_sensei_dialog.png)
 
@@ -82,8 +82,8 @@ Sensei generates a remediation and opens a pull request. The finding's fix statu
 
 The pull request changes your code; it does not change what is running. So the finding **stays open** after Sensei fixes it, and the badge says which step is still outstanding:
 
-- **PR open** — the change is waiting to be reviewed and merged.
-- **PR merged** — merged, but not yet deployed.
+- **PR Open** — the change is waiting to be reviewed and merged.
+- **PR Merged** — merged, but not yet deployed.
 
 What closes the finding is the next scan that sees the fix in place. For code scanning that is the next scan of the branch you merged into. For findings that come from a cloud account, it is the next scan *after the infrastructure change is applied* — the scanner reads the account, not your repository, so merging Terraform does not change what it reports.
 
@@ -93,11 +93,11 @@ While a fix is outstanding, the same finding may keep being reported by each new
 
 A repository you link from a finding (the [Link a repository](#link-a-repository-if-the-asset-does-not-have-one) step above) is added for fixes only. It does not scan, and inbound webhooks do not trigger anything for it, until you turn scanning on. This keeps an ad-hoc fix from quietly enrolling a repository in scanning you did not ask for.
 
-On the **Repositories** view of the Sensei hub, a fix-only repository is marked **Fix-only**.
+On the **Repositories** view of the Sensei hub, a fix-only repository is marked **Fix-Only**.
 
 ![A fix-only repository on the Repositories view](images/targets_fix_only.png)
 
-To start scanning it, open its row actions and choose **Enable scanning**. From then on it behaves like any onboarded repository.
+To start scanning it, open its row actions and choose **Enable Scanning**. From then on it behaves like any onboarded repository.
 
 ![Enabling scanning on a fix-only repository](images/enable_scanning_menu.png)
 
@@ -136,4 +136,4 @@ Two places on the Sensei hub help you follow what Sensei has done:
 
   ![Fix Impact panel](images/fix_impact.png)
 
-Use the **Scan now**, **Scan history**, **Configure**, and **Re-stage candidates** row actions to manage each onboarded repository over time (see [Reference](/sensei/sensei_reference/#repository-row-actions)).
+Use the **Scan Now**, **Scan History**, **Configure**, and **Re-stage Candidates** row actions to manage each onboarded repository over time (see [Reference](/sensei/sensei_reference/#repository-row-actions)).

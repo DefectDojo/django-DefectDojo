@@ -34,10 +34,10 @@ You can combine them: a short pasted summary plus a diagram often produces a bet
 
 Generation runs in the background and moves through four stages, shown on the run as it progresses:
 
-1. **Extracting architecture** — components, trust boundaries, data assets and data flows.
-2. **Enumerating threats** — threats per STRIDE category.
-3. **Writing security requirements** — testable requirements, each tied to the threats it mitigates.
-4. **Assembling results** — the diagram and final consistency checks.
+1. **Extracting the Architecture** — components, trust boundaries, data assets and data flows.
+2. **Enumerating Threats** — threats per STRIDE category.
+3. **Writing Security Requirements** — testable requirements, each tied to the threats it mitigates.
+4. **Assembling Results** — the diagram and final consistency checks.
 
 A run typically takes several minutes. You can leave the page; progress and results are kept on the run.
 
@@ -53,7 +53,7 @@ The model also records what it could **not** determine — assumptions it had to
 
 Each threat carries:
 
-- Its **STRIDE category** (spoofing, tampering, repudiation, information disclosure, denial of service, elevation of privilege) and a **severity**.
+- Its **STRIDE Category** (spoofing, tampering, repudiation, information disclosure, denial of service, elevation of privilege) and a **severity**.
 - The **attacker profile** — for example an external unauthenticated attacker, an insider, or a supply-chain compromise — and the skill required.
 - An ordered **attack path**: the steps an attacker would take, with prerequisites.
 - A **CWE**, where one applies, drawn from a fixed list rather than invented.

@@ -28,7 +28,7 @@ to upload them is the slow part. The **Import SBOM** page takes the whole set:
    own `metadata.component`, or an SPDX document's name and described package —
    and matched against the products you have permission to import into.
 3. Confirm the product for each file. Where the document is unambiguous, the
-   match is pre-filled and the **Why** column says how it was reached (an exact
+   match is pre-filled and the **Reason** column says how it was reached (an exact
    name, a normalized name, or one of several possible matches). Where it is not,
    the row asks rather than guessing.
 4. Press **Import**.
@@ -49,7 +49,7 @@ product you cannot write to.
 
 ## Replace or merge
 
-**Replace existing dependencies** applies to every file in the batch. When on,
+**Replace Existing Dependencies** applies to every file in the batch. When on,
 dependencies absent from the new import are removed unless they are linked to
 findings. When off, the import merges into what is already recorded. Leave it off
 when you are adding a component SBOM alongside others; turn it on when the SBOM

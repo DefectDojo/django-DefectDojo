@@ -205,7 +205,7 @@ Open **Act > Triage Engine > Runs** and expand the newest run:
 
 ![The rule run trace, showing one finding changed and the rest left alone](images/14-pain-rule-run-trace.jpg)
 
-The trace records each node's input and output counts, and **What changed** names the finding that
+The trace records each node's input and output counts, and **Show Changes** lists the finding that
 was updated. Reload the finding:
 
 | Expected | Why |

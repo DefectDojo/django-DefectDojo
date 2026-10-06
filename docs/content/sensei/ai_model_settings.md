@@ -38,15 +38,15 @@ All secrets are **encrypted at rest** and are **write-only**: once saved, the fo
 whether a secret is set, never its value. Leave a secret field blank when saving to keep the
 stored value; type a new value to replace it. The one exception is the **API Base URL**: a saved
 API key is kept only for the base URL it was saved with, so changing the base URL to a new
-gateway means entering the key again (clearing the base URL does not). **Test connection** follows
+gateway means entering the key again (clearing the base URL does not). **Test Connection** follows
 the same rule.
 
 ### Claude (Anthropic) and OpenAI
 
 These providers use a single API key:
 
-1. **Model (optional)** — e.g. a specific Claude or OpenAI model. Blank uses the provider default.
-2. **API Base URL (optional)** — point at a self-hosted gateway instead of the provider's public
+1. **Model (Optional)** — e.g. a specific Claude or OpenAI model. Blank uses the provider default.
+2. **API Base URL (Optional)** — point at a self-hosted gateway instead of the provider's public
    API. Blank uses the default (`https://api.anthropic.com` / `https://api.openai.com`).
 3. **LLM API Key** — the provider API key.
 
@@ -57,11 +57,11 @@ with AWS credentials rather than a single key, so its fields differ:
 
 ![AI Model Settings with Amazon Bedrock selected](images/ai_model_settings_bedrock.png)
 
-1. **Model (optional)** — a Bedrock model id or inference-profile ARN, e.g.
+1. **Model (Optional)** — a Bedrock model id or inference-profile ARN, e.g.
    `anthropic.claude-3-5-sonnet-20241022-v2:0`, or a cross-region inference profile like
    `us.anthropic.claude-sonnet-4-5-...`. Some newer models are only reachable through an
    inference profile. Blank uses the engine default.
-2. **API Base URL (optional)** — a custom Bedrock endpoint (for a VPC endpoint or FIPS). Blank
+2. **API Base URL (Optional)** — a custom Bedrock endpoint (for a VPC endpoint or FIPS). Blank
    uses the default AWS endpoint for the region.
 3. **AWS Region** — **required**. The region hosting the model, e.g. `us-east-1`.
 4. **AWS Access Key ID / Secret Access Key / Session Token** — **optional** (see below).
@@ -106,7 +106,7 @@ model you intend to use in your project's Vertex Model Garden first.
 
 Its fields differ from the key-based providers:
 
-1. **Model (optional)** — any model enabled in your project's Model Garden, e.g.
+1. **Model (Optional)** — any model enabled in your project's Model Garden, e.g.
    `claude-sonnet-4-6` or `gemini-2.5-pro`. Blank uses the engine default (a Claude model).
 2. **Vertex Project ID** — **required**. The GCP project hosting Vertex AI.
 3. **Vertex Region** — the Vertex region, e.g. `global` (the default) or `us-east5`.
@@ -132,7 +132,7 @@ model must be enabled in that project's Model Garden.
 
 ## Test connection
 
-**Test connection** validates the configuration before a scan relies on it:
+**Test Connection** validates the configuration before a scan relies on it:
 
 - For **Claude** / **OpenAI**, it makes a minimal authenticated call to the provider.
 - For **Amazon Bedrock with static keys**, it lists the region's foundation models to confirm the

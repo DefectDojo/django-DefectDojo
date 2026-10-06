@@ -45,8 +45,8 @@ Personas sign in with a shared password set by the instance administrator. Witho
 
 Superusers see two buttons in the banner:
 
-* **Reset sample data** replaces everything in the sandbox with a fresh copy of the sample data;
-* **Wipe sandbox** empties it, leaving no sample data, for practicing an import from scratch.
+* **Reset Sample Data** replaces everything in the sandbox with a fresh copy of the sample data;
+* **Wipe Sandbox** empties it, leaving no sample data, for practicing an import from scratch.
 
 ![Confirming a reset](images/sandbox_reset_confirm.png)
 

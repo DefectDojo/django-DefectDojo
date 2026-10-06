@@ -60,7 +60,7 @@ Review asks someone to *look*. Assignment makes someone *responsible*, and it do
 **Assignees** sits beside **Owners** on the Finding edit form. Owners is a group — the team whose queue this belongs in — while Assignees are individual people.
 
 * Assign from the Finding edit form, or to many Findings at once from the bulk editor.
-* In the bulk editor, assignees are **added** to whoever is already assigned. Tick **Replace existing assignees** to make your selection the complete list — which removes anyone not selected, including everyone if you select nobody.
+* In the bulk editor, assignees are **added** to whoever is already assigned. Tick **Replace Existing Assignees** to make your selection the complete list — which removes anyone not selected, including everyone if you select nobody.
 * Findings lists carry an **Assignees** column and an assignee filter, and reports can include an **Assignees** column.
 * Each person's assignments appear in their [My Work](/metrics_reports/dashboards/pro__my_work/) queue.
 

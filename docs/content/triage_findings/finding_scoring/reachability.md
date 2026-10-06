@@ -21,9 +21,9 @@ Every verdict is normalized to the same five values, whatever produced it:
 
 | Verdict | Meaning |
 |---|---|
-| **Reachable (runtime)** | The vulnerable code was observed executing. |
-| **Reachable (static)** | A call path to the vulnerable code exists from an application entry point. |
-| **Potentially reachable** | Partial evidence — for example the vulnerable package is used, but the specific function could not be confirmed. |
+| **Reachable (Runtime)** | The vulnerable code was observed executing. |
+| **Reachable (Static)** | A call path to the vulnerable code exists from an application entry point. |
+| **Potentially Reachable** | Partial evidence — for example the vulnerable package is used, but the specific function could not be confirmed. |
 | **Unreachable** | Analysis found no path to the vulnerable code. |
 | **Unknown** | No reachability analysis covers this Finding yet. |
 

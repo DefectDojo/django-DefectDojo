@@ -35,7 +35,7 @@ Each repository in the tenant becomes a Record. A repository that disappears fro
 A repository's default branch is always imported. Two optional fields extend this:
 
 - **Branch**: a comma-separated list of exact branch names or `*` wildcard families, for example `release/*, bugfix/*`. Every entry adds its matching branches on top of the default branch. Blank entries are ignored. A branch imports only if Aqua returns it for that repository in the scan-results feed the connector reads (see the note below).
-- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding, unless **Separate Deduplication Per Branch** is on. When this is off, all selected branches import into the Record's default engagement.
+- **Track Scanned Branches**: when enabled, each imported branch gets its own engagement on the mapped Record. A fix on one branch then cannot close another branch's findings. The default branch is imported first. A finding that also appears on another branch is marked a duplicate of the default branch's finding, unless **Separate Deduplication per Branch** is on. When this is off, all selected branches import into the Record's default engagement.
 
 This setting also affects which branches are selected when **Branch** is blank. If **Track Scanned Branches** is off, only the default branch is imported. If it is on, every branch Aqua returns for the repository in its scan-results feed is imported.
 
@@ -47,7 +47,7 @@ By default, the same issue found on two branches is one finding. The second bran
 marked a duplicate of the default branch's finding. This keeps one row per real issue when a
 release branch carries the same code as the default branch.
 
-Turn on **Separate Deduplication Per Branch** to keep each branch apart. The same issue on two
+Turn on **Separate Deduplication per Branch** to keep each branch apart. The same issue on two
 branches then stays two findings, and each branch reports its own counts.
 
 This setting applies only to branches that have their own engagement. Turn on **Track Scanned

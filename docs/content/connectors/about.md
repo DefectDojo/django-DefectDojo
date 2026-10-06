@@ -50,7 +50,7 @@ Both directions share the same refreshed layout:
 
 On the **Upstream Connectors** page:
 
-* **Configured Connectors** lists the connectors you have already set up. Each tile shows an operational health summary (health status, last operation, and total / mapped record counts) and a **Manage Configuration** menu with **Manage Records & Operations**, **Edit Configuration**, and **Delete Configuration** actions.
+* **Configured Connectors** lists the connectors you have already set up. Each tile shows an operational health summary (health status, last operation, and total / mapped record counts) and a **Manage Configuration** menu with **Manage Records and Operations**, **Edit Configuration**, and **Delete Configuration** actions.
 * **Available Connectors** lists the supported tools you have not yet configured, each with an **Add Configuration** button.
 * A filter in the page header narrows both sections by connector type: **All**, **Asset** (or **Asset**, depending on your instance's vocabulary) for connectors that import asset inventory, and **Finding** for connectors that import vulnerability data.
 
