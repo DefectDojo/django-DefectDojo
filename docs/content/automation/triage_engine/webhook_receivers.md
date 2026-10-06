@@ -71,7 +71,7 @@ Posting comments needs a go-integrators version that provides it. When DefectDoj
 
 1. **New Webhook Receiver**, then **Custom Webhook**. Give it a label and choose how the sender authenticates.
 2. Save. The **Setup** tab shows the URL to give the sender.
-3. On **Sample Payload**, paste an example from the sender's documentation, or send one for real. **Parse** lists every path in it, such as `webhook.payload.issue.key`, with an example value and a copy button.
+3. On **Sample Payload**, paste an example from the sender's documentation, or send one for real, and **Submit** it. The tab lists every path in it, such as `webhook.payload.issue.key`, with an example value and a copy button.
 4. **Create a Rule** opens the editor with an **On an Inbound Webhook** trigger for this receiver. Add **Find Findings by a Value** to turn a payload value into Findings, then any Findings or Egress nodes.
 5. **Preview** runs the rule against the sample, or against a payload you paste into **Test With a Payload**, and changes nothing. A webhook rule has no manual **Run**: it runs when its receiver records a delivery.
 
