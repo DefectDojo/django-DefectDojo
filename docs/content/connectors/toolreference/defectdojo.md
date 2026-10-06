@@ -42,6 +42,7 @@ After Discover, the connector tile shows a **Migration preflight** card. The car
 | | Engagement presets, report types and requesters |
 | | A Finding's history |
 | | Users' roles on Products, Organizations and groups |
+| | Request and response pairs past 16 MiB per Finding |
 
 A copied Finding keeps its original scan type and field values. DefectDojo Pro computes the same hash code the source used. Later scans then deduplicate against the copied Findings. DefectDojo Pro does not copy duplicate Findings from the source. DefectDojo Pro finds duplicates again on its own, with its own rules.
 
