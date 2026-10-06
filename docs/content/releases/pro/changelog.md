@@ -16,7 +16,89 @@ You can subscribe to these release notes with the [RSS feed](/releases/pro/chang
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## October 2026: v3.4
+
+### October 5, 2026: v3.4.0
+
+New features:
+* **(Triage Engine)** Webhook receivers let Jira and other tools send changes back to DefectDojo, and the Jira Downstream Connector gains two-way sync and Push Notes as Comments.
+* **(Triage Engine)** AI steps: three new nodes in an AI section of the palette (Check for False Positive, Assess Exploitability, and Group by Fix) ask Sensei one fixed question about the findings that reach them and route each finding out of a named exit, so the AI proposes and a person decides.
+* **(Triage Engine)** Asset actions gain computed destinations (set the organization, parent, or SLA configuration from a tag, attribute, or connector field with a mapping), connector record attributes are available in the asset envelope, and a new Add Membership node replaces the admin-only membership rules.
+* **(Sandbox)** Sandbox Mode: a practice copy of DefectDojo Pro under `/sandbox/`, on its own database and preloaded with sample data, with Reset and Wipe for superusers. Nothing done in the sandbox reaches production. Self-hosted instances turn it on with `DD_SANDBOX_ENABLED`.
+* **(Support)** The new Support section in Settings searches the docs first, then lets you file feature, connector, bug, and feedback requests and vote on a public community board. It replaces the Contact Support menu entries and pages; old bookmarks redirect.
+* **(Remediation Center)** A new beta module (feature flag `remediation_center`, off by default) that makes the remediation action the unit of work: open findings are grouped by the change that resolves them, one action per change per place, each with a due date, risk, owner, workflow status, and the findings it will close.
+* **(AI Inventory)** A beta AI inventory (feature flag `ai_inventory`, off by default, requires Locations): every scanned repository gets an inventory of its coding assistants, MCP servers, models, AI packages, AI service endpoints, agent skills, and provider keys. Governance policies mark each as authorized, unauthorized, or needs review, unauthorized components become findings, and each Asset exports a CycloneDX 1.6 AIBOM. The DefectDojo scanner detects the AI in a repository and uploads it as a CycloneDX inventory.
+* **(Assets)** A Needs Attention inbox under Assets lists assets still sitting in a connector's default organization or missing the fields that priority and SLA run on, a What Drives Priority and SLA card appears on the asset page, and onboarding is complete when the inbox reads zero.
+* **(Assets)** Hierarchy change plans: bulk or AI-made reorganizations become a server-side plan with a dry-run diff that you review, apply as one change, and undo if needed. Plans can be built from JSON or a CSV upload.
+* **(Connectors)** New Microsoft Azure and Google Cloud asset connectors, and a new Kenna Security (Cisco Vulnerability Management) connector.
+* **(Connectors)** AWS Security Hub gains configurable asset grouping (by resource type or resource) with hierarchy parents, account parent records, OU and account-tag placement, AWS tags, and re-placing of existing assets. The same grouping and placement ladder comes to Microsoft Defender for Cloud, Prowler, Google Cloud SCC, and Lacework.
+* **(Connectors)** Re-mapping an already-mapped record to a different asset now moves its findings to the new asset by default, or closes them, instead of leaving them open and importing a duplicate set.
+\* **(Findings)** Move or copy findings to another test, singly or in bulk.
+* **(Findings)** The finding tables gain an Exception Requested column and filter for findings sitting in a risk acceptance nobody has decided yet.
+* **(Correlation)** Fix with Sensei on Root Causes: the Root Cause dialog's member table carries the Sensei column, so you can launch a fix for each finding in the cluster.
+* **(Locations)** The Location page returns, with the asset-scoped Metadata box, a Custom Fields card, and a Referenced By table of the assets that use the location. Cloud resource identifiers (AWS ARNs, GCP self-links, Azure resource ids) are decomposed into provider, account, region, service, and resource fields.
+* **(Compliance)** Supporting files can be attached to regulatory obligations as evidence.
+* **(Reporting)** Report Builder gains Location per Asset blocks and Asset and Organization name columns.
+* **(PSIRT)** PSIRT is out of beta, the PSIRT API is available on `/api/v2/psirt/*` with token authentication, and the MCP server gains a PSIRT toolset.
+* **(i18n)** Ten more languages: Polish, Ukrainian, Turkish, Indonesian, Filipino, Vietnamese, Thai, Korean, and Chinese (Simplified and Traditional).
+* **(API)** Findings can be ordered by priority.
+
+Upgrade notes:
+* **(Deployment)** Self-hosted Docker Compose deployments, and Helm deployments with `webhookGateway.enabled`, run a new webhook gateway service in front of webhook receivers, with its own schema and database role inside DefectDojo's database. Please see [additional instructions](/releases/pro/webhook-gateway) for more details.
+* **(Helm)** New chart values: `connectors.debug` (default off), `connectors.vendorEgress` (private-network blocking and allowed or denied CIDRs, default off), `dojo.obligationAttachmentMaxBytes` (default 10 MB), and a `sandbox` values block for Sandbox Mode. The Go service's internal routes are kept off nginx and its rate-limit toggles are split. The dd-orch workers and integrators mount only the dd-orch root CA, and the django readiness probe now has to reach a uwsgi worker.
+* **(Deployment)** The `pro.0001` migration streams and bulk-creates its enhanced finding rows, so the first upgrade on a large instance completes in bounded memory.
+
 ## September 2026: v3.3
+
+### September 28, 2026: v3.3.300
+
+New features:
+* **(i18n)** The Pro UI is now multilingual, with 27 languages available including German, Japanese, French, Italian, Spanish, Dutch, Portuguese (Brazil), Russian, Hindi, Bengali, Marathi, Tamil, Telugu, Hebrew, Arabic, Persian, and Urdu. A new setting lets you choose the interface language.
+* **(Appearance)** DefectDojo's 2026 rebrand ships with a new logo and brand colors, plus an Appearance page with theme presets and a color customizer.
+* **(Reporting)** The Report Builder can export to CSV, Excel, and JSON. Reports gain template variables and per-finding / per-asset Triage Engine reports, and a new `/api/v2/report_schedules/` endpoint schedules report generation. Generated reports also expose a plain-text sidecar and content endpoint.
+* **(Locations)** Code to Cloud Locations arrive: container-image and connector-populated cloud-resource inventories, an image-to-repository link, suggested `deploys_to` edges, and typed location items. Harbor and Trivy Operator connectors emit inventories, and the scanned image or resource is recorded on every finding.
+* **(Findings)** Exploit Maturity and Reachability are now manually editable, and Priority, Risk, and Risk Score are added to every findings export.
+* **(Tables)** The column picker gains select all / deselect all, and lazy list filters gain "select all matching."
+* **(MFA)** Superusers can reset another user's MFA.
+* **(MCP)** The MCP server adds a Dashboards 2.0 toolset and dashboard support, and the reporting toolset is now customer-visible.
+* **(SLA)** Two-stage regulatory deadlines for vulnerability response.
+* **(Risk Acceptance)** Filter the risk-acceptance list by host, and see the hosts an acceptance covers.
+* **(Connectors)** The GitLab connector gains an Exclude Archived Projects toggle for project discovery.
+
+Enhancements:
+* **(Dashboards)** The Command Center scene is refined with a dot grid, softer beams, a risk-colored actionable ring, and an automation bar. Dashboards 2.0 layouts add audit history, ETag / If-Match concurrency, and a widget-config JSON Schema.
+* **(Vulnerability Explorer)** Multi-value filters, null-last multi-column sorting, and a filter for every column.
+* **(Tables)** Numeric, score, and date columns sort descending first, with blanks last.
+* **(Sensei)** Sensei and AI Agent Red Teaming reach general availability (the BETA badge and the `agent_redteam` feature flag are removed), and the Advisor's cross-tool estimate now simulates dedupe within Dedupe Pool scope.
+* **(Connectors)** Each connector sync is metered with a single usage record, and NowSecure includes the app group in the product name.
+* **(Performance)** Audit-log Changes filters search the stored row JSON and count in the page query; report block filter tables load only when filters are added; and the nightly enrichment fan-out no longer depends on a shared connection.
+
+Bug fixes:
+* **(Connectors)** Fixes across Aqua (token-exchange redirect handling and server-side branch discovery), Snyk (org enumeration and access validation via the REST API, and no longer fetching SCA issues from both the v1 and REST APIs), Cycode (pagination parameters), NowSecure (assessment-status decoding), and YesWeHack (endpoints built from the report scope). A sync that started under the license is allowed to finish before it blocks.
+* **(Findings)** Bulk Edit keeps its popover open while picking a dropdown option and no longer clips the Risk Acceptance list, and filters no longer leak between the findings status pages.
+* **(Reporting)** The Report Builder block modal recovers when field options fail to load, a duplicated report block preserves its chart date range and truncates the copy name, and report templates no longer try to load scripts nginx does not serve.
+* **(Parsers)** Crash fixes in the Aqua and Snyk parsers for None-field concatenation, and Generic Findings Import correctly reads CSV KEV/fix booleans, `CVSSV3_score`, and empty cells.
+* **(Deduplication)** Matching Configuration loads every row when the server caps page size, and the duplicate-finding self-FK is row-locked so import dedup and duplicate deletion no longer fail at commit.
+* **(Importers)** Reimport with `group_by` no longer 500s on duplicate same-name finding groups, and scheme-less connector endpoints store their host.
+* **(Assets)** The hierarchy link and gear no longer act on an unloaded asset, and the Asset/Location relationship is shown and editable on the dependency map.
+* **(SLA)** SLA configurations governed by a deleted response policy are re-swept.
+* **(Permissions)** The permission cache is busted correctly on Pro membership, role, and group-member writes and on reassign-deletes, and user and group deletes no longer fail in the permission-cache receivers.
+* **(JIRA)** Select-list custom-field values are wrapped correctly, the authorized project queryset is ordered by id, and empty credentials no longer garble debug dumps.
+* **(SSO/SCIM)** SAML keeps an uploaded metadata file across later saves, and SCIM routes mount under the configured URL prefix.
+* **(UI)** The OS banner message decodes as UTF-8 and restores its list and paragraph styles, and filter-menu controls render in flow so Clear/Apply stays reachable.
+
+Security fixes:
+* **(Authorization)** Hardened authorization on the audit history page, the merge-finding action aligned with the object-level permission check, Location relation filters scoped to the caller's products, and cross-organization asset-hierarchy edges refused on every write path.
+* **(Secrets)** Stored settings credentials are masked in the audit log, saved SSO, OIDC, and email secrets are no longer sent to the settings pages, and the stored LDAP bind password is reused only for the saved server and Bind DN.
+* **(MFA)** TOTP codes are single-use, recovery codes use a CSPRNG, and MFA is enforced on the Vue API for session logins.
+* **(Sensei)** The engine and CI endpoints are scoped to the caller's objects, the LLM key is kept on its own endpoint with Vertex host validation and untrusted-prompt fencing, and only repository writers can trigger `/fix` from a comment.
+
+Behavior changes:
+* **(Deduplication)** The Tenable Scan `hash_code` fields no longer include the description, changing how those findings deduplicate.
+
+Upgrade notes:
+* **(Logging)** The default logging handler is now `gcp_json`, and nginx logs carry a severity.
+* **(Deployment)** Back up both databases before upgrading; a restore runbook is now linked from the on-prem docs.
 
 ### September 22, 2026: v3.3.200
 
