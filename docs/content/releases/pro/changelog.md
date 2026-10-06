@@ -2,7 +2,6 @@
 title: "DefectDojo Pro Changelog"
 description: "DefectDojo Pro Changelog"
 exclude_search: true
-toc_end_level: 2
 outputs:
   - "html"
   - "rss"
