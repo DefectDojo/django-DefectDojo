@@ -39,6 +39,7 @@ After Discover, the connector tile shows a **Migration preflight** card. The car
 | Users that the copied data references, created as inactive users with no password | Tool configurations and credentials, notification settings and system settings |
 | | API scan configurations, threat model files and locations that are not URLs |
 | | Engagement presets, report types and requesters |
+| | A Finding's history |
 
 A copied Finding keeps its original scan type and field values. DefectDojo Pro computes the same hash code the source used. Later scans then deduplicate against the copied Findings. DefectDojo Pro does not copy duplicate Findings from the source. DefectDojo Pro finds duplicates again on its own, with its own rules.
 
@@ -52,10 +53,7 @@ Compat mode also leaves out:
 
 * files;
 * custom fields on Findings;
-* found-by test types;
-* the Product's SLA configuration and regulations;
-* status history;
-* detection of a Finding deleted at the source.
+* found-by test types.
 
 #### Things to know
 
