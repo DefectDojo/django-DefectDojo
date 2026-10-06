@@ -161,7 +161,8 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
                     username = request.POST.get("username", None)
                     if username:
                         dojo_user = Dojo_User.objects.filter(username=username).first()
-                        if dojo_user:
+                        # Accounts without a usable password could never complete the reset.
+                        if dojo_user and dojo_user.has_usable_password():
                             dojo_user.enable_force_password_reset()
                 raise Ratelimited
             return fn(request, *args, **kw)
