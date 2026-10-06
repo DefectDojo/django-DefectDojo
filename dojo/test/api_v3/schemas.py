@@ -29,7 +29,7 @@ from dojo.engagement.api_v3.schemas import EngagementSlim
 from dojo.models import Development_Environment, Test, Test_Type
 from dojo.product.api_v3.schemas import AssetSlim
 from dojo.product_type.api_v3.schemas import OrganizationSlim
-from dojo.user.api_v3.schemas import UserSlim
+from dojo.user.api_v3.schemas import UserStub
 
 
 class TestTypeSlim(Schema):
@@ -112,7 +112,7 @@ TestSlim.EXPANDABLE = {
     "engagement": ExpandRel(attr="engagement", path="engagement", schema=EngagementSlim),
     "asset": ExpandRel(attr="engagement.product", path="engagement__product", schema=AssetSlim),
     "organization": ExpandRel(attr="engagement.product.prod_type", path="engagement__product__prod_type", schema=OrganizationSlim),
-    "lead": ExpandRel(attr="lead", path="lead", schema=UserSlim),
+    "lead": ExpandRel(attr="lead", path="lead", schema=UserStub),
     "environment": ExpandRel(attr="environment", path="environment", schema=EnvironmentSlim),
 }
 

@@ -66,6 +66,6 @@ Review asks someone to *look*. Assignment makes someone *responsible*, and it do
 
 You can only assign a Finding to somebody who can already see it. Assignment does not grant access.
 
-The [Rules Engine](/automation/rules_engine/) can set assignees automatically: choose **Set Users** and the **assignees** field.
+The [Triage Engine](/automation/rules_engine/) can set assignees automatically: choose **Set Users** and the **assignees** field.
 
 Assignment is controlled by the **Work Assignment** [feature flag](/admin/feature_flags/pro__feature_flags/).

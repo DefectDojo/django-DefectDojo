@@ -15,7 +15,7 @@ weight: 1
 | Gestione delle vulnerabilità principale | ✔️ Importa, traccia e gestisce i riscontri da oltre 500 strumenti di sicurezza | ✔️ Tutto ciò che è incluso nella versione open-source, ottimizzato per la scalabilità |
 | Deduplicazione dei riscontri | ✔️ Deduplicazione standard | ✔️ Deduplicazione avanzata e configurabile |
 | API REST | ✔️ API REST completa | ✔️ API REST completa |
-| Autenticazione e controllo degli accessi | ✔️ Autenticazione locale e RBAC di base | ✔️ SSO (SAML/OAuth), MFA, RBAC avanzato |
+| Autenticazione e controllo degli accessi | ✔️ Account locali ed elenchi di accesso per Asset | ✔️ SSO (SAML, OIDC, OAuth), LDAP, MFA, controllo degli accessi basato sui ruoli |
 | Interfaccia utente | ✔️ UI Community | ✔️ UI Pro moderna con prestazioni migliorate |
 | Dashboard e reportistica | ✔️ Dashboard e report di base | ✔️ Dashboard avanzate e personalizzabili e reportistica esecutiva |
 | Automazione e flussi di lavoro | ❌ Non incluso | ✔️ Motore di regole e flussi di lavoro automatizzati |

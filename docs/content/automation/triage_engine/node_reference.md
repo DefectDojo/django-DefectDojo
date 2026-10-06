@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Triage Engine ships 43 nodes in five categories. This page documents all of them.
+Triage Engine ships 44 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -528,9 +528,33 @@ Moves the Asset to a different Organization (Product Type). Its primary organiza
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Organization** | none | The destination. |
+| **Destination** | `A Fixed Organization` | `A Fixed Organization`, or `Computed From Each Asset` to work the Organization out per Asset. |
+| **Organization** | none | The destination, for a fixed destination. |
+| **Computed Destination** | none | How each Asset's Organization is worked out, for a computed destination. See [Computed destinations](#computed-destinations). |
 
-The permission gate mirrors the Asset form: the rule owner needs edit permission on each Asset, and the add-asset permission on the destination Organization. Without the latter the run fails up front, before anything moves.
+The permission gate mirrors the Asset form: the rule owner needs edit permission on each Asset, and the add-asset permission on the destination Organization. For a fixed destination, a missing add-asset permission fails the run up front, before anything moves. For a computed destination, an Asset whose value names an Organization the owner cannot add Assets to is skipped with the reason `not_permitted`, and the rest still move.
+
+### Add Organization Membership
+
+`asset.add_membership`
+
+Adds the Asset to another Organization alongside its primary one, or removes a membership a rule added. This is how one Asset belongs to a team, a compliance scope and a portfolio at once. The node is only offered while non-exclusive Organizations are turned on for the instance (`DD_V3_ORGANIZATION_NONEXCLUSIVE`); in a rule saved before that setting was turned off, it changes nothing and counts every Asset as `skipped_flag_off`.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Action** | `Add Membership` | `Add Membership` or `Remove Membership`. |
+| **Destination** | `A Fixed Organization` | `A Fixed Organization`, or `Computed From Each Asset`. |
+| **Organization** | none | The Organization to join, for a fixed destination. |
+| **Computed Destination** | none | For a computed destination. Unlike the other nodes, one Asset can join several Organizations: an Asset tagged `scope:pci` and `scope:sox` joins both. See [Computed destinations](#computed-destinations). |
+
+What it will and will not touch:
+
+* It only ever writes memberships of its own kind (rule memberships). A membership a person pinned by hand, or one a connector created, is never claimed, changed or removed, and the Asset's primary Organization is out of its reach entirely.
+* Adding a membership the Asset already holds, by whatever means, changes nothing and counts the Asset as unchanged. Removing only takes away rule memberships.
+* It needs the same permissions as pinning an Asset into an Organization by hand: edit on the Asset and edit on the Organization. A fixed Organization the owner cannot edit fails the run; a computed one is skipped as `not_permitted`.
+* Removing never creates an Organization, whatever the computed destination says.
+
+This node replaces the older tag-to-Organization membership rules, which could only be managed from the Django admin. Those keep working for the Organizations they already target, and this node leaves those Organizations alone (it counts them as `membership_rule`), so the two never fight over the same membership. To move one over, write the equivalent rule here and then delete the old membership rule.
 
 ### Add Tags
 
@@ -560,8 +584,9 @@ Places the Asset under a parent in the Asset hierarchy, or removes its parent. A
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Action** | `Set Parent` | `Set Parent` or `Remove Parent`. |
+| **Action** | `Set Parent` | `Set Parent`, `Set Parent Computed From Each Asset`, or `Remove Parent`. |
 | **Parent** | none | The Asset to place these under. Shown while the action is Set Parent. |
+| **Computed Destination** | none | How each Asset's parent is worked out, by Asset name. Shown for the computed action. With **Create It When Missing** on, a parent that does not exist yet is created as a plain Asset in the child's Organization. See [Computed destinations](#computed-destinations). |
 
 ### Set a Custom Field
 
@@ -598,7 +623,9 @@ Assigns an SLA configuration to every Asset that reaches it. Findings under that
 
 | Setting | Notes |
 |---------|-------|
-| **SLA Configuration** | Which SLA configuration to assign. Required. |
+| **Destination** | `A Fixed SLA Configuration` (the default), or `Computed From Each Asset` to pick the configuration by name per Asset. |
+| **SLA Configuration** | Which SLA configuration to assign, for a fixed destination. |
+| **Computed Destination** | For a computed destination. The name resolves among the configurations the owner may use, and a name that matches none skips the Asset: this node never creates an SLA configuration. See [Computed destinations](#computed-destinations). |
 
 **An Asset already recalculating is skipped, not silently dropped.** If a person, or another rule, is already recalculating the same Asset's SLA dates when this node reaches it, writing here would not change anything and would be reverted, so the node counts that Asset as skipped instead of changed. The run's node summary reports the skip by name, alongside how many Assets were actually changed.
 
@@ -625,6 +652,72 @@ Makes the Asset deduplicate together with the rest of a [dedupe pool](/triage_fi
 | **Action** | `Assign to Pool` | `Assign to Pool` or `Remove from Pool`. |
 | **Pool** | none | Shown for `Assign to Pool`. The pool these Assets should deduplicate within. Required. |
 | **Matching** | `Same tool` | Which kind of matching this membership governs: `Same tool` or `Cross tool`. Reimport matching is not offered, because a pool has no effect on it. |
+
+### Computed destinations
+
+**Set Organization**, **Add Organization Membership**, **Set Parent** and **Assign SLA Configuration** can work their destination out from each Asset instead of taking one fixed choice. "Assets tagged `team:payments` go to the Payments Organization" then becomes one rule, rather than one rule per team or a move per Asset.
+
+A computed destination reads a value off the Asset, optionally maps it through a table, shapes it, and then finds the destination with that **name**:
+
+| Setting | Notes |
+|---------|-------|
+| **Read the Value From** | Where the value comes from: `Tag`, `Field`, `Custom Field`, `Connector Attribute` or `Name Segment`. |
+| **Tag Key** | For `Tag`. The key of a key/value tag: `team` reads both `team:payments` and `team=payments`. Tags synced from AWS resources arrive as `aws:<key>:<value>`, so the key `aws:team` reads `aws:team:payments`. A key ending in `:` or `=` is used as an exact prefix. |
+| **Field** | For `Field`: the Asset's `name`, `business_criticality`, `platform`, `lifecycle`, `origin` or `kind`. |
+| **Custom Field** | For `Custom Field`: one of the Asset [custom fields](/asset_modelling/pro__custom_fields/). A multi-select field contributes each selected option. |
+| **Connector** and **Attribute** | For `Connector Attribute`: an attribute of the connector records mapped to the Asset, for example `AWS_ACCOUNT_NAME`. Leave the connector on `Any Connector` to read whichever record reports it, or pick one. See [Connector attributes](../building_rules/#connector-attributes). |
+| **Split On** and **Keep Segment** | Split the value on a fixed delimiter and keep one segment, counting from `0`; `-1` is the last segment. `Name Segment` always splits the Asset's name, so `payments-checkout-api` split on `-` keeps `payments` at `0` and `api` at `-1`. Leave the delimiter empty to use the whole value. |
+| **Value Mapping** | Optional rows of value and destination name. Matching ignores case. A value ending in `*` matches everything that starts with it (`pay*` matches `payments` and `pay-eu`); an exact row wins over a `*` row, and the longest `*` row wins among those. |
+| **Values Not in the Table** | With a mapping table: `Use the Value` (the default) passes an unmapped value through, `Skip` skips the Asset. |
+| **Letter Case**, **Prefix** and **Suffix** | Shape a value the table did not map: `Title Case` turns `payments` into `Payments`, a prefix of `Team ` makes it `Team Payments`. A mapped value is used exactly as the table writes it. |
+| **Create It When Missing** | For Organizations and parent Assets only. When nothing has the name, create it: an Organization of the chosen **Type**, or a plain parent Asset in the child's Organization. |
+| **Type** | The Organization type a created Organization gets: Team, Business Application, Compliance Scope, Portfolio or Custom (the default). |
+
+**How a name is found.** An Organization or parent Asset whose name matches exactly is used; otherwise the match ignores case. Two Organizations whose names differ only by case, with neither matching exactly, are ambiguous and skip the Asset. Only destinations the rule owner may use are found, and creating one needs the same permission creating it by hand does, so a computed destination never reaches further than its owner can. Each distinct name is looked up once per batch, however many Assets share it.
+
+**An Asset with nowhere to go is skipped, never an error.** One Asset without a `team` tag does not stop the rest of a sweep. The node trace counts skipped Assets as `skipped_unresolved` and says why under `skip_reasons`:
+
+| Reason | Meaning |
+|--------|---------|
+| `no_value` | The Asset has no such tag, field, attribute or segment. |
+| `ambiguous_value` | It has several, and the action takes one destination (for example two `team` tags on a **Set Organization**). |
+| `unmapped` | The value is not in the mapping table, and unmapped values are skipped. |
+| `invalid_name` | The shaped name is longer than a destination name can be. |
+| `not_found` | Nothing has that name, and creating it is off. |
+| `ambiguous_destination` | Several destinations match the name, differing only by case. |
+| `not_permitted` | The destination exists, but the rule owner may not use it. |
+| `cannot_create` | Creating it is on, but the rule owner may not create one. |
+| `membership_rule` | **Add Organization Membership** only: the Organization is still managed by an older membership rule. |
+
+There is no free-form pattern matching. Splitting on a delimiter and `*` prefixes cover the common naming conventions, and every value is length-capped, so a rule's matching cost grows only with the size of its input.
+
+**Preview shows where every Asset would go.** Alongside the list of changes, **Preview** lists each sampled Asset a computed destination looked at: the value it read, the destination that value names, whether the run would create that destination (marked **New**), and, for the Assets it would leave alone, whether they are already there or why they were skipped. Nothing Preview creates survives it.
+
+#### Example: place assets by team tag
+
+Teams tag their Assets `team:payments`, `team:search` and so on, and each team has an Organization of the same name.
+
+1. Add a **Manual Run** or **On a Schedule** trigger that sweeps Assets, scoped to the Organization new Assets land in. To catch Assets as they arrive instead, use **On Asset Event**.
+2. Add **Set Organization** and set **Destination** to `Computed From Each Asset`.
+3. Set **Read the Value From** to `Tag` and **Tag Key** to `team`.
+4. Set **Letter Case** to `Title Case`, so `team:payments` names `Payments`.
+5. Optionally turn on **Create It When Missing** with **Type** `Team`, so a new team's first Asset creates its Organization.
+6. **Preview**. Every Asset with a `team` tag is listed with its destination; untagged Assets show as skipped with `no_value`.
+
+If a few teams' Organizations are named differently from their tags, add mapping rows for just those (`pay*` to `Payments Platform`), and leave **Values Not in the Table** on `Use the Value` for the rest.
+
+#### Example: place AWS accounts by OU
+
+AWS organizes accounts into organizational units, and a common goal is one Organization per OU. The Security Hub connector does not report an account's OU, but it does report the account's id and, where AWS Organizations permits it, its name (`AWS_ACCOUNT_NAME`), and account names usually encode the OU (`payments-prod`, `payments-dev`, `platform-shared`).
+
+1. Add a trigger that sweeps Assets, scoped to the Organization your Security Hub connector places accounts in.
+2. Add **Set Organization** with **Destination** `Computed From Each Asset`.
+3. Set **Read the Value From** to `Connector Attribute`, **Connector** to Security Hub and **Attribute** to `AWS_ACCOUNT_NAME`.
+4. Set **Split On** to `-` and **Keep Segment** to `0`, so `payments-prod` reads `payments`.
+5. Add one mapping row per OU (`payments` to `Payments OU`, `platform` to `Platform OU`) and set **Values Not in the Table** to `Skip`, so an account that follows no convention stays where it is until somebody maps it.
+6. **Preview**, then run it.
+
+When account names do not encode the OU, map account ids instead: read `AWS_ACCOUNT_ID`, leave **Split On** empty, and add one row per account id. To keep the account in its current Organization and also make it a member of its OU's Organization, use **Add Organization Membership** with the same computed destination instead of **Set Organization**.
 
 ## Egress
 
@@ -779,7 +872,7 @@ Generates a report from a template, scoped to the Findings that reached this nod
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.
 
-**One report per Finding or per Asset.** Build a report template for a single Finding (or a single Asset) using [template variables](/metrics_reports/reports/report-builder/#template-variables), then pick `each_finding` or `each_asset`. Each report fills the template's variables from its own item: `each_finding` supplies the Finding, its Asset and its primary vulnerability ID; `each_asset` supplies the Asset. Each generated report is named after its template and item, for example `Single Finding: SQL Injection in Login Form (Payments Portal)`, so two reports on the same issue in different Assets stay distinct. A template with no variables is still scoped to the item, by pinning its Finding blocks to that Finding (or to that Asset's matched Findings) the way `batch_findings` does.
+**One report per Finding or per Asset.** Build a report template for a single Finding (or a single Asset) using [template variables](/metrics_reports/reports/report-builder/#template-variables), then pick `each_finding` or `each_asset`. Each report fills the template's variables from its own item: `each_finding` supplies the Finding, its Asset and its primary vulnerability ID; `each_asset` supplies the Asset. Each generated report is named after its template and item, for example `Single Finding: SQL Injection in Login Form (Payments Portal)`, so two reports on the same issue in different Assets stay distinct. A template with no variables is still scoped to the item, by pinning its Finding blocks to that Finding (or to that Asset's matched Findings) the way `batch_findings` does. Once a template uses a variable anywhere, including in a Widget Block's filters, only the Blocks that use one are narrowed to the item, and the others keep their own filters.
 
 A template that uses a variable the chosen scope cannot fill, such as `{{finding.id}}` with `batch_findings`, is refused when the rule is saved, with a message naming the variable and the scope that fills it. A Finding with no vulnerability ID is skipped, with a reason, when the template uses `{{vulnerability_id}}`.
 

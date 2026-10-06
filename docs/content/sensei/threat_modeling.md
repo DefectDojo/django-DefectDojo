@@ -11,7 +11,7 @@ weight: 5
 
 This is Sensei's **pre-code** capability. Where [scan-and-fix](/sensei/about_sensei/) works on a repository that already exists, threat modeling works on the design, before there is code to scan.
 
-> **📍 Where to find it:** open **Threat Modeling** from the left-hand navigation, directly below Sensei.
+> **📍 Where to find it:** open **Sensei + AI > Threat Modeling** from the left-hand navigation, directly below Sensei.
 
 ## What you need
 

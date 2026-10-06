@@ -16,25 +16,23 @@ The Pro UI brings the following enhancements to DefectDojo:
 - Access to new Pro features, including [Upstream Connectors](/connectors/upstream/about/), [Universal Importer](/import_data/pro/specialized_import/external_tools/), and [Pro Metrics](/metrics_reports/pro_metrics/pro__overview/) views.
 - Improved UI workflows: better filtering, dashboards, and navigation.
 
-## Switching To The Pro UI
+## The Pro UI is the default
 
-To access the Pro UI, open your User Options menu from the top-right hand corner.  You can also switch back to the Classic UI from the same menu.
-
-![image](images/beta-classic-uis.png)
+From DefectDojo Pro 3.3 the Pro UI is the interface you land on after logging in, and the user-menu switch between the Pro UI and the Classic UI no longer exists. Your user menu (your name at the bottom of the sidebar) holds your profile, API token and documentation links. The few pages that still open in the Classic UI are marked in the sidebar and open in a new tab.
 
 ## Navigational Changes
 
 ![image](images/pro_ui_overview.png)
 
-1. The **Sidebar** has been reorganized into four parent categories: Dashboards, Import, Manage, and Settings.
+1. The **Sidebar** is organized into five sections: **Overview**, **Sensei + AI**, **Connect**, **Act**, and **Settings**. See [The Sidebar Menu](/navigation/pro__sidebar/) for the full layout and a table of where each page moved.
 
-2. The Homepage, [AI-powered native API connection capabilities](/metrics_reports/ai/mcp_server_pro/), Pro Metrics, and the Calendar view are all accessible under Dashboards.
+2. The **Overview** section holds the Home page and [Dashboards](/metrics_reports/dashboards/custom-dashboards/), the [Pro Metrics](/metrics_reports/pro_metrics/pro__overview/) views (under **Insights**), [My Work](/metrics_reports/dashboards/pro__my_work/), [Reporting](/metrics_reports/reports/report-builder/), and the Calendar view.
 
-4. Import methods can be found in the Import section: set up [Connectors](/connectors/about/) to pull findings in from your scanners (Upstream) or push them out to issue trackers (Downstream), use the [Add Findings](/import_data/import_scan_files/pro__import_scan_ui/) form to Add Findings, use [Smart Upload](/import_data/pro/specialized_import/smart_upload/) to handle infrastructure scanning tools, or use our external tools—[Universal Importer and DefectDojo CLI](/import_data/pro/specialized_import/external_tools/)—to streamline both the import and reimport processes of Findings and associated objects.
+3. The **Sensei + AI** section holds [Sensei](/sensei/about_sensei/), Threat Modeling, and the [AI-powered native API connection capabilities](/metrics_reports/ai/mcp_server_pro/) (MCP).
 
-5. The **Manage** section allows you to view different objects in the [Asset Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/), with views for Organizations, Assets, Engagements, Tests, Findings, Risk Acceptances, Endpoints, and Components.  There are additional sections for generating reports (Report Builder), using surveys (Surveys), as well as a [Rules Engine](/automation/rules_engine/about/). 
+4. The **Connect** section holds everything that moves data in or out of DefectDojo: [Upstream and Downstream Connectors](/connectors/about/) to pull findings in from your scanners or push them out to issue trackers, the legacy Jira integration, Authorization (SSO providers, login and MFA settings), Diagnostics, and **Import**, where you can use the [Add Findings](/import_data/import_scan_files/pro__import_scan_ui/) form to Add Findings, use [Smart Upload](/import_data/pro/specialized_import/smart_upload/) to handle infrastructure scanning tools, or use our external tools—[Universal Importer and DefectDojo CLI](/import_data/pro/specialized_import/external_tools/)—to streamline both the import and reimport processes of Findings and associated objects.
 
-5. The **Settings** section allows you to configure your DefectDojo instance, including your License, Cloud Settings, Users, Feature Configuration and admin-level Enterprise Settings. (Integrations have moved to **Import > Connectors > Downstream Connectors**.)
+5. The **Act** section is where the work happens: the Triage Engine ([Rules Engine](/automation/rules_engine/about/)), Vulnerability Explorer, Risk Acceptances, and **Explore**, which holds the [Asset Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/) views for Organizations, Assets, Engagements, Tests, and Findings, along with Surveys and the Attack Surface (Endpoints or Locations, and Components).
 
 6. The **Settings** section holds the administrative pages, grouped as System, Users & Permissions, Finding Workflow, Configuration, Notifications, Operations, and License & Support, with an **All Settings** page that lists and searches all of them. See [The Sidebar Menu](/navigation/pro__sidebar/).
 
