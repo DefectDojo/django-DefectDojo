@@ -21,20 +21,20 @@ Choose the connector when you want to try the move first, or move Products one a
 ## Path 1: Copy with the DefectDojo connector
 
 1. On the source, choose a **superuser** and copy its **API v2 key**.
-2. Make the source reachable from Pro over **HTTPS**. For a cloud-hosted Pro instance, allow your region's published outbound IP addresses on the source.
+2. Make the source reachable from Pro over **HTTPS**. The source must accept HTTPS connections from your Pro instance.
 3. In Pro, add a **DefectDojo (Open Source)** connector. Enter the source URL as **Location** and the API key as **Secret**. Pro checks the connection when you save it, and warns you if it finds no Products.
 4. Run **Discover**, then read the **Migration preflight** card on the connector tile.
 5. Turn on auto-mapping, or map each Record to an Asset yourself.
 6. Run **Sync**. Run it again whenever you like; a second Sync changes nothing unless the source changed.
-7. To switch over, stop using the source, then run Discover and a last Sync. Confirm the Finding counts match for the Products you mapped.
+7. To switch over, stop using the source, then run Discover and a last Sync. Confirm that the active Finding counts match for the Products you mapped. Pro keeps closed copies of Findings that the source deleted, so the total counts can differ.
 
    After the first Sync, a Sync copies status changes and closes Findings that the source no longer has. It does not copy later edits to a Finding's title, severity, description or other fields. It does not change `verified`. It does not undo a false positive, out of scope or risk acceptance that the source reverts.
 
-8. After you switch over, activate the copied users who will sign in. Then set up SSO, JIRA, tool credentials and notifications in Pro.
+8. After you switch over, activate the copied users who will sign in. Their roles on Products, Organizations and groups do not cross. An activated user has no access until you grant it. Then set up SSO, JIRA, tool credentials and notifications in Pro.
 
 The [DefectDojo connector page](/connectors/toolreference/defectdojo/) lists what crosses and what does not.
 
-Pro applies its own deduplication settings to copied Findings. If the source ran with deduplication off, Pro can mark some copies as duplicates. Both Findings stay, matched to their source Findings.
+Pro applies its own deduplication settings to copied Findings. If the source ran with deduplication off, Pro can mark some copies as duplicates. Both Findings stay, matched to their source Findings. If **Delete Deduplicate Findings** is on in Pro's **System Settings**, Pro deletes the duplicate copy instead. The next Sync then copies it again.
 
 ## Path 2: Restore a database dump
 
