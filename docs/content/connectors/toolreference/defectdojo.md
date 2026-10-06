@@ -36,7 +36,7 @@ After Discover, the connector tile shows a **Migration preflight** card. The car
 | Engagements and Tests, with their fields, tags and notes | API tokens |
 | Every non-duplicate Finding, with its fields, tags, vulnerability ids, CWEs, endpoints with their status, raw requests and responses, notes, files and custom fields | SSO settings |
 | Finding Groups and Risk Acceptances, with their members and proof files | JIRA instances and credentials |
-| Users that the copied data references, created as inactive users with no password | Tool configurations and credentials, notification settings and system settings |
+| Every user that the source data references, in mapped and unmapped Products alike, created as an inactive user with no password | Tool configurations and credentials, notification settings and system settings |
 | | API scan configurations, threat model files and locations that are not URLs |
 | | Engagement presets, report types and requesters |
 | | A Finding's history |
@@ -60,6 +60,7 @@ Compat mode also leaves out:
 * An existing Asset keeps its name, description and other fields when you map a Record onto it. The connector only adds tags, source regulations and metadata to it.
 * Until you finish migration, each Sync updates the Engagement and Test fields from the source. A field you changed in Pro, for example the lead, reverts on the next Sync.
 * If a Finding disappears from the source, the next complete Sync closes its copy in DefectDojo Pro. In compat mode, the copies of a source Product that loses its last Finding stay open. The connector never deletes a Finding.
-* Copied users are inactive. Activate the ones who need to sign in to DefectDojo Pro. Every user counts toward your license's user limit.
+* The connector creates an inactive DefectDojo Pro user for every user that the source data references. This covers mapped and unmapped Products alike. These users count toward your license's user limit. Activate the ones who need to sign in to DefectDojo Pro.
+* Like any connector, each Sync counts every copied Finding toward your weekly Finding usage.
 * If you point the connector at a different source, its old Records turn Missing. The connector never writes one source's data into another source's Assets.
 * Keep the source URL the same while Records stay mapped. The Record ids come from the URL, so a new URL makes Discover create new Records. An upgrade from compat mode to the export API keeps the same Records.
