@@ -116,8 +116,10 @@ class _Prefetcher:
 
         # Get the concrete field type
         field_meta = getattr(type(model_instance), field_name, None)
-        # Check if the field represents a many-to-many relationship as we need to instantiate the serializer accordingly
-        many = utils._is_many_to_many_relation(field_meta)
+        # Check if the field represents a to-many relationship as we need to instantiate the serializer accordingly.
+        # Both many-to-many fields and the reverse side of a ForeignKey (one-to-many) resolve to a RelatedManager,
+        # so both must be treated as 'many' -- otherwise the single-object path dereferences ``.pk`` on the manager.
+        many = utils._is_many_to_many_relation(field_meta) or utils._is_one_to_many_relation(field_meta)
         # Get the field from the instance
         return getattr(model_instance, field_name, None), many
 
