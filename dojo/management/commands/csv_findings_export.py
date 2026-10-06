@@ -1,9 +1,9 @@
-import csv
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
 from dojo.models import Finding
+from dojo.utils_spreadsheet import TextCellWriter
 
 """
 Author: Aaron Weaver
@@ -24,7 +24,7 @@ class Command(BaseCommand):
                                           active=True).select_related(
             "test__engagement__product")
         with file_path.open("w", encoding="utf-8", newline="") as fout:
-            writer = csv.writer(fout)
+            writer = TextCellWriter(fout)
 
             headers = [
                 "product_name",

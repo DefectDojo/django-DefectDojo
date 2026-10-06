@@ -1,4 +1,3 @@
-import csv
 import logging
 import mimetypes
 import operator
@@ -131,6 +130,7 @@ from dojo.utils import (
     handle_uploaded_threat,
     redirect_to_return_url_or_else,
 )
+from dojo.utils_spreadsheet import TextCellWriter, store_cells_as_text
 
 logger = logging.getLogger(__name__)
 
@@ -1648,7 +1648,7 @@ def csv_export(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = "attachment; filename=engagements.csv"
 
-    writer = csv.writer(response)
+    writer = TextCellWriter(response)
 
     first_row = True
     for engagement in engagements:
@@ -1714,6 +1714,7 @@ def excel_export(request):
             worksheet.cell(row=row_num, column=col_num, value=getattr(engagement, "test_count", 0))
         row_num += 1
 
+    store_cells_as_text(workbook)
     with NamedTemporaryFile() as tmp:
         workbook.save(tmp.name)
         tmp.seek(0)
