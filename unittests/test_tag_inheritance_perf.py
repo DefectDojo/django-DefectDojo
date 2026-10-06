@@ -22,7 +22,7 @@ from django.test import override_settings
 from django.utils import timezone
 
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
+from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tags.inheritance import propagate_tags_on_product_sync
 from unittests.dojo_test_case import (
     DojoAPITestCase,
@@ -469,6 +469,10 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
         super().setUp()
         self.login_as_admin()
         self.system_settings(enable_product_tag_inheritance=True)
+        # Superusers always receive the import notifications, and the two fixture variants
+        # (dojo_testdata.json / dojo_testdata_locations.json) disagree on user5's superuser
+        # flag. Pin it so the recipient count, and with it the query count, is the same in both.
+        Dojo_User.objects.filter(username="user5").update(is_superuser=False)
         self.product = self.create_product("Tag Perf Import Product", tags=["inherit", "these"])
         self.engagement = self.create_engagement("Tag Perf Import Engagement", self.product)
         self.scan_path = get_unit_tests_scans_path("zap") / "dvwa_baseline_dojo.xml"
@@ -641,9 +645,9 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # matching loop finishes, instead of saving each one inline as soon as it fails to
     # match (see process_finding_that_was_not_matched and _drain_pending_new_findings).
     # Reimport-no-change is unaffected because it creates no new findings to defer.
-    EXPECTED_ZAP_IMPORT_V2 = 294
-    EXPECTED_ZAP_IMPORT_V3 = 319
+    EXPECTED_ZAP_IMPORT_V2 = 282
+    EXPECTED_ZAP_IMPORT_V3 = 307
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 159
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 153
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 181

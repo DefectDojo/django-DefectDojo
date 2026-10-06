@@ -197,7 +197,7 @@ class ViewTest(View):
             # Make a notification for this actions
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
-            process_tag_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title, parent=test)
             messages.add_message(
                 request,
                 messages.SUCCESS,
