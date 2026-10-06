@@ -146,7 +146,7 @@ class EndpointMetaImportEndpointSemanticsTest(EndpointMetaImportQueryCountMixin,
         self.other_case = Endpoint.objects.create(host="Sem1.example.com", product=self.product)
         self.other_product_endpoint = Endpoint.objects.create(host="sem1.example.com", product=self.other_product)
 
-    def tags(self, endpoint, field="tags"):
+    def tag_names(self, endpoint, field="tags"):
         return {tag.name for tag in getattr(endpoint, field).all()}
 
     def meta(self, endpoint):
@@ -168,13 +168,13 @@ class EndpointMetaImportEndpointSemanticsTest(EndpointMetaImportQueryCountMixin,
         # tag names are stored lowercase, so "Team" never replaces anything.
         self.assertEqual(
             {"inherited-tag", "other", "owner:alice", "team:ops", "team:red", "team:blue", "env:prod"},
-            self.tags(self.endpoint),
+            self.tag_names(self.endpoint),
         )
         self.assertEqual({"Team": "Ops", "team": "blue", "env": "prod", "owner": "alice"}, self.meta(self.endpoint))
 
         created = Endpoint.objects.get(host="new1.example.com", product=self.product)
-        self.assertEqual({"inherited-tag", "team:dev", "team:green", "env:qa", "owner:bob"}, self.tags(created))
-        self.assertEqual({"inherited-tag"}, self.tags(created, "inherited_tags"))
+        self.assertEqual({"inherited-tag", "team:dev", "team:green", "env:qa", "owner:bob"}, self.tag_names(created))
+        self.assertEqual({"inherited-tag"}, self.tag_names(created, "inherited_tags"))
         self.assertEqual({"Team": "Dev", "team": "green", "env": "qa", "owner": "bob"}, self.meta(created))
 
         # Tags left with no endpoint are deleted, as tagulous does on a per-instance save.
@@ -183,8 +183,8 @@ class EndpointMetaImportEndpointSemanticsTest(EndpointMetaImportQueryCountMixin,
         self.assertEqual(1, tag_model.objects.get(name="team:red").count)
 
         # Only the product's inherited tag, which it got on creation.
-        self.assertEqual({"inherited-tag"}, self.tags(self.other_case))
-        self.assertEqual(set(), self.tags(self.other_product_endpoint))
+        self.assertEqual({"inherited-tag"}, self.tag_names(self.other_case))
+        self.assertEqual(set(), self.tag_names(self.other_product_endpoint))
         for untouched in (self.other_case, self.other_product_endpoint):
             self.assertEqual({}, self.meta(untouched))
         # The row without a hostname is skipped and nothing else is created.
@@ -194,13 +194,13 @@ class EndpointMetaImportEndpointSemanticsTest(EndpointMetaImportQueryCountMixin,
         content = "hostname,team\nsem1.example.com,red\nmissing.example.com,blue\n"
         self.import_csv(content, product=self.product.id, create_endpoints=False, create_tags=False, create_dojo_meta=True)
         self.endpoint.refresh_from_db()
-        self.assertEqual({"team:old", "steam:keep", "other", "inherited-tag"}, self.tags(self.endpoint))
+        self.assertEqual({"team:old", "steam:keep", "other", "inherited-tag"}, self.tag_names(self.endpoint))
         self.assertEqual({"team": "red", "env": "stale"}, self.meta(self.endpoint))
         self.assertFalse(Endpoint.objects.filter(host="missing.example.com").exists())
 
         self.import_csv(content, product=self.product.id, create_endpoints=False, create_tags=True, create_dojo_meta=False)
         self.endpoint.refresh_from_db()
-        self.assertEqual({"team:red", "team:old", "other", "inherited-tag"}, self.tags(self.endpoint))
+        self.assertEqual({"team:red", "team:old", "other", "inherited-tag"}, self.tag_names(self.endpoint))
         self.assertEqual({"team": "red", "env": "stale"}, self.meta(self.endpoint))
 
 
