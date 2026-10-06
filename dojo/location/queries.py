@@ -62,6 +62,17 @@ def get_authorized_locations(permission, queryset=None, user=None):
     return Location.objects.all().order_by("id") if queryset is None else queryset
 
 
+def get_import_form_locations(product, user):
+    """
+    Locations offered on the import and re-import forms: the product's own, or, when the product
+    has none, the ones the user can view (the same set the import API accepts).
+    """
+    locations = Location.objects.filter(products__product=product)
+    if locations.exists():
+        return locations
+    return get_authorized_locations("view", user=user)
+
+
 def get_authorized_location_finding_reference(permission, queryset=None, user=None):
     impl = get_auth_filter("location.get_authorized_location_finding_reference")
     if impl:

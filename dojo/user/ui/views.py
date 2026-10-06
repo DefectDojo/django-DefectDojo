@@ -24,6 +24,7 @@ from django.db.models.deletion import RestrictedError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.crypto import salted_hmac
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from rest_framework.authtoken.models import Token
@@ -148,8 +149,13 @@ def api_v2_key(request):
 
 
 # #  user specific
+def login_password_ratelimit_key(group, request):
+    """Group login attempts by password, keyed with an HMAC rather than the raw value."""
+    return salted_hmac("dojo.login.ratelimit", request.POST.get("password", "")).hexdigest()
+
+
 @dojo_ratelimit(key="post:username")
-@dojo_ratelimit(key="post:password")
+@dojo_ratelimit(key=login_password_ratelimit_key)
 def login_view(request):
     return DojoLoginView.as_view(template_name="dojo/login.html", authentication_form=AuthenticationForm)(request)
 
