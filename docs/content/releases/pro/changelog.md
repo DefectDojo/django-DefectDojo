@@ -33,7 +33,7 @@ New features:
 * **(Connectors)** New Microsoft Azure and Google Cloud asset connectors, and a new Kenna Security (Cisco Vulnerability Management) connector.
 * **(Connectors)** AWS Security Hub gains configurable asset grouping (by resource type or resource) with hierarchy parents, account parent records, OU and account-tag placement, AWS tags, and re-placing of existing assets. The same grouping and placement ladder comes to Microsoft Defender for Cloud, Prowler, Google Cloud SCC, and Lacework.
 * **(Connectors)** Re-mapping an already-mapped record to a different asset now moves its findings to the new asset by default, or closes them, instead of leaving them open and importing a duplicate set.
-\* **(Findings)** Move or copy findings to another test, singly or in bulk.
+* **(Findings)** Move or copy findings to another test, singly or in bulk.
 * **(Findings)** The finding tables gain an Exception Requested column and filter for findings sitting in a risk acceptance nobody has decided yet.
 * **(Correlation)** Fix with Sensei on Root Causes: the Root Cause dialog's member table carries the Sensei column, so you can launch a fix for each finding in the cluster.
 * **(Locations)** The Location page returns, with the asset-scoped Metadata box, a Custom Fields card, and a Referenced By table of the assets that use the location. Cloud resource identifiers (AWS ARNs, GCP self-links, Azure resource ids) are decomposed into provider, account, region, service, and resource fields.
