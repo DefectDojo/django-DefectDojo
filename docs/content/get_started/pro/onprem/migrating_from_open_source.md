@@ -1,6 +1,6 @@
 ---
 title: "Migrating from Open Source to DefectDojo Pro"
-description: "Copy an open source DefectDojo into DefectDojo Pro with the DefectDojo connector, or move the whole instance with a database dump"
+description: "Copy an open source DefectDojo into DefectDojo Pro with a connector, or move the whole instance with a database dump"
 draft: false
 weight: 3
 audience: pro
@@ -13,8 +13,8 @@ There are two ways to move from an open source DefectDojo to DefectDojo Pro.
 | What moves | The Products you pick, into a Pro tenant that can already hold data | The whole instance, replacing the Pro database |
 | Downtime | None. Run it again and again until you switch over | A freeze window on the source |
 | Pro hosting | Cloud-hosted and self-hosted | Self-hosted (for cloud-hosted Pro, support runs the restore) |
-| What stays behind | API tokens, SSO, JIRA and tool credentials, notification settings and system settings; API scan configurations, threat model files and locations that are not URLs; engagement presets, report types and requesters; and a Finding's history | Nothing |
-| Source version | 3.5.0 or later for a full copy; older releases in compatibility mode | Every 2.x release; 3.0.0 to 3.0.100 upgrade first |
+| What stays behind | API tokens, SSO, JIRA and other settings. See the [connector page](/connectors/toolreference/defectdojo/) for the full list. | Nothing |
+| Source version | 3.5.0 or later for a full copy. An older source works in compatibility mode only with Locations off; with Locations on, it must upgrade first. | Every 2.x release; 3.0.0 to 3.0.100 upgrade first |
 
 Choose the connector when you want to try the move first, or move Products one at a time. Choose it also when you want to keep using the source until a date you pick. Choose the database dump when you want an exact copy of the whole instance, settings and credentials included.
 
@@ -30,6 +30,8 @@ Choose the connector when you want to try the move first, or move Products one a
 8. After you switch over, activate the copied users who will sign in. Then set up SSO, JIRA, tool credentials and notifications in Pro.
 
 The [DefectDojo connector page](/connectors/toolreference/defectdojo/) lists what crosses and what does not.
+
+Pro applies its own deduplication settings to copied Findings. If the source ran with deduplication off, Pro can mark some copies as duplicates. Both Findings stay, matched to their source Findings.
 
 ## Path 2: Restore a database dump
 

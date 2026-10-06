@@ -6,11 +6,11 @@ weight: 4
 audience: pro
 ---
 
-This is the detailed runbook for migrating an open source DefectDojo to self-hosted Pro **on Kubernetes**: the dry run and the cutover, a troubleshooting index keyed on the exact error text (search this page for the message you see), and a post-migration verification checklist. It is a companion to the general [Migrating from Open Source to Self-Hosted DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/) overview, which covers the data-movement concepts that apply to either deployment method.
+This is the detailed runbook for migrating an open source DefectDojo to self-hosted Pro **on Kubernetes**: the dry run and the cutover, a troubleshooting index keyed on the exact error text (search this page for the message you see), and a post-migration verification checklist. It is a companion to the general [Migrating from Open Source to DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/) overview, which covers the data-movement concepts that apply to either deployment method.
 
 The sequence and the troubleshooting entries were validated by reproducing a `2.58.3` → `3.2.400` migration end to end. Read it alongside:
 
-- [Migrating from Open Source to Self-Hosted DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/) — the canonical procedure.
+- [Migrating from Open Source to DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/) — the canonical procedure.
 - [DefectDojo Pro Installation Guide](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/) (Kubernetes).
 - [DefectDojo Pro Upgrade Guide](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) (Kubernetes).
 - [Backing Up a Self-Hosted Deployment](/get_started/pro/onprem/backing_up/).
