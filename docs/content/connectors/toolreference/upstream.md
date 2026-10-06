@@ -74,6 +74,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Google Cloud, JSM Assets, Mi
 - [Datadog](/connectors/toolreference/datadog/)
 - [Deepfence ThreatMapper](/connectors/toolreference/deepfence_threatmapper/)
 - [DeepSource](/connectors/toolreference/deepsource/)
+- [DefectDojo (Open Source)](/connectors/toolreference/defectdojo/)
 - [Dependency-Track](/connectors/toolreference/dependency_track/)
 - [Detectify](/connectors/toolreference/detectify/)
 - [Docker Scout](/connectors/toolreference/docker_scout/)
