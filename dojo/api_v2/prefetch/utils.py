@@ -17,6 +17,29 @@ def _is_many_to_many_relation(field):
     return isinstance(field, related.ManyToManyDescriptor)
 
 
+def _is_one_to_many_relation(field):
+    """
+    Check if a field specifies a reverse one-to-many relationship, i.e. the
+    "many" side of a ForeignKey. Example: ``Finding.locations`` is the reverse
+    of ``LocationFindingReference.finding`` (``related_name="locations"``).
+
+    Django exposes these through the ``ReverseManyToOneDescriptor``, and accessing
+    the attribute yields a ``RelatedManager`` -- exactly like a many-to-many
+    field. ``ManyToManyDescriptor`` subclasses ``ReverseManyToOneDescriptor``, so
+    the many-to-many case is excluded here; ``_is_many_to_many_relation`` covers it.
+
+    Args:
+        field (django.db.models.fields): The field to check
+
+    Returns:
+        bool: true if the field is a reverse one-to-many relationship
+
+    """
+    return isinstance(field, related.ReverseManyToOneDescriptor) and not isinstance(
+        field, related.ManyToManyDescriptor,
+    )
+
+
 def _is_one_to_one_relation(field):
     """
     Check if a field specified a one-to-one relationship as defined by django.
