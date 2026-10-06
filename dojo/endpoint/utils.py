@@ -2,18 +2,23 @@ import csv
 import io
 import logging
 import re
+from collections import defaultdict
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
-from django.db.models import Count, Q
+from django.db import transaction
+from django.db.models import Case, Count, F, IntegerField, Q, When, signals
+from django.db.models.functions import Lower
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
-from dojo.location.models import Location
+from dojo.location.models import Location, LocationProductReference
 from dojo.models import DojoMeta, Endpoint
+from dojo.tags.utils import bulk_add_tag_mapping
 from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
@@ -319,67 +324,255 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
             raise ValidationError(msg)
 
     keys = [key for key in reader.fieldnames if key != "hostname"]
-
+    rows = []
     for row in reader:
-        endpoint = None
         host = row.get("hostname", None)
-
         if not host:
             continue
+        # Only cells with a value are applied; empty cells leave the existing meta and tags alone.
+        rows.append((host, [(key, row.get(key)) for key in keys if row.get(key) is not None and len(row.get(key)) > 0]))
 
-        # TODO: Delete this after the move to Locations
-        if object_class == Endpoint:
-            endpoints = Endpoint.objects.filter(host=host, product=product)
-            if not endpoints.exists() and create_endpoints:
-                endpoints = [Endpoint.objects.create(host=host, product=product)]
-        elif object_class == Location:
-            endpoints = Location.objects.filter(url__host=host, products__product=product)
-            if not endpoints.exists() and create_endpoints:
-                url = URL.get_or_create_from_values(host=host)
-                url.location.associate_with_product(product)
-                endpoints = [url.location]
-        meta = [(key, row.get(key)) for key in keys]
-
-        for endpoint in endpoints:
-            existing_tags = [tag.name for tag in endpoint.tags.all()]
-            # A shared Location has one tag set, so a write here changes what the others see.
-            write_tags = create_tags and not (
-                object_class == Location and endpoint.products.count() > 1
+    if rows:
+        with transaction.atomic():
+            _MetaImport(product, object_class, create_tags=create_tags, create_meta=create_meta).run(
+                rows, create_endpoints=create_endpoints,
             )
-            if create_tags and not write_tags:
-                logger.info(
-                    "Skipping tags for location %s: it is shared by more than one product",
-                    endpoint.id,
-                )
-            for item in meta:
-                # Determine if there is a value here
-                if item[1] is not None and len(item[1]) > 0:
-                    if create_meta:
-                        # check if meta exists first. Don't want to make duplicate endpoints
-                        # TODO: Delete this after the move to Locations
-                        if object_class == Endpoint:
-                            dojo_meta = DojoMeta.objects.get_or_create(
-                                endpoint=endpoint,
-                                name=item[0])[0]
-                        elif object_class == Location:
-                            dojo_meta = DojoMeta.objects.get_or_create(
-                                location=endpoint,
-                                location_product=product,
-                                name=item[0])[0]
-                        dojo_meta.value = item[1]
-                        dojo_meta.save()
+    return None
+
+
+class _MetaImport:
+
+    """
+    Apply an endpoint meta CSV in a fixed number of queries.
+
+    The rows are applied in file order to an in-memory copy of each endpoint's (or
+    location's) tags and meta, exactly as the old per-row loop applied them to the
+    database, and only the net difference is written at the end: one lookup for every
+    host, one read of the current tags and meta, then bulk inserts, updates and deletes.
+    """
+
+    def __init__(self, product, object_class, *, create_tags, create_meta):
+        self.product = product
+        self.object_class = object_class
+        self.create_tags = create_tags
+        self.create_meta = create_meta
+        self.is_location = object_class == Location
+
+    def run(self, rows, *, create_endpoints):
+        hosts = list(dict.fromkeys(host for host, _ in rows))
+        objects_by_host = self.load_objects(hosts)
+        created = []
+        if create_endpoints:
+            missing = [host for host in hosts if not objects_by_host.get(host)]
+            if missing:
+                created = self.create_objects(missing, objects_by_host)
+
+        objects = {obj.pk: obj for objs in objects_by_host.values() for obj in objs}
+        if not objects:
+            return
+        shared = self.shared_location_ids(objects) if self.is_location else set()
+        original_tags, through_rows = self.load_tags(objects)
+        current_meta = self.load_meta(objects)
+        tags = {pk: list(names) for pk, names in original_tags.items()}
+        meta = {}
+
+        for host, values in rows:
+            for obj in objects_by_host.get(host, []):
+                # A shared Location has one tag set, so a write here changes what the others see.
+                write_tags = self.create_tags and obj.pk not in shared
+                if self.create_tags and not write_tags:
+                    logger.info("Skipping tags for location %s: it is shared by more than one product", obj.pk)
+                if not values:
+                    continue
+                existing_tags = list(tags[obj.pk])
+                for key, value in values:
+                    if self.create_meta:
+                        meta[obj.pk, key] = value
                     if write_tags:
                         for tag in existing_tags:
-                            if item[0] not in tag:
+                            if key not in tag:
                                 continue
                             # found existing. Update it
                             existing_tags.remove(tag)
                             break
-                        existing_tags += [item[0] + ":" + item[1]]
-                    # if tags are not supposed to be added, this value remain unchanged
-                    endpoint.tags = existing_tags
-            endpoint.save()
-    return None
+                        existing_tags += [key + ":" + value]
+                # Tag names are stored lowercase and unique, and read back sorted by name,
+                # which is what the next row for the same host saw from the database.
+                tags[obj.pk] = sorted({name.lower() for name in existing_tags})
+
+        changed = self.write_tags(objects, original_tags, tags, through_rows)
+        self.write_meta(objects, current_meta, meta)
+        self.apply_inheritance(created, changed)
+        if self.is_location:
+            # The old loop saved every matched location, which moved its updated timestamp.
+            Location.objects.filter(pk__in=list(objects)).update(updated=timezone.now())
+
+    def load_objects(self, hosts):
+        objects_by_host = defaultdict(list)
+        if self.is_location:
+            queryset = (
+                Location.objects.filter(url__host__in=hosts, products__product=self.product)
+                .annotate(meta_import_host=F("url__host"))
+                .order_by("id")
+            )
+            for location in queryset:
+                objects_by_host[location.meta_import_host].append(location)
+        else:
+            # Filter on lower(host) so the (product, lower(host)) index serves the lookup, then
+            # keep the exact matches: host matching has always been case sensitive.
+            wanted = set(hosts)
+            queryset = (
+                Endpoint.objects.annotate(meta_import_host=Lower("host"))
+                .filter(product=self.product, meta_import_host__in={host.lower() for host in hosts})
+                .order_by("id")
+            )
+            for endpoint in queryset:
+                if endpoint.host in wanted:
+                    objects_by_host[endpoint.host].append(endpoint)
+        return objects_by_host
+
+    def create_objects(self, missing, objects_by_host):
+        if self.is_location:
+            # Creating a location goes through URL identity hashing and the product reference
+            # helpers, so it stays one host at a time.
+            created = []
+            for host in missing:
+                url = URL.get_or_create_from_values(host=host)
+                url.location.associate_with_product(self.product)
+                objects_by_host[host] = [url.location]
+                created.append(url.location)
+            return created
+
+        from dojo.tags import inheritance as tag_inheritance  # noqa: PLC0415 -- avoid import cycle via dojo.forms
+
+        created = Endpoint.objects.bulk_create([Endpoint(host=host, product=self.product) for host in missing])
+        # bulk_create skips post_save. Send it so receivers that act on a new endpoint (search
+        # indexing, Pro prioritization) still see each one; product tag inheritance is applied
+        # once for the whole batch afterwards instead of per endpoint.
+        with tag_inheritance.suppress_tag_inheritance():
+            for endpoint in created:
+                signals.post_save.send(
+                    sender=Endpoint, instance=endpoint, created=True, update_fields=None, raw=False,
+                    using=endpoint._state.db,
+                )
+        for host, endpoint in zip(missing, created, strict=True):
+            objects_by_host[host] = [endpoint]
+        return created
+
+    def shared_location_ids(self, objects):
+        return set(
+            LocationProductReference.objects.filter(location_id__in=list(objects))
+            # BaseManager orders by id; clear it or the id joins the GROUP BY.
+            .order_by()
+            .values("location_id")
+            .annotate(product_count=Count("id"))
+            .filter(product_count__gt=1)
+            .values_list("location_id", flat=True),
+        )
+
+    def tag_through(self):
+        field = self.object_class._meta.get_field("tags")
+        through = field.remote_field.through
+        source = target = None
+        for through_field in through._meta.fields:
+            remote = getattr(through_field, "remote_field", None)
+            if remote is None:
+                continue
+            if remote.model == self.object_class:
+                source = through_field.attname
+            elif remote.model == field.related_model:
+                target = through_field.attname
+        return field.related_model, through, source, target
+
+    def load_tags(self, objects):
+        _, through, source, target = self.tag_through()
+        tags = {pk: [] for pk in objects}
+        through_rows = {}
+        rows = (
+            through.objects.filter(**{f"{source}__in": list(objects)})
+            .order_by(f"{target.removesuffix('_id')}__name")
+            .values_list("pk", source, target, f"{target.removesuffix('_id')}__name")
+        )
+        for row_id, obj_id, tag_id, name in rows:
+            tags[obj_id].append(name)
+            through_rows[obj_id, name] = (row_id, tag_id)
+        return tags, through_rows
+
+    def load_meta(self, objects):
+        if self.is_location:
+            queryset = DojoMeta.objects.filter(location_id__in=list(objects), location_product=self.product)
+            owner = "location_id"
+        else:
+            queryset = DojoMeta.objects.filter(endpoint_id__in=list(objects))
+            owner = "endpoint_id"
+        return {(getattr(row, owner), row.name): row for row in queryset}
+
+    def write_tags(self, objects, original_tags, tags, through_rows):
+        tag_model, through, _, _ = self.tag_through()
+        to_add = defaultdict(list)
+        removed_rows = []
+        changed = []
+        for pk, names in tags.items():
+            before = set(original_tags[pk])
+            after = set(names)
+            if before == after:
+                continue
+            changed.append(objects[pk])
+            for name in after - before:
+                to_add[name].append(objects[pk])
+            removed_rows.extend(through_rows[pk, name] for name in before - after)
+
+        if to_add:
+            bulk_add_tag_mapping(dict(to_add))
+        if removed_rows:
+            # One DELETE: the collector behind QuerySet.delete() would split the ids into
+            # batches of 100. Tag through rows have nothing that depends on them, and the
+            # tag counts are maintained just below.
+            removed = through.objects.filter(pk__in=[row_id for row_id, _ in removed_rows])
+            removed._raw_delete(removed.db)
+            removed_per_tag = defaultdict(int)
+            for _, tag_id in removed_rows:
+                removed_per_tag[tag_id] += 1
+            tag_model.objects.filter(pk__in=list(removed_per_tag)).update(
+                count=Case(
+                    *[When(pk=pk, then=F("count") - amount) for pk, amount in removed_per_tag.items()],
+                    output_field=IntegerField(),
+                ),
+            )
+            # Same clean-up tagulous does when an instance save drops a tag: a tag nothing
+            # uses any more is deleted unless it is protected.
+            for tag in tag_model.objects.filter(pk__in=list(removed_per_tag), count__lte=0):
+                tag.try_delete()
+        return changed
+
+    def write_meta(self, objects, current_meta, meta):
+        to_create = []
+        to_update = []
+        for (pk, name), value in meta.items():
+            row = current_meta.get((pk, name))
+            if row is None:
+                owner = {"location": objects[pk], "location_product": self.product} if self.is_location else {"endpoint": objects[pk]}
+                to_create.append(DojoMeta(name=name, value=value, **owner))
+            elif row.value != value:
+                row.value = value
+                to_update.append(row)
+        if to_create:
+            DojoMeta.objects.bulk_create(to_create)
+        if to_update:
+            DojoMeta.objects.bulk_update(to_update, ["value"])
+
+    def apply_inheritance(self, created, changed):
+        # The tag writes above bypass the m2m signals that keep product-inherited tags in
+        # place, so run inheritance once for every new or retagged object instead.
+        from dojo.tags import inheritance as tag_inheritance  # noqa: PLC0415 -- avoid import cycle via dojo.forms
+
+        touched = list({obj.pk: obj for obj in [*created, *changed]}.values())
+        if not touched:
+            return
+        if self.is_location:
+            tag_inheritance.apply_inherited_tags_for_locations(touched, product=self.product)
+        else:
+            tag_inheritance.apply_inherited_tags_for_endpoints(touched)
 
 
 def remove_broken_endpoint_statuses(apps):
