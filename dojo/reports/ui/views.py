@@ -1,4 +1,3 @@
-import csv
 import logging
 import re
 from datetime import datetime
@@ -56,6 +55,7 @@ from dojo.utils import (
     get_system_setting,
     get_words_for_field,
 )
+from dojo.utils_spreadsheet import TextCellWriter, store_cells_as_text
 
 logger = logging.getLogger(__name__)
 
@@ -857,7 +857,7 @@ class CSVExportView(View):
     def build_response(self, findings, filename="findings.csv"):
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename={filename}"
-        writer = csv.writer(response)
+        writer = TextCellWriter(response)
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
         allowed_foreign_keys = get_foreign_keys()
@@ -1151,6 +1151,7 @@ class ExcelExportView(View):
                 self.add_extra_values()
             row_num += 1
 
+        store_cells_as_text(workbook)
         with NamedTemporaryFile() as tmp:
             workbook.save(tmp.name)
             tmp.seek(0)
