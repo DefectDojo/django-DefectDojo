@@ -638,7 +638,7 @@ class ViewFinding(View):
                 reverse("view_finding", args=(finding.id,)),
             )
             title = f"Finding: {finding.title}"
-            process_tag_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title, parent=finding)
             # Add a message to the request
             messages.add_message(
                 request, messages.SUCCESS, _("Note saved."), extra_tags="alert-success",
