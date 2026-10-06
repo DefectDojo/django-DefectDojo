@@ -3,6 +3,8 @@ from typing import NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
@@ -182,6 +184,14 @@ class EndpointManager(BaseLocationManager):
         """Accumulate endpoint statuses for bulk mitigation in persist()."""
         self._statuses_to_mitigate.extend((eps, user) for eps in statuses)
 
+    def _existing_endpoints_for_queued_hosts(self):
+        """Endpoints of this product whose host matches the host of a queued key."""
+        hosts = {key.host for key in self._endpoints_to_create}
+        host_filter = Q(lower_host__in={host for host in hosts if host is not None})
+        if None in hosts:
+            host_filter |= Q(host__isnull=True) | Q(host="")
+        return Endpoint.objects.filter(product=self._product).annotate(lower_host=Lower("host")).filter(host_filter)
+
     def get_or_create_endpoints(self) -> tuple[dict[EndpointUniqueKey, Endpoint], list[Endpoint]]:
         """
         For each queued endpoint record, fetch the existing DB row or bulk_create a new one.
@@ -198,9 +208,13 @@ class EndpointManager(BaseLocationManager):
         endpoints_by_key: dict[EndpointUniqueKey, Endpoint] = {}
 
         with transaction.atomic():
-            # Fetch all existing endpoints for this product
+            # Fetch only the product's endpoints that could match a queued key. A key's host is
+            # the lowercased host (or None for a missing/empty one), so every matching row has
+            # lower(host) in the queued set and the idx_ep_product_lower_host index serves the
+            # lookup. Reading every endpoint of the product instead cost one Python row per
+            # endpoint per flush: minutes on a product with millions of endpoints.
             for ep in (
-                Endpoint.objects.filter(product=self._product)
+                self._existing_endpoints_for_queued_hosts()
                 .only("id", "protocol", "userinfo", "host", "port", "path", "query", "fragment", "product_id")
                 .order_by("id")
                 .iterator()
@@ -215,8 +229,9 @@ class EndpointManager(BaseLocationManager):
                     fragment=ep.fragment,
                     product_id=ep.product_id,
                 )
-                # First-by-id wins, matching endpoint_get_or_create behavior
-                if key not in endpoints_by_key:
+                # First-by-id wins, matching endpoint_get_or_create behavior. Same-host rows with
+                # another path or port come back too; only queued keys are kept.
+                if key in self._endpoints_to_create and key not in endpoints_by_key:
                     endpoints_by_key[key] = ep
 
             # Determine which endpoints still need creating
