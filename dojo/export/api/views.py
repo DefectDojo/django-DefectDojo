@@ -96,7 +96,9 @@ class ExportViewSet(viewsets.ViewSet):
             OpenApiParameter("cursor", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
                              description="The next value from the previous page. Empty for the first page."),
             OpenApiParameter("limit", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False,
-                             description="Most object lines on one page (1 to 5000)."),
+                             description="Most finding, finding group and risk acceptance lines on one page: "
+                                         "1 to 5000, default 1000. Product, engagement and test lines do not "
+                                         "count."),
             OpenApiParameter("include_duplicates", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False),
             MAX_FILE_BYTES_PARAMETER,
             OpenApiParameter("max_pair_bytes", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False,
