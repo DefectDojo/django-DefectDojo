@@ -471,6 +471,19 @@ class TestRiskAcceptanceApi(APITestCase):
         self.assertIsNone(ra.expiration_date_handled)
         self.assertIsNone(ra.expiration_date_warned)
 
+    def test_partial_update_without_accepted_findings_keeps_findings(self):
+        ra = self.make_risk_acceptance()
+
+        response = self.client.patch(f"{self.url}{ra.id}/", {"name": "Renamed RA"}, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        ra.refresh_from_db()
+        self.assertEqual("Renamed RA", ra.name)
+        self.assertEqual([self.finding_a1.id], list(ra.accepted_findings.values_list("id", flat=True)))
+        self.finding_a1.refresh_from_db()
+        self.assertFalse(self.finding_a1.active)
+        self.assertTrue(self.finding_a1.risk_accepted)
+
     def make_risk_acceptance(self, *, expired=False):
         """Build a risk acceptance covering finding_a1, optionally in the post-expiry state."""
         stamp = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=5)
