@@ -35,6 +35,21 @@ encryption employed, but not FIPS-validated, deducts 3 instead of 5.
 
 Requirements with no documented partial condition always deduct their full weight.
 
+### Posture evidence
+
+Four configuration management requirements (`3.4.1`, `3.4.2`, `3.4.6` and `3.4.7`) have an
+**Evidence** button in the requirements table. It shows what the Asset's posture scans found in the
+90 days up to the assessment date (or up to today, while the date is unset or still ahead): which
+posture scan types ran, how many failed checks are still open by severity, how many were risk
+accepted, and the hosts with open failed checks. The scan types that count are the ones set on the
+[Compliance Profile](../compliance_profile/), or the default posture scan types without one.
+
+The evidence is computed each time the page opens and never sets a result. You still record **Met**
+or **Not met**, and the SPRS score follows the result you record. With no posture scan in that
+window, the evidence says there is nothing to show.
+
+Automation can read the same evidence from `GET /api/v2/cmmc_assessments/{id}/posture_evidence/`.
+
 ## What the assessment computes
 
 ### SPRS score

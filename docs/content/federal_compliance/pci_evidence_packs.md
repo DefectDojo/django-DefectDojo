@@ -72,7 +72,7 @@ the assessor with a note saying why.
 
 | Requirement | Read from |
 |---|---|
-| 2.2.1, 2.2.2, 2.2.4 to 2.2.7 | The posture scans of the Asset's systems in the period: which ran, which failed checks are still open, and which deviations were risk accepted |
+| 2.2.1, 2.2.2, 2.2.4 to 2.2.7 | The posture scans of the Asset's systems in the period: which ran, which failed checks are still open and on which hosts, and which deviations were risk accepted |
 | 6.3.1 | How fresh the vulnerability enrichment data is |
 | 6.3.2 | The component inventory built from imported SBOM and dependency data |
 | 6.3.3 | The SLA configuration and the findings measured against it |
@@ -100,10 +100,11 @@ DISA STIG checklists, OpenSCAP, Lynis, kube-bench, docker-bench and cloud postur
 has a [Compliance Profile](../compliance_profile/), its configuration test types decide which scans
 count. With no posture scan in the period the requirement stays manual, because there is nothing to
 show. A requirement is satisfied when every failed check is fixed or risk accepted, and partially
-satisfied while some are neither. Several of these requirements also need a record DefectDojo does
-not hold (the written configuration standard, why an insecure service is justified), so they are
-marked as partly automated. Requirement 2.2.3, separating functions with different security needs,
-is manual.
+satisfied while some are neither. The evidence lists the hosts that still have open failed checks,
+most first, with their count by severity (up to 100 hosts, and how many more there are). Several of
+these requirements also need a record DefectDojo does not hold (the written configuration standard,
+why an insecure service is justified), so they are marked as partly automated. Requirement 2.2.3,
+separating functions with different security needs, is manual.
 
 An assessment that existed before Requirement 2 was added picks it up the next time it is
 recomputed.
