@@ -3,7 +3,9 @@ from io import StringIO
 from unittest.mock import patch
 
 from django.core.management import call_command
+from django.db import connection
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from dojo.location.models import (
@@ -12,6 +14,7 @@ from dojo.location.models import (
     LocationProductReference,
 )
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
+from dojo.management.commands import migrate_endpoints_to_locations
 from dojo.models import (
     Dojo_User,
     DojoMeta,
@@ -763,3 +766,163 @@ class MigrateEndpointsToLocationsTest(TestCase):
         )
         self.assertEqual(len(saved), 2)
         self.assertEqual([url.host for url in created], ["brand-new.example.com"])
+
+
+# Regression: the endpoints-to-locations backfill was OOM-killed on a large install. A
+# chunk prefetched every status of every endpoint with the FULL Finding row (wide text
+# columns) and a joined User per status, although the migration only reads the finding's
+# id and its test -> engagement -> product chain. A hot endpoint with tens of thousands
+# of statuses turned one chunk into gigabytes.
+@override_settings(V3_FEATURE_LOCATIONS=True)
+class MigrateEndpointsToLocationsMemoryTest(TestCase):
+
+    # Reuse the fixtures of the main class without re-running its tests here.
+    setUp = MigrateEndpointsToLocationsTest.setUp
+    _make_endpoint = MigrateEndpointsToLocationsTest._make_endpoint
+    _make_test = MigrateEndpointsToLocationsTest._make_test
+    _run = MigrateEndpointsToLocationsTest._run
+
+    def _make_hot_endpoint(self, host, fanout):
+        """One endpoint linked to ``fanout`` findings, each on its own test."""
+        with Endpoint.allow_endpoint_init():
+            endpoint = Endpoint.objects.create(protocol="https", host=host, product=self.product)
+        for i in range(fanout):
+            finding = Finding.objects.create(
+                title=f"Hot finding {i}",
+                test=self._make_test(),
+                severity="High",
+                numerical_severity="S1",
+                description="A very wide description. " * 50,
+                mitigation="A very wide mitigation. " * 50,
+                active=True,
+                verified=False,
+                reporter=self.reporter,
+            )
+            Endpoint_Status.objects.create(
+                endpoint=endpoint,
+                finding=finding,
+                date=datetime.date(2024, 5, 17),
+                mitigated=True,
+                mitigated_by=self.reporter,
+                mitigated_time=timezone.now(),
+            )
+        return endpoint
+
+    def _finding_selects(self, captured):
+        return [
+            q["sql"] for q in captured.captured_queries
+            if q["sql"].lstrip().upper().startswith("SELECT") and 'FROM "dojo_finding"' in q["sql"]
+        ]
+
+    def test_status_prefetch_does_not_load_wide_finding_columns(self):
+        self._make_hot_endpoint("hot.example.com", fanout=3)
+
+        with CaptureQueriesContext(connection) as captured:
+            self._run()
+
+        finding_selects = self._finding_selects(captured)
+        self.assertTrue(finding_selects, msg="expected a dojo_finding prefetch query")
+        for sql in finding_selects:
+            for column in ("description", "mitigation", "impact", "references", "steps_to_reproduce"):
+                self.assertNotIn(
+                    f'"dojo_finding"."{column}"', sql,
+                    msg=f"the finding prefetch loads the wide {column!r} column: {sql}",
+                )
+        # The migration needs no auditor row either: it writes the status's user id.
+        user_joins = [
+            q["sql"] for q in captured.captured_queries
+            if 'FROM "dojo_endpoint_status"' in q["sql"] and '"dojo_dojo_user"' in q["sql"]
+        ]
+        self.assertEqual(user_joins, [], msg="the status prefetch joins the full mitigated_by user row")
+
+        # The narrowed read still writes the same references, auditor included.
+        refs = list(LocationFindingReference.objects.all())
+        self.assertEqual(len(refs), 3)
+        for ref in refs:
+            self.assertEqual(ref.auditor_id, self.reporter.id)
+            self.assertEqual(ref.status, FindingLocationStatus.Mitigated)
+        self.assertEqual(
+            list(LocationProductReference.objects.values_list("product_id", flat=True)),
+            [self.product.id],
+        )
+
+    def test_query_count_does_not_grow_with_statuses_per_endpoint(self):
+        # Narrowing the prefetch must not trade memory for an N+1: a deferred field read
+        # per status (or per finding/test/engagement) would make the query count scale
+        # with the endpoint's fan-out.
+        small_endpoint = self._make_hot_endpoint("small.example.com", fanout=2)
+        with CaptureQueriesContext(connection) as small:
+            self._run()
+
+        # The second run resumes past the first endpoint, so each run migrates exactly
+        # one new endpoint and only the fan-out differs.
+        self._make_hot_endpoint("big.example.com", fanout=8)
+        with CaptureQueriesContext(connection) as big:
+            self._run(start_after_id=small_endpoint.id)
+
+        self.assertEqual(LocationFindingReference.objects.count(), 10)
+        self.assertEqual(
+            len(big.captured_queries), len(small.captured_queries),
+            msg="queries grew with the statuses per endpoint:\n"
+                + "\n".join(q["sql"][:200] for q in big.captured_queries),
+        )
+
+    def test_statuses_of_a_hot_endpoint_are_streamed_in_batch_size_slices(self):
+        # One endpoint with more statuses than --batch-size: its statuses and their
+        # reference rows are read and written a slice at a time, never all at once.
+        self._make_hot_endpoint("streamed.example.com", fanout=5)
+        written = []
+        original = LocationFindingReference.objects.bulk_create
+
+        def recording_bulk_create(objs, *args, **kwargs):
+            written.append(len(objs))
+            return original(objs, *args, **kwargs)
+
+        with patch.object(LocationFindingReference.objects, "bulk_create", side_effect=recording_bulk_create):
+            self._run(batch_size=2)
+
+        self.assertEqual(written, [2, 2, 1], msg=f"finding reference writes per slice: {written}")
+        refs = LocationFindingReference.objects.all()
+        self.assertEqual(refs.count(), 5)
+        self.assertEqual({ref.auditor_id for ref in refs}, {self.reporter.id})
+        self.assertEqual(
+            list(LocationProductReference.objects.values_list("product_id", "status")),
+            [(self.product.id, ProductLocationStatus.Mitigated)],
+        )
+
+    def test_run_scoped_state_stays_bounded_across_chunks(self):
+        # Every per-endpoint structure lives for one chunk. The tag queue is flushed at
+        # each chunk boundary holding at most --batch-size endpoints, and no container on
+        # the command instance grows with the number of endpoints migrated.
+        def run_and_measure(count, prefix):
+            for i in range(count):
+                self._make_endpoint(f"{prefix}-{i}.example.com", [f"{prefix}-tag-{i}"])
+            command = migrate_endpoints_to_locations.Command()
+            flushed_sizes = []
+            original_flush = command._flush_location_tags
+
+            def measuring_flush():
+                flushed_sizes.append(
+                    (len(command.pending_endpoint_tags), sum(len(v) for v in command.pending_tag_locations.values())),
+                )
+                original_flush()
+
+            command._flush_location_tags = measuring_flush
+            call_command(command, batch_size=2, progress_every=100, stdout=StringIO())
+            containers = {
+                name: len(value) for name, value in vars(command).items()
+                if isinstance(value, (list, dict, set)) and name not in {"timings", "counts"}
+            }
+            return flushed_sizes, containers
+
+        _small_flushes, small_containers = run_and_measure(3, "small")
+        large_flushes, large_containers = run_and_measure(9, "large")
+
+        self.assertTrue(large_flushes)
+        for endpoints_queued, locations_queued in large_flushes:
+            self.assertLessEqual(endpoints_queued, 2, msg=large_flushes)
+            self.assertLessEqual(locations_queued, 2, msg=large_flushes)
+        self.assertEqual(
+            large_containers, small_containers,
+            msg=f"run-scoped containers grew with the endpoint count: {small_containers} -> {large_containers}",
+        )
