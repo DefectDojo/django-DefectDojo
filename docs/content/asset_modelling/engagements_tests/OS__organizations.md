@@ -33,7 +33,7 @@ If you have a single Organization that contains all of the relevant information 
 
 If a particular software project has many distinct deployments or versions, it may be worth creating a single Organization which covers the scope of the entire project and having each version exist as individual Assets. In some workflows, Organizations may also be used to separate software lifecycle stages: one Organization for “In Development,” one Organization for “In Production,” etc.
 
-Organizations can be used to determine access to subsidiaries, acquired companies, or other regulated business units for RBAC purposes. In complex businesses, where there are a lot of unique projects with different access rules, Organizations are particularly relevant.
+Organizations can be used to determine access to subsidiaries, acquired companies, or other regulated business units for access control. In complex businesses, where there are a lot of unique projects with different access rules, Organizations are particularly relevant.
 
 Ultimately, the decision of how to use Organizations and Assets depends on how you best wish to reflect your unique organizational structure and the needs of your security team. 
 
@@ -109,7 +109,7 @@ Organizations are intended to represent structural ownership or reporting bounda
 
 ## Organization Boundaries 
 
-Organizations establish both reporting and access boundaries within DefectDojo. Because integrations, RBAC permissions, ownership, metrics, and deduplication models frequently inherit Organizations’ structure, designing clear boundaries early helps avoid hierarchy sprawl and reporting fragmentation later.
+Organizations establish both reporting and access boundaries within DefectDojo. Because integrations, access permissions, ownership, metrics, and deduplication models frequently inherit Organizations’ structure, designing clear boundaries early helps avoid hierarchy sprawl and reporting fragmentation later.
 
 ### Findings and Automation 
 
@@ -117,9 +117,9 @@ Although integrations are typically configured on lower-level objects such as As
 
 Permissions cascade downward, meaning that access to an Organization automatically grants access to all objects within that Organization (e.g., Assets, Engagements, Tests, and Findings). 
 
-The DefectDojo RBAC model can be used to gate human user access, but can also restrict API tokens’ access to particular Organizations.
+An Organization’s [Authorized Users](/admin/user_management/os__authorized_users/) list gates human access. API tokens act as the user they belong to, so a token can only reach the Organizations its user is authorized for.
 
-For more information on user roles, see our [Permissions](/admin/user_management/os__authorized_users/) article.
+For more information on access, see [Open-Source Permissions](/admin/user_management/os__authorized_users/).
 
 ### Ownership 
 

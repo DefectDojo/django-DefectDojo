@@ -23,7 +23,7 @@ Managing roles requires **superuser** status or the built-in **Owner** Global Ro
 
 ## Opening the Roles page
 
-Go to **👤 Users > Roles** in the left sidebar. The menu entry is visible to superusers and holders of the built-in Owner Global Role.
+Go to **Settings > Users & Permissions > Roles** in the left sidebar. The menu entry is visible to superusers and holders of the built-in Owner Global Role.
 
 ![The Roles page listing built-in and custom roles](images/pro_roles_list.png)
 

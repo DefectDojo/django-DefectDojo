@@ -42,6 +42,17 @@ class TestLocationDataCodeFactory(DojoTestCase):
         self.assertIsNone(data.data["line"])
 
 
+class TestLocationDataDependencyFactory(DojoTestCase):
+    def test_component_type_is_empty_when_the_report_does_not_say(self):
+        data = LocationData.dependency(purl="pkg:npm/lodash@4.17.21")
+        self.assertEqual("", data.data["component_type"])
+
+    def test_component_type_is_carried_as_the_report_states_it(self):
+        data = LocationData.dependency(purl="pkg:huggingface/org/model", component_type="machine-learning-model")
+        self.assertEqual("machine-learning-model", data.data["component_type"])
+        self.assertEqual("pkg:huggingface/org/model", data.data["purl"])
+
+
 @skip_unless_v3
 class TestGetLocationsHashSymmetry(DojoTestCase):
     @classmethod

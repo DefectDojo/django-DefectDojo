@@ -10,7 +10,7 @@ free-form key/value metadata, custom fields are **typed and defined up front**: 
 defines each field once (a label, a key, and a data type), and everyone else fills in a value of that
 type on the records they work with.
 
-Custom Fields is turned on per instance from **Settings → Feature Flags → Custom Fields**. Enabling
+Custom Fields is turned on per instance from the **Custom Fields** row on the **Settings > Feature Flags** page. Enabling
 it is one-way, and it replaces the earlier metadata feature: once on, DefectDojo reads and writes
 custom fields everywhere metadata was used, so existing metadata values are no longer shown until you
 convert them. Converting your existing metadata is a separate, optional step you run when you are ready
@@ -30,7 +30,7 @@ Custom fields are available on six record types:
 ## Defining fields
 
 Custom fields are definitions-first: a value can only be filled in for a field that has been defined.
-Superusers define fields under **Settings → Configuration → Custom Fields**. Pick a record type, then
+Superusers define fields under **Settings > Configuration > Custom Fields**. Pick a record type, then
 add the fields that apply to it. Each definition has:
 
 - **Record type**: which of the six record types the field applies to. A field defined for Findings
@@ -71,7 +71,7 @@ editor is available on all six record types: Organizations, Assets, Engagements,
 Risk Acceptances.
 
 If no fields are defined for the record type yet, the editor says so, and an administrator can define
-them under **Settings → Configuration → Custom Fields**.
+them under **Settings > Configuration > Custom Fields**.
 
 ## Custom fields on the create and edit forms
 
@@ -80,7 +80,7 @@ in while the record is being created rather than only afterwards. Each field use
 typed editor, and is validated the same way when the form is submitted.
 
 By default custom fields appear at the end of the **Optional Fields** section. An administrator can
-change that for each form under **Settings → UI Defaults → Form Configuration**, where every custom
+change that for each form under **Settings > UI Defaults > Form Configuration**, where every custom
 field is listed alongside the built-in fields and can be moved into the main body of the form, hidden,
 made required for that form, or reordered. See
 [Configuring Forms](../../navigation/pro__form_configuration/) for how those controls work.
@@ -113,7 +113,7 @@ parameter use the field's **Name**, so sorting a list by a `cost_center` field a
 
 Enabling the feature does not move any data on its own: it switches Findings and Assets over to the
 typed store, so metadata you entered before is no longer shown until you convert it. When you are ready,
-click **Convert** under **Custom Fields** on the **Settings → Feature Flags** page. It copies existing
+click **Convert** under **Custom Fields** on the **Settings > Feature Flags** page. It copies existing
 Finding and Asset metadata into typed fields with a best-effort data type inferred from the values, runs
 in the background with a progress bar you can watch (and cancel), and is non-destructive: the original
 metadata rows are left in place. The conversion is safe to run again: it never duplicates, and a re-run

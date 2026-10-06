@@ -221,7 +221,7 @@ later switched off, so a deployment can always inspect and clean up what it crea
 
 ## Accessing Organizations
 
-Organizations are accessible via the sidebar. The submenu provides access to All Organizations as well as the option to create a new Organization.
+Organizations are accessible from the sidebar under **Act > Explore > Organizations**; new Organizations are created with the **New Organization** button at the top of the list.
 
 ![image](images/org_ss1.png)
 
@@ -247,10 +247,7 @@ member Asset with the provenance of its membership (see
 
 ### Create Organizations 
 
-There are two ways to create Organizations: 
-
-- From the **New Organization** option in the side menu
-- From the **New Organization** button at the top of the All Organizations list 
+Organizations are created from the **New Organization** button at the top of the All Organizations list (**Act > Explore > Organizations**). 
 
 ### Edit Organizations 
 

@@ -12,7 +12,7 @@ your own CI), it needs an LLM. **AI Model Settings** is where you choose that mo
 its credentials, once, instance-wide — the hosted worker uses this configuration instead of any
 per-repository secret.
 
-You reach it from the sidebar under **Sensei + AI → AI Model Settings**. You need a global
+You reach it from the sidebar under **Sensei + AI > AI Model Settings**. You need a global
 **Maintainer** or **Owner** role to change it.
 
 > **On-premise only.** This page exists only on **on-premise** ("local") deployments, where you
@@ -36,7 +36,10 @@ default) and an optional **API Base URL** to point at an on-prem or self-hosted 
 
 All secrets are **encrypted at rest** and are **write-only**: once saved, the form shows only
 whether a secret is set, never its value. Leave a secret field blank when saving to keep the
-stored value; type a new value to replace it.
+stored value; type a new value to replace it. The one exception is the **API Base URL**: a saved
+API key is kept only for the base URL it was saved with, so changing the base URL to a new
+gateway means entering the key again (clearing the base URL does not). **Test connection** follows
+the same rule.
 
 ### Claude (Anthropic) and OpenAI
 

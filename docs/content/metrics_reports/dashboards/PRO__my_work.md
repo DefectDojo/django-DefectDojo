@@ -7,7 +7,7 @@ weight: 4
 
 **My Work** answers one question: what is waiting on me? It is a per-user view — the same page shows each person their own queue.
 
-Open it from **Dashboards > My Work** in the left sidebar.
+Open it from **Overview > My Work** in the left sidebar.
 
 ## The queues
 

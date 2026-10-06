@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<bom serialNumber="urn:uuid:9d2e7a44-1b3f-4c6d-8e5a-2f4b6c8d0e13" version="1" xmlns="http://cyclonedx.org/schema/bom/1.2" xmlns:v="http://cyclonedx.org/schema/ext/vulnerability/1.0">
+    <components>
+        <component type="machine-learning-model" bom-ref="model">
+            <name>example-model</name>
+            <version>1.0</version>
+            <purl>pkg:huggingface/example-org/example-model@1.0</purl>
+            <v:vulnerabilities>
+                <v:vulnerability ref="model">
+                    <v:id>CVE-2099-0001</v:id>
+                    <v:ratings>
+                        <v:rating>
+                            <v:severity>High</v:severity>
+                        </v:rating>
+                    </v:ratings>
+                </v:vulnerability>
+            </v:vulnerabilities>
+        </component>
+        <component type="data" bom-ref="dataset">
+            <name>example-dataset</name>
+            <version>2.0</version>
+            <purl>pkg:generic/example-dataset@2.0</purl>
+        </component>
+        <component bom-ref="untyped">
+            <name>urllib3</name>
+            <version>2.0.0</version>
+            <purl>pkg:pypi/urllib3@2.0.0</purl>
+        </component>
+    </components>
+    <v:vulnerabilities>
+        <v:vulnerability ref="dataset">
+            <v:id>CVE-2099-0002</v:id>
+            <v:ratings>
+                <v:rating>
+                    <v:severity>Medium</v:severity>
+                </v:rating>
+            </v:ratings>
+        </v:vulnerability>
+        <v:vulnerability ref="untyped">
+            <v:id>CVE-2099-0003</v:id>
+            <v:ratings>
+                <v:rating>
+                    <v:severity>Low</v:severity>
+                </v:rating>
+            </v:ratings>
+        </v:vulnerability>
+    </v:vulnerabilities>
+</bom>

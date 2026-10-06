@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<bom serialNumber="urn:uuid:5b1c2c1e-6f0a-4a8e-9d51-0c7a1f6e2b40" version="1" xmlns="http://cyclonedx.org/schema/bom/1.4">
+    <components>
+        <component type="machine-learning-model" bom-ref="model">
+            <name>example-model</name>
+            <version>1.0</version>
+            <purl>pkg:huggingface/example-org/example-model@1.0</purl>
+        </component>
+        <component type="library" bom-ref="library">
+            <name>requests</name>
+            <version>2.31.0</version>
+            <purl>pkg:pypi/requests@2.31.0</purl>
+        </component>
+        <component bom-ref="untyped">
+            <name>urllib3</name>
+            <version>2.0.0</version>
+            <purl>pkg:pypi/urllib3@2.0.0</purl>
+        </component>
+    </components>
+    <vulnerabilities>
+        <vulnerability bom-ref="vuln-model">
+            <id>CVE-2099-0001</id>
+            <ratings>
+                <rating>
+                    <severity>high</severity>
+                </rating>
+            </ratings>
+            <affects>
+                <target>
+                    <ref>model</ref>
+                </target>
+            </affects>
+        </vulnerability>
+        <vulnerability bom-ref="vuln-untyped">
+            <id>CVE-2099-0002</id>
+            <ratings>
+                <rating>
+                    <severity>medium</severity>
+                </rating>
+            </ratings>
+            <affects>
+                <target>
+                    <ref>untyped</ref>
+                </target>
+            </affects>
+        </vulnerability>
+    </vulnerabilities>
+</bom>

@@ -11,7 +11,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The reusable Report Builder (Themes, Blocks, Templates, and saved Generated Reports) is a DefectDojo Pro feature, currently in beta.</span>
 
-The DefectDojo Pro Report Builder lets you compose polished reports out of reusable parts, so you can build the pieces once and reuse them everywhere instead of rebuilding a report from scratch each time. You reach it from the **📄 Reporting** area in the sidebar.
+The DefectDojo Pro Report Builder lets you compose polished reports out of reusable parts, so you can build the pieces once and reuse them everywhere instead of rebuilding a report from scratch each time. You reach it from **Overview > Reporting** in the sidebar.
 
 ## How it compares to open source
 
@@ -68,7 +68,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Image**
 - **Text block**
 
-**Tabular** and **Detail** blocks both pull live records from one entity. You pick the entity with a model choice, then select which fields to include and how to order the records. The model choice is exactly one of these seven entities:
+**Tabular** and **Detail** blocks both pull live records from one entity. You pick the entity with a model choice, then select which fields to include and how to order the records. The model choice is one of these entities:
 
 - **Organization**
 - **Asset**
@@ -77,6 +77,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Finding**
 - **Test type**
 - **Risk acceptance**
+- **Location** (only when Locations are enabled). A switch under the model choice picks what each row is: **Location** (every location, whatever its type), **URL**, **Dependency**, or **Location per Asset**.
 
 > **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. You may still encounter the legacy wording in some underlying field and filter names.
 
@@ -85,6 +86,22 @@ The difference is presentation: a **Tabular** block lays the records out as a ta
 Fields render in the order they are listed. Selecting a field adds it to the end of the list, and the **Fields** section of the block editor shows the selection as a numbered list you can rearrange: drag a field by its handle, or use the arrow buttons to move it up or down. Removing a field from that list deselects it. Columns in a Tabular block, and the label and value pairs in a Detail block, follow this order when the report is generated.
 
 When Locations are enabled, each of the Organization, Asset, Engagement, Test, and Finding entities offers a **Location Count** field. An Asset counts the locations it references directly and a Finding counts the locations attached to it. An Organization rolls up the distinct locations across its Assets, and an Engagement or Test counts the distinct locations touched by its Findings, so a host shared by several findings counts once. The counts respect the viewer's permissions, so a user who can only see some Assets in an Organization sees only those Assets' locations in its count.
+
+### Reporting which Assets a location belongs to
+
+DefectDojo stores each location once, so a single host or URL can belong to several Assets, and those Assets can sit in different Organizations. There are two ways to report on that link, and you can use either one in the same report.
+
+**Location per Asset** gives one row for each pairing of a location and an Asset. If three Assets reference a location, it appears on three rows. Each row carries the location's type and value, the Asset's name, the Organization's name, and the status of that link (**Active** or **Mitigated**), so you can filter to live links only. Use this for exports you want to sort, pivot, or match against another inventory such as a CMDB.
+
+**Location**, **URL**, and **Dependency** blocks also offer three columns that list the Assets on one row per location:
+
+- **Asset Names**: every Asset that references the location.
+- **Active Asset Names**: only the Assets whose link to the location is Active.
+- **Organization Names**: the distinct Organizations of those Assets, which can be fewer than the Assets.
+
+Names are sorted and separated by `; `. A location referenced by so many Assets that the list goes past 32,000 characters is cut off with `…`, which keeps each value inside the Excel cell limit. The Location per Asset block has no such limit, so use it for locations shared very widely.
+
+Both follow the viewer's permissions. The Assets and Organizations named are only the ones the person the report is generated for can see, the same rule the **Active** and **Total** Asset counts already follow.
 
 A **Chart** block draws one chart from the catalog below — the same charts the Insights dashboards use, so a figure in a report matches the figure your team already reads on screen. You choose the chart, and the chart decides what it can be filtered by:
 
@@ -124,7 +141,7 @@ A **Widget** block puts a [Customizable Dashboards](../../dashboards/custom-dash
 
 The block type appears only while Customizable Dashboards is enabled, because everything that configures a widget lives there. A Widget block saved earlier keeps working and keeps generating if the feature is later turned off.
 
-Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type.
+Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type. The one exception is **Variable Filters**, shown below **Configure Widget**, which narrow the widget to the finding or asset a report is generated for (see [Template variables](#template-variables)).
 
 Not every widget can go in a report, and the picker lists only the ones that can. How each one is drawn depends on the widget:
 
@@ -230,7 +247,7 @@ Three variables exist:
 
 Tokens can go in two places:
 
-- **Block filters.** Under **Variable Filters** in a Tabular, Detail or Graph Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical.
+- **Block filters.** Under **Variable Filters** in a Tabular, Detail, Graph or Widget Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical. In a Widget Block, the rows offered follow what the widget counts (a Count widget set to Assets offers *Asset is the report's asset*), and a ticked row replaces the same filter set in the widget's own settings.
 - **Text.** A Block header, a cover page title, a text Block, a theme footer: type a token and it is replaced with the value when the report is generated, for example `Exposure Report for {{vulnerability_id}}`.
 
 A variable is filled in from wherever the report is generated:
@@ -241,7 +258,7 @@ A variable is filled in from wherever the report is generated:
 
 A report can only be about a finding or asset its requester is allowed to see. A generation that is missing a variable its Template uses is refused with a message naming it, rather than silently reporting on everything. A Template preview shows tokens as written and shows a placeholder in place of any Block that filters on a variable.
 
-The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks take their filters from the widget's own settings and do not use variables.
+The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks are not part of those exports, but a Template's variables are one set whatever the format, so an export still asks for a variable that only a Widget Block uses.
 
 ## Building a report in the UI
 

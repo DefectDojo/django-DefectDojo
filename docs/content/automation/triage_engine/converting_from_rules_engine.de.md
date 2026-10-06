@@ -1,7 +1,7 @@
 ---
 title: Migration von der Rules Engine
 description: Bestehende Rules-Engine-Regeln in Rules-Engine-2.0-Graphen überführen
-weight: 6
+weight: 7
 audience: pro
 aliases:
 - /de/automation/rules_engine_v2/converting_from_rules_engine/
