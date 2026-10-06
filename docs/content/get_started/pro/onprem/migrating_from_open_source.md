@@ -27,6 +27,9 @@ Choose the connector when you want to try the move first, or move Products one a
 5. Turn on auto-mapping, or map each Record to an Asset yourself.
 6. Run **Sync**. Run it again whenever you like; a second Sync changes nothing unless the source changed.
 7. To switch over, stop using the source, then run Discover and a last Sync. Confirm the Finding counts match for the Products you mapped.
+
+   After the first Sync, a Sync copies status changes and closes Findings that the source no longer has. It does not copy later edits to a Finding's title, severity, description or other fields. It does not change `verified`. It does not undo a false positive, out of scope or risk acceptance that the source reverts.
+
 8. After you switch over, activate the copied users who will sign in. Then set up SSO, JIRA, tool credentials and notifications in Pro.
 
 The [DefectDojo connector page](/connectors/toolreference/defectdojo/) lists what crosses and what does not.

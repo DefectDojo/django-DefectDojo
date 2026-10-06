@@ -59,6 +59,7 @@ Compat mode also leaves out:
 
 * An existing Asset keeps its name, description and other fields when you map a Record onto it. The connector only adds tags, source regulations and metadata to it.
 * Until you finish migration, each Sync updates the Engagement and Test fields from the source. A field you changed in Pro, for example the lead, reverts on the next Sync.
+* After the first Sync, a Sync copies status changes and closes Findings that the source no longer has. It does not copy later edits to a Finding's title, severity, description or other fields. It does not change `verified`. It does not undo a false positive, out of scope or risk acceptance that the source reverts.
 * If a Finding disappears from the source, the next complete Sync closes its copy in DefectDojo Pro. In compat mode, the copies of a source Product that loses its last Finding stay open. The connector never deletes a Finding.
 * The connector creates an inactive DefectDojo Pro user for every user that the source data references. This covers mapped and unmapped Products alike. These users count toward your license's user limit. Activate the ones who need to sign in to DefectDojo Pro.
 * Like any connector, each Sync counts every copied Finding toward your weekly Finding usage.
