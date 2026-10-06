@@ -18,7 +18,7 @@ Each of these previously produced a closed finding plus a "new" finding, losing 
 
 ## Enabling Location Tracking
 
-Location tracking is configured per tool on **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout).
+Location tracking is configured per tool on **Settings > Finding Workflow > Matching Configuration**.
 
 1. Find the tool's row and select its **Reimport** column.
 2. Set the **Algorithm** to **Hash code**. Location tracking applies to that algorithm only: tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
@@ -62,6 +62,14 @@ With tracking enabled, reimport matching happens in two stages:
 | Manifest move | Same package, different lockfile/manifest path |
 
 When the same vulnerable package appears in **several manifests**, each manifest's finding is tracked independently: a version bump in one lockfile never swallows the finding from another.
+
+### Cloud resource findings
+
+Cloud resources match on their identifier alone: the ARN, resource URI, or Azure resource ID the provider assigned. There is no fuzzy match here, and that is on purpose. A cloud provider assigns that identifier once, when it creates the resource, and never changes it. A bucket is not renamed into a different bucket. Instead, the provider deletes it and creates a new one. That new bucket is a genuinely different resource, so it is correctly a different finding.
+
+Region, service, tags, and display name can all change. The resource itself stays the same. None of these fields take part in the match. A relabelled instance is still the same instance, so it keeps its findings.
+
+With Locations enabled, the **Hash Code** and **Unique ID From Tool or Hash Code** algorithms do not mark two findings as duplicates when they sit on two different cloud resources, even if the rest of their identity matches. A finding with no cloud resource is not affected, and still deduplicates as before. The check applies when findings are compared: findings that an earlier import already marked as duplicates stay marked, and a later import does not split them.
 
 ### Severity re-scores
 

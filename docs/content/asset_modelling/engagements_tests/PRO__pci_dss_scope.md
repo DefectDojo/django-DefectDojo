@@ -7,7 +7,9 @@ weight: 8
 
 The PCI DSS scope features let an organization record how each Asset relates to its cardholder data environment, run a patch clock that matches the Requirement 6.3.3 timeline, and export the scope inventory an assessor asks for under Requirement 12.5.1. These features are additive: they record the entity's own determinations and never decide compliance, which remains the assessor's judgment.
 
-The PCI DSS scope features, including their API endpoints, are released behind a feature flag. An administrator turns it on per instance from the Feature Flags page before it is generally available. Until then the regulatory profile and inventory endpoints answer with a 403.
+The PCI DSS scope features, including their API endpoints, are released behind the **PCI DSS** feature flag. An administrator turns it on per instance from the Feature Flags page before it is generally available. Until then scope confirmation and the scope inventory export answer with a 403.
+
+The regulatory profile itself also holds an Asset's CRA and DORA facts, so the **Regulatory Profile** flag opens it as well. With only that flag on, the Asset page shows and saves the CRA and DORA fields, while scope confirmation and the inventory export stay closed until **PCI DSS** is on too.
 
 ## PCI DSS scope on an Asset
 

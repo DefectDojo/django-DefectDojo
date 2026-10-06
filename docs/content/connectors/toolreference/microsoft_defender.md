@@ -6,7 +6,7 @@ audience: pro
 ---
 The Microsoft Defender connector imports device vulnerability findings from **Microsoft Defender Vulnerability Management (MDVM)** — one finding per device / software version / CVE combination, including severity, CVSS score, exploitability level and recommended security updates. DefectDojo will discover your Defender **device groups** and create a Record for each one; devices that aren't assigned to any device group are collected under a synthetic **Unassigned** group.
 
-Here a *device* is a single onboarded machine (identified by its Microsoft device ID), so one machine with several vulnerable software versions produces several findings. A tenant with thousands of devices can therefore produce a large number of findings; see [Importing in phases with device groups](#importing-in-phases-with-device-groups) below to bring them in a few device groups at a time.
+Here a *device* is a single onboarded machine (identified by its Microsoft device ID), so one machine with several vulnerable software versions produces several findings. A tenant with thousands of devices can therefore produce a large number of findings; see [Importing in phases with device groups](#importing-in-phases-with-device-groups) below to bring them in a few device groups at a time, or [Consolidating findings by vulnerability](#consolidating-findings-by-vulnerability) to import one finding per vulnerability with the affected devices attached to it.
 
 **Please note:** this Connector is distinct from the file\-based **"MSDefender Parser"** scan type, which imports manually exported Defender files. Choose one import path per Asset to avoid duplicate findings.
 
@@ -30,7 +30,8 @@ The connector authenticates as a Microsoft Entra ID **app registration** using t
 3. Enter the **Application (client) ID** in the **Client ID** field.
 4. Enter the client secret value in the **Client Secret** field.
 5. Optionally, set **Device Groups** to a comma\-separated list of Defender RBAC device group names to import only those groups (see [Importing in phases with device groups](#importing-in-phases-with-device-groups)). Leave it blank to import every device group. Use `Unassigned` for devices that are not in any RBAC group.
-6. Optionally, set a **Minimum Severity** to limit which findings are imported.
+6. Optionally, enable **Consolidate Findings by Vulnerability** to import one finding per CVE and software version per device group, with the affected devices attached as endpoints, instead of one finding per device (see [Consolidating findings by vulnerability](#consolidating-findings-by-vulnerability)).
+7. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each Defender device group becomes a Record. Microsoft regenerates the vulnerability snapshot the connector reads roughly every 6 hours, and newly onboarded devices can take up to \~24 hours to produce their first vulnerability data — a brand\-new tenant will legitimately Sync zero findings until devices are onboarded and assessed. License activation itself can also take \~20 minutes or more to reach the API ("No active license found" errors during that window resolve on their own).
 
@@ -42,6 +43,19 @@ A large tenant can hold thousands of devices, which may be more findings than yo
 * **Record mapping.** With the field left blank, the connector discovers every device group and creates a Record for each. Map only the Records you want and leave the rest unmapped. Only mapped Records sync findings, so unmapped groups never import.
 
 In both cases the org\-wide snapshot Microsoft provides is read in full on each Sync (the export API cannot filter by group on the server side), but findings are only imported for the groups you selected.
+
+#### Consolidating findings by vulnerability
+
+By default every row Defender reports becomes its own finding, so a CVE in a package installed on 500 devices arrives as 500 findings, and a Patch Tuesday can add thousands of findings per device group at once. Enabling **Consolidate Findings by Vulnerability** on the connector changes what a finding represents:
+
+* **One finding per CVE and software version, per device group.** All devices in the group that report the same CVE in the same vendor, software and version fold into a single finding. The finding's title, component, mitigation and references are the CVE\-level details Defender reports identically on every device.
+* **Affected devices become endpoints.** Each device is attached to the finding as an endpoint named after the device, so the finding shows how many and which devices are affected, and the endpoint count feeds Prioritization the same way it does for any other finding. The description lists the affected device count and the distinct disk and registry evidence paths seen across the devices (capped at 20 of each).
+* **Device status follows each sync.** A device that stops reporting the vulnerability is marked mitigated on the finding at the next Sync, and marked active again if it reappears, without opening or closing a finding. The finding itself closes only once no device in the group reports the vulnerability any more.
+* **Earliest date, highest severity.** The finding's date is the earliest *first seen* across the affected devices. Defender reports one severity per CVE, so devices normally agree; if they do not, the highest reported severity and CVSS score are used.
+
+A **Minimum Severity** (connector\-level or a Record's override) is applied to each device row before consolidation, so it works exactly as it does without consolidation.
+
+Switching the setting on an existing connector changes the identity of the imported findings, so the next Sync closes the per\-device findings and creates the consolidated ones (or the reverse when switching it off). Enable it before the first Sync where you can; otherwise, plan the switch like a re\-baseline of that connector's findings.
 
 #### Setting a minimum severity per device group
 

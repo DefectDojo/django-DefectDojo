@@ -62,7 +62,7 @@ GitLab is supported alongside GitHub (gitlab.com and self-managed). The scan-and
 
 - **Connection:** a **project or group access token** (role **Developer**, or **Maintainer** if push rules require it) with the **`api`** and **`write_repository`** scopes, not a GitHub App. See [Set up Sensei](/sensei/setup_sensei/#connect-gitlab).
 - **Webhook:** each onboarded project needs a webhook to `…/sensei/gitlab/webhooks` (with the connection's secret) subscribed to **Push**, **Merge request**, and **Comment** events. Adding a webhook requires **Maintainer**/**Owner** on the project.
-- **Merge requests, not pull requests:** fixes open a **merge request** against the default branch; the `/fix` comment works on merge-request notes.
+- **Merge requests, not pull requests:** fixes open a **merge request** against the default branch; the `/fix` comment works on merge-request notes, from project members with **Developer** access or higher.
 - **Commit-status gate:** the PR status check is a GitLab **commit status** on the merge request's head commit: `running` while scanning, then `success` or `failed` (fail-on-new). GitLab has no *neutral* state, so a **non-gating** scan that still has findings shows a **green** status; the summary note carries the finding details.
 - **Self-managed:** point the **GitLab Base URL** at your instance; DefectDojo clones and calls the API against that host.
 
@@ -75,6 +75,7 @@ Bitbucket **Cloud** and **Server/Data Center** are supported. The scan-and-fix b
 - **Webhook:** each onboarded repository needs a webhook to `…/sensei/bitbucket/webhooks` (with the connection's secret, verified via HMAC-SHA256 `X-Hub-Signature`) subscribed to **Push**, **Pull request** (created/updated/merged/declined), and **Pull request comment** events.
 - **Build-status gate:** the PR status check is posted as a Bitbucket **build status** on the head commit (`INPROGRESS` → `SUCCESSFUL`/`FAILED`). Bitbucket has no *neutral* state, so a non-gating scan maps to `SUCCESSFUL` and the summary comment carries the detail. The build-status link must be a public URL, so it uses your DefectDojo host.
 - **Repository names:** `workspace/repo` (Cloud) or `PROJECTKEY/repo` (Server/Data Center).
+- **`/fix` comments:** DefectDojo runs a `/fix` only when the commenter has **write** access to the repository, so the connection must be able to read repository permissions (a workspace admin's OAuth or token on Cloud). If it cannot, `/fix` comments do nothing; the Fix button in DefectDojo still works.
 - **Server/Data Center:** set the **Base URL** to your host; DefectDojo uses the v1.0 REST API and `/scm/…` git paths.
 
 ## Azure DevOps specifics
@@ -86,6 +87,7 @@ Azure DevOps Repos are supported via a **Personal Access Token**. The scan-and-f
 - **Commit-status gate:** the PR status check is posted as a Git **commit status** on the head commit.
 - **Repository names:** `project/repo` (the organization is stored on the connection).
 - **Azure DevOps Server:** set the **Base URL** to your on-prem collection URL.
+- **No `/fix` comments:** Azure DevOps cannot tell DefectDojo whether a commenter can push to the repository, so `/fix` comments are not acted on. Use the Fix button in DefectDojo instead.
 
 ## GitHub Enterprise Server specifics
 

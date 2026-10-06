@@ -145,7 +145,8 @@ The PCI DSS workbook has eight sheets:
   date and whether it is in date.
 - **Compensating controls**, every result an assessor overrode, with the reason recorded.
 - **Obligation results**, every requirement in the catalog with both status columns, the
-  narrative, the attachments and the gathered evidence.
+  narrative, the supporting files (each with the start of its SHA-256 digest) and the gathered
+  evidence.
 
 Text in the workbook is written as text rather than as a formula, so a narrative that begins with
 an equals sign is not executed by a spreadsheet application when the assessor opens it.

@@ -27,7 +27,7 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h3 class="pull-left">
-                    {{ test }}
+                    <i class="fa-solid fa-flask dd-card-icon" aria-hidden="true"></i>{{ test }}
                     {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
                     <small>{% trans "Updated" %} {{ test.updated|naturaltime|default_if_none:"" }}, {% trans "Created" %} {{ test.created|naturaltime|default_if_none:"" }}</small>
                 </h3>
@@ -182,7 +182,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4>
-                            {% trans "Details" %} <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i class="fa-solid fa-chevron-up"></i></a></span>
+                            <i class="fa-solid fa-circle-info dd-card-icon" aria-hidden="true"></i>{% trans "Details" %} <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i class="fa-solid fa-chevron-up"></i></a></span>
                         </h4>
                     </div>
                     <div id="vuln_desc" class="panel-body finding-description collapse in">{{ test.description|markdown_render }}</div>
@@ -197,7 +197,7 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="has-filters">
-                        {% trans "Import History" %} ({{  test.total_reimport_count }})
+                        <i class="fa-solid fa-clock-rotate-left dd-card-icon" aria-hidden="true"></i>{% trans "Import History" %} ({{  test.total_reimport_count }})
                         <i class="fa-solid fa-circle-question has-popover"
                         data-content="List of imports/reimports that created/closed/reactivated any findings in this test.">
                         </i>
@@ -304,7 +304,7 @@
             <div class="panel-heading tight">
                 <div class="clearfix">
                     <h4>
-                        {% trans "Groups" %} ({{ finding_groups|length }})
+                        <i class="fa-solid fa-layer-group dd-card-icon" aria-hidden="true"></i>{% trans "Groups" %} ({{ finding_groups|length }})
                         <div class="dropdown pull-right">
                             <span class="pull-right">
                                 <a data-toggle="collapse" href="#finding_groups_panel">
@@ -529,7 +529,7 @@
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h4 class="has-filters">
-                    {% trans "Findings" %} ({{ findings.total_count }}) <small>{{ test.id|get_severity_count:"test" }}</small>
+                    <i class="fa-solid fa-bug dd-card-icon" aria-hidden="true"></i>{% trans "Findings" %} ({{ findings.total_count }}) <small>{{ test.id|get_severity_count:"test" }}</small>
                     <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
                         &nbsp;
@@ -1333,7 +1333,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>
-                        {% trans "Files" %}<span class="pull-right">&nbsp;
+                        <i class="fa-solid fa-paperclip dd-card-icon" aria-hidden="true"></i>{% trans "Files" %}<span class="pull-right">&nbsp;
                         <a data-toggle="collapse" href="#add_feat_files">
                             <i class="fa-solid fa-chevron-down"></i></a></span>
                         {% if test|has_object_permission:"edit" %}

@@ -26,7 +26,7 @@ The user record itself is kept. Findings, notes and history reference the people
 
 ## Setup
 
-1. Open **Connect > Authorization** and select **SCIM Provisioning**. SCIM is listed alongside your login providers because it connects to the same identity provider, and is tagged **Provisioning** to distinguish it from the providers that put a button on the login page.
+1. Open **Connect > Authorization > Providers** and select **SCIM Provisioning**. SCIM is listed alongside your login providers because it connects to the same identity provider, and is tagged **Provisioning** to distinguish it from the providers that put a button on the login page.
 
 2. Check **Enable SCIM Provisioning** and submit. While this is off, the SCIM endpoints behave as though they do not exist, so a connection test from your identity provider reports the address as not found.
 

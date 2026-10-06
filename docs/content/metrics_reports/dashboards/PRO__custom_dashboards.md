@@ -66,7 +66,7 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 - **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout (unless it is collaborative, below). Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
 - **Collaborative** — a Maintainer can mark a shared layout as **collaborative** from **Manage Layouts** (**Make Collaborative**, reversed with **Stop Collaborating**). A collaborative layout is one live dashboard rather than a template to copy: it appears in every user's layout picker, anyone can set it as their default, and anyone can add, remove, rearrange, or configure its widgets. Every change is saved to the same layout, so everyone using it sees it. Renaming, unsharing, deleting, and the collaborative setting itself stay with a Maintainer. If a layout stops being collaborative (or is unshared), users who had it as their default fall back to their own layouts. Edits are saved as they are made, so two people editing at the same moment can overwrite each other's change; the layout re-syncs from the server when you enter edit mode.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
-- **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults).
+- **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (**Settings > UI Defaults > Layout Defaults**).
 
 ### Restricting customization
 
@@ -115,6 +115,8 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, the duplicate icon to copy it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
 
 Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
+
+A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its gear icon to leave the widget's title bar blank.
 
 ### Putting a widget into a report
 

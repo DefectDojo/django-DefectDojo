@@ -5,7 +5,7 @@ audience: pro
 weight: 2
 ---
 
-The DefectDojo Pro UI has various Metrics dashboards to help visualize your current security posture. Each dashboard allows stakeholders at different levels of the organization to make informed decisions without needing to interpret raw data or navigate individual Findings. These dashboards include:
+The DefectDojo Pro UI has various Metrics dashboards to help visualize your current security posture. Open them from **Overview > Insights** in the sidebar. Each dashboard allows stakeholders at different levels of the organization to make informed decisions without needing to interpret raw data or navigate individual Findings. These dashboards include:
 * [Executive Insights](/metrics_reports/pro_metrics/pro__executive_insights/#main-content)
 * [Priority Insights](/metrics_reports/pro_metrics/pro__priority_insights/#main-content)
 * [Program Insights](/metrics_reports/pro_metrics/pro__program_insights/#main-content)
@@ -20,9 +20,11 @@ Before elaborating on each particular dashboard, there are some commonalities be
 
 ### Filtering
 
-All Metrics can be filtered by timeframe, Organization, Asset, and Tag. After adjusting the filter as desired, Apply Filter must be clicked in order for the filter to take effect. If you wish to export a PDF of all charts, tables, and graphs on the dashboard as currently filtered, click Export as PDF. 
+All Metrics can be filtered by timeframe, Organization, Asset, and Tag. After adjusting the filter as desired, Apply Filters must be clicked in order for the filter to take effect. If you wish to export a PDF of all charts, tables, and graphs on the dashboard as currently filtered, click Export as PDF. 
 
 The filtering timeframe is limited to the past year, but can otherwise be adjusted to include the past 7, 14, 30, 90, or 180 days.
+
+Each dashboard opens filtered to the past 90 days. DefectDojo remembers the timeframe you last applied on any Metrics dashboard, so the next time you open one from the menu it uses that timeframe instead. Clicking Clear Filters is remembered too: dashboards then open with no timeframe filter until you apply a new one. The timeframe is saved in your browser, so it applies per browser rather than following your account to another device. A bookmarked or shared link always keeps the timeframe written in its URL.
 
 Note that filter parameters are rendered in the URL, so you can bookmark multiple pages with various filter parameters.  This can be useful for quick reference, or for consistently generating a particular kind of report.
 
@@ -39,7 +41,7 @@ Each graph has a ⋮ kebab menu in the top right of each view with the following
 
 ### Access
 
-The Metrics section will only represent data from the Organizations and Assets that each User has the appropriate permissions to view. A User with access limited to a single Asset will only be able to see Metrics for that particular Asset, but if they don’t have access to the other Assets within the parent Organization, data from those other Assets won't be represented in Metrics. 
+The Insights section will only represent data from the Organizations and Assets that each User has the appropriate permissions to view. A User with access limited to a single Asset will only be able to see Metrics for that particular Asset, but if they don’t have access to the other Assets within the parent Organization, data from those other Assets won't be represented in Metrics. 
 
 ### Viewing Data Within Charts
 

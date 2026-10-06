@@ -9,7 +9,7 @@
         <div class="col-md-10">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    {{ name }}
+                    <i class="fa-solid fa-clipboard-question dd-card-icon" aria-hidden="true"></i>{{ name }}
                 </div>
             </div>
             {% if questions %}
@@ -53,14 +53,14 @@
             <div class="panel panel-default filters">
                 {% if filtered.form %}
                     {% if "dojo.add_question"|has_configuration_permission:request %}
-                        <div class="panel-heading">Actions</div>
+                        <div class="panel-heading"><i class="fa-solid fa-bolt dd-card-icon" aria-hidden="true"></i>Actions</div>
                         <div class="panel-body centered">
                             <a class="btn btn-sm btn-secondary" href="{% url 'create_question' %}">
                                 Create Question
                             </a>
                         </div>
                     {% endif %}
-                    <div class="panel-heading">Filters</div>
+                    <div class="panel-heading"><i class="fa-solid fa-filter dd-card-icon" aria-hidden="true"></i>Filters</div>
                     <form method="get" class="panel-body">
                         {% for field in filtered.form.visible_fields %}
                             <div class="form-group">

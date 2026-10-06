@@ -73,7 +73,7 @@ In every case the values arrive without a re-import, and the daily run remains t
 
 ## Viewing KEV/EPSS in the Vulnerability Explorer
 
-The **Vulnerability Explorer** lists one row per vulnerability ID, with the same five KEV/EPSS columns you get on the Findings table — **EPSS Score**, **EPSS Percentile**, **Known Exploited**, **Ransomware Used** and **KEV Date**:
+The **Vulnerability Explorer** (**Act > Vulnerability Explorer** in the sidebar) lists one row per vulnerability ID, with the same five KEV/EPSS columns you get on the Findings table — **EPSS Score**, **EPSS Percentile**, **Known Exploited**, **Ransomware Used** and **KEV Date**:
 
 ![image](images/Pro_EPSS_KEV_Explorer_Columns.png)
 

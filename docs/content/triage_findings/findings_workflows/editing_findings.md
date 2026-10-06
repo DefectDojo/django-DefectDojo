@@ -19,7 +19,7 @@ This will open the **Edit Finding** form, where you can edit the metadata, chang
 
 ### Edit Finding Form: Fields
 
-* **"Test" cannot be edited:** Findings always have to be associated with a Test object, and cannot be moved out of that context. However, the Engagement containing a Test can be moved to another Asset.  
+* **"Test" cannot be edited here:** Findings always have to be associated with a Test object. The **Test** field on this form is read-only, and the Engagement containing a Test can be moved to another Asset. In the DefectDojo Pro UI you can also move or copy a Finding to another Test — in the same Engagement, another Engagement, or another Asset — with **Move or Copy Finding** in its ⋮ menu; see [Move or Copy](/triage_findings/findings_workflows/pro__bulk_edit_findings/#move-or-copy). Changing `test` in an API update of a Finding has no effect; automations use `POST /api/v2/findings/{id}/move/` instead.  
 ​
 * **Found By** is the scan tool which discovered this Finding. Note that you can add additional scan tools beyond the tool associated with the Test.  
 ​
