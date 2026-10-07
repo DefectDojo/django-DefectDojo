@@ -79,9 +79,55 @@ Both create Locations on their identity hash and upsert their references, so the
 
 ## What the Migration Does Not Do
 
-- It does **not** delete the original Endpoint or Endpoint_Status rows. They remain in the database to back the read-only legacy API. They are not used by the new UI or by imports after the feature is enabled.
+- It does **not** delete the original Endpoint or Endpoint_Status rows. They remain in the database to back the read-only legacy API. They are not used by the new UI or by imports after the feature is enabled, but they still count toward your license. See [Removing the Legacy Endpoint Rows](#removing-the-legacy-endpoint-rows).
 - It does **not** modify your Findings. The backfills only *read* the `component_*` and `file_path`/`line` fields; they add Locations and references alongside, leaving the Finding rows untouched.
 - It does **not** convert cloud resources into Cloud Resource Locations. Endpoints often recorded things that are not web addresses at all, such as container references and AWS ARNs. Every one of those migrates as a URL Location, the same as any other Endpoint. DefectDojo cannot reliably tell a resource identifier stuffed into a host field from a genuine hostname. Guessing wrong can change a Finding's identity. To model those resources properly, import the account through a cloud connector. The connector reads the provider's own resource identifier. It creates a Cloud Resource Location from that identifier.
+
+## Removing the Legacy Endpoint Rows
+
+The migration leaves the original `Endpoint` and `Endpoint_Status` rows in place, and your license still counts them: a **Findings + Endpoints** license counts Endpoints, and a **Total Findings** license counts Endpoint Statuses. Once their data is in Locations, these rows only take up license capacity, so you can delete them.
+
+DefectDojo deletes a legacy row only when its data reached Locations. Everything else stays, and DefectDojo shows the reason next to it.
+
+- An **Endpoint Status** counts as migrated when its Endpoint's URL Location exists and has a Location finding reference for the same Finding.
+- An **Endpoint** counts as migrated when its URL Location exists, is linked to the Endpoint's Asset, and every one of its Endpoint Statuses is migrated.
+
+Rows that are not migrated show one of these reasons:
+
+| Migration Status | Meaning |
+| --- | --- |
+| **No Location** | No URL Location matches the Endpoint. It was probably added after the backfill ran. Run the **Endpoints to Locations backfill** again, then check it again. |
+| **No Asset Reference** | The URL Location exists but is not linked to the Endpoint's Asset. |
+| **No Finding Reference** | At least one Endpoint Status has no matching Location finding reference. |
+| **Invalid URL** | The Endpoint's fields do not form a valid URL, so the backfill skipped it. |
+
+Deleting legacy rows cannot be undone. It also removes the records that the Endpoint Status audit page and the read-only legacy API read from. Take a database backup first.
+
+### From the License Page
+
+Only superusers can delete legacy rows, and only while Locations are enabled. Other users who can see the tables get them read-only.
+
+1. Open **Settings > License & Support > View License**.
+2. In **Audit Usage**, click **View Endpoints** (on a Findings + Endpoints license) or **View Endpoint Statuses** (on a Total Findings license).
+   - **View Endpoints** opens the **Legacy Endpoints** page. Each row shows its Asset, its Endpoint Status counts and its **Migration Status**.
+   - **View Endpoint Statuses** opens the **Endpoint Statuses** page, which has the same **Migration Status** column.
+3. To delete one row, open its menu and choose **Delete Endpoint** or **Delete Endpoint Status**. Only migrated rows have this option. Deleting an Endpoint also deletes its Endpoint Statuses.
+4. To delete every migrated row at once, click **Delete All Migrated**. DefectDojo reports how many rows it deleted and how many it kept.
+
+The usage figures on the License page update as soon as the delete finishes.
+
+### From the Command Line
+
+Two management commands do the same cleanup for scripted or air-gapped installs. Both are a dry run by default: they print what they would delete and why each kept row stays, then roll back.
+
+```bash
+python manage.py delete_legacy_endpoints
+python manage.py delete_legacy_endpoint_statuses
+```
+
+Add `--apply` to delete. The command asks you to confirm before it deletes anything; add `--force` to skip the prompt.
+
+`delete_legacy_endpoints` removes migrated Endpoints together with their Endpoint Statuses. `delete_legacy_endpoint_statuses` removes only migrated Endpoint Statuses and leaves the Endpoints in place.
 
 ## Endpoint API After Migration
 
