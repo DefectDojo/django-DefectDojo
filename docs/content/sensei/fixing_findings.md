@@ -84,6 +84,15 @@ Sensei generates a remediation and opens a pull request. The finding's fix statu
 
 > **💡 One fix, one PR:** each approved fix consumes one fix from your quota and opens one pull request. Review and merge the PR in GitHub as you would any other.
 
+### When Sensei cannot start or finish a fix
+
+Sensei checks two things before it starts a fix. If either check fails, nothing is started and no fix is used:
+
+- **AI access is still being set up.** On DefectDojo Cloud, Sensei refuses the fix and shows a message saying so. DefectDojo support is notified automatically, so there is nothing for you to do. Try again once support confirms access is in place.
+- **The base branch does not exist.** If the branch you chose in the **Fix with Sensei** dialog is not in the repository, Sensei names the branch and the repository. Pick an existing branch and try again.
+
+If a fix starts but Sensei's proposed change does not match the file in the repository (for example, the file changed since the scan), Sensei retries once with more of the file. If that also fails, the badge shows *failed*. Click it to see why, the change Sensei proposed, and the part of the file it was compared against, with line numbers. **Copy for Support** copies those details if you want help from DefectDojo support.
+
 ### A fix does not close the finding on its own
 
 The pull request changes your code; it does not change what is running. So the finding **stays open** after Sensei fixes it, and the badge says which step is still outstanding:
