@@ -171,7 +171,7 @@ class DeprecationNoticeMixin:
 
     def finalize_response(self, request, response, *args, **kwargs):
         notice = get_deprecation(self.deprecation)
-        if notice is not None:
+        if notice is not None and not notice.removed:
             response["X-Deprecated"] = True
             response["X-End-Of-Life-Date"] = datetime.combine(notice.removal_date, time.min).isoformat()
         return super().finalize_response(request, response, *args, **kwargs)

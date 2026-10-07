@@ -46,8 +46,15 @@ class Deprecation:
 _DEPRECATIONS: dict[str, Deprecation] = {}
 
 
+_VERSION = re.compile(r"v?(\d+)\.(\d+)\.(\d+)")
+
+
 def _release(version: str) -> tuple[int, ...]:
-    return tuple(int(part) for part in version.split("-", maxsplit=1)[0].split(".")[:3])
+    match = _VERSION.match(version)
+    if match is None:
+        msg = f"{version!r} is not an X.Y.Z version"
+        raise ValueError(msg)
+    return tuple(int(part) for part in match.groups())
 
 
 def register_deprecation(entry: Deprecation, *, override: bool = False) -> None:

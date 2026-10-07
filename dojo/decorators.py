@@ -186,7 +186,7 @@ def deprecated_view(key):
         @wraps(func)
         def _wrapped(request, *args, **kwargs):
             notice = get_deprecation(key)
-            if request.method == "GET" and notice is not None:
+            if request.method == "GET" and notice is not None and not notice.removed:
                 messages.add_message(request, messages.WARNING, notice.message(), extra_tags="alert-warning")
             return func(request, *args, **kwargs)
 

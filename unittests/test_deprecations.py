@@ -81,6 +81,14 @@ class TestOverdue(SimpleTestCase):
         with patch.dict("dojo.deprecations._DEPRECATIONS", {"gone": gone}, clear=True):
             self.assertEqual([], overdue_deprecations("3.6.0-dev"))
 
+    def test_a_release_candidate_or_a_v_prefix_still_parses(self):
+        old = widgets(removal_version="3.4.0")
+        with patch.dict("dojo.deprecations._DEPRECATIONS", {"widgets": old}, clear=True):
+            self.assertEqual([old], overdue_deprecations("3.5.0rc1"))
+            self.assertEqual([old], overdue_deprecations("v3.5.0"))
+            with self.assertRaisesRegex(ValueError, "X.Y.Z"):
+                overdue_deprecations("latest")
+
     def test_nothing_declared_is_overdue_on_this_release_line(self):
         overdue = [entry.key for entry in overdue_deprecations(dojo.__version__)]
         self.assertEqual(
@@ -134,6 +142,15 @@ class TestDeprecatedView(SimpleTestCase):
     def test_a_post_shows_nothing_so_the_redirect_does_not_repeat_it(self):
         self.assertEqual([], self.shown("post"))
 
+    def test_a_removed_declaration_shows_nothing(self):
+        gone = widgets(key="gone", removal_version="3.3.0", removed=True)
+        with patch.dict("dojo.deprecations._DEPRECATIONS", {"gone": gone}, clear=True):
+            request = RequestFactory().get("/gone")
+            request.session = {}
+            request._messages = FallbackStorage(request)
+            deprecated_view("gone")(ok_view)(request)
+            self.assertEqual([], list(get_messages(request)))
+
     def test_an_undeclared_key_fails_at_import(self):
         with self.assertRaises(ImproperlyConfigured):
             deprecated_view("no_such_feature")
@@ -169,6 +186,10 @@ class UndeclaredProbe(ToolTypeProbe):
     deprecation = "no_such_feature"
 
 
+class RemovedProbe(ToolTypeProbe):
+    deprecation = "gone"
+
+
 class TestDeprecationHeaders(SimpleTestCase):
     def test_a_declared_feature_sends_both_headers_from_the_calendar(self):
         response = ToolTypeProbe.as_view()(APIRequestFactory().get("/"))
@@ -177,6 +198,13 @@ class TestDeprecationHeaders(SimpleTestCase):
 
     def test_an_undeclared_key_sends_no_header(self):
         response = UndeclaredProbe.as_view()(APIRequestFactory().get("/"))
+        self.assertFalse(response.has_header("X-Deprecated"))
+        self.assertFalse(response.has_header("X-End-Of-Life-Date"))
+
+    def test_a_removed_declaration_sends_no_header(self):
+        gone = widgets(key="gone", removal_version="3.3.0", removed=True)
+        with patch.dict("dojo.deprecations._DEPRECATIONS", {"gone": gone}, clear=True):
+            response = RemovedProbe.as_view()(APIRequestFactory().get("/"))
         self.assertFalse(response.has_header("X-Deprecated"))
         self.assertFalse(response.has_header("X-End-Of-Life-Date"))
 
