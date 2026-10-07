@@ -37,9 +37,9 @@ Every upgrade runs the initializer once before the application starts: the `init
 | --- | --- | --- | --- |
 | `0` | All applied | Passed | Nothing. The upgrade is complete. |
 | `2` | All applied | At least one failed | Fix the configuration problem the log names, then start the initializer again. The database is already upgraded, so **do not restore your backup** to retry the upgrade. |
-| `1` | Failed or not finished | Not run | The log above the exit names the failing migration. Fix the cause and start the initializer again; restore your backup only if the migration cannot be completed. |
+| `1` | Check the summary | Not run | Something other than a system check failed: a migration, or a step before or after the migrations (for example the cache or a data seed). The migration summary printed just before the exit shows whether every migration applied. Fix the cause the log names and start the initializer again. Restore your backup only when the summary shows unapplied migrations that cannot be completed. |
 
-On any non-zero exit the initializer prints the migration state of each app before it stops, so the log shows whether the database was upgraded:
+On a non-zero exit the initializer prints the migration state of each app before it stops, so the log shows whether the database was upgraded. Abridged example (the real output lists every app):
 
 ```
 Migration state (manage.py showmigrations --skip-checks lists every migration):

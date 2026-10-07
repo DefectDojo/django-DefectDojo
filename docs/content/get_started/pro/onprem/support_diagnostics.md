@@ -17,7 +17,7 @@ DefectDojo Pro can report server errors and slow requests to DefectDojo support 
 
 Both go to the DefectDojo cloud portal (`CLOUD_PORTAL_URL`, `https://cloud.defectdojo.com` by default). The person who hit the error is not notified.
 
-The default depends on the license: off when the license is for a self-hosted (`local`) deployment, on for DefectDojo Cloud.
+The default depends on the license: on for DefectDojo Cloud, and off for everything else, including a self-hosted instance whose license is missing or cannot be read.
 
 ## Turning a report on or off
 
@@ -43,7 +43,7 @@ An air-gapped instance (`DD_AIRGAPPED=true`, or the **Airgapped instance** flag)
 
 ## The cloud portal secret on a self-hosted instance
 
-A few endpoints exist for the DefectDojo cloud portal to call: the full health check, metrics, setting the license and the cloud firewall. They authenticate with the `CLOUD_PORTAL_SECRET_KEY` setting.
+A few endpoints exist for the DefectDojo cloud portal to call: the full and Celery health checks, metrics, setting the license and the cloud firewall. They authenticate with the `CLOUD_PORTAL_SECRET_KEY` setting.
 
 DefectDojo ships default values for that setting in its deployment files, and those values are public. On a self-hosted instance these endpoints refuse a shipped value, and the system checks log this warning at startup:
 
@@ -51,4 +51,4 @@ DefectDojo ships default values for that setting in its deployment files, and th
 ?: (pro.W003) CLOUD_PORTAL_SECRET_KEY is unset or set to a value that ships in DefectDojo's deployment files.
 ```
 
-Nothing on a self-hosted instance needs those endpoints, so the warning is safe to leave. To use them, set `CLOUD_PORTAL_SECRET_KEY` to a long random string (for example, `openssl rand -hex 25`) on every DefectDojo container. The Helm chart's secret generation already does this.
+Nothing on a self-hosted instance needs those endpoints, so the warning is safe to leave. To use them, set `CLOUD_PORTAL_SECRET_KEY` to a long random string (for example, `openssl rand -hex 25`) on every DefectDojo container.
