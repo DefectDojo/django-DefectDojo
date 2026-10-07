@@ -112,7 +112,10 @@ Only superusers can delete legacy rows, and only while Locations are enabled. Ot
    - **View Endpoints** opens the **Legacy Endpoints** page. Each row shows its Asset, its Endpoint Status counts and its **Migration Status**.
    - **View Endpoint Statuses** opens the **Endpoint Statuses** page, which has the same **Migration Status** column.
 3. To delete one row, open its menu and choose **Delete Endpoint** or **Delete Endpoint Status**. Only migrated rows have this option. Deleting an Endpoint also deletes its Endpoint Statuses.
-4. To delete every migrated row at once, click **Delete All Migrated**. DefectDojo reports how many rows it deleted and how many it kept.
+4. To delete several rows, tick their checkboxes and click **Delete**. Migrated rows are deleted and the others are kept.
+5. To delete every migrated row, click **Delete All Migrated**. The delete runs in the background, so it works on any number of rows. The button shows the run's progress, including after you leave the page and come back. If the page is open when the run finishes, DefectDojo reports how many rows it deleted and how many it kept. The table and the License page counts reflect the result either way.
+
+   If a run stops partway, for example because Locations was disabled, the rows it already deleted stay deleted. Click **Delete All Migrated** again to finish. Each table runs one delete at a time: clicking the button while another superuser's run is going shows that run's progress instead of starting a second one.
 
 The usage figures on the License page update as soon as the delete finishes.
 
