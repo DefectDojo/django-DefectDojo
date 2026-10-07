@@ -1,5 +1,26 @@
 from django.db.models.fields import related
 
+from dojo.location.feature import locations_enabled
+from dojo.models import Finding, Product
+
+# Reverse one-to-many relations advertised as prefetchable, per model.
+#
+# ``get_prefetchable_fields`` discovers forward ForeignKeys and many-to-many fields
+# from the model's descriptors. Reverse ForeignKeys are deliberately not discovered
+# the same way: the reverse side of a model is every FK that points at it
+# (``burprawrequestresponse_set``, ``jira_issue``, ``test_import_finding_action``, ...),
+# and most of those would only be noise in the ``?prefetch=`` enum. Reverse relations
+# are therefore opted in here, one ``related_name`` at a time.
+#
+# ``LocationFindingReference.finding`` and ``LocationProductReference.product`` both
+# declare ``related_name="locations"``. Under V3 a finding's ``endpoints`` field carries
+# those reference ids, so ``?prefetch=locations`` is how an API client resolves them to
+# a location type and value in the same request.
+_PREFETCHABLE_REVERSE_RELATIONS = {
+    Finding: ("locations",),
+    Product: ("locations",),
+}
+
 
 def _is_many_to_many_relation(field):
     """
@@ -56,6 +77,34 @@ def _is_one_to_one_relation(field):
     return isinstance(field, related.ForwardManyToOneDescriptor)
 
 
+def get_prefetchable_reverse_relations(model):
+    """
+    Get the reverse one-to-many relations that are advertised as prefetchable for
+    the given model, as ``(field_name, related_model)`` tuples.
+
+    Only the opted-in relations in ``_PREFETCHABLE_REVERSE_RELATIONS`` are returned,
+    and the Locations relations only while the Locations feature is enabled: with it
+    off, findings and products carry Endpoints instead and the relation is always empty.
+
+    Args:
+        model (django.db.models.Model): the model class to inspect
+
+    Returns:
+        list[tuple[str, django.db.models.Model]]: the prefetchable reverse relations
+
+    """
+    if not locations_enabled():
+        return []
+
+    fields = []
+    for field_name in _PREFETCHABLE_REVERSE_RELATIONS.get(model, ()):
+        descriptor = getattr(model, field_name, None)
+        if _is_one_to_many_relation(descriptor):
+            # The model that declares the ForeignKey, e.g. LocationFindingReference
+            fields.append((field_name, descriptor.field.model))
+    return fields
+
+
 def get_prefetchable_fields(serializer):
     """
     Get the fields that are prefetchable according to the serializer description.
@@ -88,5 +137,7 @@ def get_prefetchable_fields(serializer):
                 fields.append((field_name, field.field.model))
             else:
                 fields.append((field_name, field.field.related_model))
+
+    fields.extend(get_prefetchable_reverse_relations(model))
 
     return fields

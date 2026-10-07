@@ -8,9 +8,13 @@ from dojo.api_v2.prefetch import (
 )
 from dojo.api_v2.prefetch import utils
 from dojo.api_v2.prefetch.authorized_querysets import get_authorized_queryset
-from dojo.location.api.serializers import LocationFindingReferenceSerializer, LocationSerializer
+from dojo.location.api.serializers import (
+    LocationFindingReferenceSerializer,
+    LocationProductReferenceSerializer,
+    LocationSerializer,
+)
 from dojo.location.feature import locations_enabled
-from dojo.location.models import Location, LocationFindingReference
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import FileUpload, Finding
 
 # Reduce the scope of search for serializers.
@@ -133,6 +137,7 @@ class _Prefetcher:
         return {
             Location: LocationSerializer,
             LocationFindingReference: LocationFindingReferenceSerializer,
+            LocationProductReference: LocationProductReferenceSerializer,
         }.get(field_type)
 
     def _prefetch(self, entry, fields_to_fetch):
