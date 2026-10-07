@@ -31,7 +31,7 @@ Pick the branch to scan (it defaults to the repository's default branch) and cho
 
 For a Go repository, Sensei also runs [govulncheck](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck) to work out which vulnerable functions your code actually calls. Each result becomes a [reachability](/triage_findings/finding_scoring/reachability/) verdict, with the call path, on the matching Findings of the repository's Asset, and moves their priority.
 
-In DefectDojo-hosted mode the analysis runs by itself after every successful scan of the repository's default branch. To run it now, open the Asset's menu and choose **Run Reachability Analysis**. Either way it analyzes the default branch, because its verdicts apply to the whole Asset. A repository with no `go.mod` at its root has nothing for govulncheck to analyze, so the run finishes without adding verdicts. Runs appear in **Scan Activity** as **Reachability Scan**.
+In DefectDojo-hosted mode the analysis runs by itself after every successful scan of the repository's default branch, unless a reachability run for the repository is still queued or running, which covers that scan too. To run it now, open the Asset's menu and choose **Run Reachability Analysis**. The item is offered when the repository is scanned (not fix-only) and you can import scan results into the Asset, since the verdicts are written to its Findings. Either way it analyzes the default branch, because its verdicts apply to the whole Asset. A repository with no `go.mod` at its root has nothing for govulncheck to analyze, so the run finishes without adding verdicts. Runs appear in **Scan Activity** as **Reachability Scan**.
 
 ## The Sensei column on findings
 
