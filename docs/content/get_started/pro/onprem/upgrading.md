@@ -29,4 +29,29 @@ Put your own customizations in `local_settings.py`, never in `pro_settings.py`. 
 2. Back up your database, and the rest of what [Backing Up a Self-Hosted Deployment](/get_started/pro/onprem/backing_up/) lists. If an upgrade has to be undone, [Restoring a Self-Hosted Deployment](/get_started/pro/onprem/restoring/) covers bringing that backup back.
 3. Follow the steps for your deployment method: [Kubernetes (Helm)](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) or [Docker Compose](/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose/). Do not change image tags independently of the release.
 
+## Reading the initializer's result
+
+Every upgrade runs the initializer once before the application starts: the `init` container on Docker Compose, the initializer Job on Kubernetes. It applies the database migrations and then runs DefectDojo's system checks. Its exit code says how far it got:
+
+| Exit code | Migrations | System checks | What to do |
+| --- | --- | --- | --- |
+| `0` | All applied | Passed | Nothing. The upgrade is complete. |
+| `2` | All applied | At least one failed | Fix the configuration problem the log names, then start the initializer again. The database is already upgraded, so **do not restore your backup** to retry the upgrade. |
+| `1` | Check the summary | Not run | Something other than a system check failed: a migration, or a step before or after the migrations (for example the cache or a data seed). The migration summary printed just before the exit shows whether every migration applied. Fix the cause the log names and start the initializer again. Restore your backup only when the summary shows unapplied migrations that cannot be completed. |
+
+On a non-zero exit the initializer prints the migration state of each app before it stops, so the log shows whether the database was upgraded. Abridged example (the real output lists every app):
+
+```
+Migration state (manage.py showmigrations --skip-checks lists every migration):
+  dojo: 301 of 301 applied
+  pro: 250 of 251 applied (not applied: 0251_example)
+```
+
+To see the code after the fact:
+
+- **Docker Compose:** `docker inspect --format '{{.State.ExitCode}}' init`
+- **Kubernetes:** `kubectl get pod -n <namespace> -l app.kubernetes.io/component=initializer -o jsonpath='{.items[*].status.containerStatuses[*].state.terminated.exitCode}'`
+
+When `DD_INITIALIZE=false` skips the migrations, exit code `2` still means a system check failed, and the database is unchanged.
+
 If you have questions about upgrading your on-premise deployment, contact [support@defectdojo.com](mailto:support@defectdojo.com).

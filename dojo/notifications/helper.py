@@ -900,7 +900,9 @@ class NotificationManager(NotificationManagerHelpers):
     def _process_recipients(self, event: str | None = None, **kwargs: dict) -> None:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug("creating notifications for recipients: %s", kwargs["recipients"])
-        for recipient_notifications in self._get_recipient_notifications(kwargs["recipients"]):
+        # Callers pass usernames or Dojo_User instances; the lookup needs usernames.
+        recipients = [getattr(recipient, "username", recipient) for recipient in kwargs["recipients"]]
+        for recipient_notifications in self._get_recipient_notifications(recipients):
             if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
                 # merge the system level notifications with the personal level
                 # this allows for system to trump the personal
@@ -1151,7 +1153,7 @@ class NotificationManager(NotificationManagerHelpers):
                     logger.exception("Failed to send Webhooks notification for event %s", event)
 
 
-def process_tag_notifications(request, note, parent_url, parent_title):
+def process_tag_notifications(request, note, parent_url, parent_title, parent=None):
     # Django usernames may contain "@ . + - _" in addition to word characters (see
     # Django's username validators), so capture that whole set instead of only \w.
     # The leading (?:\A|\s)@ anchor keeps email addresses written in prose from
@@ -1166,6 +1168,11 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         for username in usernames_to_check
         if Dojo_User.objects.filter(is_active=True, username=username).exists()
     ]
+    if parent is not None:
+        # Only users who can see the object the note is attached to get the mention.
+        from dojo.authorization.authorization import user_has_permission  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        users_to_notify = [user for user in users_to_notify if user_has_permission(user, parent, "view")]
 
     if len(note.entry) > 200:
         note.entry = note.entry[:200]
