@@ -1451,12 +1451,17 @@ datatables.net-colreorder@^2.1.2:
     datatables.net "^2"
     jquery ">=1.7"
 
-datatables.net@^2, datatables.net@^2.3.8:
+datatables.net@^2:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.8.tgz#55a8dbe3bd2196951c498ab79bf44602a2bf3229"
   integrity sha512-uhViowhlDlheAuo5a8TrkQqADsjrtGeOyvrigvr4t0+K3MyAWqClORXWAYIcN9VLX6iIX0C8O9gwJNd01hITRg==
   dependencies:
     jquery ">=1.7"
+
+datatables.net@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.3.tgz#e8f0b0b8eb52abbc9cd6967c59a1e63a494e0739"
+  integrity sha512-B34/A+KAkKQnl6si+SgmB8grhDepfHDXEFyQxJanqY70dB4ab0pHTF1aHZvLKKruuUoL815/y3YeTSYUr/pAOw==
 
 debug@^4.0.0:
   version "4.4.3"
