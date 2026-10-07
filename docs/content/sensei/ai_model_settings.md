@@ -12,6 +12,11 @@ your own CI), it needs an LLM. **AI Model Settings** is where you choose that mo
 its credentials, once, instance-wide — the hosted worker uses this configuration instead of any
 per-repository secret.
 
+The same configuration serves the AI features that call the model from DefectDojo itself:
+[threat modeling](/sensei/threat_modeling/), the [Advisor](/sensei/sensei_advisor/), triage of
+dynamic scan results, AI steps in rules, and the [AI agent red team](/sensei/ai_agent_redteam/)'s
+hardening suggestions and runtime checks. Every provider below works for all of them.
+
 You reach it from the sidebar under **Sensei + AI > AI Model Settings**. You need a global
 **Maintainer** or **Owner** role to change it.
 
@@ -120,6 +125,12 @@ to store or rotate.
 > engine does not run inside AWS — a non-EKS Kubernetes cluster or a Docker Compose host in your
 > own data center has none. In those deployments you must enter static AWS keys above; the
 > "leave the keys blank" path applies only to AWS-hosted runtimes.
+
+Features that call the model from DefectDojo itself (threat modeling, the Advisor and the
+others listed at the top of this page) use the same rule, from where the DefectDojo application
+runs: the static keys if you entered them, otherwise the role attached to the DefectDojo
+application's own workload. With the keys left blank, give that workload a role too, not only the
+Sensei engine.
 
 Either way, the identity used needs permission to invoke the Bedrock model (`bedrock:InvokeModel`)
 in the chosen region.
