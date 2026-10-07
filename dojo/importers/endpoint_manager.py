@@ -3,7 +3,7 @@ from typing import NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Value
 from django.db.models.functions import Lower
 from django.utils import timezone
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
@@ -185,11 +185,22 @@ class EndpointManager(BaseLocationManager):
         self._statuses_to_mitigate.extend((eps, user) for eps in statuses)
 
     def _existing_endpoints_for_queued_hosts(self):
-        """Endpoints of this product whose host matches the host of a queued key."""
-        hosts = {key.host for key in self._endpoints_to_create}
-        host_filter = Q(lower_host__in={host for host in hosts if host is not None})
-        if None in hosts:
-            host_filter |= Q(host__isnull=True) | Q(host="")
+        """
+        Endpoints of this product whose host matches the host of a queued key.
+
+        A key's host is the host lowercased by Python, but the index is on the database's
+        LOWER(host), and the two disagree for some characters (a dotted capital I, a final
+        sigma, or any non-ASCII letter under a C collation). So the filter accepts both the
+        Python-lowered key hosts and the database's LOWER() of the raw queued hosts, computed
+        inside the same query; the key comparison in get_or_create_endpoints then keeps
+        exactly the rows the old full-product scan matched.
+        """
+        key_hosts = {key.host for key in self._endpoints_to_create if key.host is not None}
+        raw_hosts = {kwargs.get("host") for kwargs in self._endpoints_to_create.values() if kwargs.get("host")}
+        host_filter = Q(lower_host__in=key_hosts) | Q(lower_host__in=[Lower(Value(host)) for host in sorted(raw_hosts)])
+        if any(key.host is None for key in self._endpoints_to_create):
+            # Written against lower_host so the (product, lower(host)) index serves it.
+            host_filter |= Q(lower_host__isnull=True) | Q(lower_host="")
         return Endpoint.objects.filter(product=self._product).annotate(lower_host=Lower("host")).filter(host_filter)
 
     def get_or_create_endpoints(self) -> tuple[dict[EndpointUniqueKey, Endpoint], list[Endpoint]]:

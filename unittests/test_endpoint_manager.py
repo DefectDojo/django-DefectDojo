@@ -167,3 +167,19 @@ class TestGetOrCreateEndpointsScopedLookup(TestCase):
             self.assertEqual(self.product.id, by_host["only-other.example.com"].product_id)
         with self.subTest("nothing else created"):
             self.assertEqual(1, len(created))
+
+    def test_host_whose_python_and_database_lowercase_differ_is_reused(self):
+        # Python and Postgres lowercase a dotted capital I differently. The existing row must
+        # still be found on every flush instead of a new duplicate being created each time.
+        existing = Endpoint.objects.create(protocol="https", host="İSTANBUL.example.com", product=self.product)
+        empty_host = Endpoint.objects.create(protocol=None, host="", path="/empty", product=self.product)
+        for flush in range(3):
+            manager = self._manager_for(
+                Endpoint(protocol="https", host="İSTANBUL.example.com"),
+                Endpoint(protocol=None, host=None, path="/empty"),
+            )
+            endpoints_by_key, created, _ = self._rows_loaded(manager)
+            with self.subTest(flush=flush):
+                self.assertEqual([], created)
+                self.assertEqual({existing.id, empty_host.id}, {ep.id for ep in endpoints_by_key.values()})
+        self.assertEqual(2, Endpoint.objects.filter(product=self.product).count())
