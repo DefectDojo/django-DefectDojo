@@ -7,7 +7,7 @@ from collections import defaultdict
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, When, signals
 from django.db.models.functions import Lower
 from django.http import HttpResponseRedirect
@@ -372,6 +372,10 @@ class _MetaImport:
             return
         shared = self.shared_location_ids(objects) if self.is_location else set()
         original_tags, through_rows = self.load_tags(objects)
+        # Product-inherited tags are sticky: on the old per-row path a row that removed one
+        # (a key that is a substring of it) had it put straight back by the m2m signal. The
+        # batched writes bypass that signal, so keep them in every row's result instead.
+        inherited = self.load_inherited_tags(objects)
         current_meta = self.load_meta(objects)
         tags = {pk: list(names) for pk, names in original_tags.items()}
         meta = {}
@@ -398,7 +402,7 @@ class _MetaImport:
                         existing_tags += [key + ":" + value]
                 # Tag names are stored lowercase and unique, and read back sorted by name,
                 # which is what the next row for the same host saw from the database.
-                tags[obj.pk] = sorted({name.lower() for name in existing_tags})
+                tags[obj.pk] = sorted({name.lower() for name in existing_tags} | inherited[obj.pk])
 
         changed = self.write_tags(objects, original_tags, tags, through_rows)
         self.write_meta(objects, current_meta, meta)
@@ -423,7 +427,7 @@ class _MetaImport:
             wanted = set(hosts)
             queryset = (
                 Endpoint.objects.annotate(meta_import_host=Lower("host"))
-                .filter(product=self.product, meta_import_host__in={host.lower() for host in hosts})
+                .filter(product=self.product, meta_import_host__in=self.db_lower(hosts))
                 .order_by("id")
             )
             for endpoint in queryset:
@@ -457,6 +461,10 @@ class _MetaImport:
                 )
         for host, endpoint in zip(missing, created, strict=True):
             objects_by_host[host] = [endpoint]
+        # The old path created each endpoint with Endpoint.objects.create(), whose post_save
+        # gave it the product's inherited tags before any row was applied, and the rows then
+        # saw (and could replace) those tags. Apply them now, before the rows, to match.
+        tag_inheritance.apply_inherited_tags_for_endpoints(created)
         return created
 
     def shared_location_ids(self, objects):
@@ -470,8 +478,24 @@ class _MetaImport:
             .values_list("location_id", flat=True),
         )
 
-    def tag_through(self):
-        field = self.object_class._meta.get_field("tags")
+    @staticmethod
+    def db_lower(values):
+        """
+        Lowercase values the way Postgres LOWER() does.
+
+        Python's str.lower() differs from the database for some characters (for example a
+        dotted capital I), so comparing a Python-lowered host against LOWER(host) can miss
+        the row and create a duplicate. One query lowercases them all on the database side.
+        """
+        values = list(values)
+        if not values:
+            return []
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT LOWER(value) FROM UNNEST(%s::text[]) AS value", [values])
+            return [row[0] for row in cursor.fetchall()]
+
+    def tag_through(self, field_name="tags"):
+        field = self.object_class._meta.get_field(field_name)
         through = field.remote_field.through
         source = target = None
         for through_field in through._meta.fields:
@@ -497,6 +521,17 @@ class _MetaImport:
             tags[obj_id].append(name)
             through_rows[obj_id, name] = (row_id, tag_id)
         return tags, through_rows
+
+    def load_inherited_tags(self, objects):
+        """The inherited tag names of each object, as stored right now."""
+        _, through, source, target = self.tag_through("inherited_tags")
+        inherited = {pk: set() for pk in objects}
+        rows = through.objects.filter(**{f"{source}__in": list(objects)}).values_list(
+            source, f"{target.removesuffix('_id')}__name",
+        )
+        for obj_id, name in rows:
+            inherited[obj_id].add(name)
+        return inherited
 
     def load_meta(self, objects):
         if self.is_location:
@@ -557,9 +592,9 @@ class _MetaImport:
                 row.value = value
                 to_update.append(row)
         if to_create:
-            DojoMeta.objects.bulk_create(to_create)
+            DojoMeta.objects.bulk_create(to_create, batch_size=1000)
         if to_update:
-            DojoMeta.objects.bulk_update(to_update, ["value"])
+            DojoMeta.objects.bulk_update(to_update, ["value"], batch_size=1000)
 
     def apply_inheritance(self, created, changed):
         # The tag writes above bypass the m2m signals that keep product-inherited tags in

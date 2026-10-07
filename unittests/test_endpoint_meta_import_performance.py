@@ -203,6 +203,43 @@ class EndpointMetaImportEndpointSemanticsTest(EndpointMetaImportQueryCountMixin,
         self.assertEqual({"team:red", "team:old", "other", "inherited-tag"}, self.tag_names(self.endpoint))
         self.assertEqual({"team": "red", "env": "stale"}, self.meta(self.endpoint))
 
+    def _product_inheriting(self, name, tag):
+        product = Product.objects.create(
+            name=name, description="meta import", prod_type_id=1, enable_product_tag_inheritance=True,
+        )
+        product.tags = [tag]
+        product.save()
+        return product
+
+    def test_inherited_tag_containing_a_key_is_kept(self):
+        # A product tag that contains a CSV key ("team" in "team-payments") is what the
+        # substring replacement picks first. The old per-row path put the inherited tag
+        # straight back after every row, so it stays, and the row's tag is added.
+        product = self._product_inheriting("Meta Import Inherited Substring", "team-payments")
+        existing = Endpoint.objects.create(host="inherit.example.com", product=product)
+        self.assertEqual({"team-payments"}, self.tag_names(existing))
+
+        self.import_csv(
+            "hostname,team\ninherit.example.com,red\nnew-inherit.example.com,red\nnew-inherit.example.com,blue\n",
+            product=product.id,
+        )
+
+        existing.refresh_from_db()
+        self.assertEqual({"team-payments", "team:red"}, self.tag_names(existing))
+        self.assertEqual({"team-payments"}, self.tag_names(existing, "inherited_tags"))
+        created = Endpoint.objects.get(host="new-inherit.example.com", product=product)
+        # The second row replaced the inherited tag again (it sorts first), not "team:red".
+        self.assertEqual({"team-payments", "team:red", "team:blue"}, self.tag_names(created))
+        self.assertEqual({"team-payments"}, self.tag_names(created, "inherited_tags"))
+
+    def test_host_whose_python_and_database_lowercase_differ_is_matched(self):
+        # Python lowercases a dotted capital I differently from Postgres LOWER(); matching
+        # must still find the existing endpoint instead of creating a second one.
+        existing = Endpoint.objects.create(host="İstanbul.example.com", product=self.product)
+        self.import_csv("hostname,team\nİstanbul.example.com,red\n", product=self.product.id)
+        self.assertEqual(1, Endpoint.objects.filter(host="İstanbul.example.com", product=self.product).count())
+        self.assertEqual({"team": "red"}, self.meta(existing))
+
 
 @skip_unless_v3
 class EndpointMetaImportLocationQueryCountTest(EndpointMetaImportQueryCountMixin, DojoAPITestCase):
