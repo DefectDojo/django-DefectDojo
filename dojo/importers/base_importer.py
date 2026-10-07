@@ -1376,35 +1376,41 @@ class BaseImporter(ImporterOptions):
                 not in_pushed_group
                 and (self.push_to_jira or is_keep_in_sync(finding, prefetched_jira_instance=self.jira_instance)),
             )
-        self._add_note_to_findings(findings, note_message, db)
-        for finding in findings:
-            # Remove risk acceptance if present (vulnerability is now fixed)
-            # risk_unaccept will check if finding.risk_accepted is True before proceeding
-            ra_helper.risk_unaccept(
-                self.user, finding, perform_save=False, post_comments=False,
-                source="reimport", reason="the scan no longer reports this finding",
-            )
-        self.location_handler.record_mitigations_for_findings(findings, self.user)
+        # One transaction from the first write to the last post_save: if anything raises part way
+        # (a receiver, a write), nothing is left closed without its post-processing. The old
+        # per-finding path saved and post-processed each finding together, so a later run
+        # retried whatever it had not reached; a half-written batch would instead be skipped as
+        # already mitigated.
+        with transaction.atomic():
+            self._add_note_to_findings(findings, note_message, db)
+            for finding in findings:
+                # Remove risk acceptance if present (vulnerability is now fixed)
+                # risk_unaccept will check if finding.risk_accepted is True before proceeding
+                ra_helper.risk_unaccept(
+                    self.user, finding, perform_save=False, post_comments=False,
+                    source="reimport", reason="the scan no longer reports this finding",
+                )
+            self.location_handler.record_mitigations_for_findings(findings, self.user)
 
-        # What Finding.save() derives before writing the row
-        ids_with_locations = self._finding_ids_with_locations([f.id for f in findings if f.file_path is not None])
-        for finding in findings:
-            finding.derive_persisted_fields(dedupe_option=False, is_new_finding=False)
-            if finding.file_path is not None:
-                finding.static_finding = True
-                if finding.id not in ids_with_locations:
-                    finding.dynamic_finding = False
-            finding.set_sla_expiration_date()
-        for finding in findings:
-            pre_save.send(sender=Finding, instance=finding, raw=False, using=db, update_fields=None)
-        now = timezone.now()
-        changed = {"active", "is_mitigated", "mitigated", "mitigated_by", "risk_accepted", "last_status_update", "updated"}
-        for finding, before in zip(findings, loaded, strict=True):
-            finding.updated = now  # auto_now, which bulk_update does not apply
-            changed.update(f.name for f in written if f.attname in before and finding.__dict__.get(f.attname) != before[f.attname])
-        Finding.objects.bulk_update(findings, sorted(changed), batch_size=self.MITIGATE_FINDINGS_BATCH_SIZE)
-        for finding in findings:
-            post_save.send(sender=Finding, instance=finding, created=False, update_fields=None, raw=False, using=db)
+            # What Finding.save() derives before writing the row
+            ids_with_locations = self._finding_ids_with_locations([f.id for f in findings if f.file_path is not None])
+            for finding in findings:
+                finding.derive_persisted_fields(dedupe_option=False, is_new_finding=False)
+                if finding.file_path is not None:
+                    finding.static_finding = True
+                    if finding.id not in ids_with_locations:
+                        finding.dynamic_finding = False
+                finding.set_sla_expiration_date()
+            for finding in findings:
+                pre_save.send(sender=Finding, instance=finding, raw=False, using=db, update_fields=None)
+            now = timezone.now()
+            changed = {"active", "is_mitigated", "mitigated", "mitigated_by", "risk_accepted", "last_status_update", "updated"}
+            for finding, before in zip(findings, loaded, strict=True):
+                finding.updated = now  # auto_now, which bulk_update does not apply
+                changed.update(f.name for f in written if f.attname in before and finding.__dict__.get(f.attname) != before[f.attname])
+            Finding.objects.bulk_update(findings, sorted(changed), batch_size=self.MITIGATE_FINDINGS_BATCH_SIZE)
+            for finding in findings:
+                post_save.send(sender=Finding, instance=finding, created=False, update_fields=None, raw=False, using=db)
 
         # Finding.save()'s post-processing (post_process_finding_save with dedupe off)
         system_settings = System_Settings.objects.get()

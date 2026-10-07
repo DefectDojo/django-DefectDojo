@@ -194,6 +194,38 @@ class CloseOldFindingsBatchMixin:
         self.assertFalse(kept.is_mitigated)
         self.assertEqual(0, kept.notes.count())
 
+    def test_a_receiver_failing_mid_batch_leaves_nothing_half_closed(self):
+        # The old per-finding path saved and post-processed each finding together, so a
+        # failure left the rest open and the next reimport closed them. The batched close must
+        # not leave findings written as closed whose post_save never ran: the next reimport
+        # would skip them as already mitigated.
+        test = self._seed_test("close-batch-failure", 4)
+        kept = Finding.objects.get(test=test, unique_id_from_tool="close-batch-0")
+        calls = []
+
+        def fail_on_second(sender, instance, created, **kwargs):
+            if not created:
+                calls.append(instance.pk)
+                if len(calls) == 2:
+                    msg = "receiver failed"
+                    raise RuntimeError(msg)
+
+        post_save.connect(fail_on_second, sender=Finding, dispatch_uid="close-batch-fail")
+        try:
+            with self.assertRaises(RuntimeError):
+                self._reimport_keeping_one(test)
+        finally:
+            post_save.disconnect(sender=Finding, dispatch_uid="close-batch-fail")
+
+        others = Finding.objects.filter(test=test).exclude(id=kept.id)
+        with self.subTest("nothing was written closed"):
+            self.assertEqual(3, others.filter(active=True, is_mitigated=False).count())
+        with self.subTest("no close notes were left behind"):
+            self.assertEqual(0, sum(finding.notes.count() for finding in others))
+        with self.subTest("the next reimport closes them"):
+            self.assertEqual(3, self._reimport_keeping_one(test))
+            self.assertEqual(3, others.filter(active=False, is_mitigated=True).count())
+
 
 @override_settings(V3_FEATURE_LOCATIONS=False)
 class TestReimportCloseOldFindingsBatchEndpoints(CloseOldFindingsBatchMixin, DojoTestCase):
