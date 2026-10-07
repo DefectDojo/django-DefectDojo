@@ -722,11 +722,17 @@ class Command(BaseCommand):
         if not migrated:
             return
         endpoints_with_statuses: set[int] = set()
+        # Endpoints whose own reference building raised. Only these stop collecting: as before,
+        # a failure part-way through one endpoint's statuses ends that endpoint's loop, while a
+        # failure elsewhere for the endpoint (a meta row, one reference row rejected at write
+        # time) leaves its remaining statuses to be migrated. Checking the run-wide
+        # failed_endpoint_ids here would also drop those, which the old code never did.
+        stopped_endpoint_ids: set[int] = set()
         for statuses in self._iter_status_slices(list(migrated)):
             for endpoint_status in statuses:
                 endpoint_id = endpoint_status.endpoint_id
                 endpoints_with_statuses.add(endpoint_id)
-                if endpoint_id in self.failed_endpoint_ids:
+                if endpoint_id in stopped_endpoint_ids:
                     continue
                 _, location = migrated[endpoint_id]
                 try:
@@ -734,6 +740,7 @@ class Command(BaseCommand):
                 except Exception as exc:
                     logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
                     self._record_endpoint_failure(endpoint_id, exc)
+                    stopped_endpoint_ids.add(endpoint_id)
             self._write_finding_refs(rows)
 
         # No findings: associate with the endpoint's product if one exists.

@@ -781,6 +781,7 @@ class MigrateEndpointsToLocationsMemoryTest(TestCase):
     _make_endpoint = MigrateEndpointsToLocationsTest._make_endpoint
     _make_test = MigrateEndpointsToLocationsTest._make_test
     _run = MigrateEndpointsToLocationsTest._run
+    _location_for = MigrateEndpointsToLocationsTest._location_for
 
     def _make_hot_endpoint(self, host, fanout):
         """One endpoint linked to ``fanout`` findings, each on its own test."""
@@ -926,3 +927,43 @@ class MigrateEndpointsToLocationsMemoryTest(TestCase):
             large_containers, small_containers,
             msg=f"run-scoped containers grew with the endpoint count: {small_containers} -> {large_containers}",
         )
+
+    def test_failed_reference_row_does_not_drop_the_endpoints_later_slices(self):
+        # A reference row rejected at write time records the endpoint as failed. Its other
+        # statuses must still be migrated, as they were before statuses were streamed.
+        endpoint = self._make_hot_endpoint("partial-ref.example.com", 5)
+        statuses = list(Endpoint_Status.objects.filter(endpoint=endpoint).order_by("id"))
+        bad_finding_id = statuses[0].finding_id
+        original = LocationFindingReference.objects.bulk_create
+
+        def reject_one(objs, *args, **kwargs):
+            if any(obj.finding_id == bad_finding_id for obj in objs):
+                msg = "injected reference failure"
+                raise RuntimeError(msg)
+            return original(objs, *args, **kwargs)
+
+        with patch.object(LocationFindingReference.objects, "bulk_create", side_effect=reject_one):
+            self._run(batch_size=2)
+
+        location = self._location_for("partial-ref.example.com")
+        migrated = set(LocationFindingReference.objects.filter(location=location).values_list("finding_id", flat=True))
+        self.assertEqual({status.finding_id for status in statuses[1:]}, migrated)
+
+    def test_failed_meta_row_does_not_drop_the_endpoints_statuses(self):
+        # A meta row that fails to write marks the endpoint failed, but its statuses are a
+        # separate write and must still become finding references.
+        endpoint = self._make_hot_endpoint("meta-fails.example.com", 3)
+        DojoMeta.objects.create(endpoint=endpoint, name="owner", value="team")
+        original = DojoMeta.objects.bulk_create
+
+        def reject_meta(objs, *args, **kwargs):
+            if any(obj.name == "owner" for obj in objs):
+                msg = "injected meta failure"
+                raise RuntimeError(msg)
+            return original(objs, *args, **kwargs)
+
+        with patch.object(DojoMeta.objects, "bulk_create", side_effect=reject_meta):
+            self._run(batch_size=1000)
+
+        location = self._location_for("meta-fails.example.com")
+        self.assertEqual(3, LocationFindingReference.objects.filter(location=location).count())
