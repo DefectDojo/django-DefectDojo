@@ -6,6 +6,7 @@ from tempfile import NamedTemporaryFile
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.db.models import Exists, OuterRef
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -29,7 +30,7 @@ from dojo.finding.ui.views import BaseListFindings
 from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
-from dojo.location.queries import get_authorized_locations
+from dojo.location.queries import authorized_finding_references, get_authorized_locations
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
@@ -96,7 +97,7 @@ class ReportBuilder(View):
 
     def get_endpoints(self, request: HttpRequest):
         if locations_enabled():
-            endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+            endpoints = Location.objects.filter(active_location_reference(request.user)).distinct()
             filter_class = URLFilter
         else:
             endpoints = Endpoint.objects.filter(
@@ -213,10 +214,23 @@ def report_findings(request):
                    })
 
 
+def active_location_reference(user, product=None):
+    """
+    Condition for a Location with an active finding the user may see.
+
+    A Location is shared by every product that recorded it, so the status of findings
+    in other products must not make it show up as vulnerable here.
+    """
+    references = authorized_finding_references(user).filter(location=OuterRef("pk"), status=FindingLocationStatus.Active)
+    if product is not None:
+        references = references.filter(finding__test__engagement__product=product)
+    return Exists(references)
+
+
 def report_endpoints(request):
     if locations_enabled():
         endpoints = get_authorized_locations(Permissions.Location_View)
-        endpoints = endpoints.filter(findings__status=FindingLocationStatus.Active).distinct()
+        endpoints = endpoints.filter(active_location_reference(request.user)).distinct()
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
@@ -285,8 +299,7 @@ def product_endpoint_report(request, pid):
     if locations_enabled():
         endpoints = Location.objects.filter(
             products__product=product,
-            findings__status=FindingLocationStatus.Active,
-        )
+        ).filter(active_location_reference(request.user, product=product))
         endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), user=request.user)
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:

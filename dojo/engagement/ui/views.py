@@ -1228,7 +1228,7 @@ def add_risk_acceptance(request, eid, fid=None):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = RiskAcceptanceForm(request.POST, request.FILES)
+        form = RiskAcceptanceForm(request.POST, request.FILES, engagement=eng)
         if form.is_valid():
             # first capture notes param as it cannot be saved directly as m2m
             notes = None
@@ -1270,7 +1270,7 @@ def add_risk_acceptance(request, eid, fid=None):
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(eid, )))
     else:
         risk_acceptance_title_suggestion = f"Accept: {finding}"
-        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
+        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion}, engagement=eng)
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).prefetch_related("test", "finding_group_set").order_by("test__id", "numerical_severity", "title")
 
@@ -1399,7 +1399,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 
         if "add_findings" in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
-                request.POST, request.FILES, instance=risk_acceptance)
+                request.POST, request.FILES, instance=risk_acceptance, engagement=eng)
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data["accepted_findings"]
@@ -1421,7 +1421,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
-    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
+    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance, engagement=eng)
 
     accepted_findings = risk_acceptance.accepted_findings.order_by("numerical_severity")
     fpage = get_page_items(request, accepted_findings, 15)

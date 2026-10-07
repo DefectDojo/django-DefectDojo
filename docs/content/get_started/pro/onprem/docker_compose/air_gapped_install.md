@@ -89,6 +89,19 @@ docker image ls
 
 Note the repository prefix shared by the DefectDojo images in that output. You need it in the next step, and the set of images varies between releases, so read it from your own output rather than assuming a list.
 
+Finally, fetch the Pro settings. They ship in their own image, which neither `deploy download` nor `app pull-images` retrieves, and the CLI cannot fetch them later on an air-gapped host. Copy them into the customizations directory so they travel inside the deployment archive:
+
+```bash
+SETTINGS_IMAGE="us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro/settings:x.y.z"
+docker pull "$SETTINGS_IMAGE"
+docker create --name settings_image "$SETTINGS_IMAGE"
+sudo docker cp settings_image:/settings/. /opt/dojo/customizations/
+docker rm settings_image
+ls -l /opt/dojo/customizations/pro_settings.py
+```
+
+The last command must list `pro_settings.py`. Without that file the Pro features are not loaded, and nobody can sign in: the login page shows only the logo, and a sign-in attempt fails with `Sign in failed (HTTP 200)`.
+
 ### 4. Record the generated configuration
 
 The standard install generates several configuration values on first run. In an air-gapped install you set them by hand on the target host, so capture them now:
@@ -235,6 +248,14 @@ sudo chown -R dojosrv:dojosrv /opt/dojo
 sudo chmod -R go+w /opt/dojo/media
 ```
 
+Confirm the Pro settings from step 3 arrived with it:
+
+```bash
+ls -l /opt/dojo/customizations/pro_settings.py
+```
+
+If DefectDojo will call services whose certificates are signed by an internal CA, such as a self-hosted GitLab or another SSO provider, Jira, or a tool reached through a Connector, install your CA bundle now. See [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). An air-gapped network almost always has an internal CA, and without the bundle those calls fail with `certificate verify failed`.
+
 ### 8. Set the configuration by hand
 
 An air-gapped install does not use the interactive first install, so set the values it would otherwise generate for you. Use the keys you captured in step 4:
@@ -333,9 +354,25 @@ dojo-compose-cli app restart
 
 Two things catch people out. Restarting without changing the configured version brings the stack back on the images you already had, because the version selects the image tags. And the set of images can change between releases, so compare what you loaded against what the new version's pull produced rather than assuming the previous list still applies.
 
-Your existing deployment directory does not pick up the new version's compose file or nginx configuration on its own, so restore the new `/opt/dojo` contents as you did in step 7, keeping your own customizations, certificates, and media.
+Your existing deployment directory does not pick up the new version's files on its own, so restore the new `/opt/dojo` contents as you did in step 7. Some files must come from the new version and others must be carried over from your current install, and mixing them up is the most common cause of a broken air-gapped upgrade:
+
+| Take from the new version | Carry over from your current install |
+| --- | --- |
+| `docker-compose.yml` and the nginx configuration | `customizations/local_settings.py`, if you changed it |
+| `customizations/pro_settings.py` (an older copy will not start against the new release) | `certs/dojo.crt` and `certs/dojo.key`, your server certificate |
+| The other files in `certs/`, which are internal service certificates | Everything in `certs/private/`, your CA bundles. The new version ships these files empty. |
+| | `media/`, your uploaded files |
+
+Before restarting, confirm that `customizations/pro_settings.py` is present, and that `certs/private/dojo-ca-bundle.crt` is not empty if you use an internal CA.
 
 Back up your database before any upgrade, and review the [upgrade notes](/releases/os_upgrading/upgrading_guide/) for every version between your current one and your target. If you are several releases behind, contact support before starting.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| The login page shows only the logo and footer, with no login form. A sign-in through `?force_login_form` fails with `Sign in failed (HTTP 200)`, and the browser's Network tab shows `/api/vue/auth/login/config/` redirecting to `/login?next=...`. | `customizations/pro_settings.py` is missing, so the Pro features are not loaded. | Fetch the settings on the staging host as in step 3, copy `pro_settings.py` into `/opt/dojo/customizations/`, then run `dojo-compose-cli app restart`. |
+| Signing in through an SSO provider fails with `certificate verify failed` after you authenticate with the provider. | DefectDojo does not trust the CA that signed the provider's certificate, usually because `certs/private/dojo-ca-bundle.crt` is empty. | Add your CA bundle as described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). `docker logs dojo` should then show `REQUESTS_CA_BUNDLE set to /app/certs/private/dojo-ca-bundle.crt`. |
 
 ## Features that need outbound access
 
