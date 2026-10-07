@@ -45,8 +45,10 @@ ALERT_BULK_CREATE_BATCH_SIZE = 1000
 
 # Mails sent over one SMTP session before it is closed and a new one opened. A fan-out
 # reuses the session instead of connecting (and logging in) once per recipient, but stays
-# under the per-session message limits mail servers commonly enforce.
-MAIL_MESSAGES_PER_CONNECTION = 100
+# within the per-session message limits mail servers commonly enforce (Exchange receive
+# connectors default to 20). A relay with a lower limit, or one that drops an idle session,
+# is covered by the retry in EmailNotificationManger._send_email.
+MAIL_MESSAGES_PER_CONNECTION = 20
 
 
 class MailConnectionBatch:
@@ -81,6 +83,11 @@ class MailConnectionBatch:
         self._sent += 1
         return self._connection
 
+    @property
+    def reused(self) -> bool:
+        """Whether the current message is not the first its connection carries."""
+        return self._connection is not None and self._sent > 1
+
     def discard(self) -> None:
         """Drop the connection after a failed send; the next message opens a new one."""
         self.close()
@@ -93,6 +100,31 @@ class MailConnectionBatch:
             connection.close()
         except Exception:
             logger.exception("Unable to close the notification mail connection")
+
+
+class AlertBuffer:
+
+    """
+    The in-app alerts of one fan-out, written in batches instead of one INSERT per recipient.
+
+    Written every ``ALERT_BULK_CREATE_BATCH_SIZE`` alerts rather than only when the fan-out
+    ends, so memory stays bounded, a worker stopped mid fan-out keeps what it had built, and a
+    bad row costs its own batch rather than every recipient's alert.
+    """
+
+    def __init__(self, write) -> None:
+        self._write = write
+        self._pending: list = []
+
+    def append(self, alert) -> None:
+        self._pending.append(alert)
+        if len(self._pending) >= ALERT_BULK_CREATE_BATCH_SIZE:
+            self.flush()
+
+    def flush(self) -> None:
+        pending, self._pending = self._pending, []
+        if pending:
+            self._write(pending)
 
 
 class WebhookOwners:
@@ -503,6 +535,25 @@ class EmailNotificationManger(NotificationManagerHelpers):
         if self.mail_batch is not None:
             self.mail_batch.discard()
 
+    def _send_email(self, email: EmailMessage) -> None:
+        """
+        Send one notification mail, on the fan-out's shared connection when there is one.
+
+        A shared SMTP session can end under the message: the server caps messages per
+        session, or drops a session that sat idle while a slow Slack or webhook call ran. So
+        a send that fails on a connection that already carried a message is retried once on
+        a new connection; only a failure there is the recipient's own.
+        """
+        try:
+            email.send(fail_silently=False)
+        except Exception:
+            if self.mail_batch is None or not self.mail_batch.reused:
+                raise
+            logger.warning("Notification mail failed on a reused connection, retrying on a new one", exc_info=True)
+            self.mail_batch.discard()
+            email.connection = self.mail_batch.connection()
+            email.send(fail_silently=False)
+
     def send_mail_notification(
         self,
         event: str,
@@ -535,7 +586,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
             )
             email.content_subtype = "html"
             logger.debug("sending email alert")
-            email.send(fail_silently=False)
+            self._send_email(email)
 
         except Exception as exception:
             self._discard_mail_connection()
@@ -712,10 +763,10 @@ class AlertNotificationManger(NotificationManagerHelpers):
     """Manger for alert notifications and their helpers."""
 
     #: When a NotificationManager fans one notification out to many recipients it
-    #: hands every alert manager the same list, collects the built alerts in it and
-    #: writes them with one bulk INSERT at the end. None (a manager built on its own)
+    #: hands every alert manager the same AlertBuffer, which collects the built alerts
+    #: and writes them with one bulk INSERT per batch. None (a manager built on its own)
     #: writes each alert as it is built.
-    alert_buffer: list | None = None
+    alert_buffer: AlertBuffer | None = None
 
     def send_alert_notification(
         self,
@@ -777,8 +828,9 @@ class NotificationManager(NotificationManagerHelpers):
 
     def create_notification(self, event: str | None = None, **kwargs: dict) -> None:
         # Every recipient's in-app alert is collected while the notification fans out and
-        # written in one bulk INSERT at the end, instead of one INSERT per recipient. A
-        # nested call on the same manager joins the outer batch.
+        # written in bulk INSERTs of ALERT_BULK_CREATE_BATCH_SIZE (the rest when the fan-out
+        # ends), instead of one INSERT per recipient. A nested call on the same manager
+        # joins the outer batch.
         #
         # The other per-recipient costs are shared the same way for the duration of the
         # fan-out: each channel's message is rendered once and reused for every recipient
@@ -788,7 +840,7 @@ class NotificationManager(NotificationManagerHelpers):
         if getattr(self, "_alert_buffer", None) is not None:
             self._create_notification(event, **kwargs)
             return
-        self._alert_buffer = []
+        self._alert_buffer = AlertBuffer(lambda alerts: self._flush_alerts(alerts, kwargs))
         self._render_cache = NotificationRenderCache()
         self._mail_batch = MailConnectionBatch(lambda: self._get_manager_instance("mail")._new_mail_connection())
         self._webhook_owners = WebhookOwners()
@@ -800,7 +852,7 @@ class NotificationManager(NotificationManagerHelpers):
             self._render_cache = None
             self._webhook_owners = None
             mail_batch.close()
-            self._flush_alerts(pending, kwargs)
+            pending.flush()
 
     def _flush_alerts(self, alerts: list, kwargs: dict) -> None:
         if not alerts:

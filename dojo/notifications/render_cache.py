@@ -26,6 +26,10 @@ slicing it, handing it to a filter that rewrites it, putting it in a JSON dump) 
 render as opaque. An opaque render is thrown away and the template is rendered again with
 the real user, and from then on that template is rendered per recipient, as before. So the
 cache either reproduces the direct render or steps aside; it never guesses.
+
+One known difference: "{% now %}" is evaluated when the stored render was made, so recipients
+served from it get that moment rather than the moment of their own send. No notification
+template uses it.
 """
 
 from __future__ import annotations
@@ -73,6 +77,15 @@ _OUTPUT_CODE = frozenset({
 _REWRITING_CODE = frozenset({
     defaulttags.FilterNode.render.__code__,
     defaulttags.SpacelessNode.render.__code__,
+})
+
+#: Tags that render a recipient string into a template variable when given "as <name>"
+#: ("{% firstof user.first_name as n %}", "{% blocktranslate asvar v %}"). The variable then
+#: holds plain text with the marker in it, which the template may measure or cut
+#: ("{{ n|truncatechars:4 }}") with nothing to tell the cache, so such a render is opaque.
+_ASVAR_CODE = frozenset({
+    defaulttags.FirstOfNode.render.__code__,
+    i18n_tags.BlockTranslateNode.render.__code__,
 })
 
 #: The template engine, Django's i18n tags, and its escaping. A recipient string has to reach
@@ -134,6 +147,8 @@ class _Recorder:
                 code = frame.f_code
                 if code in _REWRITING_CODE:
                     break
+                if code in _ASVAR_CODE and getattr(frame.f_locals.get("self"), "asvar", None):
+                    break
                 if code.co_filename.startswith(_ENGINE_FILES):
                     if above_engine:
                         break
@@ -181,6 +196,18 @@ class _RecipientProxy:
 
     def __dir__(self):
         return dir(self._dd_target)
+
+    def __getitem__(self, key):
+        # The template engine tries "value[bit]" before "value.bit" for every lookup. For a
+        # target that cannot be indexed, fail as it would, so the engine moves on to the
+        # attribute. Indexing one that can ({{ user.extra.k }}, {{ user.groups.all.0 }})
+        # is not something the cache records, so that render is opaque.
+        target = self._dd_target
+        if not hasattr(type(target), "__getitem__"):
+            msg = f"'{type(target).__name__}' object is not subscriptable"
+            raise TypeError(msg)
+        self._dd_recorder.opaque = True
+        return target[key]
 
     def __bool__(self) -> bool:
         target = self._dd_target
@@ -461,7 +488,10 @@ class NotificationRenderCache:
         self.reuses = 0
 
     def _key(self, owner, event: str, notification_type: str, context: dict) -> tuple:
-        shared = []
+        # A render with no recipient (the system mail to mail_notifications_to, the system
+        # Slack channel, a webhook with no owner) reads nothing through "user", so nothing
+        # would tell it apart from a recipient's render: it is kept under a key of its own.
+        shared = [("user", context.get("user") is None)]
         for name in sorted(context):
             if name == "user":
                 continue
