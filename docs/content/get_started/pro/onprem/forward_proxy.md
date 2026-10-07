@@ -26,7 +26,7 @@ On `dojo-compose-cli`–based deployments, set the proxy variables in your deplo
 | `HTTP_PROXY` | URL of the proxy for outbound HTTP requests (if different from `HTTPS_PROXY`) |
 | `NO_PROXY` | Comma-separated list of extra hosts, domain suffixes and CIDR ranges that should bypass the proxy, such as your internal Jira or SSO hosts. The stack's own service names are already covered (see below), so list only hosts outside the stack. |
 
-Always write the scheme, for example `http://proxy.example.com:3128`. A value without one is not read reliably: a dotted name or an IP address with a port is read as `http://`, but a short name such as `proxy:3128`, or a value carrying credentials without a scheme, is refused. Only HTTP(S) proxies are supported. In the Python services (the application, workers and PSIRT feed fetches), a proxy value that cannot be used, such as a `socks5://` proxy, makes outbound calls fail with an error rather than connect directly.
+Always write the scheme, for example `http://proxy.example.com:3128`, because a value without one is not read the same way by every service. Only HTTP(S) proxies are supported. In the Python services (the application, workers and PSIRT feed fetches), a dotted name or an IP address with a port is read as `http://`, but a short name such as `proxy:3128`, a value carrying credentials without a scheme, or a proxy that cannot be used, such as a `socks5://` proxy, is refused: outbound calls fail with an error rather than connect directly.
 
 The compose bundle passes these values to every container that makes outbound calls through its `x-proxy-vars` (`proxyenv`) block:
 
