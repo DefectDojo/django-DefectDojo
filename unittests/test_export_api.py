@@ -3,6 +3,7 @@ import datetime
 import json
 import re
 import uuid
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.core.files.base import ContentFile
@@ -526,6 +527,19 @@ class ExportProductStreamTest(DojoTestCase):
                 self.assertEqual(self.client.get(url, {"max_pair_bytes": value}).status_code, 400)
         for value in ("0", "67108864"):
             self.assertEqual(self.page(max_pair_bytes=value)[-1]["kind"], "end")
+
+    def test_a_full_pair_batch_goes_out_before_the_next_finding_is_read(self):
+        read = []
+
+        def findings():
+            for number in range(rows.PAIR_BATCH_FINDINGS + 1):
+                read.append(number)
+                yield SimpleNamespace(pair_sizes=[])
+
+        out = rows.with_pairs(findings(), services.DEFAULT_MAX_PAIR_BYTES)
+        for _ in range(rows.PAIR_BATCH_FINDINGS):
+            next(out)
+        self.assertEqual(len(read), rows.PAIR_BATCH_FINDINGS)
 
     def test_left_out_pairs_are_never_read(self):
         first, second = self.findings_without_pairs()

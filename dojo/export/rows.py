@@ -194,11 +194,14 @@ def with_pairs(findings, max_pair_bytes: int):
     batch, batch_bytes = [], 0
     for finding in findings:
         kept, size = _kept_pair_ids(finding.pair_sizes, max_pair_bytes)
-        if batch and (batch_bytes + size > max_pair_bytes or len(batch) == PAIR_BATCH_FINDINGS):
+        if batch and batch_bytes + size > max_pair_bytes:
             yield from _load_pairs(batch)
             batch, batch_bytes = [], 0
         batch.append((finding, kept, len(finding.pair_sizes) - len(kept)))
         batch_bytes += size
+        if len(batch) == PAIR_BATCH_FINDINGS:
+            yield from _load_pairs(batch)
+            batch, batch_bytes = [], 0
     yield from _load_pairs(batch)
 
 
