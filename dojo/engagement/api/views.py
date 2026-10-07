@@ -209,6 +209,7 @@ class EngagementViewSet(
                     reverse("view_engagement", args=(engagement.id,)),
                 ),
                 parent_title=f"Engagement: {engagement.name}",
+                parent=engagement,
             )
 
             serialized_note = api_v2_serializers.NoteSerializer(

@@ -33,6 +33,7 @@ def process_note_added(engagement, note, *, user):
             note=note,
             parent_url=request.build_absolute_uri(reverse("view_engagement", args=(engagement.id,))),
             parent_title=f"Engagement: {engagement.name}",
+            parent=engagement,
         )
 
 
