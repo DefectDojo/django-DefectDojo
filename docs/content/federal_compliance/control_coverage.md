@@ -27,12 +27,17 @@ automatically. Among others:
 Extraction is grounded in the imported catalog, so an identifier the catalog does not recognize
 never produces a mapping.
 
-The same sources also carry PCI DSS requirements (Wazuh's `pci_dss_4.0:2.2.4`, Prowler's
-`PCI-4.0` list), which map to the bundled PCI DSS catalog and show in its coverage and
-[PCI DSS assessments](../pci_evidence_packs/). Only references that name PCI DSS version 4 are
-read: version 3.2.1 numbers the same requirements differently, so a `pci_dss_3.2.1` reference is
-skipped rather than mapped to the wrong requirement. PCI DSS mappings never appear on a FedRAMP
-POA&M item, which cites 800-53 controls only.
+The same sources also carry PCI DSS requirements (Wazuh's `pci_dss_v4.0:2.2.4`, Prowler's
+`PCI-4.0` list), which map to the bundled PCI DSS catalog and show in its coverage. A
+[PCI DSS assessment](../pci_evidence_packs/) does not read these mappings: it reads the scans and
+records described on that page. Only references that name PCI DSS version 4 are read: version
+3.2.1 numbers the same requirements differently, so a `pci_dss_3.2.1` reference is skipped rather
+than mapped to the wrong requirement. PCI DSS mappings never appear on a FedRAMP POA&M item, which
+cites 800-53 controls only.
+
+The connectors add their tags when they create a finding. A finding imported before a connector
+began tagging keeps the tags it had, so it maps to no control from those tags. Findings the
+connector creates from then on carry them.
 
 Findings that carry no control references of their own are attributed to the default scan controls
 on the Compliance Profile — see [Compliance Profile](../compliance_profile).

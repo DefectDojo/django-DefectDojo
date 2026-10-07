@@ -26,7 +26,7 @@ The service account must meet all of the following requirements. A service accou
 
 Wiz serves two different data classes, and the connector imports both by default:
 
-* **Issues**: a Wiz Control fired on a resource. These are policy and posture violations. A typical tenant has hundreds or thousands. An Issue is tagged with each NIST 800-53, PCI DSS and CIS requirement its Control maps to, for example `nist_sp_800-53_revision_5:ac-6(3)`, so DefectDojo Pro can map it to those controls (see [Control Coverage](/federal_compliance/control_coverage/)). Other frameworks stay in the description only.
+* **Issues**: a Wiz Control fired on a resource. These are policy and posture violations. A typical tenant has hundreds or thousands. An Issue is tagged with each NIST 800-53, PCI DSS and CIS requirement its Control maps to, for example `nist_sp_800-53_revision_5:ac-6(3)`. DefectDojo Pro maps the NIST 800-53 and PCI DSS tags to controls (see [Control Coverage](/federal_compliance/control_coverage/)). CIS tags are kept on the finding but are not mapped to a catalog. Other frameworks stay in the description only.
 * **Vulnerability Findings**: one CVE on one package on one asset. A tenant with a few thousand assets can hold millions. Each asset carries many packages, and each package can carry many CVEs.
 
 If your DefectDojo finding count is far higher than your asset count, Vulnerability Findings are the reason. That is expected: a finding is one problem on one asset, not one asset.

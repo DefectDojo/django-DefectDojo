@@ -100,10 +100,14 @@ DISA STIG checklists, OpenSCAP, Lynis, kube-bench, docker-bench and cloud postur
 has a [Compliance Profile](../compliance_profile/), its configuration test types decide which scans
 count. With no posture scan in the period the requirement stays manual, because there is nothing to
 show. A requirement is satisfied when every failed check is fixed or risk accepted, and partially
-satisfied while some are neither. The evidence lists the hosts that still have open failed checks,
-most first, with their count by severity (up to 100 hosts, and how many more there are). Several of
-these requirements also need a record DefectDojo does not hold (the written configuration standard,
-why an insecure service is justified), so they are marked as partly automated. Requirement 2.2.3,
+satisfied while some are neither. Failed checks of Info severity are reported in the evidence but
+do not count against the requirement. The evidence lists the hosts that still have open failed
+checks, most first, with their count by severity (up to 100 hosts, and how many more there are).
+
+Requirements 2.2.1, 2.2.2, 2.2.5 and 2.2.7 also need a record DefectDojo does not hold (the written
+configuration standard, why an insecure service is justified, the inventory of vendor accounts), so
+the scans alone take them no further than partially satisfied, and the evidence says the record is
+still needed. Attach the record and override the result once it is in place. Requirement 2.2.3,
 separating functions with different security needs, is manual.
 
 An assessment that existed before Requirement 2 was added picks it up the next time it is
