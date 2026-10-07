@@ -170,6 +170,7 @@ class TestsViewSet(
                     reverse("view_test", args=(test.id,)),
                 ),
                 parent_title=f"Test: {test.title}",
+                parent=test,
             )
 
             serialized_note = api_v2_serializers.NoteSerializer(

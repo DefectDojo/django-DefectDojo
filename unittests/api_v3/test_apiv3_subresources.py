@@ -389,7 +389,9 @@ class TestApiV3NoteSideEffectsFinding(_SubResourceBase):
         self.assertEqual(expected_pk, getattr(add_comment.call_args.args[0], "pk", None))
 
     def test_finding_note_mention_dispatches_user_mentioned_notification(self):
-        Dojo_User.objects.create_user(username="v3_mention_target", password="x")  # noqa: S106
+        target = Dojo_User.objects.create_user(username="v3_mention_target", password="x")  # noqa: S106
+        # Mentions only reach users who can see the finding.
+        self.finding.test.engagement.product.authorized_users.add(target)
         with mock.patch(self._CREATE_NOTIFICATION) as create_notif:
             self._post_note(entry="hey @v3_mention_target please review")
         mention_calls = [c for c in create_notif.call_args_list if c.kwargs.get("event") == "user_mentioned"]
@@ -410,7 +412,10 @@ class TestApiV3NoteSideEffectsEngagementTest(_SubResourceBase):
     _JIRA_ADD_COMMENT = "dojo.jira.services.add_comment"
 
     def _assert_mention_notified(self, resource, parent, username):
-        Dojo_User.objects.create_user(username=username, password="x")  # noqa: S106
+        target = Dojo_User.objects.create_user(username=username, password="x")  # noqa: S106
+        # Mentions only reach users who can see the object the note is on.
+        product = parent.product if resource == "engagements" else parent.engagement.product
+        product.authorized_users.add(target)
         with mock.patch(self._CREATE_NOTIFICATION) as create_notif:
             response = self.client.post(
                 self.v3_url(f"{resource}/{parent.pk}/notes"), {"entry": f"cc @{username}"}, format="json",
