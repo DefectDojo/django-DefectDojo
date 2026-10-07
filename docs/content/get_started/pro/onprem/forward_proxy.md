@@ -26,6 +26,8 @@ On `dojo-compose-cli`–based deployments, set the proxy variables in your deplo
 | `HTTP_PROXY` | URL of the proxy for outbound HTTP requests (if different from `HTTPS_PROXY`) |
 | `NO_PROXY` | Comma-separated list of extra hosts, domain suffixes and CIDR ranges that should bypass the proxy, such as your internal Jira or SSO hosts. The stack's own service names are already covered (see below), so list only hosts outside the stack. |
 
+Write each proxy URL with its scheme, for example `http://proxy.example.com:3128`. A bare `proxy.example.com:3128` is rejected by DefectDojo's Python clients. Only HTTP(S) proxies are supported: PSIRT feed fetches ignore a `socks5://` proxy and connect directly, logging a warning.
+
 The compose bundle passes these values to every container that makes outbound calls through its `x-proxy-vars` (`proxyenv`) block:
 
 - **dojo** and **dojo-import-scan**: Jira, SonarQube, SSO and other web-side outbound calls
@@ -33,7 +35,8 @@ The compose bundle passes these values to every container that makes outbound ca
 - **init**: the one-off initializer that runs before the stack starts
 - **ddorch-workers**: the orchestrator workers (rules engine, scheduling, integrators and Sensei dispatch)
 - **connectors** and **integrators**: cloud-tool API calls run by the Pro Connector and integrator frameworks
-- **nginx**, **ddorch**, **mcp-server**, **webhook-gateway** and **sensei-engine**: added in 3.4.100, so any outbound call they make goes through the proxy (for the Sensei engine, GitHub and the LLM provider), while their calls to other containers stay direct
+- **ddorch**, **mcp-server**, **webhook-gateway** and **sensei-engine**: added in 3.4.100, so any outbound call they make goes through the proxy (for the Sensei engine, GitHub and the LLM provider), while their calls to other containers stay direct
+- **nginx** also receives the variables from 3.4.100, but nginx itself does not read them
 
 PSIRT feed fetches honour `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` from 3.4.100. Earlier releases fetched feeds directly even with a proxy configured.
 
@@ -47,7 +50,9 @@ The containers call each other by service name: the application calls `connector
 localhost,127.0.0.1,nginx,dojo,dojo-import-scan,celerybeat,celeryworker,init,redis,postgres,connectors,integrators,integrator,ddorch,ddorch-workers,mcp-server,webhook-gateway,sensei-engine,192.168.42.0/24
 ```
 
-`192.168.42.0/24` is the bundle's `dd-net` network. Whatever you set in `NO_PROXY` is appended after this list rather than replacing it, so `NO_PROXY=.corp.example.com` gives the containers the list above followed by `,.corp.example.com`.
+`192.168.42.0/24` is the bundle's `dd-net` network. A CIDR entry only matches a URL written with an IP address: a service name that resolves into that range is not matched by the CIDR, which is why the names are listed as well. Whatever you set in `NO_PROXY` is appended after this list rather than replacing it, so `NO_PROXY=.corp.example.com` gives the containers the list above followed by `,.corp.example.com`.
+
+A leading-dot entry is read slightly differently across the stack. The Python services match `.corp.example.com` against `corp.example.com` itself as well as its subdomains, while the Go services match only the subdomains. To cover both, list both forms: `corp.example.com,.corp.example.com`.
 
 To replace the built-in part, for example because you renamed services or changed the network, set `DD_INTERNAL_NO_PROXY` to the full list you want. Your `NO_PROXY` is still appended to it.
 
@@ -62,10 +67,14 @@ A proxy that inspects TLS re-signs every certificate with its own CA, and the co
 | **dojo**, **dojo-import-scan**, **celeryworker**, **ddorch-workers**, and from 3.4.100 **celerybeat** and **init** | `/app/certs/private/dojo-ca-bundle.crt` | On startup the entrypoint merges the file with the system roots and exports the result as `REQUESTS_CA_BUNDLE`, so public CAs stay trusted. From 3.4.100 PSIRT feed fetches also trust this bundle. |
 | **connectors** | `/app/certs/private/connectors-ca-bundle.crt` | Appended to `CA_BUNDLES` on startup. |
 | **mcp-server** | `DD_MCP_CA_BUNDLE` (default `/app/certs/orch_tls_root.ca`) | Added to the platform roots. The default is the stack's internal CA, which it needs to reach `nginx:7443`. |
-| **sensei-engine** | `SENSEI_SSL_CERT_FILE` (default `/app/certs/orch_tls_root.ca`), passed to the engine as `SSL_CERT_FILE` | Added to the system roots. Keep the internal CA in any file you point it at, or its callback to `nginx:7443` fails. |
+| **sensei-engine** | `SENSEI_SSL_CERT_FILE` (default `/app/certs/orch_tls_root.ca`), passed to the engine as `SSL_CERT_FILE` | `SSL_CERT_FILE` can replace the default trust file rather than add to it, so point it at one bundle that holds the internal CA (needed for its callback to `nginx:7443`), the proxy's CA, and the public roots the engine needs. |
 | **webhook-gateway** | `/app/certs/dojo_internal.ca`, mounted from `certs/orch_tls_root.ca` | Delivers only to the internal `nginx` listener, so it never needs the proxy's CA. |
 
-For the application side, install the proxy's CA (one or more PEM certificates) as `dojo-ca-bundle.crt`, as described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca), and restart the stack. Use `connectors-ca-bundle.crt` as well when Connector traffic goes through the same proxy. On Kubernetes, see [Trusting an internal or private CA](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#trusting-an-internal-or-private-ca).
+For the application side, install the proxy's CA (one or more PEM certificates) as `dojo-ca-bundle.crt`, as described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca), and restart the stack. Use `connectors-ca-bundle.crt` as well when Connector traffic goes through the same proxy. For Kubernetes deployments, see [Installing on Kubernetes](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/).
+
+## Destination rules belong on the proxy
+
+Once a request goes through the proxy, the proxy resolves the destination name itself, so DefectDojo's own outbound checks (such as `DD_OUTBOUND_BLOCK_PRIVATE_NETWORKS` and `DD_OUTBOUND_DENIED_CIDRS`) can only check the name as DefectDojo resolves it. A name only the proxy can resolve, or one it resolves differently, is passed through. If you rely on blocking internal or metadata addresses, enforce the same egress rules on the proxy.
 
 ## Verifying the proxy is in use
 
