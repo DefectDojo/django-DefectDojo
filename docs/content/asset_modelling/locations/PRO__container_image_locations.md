@@ -25,6 +25,8 @@ Each image carries:
 
 The location's canonical value is `registry/repository@sha256:<digest>` when the digest is known, and `registry/repository:tag` when it is not. A tag-only image and a digest image for the same repository are **different locations on purpose**: tags move and digests do not, so collapsing them would make a finding on last week's `:latest` read as a finding on this week's. Every reference to an image records whether its digest is known (`digest_known`), and the lists mark tag-only images as **digest unknown**.
 
+Deduplication compares images by the same identity, so the same vulnerability in two images is two findings. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#container-image-findings).
+
 Image locations are **scan-managed**: they are created by imports and connectors, not by hand. There is no "New Image" action; the scanner or registry is the source of truth.
 
 ## Where to Find Them
