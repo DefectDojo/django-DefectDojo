@@ -1,0 +1,178 @@
+{{- /*
+  Multiple-choice knowledge check, scored in the browser.
+
+  Usage: {{< quiz "triage_engine" >}}
+
+  Questions live in data/quizzes/<name>.yaml: a title and a list of questions,
+  each with q, options, answer (0-based index), why, and an optional source
+  (a path relative to the page's section, e.g. "runs/#cascading").
+
+  The markup is rendered here so the questions read without JavaScript; the
+  inline script adds answering, feedback and scoring. Styles are inline rather
+  than in _custom.scss because PurgeCSS cannot see classes that only appear in
+  a shortcode used on one page.
+*/ -}}
+{{- $name := .Get 0 -}}
+{{- $quiz := index site.Data.quizzes $name -}}
+{{- if not $quiz -}}
+  {{- errorf "quiz shortcode: no data/quizzes/%s.yaml (used in %s)" $name .Page.File.Path -}}
+{{- end -}}
+{{- $page := .Page -}}
+{{- $base := .Page.CurrentSection.RelPermalink -}}
+{{- $total := len $quiz.questions -}}
+{{- $letters := slice "A" "B" "C" "D" "E" "F" -}}
+<style>
+  .dd-quiz { --q-ok: #1f7a4d; --q-ok-bg: rgba(31, 122, 77, 0.1); --q-bad: #b42318; --q-bad-bg: rgba(180, 35, 24, 0.08); margin: 1.5rem 0; }
+  [data-bs-theme='dark'] .dd-quiz { --q-ok: #6fd3a0; --q-ok-bg: rgba(111, 211, 160, 0.12); --q-bad: #ff8a80; --q-bad-bg: rgba(255, 138, 128, 0.1); }
+  .dd-quiz-bar { position: sticky; top: 4.5rem; z-index: 2; display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem; margin-bottom: 1.25rem; background: var(--dd-surface); border: 1px solid var(--dd-border); border-radius: 0.5rem; box-shadow: var(--dd-shadow-card); font-size: 0.9rem; }
+  .dd-quiz-bar strong { font-variant-numeric: tabular-nums; }
+  .dd-quiz-track { flex: 1; height: 6px; background: var(--dd-surface-2); border-radius: 3px; overflow: hidden; }
+  .dd-quiz-fill { height: 100%; width: 0; background: var(--dd-orange); transition: width 0.2s ease; }
+  .dd-quiz-q { margin: 0 0 1.25rem; padding: 1.1rem 1.25rem; background: var(--dd-surface); border: 1px solid var(--dd-border); border-radius: 0.5rem; }
+  .dd-quiz-q legend { float: left; width: 100%; padding: 0; line-height: 1.45; font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--dd-ink); }
+  .dd-quiz-num { color: var(--dd-muted); font-weight: 500; margin-right: 0.35rem; }
+  .dd-quiz-opt { clear: both; display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.55rem 0.75rem; margin: 0.35rem 0; border: 1px solid var(--dd-border); border-radius: 0.4rem; cursor: pointer; line-height: 1.45; }
+  .dd-quiz-opt:hover { border-color: var(--dd-border-strong); background: var(--dd-surface-2); }
+  .dd-quiz-opt input { margin-top: 0.25rem; accent-color: var(--dd-orange); flex-shrink: 0; }
+  .dd-quiz-opt code { font-size: 0.85em; }
+  .dd-quiz-letter { font-weight: 600; color: var(--dd-muted); min-width: 1.1rem; }
+  .dd-quiz-opt.is-correct, .dd-quiz-opt.is-correct:hover { border-color: var(--q-ok); background: var(--q-ok-bg); }
+  .dd-quiz-opt.is-wrong, .dd-quiz-opt.is-wrong:hover { border-color: var(--q-bad); background: var(--q-bad-bg); }
+  .dd-quiz-feedback { margin-top: 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--dd-border-strong); font-size: 0.92rem; }
+  .dd-quiz-feedback[hidden] { display: none; }
+  .dd-quiz-verdict { font-weight: 600; margin-right: 0.3rem; }
+  .is-right .dd-quiz-feedback { border-left-color: var(--q-ok); }
+  .is-right .dd-quiz-verdict { color: var(--q-ok); }
+  .is-missed .dd-quiz-feedback { border-left-color: var(--q-bad); }
+  .is-missed .dd-quiz-verdict { color: var(--q-bad); }
+  .dd-quiz-hint { margin: 0.6rem 0 0; padding: 0.6rem 0.75rem; background: var(--dd-surface-2); border-radius: 0.4rem; }
+  .dd-quiz-hint[hidden] { display: none; }
+  .dd-quiz-hint-label { font-weight: 600; }
+  .dd-quiz-result { padding: 1.25rem; border: 1px solid var(--dd-border); border-radius: 0.5rem; background: var(--dd-surface-2); }
+  .dd-quiz-result[hidden] { display: none; }
+  .dd-quiz-result h3 { margin-top: 0; }
+  @media (max-width: 575px) { .dd-quiz-bar { top: 3.75rem; } .dd-quiz-q { padding: 0.9rem; } }
+</style>
+<div class="dd-quiz" data-quiz="{{ $name }}" data-total="{{ $total }}">
+  <div class="dd-quiz-bar" aria-live="polite">
+    <span>Answered <strong data-quiz-answered>0</strong> / {{ $total }}</span>
+    <div class="dd-quiz-track" aria-hidden="true"><div class="dd-quiz-fill"></div></div>
+    <span>Score <strong data-quiz-score>0</strong></span>
+  </div>
+  {{- range $i, $item := $quiz.questions }}
+  <fieldset class="dd-quiz-q" data-answer="{{ $item.answer }}">
+    <legend><span class="dd-quiz-num">{{ add $i 1 }}.</span>{{ $page.RenderString $item.q }}</legend>
+    {{- range $j, $opt := $item.options }}
+    <label class="dd-quiz-opt">
+      <input type="radio" name="{{ $name }}-q{{ $i }}" value="{{ $j }}">
+      <span class="dd-quiz-letter">{{ index $letters $j }}.</span>
+      <span>{{ $page.RenderString $opt }}</span>
+    </label>
+    {{- end }}
+    <div class="dd-quiz-feedback" hidden>
+      <span class="dd-quiz-verdict"></span>{{ $page.RenderString $item.why }}
+      {{- with $item.source }} <a href="{{ $base }}{{ . }}">Read more</a>{{ end }}
+      {{- range $j, $hint := $item.hints }}
+      {{- with $hint }}
+      {{- $href := cond (hasPrefix .link "/") (relURL .link) (printf "%s%s" $base .link) }}
+      <p class="dd-quiz-hint" data-hint="{{ $j }}" hidden>
+        <span class="dd-quiz-hint-label">Where to look instead:</span> {{ $page.RenderString .note }}
+        <a href="{{ $href }}">{{ .label }} &rarr;</a>
+      </p>
+      {{- end }}
+      {{- end }}
+    </div>
+  </fieldset>
+  {{- end }}
+  <div class="dd-quiz-result" hidden aria-live="polite">
+    <h3 data-quiz-headline></h3>
+    <p data-quiz-detail></p>
+    <button type="button" class="btn btn-primary" data-quiz-reset>Try again</button>
+  </div>
+</div>
+<script>
+  (function () {
+    "use strict";
+    var root = document.querySelector('.dd-quiz[data-quiz="{{ $name }}"]');
+    if (!root) return;
+    var total = Number(root.dataset.total);
+    var letters = ["A", "B", "C", "D", "E", "F"];
+    var answered = 0;
+    var score = 0;
+    var questions = root.querySelectorAll(".dd-quiz-q");
+    var answeredEl = root.querySelector("[data-quiz-answered]");
+    var scoreEl = root.querySelector("[data-quiz-score]");
+    var fill = root.querySelector(".dd-quiz-fill");
+    var result = root.querySelector(".dd-quiz-result");
+
+    function update() {
+      answeredEl.textContent = answered;
+      scoreEl.textContent = score;
+      fill.style.width = (answered / total) * 100 + "%";
+      if (answered < total) {
+        result.hidden = true;
+        return;
+      }
+      var pct = Math.round((score / total) * 100);
+      var missed = [];
+      questions.forEach(function (q, i) {
+        if (q.dataset.first === "missed") missed.push(i + 1);
+      });
+      root.querySelector("[data-quiz-headline]").textContent =
+        "You scored " + score + " / " + total + " (" + pct + "%)";
+      root.querySelector("[data-quiz-detail]").textContent = missed.length
+        ? "Questions to revisit: " + missed.join(", ") + ". Each one links to the page that covers it."
+        : "A perfect score. You know Triage Engine well.";
+      result.hidden = false;
+    }
+
+    // Options stay selectable after the first pick so readers can explore the
+    // other answers and their notes. The score counts the first pick only.
+    questions.forEach(function (q) {
+      var correct = Number(q.dataset.answer);
+      q.addEventListener("change", function (e) {
+        if (e.target.type !== "radio") return;
+        var picked = Number(e.target.value);
+        var right = picked === correct;
+        if (!q.dataset.first) {
+          q.dataset.first = right ? "right" : "missed";
+          answered += 1;
+          if (right) score += 1;
+        }
+        q.classList.remove("is-right", "is-missed");
+        q.classList.add(right ? "is-right" : "is-missed");
+        q.querySelectorAll("input").forEach(function (input) {
+          var label = input.closest(".dd-quiz-opt");
+          var v = Number(input.value);
+          label.classList.toggle("is-correct", v === correct);
+          label.classList.toggle("is-wrong", v === picked && !right);
+        });
+        q.querySelector(".dd-quiz-verdict").textContent = right
+          ? "Correct."
+          : "Not quite. The answer is " + letters[correct] + ".";
+        q.querySelectorAll(".dd-quiz-hint").forEach(function (h) {
+          h.hidden = Number(h.dataset.hint) !== picked;
+        });
+        q.querySelector(".dd-quiz-feedback").hidden = false;
+        update();
+      });
+    });
+
+    root.querySelector("[data-quiz-reset]").addEventListener("click", function () {
+      questions.forEach(function (q) {
+        q.classList.remove("is-right", "is-missed");
+        delete q.dataset.first;
+        q.querySelector(".dd-quiz-feedback").hidden = true;
+        q.querySelectorAll(".dd-quiz-hint").forEach(function (h) { h.hidden = true; });
+        q.querySelectorAll("input").forEach(function (input) {
+          input.checked = false;
+          input.closest(".dd-quiz-opt").classList.remove("is-correct", "is-wrong");
+        });
+      });
+      answered = 0;
+      score = 0;
+      update();
+      root.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  })();
+</script>
