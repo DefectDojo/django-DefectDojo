@@ -1096,6 +1096,12 @@ class ProductTypeSerializer(serializers.ModelSerializer):
         model = Product_Type
         fields = "__all__"
 
+class ProductTypeBasicSerializer(serializers.ModelSerializer):
+    environment = serializers.CharField(read_only=True)
+    class Meta:
+        model = Product_Type
+        fields = "__all__"
+
 class ProductTypeAllSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
