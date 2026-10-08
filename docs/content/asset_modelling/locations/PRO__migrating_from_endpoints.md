@@ -9,7 +9,7 @@ When you enable Locations on an existing DefectDojo Pro instance, the data alrea
 
 Note that migration is **one-way**. There is no automated rollback path that re-creates Endpoints from Locations.
 
-> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations and are scheduled for **removal in 3.4.0**. Until then the Endpoints UI and the read-only Endpoint API stay available, and the **DEPRECATED** badges shown on the Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables link here. Enable Locations and run the migration below before 3.4.0.
+> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations. The Endpoints pages go away in **3.6.0 (December 2026)**. The read-only Endpoint API (`/api/v2/endpoints/`, `/api/v2/endpoint_status/`) stays until its own deprecation announcement. The Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables carry a deprecation banner. Enable Locations and run the migration below before 3.6.0.
 
 ## Running the migration from the Feature Flags page
 
