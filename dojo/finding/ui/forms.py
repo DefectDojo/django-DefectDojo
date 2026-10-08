@@ -7,7 +7,6 @@ from django_tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
 from dojo.finding.cwe import cwe_number, parse_cwes
-from dojo.finding.queries import get_authorized_findings
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
@@ -211,9 +210,11 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         model = Risk_Acceptance
         fields = ["accepted_findings"]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, engagement=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["accepted_findings"].queryset = get_authorized_findings("edit")
+        from dojo.risk_acceptance.ui.forms import accepted_findings_choices  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        self.fields["accepted_findings"].queryset = accepted_findings_choices(engagement)
 
 
 class AddFindingForm(CweFormMixin, forms.ModelForm):

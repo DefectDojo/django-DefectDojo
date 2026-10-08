@@ -53,6 +53,7 @@ from dojo.models import (
     Test,
     User,
 )
+from dojo.product.queries import get_authorized_products
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -243,6 +244,19 @@ class MetaSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"location_product": "location_product only applies to location metadata."})
             if not LocationProductReference.objects.filter(location=location, product=location_product).exists():
                 raise serializers.ValidationError({"location_product": "The product does not reference this location."})
+        elif (location := data.get("location")) is not None and locations_enabled():
+            # Location metadata belongs to one product. A location recorded by a single
+            # product is scoped to it; one recorded by several products takes the caller's
+            # product when that is unambiguous, and otherwise the request has to say which one.
+            referencing = Product.objects.filter(locations__location=location)
+            if referencing.count() == 1:
+                data["location_product"] = referencing.get()
+            elif referencing.count() > 1:
+                user = getattr(self.context.get("request"), "user", None)
+                products = get_authorized_products("edit", user=user).filter(locations__location=location) if user else Product.objects.none()
+                if products.count() != 1:
+                    raise serializers.ValidationError({"location_product": "location_product is required for location metadata."})
+                data["location_product"] = products.get()
         DojoMeta(**data).clean()
         return data
 

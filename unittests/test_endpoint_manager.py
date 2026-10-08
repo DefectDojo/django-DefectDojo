@@ -1,6 +1,10 @@
+from unittest import mock
+
 from django.test import TestCase
 
 from dojo.importers.endpoint_manager import EndpointManager, EndpointUniqueKey
+from dojo.models import Endpoint, Product, Product_Type
+from unittests.dojo_test_case import skip_unless_v2
 
 
 class TestMakeEndpointUniqueTuple(TestCase):
@@ -81,3 +85,101 @@ class TestMakeEndpointUniqueTuple(TestCase):
     def test_port_none_without_known_protocol(self):
         key = self._make(protocol="custom", host="example.com", port=None)
         self.assertIsNone(key.port)
+
+
+# Regression: every import/reimport flush loaded ALL of the product's endpoints into Python to
+# match the handful the report names, so on a product with millions of endpoints one flush spent
+# minutes iterating rows (wall time far above SQL time) even when nothing had to be created.
+@skip_unless_v2
+class TestGetOrCreateEndpointsScopedLookup(TestCase):
+
+    """get_or_create_endpoints reads only the product's endpoints the report could match."""
+
+    def setUp(self):
+        prod_type = Product_Type.objects.create(name="Endpoint manager lookup org")
+        self.product = Product.objects.create(name="Endpoint manager lookup", description="test", prod_type=prod_type)
+        self.other_product = Product.objects.create(name="Endpoint manager other", description="test", prod_type=prod_type)
+
+    def _manager_for(self, *endpoints):
+        manager = EndpointManager(self.product)
+        for endpoint in endpoints:
+            manager.record_endpoint(endpoint)
+        return manager
+
+    def _unrelated_endpoints(self, count):
+        Endpoint.objects.bulk_create(
+            Endpoint(protocol="https", host=f"unrelated-{i}.example.com", product=self.product) for i in range(count)
+        )
+
+    def _rows_loaded(self, manager):
+        loaded = []
+        original = Endpoint.from_db.__func__
+
+        def counting_from_db(cls, db, field_names, values):
+            instance = original(cls, db, field_names, values)
+            loaded.append(instance)
+            return instance
+
+        with mock.patch.object(Endpoint, "from_db", classmethod(counting_from_db)):
+            endpoints_by_key, created = manager.get_or_create_endpoints()
+        return endpoints_by_key, created, loaded
+
+    def test_rows_loaded_do_not_grow_with_unrelated_product_endpoints(self):
+        existing = Endpoint.objects.create(protocol="https", host="match.example.com", path="/a", product=self.product)
+        results = {}
+        for unrelated in (0, 60):
+            if unrelated:
+                self._unrelated_endpoints(unrelated)
+            manager = self._manager_for(Endpoint(protocol="https", host="match.example.com", path="/a"))
+            endpoints_by_key, created, loaded = self._rows_loaded(manager)
+            results[unrelated] = len(loaded)
+            with self.subTest(unrelated=unrelated):
+                self.assertEqual([], created)
+                self.assertEqual([existing.id], [ep.id for ep in endpoints_by_key.values()])
+        self.assertEqual(
+            results[0], results[60],
+            msg=f"rows loaded from dojo_endpoint grew with unrelated endpoints in the product: {results}",
+        )
+
+    def test_matching_semantics_are_unchanged(self):
+        # host and protocol compare case-insensitively, the scheme's default port equals no port,
+        # the first endpoint by id wins, and endpoints of other products never match.
+        first = Endpoint.objects.create(protocol="HTTPS", host="Mixed.Example.COM", port=443, product=self.product)
+        Endpoint.objects.create(protocol="https", host="mixed.example.com", port=None, product=self.product)
+        Endpoint.objects.create(protocol="https", host="only-other.example.com", product=self.other_product)
+        no_host = Endpoint.objects.create(protocol=None, host=None, path="/no-host", product=self.product)
+        self._unrelated_endpoints(5)
+
+        manager = self._manager_for(
+            Endpoint(protocol="https", host="mixed.example.com"),
+            Endpoint(protocol="https", host="only-other.example.com"),
+            Endpoint(protocol=None, host=None, path="/no-host"),
+        )
+        endpoints_by_key, created, _ = self._rows_loaded(manager)
+
+        by_host = {key.host: ep for key, ep in endpoints_by_key.items()}
+        with self.subTest("case and default port"):
+            self.assertEqual(first.id, by_host["mixed.example.com"].id)
+        with self.subTest("null host"):
+            self.assertEqual(no_host.id, by_host[None].id)
+        with self.subTest("other product's endpoint is not reused"):
+            self.assertEqual(["only-other.example.com"], [ep.host for ep in created])
+            self.assertEqual(self.product.id, by_host["only-other.example.com"].product_id)
+        with self.subTest("nothing else created"):
+            self.assertEqual(1, len(created))
+
+    def test_host_whose_python_and_database_lowercase_differ_is_reused(self):
+        # Python and Postgres lowercase a dotted capital I differently. The existing row must
+        # still be found on every flush instead of a new duplicate being created each time.
+        existing = Endpoint.objects.create(protocol="https", host="İSTANBUL.example.com", product=self.product)
+        empty_host = Endpoint.objects.create(protocol=None, host="", path="/empty", product=self.product)
+        for flush in range(3):
+            manager = self._manager_for(
+                Endpoint(protocol="https", host="İSTANBUL.example.com"),
+                Endpoint(protocol=None, host=None, path="/empty"),
+            )
+            endpoints_by_key, created, _ = self._rows_loaded(manager)
+            with self.subTest(flush=flush):
+                self.assertEqual([], created)
+                self.assertEqual({existing.id, empty_host.id}, {ep.id for ep in endpoints_by_key.values()})
+        self.assertEqual(2, Endpoint.objects.filter(product=self.product).count())

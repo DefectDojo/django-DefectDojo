@@ -1,7 +1,9 @@
 import base64
+import binascii
 import logging
 import time
 from itertools import batched
+from pathlib import Path
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -1282,15 +1284,31 @@ class BaseImporter(ImporterOptions):
         object
         """
         if finding.unsaved_files:
+            title_max_length = FileUpload._meta.get_field("title").max_length
             for unsaved_file in finding.unsaved_files:
-                data = base64.b64decode(unsaved_file.get("data"))
-                title = unsaved_file.get("title", "<No title>")
+                title = unsaved_file.get("title") or "<No title>"
+                if len(title) > title_max_length:
+                    # Keep the extension, which is what the file type check reads.
+                    suffix = Path(title).suffix[-20:]
+                    title = title[:title_max_length - len(suffix)] + suffix
+                try:
+                    data = base64.b64decode(unsaved_file.get("data") or "", validate=True)
+                except (binascii.Error, ValueError):
+                    logger.warning("Skipping attachment %r on finding %r: the data is not valid base64", title, finding.title)
+                    continue
                 # Always a fresh row. Matching on title alone reused whatever
                 # FileUpload already happened to carry that name — including one
                 # attached to a finding in an unrelated product — and the save()
                 # below then repointed it at this scan's content, so the other
                 # finding silently started serving this file instead of its own.
-                file_upload = FileUpload.objects.create(title=title)
+                file_upload = FileUpload(title=title)
+                try:
+                    # The same file type rules as an upload through the UI or API.
+                    file_upload.clean()
+                except ValidationError as e:
+                    logger.warning("Skipping attachment %r on finding %r: %s", title, finding.title, e)
+                    continue
+                file_upload.save()
                 file_upload.file.save(title, ContentFile(data))
                 file_upload.save()
                 finding.files.add(file_upload)
