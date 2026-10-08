@@ -47,7 +47,7 @@ With a finer grouping:
 
 New assets from a Prowler connection are placed in the connector's default organization. The **Organization Placement** field can instead use:
 
-* **One per provider:** an organization per provider, named after its alias (or `<type>:<account>` without one).
-* **One per cloud type:** an organization per cloud, for example `AWS`, `Azure` or `Google Cloud`.
+* **One per Provider:** an organization per provider, named after its alias (or `<type>:<account>` without one).
+* **One per Cloud Type:** an organization per cloud, for example `AWS`, `Azure` or `Google Cloud`.
 
 Organizations are created when they do not exist yet, and reused when they do. The field only affects assets created after it is set: assets that already exist are never moved.

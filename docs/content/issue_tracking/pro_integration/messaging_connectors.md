@@ -93,7 +93,7 @@ Treat this URL as a password. Anyone holding it can post to that channel.
    - **Workflow URL**: the URL you copied.
 4. Save.
 
-DefectDojo checks the URL's shape on save (it must be `https://` and on a Microsoft workflow host) but does not post to it. A workflow URL has no way to be tested other than sending a message, and a surprise message in a channel on save is worse than finding out later. Use **Send test message** when you are ready.
+DefectDojo checks the URL's shape on save (it must be `https://` and on a Microsoft workflow host) but does not post to it. A workflow URL has no way to be tested other than sending a message, and a surprise message in a channel on save is worse than finding out later. Use **Send Test Message** when you are ready.
 
 A Teams destination has one optional field, a channel label, which only labels the delivery record. The workflow URL already decides the destination.
 
@@ -154,7 +154,7 @@ FIFO topics (an ARN ending in `.fifo`) are not supported. They require a message
 
 ## Send a test message
 
-Anywhere a messaging destination is configured, **Send test message** delivers a short message through exactly the same path a real alert uses, and reports what the vendor said.
+Anywhere a messaging destination is configured, **Send Test Message** delivers a short message through exactly the same path a real alert uses, and reports what the vendor said.
 
 Use it to confirm the things that are easy to get wrong: for Slack, that the channel ID is right and the bot can post there; for Teams, that the workflow URL still works; for email, that the address is deliverable; for SNS, that the key may publish to that topic. The vendor's own answer is passed through, so a missing Slack invite reads as a message telling you to invite the bot rather than a generic failure.
 
@@ -171,10 +171,10 @@ The short route, for the common case of announcing new findings from an import.
 1. Go to **Connect > Downstream** and select **Create Alert** on a messaging connection, or open **Messaging Alerts** directly.
 2. Select **New Alert** and fill in:
    - **Name**: what this alert is for, for example `New highs to the security channel`.
-   - **Alert**: what it is about. **New findings from an import** is currently the only option.
-   - **Send over**: the messaging connection.
+   - **Alert**: what it is about. **New Findings From an Import** is currently the only option.
+   - **Send Over**: the messaging connection.
    - **Where it delivers**: the vendor's own destination field, so a Slack channel ID, an optional Teams channel label, a list of email addresses, or an SNS topic ARN.
-   - **Severity**: the floor, from **Critical only** through **Every severity**.
+   - **Severity**: the floor, from **Critical Only** through **Every Severity**.
    - **Mode**: **Simulate** records what would have been sent without sending it, **Live** actually sends.
 3. Select **Create Alert**.
 

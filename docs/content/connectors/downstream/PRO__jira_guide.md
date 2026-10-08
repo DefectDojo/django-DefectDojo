@@ -25,7 +25,7 @@ DefectDojo's Jira integration can be used to push Finding data to one or more Ji
 
 DefectDojo Pro can convert an existing classic Jira setup into Downstream Connector configuration for you, rather than making you rebuild it by hand.
 
-**Where to find it:** go to **Connect > Downstream** to open the **Downstream Connectors** page, and use the **Classic Jira Migration** card. Click **Migrate from classic Jira**, then confirm.
+**Where to find it:** go to **Connect > Downstream** to open the **Downstream Connectors** page, and use the **Classic Jira Migration** card. Click **Migrate From Classic Jira**, then confirm.
 
 The card only appears if there is classic Jira configuration to migrate, or a previous run to report — so an instance that never used classic Jira will not see it. Once everything has been migrated the card remains but the button is disabled, because there is nothing left to do.
 

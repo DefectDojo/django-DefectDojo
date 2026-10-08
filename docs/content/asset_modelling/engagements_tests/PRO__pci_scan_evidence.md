@@ -15,11 +15,11 @@ The scan evidence UI is released behind a feature flag. An administrator turns i
 
 A test plays a PCI role. The role comes from the test type, so a scanner that is always an internal vulnerability scan is classified once rather than per test:
 
-- **Internal vulnerability scan**: the Requirement 11.3.1 quarterly internal scan.
-- **External ASV scan**: the Requirement 11.3.2 quarterly external scan performed by an Approved Scanning Vendor.
-- **Web application assessment**: an application scan, which supports Requirement 6.4.
-- **Penetration test**: a Requirement 11.4 penetration test delivered as a test rather than an engagement.
-- **Segmentation test**: a Requirement 11.4.5 or 11.4.6 test of segmentation controls.
+- **Internal Vulnerability Scan**: the Requirement 11.3.1 quarterly internal scan.
+- **External ASV Scan**: the Requirement 11.3.2 quarterly external scan performed by an Approved Scanning Vendor.
+- **Web Application Assessment**: an application scan, which supports Requirement 6.4.
+- **Penetration Test**: a Requirement 11.4 penetration test delivered as a test rather than an engagement.
+- **Segmentation Test**: a Requirement 11.4.5 or 11.4.6 test of segmentation controls.
 
 Common scanner names are classified on first run, and the classification only fills a role that has not been set, so it never overwrites a choice someone made. A single test can override its type's role when one scanner is used for two purposes.
 

@@ -12,6 +12,11 @@ your own CI), it needs an LLM. **AI Model Settings** is where you choose that mo
 its credentials, once, instance-wide — the hosted worker uses this configuration instead of any
 per-repository secret.
 
+The same configuration serves the AI features that call the model from DefectDojo itself:
+[threat modeling](/sensei/threat_modeling/), the [Advisor](/sensei/sensei_advisor/), triage of
+dynamic scan results, AI steps in rules, and the [AI agent red team](/sensei/ai_agent_redteam/)'s
+hardening suggestions and runtime checks. Every provider below works for all of them.
+
 You reach it from the sidebar under **Sensei + AI > AI Model Settings**. You need a global
 **Maintainer** or **Owner** role to change it.
 
@@ -64,17 +69,17 @@ All secrets are **encrypted at rest** and are **write-only**: once saved, the fo
 whether a secret is set, never its value. Leave a secret field blank when saving to keep the
 stored value; type a new value to replace it. The one exception is the **API Base URL**: a saved
 API key is kept only for the base URL it was saved with, so changing the base URL to a new
-gateway means entering the key again (clearing the base URL does not). **Test connection** follows
+gateway means entering the key again (clearing the base URL does not). **Test Connection** follows
 the same rule.
 
 ### Claude (Anthropic) and OpenAI
 
 These providers use a single API key:
 
-1. **Model (optional)** — e.g. a specific Claude or OpenAI model. For Claude, blank tries a list of
+1. **Model (Optional)** — e.g. a specific Claude or OpenAI model. For Claude, blank tries a list of
    models newest first (see [What a blank Model runs](#what-a-blank-model-runs)); for OpenAI, blank
    uses the provider default.
-2. **API Base URL (optional)** — point at a self-hosted gateway instead of the provider's public
+2. **API Base URL (Optional)** — point at a self-hosted gateway instead of the provider's public
    API. Blank uses the default (`https://api.anthropic.com` / `https://api.openai.com`).
 3. **LLM API Key** — the provider API key.
 
@@ -85,11 +90,11 @@ with AWS credentials rather than a single key, so its fields differ:
 
 ![AI Model Settings with Amazon Bedrock selected](images/ai_model_settings_bedrock.png)
 
-1. **Model (optional)** — a Bedrock model id or inference-profile ARN, e.g.
+1. **Model (Optional)** — a Bedrock model id or inference-profile ARN, e.g.
    `anthropic.claude-3-5-sonnet-20241022-v2:0`, or a cross-region inference profile like
    `us.anthropic.claude-sonnet-4-5-...`. Some newer models are only reachable through an
    inference profile. Blank uses the engine default.
-2. **API Base URL (optional)** — a custom Bedrock endpoint (for a VPC endpoint or FIPS). Blank
+2. **API Base URL (Optional)** — a custom Bedrock endpoint (for a VPC endpoint or FIPS). Blank
    uses the default AWS endpoint for the region.
 3. **AWS Region** — **required**. The region hosting the model, e.g. `us-east-1`.
 4. **AWS Access Key ID / Secret Access Key / Session Token** — **optional** (see below).
@@ -121,6 +126,12 @@ to store or rotate.
 > own data center has none. In those deployments you must enter static AWS keys above; the
 > "leave the keys blank" path applies only to AWS-hosted runtimes.
 
+Features that call the model from DefectDojo itself (threat modeling, the Advisor and the
+others listed at the top of this page) use the same rule, from where the DefectDojo application
+runs: the static keys if you entered them, otherwise the role attached to the DefectDojo
+application's own workload. With the keys left blank, give that workload a role too, not only the
+Sensei engine.
+
 Either way, the identity used needs permission to invoke the Bedrock model (`bedrock:InvokeModel`)
 in the chosen region.
 
@@ -134,7 +145,7 @@ model you intend to use in your project's Vertex Model Garden first.
 
 Its fields differ from the key-based providers:
 
-1. **Model (optional)** — any model enabled in your project's Model Garden, e.g.
+1. **Model (Optional)** — any model enabled in your project's Model Garden, e.g.
    `claude-sonnet-4-6` or `gemini-2.5-pro`. Blank tries a list of Claude models newest first (see
    [What a blank Model runs](#what-a-blank-model-runs)).
 2. **Vertex Project ID** — **required**. The GCP project hosting Vertex AI.
@@ -161,7 +172,7 @@ model must be enabled in that project's Model Garden.
 
 ## Test connection
 
-**Test connection** validates the configuration before a scan relies on it:
+**Test Connection** validates the configuration before a scan relies on it:
 
 - For **Claude** / **OpenAI**, it makes a minimal authenticated call to the provider.
 - For **Amazon Bedrock with static keys**, it lists the region's foundation models to confirm the

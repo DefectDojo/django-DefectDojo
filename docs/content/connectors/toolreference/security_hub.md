@@ -59,7 +59,7 @@ By default the connector creates one Record, and so one asset, per AWS account a
 | Asset Grouping | Records | Findings are imported on |
 |---|---|---|
 | **Account and Region** (default) | one per AWS account and region | the account and region Records |
-| **Resource type** | additionally, one per resource type (EC2, ECR, Lambda, S3, ...) under each account and region | the resource type Records |
+| **Resource Type** | additionally, one per resource type (EC2, ECR, Lambda, S3, ...) under each account and region | the resource type Records |
 | **Resource** | additionally, one per resource, under its resource type | the resource Records |
 
 With **Resource**, a container image is not a resource of its own: every image of an ECR repository is grouped under that repository, along with the repository's own findings, because an image digest is a version of the repository. Lambda function versions are likewise grouped under the function.
@@ -85,7 +85,7 @@ Turn on **Parent Asset per AWS Account** to add one asset per AWS account above 
 | Asset Grouping | Hierarchy with Parent Asset per AWS Account |
 |---|---|
 | **Account and Region** | account > account and region |
-| **Resource type** | account > account and region > resource type |
+| **Resource Type** | account > account and region > resource type |
 | **Resource** | account > account and region > resource type > resource |
 
 Existing account and region assets keep their names and identities, so existing mappings, findings and history are unchanged; they gain the parent on the next discovery. The account asset is placed in the same organization as the account's other assets (see *Organization Placement*). Turning the toggle off stops creating account assets; relationships already drawn stay until you remove them.
@@ -94,10 +94,10 @@ Existing account and region assets keep their names and identities, so existing 
 
 New assets from a Security Hub connection are placed in the organization named **Security Hub Connector**. The **Organization Placement** field can instead place each AWS account's assets in an organization of its own:
 
-* **One per AWS account, named by account ID:** organizations named `AWS <account id>`.
-* **One per AWS account, named by account name:** organizations named after the AWS account name, falling back to `AWS <account id>` when the name cannot be read.
-* **One per AWS Organizations OU, nested along the OU path:** each account's assets go to an organization for the organizational unit (OU) the account sits in. The full OU path becomes nested organizations: an account in the OU `Prod` under the OU `Workloads` lands in the organization `Workloads / Prod`, nested under the organization `Workloads`. Each nested organization is named by its whole path so that two OUs with the same name under different parents stay apart.
-* **Named by an AWS account tag:** each account's assets go to an organization named after the value of an AWS account tag. Enter the tag key, for example `team`, in **AWS Account Tag Key**. A key that differs only in case also matches.
+* **One per AWS Account, Named by Account ID:** organizations named `AWS <account id>`.
+* **One per AWS Account, Named by Account Name:** organizations named after the AWS account name, falling back to `AWS <account id>` when the name cannot be read.
+* **One per AWS Organizations OU, Nested Along the OU Path:** each account's assets go to an organization for the organizational unit (OU) the account sits in. The full OU path becomes nested organizations: an account in the OU `Prod` under the OU `Workloads` lands in the organization `Workloads / Prod`, nested under the organization `Workloads`. Each nested organization is named by its whole path so that two OUs with the same name under different parents stay apart.
+* **Named by an AWS Account Tag:** each account's assets go to an organization named after the value of an AWS account tag. Enter the tag key, for example `team`, in **AWS Account Tag Key**. A key that differs only in case also matches.
 
 Organizations are created when they do not exist yet, and reused when they do. Nesting is only added to an organization that has no parent and the same organization type as its parent; DefectDojo never moves an organization you nested yourself. An account that sits directly under the organization root, an account without the tag, and every account when the optional permissions are missing, keep the default **Security Hub Connector** placement.
 
@@ -109,11 +109,11 @@ A connection that mapped its assets before you chose an **Organization Placement
 
 1. Save the connection with the placement you want, then run a discovery (or wait for the scheduled one).
 2. Click **Preview**. Nothing changes yet. The preview lists every asset that will move, from which organization to which, how many descendants move along with their parents, how many parent relationships are removed because they would cross organizations, how many organizations will be created, and how many assets are skipped and why.
-3. Click **Apply** and confirm. The moves run in the background in batches, and DefectDojo notifies you when they finish. The panel shows the outcome of the last run.
+3. Click **Start Re-placement** and confirm. The moves run in the background in batches, and DefectDojo notifies you when they finish. The panel shows the outcome of the last run.
 
 Only assets that are still in the connector's default organization move. An asset you (or a rule) already placed in another organization is never touched. An asset is also skipped when its account has no placement (no OU, no tag), when the placement on its Record was computed under a different setting (run a discovery first), when you cannot edit it, or when you may not add assets to its destination organization or create the organizations it needs.
 
-Moves follow the same rules as any other organization move in DefectDojo: an asset's descendants move with it unless you turn off **Move children along**, a parent relationship left crossing organizations is removed and its owners are notified, and priority is recalculated for every affected organization. After the moves, the connector's parent relationships that could not be drawn while parent and child sat in different organizations are drawn.
+Moves follow the same rules as any other organization move in DefectDojo: an asset's descendants move with it unless you turn off **Move Children Along**, a parent relationship left crossing organizations is removed and its owners are notified, and priority is recalculated for every affected organization. After the moves, the connector's parent relationships that could not be drawn while parent and child sat in different organizations are drawn.
 
 The same action is available to automation with an API token, for a user who can manage connectors:
 

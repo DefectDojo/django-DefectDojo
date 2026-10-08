@@ -28,7 +28,7 @@ deliverable it produces. Open the Asset that represents your system boundary, go
 
 ### Choosing a scan item policy
 
-Past-due-only is the FedRAMP ConMon minimum. **Include all open items** is the more conservative
+Past-due-only is the FedRAMP ConMon minimum. **Include All Open Items** is the more conservative
 choice, and is the default.
 
 ## Saving and syncing

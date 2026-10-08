@@ -67,7 +67,7 @@ DefectDojo Pro adds more ways to match across tools. The cross tool setting in M
 
 By default a new Finding is compared with Findings anywhere in the same Asset (called a Product in the API and in older versions). Findings in different Assets are not compared.
 
-To narrow the scope, turn on **Deduplication within this engagement only** on an Engagement (in DefectDojo Pro the option is **Isolate Deduplication from Other Engagements**). When either of two Engagements has it enabled, their Findings are never deduplicated against each other. This is useful when Engagements in one Asset represent separate contexts, such as different repositories, and you want each one to keep its own Findings.
+To narrow the scope, turn on **Deduplication within this engagement only** on an Engagement (in DefectDojo Pro the option is **Isolate Deduplication From Other Engagements**). When either of two Engagements has it enabled, their Findings are never deduplicated against each other. This is useful when Engagements in one Asset represent separate contexts, such as different repositories, and you want each one to keep its own Findings.
 
 DefectDojo Pro can also widen the scope with [Dedupe Pools](/triage_findings/finding_deduplication/pro__dedupe_pools/), which group chosen Assets so their Findings deduplicate against each other.
 

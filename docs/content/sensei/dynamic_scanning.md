@@ -19,7 +19,7 @@ between stops the next scan.
 ## Adding a target
 
 Open a repository's Sensei configuration (the **Configure Repository** screen for a saved
-repo) and find the **Dynamic Scanning (DAST)** section. Choose **Add target** and fill in:
+repo) and find the **Dynamic Scanning (DAST)** section. Choose **Add Target** and fill in:
 
 - **Target URL**: the deployed environment to scan, for example `https://staging.example.com`.
 - **Environment**: a label (Production, Staging, Development, Other). It is descriptive, and it
@@ -32,7 +32,7 @@ repo) and find the **Dynamic Scanning (DAST)** section. Choose **Add target** an
   `*.example.com`. Leave it blank to allow the target host only. The scope is enforced by the
   egress boundary, not by the scan configuration, so a scan cannot wander outside it even if a
   page redirects.
-- **Scan on deploy**: optional. Automatically launch a scan of this target when its repository
+- **Scan on Deploy**: optional. Automatically launch a scan of this target when its repository
   and environment are deployed (see [Scanning on deploy](#scanning-on-deploy)).
 
 Targets attach to a saved configuration, so the panel appears when you are editing an existing
@@ -67,7 +67,7 @@ Select **Verify** on an unverified target. Sensei shows a DNS **TXT** record to 
 - a **record name** such as `_dd-dast-challenge.staging.example.com`
 - a **record value** such as `dd-dast-verify=<token>`
 
-Add that record to your DNS, then choose **Check now**. Sensei resolves the record and, on a
+Add that record to your DNS, then choose **Check Now**. Sensei resolves the record and, on a
 match, marks the target verified. DNS changes take a few minutes to propagate, so if the first
 check does not find the record, wait and try again. A verification lasts 90 days.
 
@@ -96,7 +96,7 @@ on deploy** for the target, then connect the repository's GitHub App so Sensei r
 deployment events.
 
 When GitHub reports a **successful** deployment, Sensei launches a scan of every target on that
-repository that has **Scan on deploy** turned on and whose **Environment** matches the one that
+repository that has **Scan on Deploy** turned on and whose **Environment** matches the one that
 was deployed (`production`, `staging`, and `dev` are matched flexibly). A deployment that fails,
 or one to an environment no target is watching, launches nothing.
 

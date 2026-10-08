@@ -16,7 +16,7 @@ Open it from **Overview > My Work** in the left sidebar.
 | **Assigned to Me** | Findings assigned to you personally. Hidden unless the **Work Assignment** feature is enabled. |
 | **My Team's Queue** | Findings owned by a group you belong to. Owners is group-level, so this is your team's work rather than yours specifically. |
 | **Awaiting My Review** | Findings where you were asked to review and the review is still open. |
-| **Reviews I Requested** | Reviews you started that nobody has cleared yet. |
+| **Requested Reviews** | Reviews you started that nobody has cleared yet. |
 | **My Risk Acceptances** | Risk Acceptances you own that nobody has handled. Expired ones stay listed until they are dealt with. |
 
 Each queue is a full Findings or Risk Acceptances list, so the usual filtering, sorting and column controls all work, and each tab remembers its own column layout.

@@ -36,7 +36,7 @@ SBOM that produced them is the thing to fix.
 Select **Annotate** (or **Edit**) on a row. Three fields, all optional, all scoped
 to that component in that asset:
 
-**PCRSS (1–5)** — the static risk rating your PSIRT policy assigns this component
+**PCRSS (1 to 5)** — the static risk rating your PSIRT policy assigns this component
 in this context. It is copied onto matches produced for the pair, where it feeds
 case worthiness, unless an analyst overrides it on the match itself.
 
@@ -54,7 +54,7 @@ Saving a CPE does not rewrite matches that already exist. The matcher reads the
 annotation on each advisory's next pass, so the change shows up as advisories are
 re-evaluated.
 
-**Re-evaluate matches** on the dialog does not wait for that. It re-queues the
+**Re-evaluate Matches** on the dialog does not wait for that. It re-queues the
 advisories that already matched this component, and reports how many, so you can
 see the effect of an annotation you just made rather than wondering whether it
 took.

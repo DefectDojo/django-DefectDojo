@@ -21,9 +21,9 @@ Every verdict is normalized to the same five values, whatever produced it:
 
 | Verdict | Meaning |
 |---|---|
-| **Reachable (runtime)** | The vulnerable code was observed executing. |
-| **Reachable (static)** | A call path to the vulnerable code exists from an application entry point. |
-| **Potentially reachable** | Partial evidence — for example the vulnerable package is used, but the specific function could not be confirmed. |
+| **Reachable (Runtime)** | The vulnerable code was observed executing. |
+| **Reachable (Static)** | A call path to the vulnerable code exists from an application entry point. |
+| **Potentially Reachable** | Partial evidence — for example the vulnerable package is used, but the specific function could not be confirmed. |
 | **Unreachable** | Analysis found no path to the vulnerable code. |
 | **Unknown** | No reachability analysis covers this Finding yet. |
 
@@ -83,6 +83,24 @@ A verdict from **Sensei** carries the call path govulncheck found, from your cod
 down to the vulnerable function. It is shown on the Finding under **Reachability
 Call Path**.
 
+### How verdicts end
+
+A verdict lasts as long as its source keeps reporting it.
+
+- **A report that stops asserting a verdict retracts it.** When you reimport a report into the
+  same Test, the report covers every Finding it still contains. If it no longer carries a
+  verdict for one of those Findings, that source's verdict is removed and the Finding falls back
+  to what the other sources say, or to **Unknown**. Verdicts from other tools, connectors, the
+  Reachability API and manual verdicts are not affected.
+- **A verdict nobody re-asserts expires.** Once a day, verdicts whose source has not reported
+  them again within the staleness window are removed. The window is 30 days by default, set with
+  the `DD_REACHABILITY_STALENESS_DAYS` environment variable. A source that reports more often can
+  expire sooner: `DD_REACHABILITY_SOURCE_STALENESS_DAYS` takes a JSON object of source name to
+  days, for example `{"Sysdig Vulnerability Report": 7}`. The source name is the one shown with
+  the verdict on the Finding.
+
+Manual verdicts are never removed by either.
+
 ### Setting reachability by hand
 
 When no scanner or connector reports reachability, you can record a verdict
@@ -94,8 +112,8 @@ A manual verdict is not special-cased above scanners: it competes in the same
 resolution as every other source, so a **stronger scanner verdict still overrides
 it** — the value shown as **Resolved** beneath the dropdown is the winner across all
 sources, which may differ from what you chose. What is different is that a manual
-verdict is **never removed by the staleness sweep**, because a human judgment should
-not silently decay the way an unrefreshed scanner verdict does. Choose *No manual
+verdict is **never removed by the staleness sweep or by a reimport**, because a human
+judgment should not silently decay the way an unrefreshed scanner verdict does. Choose *No manual
 override* to remove it.
 
 Reachability describes the vulnerable code *inside* your application. For whether the

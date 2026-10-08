@@ -17,12 +17,12 @@ rather than a yes/no:
 - **Affected** — at least one dependency in your inventory has a version inside
   the advisory's affected range. The panel names the components and the products
   that carry them.
-- **Not affected** — every dependency that corresponds to this advisory has a
+- **Not Affected** — every dependency that corresponds to this advisory has a
   version provably outside the affected range.
 - **Unknown** — a dependency corresponds, but there is nothing comparable to
   judge on. Usually the inventory records no version, or records something that
   is not a version (`latest`, a branch name, a build tag).
-- **No inventory signal** — nothing in your inventory corresponds to this
+- **No Inventory Signal** — nothing in your inventory corresponds to this
   advisory at all.
 
 The last two are separate on purpose. "Every version I run is outside the range"
@@ -96,7 +96,7 @@ changes it.
   matters outlasts the rule that disagreed.
 - **Re-match** queues the advisory for another matching pass. Useful after an SBOM
   import or after correcting a component's version.
-- **Add to case** opens a case on the advisory, or attaches it to one already open.
+- **Add to Case** opens a case on the advisory, or attaches it to one already open.
   This does **not** require the advisory to have matched anything: an advisory your
   inventory could not answer for — no SBOM imported, a component the publisher
   spells differently, or one that arrived an hour ago — is frequently the one most

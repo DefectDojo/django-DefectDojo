@@ -34,7 +34,7 @@ Use **Add Target** in the hub's **AI Agents** tab, give the target a label, link
 | Field | Meaning |
 |-------|---------|
 | **Label** | A display name for the target (e.g. "Support chatbot"). Unique within an Asset. |
-| **Adapter** | How the attacker talks to the target: **OpenAI-compatible**, **OpenAI tool calling**, or **Generic JSON** (see below). |
+| **Adapter** | How the attacker talks to the target: **OpenAI-compatible**, **OpenAI Tool Calling**, or **Generic JSON** (see below). |
 | **Base URL** | The deployed agent endpoint to attack. |
 | **Auth header** | The header the target credential is sent in. Blank sends it as `Authorization: Bearer <credential>`; set it (e.g. `x-api-key`) to send the raw credential instead. |
 | **Target credential** | The bearer token or API key for the target agent (encrypted at rest). Optional; a target may be unauthenticated. This is **not** the LLM credential the attacker uses. |
@@ -48,7 +48,7 @@ Use **Add Target** in the hub's **AI Agents** tab, give the target a label, link
 
 **OpenAI-compatible**: for an endpoint that accepts the OpenAI Chat Completions shape. The attacker POSTs the running conversation to `<base URL>/chat/completions` and reads the reply from `choices[0].message.content`. This is the simplest option when your agent already speaks that protocol.
 
-**OpenAI tool calling**: the same Chat Completions shape, but the attacker also declares a set of decoy tools (destructive, data-exfiltrating, or safety-disabling operations a well-behaved agent should refuse) and watches for the agent actually **invoking** one. A returned tool call for a restricted tool is recorded as a Critical break, a real unsafe-tool-use signal rather than a match on the agent's chat text. Choose this adapter for an agent that exposes function/tool calling.
+**OpenAI Tool Calling**: the same Chat Completions shape, but the attacker also declares a set of decoy tools (destructive, data-exfiltrating, or safety-disabling operations a well-behaved agent should refuse) and watches for the agent actually **invoking** one. A returned tool call for a restricted tool is recorded as a Critical break, a real unsafe-tool-use signal rather than a match on the agent's chat text. Choose this adapter for an agent that exposes function/tool calling.
 
 **Generic JSON**: for any JSON HTTP chat API. You provide:
 
@@ -60,7 +60,7 @@ For example, an agent whose API takes `{"prompt": "..."}` and answers `{"result"
 
 ## Scan a target
 
-Open a target's row menu and choose **Scan now**. Sensei dispatches the attacker, which holds a multi-turn conversation with the agent per technique and adapts based on how the agent responds, until it either achieves the objective or exhausts the turn/token budget for the mode tier. Scans appear on the hub's **Scan Activity** ledger alongside repository and cloud scans.
+Open a target's row menu and choose **Scan Now**. Sensei dispatches the attacker, which holds a multi-turn conversation with the agent per technique and adapts based on how the agent responds, until it either achieves the objective or exhausts the turn/token budget for the mode tier. Scans appear on the hub's **Scan Activity** ledger alongside repository and cloud scans.
 
 Each imported finding is a confirmed **break**: a technique that got the agent to satisfy the objective. It is a **dynamic** finding recorded against the agent's endpoint (a URL location, when the Locations feature is on), and it carries:
 
@@ -73,17 +73,17 @@ A scan that breaks nothing is a successful, empty scan, the same way a cloud sca
 
 ### Schedule recurring scans
 
-Instead of running a scan by hand each time, you can put a target on a recurring schedule. Open the target's row menu, choose **Schedule scans**, and set a cadence. A scheduled scan takes the same path a manual one does, so it respects the same requirements: a disabled target, or one with no endpoint, records a failed run rather than silently skipping.
+Instead of running a scan by hand each time, you can put a target on a recurring schedule. Open the target's row menu, choose **Schedule Scans**, and set a cadence. A scheduled scan takes the same path a manual one does, so it respects the same requirements: a disabled target, or one with no endpoint, records a failed run rather than silently skipping.
 
 An agent scan is capped at **once per day**. A red-team scan drives an LLM through many turns against a live endpoint, so it is deliberately more conservative than the hourly cadence the other capabilities allow, and an agent's behavior does not usually change on an hourly timescale.
 
-The **Schedule scans** action appears only when the scheduling service is enabled on your instance. If you do not see it, ask your DefectDojo administrator whether the scheduling service is turned on.
+The **Schedule Scans** action appears only when the scheduling service is enabled on your instance. If you do not see it, ask your DefectDojo administrator whether the scheduling service is turned on.
 
 ## Reports and hardening
 
 Each target has a **report** (from its row menu) that gathers what its scans have found: a summary, a **technique-coverage matrix** (every technique the attacker can attempt, and whether the target currently has an open break for it), the breaks with their severity and judge confidence, and the scan history.
 
-For any break, **Suggest hardening** turns the finding into a concrete guardrail suggestion for the agent's *own* system prompt and input handling: the instruction lines to add, how to frame untrusted input, why the attack worked, and the residual risk. It is advice a human reviews and applies (nothing is changed automatically), and it needs a configured Sensei AI provider.
+For any break, **Suggest Hardening** turns the finding into a concrete guardrail suggestion for the agent's *own* system prompt and input handling: the instruction lines to add, how to frame untrusted input, why the attack worked, and the residual risk. It is advice a human reviews and applies (nothing is changed automatically), and it needs a configured Sensei AI provider.
 
 ## Runtime action checks
 

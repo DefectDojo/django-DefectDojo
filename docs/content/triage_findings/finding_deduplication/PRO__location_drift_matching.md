@@ -21,9 +21,9 @@ Each of these previously produced a closed finding plus a "new" finding, losing 
 Location tracking is configured per tool on **Settings > Finding Workflow > Matching Configuration**.
 
 1. Find the tool's row and select its **Reimport** column.
-2. Set the **Algorithm** to **Hash code**. Location tracking applies to that algorithm only: tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
-3. Tick **Track findings as locations change**.
-4. Select **Review impact**, then **Apply**.
+2. Set the **Algorithm** to **Hash Code**. Location tracking applies to that algorithm only: tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
+3. Tick **Track Findings as Locations Change**.
+4. Select **Review Impact**, then **Save**.
 
 The review step matters here. Turning tracking on or off changes which fields the reimport hash is built from, so every hash already stored for that tool becomes stale and the whole backlog is recomputed in the background. The review tells you how many findings that is before you commit, and until the recompute finishes the tool's findings are hashed under two different definitions and may not match each other. See [Enabling on Existing Data](#enabling-on-existing-data-upgrades) below.
 
@@ -70,6 +70,16 @@ Cloud resources match on their identifier alone: the ARN, resource URI, or Azure
 Region, service, tags, and display name can all change. The resource itself stays the same. None of these fields take part in the match. A relabelled instance is still the same instance, so it keeps its findings.
 
 With Locations enabled, the **Hash Code** and **Unique ID From Tool or Hash Code** algorithms do not mark two findings as duplicates when they sit on two different cloud resources, even if the rest of their identity matches. A finding with no cloud resource is not affected, and still deduplicates as before. The check applies when findings are compared: findings that an earlier import already marked as duplicates stay marked, and a later import does not split them.
+
+### Container image findings
+
+Container images match on their identity alone: `registry/repository@sha256:<digest>` when the scanner knows the digest, and `registry/repository:tag` when it does not (see [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)). Scanning the same image again reports the same identity, so its findings deduplicate as before.
+
+With Locations enabled, the **Hash Code** and **Unique ID From Tool or Hash Code** algorithms do not mark two findings as duplicates when they sit in two different container images, even when the package, version and vulnerability match. The same CVE in two images is two findings, one per image. Findings that share at least one image still match, so a report that names an image by several digests behaves as one image.
+
+A finding with no image is not affected and deduplicates as before. Because tags move and digests do not, an image reported by tag and the same repository reported by digest are different images here too. The check applies when findings are compared: findings that an earlier import already marked as duplicates stay marked, and a later import does not split them.
+
+This changes deduplication for every tool that attaches the scanned image to its findings, including Anchore Grype, Trivy, Trivy Operator, Snyk container projects and Anchore Enterprise. In an Engagement or Asset that holds scans of several images, each image's findings now stay separate instead of collapsing into the first image's findings.
 
 ### Severity re-scores
 
