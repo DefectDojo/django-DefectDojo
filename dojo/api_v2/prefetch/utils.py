@@ -16,6 +16,14 @@ from dojo.models import Finding, Product
 # declare ``related_name="locations"``. Under V3 a finding's ``endpoints`` field carries
 # those reference ids, so ``?prefetch=locations`` is how an API client resolves them to
 # a location type and value in the same request.
+#
+# The table is also the request-time allowlist: ``_Prefetcher`` skips any reverse
+# relation not listed here, so ``?prefetch=finding_set`` on a test (every finding in
+# the test, unbounded) is not served just because the name resolves on the model.
+#
+# On findings, ``locations`` returns the same rows as ``endpoints`` does under V3
+# (see ``_Prefetcher.get_field_value_override``). It is listed anyway so the option
+# has its V3 name in the documented enum.
 _PREFETCHABLE_REVERSE_RELATIONS = {
     Finding: ("locations",),
     Product: ("locations",),
@@ -75,6 +83,25 @@ def _is_one_to_one_relation(field):
 
     """
     return isinstance(field, related.ForwardManyToOneDescriptor)
+
+
+def is_prefetchable_reverse_relation(model, field_name):
+    """
+    Check if a reverse one-to-many relation is opted in to prefetching for the given
+    model (or one of its parents, so a subclass of ``Finding`` inherits the entry).
+
+    Args:
+        model (django.db.models.Model): the model class the field is read from
+        field_name (str): the name of the reverse relation
+
+    Returns:
+        bool: true if ``_PREFETCHABLE_REVERSE_RELATIONS`` lists the relation
+
+    """
+    return any(
+        issubclass(model, opted_in_model) and field_name in field_names
+        for opted_in_model, field_names in _PREFETCHABLE_REVERSE_RELATIONS.items()
+    )
 
 
 def get_prefetchable_reverse_relations(model):

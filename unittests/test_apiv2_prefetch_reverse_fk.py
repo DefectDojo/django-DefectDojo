@@ -21,9 +21,12 @@ treated as "many" and prefetching it returns the related rows without raising.
 from types import SimpleNamespace
 
 from crum import impersonate
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils.timezone import now
 
 from dojo.api_v2.prefetch import prefetcher as prefetcher_module
+from dojo.api_v2.prefetch.utils import is_prefetchable_reverse_relation
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
@@ -62,7 +65,7 @@ class PrefetchReverseForeignKeyTest(DojoTestCase):
             target_end=now(),
         )
         cls.admin = Dojo_User.objects.get(username="admin")
-        test = Test.objects.create(
+        cls.test = test = Test.objects.create(
             engagement=engagement,
             test_type=test_type,
             target_start=now(),
@@ -119,3 +122,41 @@ class PrefetchReverseForeignKeyTest(DojoTestCase):
             data["locations"],
             "the finding's LocationFindingReference should be present in the prefetch payload",
         )
+
+    def _prefetch_as_admin(self, entry, fields):
+        prefetcher = prefetcher_module._Prefetcher(request=SimpleNamespace(user=self.admin))
+        with impersonate(self.admin):
+            prefetcher._prefetch(entry, fields)
+        return prefetcher.prefetched_data
+
+    def test_only_opted_in_reverse_relations_are_prefetchable(self):
+        self.assertTrue(is_prefetchable_reverse_relation(Finding, "locations"))
+        self.assertTrue(is_prefetchable_reverse_relation(Product, "locations"))
+        self.assertFalse(is_prefetchable_reverse_relation(Test, "finding_set"))
+        self.assertFalse(is_prefetchable_reverse_relation(Product, "engagement_set"))
+
+    def test_unlisted_reverse_relation_is_not_prefetched(self):
+        """``?prefetch=finding_set`` on a test would serialize every finding in it, so it is skipped."""
+        self.assertNotIn("finding_set", self._prefetch_as_admin(self.test, ["finding_set"]))
+        self.assertNotIn("engagement_set", self._prefetch_as_admin(self.product, ["engagement_set"]))
+
+    def test_prefetch_locations_query_count_does_not_grow_per_reference(self):
+        """The reference serializer reads ``location.*``; that must not cost one query per reference."""
+        with CaptureQueriesContext(connection) as one_reference:
+            self._prefetch_as_admin(self.finding, ["locations"])
+
+        for index in range(3):
+            LocationFindingReference.objects.create(
+                location=Location.objects.create(
+                    location_type="URL",
+                    location_value=f"https://prefetch-revfk-{index}.example.com/",
+                ),
+                finding=self.finding,
+                status=FindingLocationStatus.Active,
+            )
+
+        with CaptureQueriesContext(connection) as four_references:
+            data = self._prefetch_as_admin(self.finding, ["locations"])
+
+        self.assertEqual(4, len(data["locations"]))
+        self.assertEqual(len(one_reference.captured_queries), len(four_references.captured_queries))
