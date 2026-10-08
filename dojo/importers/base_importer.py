@@ -1068,10 +1068,19 @@ class BaseImporter(ImporterOptions):
         returning the finding afterward
         """
         for req_resp in getattr(finding, "unsaved_req_resp", []):
+            # A dynamic-scan parser can emit a pair whose request or response is missing
+            # (for example a request that produced no response), leaving "req"/"resp" as
+            # None. base64.b64encode(None.encode(...)) then raised
+            # "AttributeError: 'NoneType' object has no attribute 'encode'" and killed the
+            # whole import task. Coerce a missing side to an empty string so the pair is
+            # still stored, matching the unsaved_request/unsaved_response path below that
+            # already tolerates a missing value.
+            request = req_resp.get("req") or ""
+            response = req_resp.get("resp") or ""
             self.pending_burp_rr.append(BurpRawRequestResponse(
                 finding=finding,
-                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
+                burpRequestBase64=base64.b64encode(request.encode("utf-8")),
+                burpResponseBase64=base64.b64encode(response.encode("utf-8")),
             ))
 
         unsaved_request = getattr(finding, "unsaved_request", None)
