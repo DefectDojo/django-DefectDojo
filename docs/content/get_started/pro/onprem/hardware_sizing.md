@@ -92,6 +92,15 @@ What each knob does:
 | `DD_CELERY_WORKER_AUTOSCALE_MAX` | host vCPU | The ceiling Celery scales up to under load. Keep it near the core count so bursts don't open more connections than the database can serve. |
 
 These four decide how many database connections the application holds open, so tune them alongside the database's own limits (see [Tuning the database](#tuning-the-database)). The Helm chart derives the same settings from your values, so on Kubernetes you normally leave them to the chart.
+
+**Stuck web processes.** uWSGI's harakiri timer restarts a web process whose threads have all stopped making progress. The timer belongs to the whole process, not to each request: it fires only after the configured number of seconds pass with no request starting or finishing on any of that process's threads, so one stuck thread is not recovered while the others keep serving. When it fires, uWSGI logs the request each thread was handling and a Python stack trace for every thread, then starts a fresh process. The Compose bundles set it per service:
+
+| Setting | Service | Default | Notes |
+| --- | --- | --- | --- |
+| `DD_UWSGI_HARAKIRI` | `dojo` (web) | 900 | Raise it only if a legitimate page or export takes longer than this. |
+| `DD_UWSGI_IMPORT_HARAKIRI` | `dojo-import-scan` (imports) | 1770 | Keep it below the 1800-second nginx timeout, so uWSGI logs the stuck import before nginx gives up on it. |
+
+Change either one with `dojo-compose-cli environment add` and restart, as above. A harakiri restart frees the process but does not remove the cause. If one shows up in the log, send the stack traces that come with it to support, since they show where the process was stuck.
 {{< /tab >}}
 {{< /tabs >}}
 
