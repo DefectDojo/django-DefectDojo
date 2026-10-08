@@ -846,6 +846,7 @@ Key facts:
 ## Optional
 
 - [Open Source Upgrading](https://docs.defectdojo.com/releases/os_upgrading/upgrading_guide/): Release specific upgrading instructions
+- [Upgrading to DefectDojo Version 3.4.100](https://docs.defectdojo.com/releases/os_upgrading/3.4.100/): The deprecated Tool Type, Tool Configuration, and API Scan Configuration API endpoints send a corrected end-of-life date and a single-sentence Classic UI warning.
 - [Upgrading to DefectDojo Version 3.5.x](https://docs.defectdojo.com/releases/os_upgrading/3.5/): No special instructions.
 - [Upgrading to DefectDojo Version 3.3.200](https://docs.defectdojo.com/releases/os_upgrading/3.3.200/): In DefectDojo Pro, a restart now applies the Locations and Organization / Asset Relabeling toggles to the Classic UI and the /api/v2 route wiring. Those surfaces used to keep following the deployment environment variables no matter what the Feature Flags page said.
 - [Upgrading to DefectDojo Version 3.4.x](https://docs.defectdojo.com/releases/os_upgrading/3.4/): No special instructions.
