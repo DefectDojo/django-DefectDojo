@@ -599,7 +599,6 @@ LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}webhook/",
     rf"^{URL_PREFIX}jira/webhook/([\w-]+)$",
     rf"^{URL_PREFIX}jira/webhook/",
-    rf"^{URL_PREFIX}reports/cover$",
     rf"^{URL_PREFIX}finding/image/(?P<token>[^/]+)$",
     rf"^{URL_PREFIX}api/v2/",
     r"complete/",

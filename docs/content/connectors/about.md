@@ -27,10 +27,10 @@ If you think of DefectDojo as the hub of your security data, Upstream Connectors
 
 ## Where to find Connectors
 
-In the Pro UI sidebar, open the **Connectors** group under the **Import** header:
+In the Pro UI sidebar, open the **Connect** section:
 
-* **Connectors > Upstream Connectors** — replaces the old **API Connectors** entry (previously under Import).
-* **Connectors > Downstream Connectors** — replaces the old **Integrations** entry (previously under Settings). This direction is currently in **Beta**.
+* **Connect > Upstream** opens the **Upstream Connectors** page — it replaces the old **API Connectors** entry (previously under Import).
+* **Connect > Downstream** opens the **Downstream Connectors** page — it replaces the old **Integrations** entry (previously under Settings). This direction is currently in **Beta**.
 
 Old bookmarks and deep links keep working: the legacy **API Connectors** and **Integrations** URLs automatically redirect to the new **Upstream Connectors** and **Downstream Connectors** pages.
 
@@ -39,7 +39,7 @@ Old bookmarks and deep links keep working: the legacy **API Connectors** and **I
 * **Upstream Connectors** is visible to users with a Global Role of Reader or higher.
 * **Downstream Connectors** is visible to superusers only, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances.
 
-The **Connectors** group appears in the sidebar if at least one of the two pages is visible to you.
+The **Upstream** and **Downstream** entries under **Connect** each appear in the sidebar only when that page is visible to you.
 
 ## The Connectors pages
 
@@ -50,7 +50,7 @@ Both directions share the same refreshed layout:
 
 On the **Upstream Connectors** page:
 
-* **Configured Connectors** lists the connectors you have already set up. Each tile shows an operational health summary (health status, last operation, and total / mapped record counts) and a **Manage Configuration** menu with **Manage Records & Operations**, **Edit Configuration**, and **Delete Configuration** actions.
+* **Configured Connectors** lists the connectors you have already set up. Each tile shows an operational health summary (health status, last operation, and total / mapped record counts) and a **Manage Configuration** menu with **Manage Records and Operations**, **Edit Configuration**, and **Delete Configuration** actions.
 * **Available Connectors** lists the supported tools you have not yet configured, each with an **Add Configuration** button.
 * A filter in the page header narrows both sections by connector type: **All**, **Asset** (or **Asset**, depending on your instance's vocabulary) for connectors that import asset inventory, and **Finding** for connectors that import vulnerability data.
 

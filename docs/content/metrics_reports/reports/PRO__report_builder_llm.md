@@ -16,7 +16,7 @@ This guide pairs with the [Report Builder API guide](../report-builder-api/), wh
 
 ## Before you start
 
-1. **Get an API token.** In the DefectDojo Pro UI, go to **User Settings → API v2 Key** and copy the token. Then set it as an environment variable so the generated script can read it without the token ever appearing in chat:
+1. **Get an API token.** In the DefectDojo Pro UI, open the user menu (your name at the bottom of the sidebar), select **API v2 Token** and copy the token. Then set it as an environment variable so the generated script can read it without the token ever appearing in chat:
 
 ```shell
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
@@ -283,7 +283,7 @@ Every request needs:
     Accept:        application/json
     Content-Type:  application/json   (on POST/PATCH)
 
-Get the token from User Settings -> API v2 Key in the DefectDojo Pro UI.
+Get the token from the user menu (your name at the bottom of the sidebar) under API v2 Token in the DefectDojo Pro UI.
 
 ================================================================================
 WHAT I WANT YOU TO DO

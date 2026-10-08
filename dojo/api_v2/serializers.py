@@ -24,7 +24,7 @@ from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.location.feature import locations_enabled
-from dojo.location.models import Location
+from dojo.location.models import Location, LocationProductReference
 from dojo.location.queries import get_authorized_locations
 from dojo.models import (
     DEDUPLICATION_EXECUTION_MODE_CHOICES,
@@ -53,6 +53,7 @@ from dojo.models import (
     Test,
     User,
 )
+from dojo.product.queries import get_authorized_products
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -214,6 +215,15 @@ class MetaSerializer(serializers.ModelSerializer):
         default=None,
         allow_null=True,
     )
+    # A Location is shared by every product that recorded the same value, so location
+    # metadata is scoped to one product. ``editable=False`` on the model keeps it out of
+    # ``ModelSerializer``'s generated fields, so it is declared here to be writable.
+    location_product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
     finding = serializers.PrimaryKeyRelatedField(
         queryset=Finding.objects.all(),
         required=False,
@@ -222,8 +232,31 @@ class MetaSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        if locations_enabled() and "endpoint" in data:
-            data["location"] = data.pop("endpoint")
+        if locations_enabled():
+            # Legacy clients name the location through ``endpoint``. The field defaults to
+            # None, so only an endpoint that was actually given may stand in for ``location``;
+            # popping unconditionally used to replace a real location with None.
+            endpoint = data.pop("endpoint", None)
+            if endpoint is not None:
+                data["location"] = endpoint
+        if (location_product := data.get("location_product")) is not None:
+            if (location := data.get("location")) is None:
+                raise serializers.ValidationError({"location_product": "location_product only applies to location metadata."})
+            if not LocationProductReference.objects.filter(location=location, product=location_product).exists():
+                raise serializers.ValidationError({"location_product": "The product does not reference this location."})
+        elif (location := data.get("location")) is not None and locations_enabled():
+            # Location metadata belongs to one product. A location recorded by a single
+            # product is scoped to it; one recorded by several products takes the caller's
+            # product when that is unambiguous, and otherwise the request has to say which one.
+            referencing = Product.objects.filter(locations__location=location)
+            if referencing.count() == 1:
+                data["location_product"] = referencing.get()
+            elif referencing.count() > 1:
+                user = getattr(self.context.get("request"), "user", None)
+                products = get_authorized_products("edit", user=user).filter(locations__location=location) if user else Product.objects.none()
+                if products.count() != 1:
+                    raise serializers.ValidationError({"location_product": "location_product is required for location metadata."})
+                data["location_product"] = products.get()
         DojoMeta(**data).clean()
         return data
 

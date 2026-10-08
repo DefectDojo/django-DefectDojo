@@ -30,7 +30,7 @@ Both engines run side by side. Turning on Triage Engine does not disable or conv
 
 Triage Engine is in Beta and is off by default. A superuser turns it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
-Once the flag is on, a **Triage Engine** section appears in the sidebar with three pages:
+Once the flag is on, a **Triage Engine** group appears under **Act** in the sidebar with three pages (the classic engine sits alongside them as **Classic Rules**):
 
 | Page | What it is for |
 |------|----------------|
@@ -42,7 +42,7 @@ Once the flag is on, a **Triage Engine** section appears in the sidebar with thr
 
 Access is governed by four global role permissions, shared with the original Rules Engine:
 
-* **Rule View** is required to see the sidebar section and everything under it.
+* **Rule View** is required to see the Triage Engine group and everything under it.
 * **Rule Add** is required to create a rule, including converting one from the original Rules Engine.
 * **Rule Edit** is required to change, enable, schedule, run, replay, or take ownership of an existing rule.
 * **Rule Delete** is required to delete a rule.
@@ -121,7 +121,8 @@ Runs and deliveries are both kept for 180 days by default, then pruned. The prod
 ## Where to go next
 
 * [Building Rules](../building_rules/) covers the editor, triggers, scope, conditions and templates.
-* [Node Reference](../node_reference/) documents all 41 nodes.
+* [Webhook Receivers](../webhook_receivers/) covers inbound webhooks and two-way sync with Downstream Connectors.
+* [Node Reference](../node_reference/) documents all 47 nodes.
 * [Runs](../runs/) covers execution, traces, cascading and limits.
 * [Deliveries](../deliveries/) covers channels, statuses, retries and replay.
 * [Converting from Rules Engine](../converting_from_rules_engine/) covers moving existing rules across.

@@ -1,7 +1,7 @@
 ---
 title: "Converting from Rules Engine"
 description: "Move existing Rules Engine rules across to Triage Engine graphs"
-weight: 6
+weight: 7
 audience: pro
 aliases:
   - /automation/rules_engine_v2/converting_from_rules_engine/

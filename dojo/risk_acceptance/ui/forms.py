@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from dojo.finding.queries import get_authorized_findings
+from dojo.finding.queries import get_authorized_findings_for_queryset
 from dojo.models import Finding, Risk_Acceptance
 from dojo.utils import get_system_setting
 
@@ -46,6 +46,13 @@ class EditRiskAcceptanceForm(forms.ModelForm):
         return data
 
 
+def accepted_findings_choices(engagement):
+    """The findings a risk acceptance on ``engagement`` may cover: the engagement's own, limited to those the user may edit."""
+    if engagement is None:
+        return Finding.objects.none()
+    return get_authorized_findings_for_queryset("edit", Finding.objects.filter(test__engagement=engagement))
+
+
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
@@ -59,7 +66,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         model = Risk_Acceptance
         fields = "__all__"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, engagement=None, **kwargs):
         super().__init__(*args, **kwargs)
         import dojo.risk_acceptance.helper as ra_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
 
@@ -70,7 +77,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             # logger.debug('setting default expiration_date: %s', expiration_date)
             self.fields["expiration_date"].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
-        self.fields["accepted_findings"].queryset = get_authorized_findings("edit")
+        self.fields["accepted_findings"].queryset = accepted_findings_choices(engagement)
         if disclaimer := get_system_setting("disclaimer_notes"):
             self.disclaimer = disclaimer.strip()
 

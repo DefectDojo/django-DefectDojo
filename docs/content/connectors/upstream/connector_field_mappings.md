@@ -97,7 +97,7 @@ classifies every mapping change before applying it:
   default, as does writing `unique_id_from_tool`.
 
 Which fields are identity-relevant follows **your** deduplication settings for that scan type
-under **Enterprise Settings**, not a fixed list, so it tracks any change you make there.
+under **Settings > Finding Workflow > Matching Configuration**, not a fixed list, so it tracks any change you make there.
 
 ### Do not map a vulnerability ID straight into `unique_id_from_tool`
 
@@ -138,7 +138,7 @@ Each row is one mapping: the **Target Field** to write, the **Expression** to wr
 and an optional **Strip Pattern**. The target list is the set of finding fields DefectDojo will
 accept, so you cannot select one that would be rejected on save.
 
-Fields that reach identity for this scan type are tagged **identity** as you select them. That
+Fields that reach identity for this scan type are tagged **Identity** as you select them. That
 tag follows your deduplication settings for the scan type, so it reflects what this instance
 actually hashes rather than a fixed list. Two rows may not target the same field, and the
 editor will say so before you continue.

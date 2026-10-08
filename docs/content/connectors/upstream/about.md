@@ -82,6 +82,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **GitHub Advanced Security**
 * **GitLab**
 * **Google Artifact Analysis**
+* **Google Cloud**
 * **Google Cloud SCC**
 * **Group-IB ASM**
 * **HackerOne**
@@ -161,7 +162,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 
 For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../../toolreference/upstream/) reference.
 
-Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Asset and Organization hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
+Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Asset and Organization hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Google Cloud**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
 These connections provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 
@@ -210,7 +211,7 @@ Each Connector also decides how your tool's data becomes a DefectDojo Finding �
 
 On DefectDojo Pro Cloud, you can ask our team to build a connector for a tool we don't support yet — directly from the UI:
 
-1. Go to **Connectors → Upstream Connectors** (for tools that import data *into* DefectDojo). Issue-tracker and other outbound integrations can be requested the same way under **Connectors → Downstream Connectors**.
+1. Go to **Connect > Upstream** (for tools that import data *into* DefectDojo). Issue-tracker and other outbound integrations can be requested the same way under **Connect > Downstream**.
 2. In the **Available Connectors** section, click **Request a Connector**.
 3. Fill in the request form. The **Tool / Asset Name**, the **Tool API Base URL**, the **Authentication Type** and the credentials for that authentication type are all required, because our team needs a reachable address and a working credential to build a connector and confirm it works against your tool. Credentials are stored securely. You can optionally add the vendor website, a link to the tool's API docs, and a note describing your use case.
 4. Click **Submit Request**. You'll see a confirmation that your request was received. Our team reviews each request to evaluate building support — submitting a request is not a guarantee that the connector will be built.
@@ -223,7 +224,7 @@ Even without a connector, DefectDojo can still handle manual import for a wide r
 
 # **Next Steps**
 
-* Check out the **Upstream Connectors** page by switching to DefectDojo's **Pro UI** and opening **Connectors \> Upstream Connectors** under the **Import** header.
+* Check out the **Upstream Connectors** page by switching to DefectDojo's **Pro UI** and opening **Connect > Upstream**.
 * Follow our guide to [create your first Upstream Connector](../add_edit/).
 * Check out the process of [Running Operations](../manage_operations/) with your Connected security tools and see how they can be configured to import data.
 * Adjust how your tool's data maps onto DefectDojo fields with [Connector Field Mappings](../connector_field_mappings/).

@@ -475,6 +475,7 @@ class FindingViewSet(
                     reverse("view_finding", args=(finding.id,)),
                 ),
                 parent_title=f"Finding: {finding.title}",
+                parent=finding,
             )
 
             if finding.has_jira_issue:

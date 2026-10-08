@@ -23,7 +23,7 @@ Once the feature is enabled, **Global Locations** becomes available as an **Algo
 
 ## Configuring Global Locations Deduplication
 
-Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Locations can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration**.
 
 > **A pooled Asset is bounded to its pool.** "Across all Assets" holds while an Asset is not in a
 > [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) for the matching kind
@@ -48,7 +48,7 @@ At least one type must be selected; both are selected by default. A tool configu
 
 Use Same-Tool Deduplication with the Global Locations algorithm when you want to deduplicate Findings from a single tool across multiple Assets by shared location.
 
-1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same tool** cell.
+1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same Tool** cell.
 2. Set the **Algorithm** to **Global Locations**.
 3. Choose the **Location Types** to match on.
 4. Review the impact and confirm.
@@ -60,7 +60,7 @@ Use Cross-Tool Deduplication with the Global Locations algorithm when you want t
 Cross-tool matching reads the importing tool's location-type selection, so configure Global Locations on **each** tool that should participate, with matching Location Types.
 
 1. Open **Settings > Finding Workflow > Matching Configuration**.
-2. For each tool to include: select its **Cross tool** cell, set the **Algorithm** to **Global Locations**, choose the Location Types, review the impact and confirm.
+2. For each tool to include: select its **Cross Tool** cell, set the **Algorithm** to **Global Locations**, choose the Location Types, review the impact and confirm.
 
 ## How Matching Works
 

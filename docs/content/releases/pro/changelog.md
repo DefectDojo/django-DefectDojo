@@ -16,6 +16,38 @@ You can subscribe to these release notes with the [RSS feed](/releases/pro/chang
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## October 2026: v3.4
+
+### October 5, 2026: v3.4.0
+
+New features:
+* **(Triage Engine)** Webhook receivers let Jira and other tools send changes back to DefectDojo, and the Jira Downstream Connector gains two-way sync and Push Notes as Comments.
+* **(Triage Engine)** AI steps: three new nodes in an AI section of the palette (Check for False Positive, Assess Exploitability, and Group by Fix) ask Sensei one fixed question about the findings that reach them and route each finding out of a named exit, so the AI proposes and a person decides.
+* **(Triage Engine)** Asset actions gain computed destinations (set the organization, parent, or SLA configuration from a tag, attribute, or connector field with a mapping), connector record attributes are available in the asset envelope, and a new Add Membership node replaces the admin-only membership rules.
+* **(Sandbox)** Sandbox Mode: a practice copy of DefectDojo Pro under `/sandbox/`, on its own database and preloaded with sample data, with Reset and Wipe for superusers. Nothing done in the sandbox reaches production. Self-hosted instances turn it on with `DD_SANDBOX_ENABLED`.
+* **(Support)** The new Support section in Settings searches the docs first, then lets you file feature, connector, bug, and feedback requests and vote on a public community board. It replaces the Contact Support menu entries and pages; old bookmarks redirect.
+* **(Remediation Center)** A new beta module (feature flag `remediation_center`, off by default) that makes the remediation action the unit of work: open findings are grouped by the change that resolves them, one action per change per place, each with a due date, risk, owner, workflow status, and the findings it will close.
+* **(AI Inventory)** A beta AI inventory (feature flag `ai_inventory`, off by default, requires Locations): every scanned repository gets an inventory of its coding assistants, MCP servers, models, AI packages, AI service endpoints, agent skills, and provider keys. Governance policies mark each as authorized, unauthorized, or needs review, unauthorized components become findings, and each Asset exports a CycloneDX 1.6 AIBOM. The DefectDojo scanner detects the AI in a repository and uploads it as a CycloneDX inventory.
+* **(Assets)** A Needs Attention inbox under Assets lists assets still sitting in a connector's default organization or missing the fields that priority and SLA run on, a What Drives Priority and SLA card appears on the asset page, and onboarding is complete when the inbox reads zero.
+* **(Assets)** Hierarchy change plans: bulk or AI-made reorganizations become a server-side plan with a dry-run diff that you review, apply as one change, and undo if needed. Plans can be built from JSON or a CSV upload.
+* **(Connectors)** New Microsoft Azure and Google Cloud asset connectors, and a new Kenna Security (Cisco Vulnerability Management) connector.
+* **(Connectors)** AWS Security Hub gains configurable asset grouping (by resource type or resource) with hierarchy parents, account parent records, OU and account-tag placement, AWS tags, and re-placing of existing assets. The same grouping and placement ladder comes to Microsoft Defender for Cloud, Prowler, Google Cloud SCC, and Lacework.
+* **(Connectors)** Re-mapping an already-mapped record to a different asset now moves its findings to the new asset by default, or closes them, instead of leaving them open and importing a duplicate set.
+* **(Findings)** Move or copy findings to another test, singly or in bulk.
+* **(Findings)** The finding tables gain an Exception Requested column and filter for findings sitting in a risk acceptance nobody has decided yet.
+* **(Correlation)** Fix with Sensei on Root Causes: the Root Cause dialog's member table carries the Sensei column, so you can launch a fix for each finding in the cluster.
+* **(Locations)** The Location page returns, with the asset-scoped Metadata box, a Custom Fields card, and a Referenced By table of the assets that use the location. Cloud resource identifiers (AWS ARNs, GCP self-links, Azure resource ids) are decomposed into provider, account, region, service, and resource fields.
+* **(Compliance)** Supporting files can be attached to regulatory obligations as evidence.
+* **(Reporting)** Report Builder gains Location per Asset blocks and Asset and Organization name columns.
+* **(PSIRT)** PSIRT is out of beta, the PSIRT API is available on `/api/v2/psirt/*` with token authentication, and the MCP server gains a PSIRT toolset.
+* **(i18n)** Ten more languages: Polish, Ukrainian, Turkish, Indonesian, Filipino, Vietnamese, Thai, Korean, and Chinese (Simplified and Traditional).
+* **(API)** Findings can be ordered by priority.
+
+Upgrade notes:
+* **(Deployment)** Self-hosted Docker Compose deployments, and Helm deployments with `webhookGateway.enabled`, run a new webhook gateway service in front of webhook receivers, with its own schema and database role inside DefectDojo's database. Please see [additional instructions](/releases/pro/webhook-gateway) for more details.
+* **(Helm)** New chart values: `connectors.debug` (default off), `connectors.vendorEgress` (private-network blocking and allowed or denied CIDRs, default off), `dojo.obligationAttachmentMaxBytes` (default 10 MB), and a `sandbox` values block for Sandbox Mode. The Go service's internal routes are kept off nginx and its rate-limit toggles are split. The dd-orch workers and integrators mount only the dd-orch root CA, and the django readiness probe now has to reach a uwsgi worker.
+* **(Deployment)** The `pro.0001` migration streams and bulk-creates its enhanced finding rows, so the first upgrade on a large instance completes in bounded memory.
+
 ## September 2026: v3.3
 
 ### September 28, 2026: v3.3.300

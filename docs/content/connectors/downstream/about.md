@@ -28,7 +28,7 @@ Supported Downstream Connectors:
 
 ## Opening the Downstream Connectors page
 
-The Downstream Connectors page can be found under **Import > Connectors > Downstream Connectors** in the sidebar.
+The Downstream Connectors page can be found under **Connect > Downstream** in the sidebar.
 
 ![image](images/integrators_3.png)
 
@@ -64,7 +64,7 @@ Findings can also be pushed automatically, with the **Issue Tracker Assignment**
 Each Issue Tracker Assignment can optionally narrow which Findings are pushed **automatically**:
 
 - **Minimum Severity**: only automatically create tickets for Findings at or above the selected severity. Leave it blank to include every severity.
-- **Active findings only**: only automatically create tickets for active Findings, skipping ones that are already mitigated, false positive, or risk accepted when the assignment first sees them.
+- **Active Findings Only**: only automatically create tickets for active Findings, skipping ones that are already mitigated, false positive, or risk accepted when the assignment first sees them.
 
 These filters apply to automatic **creation** only. Updates to a Finding that already has a linked ticket are always sent, so status changes (including closures) continue to propagate. A manual **Push to Integrator** always ignores the filters. Leaving both at their defaults preserves the original behavior of pushing every Finding.
 

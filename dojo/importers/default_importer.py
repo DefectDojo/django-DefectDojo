@@ -446,20 +446,25 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 new_hash_codes.append(hash_code)
             if (unique_id_from_tool := finding.get("unique_id_from_tool")) is not None:
                 new_unique_ids_from_tool.append(unique_id_from_tool)
-        old_findings = self.get_close_old_findings_queryset(new_hash_codes, new_unique_ids_from_tool)
+        # jira_issue and the group's are read for every finding to decide the JIRA push, and
+        # the test chain for its SLA and tool issue updater
+        old_findings = (
+            self.get_close_old_findings_queryset(new_hash_codes, new_unique_ids_from_tool)
+            .select_related("jira_issue", "test__test_type", "test__engagement__product")
+            .prefetch_related("finding_group_set__jira_issue")
+        )
         # Update the status of the findings and any locations
-        for old_finding in old_findings:
-            url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
-            test_title = str(self.test.title)
-            self.mitigate_finding(
-                old_finding,
-                (
-                    'This Finding has been automatically closed by the Test: \n "' + test_title + '"\n' + url +
-                    "\n\nThis is because this Finding is not present anymore in recent scans."
-                ),
-                finding_groups_enabled=self.findings_groups_enabled,
-                product_grading_option=False,
-            )
+        url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
+        test_title = str(self.test.title)
+        self.mitigate_findings(
+            list(old_findings),
+            (
+                'This Finding has been automatically closed by the Test: \n "' + test_title + '"\n' + url +
+                "\n\nThis is because this Finding is not present anymore in recent scans."
+            ),
+            finding_groups_enabled=self.findings_groups_enabled,
+            product_grading_option=False,
+        )
         # Persist any accumulated location/endpoint status changes
         self.location_handler.persist()
         self.flush_vulnerability_ids()

@@ -35,7 +35,7 @@ By default, the first account created on a new DefectDojo instance will have Sup
 
 ### Add Superuser or Global Role status to an existing user
 
-1. Navigate to the 👤 Users \> Users page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
+1. Navigate to the **Settings > Users & Permissions > Users** page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
 ​
 ![image](images/Set_a_User's_Permissions.png)
 ​
@@ -72,7 +72,7 @@ If a user has already been added as an Organization member, and does not require
 
 ### Adding a new Member
 
-1. Navigate to the Asset or Organization which you want to assign a user to. You can select the Asset from the list under **Assets \> All Assets**.
+1. Navigate to the Asset or Organization which you want to assign a user to. You can select the Asset from the list under **Act > Explore > Assets > All**.
 
 ![image](images/Set_a_User's_Permissions_4.png)
 
@@ -118,30 +118,30 @@ Configuration Permissions are not related to a specific Asset or Organization \-
 ​
 ### List of Configuration Permissions
 
-* **Credential Manager:** Access to the ⚙️Configuration \> Credential Manager page
-* **Development Environments:** Manage the Engagements \> Environments list
-* **Finding Templates:** Access to the Findings \> Finding Templates page
-* **Groups**: Access the 👤Users \> Groups page
-* **Jira Instances:** Access the ⚙️Configuration \> JIRA page
+* **Credential Manager:** Access to the Credential Manager page
+* **Development Environments:** Manage the **Settings > Configuration > Environments** list
+* **Finding Templates:** Access to the **Act > Explore > Findings > Templates** page
+* **Groups**: Access the **Settings > Users & Permissions > Groups** page
+* **Jira Instances:** Access the **Connect > Jira** page
 * **Language Types**:Access the [Language Types](/automation/api/languages/) API endpoint
-* **Login Banner**: Edit the ⚙️Configuration \> Login Banner page
-* **Announcements**: Access ⚙️Configuration \> Announcements
-* **Note Types:** Access the ⚙️Configuration \> Note Types page
+* **Login Banner**: Edit the **Settings > System > Login Banner** page
+* **Announcements**: Access **Settings > System > Announcement Banner**
+* **Note Types:** Access the **Settings > Configuration > Note Types** page
 * **Organizations:** n/a
-* **Questionnaires**: Access the Questionnaires \> All Questionnaires page
-* **Questions**: Access the Questionnaires \> Questions page
-* **Regulations**: Access the ⚙️Configuration \> Regulations page
-* **SLA Configuration:** Access the ⚙️Configuration \> SLA Configuration page
-* **Test Types:** Add or edit a Test Type (under Engagements \> Test Types)
-* **Tool Configuration:** Access the **⚙️Configuration \> Tool Types** page
-* **Tool Types:** Access the ⚙️Configuration \> Tool Types page
-* **Users:** Access the 👤Users \> Users page
+* **Questionnaires**: Access the **Act > Explore > Surveys > Surveys** page
+* **Questions**: Access the **Act > Explore > Surveys > Questions** page
+* **Regulations**: Access the **Settings > Configuration > Regulations** page
+* **SLA Configuration:** Access the **Settings > Finding Workflow > Service Level Agreements** page
+* **Test Types:** Add or edit a Test Type (under **Settings > Configuration > Test Types**)
+* **Tool Configuration:** Access the **Settings > Configuration > Tool Configurations** page
+* **Tool Types:** Access the **Settings > Configuration > Tool Types** page
+* **Users:** Access the **Settings > Users & Permissions > Users** page
 
 ### Add Configuration Permissions to a User
 
 **Only Superusers can add Configuration Permissions to a User**.
 
-1. Navigate to the 👤 Users \> Users page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
+1. Navigate to the **Settings > Users & Permissions > Users** page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
 ​
 ![image](images/Set_a_User's_Permissions_7.png)
 

@@ -19,7 +19,7 @@ For now, it’s good to know that **Engagements** can store data from multiple t
 
 The Import Scan form can be accessed from multiple locations:
 
-1. Via the **Import > Add Findings** menu option on the sidebar
+1. Via **Connect > Import > Add Findings** on the sidebar
 2. From a **Asset’s** **‘⋮’ (horizontal dots) Menu**, from a **Assets Table**
 3. From the **⚙️Gear Menu** on a **Asset Page**
 

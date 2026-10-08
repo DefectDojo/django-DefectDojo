@@ -88,7 +88,7 @@ Multiple Tests can be stored within a single Engagement, and Engagements are sto
 
 Tests can be accessed from various sections of the DefectDojo UI. 
 
-- The sidebar 
+- The sidebar, under **Act > Explore > Tests**
 
 ![image](images/tests_ss13.png)
 
@@ -114,7 +114,7 @@ Tests can be automatically created when scan data is imported directly into an E
 
 In order to make a Test, an Engagement must be made to contain it, as well as an Asset that will contain that Engagement. Afterwards, there are several ways to create a Test: 
 
-- In the sidebar, under Tests within the **Manage** subsection
+- From the **New Test** button at the top of the Tests list (**Act > Explore > Tests**)
     - You will have to select the pre-existing Engagement to attribute the Test to when completing the New Test form. 
 
 ![image](images/tests_ss1.png)

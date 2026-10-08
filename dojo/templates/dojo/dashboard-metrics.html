@@ -57,7 +57,7 @@
     <div class="row metric-data">
         <div class="col-md-6 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">{% trans "Open Bug Count by Month" %}</div>
+                <div class="panel-heading"><i class="fa-solid fa-chart-line dd-card-icon" aria-hidden="true"></i>{% trans "Open Bug Count by Month" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div aria-describedby="opened-per-month-description" aria-labelledby="opened-per-month-title"
@@ -99,7 +99,7 @@
 
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading">{% trans "Risk Accepted Bug Count by Month" %}</div>
+                <div class="panel-heading"><i class="fa-solid fa-chart-line dd-card-icon" aria-hidden="true"></i>{% trans "Risk Accepted Bug Count by Month" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div aria-describedby="accepted-per-month-description" aria-labelledby="accepted-per-month-title"
@@ -141,7 +141,7 @@
 
         <div class="col-md-12 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">{% trans "Open Bug Count by Week" %}</div>
+                <div class="panel-heading"><i class="fa-solid fa-chart-line dd-card-icon" aria-hidden="true"></i>{% trans "Open Bug Count by Week" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div aria-describedby="opened-per-week-description" aria-labelledby="opened-per-week-title" class="graph"
@@ -183,7 +183,7 @@
 
         <div class="col-md-12 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">{% trans "Risk Accepted Bug Count by Week" %}</div>
+                <div class="panel-heading"><i class="fa-solid fa-chart-line dd-card-icon" aria-hidden="true"></i>{% trans "Risk Accepted Bug Count by Week" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div aria-describedby="accepted-per-week-description" aria-labelledby="accepted-per-week-title"
@@ -227,7 +227,7 @@
         {% if top_ten_products %}
             <div class="col-md-12 section-start">
                 <div class="panel panel-default">
-                    <div class="panel-heading">{% blocktrans with length=top_ten_products|length %}Top {{ length }} Products By Bug
+                    <div class="panel-heading"><i class="fa-solid fa-ranking-star dd-card-icon" aria-hidden="true"></i>{% blocktrans with length=top_ten_products|length %}Top {{ length }} Products By Bug
                         Severity{% endblocktrans %}</div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
@@ -274,7 +274,7 @@
 
         <div class="col-md-4 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">{% trans "Total Findings In Period By Severity" %}</div>
+                <div class="panel-heading"><i class="fa-solid fa-chart-pie dd-card-icon" aria-hidden="true"></i>{% trans "Total Findings In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div aria-labelledby="severity-pie-title" aria-describedby="opened-in-period-description" class="graph" id="opened_in_period" role="img"
@@ -296,7 +296,7 @@
 
         <div class="col-md-4">
             <div class="panel panel-default">
-                <div class="panel-heading">{% trans "Total Findings Risk Accepted In Period By Severity" %}</div>
+                <div class="panel-heading"><i class="fa-solid fa-chart-pie dd-card-icon" aria-hidden="true"></i>{% trans "Total Findings Risk Accepted In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div aria-labelledby="total-accepted-severity-pie-title" aria-describedby="total-accepted-in-period-description" class="graph" id="total_accepted_in_period"
@@ -321,7 +321,7 @@
 
         <div class="col-md-4">
             <div class="panel panel-default">
-                <div class="panel-heading">{% trans "Total Findings Closed In Period By Severity" %}</div>
+                <div class="panel-heading"><i class="fa-solid fa-chart-pie dd-card-icon" aria-hidden="true"></i>{% trans "Total Findings Closed In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div
@@ -348,7 +348,7 @@
             <div class="col-lg-12 section-start">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        {% trans "Weekly activity, displayed by day, of findings reported.*" %}
+                        <i class="fa-solid fa-chart-line dd-card-icon" aria-hidden="true"></i>{% trans "Weekly activity, displayed by day, of findings reported.*" %}
                     </div>
                     <div class="panel-body">
                         <div

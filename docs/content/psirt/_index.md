@@ -25,6 +25,27 @@ PSIRT is a Pro feature in beta. It requires the **PSIRT** feature flag (which
 depends on **Locations**) and the **PSIRT Advisory Engine** license
 entitlement.
 
+### Migrating from the PSIRT 1.x sidecar
+
+Before 3.3.0, PSIRT was a separate service (the PSIRT Advisory Engine) served
+under `/psirt/` next to DefectDojo. DefectDojo Pro 3.3.0 replaced it with the
+module described here, running inside the main application. The old `/psirt/`
+URL redirects to the native pages on 3.3.x and is removed in 3.4.0; the
+separate service is no longer released.
+
+An existing sidecar database is carried into PSIRT 2.0 with a one-shot
+importer. Run it on a DefectDojo Pro instance with a connection string for
+the old `pae` database, first as a dry run and then with `--commit`:
+
+```bash
+python3 manage.py psirt_import_legacy --dsn postgresql://user:pass@host/pae
+python3 manage.py psirt_import_legacy --dsn postgresql://user:pass@host/pae --commit
+```
+
+The dry run performs the whole import inside a transaction and rolls it back,
+so its report reflects real constraints. Imported feed sources land disabled;
+enabling one presents its publisher's terms again.
+
 ### If you don't see PSIRT in the menu
 
 The PSIRT flag depends on **Locations**, and a flag with an unmet dependency is
@@ -95,6 +116,11 @@ Two pages are configuration rather than workflow:
   triage clock warns and breaches.
 - **[PSIRT Settings](settings/)** — the case-worthiness calibration, the "new"
   item window, and which upstream changes count as material.
+
+All of it is also reachable from an AI assistant: the
+**[MCP Server's PSIRT Toolset](../metrics_reports/ai/mcp_server_pro/#psirt-toolset)**
+(`?toolsets=psirt`) exposes the queue, rules, cases and authored advisories as
+tools, under the same permissions as the pages above.
 
 You do not need all of it. Feeds plus an inventory is enough to start getting
 answers; rules, cases and SLAs are for teams that want the workflow around them,

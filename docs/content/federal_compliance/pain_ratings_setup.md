@@ -167,7 +167,7 @@ page. Nothing is wrong — continue.
 PAIN is a judgment about the effect exploitation would have on your agency customers. DefectDojo
 never derives one. Ratings are assigned with a [Rules Engine 2.0](/automation/rules_engine_2/) rule.
 
-Go to **Rules Engine 2.0 > All Rules**, choose **New Rule**, and wire three nodes left to right:
+Go to **Act > Triage Engine > Rules**, choose **New Rule**, and wire three nodes left to right:
 
 | Order | Palette section | Node | Configuration |
 | --- | --- | --- | --- |
@@ -201,11 +201,11 @@ Set the mode to **Live**, toggle **Enabled** on, **Save**, then **Run Now**. A r
 saved and enabled first: **Run Now** is greyed out while there are unsaved changes, and a disabled
 rule records no run.
 
-Open **Rules Engine 2.0 > Runs** and expand the newest run:
+Open **Act > Triage Engine > Runs** and expand the newest run:
 
 ![The rule run trace, showing one finding changed and the rest left alone](images/14-pain-rule-run-trace.jpg)
 
-The trace records each node's input and output counts, and **What changed** names the finding that
+The trace records each node's input and output counts, and **Show Changes** lists the finding that
 was updated. Reload the finding:
 
 | Expected | Why |

@@ -18,7 +18,7 @@ Go to **Settings > Finding Workflow > AI Governance Policies** and choose **New 
 | **Scope** | Global, one Organization, or one Asset. |
 | **Match type and value** | What the policy recognizes. An exact Package URL, such as `pkg:npm/@modelcontextprotocol/server-filesystem` (without a version it matches every version). A Package URL pattern with `*` or `?`, such as `pkg:npm/@modelcontextprotocol/*`. An AI category, such as `mcp-server`, or the `package` kind, which covers every AI package. Or a provider, such as `anthropic`. |
 | **Decision** | Authorized, unauthorized, or needs review. |
-| **Finding severity** | For unauthorized components only. Leave it on the default to use the kind's default: High for MCP servers and AI services, Medium for assistants, models and packages, Low for skills. |
+| **Finding Severity** | For unauthorized components only. Leave it on the default to use the kind's default: High for MCP servers and AI services, Medium for assistants, models and packages, Low for skills. |
 | **Justification** | Why. Shown when you expand a component in the inventory, and in the Finding. |
 | **Owner** | The person or group accountable for the policy. |
 
@@ -36,7 +36,7 @@ When several policies match one component on one Asset:
 
 A component that no enabled policy matches **needs review**. DefectDojo never treats unknown AI as allowed.
 
-Decisions are re-evaluated in the background after every inventory import and every policy change, for exactly the Assets the change can affect. A nightly pass catches anything else. A superuser can also choose **Re-evaluate all** on the policies page.
+Decisions are re-evaluated in the background after every inventory import and every policy change, for exactly the Assets the change can affect. A nightly pass catches anything else. A superuser can also choose **Re-evaluate All** on the policies page.
 
 ## Findings
 
@@ -53,13 +53,13 @@ Re-evaluation keeps it in step with the repository:
 - Unauthorizing it again reopens the same Finding. It never creates a second one.
 - A Finding someone marked false positive, out of scope or risk accepted is left alone.
 
-Components that need review raise nothing by default and are counted on the inventory page. To triage them like any other Finding, turn on **Raise Info Findings for AI components needing review** at the top of the policies page. Each undecided component then raises an Info Finding, and turning the setting off mitigates them.
+Components that need review raise nothing by default and are counted on the inventory page. To triage them like any other Finding, turn on **Raise Info Findings for AI Components Needing Review** at the top of the policies page. Each undecided component then raises an Info Finding, and turning the setting off mitigates them.
 
 ## Automating the Response
 
 Because violations are Findings, the Triage Engine handles them with no new setup. A template ships in the Triage Engine: **AI Governance: ticket and notify on an unauthorized AI component**. It triggers on new Findings tagged `ai-governance` at High or Critical, opens a ticket and sends an alert. Adopt it, point the ticket at your project, and try it in Simulate first.
 
-A notification event, **AI component discovered**, fires the first time a kind of AI component appears on an Asset, such as its first MCP server. Removing and re-adding a component does not fire it again. Choose where it goes in your notification settings.
+A notification event, **AI Component Discovered**, fires the first time a kind of AI component appears on an Asset, such as its first MCP server. Removing and re-adding a component does not fire it again. Choose where it goes in your notification settings.
 
 ## Using the API
 
