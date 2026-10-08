@@ -1,4 +1,5 @@
 import logging
+from itertools import batched
 from typing import NamedTuple
 
 from django.core.exceptions import ValidationError
@@ -34,6 +35,9 @@ class EndpointUniqueKey(NamedTuple):
 
 # TODO: Delete this after the move to Locations
 class EndpointManager(BaseLocationManager):
+
+    # Bounds the IN list of record_mitigations_for_findings' status lookup.
+    MITIGATION_LOOKUP_CHUNK = 1000
 
     def __init__(self, product: Product) -> None:
         self._product = product
@@ -364,6 +368,17 @@ class EndpointManager(BaseLocationManager):
     def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         """Record endpoint statuses on this finding for mitigation."""
         self.record_statuses_to_mitigate(finding.status_finding.all(), user)
+
+    def record_mitigations_for_findings(self, findings: list[Finding], user: Dojo_User) -> None:
+        """
+        Record endpoint statuses on all of these findings for mitigation.
+
+        The rows finding.status_finding.all() returns for each finding, read with one
+        query per chunk of findings rather than one per finding.
+        """
+        finding_ids = [finding.id for finding in findings]
+        for chunk in batched(finding_ids, self.MITIGATION_LOOKUP_CHUNK, strict=False):
+            self.record_statuses_to_mitigate(list(Endpoint_Status.objects.filter(finding_id__in=chunk)), user)
 
     def get_locations_for_tagging(self, findings: list[Finding]):
         """Return queryset of locations to apply tags to."""
