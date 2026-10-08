@@ -44,7 +44,7 @@ Interface colors are set separately for light mode and dark mode, so each mode c
 | **Components** | Form field background and border, menus and dialogs, menu hover, and selection. |
 | **Operational Status** | The live status indicators on the Command Center: healthy, degraded, and down. These are separate from finding severity colors. |
 
-Each color shows **Preset** until you change it. Select **Use preset** under a customized color to return it to the preset, or use the reset button on a group to clear the whole group for the mode you are editing.
+Each color shows **Preset** until you change it. Select **Use Preset** under a customized color to return it to the preset, or use the reset button on a group to clear the whole group for the mode you are editing.
 
 ## Legibility
 

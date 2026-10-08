@@ -27,12 +27,12 @@ Nothing in the payload travels through the engine except as data. A payload cann
 For a connector that supports it (Jira today), the fastest route is the connection itself:
 
 1. Open **Connect > Downstream**, then the Jira connection.
-2. Choose **Turn On Two-way Sync**. This creates a Jira receiver already bound to this connection.
+2. Choose **Turn On Two-Way Sync**. This creates a Jira receiver already bound to this connection.
 3. Enter the webhook secret you will give Jira, review the behaviors, and save. The receiver and its rule start **disabled**.
 4. Follow the **Setup** tab: in Jira, open **System > WebHooks**, create a webhook with the receiver's URL and secret, and subscribe it to **Issue updated** and **Comment created**. Limit its JQL to the projects your connector pushes to. A Jira Data Center version that offers no webhook secret cannot sign, so switch the receiver to **URL Token Only** for it.
 5. Enable the receiver. From then on, the **Receipts** tab shows each delivery and the **Rules** tab links to the rule that acts on them.
 
-A connection has at most one two-way sync receiver. When someone else already turned it on, the connection's **Two-way Sync** card says **Managed by another user** instead of offering to create a second one.
+A connection has at most one two-way sync receiver. When someone else already turned it on, the connection's **Two-Way Sync** card says **Managed by another user** instead of offering to create a second one.
 
 Binding the receiver to its connection matters when you have more than one Jira site: ticket keys such as `SEC-101` are only unique within one site, so a bound receiver only ever matches the tickets its own connection created. If the connection is deleted, DefectDojo switches its receiver off and says why on the receiver; choose a new connection and turn it back on.
 

@@ -17,7 +17,7 @@ Enabling Locations only changes behaviour for *new* imports; your existing histo
 
 When a backfill finishes it reports how many source objects it processed and how many distinct **Locations** those objects resolved to. The two numbers differ by design: several source objects can share one Location (many Endpoints normalising to the same URL, or many Findings sharing one component), so the Location count is normally lower than the object count. If any individual object could not be migrated it is skipped rather than aborting the run, and the number skipped is shown alongside the result.
 
-A running item shows a **Cancel** button. Cancelling stops the run at the next batch boundary, so it is not instant: the current batch finishes and commits first. A cancelled run keeps everything it had already migrated, is reported as **Cancelled** with its partial counts, and because every step is idempotent, running the same item again resumes from where it stopped and converges on the same result as an uninterrupted run. Cancel is also the recovery path when a run's worker is lost: a run that stops reporting progress is marked failed on its own so the item becomes runnable again, and forcing a cancel releases a run that is otherwise wedged.
+A running item shows a **Cancel** button. Cancelling stops the run at the next batch boundary, so it is not instant: the current batch finishes and commits first. A cancelled run keeps everything it had already migrated, is reported as **Canceled** with its partial counts, and because every step is idempotent, running the same item again resumes from where it stopped and converges on the same result as an uninterrupted run. Cancel is also the recovery path when a run's worker is lost: a run that stops reporting progress is marked failed on its own so the item becomes runnable again, and forcing a cancel releases a run that is otherwise wedged.
 
 The suite has four items, because a Finding can carry three independent kinds of location:
 
@@ -41,9 +41,9 @@ python manage.py migrate_findings_to_code_locations
 Each suite item carries a durable **completed** marker, so the page can state that a migration does not need to be run again. It is set two ways:
 
 - **Automatically**, when a run started here finishes successfully.
-- **Manually**, with **Mark as completed**, for a migration that finished another way: a management command from the list above, a database restore, or a fresh instance that never had Endpoints to carry forward.
+- **Manually**, with **Mark as Completed**, for a migration that finished another way: a management command from the list above, a database restore, or a fresh instance that never had Endpoints to carry forward.
 
-A completed item shows a **Completed** badge with who marked it and when, its **Run** button becomes **Run again** (the step stays idempotent, so re-running is always safe), and **Mark as not completed** clears the marker.
+A completed item shows a **Completed** badge with who marked it and when, its **Run** button becomes **Run Again** (the step stays idempotent, so re-running is always safe), and **Mark as Not Completed** clears the marker.
 
 Marking the three backfills complete also satisfies the identity rehash's precondition, so a manual mark unlocks the rehash exactly as a real run does. Mark a backfill by hand only when its data really is migrated: the UI asks you to confirm, because unlocking the rehash before the backfill has run would let it recompute identities against a half-migrated database.
 

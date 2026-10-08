@@ -16,7 +16,7 @@ Before you begin this process, we recommend checking our [Tool-Specific Referenc
 ​
 ![image](images/add_edit_connectors.png)
 
-3. Choose a new Connector you want to add to DefectDojo in **Available Connectors**, and click the **Add Configuration** button on the tool's tile. You can use the **Search Connectors** box to filter each section by tool name, or the **All / Asset / Finding** toggle in the page header to filter by connector type.  
+3. Choose a new Connector you want to add to DefectDojo in **Available Connectors**, and click the **Add Configuration** button on the tool's tile. You can use the **Search connectors** box to filter each section by tool name, or the **All / Asset / Finding** toggle in the page header to filter by connector type.  
 ​  
 You can also edit an existing Connector under the **Configured Connectors** header. Click **Manage Configuration > Edit Configuration** for the Configured Connector you want to Edit.  
 ​

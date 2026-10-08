@@ -27,9 +27,9 @@ Every verdict is normalized to the same five values, whatever produced it:
 
 | Verdict | Meaning |
 |---|---|
-| **Externally exposed** | An unrestricted path from the internet was observed or reported. |
-| **Partially exposed** | An internet path exists but is constrained, for example to specific address ranges, ports, or an authenticated audience. |
-| **Internally reachable** | No internet path, but the asset is reachable beyond its own network boundary, such as over a VPN or from another network or account. |
+| **Externally Exposed** | An unrestricted path from the internet was observed or reported. |
+| **Partially Exposed** | An internet path exists but is constrained, for example to specific address ranges, ports, or an authenticated audience. |
+| **Internally Reachable** | No internet path, but the asset is reachable beyond its own network boundary, such as over a VPN or from another network or account. |
 | **Isolated** | A source states there is no reachability beyond the local network. |
 | **Unknown** | No source has reported on this asset yet. |
 
@@ -119,8 +119,8 @@ propagate.
 
 ## Deployment context
 
-Alongside exposure, each Finding records whether its code is **In production**, **Not in
-production**, or **Unknown**.
+Alongside exposure, each Finding records whether its code is **In Production**, **Not in
+Production**, or **Unknown**.
 
 This is resolved from two settings, in order:
 
@@ -196,8 +196,8 @@ That setting is **off by default and separate from the feature flag**, because i
 remediation deadlines. Turning on Asset Exposure never shortens an SLA on its own; a
 compliance owner has to opt in. When enabled, the tag and the computed verdict are combined
 rather than replacing one another, so an existing tag keeps working and enabling the
-setting can only tighten a deadline, never loosen one. Both **Externally exposed** and
-**Partially exposed** count as internet-reachable for tiering.
+setting can only tighten a deadline, never loosen one. Both **Externally Exposed** and
+**Partially Exposed** count as internet-reachable for tiering.
 
 ## Filtering and reporting
 

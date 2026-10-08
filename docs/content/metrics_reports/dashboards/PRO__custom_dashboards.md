@@ -130,7 +130,7 @@ This **copies** the widget rather than linking to it. Editing the dashboard widg
 
 The **Manage Layouts** dialog (the gear button on the toolbar) is the hub for everything layout-level:
 
-- **Your Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts.
+- **Saved Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts.
 - **Create New** — start a fresh, empty layout to build from scratch.
 - **Shared Templates** — browse curated and team-published layouts grouped by category, and click **Use Layout** to clone one into your own space.
 
@@ -151,7 +151,7 @@ DefectDojo ships four ready-to-use shared templates you can clone as a starting 
 
 ### The empty state
 
-A brand-new layout with no widgets shows a **"Build Your First Dashboard"** prompt. Click **Add Your First Widget** to jump straight into edit mode and start choosing widgets.
+A brand-new layout with no widgets shows a **"Build a Dashboard"** prompt. Click **Add Widget** to jump straight into edit mode and start choosing widgets.
 
 ![The empty-layout state](images/pro_dashboard_v2_empty_state.png)
 

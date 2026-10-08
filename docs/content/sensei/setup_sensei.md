@@ -16,7 +16,7 @@ Setting up Sensei has two parts: **connect a source-control provider**, then **o
 
 Onboarding, configuration, scanning, and fixing are the same for every provider; only the initial connection differs. This page covers [connecting a GitHub App](#connect-a-github-app), [GitHub Enterprise Server](#connect-github-enterprise-server), [GitLab](#connect-gitlab), [Bitbucket](#connect-bitbucket), and [Azure DevOps](#connect-azure-devops); the [Select repositories](#select-repositories) step onward is shared.
 
-**Add Repositories** on the Sensei hub is the entry point for both. It opens a menu listing each connection by name: pick one to choose repositories from it, or choose **Connect a new source** to set up a provider you haven't connected yet. With nothing connected, it goes straight to the connect flow.
+**Add Repositories** on the Sensei hub is the entry point for both. It opens a menu listing each connection by name: pick one to choose repositories from it, or choose **Connect a New Source** to set up a provider you haven't connected yet. With nothing connected, it goes straight to the connect flow.
 
 ![The Add Repositories menu](images/add_repositories_menu.png)
 
@@ -28,20 +28,20 @@ A **connection** is one configured source-control identity: a GitHub App registr
 
 The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, open it for editing (**Update credentials**, or **Manage App & installations** for GitHub), or disconnect it.
 
-![Connection row actions](images/connection_row_menu.png) **Add a connection** never shows an existing connection's details. Everything about a connection you already have is on its own screen, reached from its row.
+![Connection row actions](images/connection_row_menu.png) **Add a Connection** never shows an existing connection's details. Everything about a connection you already have is on its own screen, reached from its row.
 
 ### Several organizations per provider
 
 An instance can hold **as many connections as you need, for every provider**, one per organization, group, or workspace:
 
-- **GitHub:** install the App on each organization or user account (**Install on another account**). One App registration covers them all. To keep separate registrations, such as a GitHub Enterprise Server host alongside github.com, use **Register another GitHub App**. An App's own state (its installations, permission approvals, **Install on another account**, and **Disconnect this App**) lives on that connection's screen, opened with **Manage App & installations** on its row. With more than one registration, a picker there switches between them.
+- **GitHub:** install the App on each organization or user account (**Install on another account**). One App registration covers them all. To keep separate registrations, such as a GitHub Enterprise Server host alongside github.com, use **Register Another GitHub App**. An App's own state (its installations, permission approvals, **Install on another account**, and **Disconnect This App**) lives on that connection's screen, opened with **Manage App & installations** on its row. With more than one registration, a picker there switches between them.
 - **GitLab:** one connection per group or project token, including several on the same host (`gitlab.com` plus self-managed).
 - **Bitbucket:** one connection per workspace.
 - **Azure DevOps:** one connection per organization, since a PAT is org-scoped.
 
 Each pass through **Connect** on the Connections page **adds** a connection, so connecting a second group or workspace never replaces the first. Give each one a **Connection Label** to tell them apart in the table. Each repository records the connection it was onboarded through, and its scans, pull requests, and fixes use that connection's credential. When more than one connection exists for a provider, onboarding asks which one to use instead of choosing for you.
 
-To rotate a token, PAT, or app password, use **Update credentials** on that connection's row. The screen that opens is about a single connection: it is titled **Edit connection: \<label\>** and saving updates that connection instead of adding another. Reaching it from **Connect** instead titles it **Add a connection**. (GitHub App credentials are managed on GitHub.)
+To rotate a token, PAT, or app password, use **Update credentials** on that connection's row. The screen that opens is about a single connection: it is titled **Edit connection: \<label\>** and saving updates that connection instead of adding another. Reaching it from **Connect** instead titles it **Add a Connection**. (GitHub App credentials are managed on GitHub.)
 
 A provider's **webhook URL is shared by all of its connections**, and each connection verifies its own secret, so you do not need a different URL per group, workspace, or organization.
 
@@ -49,7 +49,7 @@ A provider's **webhook URL is shared by all of its connections**, and each conne
 
 ## Choose a source-control provider
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**, then pick your source-control provider: **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
+From the Sensei hub, choose **Add Repositories → Connect a New Source** (or **Connect** on the Connections page) to open **Add a Connection**, then pick your source-control provider: **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
 
 ![Add a connection, with the source-control provider chosen here](images/setup_providers.png)
 
@@ -57,7 +57,7 @@ From the Sensei hub, choose **Add Repositories → Connect a new source** (or **
 
 Sensei runs entirely through a GitHub App. Install it on your org/account and DefectDojo uses short-lived tokens to open PRs, scan, and apply fixes. Nothing to paste, nothing to rotate.
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**.
+From the Sensei hub, choose **Add Repositories → Connect a New Source** (or **Connect** on the Connections page) to open **Add a Connection**.
 
 ### Step 1: Create the App
 
@@ -85,7 +85,7 @@ On GitHub, confirm the installation location (your organization), choose **All r
 
 Sensei also supports **GitLab**, both **gitlab.com** and **self-managed** instances. Instead of a GitHub App, GitLab connects with a **project or group access token** plus a webhook; Sensei uses that token to scan, open merge requests, and apply fixes.
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**, then select **GitLab** as the source-control provider.
+From the Sensei hub, choose **Add Repositories → Connect a New Source** (or **Connect** on the Connections page) to open **Add a Connection**, then select **GitLab** as the source-control provider.
 
 ### Step 1: Create an access token
 
@@ -100,13 +100,13 @@ Create the token and copy the generated `glpat-…` value (GitLab shows it only 
 
 ### Step 2: Connect
 
-Back in **Add a connection** with **GitLab** selected, fill in:
+Back in **Add a Connection** with **GitLab** selected, fill in:
 
 - **GitLab Base URL:** `https://gitlab.com`, or your self-managed instance URL (for example `https://gitlab.example.com`).
 - **Access Token:** the `glpat-…` token from Step 1.
 - **Webhook Secret:** leave blank to auto-generate (recommended). You'll add this secret to the webhook in the next step.
 
-Click **Add GitLab connection**. DefectDojo validates the token, stores it encrypted, and can then list projects, open merge requests, and run scans.
+Click **Add GitLab Connection**. DefectDojo validates the token, stores it encrypted, and can then list projects, open merge requests, and run scans.
 
 ### Step 3: Add the webhook
 
@@ -132,12 +132,12 @@ On your GitHub Enterprise Server instance, go to **Settings → Developer settin
 
 ### Step 2: Connect manually
 
-On the connection screen with **GitHub** selected, click **Set up manually instead** and fill in:
+On the connection screen with **GitHub** selected, click **Set Up Manually Instead** and fill in:
 
 - **App ID** and **Private Key (PEM)** from Step 1 (plus Client ID/Secret and Webhook Secret if configured).
 - **GitHub Enterprise host:** your instance host, for example `https://github.example.com`. DefectDojo derives the API (`/api/v3`) and web origins from it. Leave blank for github.com.
 
-Click **Save App credentials**. DefectDojo validates them against your enterprise host, then install the App and continue with [Select repositories](#select-repositories).
+Click **Save App Credentials**. DefectDojo validates them against your enterprise host, then install the App and continue with [Select repositories](#select-repositories).
 
 > **🔑 Tip:** The host must be reachable from DefectDojo (and DefectDojo reachable from GHES for webhooks). Internal-only hosts are fine as long as both can reach each other on your network.
 
@@ -145,11 +145,11 @@ Click **Save App credentials**. DefectDojo validates them against your enterpris
 
 Sensei supports **Bitbucket Cloud** (`bitbucket.org`) and **Bitbucket Server / Data Center** (self-hosted). Three non-deprecated auth methods are offered; **OAuth is recommended**.
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page), then select **Bitbucket** and your **deployment** (Cloud or Server/Data Center) and **authentication** type.
+From the Sensei hub, choose **Add Repositories → Connect a New Source** (or **Connect** on the Connections page), then select **Bitbucket** and your **deployment** (Cloud or Server/Data Center) and **authentication** type.
 
 ### Step 1: Create the credential
 
-**OAuth (recommended):** in Bitbucket, open **Workspace settings → OAuth consumers → Add consumer**:
+**OAuth (Recommended):** in Bitbucket, open **Workspace settings → OAuth consumers → Add consumer**:
 
 - **Callback URL:** the one shown on the connection screen (`https://<your-defectdojo-host>/sensei/bitbucket/oauth/callback`).
 - **Permissions:** **Account: Read**, **Repositories: Read + Write**, **Pull requests: Read + Write** (add **Webhooks: Read + Write** if you'll manage webhooks via the API).
@@ -164,7 +164,7 @@ Save it, then copy the consumer's **Key** (Client ID) and **Secret**.
 
 Back on the connection screen with **Bitbucket** selected:
 
-- **OAuth:** paste the **Client ID** and **Client Secret**, then click **Connect with Bitbucket**. Approve the consent screen; DefectDojo stores the resulting tokens encrypted and refreshes them automatically.
+- **OAuth:** paste the **Client ID** and **Client Secret**, then click **Connect With Bitbucket**. Approve the consent screen; DefectDojo stores the resulting tokens encrypted and refreshes them automatically.
 - **API token / Access token:** enter your **Workspace** (Cloud), your **email** (API-token auth only), and the **token**. For Server/Data Center, enter your host **Base URL**.
 
 DefectDojo validates the credential and can then list repositories, open pull requests, and run scans.
@@ -185,7 +185,7 @@ After connecting, click **Choose Repositories** and continue with [Select reposi
 
 Sensei supports **Azure DevOps Repos** using a **Personal Access Token (PAT)**. Repositories live in an **organization → project → repository** hierarchy.
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page), then select **Azure DevOps**.
+From the Sensei hub, choose **Add Repositories → Connect a New Source** (or **Connect** on the Connections page), then select **Azure DevOps**.
 
 ### Step 1: Create a PAT
 
@@ -252,14 +252,14 @@ When automated fixes are enabled, findings that meet your criteria are staged as
 
 ![Automated fix criteria and advanced options](images/repo_config_advanced.png)
 
-- **Severity threshold:** findings at or above this severity qualify (choose *Any* to gate on risk only).
-- **Risk threshold:** findings at or above this risk level also qualify (combined with severity using OR).
-- **Open fix PRs against branch:** the branch auto-fix pull requests target; overridable per fix when you approve individually.
-- **Exclude findings tagged:** skip findings carrying the tags you list (e.g. `no-fix`).
+- **Severity Threshold:** findings at or above this severity qualify (choose *Any* to gate on risk only).
+- **Risk Threshold:** findings at or above this risk level also qualify (combined with severity using OR).
+- **Open Fix PRs Against Branch:** the branch auto-fix pull requests target; overridable per fix when you approve individually.
+- **Exclude Findings Tagged:** skip findings carrying the tags you list (e.g. `no-fix`).
 - **Automatically remediate candidates:** when enabled, a background check (about every 5 minutes) opens fix pull requests for this repo's staged candidates without waiting for approval, until your fix quota is reached. Leave off to review and approve each candidate yourself.
 
-Under **Advanced options** you can link the repository to an existing Asset/asset or create a new one, set the organization, and set a minimum severity below which findings are neither reported nor used in the merge gate.
+Under **Advanced Options** you can link the repository to an existing Asset/asset or create a new one, set the organization, and set a minimum severity below which findings are neither reported nor used in the merge gate.
 
 ## Onboard
 
-Click **Onboard for hosted scanning**. The repository appears on the Sensei hub with a status of **Active**, ready to scan. From here, continue to [Fixing findings with Sensei](/sensei/fixing_findings/).
+Click **Onboard for Hosted Scanning**. The repository appears on the Sensei hub with a status of **Active**, ready to scan. From here, continue to [Fixing findings with Sensei](/sensei/fixing_findings/).

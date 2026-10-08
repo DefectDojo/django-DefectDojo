@@ -40,10 +40,10 @@ Each onboarded repository has a row-actions menu on the Sensei hub:
 
 ![Repository row actions](images/repo_row_menu.png)
 
-- **Scan now:** start an on-demand scan (opens the branch picker).
-- **Scan history:** view this repository's past scans.
+- **Scan Now:** start an on-demand scan (opens the branch picker).
+- **Scan History:** view this repository's past scans.
 - **Configure:** reopen the configuration form (PR reporting, automated fixes, Asset linkage).
-- **Re-stage candidates:** re-evaluate the repository's findings against the auto-fix criteria and stage fresh candidates.
+- **Re-stage Candidates:** re-evaluate the repository's findings against the auto-fix criteria and stage fresh candidates.
 - **Delete:** remove the repository from Sensei. This stops scanning it; it does not delete the underlying asset or findings.
 
 ## Quotas and metering

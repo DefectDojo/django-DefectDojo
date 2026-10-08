@@ -21,9 +21,9 @@ Each of these previously produced a closed finding plus a "new" finding, losing 
 Location tracking is configured per tool on **Settings > Finding Workflow > Matching Configuration**.
 
 1. Find the tool's row and select its **Reimport** column.
-2. Set the **Algorithm** to **Hash code**. Location tracking applies to that algorithm only: tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
-3. Tick **Track findings as locations change**.
-4. Select **Review impact**, then **Apply**.
+2. Set the **Algorithm** to **Hash Code**. Location tracking applies to that algorithm only: tools with a reliable **Unique ID From Tool** already track movement through their stable IDs and do not need it.
+3. Tick **Track Findings as Locations Change**.
+4. Select **Review Impact**, then **Save**.
 
 The review step matters here. Turning tracking on or off changes which fields the reimport hash is built from, so every hash already stored for that tool becomes stale and the whole backlog is recomputed in the background. The review tells you how many findings that is before you commit, and until the recompute finishes the tool's findings are hashed under two different definitions and may not match each other. See [Enabling on Existing Data](#enabling-on-existing-data-upgrades) below.
 

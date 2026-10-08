@@ -49,8 +49,8 @@ Everything is named after your production database, so several installations sha
 | Object | Name | Purpose |
 | --- | --- | --- |
 | Database | `dojodb_sandbox` | The live sandbox |
-| Database | `dojodb_sandbox_tpl_empty` | Template for **Wipe sandbox** |
-| Database | `dojodb_sandbox_tpl_seeded` | Template for **Reset sample data** |
+| Database | `dojodb_sandbox_tpl_empty` | Template for **Wipe Sandbox** |
+| Database | `dojodb_sandbox_tpl_seeded` | Template for **Reset Sample Data** |
 | Role | `dojodb_sandbox` | What the sandbox connects as; it can reach only the sandbox databases |
 | Role | `dojodb_sandbox_admin` | Owns the three sandbox databases, to reset them |
 

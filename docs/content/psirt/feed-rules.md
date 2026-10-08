@@ -48,7 +48,7 @@ A rule is conditions plus actions.
 tests: contains any of, contains all of, contains none of, or matches a regular
 expression. Terms are comma-separated.
 
-**Whole word** is on by default and matters more than it looks. Without it, a term
+**Whole Word** is on by default and matters more than it looks. Without it, a term
 like `SSL` matches inside "assembly" and a scoring rule quietly stops meaning
 anything. It does not apply to a regular expression, which can anchor itself.
 
@@ -65,7 +65,7 @@ Two settings control how rules interact:
 
 ### Preview before you turn it on
 
-**Preview against recent advisories** runs the rule over a window of real
+**Preview Against Recent Advisories** runs the rule over a window of real
 advisories and reports how many it would have caught, listing a sample.
 
 Use it every time. A feed rule is written against a corpus nobody can read, and

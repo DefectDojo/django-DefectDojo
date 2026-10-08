@@ -43,7 +43,7 @@ By default the connector creates one Record, and so one asset, per Azure subscri
 | Asset Grouping | Records | Findings are imported on |
 |---|---|---|
 | **Subscription** (default) | one per subscription | the subscription Records |
-| **Resource group** | additionally, one per resource group under each subscription | the resource group Records |
+| **Resource Group** | additionally, one per resource group under each subscription | the resource group Records |
 | **Resource** | additionally, one per resource, under its resource group | the resource Records |
 
 With **Resource**, a container image is not a resource of its own: every image of a container registry repository is grouped under that repository, because an image digest is a version of the repository. A resource outside any resource group is placed under a **No resource group** Record.
@@ -65,8 +65,8 @@ With a finer grouping:
 
 New assets from a Defender for Cloud connection are placed in the connector's default organization. The **Organization Placement** field can instead place them by Azure structure:
 
-* **One per subscription, named by subscription name:** an organization per subscription, named after the subscription.
-* **One per subscription, named by subscription ID:** organizations named `Azure <subscription id>`.
-* **One per management group:** an organization per nearest management group of the subscription, falling back to the subscription name when the management group cannot be read.
+* **One per Subscription, Named by Subscription Name:** an organization per subscription, named after the subscription.
+* **One per Subscription, Named by Subscription ID:** organizations named `Azure <subscription id>`.
+* **One per Management Group:** an organization per nearest management group of the subscription, falling back to the subscription name when the management group cannot be read.
 
 Organizations are created when they do not exist yet, and reused when they do. The field only affects assets created after it is set: assets that already exist are never moved.

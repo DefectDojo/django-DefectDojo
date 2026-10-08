@@ -46,7 +46,7 @@ This is what makes Authorization Connectors different from the [connector galler
 | --- | --- | --- |
 | **Enabled** | Configured and accepting sign-ins | Nothing |
 | **Disabled** | Configured, but switched off — its button will not appear on the login page | Re-enable it from its configuration when you want it back |
-| **Not configured** | Supported, nothing filled in yet | **Configure** to set it up |
+| **Not Configured** | Supported, nothing filled in yet | **Configure** to set it up |
 
 Selecting a provider opens that provider's own settings form directly. There is no intermediate provider picker.
 

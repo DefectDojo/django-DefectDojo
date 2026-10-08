@@ -38,10 +38,10 @@ This configuration is seeded once and is never made the default and never assign
 
 Requirement 6.3.3 runs the one-month clock from when a patch was released, not from when the finding happened to be detected. Each SLA configuration therefore carries an **SLA start policy** that chooses which date the clock starts from:
 
-- **Detection date**: the default, and the same behavior as before. The clock starts when the finding was found.
-- **Vulnerability publish date**: the clock starts when the vulnerability was published.
-- **Fix-available date**: the clock starts when a fix became available.
-- **Earliest known**: the clock starts from the earliest of the dates above.
+- **Detection Date**: the default, and the same behavior as before. The clock starts when the finding was found.
+- **Vulnerability Publish Date**: the clock starts when the vulnerability was published.
+- **Fix-Available Date**: the clock starts when a fix became available.
+- **Earliest Known**: the clock starts from the earliest of the dates above.
 
 A computed start that would fall after the detection date is clamped to the detection date, so a policy can only tighten the clock, never lengthen it. A start date set by hand, through the finding edit form or the API, is authoritative and the policy never overrides it; clearing it hands the start back to the policy. A start date that was already in place before a policy was chosen is treated the same way. Changing a configuration's policy recalculates the start and expiration dates of the findings already under it, in the background.
 

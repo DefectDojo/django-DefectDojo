@@ -35,9 +35,9 @@ Complete the following steps in the Azure portal before configuring DefectDojo:
 
 In DefectDojo, go to **Connect > Authorization > Providers**, select **Microsoft Entra ID**, and fill in the form. The field labels match the Entra portal:
 
-- **Application (client) ID** — the client ID from step 2.
+- **Application (Client) ID** — the client ID from step 2.
 - **Client Secret** — the secret **Value** from step 3. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or the tenant ID.
-- **Directory (tenant) ID** — the tenant ID from step 2.
+- **Directory (Tenant) ID** — the tenant ID from step 2.
 - **Application ID URI** — the resource DefectDojo reads additional information (such as group names) from. Defaults to `https://graph.microsoft.com` and is required; only change it if your group names live on a different API resource.
 - **Azure AD Groups Filter** — optionally, a regex that restricts which groups are imported (see [Group Mapping](#group-mapping)).
 

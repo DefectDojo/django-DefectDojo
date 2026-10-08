@@ -26,7 +26,7 @@ The row is written **before** any network call happens, and it holds exactly wha
 | **Mode** | `simulate` or `live`. |
 | **Status** | Where the delivery got to. |
 | **Attempts** | How many sends have been tried, against the maximum allowed. |
-| **Last error** | Why the last attempt failed, or why the delivery was skipped. |
+| **Last Error** | Why the last attempt failed, or why the delivery was skipped. |
 | **Response** | What the destination said back. |
 | **External reference** and **URL** | The ticket key, message id or file path the destination returned, and a link to it when there is one. |
 

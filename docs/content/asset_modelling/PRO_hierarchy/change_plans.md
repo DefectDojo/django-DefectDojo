@@ -70,7 +70,7 @@ An operation you are not allowed to perform is listed in `errors` with the code 
 
 A CSV file is a second way to build a plan, and the diff can be downloaded as CSV for review in a spreadsheet.
 
-Download the current state of every Asset you can see with `GET /api/v2/hierarchy/assets.csv/` (add `?organization=<id>`, repeated, to limit it to some Organizations), or with **Download current state as CSV** on the Plans page. The file has one row per Asset and these columns:
+Download the current state of every Asset you can see with `GET /api/v2/hierarchy/assets.csv/` (add `?organization=<id>`, repeated, to limit it to some Organizations), or with **Download Current State as CSV** on the Plans page. The file has one row per Asset and these columns:
 
 | Column | Content |
 | --- | --- |
@@ -105,13 +105,13 @@ curl -X POST "https://defectdojo.example.com/api/v2/hierarchy/plans/" \
 
 ## Reviewing plans in the UI
 
-**Change Plans** appears under the Asset Hierarchy in the navigation. The list shows every plan you can see with its status and counts. A plan's page shows the diff grouped by kind (Organizations created, Assets moved with their subtrees, parent links removed, fields changed, memberships, recalculation, errors), each with its count, and a filter box that narrows every group. From there **Export as CSV** downloads the diff, **Apply** applies a draft plan, and **Undo** reverses an applied one.
+**Change Plans** appears under the Asset Hierarchy in the navigation. The list shows every plan you can see with its status and counts. A plan's page shows the diff grouped by kind (Organizations created, Assets moved with their subtrees, parent links removed, fields changed, memberships, recalculation, errors), each with its count, and a filter box that narrows every group. From there **Export as CSV** downloads the diff, **Run Plan** applies a draft plan, and **Undo** reverses an applied one.
 
-The bulk update form on the Assets list uses the same review: when change plans are on, submitting the form first shows the diff of what it would change, and nothing is written until you choose **Apply**.
+The bulk update form on the Assets list uses the same review: when change plans are on, submitting the form first shows the diff of what it would change, and nothing is written until you choose **Submit**.
 
 ## Applying a plan
 
-`POST /api/v2/hierarchy/plans/{id}/apply/` (or **Apply** on the plan's page) applies a draft plan.
+`POST /api/v2/hierarchy/plans/{id}/apply/` (or **Run Plan** on the plan's page) applies a draft plan.
 
 1. **The plan is checked again first.** DefectDojo runs the dry run again, as the person applying it. If any operation is refused now (for example, a permission was removed), the request fails with a `400` listing the errors and nothing is written. If any value recorded in the diff no longer matches the current state, the plan is marked **stale** and the request fails with a `409` (see below).
 2. **The plan is then applied in the background.** The plan's status becomes `applying`, and the response is a `202`. Check the plan until its status is `applied` or `failed`. The same check runs again when the background work starts, while holding the hierarchy lock, so a change made in between is caught too.

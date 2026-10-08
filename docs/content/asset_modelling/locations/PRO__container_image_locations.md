@@ -23,7 +23,7 @@ Each image carries:
 
 ### Identity: digests first, tags when that is all there is
 
-The location's canonical value is `registry/repository@sha256:<digest>` when the digest is known, and `registry/repository:tag` when it is not. A tag-only image and a digest image for the same repository are **different locations on purpose**: tags move and digests do not, so collapsing them would make a finding on last week's `:latest` read as a finding on this week's. Every reference to an image records whether its digest is known (`digest_known`), and the lists mark tag-only images as **digest unknown**.
+The location's canonical value is `registry/repository@sha256:<digest>` when the digest is known, and `registry/repository:tag` when it is not. A tag-only image and a digest image for the same repository are **different locations on purpose**: tags move and digests do not, so collapsing them would make a finding on last week's `:latest` read as a finding on this week's. Every reference to an image records whether its digest is known (`digest_known`), and the lists mark tag-only images as **Digest Unknown**.
 
 Deduplication compares images by the same identity, so the same vulnerability in two images is two findings. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#container-image-findings).
 
@@ -34,14 +34,14 @@ Image locations are **scan-managed**: they are created by imports and connectors
 - **All Images** in the sidebar (under Locations, or under Attack Surface in the reorganized menu) lists every image on the instance, with filters for registry, repository, tag and whether the digest is known.
 - **View Images** in an Asset's Locations menu scopes the list to one asset.
 - The asset **location map** draws a Container Images region, grouping images by registry and then repository. A repository with one image collapses to that image.
-- A finding's page has a **Runs in** tile listing the images the finding was found in, each with its registry, repository, tag and short digest, and the assets that run it.
+- A finding's page has a **Runs In** tile listing the images the finding was found in, each with its registry, repository, tag and short digest, and the assets that run it.
 
 ## Built From: the Image to Repository Link
 
-An image's `org.opencontainers.image.source` label names the repository that built it. When the label is present, DefectDojo matches it against, in order, Sensei repository configurations, the **Repo** field of engagements, and repositories mapped through the SCM asset connectors (GitHub, GitLab, Azure DevOps, Bitbucket), and records the matching asset as the image's **Built from** owner together with the `.revision` label.
+An image's `org.opencontainers.image.source` label names the repository that built it. When the label is present, DefectDojo matches it against, in order, Sensei repository configurations, the **Repo** field of engagements, and repositories mapped through the SCM asset connectors (GitHub, GitLab, Azure DevOps, Bitbucket), and records the matching asset as the image's **Built From** owner together with the `.revision` label.
 
-- One match is linked automatically and shown on the image page and in the finding's **Runs in** tile as "Built from *asset* at *revision*".
-- More than one match is recorded as **candidates** rather than guessed at. The image page lists them, and a person can link one, or any other asset, with **Link repository**.
+- One match is linked automatically and shown on the image page and in the finding's **Runs In** tile as "Built From *asset* at *revision*".
+- More than one match is recorded as **candidates** rather than guessed at. The image page lists them, and a person can link one, or any other asset, with **Link Repository**.
 - A link made by hand outranks everything the scanners say and is never overwritten; **Unlink** hands the decision back to the resolver.
 - Images built from one asset and seen running in another feed the [suggested edges](/asset_modelling/pro_hierarchy/asset_hierarchy/#suggested-edges-from-container-evidence) on the hierarchy page. No edge is ever drawn without a person accepting it.
 

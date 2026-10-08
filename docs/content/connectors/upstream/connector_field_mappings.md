@@ -138,7 +138,7 @@ Each row is one mapping: the **Target Field** to write, the **Expression** to wr
 and an optional **Strip Pattern**. The target list is the set of finding fields DefectDojo will
 accept, so you cannot select one that would be rejected on save.
 
-Fields that reach identity for this scan type are tagged **identity** as you select them. That
+Fields that reach identity for this scan type are tagged **Identity** as you select them. That
 tag follows your deduplication settings for the scan type, so it reflects what this instance
 actually hashes rather than a fixed list. Two rows may not target the same field, and the
 editor will say so before you continue.

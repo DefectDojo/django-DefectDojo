@@ -109,7 +109,7 @@ A **Chart** block draws one chart from the catalog below — the same charts the
 - Charts of assets expose the **Asset** filter, and the filter selects assets, scoping the chart to the findings belonging to them.
 - Portfolio-wide charts take no filter, because they summarize the whole instance by design.
 
-A Chart also has a **Date Range** setting. Leave it on **All time** (the default, and how every existing Chart behaves) to draw on the full history, or pick a trailing window (the last 30, 90, or 180 days, the last year, or the last two years) to limit the chart to findings from that period. It is the same date window the Insights dashboards apply, so a report chart and the matching dashboard chart cover the same span. The window is measured against each finding's **date** (when the finding was found), not when its scan was imported, so a time chart extends forward only as findings carrying newer dates arrive.
+A Chart also has a **Date Range** setting. Leave it on **All Time** (the default, and how every existing Chart behaves) to draw on the full history, or pick a trailing window (the last 30, 90, or 180 days, the last year, or the last two years) to limit the chart to findings from that period. It is the same date window the Insights dashboards apply, so a report chart and the matching dashboard chart cover the same span. The window is measured against each finding's **date** (when the finding was found), not when its scan was imported, so a time chart extends forward only as findings carrying newer dates arrive.
 
 | Chart | What it shows |
 |-------|---------------|
@@ -323,7 +323,7 @@ date, and both they and this Report Builder offer a one-click migration.
 
 ### Migrating your saved templates
 
-Use **Migrate to the new engine** on any classic page, or **Import from Classic Engine**
+Use **Migrate to the new engine** on any classic page, or **Import From Classic Engine**
 on *All Report Templates* here. Both run the same conversion, so it does not matter which
 you start from, and both are safe to run more than once: a classic template whose name
 already exists here is reported as *already migrated* rather than duplicated.
