@@ -6,7 +6,7 @@
   "dependencies": {
     "@fontsource-variable/inter": "^5.2",
     "@fontsource-variable/jetbrains-mono": "^5.2",
-    "@scalar/api-reference": "1.72.1",
+    "@scalar/api-reference": "1.72.4",
     "bootstrap-wysiwyg": "^2.0.0",
     "chart.js": "^4.4",
     "chartjs-adapter-moment": "^1.0",
