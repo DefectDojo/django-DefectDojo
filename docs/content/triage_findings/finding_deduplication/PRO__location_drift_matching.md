@@ -71,6 +71,16 @@ Region, service, tags, and display name can all change. The resource itself stay
 
 With Locations enabled, the **Hash Code** and **Unique ID From Tool or Hash Code** algorithms do not mark two findings as duplicates when they sit on two different cloud resources, even if the rest of their identity matches. A finding with no cloud resource is not affected, and still deduplicates as before. The check applies when findings are compared: findings that an earlier import already marked as duplicates stay marked, and a later import does not split them.
 
+### Container image findings
+
+Container images match on their identity alone: `registry/repository@sha256:<digest>` when the scanner knows the digest, and `registry/repository:tag` when it does not (see [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)). Scanning the same image again reports the same identity, so its findings deduplicate as before.
+
+With Locations enabled, the **Hash Code** and **Unique ID From Tool or Hash Code** algorithms do not mark two findings as duplicates when they sit in two different container images, even when the package, version and vulnerability match. The same CVE in two images is two findings, one per image. Findings that share at least one image still match, so a report that names an image by several digests behaves as one image.
+
+A finding with no image is not affected and deduplicates as before. Because tags move and digests do not, an image reported by tag and the same repository reported by digest are different images here too. The check applies when findings are compared: findings that an earlier import already marked as duplicates stay marked, and a later import does not split them.
+
+This changes deduplication for every tool that attaches the scanned image to its findings, including Anchore Grype, Trivy, Trivy Operator, Snyk container projects and Anchore Enterprise. In an Engagement or Asset that holds scans of several images, each image's findings now stay separate instead of collapsing into the first image's findings.
+
 ### Severity re-scores
 
 Security tools re-score severities as their rule engines evolve. With tracking enabled, a tool-reported severity change does **not** split a finding's identity: the finding matches, and its severity is updated from the scan, unless a person has re-triaged the severity by hand, in which case the human's value always wins (see below).

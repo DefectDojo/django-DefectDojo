@@ -1,17 +1,13 @@
 from unittest.mock import patch
 
 from dojo.authorization.models import (
-    Dojo_Group_Member,
     Global_Role,
-    Product_Group,
     Product_Member,
-    Product_Type_Group,
     Product_Type_Member,
     Role,
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import (
-    Dojo_Group,
     Dojo_User,
     Product,
     Product_Type,
@@ -131,97 +127,36 @@ class TestGetAuthorizedUsersForProductType(DojoTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.reader_role = Role.objects.get(name="Reader")
-        cls.writer_role = Role.objects.get(name="Writer")
+        cls.superuser = Dojo_User.objects.create(username="uq_pt_superuser", is_superuser=True, is_active=True)
+        cls.staff = Dojo_User.objects.create(username="uq_pt_staff", is_staff=True, is_active=True)
+        cls.user_no_perms = Dojo_User.objects.create(username="uq_pt_no_perms", is_active=True)
+        cls.user_product_type_member = Dojo_User.objects.create(username="uq_pt_member", is_active=True)
 
-        # Create users with different permission levels
-        cls.superuser = Dojo_User.objects.create(
-            username="uq_pt_superuser",
-            is_superuser=True,
-            is_active=True,
-        )
-        cls.user_no_perms = Dojo_User.objects.create(
-            username="uq_pt_no_perms",
-            is_active=True,
-        )
-        cls.user_product_type_member = Dojo_User.objects.create(
-            username="uq_pt_member",
-            is_active=True,
-        )
-        cls.user_global_reader = Dojo_User.objects.create(
-            username="uq_pt_global_reader",
-            is_active=True,
-        )
-        cls.user_group_member = Dojo_User.objects.create(
-            username="uq_pt_group_member",
-            is_active=True,
-        )
-
-        # Create product type
         cls.product_type = Product_Type.objects.create(name="UQ Test PT")
+        cls.product_type.authorized_users.add(cls.user_product_type_member)
 
-        # Set up memberships
-        Product_Type_Member.objects.create(
-            user=cls.user_product_type_member,
-            product_type=cls.product_type,
-            role=cls.reader_role,
-        )
-        Global_Role.objects.create(
-            user=cls.user_global_reader,
-            role=cls.reader_role,
-        )
+    def _users(self, caller, users=None):
+        with patch("dojo.authorization.query_registrations.get_current_user", return_value=caller):
+            return list(get_authorized_users_for_product_type(users, self.product_type, Permissions.Product_Type_View))
 
-        # Create group and group membership
-        cls.group = Dojo_Group.objects.create(name="UQ PT Test Group")
-        Dojo_Group_Member.objects.create(
-            user=cls.user_group_member,
-            group=cls.group,
-            role=cls.reader_role,
-        )
-        Product_Type_Group.objects.create(
-            product_type=cls.product_type,
-            group=cls.group,
-            role=cls.reader_role,
-        )
+    def test_result_describes_the_listed_users_not_the_caller(self):
+        # The same candidate set comes back whoever asks: the members of the
+        # product type plus superusers, never the unrelated users.
+        for caller in (self.superuser, self.staff, self.user_product_type_member, self.user_no_perms, None):
+            with self.subTest(caller=caller):
+                users = self._users(caller)
+                self.assertIn(self.superuser, users)
+                self.assertIn(self.user_product_type_member, users)
+                self.assertNotIn(self.user_no_perms, users)
+                self.assertNotIn(self.staff, users)
 
-    @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_superuser_caller_sees_all(self, mock_get_current_user):
-        # Legacy: this query is gated on the calling user, not on the
-        # listed users' RBAC roles. A superuser caller sees the input
-        # queryset unchanged.
-        mock_get_current_user.return_value = self.superuser
-        users = get_authorized_users_for_product_type(
-            Dojo_User.objects.all(),
-            self.product_type,
-            Permissions.Product_Type_View,
-        )
-        self.assertIn(self.superuser, users)
-        self.assertIn(self.user_no_perms, users)
-        self.assertIn(self.user_global_reader, users)
+    def test_users_parameter_filters_base_queryset(self):
+        users = self._users(self.superuser, Dojo_User.objects.filter(is_superuser=False))
+        self.assertEqual([self.user_product_type_member], users)
 
-    @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_non_staff_caller_sees_only_superusers(self, mock_get_current_user):
-        # OS: carrier Product_Type_Member is inert. A non-staff caller without
-        # authorized_users membership sees only superusers (2.58.4 parity).
-        mock_get_current_user.return_value = self.user_product_type_member
-        users = get_authorized_users_for_product_type(
-            Dojo_User.objects.all(),
-            self.product_type,
-            Permissions.Product_Type_View,
-        )
-        self.assertIn(self.superuser, users)
-        self.assertNotIn(self.user_product_type_member, users)
-        self.assertNotIn(self.user_no_perms, users)
-
-    @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_anonymous_caller_sees_none(self, mock_get_current_user):
-        mock_get_current_user.return_value = None
-        users = get_authorized_users_for_product_type(
-            Dojo_User.objects.all(),
-            self.product_type,
-            Permissions.Product_Type_View,
-        )
-        self.assertEqual(users.count(), 0)
+    def test_no_product_type_returns_nobody(self):
+        with patch("dojo.authorization.query_registrations.get_current_user", return_value=self.superuser):
+            self.assertEqual(0, get_authorized_users_for_product_type(None, None, Permissions.Product_Type_View).count())
 
 
 class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
@@ -230,141 +165,38 @@ class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.reader_role = Role.objects.get(name="Reader")
-        cls.writer_role = Role.objects.get(name="Writer")
+        cls.superuser = Dojo_User.objects.create(username="uq_ppt_superuser", is_superuser=True, is_active=True)
+        cls.staff = Dojo_User.objects.create(username="uq_ppt_staff", is_staff=True, is_active=True)
+        cls.user_no_perms = Dojo_User.objects.create(username="uq_ppt_no_perms", is_active=True)
+        cls.user_product_member = Dojo_User.objects.create(username="uq_ppt_prod_member", is_active=True)
+        cls.user_product_type_member = Dojo_User.objects.create(username="uq_ppt_pt_member", is_active=True)
 
-        # Create users with different permission levels
-        cls.superuser = Dojo_User.objects.create(
-            username="uq_ppt_superuser",
-            is_superuser=True,
-            is_active=True,
-        )
-        cls.user_no_perms = Dojo_User.objects.create(
-            username="uq_ppt_no_perms",
-            is_active=True,
-        )
-        cls.user_product_member = Dojo_User.objects.create(
-            username="uq_ppt_prod_member",
-            is_active=True,
-        )
-        cls.user_product_type_member = Dojo_User.objects.create(
-            username="uq_ppt_pt_member",
-            is_active=True,
-        )
-        cls.user_global_reader = Dojo_User.objects.create(
-            username="uq_ppt_global_reader",
-            is_active=True,
-        )
-        cls.user_group_product_member = Dojo_User.objects.create(
-            username="uq_ppt_group_prod_member",
-            is_active=True,
-        )
-        cls.user_group_product_type_member = Dojo_User.objects.create(
-            username="uq_ppt_group_pt_member",
-            is_active=True,
-        )
-
-        # Create product type and product
         cls.product_type = Product_Type.objects.create(name="UQ PPT Test PT")
-        cls.product = Product.objects.create(
-            name="UQ PPT Test Product",
-            description="Test",
-            prod_type=cls.product_type,
-        )
+        cls.product = Product.objects.create(name="UQ PPT Test Product", description="Test", prod_type=cls.product_type)
+        cls.product.authorized_users.add(cls.user_product_member)
+        cls.product_type.authorized_users.add(cls.user_product_type_member)
 
-        # Set up direct memberships
-        Product_Member.objects.create(
-            user=cls.user_product_member,
-            product=cls.product,
-            role=cls.reader_role,
-        )
-        Product_Type_Member.objects.create(
-            user=cls.user_product_type_member,
-            product_type=cls.product_type,
-            role=cls.reader_role,
-        )
-        Global_Role.objects.create(
-            user=cls.user_global_reader,
-            role=cls.reader_role,
-        )
+    def _users(self, caller, users=None):
+        with patch("dojo.authorization.query_registrations.get_current_user", return_value=caller):
+            return list(get_authorized_users_for_product_and_product_type(users, self.product, Permissions.Product_View))
 
-        # Create groups and group memberships
-        cls.group_product = Dojo_Group.objects.create(name="UQ PPT Product Group")
-        cls.group_product_type = Dojo_Group.objects.create(name="UQ PPT Product Type Group")
+    def test_result_describes_the_listed_users_not_the_caller(self):
+        for caller in (self.superuser, self.staff, self.user_product_member, self.user_no_perms, None):
+            with self.subTest(caller=caller):
+                users = self._users(caller)
+                self.assertIn(self.superuser, users)
+                self.assertIn(self.user_product_member, users)
+                self.assertIn(self.user_product_type_member, users)
+                self.assertNotIn(self.user_no_perms, users)
+                self.assertNotIn(self.staff, users)
 
-        Dojo_Group_Member.objects.create(
-            user=cls.user_group_product_member,
-            group=cls.group_product,
-            role=cls.reader_role,
-        )
-        Dojo_Group_Member.objects.create(
-            user=cls.user_group_product_type_member,
-            group=cls.group_product_type,
-            role=cls.reader_role,
-        )
+    def test_users_parameter_filters_base_queryset(self):
+        users = self._users(self.superuser, Dojo_User.objects.filter(is_active=True, is_superuser=False))
+        self.assertEqual({self.user_product_member, self.user_product_type_member}, set(users))
 
-        Product_Group.objects.create(
-            product=cls.product,
-            group=cls.group_product,
-            role=cls.reader_role,
-        )
-        Product_Type_Group.objects.create(
-            product_type=cls.product_type,
-            group=cls.group_product_type,
-            role=cls.reader_role,
-        )
-
-    @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_superuser_caller_sees_all(self, mock_get_current_user):
-        # Legacy: gated on the calling user. None defaults to all users.
-        mock_get_current_user.return_value = self.superuser
-        users = get_authorized_users_for_product_and_product_type(
-            None,
-            self.product,
-            Permissions.Product_View,
-        )
-        self.assertIn(self.superuser, users)
-        self.assertIn(self.user_no_perms, users)
-        self.assertIn(self.user_global_reader, users)
-
-    @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_non_staff_caller_sees_only_superusers(self, mock_get_current_user):
-        # OS: carrier Product_Member is inert. A non-staff caller without
-        # authorized_users membership sees only superusers (2.58.4 parity).
-        mock_get_current_user.return_value = self.user_product_member
-        users = get_authorized_users_for_product_and_product_type(
-            None,
-            self.product,
-            Permissions.Product_View,
-        )
-        self.assertIn(self.superuser, users)
-        self.assertNotIn(self.user_product_member, users)
-        self.assertNotIn(self.user_no_perms, users)
-
-    @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_anonymous_caller_sees_none(self, mock_get_current_user):
-        mock_get_current_user.return_value = None
-        users = get_authorized_users_for_product_and_product_type(
-            None,
-            self.product,
-            Permissions.Product_View,
-        )
-        self.assertEqual(users.count(), 0)
-
-    @patch("dojo.authorization.query_registrations.get_current_user")
-    def test_users_parameter_filters_base_queryset(self, mock_get_current_user):
-        # Legacy: when the caller is staff/superuser, the function returns
-        # the input queryset unchanged — the caller's pre-filter (here
-        # is_active=True) is preserved.
-        mock_get_current_user.return_value = self.superuser
-        active_users = Dojo_User.objects.filter(is_active=True)
-        users = get_authorized_users_for_product_and_product_type(
-            active_users,
-            self.product,
-            Permissions.Product_View,
-        )
-        for user in users:
-            self.assertTrue(user.is_active)
+    def test_no_product_returns_nobody(self):
+        with patch("dojo.authorization.query_registrations.get_current_user", return_value=self.superuser):
+            self.assertEqual(0, get_authorized_users_for_product_and_product_type(None, None, Permissions.Product_View).count())
 
 
 class TestGetAuthorizedUsersViaAuthorizedUsers(DojoTestCase):

@@ -34,6 +34,32 @@ match the provider you choose.
 Every provider also accepts an optional **Model** override (leave blank to use the provider's
 default) and an optional **API Base URL** to point at an on-prem or self-hosted gateway.
 
+### What a blank Model runs
+
+For **Claude (Anthropic)** and **Google Vertex AI**, a blank **Model** does not pin one model.
+Sensei starts with the newest model it supports and steps down to an older one if that model is
+refused:
+
+| Provider | Tried in this order |
+|----------|---------------------|
+| **Claude (Anthropic)** | `claude-sonnet-5-5`, then `claude-sonnet-4-6`, then `claude-sonnet-4-5` |
+| **Google Vertex AI** | `claude-sonnet-5-5`, then `claude-sonnet-4-6` |
+
+Sensei moves to the next model when the provider rejects the current one. Common reasons: your
+API key's organization does not have access to it yet, or the model is not enabled in your
+project's Vertex Model Garden. It also moves on if the model declines to answer the request. Once
+a model has been skipped, the rest of that scan or fix stays on the model that worked. If the
+last model in the list fails too, the run fails with that model's error.
+
+A rejected API key, or a network failure, stops at the first model. Every model would fail the
+same way.
+
+**Test connection** follows the same order and reports the model that actually answered, for
+example "Validated claude-sonnet-4-6" when your key cannot reach `claude-sonnet-5-5` yet.
+
+To use one specific model and never step down, enter it in **Model**. If that model is refused,
+the run fails instead of switching to another one.
+
 All secrets are **encrypted at rest** and are **write-only**: once saved, the form shows only
 whether a secret is set, never its value. Leave a secret field blank when saving to keep the
 stored value; type a new value to replace it. The one exception is the **API Base URL**: a saved
@@ -45,7 +71,9 @@ the same rule.
 
 These providers use a single API key:
 
-1. **Model (Optional)** — e.g. a specific Claude or OpenAI model. Blank uses the provider default.
+1. **Model (Optional)** — e.g. a specific Claude or OpenAI model. For Claude, blank tries a list of
+   models newest first (see [What a blank Model runs](#what-a-blank-model-runs)); for OpenAI, blank
+   uses the provider default.
 2. **API Base URL (Optional)** — point at a self-hosted gateway instead of the provider's public
    API. Blank uses the default (`https://api.anthropic.com` / `https://api.openai.com`).
 3. **LLM API Key** — the provider API key.
@@ -107,7 +135,8 @@ model you intend to use in your project's Vertex Model Garden first.
 Its fields differ from the key-based providers:
 
 1. **Model (Optional)** — any model enabled in your project's Model Garden, e.g.
-   `claude-sonnet-4-6` or `gemini-2.5-pro`. Blank uses the engine default (a Claude model).
+   `claude-sonnet-4-6` or `gemini-2.5-pro`. Blank tries a list of Claude models newest first (see
+   [What a blank Model runs](#what-a-blank-model-runs)).
 2. **Vertex Project ID** — **required**. The GCP project hosting Vertex AI.
 3. **Vertex Region** — the Vertex region, e.g. `global` (the default) or `us-east5`.
 4. **Service Account Key (JSON)** — **optional** (see below).

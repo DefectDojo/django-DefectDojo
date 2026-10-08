@@ -11,9 +11,9 @@ difference: DefectDojo Pro records whether each Finding's vulnerable code can
 actually be reached, shows you where that conclusion came from, and feeds it
 into the Finding's computed **priority**.
 
-Reachability is a **beta** feature and is **off by default**. A superuser
-enables it under **Settings > Feature Flags**. While it is off, no verdicts are
-recorded, priority is unaffected, and no reachability UI appears.
+Reachability is on for every DefectDojo Pro instance, and there is nothing to
+enable. Verdicts are recorded as soon as a source reports them, and a Finding
+that no source covers stays at **Unknown**.
 
 ## Verdicts
 
@@ -64,6 +64,24 @@ reachability that tools you may already run are producing:
 
 Coverage is normally partial, and that is expected. Tools that do not report
 reachability simply leave their Findings at **Unknown**.
+
+### Sources that report reachability
+
+| Source | What DefectDojo reads | Verdicts it can report |
+|---|---|---|
+| [govulncheck](/supported_tools/parsers/file/govulncheck/) report import (**Govulncheck Scanner V2**) | The reachability level govulncheck prints for each vulnerability: symbol, package or module | Reachable (static), Potentially reachable |
+| [Snyk Issue API](/supported_tools/parsers/file/snyk_issue_api/) report import | The reachability value Snyk records on each issue | Reachable (static), Potentially reachable, Unreachable |
+| [Sysdig Vulnerability Report](/supported_tools/parsers/file/sysdig_reports/) import | Sysdig's "in use" flag on each package | Reachable (runtime), Unreachable |
+| Universal Parser | A report column mapped to the **Reachability** field | Any |
+| [Snyk](/connectors/toolreference/snyk/) connector | The reachability Snyk records on each issue | Reachable (static), Potentially reachable, Unreachable |
+| [Semgrep](/connectors/toolreference/semgrep/) connector | Semgrep Supply Chain reachability | Reachable (static), Potentially reachable, Unreachable |
+| [Aqua Supply Chain](/connectors/toolreference/aqua_supply_chain/) connector | Aqua's reachable-package flag | Reachable (static) |
+| [Sensei](/sensei/fixing_findings/#reachability-analysis) | govulncheck call paths for the Go code in an onboarded repository | Reachable (static), Potentially reachable |
+| Reachability API | Verdicts your own tooling posts to `POST /api/v2/reachability/verdicts/` | Any |
+
+A verdict from **Sensei** carries the call path govulncheck found, from your code
+down to the vulnerable function. It is shown on the Finding under **Reachability
+Call Path**.
 
 ### Setting reachability by hand
 

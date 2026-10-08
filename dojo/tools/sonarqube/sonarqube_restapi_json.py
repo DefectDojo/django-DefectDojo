@@ -91,7 +91,7 @@ class SonarQubeRESTAPIJSON:
                     component_name = None
                     component_version = None
                     if "Filename: " in message and " | " in message:
-                        component_pattern = r"Filename: .* \| "
+                        component_pattern = r"Filename: [^|]* \| "
                         comp = re.findall(component_pattern, message)
                         if comp:
                             component_result = comp[0].split("Filename: ")[1].split(" | ")[0]

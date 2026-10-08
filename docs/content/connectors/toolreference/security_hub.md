@@ -169,3 +169,11 @@ Account names and the OU and account tag placements read from AWS Organizations.
 ```
 
 Placement by OU or account tag makes one or two AWS Organizations requests per account on each discovery, paced to stay under the AWS Organizations rate limit, so a discovery across thousands of accounts takes several minutes longer.
+
+#### Compliance Tags
+
+Each Finding is tagged with the compliance requirements Security Hub relates its control to, for
+example `nist.800-53.r5:ac-2(1)` or `pci_dss_v4.0.1/2.2.4`. DefectDojo Pro reads these tags to map
+the Finding to NIST 800-53 and PCI DSS controls (see
+[Control Coverage](/federal_compliance/control_coverage/)). The same requirements are still listed
+under **Compliance details** in the Finding's description.
