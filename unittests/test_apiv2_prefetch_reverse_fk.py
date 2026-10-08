@@ -20,6 +20,7 @@ treated as "many" and prefetching it returns the related rows without raising.
 
 from types import SimpleNamespace
 
+from crum import impersonate
 from django.utils.timezone import now
 
 from dojo.api_v2.prefetch import prefetcher as prefetcher_module
@@ -105,8 +106,11 @@ class PrefetchReverseForeignKeyTest(DojoTestCase):
         request = SimpleNamespace(user=self.admin)
         prefetcher = prefetcher_module._Prefetcher(request=request)
 
-        # Must not raise ``AttributeError: 'RelatedManager' object has no attribute 'pk'``.
-        prefetcher._prefetch(self.finding, ["locations"])
+        # The Location reference policies resolve the user from the thread-local
+        # current user (``discard_user``), not ``request.user``, so set it here.
+        with impersonate(self.admin):
+            # Must not raise ``AttributeError: 'RelatedManager' object has no attribute 'pk'``.
+            prefetcher._prefetch(self.finding, ["locations"])
 
         data = prefetcher.prefetched_data
         self.assertIn("locations", data)
