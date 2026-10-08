@@ -645,9 +645,17 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # matching loop finishes, instead of saving each one inline as soon as it fails to
     # match (see process_finding_that_was_not_matched and _drain_pending_new_findings).
     # Reimport-no-change is unaffected because it creates no new findings to defer.
-    EXPECTED_ZAP_IMPORT_V2 = 282
-    EXPECTED_ZAP_IMPORT_V3 = 307
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 153
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 181
+    # +7 import, +5 reimport-no-change, +6 reimport-with-new (measured, both modes):
+    # scan_added is dispatched through async_create_notification with ids instead of
+    # being built in the request, so the task (run inline here under
+    # CELERY_TASK_ALWAYS_EAGER) loads the test chain and the listed findings back by id
+    # and resolves recipients there. The fan-out writes alerts in one bulk insert, so
+    # the recipient count no longer moves the total: pinning user5 to non-superuser
+    # (which took 12 import / 6 reimport-with-new queries off the per-recipient path)
+    # measures the same with and without the pin on this path.
+    EXPECTED_ZAP_IMPORT_V2 = 289
+    EXPECTED_ZAP_IMPORT_V3 = 314
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 80
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 159
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187
