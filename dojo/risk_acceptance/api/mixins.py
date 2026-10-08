@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 from dojo.authorization.api_permissions import UserHasRiskAcceptanceRelatedObjectPermission
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.models import Engagement, Risk_Acceptance, User
+from dojo.models import Engagement, Finding, Risk_Acceptance, User
 from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
 from dojo.vulnerability.queries import finding_ids_with_vulnerability_ids
 
@@ -91,9 +91,16 @@ class AcceptedFindingsMixin(ABC):
 def _accept_risks(accepted_risks: list[AcceptedRisk], base_findings: QuerySet, owner: User):
     accepted = []
     for risk in accepted_risks:
-        finding_ids = finding_ids_with_vulnerability_ids(risk.vulnerability_id, lookup="exact")
-        findings = base_findings.filter(id__in=finding_ids)
-        if findings.exists():
+        # Resolve to concrete ids in two flat steps and update by primary key. Composing the
+        # vulnerability subquery into base_findings and calling update() on that makes Django
+        # emit "id IN (SELECT ... FROM dojo_finding ...)", a self-join four tables deep; when
+        # the planner underestimates these tables (e.g. vacuumed but never analyzed) it runs
+        # as nested sequential scans and a single UPDATE can take minutes.
+        vulnerability_finding_ids = list(finding_ids_with_vulnerability_ids(risk.vulnerability_id, lookup="exact"))
+        if not vulnerability_finding_ids:
+            continue
+        finding_ids = list(base_findings.filter(id__in=vulnerability_finding_ids).values_list("id", flat=True))
+        if finding_ids:
             # TODO: we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix
             name = risk.vulnerability_id + " via api at " + timezone.now().strftime("%b %d, %Y, %H:%M:%S")
@@ -101,8 +108,8 @@ def _accept_risks(accepted_risks: list[AcceptedRisk], base_findings: QuerySet, o
                                                         decision=Risk_Acceptance.TREATMENT_ACCEPT,
                                                         decision_details=risk.justification,
                                                         accepted_by=risk.accepted_by[:200])
-            acceptance.accepted_findings.set(findings)
-            findings.update(risk_accepted=True, active=False)
+            acceptance.accepted_findings.set(finding_ids)
+            Finding.objects.filter(id__in=finding_ids).update(risk_accepted=True, active=False)
             acceptance.save()
             accepted.append(acceptance)
 
