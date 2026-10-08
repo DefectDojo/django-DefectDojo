@@ -111,7 +111,7 @@ Setup leads because nothing reaches the triage queue until there is an inventory
 
 The record catalogs, behind one entry: **Attack Surface**, Organizations, Assets, Engagements, Tests, Findings and Surveys.
 
-**Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the location pages (Locations, URLs, Dependencies, Source Code) when your instance uses Locations, or the endpoint pages when it does not.
+**Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the location pages (Locations, URLs, Dependencies, Source Code and Cloud Resources, with Images and AI Inventory when those features are on) when your instance uses Locations, or the endpoint pages when it does not.
 
 ## Connect
 
