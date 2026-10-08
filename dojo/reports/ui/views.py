@@ -30,7 +30,11 @@ from dojo.finding.ui.views import BaseListFindings
 from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
-from dojo.location.queries import authorized_finding_references, get_authorized_locations
+from dojo.location.queries import (
+    annotate_location_counts_and_status,
+    authorized_finding_references,
+    get_authorized_locations,
+)
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
@@ -98,6 +102,7 @@ class ReportBuilder(View):
     def get_endpoints(self, request: HttpRequest):
         if locations_enabled():
             endpoints = Location.objects.filter(active_location_reference(request.user)).distinct()
+            endpoints = annotate_location_counts_and_status(endpoints, user=request.user)
             filter_class = URLFilter
         else:
             endpoints = Endpoint.objects.filter(
@@ -231,6 +236,7 @@ def report_endpoints(request):
     if locations_enabled():
         endpoints = get_authorized_locations(Permissions.Location_View)
         endpoints = endpoints.filter(active_location_reference(request.user)).distinct()
+        endpoints = annotate_location_counts_and_status(endpoints, user=request.user)
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
