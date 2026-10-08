@@ -108,7 +108,7 @@ Email needs no credential. DefectDojo sends through the mail server this instanc
    - **Instance Label**: a label that tells this connection apart from others.
 4. Save.
 
-Saving fails if this instance has no mail server or no sender address configured, because nothing sent over the connection would leave the building. Configure SMTP under **Settings > System > System Settings** first.
+Saving fails if this instance has no mail server or no sender address configured, because nothing sent over the connection would leave the building. On a self-hosted install, set the mail server under **Settings > System > Email** (and check it with **Test Connection** there), and the sender address (**Email From**) under **Settings > System > System Settings**.
 
 Recipients are set on the alert, not on the connection, so one Email connection serves every alert. An email destination takes up to 50 addresses; past that, use a distribution address.
 
