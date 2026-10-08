@@ -3,9 +3,12 @@
 
   Usage: {{< quiz "triage_engine" >}}
 
-  Questions live in data/quizzes/<name>.yaml: a title and a list of questions,
-  each with q, options, answer (0-based index), why, and an optional source
-  (a path relative to the page's section, e.g. "runs/#cascading").
+  Questions live in data/quizzes/<name>.yaml: a subject (used in the result
+  message) and a list of questions, each with q, options, answer (0-based
+  index), why, an optional source, and optional hints (one per option, null for
+  the correct one) that point a wrong pick at the feature it describes. Links
+  starting with "/" are site paths; others are relative to the page's section,
+  e.g. "runs/#cascading".
 
   The markup is rendered here so the questions read without JavaScript; the
   inline script adds answering, feedback and scoring. Styles are inline rather
@@ -53,7 +56,7 @@
   .dd-quiz-result h3 { margin-top: 0; }
   @media (max-width: 575px) { .dd-quiz-bar { top: 3.75rem; } .dd-quiz-q { padding: 0.9rem; } }
 </style>
-<div class="dd-quiz" data-quiz="{{ $name }}" data-total="{{ $total }}">
+<div class="dd-quiz" data-quiz="{{ $name }}" data-total="{{ $total }}" data-subject="{{ $quiz.subject }}">
   <div class="dd-quiz-bar" aria-live="polite">
     <span>Answered <strong data-quiz-answered>0</strong> / {{ $total }}</span>
     <div class="dd-quiz-track" aria-hidden="true"><div class="dd-quiz-fill"></div></div>
@@ -71,7 +74,7 @@
     {{- end }}
     <div class="dd-quiz-feedback" hidden>
       <span class="dd-quiz-verdict"></span>{{ $page.RenderString $item.why }}
-      {{- with $item.source }} <a href="{{ $base }}{{ . }}">Read more</a>{{ end }}
+      {{- with $item.source }} <a href="{{ cond (hasPrefix . "/") (relURL .) (printf "%s%s" $base .) }}">Read more</a>{{ end }}
       {{- range $j, $hint := $item.hints }}
       {{- with $hint }}
       {{- $href := cond (hasPrefix .link "/") (relURL .link) (printf "%s%s" $base .link) }}
@@ -122,7 +125,7 @@
         "You scored " + score + " / " + total + " (" + pct + "%)";
       root.querySelector("[data-quiz-detail]").textContent = missed.length
         ? "Questions to revisit: " + missed.join(", ") + ". Each one links to the page that covers it."
-        : "A perfect score. You know Triage Engine well.";
+        : "A perfect score. You know " + root.dataset.subject + " well.";
       result.hidden = false;
     }
 
