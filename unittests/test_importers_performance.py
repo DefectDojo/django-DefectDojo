@@ -349,7 +349,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_async_tasks2=2,
             expected_num_queries3=28,
             expected_num_async_tasks3=2,
-            expected_num_queries4=97,
+            expected_num_queries4=49,
             expected_num_async_tasks4=1,
         )
 
@@ -373,7 +373,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_async_tasks2=2,
             expected_num_queries3=45,
             expected_num_async_tasks3=2,
-            expected_num_queries4=107,
+            expected_num_queries4=59,
             expected_num_async_tasks4=1,
         )
 
@@ -398,7 +398,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_async_tasks2=5,
             expected_num_queries3=54,
             expected_num_async_tasks3=4,
-            expected_num_queries4=116,
+            expected_num_queries4=68,
             expected_num_async_tasks4=4,
         )
 
@@ -676,7 +676,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=2,
             expected_num_queries3=35,
             expected_num_async_tasks3=2,
-            expected_num_queries4=97,
+            expected_num_queries4=54,
             expected_num_async_tasks4=1,
         )
 
@@ -700,7 +700,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=2,
             expected_num_queries3=56,
             expected_num_async_tasks3=2,
-            expected_num_queries4=107,
+            expected_num_queries4=64,
             expected_num_async_tasks4=1,
         )
 
@@ -725,7 +725,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=5,
             expected_num_queries3=65,
             expected_num_async_tasks3=4,
-            expected_num_queries4=119,
+            expected_num_queries4=76,
             expected_num_async_tasks4=4,
         )
 
