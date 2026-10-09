@@ -24,3 +24,8 @@ class ConfigurationDefaultChecksTest(SimpleTestCase):
     @override_settings(SECRET_KEY=CONFIGURED_SECRET, CREDENTIAL_AES_256_KEY=".", ALLOWED_HOSTS=["*"], DEBUG=True)
     def test_settings_dist_placeholder_key_is_reported_and_wildcard_hosts_allowed_in_debug(self):
         self.assertEqual({"dojo.W003"}, self._ids())
+
+    @override_settings(SECRET_KEY="", CREDENTIAL_AES_256_KEY=CONFIGURED_CREDENTIAL_KEY, ALLOWED_HOSTS=["defectdojo.example.com"], DEBUG=False)
+    def test_an_empty_secret_key_does_not_break_the_check(self):
+        # manage.py check runs in containers that set no SECRET_KEY, and reading an empty one raises.
+        self.assertEqual(set(), self._ids())
