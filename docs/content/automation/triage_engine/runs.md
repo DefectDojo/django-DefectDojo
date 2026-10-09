@@ -114,7 +114,7 @@ Both windows are configurable, and either can be set to keep records indefinitel
 
 The run happens on a worker, not in your browser. The editor waits for it and shows the counts on each node; from the rule list, open **Runs** to follow it. The run records you as **Triggered by**, and it follows the rule's mode: in Simulate, its Finding and Asset edits are real and only outbound sends are held back.
 
-Run Now works on a disabled rule too, AI steps included, so you can try a rule by hand before you enable it. Enabling a rule is what lets its trigger start it on its own. Disabling an enabled rule drops any run of it that is still waiting to start, including one started with Run Now.
+Run Now works on a disabled rule too, AI steps included, so you can try a rule by hand before you enable it. Enabling a rule is what lets its trigger start it on its own. A run started with Run Now that is still waiting to start does not run if, by then, the rule is disabled and has changed since you pressed it: it was disabled, edited, or taken over by someone else.
 
 **Preview**, in the editor, is the only dry run. It runs the real engine and then rolls everything back, records no run, and forces egress to simulate. Use Preview while building, and runs to see what actually happened.
 
