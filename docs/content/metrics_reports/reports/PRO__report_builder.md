@@ -221,7 +221,7 @@ A Generated Report moves through these statuses as it is built:
 | Pending | The report has been requested and is queued. |
 | Processing | The report is being assembled. |
 | Completed | The report is ready to download. |
-| Failed | The report could not be generated. The **Reason** column of the Generated Reports list says why. |
+| Failed | The report could not be generated. The Generated Reports list shows why, under the status. |
 
 > **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC): users only ever see data they are authorized to view, even inside a report.
 
@@ -316,7 +316,7 @@ When the Template is ready, generate the report. If the Template uses [template 
 
 When the report finishes, a notice says it is ready and links to its row in the Generated Reports list. A large report can take longer than the dialog waits for (about a minute). It then keeps generating in the background, the dialog closes, and the notice links to its row in the Generated Reports list.
 
-Generated reports are collected in the Generated Reports list, which shows each report's status, the reason a failed report could not be generated, its file format, and the time it was requested and completed. Open a report's menu to open it in the browser or download it.
+Generated reports are collected in the Generated Reports list, which shows each report's status (with the reason, when a report could not be generated), its file format, and the time it was requested and completed. Open a report's menu to open it in the browser or download it.
 
 ![Generated reports list](images/pro_generated_reports_list.png)
 
