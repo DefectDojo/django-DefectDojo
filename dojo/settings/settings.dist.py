@@ -210,6 +210,8 @@ env = environ.FileAwareEnv(
     DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
+    # Give each Qualys WAS finding the scanner's UNIQUE_ID instead of grouping findings by QID
+    DD_QUALYS_WAS_UNIQUE_ID=(bool, False),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
@@ -2112,8 +2114,9 @@ SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
 # Create a unique finding for all findings in qualys WAS parser
-# If using this, lines for Qualys WAS deduplication functions must be un-commented
-QUALYS_WAS_UNIQUE_ID = False
+# If using this, also set DD_DEDUPLICATION_ALGORITHM_PER_PARSER={"Qualys Webapp Scan": "unique_id_from_tool"}
+# so reimport matches findings by their Qualys unique ID (see the Qualys Webapp Scan parser docs)
+QUALYS_WAS_UNIQUE_ID = env("DD_QUALYS_WAS_UNIQUE_ID")
 
 SERIALIZATION_MODULES = {
     "xml": "django_tagulous.serializers.xml_serializer",
