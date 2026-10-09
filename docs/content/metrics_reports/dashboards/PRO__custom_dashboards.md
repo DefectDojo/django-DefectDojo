@@ -104,6 +104,8 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 - **Model** — which records the widget reads (Finding, Asset, Engagement, or Test), where applicable.
 - **Filters** — an embedded list-view filter UI that scopes the widget to exactly the records you want (for example, active Critical findings). The filters you pick here are the same ones you would use on that object's list page.
 - **Refresh interval** — how often the widget reloads on its own.
+- **Aggregation** (finding widgets) — what a Count, Graph, or Severity Tiles widget counts: findings, or the **unique CWEs**, **unique vulnerability IDs**, or **unique issues** (the vulnerability ID when a finding has one, otherwise its CWE) behind them. See [Counting unique issues instead of findings](#counting-unique-issues-instead-of-findings).
+- **Include child assets** (finding widgets) — when the filters scope the widget to one asset, also count everything under that asset in the [asset hierarchy](../../../asset_modelling/PRO_hierarchy/), so one row of tiles describes a whole system.
 - **Type-specific options** — for example chart type and group-by dimension for a Graph, thresholds for a Gauge, or the metric for a Top-N leaderboard.
 
 ![Configuring a Graph widget](images/pro_dashboard_v2_widget_config.png)
@@ -165,7 +167,8 @@ Single-glance metrics — counts, KPIs, and gauges.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. |
+| **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. On findings it can count unique CWEs or vulnerability IDs instead of findings. |
+| **Severity Tiles** | One number per severity over the filtered findings, plus a combined total — e.g. "2 unique Highs on this asset." Counts findings, unique CWEs, unique vulnerability IDs, or unique issues, optionally including child assets. |
 | **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. |
 | **Gauge** | A ratio drawn as an arc gauge — a "universe" filter as the denominator and a "pass" filter as the numerator. Use for SLA compliance, mitigation rate, or scan coverage, with configurable warning/OK thresholds. |
 | **License Usage** | Your account's license-usage status with a per-signal breakdown (database size, weekly finding volume, and so on). *Requires the Maintainer role.* |
@@ -177,7 +180,7 @@ Time-series and distribution visualizations.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Graph** | A general-purpose chart over any model and group-by dimension — bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. |
+| **Graph** | A general-purpose chart over any model and group-by dimension — bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. On findings the bars can count unique CWEs or vulnerability IDs instead of findings. |
 | **Sankey** | A flow diagram from a source dimension to a target dimension — e.g. Severity → Status. |
 | **Sunburst** | A one- or two-level radial breakdown — e.g. Severity, then Test Type within each severity. |
 | **Risk Matrix** | An EPSS-probability × risk heatmap of findings — bottom-left safe, top-right dangerous. |
@@ -213,6 +216,29 @@ Notes, shortcuts, and structure.
 | **Section Break** | A labeled divider for grouping related widgets under a heading. |
 | **Markdown / Notes** | An inline rich-text panel for headers, context notes, or reference links. |
 | **Quick Actions** | One-click action buttons that navigate to a chosen page. |
+
+## Counting unique issues instead of findings
+
+A finding count answers "how many findings do we have?". For management reporting the question is usually "how many distinct problems do we have?": a SAST tool that flags the same weakness in twenty files produces twenty findings for one CWE, and a container scanner that finds one CVE in forty images produces forty findings for one vulnerability. An application owner who sees 110 Medium findings may really be looking at 60 unique issues.
+
+The **Count**, **Graph**, and **Severity Tiles** widgets can count that way. In the configuration dialog, set **Aggregation** to one of:
+
+| Aggregation | What one unit is |
+|-------------|------------------|
+| **Count** | A finding (the default). |
+| **Unique CWEs** | A distinct CWE across the filtered findings. Findings with no CWE contribute nothing. |
+| **Unique Vulnerability IDs** | A distinct vulnerability identifier (CVE, GHSA, and so on) across the filtered findings. Identifiers are compared case-insensitively. Findings with no identifier contribute nothing. |
+| **Unique Issues** | A distinct issue, using the vulnerability ID when a finding has one and its CWE otherwise — one combined total for SAST and SCA results together. |
+
+To report on a whole system:
+
+1. In the **Filters** step, filter the findings list to the asset you care about.
+2. In the **Display** step, tick **Include child assets**. The widget then counts findings on that asset and on every asset under it in the hierarchy (following the parent and contains relationships), the same way the Insights pages roll up child assets.
+3. For one number per severity, use the **Severity Tiles** widget: it renders Critical through Info as a row of tiles, plus a **Total** tile.
+
+> **Note:** With a distinct aggregation the total is not the sum of the severity tiles. The same CVE reported at High on one asset and Medium on another is one unique issue overall, but appears in both severity tiles. The Severity Tiles widget says so under its tiles.
+
+Clicking a severity tile opens the finding list filtered to that severity, so you can see the findings behind the number. The link is not offered while child assets are included, because the finding list page cannot express a hierarchy rollup in its URL.
 
 ## Next steps
 
