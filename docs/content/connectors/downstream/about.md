@@ -50,9 +50,9 @@ Once these components are configured, Findings and Finding Groups can be sent to
 
 - **Manually**: Findings and Finding Groups have a **Push to Connector** action: in the gear menu, as a checkbox on the edit form, and in **Bulk Edit** for several Findings at once. When an **Issue Tracker Assignment** covers the Finding's Engagement or Asset, this creates an Issue in the Issue Tracker with the corresponding Finding/Finding Group information, or updates the Issue it already has.
 
-    When no Issue Tracker Assignment covers the Engagement or the Asset, nothing is sent. Pushing a Finding then shows a warning that no connector is assigned to its Asset or Engagement, and **Bulk Edit** reports how many of the selected Findings were not sent. To push them, assign an Issue Tracker Mapping to the Asset or the Engagement first.
+    When no Issue Tracker Assignment covers the Engagement or the Asset, nothing is sent. Pushing a Finding or a Finding Group then shows a warning that no connector is assigned to its Asset or Engagement, and **Bulk Edit** reports how many of the selected Findings were not sent. To push them, assign an Issue Tracker Mapping to the Asset or the Engagement first.
 
-    A push only hands the Finding to the connector: the Issue is created or updated in the background, so it can take a moment to appear in the **Connector Tickets** column.
+    A push only hands the Finding or Finding Group to the connector: the Issue is created or updated in the background, so it can take a moment to appear in the **Connector Tickets** column.
 
 ### Automatically Push Findings
 
