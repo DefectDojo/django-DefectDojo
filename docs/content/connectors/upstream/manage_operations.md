@@ -106,6 +106,8 @@ To have DefectDojo run a Sync operation off\-schedule:
 
 Sync runs in the background. When it finishes, the page reloads its Records and Operations on its own.
 
+The connectors service runs one operation at a time across all Connectors, so a manual run can wait while another Connector's operation finishes. The page keeps checking for up to two hours. If the run has still not started by then, a message says so; refresh the page later to see its results. Operations that start on their schedule while the page is open appear the next time the page loads.
+
 ## When a manual run is refused
 
 If DefectDojo cannot start a manual Discover or Sync, a message says why. The two most common reasons are:
