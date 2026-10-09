@@ -19,7 +19,7 @@ DefectDojo-CLI has the same functionality as Universal Importer, but also includ
 
 ## Installation
 
-1. Locate “External Tools” from your User Profile menu:
+1. Locate “External Tools” in the account menu, which opens from your username at the bottom of the sidebar:
 
 2. Download the appropriate binary for your operating system from the platform.
 
@@ -36,14 +36,11 @@ DefectDojo-CLI has the same functionality as Universal Importer, but also includ
 Universal Importer & DefectDojo-CLI can be configured using flags, environment variables, or a configuration file. The most important configuration is the API token, which must be set as an environment variable:
 
 1. Add your API key to your environment variables. 
-You can retrieve your API key from: `https://YOUR_INSTANCE.cloud.defectdojo.com/api/key-v2`
-
-or 
-
-Via the DefectDojo user interface 
-in the user dropdown in the top-right corner:
+You can retrieve your API key from **API v2 Token** in the account menu:
 
 ![image](images/api-token.png)
+
+or go directly to: `https://YOUR_INSTANCE.cloud.defectdojo.com/ui/api/token/`
 
 2. Set your environment variable for the API token.
 

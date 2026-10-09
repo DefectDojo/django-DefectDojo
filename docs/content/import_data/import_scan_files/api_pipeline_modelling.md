@@ -13,11 +13,11 @@ These pipelines can be created by directly calling our API **/reimport** endpoin
 
 ## DefectDojo’s API
 
-DefectDojo’s API is documented in\-app using the OpenAPI framework. You can access this documentation from the User Menu in the top right\-hand corner, under **‘API v2 OpenAPI3’**.
+DefectDojo’s API is documented in\-app using the OpenAPI framework. You can access this documentation from the user menu, under **API v2 Docs**. In DefectDojo Pro, the user menu opens from your username at the bottom of the sidebar; in the Open Source UI, it is in the top right\-hand corner.
 
 \- The documentation can be used to test API calls with various parameters, and does so using your own user’s API Token.
 
-If you need to access an API token for a script or another integration, you can find that information under the **API v2 Token** option from the same menu.
+If you need to access an API token for a script or another integration, you can find that information under the **API v2 Token** option from the same menu (**API v2 Key** in the Open Source UI).
 
 ![image](images/api_pipeline_modelling.png)
 
