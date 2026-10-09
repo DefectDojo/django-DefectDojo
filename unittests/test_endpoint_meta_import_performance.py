@@ -269,3 +269,33 @@ class EndpointMetaImportLocationQueryCountTest(EndpointMetaImportQueryCountMixin
                 VALUES_B,
                 dict(DojoMeta.objects.filter(location=location, location_product_id=1).values_list("name", "value")),
             )
+
+    # Regression: with Locations on, every new host was created one at a time through the URL and
+    # product-reference helpers (about 29 queries per host), so a 50-new-host file issued about 1,500
+    # queries where the same file with Locations off issues about 115.
+    def test_create_query_count_does_not_grow_with_rows(self):
+        self.warm_up()
+        small_hosts = [f"newsmall{i}.example.com" for i in range(10)]
+        large_hosts = [f"newlarge{i}.example.com" for i in range(40)]
+
+        self.assert_constant(
+            self.count_import_queries(small_hosts, VALUES_A),
+            self.count_import_queries(large_hosts, VALUES_A),
+            "create",
+        )
+
+        for host in small_hosts + large_hosts:
+            locations = Location.objects.filter(url__host=host)
+            self.assertEqual(1, locations.count(), host)
+            location = locations.get()
+            self.assertEqual(
+                ["Mitigated"],
+                list(location.products.filter(product_id=1).values_list("status", flat=True)),
+                host,
+            )
+            self.assertEqual({"team:red", "env:prod", "owner:alice"}, {tag.name for tag in location.tags.all()}, host)
+            self.assertEqual(
+                VALUES_A,
+                dict(DojoMeta.objects.filter(location=location, location_product_id=1).values_list("name", "value")),
+                host,
+            )
