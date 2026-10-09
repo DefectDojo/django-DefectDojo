@@ -21,7 +21,7 @@ does anything — a scheduled rule with no schedule never runs at all, so that l
 Adopting one creates a rule of your own and drops you into the editor on it.
 
 An adopted rule arrives **disabled and in simulate mode**, exactly like any new rule. Nothing runs
-and nothing is sent until you have set its scope, finished its setup steps, and enabled it. That is
+on its own and nothing is sent until you have set its scope, finished its setup steps, and enabled it. That is
 deliberate: several templates raise tickets and send messages, and the first run of one across an
 unfiltered set of Assets is not something you want to discover after the fact.
 

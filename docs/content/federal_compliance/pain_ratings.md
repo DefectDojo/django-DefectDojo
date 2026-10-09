@@ -160,7 +160,7 @@ matched the filter, and one rating was written.
 
 Two templates covering the PAIN workflow ship in the template gallery, alongside three Class C
 scan-cadence watchdogs. Adopting a template creates a new rule of your own, disabled and in simulate
-mode, so nothing runs until you configure and enable it.
+mode, so nothing runs on its own until you configure and enable it.
 
 ![The FedRAMP Class C templates in the Triage Engine template gallery](images/15-fedramp-rule-templates.jpg)
 
