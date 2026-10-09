@@ -7,7 +7,7 @@ from django.db import models
 from watson import search as watson
 
 from dojo.auditlog import configure_audit_system, register_django_pghistory_models
-from dojo.checks import check_configuration_deduplication
+from dojo.checks import check_configuration_deduplication, check_configuration_defaults
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ class DojoAppConfig(AppConfig):
             register_watson_models(self)
 
         register_check(check_configuration_deduplication, "dojo")
+        register_check(check_configuration_defaults, "dojo")
 
         # Trigger registration of the OS authorization queryset filters.
         # query_registrations.py is no longer imported by the package
