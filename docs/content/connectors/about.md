@@ -37,7 +37,9 @@ Old bookmarks and deep links keep working: the legacy **API Connectors** and **I
 ## Who can see what
 
 * **Upstream Connectors** is visible to users with a Global Role of Reader or higher.
-* **Downstream Connectors** is visible to superusers only, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances.
+* **Downstream Connectors** is visible to users whose Global Role grants the **Integration: View** permission, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances. Adding, editing, or deleting a Downstream Connector, or its mappings and assignments, requires **Integration: Edit**.
+
+None of the built-in roles grants either Integration permission, so Downstream Connectors is available to superusers and to users whose Global Role is a [custom role](/admin/user_management/pro__custom_rbac_roles/) that includes them. A user with **Integration: View** but not **Integration: Edit** sees the configured and available connectors, but is not offered the add, edit, and delete actions.
 
 The **Upstream** and **Downstream** entries under **Connect** each appear in the sidebar only when that page is visible to you.
 
