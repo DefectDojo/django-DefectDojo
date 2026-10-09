@@ -30,13 +30,14 @@ Both engines run side by side. Turning on Triage Engine does not disable or conv
 
 Triage Engine is in Beta and is off by default. A superuser turns it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
-Once the flag is on, a **Triage Engine** group appears under **Act** in the sidebar with three pages (the classic engine sits alongside them as **Classic Rules**):
+Once the flag is on, a **Triage Engine** group appears under **Act** in the sidebar with four pages (the classic engine sits alongside them as **Classic Rules**):
 
 | Page | What it is for |
 |------|----------------|
-| **All Rules** | The rule list. Create, edit, enable, run and delete rules from here. |
+| **Rules** | The rule list. Create, edit, enable, run and delete rules from here. |
 | **Runs** | Every execution, with its per-node trace. |
 | **Deliveries** | The ledger of everything rules have sent outward. |
+| **Webhook Receivers** | Inbound URLs that other tools post webhooks to, for the rules that act on them. See [Webhook Receivers](../webhook_receivers/). |
 
 ### Permissions
 
@@ -91,8 +92,10 @@ Every rule runs **as its owner**. It sees exactly the Findings that user can see
 
 Mode is set per rule, not per node.
 
-* **Simulate** (the default) runs the whole graph for real, including every Finding edit, but egress nodes record what they *would* have sent and stop there. Nothing leaves DefectDojo.
+* **Simulate** (the default) runs the whole graph for real, including every Finding and Asset edit, but egress nodes record what they *would* have sent and stop there. Nothing leaves DefectDojo.
 * **Live** performs the sends.
+
+Simulate only holds back outbound sends. It is not a dry run: a simulated run changes Findings and Assets exactly as a live one does. The only dry run is **Preview** in the editor, which rolls every change back and records no run. See [Building Rules](../building_rules/#previewing-before-you-save).
 
 Simulated sends still appear in the Deliveries ledger, marked `simulated`, with their full payload. That is the intended way to review a rule before you let it out.
 
