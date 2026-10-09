@@ -83,6 +83,24 @@ Both create Locations on their identity hash and upsert their references, so the
 - It does **not** modify your Findings. The backfills only *read* the `component_*` and `file_path`/`line` fields; they add Locations and references alongside, leaving the Finding rows untouched.
 - It does **not** convert cloud resources into Cloud Resource Locations. Endpoints often recorded things that are not web addresses at all, such as container references and AWS ARNs. Every one of those migrates as a URL Location, the same as any other Endpoint. DefectDojo cannot reliably tell a resource identifier stuffed into a host field from a genuine hostname. Guessing wrong can change a Finding's identity. To model those resources properly, import the account through a cloud connector. The connector reads the provider's own resource identifier. It creates a Cloud Resource Location from that identifier.
 
+## Links to the Old Endpoint Pages
+
+Once Locations is enabled, the Endpoint pages are gone. A bookmark or a shared link to one opens the page that replaced it:
+
+| Old page | Opens |
+| --- | --- |
+| All Endpoints, Vulnerable Endpoints, All Hosts, Vulnerable Hosts, one Host, or a dashboard tile's Endpoint list | **All URLs** |
+| An Asset's or a Finding's Endpoints or Hosts | That Asset's or Finding's **URLs** |
+| New Endpoint | **New URL** |
+| One Endpoint, or its edit page | Its **Location** (see below) |
+
+A link to one Endpoint can carry either kind of ID, and DefectDojo tries them in this order:
+
+1. **A legacy Endpoint** (a link made before the migration). The link opens the URL Location the backfill migrated it to, as long as the legacy Endpoint row still exists and you can view both the Endpoint and the Location.
+2. **An ID from `/api/v2/endpoints/`** (one listed after the migration). The link opens that row's URL Location, if you can view it.
+
+When the ID matches neither, the link opens **All URLs**. Removing the legacy Endpoint rows (see below) removes the first match, so a link to a removed Endpoint opens **All URLs** unless its ID also belongs to a row of `/api/v2/endpoints/`.
+
 ## Removing the Legacy Endpoint Rows
 
 The migration leaves the original `Endpoint` and `Endpoint_Status` rows in place, and your license still counts them: a **Findings + Endpoints** license counts Endpoints, and a **Total Findings** license counts Endpoint Statuses. Once their data is in Locations, these rows only take up license capacity, so you can delete them.
@@ -139,7 +157,7 @@ Once Locations is enabled, the legacy Endpoint API enters a **read-compatibility
 ### What still works
 
 - `GET /api/v2/endpoints/` — Returns rows that *look like* Endpoints but are actually projected from `LocationProductReference` rows joined to URL Locations. The familiar fields (`protocol`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present.
-- `GET /api/v2/endpoints/{id}/` — Single-Endpoint retrieval works the same way. The `id` is the original Endpoint ID and is preserved through the migration via the Asset Reference mapping.
+- `GET /api/v2/endpoints/{id}/`: Single-Endpoint retrieval works the same way. Each row is one URL Location on one Asset, so the `id` is that Asset Reference's ID, not the original Endpoint ID, and `location_id` names the Location.
 - `GET /api/v2/endpoint_status/` and `GET /api/v2/endpoint_status/{id}/` — Returns rows projected from `LocationFindingReference`. The legacy `mitigated`, `false_positive`, `out_of_scope`, and `risk_accepted` boolean fields are reconstructed.
 - Filtering by `protocol`, `host`, `port`, `path`, `query`, `fragment`, `product`, and `tag(s)` continues to work.
 - The `generate_report` action on individual Endpoints continues to work.
