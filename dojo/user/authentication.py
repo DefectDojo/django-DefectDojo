@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django_ratelimit import ALL
 from django_ratelimit.core import is_ratelimited
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, Throttled, ValidationError
@@ -99,6 +100,22 @@ class DojoBasicAuthentication(BasicAuthentication):
             msg = "A password reset is required before this account can use the API."
             raise AuthenticationFailed(msg)
         return user, auth
+
+
+class DojoBasicAuthenticationScheme(OpenApiAuthenticationExtension):
+
+    """
+    OpenAPI scheme for DojoBasicAuthentication.
+
+    drf-spectacular's own Basic scheme does not match subclasses, so the subclass is
+    registered under the same name and the generated schema is unchanged.
+    """
+
+    target_class = "dojo.user.authentication.DojoBasicAuthentication"
+    name = "basicAuth"
+
+    def get_security_definition(self, auto_schema):
+        return {"type": "http", "scheme": "basic"}
 
 
 def revoke_api_token(user) -> None:
