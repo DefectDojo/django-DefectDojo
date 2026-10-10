@@ -29,15 +29,17 @@ If you think of DefectDojo as the hub of your security data, Upstream Connectors
 
 In the Pro UI sidebar, open the **Connect** section:
 
-* **Connect > Upstream** opens the **Upstream Connectors** page — it replaces the old **API Connectors** entry (previously under Import).
-* **Connect > Downstream** opens the **Downstream Connectors** page — it replaces the old **Integrations** entry (previously under Settings). This direction is currently in **Beta**.
+* **Connect > Upstream** opens the **Upstream Connectors** page, which replaces the old **API Connectors** entry (previously under Import).
+* **Connect > Downstream** opens the **Downstream Connectors** page, which replaces the old **Integrations** entry (previously under Settings). This direction is currently in **Beta**.
 
 Old bookmarks and deep links keep working: the legacy **API Connectors** and **Integrations** URLs automatically redirect to the new **Upstream Connectors** and **Downstream Connectors** pages.
 
 ## Who can see what
 
 * **Upstream Connectors** is visible to users with a Global Role of Reader or higher.
-* **Downstream Connectors** is visible to superusers only, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances.
+* **Downstream Connectors** is visible to users whose Global Role grants the **Integration: View** permission, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances. Adding, editing, or deleting a Downstream Connector, or its mappings and assignments, requires **Integration: Edit**.
+
+None of the built-in roles grants either Integration permission, so Downstream Connectors is available to superusers and to users whose Global Role is a [custom role](/admin/user_management/pro__custom_rbac_roles/) that includes them. A user with **Integration: View** but not **Integration: Edit** sees the configured and available connectors, but is not offered the add, edit, and delete actions.
 
 The **Upstream** and **Downstream** entries under **Connect** each appear in the sidebar only when that page is visible to you.
 
@@ -45,18 +47,20 @@ The **Upstream** and **Downstream** entries under **Connect** each appear in the
 
 Both directions share the same refreshed layout:
 
-* Each tool is shown as a full-width **tile** — logo on the left, the tool name and a short description in the middle, and an action button on the right.
+* Each tool is shown as a full-width **tile**: logo on the left, the tool name and a short description in the middle, and an action button on the right.
 * Each section has a **search box** that filters tiles by tool name as you type.
 
 On the **Upstream Connectors** page:
 
 * **Configured Connectors** lists the connectors you have already set up. Each tile shows an operational health summary (health status, last operation, and total / mapped record counts) and a **Manage Configuration** menu with **Manage Records and Operations**, **Edit Configuration**, and **Delete Configuration** actions.
 * **Available Connectors** lists the supported tools you have not yet configured, each with an **Add Configuration** button.
-* A filter in the page header narrows both sections by connector type: **All**, **Asset** (or **Asset**, depending on your instance's vocabulary) for connectors that import asset inventory, and **Finding** for connectors that import vulnerability data.
+* A filter in the page header narrows both sections by connector type: **All**, **Asset** (or **Product**, depending on your instance's vocabulary) for connectors that import asset inventory, and **Finding** for connectors that import vulnerability data.
 
 On the **Downstream Connectors** page:
 
-* **Available Integrations** lists every supported issue tracker. Tiles for integrations you have configured show a count of existing Integration Instances.
+* **Configured Connectors** lists the connectors you have already set up. Each tile has a **Manage Configuration** menu with **Manage Mappings and Assignments** (for connectors that open tickets), **Edit Configuration**, and **Delete Configuration** actions.
+* **Available Connectors** lists the supported services, each with an **Add Configuration** button.
+* Both sections group their tiles by category, such as **Ticketing** and **Incident Management**.
 
 ## Next Steps
 
