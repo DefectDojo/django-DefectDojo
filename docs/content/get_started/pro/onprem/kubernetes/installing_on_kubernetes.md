@@ -11,8 +11,9 @@ aliases:
 <!--
   Generated from the DefectDojo Pro Helm chart repository.
   Source: docs/INSTALLATION_GUIDE.md at chart version 3.1.304.
-  Edit the source guide, not this file. Local edits are overwritten
-  the next time the chart is released.
+  This copy carries hand edits that are pending a sync from the chart
+  repository's source guide. Make the same change there too, or the next
+  sync from the chart overwrites it.
 -->
 Covers deployment on AWS EKS and OpenShift (ROSA). The workflow is the same
 for both: set up infrastructure, create secrets, install the chart.
@@ -306,17 +307,37 @@ CHART="dojopro-<version>/dojopro"
 
 ### Verify the Bundle Signature
 
-Each release publishes a detached GPG signature for the bundle
-(`dojo-pro-helm-bundled-<version>.zip.asc`) and the public key that made it
-(`dojo-pro-release-signing.asc`). Check the zip before you extract it:
+Each release has a detached GPG signature for the bundle,
+`dojo-pro-helm-bundled-<version>.zip.asc`, made with the DefectDojo release
+signing key, `dojo-pro-release-signing.asc`. Get the public key from DefectDojo
+support, or take it from a bundle you have already verified. A copy of the key
+also ships inside the zip, but a key taken from the file you are checking proves
+nothing on its own, so check its fingerprint first:
+
+```bash
+gpg --show-keys --with-fingerprint dojo-pro-release-signing.asc
+```
+
+The primary key's fingerprint must be:
+
+```text
+69D5 A6D7 01E6 6415 03F2  8E9B 2227 78D8 18CC 8FAB
+```
+
+If it differs, stop and contact support@defectdojo.com. If it matches, import
+the key and check the zip before you extract it:
 
 ```bash
 gpg --import dojo-pro-release-signing.asc
 gpg --verify dojo-pro-helm-bundled-<version>.zip.asc dojo-pro-helm-bundled-<version>.zip
 ```
 
-`gpg` should report a good signature. Do not install from a bundle that fails
-this check; contact support@defectdojo.com instead.
+`gpg` should report a good signature from
+`DefectDojo Release Signing <releases@defectdojo.com>`. It also warns that the
+key is not certified with a trusted signature. That warning is expected: it
+only means you have not signed the key yourself, and the fingerprint check
+above is what establishes trust. Do not install from a bundle that fails this
+check; contact support@defectdojo.com instead.
 
 The chart package inside the zip also carries a cosign signature,
 `dojopro-<version>.tgz.sig`, made with the key in `dojo-pro-cosign.pub`. With
@@ -327,6 +348,11 @@ newer, after you unzip the bundle:
 cosign verify-blob --key dojo-pro-cosign.pub \
   --signature dojopro-<version>.tgz.sig dojopro-<version>.tgz
 ```
+
+By default `cosign` also looks the signature up in the public transparency log,
+which needs internet access. If your network has no internet access, add the
+flag your cosign version uses to skip the transparency log lookup (see
+`cosign verify-blob --help`).
 
 ---
 
@@ -434,7 +460,7 @@ A successful connection looks like:
 pod "psql-test" deleted
 ```
 
-If this fails with `database "dojodb" does not exist`, your RDS instance is
+If this fails with `database "dojodb" does not exist`, your database server is
 reachable but the database has not been created yet. Create it:
 
 ```bash
@@ -707,7 +733,7 @@ Pass them to `helm install` / `helm template`:
 --set-file ddorch.tls.key=orch_server.key
 ```
 
-> The `scripts/bootstrap/bootstrap-aws-eks.sh` helper generates and reuses these
+> The `bootstrap/bootstrap-aws-eks.sh` helper in the extracted bundle generates and reuses these
 > automatically via the `dojopro-orch-certs-configmap` — if you are using
 > that script you do not need to create them manually.
 
@@ -1204,8 +1230,8 @@ kubectl get secret dojopro-secrets -n $NAMESPACE \
 ```
 
 If you used inline secrets instead of an external secret, the password is in
-the chart-managed secret, which is named after the release (`dojopro` for the
-release name used in this guide):
+the chart-managed secret. It is named `dojopro` for this guide's release name;
+for a release name that does not contain `dojopro`, it is `<release>-dojopro`:
 
 ```bash
 kubectl get secret dojopro -n $NAMESPACE \
@@ -1986,7 +2012,7 @@ one of the two approaches:
   This renders `spec.tls[].secretName` on the ingress and omits the
   `networking.gke.io/managed-certificates` annotation.
 
-> **Bootstrap script support:** `scripts/bootstrap/bootstrap-gcp-gke.sh` only
+> **Bootstrap script support:** `bootstrap/bootstrap-gcp-gke.sh` in the extracted bundle only
 > covers the GCP-native cert flows (`google-managed` and `pre-shared`). For the
 > BYO `secret` path, install with `helm` directly (create the TLS secret first,
 > then pass `certificates.ingress.source=secret` and

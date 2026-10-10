@@ -11,8 +11,9 @@ aliases:
 <!--
   Generated from the DefectDojo Pro Helm chart repository.
   Source: docs/UPGRADE_GUIDE.md at chart version 3.1.304.
-  Edit the source guide, not this file. Local edits are overwritten
-  the next time the chart is released.
+  This copy carries hand edits that are pending a sync from the chart
+  repository's source guide. Make the same change there too, or the next
+  sync from the chart overwrites it.
 -->
 Covers upgrading an existing DefectDojo Pro release to a newer chart version.
 The recommended path is to pull the chart directly from the DefectDojo OCI
@@ -59,7 +60,7 @@ common cause of failed upgrades.
    and the target. Breaking changes, new required fields, and migration
    prerequisites are called out there. See the
    [DefectDojo Pro Changelog](/releases/pro/changelog/) and the
-   [upgrade notes](/releases/os_upgrading/upgrading_guide/).
+   [on-premise upgrade notes](/get_started/pro/onprem/upgrading/).
 2. **Check your current chart version.** This is the floor for the upgrade:
 
    ```bash
@@ -82,7 +83,22 @@ common cause of failed upgrades.
    with `ddorch.tls.rootCa is required`. `$CHART` is the target chart's
    directory: the extracted zip (see [Upgrade via Extracted Zip](#upgrade-via-extracted-zip)),
    or a copy pulled from the registry after you
-   [authenticate](#authenticate-to-the-registry):
+   [authenticate](#authenticate-to-the-registry).
+
+   The render also needs the three ddorch certificate files on disk. If you no
+   longer have the ones you installed with, copy them out of the release's
+   `<release>-orch-certs-configmap` ConfigMap (`dojopro-orch-certs-configmap`
+   for the release name used here):
+
+   ```bash
+   CM=dojopro-orch-certs-configmap
+   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls_root\.ca}' > orch_ca.crt
+   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls\.crt}' > orch_server.crt
+   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls\.key}' > orch_server.key
+   chmod 600 orch_server.key
+   ```
+
+   Then pull the target chart and render it:
 
    ```bash
    VERSION="<chart-version>"
