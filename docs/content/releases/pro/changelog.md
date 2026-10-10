@@ -10,7 +10,7 @@ aliases:
   - "/changelog/pro_changelog/"
 ---
 
-Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
+Here are the release notes for **DefectDojo Pro**, both cloud-hosted and self-hosted. Self-hosted deployments install the same version numbers listed here, and entries about deployment, such as Helm chart or Docker Compose changes, apply to self-hosted instances only. These release notes are focused on UX, so will not include all code changes.
 
 You can subscribe to these release notes with the [RSS feed](/releases/pro/changelog/index.xml).
 

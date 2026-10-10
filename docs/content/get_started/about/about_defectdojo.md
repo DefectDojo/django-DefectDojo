@@ -90,7 +90,7 @@ DefectDojo, Inc. hosts a Pro edition of this software for commercial purposes.  
 * **[Priority And Risk](/asset_modelling/pro_hierarchy/priority_sla/)** to identify the Findings of highest urgency, system-wide
 * **Premium Support** and implementation guidance for your organization
 
-The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises.
+The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises: see [Self-Hosting DefectDojo Pro](/get_started/pro/onprem/installation_options/).
 
 For more information on DefectDojo Pro, check out our [Pricing page](https://defectdojo.com/pricing).
 
@@ -123,7 +123,7 @@ Whether you’re a Pro or an Open-Source user, we have many resources to help yo
 
 To get in touch with the DefectDojo, Inc. team, you can always reach out to [hello@defectdojo.com](mailto:hello@defectdojo.com).
 
-We regularly on [LinkedIn](https://www.linkedin.com/company/33245534) and also host online presentations for AppSec professionals that can be accessed live or on demand. You can learn about upcoming events on our [Events page](https://defectdojo.com/events) or watch past presentations on our [YouTube Channel](https://www.youtube.com/@defectdojo).
+We post regularly on [LinkedIn](https://www.linkedin.com/company/33245534) and also host online presentations for AppSec professionals that can be accessed live or on demand. You can learn about upcoming events on our [Events page](https://defectdojo.com/events) or watch past presentations on our [YouTube Channel](https://www.youtube.com/@defectdojo).
 
 ### Stickers
 

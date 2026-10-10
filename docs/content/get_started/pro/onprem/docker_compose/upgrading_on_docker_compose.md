@@ -23,7 +23,7 @@ Keep your own settings in `/opt/dojo/customizations/local_settings.py`. That fil
 The CLI can do the whole upgrade, prompting for the version:
 
 ```bash
-dojo-compose-cli app upgrade
+sudo -E dojo-compose-cli app upgrade
 ```
 
 ## Upgrade step by step
@@ -31,10 +31,10 @@ dojo-compose-cli app upgrade
 If you would rather do it in steps, stop the application, set the new version, download the matching deployment files, then start again:
 
 ```bash
-dojo-compose-cli app stop
-dojo-compose-cli config set --version x.y.z --deploy-version x.y.z
-dojo-compose-cli deploy download
-dojo-compose-cli app start
+sudo -E dojo-compose-cli app stop
+sudo -E dojo-compose-cli config set --version x.y.z --deploy-version x.y.z
+sudo -E dojo-compose-cli deploy download
+sudo -E dojo-compose-cli app start
 ```
 
 The version you set selects the image tags, and `deploy download` fetches the deployment files that match it. The download step compares the incoming `docker-compose.yml`, nginx configuration, and `local_settings.py` against what you already have, and tells you when they differ so you can reconcile your changes. Adding `--overwrite` accepts the new versions of those files and discards local modifications to them, so use it deliberately.
@@ -48,10 +48,10 @@ In an air-gapped deployment, `app upgrade` is declined because it reaches the re
 Docker Compose has no automatic rollback. To return to the previous release, set the prior version and re-download the matching deployment files:
 
 ```bash
-dojo-compose-cli app stop
-dojo-compose-cli config set --version x.y.z --deploy-version x.y.z
-dojo-compose-cli deploy download
-dojo-compose-cli app start
+sudo -E dojo-compose-cli app stop
+sudo -E dojo-compose-cli config set --version x.y.z --deploy-version x.y.z
+sudo -E dojo-compose-cli deploy download
+sudo -E dojo-compose-cli app start
 ```
 
 **Database migrations do not roll back.** Setting an older version restores the images and deployment files, but it does not reverse a schema migration the upgrade applied. If the upgrade migrated the database, restore from the backup you took before upgrading (see [Restoring a Self-Hosted Deployment](/get_started/pro/onprem/restoring/)), or coordinate a manual migration reversal with DefectDojo support before you start the older version. If you are several releases behind, contact [support@defectdojo.com](mailto:support@defectdojo.com).

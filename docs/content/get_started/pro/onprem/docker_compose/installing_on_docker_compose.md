@@ -18,7 +18,15 @@ Almost all of the work is done by `dojo-compose-cli`, which DefectDojo provides 
 
 Size the deployment first. The hardware sizing guidance in this section covers what to provision for both the application host and the database.
 
-Ubuntu 24.04 LTS is the supported operating system for this installation. Update it fully before you begin. The installation runs commands as root, so you need `sudo` or a root shell on both hosts.
+Ubuntu 24.04 LTS is the supported operating system for this installation. The installation runs commands as root, so you need `sudo` or a root shell on both hosts.
+
+Update both hosts fully before you begin, and reboot if the update asks for it:
+
+```bash
+sudo apt update
+sudo apt -y full-upgrade
+[ -f /var/run/reboot-required ] && sudo reboot
+```
 
 You will need two files from DefectDojo, which arrive with your subscription: the `dojo-compose-cli` archive and your license file, usually named `dojopro.lic`. Contact your account representative or [support@defectdojo.com](mailto:support@defectdojo.com) if you do not have them.
 
@@ -40,8 +48,8 @@ Note the hostname, the port if it is not the default 5432, and the credentials. 
 On Ubuntu 24.04, PostgreSQL 16 is in the default repositories:
 
 ```bash
-apt update
-apt -y install postgresql postgresql-contrib
+sudo apt update
+sudo apt -y install postgresql postgresql-contrib
 ```
 
 Create the databases and the application user. DefectDojo uses a second database for its orchestration service, so create both. Open a `psql` session as the `postgres` superuser:
@@ -82,7 +90,7 @@ host  postgres       dojodbusr  <app-server-address>/32  scram-sha-256
 Restart for both changes to take effect:
 
 ```bash
-systemctl restart postgresql
+sudo systemctl restart postgresql
 ```
 
 PostgreSQL's stock settings are sized for a small machine. Before you load real data, raise the memory and connection settings to match the host, following [Tuning the database](/get_started/pro/onprem/hardware_sizing/#tuning-the-database) on the Hardware Sizing page.
@@ -110,7 +118,7 @@ If the host reaches the internet through an outbound proxy, see [Running DefectD
 
 Users only need to reach the application host on ports 80 and 443, which nginx serves. Allow those from your users' networks and nothing else.
 
-Plan for two more ports that the stack publishes on every interface of the host: `9142` for the MCP server and `9871` for the orchestration service. Unless you have a reason to reach them from elsewhere, block them from outside the host.
+The stack also publishes two internal ports on the host: `9142` for the MCP server and `9871` for the orchestration service. From release 3.3.300 they are bound to `127.0.0.1`, so other hosts cannot reach them. On earlier releases they are published on every interface of the host; unless you have a reason to reach them from elsewhere, block them from outside the host.
 
 Do this at your network firewall or security group, or in the `DOCKER-USER` iptables chain on the host. A host firewall such as `ufw` is not enough on its own: Docker writes its own rules for published ports, and those rules take effect ahead of `ufw`, so a `ufw deny` does not close a port Docker has published. See Docker's [packet filtering and firewalls](https://docs.docker.com/engine/network/packet-filtering-firewalls/) documentation for how to add rules to `DOCKER-USER`.
 
@@ -119,8 +127,8 @@ Do this at your network firewall or security group, or in the `DOCKER-USER` ipta
 Install the client tools and connect before going any further. A database problem is much easier to diagnose now than in the middle of the install:
 
 ```bash
-apt update
-apt -y install postgresql-client-common postgresql-client-16
+sudo apt update
+sudo apt -y install postgresql-client-common postgresql-client-16
 psql -h <db-host> -p 5432 -d dojodb -U dojodbusr -W
 ```
 
@@ -171,8 +179,8 @@ The wizard prompts for the following.
 | Deploy Type | `separate-db` for a database on its own host, or `containerized-db` to run PostgreSQL in a container. |
 | Database Connection Type | Choose Single Line and supply the whole connection string. |
 | Database URL | `postgres://<user>:<password>@<host>:5432/dojodb`. It must begin with `postgres://` rather than `postgresql://`. |
-| `DD_ALLOWED_HOSTS` | Host headers the application will answer to. |
-| `DD_SITE_URL` | The full URL where users reach DefectDojo, for example `https://defectdojo.internal.example.com`. |
+| `DD_ALLOWED_HOSTS` | Host headers the application will answer to. The default is `*`, which accepts any host name. Enter the host name users browse to instead. |
+| `DD_SITE_URL` | The full URL where users reach DefectDojo, for example `https://defectdojo.internal.example.com`. The default is `http://localhost`, which only suits a test on the host itself, so replace it. |
 
 Two things worth knowing at the prompts. Supply the database connection as a single line rather than value by value, since the per-value path does not currently ask for the username. And if the password contains characters like `!`, `@`, or `#`, URL encode them in the connection string.
 
@@ -194,15 +202,31 @@ Once it finishes, DefectDojo is available at the site URL you gave it.
 
 It also creates a `dojosrv` user and group, which own the application's files.
 
-The running stack is the Django application, a separate container that handles scan imports, nginx, a Celery worker and scheduler, Valkey for caching and queueing, the connectors service, and the MCP server. `docker ps` lists them.
+As of release 3.4.0, the running stack is these containers:
+
+| Container | What it runs |
+| --- | --- |
+| `nginx` | The web server, on ports 80 and 443 |
+| `dojo` | The Django application |
+| `dojo-import-scan` | Scan imports, separate from the web application |
+| `celeryworker`, `celerybeat` | The Celery worker and scheduler |
+| `redis` | Valkey, for caching and queueing |
+| `connectors`, `integrators` | The connectors and integrators services |
+| `ddorch`, `ddorch-workers` | The orchestration service and its workers |
+| `mcp-server` | The MCP server |
+| `webhook-gateway` | Receives inbound webhooks |
+| `sensei-engine` | The Sensei engine |
+| `init` | Applies database migrations at each start, then exits |
+
+With the `containerized-db` deployment type there is also a `postgres` container. `docker ps -a` lists them all, including `init` after it has exited.
 
 Day to day, these are the commands you need:
 
 ```bash
 systemctl status defectdojo-compose
-dojo-compose-cli app start
-dojo-compose-cli app stop
-dojo-compose-cli app restart
+sudo -E dojo-compose-cli app start
+sudo -E dojo-compose-cli app stop
+sudo -E dojo-compose-cli app restart
 docker logs dojo
 ```
 
@@ -257,7 +281,7 @@ sudo cp my-internal-ca.crt /opt/dojo/certs/private/dojo-ca-bundle.crt
 sudo chmod 644 /opt/dojo/certs/private/dojo-ca-bundle.crt
 
 # Restart the application so the containers pick it up
-dojo-compose-cli app restart
+sudo -E dojo-compose-cli app restart
 ```
 
 Use the filename `connectors-ca-bundle.crt` instead when the CA is only needed for Connector tools, and install both files if you need both. Inside the containers these paths are `/app/certs/private/dojo-ca-bundle.crt` and `/app/certs/private/connectors-ca-bundle.crt`.

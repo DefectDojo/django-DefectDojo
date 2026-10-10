@@ -102,12 +102,16 @@ The Pro release ships as a signed bundle (`dojo-pro-helm-bundled-<version>.zip`)
 gpg --import dojo-pro-release-signing.asc
 gpg --verify dojo-pro-helm-bundled-<version>.zip.asc dojo-pro-helm-bundled-<version>.zip
 
-# cosign check (SBOM/attestations are signed with the release cosign key)
+# cosign check of the chart package inside the bundle (unzip it first)
 cosign verify-blob \
   --key dojo-pro-cosign.pub \
-  --signature dojo-pro-helm-bundled-<version>.zip.sig \
-  dojo-pro-helm-bundled-<version>.zip
+  --signature dojopro-<version>.tgz.sig \
+  dojopro-<version>.tgz
 ```
+
+The zip itself has a GPG signature only; the cosign signature covers the chart
+package `dojopro-<version>.tgz`. See
+[Verify the Bundle Signature](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#verify-the-bundle-signature).
 
 You also need your existing `dojopro.lic` license file, which is not part of the bundle.
 

@@ -28,17 +28,17 @@ delays during the install process.
 
 | Item | Example | Where to find it |
 |------|---------|-------------------|
-| **PostgreSQL host** | `mydb.abc123.us-east-1.rds.amazonaws.com` | AWS RDS console or `aws rds describe-db-instances` |
+| **PostgreSQL host** | `db.internal.example.com` | Your DBA or your cloud provider's database console (on AWS: `aws rds describe-db-instances`) |
 | **PostgreSQL port** | `5432` | Usually 5432 unless customized |
 | **PostgreSQL database name** | `dojodb` | Your DBA or Terraform/CloudFormation outputs — must be created before install (see note below) |
 | **Orchestrator database** | `dojodb-ddorch` | Either grant the app role `CREATEDB` or pre-create `<dbname>-ddorch` — see [Pre-flight: Orchestrator (ddorch) Database](#pre-flight-orchestrator-ddorch-database) |
-| **PostgreSQL username** | `defectdojo` | `aws rds describe-db-instances --query 'DBInstances[].MasterUsername'` |
-| **PostgreSQL password** | — | AWS Secrets Manager, Terraform state, or your DBA |
-| **Redis/ElastiCache endpoint** | `my-redis.abc123.use1.cache.amazonaws.com` | `aws elasticache describe-cache-clusters --show-cache-node-info` |
-| **Redis password** | — | Omit if auth is disabled (VPC-only). Check: `aws elasticache describe-replication-groups --query 'ReplicationGroups[].AuthTokenEnabled'` |
-| **EFS filesystem ID** | `fs-0abc123def456` | `aws efs describe-file-systems --region <region>` |
-| **EFS access point ID** (if applicable) | `fsap-0abc123def456` | `aws efs describe-access-points --file-system-id <fs-id>` |
-| **EFS access point UID/GID** | UID `1001`, GID `1337` | Must match the container security context (see note below) |
+| **PostgreSQL username** | `defectdojo` | Your DBA, or the database instance's settings in your provider's console |
+| **PostgreSQL password** | — | Your secret manager, Terraform state, or your DBA |
+| **Redis or Valkey endpoint** | `redis.internal.example.com` | Your managed cache's console (on AWS: `aws elasticache describe-cache-clusters --show-cache-node-info`) |
+| **Redis password** | — | Omit if auth is disabled. On AWS, check with `aws elasticache describe-replication-groups --query 'ReplicationGroups[].AuthTokenEnabled'` |
+| **EFS filesystem ID** (EKS with EFS only) | `fs-0abc123def456` | `aws efs describe-file-systems --region <region>` |
+| **EFS access point ID** (EKS, if applicable) | `fsap-0abc123def456` | `aws efs describe-access-points --file-system-id <fs-id>` |
+| **EFS access point UID/GID** (EKS) | UID `1001`, GID `1337` | Must match the container security context (see note below) |
 | **Domain name (FQDN)** | `dojo.example.com` | Your DNS administrator (see platform-specific notes below) |
 | **ACM certificate ARN** (EKS with HTTPS) | `arn:aws:acm:...` | `aws acm list-certificates --region <region>` |
 | **OpenShift apps domain** (ROSA only) | `apps.abc123.p1.openshiftapps.com` | `oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'` |
@@ -104,7 +104,7 @@ commands shown to create cryptographically random values:
 | Django secret key | `DD_SECRET_KEY` | `openssl rand -hex 25` |
 | AES-256 encryption key | `DD_CREDENTIAL_AES_256_KEY` | `openssl rand -hex 16` |
 | Cloud portal secret | `CLOUD_PORTAL_SECRET_KEY` | `openssl rand -hex 25` |
-| Connectors shared secret | `DD_CONNECTORS_SHARED_SECRET` | Use same value as `CLOUD_PORTAL_SECRET_KEY` |
+| Connectors shared secret | `DD_CONNECTORS_SHARED_SECRET` | Use the same value as `CLOUD_PORTAL_SECRET_KEY` |
 | Admin password | `DD_ADMIN_PASSWORD` | `openssl rand -base64 16` |
 | Metrics password | `METRICS_HTTP_AUTH_PASSWORD` | `openssl rand -hex 16` |
 
@@ -133,18 +133,22 @@ These come from your existing infrastructure — do not generate them:
 
 ## Prerequisites
 
-```bash
-# Required tools
-brew install awscli helm kubectl jq openssl eksctl
+On the workstation you install from, you need these on every platform:
 
-# Verify AWS access
-aws sts get-caller-identity
-```
+- `helm` 3.x or newer
+- `kubectl`, with its current context pointed at the target cluster
+- `openssl` 3.0 or newer. The certificate commands below use `-copy_extensions`,
+  which LibreSSL does not support, and macOS ships LibreSSL as `/usr/bin/openssl`.
+  On macOS, install OpenSSL 3 (for example with Homebrew) and check with
+  `openssl version` that it is the one on your `PATH`.
+- `jq`
 
-For OpenShift/ROSA, also install:
-```bash
-brew install rosa openshift-cli
-```
+Then add the tools for your platform:
+
+- **AWS EKS:** the `aws` CLI and `eksctl`, authenticated to the account that
+  holds the cluster (`aws sts get-caller-identity` confirms it)
+- **OpenShift / ROSA:** `oc`, and the `rosa` CLI on ROSA
+- **Other clusters:** nothing more than the list above
 
 ### Outbound Connectivity Requirements
 
@@ -162,7 +166,7 @@ host us-south1-docker.pkg.dev
 ```
 
 > For air-gapped environments, see
-> [Private Registry / Air-Gapped Environments](#private-registry-air-gapped-environments).
+> [Private Registry / Air-Gapped Environments](#private-registry--air-gapped-environments).
 
 **Database (Required)**
 
@@ -270,13 +274,15 @@ Installation instructions vary by EKS version. Follow the
 
 ## Extract the Chart Package
 
-The chart ships as a zip containing a `.tgz` Helm package. Extract both before
-proceeding. Use a versioned extraction path to avoid silently overwriting
-presets when you extract a newer chart version later:
+The chart ships as a zip, `dojo-pro-helm-bundled-<version>.zip`, containing a
+`.tgz` Helm package. Verify the zip's signature first (see
+[Verify the Bundle Signature](#verify-the-bundle-signature)), then extract both.
+Use a versioned extraction path to avoid silently overwriting presets when you
+extract a newer chart version later:
 
 ```bash
-unzip helm-chart-<version>.zip -d /tmp/dojopro-extract
-cd /tmp/dojopro-extract
+unzip dojo-pro-helm-bundled-<version>.zip -d /tmp/dojopro-<version>
+cd /tmp/dojopro-<version>
 mkdir -p dojopro-<version>
 tar -xzf dojopro-<version>.tgz -C dojopro-<version>/
 ```
@@ -286,7 +292,7 @@ subsequent `helm` commands in this guide use `$CHART`:
 
 ```bash
 CHART="dojopro-<version>/dojopro"
-# e.g. CHART="dojopro-2.55.4/dojopro"
+# e.g. CHART="dojopro-3.4.0/dojopro"
 ```
 
 > **Why extraction is required for CLI users:** The preset files
@@ -297,6 +303,30 @@ CHART="dojopro-<version>/dojopro"
 >
 > **ArgoCD users do not need to extract.** ArgoCD reads `valueFiles` directly
 > from inside the chart package. See [Deploy with ArgoCD](#deploy-with-argocd).
+
+### Verify the Bundle Signature
+
+Each release publishes a detached GPG signature for the bundle
+(`dojo-pro-helm-bundled-<version>.zip.asc`) and the public key that made it
+(`dojo-pro-release-signing.asc`). Check the zip before you extract it:
+
+```bash
+gpg --import dojo-pro-release-signing.asc
+gpg --verify dojo-pro-helm-bundled-<version>.zip.asc dojo-pro-helm-bundled-<version>.zip
+```
+
+`gpg` should report a good signature. Do not install from a bundle that fails
+this check; contact support@defectdojo.com instead.
+
+The chart package inside the zip also carries a cosign signature,
+`dojopro-<version>.tgz.sig`, made with the key in `dojo-pro-cosign.pub`. With
+[cosign](https://docs.sigstore.dev/cosign/system_config/installation/) 2.0 or
+newer, after you unzip the bundle:
+
+```bash
+cosign verify-blob --key dojo-pro-cosign.pub \
+  --signature dojopro-<version>.tgz.sig dojopro-<version>.tgz
+```
 
 ---
 
@@ -351,7 +381,7 @@ At minimum, set:
 
 **Storage notes:**
 - **EKS:** Use EFS — not EBS. EBS volumes cannot be shared across nodes, causing
-  `Multi-Attach` errors. See [Known Issues](#known-issues-chart-version-2.57.1).
+  `Multi-Attach` errors. See [Known Issues](#known-issues).
   If your EFS uses an access point, also set `storage.efs.accessPointId` —
   see [EFS Access Points](#efs-access-points).
 - **OpenShift/ROSA:** The platform preset defaults to `storage.type: "pvc"` with
@@ -373,7 +403,16 @@ See `template.yaml` for the full list of options.
 ### Pre-flight: Verify Database Connectivity
 
 Confirm your database is reachable before proceeding — it will save significant
-troubleshooting time later. Spin up a temporary pod with `psql`:
+troubleshooting time later. The check runs a temporary pod in the namespace you
+will install into, so set `NAMESPACE` and create the namespace first (on
+OpenShift, `oc new-project "$NAMESPACE"` instead of `kubectl create namespace`):
+
+```bash
+NAMESPACE="dojopro"
+kubectl create namespace "$NAMESPACE"
+```
+
+Then spin up a temporary pod with `psql`:
 
 ```bash
 kubectl run psql-test --rm -i --restart=Never \
@@ -472,7 +511,11 @@ Two options here.
 
 ### Option A: External Secret (recommended for GitOps)
 
-Create a Kubernetes Secret with the 12 required keys before installing the chart.
+Create a Kubernetes Secret before installing the chart. It needs the 10 keys
+listed in the tables above. `DD_PRO_ENHANCEMENTS_EPSS_BUCKET_KEY` must be present
+but can be empty, and `DD_CONNECTORS_SHARED_SECRET` holds the same value as
+`CLOUD_PORTAL_SECRET_KEY`. The template also has keys for optional components,
+such as Sensei and the webhook gateway; keep them in the Secret.
 Use the `secrets-template.yaml` provided by DefectDojo support as a starting
 point (see [Prepare Your Values File](#prepare-your-values-file) for how to
 obtain it):
@@ -512,7 +555,7 @@ dojo:
   secretKey: ""                    # openssl rand -hex 25
   credentialAES256Key: ""          # openssl rand -hex 16
   cloudPortalSecretKey: ""         # openssl rand -hex 25
-  connectorsSharedSecret: ""       # openssl rand -hex 25 (or reuse cloudPortalSecretKey)
+  connectorsSharedSecret: ""       # leave empty: the chart uses the cloudPortalSecretKey value
   admin:
     password: ""                   # openssl rand -base64 16
   emailUrl: "consolemail://"
@@ -664,7 +707,7 @@ Pass them to `helm install` / `helm template`:
 --set-file ddorch.tls.key=orch_server.key
 ```
 
-> The `scripts/bootstrap-aws-eks.sh` helper generates and reuses these
+> The `scripts/bootstrap/bootstrap-aws-eks.sh` helper generates and reuses these
 > automatically via the `dojopro-orch-certs-configmap` — if you are using
 > that script you do not need to create them manually.
 
@@ -680,12 +723,28 @@ Before deploying, verify your license is valid and has not expired:
 
 ```bash
 sed -n '/^[[:space:]]*ey/,/-----END/p' license.lic \
-  | sed '$d' | tr -d ' ' | base64 -d | jq .
+  | sed '$d' | tr -d ' ' | base64 -d | jq 'del(.container_token)'
 ```
 
 This displays the license metadata including:
 - `not_after` — license expiry date
 - `license_package` — confirms your tier
+
+The command leaves out `container_token` on purpose. That field is your
+registry key: a base64-encoded Google Cloud service account key that can pull
+DefectDojo Pro images and charts. Treat it as a secret, and keep it out of
+terminal output, logs and tickets. If you need to log in to the registry by
+hand, pipe it straight into the login command so it is never printed:
+
+```bash
+sed -n '/^[[:space:]]*ey/,/-----END/p' license.lic \
+  | sed '$d' | tr -d ' ' | base64 -d | jq -r .container_token \
+  | docker login -u _json_key_base64 --password-stdin https://us-south1-docker.pkg.dev
+```
+
+For Helm, replace the last line with
+`helm registry login -u _json_key_base64 --password-stdin us-south1-docker.pkg.dev`.
+`dojo-helm-cli register` does both for you.
 
 > **Image pull secrets:** When `images.pullSecrets.extractFromLicense: true`
 > is set (the default in platform presets), the chart automatically extracts
@@ -693,7 +752,7 @@ This displays the license metadata including:
 > pull secret needed to pull DefectDojo images from the container registry. No
 > manual extraction or decoding is required. If you are using a private registry
 > instead, set `extractFromLicense: false` and provide your own pull secret —
-> see [Private Registry / Air-Gapped Environments](#private-registry-air-gapped-environments).
+> see [Private Registry / Air-Gapped Environments](#private-registry--air-gapped-environments).
 
 ### Option 1: --set-file (standard Helm install)
 
@@ -760,8 +819,9 @@ fips:
   validate: true    # refuse to render a partly-FIPS deployment (see below)
 ```
 
-`-fips` tagged images must be available in your registry. Contact
-hello@defectdojo.com for access.
+The `-fips` images are published in the same registry as the standard images
+from release 3.3.200, and the registry key in your license already pulls them.
+See [Getting the FIPS images](/get_started/pro/onprem/fips_mode/#getting-the-fips-images).
 
 ### Components without a FIPS variant
 
@@ -807,8 +867,8 @@ kubectl -n $NAMESPACE exec deploy/dojopro-django -- python3 /verify_fips.py
 ```
 
 Behaviour changes to plan for (password hashing moves to PBKDF2, ChaCha20 is
-dropped from the TLS cipher list) are covered in the FIPS 140-3 Mode page of
-the Asset documentation.
+dropped from the TLS cipher list) are covered on the
+[FIPS 140-3 Mode](/get_started/pro/onprem/fips_mode/) page.
 
 ---
 
@@ -857,7 +917,7 @@ secrets + license choices you made above.
 
 ```bash
 NAMESPACE="dojopro"
-kubectl create namespace $NAMESPACE
+kubectl create namespace $NAMESPACE   # skip if you created it for the pre-flight check
 ```
 
 > **Namespace consistency:** The namespace value must match across all
@@ -934,7 +994,7 @@ configure an ACM certificate.
 ```bash
 NAMESPACE="dojopro"
 oc new-project $NAMESPACE
-# Or, if the namespace already exists:
+# Or, if the namespace already exists (for example from the pre-flight check):
 # oc project $NAMESPACE
 ```
 
@@ -1072,10 +1132,13 @@ kubectl get jobs -n $NAMESPACE
 
 # Check all pods are running
 kubectl get pods -n $NAMESPACE
-# Expected components (chart 2.57+): django, celery-worker, celery-beat,
-# connectors, nginx, ddorch, ddorch-workers, integrators, mcp-server, plus
-# redis and postgresql if you are using the bundled copies, plus sensei if
-# you enabled it (sensei.enabled).
+# Expected pods (chart 3.4.0, standard profile, release dojopro):
+# django (nginx runs inside the django pod), django-import, celery-worker,
+# celery-imports-worker, celery-beat, connectors, integrators, ddorch,
+# ddorch-workers and mcp-server; the initializer job's pod; webhook-gateway,
+# except with dojo.existingSecret unless webhookGateway.existingSecretHasKeys
+# is set; redis unless you use an external broker; postgresql only if you
+# enabled the bundled copy; sensei only if you set sensei.enabled.
 # Note: ddorch-workers replaces the legacy kairos, rulesengine, and
 # hatchet-integrators workers.
 
@@ -1141,10 +1204,11 @@ kubectl get secret dojopro-secrets -n $NAMESPACE \
 ```
 
 If you used inline secrets instead of an external secret, the password is in
-the chart-managed secret:
+the chart-managed secret, which is named after the release (`dojopro` for the
+release name used in this guide):
 
 ```bash
-kubectl get secret dojopro-defectdojo -n $NAMESPACE \
+kubectl get secret dojopro -n $NAMESPACE \
   -o jsonpath='{.data.DD_ADMIN_PASSWORD}' | base64 -d && echo
 ```
 
@@ -1174,20 +1238,24 @@ celery:
   logLevel: "DEBUG"
 ```
 
+To toggle it without editing files, run `helm upgrade` against the chart
+version the release already runs, with `--reuse-values`. That keeps every value
+the release was installed with, including the license, the secret references and
+the `--set-file` ddorch certificates, and changes only what you `--set`:
+
 ```bash
 helm upgrade dojopro $CHART \
   -n $NAMESPACE \
-  -f $CHART/presets/platforms/<platform>.yaml \
-  -f $CHART/presets/profiles/standard.yaml \
-  -f my-company.yaml \
+  --reuse-values \
   --set config.logLevel=DEBUG \
   --set celery.logLevel=DEBUG \
   --wait --timeout 15m
 ```
 
-The `--set` flags override values file settings, so you can toggle debug
-logging without editing files. Once the issue is resolved, run `helm upgrade`
-again without the `--set` flags to return to your configured defaults.
+Without `--reuse-values`, `helm upgrade` needs every values file and `--set` /
+`--set-file` flag from your install; leaving out the ddorch certificates fails
+with `ddorch.tls.rootCa is required`. Once the issue is resolved, run the same
+command with `INFO` in place of `DEBUG`.
 
 The Django deployment also supports `django.uwsgi.enableDebug: true`, which
 sets `DD_DEBUG=True` for lower-level framework debugging. This produces
@@ -1383,7 +1451,7 @@ Keep each layer focused on one thing.
 > the chart package, so they update automatically when you change
 > `targetRevision`. CLI users must re-extract presets when upgrading to a new
 > chart version to pick up any changes to platform or profile defaults. Use a
-> versioned extraction path (e.g., `dojopro-2.55.4/`) to avoid confusion
+> versioned extraction path (e.g., `dojopro-3.4.0/`) to avoid confusion
 > between chart versions — see [Extract the Chart Package](#extract-the-chart-package).
 
 ---
@@ -1501,7 +1569,7 @@ A typical OCI upgrade looks like this (same values files and `--set` flags
 as the original install):
 
 ```bash
-VERSION="<chart-version>"   # e.g. 2.57.2
+VERSION="<chart-version>"   # e.g. 3.4.0
 
 helm upgrade dojopro \
   oci://us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro-helm-v2/dojopro \
@@ -1619,11 +1687,11 @@ toggle these database/broker flags — you must set them yourself.
 > before the main process starts. This is a common pattern for StatefulSets
 > with persistent storage. If your cluster enforces a `restricted` Pod Security
 > Standard or OpenShift SCC that forbids root init containers, disable it with
-> `postgresql.initContainer.enabled: false` (see [Known Issues](#known-issues-chart-version-2.57.1)).
+> `postgresql.initContainer.enabled: false` (see [Known Issues](#known-issues)).
 
 When using embedded PostgreSQL on EKS, you will also need the EBS CSI driver
 (see [AWS EKS Prerequisites](#aws-eks-prerequisites)) and may need to adjust
-storage defaults (see [Known Issues](#known-issues-chart-version-2.57.1)).
+storage defaults (see [Known Issues](#known-issues)).
 
 Validate your values before installing — the minimal path requires more
 overrides and is more likely to hit rendering errors:
@@ -1677,11 +1745,11 @@ override individual images:
 images:
   registry: "my-registry.example.com"
   prefix: "defectdojo/"          # path within your registry
-  tag: "2.53.0"
+  tag: "<version>"
   connectors:
     registry: "my-registry.example.com"
     repository: "defectdojo/connectors"
-    tag: "2.53.0"
+    tag: "<version>"
   redis:
     registry: "my-registry.example.com"
     repository: "defectdojo/redis"
@@ -1970,10 +2038,11 @@ method you choose.
 
 ---
 
-## Known Issues (Chart Version 2.57.1)
+## Known Issues
 
-These are confirmed bugs in the current chart. Workarounds are documented
-here until a patched version is released.
+These issues were confirmed on chart 2.57.1. Workarounds are documented here
+until a patched version is released; check the
+[DefectDojo Pro Changelog](/releases/pro/changelog/) for fixes in later releases.
 
 ### Minimal install with local PostgreSQL or Redis only
 
@@ -2022,16 +2091,6 @@ postgresql:
 ```
 
 ### All deployments
-
-**Connectors pod crashloops while initializer is running (Expected Behavior)**
-
-During the first install, the connectors pod will enter `CrashLoopBackOff`
-while the initializer job is running database migrations. This is expected —
-the connectors pod attempts to call the Django API (`/api/connectors/v1/config/`),
-which returns a 500 because the database schema is not yet fully migrated.
-Once the initializer job completes successfully (shows `1/1 COMPLETIONS` in
-`kubectl get jobs`), the connectors pod will recover on its next restart cycle.
-No manual intervention is required.
 
 **Initializer crash after migrations leaves unrecoverable database state (BUG-18)**
 
@@ -2106,7 +2165,7 @@ Check logs:
 kubectl logs -n $NAMESPACE <pod-name> --previous
 ```
 
-Usually one of: missing or wrong secrets (check all 12 keys), database unreachable
+Usually one of: missing or wrong secrets (check all 10 required keys), database unreachable
 (check `database.host` and security groups), or internal TLS cert missing
 (check `dojopro-internal-tls` secret exists).
 
@@ -2130,7 +2189,7 @@ an external secret is configured.
 If pods fail with permission errors on NFS volumes, check that
 `securityContext.openshift.fsGroup` falls within your namespace's
 supplemental-groups range. See the fsGroup lookup in
-[Deploy → OpenShift / ROSA](#openshift-rosa).
+[Deploy → OpenShift / ROSA](#openshift--rosa).
 
 ### ALB not showing up (EKS)
 

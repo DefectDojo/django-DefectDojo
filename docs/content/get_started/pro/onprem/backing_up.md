@@ -59,7 +59,7 @@ pg_dump -h <db_host> -U <db_user> -Fc dojodb > dojodb.dump
 pg_dump -h <db_host> -U <db_user> -Fc dojodb-ddorch > dojodb-ddorch.dump
 ```
 
-The `dojo-db-backup` tool dumps the main database only, so if you use it, dump the `-ddorch` database alongside it.
+If you use `dojo-backup`, the standalone backup utility DefectDojo support provides for Compose installs, note that it dumps the main database only. Dump the `-ddorch` database alongside it with `pg_dump` as above. `dojo-compose-cli` 2.1.5 and earlier have no backup command of their own.
 {{< /tab >}}
 {{< /tabs >}}
 

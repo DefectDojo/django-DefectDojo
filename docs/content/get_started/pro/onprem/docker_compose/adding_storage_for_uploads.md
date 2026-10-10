@@ -50,13 +50,13 @@ Three tools are commonly used to mount S3 as a filesystem on Linux.
 
 This requires downtime, since the application must not be writing uploads while they are being copied.
 
-1. Stop DefectDojo with `dojo-compose-cli app stop`, so nothing changes underneath you during the move.
+1. Stop DefectDojo with `sudo -E dojo-compose-cli app stop`, so nothing changes underneath you during the move.
 2. Rename the existing media directory to keep it as a rollback point, for example moving `media` to `old-media` inside your deployment directory.
 3. Create an empty directory at the original media path to act as the mount point.
 4. Attach the new filesystem. The specifics depend on what you chose above, but it comes to three things: make the storage available to Linux, which for object storage means creating the bucket and its permissions; mount it at the media path; and make the mount survive a reboot, usually with an `/etc/fstab` entry or the equivalent for your tool.
 5. Copy the old contents across, preserving ownership and permissions. `rsync -Pav` from the old directory to the new one does this and reports progress, which is useful when there is a lot to move.
 6. Confirm the files arrived. For object storage, checking the bucket in your provider's console is the quickest way to be sure the mount is really writing where you think it is.
-7. Start DefectDojo with `dojo-compose-cli app start` and upload a test file. If the upload fails, the container logs will say why, and permissions are the usual cause.
+7. Start DefectDojo with `sudo -E dojo-compose-cli app start` and upload a test file. If the upload fails, the container logs will say why, and permissions are the usual cause.
 
 Keep the old directory until the test upload succeeds and you have confirmed that files migrated from it are readable in the UI. It is your way back if the new filesystem does not behave.
 
