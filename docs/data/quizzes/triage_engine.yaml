@@ -1,0 +1,421 @@
+subject: "Triage Engine"
+questions:
+  - q: "What is Triage Engine?"
+    options:
+      - "A scanner that finds new vulnerabilities in your Assets"
+      - "A visual automation builder: each rule is a graph of nodes that decides when it runs and what happens to the items that flow through it"
+      - "A machine-learning model that scores and prioritizes Findings"
+      - "A dashboard that summarizes open Findings by severity"
+    answer: 1
+    why: "A rule is a graph: one trigger node that decides when the rule wakes up, wired to logic, Finding, Asset and egress nodes that say what happens next."
+    source: "about/"
+    hints:
+      - note: "DefectDojo doesn't scan. To pull results from your scanners automatically, connect them with Upstream Connectors."
+        link: "/connectors/upstream/about/"
+        label: "Upstream Connectors"
+      - null
+      - note: "Scoring and ranking Findings is the job of Priority & Risk, which you tune with a Prioritization Engine."
+        link: "/asset_modelling/pro_hierarchy/priority_sla/"
+        label: "Priority, Risk and SLAs"
+      - note: "For severity summaries at a glance, build a Customizable Dashboard."
+        link: "/metrics_reports/dashboards/custom-dashboards/"
+        label: "Customizable Dashboards"
+
+  - q: "What does Triage Engine add over the original Rules Engine?"
+    options:
+      - "Branching, sending to outside systems, a full record of every run and send, and a simulate mode for safe testing"
+      - "Only a faster way to apply the same filter-plus-actions rules"
+      - "Automatic conversion and retirement of all your existing rules"
+      - "Rules that run without needing an owner or permissions"
+    answer: 0
+    why: "It keeps the filter-plus-actions capability and adds four things: branching, egress, traceability through Runs and Deliveries, and Simulate mode."
+    source: "about/#what-it-adds-over-rules-engine"
+    hints:
+      - null
+      - note: "If a filter plus a list of actions is all you need, the original Rules Engine still does exactly that."
+        link: "/automation/rules_engine/about/"
+        label: "Rules Engine"
+      - note: "Nothing converts on its own. When you're ready, the converter creates disabled copies for you to review."
+        link: "converting_from_rules_engine/"
+        label: "Converting from Rules Engine"
+      - note: "Every rule runs as its owner. To widen what a rule can reach, assign an owner with wider access, or use **Take Ownership**."
+        link: "about/#owner"
+        label: "Rule owners"
+
+  - q: "Which of these is a good use for a Triage Engine rule?"
+    options:
+      - "Running a scanner against an Asset on a schedule"
+      - "Writing a parser for a new scan format"
+      - "When a Critical Finding is created, opening a JIRA issue and posting to Slack, while only tagging lower-severity Findings"
+      - "Changing which users can log in to DefectDojo"
+    answer: 2
+    why: "An If / Filter node splits Findings into a true and a false branch, so one rule can ticket and notify on Criticals and treat the rest differently."
+    source: "about/#what-it-adds-over-rules-engine"
+    hints:
+      - note: "DefectDojo doesn't run scanners, but Upstream Connectors sync your tools' results on a schedule. A rule can then react with the **When a Scan Has Landed** trigger."
+        link: "/connectors/upstream/about/"
+        label: "Upstream Connectors"
+      - note: "For a format with no built-in parser, the Universal Parser lets you map it without writing code."
+        link: "/import_data/pro/specialized_import/universal_parser/"
+        label: "Universal Parser"
+      - null
+      - note: "Who can log in is managed by your identity provider. SCIM provisions and deprovisions users automatically."
+        link: "/admin/sso/pro__scim/"
+        label: "SCIM Provisioning"
+
+  - q: "Besides Findings, what else can Triage Engine rules work on, and why is that useful?"
+    options:
+      - "Users, to automate onboarding and offboarding"
+      - "Assets, to keep inventory organized: setting fields, tagging, moving them between Organizations and enforcing that as new Assets arrive"
+      - "Scan files, to rewrite them before import"
+      - "Nothing else. Rules only ever work on Findings"
+    answer: 1
+    why: "An Asset rule can set fields, move Assets between Organizations, tag them and place them in the hierarchy, and keeps enforcing that grouping instead of needing a one-off migration."
+    source: "about/"
+    hints:
+      - note: "To onboard and offboard users automatically, provision them from your identity provider with SCIM."
+        link: "/admin/sso/pro__scim/"
+        label: "SCIM Provisioning"
+      - null
+      - note: "To import a format DefectDojo doesn't parse, map it with the Universal Parser instead of rewriting files."
+        link: "/import_data/pro/specialized_import/universal_parser/"
+        label: "Universal Parser"
+      - note: "Rules can work on Assets too: use the **On Asset Event** trigger and the Assets nodes."
+        link: "node_reference/#assets"
+        label: "Asset nodes"
+
+  - q: "Your team already relies on rules in the original Rules Engine. What happens to them when Triage Engine is turned on?"
+    options:
+      - "They keep running unchanged. Both engines run side by side, and you can convert rules when you're ready"
+      - "They are converted to Triage Engine graphs automatically"
+      - "They stop running until you convert them"
+      - "They are deleted after 30 days"
+    answer: 0
+    why: "Turning on Triage Engine doesn't disable or convert existing rules, and there's no deadline to move them. A converter is there for when you want to."
+    source: "converting_from_rules_engine/"
+    hints:
+      - null
+      - note: "Nothing converts on its own. Run the converter when you're ready; it starts with a `--dry-run` report."
+        link: "converting_from_rules_engine/#running-the-converter"
+        label: "Running the converter"
+      - note: "They keep running, and you'll find them under **Act > Classic Rules**."
+        link: "/automation/rules_engine/about/"
+        label: "Rules Engine"
+      - note: "Nothing is deleted. Only Triage Engine's own run and delivery records are pruned, after 180 days by default."
+        link: "configuration/#retention"
+        label: "Retention settings"
+
+  - q: "What is the **Deliveries** page for?"
+    options:
+      - "Scheduling when rules run"
+      - "Configuring Slack and JIRA credentials"
+      - "Listing scan imports that are still in progress"
+      - "Showing everything rules sent, or would have sent, outside DefectDojo: what was sent, where it went and how it ended"
+    answer: 3
+    why: "Every outbound send is one row in the delivery ledger, written before the network call, so egress is auditable and simulated sends can be reviewed."
+    source: "deliveries/"
+    hints:
+      - note: "Schedules are set on the rule itself, with an **On a Schedule** trigger."
+        link: "building_rules/#scheduling"
+        label: "Scheduling"
+      - note: "Slack and Teams are set up once in system settings, and the Triage Engine nodes reuse them."
+        link: "/admin/notifications/email_slack_teams/"
+        label: "Email, Slack and Teams setup"
+      - note: "To act when an import finishes, use the **When a Scan Has Landed** trigger. To catch a scan that never arrived, use **On a Missing Scan**."
+        link: "node_reference/#when-a-scan-has-landed"
+        label: "Scan triggers"
+      - null
+
+  - q: "A Finding's severity changed overnight and nobody knows why. How does Triage Engine help answer that?"
+    options:
+      - "It doesn't. You'd have to read every rule definition"
+      - "The Finding shows a provenance timeline naming the rule, run and node that made each change"
+      - "It emails the rule owner every time a Finding changes"
+      - "Rule changes are hidden from the Finding history"
+    answer: 1
+    why: "Provenance answers \"why did this Finding change?\" on the Finding itself, with before and after values, and it survives the rule being deleted."
+    source: "runs/#provenance-on-a-finding"
+    hints:
+      - note: "No need: each run's node trace on the Runs page shows what every node did."
+        link: "runs/#the-node-trace"
+        label: "The node trace"
+      - null
+      - note: "To get told about changes, add a **Send an Email** node to the rule, or set up your personal notifications."
+        link: "node_reference/#send-an-email"
+        label: "Send an Email node"
+      - note: "Rule changes are shown on the Finding. For a wider record of who changed what, use Audit Logs."
+        link: "/admin/user_management/pro__audit_logging/"
+        label: "Audit Logs"
+
+  - q: "What do **Webhook Receivers** let Triage Engine do?"
+    options:
+      - "Let Slack users run rules from chat commands"
+      - "Expose a public API for other tools to create rules"
+      - "React to events from outside systems, such as closing a Finding when its linked Jira issue is marked Done, or adding Jira comments as notes"
+      - "Send scan reports from DefectDojo to external tools"
+    answer: 2
+    why: "Receivers accept inbound webhooks and hand them to rules. For Jira this gives two-way sync: closing, reopening and comments flow back to the linked Finding."
+    source: "webhook_receivers/#turning-on-two-way-sync-for-a-downstream-connector"
+    hints:
+      - note: "Rules don't take chat commands. To run one on demand, give it a **Manual Run** trigger and press **Run**."
+        link: "node_reference/#manual-run"
+        label: "Manual Run trigger"
+      - note: "Rules are built in the Pro UI. To let another tool start a rule, point it at a custom Webhook Receiver."
+        link: "webhook_receivers/"
+        label: "Webhook Receivers"
+      - null
+      - note: "Sending things out is egress. Use the **Generate a Report** or **Call a Webhook** node."
+        link: "node_reference/#generate-a-report"
+        label: "Generate a Report node"
+
+  - q: "How is Triage Engine turned on?"
+    options:
+      - "It turns on automatically when you upgrade to a release that includes it"
+      - "A superuser turns it on from **Settings > Feature Flags**"
+      - "Each user turns it on in their profile"
+      - "An admin sets `DD_RULES_V2_ENABLED=True` in the environment"
+    answer: 1
+    why: "Triage Engine is in Beta and off by default. A superuser turns it on with a feature flag, on both Cloud and On-Premise."
+    source: "about/#enabling-triage-engine"
+    hints:
+      - note: "Upgrading doesn't turn it on. A superuser enables it under Feature Flags."
+        link: "/admin/feature_flags/pro__feature_flags/"
+        label: "Feature Flags"
+      - null
+      - note: "It's switched on for the whole instance. Who can use it is then set by the four Rule permissions."
+        link: "about/#permissions"
+        label: "Rule permissions"
+      - note: "The `DD_RULES_V2_*` settings only tune throughput, retention and egress. The feature itself is a feature flag."
+        link: "configuration/"
+        label: "Configuration"
+
+  - q: "What state is a newly created rule in?"
+    options:
+      - "Enabled, in Live mode"
+      - "Enabled, in Simulate mode"
+      - "Disabled, in Live mode"
+      - "Disabled, in Simulate mode"
+    answer: 3
+    why: "New rules are always created disabled, so enabling one is a deliberate act. Simulate is the default mode."
+    source: "about/#rules-and-graphs"
+    hints:
+      - note: "You switch to Live yourself, as the last step after checking the simulated deliveries."
+        link: "building_rules/#testing-a-rule-safely"
+        label: "Testing a rule safely"
+      - note: "You enable a rule yourself, once Preview shows it matches what you expect."
+        link: "building_rules/#previewing-before-you-save"
+        label: "Preview"
+      - note: "Simulate is the default. Live is something you switch on."
+        link: "about/#mode-simulate-or-live"
+        label: "Simulate and Live"
+      - null
+
+  - q: "A rule in Simulate mode contains a **Set Severity** node and a **Send a Slack Message** node. What happens when it runs?"
+    options:
+      - "Nothing changes and nothing is sent"
+      - "Severity changes on the Findings, and the Slack message is recorded as a `simulated` delivery but not sent"
+      - "The Slack message is sent, but Finding changes are rolled back"
+      - "Both happen, but the run is labeled as a simulation"
+    answer: 1
+    why: "Simulate is not a partial run. Every Finding edit happens for real; only the outbound sends are held back."
+    source: "about/#mode-simulate-or-live"
+    hints:
+      - note: "For a dry run that changes nothing at all, use **Preview**. It runs the real engine, then rolls everything back."
+        link: "building_rules/#previewing-before-you-save"
+        label: "Preview"
+      - null
+      - note: "To send messages without editing Findings, build a rule with only egress nodes and set it to Live."
+        link: "node_reference/#egress"
+        label: "Egress nodes"
+      - note: "That describes Live mode, where both the edits and the sends happen."
+        link: "about/#mode-simulate-or-live"
+        label: "Simulate and Live"
+
+  - q: "A rule's trigger has an empty **Scope**. Which Findings does the rule consider?"
+    options:
+      - "Every Finding in the instance"
+      - "No Findings, because scope is required"
+      - "Every Finding the rule's owner can see"
+      - "Every Finding the user who last edited the rule can see"
+    answer: 2
+    why: "Scope is applied on top of authorization, never instead of it. The rule runs as its owner."
+    source: "building_rules/#scope"
+    hints:
+      - note: "A rule only sees what its owner sees. For instance-wide coverage, make the owner a user who can see everything."
+        link: "about/#owner"
+        label: "Rule owners"
+      - note: "Scope is optional. To narrow a rule, add scope filters, the same ones the Findings list uses."
+        link: "building_rules/#scope"
+        label: "Scope"
+      - null
+      - note: "Rules run as their owner, not their last editor. To make yourself the owner, use **Take Ownership**."
+        link: "about/#owner"
+        label: "Rule owners"
+
+  - q: "A Finding rule's scope contains a filter key that doesn't exist. What happens at run time?"
+    options:
+      - "The run errors out"
+      - "The bad filter is ignored and the rest of the scope applies"
+      - "The scope widens to everything the owner can see"
+      - "The rule is automatically disabled"
+    answer: 0
+    why: "An invalid scope fails the run rather than widening it. A rule that does nothing is recoverable; one that edits everything is not."
+    source: "building_rules/#scope"
+    hints:
+      - null
+      - note: "When converting old rules, `--drop-invalid-filters` drops unknown filters with a warning instead of failing."
+        link: "converting_from_rules_engine/#from-the-command-line"
+        label: "Converter options"
+      - note: "Use **Preview** to see what a scope matches before you save."
+        link: "building_rules/#previewing-before-you-save"
+        label: "Preview"
+      - note: "The rule stays enabled. Read the error on the Runs page and fix the scope."
+        link: "runs/#what-a-run-records"
+        label: "Runs"
+
+  - q: "A run's third node raises an error after the first two nodes edited 200 Findings. What is the outcome?"
+    options:
+      - "The 200 edits are kept and the run is marked partial"
+      - "All Finding changes are rolled back, the node trace and error are still recorded, and no deliveries are sent"
+      - "Everything is rolled back, including the trace, so the run leaves no record"
+      - "The run retries from the failed node"
+    answer: 1
+    why: "A run is atomic, but the trace is written afterwards. Deliveries are dispatched only after the run commits."
+    source: "runs/#a-failed-run-changes-nothing"
+    hints:
+      - note: "Runs are all or nothing. The node trace shows which node broke."
+        link: "runs/#the-node-trace"
+        label: "The node trace"
+      - null
+      - note: "The trace is kept even when the edits roll back. Open the run from the Runs page."
+        link: "runs/"
+        label: "Runs"
+      - note: "Runs don't resume. Fix the node and let the rule run again. Failed sends can be replayed from Deliveries."
+        link: "deliveries/#replaying-a-delivery"
+        label: "Replaying a delivery"
+
+  - q: "How does Triage Engine handle concurrency?"
+    options:
+      - "One instance-wide lock, so only one rule runs at a time"
+      - "No locking, so a rule can run several times in parallel"
+      - "Rules run one at a time, in the order of their weight"
+      - "Each rule runs once at a time, and different rules run concurrently"
+    answer: 3
+    why: "A rule can have only one run in progress. Distinct rules run concurrently, unlike the original engine's instance-wide lock."
+    source: "runs/#one-run-per-rule-at-a-time"
+    hints:
+      - note: "That's how the original Rules Engine works. Triage Engine locks per rule instead."
+        link: "converting_from_rules_engine/#what-does-not-carry-over"
+        label: "What changes when you convert"
+      - note: "A rule never races itself; a second trigger waits. To change how big each run is, tune Findings per event."
+        link: "configuration/#throughput"
+        label: "Throughput settings"
+      - note: "Rules have no run order. For steps that must happen in order, chain the nodes inside one rule."
+        link: "building_rules/#the-editor"
+        label: "The editor"
+      - null
+
+  - q: "Rule A changes a Finding, which triggers Rule B, which changes it again in a way that would trigger Rule A. What happens?"
+    options:
+      - "Rule A doesn't run again, because a rule never runs twice in the same chain"
+      - "Rule A runs again, up to a depth of 3"
+      - "Both rules loop until the stall window kills them"
+      - "The second change is blocked and Rule B errors"
+    answer: 0
+    why: "Every event carries the list of rules already traversed in its chain, so rules cannot re-trigger themselves or ping-pong."
+    source: "runs/#cascading"
+    hints:
+      - null
+      - note: "To revisit Findings regularly instead, sweep them with an **On a Schedule** trigger."
+        link: "node_reference/#on-a-schedule"
+        label: "On a Schedule trigger"
+      - note: "Loops can't happen. The stall window is for runs whose worker died."
+        link: "configuration/#run-lifetime"
+        label: "Run lifetime settings"
+      - note: "Nothing is blocked; Rule A just doesn't fire again. Follow a chain with the **Depth** and **Source run** fields."
+        link: "runs/#what-a-run-records"
+        label: "What a run records"
+
+  - q: "A scheduled rule's scope matches 250,000 Findings. With default settings, how many does the run process?"
+    options:
+      - "1,000, the chunk size"
+      - "500, the events-per-batch size"
+      - "All 250,000, processed in chunks of 1,000"
+      - "10,000, the run safety cap"
+    answer: 2
+    why: "A run is not capped. Chunk size bounds memory, not coverage."
+    source: "runs/#scale-and-limits"
+    hints:
+      - note: "Chunk size only limits memory. To cap a run on purpose, add a **Limit** node."
+        link: "node_reference/#limit"
+        label: "Limit node"
+      - note: "500 is how many Findings one event carries. Tune it with `DD_RULES_V2_EVENT_BATCH`."
+        link: "configuration/#throughput"
+        label: "Throughput settings"
+      - null
+      - note: "There's no built-in cap. To cap how many tickets or messages a run produces, add a **Limit** node."
+        link: "node_reference/#limit"
+        label: "Limit node"
+
+  - q: "A rule tries to open a JIRA issue for a Finding that already has an active delivery with the same idempotency key. What is recorded?"
+    options:
+      - "A second JIRA issue is created"
+      - "Nothing. The send is silently dropped"
+      - "The run fails with a duplicate-key error"
+      - "A `skipped` delivery row with the reason in the last error field"
+    answer: 3
+    why: "The double-send guard allows one active delivery per key. A colliding send becomes a visible skip, never a duplicate ticket."
+    source: "deliveries/#the-double-send-guard"
+    hints:
+      - note: "Duplicates are blocked. To send again on purpose, replay a failed or dead delivery."
+        link: "deliveries/#replaying-a-delivery"
+        label: "Replaying a delivery"
+      - note: "Skips are never silent. Each one shows its reason on the Deliveries page."
+        link: "deliveries/#statuses"
+        label: "Delivery statuses"
+      - note: "To avoid repeat sends within one run, add a **De-duplicate Within Run** node."
+        link: "node_reference/#de-duplicate-within-run"
+        label: "De-duplicate Within Run"
+      - null
+
+  - q: "You save a rule whose **Call a Webhook** node points to `http://10.0.0.5/hook`. With default settings, what happens?"
+    options:
+      - "The rule saves, and the send fails at run time"
+      - "The rule saves and sends normally"
+      - "The URL is rewritten to `https`"
+      - "The save is rejected because the host resolves to a private address, unless `DD_RULES_V2_ALLOW_PRIVATE_EGRESS` is turned on"
+    answer: 3
+    why: "Loopback, link-local, private, reserved and multicast hosts are rejected at save time by default, to stop request forgery from inside the cluster."
+    source: "configuration/#outbound-destination-validation"
+    hints:
+      - note: "Destinations are checked when you save, so a bad URL fails early."
+        link: "configuration/#outbound-destination-validation"
+        label: "Destination validation"
+      - note: "To allow private addresses, turn on `DD_RULES_V2_ALLOW_PRIVATE_EGRESS`."
+        link: "configuration/#outbound-destination-validation"
+        label: "Destination validation"
+      - note: "URLs aren't rewritten. For ready-made outbound alerts, see Messaging Connectors."
+        link: "/issue_tracking/pro_integration/messaging_connectors/"
+        label: "Messaging Connectors"
+      - null
+
+  - q: "You convert Rules Engine rules with `python manage.py convert_rules_to_v2` and no extra options. Which statement is true?"
+    options:
+      - "Converted rules are enabled, and the originals are disabled"
+      - "Converted rules are disabled, and their schedules are not copied unless you pass `--activate-schedules`"
+      - "Converted rules keep their run history from the old engine"
+      - "Every Rules Engine action, including \"set false positive to false\", converts automatically"
+    answer: 1
+    why: "Converted rules always land disabled, and schedules are copied only with `--activate-schedules`. Run history stays put, and \"set false positive to false\" must be converted by hand."
+    source: "converting_from_rules_engine/#what-does-not-carry-over"
+    hints:
+      - note: "You enable converted rules yourself. Follow the suggested order, with Simulate first."
+        link: "converting_from_rules_engine/#a-suggested-order"
+        label: "A suggested order"
+      - null
+      - note: "Run history stays in the original engine's UI."
+        link: "/automation/rules_engine/about/"
+        label: "Rules Engine"
+      - note: "Run `--dry-run` first to see which rules need converting by hand."
+        link: "converting_from_rules_engine/#from-the-command-line"
+        label: "Converter options"

@@ -1,0 +1,114 @@
+# How to write a docs quiz
+# ========================
+#
+# This file is a worked example, not a real quiz. No page uses it, so it is
+# never rendered. Copy it to data/quizzes/<name>.yaml and replace the
+# questions to start a new quiz.
+#
+# 1. Create the data file
+#    data/quizzes/<name>.yaml. <name> is how a page refers to the quiz, so
+#    use lowercase and underscores (for example: import_reimport).
+#
+# 2. Create the page
+#    Add a Markdown page in the section the quiz covers, usually named
+#    quiz.md, with the shortcode in its body:
+#
+#      ---
+#      title: "Knowledge Check"
+#      description: "Test what you know about <feature> with 20 multiple-choice questions"
+#      weight: 99           # where it sits in the sidebar; usually last in its section
+#      audience: pro        # pro, opensource, or leave it out for both editions
+#      ---
+#      One or two sentences on what the quiz covers.
+#
+#      {{< quiz "<name>" >}}
+#
+#    The shortcode lives in layouts/shortcodes/quiz.html. Building the site
+#    fails with an error if <name> does not match a data file.
+#
+# 3. Check it
+#    Run `hugo server` from docs/, open the page, and answer every question.
+#    Click through the "Read more" link and every hint link: a link that
+#    points at a heading that doesn't exist won't break the build.
+#
+# Writing guidelines
+# ------------------
+# - Ground every question in the docs. If the docs don't say it, don't ask it.
+# - Aim for about 20 questions. At least a third should be broad ("what is
+#   this feature for, what can you do with it"); put those first, then the
+#   specific behavior questions.
+# - Prefer questions about how a feature behaves over numbers to memorize
+#   (default limits, retention days, and so on).
+# - Every wrong option gets a hint pointing to the feature that would handle
+#   that case, or to the page that explains the real behavior. Only link to
+#   features you've confirmed exist in the docs.
+# - Spread the correct answers across A, B, C and D.
+# - Match the page's audience: on a Pro page, use Pro names (for example
+#   "Add Findings form") and Pro pages for links, and don't label things
+#   "(Pro)".
+#
+# Links
+# -----
+# `source` and hint `link` values take either form:
+#   "/import_data/import_intro/reimport/#close-findings"   starts with "/": a path on the site
+#   "runs/#cascading"                                      no "/": relative to the quiz page's section
+# The part after "#" is the heading's id: the heading text in lowercase, with
+# spaces turned into hyphens and most punctuation removed.
+#
+# Formatting
+# ----------
+# q, options, why and note accept inline Markdown: **bold**, `code`, and
+# [links](/path/). Quote each string, and escape a double quote inside one
+# as \".
+
+# Shown in the message for a perfect score: "You know <subject> well."
+subject: "Example Feature"
+
+questions:
+  # A broad question. These come first.
+  - q: "What is Example Feature for?"   # the question; inline Markdown allowed
+    options:                            # 2 to 6 options, shown as A, B, C...
+      - "Scanning your Assets for new vulnerabilities"
+      - "Automatically routing new Findings to the team that owns them"
+      - "Exporting Findings to a spreadsheet"
+      - "Resetting user passwords"
+    answer: 1                           # 0-based: 0 = A, 1 = B, 2 = C, 3 = D
+    # Shown after any pick: why the correct answer is right. Keep it to one or
+    # two sentences.
+    why: "Example Feature routes each new Finding to its owning team, based on rules you define."
+    # Optional "Read more" link: the section that covers the answer.
+    source: "/automation/example_feature/about/"
+    # Optional, but expected. One entry per option, in the same order.
+    # Use null for the correct option. A wrong pick shows its note under a
+    # "Where to look instead:" label, followed by a link to `link`, using
+    # `label` as the link text.
+    hints:
+      - note: "DefectDojo doesn't scan. To pull results from your tools automatically, use Upstream Connectors."
+        link: "/connectors/upstream/about/"
+        label: "Upstream Connectors"
+      - null  # correct answer does not need a hint
+      - note: "To get Findings out of DefectDojo, DefectDojo-CLI exports them to JSON or CSV."
+        link: "/import_data/pro/specialized_import/external_tools/#export"
+        label: "DefectDojo-CLI export"
+      - note: "Passwords are managed in user settings, or by your identity provider through SSO."
+        link: "/admin/user_management/pro__resetting_user_credentials/"
+        label: "Resetting user credentials"
+
+  # A specific behavior question. Three options is fine; the hints list must
+  # still have one entry per option.
+  - q: "A rule matches a Finding that's already **Risk Accepted**. What happens?"
+    options:
+      - "The Finding is reopened"
+      - "The Finding is left as it is"
+      - "The rule fails"
+    answer: 1
+    why: "Example Feature never overrides an explicit triage decision such as a Risk Acceptance."
+    source: "about/#triage-decisions"   # relative to the quiz page's section
+    hints:
+      - note: "To reopen a Finding, remove its Risk Acceptance first."
+        link: "/triage_findings/findings_workflows/pro__risk_acceptance/"
+        label: "Risk Acceptance"
+      - null  # correct answer does not need a hint
+      - note: "Rules don't fail on a match. Check the rule's run history to see what it did."
+        link: "about/#run-history"
+        label: "Run history"
