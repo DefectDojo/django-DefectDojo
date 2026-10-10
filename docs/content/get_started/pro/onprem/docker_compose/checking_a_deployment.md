@@ -71,9 +71,9 @@ sudo -E dojo-compose-cli certs status
 
 `certs status` reads every certificate and key under `certs/` in the install directory (`/opt/dojo/certs/` in a default install) and reports what would break:
 
-- The certificate nginx serves to browsers, `certs/dojo.crt` and `certs/dojo.key`. It fails when a file is missing or unreadable, or when the key does not match the certificate, because nginx will not start. It warns when the certificate has expired or expires within 30 days, when it is still the placeholder every install ships with, and when it does not cover the host in `DD_SITE_URL`.
+- The certificate nginx serves to browsers, `certs/dojo.crt` and `certs/dojo.key`. It fails when a file is missing or unreadable, when nginx cannot read the certificate or key, or when the key does not match the certificate, because nginx will not start. It warns when the certificate has expired or expires within 30 days, when it is still the placeholder every install ships with, and when it does not cover the host in `DD_SITE_URL`.
 - The internal service certificates that ship with the deployment files.
-- The two CA bundles under `certs/private/`, described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). A bundle that is present but cannot be parsed is a failure. It warns when a bundle is not world-readable, and when the application bundle holds only private CAs on a DefectDojo version older than 3.4.0, where that bundle replaces the public roots instead of adding to them.
+- The two CA bundles under `certs/private/`, described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). A bundle that is present but cannot be parsed is a failure. It warns when a bundle is not world-readable, and when the application bundle holds only private CAs on a DefectDojo version older than 3.4.0 (2.63.0 on the 2.x line), or when the version is `latest`. On those older versions the bundle replaces the public roots instead of adding to them.
 - After an upgrade, a CA bundle that is now empty although the previous install directory still has certificates in it. The warning gives the `cp` command that restores it.
 
 `certs status` exits non-zero on failures only. Add `--strict` to exit non-zero on warnings too. When there is nothing to report it prints `Certificates are in order.`
@@ -91,7 +91,7 @@ sudo -E dojo-compose-cli certs add-ca --restart my-internal-ca.pem
 - `dojo-ca-bundle.crt`, which the application uses for the services it calls itself: SSO providers, Jira, notifications and enrichment feeds.
 - `connectors-ca-bundle.crt`, which the connectors service uses for the tools it reaches.
 
-It rebuilds the application bundle with the host's public root CAs included, so trusting an internal CA never removes trust in public ones. Certificates already in a bundle are skipped, so running it twice is safe. It warns about a certificate in your files that has expired or expires soon, or that is neither a CA certificate nor self-signed, since such a certificate makes no server trusted.
+It rebuilds the application bundle with the host's public root CAs included, so trusting an internal CA never removes trust in public ones. If the host has no public CA bundle, it warns that the file will hold only your CAs. Certificates already in a bundle are skipped, so running it twice is safe. It warns about a certificate in your files that has expired or expires soon, or that is neither a CA certificate nor self-signed, since such a certificate makes no server trusted.
 
 | Option | Effect |
 | --- | --- |
@@ -105,7 +105,7 @@ Put the options before the file names. The CLI stops reading options at the firs
 
 The containers read the bundles only when they start. Without `--restart`, run `sudo -E dojo-compose-cli app restart` before you test.
 
-With an older CLI, install the bundle by hand as described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). On a DefectDojo version older than 3.4.0, include the public root CAs in that file as well.
+With an older CLI, install the bundle by hand as described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). On a DefectDojo version older than 3.4.0, build the file from the host's public CA bundle plus yours, as that section shows.
 
 ## Test an outbound connection with certs test
 

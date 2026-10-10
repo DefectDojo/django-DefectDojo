@@ -41,7 +41,7 @@ The version you set selects the image tags, and `deploy download` fetches the de
 
 ## Air-gapped upgrades
 
-In an air-gapped deployment, `app upgrade` cannot reach the registry, so it upgrades from an offline bundle instead. Create the bundle on a staging host that has registry access and the same license and deployment type, carry the file across, and upgrade from it:
+With a `dojo-compose-cli` release that has `bundle`, `app upgrade` can upgrade from an offline bundle. That is the next `dojo-compose-cli` release after 2.1.5, on both hosts. If `dojo-compose-cli --help` lists `bundle`, your CLI has it. Create the bundle on a staging host that has registry access and the same license and deployment type, carry the file across, and upgrade from it:
 
 ```bash
 # On the staging host
@@ -51,7 +51,7 @@ sudo -E dojo-compose-cli bundle create --defectdojo-version x.y.z
 sudo -E dojo-compose-cli app upgrade --bundle defectdojo-x.y.z-<deployment-type>-bundle.tar.gz
 ```
 
-`bundle create` and `app upgrade --bundle` ship in the next `dojo-compose-cli` release after 2.1.5, and both hosts need it. With 2.1.5 or earlier, `app upgrade` is declined in air-gapped mode, and you repeat the staged image-transfer route you used to install: pull the new images on the staging host, move them across, load them on the application host, then set the new `--version` and `--deploy-version` and restart. See [Upgrading an air-gapped deployment](/get_started/pro/onprem/docker_compose/air_gapped_install/#upgrading-an-air-gapped-deployment) for both procedures.
+With 2.1.5 or earlier, `app upgrade` is declined in air-gapped mode, and you repeat the staged image-transfer route you used to install: pull the new images on the staging host, move them across, load them on the application host, then set the new `--version` and `--deploy-version` and restart. See [Upgrading an air-gapped deployment](/get_started/pro/onprem/docker_compose/air_gapped_install/#upgrading-an-air-gapped-deployment) for both procedures.
 
 ## Check before and after
 

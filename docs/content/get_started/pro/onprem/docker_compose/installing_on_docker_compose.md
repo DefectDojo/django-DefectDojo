@@ -260,12 +260,20 @@ sudo chmod 644 /opt/dojo/certs/private/dojo-ca-bundle.crt
 dojo-compose-cli app restart
 ```
 
+On DefectDojo versions before 3.4.0 this file replaces the public root CAs instead of adding to them, so a file holding only your CA breaks calls to publicly signed services. Build it from the host's bundle plus yours:
+
+```bash
+cat /etc/ssl/certs/ca-certificates.crt my-internal-ca.crt | sudo tee /opt/dojo/certs/private/dojo-ca-bundle.crt >/dev/null
+```
+
+On RHEL-family hosts the host's bundle is `/etc/pki/tls/certs/ca-bundle.crt`.
+
 Use the filename `connectors-ca-bundle.crt` instead when the CA is only needed for Connector tools, and install both files if you need both. Inside the containers these paths are `/app/certs/private/dojo-ca-bundle.crt` and `/app/certs/private/connectors-ca-bundle.crt`.
 
-To confirm the bundle was loaded, look at the `dojo` container's startup logs for the confirmation line:
+To confirm the bundle was loaded, look at the `dojo` container's startup logs (`docker logs dojo`). They should show a line starting `REQUESTS_CA_BUNDLE set to`. On DefectDojo 3.4.0 and later it names a merged file and mentions `system roots + /app/certs/private/dojo-ca-bundle.crt`. For example:
 
 ```text
-REQUESTS_CA_BUNDLE set to /app/certs/private/dojo-ca-bundle.crt
+REQUESTS_CA_BUNDLE set to /tmp/dojo-ca-bundle.merged.crt (system roots + /app/certs/private/dojo-ca-bundle.crt)
 ```
 
 If the file is missing or empty the container logs `No CA bundle found ...` instead and starts normally, so a bundle you forgot to install fails as an untrusted-certificate error on the outbound call rather than as a startup error.
