@@ -147,7 +147,7 @@ Not every state applies to every connector. **Stale** is set by the findings-imp
 
 ### New
 
-A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see our guide on [Editing Records]().
+A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see [Change the Mapping of a Record](#change-the-mapping-of-a-record).
 
 ### Good
 
@@ -185,7 +185,7 @@ Records can be Edited, Ignored or Deleted from the **Manage Records \& Operation
 
 Although Mapped and Unmapped records are located in separate tables, they can both be edited in the same way.
 
-From the Records table, click the blue ▼ Arrow next to the State column on a given Record. From there, you can select **Edit Record,** or **Delete Record.**
+From the Records table, open a Record's **⋮** menu, next to its **State**. From there, you can select **Edit Record** or **Delete Record**.
 
 ![image](images/edit_ignore_delete_records.png)
 
