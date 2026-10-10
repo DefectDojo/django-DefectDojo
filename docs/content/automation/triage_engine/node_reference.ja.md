@@ -1,7 +1,7 @@
 ---
 title: ノードリファレンス
 description: Triage Engineに搭載されているすべてのノードと、それぞれの機能
-weight: 3
+weight: 4
 audience: pro
 aliases:
 - /ja/automation/rules_engine_v2/node_reference/

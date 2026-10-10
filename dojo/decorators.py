@@ -4,11 +4,13 @@ from functools import wraps
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django_ratelimit import UNSAFE
 from django_ratelimit.core import is_ratelimited
 from django_ratelimit.exceptions import Ratelimited
 
+from dojo.deprecations import get_deprecation
 from dojo.models import Dojo_User
 
 logger = logging.getLogger(__name__)
@@ -159,7 +161,8 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
                     username = request.POST.get("username", None)
                     if username:
                         dojo_user = Dojo_User.objects.filter(username=username).first()
-                        if dojo_user:
+                        # Accounts without a usable password could never complete the reset.
+                        if dojo_user and dojo_user.has_usable_password():
                             dojo_user.enable_force_password_reset()
                 raise Ratelimited
             return fn(request, *args, **kw)
@@ -168,26 +171,28 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
     return decorator
 
 
-def deprecated_view(feature_name, removal_version="X.Y.Z", removal_date="some time in the future"):
+def deprecated_view(key):
     """
-    Decorator that adds a deprecation warning message to a view.
+    Show the Classic UI warning that ``dojo.deprecations`` declares for ``key``.
 
     Only adds the message on GET requests to avoid duplicate warnings
     when POST requests redirect.
     """
+    if get_deprecation(key) is None:
+        msg = f"{key!r} has no declaration in dojo/deprecations.py"
+        raise ImproperlyConfigured(msg)
+
     def decorator(func):
         @wraps(func)
         def _wrapped(request, *args, **kwargs):
-            if request.method == "GET":
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    f"{feature_name} is deprecated and will be removed in DefectDojo v{removal_version} "
-                    f"({removal_date}). Please plan to migrate away from this feature.",
-                    extra_tags="alert-warning",
-                )
+            notice = get_deprecation(key)
+            if request.method == "GET" and notice is not None and not notice.removed:
+                messages.add_message(request, messages.WARNING, notice.message(), extra_tags="alert-warning")
             return func(request, *args, **kwargs)
+
+        _wrapped.deprecation = key
         return _wrapped
+
     return decorator
 
 

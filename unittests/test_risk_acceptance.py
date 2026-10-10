@@ -105,6 +105,32 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertEqual(302, response.status_code, response.content[:1000])
         self.assert_all_inactive_risk_accepted(Finding.objects.filter(id__in=[2, 3, 4, 5]))
 
+    def test_add_risk_acceptance_only_covers_the_engagements_findings(self):
+        # finding 22 belongs to engagement 3 of the same product
+        ra_data = copy.copy(self.data_risk_accceptance)
+        ra_data["accepted_findings"] = [2, 22]
+        response = self.client.post(reverse("add_risk_acceptance", args=(1,)), ra_data)
+        self.assertEqual(200, response.status_code)
+        self.assertIn("accepted_findings", response.context["form"].errors)
+        self.assertFalse(Risk_Acceptance.objects.filter(name=ra_data["name"]).exists())
+        self.assertTrue(self.assert_all_active_not_risk_accepted(Finding.objects.filter(id__in=[2, 22])))
+
+    def test_add_findings_to_risk_acceptance_only_covers_the_engagements_findings(self):
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+
+        data_add_findings_to_ra = {
+            "add_findings": "Add Selected Findings",
+            "accepted_findings": [4, 22],
+        }
+        response = self.client.post(reverse("view_risk_acceptance", args=(1, ra.id)),
+                    urlencode(MultiValueDict(data_add_findings_to_ra), doseq=True),
+                    content_type="application/x-www-form-urlencoded")
+
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertNotIn(22, ra.accepted_findings.values_list("id", flat=True))
+        self.assertTrue(self.assert_all_active_not_risk_accepted(Finding.objects.filter(id=22)))
+
     def test_remove_findings_from_risk_acceptance_findings_active(self):
         # create risk acceptance first
         self.test_add_risk_acceptance_multiple_findings_accepted()

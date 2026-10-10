@@ -88,20 +88,25 @@ class Location(BaseModel):
     def __str__(self):
         return self.location_value
 
+    def _tags_are_readable(self):
+        # List querysets annotate this once per page (annotate_tags_readable); otherwise one EXISTS.
+        from dojo.location.queries import TAGS_READABLE_ANNOTATION, location_tags_readable  # noqa: PLC0415
+        readable = getattr(self, TAGS_READABLE_ANNOTATION, None)
+        if readable is None:
+            readable = location_tags_readable(self)
+        return readable
+
     @property
     def readable_tags(self):
         """Tags on this row, or none of them when another product also labels the row."""
-        # ponytail: one EXISTS per rendered row; annotate the list querysets if it shows up.
-        from dojo.location.queries import location_tags_readable  # noqa: PLC0415
-        if not location_tags_readable(self):
+        if not self._tags_are_readable():
             return []
         return list(self.tags.all())
 
     @property
     def readable_inherited_tags(self):
         """The inherited subset of :attr:`readable_tags`."""
-        from dojo.location.queries import location_tags_readable  # noqa: PLC0415
-        if not location_tags_readable(self):
+        if not self._tags_are_readable():
             return []
         return list(self.inherited_tags.all())
 

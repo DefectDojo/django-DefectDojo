@@ -98,12 +98,13 @@ def _resolve_engagement_for_import(request: HttpRequest, payload: ImportForm) ->
     auto.process_import_meta_data_from_dict(context)
     # The names below are resolved before the check, so an existing target is authorized as the
     # object it is rather than as a target that does not exist yet.
+    context["product_type"] = auto.get_target_product_type_if_exists(**context)
     context["product"] = auto.get_target_product_if_exists(**context)
     context["engagement"] = auto.get_target_engagement_if_exists(**context)
     _require_permission(
         allowed=check_auto_create_permission(
             request.user, context.get("product"), payload.asset_name, context.get("engagement"),
-            payload.engagement_name, None, payload.organization_name,
+            payload.engagement_name, context.get("product_type"), payload.organization_name,
             "Need engagement or asset_name + engagement_name to perform import",
         ),
     )
@@ -153,6 +154,7 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object 
         "auto_create_context": payload.auto_create_context,
     }
     auto.process_import_meta_data_from_dict(context)
+    context["product_type"] = auto.get_target_product_type_if_exists(**context)
     context["product"] = auto.get_target_product_if_exists(**context)
     context["engagement"] = auto.get_target_engagement_if_exists(**context)
     target_test = auto.get_target_test_if_exists(**context)
@@ -166,7 +168,7 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object 
     _require_permission(
         allowed=check_auto_create_permission(
             request.user, context.get("product"), payload.asset_name, context.get("engagement"),
-            payload.engagement_name, None, payload.organization_name,
+            payload.engagement_name, context.get("product_type"), payload.organization_name,
             "Need test or asset_name + engagement_name + scan_type to perform reimport",
         ),
     )

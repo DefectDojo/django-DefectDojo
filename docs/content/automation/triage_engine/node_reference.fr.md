@@ -1,7 +1,7 @@
 ---
 title: Référence des nœuds
 description: Tous les nœuds fournis avec Triage Engine, et ce que fait chacun d'eux
-weight: 3
+weight: 4
 audience: pro
 aliases:
 - /fr/automation/rules_engine_v2/node_reference/

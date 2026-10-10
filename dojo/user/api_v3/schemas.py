@@ -25,7 +25,10 @@ if TYPE_CHECKING:
     from dojo.api_v3.expand import ExpandRel
 
 
-class UserSlim(Schema):
+class UserStub(Schema):
+
+    """``?expand=`` target for a user relation (``reporter``, ``lead``). Same fields as v2's ``UserStubSerializer``."""
+
     django_model: ClassVar = Dojo_User
     SELECT_RELATED: ClassVar[tuple] = ()
     PREFETCH_RELATED: ClassVar[tuple] = ()
@@ -35,6 +38,9 @@ class UserSlim(Schema):
     username: str
     first_name: str
     last_name: str
+
+
+class UserSlim(UserStub):
     email: str
     is_active: bool
     is_superuser: bool

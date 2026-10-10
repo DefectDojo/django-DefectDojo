@@ -11,7 +11,7 @@ Pools are for the case where the same thing is genuinely deployed in several pla
 
 A pool may span Organizations, and everything a pool does crosses that boundary with it: a Finding in one Organization can be marked a duplicate of a Finding in another, and a false positive recorded in one Organization is replicated to matching Findings in the others that share the pool. You only ever see the members you have access to, and a member you cannot read is shown as a placeholder rather than hidden, so a pool never looks smaller than it is.
 
-Find pools at **Settings \> Finding Workflow \> Dedupe Pools** (**Settings \> Pro Settings \> Deduplication Settings \> Dedupe Pools** on instances still using the previous menu layout). Matching Configuration sits beside it in the same group.
+Find pools at **Settings > Finding Workflow > Dedupe Pools**. Matching Configuration sits beside it in the same group.
 
 ## Pools vs. the global algorithms
 
@@ -39,8 +39,8 @@ A pool does not change **how** two Findings are compared. It changes **which** F
 
 An Asset joins a pool for one **matching kind** at a time, and can be in at most one pool per kind. The same Asset can therefore share same-tool matching with one group and cross-tool matching with another.
 
-* **Same tool.** Findings from the same scanner deduplicate across the pool's Assets.
-* **Cross tool.** Findings from different scanners deduplicate across the pool's Assets.
+* **Same Tool.** Findings from the same scanner deduplicate across the pool's Assets.
+* **Cross Tool.** Findings from different scanners deduplicate across the pool's Assets.
 Membership is offered for these two kinds only. There is no reimport kind to pool for, and that
 is deliberate rather than an omission: a reimport matches inside its own Test, so pooling could
 never widen what it compares, and the one thing a reimport membership could do (select a
@@ -58,8 +58,8 @@ If you try to add an Asset that already matches within another pool for that kin
 A new pool has no members, so nothing about deduplication changes until you add some. This is deliberate: creating a pool to look at it is safe.
 
 1. Open **Settings \> Finding Workflow \> Dedupe Pools**.
-2. Enter a name under **New pool** and click **Create Pool**.
-3. Select the pool, then pick the **Matching kind** you want to configure.
+2. Enter a name under **New Pool** and click **Create Pool**.
+3. Select the pool, then pick the **Matching Kind** you want to configure.
 
 ## Adding Assets, and previewing first
 
@@ -71,7 +71,7 @@ Adding members applies to **future imports**. Findings already in DefectDojo are
 
 ## Applying a pool to Findings that already exist
 
-**Apply to existing findings** re-runs deduplication over the Findings already in the pool's Assets. This can mark a large number of Findings as duplicates at once, so it is gated:
+**Apply to Existing Findings** re-runs deduplication over the Findings already in the pool's Assets. This can mark a large number of Findings as duplicates at once, so it is gated:
 
 1. Click **Preview Re-run**. This reports how many Findings you can see share an identity with a Finding in another Asset in the pool.
 2. **Apply Now** stays disabled until that preview has run, and uses the acknowledgement the preview returned.
@@ -89,10 +89,10 @@ points you at System Settings rather than reporting a silent zero.
 
 ## Where originals collect
 
-**Where originals collect** decides which Finding a pool's duplicates point at.
+**Original Placement** decides which Finding a pool's duplicates point at.
 
-* **Oldest finding wins.** The default, and what deduplication has always done.
-* **Designated asset, then oldest.** Duplicates point at the chosen Asset where it has a matching Finding old enough to be the original (the engine's age check still applies), and at the oldest Finding otherwise. The designated Asset has to be a member of the pool for same-tool or cross-tool matching: add it first, then designate it.
+* **Oldest Finding Wins.** The default, and what deduplication has always done.
+* **Designated Asset, Then Oldest.** Duplicates point at the chosen Asset where it has a matching Finding old enough to be the original (the engine's age check still applies), and at the oldest Finding otherwise. The designated Asset has to be a member of the pool for same-tool or cross-tool matching: add it first, then designate it.
 
 Use the second when one Asset is the place your team actually works, and you want the originals to land there rather than wherever the earliest scan happened to run.
 
@@ -116,7 +116,7 @@ The panel also offers **Pool this asset and everything under it**, which pools t
 * It **skips rather than steals**. A descendant already pooled elsewhere for that kind is reported back as left alone, not moved.
 * It pools only what you can read. A descendant you do not have access to is neither pooled nor named; the panel reports how many were left alone for that reason.
 
-A membership created this way is marked **from parent**. **Untoggle subtree** removes only the memberships the toggle created; a membership someone added by hand survives it.
+A membership created this way is marked **From Parent**. **Untoggle Subtree** removes only the memberships the toggle created; a membership someone added by hand survives it.
 
 ## Pooling automatically with a Rule
 

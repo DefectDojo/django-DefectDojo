@@ -18,7 +18,7 @@ Either way, **every page keeps the same URL**. Bookmarks, saved links and anythi
 | Section | What it holds |
 | --- | --- |
 | **Overview** | Dashboards, Insights, My Work, Reporting, Calendar |
-| **Sensei + AI** | AppSec, CSPM, Threat Modeling, MCP, AI Model Settings |
+| **Sensei + AI** | Sensei, CSPM, Threat Modeling, MCP, AI Model Settings |
 | **Connect** | Upstream, Downstream, Jira, Authorization, Diagnostics, Import |
 | **Act** | Triage Engine, Vulnerability Explorer, Root Causes, Risk Acceptances, PSIRT, Explore |
 | **Settings** | All Settings, plus the eight groups described under [The Settings section](#the-settings-section) |
@@ -27,20 +27,20 @@ You only ever see the entries your account has permission to open, and a group d
 
 ## Searching
 
-The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two kinds of results:
+The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two modes, switched with **Tab**:
 
-- **Data Results**: your records (findings, assets, engagements and the rest), through the same engine as the full results page. **See all results** at the bottom opens that page. See [Global Search](/navigation/pro__global_search/).
-- **Navigation Results**: every menu destination your account can currently reach.
+- **Search**: your records (findings, assets, engagements and the rest), through the same engine as the full results page, with the pages whose name matches ranked in. **See All Results** at the end opens that page. See [Global Search](/navigation/pro__global_search/).
+- **Navigate**: pages only, every menu destination your account can currently reach. Its tabs are the sidebar's top-level sections.
 
-Navigation results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu and a one line description of the page.
+Page results match more than the entry's label. Each destination is also searchable by its position in the menu and by related vocabulary, so `finding` surfaces **Findings > All** even though the entry itself is labelled "All", and `sso` surfaces the authorization providers. Each result shows where the entry lives in the menu, and its one line description appears when you hover it.
 
-Before you type anything, the dialog offers your **recent destinations**: the last few menu pages you visited (excluding the one you are on), one **Enter** away. Recents are remembered per browser.
+Before you type anything, the dialog offers your **recent places**, one **Enter** away; in Navigate mode your pinned pages come first. Recents are kept in your browser for each user, and cleared when you log out.
 
-Move through results with the arrow keys, open one with **Enter**, and close the search with **Escape**. Entries that open in the Classic UI are marked and open in a new tab. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically, and it follows whichever menu layout is active.
+Move through results with the arrow keys, open one with **Enter** (or in a new tab with **Cmd+Enter** / **Ctrl+Enter**), and close the search with **Escape**. Entries that open in the Classic UI are marked and open in a new tab. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically, and it follows whichever menu layout is active.
 
 Three conventions run through the whole menu:
 
-- **There are no separate "New" entries.** Each list page has a **New** button that opens the create form, so the menu carries one entry per catalog instead of two. If your account can create a record but not list them, the menu entry takes you straight to the create form.
+- **There are no separate "New" entries.** Each list page has a **New** button (**New Asset**, **New Finding**, and so on) that opens the create form, so the menu carries one entry per catalog instead of two. If your account can create a record but not list them, the menu entry takes you straight to the create form.
 - **Nothing nests more than one level below a section.** Reaching a page is at most section, group, page.
 - **A feature occupies one entry, not one per screen.** PSIRT's nine pages, the Triage Engine's four and the record catalogs all sit behind a single entry each, instead of spreading across the menu.
 - **An entry is not repeated inside itself.** Where a group already names the thing, its entries do not name it again: **Findings** holds Active, Mitigated and All rather than "All Findings", and **Attack Surface** holds Endpoints and Hosts rather than "All Endpoints".
@@ -49,7 +49,7 @@ Three conventions run through the whole menu:
 
 ![The Pinned section at the top of the sidebar](images/sidebar_pinned_pages.png)
 
-Hover any page row (in the sidebar, in a collapsed-rail flyout, or in a Global Search result) and a pin appears at its end; on touch screens the pin always shows. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
+Hover any page row in the sidebar or in a collapsed-rail flyout and a pin appears at its end; on touch screens the pin always shows. In Global Search, a page result's row actions menu (the **...** button, or **Option+Enter** / **Alt+Enter**) offers **Pin to Sidebar** and **Remove Sidebar Pin**. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
 
 Pins are stored per user on the server, so they survive a browser reset and follow you across machines. When the **Restrict Layout Customization** switch is on (see [UI Defaults](#ui-defaults)), pins count as layout customization: only superusers can change them, and everyone else sees their existing pins read-only.
 
@@ -77,7 +77,7 @@ The rail also follows your page as you navigate: opening a page that lives insid
 
 The AI capabilities sit together in their own section rather than being spread through the dashboards.
 
-**AppSec** is the Sensei code security capability, and was previously listed simply as **Sensei**. The page and its URL are unchanged. The name changed because Sensei now covers more than one capability, so the entries beside it name what each one does.
+**Sensei** opens the Sensei hub, the scan-and-fix capability that was previously listed under Dashboards. The page and its URL are unchanged.
 
 **CSPM** carries a gold `SOON` badge. Cloud security posture management is not available yet, so the entry does not open a page. Selecting it explains that the capability is on the way. Nothing needs enabling, and no license unlocks it early. The entry starts working when the capability ships.
 
@@ -111,7 +111,7 @@ Setup leads because nothing reaches the triage queue until there is an inventory
 
 The record catalogs, behind one entry: **Attack Surface**, Organizations, Assets, Engagements, Tests, Findings and Surveys.
 
-**Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the endpoint pages or the location pages depending on whether your instance uses Locations.
+**Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the location pages (Locations, URLs, Dependencies, Source Code and Cloud Resources, with Images and AI Inventory when those features are on) when your instance uses Locations, or the endpoint pages when it does not.
 
 ## Connect
 
@@ -125,14 +125,14 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 
 | Group | What it holds |
 | --- | --- |
-| **System** | System Settings, Appearance, Announcement Banner, Login Banner, Email |
+| **System** | System Settings, Appearance, Announcement Banner, Login Banner, and on on-premise instances, Email |
 | **UI Defaults** | Form Configuration, Layout Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | Dedupe Pools, Matching Configuration, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
-| **Configuration** | Environments, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
-| **Notifications** | Notification Events, Notification Webhooks |
+| **Configuration** | Environments, Platforms, Lifecycles, Origins, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
+| **Notifications** | Personal Notifications, System Notifications, Notification Template, Notification Webhooks |
 | **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal, Firewall Rules, Maintenance Windows |
-| **License & Support** | License Manager, Version Manager, Contact Support |
+| **License & Support** | License Manager, Support, and on on-premise instances, Version Manager |
 
 **Feature Flags sits above the groups**, directly under All Settings, rather than inside any of them. It is the page administrators open most often, and it reads alongside All Settings: one lists what exists, the other controls what is switched on. It is still filed under System in the All Settings directory.
 
@@ -156,43 +156,43 @@ If you are used to the previous layout:
 | Previously | Now |
 | --- | --- |
 | Dashboards | Overview |
-| Dashboards → Sensei | Sensei + AI → AppSec |
-| Dashboards → Threat Modeling / MCP / AI Model Settings | Sensei + AI |
-| Dashboards → PSIRT Feeds, and the eight other PSIRT entries | The PSIRT section |
-| Dashboards → Metrics | Overview → Insights |
-| Dashboards → Reporting → Report Templates → All / New | Overview → Reporting → Report Templates |
-| Import → *(whole section)* | Connect → Import *(last entry)* |
-| Import → Smart Upload → Add Findings | Connect → Import → Smart Upload |
+| Dashboards > Sensei | Sensei + AI > Sensei |
+| Dashboards > Threat Modeling / MCP / AI Model Settings | Sensei + AI |
+| Dashboards > PSIRT Feeds, and the eight other PSIRT entries | The PSIRT section |
+| Dashboards > Metrics | Overview > Insights |
+| Dashboards > Reporting > Report Templates > All / New | Overview > Reporting > Report Templates |
+| Import > *(whole section)* | Connect > Import *(last entry)* |
+| Import > Smart Upload > Add Findings | Connect > Import > Smart Upload |
 | Manage | Act |
-| Manage → Endpoints / Locations / Components | Act → Explore → Attack Surface |
-| Manage → Organizations / Assets / Engagements / Tests / Findings / Surveys | Act → Explore |
-| Manage → Risk Acceptances | Act → Risk Acceptances |
-| Manage → Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
-| Manage → Rules Engine and Rules Engine 2.0 | Act → Triage Engine |
-| Manage → *(any)* → New *(record)* | The **New** button on the matching list page |
-| Dashboards → Home | Overview → Dashboards *(when Dashboards 2.0 is on)* |
-| Settings → *(top level)* → Feature Flags | Unchanged: still at the top level, below All Settings |
-| Settings → Pro Settings → System Settings | Settings → System → System Settings |
-| Settings → Pro Settings → Appearance | Settings → System → Appearance |
-| Settings → Pro Settings → Banner Settings → Announcement Banner Settings | Settings → System → Announcement Banner |
-| Settings → Pro Settings → Banner Settings → Login Banner Settings | Settings → System → Login Banner |
-| Settings → Pro Settings → Email Settings | Settings → System → Email |
-| Settings → Users → All Users / New User | Settings → Users & Permissions → Users |
-| Settings → Users → All Groups / New Group | Settings → Users & Permissions → Groups |
-| Settings → Users → Roles | Settings → Users & Permissions → Roles |
-| Settings → Pro Settings → Deduplication Settings → *(three pages)* | Settings → Finding Workflow → Matching Configuration (one page covering same-tool, cross-tool and reimport matching), beside Dedupe Pools |
-| Settings → Pro Settings → Finding Enrichment Settings | Settings → Finding Workflow → Finding Enrichment |
-| Settings → Configuration → Service Level Agreements | Settings → Finding Workflow → Service Level Agreements |
-| Settings → Configuration → Prioritization Engines | Settings → Finding Workflow → Prioritization Engines |
-| Settings → Configuration → Mitigation Policies | Settings → Finding Workflow → Mitigation Policies |
-| Settings → Configuration → *(reference-data catalogs)* | Settings → Configuration → *(unchanged)* |
-| Settings → Pro Settings → Notification Settings | Settings → Notifications |
-| Settings → Configuration → Audit Logs | Settings → Operations → Audit Logs |
-| Settings → Configuration → Usage log | Settings → Operations → Usage Logs |
-| Settings → Configuration → All Schedules | Settings → Operations → Schedules |
-| Settings → Pro Settings → Celery Status | Settings → Operations → Celery Status |
-| Settings → Cloud Manager → *(cloud pages)* | Settings → Operations |
-| Settings → License Manager / Version Manager / Contact Support | Settings → License & Support |
+| Manage > Endpoints / Locations / Components | Act > Explore > Attack Surface |
+| Manage > Organizations / Assets / Engagements / Tests / Findings / Surveys | Act > Explore |
+| Manage > Risk Acceptances | Act > Risk Acceptances |
+| Manage > Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
+| Manage > Rules Engine and Rules Engine 2.0 | Act > Triage Engine |
+| Manage > *(any)* > New *(record)* | The **New** *(record)* button on the matching list page |
+| Dashboards > Home | Overview > Dashboards *(when Dashboards 2.0 is on)* |
+| Settings > *(top level)* > Feature Flags | Unchanged: still at the top level, below All Settings |
+| Settings > Pro Settings > System Settings | Settings > System > System Settings |
+| Settings > Pro Settings > Appearance | Settings > System > Appearance |
+| Settings > Pro Settings > Banner Settings > Announcement Banner Settings | Settings > System > Announcement Banner |
+| Settings > Pro Settings > Banner Settings > Login Banner Settings | Settings > System > Login Banner |
+| Settings > Pro Settings > Email Settings | Settings > System > Email |
+| Settings > Users > All Users / New User | Settings > Users & Permissions > Users |
+| Settings > Users > All Groups / New Group | Settings > Users & Permissions > Groups |
+| Settings > Users > Roles | Settings > Users & Permissions > Roles |
+| Settings > Pro Settings > Deduplication Settings > *(three pages)* | Settings > Finding Workflow > Matching Configuration (one page covering same-tool, cross-tool and reimport matching), beside Dedupe Pools |
+| Settings > Pro Settings > Finding Enrichment Settings | Settings > Finding Workflow > Finding Enrichment |
+| Settings > Configuration > Service Level Agreements | Settings > Finding Workflow > Service Level Agreements |
+| Settings > Configuration > Prioritization Engines | Settings > Finding Workflow > Prioritization Engines |
+| Settings > Configuration > Mitigation Policies | Settings > Finding Workflow > Mitigation Policies |
+| Settings > Configuration > *(reference-data catalogs)* | Settings > Configuration > *(unchanged)* |
+| Settings > Pro Settings > Notification Settings | Settings > Notifications > Personal Notifications / System Notifications / Notification Template / Notification Webhooks |
+| Settings > Configuration > Audit Logs | Settings > Operations > Audit Logs |
+| Settings > Configuration > Usage log | Settings > Operations > Usage Logs |
+| Settings > Configuration > All Schedules | Settings > Operations > Schedules |
+| Settings > Pro Settings > Celery Status | Settings > Operations > Celery Status |
+| Settings > Cloud Manager > *(cloud pages)* | Settings > Operations |
+| Settings > License Manager / Version Manager / Support | Settings > License & Support |
 
 The group that was named after your license package, **Pro Settings** on a Pro instance and **Enterprise Settings** on an Enterprise one, no longer exists. Its pages are distributed across System, Finding Workflow, Notifications and Operations.
 

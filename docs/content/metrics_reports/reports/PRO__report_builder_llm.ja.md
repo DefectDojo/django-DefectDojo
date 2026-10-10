@@ -98,16 +98,29 @@ A Block's `block_type` is one of: stock | tabular | detail
 
 (A `chart` block type is reserved but not yet exposed via the API.)
 
-`model_choice` is locked to one of EXACTLY these seven entities (this is an
-enum in the OpenAPI schema -- do not invent others):
+`model_choice` is locked to one of EXACTLY these entities (this is an enum
+in the OpenAPI schema -- do not invent others):
 
     organization | asset | engagement | test | finding | test_type | risk_acceptance
 
-NOTE: Even if the tenant has REST endpoints like /api/v2/location/,
-/api/v2/location_findings/, or /api/v2/location_products/, those are NOT
-selectable as `model_choice`. Any "location" scoping must flow through asset
-(formerly Product), tag, or organization (formerly Product Type) filters on
-the supported entities.
+and, ONLY when the tenant has Locations enabled, also:
+
+    location | url | dependency | location_asset
+
+With Locations disabled the four location values are refused on create and
+missing from the field options, so check the field options before using one.
+
+- `location`, `url`, `dependency`: one row per location. They offer the
+  columns `asset_names`, `active_asset_names` and `organization_names`: the
+  Assets (formerly Products) and Organizations (formerly Product Types) that
+  reference the location, sorted, joined with "; ", and capped at 32,000
+  characters.
+- `location_asset`: one row per location/Asset pair, so a location shared by
+  N Assets gives N rows. Columns include `location_type`, `location_value`,
+  `asset_name`, `organization_name` and `status` (Active or Mitigated).
+
+Both are limited to the Assets the requesting user may view. To answer "which
+Assets and Organizations does each server belong to", prefer `location_asset`.
 
 ================================================================================
 FIELDS (columns) -- discover, never invent

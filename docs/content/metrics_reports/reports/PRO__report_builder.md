@@ -9,15 +9,15 @@ aliases:
   - /en/share_your_findings/pro_reports/using_the_report_builder
   - /metrics_reports/reports/using_the_report_builder
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The reusable Report Builder (Themes, Blocks, Templates, and saved Generated Reports) is a DefectDojo Pro feature, currently in beta.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The reusable Report Builder (Themes, Blocks, Templates, and saved Generated Reports) is a DefectDojo Pro feature.</span>
 
-The DefectDojo Pro Report Builder lets you compose polished reports out of reusable parts, so you can build the pieces once and reuse them everywhere instead of rebuilding a report from scratch each time. You reach it from the **📄 Reporting** area in the sidebar.
+The DefectDojo Pro Report Builder lets you compose polished reports out of reusable parts, so you can build the pieces once and reuse them everywhere instead of rebuilding a report from scratch each time. You reach it from **Overview > Reporting** in the sidebar.
 
 ## How it compares to open source
 
 Open source DefectDojo can build a report, run it, and let you retrieve the output, but it does **not** save report templates or persist the reports you generate. Each report is a one-time effort.
 
-DefectDojo Pro turns reporting into reusable building blocks. You save **Themes**, **Blocks**, and **Templates** that you can mix, match, and reuse, and every report you run is persisted as a **Generated Report** you can download or re-run later. Pro also exposes the entire workflow through a full REST API and supports LLM-assisted authoring, so reports can be built and run programmatically.
+DefectDojo Pro turns reporting into reusable building blocks. You save **Themes**, **Blocks**, and **Templates** that you can mix, match, and reuse, and every report you run is persisted as a **Generated Report** you can open or download later. Pro also exposes the entire workflow through a full REST API and supports LLM-assisted authoring, so reports can be built and run programmatically.
 
 > **💡 Tip:** If you are using open source DefectDojo, see the [open source report builder](../using-the-report-builder/) instead.
 
@@ -68,7 +68,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Image**
 - **Text block**
 
-**Tabular** and **Detail** blocks both pull live records from one entity. You pick the entity with a model choice, then select which fields to include and how to order the records. The model choice is exactly one of these seven entities:
+**Tabular** and **Detail** blocks both pull live records from one entity. You pick the entity with a model choice, then select which fields to include and how to order the records. The model choice is one of these entities:
 
 - **Organization**
 - **Asset**
@@ -77,6 +77,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Finding**
 - **Test type**
 - **Risk acceptance**
+- **Location** (only when Locations are enabled). A switch under the model choice picks what each row is: **Location** (every location, whatever its type), **URL**, **Dependency**, or **Location per Asset**.
 
 > **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. You may still encounter the legacy wording in some underlying field and filter names.
 
@@ -86,13 +87,29 @@ Fields render in the order they are listed. Selecting a field adds it to the end
 
 When Locations are enabled, each of the Organization, Asset, Engagement, Test, and Finding entities offers a **Location Count** field. An Asset counts the locations it references directly and a Finding counts the locations attached to it. An Organization rolls up the distinct locations across its Assets, and an Engagement or Test counts the distinct locations touched by its Findings, so a host shared by several findings counts once. The counts respect the viewer's permissions, so a user who can only see some Assets in an Organization sees only those Assets' locations in its count.
 
+### Reporting which Assets a location belongs to
+
+DefectDojo stores each location once, so a single host or URL can belong to several Assets, and those Assets can sit in different Organizations. There are two ways to report on that link, and you can use either one in the same report.
+
+**Location per Asset** gives one row for each pairing of a location and an Asset. If three Assets reference a location, it appears on three rows. Each row carries the location's type and value, the Asset's name, the Organization's name, and the status of that link (**Active** or **Mitigated**), so you can filter to live links only. Use this for exports you want to sort, pivot, or match against another inventory such as a CMDB.
+
+**Location**, **URL**, and **Dependency** blocks also offer three columns that list the Assets on one row per location:
+
+- **Asset Names**: every Asset that references the location.
+- **Active Asset Names**: only the Assets whose link to the location is Active.
+- **Organization Names**: the distinct Organizations of those Assets, which can be fewer than the Assets.
+
+Names are sorted and separated by `; `. A location referenced by so many Assets that the list goes past 32,000 characters is cut off with `…`, which keeps each value inside the Excel cell limit. The Location per Asset block has no such limit, so use it for locations shared very widely.
+
+Both follow the viewer's permissions. The Assets and Organizations named are only the ones the person the report is generated for can see, the same rule the **Active** and **Total** Asset counts already follow.
+
 A **Chart** block draws one chart from the catalog below — the same charts the Insights dashboards use, so a figure in a report matches the figure your team already reads on screen. You choose the chart, and the chart decides what it can be filtered by:
 
 - Charts of findings expose the **Finding** filter, and the filter narrows the findings the chart counts.
 - Charts of assets expose the **Asset** filter, and the filter selects assets, scoping the chart to the findings belonging to them.
 - Portfolio-wide charts take no filter, because they summarize the whole instance by design.
 
-A Chart also has a **Date Range** setting. Leave it on **All time** (the default, and how every existing Chart behaves) to draw on the full history, or pick a trailing window (the last 30, 90, or 180 days, the last year, or the last two years) to limit the chart to findings from that period. It is the same date window the Insights dashboards apply, so a report chart and the matching dashboard chart cover the same span. The window is measured against each finding's **date** (when the finding was found), not when its scan was imported, so a time chart extends forward only as findings carrying newer dates arrive.
+A Chart also has a **Date Range** setting. Leave it on **All Time** (the default, and how every existing Chart behaves) to draw on the full history, or pick a trailing window (the last 30, 90, or 180 days, the last year, or the last two years) to limit the chart to findings from that period. It is the same date window the Insights dashboards apply, so a report chart and the matching dashboard chart cover the same span. The window is measured against each finding's **date** (when the finding was found), not when its scan was imported, so a time chart extends forward only as findings carrying newer dates arrive.
 
 | Chart | What it shows |
 |-------|---------------|
@@ -124,7 +141,7 @@ A **Widget** block puts a [Customizable Dashboards](../../dashboards/custom-dash
 
 The block type appears only while Customizable Dashboards is enabled, because everything that configures a widget lives there. A Widget block saved earlier keeps working and keeps generating if the feature is later turned off.
 
-Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type.
+Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type. The one exception is **Variable Filters**, shown below **Configure Widget**, which narrow the widget to the finding or asset a report is generated for (see [Template variables](#template-variables)).
 
 Not every widget can go in a report, and the picker lists only the ones that can. How each one is drawn depends on the widget:
 
@@ -171,7 +188,7 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Generated Reports
 
-Running a Template produces a **Generated Report**: a persisted file that you can download and re-run on demand. Each Generated Report is **frozen in time**: it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, re-run the Template.
+Running a Template produces a **Generated Report**: a persisted file that you can open or download from the Generated Reports list whenever you need it. Each Generated Report is **frozen in time**: it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, generate the Template again.
 
 A Generated Report comes in one of five formats, in two groups:
 
@@ -204,11 +221,17 @@ A Generated Report moves through these statuses as it is built:
 | Pending | The report has been requested and is queued. |
 | Processing | The report is being assembled. |
 | Completed | The report is ready to download. |
-| Failed | The report could not be generated. |
+| Failed | The report could not be generated. The Generated Reports list shows why, under the status. |
 
-> **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC) — users only ever see data they are authorized to view, even inside a report.
+> **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC): users only ever see data they are authorized to view, even inside a report.
 
 You can build this in the UI (below) or automate it with the [API](../report-builder-api/).
+
+### Who can see Generated Reports
+
+The **Generated Reports** list is open to anyone who can view generated reports, either through a global role or through a role on any Organization (every built-in role includes it). An Organization Reader who runs a **Quick Export** from a Findings list finds the stored report there afterwards. Everyone sees the reports they requested themselves. A report somebody else requested appears only when the viewer could see everything that report could show, because a report is rendered with the access of the person who requested it. Deleting a Generated Report needs a global role.
+
+**Templates**, **Blocks** and **Themes** are shared across every Organization, so their pages, and the matching entries under **Reporting** in the sidebar, need a global role. A user whose access comes only from an Organization role sees **Generated Reports** alone under **Reporting**.
 
 ### Report retention
 
@@ -230,7 +253,7 @@ Three variables exist:
 
 Tokens can go in two places:
 
-- **Block filters.** Under **Variable Filters** in a Tabular, Detail or Graph Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical.
+- **Block filters.** Under **Variable Filters** in a Tabular, Detail, Graph or Widget Block, tick the filter the Block should take from the report: for a Finding Block, *Finding is the report's finding* (`{{finding.id}}`), *Asset is the report's asset* (`{{asset.id}}`) or *Vulnerability ID is the report's vulnerability ID* (`{{vulnerability_id}}`). Only Blocks with a variable filter are narrowed. The other Blocks in the same Template keep their own filters, so a page about one finding can still end with a table of every open Critical. In a Widget Block, the rows offered follow what the widget counts (a Count widget set to Assets offers *Asset is the report's asset*), and a ticked row replaces the same filter set in the widget's own settings.
 - **Text.** A Block header, a cover page title, a text Block, a theme footer: type a token and it is replaced with the value when the report is generated, for example `Exposure Report for {{vulnerability_id}}`.
 
 A variable is filled in from wherever the report is generated:
@@ -241,7 +264,7 @@ A variable is filled in from wherever the report is generated:
 
 A report can only be about a finding or asset its requester is allowed to see. A generation that is missing a variable its Template uses is refused with a message naming it, rather than silently reporting on everything. A Template preview shows tokens as written and shows a placeholder in place of any Block that filters on a variable.
 
-The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks take their filters from the widget's own settings and do not use variables.
+The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks are not part of those exports, but a Template's variables are one set whatever the format, so an export still asks for a variable that only a Widget Block uses.
 
 ## Building a report in the UI
 
@@ -291,11 +314,13 @@ When the Template is ready, generate the report. If the Template uses [template 
 
 ![Generate report dialog](images/pro_generate_report_dialog.png)
 
-Generated reports are collected in the Generated Reports list, which shows each report's status, file format, the time it was requested and completed, and a download link.
+When the report finishes, a notice says it is ready and links to its row in the Generated Reports list. A large report can take longer than the dialog waits for (about a minute). It then keeps generating in the background, the dialog closes, and the notice links to its row in the Generated Reports list.
+
+Generated reports are collected in the Generated Reports list, which shows each report's status (with the reason, when a report could not be generated), its file format, and the time it was requested and completed. Open a report's menu to open it in the browser or download it.
 
 ![Generated reports list](images/pro_generated_reports_list.png)
 
-You can re-run a Template at any time to produce a fresh report. Keep in mind that each Generated Report is frozen in time — it reflects your data as of when it was generated and will not change as DefectDojo data changes, so re-run the Template whenever you need an up-to-date snapshot.
+You can generate a Template again at any time to produce a fresh report. Keep in mind that each Generated Report is frozen in time: it reflects your data as of when it was generated and will not change as DefectDojo data changes, so generate the Template again whenever you need an up-to-date snapshot.
 
 ## Moving off the classic report engine
 
@@ -306,7 +331,7 @@ date, and both they and this Report Builder offer a one-click migration.
 
 ### Migrating your saved templates
 
-Use **Migrate to the new engine** on any classic page, or **Import from Classic Engine**
+Use **Migrate to the new engine** on any classic page, or **Import From Classic Engine**
 on *All Report Templates* here. Both run the same conversion, so it does not matter which
 you start from, and both are safe to run more than once: a classic template whose name
 already exists here is reported as *already migrated* rather than duplicated.

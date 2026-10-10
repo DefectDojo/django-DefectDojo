@@ -19,7 +19,7 @@ For now, it’s good to know that **Engagements** can store data from multiple t
 
 The Import Scan form can be accessed from multiple locations:
 
-1. Via the **Import > Add Findings** menu option on the sidebar
+1. Via **Connect > Import > Add Findings** on the sidebar
 2. From a **Asset’s** **‘⋮’ (horizontal dots) Menu**, from a **Assets Table**
 3. From the **⚙️Gear Menu** on a **Asset Page**
 
@@ -32,8 +32,8 @@ The Test will be created with a name that matches the Scan Type: e.g. a Tenable 
 ### Form Options
 
 * **Scan File:** by clicking on the Choose button, you can select a file from your computer to upload.
-* **Scan Date (optional):** if you want to select a single Scan Date to be applied to all Findings that result from this import, you can select the date in this field.   
-If you do not select a Scan Date, Findings created from this report will use the date specified by the tool. SLAs for each Finding will be calculated based on their date.
+* **Scan Date (optional):** this field starts empty. Leave it empty to keep the dates the tool wrote into the report: each Finding takes its date from the report, or today's date if the report has none. Select a date only if you want that single date applied to every Finding from this import.  
+SLAs for each Finding are calculated from its date, so Findings from an older report keep their original dates and can already be past their SLA when they arrive.
 * **Scan Type:** select the tool used to create this data.
 * **Organization / Asset / Engagement Name:** select the Organization, Asset, and Engagement Name which you want to create a new Test under. You can also create a new Organization, Asset and/or Engagement at this time if you wish to, by entering the names of the objects that you want to create.
 * **Environment:** select an Environment that corresponds to the data you’re uploading.
@@ -61,19 +61,20 @@ To open Optional Fields, click the button labelled **"Optional Fields +"** above
 * **Version, Branch Tag, Commit Hash, Build ID, Service** can all be specified if you want to include these details in the Test.
 * **Source Code Management URI** can also be specified. This form option must be a valid URI.
 * **Group By:** if you want to create Finding Groups out of this File, you can specify the grouping method here.
+* **Close Old Findings** and **Close Old Findings Within This Asset**: see [Close Old Findings](#close-old-findings) below.
 
 ### Close Old Findings
 
-When importing a scan, you can automatically close Findings from previous scans that are no longer present in the new report. Enable this by checking the **Close Old Findings** checkbox in the UI or setting `close_old_findings: true` in the API.
+When importing a scan, you can automatically close Findings from previous scans that are no longer present in the new report. Enable this by checking the **Close Old Findings** checkbox (under **Optional Fields**) in the UI or setting `close_old_findings: true` in the API.
 
 #### Scope: Engagement vs. Asset
 
-By default, `close_old_findings` closes Findings of the same scan type within the **same Engagement**. DefectDojo Pro adds a second option — **Close Old Findings Within This Asset** — which widens the scope to all Findings of the same scan type across the **entire Asset**, regardless of which Engagement they belong to.
+By default, `close_old_findings` closes Findings of the same scan type in the other Tests of the **same Engagement**. The Test that the import creates is never affected, since every Finding in it comes from the new report. DefectDojo Pro adds a second option, **Close Old Findings Within This Asset**, which widens the scope to all Findings of the same scan type across the **entire Asset**, regardless of which Engagement they belong to.
 
 | Option | UI checkbox | API parameter | Scope |
 |---|---|---|---|
-| Close old findings (engagement scope) | **Close Old Findings** | `close_old_findings: true` | Same Engagement |
-| Close old findings (Asset scope) | **Close Old Findings Within This Asset** | `close_old_findings_product_scope: true` | Entire Asset |
+| Close old findings (engagement scope) | **Close Old Findings** | `close_old_findings: true` | Other Tests in the same Engagement |
+| Close old findings (Asset scope) | **Close Old Findings Within This Asset** | `close_old_findings_product_scope: true` | Other Tests in the entire Asset |
 
 `close_old_findings_product_scope` requires `close_old_findings` to also be enabled. Setting `close_old_findings_product_scope` without `close_old_findings` has no effect.
 
@@ -85,7 +86,9 @@ The `service` field is also respected: only Findings with an identical `service`
 
 Some scanners might not include triage information in their reports (e.g. tfsec). They simply scan code or dependencies, flag issues, and return everything, regardless of whether a vulnerability has already been triaged or not.
 
-To handle this case, DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can use DefectDojo as the source of truth for triage, instead of reactivating your triaged Findings on each import / reimport.
+To handle this case, the **Reimport** form has a **Do Not Reactivate** checkbox (API: `do_not_reactivate` on `/reimport-scan`), so you can use DefectDojo as the source of truth for triage. When it is checked, a closed Finding that appears again in the report stays closed instead of being reactivated. New Findings are still created, and Findings that are already open are processed as usual.
+
+The Import form has no Do Not Reactivate checkbox: an import always creates a new Test, so it never reactivates a Finding. See [Reimport](/import_data/import_intro/reimport/) for how reactivation works.
 
 ### Using the Scan Completion Date (API: `scan_date`) field
 
@@ -105,3 +108,5 @@ Here are the following use cases for using this field:
     - Finding date will be whatever the user set for `scan_date`
 4. The report **sets** the date, and the `scan_date` is **set** at import
     - Finding date will be whatever the user set for `scan_date`
+
+In the Pro UI, the **Scan Date** field on both the Import and Reimport forms starts empty, so cases 1 and 2 apply unless you select a date. On Reimport, a Scan Date applies only to the Findings the Reimport creates: Findings that already exist in the Test keep their dates.

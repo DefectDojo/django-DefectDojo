@@ -573,6 +573,7 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("fjioefjwoefijo", item.unique_id_from_tool)
         self.assertEqual("Medium", item.severity)
         self.assertEqual("CVE-2024-2529", item.unsaved_vulnerability_ids[0])
         self.assertEqual("120", item.cwe)
@@ -582,12 +583,14 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("2023-10-16", item.date)
         item = findings[1]
         self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
+        self.assertEqual("asdfwfewfwefewf", item.unique_id_from_tool)
         self.assertEqual("Low", item.severity)
         self.assertEqual(0, item.cwe)
         self.assertIsNone(item.cvssv3_score)
         self.assertEqual("2023-07-25", item.date)
         item = findings[2]
         self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
+        self.assertEqual("fjoiewfjoweifjoihugu-", item.unique_id_from_tool)
         self.assertEqual("Low", item.severity)
         self.assertEqual("2024-01-29", item.date)
         item = findings[3]
@@ -623,6 +626,7 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertEqual("typescript:7777_fwafewef", item.title)
+        self.assertEqual("fwafewef", item.unique_id_from_tool)
         self.assertEqual("High", item.severity)
         self.assertEqual("2024-02-13", item.date)
         item = findings[1]

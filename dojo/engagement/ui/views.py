@@ -1,4 +1,3 @@
-import csv
 import logging
 import mimetypes
 import operator
@@ -42,6 +41,7 @@ from openpyxl.styles import Font
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.endpoint.queries import get_import_form_endpoints
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import (
@@ -85,13 +85,12 @@ from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
-from dojo.location.models import Location
+from dojo.location.queries import get_import_form_locations
 from dojo.location.utils import save_locations_to_add
 from dojo.models import (
     Check_List,
     Development_Environment,
     Dojo_User,
-    Endpoint,
     Engagement,
     Finding,
     Note_Type,
@@ -131,6 +130,7 @@ from dojo.utils import (
     handle_uploaded_threat,
     redirect_to_return_url_or_else,
 )
+from dojo.utils_spreadsheet import TextCellWriter, store_cells_as_text
 
 logger = logging.getLogger(__name__)
 
@@ -807,10 +807,10 @@ class ImportScanResultsView(View):
         product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
 
         if locations_enabled():
-            endpoints = Location.objects.filter(products__product_id=product_tab.product.id)
+            endpoints = get_import_form_locations(product_tab.product, user)
         else:
             # TODO: Delete this after the move to Locations
-            endpoints = Endpoint.objects.filter(product__id=product_tab.product.id)
+            endpoints = get_import_form_endpoints(product_tab.product, user)
 
         # Get the import form with some initial data in place
         form = self.get_form(
@@ -1228,7 +1228,7 @@ def add_risk_acceptance(request, eid, fid=None):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = RiskAcceptanceForm(request.POST, request.FILES)
+        form = RiskAcceptanceForm(request.POST, request.FILES, engagement=eng)
         if form.is_valid():
             # first capture notes param as it cannot be saved directly as m2m
             notes = None
@@ -1270,7 +1270,7 @@ def add_risk_acceptance(request, eid, fid=None):
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(eid, )))
     else:
         risk_acceptance_title_suggestion = f"Accept: {finding}"
-        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
+        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion}, engagement=eng)
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).prefetch_related("test", "finding_group_set").order_by("test__id", "numerical_severity", "title")
 
@@ -1310,6 +1310,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
     errors = False
 
     if request.method == "POST":
+        # The page itself only needs view access; changing the risk acceptance needs edit.
+        user_has_permission_or_403(request.user, risk_acceptance, "edit")
         # deleting before instantiating the form otherwise django messes up and we end up with an empty path value
         if len(request.FILES) > 0:
             logger.debug("new proof uploaded")
@@ -1397,7 +1399,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 
         if "add_findings" in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
-                request.POST, request.FILES, instance=risk_acceptance)
+                request.POST, request.FILES, instance=risk_acceptance, engagement=eng)
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data["accepted_findings"]
@@ -1419,7 +1421,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
-    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
+    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance, engagement=eng)
 
     accepted_findings = risk_acceptance.accepted_findings.order_by("numerical_severity")
     fpage = get_page_items(request, accepted_findings, 15)
@@ -1646,7 +1648,7 @@ def csv_export(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = "attachment; filename=engagements.csv"
 
-    writer = csv.writer(response)
+    writer = TextCellWriter(response)
 
     first_row = True
     for engagement in engagements:
@@ -1712,6 +1714,7 @@ def excel_export(request):
             worksheet.cell(row=row_num, column=col_num, value=getattr(engagement, "test_count", 0))
         row_num += 1
 
+    store_cells_as_text(workbook)
     with NamedTemporaryFile() as tmp:
         workbook.save(tmp.name)
         tmp.seek(0)

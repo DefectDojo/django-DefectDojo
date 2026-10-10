@@ -1,7 +1,7 @@
 ---
 title: "Deliveries"
 description: "The ledger of everything rules send outward, and how retries and replay work"
-weight: 5
+weight: 6
 audience: pro
 aliases:
   - /automation/rules_engine_v2/deliveries/
@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Every outbound side effect a rule produces is one row in the delivery ledger. **Triage Engine > Deliveries** lists them.
+Every outbound side effect a rule produces is one row in the delivery ledger. **Act > Triage Engine > Deliveries** lists them.
 
 The row is written **before** any network call happens, and it holds exactly what would be, or was, sent. That is what makes egress auditable rather than a log line you hope somebody kept, and it is why **Simulate** is not a separate code path: a simulated send is the same row with the dispatch step skipped.
 
@@ -26,7 +26,7 @@ The row is written **before** any network call happens, and it holds exactly wha
 | **Mode** | `simulate` or `live`. |
 | **Status** | Where the delivery got to. |
 | **Attempts** | How many sends have been tried, against the maximum allowed. |
-| **Last error** | Why the last attempt failed, or why the delivery was skipped. |
+| **Last Error** | Why the last attempt failed, or why the delivery was skipped. |
 | **Response** | What the destination said back. |
 | **External reference** and **URL** | The ticket key, message id or file path the destination returned, and a link to it when there is one. |
 

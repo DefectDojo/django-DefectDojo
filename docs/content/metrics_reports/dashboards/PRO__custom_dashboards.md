@@ -66,7 +66,7 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 - **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout (unless it is collaborative, below). Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
 - **Collaborative** — a Maintainer can mark a shared layout as **collaborative** from **Manage Layouts** (**Make Collaborative**, reversed with **Stop Collaborating**). A collaborative layout is one live dashboard rather than a template to copy: it appears in every user's layout picker, anyone can set it as their default, and anyone can add, remove, rearrange, or configure its widgets. Every change is saved to the same layout, so everyone using it sees it. Renaming, unsharing, deleting, and the collaborative setting itself stay with a Maintainer. If a layout stops being collaborative (or is unshared), users who had it as their default fall back to their own layouts. Edits are saved as they are made, so two people editing at the same moment can overwrite each other's change; the layout re-syncs from the server when you enter edit mode.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
-- **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults).
+- **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (**Settings > UI Defaults > Layout Defaults**).
 
 ### Restricting customization
 
@@ -116,6 +116,8 @@ Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on
 
 Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
 
+A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its gear icon to leave the widget's title bar blank.
+
 ### Putting a widget into a report
 
 Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go straight into a document you send out.
@@ -128,7 +130,7 @@ This **copies** the widget rather than linking to it. Editing the dashboard widg
 
 The **Manage Layouts** dialog (the gear button on the toolbar) is the hub for everything layout-level:
 
-- **Your Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts.
+- **Saved Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts.
 - **Create New** — start a fresh, empty layout to build from scratch.
 - **Shared Templates** — browse curated and team-published layouts grouped by category, and click **Use Layout** to clone one into your own space.
 
@@ -149,7 +151,7 @@ DefectDojo ships four ready-to-use shared templates you can clone as a starting 
 
 ### The empty state
 
-A brand-new layout with no widgets shows a **"Build Your First Dashboard"** prompt. Click **Add Your First Widget** to jump straight into edit mode and start choosing widgets.
+A brand-new layout with no widgets shows a **"Build a Dashboard"** prompt. Click **Add Widget** to jump straight into edit mode and start choosing widgets.
 
 ![The empty-layout state](images/pro_dashboard_v2_empty_state.png)
 

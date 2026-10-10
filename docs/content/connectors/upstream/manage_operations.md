@@ -14,11 +14,11 @@ Once an Upstream Connector is set up, it will run two Operations on a recurring 
 
 Both of these Operations are managed on the Operations page of a Connector. The table will also track past runs of these Operations so that you can ensure your Connector is up to date.
 
-To access a Connector's Operations Page, open **Manage Records & Operations** for the Connector you wish to work with, and then switch to the **</\> Operations From (tool)** tab.
+To access a Connector's Operations Page, open **Manage Records and Operations** for the Connector you wish to work with, and then switch to the **</\> Operations From (tool)** tab.
 
 ![image](images/operations_discover.png)
 
-The **Manage Records & Operations** page can also be used to handle Records; which are the individual Asset mappings of your connected tool.  See [Managing Records](../manage_records) for more information.
+The **Manage Records and Operations** page can also be used to handle Records; which are the individual Asset mappings of your connected tool.  See [Managing Records](../manage_records) for more information.
 
 ## The Operations Page
 
@@ -27,7 +27,7 @@ The **Manage Records & Operations** page can also be used to handle Records; whi
 Each entry on the Operations Page's table is a record of an operation event, with the following traits:
 
 * **Type** describes whether the event was a **Sync** or a **Discover** operation.
-* **Status** describes whether the event ran successfully.
+* **Status** describes how the event went: **Success**, **Error** or **Timeout** once it has finished, or **Pending** while it is still running. The **Status** filter offers all four.
 * **Trigger** describes how the event was triggered \- was it a **Scheduled** operation which ran automatically, or a **Manual** operation which was triggered by a DefectDojo user?
 * The **Start \& End Time** of each operation is recorded here, along with the **Duration**.
 
@@ -41,11 +41,11 @@ The **Upstream Connectors** page flags this on the Connector's tile:
 
 ![image](images/connector_visibility_warning.png)
 
-* **Connected, but nothing is visible** means the last operation succeeded and the tool reported
+* **Connected, but Nothing Visible** means the last operation succeeded and the tool reported
   no data at all for these credentials. This almost always means the account is missing a grant
   in the tool rather than in DefectDojo. Hover the warning to see what to grant for that
   specific tool.
-* **All *n* records are missing from the tool** means the Connector previously saw data and no
+* **All *n* Records Missing From the Tool** means the Connector previously saw data and no
   longer does. Records that disappear from the tool are kept and marked **Missing** rather than
   deleted, so your mappings survive. Common causes are a revoked permission, a rotated
   credential with a narrower scope, or projects deleted in the tool.
@@ -69,7 +69,7 @@ Each time your Connector runs a **Discover** operation, it will look for new **V
 
 ### Run Discover Manually
 
-**Discover** operations will automatically run on a regular basis, but they can also be run manually. If you're setting up this Connector for the first time, you can click the **Discover** button next to the **Unmapped Records** header. After you refresh the page, you will see your initial list of **Records**.
+**Discover** operations will automatically run on a regular basis, but they can also be run manually. If you're setting up this Connector for the first time, you can click the **Discover** button next to the **Unmapped Records** header. Discover runs in the background: when it finishes, the page reloads its Records and Operations on its own, and your initial list of **Records** appears.
 
 ![image](images/operations_discover_3.png)
 
@@ -103,6 +103,17 @@ To have DefectDojo run a Sync operation off\-schedule:
 2. From this page, click the **Sync** button. This button is located next to the **Mapped Records** header.
 
 ![image](images/operations_sync.png)
+
+Sync runs in the background. When it finishes, the page reloads its Records and Operations on its own.
+
+The connectors service runs one operation at a time across all Connectors, so a manual run can wait while another Connector's operation finishes. The page keeps checking for up to two hours. If the run has still not started by then, a message says so; refresh the page later to see its results. Operations that start on their schedule while the page is open appear the next time the page loads.
+
+## When a manual run is refused
+
+If DefectDojo cannot start a manual Discover or Sync, a message says why. The two most common reasons are:
+
+* **Request was throttled**: a user can start at most three Discover runs and three Sync runs a minute, across all Connectors. The message says how many seconds to wait before trying again.
+* **The connectors service could not be reached**: the service that runs Connector operations is not answering. Try again in a few minutes. If the message persists, ask an administrator to check that the connectors service is running.
 
 ## Getting told when a Connector stops working
 

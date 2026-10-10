@@ -12,6 +12,8 @@ DefectDojo is designed to ingest bulk reports from tools, creating one or more F
 
 This is where Deduplication comes in, a Smart feature which you can set up to automatically manage duplicate Findings.
 
+For how the matching itself works, including which algorithms can match Findings reported by two different tools, see [How DefectDojo Deduplicates Findings Across Security Tools](/triage_findings/finding_deduplication/deduplication_across_tools/).
+
 ## How DefectDojo handles duplicates
 
 1. First, you import **Test 1\.** Your report contains a vulnerability which is recorded as Finding A.

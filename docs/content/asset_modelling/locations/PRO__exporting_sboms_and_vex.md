@@ -21,7 +21,26 @@ The Asset page carries an **Export** panel offering the same data without going 
 
 Each choice names the format and specification version it produces, for example *SBOM — component inventory only (CycloneDX 1.6)*. Those labels are read from the server as the panel renders rather than written into the page, so they describe the document you will actually receive: when the exporters adopt a newer specification, the labels follow rather than going stale.
 
-The Asset page and the API endpoints below emit the same specification version, so a document exported from either path is interchangeable with the other.
+The Asset page and the API endpoints below emit the same specification version, but their VEX statements come from different data. The API's VEX reads the status of each Finding on each dependency (see [Exporting a VEX document](#exporting-a-vex-document)). The Asset page's VEX, and the vulnerabilities block of its VDR, read each Finding's own VEX analysis: the state, justification, response and detail set on the Finding.
+
+### How the Asset page builds VEX statements
+
+A Finding with no VEX analysis set gets a state from its status:
+
+| Finding status | VEX `analysis.state` |
+| --- | --- |
+| False Positive | `false_positive` |
+| Mitigated | `resolved` |
+| Risk Accepted | `exploitable`, with `response: ["will_not_fix"]` |
+| Anything else | `in_triage` |
+
+When every Finding for a vulnerability has the same state, the vulnerability is one entry listing every affected component. When they disagree (one host's Finding is marked not affected while another host's is still in triage), the export never lets the safer claim speak for the others:
+
+- Each component takes the least-resolved state among its Findings, in the order `exploitable`, `in_triage`, `resolved_with_pedigree`, `resolved`, `false_positive`, `not_affected`.
+- A Finding with no component is a statement about the whole Asset, so it takes the least-resolved state of all the vulnerability's Findings.
+- Components that end up in different states are listed in separate entries for the same vulnerability, each with the analysis of a Finding that holds that state.
+
+So two hosts with different states for one vulnerability in the same component never export as one `not_affected`.
 
 ## Exporting an SBOM
 

@@ -13,7 +13,7 @@ A rule is built on a canvas. You drag nodes out of a palette, wire them together
 
 ## Starting a rule
 
-From **Triage Engine > All Rules** there are two ways to begin.
+From **Act > Triage Engine > Rules** there are two ways to begin.
 
 **From Template** opens a gallery of rules that ship with DefectDojo, grouped into packs. Each card
 says what the rule is for, which nodes its graph contains, and what you have to configure before it
@@ -21,7 +21,7 @@ does anything — a scheduled rule with no schedule never runs at all, so that l
 Adopting one creates a rule of your own and drops you into the editor on it.
 
 An adopted rule arrives **disabled and in simulate mode**, exactly like any new rule. Nothing runs
-and nothing is sent until you have set its scope, finished its setup steps, and enabled it. That is
+on its own and nothing is sent until you have set its scope, finished its setup steps, and enabled it. That is
 deliberate: several templates raise tickets and send messages, and the first run of one across an
 unfiltered set of Assets is not something you want to discover after the fact.
 
@@ -71,7 +71,7 @@ Preview runs the real engine, not a simulation of it, and then rolls the whole t
 
 Preview is the one execution that caps how many items it looks at, so that it stays fast. When it truncates, it says so in the trace. A real run has no such cap.
 
-For an Asset rule, Preview lists the Assets it would change and what would change about each one, before and after, the same way it does for a Finding rule.
+For an Asset rule, Preview lists the Assets it would change and what would change about each one, before and after, the same way it does for a Finding rule. When a node works its destination out per Asset, Preview also lists where each sampled Asset would go, including the ones already there and the ones it would skip, and marks a destination the run would create. See [Computed destinations](../node_reference/#computed-destinations).
 
 ## What a rule works on
 
@@ -94,7 +94,7 @@ Every graph starts with exactly one trigger.
 * **On Finding Event** wakes the rule when Findings are created, updated, closed or reopened. Choose which of those in the node's **Event** setting, or `any` for all four.
 * **On Asset Event** wakes the rule when Assets are created or updated, tag changes included.
 * **On a Schedule** sweeps everything in scope on a recurring schedule, Findings or Assets per its **Sweep Over** setting.
-* **Manual Run** sweeps everything in scope when you press **Run** on the rule, Findings or Assets per its **Sweep Over** setting.
+* **Manual Run** sweeps everything in scope when you press **Run Now** on the rule, Findings or Assets per its **Sweep Over** setting.
 * **On a Missing Scan** runs on a schedule and reports Assets whose expected scan has not arrived.
 * **When a Scan Has Landed** wakes the rule once for each scan import that finishes, or fails, on an Asset in scope.
 * **When a Group of Scans Has Landed** waits for a set of scan types to finish importing into an Asset and wakes the rule once for the whole group, down a `complete` or `incomplete` output. See the [Node Reference](../node_reference/) for how a group is defined and what happens when a scan fails or never arrives.
@@ -146,6 +146,22 @@ ctx.rule_name
 A path that does not resolve produces no value rather than an error.
 
 An Asset rule reads its items the same way, through `product.*`, `product_type.*` and `ctx.*` paths. `ctx.changed_fields` carries the names of the fields an update changed, and the insert menu only offers paths the rule's items actually carry.
+
+### Referring to webhook data
+
+A rule started by **On an Inbound Webhook** reads the delivery through `webhook.*` paths. Once **Find Findings by a Value** has found a Finding, the item also carries every `finding.*` path above, and the `webhook` block stays with it.
+
+```
+webhook.payload.issue.key       a value in the item's object
+webhook.root.webhookEvent       a value in the whole payload
+webhook.fields.state            a named field the trigger read
+webhook.headers.x-event-type    a header the receiver keeps
+webhook.receiver.label          the receiver
+ctx.receipt_id                  the receipt the run came from
+ctx.ticket_link_id              the ticket a lookup matched
+```
+
+The receiver's **Sample Payload** tab lists every path in its sample, and the insert menu offers them in the rule editor. See [Webhook Receivers](../webhook_receivers/).
 
 ### Conditioning on an exception
 
@@ -243,6 +259,21 @@ An Asset item carries no `finding`, `test` or `engagement` block at all — thos
 `asset_type` is the type's code, not its display label.
 
 Alongside `product`, an Asset item carries `product_type` (`id`, `name`) and `ctx`. Because the key names match, a condition or template written against `product.name` or `product_type.name` means the same thing whichever kind of rule it is in.
+
+#### Connector attributes
+
+An Asset discovered by a connector carries what that connector knows about it: the custom attributes of the connector records mapped to the Asset, such as an AWS account's id, name and region, or an ECR repository. A rule reads them, and only reads them, through `connector.*` paths:
+
+```
+connector.name                               the connector of the first record mapped to the Asset
+connector.names                              every connector with a record mapped to it
+connector.attributes.AWS_ACCOUNT_NAME        an attribute, from whichever record reports it
+connector.by_name.security-hub.AWS_REGION    an attribute, from one connector's records only
+```
+
+An Asset mapped from more than one connector carries all of their attributes. When two records report the same attribute, `connector.attributes` keeps the value from the record discovered first, and `connector.by_name` keeps each connector's own. An Asset no connector record maps to has empty `connector` paths, so a condition that `connector.attributes.AWS_REGION` **is not set** matches it.
+
+The condition builder and the insert menu offer the attributes of the connectors configured on the instance. Any other attribute works typed by hand. A rule that never mentions `connector` does not pay for reading the records at all, and one that does reads them once per batch of Assets. Attribute values are text, capped at 4,000 characters each.
 
 ### Conditions
 
@@ -363,4 +394,4 @@ The recommended order for a rule that sends anything:
 4. Let it run, then read **Deliveries** and check the recorded payloads are what you intended.
 5. Switch the mode to **Live**.
 
-Simulate is not a partial run. Every Finding or Asset edit in the graph happens for real in simulate mode. Only the outbound sends are held back.
+Simulate is not a partial run. Every Finding or Asset edit in the graph happens for real in simulate mode. Only the outbound sends are held back. **Preview** is the only way to run a graph without changing anything.

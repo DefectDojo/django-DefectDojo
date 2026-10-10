@@ -1,4 +1,3 @@
-import csv
 import logging
 import re
 from datetime import datetime
@@ -7,6 +6,7 @@ from tempfile import NamedTemporaryFile
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.db.models import Exists, OuterRef
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -30,7 +30,11 @@ from dojo.finding.ui.views import BaseListFindings
 from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
-from dojo.location.queries import get_authorized_locations
+from dojo.location.queries import (
+    annotate_location_counts_and_status,
+    authorized_finding_references,
+    get_authorized_locations,
+)
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
@@ -56,6 +60,7 @@ from dojo.utils import (
     get_system_setting,
     get_words_for_field,
 )
+from dojo.utils_spreadsheet import TextCellWriter, store_cells_as_text
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +101,8 @@ class ReportBuilder(View):
 
     def get_endpoints(self, request: HttpRequest):
         if locations_enabled():
-            endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+            endpoints = Location.objects.filter(active_location_reference(request.user)).distinct()
+            endpoints = annotate_location_counts_and_status(endpoints, user=request.user)
             filter_class = URLFilter
         else:
             endpoints = Endpoint.objects.filter(
@@ -213,10 +219,24 @@ def report_findings(request):
                    })
 
 
+def active_location_reference(user, product=None):
+    """
+    Condition for a Location with an active finding the user may see.
+
+    A Location is shared by every product that recorded it, so the status of findings
+    in other products must not make it show up as vulnerable here.
+    """
+    references = authorized_finding_references(user).filter(location=OuterRef("pk"), status=FindingLocationStatus.Active)
+    if product is not None:
+        references = references.filter(finding__test__engagement__product=product)
+    return Exists(references)
+
+
 def report_endpoints(request):
     if locations_enabled():
         endpoints = get_authorized_locations(Permissions.Location_View)
-        endpoints = endpoints.filter(findings__status=FindingLocationStatus.Active).distinct()
+        endpoints = endpoints.filter(active_location_reference(request.user)).distinct()
+        endpoints = annotate_location_counts_and_status(endpoints, user=request.user)
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
@@ -285,8 +305,7 @@ def product_endpoint_report(request, pid):
     if locations_enabled():
         endpoints = Location.objects.filter(
             products__product=product,
-            findings__status=FindingLocationStatus.Active,
-        )
+        ).filter(active_location_reference(request.user, product=product))
         endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), user=request.user)
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
@@ -857,7 +876,7 @@ class CSVExportView(View):
     def build_response(self, findings, filename="findings.csv"):
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename={filename}"
-        writer = csv.writer(response)
+        writer = TextCellWriter(response)
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
         allowed_foreign_keys = get_foreign_keys()
@@ -1151,6 +1170,7 @@ class ExcelExportView(View):
                 self.add_extra_values()
             row_num += 1
 
+        store_cells_as_text(workbook)
         with NamedTemporaryFile() as tmp:
             workbook.save(tmp.name)
             tmp.seek(0)

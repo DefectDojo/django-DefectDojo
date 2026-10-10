@@ -47,7 +47,7 @@ To onboard one account directly, use **Add Accounts → Onboard a single account
 
 ![The cloud accounts list](images/cspm_accounts_list.png)
 
-The **Cloud Accounts** list mirrors the AppSec repository list: the account identifier links out to the provider console, and each row shows its provider, linked Asset, **Active Findings** (linking to that Asset's findings), last scan time, and a row menu (**Scan now**, **Configure**, **Remove**).
+The **Cloud Accounts** list mirrors the AppSec repository list: the account identifier links out to the provider console, and each row shows its provider, linked Asset, **Active Findings** (linking to that Asset's findings), last scan time, and a row menu (**Scan Now**, **Configure**, **Remove**).
 
 ### Provider identity and scan credentials
 
@@ -152,7 +152,7 @@ If you drive the API directly, the delegated blob shapes are:
 
 ## Scan a cloud account
 
-Open a cloud account's row menu and choose **Scan now**. Sensei runs Prowler against the account and imports the results. A large account is scanned in **shards** (by service group) when a single scan would run long; the shards are reconciled into one set of findings.
+Open a cloud account's row menu and choose **Scan Now**. Sensei runs Prowler against the account and imports the results. A large account is scanned in **shards** (by service group) when a single scan would run long; the shards are reconciled into one set of findings.
 
 Each imported finding is a **cloud-posture finding** recorded against the **cloud resource** it concerns (an S3 bucket, a security group, a storage account, and so on) rather than a file. Its identity comes from Prowler's own per-finding id, so re-scanning the account updates the same findings rather than duplicating them, and a resource that reports several distinct checks produces several distinct findings.
 
@@ -164,7 +164,7 @@ Each imported finding is a **cloud-posture finding** recorded against the **clou
 
 A cloud finding has **two** remediation paths, and the right one depends on how the resource is managed:
 
-- **IaC pull request** — when the resource is provisioned by infrastructure-as-code, Sensei can open a pull request on a linked IaC repository, exactly like an AppSec fix. This is the same **Fix with Sensei** flow described in [Fixing findings with Sensei](/sensei/fixing_findings/); for a cloud finding it opens the PR on the account's linked IaC repository. The finding stays open until the change is applied *and the next scan sees it*, because the scanner reads the account, not your repository.
+- **IaC pull request** — when the resource is provisioned by infrastructure-as-code, Sensei can open a pull request on a linked IaC repository, exactly like an AppSec fix. This is the same **Fix With Sensei** flow described in [Fixing findings with Sensei](/sensei/fixing_findings/); for a cloud finding it opens the PR on the account's linked IaC repository. The finding stays open until the change is applied *and the next scan sees it*, because the scanner reads the account, not your repository.
 - **Fix in Cloud (direct remediation)** — a live, **reversible** change applied straight to the cloud resource through the provider API, with no repository and no deploy. This is the fastest path for click-ops resources that no IaC provisions.
 
 ### Fix in Cloud (direct remediation)

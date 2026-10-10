@@ -62,6 +62,17 @@ def get_authorized_locations(permission, queryset=None, user=None):
     return Location.objects.all().order_by("id") if queryset is None else queryset
 
 
+def get_import_form_locations(product, user):
+    """
+    Locations offered on the import and re-import forms: the product's own, or, when the product
+    has none, the ones the user can view (the same set the import API accepts).
+    """
+    locations = Location.objects.filter(products__product=product)
+    if locations.exists():
+        return locations
+    return get_authorized_locations("view", user=user)
+
+
 def get_authorized_location_finding_reference(permission, queryset=None, user=None):
     impl = get_auth_filter("location.get_authorized_location_finding_reference")
     if impl:
@@ -173,6 +184,16 @@ def readable_tag_match(location_field, user=None, **lookups):
     return Exists(
         fully_authorized_locations(user).filter(pk=OuterRef(location_field), **lookups),
     )
+
+
+# Read by Location.readable_tags. Its own name, so it never collides with an annotation a caller
+# (Pro's v3 router, for one) already puts on the same queryset.
+TAGS_READABLE_ANNOTATION = "caller_may_read_tags"
+
+
+def annotate_tags_readable(locations, user=None):
+    """Annotate :data:`TAGS_READABLE_ANNOTATION` (see :func:`location_tags_readable`) once per page instead of per row."""
+    return locations.annotate(**{TAGS_READABLE_ANNOTATION: readable_tag_match("pk", user=user)})
 
 
 def annotate_location_counts_and_status(locations, user=None):

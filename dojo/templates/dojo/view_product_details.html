@@ -15,7 +15,7 @@
     <div class="panel panel-default">
       <div class="panel-heading tight">
         <div class="clearfix">
-          <h3 class="pull-left">{% trans "Description" %}</h3>
+          <h3 class="pull-left"><i class="fa-solid fa-align-left dd-card-icon" aria-hidden="true"></i>{% trans "Description" %}</h3>
           <div class="dropdown pull-right">
             <div class="btn-group">
               <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Options' %}">
@@ -122,33 +122,33 @@
 <div class="col-md-12">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-chart-pie me-2" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-chart-pie dd-card-icon" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
     </div>
     <table class="table table-condensed metrics-severity-counts">
       <tbody>
         <tr>
           <td class="col-sm-2 bg-vuln-critical vuln-count text-center">
-              <a aria-label="{{ critical }} critical findings" href="{% url 'product_open_findings' prod.id %}?severity=Critical" style="color:#FFFFFF;text-decoration:none">{{ critical }}<span class="hidden-xs"><br>
+              <a aria-label="{{ critical }} critical findings" href="{% url 'product_open_findings' prod.id %}?severity=Critical" style="color:inherit;text-decoration:none">{{ critical }}<span class="hidden-xs"><br>
               <small>{% trans "CRITICAL" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-high vuln-count text-center">
-              <a aria-label="{{ high }} high severity findings" href="{% url 'product_open_findings' prod.id %}?severity=High" style="color:#FFFFFF;text-decoration:none">{{ high }}<span class="hidden-xs"><br>
+              <a aria-label="{{ high }} high severity findings" href="{% url 'product_open_findings' prod.id %}?severity=High" style="color:inherit;text-decoration:none">{{ high }}<span class="hidden-xs"><br>
               <small>{% trans "HIGH" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-medium vuln-count text-center">
-              <a aria-label="{{ medium }} medium severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Medium" style="color:#FFFFFF;text-decoration:none">{{ medium }}<span class="hidden-xs"><br>
+              <a aria-label="{{ medium }} medium severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Medium" style="color:inherit;text-decoration:none">{{ medium }}<span class="hidden-xs"><br>
               <small>{% trans "MEDIUM" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-low vuln-count text-center">
-              <a aria-label="{{ low }} low severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Low" style="color:#FFFFFF;text-decoration:none">{{ low }}<span class="hidden-xs"><br>
+              <a aria-label="{{ low }} low severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Low" style="color:inherit;text-decoration:none">{{ low }}<span class="hidden-xs"><br>
               <small>{% trans "LOW" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-info vuln-count text-center">
-              <a aria-label="{{ info }} info severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Info" style="color:#FFFFFF;text-decoration:none">{{ info }}<span class="hidden-xs"><br>
+              <a aria-label="{{ info }} info severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Info" style="color:inherit;text-decoration:none">{{ info }}<span class="hidden-xs"><br>
               <small>{% trans "INFO" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-muted vuln-count text-center">
-              <a href="{% url 'product_open_findings' prod.id %}" style="color:#FFFFFF;text-decoration:none">{{ total }}<span class="hidden-xs"><br>
+              <a href="{% url 'product_open_findings' prod.id %}" style="color:inherit;text-decoration:none">{{ total }}<span class="hidden-xs"><br>
               <small>{% trans "TOTAL" %}</small></span></a>
           </td>
         </tr>
@@ -162,7 +162,7 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa-solid fa-bolt" aria-hidden="true"></span>{% trans "Technologies" %} {% if app_analysis %}({{ app_analysis.count }}){% endif %}
+        <h3 class="panel-title"><span class="fa-solid fa-bolt dd-card-icon" aria-hidden="true"></span>{% trans "Technologies" %} {% if app_analysis %}({{ app_analysis.count }}){% endif %}
             {% if prod|has_object_permission:"add" %}
             <a title="{% trans "Add new Technology" %}" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa-solid fa-plus"></span> </a>
             {% endif %}
@@ -210,7 +210,7 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa-solid fa-gavel" aria-hidden="true"></span>{% trans "Regulations" %} {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
+        <h3 class="panel-title"><span class="fa-solid fa-gavel dd-card-icon" aria-hidden="true"></span>{% trans "Regulations" %} {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
       </div>
       <ul class="list-group">
       {% for regulation in prod.regulations.all %}
@@ -230,7 +230,7 @@
   <div class="col-md-12">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class ="fa-solid fa-scale-balanced" aria-hidden="true"></span>{% trans "Benchmark Progress" %}</h3>
+        <h3 class="panel-title"><span class="fa-solid fa-scale-balanced dd-card-icon" aria-hidden="true"></span>{% trans "Benchmark Progress" %}</h3>
       </div>
         <ul class="list-group">
           {% for benchmark in benchmarks_percents %}
@@ -276,7 +276,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h4 class="pull-left">{% trans "Authorized Users" %}</h4>
+                <h4 class="pull-left"><i class="fa-solid fa-users dd-card-icon" aria-hidden="true"></i>{% trans "Authorized Users" %}</h4>
                 &nbsp;
                 {% if prod|has_object_permission:"staff_only" %}
                 <div class="dropdown pull-right">
@@ -356,7 +356,7 @@
 <div class="col-md-4">
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>{% trans "Metadata" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw dd-card-icon" aria-hidden="true"></span>{% trans "Metadata" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped" id="set-width">
@@ -419,7 +419,7 @@
     {% if system_settings.enable_finding_sla %}
     <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-calendar-check fa-fw" aria-hidden="true"></span>&nbsp;Service Level Agreement</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-calendar-check fa-fw dd-card-icon" aria-hidden="true"></span>Service Level Agreement</h3>
     </div><div class="panel-body">
         <p>{{ sla.name }}</p>
         <p>{{ sla.description }}</p>
@@ -477,7 +477,7 @@
 {% if languages %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-language" aria-hidden="true"></span>{% trans "Languages" %} ({{ languages.count }})</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-language dd-card-icon" aria-hidden="true"></span>{% trans "Languages" %} ({{ languages.count }})</h3>
     </div>
     <div class="panel-body" style="text-align: center;">
       <div style="display: inline-block; padding: 0px 15px 0px 15px; vertical-align: top;">
@@ -502,7 +502,7 @@
 {% if product_metadata %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-wand-magic-sparkles fa-fw" aria-hidden="true"></span>{% trans "Custom Fields" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-wand-magic-sparkles fa-fw dd-card-icon" aria-hidden="true"></span>{% trans "Custom Fields" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped">
@@ -522,7 +522,7 @@
 <!-- Contacts -->
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Contacts" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-users fa-fw dd-card-icon" aria-hidden="true"></span>{% trans "Contacts" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped">
@@ -548,7 +548,7 @@
 <div class="panel panel-default panel-default-secondary" id="edit_notifications">
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
-    <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Notifications" %}
+    <h3 class="panel-title"><span class="fa-solid fa-users fa-fw dd-card-icon" aria-hidden="true"></span>{% trans "Notifications" %}
       <i class="fa-solid fa-circle-question has-popover" data-content="{{ labels.ASSET_NOTIFICATIONS_HELP }}" %}"></i>
     </h3>
   </div>

@@ -3,14 +3,14 @@
 <div data-multiple='true' class="panel panel-available-widget" >
     <div class="panel-heading tight" title="{% trans 'Click and drag to move' %}" data-toggle="tooltip">
         <div class="clearfix">
-            <h5 class="pull-left">Vulnerable Endpoints</h5>
+            <h5 class="pull-left"><i class="fa-solid fa-sitemap dd-card-icon" aria-hidden="true"></i>Vulnerable Endpoints</h5>
             <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>
         </div>
     </div>
     <div class="panel-body">
         <div class="panel panel-available-widget">
             <div class="panel-heading">
-                <h6>Filters</h6>
+                <h6><i class="fa-solid fa-filter dd-card-icon" aria-hidden="true"></i>Filters</h6>
             </div>
             <div class="panel-body">
                 {% if extra_help %}
@@ -45,7 +45,7 @@
                         <tr>
                             {% if V3_FEATURE_LOCATIONS %}
                                 <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a></td>
-                                <td><a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings.count }}</a></td>
+                                <td><a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.total_findings }}</a></td>
                             {% else %}
                                 <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a></td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>

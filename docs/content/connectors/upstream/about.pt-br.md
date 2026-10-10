@@ -59,6 +59,7 @@ Atualmente oferecemos suporte a Conectores Upstream para as seguintes ferramenta
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
+* **Google Cloud**
 * **Google Cloud Security Command Center**
 * **Group-IB ASM**
 * **HackerOne**
@@ -104,7 +105,7 @@ Atualmente oferecemos suporte a Conectores Upstream para as seguintes ferramenta
 
 Para instruções de configuração passo a passo de cada ferramenta, veja a referência [Configuração de Conectores por Ferramenta](../toolreference/).
 
-A maioria dos Conectores importa **achados**. Alguns são **Asset Connectors** que, em vez disso, importam seu **inventário de ativos** — construindo e mantendo sua hierarquia de Produto (Ativo) e Tipo de Produto (Organização) em vez de importar achados: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets** e **ServiceNow CMDB**. (O **runZero** é principalmente um Asset Connector, mas também pode, opcionalmente, importar vulnerabilidades como achados.)
+A maioria dos Conectores importa **achados**. Alguns são **Asset Connectors** que, em vez disso, importam seu **inventário de ativos** — construindo e mantendo sua hierarquia de Produto (Ativo) e Tipo de Produto (Organização) em vez de importar achados: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Google Cloud**, **Jira Service Management Assets** e **ServiceNow CMDB**. (O **runZero** é principalmente um Asset Connector, mas também pode, opcionalmente, importar vulnerabilidades como achados.)
 
 Essas conexões oferecem uma integração com o DefectDojo na velocidade de uma API, e podem ser usadas para ingerir e organizar automaticamente os dados de vulnerabilidade da ferramenta.
 

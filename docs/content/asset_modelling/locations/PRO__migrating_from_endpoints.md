@@ -9,7 +9,7 @@ When you enable Locations on an existing DefectDojo Pro instance, the data alrea
 
 Note that migration is **one-way**. There is no automated rollback path that re-creates Endpoints from Locations.
 
-> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations and are scheduled for **removal in 3.4.0**. Until then the Endpoints UI and the read-only Endpoint API stay available, and the **DEPRECATED** badges shown on the Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables link here. Enable Locations and run the migration below before 3.4.0.
+> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations. The Endpoints pages go away in **3.6.0 (December 2026)**. The read-only Endpoint API (`/api/v2/endpoints/`, `/api/v2/endpoint_status/`) stays until its own deprecation announcement. The Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables carry a deprecation banner. Enable Locations and run the migration below before 3.6.0.
 
 ## Running the migration from the Feature Flags page
 
@@ -17,7 +17,7 @@ Enabling Locations only changes behaviour for *new* imports; your existing histo
 
 When a backfill finishes it reports how many source objects it processed and how many distinct **Locations** those objects resolved to. The two numbers differ by design: several source objects can share one Location (many Endpoints normalising to the same URL, or many Findings sharing one component), so the Location count is normally lower than the object count. If any individual object could not be migrated it is skipped rather than aborting the run, and the number skipped is shown alongside the result.
 
-A running item shows a **Cancel** button. Cancelling stops the run at the next batch boundary, so it is not instant: the current batch finishes and commits first. A cancelled run keeps everything it had already migrated, is reported as **Cancelled** with its partial counts, and because every step is idempotent, running the same item again resumes from where it stopped and converges on the same result as an uninterrupted run. Cancel is also the recovery path when a run's worker is lost: a run that stops reporting progress is marked failed on its own so the item becomes runnable again, and forcing a cancel releases a run that is otherwise wedged.
+A running item shows a **Cancel** button. Cancelling stops the run at the next batch boundary, so it is not instant: the current batch finishes and commits first. A cancelled run keeps everything it had already migrated, is reported as **Canceled** with its partial counts, and because every step is idempotent, running the same item again resumes from where it stopped and converges on the same result as an uninterrupted run. Cancel is also the recovery path when a run's worker is lost: a run that stops reporting progress is marked failed on its own so the item becomes runnable again, and forcing a cancel releases a run that is otherwise wedged.
 
 The suite has four items, because a Finding can carry three independent kinds of location:
 
@@ -41,9 +41,9 @@ python manage.py migrate_findings_to_code_locations
 Each suite item carries a durable **completed** marker, so the page can state that a migration does not need to be run again. It is set two ways:
 
 - **Automatically**, when a run started here finishes successfully.
-- **Manually**, with **Mark as completed**, for a migration that finished another way: a management command from the list above, a database restore, or a fresh instance that never had Endpoints to carry forward.
+- **Manually**, with **Mark as Completed**, for a migration that finished another way: a management command from the list above, a database restore, or a fresh instance that never had Endpoints to carry forward.
 
-A completed item shows a **Completed** badge with who marked it and when, its **Run** button becomes **Run again** (the step stays idempotent, so re-running is always safe), and **Mark as not completed** clears the marker.
+A completed item shows a **Completed** badge with who marked it and when, its **Run** button becomes **Run Again** (the step stays idempotent, so re-running is always safe), and **Mark as Not Completed** clears the marker.
 
 Marking the three backfills complete also satisfies the identity rehash's precondition, so a manual mark unlocks the rehash exactly as a real run does. Mark a backfill by hand only when its data really is migrated: the UI asks you to confirm, because unlocking the rehash before the backfill has run would let it recompute identities against a half-migrated database.
 
@@ -79,8 +79,76 @@ Both create Locations on their identity hash and upsert their references, so the
 
 ## What the Migration Does Not Do
 
-- It does **not** delete the original Endpoint or Endpoint_Status rows. They remain in the database to back the read-only legacy API. They are not used by the new UI or by imports after the feature is enabled.
+- It does **not** delete the original Endpoint or Endpoint_Status rows. They remain in the database to back the read-only legacy API. They are not used by the new UI or by imports after the feature is enabled, but they still count toward your license. See [Removing the Legacy Endpoint Rows](#removing-the-legacy-endpoint-rows).
 - It does **not** modify your Findings. The backfills only *read* the `component_*` and `file_path`/`line` fields; they add Locations and references alongside, leaving the Finding rows untouched.
+- It does **not** convert cloud resources into Cloud Resource Locations. Endpoints often recorded things that are not web addresses at all, such as container references and AWS ARNs. Every one of those migrates as a URL Location, the same as any other Endpoint. DefectDojo cannot reliably tell a resource identifier stuffed into a host field from a genuine hostname. Guessing wrong can change a Finding's identity. To model those resources properly, import the account through a cloud connector. The connector reads the provider's own resource identifier. It creates a Cloud Resource Location from that identifier.
+
+## Links to the Old Endpoint Pages
+
+Once Locations is enabled, the Endpoint pages are gone. A bookmark or a shared link to one opens the page that replaced it:
+
+| Old page | Opens |
+| --- | --- |
+| All Endpoints, Vulnerable Endpoints, All Hosts, Vulnerable Hosts, one Host, or a dashboard tile's Endpoint list | **All URLs** |
+| An Asset's or a Finding's Endpoints or Hosts | That Asset's or Finding's **URLs** |
+| New Endpoint | **New URL** |
+| One Endpoint, or its edit page | Its **Location** (see below) |
+
+A link to one Endpoint can carry either kind of ID, and DefectDojo tries them in this order:
+
+1. **A legacy Endpoint** (a link made before the migration). The link opens the URL Location the backfill migrated it to, as long as the legacy Endpoint row still exists and you can view both the Endpoint and the Location.
+2. **An ID from `/api/v2/endpoints/`** (one listed after the migration). The link opens that row's URL Location, if you can view it.
+
+When the ID matches neither, the link opens **All URLs**. Removing the legacy Endpoint rows (see below) removes the first match, so a link to a removed Endpoint opens **All URLs** unless its ID also belongs to a row of `/api/v2/endpoints/`.
+
+## Removing the Legacy Endpoint Rows
+
+The migration leaves the original `Endpoint` and `Endpoint_Status` rows in place, and your license still counts them: a **Findings + Endpoints** license counts Endpoints, and a **Total Findings** license counts Endpoint Statuses. Once their data is in Locations, these rows only take up license capacity, so you can delete them.
+
+DefectDojo deletes a legacy row only when its data reached Locations. Everything else stays, and DefectDojo shows the reason next to it.
+
+- An **Endpoint Status** counts as migrated when its Endpoint's URL Location exists and has a Location finding reference for the same Finding.
+- An **Endpoint** counts as migrated when its URL Location exists, is linked to the Endpoint's Asset, and every one of its Endpoint Statuses is migrated.
+
+Rows that are not migrated show one of these reasons:
+
+| Migration Status | Meaning |
+| --- | --- |
+| **No Location** | No URL Location matches the Endpoint. It was probably added after the backfill ran. Run the **Endpoints to Locations backfill** again, then check it again. |
+| **No Asset Reference** | The URL Location exists but is not linked to the Endpoint's Asset. |
+| **No Finding Reference** | At least one Endpoint Status has no matching Location finding reference. |
+| **Invalid URL** | The Endpoint's fields do not form a valid URL, so the backfill skipped it. |
+
+Deleting legacy rows cannot be undone. It also removes the records that the Endpoint Status audit page and the read-only legacy API read from. Take a database backup first.
+
+### From the License Page
+
+Only superusers can delete legacy rows, and only while Locations are enabled. Other users who can see the tables get them read-only.
+
+1. Open **Settings > License & Support > View License**.
+2. In **Audit Usage**, click **View Endpoints** (on a Findings + Endpoints license) or **View Endpoint Statuses** (on a Total Findings license).
+   - **View Endpoints** opens the **Legacy Endpoints** page. Each row shows its Asset, its Endpoint Status counts and its **Migration Status**.
+   - **View Endpoint Statuses** opens the **Endpoint Statuses** page, which has the same **Migration Status** column.
+3. To delete one row, open its menu and choose **Delete Endpoint** or **Delete Endpoint Status**. Only migrated rows have this option. Deleting an Endpoint also deletes its Endpoint Statuses.
+4. To delete several rows, tick their checkboxes and click **Delete**. Migrated rows are deleted and the others are kept.
+5. To delete every migrated row, click **Delete All Migrated**. The delete runs in the background, so it works on any number of rows. The button shows the run's progress, including after you leave the page and come back. If the page is open when the run finishes, DefectDojo reports how many rows it deleted and how many it kept. The table and the License page counts reflect the result either way.
+
+   If a run stops partway, for example because Locations was disabled, the rows it already deleted stay deleted. Click **Delete All Migrated** again to finish. Each table runs one delete at a time: clicking the button while another superuser's run is going shows that run's progress instead of starting a second one.
+
+The usage figures on the License page update as soon as the delete finishes.
+
+### From the Command Line
+
+Two management commands do the same cleanup for scripted or air-gapped installs. Both are a dry run by default: they print what they would delete and why each kept row stays, then roll back.
+
+```bash
+python manage.py delete_legacy_endpoints
+python manage.py delete_legacy_endpoint_statuses
+```
+
+Add `--apply` to delete. The command asks you to confirm before it deletes anything; add `--force` to skip the prompt.
+
+`delete_legacy_endpoints` removes migrated Endpoints together with their Endpoint Statuses. `delete_legacy_endpoint_statuses` removes only migrated Endpoint Statuses and leaves the Endpoints in place.
 
 ## Endpoint API After Migration
 
@@ -89,7 +157,7 @@ Once Locations is enabled, the legacy Endpoint API enters a **read-compatibility
 ### What still works
 
 - `GET /api/v2/endpoints/` — Returns rows that *look like* Endpoints but are actually projected from `LocationProductReference` rows joined to URL Locations. The familiar fields (`protocol`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present.
-- `GET /api/v2/endpoints/{id}/` — Single-Endpoint retrieval works the same way. The `id` is the original Endpoint ID and is preserved through the migration via the Asset Reference mapping.
+- `GET /api/v2/endpoints/{id}/`: Single-Endpoint retrieval works the same way. Each row is one URL Location on one Asset, so the `id` is that Asset Reference's ID, not the original Endpoint ID, and `location_id` names the Location.
 - `GET /api/v2/endpoint_status/` and `GET /api/v2/endpoint_status/{id}/` — Returns rows projected from `LocationFindingReference`. The legacy `mitigated`, `false_positive`, `out_of_scope`, and `risk_accepted` boolean fields are reconstructed.
 - Filtering by `protocol`, `host`, `port`, `path`, `query`, `fragment`, `product`, and `tag(s)` continues to work.
 - The `generate_report` action on individual Endpoints continues to work.
@@ -130,4 +198,6 @@ If you hit this on a read you expected to work, send us the request path. That r
 
 Tags applied to Endpoints become tags on the Location object (not on the URL subtype). Tag-based filters in the legacy API continue to match.
 
-Endpoint metadata is re-pointed at the Location during migration. Existing automations that read metadata via `/api/v2/endpoint_meta/` should continue to work; new metadata should be written through the Location endpoints.
+Endpoint metadata is re-pointed at the Location during migration, scoped to the Asset the Endpoint belonged to. It is shown in the **Custom Fields** card on the Location page (open a Location from any list), the same card the Endpoint page used, with the Asset each field belongs to shown under its value. Fields can be added, edited and deleted there. Existing automations that read metadata via `/api/v2/endpoint_meta/` should continue to work; new metadata should be written through the Location endpoints.
+
+The Custom Fields feature flag does not change Location metadata. That feature covers Findings, Assets, Organizations, Engagements, Tests and Risk Acceptances; a Location's fields stay the migrated metadata, shown in the Custom Fields card whether the flag is on or off.

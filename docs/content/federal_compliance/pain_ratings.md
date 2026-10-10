@@ -160,14 +160,14 @@ matched the filter, and one rating was written.
 
 Two templates covering the PAIN workflow ship in the template gallery, alongside three Class C
 scan-cadence watchdogs. Adopting a template creates a new rule of your own, disabled and in simulate
-mode, so nothing runs until you configure and enable it.
+mode, so nothing runs on its own until you configure and enable it.
 
 ![The FedRAMP Class C templates in the Triage Engine template gallery](images/15-fedramp-rule-templates.jpg)
 
 | Template | What it does |
 | --- | --- |
-| **FedRAMP — route unrated findings for impact review** | A scheduled sweep for active findings that carry exploit evidence — weaponized or worse — and no PAIN rating, raising an alert to the reviewers who own impact decisions. It surfaces the queue rather than assigning a rating, which is what FedRAMP's provider-judgment requirement asks for. |
-| **FedRAMP — escalate reportable-incident candidates** | A scheduled sweep for active findings rated above N3 that are likely exploitable and sit on exposed assets, raising a ticket for each. Class C treats such a finding as a FedRAMP Reportable Incident until it is mitigated to N3 or below. |
+| **FedRAMP: route unrated findings for impact review** | A scheduled sweep for active findings that carry exploit evidence (weaponized or worse) and no PAIN rating, raising an alert to the reviewers who own impact decisions. It surfaces the queue rather than assigning a rating, which is what FedRAMP's provider-judgment requirement asks for. |
+| **FedRAMP: escalate reportable-incident candidates** | A scheduled sweep for active findings rated above N3 that are likely exploitable and sit on exposed assets, raising a ticket for each. Class C treats such a finding as a FedRAMP Reportable Incident until it is mitigated to N3 or below. |
 
 See [Building Rules](/automation/triage_engine/building_rules/) for how a template is adopted.
 

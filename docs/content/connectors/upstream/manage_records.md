@@ -9,7 +9,7 @@ aliases:
 
 Once you have run your first Discover operation, you should see a list of Mapped or Unmapped records on the **Manage Records and Operations** page.
 
-Each configured Connector's tile on the **Upstream Connectors** page shows how many of its records still need to be mapped. If any records need attention, the count is highlighted and a **Manage Records \& Operations** button appears directly on the tile. The page is always reachable from the tile's **Manage Configuration \> Manage Records \& Operations** menu as well.
+Each configured Connector's tile on the **Upstream Connectors** page shows how many of its records still need to be mapped. If any records need attention, the count is highlighted and a **Manage Records \& Operations** button appears directly on the tile. The page is always reachable from the tile's **Manage Configuration > Manage Records \& Operations** menu as well.
 
 ## What's a Record?
 
@@ -47,12 +47,22 @@ Auto-Mapping resolves each Record in a fixed order, and stops at the first answe
 Vendor-Equivalent Product. Once a Connector has mapped that identifier once, it recognises it
 on every later Discover — so renaming the project in the tool, or in DefectDojo, no longer
 loses the Mapping or creates a duplicate Asset.
-2. **The name.** If the Connector has not seen the identifier before, it looks for an Asset
+2. **The container image repository.** If the Record describes a container image repository,
+it maps to the Asset that repository already resolves to, whichever Connector (or person)
+recorded it first. Two tools reporting the same repository under different names therefore
+share one Asset. See
+[Container image repositories](/asset_modelling/engagements_tests/pro__assets/#container-image-repositories-the-oci-namespace).
+3. **The name.** If the Connector has not seen the identifier before, it looks for an Asset
 whose name matches. When one is found, the Record is mapped to it and the identifier is
 recorded, so step 1 answers from then on.
-3. **A new Asset.** If neither matches, DefectDojo creates one.
+4. **A new Asset.** If nothing matches, DefectDojo creates one.
 
-Step 1 requires the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
+Steps 2 to 4 record the tool's identifier, and steps 3 and 4 also record the repository, so
+step 1 (and, for other tools, step 2) answers from then on. A Record already known by its
+identifier stays on its Asset even when its repository resolves elsewhere: DefectDojo shows
+that as a repository conflict on both Assets rather than moving its Findings.
+
+Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
 Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
 nothing about existing Mappings: the first Discover after it is turned on records identifiers
 for the Records you already have, and later runs use them.
@@ -73,12 +83,22 @@ Auto-Mapping resolves each Record in a fixed order, and stops at the first answe
 Vendor-Equivalent Product. Once a Connector has mapped that identifier once, it recognises it
 on every later Discover — so renaming the project in the tool, or in DefectDojo, no longer
 loses the Mapping or creates a duplicate Product.
-2. **The name.** If the Connector has not seen the identifier before, it looks for a Product
+2. **The container image repository.** If the Record describes a container image repository,
+it maps to the Product that repository already resolves to, whichever Connector (or person)
+recorded it first. Two tools reporting the same repository under different names therefore
+share one Product. See
+[Container image repositories](/asset_modelling/engagements_tests/pro__assets/#container-image-repositories-the-oci-namespace).
+3. **The name.** If the Connector has not seen the identifier before, it looks for a Product
 whose name matches. When one is found, the Record is mapped to it and the identifier is
 recorded, so step 1 answers from then on.
-3. **A new Product.** If neither matches, DefectDojo creates one.
+4. **A new Product.** If nothing matches, DefectDojo creates one.
 
-Step 1 requires the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
+Steps 2 to 4 record the tool's identifier, and steps 3 and 4 also record the repository, so
+step 1 (and, for other tools, step 2) answers from then on. A Record already known by its
+identifier stays on its Product even when its repository resolves elsewhere: DefectDojo shows
+that as a repository conflict on both Products rather than moving its Findings.
+
+Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
 Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
 nothing about existing Mappings: the first Discover after it is turned on records identifiers
 for the Records you already have, and later runs use them.
@@ -99,7 +119,7 @@ David has just finished setting up a connector for his BurpSuite tool, and runs 
 ​
 * If David leaves Auto-Mapping off, DefectDojo will still discover those 4 Sites and create Records, but it won't import any data until David creates the Mappings himself.  
 ​
-* David can always change how these mappings are set up later. Maybe he wants to consolidate the output of a few different Burp Sites into a single Asset. Or maybe he's looking to have an Asset which records scan data from a few different tools - including Burp. It's easy for David to change where Burp scan data is stored into DefectDojo by changing the Mapping of these Records.
+* David can always change how these mappings are set up later. Maybe he wants to consolidate the output of a few different Burp Sites into a single Asset. Or maybe he's looking to have an Asset which records scan data from a few different tools - including Burp. It's easy for David to change where Burp scan data is stored into DefectDojo by changing the Mapping of these Records, and the Findings Burp has already imported can move along with them (see [What happens to Findings you already imported](#what-happens-to-findings-you-already-imported)).
 
 ## How Records interact with Assets
 
@@ -119,7 +139,7 @@ To learn more about Assets, Engagements and Tests, see our [Asset Hierarchy Over
 
 Each Record has an associated state to communicate how the Record is working.
 
-A connector's full records list is reached by opening the connector from **Connect \> Upstream** — the page is titled **All \<Connector\> Records**. Despite the name, it lists every Record belonging to **that one connector**, not every Record on the instance.
+A connector's full records list is reached by opening the connector from **Connect > Upstream** — the page is titled **All \<Connector\> Records**. Despite the name, it lists every Record belonging to **that one connector**, not every Record on the instance.
 
 That list can be **filtered by state** from the **State** column, and more than one state can be selected at a time. This is the fastest way to answer the questions that come up most often on a large connector fleet — *what is waiting for me to map?* (**New**) and *what has stopped reporting?* (**Missing** or **Error**) — without reading through every Record.
 
@@ -127,7 +147,7 @@ Not every state applies to every connector. **Stale** is set by the findings-imp
 
 ### New
 
-A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see our guide on [Editing Records]().
+A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see [Change the Mapping of a Record](#change-the-mapping-of-a-record).
 
 ### Good
 
@@ -165,7 +185,7 @@ Records can be Edited, Ignored or Deleted from the **Manage Records \& Operation
 
 Although Mapped and Unmapped records are located in separate tables, they can both be edited in the same way.
 
-From the Records table, click the blue ▼ Arrow next to the State column on a given Record. From there, you can select **Edit Record,** or **Delete Record.**
+From the Records table, open a Record's **⋮** menu, next to its **State**. From there, you can select **Edit Record** or **Delete Record**.
 
 ![image](images/edit_ignore_delete_records.png)
 
@@ -178,6 +198,28 @@ Clicking **Edit Record** will open a window which allows you to change the desti
 The scan data associated with a Record can be directed to flow into a different Asset by changing the mapping. 
 
 Select, or type in the name of a new Asset from the drop\-down menu to the right.
+
+#### What happens to Findings you already imported
+
+When a Record that is already Mapped (state **Good**) is pointed at a different Asset, the **Edit Record** window asks what should happen to the Findings that Record has already imported. You can reorganize your Assets at any time: neither option leaves the old Findings open on the old Asset, and neither imports a duplicate set on the next sync.
+
+* **Move** (selected by default): the Record's Connector Tests move to the new Asset's **Global Connectors** Engagement, and their Findings move with them. Notes, files, history, Finding Groups, Risk Acceptances and Endpoints or Locations go along, and the next sync updates the same Test, so existing Findings are matched rather than created again. SLA dates and Priority are recalculated for the new Asset. If the Connector tracks branches, each branch's Test moves too. The old Asset keeps nothing from this Record: its now-empty Connector Engagement is removed, unless someone added notes, files or a Risk Acceptance to it.
+* **Start Fresh**: the Record's existing Tests stay on the old Asset as history, and their open Findings are closed with a note saying the Record was re-mapped, so they no longer count toward that Asset. The next sync imports a new set of Findings into the new Asset.
+
+The choice only appears when you change the Asset of a Mapped Record. Mapping a New Record for the first time has no existing Findings to move or close.
+
+Re-mapping moves Findings out of one Asset and into another, so it requires permission to edit both the current and the new Asset, in addition to permission to edit Connectors.
+
+If Auto-Mapping ever points a Record at a different Asset, it uses **Move**.
+
+To re-map a Record through the API, send `remap_findings` with `POST /api/v2/connector_records/{id}/assign_product/`. Accepted values are `move` (the default when omitted) and `start_fresh`, for example:
+
+```json
+{
+  "product_name": "Payments API",
+  "remap_findings": "start_fresh"
+}
+```
 
 #### Edit the State of a Record
 

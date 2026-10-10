@@ -26,7 +26,7 @@ weight: 1
 
 > **🔎 BETA:** Sensei is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases.
 
-> **📍 Where to find it:** open **Sensei** from the left-hand navigation.
+> **📍 Where to find it:** open **Sensei + AI > Sensei** from the left-hand navigation.
 
 ![Sensei hub](images/hub_overview.png)
 
@@ -47,7 +47,7 @@ Sensei can remediate a finding in three ways:
 
 - **The Fix button on a finding:** trigger a one-off fix directly from the findings table or a finding's detail page. See [Fixing findings with Sensei](/sensei/fixing_findings/).
 - **Auto-fix candidates:** after each scan, Sensei stages the findings that match your criteria as candidates. You review them and approve the ones to fix (or let Sensei remediate them automatically). See [Auto-fix candidates](/sensei/fixing_findings/#auto-fix-candidate-triage).
-- **A `/fix` comment on a pull request:** comment `/fix` on a pull request and Sensei pushes a remediation to that PR.
+- **A `/fix` comment on a pull request:** comment `/fix` on a pull request and Sensei pushes a remediation to that PR. Only someone who can push to the repository can run it. On Azure DevOps, use the Fix button instead.
 
 ## Requirements
 

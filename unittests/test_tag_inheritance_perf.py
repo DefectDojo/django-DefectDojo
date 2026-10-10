@@ -22,7 +22,7 @@ from django.test import override_settings
 from django.utils import timezone
 
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
+from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tags.inheritance import propagate_tags_on_product_sync
 from unittests.dojo_test_case import (
     DojoAPITestCase,
@@ -469,6 +469,10 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
         super().setUp()
         self.login_as_admin()
         self.system_settings(enable_product_tag_inheritance=True)
+        # Superusers always receive the import notifications, and the two fixture variants
+        # (dojo_testdata.json / dojo_testdata_locations.json) disagree on user5's superuser
+        # flag. Pin it so the recipient count, and with it the query count, is the same in both.
+        Dojo_User.objects.filter(username="user5").update(is_superuser=False)
         self.product = self.create_product("Tag Perf Import Product", tags=["inherit", "these"])
         self.engagement = self.create_engagement("Tag Perf Import Engagement", self.product)
         self.scan_path = get_unit_tests_scans_path("zap") / "dvwa_baseline_dojo.xml"
@@ -641,9 +645,17 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # matching loop finishes, instead of saving each one inline as soon as it fails to
     # match (see process_finding_that_was_not_matched and _drain_pending_new_findings).
     # Reimport-no-change is unaffected because it creates no new findings to defer.
-    EXPECTED_ZAP_IMPORT_V2 = 294
-    EXPECTED_ZAP_IMPORT_V3 = 319
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
+    # +7 import, +5 reimport-no-change, +6 reimport-with-new (measured, both modes):
+    # scan_added is dispatched through async_create_notification with ids instead of
+    # being built in the request, so the task (run inline here under
+    # CELERY_TASK_ALWAYS_EAGER) loads the test chain and the listed findings back by id
+    # and resolves recipients there. The fan-out writes alerts in one bulk insert, so
+    # the recipient count no longer moves the total: pinning user5 to non-superuser
+    # (which took 12 import / 6 reimport-with-new queries off the per-recipient path)
+    # measures the same with and without the pin on this path.
+    EXPECTED_ZAP_IMPORT_V2 = 289
+    EXPECTED_ZAP_IMPORT_V3 = 314
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 80
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
     EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 159
     EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187

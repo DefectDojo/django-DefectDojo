@@ -11,9 +11,9 @@ difference: DefectDojo Pro records whether each Finding's vulnerable code can
 actually be reached, shows you where that conclusion came from, and feeds it
 into the Finding's computed **priority**.
 
-Reachability is a **beta** feature and is **off by default**. A superuser
-enables it under **Settings > Feature Flags**. While it is off, no verdicts are
-recorded, priority is unaffected, and no reachability UI appears.
+Reachability is on for every DefectDojo Pro instance, and there is nothing to
+enable. Verdicts are recorded as soon as a source reports them, and a Finding
+that no source covers stays at **Unknown**.
 
 ## Verdicts
 
@@ -21,9 +21,9 @@ Every verdict is normalized to the same five values, whatever produced it:
 
 | Verdict | Meaning |
 |---|---|
-| **Reachable (runtime)** | The vulnerable code was observed executing. |
-| **Reachable (static)** | A call path to the vulnerable code exists from an application entry point. |
-| **Potentially reachable** | Partial evidence — for example the vulnerable package is used, but the specific function could not be confirmed. |
+| **Reachable (Runtime)** | The vulnerable code was observed executing. |
+| **Reachable (Static)** | A call path to the vulnerable code exists from an application entry point. |
+| **Potentially Reachable** | Partial evidence — for example the vulnerable package is used, but the specific function could not be confirmed. |
 | **Unreachable** | Analysis found no path to the vulnerable code. |
 | **Unknown** | No reachability analysis covers this Finding yet. |
 
@@ -65,6 +65,42 @@ reachability that tools you may already run are producing:
 Coverage is normally partial, and that is expected. Tools that do not report
 reachability simply leave their Findings at **Unknown**.
 
+### Sources that report reachability
+
+| Source | What DefectDojo reads | Verdicts it can report |
+|---|---|---|
+| [govulncheck](/supported_tools/parsers/file/govulncheck/) report import (**Govulncheck Scanner V2**) | The reachability level govulncheck prints for each vulnerability: symbol, package or module | Reachable (static), Potentially reachable |
+| [Snyk Issue API](/supported_tools/parsers/file/snyk_issue_api/) report import | The reachability value Snyk records on each issue | Reachable (static), Potentially reachable, Unreachable |
+| [Sysdig Vulnerability Report](/supported_tools/parsers/file/sysdig_reports/) import | Sysdig's "in use" flag on each package | Reachable (runtime), Unreachable |
+| Universal Parser | A report column mapped to the **Reachability** field | Any |
+| [Snyk](/connectors/toolreference/snyk/) connector | The reachability Snyk records on each issue | Reachable (static), Potentially reachable, Unreachable |
+| [Semgrep](/connectors/toolreference/semgrep/) connector | Semgrep Supply Chain reachability | Reachable (static), Potentially reachable, Unreachable |
+| [Aqua Supply Chain](/connectors/toolreference/aqua_supply_chain/) connector | Aqua's reachable-package flag | Reachable (static) |
+| [Sensei](/sensei/fixing_findings/#reachability-analysis) | govulncheck call paths for the Go code in an onboarded repository | Reachable (static), Potentially reachable |
+| Reachability API | Verdicts your own tooling posts to `POST /api/v2/reachability/verdicts/` | Any |
+
+A verdict from **Sensei** carries the call path govulncheck found, from your code
+down to the vulnerable function. It is shown on the Finding under **Reachability
+Call Path**.
+
+### How verdicts end
+
+A verdict lasts as long as its source keeps reporting it.
+
+- **A report that stops asserting a verdict retracts it.** When you reimport a report into the
+  same Test, the report covers every Finding it still contains. If it no longer carries a
+  verdict for one of those Findings, that source's verdict is removed and the Finding falls back
+  to what the other sources say, or to **Unknown**. Verdicts from other tools, connectors, the
+  Reachability API and manual verdicts are not affected.
+- **A verdict nobody re-asserts expires.** Once a day, verdicts whose source has not reported
+  them again within the staleness window are removed. The window is 30 days by default, set with
+  the `DD_REACHABILITY_STALENESS_DAYS` environment variable. A source that reports more often can
+  expire sooner: `DD_REACHABILITY_SOURCE_STALENESS_DAYS` takes a JSON object of source name to
+  days, for example `{"Sysdig Vulnerability Report": 7}`. The source name is the one shown with
+  the verdict on the Finding.
+
+Manual verdicts are never removed by either.
+
 ### Setting reachability by hand
 
 When no scanner or connector reports reachability, you can record a verdict
@@ -76,8 +112,8 @@ A manual verdict is not special-cased above scanners: it competes in the same
 resolution as every other source, so a **stronger scanner verdict still overrides
 it** — the value shown as **Resolved** beneath the dropdown is the winner across all
 sources, which may differ from what you chose. What is different is that a manual
-verdict is **never removed by the staleness sweep**, because a human judgment should
-not silently decay the way an unrefreshed scanner verdict does. Choose *No manual
+verdict is **never removed by the staleness sweep or by a reimport**, because a human
+judgment should not silently decay the way an unrefreshed scanner verdict does. Choose *No manual
 override* to remove it.
 
 Reachability describes the vulnerable code *inside* your application. For whether the

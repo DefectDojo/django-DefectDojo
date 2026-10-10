@@ -58,9 +58,22 @@ class TestsViewSet(
         return Test
 
     def get_queryset(self):
+        # select_related / prefetch_related keep TestSerializer from issuing a
+        # query per row: test_type is read three times per test (test_type_name,
+        # deduplication_algorithm, hash_code_fields), tags and the finding groups
+        # (with their JIRA issue) are serialized per test, and notes/files are
+        # already prefetched. Without these the list view's query count grows
+        # with the number of tests returned, producing 400+ queries for a single
+        # page on large instances.
         return (
             get_authorized_tests("view")
-            .prefetch_related(notes_prefetch(), "files")
+            .select_related("test_type")
+            .prefetch_related(
+                notes_prefetch(),
+                "files",
+                "tags",
+                "finding_group_set__jira_issue",
+            )
             .distinct()
         )
 
@@ -170,6 +183,7 @@ class TestsViewSet(
                     reverse("view_test", args=(test.id,)),
                 ),
                 parent_title=f"Test: {test.title}",
+                parent=test,
             )
 
             serialized_note = api_v2_serializers.NoteSerializer(

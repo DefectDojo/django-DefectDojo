@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Product
+from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Engagement, Finding, Product, Test
 from dojo.tags.utils import bulk_add_tag_mapping
 from dojo.url.models import URL
 
@@ -64,8 +64,17 @@ class _ChunkRows:
         self.meta_endpoint_ids: list[int | None] = []
         self._seen_meta: set[tuple[int, int | None, str]] = set()
 
+        # Finding references are written one status slice at a time (see
+        # `Command._migrate_statuses`) and drained after each write, so these
+        # lists hold at most one slice.
         self.finding_refs: list[LocationFindingReference] = []
         self.finding_ref_endpoint_ids: list[int | None] = []
+        # (location, finding) keys already queued in this chunk. Two statuses can
+        # only collide on that key when two endpoints of the chunk resolve to the
+        # same Location (Endpoint_Status is unique on (endpoint, finding)), so
+        # only keys of those shared locations are remembered. Remembering every
+        # key would grow with the statuses per chunk again.
+        self.shared_location_ids: set[int] = set()
         self._seen_finding_refs: set[tuple[int, int]] = set()
 
         # (location_id, product_id) -> (status, product, location, endpoint_id)
@@ -110,12 +119,19 @@ class _ChunkRows:
 
     def add_finding_ref(self, reference: LocationFindingReference, endpoint_id: int | None) -> None:
         """Queue a finding reference, keyed on its unique (location, finding)."""
-        key = (reference.location.id, reference.finding_id)
-        if key in self._seen_finding_refs:
-            return
-        self._seen_finding_refs.add(key)
+        if reference.location.id in self.shared_location_ids:
+            key = (reference.location.id, reference.finding_id)
+            if key in self._seen_finding_refs:
+                return
+            self._seen_finding_refs.add(key)
         self.finding_refs.append(reference)
         self.finding_ref_endpoint_ids.append(endpoint_id)
+
+    def drain_finding_refs(self) -> tuple[list[LocationFindingReference], list[int | None]]:
+        """Hand over the queued finding references and start an empty queue."""
+        refs, endpoint_ids = self.finding_refs, self.finding_ref_endpoint_ids
+        self.finding_refs, self.finding_ref_endpoint_ids = [], []
+        return refs, endpoint_ids
 
     def record_product(
         self,
@@ -152,6 +168,25 @@ class _ChunkRows:
         ]
         endpoint_ids = [endpoint_id for _, _, _, endpoint_id in self._product_refs.values()]
         return rows, endpoint_ids
+
+
+# The finding -> test -> engagement -> product chain behind each Endpoint_Status,
+# prefetched one level at a time. The chain is prefetched, NOT select_related: as
+# one `finding__test__engagement__product` join it folds into the status query,
+# and on a large corpus the planner mis-estimates the status IN-list (~180x) and
+# seq-scans every finding/test/product to hash them down to the slice's handful of
+# rows (the 76-194s chunks behind the ~75% stall). Prefetching resolves each FK
+# level with a PK-driven IN query, which the planner answers by index lookup.
+#
+# `_add_status_references` reads only the FK that leads to the next level (and the
+# product itself), so every intermediate level loads just its id and that FK. A
+# full Finding row carries many wide text columns the migration never reads.
+_STATUS_CHAIN_PREFETCHES = (
+    Prefetch("finding", queryset=Finding.objects.only("id", "test")),
+    Prefetch("finding__test", queryset=Test.objects.only("id", "engagement")),
+    Prefetch("finding__test__engagement", queryset=Engagement.objects.only("id", "product")),
+    "finding__test__engagement__product",
+)
 
 
 # Phases tracked by --benchmark. Order is preserved in the summary table.
@@ -572,13 +607,25 @@ class Command(BaseCommand):
 
         Everything between the location resolve and the writes is pure Python
         over already-prefetched data, so the DB sees a fixed handful of
-        statements per chunk rather than a dozen per endpoint.
+        statements per chunk rather than a dozen per endpoint. The chunk's
+        Endpoint_Status rows are the exception: they are read and written in
+        slices of ``--batch-size`` (see ``_migrate_statuses``), because one
+        endpoint can carry tens of thousands of them.
         """
         resolved = self._resolve_locations(endpoints)
         if not resolved:
             return
 
         rows = _ChunkRows()
+        endpoints_per_location: dict[int, int] = defaultdict(int)
+        for _, location in resolved:
+            endpoints_per_location[location.id] += 1
+        rows.shared_location_ids = {
+            location_id for location_id, count in endpoints_per_location.items() if count > 1
+        }
+        # Endpoints whose tags/meta were collected without error, in chunk order.
+        # Only these get their statuses migrated, as before.
+        migrated: dict[int, tuple[Endpoint, Location]] = {}
         for endpoint, location in resolved:
             endpoint_id = getattr(endpoint, "id", None)
             try:
@@ -595,12 +642,13 @@ class Command(BaseCommand):
 
                 # Track the endpoint's own product as a contributor for the
                 # per-chunk tag inheritance pass (the no-findings branch
-                # of `_collect_references` also depends on this product, and it
+                # of `_migrate_statuses` also depends on this product, and it
                 # won't be tracked otherwise).
                 if endpoint.product_id:
                     rows.track_product_location(endpoint.product, location)
 
-                self._collect_references(endpoint, location, rows)
+                if endpoint_id is not None:
+                    migrated[endpoint_id] = (endpoint, location)
             except Exception as exc:
                 logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
                 self._record_endpoint_failure(endpoint_id, exc)
@@ -611,20 +659,7 @@ class Command(BaseCommand):
         # a metadata value alone.
         self._bulk_create_rows("meta", DojoMeta, rows.meta, rows.meta_endpoint_ids)
 
-        # LocationFindingReference: upsert on (location, finding) so a re-run
-        # syncs the status/auditor/audit_time when the source Endpoint_Status
-        # has moved on. `created` is deliberately absent from update_fields —
-        # the original creation timestamp is preserved on repeat runs.
-        self._bulk_create_rows(
-            "finding_refs", LocationFindingReference,
-            rows.finding_refs, rows.finding_ref_endpoint_ids,
-            cm_factory=lambda: _suspend_auto_now_add(LocationFindingReference, "created"),
-            conflict_kwargs={
-                "update_conflicts": True,
-                "update_fields": ["status", "auditor", "audit_time", "updated"],
-                "unique_fields": ["location", "finding"],
-            },
-        )
+        self._migrate_statuses(migrated, rows)
 
         # LocationProductReference: insert-only. The status carried here is
         # derived from this chunk alone, so it is not authoritative — the
@@ -642,72 +677,146 @@ class Command(BaseCommand):
         # method's docstring for why this is equivalent to an end-of-run pass.
         self._run_tag_inheritance_for_chunk(rows)
 
-    def _collect_references(
+    def _iter_status_slices(self, endpoint_ids: list[int]):
+        """
+        Yield the chunk's Endpoint_Status rows in lists of at most ``batch_size``.
+
+        Statuses are not prefetched onto the endpoints: a chunk holds
+        ``batch_size`` endpoints, but one endpoint can carry tens of thousands of
+        statuses, and holding every status (plus a reference row per status) of
+        a chunk at once is what pushed a large run past its memory limit.
+        Streaming them keeps the rows in memory bounded by ``batch_size`` no
+        matter how the statuses are spread over the endpoints. Ordered by
+        endpoint, then id, so references are queued in the same order as when
+        they hung off the id-ordered endpoints.
+        """
+        queryset = (
+            Endpoint_Status.objects
+            .filter(endpoint_id__in=endpoint_ids)
+            .order_by("endpoint_id", "id")
+            .prefetch_related(*_STATUS_CHAIN_PREFETCHES)
+        )
+        iterator = queryset.iterator(chunk_size=self.batch_size)
+        while True:
+            t = self._bench_start()
+            statuses = list(islice(iterator, self.batch_size))
+            self._bench_end("fetch_chunk", t)
+            if not statuses:
+                return
+            yield statuses
+
+    def _migrate_statuses(
         self,
-        endpoint: Endpoint,
-        location: Location,
+        migrated: dict[int, tuple[Endpoint, Location]],
         rows: _ChunkRows,
     ) -> None:
         """
-        Accumulate this endpoint's finding/product reference rows.
+        Write the chunk's finding references and queue its product references.
 
-        Pure Python over the prefetched ``status_endpoint`` list — no queries.
         Bypasses ``Location.associate_with_finding`` (which would trigger
         full_clean validation plus the post_save inherit_tags signal per row)
-        and is semantically equivalent to it for this migration.
+        and is semantically equivalent to it for this migration. Finding
+        references are written once per status slice, so neither the statuses
+        nor their reference rows accumulate over the chunk.
         """
-        endpoint_id = getattr(endpoint, "id", None)
-
-        # Pull the prefetched list once. Avoids the redundant `.exists()` round-
-        # trip the prior code did and lets the loop iterate prefetched data.
-        statuses = list(endpoint.status_endpoint.all())
-
-        # No findings — associate with the endpoint's product if one exists.
-        if not statuses:
-            if endpoint.product_id:
-                rows.record_product(
-                    endpoint.product, location, ProductLocationStatus.Mitigated, endpoint_id,
-                )
+        if not migrated:
             return
+        endpoints_with_statuses: set[int] = set()
+        # Endpoints whose own reference building raised. Only these stop collecting: as before,
+        # a failure part-way through one endpoint's statuses ends that endpoint's loop, while a
+        # failure elsewhere for the endpoint (a meta row, one reference row rejected at write
+        # time) leaves its remaining statuses to be migrated. Checking the run-wide
+        # failed_endpoint_ids here would also drop those, which the old code never did.
+        stopped_endpoint_ids: set[int] = set()
+        for statuses in self._iter_status_slices(list(migrated)):
+            for endpoint_status in statuses:
+                endpoint_id = endpoint_status.endpoint_id
+                endpoints_with_statuses.add(endpoint_id)
+                if endpoint_id in stopped_endpoint_ids:
+                    continue
+                _, location = migrated[endpoint_id]
+                try:
+                    self._add_status_references(endpoint_status, location, rows, endpoint_id)
+                except Exception as exc:
+                    logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
+                    self._record_endpoint_failure(endpoint_id, exc)
+                    stopped_endpoint_ids.add(endpoint_id)
+            self._write_finding_refs(rows)
 
-        for endpoint_status in statuses:
-            finding = endpoint_status.finding
-            if finding is None:
+        # No findings: associate with the endpoint's product if one exists.
+        for endpoint_id, (endpoint, location) in migrated.items():
+            if endpoint_id in endpoints_with_statuses or not endpoint.product_id:
                 continue
-            product = finding.test.engagement.product
-            # Track this contributing product for the per-chunk tag
-            # inheritance pass (covers the case where a finding's product
-            # differs from endpoint.product).
-            rows.track_product_location(product, location)
-            status = self._convert_endpoint_status_to_string_status(endpoint_status)
             rows.record_product(
-                product,
-                location,
-                ProductLocationStatus.Active
-                if status == FindingLocationStatus.Active
-                else ProductLocationStatus.Mitigated,
-                endpoint_id,
+                endpoint.product, location, ProductLocationStatus.Mitigated, endpoint_id,
             )
 
-            # Endpoint_Status.date is a Date; the original code persisted
-            # the same midnight-aware datetime in a post-save UPDATE. We
-            # set it directly here — bulk_create skips auto_now_add so the
-            # explicit value is honored.
-            created_dt = timezone.make_aware(datetime.datetime(
-                endpoint_status.date.year,
-                endpoint_status.date.month,
-                endpoint_status.date.day,
-            ))
-            rows.add_finding_ref(LocationFindingReference(
-                location=location,
-                finding=finding,
-                status=status,
-                auditor=endpoint_status.mitigated_by,
-                audit_time=endpoint_status.mitigated_time or endpoint_status.last_modified,
-                relationship="",
-                relationship_data={},
-                created=created_dt,
-            ), endpoint_id)
+    def _write_finding_refs(self, rows: _ChunkRows) -> None:
+        """
+        Upsert the queued finding references and empty the queue.
+
+        Upsert on (location, finding) so a re-run syncs the status/auditor/
+        audit_time when the source Endpoint_Status has moved on. `created` is
+        deliberately absent from update_fields: the original creation timestamp
+        is preserved on repeat runs.
+        """
+        refs, endpoint_ids = rows.drain_finding_refs()
+        self._bulk_create_rows(
+            "finding_refs", LocationFindingReference,
+            refs, endpoint_ids,
+            cm_factory=lambda: _suspend_auto_now_add(LocationFindingReference, "created"),
+            conflict_kwargs={
+                "update_conflicts": True,
+                "update_fields": ["status", "auditor", "audit_time", "updated"],
+                "unique_fields": ["location", "finding"],
+            },
+        )
+
+    def _add_status_references(
+        self,
+        endpoint_status: Endpoint_Status,
+        location: Location,
+        rows: _ChunkRows,
+        endpoint_id: int,
+    ) -> None:
+        """Queue the finding reference and product reference for one status."""
+        finding = endpoint_status.finding
+        if finding is None:
+            return
+        product = finding.test.engagement.product
+        # Track this contributing product for the per-chunk tag
+        # inheritance pass (covers the case where a finding's product
+        # differs from endpoint.product).
+        rows.track_product_location(product, location)
+        status = self._convert_endpoint_status_to_string_status(endpoint_status)
+        rows.record_product(
+            product,
+            location,
+            ProductLocationStatus.Active
+            if status == FindingLocationStatus.Active
+            else ProductLocationStatus.Mitigated,
+            endpoint_id,
+        )
+
+        # Endpoint_Status.date is a Date; the original code persisted
+        # the same midnight-aware datetime in a post-save UPDATE. We
+        # set it directly here: bulk_create skips auto_now_add so the
+        # explicit value is honored.
+        created_dt = timezone.make_aware(datetime.datetime(
+            endpoint_status.date.year,
+            endpoint_status.date.month,
+            endpoint_status.date.day,
+        ))
+        rows.add_finding_ref(LocationFindingReference(
+            location=location,
+            finding_id=finding.id,
+            status=status,
+            auditor_id=endpoint_status.mitigated_by_id,
+            audit_time=endpoint_status.mitigated_time or endpoint_status.last_modified,
+            relationship="",
+            relationship_data={},
+            created=created_dt,
+        ), endpoint_id)
 
     def _convert_endpoint_status_to_string_status(self, endpoint_status: Endpoint_Status) -> str:
         """
@@ -984,10 +1093,9 @@ class Command(BaseCommand):
             #   - `product` is select_related so we don't lazy-load it for the
             #     no-findings branch
             #   - `tags` and `endpoint_meta` are prefetched managers
-            #   - `status_endpoint` is prefetched with `mitigated_by` inline; the
-            #     finding -> test -> engagement -> product chain is prefetched per
-            #     level (NOT select_related) so the reference rows can be built
-            #     without queries and without the whole-table join below.
+            #   - `status_endpoint` is NOT prefetched: a chunk's statuses are
+            #     streamed in batch-size slices by `_migrate_statuses`, because one
+            #     endpoint can carry tens of thousands of them.
             # Explicit id ordering makes the scan deterministic across runs,
             # which is what gives the progress lines' "last id" its meaning as
             # a resume cursor for --start-after-id.
@@ -998,20 +1106,6 @@ class Command(BaseCommand):
                 .prefetch_related(
                     "tags",
                     "endpoint_meta",
-                    # mitigated_by is a single narrow FK on the status row: join it inline.
-                    Prefetch(
-                        "status_endpoint",
-                        queryset=Endpoint_Status.objects.select_related("mitigated_by"),
-                    ),
-                    # The finding chain is prefetched, NOT select_related. As one
-                    # `finding__test__engagement__product` join it folds into the status
-                    # query, and on a large corpus the planner mis-estimates the status
-                    # IN-list (~180x) and seq-scans every finding/test/product to hash
-                    # them down to the chunk's handful of rows — the 76-194s chunks behind
-                    # the ~75% stall. Prefetching resolves each FK level with a PK-driven
-                    # IN query scoped to the chunk, which the planner answers by index
-                    # lookup. `_collect_references` reads the same cached objects either way.
-                    "status_endpoint__finding__test__engagement__product",
                 )
             )
             if self.start_after_id is not None:
