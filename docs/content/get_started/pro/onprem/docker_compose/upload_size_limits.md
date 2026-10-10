@@ -20,8 +20,8 @@ A large scan file can be rejected at two points on a Docker Compose deployment: 
 DefectDojo enforces a maximum scan file size of its own, and rejects anything larger with a message naming the current limit. It defaults to 100 MB. On Docker Compose, set the `DD_SCAN_FILE_MAX_SIZE` environment variable, in megabytes, through the CLI, then restart:
 
 ```bash
-dojo-compose-cli environment add DD_SCAN_FILE_MAX_SIZE=200
-dojo-compose-cli app restart
+sudo -E dojo-compose-cli environment add --key DD_SCAN_FILE_MAX_SIZE --value 200
+sudo -E dojo-compose-cli app restart
 ```
 
 Run `dojo-compose-cli environment add --help` for the exact syntax your CLI version expects.

@@ -11,8 +11,9 @@ aliases:
 <!--
   Generated from the DefectDojo Pro Helm chart repository.
   Source: docs/UPGRADE_GUIDE.md at chart version 3.1.304.
-  Edit the source guide, not this file. Local edits are overwritten
-  the next time the chart is released.
+  This copy carries hand edits that are pending a sync from the chart
+  repository's source guide. Make the same change there too, or the next
+  sync from the chart overwrites it.
 -->
 Covers upgrading an existing DefectDojo Pro release to a newer chart version.
 The recommended path is to pull the chart directly from the DefectDojo OCI
@@ -57,8 +58,9 @@ common cause of failed upgrades.
 
 1. **Read the release notes** for every version between your current release
    and the target. Breaking changes, new required fields, and migration
-   prerequisites are called out there. The GitHub release page for each tag
-   links to the change log.
+   prerequisites are called out there. See the
+   [DefectDojo Pro Changelog](/releases/pro/changelog/) and the
+   [on-premise upgrade notes](/get_started/pro/onprem/upgrading/).
 2. **Check your current chart version.** This is the floor for the upgrade:
 
    ```bash
@@ -75,20 +77,51 @@ common cause of failed upgrades.
    `--set dojo.existingSecret=...` or `--set license.existingSecret=...`,
    verify those Kubernetes secrets are still present in the namespace.
 6. **Render the upgrade locally first** to catch missing fields, invalid
-   values, or template errors before touching the cluster:
+   values, or template errors before touching the cluster. Render the target
+   chart with the same values files and flags you will pass to `helm upgrade`,
+   including the three ddorch certificate files; without them the render fails
+   with `ddorch.tls.rootCa is required`. `$CHART` is the target chart's
+   directory: the extracted zip (see [Upgrade via Extracted Zip](#upgrade-via-extracted-zip)),
+   or a copy pulled from the registry after you
+   [authenticate](#authenticate-to-the-registry).
+
+   The render also needs the three ddorch certificate files on disk. If you no
+   longer have the ones you installed with, copy them out of the release's
+   `<release>-orch-certs-configmap` ConfigMap (`dojopro-orch-certs-configmap`
+   for the release name used here):
 
    ```bash
-   helm template dojopro $CHART_REF \
+   CM=dojopro-orch-certs-configmap
+   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls_root\.ca}' > orch_ca.crt
+   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls\.crt}' > orch_server.crt
+   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls\.key}' > orch_server.key
+   chmod 600 orch_server.key
+   ```
+
+   Then pull the target chart and render it:
+
+   ```bash
+   VERSION="<chart-version>"
+   helm pull oci://us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro-helm-v2/dojopro \
+     --version $VERSION --untar --untardir /tmp/dojopro-$VERSION
+   CHART="/tmp/dojopro-$VERSION/dojopro"
+
+   helm template dojopro $CHART \
      -n $NAMESPACE \
      -f $CHART/presets/platforms/<platform>.yaml \
      -f $CHART/presets/profiles/<size>.yaml \
      -f my-company.yaml \
      --set dojo.existingSecret=dojopro-secrets \
      --set license.existingSecret=dojopro-license \
+     --set-file ddorch.tls.rootCa=orch_ca.crt \
+     --set-file ddorch.tls.cert=orch_server.crt \
+     --set-file ddorch.tls.key=orch_server.key \
      > /tmp/dojopro-upgrade-render.yaml
    ```
 
-   `$CHART_REF` is the OCI reference (see below) or the extracted chart path.
+   If you installed with inline secrets and the license file, use
+   `-f my-secrets.yaml` and `--set-file license.contents=/path/to/license.lic`
+   in place of the two `existingSecret` flags.
 
 > Set `NAMESPACE` once — every command in this guide uses `$NAMESPACE`:
 >
@@ -131,18 +164,23 @@ artifact:
 oci://us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro-helm-v2/dojopro
 ```
 
-Each release is tagged with the chart version (for example `2.57.2`). The
+Each release is tagged with the chart version (for example `3.4.0`). The
 chart version matches the app version in `Chart.yaml`, so the tag you pass
-to `helm upgrade --version` is the same version number shown on the GitHub
-release.
+to `helm upgrade --version` is the DefectDojo Pro release number in the
+[DefectDojo Pro Changelog](/releases/pro/changelog/).
 
-List available chart versions:
+Helm cannot list the versions in an OCI repository. Take the version from the
+changelog, then confirm the registry has it (this needs the registry login
+below):
 
 ```bash
 helm show chart \
   oci://us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro-helm-v2/dojopro \
   --version <chart-version>
 ```
+
+The command prints the chart's `version` and `appVersion` if the version
+exists, and fails if it does not.
 
 > **Why OCI for upgrades?** The presets (`presets/platforms/*.yaml`,
 > `presets/profiles/*.yaml`) are packaged inside the chart. Referencing the
@@ -154,29 +192,44 @@ helm show chart \
 ## Authenticate to the Registry
 
 The registry is private. Helm must be logged in before it can pull the
-chart. Use a GCP service-account key or short-lived access token provided
-by DefectDojo support.
+chart. The simplest way is `dojo-helm-cli register`, which logs `helm` and
+`docker` in with the registry key in your license (see
+[Installing on Kubernetes with dojo-helm-cli](/get_started/pro/onprem/kubernetes/installing_with_dojo_helm_cli/#authenticate-to-the-registry)).
+To log in without the CLI, use one of the options below. Option A never prints
+the key and does not use `gcloud`, so it leaves your active `gcloud` account
+alone.
 
-**Option A — service-account JSON key:**
+**Option A: the registry key in your license** (`container_token`, see
+[Inspecting Your License](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#inspecting-your-license)):
 
 ```bash
-gcloud auth activate-service-account --key-file=/path/to/key.json
-gcloud auth configure-docker us-south1-docker.pkg.dev --quiet
-gcloud auth print-access-token \
-  | helm registry login -u oauth2accesstoken \
+sed -n '/^[[:space:]]*ey/,/-----END/p' /path/to/license.lic \
+  | sed '$d' | tr -d ' ' | base64 -d | jq -r .container_token \
+  | helm registry login -u _json_key_base64 \
       --password-stdin us-south1-docker.pkg.dev
 ```
 
-**Option B — interactive gcloud login (for humans with registry access):**
+If DefectDojo support gave you a service-account JSON key file instead, pass
+the file itself:
+
+```bash
+helm registry login -u _json_key --password-stdin us-south1-docker.pkg.dev \
+  < /path/to/key.json
+```
+
+**Option B: interactive gcloud login (for people whose own Google account
+has registry access):**
 
 ```bash
 gcloud auth login
-gcloud auth configure-docker us-south1-docker.pkg.dev --quiet
 gcloud auth print-access-token \
   | helm registry login -u oauth2accesstoken \
       --password-stdin us-south1-docker.pkg.dev
 ```
 
+`gcloud auth login` makes the account you sign in with the active `gcloud`
+account. If you use `gcloud` for other work, check `gcloud config list account`
+afterwards and switch back with `gcloud config set account <your-usual-account>`.
 Access tokens from `gcloud auth print-access-token` expire after one hour.
 Re-run `helm registry login` if you see a `401 Unauthorized` during the
 upgrade.
@@ -195,7 +248,7 @@ Point `helm upgrade` directly at the OCI URL and pin the chart version with
 same as the original install.
 
 ```bash
-VERSION="<chart-version>"   # e.g. 2.57.2
+VERSION="<chart-version>"   # e.g. 3.4.0
 
 helm upgrade dojopro \
   oci://us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro-helm-v2/dojopro \
@@ -247,15 +300,16 @@ helm upgrade dojopro \
 ## Upgrade via Extracted Zip
 
 For workstations that cannot reach the OCI registry, or for customers who
-prefer to stage the chart as a local file, the packaged zip from the GitHub
-release works the same way at upgrade time as it does at install time. The
-only difference from install is the command verb (`helm upgrade` instead of
-`helm install`).
+prefer to stage the chart as a local file, the packaged zip that DefectDojo
+provides for each release works the same way at upgrade time as it does at
+install time. The only difference from install is the command verb
+(`helm upgrade` instead of `helm install`).
 
-1. Download `dojo-pro-helm-bundled-<version>.zip` (and the detached
-   signature `.asc`) from the GitHub release.
-2. Verify the signature using the public key
-   (`dojo-pro-release-signing.asc`) as documented in the install guide.
+1. Get `dojo-pro-helm-bundled-<version>.zip`, its detached signature
+   `dojo-pro-helm-bundled-<version>.zip.asc`, and the public key
+   `dojo-pro-release-signing.asc` for the target release.
+2. Verify the signature as described in
+   [Verify the Bundle Signature](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#verify-the-bundle-signature).
 3. Extract the chart to a **versioned path** so presets do not collide with
    older extractions:
 
@@ -333,8 +387,11 @@ the new revision is live:
 # Chart revision bumped and status is deployed
 helm list -n $NAMESPACE
 
-# All pods Running and Ready — expect django, celery worker/beat,
-# connectors, ddorch, ddorch-workers, and (if enabled) mcp-server
+# All pods Running and Ready. On chart 3.4.0 with the standard profile:
+# django, django-import, celery-worker, celery-imports-worker, celery-beat,
+# connectors, integrators, ddorch, ddorch-workers and mcp-server, plus
+# webhook-gateway when the chart can create its secrets, redis unless you use
+# an external broker, and sensei if you enabled it
 kubectl get pods -n $NAMESPACE
 
 # Migrations succeeded — the initializer job should show Completed
@@ -346,8 +403,12 @@ kubectl get deployment -n $NAMESPACE \
 ```
 
 Hit the login page to confirm the UI comes up and the admin user can
-authenticate. For programmatic checks, the `/login/` endpoint returns 200
-when the app is healthy.
+authenticate. For programmatic checks, the light health check needs no
+login and returns 200 when the application is up:
+
+```bash
+curl -fsS https://<your-fqdn>/api/v2/health_check/light/
+```
 
 ---
 

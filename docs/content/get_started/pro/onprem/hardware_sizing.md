@@ -8,7 +8,7 @@ audience: pro
 
 Sizing a DefectDojo deployment comes down to two questions. How much data are you holding, and how many people are working in it at once. This page gives starting points for both.
 
-Treat what follows as general guidance rather than a specification. The figures lean deliberately conservative, and they assume a deployment doing everyday triage alongside regular scan imports. Your own numbers will move depending on how you use the Asset, so read the notes under the table before you provision anything.
+Treat what follows as general guidance rather than a specification. The figures lean deliberately conservative, and they assume a deployment doing everyday triage alongside regular scan imports. Your own numbers will move depending on how you use the product, so read the notes under the table before you provision anything.
 
 Specs are given as generic vCPU and memory figures so they apply to any cloud provider or on-premise hardware. The sizing table has a tab for each deployment method: Kubernetes runs the application tier as pods across nodes and scales out, while Docker Compose runs everything on one host and scales up. Whichever you choose, read [Sizing and tuning the application tier](#sizing-and-tuning-the-application-tier) too, where the two differ most.
 
@@ -65,21 +65,21 @@ The "Application nodes" column is the compute the application tier needs. How yo
 The Helm chart runs the application tier as pods and sets the uWSGI and Celery concurrency for you from your values, so on Kubernetes you provide the capacity and let the chart place pods on it. Kubernetes spreads the load whether you give it a few large nodes or more small ones, so the node counts in the table are one workable arrangement rather than a requirement. Two things are worth holding to: keep at least two nodes so losing one doesn't take the application down, and avoid nodes smaller than 2 vCPU / 8 GB so individual pods schedule comfortably.
 {{< /tab >}}
 {{< tab "Compose" >}}
-On a single host there are no pods to schedule or nodes to spread across, so read the "Application nodes" column as one total: add the per-node figures together and provision that much CPU and memory on the one machine. Compute-optimized hardware for that host is worth choosing when your provider offers it. A single host has no redundancy, so treat losing it as downtime and keep a tested backup and a restore plan.
+On a single host there are no pods to schedule or nodes to spread across. The Compose table's "Application host" column already adds the Kubernetes per-node figures together, so provision that much CPU and memory on the one machine. Compute-optimized hardware for that host is worth choosing when your provider offers it. A single host has no redundancy, so treat losing it as downtime and keep a tested backup and a restore plan.
 
 Sizing the host is only half of it. The application does not reach for extra cores on its own: the uWSGI web processes and the Celery workers run at fixed counts until you raise them. After you resize the host, tune these and restart.
 
 Scale with **processes, not threads.** uWSGI threads do not run Python in parallel — the GIL lets only one thread per process execute at a time — so past a handful they mostly consume database connections and add context-switching overhead instead of throughput. Keep threads low and add processes as the lever:
 
 ```bash
-dojo-compose-cli environment add --key "DD_UWSGI_NUM_OF_THREADS"        --value "4"
-dojo-compose-cli environment add --key "DD_UWSGI_NUM_OF_PROCESSES"      --value "<1–1.5× the host's CPU count, then tune>"
-dojo-compose-cli environment add --key "DD_CELERY_WORKER_CONCURRENCY"   --value "<app_cpus>"
-dojo-compose-cli environment add --key "DD_CELERY_WORKER_AUTOSCALE_MAX" --value "<app_cpus>"
+sudo -E dojo-compose-cli environment add --key "DD_UWSGI_NUM_OF_THREADS"        --value "4"
+sudo -E dojo-compose-cli environment add --key "DD_UWSGI_NUM_OF_PROCESSES"      --value "<1–1.5× the host's CPU count, then tune>"
+sudo -E dojo-compose-cli environment add --key "DD_CELERY_WORKER_CONCURRENCY"   --value "<app_cpus>"
+sudo -E dojo-compose-cli environment add --key "DD_CELERY_WORKER_AUTOSCALE_MAX" --value "<app_cpus>"
 
-dojo-compose-cli environment print   # confirm the values
-dojo-compose-cli app stop
-dojo-compose-cli app start
+sudo -E dojo-compose-cli environment print   # confirm the values
+sudo -E dojo-compose-cli app stop
+sudo -E dojo-compose-cli app start
 ```
 
 What each knob does:

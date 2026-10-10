@@ -107,10 +107,10 @@ The last command must list `pro_settings.py`. Without that file the Pro features
 The standard install generates several configuration values on first run. In an air-gapped install you set them by hand on the target host, so capture them now:
 
 ```bash
-dojo-compose-cli environment print | head -n 9
+dojo-compose-cli environment print | grep -E 'DD_SECRET_KEY|DD_CREDENTIAL_AES_256_KEY'
 ```
 
-Keep the credential encryption key and the secret key. Both are generated 64 character random strings, and the credential key in particular must match the one used when credentials were encrypted, so record it accurately and store it as a secret. The uwsgi and celery values in the same output are useful as starting points for the target host.
+These are the two keys `deploy download` generated: the secret key and the credential encryption key. Both are 64 character random strings, and the credential key in particular must match the one used when credentials were encrypted, so record them accurately and store them as secrets. The output of `environment print` is not in a fixed order, so filter for the keys by name rather than taking the first lines. Run it without the filter to see the uwsgi and celery values as well, which are useful starting points for the target host.
 
 Treat this output as sensitive. It contains the keys protecting stored credentials for your deployment.
 
