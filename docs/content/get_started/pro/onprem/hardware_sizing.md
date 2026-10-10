@@ -166,6 +166,14 @@ The figures here already lean conservative, and being one size too large costs f
 
 Adding application capacity later is straightforward: on Kubernetes you add pods or nodes, and on Docker Compose you resize the host and raise the process and worker counts as above. Resizing a database typically means downtime, so that is the one worth getting right up front.
 
+## How long the first start takes
+
+A new install spends most of its first start in the initializer, which creates the whole database schema before the application comes up. That is a long run of database migrations, so it is slowest on the smallest hosts.
+
+On Docker Compose, allow about 30 minutes for the first start on the smallest tier in the sizing table (a 4 vCPU / 16 GB application host with a 2 vCPU / 16 GB database); larger hosts may be faster. The time also depends on disk and database performance, so we do not publish a figure for each tier. Later starts and restarts are much faster, because the schema already exists and the initializer has little left to do.
+
+`dojo-compose-cli` 2.1.x can stop waiting before a slow first start has finished and report a failure while the initializer is still working. The install can be completed without starting over: see [First install reports a failure while the initializer is still running](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#first-install-reports-a-failure-while-the-initializer-is-still-running).
+
 ## Questions or support
 
 These are starting points, not limits. If your deployment sits at the top of the table, or your workload doesn't resemble the assumptions here, talk to us before you provision. Contact your account representative or [support@defectdojo.com](mailto:support@defectdojo.com).

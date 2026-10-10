@@ -180,6 +180,8 @@ The installer then pulls the images, starts the stack, creates a systemd service
 
 Once it finishes, DefectDojo is available at the site URL you gave it.
 
+The first start is the slow part. Before the application comes up, the `init` container creates the whole database schema. Allow about 30 minutes on the smallest Compose host in the [sizing table](/get_started/pro/onprem/hardware_sizing/#sizing-table); larger hosts may be faster. `dojo-compose-cli` 2.1.x can stop waiting before that and report a failure while the initializer is still working. If that happens, do not run `first-install` again. Follow [First install reports a failure while the initializer is still running](#first-install-reports-a-failure-while-the-initializer-is-still-running) instead.
+
 ## What the installation created
 
 | Item | Location |
@@ -272,7 +274,7 @@ If the file is missing or empty the container logs `No CA bundle found ...` inst
 
 ## Reset the admin password
 
-If you lose the generated password, reset it from the application host. DefectDojo has to be running:
+If you lose the generated password, reset it from the application host. DefectDojo has to be running. The admin username is `admin`.
 
 ```bash
 sudo -E dojo-compose-cli app change-password
@@ -315,6 +317,71 @@ sudo -E dojo-compose-cli config print
 Without it, the CLI asks for the key each time.
 
 ## Troubleshooting
+
+### First install reports a failure while the initializer is still running
+
+On a slower host, `first-install` from `dojo-compose-cli` 2.1.x can give up before the initializer has finished creating the database. It prints an error, but the `init` container keeps running in the background and usually completes. The failed run leaves three things undone:
+
+- It prints no admin credentials.
+- It does not create the systemd service.
+- It does not mark the install as initialized.
+
+The commands below need your `DOJO_CLI_KEY`. Export it once for the session before you start:
+
+```bash
+export DOJO_CLI_KEY="<your-key>"
+```
+
+`sudo -E dojo-compose-cli config print` then shows `Initialized` as `false`.
+
+You do not need to reinstall. On an install that is not yet marked initialized, `app start` completes the first start: it creates the systemd service, sets the admin password, and marks the install initialized.
+
+**1. Wait for the initializer to finish.** The initializer container is named `init`. Check its state and exit code:
+
+```bash
+docker inspect --format '{{.State.Status}} {{.State.ExitCode}}' init
+```
+
+While it is working this prints `running 0`. To follow its progress, tail the log:
+
+```bash
+docker logs -f --tail 20 init
+```
+
+Wait until the state is `exited`. Do not run `app start` while it still says `running`: the start would wait on the same initializer and can time out the same way.
+
+If `docker inspect` reports `No such object: init`, the failure came before the stack was created (for example during the image pull), and this recovery does not apply.
+
+**2. Check the exit code.** `exited 0` means the database is ready, so go on to step 3. Any other code means the initializer stopped on an error, so do not continue yet:
+
+- For the codes in [Reading the initializer's result](/get_started/pro/onprem/upgrading/#reading-the-initializers-result), that table says what each one means. Its advice about restoring a backup applies to upgrades only. On a first install there is no earlier database to go back to.
+- A code that is not in that table, such as `137`, means the container was killed, often because the host ran out of memory. Check the kernel log and the host's memory before you retry, for example `sudo dmesg | grep -i -E 'killed process|out of memory'`. Ubuntu lets only root read the kernel log by default.
+
+Fix the cause the log names, then run step 3. If it reports a failure while `init` is still running, go back to step 1. If the cause is not clear, run `sudo -E dojo-compose-cli diagnostics collect` and send the bundle to [support@defectdojo.com](mailto:support@defectdojo.com).
+
+**3. Start DefectDojo.**
+
+```bash
+sudo -E dojo-compose-cli app start
+```
+
+Because the install is not marked initialized, this run brings the stack up (the initializer runs again, and finishes quickly because the schema is already in place), creates the systemd service, sets a new random admin password, prints the admin credentials, and marks the install as initialized. **Save the credentials it prints. They are not shown again.** `dojo-compose-cli` does not store the password, so if you miss it, follow [Reset the admin password](#reset-the-admin-password).
+
+Do not run `app stop` while `init` is still running. The next paragraph applies only after step 2 shows `exited 0`.
+
+If `app start` reports that DefectDojo is already running, the stack came up on its own. Run `sudo -E dojo-compose-cli app stop`, then `sudo -E dojo-compose-cli app start` again, so that the first-start steps run.
+
+**4. Confirm the result.** `sudo -E dojo-compose-cli config print` now shows `Initialized` as `true`, and DefectDojo answers at your site URL. Check that the systemd service will start DefectDojo on boot:
+
+```bash
+systemctl is-enabled defectdojo-compose
+```
+
+If it does not print `enabled`, enable it:
+
+```bash
+sudo systemctl enable defectdojo-compose
+```
 
 ### The systemd service keeps restarting
 
