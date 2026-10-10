@@ -268,15 +268,12 @@ def build_files_router(
         parent = _resolve_parent(request, get_parent_queryset, parent_label, parent_id)
         _require(request, parent, add_permission)
         # Mirror v2 FileSerializer: extension validation via FileUpload.clean() (settings
-        # .FILE_UPLOAD_TYPES); v2 does NOT enforce a size cap. Title is globally unique on the
-        # model, so pre-check it here (mirrors DRF's UniqueValidator -> 400, avoids a 500).
+        # .FILE_UPLOAD_TYPES); v2 does NOT enforce a size cap.
         upload = FileUpload(title=title, file=file)
         try:
             upload.clean()
         except DjangoValidationError as exc:
             raise validation_problem({"file": list(exc.messages)}) from exc
-        if FileUpload.objects.filter(title=upload.title).exists():
-            raise validation_problem({"title": ["A file with this title already exists."]})
         upload.save()
         parent.files.add(upload)
         return json_response(_serialize_file(upload), status=201)
