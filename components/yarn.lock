@@ -1435,13 +1435,12 @@ cva@1.0.0-beta.4:
   dependencies:
     clsx "^2.1.1"
 
-datatables.net-buttons@^3.2.6:
-  version "3.2.6"
-  resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-3.2.6.tgz#dad80c8f28eb18741cec49fb33397073217ca63e"
-  integrity sha512-rLqkB3xLIAYwVLt+lUSxybo/1WqveTAxhQm6wj6yvXlJiWq+oJ8MKW6H1q90QrXbNp0fGngnfD0cmpMZnNnnNw==
+datatables.net-buttons@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-4.1.2.tgz#d16352507ed2a3720d5f55c1f57cdd72ca45f84b"
+  integrity sha512-VigN0751S8r/brSZNRSPXgfUHZciujQ2zXkZifOuWYbgMaX/I68YyGmiuQTTrI7DMl0fXHgM4nA3lmJcdtKD2A==
   dependencies:
-    datatables.net "^2"
-    jquery ">=1.7"
+    datatables.net "^3.1"
 
 datatables.net-colreorder@^2.1.2:
   version "2.1.2"
@@ -1457,6 +1456,11 @@ datatables.net@^2, datatables.net@^2.3.8:
   integrity sha512-uhViowhlDlheAuo5a8TrkQqADsjrtGeOyvrigvr4t0+K3MyAWqClORXWAYIcN9VLX6iIX0C8O9gwJNd01hITRg==
   dependencies:
     jquery ">=1.7"
+
+datatables.net@^3.1:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.2.tgz#a5a50257bf87b0f70eca710f6ef0feeb763c5556"
+  integrity sha512-6PnhPw9lrPASP2n1t13zW595aKB41j3Qt6iykFVV6aohGtSF3CTjwQ+RsdlrGUQTj/Ji0or8+9Q7mMpf4YY1cQ==
 
 debug@^4.0.0:
   version "4.4.3"
