@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kubernetes (Helm) on DefectDojo Documentation</title><link>https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/</link><description>Recent content in Kubernetes (Helm) on DefectDojo Documentation</description><generator>Hugo</generator><language>en</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><atom:link href="https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/index.xml" rel="self" type="application/rss+xml"/><item><title>DefectDojo Pro Installation Guide (Kubernetes / Helm)</title><link>https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/installing_on_kubernetes/</guid><description>&lt;!--
  Generated from the DefectDojo Pro Helm chart repository.
  Source: docs/INSTALLATION_GUIDE.md at chart version 3.1.304.
- Edit the source guide, not this file. Local edits are overwritten
- the next time the chart is released.
+ This copy carries hand edits that are pending a sync from the chart
+ repository's source guide. Make the same change there too, or the next
+ sync from the chart overwrites it.
 --&gt;
 &lt;p&gt;Covers deployment on AWS EKS and OpenShift (ROSA). The workflow is the same
 for both: set up infrastructure, create secrets, install the chart.&lt;/p&gt;</description></item><item><title>Installing on Kubernetes with dojo-helm-cli</title><link>https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/installing_with_dojo_helm_cli/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/installing_with_dojo_helm_cli/</guid><description>&lt;p&gt;&lt;code&gt;dojo-helm-cli&lt;/code&gt; is the command line tool DefectDojo provides for Kubernetes deployments. It is the Helm counterpart to &lt;code&gt;dojo-compose-cli&lt;/code&gt;. It logs &lt;code&gt;docker&lt;/code&gt; and &lt;code&gt;helm&lt;/code&gt; into the DefectDojo Pro registry with your license, pulls the chart and every image the chart can use, checks a cluster before you install, runs the install for your platform, and gathers a diagnostics bundle when something goes wrong.&lt;/p&gt;</description></item><item><title>DefectDojo Pro Upgrade Guide (Kubernetes / Helm)</title><link>https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/</guid><description>&lt;!--
  Generated from the DefectDojo Pro Helm chart repository.
  Source: docs/UPGRADE_GUIDE.md at chart version 3.1.304.
- Edit the source guide, not this file. Local edits are overwritten
- the next time the chart is released.
+ This copy carries hand edits that are pending a sync from the chart
+ repository's source guide. Make the same change there too, or the next
+ sync from the chart overwrites it.
 --&gt;
 &lt;p&gt;Covers upgrading an existing DefectDojo Pro release to a newer chart version.
 The recommended path is to pull the chart directly from the DefectDojo OCI

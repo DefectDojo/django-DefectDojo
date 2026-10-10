@@ -8,9 +8,7 @@
 &lt;h3 id="アセット階層pro"&gt;アセット階層（Pro）&lt;/h3&gt;
 &lt;p&gt;アセット間の親子関係モデルであり、コンテキストの継承と検出事項の集約を可能にします。&lt;/p&gt;
 &lt;h2 id="エンゲージメント両方"&gt;エンゲージメント（両方）&lt;/h2&gt;
-&lt;p&gt;テスト期間、パイプライン、または評価コンテキストを表す、範囲が定められたセキュリティ活動です。&lt;/p&gt;</description></item><item><title>営業に問い合わせる</title><link>https://docs.defectdojo.com/ja/help/contact_sales/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/contact_sales/</guid><description>&lt;p&gt;チームがオンプレミスのDefectDojoインストールを必要とする場合は、→ &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="hello",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;hello at defectdojo dot com&lt;/noscript&gt;
-
- までメールで営業チームにご連絡ください。このトライアル設定プロセスはDefectDojo Cloudユーザーにのみ適用されます。&lt;/p&gt;
+&lt;p&gt;テスト期間、パイプライン、または評価コンテキストを表す、範囲が定められたセキュリティ活動です。&lt;/p&gt;</description></item><item><title>営業に問い合わせる</title><link>https://docs.defectdojo.com/ja/help/contact_sales/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/contact_sales/</guid><description>&lt;p&gt;チームがオンプレミスのDefectDojoインストールを必要とする場合は、→ &lt;a href="mailto:hello@defectdojo.com"&gt;hello@defectdojo.com&lt;/a&gt; までメールで営業チームにご連絡ください。このトライアル設定プロセスはDefectDojo Cloudユーザーにのみ適用されます。&lt;/p&gt;
 &lt;p&gt;DefectDojoの全プランには無料の2週間トライアルが含まれており、ソフトウェアの評価に利用できます。DefectDojoのトライアルインスタンスはフル機能版であり、トライアル期間終了時にはチームによって即座に有料インスタンスに変換できます。すべてを再設定したり、データを再アップロードしたりする必要はありません。&lt;/p&gt;
 &lt;p&gt;このプロセスの最後に、営業チームと連絡が取れるようになり、請求情報の受領と貴社のトライアルインスタンスの認可についてフォローアップいたします。&lt;/p&gt;
 &lt;h1 id="トライアルのリクエスト"&gt;&lt;strong&gt;トライアルのリクエスト&lt;/strong&gt;&lt;/h1&gt;
@@ -55,9 +53,38 @@
  alt="image"
  id="h-rh-i-2"
 &gt;&lt;/p&gt;
-&lt;p&gt;通常、DefectDojoは貴社名に基づいてドメイン名を付けますが、「ドメインにサーバーラベルを使用」を選択すると、DefectDojoは代わりに選択したサーバーラベルに基づいてドメインにラベルを付けます。この方法は、複数のDefectDojoインスタンスを使用する予定がある場合（例えば、本番インスタンスとテストインスタンスなど）に適していることがあります。複数のインスタンスが必要な場合は、営業チーム → &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="hello",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;hello at defectdojo dot com&lt;/noscript&gt;
+&lt;p&gt;通常、DefectDojoは貴社名に基づいてドメイン名を付けますが、「ドメインにサーバーラベルを使用」を選択すると、DefectDojoは代わりに選択したサーバーラベルに基づいてドメインにラベルを付けます。この方法は、複数のDefectDojoインスタンスを使用する予定がある場合（例えば、本番インスタンスとテストインスタンスなど）に適していることがあります。複数のインスタンスが必要な場合は、営業チーム → &lt;a href="mailto:hello@defectdojo.com"&gt;hello@defectdojo.com&lt;/a&gt; までご連絡ください。&lt;/p&gt;
+&lt;h2 id="ステップ3サーバーロケーションの選択"&gt;ステップ3：サーバーロケーションの選択&lt;/h2&gt;
+&lt;p&gt;ドロップダウンメニューからサーバーロケーションを選択します。サーバーの遅延を減らすため、DefectDojoの主要チームに地理的に最も近いサーバーを選択することをお勧めします。&lt;/p&gt;
+&lt;p&gt;
 
- までご連絡ください。&lt;/p&gt;</description></item><item><title>サポートに問い合わせる</title><link>https://docs.defectdojo.com/ja/help/contact_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/contact_support/</guid><description>&lt;p&gt;DefectDojoについてお困りですか？サポートを受ける方法をいくつかご紹介します。&lt;/p&gt;
+&lt;img
+ src="https://docs.defectdojo.com/images/request_a_trial_3.png"
+ width="2832"
+ height="2100"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-3"
+&gt;&lt;/p&gt;
+&lt;h2 id="ステップ4ファイアウォールルールの設定"&gt;ステップ4：ファイアウォールルールの設定&lt;/h2&gt;
+&lt;p&gt;DefectDojoへのアクセスを許可するIPアドレス範囲、サブネットマスク、ラベルを入力します。追加のIPアドレスやルールは、インスタンスの稼働開始後にチームが追加または変更できます。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/request_a_trial_4.png"
+ width="942"
+ height="1202"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-4"
+&gt;&lt;/p&gt;
+&lt;p&gt;DefectDojoで外部サービス（GitHubやJIRAなど）を使用したい場合は、&lt;strong&gt;外部サービスの選択&lt;/strong&gt;の下に記載されている該当するボックスにチェックを入れてください。&lt;/p&gt;
+&lt;h2 id="ステップ5プランタイプと請求頻度の確認"&gt;ステップ5：プランタイプと請求頻度の確認&lt;/h2&gt;
+&lt;p&gt;プロセスを完了する前に、使用したいプランと請求頻度（月次または年次）を確認してください。&lt;/p&gt;</description></item><item><title>サポートに問い合わせる</title><link>https://docs.defectdojo.com/ja/help/contact_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/contact_support/</guid><description>&lt;p&gt;DefectDojoについてお困りですか？サポートを受ける方法をいくつかご紹介します。&lt;/p&gt;
 &lt;h2 id="オープンソースサポート"&gt;オープンソースサポート&lt;/h2&gt;
 &lt;p&gt;オープンソースユーザーは、コミュニティチャンネルを通じてヘルプやアドバイスを受けることができます。&lt;/p&gt;
 &lt;p&gt;オープンソースユーザーにとって、最も早くヘルプを得る方法は&lt;a href="https://owasp.org/slack/invite"&gt;OWASP Slackチャンネル&lt;/a&gt;を利用することです。コミュニティメンバーは**# defectdojoチャンネル**で活発に活動しており、直面している問題の解決を手伝ってくれます。&lt;/p&gt;
@@ -66,6 +93,22 @@
 &lt;h2 id="defectdojo-proサポート"&gt;DefectDojo Proサポート&lt;/h2&gt;
 &lt;p&gt;DefectDojo Proのサブスクリプションには、初期トライアル期間中およびそれ以降も、DefectDojo, Inc.チームによるフルサポートが含まれます。&lt;/p&gt;
 &lt;h3 id="メール"&gt;メール&lt;/h3&gt;
-&lt;p&gt;顧客/Proユーザーは、&lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="support",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;support at defectdojo dot com&lt;/noscript&gt;
+&lt;p&gt;顧客/Proユーザーは、&lt;a href="mailto:support@defectdojo.com"&gt;support@defectdojo.com&lt;/a&gt; までいつでも直接チームにメールしてサポートを受けることができます。&lt;/p&gt;
+&lt;h3 id="defectdojo内で"&gt;DefectDojo内で&lt;/h3&gt;
+&lt;p&gt;DefectDojoアプリを通じて、次の2つの方法でサポートチームに連絡できます。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;左サイドバーの&lt;strong&gt;Cloud Manager &amp;gt; Contact Support&lt;/strong&gt;を開く&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;{your-instance}.defectdojo.com/cloud_portal/support&lt;/strong&gt; にアクセスする&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
 
- までいつでも直接チームにメールしてサポートを受けることができます。&lt;/p&gt;</description></item></channel></rss>
+&lt;img
+ src="https://docs.defectdojo.com/images/contact_defectdojo_support.png"
+ width="558"
+ height="1014"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;</description></item></channel></rss>

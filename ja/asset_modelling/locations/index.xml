@@ -110,9 +110,7 @@
 &lt;/table&gt;
 &lt;p&gt;この原子的な分解こそが、pURLベースの検索を有用にしています。「&lt;code&gt;django&lt;/code&gt; 名前空間にある、バージョン4.x系のすべての &lt;code&gt;pypi&lt;/code&gt; パッケージ」といった問い合わせに対し、DefectDojoは自由記述の文字列を解析することなく回答できます。&lt;/p&gt;</description></item><item><title>ソースコードロケーション</title><link>https://docs.defectdojo.com/ja/asset_modelling/locations/pro__source_code_locations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/asset_modelling/locations/pro__source_code_locations/</guid><description>&lt;p&gt;&lt;strong&gt;ソースコードロケーション&lt;/strong&gt;は、ロケーションモデルを静的解析にまで拡張します。URL(DAST)や依存関係(SCA)と並んで、&lt;strong&gt;コード&lt;/strong&gt;ロケーションは、SASTの検出事項がソースコード内のどこに存在するかを&lt;strong&gt;ファイルパスと行番号&lt;/strong&gt;によって示します。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;ソースコードロケーションを利用するには、ロケーション機能(ベータ版)が必要です。お使いのインスタンスでロケーションを有効にするには、&lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="support",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;support at defectdojo dot com&lt;/noscript&gt;
-
- までご連絡ください。&lt;/p&gt;
+&lt;p&gt;ソースコードロケーションを利用するには、ロケーション機能(ベータ版)が必要です。お使いのインスタンスでロケーションを有効にするには、&lt;a href="mailto:support@defectdojo.com"&gt;support@defectdojo.com&lt;/a&gt; までご連絡ください。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="モデル化する対象"&gt;モデル化する対象&lt;/h2&gt;
 &lt;p&gt;ファイルパスを報告するすべての静的解析の検出事項には、コードロケーションが割り当てられます。ロケーションの正規値は &lt;code&gt;path/to/file.py:42&lt;/code&gt; です(ツールが行番号を報告しない場合はファイルパスのみになります)。他のすべてのロケーションと同様、コードロケーションは共有オブジェクトです。同じファイル・行にある2つの検出事項は同じロケーションを参照し、そのロケーションは検出事項ごと・アセットごとの参照ステータスを保持します。&lt;/p&gt;

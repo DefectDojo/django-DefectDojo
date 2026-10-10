@@ -42,11 +42,23 @@
 &lt;p&gt;如果您没有收到邮件，请检查您的垃圾邮件文件夹。如果仍未收到，请让您团队的 DefectDojo 管理员确认您的账户已在实例中注册。&lt;/p&gt;
 &lt;h2 id="我无法访问我公司的-clouddefectdojo-网站"&gt;我无法访问我公司的 cloud.defectdojo 网站&lt;/h2&gt;
 &lt;p&gt;如果您公司的 cloud.defectdojo 网站在浏览器中无法加载，或出现超时，您的公司可能需要更改防火墙规则，以便接受您的连接。&lt;/p&gt;</description></item><item><title>设置额外的 Cloud 实例</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/additional-cloud-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/additional-cloud-instance/</guid><description>&lt;p&gt;添加第二个 Cloud 实例的流程，与添加您的第一个实例大致相同。本指南假定您已经完成了初始 DefectDojo 服务器的搭建，并已与我们的销售团队就添加另一个实例达成协议。&lt;/p&gt;
-&lt;p&gt;如果您尚未申请额外的 Cloud 实例，请在继续操作之前联系 &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="info",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;info at defectdojo dot com&lt;/noscript&gt;
-
- 。&lt;/p&gt;
+&lt;p&gt;如果您尚未申请额外的 Cloud 实例，请在继续操作之前联系 &lt;a href="mailto:info@defectdojo.com"&gt;info@defectdojo.com&lt;/a&gt;。&lt;/p&gt;
 &lt;h2 id="第-1-步打开新建订阅流程"&gt;第 1 步：打开新建订阅流程&lt;/h2&gt;
-&lt;p&gt;您可以通过以下链接开始此流程：&lt;a href="https://cloud.defectdojo.com/accounts/onboarding/step_1"&gt;https://cloud.defectdojo.com/accounts/onboarding/step_1&lt;/a&gt;，也可以在 Cloud Manager 页面（cloud.defectdojo.com）中点击 🛒 &lt;strong&gt;新建订阅&lt;/strong&gt;。&lt;/p&gt;</description></item><item><title>Cloud 架构</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/cloud-architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/cloud-architecture/</guid><description>&lt;p&gt;DefectDojo Cloud 是一个运行在 Google Cloud 上的多租户 SaaS 平台，基于
+&lt;p&gt;您可以通过以下链接开始此流程：&lt;a href="https://cloud.defectdojo.com/accounts/onboarding/step_1"&gt;https://cloud.defectdojo.com/accounts/onboarding/step_1&lt;/a&gt;，也可以在 Cloud Manager 页面（cloud.defectdojo.com）中点击 🛒 &lt;strong&gt;新建订阅&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/request_a_trial.png"
+ width="2832"
+ height="2100"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;h2 id="第-2-步设置您的服务器标签"&gt;第 2 步：设置您的服务器标签&lt;/h2&gt;
+&lt;p&gt;输入您公司的&lt;strong&gt;名称&lt;/strong&gt;，以及您想在 DefectDojo 中使用的&lt;strong&gt;服务器标签&lt;/strong&gt;。系统随后会在我们的服务器上为您的 DefectDojo 实例创建一个自定义域名。&lt;/p&gt;</description></item><item><title>Cloud 架构</title><link>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/cloud-architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/get_started/pro/cloud/cloud-architecture/</guid><description>&lt;p&gt;DefectDojo Cloud 是一个运行在 Google Cloud 上的多租户 SaaS 平台，基于
 **Google Kubernetes Engine（GKE）**构建。本页介绍该平台的架构方式，以及
 客户环境是如何相互隔离的。&lt;/p&gt;
 &lt;p&gt;

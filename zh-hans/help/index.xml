@@ -4,9 +4,7 @@
 &lt;h2 id="组织两者皆有"&gt;组织(两者皆有)&lt;/h2&gt;
 &lt;p&gt;一种顶级层级对象,在 DefectDojo Pro 中作为资产的父对象。它为所有子资产提供统一的治理、访问控制和报告上下文。&lt;/p&gt;
 &lt;h2 id="资产两者皆有"&gt;资产(两者皆有)&lt;/h2&gt;
-&lt;p&gt;一种一级对象,代表组织内可部署或逻辑上的系统实体(例如应用程序、主机、环境)。在 Pro 版本中,资产支持父子关系并具备更丰富的业务元数据;而在开源版本中,资产不支持父子关系。&lt;/p&gt;</description></item><item><title>联系销售</title><link>https://docs.defectdojo.com/zh-hans/help/contact_sales/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/help/contact_sales/</guid><description>&lt;p&gt;如果您的团队需要本地部署(on-premise)的 DefectDojo,请通过邮件 → &lt;script type="text/javascript" nonce="dXNlcj0iaGVsbG8iLGRvbWFpbj0iaGVua3ZlcmxpbmRlLmNvbSIsZG9jdW1lbnQud3JpdGUodXNlcisiQCIrZG9tYWluKTs="&gt;userName="hello",domainName="defectdojo",domainExtension="com",document.write("&lt;a href='mailto:"+userName+"@"+domainName+"."+domainExtension+"'&gt;"+userName+"@"+domainName+"."+domainExtension+"&lt;/a&gt;");&lt;/script&gt;&lt;noscript&gt;hello at defectdojo dot com&lt;/noscript&gt;
-
- 联系我们的销售团队。此试用申请流程仅适用于 DefectDojo Cloud 用户。&lt;/p&gt;
+&lt;p&gt;一种一级对象,代表组织内可部署或逻辑上的系统实体(例如应用程序、主机、环境)。在 Pro 版本中,资产支持父子关系并具备更丰富的业务元数据;而在开源版本中,资产不支持父子关系。&lt;/p&gt;</description></item><item><title>联系销售</title><link>https://docs.defectdojo.com/zh-hans/help/contact_sales/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/help/contact_sales/</guid><description>&lt;p&gt;如果您的团队需要本地部署(on-premise)的 DefectDojo,请通过邮件 → &lt;a href="mailto:hello@defectdojo.com"&gt;hello@defectdojo.com&lt;/a&gt; 联系我们的销售团队。此试用申请流程仅适用于 DefectDojo Cloud 用户。&lt;/p&gt;
 &lt;p&gt;DefectDojo 的所有套餐均包含 2 周的免费试用期,您可以借此评估我们的软件。DefectDojo 试用实例功能齐全,我们的团队可以在试用结束时立即将其转换为付费实例;无需重新搭建环境,也无需重新上传任何数据。&lt;/p&gt;
 &lt;p&gt;在此流程结束时,我们会安排您与销售团队对接,他们会跟进获取您的账单信息,并为您公司的试用实例完成授权。&lt;/p&gt;
 &lt;h1 id="申请试用"&gt;&lt;strong&gt;申请试用&lt;/strong&gt;&lt;/h1&gt;
