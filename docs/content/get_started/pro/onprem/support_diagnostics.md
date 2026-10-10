@@ -19,6 +19,8 @@ Both go to the DefectDojo cloud portal (`CLOUD_PORTAL_URL`, `https://cloud.defec
 
 The default depends on the license: on for DefectDojo Cloud, and off for everything else, including a self-hosted instance whose license is missing or cannot be read.
 
+These reports are separate from the logs support may ask for. On Docker Compose, a superuser can collect those logs and email them to support from the UI: see [Sending Logs to Support](/get_started/pro/onprem/docker_compose/support_bundle/).
+
 ## Turning a report on or off
 
 Neither flag appears on the Feature Flags page. Set them with the `set_feature` management command in any DefectDojo container:
