@@ -69,16 +69,18 @@ Each Full Risk Acceptance adds additional context to Risk Acceptance, such as:
     - Whether the Finding’s status will return to “Active” upon expiration.
     - Whether the SLA will restart upon expiration.
 
-Expiration is unique to Full Risk Acceptance objects, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. Once a Risk Acceptance expires, any Findings will be set to Active again. 
+Expiration is unique to Full Risk Acceptance objects, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. When a Risk Acceptance expires, its Findings are set back to Active only if **Reactivate Findings on Expiration** is checked on it (it is by default). With that option unchecked, the Findings stay Risk Accepted after the expiration date.
 
-If you don’t specify a date, the Default Risk Acceptance / Default Risk Acceptance Expiration days will be used from the System Settings page.
+A new Risk Acceptance starts with its **Expiration Date** filled in: today plus the **Default Risk Acceptance Days** setting on the System Settings page (180 unless changed). The date sits in the main part of the form, so you can see it, change it, or clear it before submitting. A Risk Acceptance with no expiration date never expires. If the setting is 0, new Risk Acceptances start with no date.
+
+The API follows the same rule: a `POST /api/v2/risk_acceptance/` that leaves out `expiration_date` gets the default date, and one that sends `"expiration_date": null` creates a Risk Acceptance that never expires.
 
 #### How to Complete a Full Risk Acceptance
 
 A Full Risk Acceptance object can be made in three different ways:
 - Using the **New Risk Acceptance** button on the **Act > Risk Acceptances** page.
-- Using the **Add Risk Acceptance** button on an individual Finding.
-- Clicking the **Risk Acceptance Actions** button that appears after selecting a Finding/multiple Findings from within a table.
+- Using **Add Risk Acceptance** in an individual Finding's gear menu.
+- Clicking the **Risk Acceptance** button that appears after selecting a Finding/multiple Findings from within a table.
 
 ##### New Risk Acceptance (Risk Acceptances page)
 
@@ -86,23 +88,23 @@ Clicking **New Risk Acceptance** on the **Act > Risk Acceptances** page will ope
 
 ##### Add Risk Acceptance (Individual) 
 
-Having opened an individual Finding, click the gear icon in the top right corner of the view and select **Add Risk Acceptance**. From there, you will be able to either add the Finding to an existing Full Risk Acceptance object, or create a new object. 
+Having opened an individual Finding, click the gear icon in the top right corner of the view and select **Add Risk Acceptance**. From there, choose **Add to Existing Risk Acceptance** to add the Finding to an existing Full Risk Acceptance object, or **Add to New Risk Acceptance** to create a new object. 
 
 ![Risk Acceptance in Finding Submenu](images/RA_image2.png)
 
-##### Risk Acceptance Actions (Table)
+##### Risk Acceptance (Table)
 
-Having selected a Finding/Findings from within a table, click the **Risk Acceptance Actions** button that appears at the top and select either **Add to New Risk Acceptance Object** or **Add to Existing Risk Acceptance Object** and fill out the required fields. 
+Having selected a Finding/Findings from within a table, click the **Risk Acceptance** button that appears at the top and select either **Add to New Risk Acceptance** or **Add to Existing Risk Acceptance** and fill out the required fields. 
 
-Findings can only be added to a single Risk Acceptance at once.  If the Risk Acceptance Actions button is unclickable, it’s likely because one of the selected Findings has already been added to a Full Risk Acceptance object.
+Findings can only be added to a single Risk Acceptance at once.  If the **Risk Acceptance** button is unclickable, it’s likely because one of the selected Findings has already been added to a Full Risk Acceptance object.
 
-![Risk Acceptance Actions button](images/RA_image5.png)
+![Risk Acceptance button](images/RA_image5.png)
 
 ##### Editing Full Risk Acceptances
 
 Once a Full Risk Acceptance object has been created, you can edit the details of the object, upload a file with proof of the Risk Acceptance, or delete the object entirely by clicking the gear icon in the top right of the object’s view. 
 
-Findings can also be added and removed from the object using the same menu. Alternatively, Findings can be removed from the object by clicking the ⋮ kebab menu next to an individual Finding, clicking **Bulk Update Actions**, and selecting **Unaccept Risk** from the Simple Risk Acceptance Status dropdown menu.
+Findings can also be added and removed from the object using the same menu. Alternatively, remove a single Finding with **Remove Risk Acceptance** in that Finding's gear menu. Selecting Findings in a table, clicking **Bulk Edit**, and choosing **Unaccept Risk** from the **Simple Risk Acceptance Status** dropdown also removes them from their Full Risk Acceptance, but only for Findings whose Asset has Simple Risk Acceptance enabled. Findings on other Assets are skipped, and a warning says how many.
 
 Finally, if you add any Findings to a Full Risk Acceptance object and then subsequently delete that object, the Findings within will have their status automatically reverted to “Active.”
 
@@ -120,9 +122,9 @@ Once enabled, Simple Risk Acceptance can be run from the table of Findings withi
 
 You can complete the Simple Risk Acceptance workflow from either the All Findings table (**Act > Explore > Findings > All** in the sidebar) or from the table of Findings within a specific test. The workflow is identical between the two. 
 
-Select the Findings you wish to Risk Accept and click the **Bulk Update Actions** button that appears at the top of the table. From there, select **Accept Risk** from the Simple Risk Acceptance Status dropdown. Because the Findings have been Simple Risk Accepted, there is no associated Full Risk Acceptance object. The Findings that were Risk Accepted are accessible from **Act > Explore > Findings > Risk Accepted** in the sidebar.
+Select the Findings you wish to Risk Accept and click the **Bulk Edit** button that appears at the top of the table. From there, select **Accept Risk** from the Simple Risk Acceptance Status dropdown. Because the Findings have been Simple Risk Accepted, there is no associated Full Risk Acceptance object. The Findings that were Risk Accepted are accessible from **Act > Explore > Findings > Risk Accepted** in the sidebar.
 
-![Risk Acceptance Actions in Table](images/RA_image4.png)
+![Bulk Edit in a Findings table](images/RA_image4.png)
 
 Conversely, if you wish to unaccept the risk for any Findings that had been previously Risk Accepted, select **Unaccept Risk**. If a Finding has been Simple Risk Accepted, the risk must be unaccepted prior to adding it to a Full Risk Acceptance object.
 
