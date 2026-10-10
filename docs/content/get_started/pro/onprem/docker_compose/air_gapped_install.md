@@ -12,7 +12,7 @@ This page is a supplement to the installation instructions supplied with your De
 
 The approach uses two hosts. A staging host with normal internet access downloads the deployment artifacts and container images. You then move those artifacts into the air-gapped network by whatever transfer process your environment allows, and complete the install on the target host with no network access to DefectDojo.
 
-Plan for the staging host to be reachable again later. Upgrades repeat the same transfer, so it is worth keeping.
+Plan for the staging host to be reachable again later. Every upgrade starts there, so it is worth keeping.
 
 ## What you need
 
@@ -20,7 +20,7 @@ On the staging host, a Linux host with internet access, Docker installed, and en
 
 On the air-gapped host, Docker installed and working, and a PostgreSQL server already provisioned and reachable, both per the standard installation instructions.
 
-On both, a copy of the `dojo-compose-cli` archive and your license file, as supplied by DefectDojo. Use CLI version 2.1.0 or later. Earlier versions have no air-gapped mode, and without it the CLI tries to reach the container registry on every command and fails with name resolution errors instead of telling you what is wrong.
+On both, a copy of the `dojo-compose-cli` archive and your license file, as supplied by DefectDojo. Use CLI version 2.1.0 or later. Earlier versions have no air-gapped mode, and without it the CLI tries to reach the container registry on every command and fails with name resolution errors instead of telling you what is wrong. To upgrade later with an offline bundle, as described in [Upgrading an air-gapped deployment](#upgrading-an-air-gapped-deployment), both hosts need the next `dojo-compose-cli` release after 2.1.5 or later.
 
 ## Stage the artifacts
 
@@ -212,7 +212,7 @@ Do not run `register` on this host. Registration exists to authenticate against 
 | `register` | Declined. Registry authentication is not available. |
 | `deploy download` | Declined. Run it on the staging host instead. |
 | `app pull-images` | Declined. Run it on the staging host instead. |
-| `app upgrade` | Declined. See the upgrade section below. |
+| `app upgrade` | Declined, unless you give it an offline bundle with `--bundle`. See the upgrade section below. |
 | `app start`, `app stop`, `app restart` | Available. These do not contact the registry. |
 
 Each declined command exits with a message naming air-gapped mode, so a refusal here is the CLI working as intended rather than a fault to diagnose.
@@ -342,9 +342,76 @@ DefectDojo is then available at the address you set as the site URL.
 
 ## Upgrading an air-gapped deployment
 
-`app upgrade` downloads from the container registry, so it is one of the commands air-gapped mode declines. Upgrades follow the same route as the install rather than being driven by a single command.
+`app upgrade` normally downloads from the container registry. On an air-gapped host it needs an offline bundle instead: one file that holds the deployment files, the Pro settings, and every image of the target version. You create the bundle on the staging host with `bundle create`, carry the file across, and pass it to `app upgrade --bundle` on the air-gapped host.
 
-On the staging host, set the new version and repeat steps 3 through 5 for it. Move the new bundle across, load the new images, then on the air-gapped host set the version to the new one and restart:
+Both commands ship in the next `dojo-compose-cli` release after 2.1.5. With 2.1.5 or earlier, follow [Upgrade by hand with an older CLI](#upgrade-by-hand-with-an-older-cli) instead.
+
+Before any upgrade, review the [upgrade notes](/releases/os_upgrading/upgrading_guide/) for every version between your current one and your target. If you are several releases behind, contact support before starting.
+
+### 1. Update the CLI on both hosts
+
+On the staging host:
+
+```bash
+sudo -E dojo-compose-cli update-binary
+```
+
+The air-gapped host cannot update itself, because `update-binary` reaches the registry. Carry the new CLI archive across, extract it, and run any command from the extracted binary as root:
+
+```bash
+sudo -E ./dojo-compose-cli config print
+```
+
+When the extracted binary is newer than the one in `/usr/bin`, it replaces it and prints `Upgraded dojo-compose CLI from version <old> to <new>`.
+
+### 2. Create the bundle on the staging host
+
+The staging host must be set up like the air-gapped one: the same license and the same deployment type. Check the deployment type with `dojo-compose-cli config print` on both hosts. A bundle made for another deployment type is refused on the air-gapped host. A license with a different subscription level only produces a warning, but the bundle then carries the settings for the wrong subscription.
+
+Create the bundle for the version you are upgrading to, replacing `x.y.z`:
+
+```bash
+sudo -E dojo-compose-cli bundle create --defectdojo-version x.y.z
+```
+
+Without `--defectdojo-version` it bundles the newest release. The bundle holds the deployment files and Pro settings for that version, every image its compose file runs with your license, and the PostgreSQL client image the CLI uses for database checks and backups. It writes `defectdojo-x.y.z-<deployment-type>-bundle.tar.gz` in the current directory. Use `--output` (or `-o`) to choose another path, on a disk with room for all the images.
+
+`bundle create` does not change the install on the staging host. It renders the target version in a temporary directory next to the output file and removes it afterwards, so you do not need to set the version on the staging host first.
+
+If the air-gapped database server runs a PostgreSQL version newer than 16, add a matching client image so the CLI can check and back up that database:
+
+```bash
+sudo -E dojo-compose-cli bundle create --defectdojo-version x.y.z --extra-image postgres:17-alpine
+```
+
+`--extra-image` can be given more than once.
+
+When it finishes, the CLI prints the version, the deployment type, the number of images and the size, followed by the `app upgrade` command to run on the air-gapped host. Move the bundle file across using your normal transfer process.
+
+### 3. Upgrade on the air-gapped host
+
+Pass the bundle to `app upgrade`:
+
+```bash
+sudo -E dojo-compose-cli app upgrade --bundle /path/to/defectdojo-x.y.z-<deployment-type>-bundle.tar.gz
+```
+
+The version comes from the bundle, so do not add `--defectdojo-version`; the CLI refuses the combination. Before it changes anything, the CLI:
+
+1. Extracts the bundle next to the install directory and checks every file against the checksums recorded when the bundle was made.
+2. Refuses a bundle made for a different deployment type, and warns when it was made for a different subscription level.
+3. Checks that Docker's data directory has room for the bundle's images. The upgrade checks the space for its backup and the new install as well. If space is short, `--backup-dir` puts the pre-upgrade backup on another disk.
+4. Loads the images and checks that every image the bundle lists is now present. It prints `Loaded N images from the bundle.`
+
+The upgrade then runs as it does on a connected host. It takes a backup, installs the new deployment files and Pro settings from the bundle, carries over your customizations, your server certificate and key, the CA bundles in `certs/private/`, and `media/`, and starts the new version. The extracted files are removed when the upgrade finishes. The loaded images stay.
+
+Afterwards, `sudo -E dojo-compose-cli doctor` checks the result, including the certificates and CA bundles. See [Checking a Deployment with doctor and certs](/get_started/pro/onprem/docker_compose/checking_a_deployment/).
+
+### Upgrade by hand with an older CLI
+
+With `dojo-compose-cli` 2.1.5 or earlier, `app upgrade` is declined in air-gapped mode and has no `--bundle` option. Upgrades follow the same route as the install.
+
+On the staging host, set the new version and repeat steps 3 through 5 for it. Move the new archive across, load the new images, then on the air-gapped host set the version to the new one and restart:
 
 ```bash
 dojo-compose-cli config set --version x.y.z
@@ -365,14 +432,14 @@ Your existing deployment directory does not pick up the new version's files on i
 
 Before restarting, confirm that `customizations/pro_settings.py` is present, and that `certs/private/dojo-ca-bundle.crt` is not empty if you use an internal CA.
 
-Back up your database before any upgrade, and review the [upgrade notes](/releases/os_upgrading/upgrading_guide/) for every version between your current one and your target. If you are several releases behind, contact support before starting.
+Back up your database before you start.
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | The login page shows only the logo and footer, with no login form. A sign-in through `?force_login_form` fails with `Sign in failed (HTTP 200)`, and the browser's Network tab shows `/api/vue/auth/login/config/` redirecting to `/login?next=...`. | `customizations/pro_settings.py` is missing, so the Pro features are not loaded. | Fetch the settings on the staging host as in step 3, copy `pro_settings.py` into `/opt/dojo/customizations/`, then run `dojo-compose-cli app restart`. |
-| Signing in through an SSO provider fails with `certificate verify failed` after you authenticate with the provider. | DefectDojo does not trust the CA that signed the provider's certificate, usually because `certs/private/dojo-ca-bundle.crt` is empty. | Add your CA bundle as described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). `docker logs dojo` should then show `REQUESTS_CA_BUNDLE set to /app/certs/private/dojo-ca-bundle.crt`. |
+| Signing in through an SSO provider fails after you authenticate with the provider. Newer releases return you to the login form with a message that single sign-on could not verify the identity provider's certificate, and the `dojo` container log has a warning naming the CA bundle file. Older releases show the raw error instead, which contains `certificate verify failed`. | DefectDojo does not trust the CA that signed the provider's certificate, usually because `certs/private/dojo-ca-bundle.crt` is empty. Less often, the provider's certificate has expired or does not match its address. | Add your CA with `sudo -E dojo-compose-cli certs add-ca --restart <ca.pem>`, then run `sudo -E dojo-compose-cli certs test https://<idp-host>/`, which should print `OK`. See [Checking a Deployment with doctor and certs](/get_started/pro/onprem/docker_compose/checking_a_deployment/#trust-an-internal-ca-with-certs-add-ca). With a CLI that has no `certs` commands, add the bundle as described in [Trusting an internal or private CA](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#trusting-an-internal-or-private-ca). Either way, `docker logs dojo` should then show `REQUESTS_CA_BUNDLE set to /app/certs/private/dojo-ca-bundle.crt`. |
 
 ## Features that need outbound access
 
