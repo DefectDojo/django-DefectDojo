@@ -56,15 +56,52 @@ The crosswalk covers the NIST 800-53 Rev 5 references DISA publishes, and like r
 extraction it is grounded in the imported catalog. Checklists assessed against a control set the
 bundled catalog does not cover produce no mappings rather than approximate ones.
 
+### Suggested mappings for findings without references
+
+Some findings cite no control at all: a SAST result, a leaked secret, a finding entered by hand, or a
+scanner that does not tag its checks. For those, DefectDojo can **suggest** a mapping: the NIST
+800-53 control, and the PCI DSS requirement 2.2 (secure configuration) item, that the finding most
+likely shows a failure of. Each suggestion appears in the finding's **Security Controls** panel,
+marked **Suggested**, with the model's confidence.
+
+A suggestion is a proposal for you to review. Until someone confirms it, it does not count as
+evidence anywhere: it is not cited on a POA&M item, and it does not appear in control coverage, in
+an assessment or in an evidence pack. From the row's menu in the Security Controls panel:
+
+* **Confirm Suggestion** turns it into a mapping set by hand, attributed to you, which then counts
+  everywhere a mapping does.
+* **Reject Suggestion** removes it, and that control is never suggested for that finding again.
+
+Confirming or rejecting needs edit permission on the finding's Asset. A suggestion is also replaced
+automatically when a scanner reference or a CCI crosswalk later maps the finding to the same control.
+
+Suggestions are **off by default**. They send a finding's title, description, mitigation, CWE,
+component, file path, tags and scanner name to the model configured in
+[AI Model Settings](/sensei/ai_model_settings/), and they run only on a Claude model configured
+there. A superuser turns them on through the API, setting how confident the model must be for a
+suggestion to be shown:
+
+```
+PATCH /api/v2/classifier/uses/control_mapping_suggestion/
+{"backend": "claude", "min_confidence": 0.8}
+```
+
+Only findings on an Asset with an enabled Compliance Profile are considered, and only open, original
+findings with no NIST 800-53 or PCI DSS mapping. Each finding is asked about once, whatever the
+answer, and each sync handles at most 100 of an Asset's findings, most severe first, so the cost
+grows with new findings rather than with every sync. Every request is recorded in the classifier's
+audit log at `/api/v2/classifier/calls/`, without the finding's content.
+
 ### When two sources disagree
 
 A finding can pick up a control mapping from more than one source. Where they disagree, the more
 authoritative one wins, in this order:
 
-1. A mapping **you set by hand**.
+1. A mapping **you set by hand** (including a suggestion you confirmed).
 2. A **CCI crosswalk** from a STIG checklist.
 3. A control reference **extracted from the finding's own text**.
 4. The profile's **default scan controls**.
+5. A **suggested** mapping that nobody has confirmed yet.
 
 A CCI crosswalk outranks text extraction because the CCI is published by the same authority that
 wrote the checklist, where an extracted reference is read out of free-form scanner output.
