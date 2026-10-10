@@ -266,7 +266,7 @@ On DefectDojo versions before 3.4.0 this file replaces the public root CAs inste
 cat /etc/ssl/certs/ca-certificates.crt my-internal-ca.crt | sudo tee /opt/dojo/certs/private/dojo-ca-bundle.crt >/dev/null
 ```
 
-On RHEL-family hosts the host's bundle is `/etc/pki/tls/certs/ca-bundle.crt`.
+On RHEL-family hosts the host's bundle is `/etc/pki/tls/certs/ca-bundle.crt`. Use this instead of the `cp` command above, then set the file's permissions as above with `sudo chmod 644 /opt/dojo/certs/private/dojo-ca-bundle.crt` and run `sudo -E dojo-compose-cli app restart`.
 
 Use the filename `connectors-ca-bundle.crt` instead when the CA is only needed for Connector tools, and install both files if you need both. Inside the containers these paths are `/app/certs/private/dojo-ca-bundle.crt` and `/app/certs/private/connectors-ca-bundle.crt`.
 
