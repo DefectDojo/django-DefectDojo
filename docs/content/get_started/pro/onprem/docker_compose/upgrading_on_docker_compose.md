@@ -41,7 +41,21 @@ The version you set selects the image tags, and `deploy download` fetches the de
 
 ## Air-gapped upgrades
 
-In an air-gapped deployment, `app upgrade` is declined because it reaches the registry. Upgrade by repeating the staged image-transfer route you used to install: pull the new images on the staging host, move the bundle across, load it on the application host, then set the new `--version` and `--deploy-version` and restart. See [Installing DefectDojo Pro in an Air-Gapped Environment](/get_started/pro/onprem/docker_compose/air_gapped_install/) for the full procedure.
+With a `dojo-compose-cli` release that has `bundle`, `app upgrade` can upgrade from an offline bundle. That is the next `dojo-compose-cli` release after 2.1.5, on both hosts. If `dojo-compose-cli --help` lists `bundle`, your CLI has it. Create the bundle on a staging host that has registry access and the same license and deployment type, carry the file across, and upgrade from it:
+
+```bash
+# On the staging host
+sudo -E dojo-compose-cli bundle create --defectdojo-version x.y.z
+
+# On the air-gapped host
+sudo -E dojo-compose-cli app upgrade --bundle defectdojo-x.y.z-<deployment-type>-bundle.tar.gz
+```
+
+With 2.1.5 or earlier, `app upgrade` is declined in air-gapped mode, and you repeat the staged image-transfer route you used to install: pull the new images on the staging host, move them across, load them on the application host, then set the new `--version` and `--deploy-version` and restart. See [Upgrading an air-gapped deployment](/get_started/pro/onprem/docker_compose/air_gapped_install/#upgrading-an-air-gapped-deployment) for both procedures.
+
+## Check before and after
+
+`sudo -E dojo-compose-cli doctor` reports what would stop the upgrade before you start, such as too little disk space, an expired license or a broken certificate, and checks the result afterwards. It ships in the same release as `bundle create`. See [Checking a Deployment with doctor and certs](/get_started/pro/onprem/docker_compose/checking_a_deployment/).
 
 ## Rollback
 

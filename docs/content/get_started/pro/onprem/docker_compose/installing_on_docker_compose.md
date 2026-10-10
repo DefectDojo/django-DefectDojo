@@ -286,15 +286,25 @@ sudo chmod 644 /opt/dojo/certs/private/dojo-ca-bundle.crt
 sudo -E dojo-compose-cli app restart
 ```
 
+On DefectDojo versions before 3.4.0 this file replaces the public root CAs instead of adding to them, so a file holding only your CA breaks calls to publicly signed services. Build it from the host's bundle plus yours:
+
+```bash
+cat /etc/ssl/certs/ca-certificates.crt my-internal-ca.crt | sudo tee /opt/dojo/certs/private/dojo-ca-bundle.crt >/dev/null
+```
+
+On RHEL-family hosts the host's bundle is `/etc/pki/tls/certs/ca-bundle.crt`. Use this instead of the `cp` command above, then set the file's permissions as above with `sudo chmod 644 /opt/dojo/certs/private/dojo-ca-bundle.crt` and run `sudo -E dojo-compose-cli app restart`.
+
 Use the filename `connectors-ca-bundle.crt` instead when the CA is only needed for Connector tools, and install both files if you need both. Inside the containers these paths are `/app/certs/private/dojo-ca-bundle.crt` and `/app/certs/private/connectors-ca-bundle.crt`.
 
-To confirm the bundle was loaded, look at the `dojo` container's startup logs for the confirmation line:
+To confirm the bundle was loaded, look at the `dojo` container's startup logs (`docker logs dojo`). They should show a line starting `REQUESTS_CA_BUNDLE set to`. On DefectDojo 3.4.0 and later it names a merged file and mentions `system roots + /app/certs/private/dojo-ca-bundle.crt`. For example:
 
 ```text
-REQUESTS_CA_BUNDLE set to /app/certs/private/dojo-ca-bundle.crt
+REQUESTS_CA_BUNDLE set to /tmp/dojo-ca-bundle.merged.crt (system roots + /app/certs/private/dojo-ca-bundle.crt)
 ```
 
 If the file is missing or empty the container logs `No CA bundle found ...` instead and starts normally, so a bundle you forgot to install fails as an untrusted-certificate error on the outbound call rather than as a startup error.
+
+From the next `dojo-compose-cli` release after 2.1.5, `certs add-ca` writes both bundles for you and keeps the public root CAs in the application bundle, and `certs test` makes an HTTPS call from inside the container to confirm the CA is trusted. See [Checking a Deployment with doctor and certs](/get_started/pro/onprem/docker_compose/checking_a_deployment/#trust-an-internal-ca-with-certs-add-ca).
 
 ## Reset the admin password
 
@@ -310,7 +320,7 @@ Upgrades are covered on their own page: see the [DefectDojo Pro Upgrade Guide (D
 
 ## Command reference
 
-`dojo-compose-cli --help` lists everything, and every subcommand takes `--help` as well. The commands you are most likely to need:
+`dojo-compose-cli --help` lists everything, and every subcommand takes `--help` as well. The commands you are most likely to need are below. `doctor`, `certs` and `bundle create` ship in the next `dojo-compose-cli` release after 2.1.5; see [Checking a Deployment with doctor and certs](/get_started/pro/onprem/docker_compose/checking_a_deployment/).
 
 | Command | What it does |
 | --- | --- |
@@ -328,6 +338,9 @@ Upgrades are covered on their own page: see the [DefectDojo Pro Upgrade Guide (D
 | `validate db-connection` | Check the database connection string |
 | `validate deploy-version` | Check the deployment files match the configured version |
 | `diagnostics collect` | Gather a diagnostics bundle for a support request |
+| `doctor` | Check what would stop DefectDojo from starting or upgrading; `--fix` repairs `media/` ownership and the systemd unit |
+| `certs status`, `certs add-ca`, `certs test` | Check the TLS certificates, trust an internal CA, and test an outbound HTTPS call from the containers |
+| `bundle create` | Create an offline upgrade bundle for an air-gapped install |
 | `register` | Authenticate to the container registry |
 | `update-binary` | Update the CLI itself |
 
