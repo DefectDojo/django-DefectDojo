@@ -84,7 +84,7 @@ Mitigation policies can be found and edited in the sidebar under **Settings > Fi
     - The EPSS and KEV values are maintained by the [EPSS / KEV sync](/triage_findings/finding_scoring/epss_kev/). They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms; on a Finding that references a CVE, the next sync overwrites what was entered.
 - **Found By**: The type of tool that identified the vulnerability.
 - **CVSSv3 and CVSSv4 Vector and Score**: The CVSS3 and CVSS4 vector and score of the selected Finding.
-- **Integrator Tickets**: Third-party issue tracker ticket numbers associated with the Finding. 
+- **Connector Tickets**: Third-party issue tracker ticket numbers associated with the Finding. In the Findings list this column is hidden by default; turn it on from the column picker.
 
 ### Vulnerable Endpoints 
 This section includes a table of the Endpoints that the selected Finding affects, along with any relevant metadata.
@@ -105,7 +105,7 @@ In addition to metadata corresponding to the tables in a Finding’s view, optio
 - **Tags**: Any tags that have been added to the Finding.
 - **Owners**: The group of users that will be responsible for the selected Finding.
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
-- **Push to Integrator**: Pushes the Finding to any integrated third-party issue trackers.
+- **Push to Connector**: Pushes the Finding to the issue tracker assigned to its Asset or Engagement through a [Downstream Connector](/connectors/downstream/about/). When no Issue Tracker Assignment covers either, nothing is sent and DefectDojo says so.
 - **Risk and priority settings**: Offers the option to override DefectDojo’s automatic calculation of the Finding’s risk and priority. 
 - **Endpoints to add**: Vulnerable endpoints that may be affected by the selected Finding that are not reflected in the preceding list of systems/endpoints.
 - **Defect review requested by**: Records who requested a defect review for the flaw in question.
@@ -159,7 +159,7 @@ The ⋮ kebab menu next to Findings contains the following functions:
 - **Add Note**: Initiates the process to add a note to the Finding. 
 - **Add Custom Field**: Adds a free-form metadata field to the Finding. With the typed [Custom Fields](/asset_modelling/pro__custom_fields/) feature enabled, this becomes **Custom Fields** and opens the typed editor, where you fill in a value for each field an administrator has defined for Findings. 
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
-- **Push to Integrator**: Pushes the Finding to any integrated third-party issue trackers.
+- **Push to Connector**: Pushes the Finding to the issue tracker assigned to its Asset or Engagement through a [Downstream Connector](/connectors/downstream/about/). When no Issue Tracker Assignment covers either, nothing is sent and DefectDojo says so.
 - **Delete Finding**: Deletes the selected Finding. 
 - **Finding History**: Reveals the history of the selected Finding.
 
