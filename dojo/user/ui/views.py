@@ -43,7 +43,7 @@ from dojo.forms import (
 from dojo.labels import get_labels
 from dojo.middleware import set_language_cookie
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
-from dojo.user.authentication import reset_token_for_user, token_expires_at
+from dojo.user.authentication import reset_token_for_user, revoke_api_token, token_expires_at
 from dojo.user.ui.filters import UserFilter
 from dojo.user.ui.forms import (
     AddDojoUserForm,
@@ -687,4 +687,7 @@ class DojoPasswordResetConfirmView(PasswordResetConfirmView):
         uci, _created = UserContactInfo.objects.get_or_create(user=user)
         uci.password_last_reset = now()
         uci.save(update_fields=["password_last_reset"])
+        # A reset through the emailed link is account recovery: the API token is a second
+        # credential the old password may have been used to obtain, so it is revoked too.
+        revoke_api_token(user)
         return response

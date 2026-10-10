@@ -3,9 +3,12 @@ from datetime import timedelta
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
-from rest_framework.authentication import TokenAuthentication
+from django_ratelimit import ALL
+from django_ratelimit.core import is_ratelimited
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, ValidationError
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, Throttled, ValidationError
 
 from dojo.authorization.authorization import user_is_superuser_or_global_owner
 from dojo.models import Dojo_User, UserContactInfo
@@ -60,6 +63,64 @@ class ExpiringTokenAuthentication(TokenAuthentication):
             msg = "API token has expired."
             raise AuthenticationFailed(msg)
         return user, token
+
+
+class DojoBasicAuthentication(BasicAuthentication):
+
+    """
+    HTTP Basic auth with the same account rules as the login page and the token endpoint.
+
+    An account that still owes a forced password reset is refused, as ``api-token-auth``
+    refuses it. With ``DD_RATE_LIMITER_BLOCK`` on, failed attempts for a username count
+    against ``DD_RATE_LIMITER_RATE`` the way failed logins do; successful requests are not
+    counted, so scripts using Basic auth are not throttled.
+    """
+
+    def authenticate_credentials(self, userid, password, request=None):
+        def limited(*, increment):
+            return request is not None and is_ratelimited(
+                request=request,
+                group="dojo.api.basic_auth",
+                key=lambda _group, _request: (userid or "").lower(),
+                rate=getattr(settings, "RATE_LIMITER_RATE", None),
+                method=ALL,
+                increment=increment,
+            )
+
+        block = getattr(settings, "RATE_LIMITER_BLOCK", False)
+        if block and limited(increment=False):
+            raise Throttled
+        try:
+            user, auth = super().authenticate_credentials(userid, password, request)
+        except AuthenticationFailed:
+            if block:
+                limited(increment=True)
+            raise
+        if Dojo_User.force_password_reset(user):
+            msg = "A password reset is required before this account can use the API."
+            raise AuthenticationFailed(msg)
+        return user, auth
+
+
+class DojoBasicAuthenticationScheme(OpenApiAuthenticationExtension):
+
+    """
+    OpenAPI scheme for DojoBasicAuthentication.
+
+    drf-spectacular's own Basic scheme does not match subclasses, so the subclass is
+    registered under the same name and the generated schema is unchanged.
+    """
+
+    target_class = "dojo.user.authentication.DojoBasicAuthentication"
+    name = "basicAuth"
+
+    def get_security_definition(self, auto_schema):
+        return {"type": "http", "scheme": "basic"}
+
+
+def revoke_api_token(user) -> None:
+    """Delete the user's API token, if any."""
+    Token.objects.filter(user_id=user.pk).delete()
 
 
 def reset_token_for_user(*, acting_user: Dojo_User, target_user: Dojo_User, allow_self_reset: bool = False) -> None:
