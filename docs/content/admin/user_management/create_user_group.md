@@ -67,6 +67,20 @@ The account that initially creates a Group will have an Owner Role for the Group
 
 The Weekly Digest is a report on all Group-assigned Assets / Organizations. To have a weekly Digest sent out, enter the destination email address you wish to use on the Create / Edit Group form.  Group members will still receive notifications as usual.
 
+### Set a landing page for a Group
+
+By default every user lands on **Home** (the Command Center) after logging in. A Group can replace that with any page inside the DefectDojo UI, so that its members land on a dashboard, a findings list, or any other page you choose, instead.
+
+1. Open the Create / Edit Group form and enter the page's path in the **Landing Page** field, for example `/ui/dashboard-v2/3` for a saved dashboard, or `/ui/finding/all/?severity=Critical` for a filtered findings list. The path is what you see in your browser's address bar after `https://your-instance`, and it must start with `/ui/`. A query string is kept, so a filtered view works as a landing page.
+2. Submit the form. From their next navigation, members of the Group land on that page after login, and the sidebar's **Home** entry takes them there too. No re-login is needed, and clearing the field puts Home back to the Command Center.
+
+A few things to know:
+
+* Only the Home page is replaced. Every other page stays reachable as usual, including the dashboards.
+* The landing page must be a path inside the DefectDojo UI. External URLs, and the classic (non-`/ui/`) routes, are rejected when the form is submitted, and so is a path that does not match any page in the UI.
+* The landing page does not grant access. If a member lacks permission to view the page, or the page is behind a feature flag that is turned off, they will see the usual permission error or "not found" page instead, so pick a page every member can open.
+* If a user belongs to several Groups that each set a landing page, the Group that was created first wins.
+
 ### Viewing a Group Page
 
 Once you have created a Group, you can access it by selecting it in the list under **Settings > Users & Permissions > Groups**.
