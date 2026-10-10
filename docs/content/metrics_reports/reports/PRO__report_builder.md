@@ -9,7 +9,7 @@ aliases:
   - /en/share_your_findings/pro_reports/using_the_report_builder
   - /metrics_reports/reports/using_the_report_builder
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The reusable Report Builder (Themes, Blocks, Templates, and saved Generated Reports) is a DefectDojo Pro feature, currently in beta.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The reusable Report Builder (Themes, Blocks, Templates, and saved Generated Reports) is a DefectDojo Pro feature.</span>
 
 The DefectDojo Pro Report Builder lets you compose polished reports out of reusable parts, so you can build the pieces once and reuse them everywhere instead of rebuilding a report from scratch each time. You reach it from **Overview > Reporting** in the sidebar.
 
@@ -17,7 +17,7 @@ The DefectDojo Pro Report Builder lets you compose polished reports out of reusa
 
 Open source DefectDojo can build a report, run it, and let you retrieve the output, but it does **not** save report templates or persist the reports you generate. Each report is a one-time effort.
 
-DefectDojo Pro turns reporting into reusable building blocks. You save **Themes**, **Blocks**, and **Templates** that you can mix, match, and reuse, and every report you run is persisted as a **Generated Report** you can download or re-run later. Pro also exposes the entire workflow through a full REST API and supports LLM-assisted authoring, so reports can be built and run programmatically.
+DefectDojo Pro turns reporting into reusable building blocks. You save **Themes**, **Blocks**, and **Templates** that you can mix, match, and reuse, and every report you run is persisted as a **Generated Report** you can open or download later. Pro also exposes the entire workflow through a full REST API and supports LLM-assisted authoring, so reports can be built and run programmatically.
 
 > **💡 Tip:** If you are using open source DefectDojo, see the [open source report builder](../using-the-report-builder/) instead.
 
@@ -188,7 +188,7 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Generated Reports
 
-Running a Template produces a **Generated Report**: a persisted file that you can download and re-run on demand. Each Generated Report is **frozen in time**: it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, re-run the Template.
+Running a Template produces a **Generated Report**: a persisted file that you can open or download from the Generated Reports list whenever you need it. Each Generated Report is **frozen in time**: it captures your DefectDojo data at the moment it was generated and does **not** update automatically when the underlying data later changes. To get a fresh snapshot, generate the Template again.
 
 A Generated Report comes in one of five formats, in two groups:
 
@@ -221,11 +221,17 @@ A Generated Report moves through these statuses as it is built:
 | Pending | The report has been requested and is queued. |
 | Processing | The report is being assembled. |
 | Completed | The report is ready to download. |
-| Failed | The report could not be generated. |
+| Failed | The report could not be generated. The Generated Reports list shows why, under the status. |
 
-> **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC) — users only ever see data they are authorized to view, even inside a report.
+> **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC): users only ever see data they are authorized to view, even inside a report.
 
 You can build this in the UI (below) or automate it with the [API](../report-builder-api/).
+
+### Who can see Generated Reports
+
+The **Generated Reports** list is open to anyone who can view generated reports, either through a global role or through a role on any Organization (every built-in role includes it). An Organization Reader who runs a **Quick Export** from a Findings list finds the stored report there afterwards. Everyone sees the reports they requested themselves. A report somebody else requested appears only when the viewer could see everything that report could show, because a report is rendered with the access of the person who requested it. Deleting a Generated Report needs a global role.
+
+**Templates**, **Blocks** and **Themes** are shared across every Organization, so their pages, and the matching entries under **Reporting** in the sidebar, need a global role. A user whose access comes only from an Organization role sees **Generated Reports** alone under **Reporting**.
 
 ### Report retention
 
@@ -308,11 +314,13 @@ When the Template is ready, generate the report. If the Template uses [template 
 
 ![Generate report dialog](images/pro_generate_report_dialog.png)
 
-Generated reports are collected in the Generated Reports list, which shows each report's status, file format, the time it was requested and completed, and a download link.
+When the report finishes, a notice says it is ready and links to its row in the Generated Reports list. A large report can take longer than the dialog waits for (about a minute). It then keeps generating in the background, the dialog closes, and the notice links to its row in the Generated Reports list.
+
+Generated reports are collected in the Generated Reports list, which shows each report's status (with the reason, when a report could not be generated), its file format, and the time it was requested and completed. Open a report's menu to open it in the browser or download it.
 
 ![Generated reports list](images/pro_generated_reports_list.png)
 
-You can re-run a Template at any time to produce a fresh report. Keep in mind that each Generated Report is frozen in time — it reflects your data as of when it was generated and will not change as DefectDojo data changes, so re-run the Template whenever you need an up-to-date snapshot.
+You can generate a Template again at any time to produce a fresh report. Keep in mind that each Generated Report is frozen in time: it reflects your data as of when it was generated and will not change as DefectDojo data changes, so generate the Template again whenever you need an up-to-date snapshot.
 
 ## Moving off the classic report engine
 
