@@ -296,7 +296,7 @@ You can **Preview** a Block to see how it will render with a Theme applied befor
 
 ![Rendered block preview](images/pro_report_block_preview.png)
 
-> **💡 Tip:** Use **Duplicate** to copy an existing Block when you need the same layout with a different filter. Since filters travel with the Block, duplicating is the right way to produce, say, a "Critical findings" table and a "High findings" table from the same column layout.
+> **💡 Tip:** Use **Duplicate** to copy an existing Block when you need the same layout with a different filter. Since filters travel with the Block, duplicating is the right way to produce, say, a "Critical findings" table and a "High findings" table from the same column layout. DefectDojo asks you to confirm first, and the copy is named after the original with "(Copy)" added.
 
 ### Step 3: Assemble a Template
 
