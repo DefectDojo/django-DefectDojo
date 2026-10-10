@@ -1493,6 +1493,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # is what every result family assigns to "title" as well.
     "Checkmarx One Scan": ["unique_id_from_tool"],
     "OPF Scan": ["title", "cwe", "severity", "description"],
+    # Strix numbers findings per run (vuln-0001, vuln-0002, ...), so the same id can point at
+    # a different issue in the next run. These fields stay the same between runs of an
+    # unchanged codebase; file_path, component_name and vulnerability_ids are each populated
+    # only by some finding classes and empty on the others, so every class keys on the
+    # subset it actually carries.
+    "Strix Scan": ["title", "cwe", "file_path", "component_name", "vulnerability_ids"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1954,6 +1960,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
     "OPF Scan": DEDUPE_ALGO_HASH_CODE,
+    # The Strix id is a per-run sequence number, so dedupe on a hash of fields that stay the
+    # same between runs; the id is kept in vuln_id_from_tool for reference only.
+    "Strix Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
