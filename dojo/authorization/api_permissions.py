@@ -172,13 +172,14 @@ class BaseDjangoModelPermission(permissions.BasePermission):
         "DELETE": "delete",
     }
 
-    def _evaluate_permissions(self, request: Request, permissions: dict[str, str]) -> bool:
+    def _evaluate_permissions(self, request: Request, permissions: dict[str, str], method: str | None = None) -> bool:
+        method = method or request.method
         # Short circuit if the request method is not in the expected methods
-        if request.method not in permissions:
+        if method not in permissions:
             return True
         # Evaluate the permissions as usual
-        for method, permission in permissions.items():
-            if request.method == method:
+        for mapped_method, permission in permissions.items():
+            if method == mapped_method:
                 return user_has_configuration_permission(
                     request.user,
                     f"{self.django_model._meta.app_label}.{permission}_{self.django_model._meta.model_name}",
@@ -192,7 +193,9 @@ class BaseDjangoModelPermission(permissions.BasePermission):
         return self._evaluate_permissions(request, expected_request_method_permission_map)
 
     def has_object_permission(self, request: Request, view, obj):
-        return self._evaluate_permissions(request, self.request_method_permission_map)
+        # delete_preview lists what a delete would remove, so it answers to the delete permission.
+        method = "DELETE" if getattr(view, "action", None) == "delete_preview" else None
+        return self._evaluate_permissions(request, self.request_method_permission_map, method=method)
 
 
 class UserHasAppAnalysisPermission(permissions.BasePermission):
