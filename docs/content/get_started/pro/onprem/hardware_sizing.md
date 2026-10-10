@@ -170,7 +170,7 @@ Adding application capacity later is straightforward: on Kubernetes you add pods
 
 A new install spends most of its first start in the initializer, which creates the whole database schema before the application comes up. That is a long run of database migrations, so it is slowest on the smallest hosts.
 
-On Docker Compose, the smallest tier in the sizing table (a 4 vCPU / 16 GB application host with a 2 vCPU / 16 GB database) can take about 30 minutes for the first start. Larger hosts may finish sooner, but the time also depends on disk and database performance, so we do not publish a figure for each tier. Allow about 30 minutes whatever the host size. Later starts and restarts are much faster, because the schema already exists and the initializer has little left to do.
+On Docker Compose, allow about 30 minutes for the first start on the smallest tier in the sizing table (a 4 vCPU / 16 GB application host with a 2 vCPU / 16 GB database); larger hosts may be faster. The time also depends on disk and database performance, so we do not publish a figure for each tier. Later starts and restarts are much faster, because the schema already exists and the initializer has little left to do.
 
 `dojo-compose-cli` 2.1.x can stop waiting before a slow first start has finished and report a failure while the initializer is still working. The install can be completed without starting over: see [First install reports a failure while the initializer is still running](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/#first-install-reports-a-failure-while-the-initializer-is-still-running).
 
