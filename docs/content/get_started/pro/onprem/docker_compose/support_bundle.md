@@ -39,7 +39,7 @@ Bundles are emailed only when they are 15 MB or smaller, because larger attachme
 
 **Email to Support** sends through the same mail server DefectDojo uses for notifications, so if notification emails already arrive, there is nothing to set up. Otherwise the page says what is missing and links to it:
 
-1. **A mail server.** Enter it under **Settings > System > Email** (host, port, user, password, and TLS or SSL), then select **Test Connection** there. If **Email Settings** is empty, DefectDojo falls back to the `DD_EMAIL_URL` environment variable (`dojo-compose-cli environment add --key DD_EMAIL_URL ...`, then `dojo-compose-cli app restart`).
+1. **A mail server.** Enter it under **Settings > System > Email Settings** (host, port, user, password, and TLS or SSL), then select **Test Connection** there. If **Email Settings** is empty, DefectDojo falls back to the `DD_EMAIL_URL` environment variable (`dojo-compose-cli environment add --key DD_EMAIL_URL ...`, then `dojo-compose-cli app restart`).
 2. **A sender address.** Set **Email From** under **Settings > System > System Settings**. Use an address the mail server is allowed to send as; many servers reject any other.
 
 The **Delivery** panel on the Support Bundle page names the mail server in use and has its own **Test Connection** button, which signs in to that server without sending anything. If the server refuses, its reply is shown.
@@ -52,14 +52,15 @@ If this network does not allow outbound email, use **Download** and attach the b
 
 The logs belong to Docker on the server, which no DefectDojo container can read. So collection runs on the server itself:
 
-- `dojo-compose-cli` installs two systemd units, `dojo-support-bundle.path` and `dojo-support-bundle.service`, when DefectDojo is installed or started.
+- `dojo-compose-cli` installs three systemd units, `dojo-support-bundle.path`, `dojo-support-bundle.service` and `dojo-support-bundle.timer`, when DefectDojo is installed or started.
 - Selecting **Collect Logs** writes a request file to `<install directory>/support-bundles/requests/` (by default `/opt/dojo/support-bundles`). That directory is mounted into the DefectDojo application containers and never into nginx, so a bundle is only served to a signed-in superuser.
 - The path unit sees the request and runs `dojo-compose-cli diagnostics fulfil-requests`, which collects the bundle into `support-bundles/bundles/`.
+- The timer also runs `fulfil-requests` 5 minutes after the server boots and every 30 minutes after that. With no request waiting, the run only checks for a collection that was cut off (by a reboot, for example) and marks it failed.
 - The server keeps the five most recent bundles and deletes older ones.
 
 ## Container log retention
 
-Docker keeps container logs in its `json-file` format with no size limit by default, so they grow until the disk fills. When Docker uses that default, `dojo-compose-cli` limits each DefectDojo container to five log files of 100 MB, which it writes to `docker-compose.logging.yml` in the install directory and applies the next time DefectDojo starts. Your own `docker-compose.override.yml`, if you have one, is still applied.
+Docker keeps container logs in its `json-file` format with no size limit by default, so they grow until the disk fills. When Docker uses that default, `dojo-compose-cli` limits each DefectDojo container to five log files of 100 MB, which it writes to `docker-compose.logging.yml` in the install directory and applies the next time DefectDojo starts. Your own `docker-compose.override.yml`, if you have one, is still applied. If you list your own compose files in `COMPOSE_FILE` (in the shell or in `.env`), they are still used too: `docker-compose.logging.yml` is added after them. A service that already sets its own `logging:` keeps it, and the limit is applied only to the others.
 
 The limit is not added when the Docker daemon uses a different log driver (for example `syslog` or `journald`), or when `/etc/docker/daemon.json` already sets `max-size`, because those settings already decide where logs go and how much is kept.
 
@@ -67,15 +68,19 @@ The limit is not added when the Docker daemon uses a different log driver (for e
 
 **The page says the host collector is not installed.** The installed `dojo-compose-cli` predates this feature, or systemd is not available. Upgrade `dojo-compose-cli`, then restart DefectDojo (`sudo dojo-compose-cli app restart`), which installs the units. Until then, run `dojo-compose-cli diagnostics collect --since 24h` on the server and send the archive it writes. `--since` takes `1h`, `24h`, `7d` or `all`.
 
-**A bundle stays Queued.** The path unit is not running. On the server, check it with:
+**A bundle stays Queued, or shows "The host collector did not pick up this request."** The path unit is not running. While a request waits, the page warns that the collector has not picked it up yet. After 10 minutes the request is marked **Failed** with that message, and **Collect Logs** works again, but a new request also waits until the unit is running. On the server, check it with:
 
 ```bash
 systemctl status dojo-support-bundle.path
 journalctl -u dojo-support-bundle.service
 ```
 
+**A bundle shows Failed with "The host collector stopped before finishing."** The collection was cut off, for example by a reboot or because the service was stopped, and has been running for more than 2 hours. The page shows a **Host Collector Stopped** warning with the command above. Check the unit, then select **Collect Logs** again.
+
+**An email shows Not Sent with "Sending stopped before it finished."** The worker sending it stopped before the mail server answered. Select **Email to Support** on the bundle's row to send it again.
+
 **A bundle failed.** The error from the server is shown under the bundle's status. The service journal above has the full output.
 
 **A bundle failed for lack of disk space.** Free space on the disk that holds the install directory, then collect again.
 
-**An email was not sent.** The error from the mail server is shown in the **Email to Support** column. Fix the mail server under **Settings > System > Email**, check it with **Test Connection** in the **Delivery** panel, then select **Email to Support** again. A message that the server refused the sign-in usually means the password is wrong or the provider needs an app password (see **Setting up email** above).
+**An email was not sent.** The error from the mail server is shown in the **Email to Support** column. Fix the mail server under **Settings > System > Email Settings**, check it with **Test Connection** in the **Delivery** panel, then select **Email to Support** again. A message that the server refused the sign-in usually means the password is wrong or the provider needs an app password (see **Setting up email** above).
