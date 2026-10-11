@@ -31,7 +31,7 @@ can follow a link in an answer and keep the conversation in view. The page you a
 of the question: asked from a finding, "how risky is this?" is about that finding.
 
 Your conversations are listed under the history button in the panel. They are private: in the app,
-only the person who asked can open them, whatever the other person's role. Delete a conversation from the same list.
+only the person who asked can open them, whatever the other person's role. Deleting a conversation removes it from your list. DefectDojo keeps it, so a change made from one of its answers stays traceable in the audit log.
 
 **Simple Answers**, at the top of the panel, asks for short, text-first answers with fewer
 charts.
@@ -53,7 +53,8 @@ not what the data says now. Ask again for current numbers.
 ## Changing findings from an answer
 
 An answer can offer to mark findings as **verified**, **false positive**, **out of scope** or
-**mitigated**, but only findings that its own queries returned. Clicking the button shows how
+**mitigated**, but only findings that its own queries returned and showed as open (and, for
+**verified**, not yet verified). An answer never offers to change a closed finding. Clicking the button shows how
 many findings the change covers and asks you to confirm. The change runs with your
 permissions, exactly like the same change made from the findings bulk-edit panel: findings you
 cannot edit are skipped.
@@ -70,8 +71,9 @@ looks up one finding, that finding's description and mitigation text, truncated.
 
 Text that came from scanners and imports is treated as data, never as instructions. The views
 an answer can use are a fixed set built into DefectDojo; the model cannot add new ones, run
-code in your browser, load images, or link outside DefectDojo. External links in an answer are
-shown as plain text.
+code in your browser, load images, or add links: link syntax in an answer's text is shown as
+plain text, and web addresses are shown as code you can copy. To take you somewhere, an answer
+offers a button, and buttons only lead to pages inside DefectDojo.
 
 ## Limits and cost
 
