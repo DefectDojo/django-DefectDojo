@@ -57,7 +57,7 @@ Moving an Asset needs edit permission on it and permission to add Assets to the 
 
 ## Moving many Assets at once
 
-**Bulk Edit** on the All Assets list moves the selected Assets together and can also set a parent (or remove it), the Asset type (when Asset types are turned on), **Business Criticality**, the SLA Configuration, the Prioritization Engine and tags. When you choose an Organization, **Move children along** decides what happens below each selected Asset:
+**Bulk Edit** on the All Assets list moves the selected Assets together and can also set a parent (or remove it), the Asset type (when Asset types are turned on), **Business Criticality**, the SLA Configuration, the Prioritization Engine and tags. When you choose an Organization, **Move Children Along** decides what happens below each selected Asset:
 
 * **On** (the default): children move with their parent, as described above.
 * **Off**: children stay in the old Organization. Their links to the moved Asset are removed, and they become top-level Assets there.
@@ -82,7 +82,7 @@ Re-parenting changes how Assets roll up, and nothing else:
 | Metrics that include child Assets | Deduplication: Findings still deduplicate within their own Asset |
 | | Priority, Risk and SLAs: they come from the Asset's own fields and its Organization |
 
-**One exception to plan for.** If you used **Pool this asset and everything under it** to put a subtree in a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/), those memberships were made from the tree as it stood then, and re-parenting does not update them. After a large re-parent, run **Untoggle subtree** and pool the subtree again to bring the pool in line with the new tree.
+**One exception to plan for.** If you used **Pool this asset and everything under it** to put a subtree in a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/), those memberships were made from the tree as it stood then, and re-parenting does not update them. After a large re-parent, run **Untoggle Subtree** and pool the subtree again to bring the pool in line with the new tree.
 
 ## Re-mapping a Connector Record
 

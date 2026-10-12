@@ -147,7 +147,7 @@ Not every state applies to every connector. **Stale** is set by the findings-imp
 
 ### New
 
-A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see our guide on [Editing Records]().
+A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see [Change the Mapping of a Record](#change-the-mapping-of-a-record).
 
 ### Good
 
@@ -185,7 +185,7 @@ Records can be Edited, Ignored or Deleted from the **Manage Records \& Operation
 
 Although Mapped and Unmapped records are located in separate tables, they can both be edited in the same way.
 
-From the Records table, click the blue ▼ Arrow next to the State column on a given Record. From there, you can select **Edit Record,** or **Delete Record.**
+From the Records table, open a Record's **⋮** menu, next to its **State**. From there, you can select **Edit Record** or **Delete Record**.
 
 ![image](images/edit_ignore_delete_records.png)
 
@@ -204,7 +204,7 @@ Select, or type in the name of a new Asset from the drop\-down menu to the right
 When a Record that is already Mapped (state **Good**) is pointed at a different Asset, the **Edit Record** window asks what should happen to the Findings that Record has already imported. You can reorganize your Assets at any time: neither option leaves the old Findings open on the old Asset, and neither imports a duplicate set on the next sync.
 
 * **Move** (selected by default): the Record's Connector Tests move to the new Asset's **Global Connectors** Engagement, and their Findings move with them. Notes, files, history, Finding Groups, Risk Acceptances and Endpoints or Locations go along, and the next sync updates the same Test, so existing Findings are matched rather than created again. SLA dates and Priority are recalculated for the new Asset. If the Connector tracks branches, each branch's Test moves too. The old Asset keeps nothing from this Record: its now-empty Connector Engagement is removed, unless someone added notes, files or a Risk Acceptance to it.
-* **Start fresh**: the Record's existing Tests stay on the old Asset as history, and their open Findings are closed with a note saying the Record was re-mapped, so they no longer count toward that Asset. The next sync imports a new set of Findings into the new Asset.
+* **Start Fresh**: the Record's existing Tests stay on the old Asset as history, and their open Findings are closed with a note saying the Record was re-mapped, so they no longer count toward that Asset. The next sync imports a new set of Findings into the new Asset.
 
 The choice only appears when you change the Asset of a Mapped Record. Mapping a New Record for the first time has no existing Findings to move or close.
 

@@ -274,7 +274,7 @@ class ImportScanForm(forms.Form):
     scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by("name"))
-    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label=_("Systems / Endpoints"))
+    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label=_("Systems / Endpoints"))
     endpoints_to_add = forms.CharField(max_length=5000, required=False, label=_("Endpoints to add"),
                                        help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                                  "Each must be valid.",
@@ -283,7 +283,7 @@ class ImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text=_("Branch or Tag that was scanned."))
     commit_hash = forms.CharField(max_length=100, required=False, help_text=_("Commit that was scanned."))
     build_id = forms.CharField(max_length=100, required=False, help_text=_("ID of the build that was scanned."))
-    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label=_("API Scan Configuration"))
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects.none(), required=False, label=_("API Scan Configuration"))
     service = forms.CharField(max_length=200, required=False,
         help_text="A service is a self-contained piece of functionality within a Product. "
                   "This is an optional field which is used in deduplication and closing of old findings when set.")
@@ -341,12 +341,12 @@ class ImportScanForm(forms.Form):
         self.fields["verified"].initial = self.active_verified_choices[0]
         if environment:
             self.fields["environment"].initial = environment
-        if endpoints:
+        if endpoints is not None:
             self.fields["endpoints"].queryset = endpoints
         elif not locations_enabled():
             # TODO: Delete this after the move to Locations
-            self.fields["endpoints"].queryset = Endpoint.objects
-        if api_scan_configuration:
+            self.fields["endpoints"].queryset = Endpoint.objects.none()
+        if api_scan_configuration is not None:
             self.fields["api_scan_configuration"].queryset = api_scan_configuration
         # couldn't find a cleaner way to add empty default
         if "group_by" in self.fields:
@@ -420,7 +420,7 @@ class ReImportScanForm(forms.Form):
 
     help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
     do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label=_("Systems / Endpoints"))
+    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label=_("Systems / Endpoints"))
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(
@@ -436,7 +436,7 @@ class ReImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text=_("Branch or Tag that was scanned."))
     commit_hash = forms.CharField(max_length=100, required=False, help_text=_("Commit that was scanned."))
     build_id = forms.CharField(max_length=100, required=False, help_text=_("ID of the build that was scanned."))
-    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label=_("API Scan Configuration"))
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects.none(), required=False, label=_("API Scan Configuration"))
     service = forms.CharField(max_length=200, required=False, help_text=_("A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set."))
     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text=_("Resource link to source code"))
     apply_tags_to_findings = forms.BooleanField(
@@ -470,14 +470,14 @@ class ReImportScanForm(forms.Form):
         if test:
             self.scan_type = test.test_type.name
             self.fields["tags"].initial = test.tags.all()
-        if endpoints:
+        if endpoints is not None:
             self.fields["endpoints"].queryset = endpoints
         elif not locations_enabled():
             # TODO: Delete this after the move to Locations
-            self.fields["endpoints"].queryset = Endpoint.objects
+            self.fields["endpoints"].queryset = Endpoint.objects.none()
         if api_scan_configuration:
             self.initial["api_scan_configuration"] = api_scan_configuration
-        if api_scan_configuration_queryset:
+        if api_scan_configuration_queryset is not None:
             self.fields["api_scan_configuration"].queryset = api_scan_configuration_queryset
         # couldn't find a cleaner way to add empty default
         if "group_by" in self.fields:

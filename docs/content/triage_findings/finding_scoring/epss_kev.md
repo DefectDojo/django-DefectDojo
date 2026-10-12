@@ -123,7 +123,7 @@ This matters because "we have not looked yet" and "we looked and it is not explo
 
 ## Running a sync on demand
 
-You do not have to wait for the daily cycle. The **Sync KEV/EPSS data** button at the top of the Vulnerability Explorer starts a sync immediately:
+You do not have to wait for the daily cycle. The **Sync KEV/EPSS Data** button at the top of the Vulnerability Explorer starts a sync immediately:
 
 ![image](images/Pro_EPSS_KEV_Sync_Started.png)
 

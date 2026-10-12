@@ -477,13 +477,14 @@ register_auth_filter("user.get_authorized_users", _get_authorized_users)
 
 
 def _get_authorized_users_for_product_type(users, product_type, permission):
+    """
+    Narrow ``users`` to the ones authorized on ``product_type``.
+
+    The result describes the candidate users, not the caller: it is used to pick
+    notification recipients and lead/reviewer choices, so it is the same whoever asks.
+    """
     if users is None:
         users = Dojo_User.objects.all()
-    user = get_current_user()
-    if user is None or getattr(user, "is_anonymous", False):
-        return users.none()
-    if _is_unrestricted(user, permission_to_action(permission)) or user.is_staff:
-        return users
     if product_type is None:
         return users.none()
     # OS: users authorized on this product type via authorized_users, plus
@@ -498,21 +499,18 @@ register_auth_filter("user.get_authorized_users_for_product_type", _get_authoriz
 
 
 def _get_authorized_users_for_product_and_product_type(users, product, permission):
+    """Narrow ``users`` to the ones authorized on ``product`` (see ``_get_authorized_users_for_product_type``)."""
     if users is None:
         users = Dojo_User.objects.all()
-    user = get_current_user()
-    if user is None or getattr(user, "is_anonymous", False):
-        return users.none()
-    if _is_unrestricted(user, permission_to_action(permission)) or user.is_staff:
-        return users
     if product is None:
         return users.none()
     # OS: users authorized on this product via authorized_users (directly on
     # the product or via its product type), plus superusers (2.58.4 always
-    # surfaced is_superuser users as candidates).
+    # surfaced is_superuser users as candidates). Subqueries keep the caller's
+    # annotations intact, and prod_type_id avoids loading the product type.
     return users.filter(
-        Q(id__in=product.authorized_users.values("id"))
-        | Q(id__in=product.prod_type.authorized_users.values("id"))
+        Q(id__in=Dojo_User.objects.filter(authorized_products=product).values("id"))
+        | Q(id__in=Dojo_User.objects.filter(authorized_product_types=product.prod_type_id).values("id"))
         | Q(is_superuser=True),
     )
 

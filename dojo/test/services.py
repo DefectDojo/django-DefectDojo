@@ -27,6 +27,7 @@ def process_note_added(test, note, *, user):
             note=note,
             parent_url=request.build_absolute_uri(reverse("view_test", args=(test.id,))),
             parent_title=f"Test: {test.title}",
+            parent=test,
         )
 
 

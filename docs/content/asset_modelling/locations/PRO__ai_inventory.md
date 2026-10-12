@@ -23,13 +23,13 @@ Other SBOMs count as well. When you [import an SBOM](../pro__working_with_sboms/
 
 | Kind | Found through | Recorded as |
 |---|---|---|
-| **Coding assistants** | Rules and config files: `CLAUDE.md`, `.claude/`, `AGENTS.md`, `.cursorrules`, `.cursor/`, `.github/copilot-instructions.md`, `.windsurfrules`, `.clinerules`, `.continue/`, `.aider.conf.yml`, `.gemini/`, `GEMINI.md`, `.codex/` | One component per assistant, with the files that prove it |
-| **MCP servers** | `.mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json`, `.claude/settings.json`, `.gemini/settings.json`, `.windsurf/mcp.json`, `.codex/config.toml`, `mcp_config.json`, `claude_desktop_config.json` | The real npm or PyPI package when the server runs with `npx` or `uvx`, a service for a remote server, and the config key that declares it |
+| **Coding Assistants** | Rules and config files: `CLAUDE.md`, `.claude/`, `AGENTS.md`, `.cursorrules`, `.cursor/`, `.github/copilot-instructions.md`, `.windsurfrules`, `.clinerules`, `.continue/`, `.aider.conf.yml`, `.gemini/`, `GEMINI.md`, `.codex/` | One component per assistant, with the files that prove it |
+| **MCP Servers** | `.mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json`, `.claude/settings.json`, `.gemini/settings.json`, `.windsurf/mcp.json`, `.codex/config.toml`, `mcp_config.json`, `claude_desktop_config.json` | The real npm or PyPI package when the server runs with `npx` or `uvx`, a service for a remote server, and the config key that declares it |
 | **Models** | Model ids in SDK calls, `from_pretrained(...)`, Ollama `Modelfile`s, MLflow model URIs, and model files in the tree (`.gguf`, `.safetensors`, `.onnx`, `.pt`) | Hugging Face models by `pkg:huggingface/...`, others by provider and id, model files with their SHA-256 |
-| **AI packages** | Manifests and lockfiles for npm, PyPI, Go, Maven, NuGet, Cargo and RubyGems | The package's own Package URL and version, marked as an SDK, agent framework, MCP SDK, ML framework or inference server |
-| **AI services** | Provider API hosts in code and config (OpenAI, Anthropic, Google, Azure OpenAI, AWS Bedrock, Mistral, Groq, Cohere) and self-hosted Ollama or vLLM | A service with its endpoint (scheme, host and port only) |
-| **Agent skills** | Every directory with a `SKILL.md` | One component per skill |
-| **AI provider keys** | Secret scanning (Gitleaks) findings for OpenAI, Anthropic, Hugging Face, Groq, Cohere and Perplexity keys | Not a component: the Findings are tagged `ai-secret` and counted on the page |
+| **AI Packages** | Manifests and lockfiles for npm, PyPI, Go, Maven, NuGet, Cargo and RubyGems | The package's own Package URL and version, marked as an SDK, agent framework, MCP SDK, ML framework or inference server |
+| **AI Services** | Provider API hosts in code and config (OpenAI, Anthropic, Google, Azure OpenAI, AWS Bedrock, Mistral, Groq, Cohere) and self-hosted Ollama or vLLM | A service with its endpoint (scheme, host and port only) |
+| **Agent Skills** | Every directory with a `SKILL.md` | One component per skill |
+| **AI Provider Keys** | Secret scanning (Gitleaks) findings for OpenAI, Anthropic, Hugging Face, Groq, Cohere and Perplexity keys | Not a component: the Findings are tagged `ai-secret` and counted on the page |
 
 ### What Is Never Recorded
 
@@ -42,7 +42,7 @@ A default-branch scan clones one commit, so AI-assisted commits can be missed on
 - **Locations > AI Inventory** lists every AI component on the Assets you can see.
 - On an Asset, open **Locations > View AI Inventory** to see that Asset's components.
 
-Across the top, seven tiles count coding assistants, MCP servers, models, AI packages, AI services, agent skills and AI provider keys. Click a tile to filter the table to that kind. The AI provider keys tile opens the Findings list filtered to `ai-secret`. Below the tiles, the authorization counts (authorized, unauthorized, needs review) and the **Shadow AI only** toggle filter the table to what no policy has allowed.
+Across the top, seven tiles count coding assistants, MCP servers, models, AI packages, AI services, agent skills and AI provider keys. Click a tile to filter the table to that kind. The AI provider keys tile opens the Findings list filtered to `ai-secret`. Below the tiles, the authorization counts (authorized, unauthorized, needs review) and the **Shadow AI Only** toggle filter the table to what no policy has allowed.
 
 Each row shows the component's kind, category, provider, authorization decision and evidence. Expand a row to see why it has that decision: the policy that decided it, the policy's scope and justification, or that no policy matched. If the decision raised a Finding, the row links to it. On an Asset, the page also shows whether AI-assisted commits were seen, and the branch and commit of the last inventory.
 

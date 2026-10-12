@@ -1,7 +1,7 @@
 from collections import UserDict
 
 from django.http import HttpRequest, HttpResponse
-from django.test import SimpleTestCase
+from django.test import RequestFactory, SimpleTestCase
 
 from dojo.product_announcements import (
     ErrorPageProductAnnouncement,
@@ -57,7 +57,16 @@ class TestProductAnnouncementSessionBanner(SimpleTestCase):
     def test_session_error_is_swallowed(self):
         request = HttpRequest()
         request.session = None
-        ErrorPageProductAnnouncement(request=request)
+        with self.assertLogs("dojo.product_announcements", level="ERROR"):
+            ErrorPageProductAnnouncement(request=request)
+
+    def test_request_without_session_is_skipped_silently(self):
+        """A request rejected before SessionMiddleware (e.g. DisallowedHost) has no session."""
+        request = RequestFactory().get("/")
+        self.assertFalse(hasattr(request, "session"))
+        with self.assertNoLogs("dojo.product_announcements", level="ERROR"):
+            ErrorPageProductAnnouncement(request=request)
+        self.assertFalse(hasattr(request, "session"))
 
     def test_no_settings_guard(self):
         """Product announcements fire without any settings check."""

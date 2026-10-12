@@ -1,9 +1,10 @@
 from html.parser import HTMLParser
+from types import SimpleNamespace
 from unittest import mock
 
 from django.test import SimpleTestCase
 
-from dojo.templatetags.display_tags import import_settings_tag, jira_project_tag
+from dojo.templatetags.display_tags import import_settings_tag, jira_project_tag, platform_icon
 
 PAYLOAD = '<a href="https://evil.example/sso">re-authenticate</a><img src="https://evil.example/b.png">'
 
@@ -53,3 +54,21 @@ class TestPopoverContentEscaping(SimpleTestCase):
             tags = _tags_after_second_parse(jira_project_tag(mock.Mock()))
         self.assertNotIn("a", tags)
         self.assertNotIn("img", tags)
+
+
+class TestOptionIconEscaping(SimpleTestCase):
+
+    def test_icon_and_name_cannot_add_markup(self):
+        option = SimpleNamespace(icon='x"><img src=x onerror=alert(1)>', name='n"><img src=x onerror=alert(2)>')
+        page = _Collector()
+        page.feed(str(platform_icon(option)))
+        self.assertEqual(page.tags, ["i"])
+        self.assertEqual(page.popover_values, [option.name])
+
+    def test_plain_option_renders_unchanged(self):
+        option = SimpleNamespace(icon="rectangle-list", name="Web")
+        self.assertEqual(
+            str(platform_icon(option)),
+            '<i class="fa-solid fa-rectangle-list has-popover" data-trigger="hover" '
+            'data-placement="bottom" data-content="Web"></i>',
+        )

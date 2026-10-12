@@ -17,7 +17,7 @@ from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
+from dojo.models import Dojo_User, Engagement, Finding, Product, Product_Type, Test, Test_Type, User
 
 from .base import ApiV3TestCase
 
@@ -191,7 +191,7 @@ class TestApiV3ImportAuthz(ApiV3TestCase):
         self.assertTrue(finding.active)
         self.assertEqual(1, Finding.objects.filter(test__engagement=self.engagement).count())
 
-    def _post_import_mode(self, **overrides):
+    def _post_import_mode(self, user=None, **overrides):
         scan = SimpleUploadedFile(
             "scan.json",
             b'{"findings":[{"title":"injected","severity":"High","description":"x"}]}',
@@ -207,7 +207,7 @@ class TestApiV3ImportAuthz(ApiV3TestCase):
             "file": scan,
         }
         payload.update(overrides)
-        return self.token_client(user=self.outsider).post(
+        return self.token_client(user=user or self.outsider).post(
             self.v3_url("import"), payload, format="multipart",
         )
 
@@ -246,3 +246,19 @@ class TestApiV3ImportAuthz(ApiV3TestCase):
             organization_name="authz brand new org",
         )
         self.assertEqual(200, response.status_code, response.content[:400])
+
+    def test_rejects_new_asset_in_existing_org(self):
+        org = self.engagement.product.prod_type
+        for mode in ("import", "auto"):
+            with self.subTest(mode=mode):
+                response = self._post_import_mode(mode=mode, asset_name=f"authz planted {mode}")
+                self.assertEqual(403, response.status_code, response.content[:400])
+                self.assertFalse(Product.objects.filter(prod_type=org, name=f"authz planted {mode}").exists())
+
+    def test_org_member_can_auto_create_asset_in_their_org(self):
+        member = Dojo_User.objects.create(username="authz org member", is_active=True)
+        self.engagement.product.prod_type.authorized_users.add(member)
+        for mode in ("import", "auto"):
+            with self.subTest(mode=mode):
+                response = self._post_import_mode(user=member, mode=mode, asset_name=f"authz member {mode}")
+                self.assertEqual(200, response.status_code, response.content[:400])

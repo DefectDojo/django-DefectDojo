@@ -30,7 +30,7 @@ By default the connector creates one Record, and so one asset, per Google Cloud 
 | Asset Grouping | Records | Findings are imported on |
 |---|---|---|
 | **Project** (default) | one per project | the project Records |
-| **Resource type** | additionally, one per resource type (`google.compute.Instance`, ...) under each project | the resource type Records |
+| **Resource Type** | additionally, one per resource type (`google.compute.Instance`, ...) under each project | the resource type Records |
 | **Resource** | additionally, one per resource, under its resource type | the resource Records |
 
 With **Resource**, Artifact Registry image digests are grouped under their image, because a digest is a version of the image.
@@ -52,7 +52,7 @@ With a finer grouping:
 
 New assets from a Google Cloud SCC connection are placed in the connector's default organization. The **Organization Placement** field can instead use:
 
-* **One per project:** an organization per project, named after the project's display name.
-* **One per folder:** an organization per nearest folder of the project, falling back to the project's display name for projects directly under the organization.
+* **One per Project:** an organization per project, named after the project's display name.
+* **One per Folder:** an organization per nearest folder of the project, falling back to the project's display name for projects directly under the organization.
 
 Organizations are created when they do not exist yet, and reused when they do. The field only affects assets created after it is set: assets that already exist are never moved. No extra permission is needed: the folder comes from the findings themselves.

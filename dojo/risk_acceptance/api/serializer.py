@@ -58,14 +58,17 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        # Determine findings to risk accept, and findings to unaccept risk
-        existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
-        new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
-        new_findings = Finding.objects.filter(id__in=new_findings_ids)
-        findings_to_add = set(new_findings) - set(existing_findings)
-        findings_to_remove = set(existing_findings) - set(new_findings)
-        findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
-        findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
+        # Determine findings to risk accept, and findings to unaccept risk. A partial update
+        # that does not send accepted_findings leaves the accepted findings as they are.
+        findings_to_add = findings_to_remove = Finding.objects.none()
+        if "accepted_findings" in validated_data:
+            existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+            new_findings_ids = [x.id for x in validated_data["accepted_findings"]]
+            new_findings = Finding.objects.filter(id__in=new_findings_ids)
+            findings_to_add = set(new_findings) - set(existing_findings)
+            findings_to_remove = set(existing_findings) - set(new_findings)
+            findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
+            findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
         old_expiration_date = self.instance.expiration_date
         # Make the update in the database
         instance = super().update(instance, validated_data)

@@ -793,7 +793,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             return []
         findings: list[Finding] = []
         for chunk in batched(finding_ids, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
-            for finding in Finding.objects.filter(id__in=chunk).prefetch_related("finding_group_set"):
+            # jira_issue and the group's are read for every finding to decide the JIRA push
+            for finding in (
+                Finding.objects.filter(id__in=chunk)
+                .select_related("jira_issue")
+                .prefetch_related("finding_group_set__jira_issue")
+            ):
                 finding.test = self.test
                 findings.append(finding)
         return findings
@@ -869,19 +874,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # state of the finding as it stands at this moment (django-DefectDojo #12291).
         # This also drops any candidate whose row was deleted in the meantime.
         findings = self._sync_close_old_finding_status_fields(findings)
-        # Determine if pushing to jira or if the finding groups are enabled
-        mitigated_findings = []
-        for finding in findings:
-            # Ensure the finding is not already closed
-            if not finding.mitigated or not finding.is_mitigated:
-                logger.debug("mitigating finding: %i:%s", finding.id, finding)
-                self.mitigate_finding(
-                    finding,
-                    f"Mitigated by {self.test.test_type} re-upload.",
-                    finding_groups_enabled=self.findings_groups_enabled,
-                    product_grading_option=False,
-                )
-                mitigated_findings.append(finding)
+        # Ensure the finding is not already closed
+        mitigated_findings = [finding for finding in findings if not finding.mitigated or not finding.is_mitigated]
+        logger.debug("mitigating %i findings", len(mitigated_findings))
+        self.mitigate_findings(
+            mitigated_findings,
+            f"Mitigated by {self.test.test_type} re-upload.",
+            finding_groups_enabled=self.findings_groups_enabled,
+            product_grading_option=False,
+        )
         # Persist any accumulated location/endpoint status changes
         self.location_handler.persist()
         self.flush_vulnerability_ids()

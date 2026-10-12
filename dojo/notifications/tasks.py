@@ -199,6 +199,17 @@ def async_create_notification(
             return
         kwargs["finding"] = finding
 
+    # Lists of findings the message names (scan_added's new/mitigated/... slices), sent
+    # as ordered ids because instances do not cross the broker. Loaded back in the order
+    # the caller chose, with the fields the templates read.
+    finding_ids = kwargs.pop("finding_ids", None) or {}
+    wanted = {i for ids in finding_ids.values() for i in ids}
+    by_id = Finding.objects.filter(id__in=wanted).only(
+        "id", "title", "severity", "numerical_severity", "duplicate",
+    ).in_bulk() if wanted else {}
+    for key, ids in finding_ids.items():
+        kwargs[key] = [by_id[i] for i in ids if i in by_id]
+
     # Resolve via the helper module so unit tests that patch
     # `dojo.notifications.helper.create_notification` capture this call.
     from dojo.notifications import helper as _notifications_helper  # noqa: PLC0415

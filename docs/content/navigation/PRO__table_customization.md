@@ -50,6 +50,12 @@ Column visibility, column order, column widths, page size, filters, and sort ord
 - **Delete Preference**: remove the active preference.
 - **Reset All Preferences**: remove every saved preference for this table and return to the built-in defaults.
 
+### Unsaved changes
+
+When you change a table's columns, filters, or sort order, a dot appears on the corner of the preferences menu button to show that the table no longer matches the active preference (or the built-in defaults) and can be saved. Open the menu to see what changed: a note at the top names the column layout, the filters and sort order, or both, and the same dot marks each save action that would keep the changes. Saving clears the dot, and so does switching to a preference. Saving the column layout clears it only for the columns, and saving the filters and sort clears it only for those.
+
+The dot compares against the table as it was when the page loaded or a preference was last applied or saved, so it does not follow you across a page reload. Filters carried in a link you opened count as part of that starting point.
+
 To switch between preferences, pick one from the list in the preferences menu. Selecting **Default** returns the table to its built-in columns and widths without deleting any of your saved preferences.
 
 Shared preferences created by other users appear under the **Shared Preferences** tab of the menu. You can load or set a shared preference as your default, but only its creator can change or delete it.

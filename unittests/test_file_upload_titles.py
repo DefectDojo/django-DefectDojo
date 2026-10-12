@@ -111,3 +111,31 @@ class TestImporterProcessFiles(DojoTestCase):
         finally:
             first_upload.delete()
             second_upload.delete()
+
+    def test_attachment_with_an_unsupported_type_is_skipped(self):
+        importer = BaseImporter.__new__(BaseImporter)
+        finding = self._finding_with_unsaved_file(self._make_test("file-uploads-product-c"), "payload.exe", b"MZ")
+
+        importer.process_files(finding)
+
+        self.assertFalse(finding.files.exists())
+
+    def test_attachment_title_is_bounded(self):
+        importer = BaseImporter.__new__(BaseImporter)
+        title = "x" * 150 + ".txt"
+        finding = self._finding_with_unsaved_file(self._make_test("file-uploads-product-d"), title, b"long")
+
+        importer.process_files(finding)
+
+        upload = finding.files.get()
+        self.assertEqual(100, len(upload.title))
+        self.assertEqual(b"long", upload.file.read())
+
+    def test_attachment_with_invalid_data_is_skipped(self):
+        importer = BaseImporter.__new__(BaseImporter)
+        finding = self._finding_with_unsaved_file(self._make_test("file-uploads-product-e"), "evidence.txt", b"ok")
+        finding.unsaved_files[0]["data"] = "not base64!"
+
+        importer.process_files(finding)
+
+        self.assertFalse(finding.files.exists())

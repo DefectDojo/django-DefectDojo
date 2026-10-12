@@ -4,6 +4,6 @@ dependencies:
   version: 16.7.27
 - name: valkey
   repository: oci://registry-1.docker.io/cloudpirates
-  version: 0.25.11
-digest: sha256:0165608d4519a11ae6d87476ae5964b5c293db2845d51fb2bb910729e7d4d3c3
-generated: "2026-09-09T02:16:11.514559549Z"
+  version: 0.25.13
+digest: sha256:e0eb73bd2a04e3d65e9f3fa725f71f74ee92f43cdc1e71db313bd7315d314b30
+generated: "2026-10-07T02:03:16.471816466Z"

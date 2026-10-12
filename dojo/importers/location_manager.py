@@ -240,6 +240,7 @@ class LocationManager(BaseLocationManager):
                         existing_finding_ref_keys.add(finding_ref_key)
 
         # Bulk create references
+        all_finding_refs = self._drop_finding_refs_for_missing_findings(all_finding_refs)
         if all_finding_refs:
             LocationFindingReference.objects.bulk_create(
                 all_finding_refs, batch_size=1000, ignore_conflicts=True,
@@ -264,6 +265,48 @@ class LocationManager(BaseLocationManager):
 
         # Clear accumulators
         self._clear_location_accumulators()
+
+    @staticmethod
+    def _drop_finding_refs_for_missing_findings(
+        finding_refs: list[LocationFindingReference],
+    ) -> list[LocationFindingReference]:
+        """
+        Return the references whose finding still exists, dropping any orphaned ones.
+
+        A ``LocationFindingReference`` is built against a finding during the import batch and
+        inserted later in :meth:`_persist_locations`. If that finding is removed between the
+        build and the insert -- a delete landing mid-import, or a finding dropped from the
+        batch -- its ``finding_id`` points at a ``dojo_finding`` row that no longer exists.
+        Django declares foreign keys ``DEFERRABLE INITIALLY DEFERRED`` on PostgreSQL, so the
+        constraint is only validated at COMMIT, surfacing there as a 500 naming
+        ``dojo_locationfindingreference`` long past this call. Checked before the write, the
+        surviving findings still get their references while the orphans are dropped -- the
+        same guard the ``EnhancedFinding`` companion write uses.
+
+        A reference whose ``finding_id`` is unresolved (``None``) is kept: that is a caller
+        bug, left for the database to report clearly rather than silently dropped here.
+        """
+        if not finding_refs:
+            return finding_refs
+
+        from dojo.models import Finding  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        finding_ids = {ref.finding_id for ref in finding_refs if ref.finding_id is not None}
+        if not finding_ids:
+            return finding_refs
+
+        present = set(Finding._base_manager.filter(pk__in=finding_ids).values_list("pk", flat=True))
+        missing = finding_ids - present
+        if not missing:
+            return finding_refs
+
+        logger.warning(
+            "Dropping %d LocationFindingReference row(s) whose finding no longer exists "
+            "(finding ids %s); a finding was removed mid-import.",
+            len(missing),
+            sorted(missing),
+        )
+        return [ref for ref in finding_refs if ref.finding_id not in missing]
 
     def _clear_location_accumulators(self) -> None:
         """

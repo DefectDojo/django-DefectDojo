@@ -27,12 +27,12 @@ Nothing in the payload travels through the engine except as data. A payload cann
 For a connector that supports it (Jira today), the fastest route is the connection itself:
 
 1. Open **Connect > Downstream**, then the Jira connection.
-2. Choose **Turn On Two-way Sync**. This creates a Jira receiver already bound to this connection.
+2. Choose **Turn On Two-Way Sync**. This creates a Jira receiver already bound to this connection.
 3. Enter the webhook secret you will give Jira, review the behaviors, and save. The receiver and its rule start **disabled**.
 4. Follow the **Setup** tab: in Jira, open **System > WebHooks**, create a webhook with the receiver's URL and secret, and subscribe it to **Issue updated** and **Comment created**. Limit its JQL to the projects your connector pushes to. A Jira Data Center version that offers no webhook secret cannot sign, so switch the receiver to **URL Token Only** for it.
 5. Enable the receiver. From then on, the **Receipts** tab shows each delivery and the **Rules** tab links to the rule that acts on them.
 
-A connection has at most one two-way sync receiver. When someone else already turned it on, the connection's **Two-way Sync** card says **Managed by another user** instead of offering to create a second one.
+A connection has at most one two-way sync receiver. When someone else already turned it on, the connection's **Two-Way Sync** card says **Managed by another user** instead of offering to create a second one.
 
 Binding the receiver to its connection matters when you have more than one Jira site: ticket keys such as `SEC-101` are only unique within one site, so a bound receiver only ever matches the tickets its own connection created. If the connection is deleted, DefectDojo switches its receiver off and says why on the receiver; choose a new connection and turn it back on.
 
@@ -71,9 +71,9 @@ Posting comments needs a go-integrators version that provides it. When DefectDoj
 
 1. **New Webhook Receiver**, then **Custom Webhook**. Give it a label and choose how the sender authenticates.
 2. Save. The **Setup** tab shows the URL to give the sender.
-3. On **Sample Payload**, paste an example from the sender's documentation, or send one for real. **Parse** lists every path in it, such as `webhook.payload.issue.key`, with an example value and a copy button.
+3. On **Sample Payload**, paste an example from the sender's documentation, or send one for real, and **Submit** it. The tab lists every path in it, such as `webhook.payload.issue.key`, with an example value and a copy button.
 4. **Create a Rule** opens the editor with an **On an Inbound Webhook** trigger for this receiver. Add **Find Findings by a Value** to turn a payload value into Findings, then any Findings or Egress nodes.
-5. **Preview** runs the rule against the sample, or against a payload you paste into **Test With a Payload**, and changes nothing. A webhook rule has no manual **Run**: it runs when its receiver records a delivery.
+5. **Preview** runs the rule against the sample, or against a payload you paste into **Test With a Payload**, and changes nothing. A webhook rule has no **Run Now**: it runs when its receiver records a delivery.
 
 See the [Node Reference](../node_reference/) for **On an Inbound Webhook**, **Find Findings by a Value**, **Apply the Ticket's Status** and **Add a Ticket Comment as a Note**.
 

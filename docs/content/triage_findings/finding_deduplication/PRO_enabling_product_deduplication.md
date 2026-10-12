@@ -46,7 +46,7 @@ Rather than Deduplicating across an entire Asset, you can scope Deduplication to
 
 ### Completing the Engagement form
 
-1. On the Engagement form, locate the ☐ **Isolate Deduplication from Other Engagements** checkbox. It appears above the **Optional Fields \+** panel.
+1. On the Engagement form, locate the ☐ **Isolate Deduplication From Other Engagements** checkbox. It appears above the **Optional Fields \+** panel.
 2. Check the box to scope Deduplication to this Engagement.
 3. Submit the form.
 

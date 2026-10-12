@@ -49,6 +49,7 @@ from dojo.api_v3.errors import ProblemDetail
 from dojo.api_v3.expand import serialize_list_row
 from dojo.api_v3.pagination import compute_count
 from dojo.api_v3.refs import LocationRef, Ref
+from dojo.utils_spreadsheet import FORMULA_PREFIXES
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -59,9 +60,6 @@ if TYPE_CHECKING:
 # Rows are streamed from a server-side chunked iterator; a chunk drives one batch of prefetch
 # queries. Test-sized data fits in one chunk (constant query count); a 100k export is <= 50 batches.
 _ITERATOR_CHUNK_SIZE = 2000
-
-# Leading characters a spreadsheet may interpret as a formula -- prefix such a cell with a quote.
-_INJECTION_PREFIXES = frozenset("=+-@\t")
 
 # Reserved params that do not apply to an export (the export is the whole filtered set): pagination
 # (limit/offset/pagination/cursor), and the projection add-ons expand/include. ``fields``/``o``/``q``
@@ -168,7 +166,7 @@ def _format_scalar(value: object) -> str:
 
 def _harden(cell: str) -> str:
     """CSV-injection defense: quote-prefix a cell that starts with a formula trigger character."""
-    if cell and cell[0] in _INJECTION_PREFIXES:
+    if cell and cell[0] in FORMULA_PREFIXES:
         return "'" + cell
     return cell
 

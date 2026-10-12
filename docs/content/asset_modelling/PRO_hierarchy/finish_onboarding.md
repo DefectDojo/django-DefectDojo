@@ -48,11 +48,11 @@ Open **Assets > Needs Attention**.
 * Select Assets and use **Bulk Edit** to move them to another Organization, set Business Criticality, set the SLA configuration or Prioritization Engine, and more. A bulk edit applies to every selected Asset at once, and the list and counts refresh when it finishes.
 * The pencil on a row opens the Asset form, which is where User Records, Revenue and the two checkboxes are set.
 
-**Create a rule from this filter** opens a new Rules Engine rule. Choose the Asset trigger, add conditions that match what you filtered on, and add the action to apply, such as setting the Organization. New Assets that match are then handled as they arrive. The rule editor does not yet fill in the trigger and conditions for you.
+**Create a Rule From This Filter** opens a new Rules Engine rule. Choose the Asset trigger, add conditions that match what you filtered on, and add the action to apply, such as setting the Organization. New Assets that match are then handled as they arrive. The rule editor does not yet fill in the trigger and conditions for you.
 
 ## What drives Priority and SLA on an Asset
 
-The **What Drives Priority and SLA** card on the Asset page lists the five fields, whether each is set, and one line on what each does. Revenue and User Records also show this Asset's share of its Organization's total, which is the number Priority actually uses. Fields that are not set link to the Asset form.
+The **Priority and SLA Drivers** card on the Asset page lists the five fields, whether each is set, and one line on what each does. Revenue and User Records also show this Asset's share of its Organization's total, which is the number Priority actually uses. Fields that are not set link to the Asset form.
 
 The card also names the Asset's Prioritization Engine and its SLA configuration, with where that SLA comes from:
 

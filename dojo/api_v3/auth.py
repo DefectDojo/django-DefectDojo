@@ -17,8 +17,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.conf import settings
 from ninja.security import APIKeyHeader
 from rest_framework.authtoken.models import Token
+
+from dojo.user.authentication import token_is_expired
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractBaseUser
@@ -35,18 +38,18 @@ class TokenAuth(APIKeyHeader):
     param_name = "Authorization"
 
     def authenticate(self, request: HttpRequest, key: str | None) -> AbstractBaseUser | None:
-        if not key:
+        if not key or not settings.API_TOKENS_ENABLED:
             return None
         parts = key.split()
         # Only handle the `Token <key>` scheme; anything else is left for session auth to try.
         if len(parts) != 2 or parts[0].lower() != _TOKEN_PREFIX:
             return None
         try:
-            token = Token.objects.select_related("user").get(key=parts[1])
+            token = Token.objects.select_related("user", "user__usercontactinfo").get(key=parts[1])
         except Token.DoesNotExist:
             return None
         user = token.user
-        if not user.is_active:
+        if not user.is_active or token_is_expired(token):
             return None
         # Set request.user so downstream authorized-queryset helpers (I8) resolve the right user
         # exactly as they do for session auth.

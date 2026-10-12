@@ -52,15 +52,15 @@ in the Asset Overview, then select **Compliance Profile**.
 
 ![The Compliance tab on an Asset, with the Compliance Profile button](images/25-asset-compliance-tab.png)
 
-The Compliance Profile page has a **Regulatory assessments** section that lists existing
+The Compliance Profile page has a **Regulatory Assessments** section that lists existing
 assessments, each with a **Review** button, and offers one start button for each regulatory
 catalog. Those start buttons always use a period from January 1 of the current year to today. To
 choose the period yourself, open the **EU Evidence** tab and select **Start Assessment**.
 
 ![The EU Evidence tab before any assessment exists](images/26-eu-evidence-start-assessment.png)
 
-In the **Start Regulatory Assessment** dialog, pick the **Catalog**, set **Period start** and
-**Period end**, add optional **Notes**, and select **Start Assessment**. The period end cannot be
+In the **Start Regulatory Assessment** dialog, pick the **Catalog**, set **Period Start** and
+**Period End**, add optional **Notes**, and select **Start Assessment**. The period end cannot be
 earlier than the period start. Both dates are included in the period.
 
 ![The Start Regulatory Assessment dialog with a quarterly period](images/27-start-regulatory-assessment-dialog.png)
@@ -143,7 +143,7 @@ that no automated check is registered for them.
 
 ### Reading the computed facts
 
-Select **Evidence** on a row to see the obligation text, its citation, and the **Computed facts**
+Select **Evidence** on a row to see the obligation text, its citation, and the **Computed Facts**
 behind the state. The facts record when they were computed (`computed_at`), and automated facts
 also record the evidence date they used (`as_of`).
 
@@ -163,14 +163,14 @@ followed by the error, and its state stays unknown. The other obligations are st
 Open an obligation's **Evidence** view to inspect the computed facts and record an assessor
 narrative. Select **Save Review** to keep your changes.
 
-An assessor can override the effective evidence state. Change **Evidence state**, fill in the
-**Override reason** field that appears, and select **Save Review**. A reason is required.
+An assessor can override the effective evidence state. Change **Evidence State**, fill in the
+**Override Reason** field that appears, and select **Save Review**. A reason is required.
 
 ![Overriding VH-7 with a reason and a narrative](images/33-override-reason-and-narrative.png)
 
 Recomputing does not replace that decision. DefectDojo retains the latest automated state beside
 the effective state so reviewers can see when they differ, along with who made the override and
-when. To return to the automated state, clear **Keep manual override** and select **Save Review**.
+when. To return to the automated state, clear **Keep Manual Override** and select **Save Review**.
 
 ![An override kept after a recompute](images/34-override-kept-after-recompute.png)
 
@@ -178,7 +178,7 @@ when. To return to the automated state, clear **Keep manual override** and selec
 
 Some obligation notes ask you to attach a document, such as a vulnerability disclosure policy or
 a penetration test report. Attach it in the obligation's **Evidence** view, under
-**Supporting files**:
+**Supporting Files**:
 
 1. Select **Attach a File** and choose the file. DefectDojo uploads it straight away and lists it
    with its size and who added it.
@@ -239,7 +239,7 @@ read them from `/api/v2/evidence_pack_artifacts/`. PDF output is not available.
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| No **EU Evidence** tab and no **Regulatory assessments** section | **EU Evidence Packs** or **Compliance** is off | Enable both in Feature Flags |
+| No **EU Evidence** tab and no **Regulatory Assessments** section | **EU Evidence Packs** or **Compliance** is off | Enable both in Feature Flags |
 | No **Start Assessment**, **Recompute Evidence**, **Generate Evidence Pack**, **Save Review**, or **Attach a File** | You can view the Asset but not edit it | Ask for a role with edit permission on the Asset |
 | Every obligation is unknown | Evidence has not been recomputed successfully yet | Select **Recompute Evidence** and wait for **Evidence Recomputed** |
 | **Evidence Not Recomputed** | The recompute request failed | Open the browser's Network tab, recompute again, and check the status of the `recompute/` request. 403: a feature flag is off or you lack edit permission. 500: a server error, so check the application logs for a traceback. 502 or 504: a proxy or app server timeout, so raise the timeout for large Assets |

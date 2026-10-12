@@ -69,7 +69,7 @@ Two are worth knowing about before you start:
 
 - **CPE** is the strongest available signal, because it compares against
   identifiers the advisory itself publishes.
-- **Affected version** asks whether the advisory's own ranges cover your installed
+- **Affected Version** asks whether the advisory's own ranges cover your installed
   version. It is a *lenient* gate: it passes when an advisory declares no ranges at
   all, which most advisories do. It narrows real exposure without excluding the
   advisories a rule exists to catch.
@@ -106,7 +106,7 @@ exactly the one-sided keyword that cannot be enabled.
 
 Every template is labelled with what it needs:
 
-- **No SBOM needed** — the rule matches an asset directly from the advisory text.
+- **No SBOM Needed** — the rule matches an asset directly from the advisory text.
   These work on any instance, including one that has never imported an SBOM.
 - **Needs SBOM** — the rule matches a component in your dependency inventory. With
   no SBOM imported it will not match anything, however well written.

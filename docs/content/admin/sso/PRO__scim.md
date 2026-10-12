@@ -119,7 +119,7 @@ Deleting a group through SCIM removes the group and its memberships. It never de
 
 By default, SCIM will not deactivate a superuser account. The common failure in any provisioning setup is an identity provider scoped more broadly than intended, and superusers are how you get back into DefectDojo when something goes wrong.
 
-If you want your identity provider to manage superusers as well, enable **Allow SCIM to deactivate superusers** on the SCIM settings page. Even then, DefectDojo refuses to deactivate the last remaining active superuser, so provisioning cannot leave the instance without an administrator.
+If you want your identity provider to manage superusers as well, enable **Allow SCIM to Deactivate Superusers** on the SCIM settings page. Even then, DefectDojo refuses to deactivate the last remaining active superuser, so provisioning cannot leave the instance without an administrator.
 
 ## Limitations
 

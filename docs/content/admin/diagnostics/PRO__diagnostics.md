@@ -38,7 +38,7 @@ Because rows are keyed on the record that produced them, re-saving an origin rec
 
 | Field | Meaning |
 | --- | --- |
-| **When** | When the row was recorded; **Started**, **Finished** and **Duration** describe the attempt itself |
+| **Date** | When the row was recorded; **Started**, **Finished** and **Duration** describe the attempt itself |
 | **Source** | The subsystem, from the table above |
 | **Provider** | The specific tool or provider within that source (`jira`, `github`, `okta`, a scanner name) |
 | **Operation** | What was attempted (`push`, `sync`, `login`, `reimport`, `rule_run`) |
@@ -46,13 +46,13 @@ Because rows are keyed on the record that produced them, re-saving an origin rec
 | **Severity** | `Info`, `Warning`, `Error`, or `Critical` |
 | **Summary** | A one-line outcome, safe to read at a glance |
 | **Trigger** | What set the attempt off: `UI`, `API`, `Scheduled`, `Webhook`, `Automatic`, `Command line`, or `System` |
-| **Triggered by** | The user responsible, or `System` for unattended work |
+| **Triggered By** | The user responsible, or `System` for unattended work |
 | **Asset** | The Asset the attempt belongs to; empty means instance-level |
-| **Related object** | The finding, engagement, or other record the attempt was about |
+| **Related Object** | The finding, engagement, or other record the attempt was about |
 | **Configuration** | Which configuration was used, by its label |
-| **External reference** | The identifier the other system returned, such as a created issue key |
+| **External Reference** | The identifier the other system returned, such as a created issue key |
 | **Correlation ID** | Ties together rows from one logical operation |
-| **Reported detail** and **Context** | The full technical detail (restricted, see [Who sees what](#who-sees-what)) |
+| **Reported Detail** and **Context** | The full technical detail (restricted, see [Who sees what](#who-sees-what)) |
 
 ## The four views
 
@@ -60,8 +60,8 @@ The tabs above the table are saved starting points, not filters you have to rebu
 
 * **Errors** — failures and timeouts. The one to open first.
 * **Successes** — proof that a working integration is working, useful when someone reports "nothing is syncing".
-* **Never completed** — attempts still `Queued` or `Running` well past when they should have finished. These are the silent ones: nothing failed, so nothing was reported, but nothing arrived either.
-* **All events** — everything, unfiltered.
+* **Never Completed** — attempts still `Queued` or `Running` well past when they should have finished. These are the silent ones: nothing failed, so nothing was reported, but nothing arrived either.
+* **All Events** — everything, unfiltered.
 
 ![All events, showing every source](images/diagnostics_all_events.png)
 
@@ -70,7 +70,7 @@ The active view is part of the page URL, so a view is linkable and survives a re
 ## Narrowing the list
 
 * **Time range** — 24 hours, 7 days, 30 days, or 90 days, from the buttons in the header.
-* **Source counts** — the coloured counts under the summary cards are also quick filters. Click one to show only that source; click it again (or **Clear source filter**) to go back. One or none is active at a time.
+* **Source counts** — the coloured counts under the summary cards are also quick filters. Click one to show only that source; click it again (or **Clear Source Filter**) to go back. One or none is active at a time.
 * **Per-column filters and sorting** — every column filters and sorts, including Severity and Source. Severity sorts by seriousness (`Critical` → `Info`) rather than alphabetically, and Source sorts by the label you see rather than the value stored underneath.
 * **Keyword Search** — searches across the text fields at once.
 * **Column preferences** — the column picker and its saved layouts behave as they do on every other Pro list.
@@ -112,7 +112,7 @@ Diagnostics is tiered, because the summary of a failure is useful to a product o
 | Rows for Assets they are authorized on | Yes | Yes |
 | Instance-level rows (no Asset) | Yes | No |
 | Summary, source, status, severity, timings, configuration | Yes | Yes |
-| **Reported detail**, **Context**, **Remote IP** | Yes | Withheld, and labelled as withheld |
+| **Reported Detail**, **Context**, **Remote IP** | Yes | Withheld, and labelled as withheld |
 
 A non-superuser sees that a detail exists and is being withheld, rather than an empty field that reads like missing data. Instance-level rows — SSO, SAML, LDAP, and other activity that belongs to no Asset — are superuser-only, since there is no Asset membership that could grant access to them.
 

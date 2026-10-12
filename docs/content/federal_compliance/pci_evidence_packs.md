@@ -16,8 +16,11 @@ Compliance says. Nothing on these screens is an assessment finding on its own.
 
 ## What the catalog covers, and what it is
 
-The catalog holds 30 controls drawn from three requirements:
+The catalog holds 37 controls drawn from four requirements:
 
+- Requirement 2, secure configuration: configuration standards for every system component,
+  vendor default accounts, running only the services a component needs, and encrypting
+  administrative access.
 - Requirement 6, the secure development and patching obligations that bear on vulnerability
   management, including the inventory of components, the remediation window for known
   vulnerabilities, and the assessment of public facing web applications.
@@ -69,6 +72,7 @@ the assessor with a note saying why.
 
 | Requirement | Read from |
 |---|---|
+| 2.2.1, 2.2.2, 2.2.4 to 2.2.7 | The posture scans of the Asset's systems in the period: which ran, which failed checks are still open and on which hosts, and which deviations were risk accepted |
 | 6.3.1 | How fresh the vulnerability enrichment data is |
 | 6.3.2 | The component inventory built from imported SBOM and dependency data |
 | 6.3.3 | The SLA configuration and the findings measured against it |
@@ -90,6 +94,24 @@ Requirement 6.3.3 reads the SLA configuration rather than a separate threshold, 
 measures against is the one configured for the Asset. The workbook states where the SLA clock
 starts, because PCI DSS counts a patching window from the release of the patch rather than from
 the day a scanner noticed.
+
+The Requirement 2 answers come from posture scans: Wazuh SCA, Fleet policies, Elastic posture,
+DISA STIG checklists, OpenSCAP, Lynis, kube-bench, docker-bench and cloud posture scans. If the Asset
+has a [Compliance Profile](../compliance_profile/), its configuration test types decide which scans
+count. With no posture scan in the period the requirement stays manual, because there is nothing to
+show. A requirement is satisfied when every failed check is fixed or risk accepted, and partially
+satisfied while some are neither. Failed checks of Info severity are reported in the evidence but
+do not count against the requirement. The evidence lists the hosts that still have open failed
+checks, most first, with their count by severity (up to 100 hosts, and how many more there are).
+
+Requirements 2.2.1, 2.2.2, 2.2.5 and 2.2.7 also need a record DefectDojo does not hold (the written
+configuration standard, why an insecure service is justified, the inventory of vendor accounts), so
+the scans alone take them no further than partially satisfied, and the evidence says the record is
+still needed. Attach the record and override the result once it is in place. Requirement 2.2.3,
+separating functions with different security needs, is manual.
+
+An assessment that existed before Requirement 2 was added picks it up the next time it is
+recomputed.
 
 Requirements DefectDojo cannot evidence are listed in the assessment as manual, each with the
 reason. A change control process, a documented inventory procedure and an assessor's judgement

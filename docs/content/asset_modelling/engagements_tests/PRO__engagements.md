@@ -127,11 +127,15 @@ Engagements can be edited by clicking **Edit Engagement** from within the gear m
 
 All ensuing fields that can be edited are also available when the Engagement is being created. 
 
+Changing the Asset field moves the Engagement, along with its Tests and Findings, to the selected Asset. Before saving that change, DefectDojo asks you to confirm the move and names both the current and the new Asset.
+
 ![image](images/engagements_ss99.png)
 
 ### Copy Engagements 
 
 You can easily duplicate Engagements by selecting “Copy Engagement” within the Engagement’s settings. This will create an exact copy of the original Engagement within the parent Asset, including the metadata, Tests, and Findings within it.
+
+Because the copy is always added to the same Asset, DefectDojo asks you to confirm before it copies anything. Once the copy is made, a notification confirms it and the new Engagement opens. To place an Engagement under a different Asset, edit the Engagement and change its Asset instead (see **Edit Engagements** above).
 
 ### Close Engagements 
 

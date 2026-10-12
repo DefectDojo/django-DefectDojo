@@ -14,8 +14,8 @@ DefectDojo Pro's MFA uses a **TOTP authenticator app** — Google Authenticator,
 1. Go to **Connect > Authorization > MFA Settings**.
 2. Under **Personal Multi-Factor Authentication Settings**, click **Set Up MFA**.
 3. Scan the QR code with your authenticator app. If you cannot scan it, the setup screen also shows the key as text, which you can type into your app by hand.
-4. Enter the six-digit code your app displays, and click **Verify & enable**.
-5. DefectDojo shows your **recovery codes**. Save them somewhere safe before continuing — see below. Click **Copy codes**, store them, then click **I've saved them. Continue**.
+4. Enter the six-digit code your app displays, and click **Verify and Enable**.
+5. DefectDojo shows your **recovery codes**. Save them somewhere safe before continuing — see below. Click **Copy Codes**, store them, then click **Confirm and Continue**.
 
 MFA is active from that point on. The next time you log in, DefectDojo will ask for a code after your password.
 

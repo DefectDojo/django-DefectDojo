@@ -27,7 +27,7 @@ By default the connector creates a single Record, and so a single asset, for the
 | Asset Grouping | Records | Findings are imported on |
 |---|---|---|
 | **Account** (default) | one for the account | the account Record |
-| **Resource type** | additionally, **Container images** and **Hosts** under the account | the two resource type Records |
+| **Resource Type** | additionally, **Container images** and **Hosts** under the account | the two resource type Records |
 | **Resource** | additionally, one per container image repository and one per host, under their resource type | the repository and host Records |
 
 With **Resource**, image tags and digests are grouped under their repository, because they are versions of the repository. Repository Records are named `<repository> (container image, <registry>, <account>)` and host Records `<hostname> (host, <account>)`, with the machine ID added when two hosts share a hostname.

@@ -475,6 +475,11 @@ def get_connection(obj):
     return _get_helper().get_jira_connection(obj)
 
 
+def url_unchanged(jira_instance, url):
+    """Whether ``url`` points at the same server as the stored instance, ignoring a trailing slash."""
+    return (url or "").rstrip("/") == (jira_instance.url or "").rstrip("/")
+
+
 def get_connection_raw(jira_server, jira_username, jira_password):
     """
     Get a raw Jira connection.

@@ -1,4 +1,7 @@
+import re
+
 from crum import impersonate
+from django.urls import reverse
 from django.utils.timezone import now
 from rest_framework.test import APIRequestFactory
 
@@ -156,3 +159,23 @@ class TestLocationCountScoping(DojoTestCase):
 
     def test_endpoint_api_count_still_complete_for_a_superuser(self):
         self.assertEqual(self._endpoint_api_counts(self.admin)[self.shared.id], 3)
+
+    def _report_count_cells(self, url_name, user):
+        self.client.force_login(user)
+        body = self.client.get(reverse(url_name), secure=True).content.decode()
+        return {
+            location.id: re.findall(rf'endpoints={location.id}">(\d+)</a>', body)
+            for location in (self.shared, self.own)
+        }
+
+    def test_report_endpoint_counts_exclude_other_products(self):
+        for url_name in ("report_endpoints", "report_builder"):
+            with self.subTest(url_name=url_name):
+                cells = self._report_count_cells(url_name, self.alice)
+                self.assertEqual(cells[self.shared.id], ["1"])
+                self.assertEqual(cells[self.own.id], ["1"])
+
+    def test_report_endpoint_counts_still_complete_for_a_superuser(self):
+        for url_name in ("report_endpoints", "report_builder"):
+            with self.subTest(url_name=url_name):
+                self.assertEqual(self._report_count_cells(url_name, self.admin)[self.shared.id], ["3"])

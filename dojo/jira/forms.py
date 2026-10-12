@@ -83,6 +83,10 @@ class AdvancedJIRAForm(BaseJiraForm):
 
     def clean(self):
         if self.instance and not self.cleaned_data["password"]:
+            # A blank password on edit keeps the stored one, but only for the same URL.
+            if self.instance.pk and not jira_services.url_unchanged(self.instance, self.cleaned_data.get("url")):
+                self.add_error("password", "Enter the password again when changing the URL.")
+                return self.cleaned_data
             self.cleaned_data["password"] = self.instance.password
         return super().clean()
 

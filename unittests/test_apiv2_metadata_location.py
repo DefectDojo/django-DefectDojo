@@ -39,17 +39,43 @@ class TestMetaSerializerLocation(DojoTestCase):
         ).location
         LocationProductReference.objects.create(location=cls.location, product=cls.product)
         cls.other_product = Product.objects.create(name="Meta Loc Other Product", description="o", prod_type=cls.product_type)
+        cls.member = Dojo_User.objects.create(username="meta_loc_member", is_active=True)
+        cls.product.authorized_users.add(cls.member)
+        cls.superuser = Dojo_User.objects.create(username="meta_loc_superuser", is_active=True, is_superuser=True)
 
-    def test_location_only_payload_is_valid(self):
-        serializer = MetaSerializer(data={"location": self.location.id, "name": "environment", "value": "prod"})
+    def _context(self, user):
+        request = APIRequestFactory().post("/api/v2/metadata/")
+        request.user = user
+        return {"request": request}
+
+    def test_location_only_payload_takes_the_callers_product(self):
+        # The member's products reference the location through one product, so that is the scope.
+        serializer = MetaSerializer(
+            data={"location": self.location.id, "name": "environment", "value": "prod"}, context=self._context(self.member),
+        )
         self.assertTrue(serializer.is_valid(), serializer.errors)
         self.assertEqual(serializer.validated_data["location"], self.location)
+        self.assertEqual(serializer.validated_data["location_product"], self.product)
+
+    def test_location_only_payload_needs_a_scope_when_it_is_ambiguous(self):
+        LocationProductReference.objects.create(location=self.location, product=self.other_product)
+        self.other_product.authorized_users.add(self.member)
+        for user in (self.member, self.superuser):
+            with self.subTest(user=user.username):
+                serializer = MetaSerializer(
+                    data={"location": self.location.id, "name": "environment", "value": "prod"}, context=self._context(user),
+                )
+                self.assertFalse(serializer.is_valid())
+                self.assertIn("location_product", serializer.errors)
 
     def test_endpoint_key_still_maps_to_location(self):
         # Legacy clients name the location through ``endpoint``; that compatibility stays.
-        serializer = MetaSerializer(data={"endpoint": self.location.id, "name": "environment", "value": "prod"})
+        serializer = MetaSerializer(
+            data={"endpoint": self.location.id, "name": "environment", "value": "prod"}, context=self._context(self.member),
+        )
         self.assertTrue(serializer.is_valid(), serializer.errors)
         self.assertEqual(serializer.validated_data["location"], self.location)
+        self.assertEqual(serializer.validated_data["location_product"], self.product)
 
     def test_location_product_scope_is_persisted(self):
         serializer = MetaSerializer(

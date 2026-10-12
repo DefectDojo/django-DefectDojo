@@ -118,7 +118,7 @@ the container-image Finding that reports only a CVE with no component attached: 
 reaches it, so the CVE is genuinely separate work. This is exactly the cross-domain case
 correlation exists to surface, and it is never hidden.
 
-Turn on **Show covered CVEs** above the table to see them. Each one is labelled with the cause
+Turn on **Show Covered CVEs** above the table to see them. Each one is labelled with the cause
 that covers it, so it is clear which fix clears it. Covered causes are only hidden from the
 default list — they keep their members, evidence and feedback, they remain reachable from a
 Finding's Root Causes panel, and a saved link to one still opens.
@@ -155,7 +155,7 @@ you have access to, ranked so the largest, riskiest ones come first.
 | **Muted** | Whether the cluster has been muted |
 
 CVE causes that a component or resource cause already covers entirely are hidden unless
-**Show covered CVEs** is on; see
+**Show Covered CVEs** is on; see
 [When a CVE is already covered by a component](#when-a-cve-is-already-covered-by-a-component).
 
 ### Narrowing the list to your Assets or Organizations

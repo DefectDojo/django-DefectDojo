@@ -348,6 +348,7 @@ def process_note_added(finding: Finding, note: Notes, *, user) -> None:
             note=note,
             parent_url=request.build_absolute_uri(reverse("view_finding", args=(finding.id,))),
             parent_title=f"Finding: {finding.title}",
+            parent=finding,
         )
 
     # (3) JIRA comment sync -- same conditions as v2 (linked issue, else finding-group issue).

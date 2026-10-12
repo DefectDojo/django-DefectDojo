@@ -16,7 +16,7 @@ A Qualys user account with **VMDR API access**, and your subscription's **API se
 2. Enter the Qualys API username in the **Username** field.
 3. Enter the Qualys API password in the **Secret** field.
 4. Optionally, restrict discovery to part of your subscription with **Host Tags** (see below).
-5. Optionally, enable **Create endpoints from hosts** to attach each finding to its host as an endpoint (see below).
+5. Optionally, enable **Create Endpoints From Hosts** to attach each finding to its host as an endpoint (see below).
 6. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each Qualys host becomes a Record. Detections Qualys has marked **Fixed** are excluded, so reimport closes remediated findings.
@@ -52,7 +52,7 @@ Notes:
 
 By default, findings imported by this connector are linked only to the mapped asset, with no per-host endpoint. On an asset that aggregates several Qualys hosts, that makes it hard to see which systems a finding affects.
 
-The optional **Create endpoints from hosts** toggle attaches each finding's Qualys host as an endpoint:
+The optional **Create Endpoints From Hosts** toggle attaches each finding's Qualys host as an endpoint:
 
 * The endpoint host is the Qualys host's **DNS name**, or its **NetBIOS name** when there is no DNS name, or its **IP address** when there is neither — the same preference order the connector uses to name the Record.
 * When the detection reports a **port**, it is included, so `web01.example.com:443` and `web01.example.com:8443` remain distinct endpoints.

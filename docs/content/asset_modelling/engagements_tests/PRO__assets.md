@@ -109,6 +109,8 @@ Assets can be edited by clicking **Edit Asset** from within the gear menu at the
 
 All ensuing fields that can be edited are also available when the Asset is being created.
 
+Changing the Organization field moves the Asset, along with its Engagements, Tests, Findings and any child Assets, to the selected Organization. Before saving that change, DefectDojo asks you to confirm the move and names both the current and the new Organization. [You can reorganize later](/asset_modelling/pro_hierarchy/reorganize_later/) lists everything a move changes.
+
 ![image](images/assets_ss2.png)
 
 ### Bulk Edit Assets
@@ -117,7 +119,7 @@ Several Assets can be edited in one action from the All Assets list. Select the 
 
 The Bulk Edit form applies any combination of the following to every selected Asset:
 
-- **Organization**: moves the selected Assets to a different Organization. You need permission to add Assets to the destination Organization.
+- **Organization**: moves the selected Assets to a different Organization. You need permission to add Assets to the destination Organization. Unless the move goes through a change plan review first, DefectDojo asks you to confirm it before saving.
 - **SLA Configuration**
 - **Prioritization Engine**
 - **Tags**: added on top of each Asset's existing tags — nothing is removed.

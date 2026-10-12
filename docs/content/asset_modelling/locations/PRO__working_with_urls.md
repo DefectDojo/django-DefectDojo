@@ -34,7 +34,7 @@ When the Locations feature is enabled, the navigation exposes:
 Common workflows from the Endpoints UI are preserved:
 
 - **Bulk status updates.** Select multiple URL Locations and apply a status (Active, Mitigated, False Positive, Risk Accepted, Out of Scope) to their Finding references in one action.
-- **Adding existing URLs to an Asset.** Use **Add Existing** on an Asset's Locations tab to link URLs already in the system rather than creating duplicates.
+- **Adding existing URLs to an Asset.** Use **Add Existing** on an Asset's Locations tab to link URLs already in the system rather than creating duplicates. **Add Existing** needs edit permission on the Asset (on a Finding's Locations, on the Finding), because it only links a Location you can already see. **New Location** creates one, so it needs permission to add Locations.
 - **Tags.** Tags applied to a URL Location propagate as inherited tags on the Findings that reference it, the same way Endpoint tags previously did.
 
 ## Status Model

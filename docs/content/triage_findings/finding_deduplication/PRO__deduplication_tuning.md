@@ -16,8 +16,8 @@ In DefectDojo Pro, matching is configured at **Settings > Finding Workflow > Mat
 
 This page replaced three separate pages (Same Tool Deduplication, Cross Tool Deduplication and Reimport Deduplication). Bookmarks to those pages redirect here. Instead of picking a tool from a dropdown on one of three pages, every tool is listed once with a column for each of the three matching kinds:
 
-- **Same tool**: how repeated scans from one tool are recognised as the same finding.
-- **Cross tool**: how findings from different tools are matched against each other.
+- **Same Tool**: how repeated scans from one tool are recognised as the same finding.
+- **Cross Tool**: how findings from different tools are matched against each other.
 - **Reimport**: which formula a reimport uses inside its own test.
 
 A tool's row shows the algorithm in force for each kind, how many hash fields it uses, and whether anyone has changed it from the shipped default.
@@ -27,8 +27,8 @@ A tool's row shows the algorithm in force for each kind, how many hash fields it
 In a tool's row, select the algorithm shown under the matching kind you want to change to edit that kind's algorithm, its hash fields, or both. Because a matching change decides which findings are treated as the same finding, it is not saved directly:
 
 1. Choose the new algorithm, the new hash fields, or both. The page explains what each algorithm matches on.
-2. Select **Review impact**. DefectDojo reports how many findings of that tool are in scope, and warns you about the two things that are easy to miss (see below).
-3. Confirm you understand the change, then select **Apply**.
+2. Select **Review Impact**. DefectDojo reports how many findings of that tool are in scope, and warns you about the two things that are easy to miss (see below).
+3. Confirm you understand the change, then select **Save**.
 
 **The two axes behave very differently, and the impact review says which one you are moving.**
 
@@ -43,7 +43,7 @@ Two rules are enforced when you save a field selection, for the reasons in [Set-
 
 Same Tool Deduplication is enabled by default for all security tool parsers. This ensures findings from consecutive scans using the same tool are properly deduplicated.
 
-To adjust Same Tool Deduplication, select the tool's **Same tool** column on **Settings > Finding Workflow > Matching Configuration** and follow the review-and-confirm steps above.
+To adjust Same Tool Deduplication, select the tool's **Same Tool** column on **Settings > Finding Workflow > Matching Configuration** and follow the review-and-confirm steps above.
 
 ### Available Deduplication Algorithms
 
@@ -107,7 +107,7 @@ The `_partial` and `_subset` fields are compared per finding pair rather than fo
 
 Cross Tool Deduplication is disabled by default, as deduplication between different security tools requires careful configuration due to variations in how tools report the same vulnerabilities.
 
-Every tool's **Cross tool** cell reads **Disabled** until you enable it. To enable Cross Tool Deduplication for a tool, select that cell on **Settings > Finding Workflow > Matching Configuration**, change the algorithm to Hash Code, and select the fields the hash should be built from. The editor will not save an algorithm with no fields, because cross-tool matching builds its hash from those fields and nothing else.
+Every tool's **Cross Tool** cell reads **Disabled** until you enable it. To enable Cross Tool Deduplication for a tool, select that cell on **Settings > Finding Workflow > Matching Configuration**, change the algorithm to Hash Code, and select the fields the hash should be built from. The editor will not save an algorithm with no fields, because cross-tool matching builds its hash from those fields and nothing else.
 
 Cross Tool Deduplication supports the Hash Code algorithm, which is suitable for most workflows, as different tools rarely share compatible unique identifiers. For SCA tools reporting the same dependencies, [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) is also available as a cross-tool option (off by default).
 

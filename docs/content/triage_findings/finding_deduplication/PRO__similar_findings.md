@@ -43,8 +43,8 @@ Open the action menu (the **⋮** button at the start of a row) to manage the du
 
 ![The Similar Findings row action menu](images/pro_similar_findings_actions.png)
 
-- **Set As Original Finding** – promote a Finding to be the original (cluster root).
-- **Mark As Duplicate** – link the similar Finding into the current Finding's duplicate cluster.
+- **Set as Original Finding** – promote a Finding to be the original (cluster root).
+- **Mark as Duplicate** – link the similar Finding into the current Finding's duplicate cluster.
 
 These actions manipulate the same duplicate relationships that automatic deduplication uses, so a Finding you link here behaves exactly like an automatically detected duplicate. Any Finding you mark as a duplicate then appears under the **Duplicate Findings** tab of this card.
 

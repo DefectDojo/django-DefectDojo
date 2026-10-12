@@ -38,7 +38,7 @@ The **Bulk Edit** button opens one form containing all of the field-level bulk a
 
 ### Replace Specific Tag
 
-**Replace Specific Tag** performs a targeted, non-destructive tag swap. Enter the tag to replace in **Existing Tag to Replace** and the replacement in **New Tag**. For each selected Finding that actually carries the old tag, DefectDojo removes that one tag and adds the new one — every other tag is preserved, and Findings that don't have the old tag are left unchanged.
+**Replace Specific Tag** performs a targeted, non-destructive tag swap. Enter the tag to replace in **Existing tag to replace** and the replacement in **New tag**. For each selected Finding that actually carries the old tag, DefectDojo removes that one tag and adds the new one — every other tag is preserved, and Findings that don't have the old tag are left unchanged.
 
 This is different from the **Tags** field above: **Tags** either *adds* tags (Append) or *overwrites the whole tag set* (Replace), whereas **Replace Specific Tag** changes only the one named tag.
 
@@ -61,7 +61,7 @@ The **Move or Copy** section puts the selected Findings in another Test. The Tes
 Choose the destination with the **Destination Asset**, **Engagement**, and **Test** dropdowns. Each narrows the next, so the Engagement list only offers Engagements in the Asset you picked, and the Test list only Tests in that Engagement. There are two ways to finish:
 
 * **Pick an existing Test.** The Findings are moved or copied into that Test.
-* **Pick only an Asset** and tick **Create a matching engagement and test if none exists.** DefectDojo mirrors each Finding's current Engagement and Test into the destination Asset, matching an Engagement by **name** and a Test by **test type and title**. An existing match is reused; only what is missing is created, and a created Engagement inherits the source Engagement's dates, lead and status.
+* **Pick only an Asset** and tick **Create Missing Engagement and Test**. DefectDojo mirrors each Finding's current Engagement and Test into the destination Asset, matching an Engagement by **name** and a Test by **test type and title**. An existing match is reused; only what is missing is created, and a created Engagement inherits the source Engagement's dates, lead and status.
 
 A selection can span several source Assets — each Finding is mirrored from its own Engagement and Test.
 

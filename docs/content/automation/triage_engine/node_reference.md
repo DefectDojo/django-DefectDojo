@@ -58,7 +58,7 @@ Sweeps everything in scope on a schedule. The schedule is configured on the rule
 
 `trigger.manual`
 
-Sweeps everything in scope when you press **Run** on the rule.
+Sweeps everything in scope when you press **Run Now** on the rule.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -154,7 +154,7 @@ A group is three separate decisions, and the settings keep them apart: **which s
 | **Settle (minutes)** | `2` | A quiet period after the last expected scan lands before the rule fires, so a report is not built while that import is still being deduplicated. Zero fires as soon as the last scan lands. |
 | **When a Scan Fails** | `Keep waiting for the deadline` | What a failed import of an expected scan type does to the group. See below. |
 
-**How a group waits.** The first expected scan to land opens a *cycle* for its asset (and engagement, when narrowed; and correlation key, when grouping by one). Each further expected scan is recorded in that cycle; a scan type that lands twice keeps the latest import, so an hourly scanner and a daily one in the same group produce "the latest hourly result at the moment the daily one landed". When every required scan has arrived and the settle delay has passed, the cycle closes `complete`. When the maximum wait passes first, or the rule's schedule ticks (for **At each tick of this rule's schedule**), it closes `incomplete`. A scan landing after the cycle closed opens the next one. Pressing **Run** on the rule closes every open cycle as it stands, which is how you fire a group that is never going to complete.
+**How a group waits.** The first expected scan to land opens a *cycle* for its asset (and engagement, when narrowed; and correlation key, when grouping by one). Each further expected scan is recorded in that cycle; a scan type that lands twice keeps the latest import, so an hourly scanner and a daily one in the same group produce "the latest hourly result at the moment the daily one landed". When every required scan has arrived and the settle delay has passed, the cycle closes `complete`. When the maximum wait passes first, or the rule's schedule ticks (for **At each tick of this rule's schedule**), it closes `incomplete`. A scan landing after the cycle closed opens the next one. Pressing **Run Now** on the rule closes every open cycle as it stands, which is how you fire a group that is never going to complete.
 
 **When a scan fails.** A failed import of an expected scan type is recorded against the cycle, and what happens next is the policy:
 

@@ -22,8 +22,8 @@ arrived in the window and splits them **four ways**:
 |---|---|
 | **Affected** | A component you run has a version inside a published affected range. |
 | **Unknown** | A component corresponds, but its recorded version cannot be judged — nothing recorded, or something that is not a version like `latest`. |
-| **Not affected** | Matching ran, and every corresponding component is provably outside the range. |
-| **No signal** | Nothing in your inventory corresponds — or matching has not run yet. |
+| **Not Affected** | Matching ran, and every corresponding component is provably outside the range. |
+| **No Signal** | Nothing in your inventory corresponds — or matching has not run yet. |
 
 **"Not affected" and "no signal" are never merged, and you should not read them as the
 same thing.** "Not affected" is an answer: the engine looked and your components are
