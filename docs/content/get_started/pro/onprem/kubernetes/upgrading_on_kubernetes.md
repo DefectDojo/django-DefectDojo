@@ -60,7 +60,8 @@ common cause of failed upgrades.
    and the target. Breaking changes, new required fields, and migration
    prerequisites are called out there. See the
    [DefectDojo Pro Changelog](/releases/pro/changelog/) and the
-   [on-premise upgrade notes](/get_started/pro/onprem/upgrading/).
+   [general on-premise upgrade procedure](/get_started/pro/onprem/upgrading/),
+   which also explains the initializer's exit codes.
 2. **Check your current chart version.** This is the floor for the upgrade:
 
    ```bash
@@ -78,50 +79,111 @@ common cause of failed upgrades.
    verify those Kubernetes secrets are still present in the namespace.
 6. **Render the upgrade locally first** to catch missing fields, invalid
    values, or template errors before touching the cluster. Render the target
-   chart with the same values files and flags you will pass to `helm upgrade`,
-   including the three ddorch certificate files; without them the render fails
-   with `ddorch.tls.rootCa is required`. `$CHART` is the target chart's
-   directory: the extracted zip (see [Upgrade via Extracted Zip](#upgrade-via-extracted-zip)),
-   or a copy pulled from the registry after you
-   [authenticate](#authenticate-to-the-registry).
+   chart with the same values files and flags you will pass to `helm upgrade`.
+   That includes the ddorch certificates: without them the render fails with
+   `ddorch.tls.rootCa is required`.
 
-   The render also needs the three ddorch certificate files on disk. If you no
-   longer have the ones you installed with, copy them out of the release's
-   `<release>-orch-certs-configmap` ConfigMap (`dojopro-orch-certs-configmap`
-   for the release name used here):
+   Work in a private directory, because the server's private key is one of the
+   files:
 
    ```bash
-   CM=dojopro-orch-certs-configmap
-   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls_root\.ca}' > orch_ca.crt
-   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls\.crt}' > orch_server.crt
-   kubectl get configmap $CM -n $NAMESPACE -o jsonpath='{.data.orch_tls\.key}' > orch_server.key
-   chmod 600 orch_server.key
+   RELEASE=dojopro
+   WORK=$(mktemp -d)
    ```
 
-   Then pull the target chart and render it:
+   If you still have the files you installed with, copy them into `"$WORK"`
+   as `orch_ca.crt`, `orch_server.crt` and `orch_server.key`. Otherwise read
+   them back from the release's stored values, which keep what you passed with
+   `--set-file`:
+
+   ```bash
+   (
+     umask 077
+     cd "$WORK" || exit 1
+     helm get values "$RELEASE" -n "$NAMESPACE" -o json | jq -r '.ddorch.tls.rootCa // empty' > orch_ca.crt
+     helm get values "$RELEASE" -n "$NAMESPACE" -o json | jq -r '.ddorch.tls.cert // empty' > orch_server.crt
+     helm get values "$RELEASE" -n "$NAMESPACE" -o json | jq -r '.ddorch.tls.key // empty' > orch_server.key
+     test -s orch_ca.crt && test -s orch_server.crt && test -s orch_server.key \
+       && echo "ddorch certificates copied" \
+       || echo "not all three are in the release values: use the fallback below"
+   )
+   ```
+
+   If that reports a missing file (for example the release is managed by
+   Argo CD, which has no Helm release to read, or the key was never passed as
+   a value), take them from the objects the chart created instead. Their names
+   start with the chart's full name, `<fullname>`: the release name when it
+   contains `dojopro`, otherwise `<release>-dojopro`, and a `tenantPrefix` or
+   `fullnameOverride` changes it. `kubectl get configmap,secret -n "$NAMESPACE" | grep orch-certs`
+   shows the exact names.
+
+   - The CA and server certificate are in the ConfigMap
+     `<fullname>-orch-certs-configmap`, under the keys `orch_tls_root.ca` and
+     `orch_tls.crt`.
+   - The private key is in the Secret `<fullname>-orch-certs`, under
+     `orch_tls.key`, on chart versions that keep it in a Secret. On chart
+     versions without that Secret, it is under `orch_tls.key` in the same
+     ConfigMap.
+   - If you set `ddorch.tls.existingSecret`, the key is in your own Secret.
+     Do not copy it: leave out `--set-file ddorch.tls.key` below and pass
+     `--set ddorch.tls.existingSecret=<your-secret>` instead.
+
+   ```bash
+   FULLNAME=dojopro
+   (
+     umask 077
+     cd "$WORK" || exit 1
+     kubectl get configmap "$FULLNAME-orch-certs-configmap" -n "$NAMESPACE" \
+       -o jsonpath='{.data.orch_tls_root\.ca}' > orch_ca.crt
+     kubectl get configmap "$FULLNAME-orch-certs-configmap" -n "$NAMESPACE" \
+       -o jsonpath='{.data.orch_tls\.crt}' > orch_server.crt
+     kubectl get secret "$FULLNAME-orch-certs" -n "$NAMESPACE" \
+       -o jsonpath='{.data.orch_tls\.key}' 2>/dev/null | base64 -d > orch_server.key
+     test -s orch_server.key || kubectl get configmap "$FULLNAME-orch-certs-configmap" \
+       -n "$NAMESPACE" -o jsonpath='{.data.orch_tls\.key}' > orch_server.key
+     test -s orch_ca.crt && test -s orch_server.crt && test -s orch_server.key \
+       && echo "ddorch certificates copied" || echo "a file is still empty: stop and check the names"
+   )
+   ```
+
+   Then point `CHART` at the target chart. If you extracted the release zip
+   (see [Upgrade via Extracted Zip](#upgrade-via-extracted-zip)), use that
+   path. To use the registry instead, [authenticate](#authenticate-to-the-registry)
+   and pull the chart into the same directory:
 
    ```bash
    VERSION="<chart-version>"
    helm pull oci://us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro-helm-v2/dojopro \
-     --version $VERSION --untar --untardir /tmp/dojopro-$VERSION
-   CHART="/tmp/dojopro-$VERSION/dojopro"
+     --version "$VERSION" --untar --untardir "$WORK"
+   CHART="$WORK/dojopro"
+   ```
 
-   helm template dojopro $CHART \
-     -n $NAMESPACE \
-     -f $CHART/presets/platforms/<platform>.yaml \
-     -f $CHART/presets/profiles/<size>.yaml \
+   Render:
+
+   ```bash
+   helm template "$RELEASE" "$CHART" \
+     -n "$NAMESPACE" \
+     -f "$CHART/presets/platforms/<platform>.yaml" \
+     -f "$CHART/presets/profiles/<size>.yaml" \
      -f my-company.yaml \
      --set dojo.existingSecret=dojopro-secrets \
      --set license.existingSecret=dojopro-license \
-     --set-file ddorch.tls.rootCa=orch_ca.crt \
-     --set-file ddorch.tls.cert=orch_server.crt \
-     --set-file ddorch.tls.key=orch_server.key \
-     > /tmp/dojopro-upgrade-render.yaml
+     --set-file ddorch.tls.rootCa="$WORK/orch_ca.crt" \
+     --set-file ddorch.tls.cert="$WORK/orch_server.crt" \
+     --set-file ddorch.tls.key="$WORK/orch_server.key" \
+     > "$WORK/upgrade-render.yaml"
    ```
 
    If you installed with inline secrets and the license file, use
    `-f my-secrets.yaml` and `--set-file license.contents=/path/to/license.lic`
    in place of the two `existingSecret` flags.
+
+   When you have reviewed the render, delete the directory. It holds the
+   private key, and the render can hold secret values too:
+
+   ```bash
+   rm -rf "$WORK"
+   ```
 
 > Set `NAMESPACE` once — every command in this guide uses `$NAMESPACE`:
 >

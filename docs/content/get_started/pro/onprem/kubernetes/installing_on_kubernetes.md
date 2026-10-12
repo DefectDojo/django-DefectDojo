@@ -350,9 +350,9 @@ cosign verify-blob --key dojo-pro-cosign.pub \
 ```
 
 By default `cosign` also looks the signature up in the public transparency log,
-which needs internet access. If your network has no internet access, add the
-flag your cosign version uses to skip the transparency log lookup (see
-`cosign verify-blob --help`).
+which needs internet access. On a network without it, cosign 2.x takes
+`--insecure-ignore-tlog=true` to skip that lookup; for other versions, see
+`cosign verify-blob --help`.
 
 ---
 
@@ -733,9 +733,10 @@ Pass them to `helm install` / `helm template`:
 --set-file ddorch.tls.key=orch_server.key
 ```
 
-> The `bootstrap/bootstrap-aws-eks.sh` helper in the extracted bundle generates and reuses these
-> automatically via the `dojopro-orch-certs-configmap` — if you are using
-> that script you do not need to create them manually.
+> The `bootstrap/bootstrap-aws-eks.sh` helper in the extracted bundle generates
+> these and reuses them on later runs, reading them back from the objects the
+> chart created for them. If you are using that script you do not need to
+> create them manually.
 
 ---
 
@@ -845,8 +846,8 @@ fips:
   validate: true    # refuse to render a partly-FIPS deployment (see below)
 ```
 
-The `-fips` images are published in the same registry as the standard images
-from release 3.3.200, and the registry key in your license already pulls them.
+The `-fips` images are published in the same registry as the standard images,
+and the registry key in your license already pulls them.
 See [Getting the FIPS images](/get_started/pro/onprem/fips_mode/#getting-the-fips-images).
 
 ### Components without a FIPS variant
@@ -1230,8 +1231,11 @@ kubectl get secret dojopro-secrets -n $NAMESPACE \
 ```
 
 If you used inline secrets instead of an external secret, the password is in
-the chart-managed secret. It is named `dojopro` for this guide's release name;
-for a release name that does not contain `dojopro`, it is `<release>-dojopro`:
+the chart-managed secret. It is named after the chart's full name: `dojopro`
+for this guide's release name, the release name itself whenever it contains
+`dojopro`, and `<release>-dojopro` otherwise. A `tenantPrefix` or
+`fullnameOverride` value changes it; `kubectl get secret -n $NAMESPACE` lists
+the exact name:
 
 ```bash
 kubectl get secret dojopro -n $NAMESPACE \
