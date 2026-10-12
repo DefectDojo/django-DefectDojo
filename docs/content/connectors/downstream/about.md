@@ -76,6 +76,14 @@ These filters apply to automatic **creation** only. Updates to a Finding that al
 
 An Issue Tracker Assignment targets a single Asset or Engagement. To cover several assets, create one Assignment per Asset (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
 
+#### Who can see and change an Assignment
+
+An Issue Tracker Assignment belongs to the Asset or Engagement it targets, so on top of the Integration permissions that open Downstream Connectors, it follows that Asset's or Engagement's permissions:
+
+- You see an Assignment, in lists and in the Assignment counts on the connector and mapping lists, only when you can view its Asset or Engagement.
+- Creating, changing, or deleting an Assignment for an Asset requires permission to edit that Asset, such as the Maintainer or Owner role on it. For an Engagement, it requires permission to edit that Engagement, such as the Writer role or higher.
+- Moving an Assignment to a different Asset or Engagement requires edit permission on both the current and the new one.
+
 ## Issue Tracker Ticket Representation
 
 Issue Tracker Tickets are represented by a series of icons under the **Connector Tickets** column when viewing and listing
