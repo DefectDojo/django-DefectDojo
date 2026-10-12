@@ -400,11 +400,11 @@ Additional features:
 
 ## July 2026: v3.1
 
-### July 31, 2026: v3.1.303
+#### July 31, 2026: v3.1.303
 
 * **(Connector)** For Checkmarx Connector, A branch value containing * now selects across every matching branch
 
-### July 29, 2026: v3.1.302
+#### July 29, 2026: v3.1.302
 
 * **(Connectors)** Added another large batch of Connectors to the Pro UI. New Findings connectors: AppCheck, CyCognito, Picus, Red Hat Satellite, ImmuniWeb, Trustwave Fusion, Scantist, Black Duck Continuous Dynamic, Finite State, SOOS, Ostorlab, Automox, Qwiet AI, HiddenLayer, Nozomi Networks, NetRise, Uptycs, Klocwork, Parasoft DTP, CI Fuzz, Akto, BigID, Action1, ManageEngine Vulnerability Manager Plus, Zimperium, Dragos, CyberArk Certificate Manager, Calico Cloud, Rapid7 InsightCloudSec, Holm Security, Wazuh SCA, Fleet, and Elastic Security.
 * **(Connectors)** Checkmarx One branch tracking now accepts wildcard branch patterns, and JFrog Xray gained a `repository_filter` that scopes discovery before any per-repository work is done. The all-records view can now be filtered by record state.
@@ -415,7 +415,7 @@ Additional features:
 * **(Search)** The search language facet is now seeded from the authorized queryset.
 * **(Bug Fixes)** The affected-engagements recompute no longer deadlocks concurrent risk acceptance updates, and stored JFrog api-summary deduplication settings are refreshed to match the current algorithm.
 
-### July 28, 2026: v3.1.301
+#### July 28, 2026: v3.1.301
 
 * **(Connectors)** Added nine parser-backed Findings connectors: Google Artifact Analysis, Zora, PingCastle, Promptfoo, Alert Logic, Cyberwatch, WebInspect Enterprise, TruffleHog, and Chef Automate. Each mirrors its existing DefectDojo parser's mapping and scan type, so connector imports and file imports land in the same parser and the same deduplication configuration. Also wired up the credential forms for the Coverity, Cobalt.io, and Nuclei connectors, and gave five connectors their own logo.
 * **(Connectors)** Connector syncs can now stream Findings in chunks, so very large syncs no longer exhaust memory. Checkmarx One per-branch tracking now defaults on for new installations only, leaving existing installations on their current behavior.
@@ -427,7 +427,7 @@ Additional features:
 * **(Bug Fixes)** Locations are now carried across a finding merge; the risk acceptance expiration job no longer aborts on an unattached risk acceptance; chained duplicates are re-pointed before excess duplicates are deleted; the deduplication hash-recompute task no longer prefetches deprecated endpoints; and the API returns a validation error instead of a 500 when `environment` is omitted.
 * **(Docs)** Documented the SSO attribute-mapping editors and OIDC group mapping, and enabling the Jira integration in System Settings. Clarified that the Jira webhook secret authenticates incoming requests.
 
-### July 27, 2026: v3.1.300
+#### July 27, 2026: v3.1.300
 
 * **(RBAC)** Added user-defined Custom Roles. You can now create your own roles with a granular permission set per object type, instead of being limited to the built-in roles.
 * **(Connectors)** Added another large batch of Connectors. New Findings connectors: Fortify (SSC and FoD), HCL AppScan (ASoC and AppScan 360°), Datadog Cloud Security, MobSF, Deepfence ThreatMapper, NeuVector, Lacework / FortiCNAPP, Socket.dev, Bright Security, Aqua Security, Escape, Detectify, Fairwinds Insights, Wallarm, Vanta, NowSecure, FOSSA, Codacy, DeepSource, Beagle Security, Orca, AccuKnox, Halo Security, and Nightfall AI. Connector nomenclature is now unified as Upstream and Downstream Connectors, and you can request either type from the cloud UI.
@@ -444,7 +444,7 @@ Additional features:
 * **(Tools)** Added a Fortify parser V2 that prefers the true line number reported by the scanner. Fixed KICS severity mapping.
 * **(Bug Fixes)** Report summary charts now render after the table of contents is rebuilt; connector records are marked STALE when their owner is deleted through an async cascade; non-superusers can view the MCP page while MCP is enabled; a background sub-fetch failure no longer ejects you to the error page on secondary navigation; dropdown filters keep every character you type; an explicit scalar `cwe` stays primary when a `cwes` list is also supplied; API schema generation no longer scopes serializer querysets by `AnonymousUser`.
 
-### July 22, 2026: v3.1.202
+#### July 22, 2026: v3.1.202
 
 * **(Connectors)** Registered the Intigriti bug bounty connector and the runZero asset connector in the Pro UI. The Qualys connector now sizes its request timeout for large detection exports.
 * **(Integrations)** Integrator assignments now support per-assignment push filters, so you can limit what gets pushed by minimum severity and active-only status. 
@@ -455,7 +455,7 @@ Additional features:
 * **(Performance)** Dashboard count tiles no longer time out on large finding buckets.
 * **(Bug Fixes)** Cleared default ordering in count subqueries
 
-### July 20, 2026: v3.1.200
+#### July 20, 2026: v3.1.200
 
 * **(Connectors)** Added another large batch of Connectors. New Findings connectors: Rapid7 InsightAppSec, Cobalt.io PtaaS, Sonatype IQ (Nexus Lifecycle), Acunetix 360, Mend (WhiteSource), Bugcrowd, Black Duck, Edgescan, Sysdig Secure, Coverity Connect, Harbor, OpenVAS / Greenbone, Nuclei / ProjectDiscovery Cloud, Endor Labs, Prowler, Kubescape / ARMO, Quay + Clair, Intruder.io, and YesWeHack. Added a ServiceNow CMDB asset connector. You can now request a new connector directly from the cloud UI, and CrowdStrike Spotlight now derives its severity floor from structured sync filters.
 * **(Integrations)** Added a Linear integrator for pushing Findings to Linear.
@@ -468,7 +468,7 @@ Additional features:
 * **(Settings)** Added `DD_EDITABLE_MITIGATED_DATA` to control whether mitigation data is editable, and ignored close-finding fields are now hidden.
 * **(Bug Fixes)** Connector backend config refresh now encodes datetimes correctly
 
-### July 15, 2026: v3.1.101
+#### July 15, 2026: v3.1.101
 
 * **(Findings)** Consolidated the bulk-edit actions in the Findings table into a single surface, and added bulk "replace tag" and bulk review actions.
 * **(Search)** Retired the legacy Watson search backend in Pro in favor of the native Postgres global search introduced in v3.1.100. Watson indexing can now be toggled with `DD_WATSON_SEARCH_ENABLED`.
@@ -477,7 +477,7 @@ Additional features:
 * **(Jira)** Fixed the "Connect with Jira" OAuth flow being blocked by hidden-field validation.
 * **(Reports)** Chart blocks in report PDFs no longer capture mid-animation, so exported charts render fully drawn.
 
-### July 13, 2026: v3.1.100
+#### July 13, 2026: v3.1.100
 
 * **(Connectors)** Added a large batch of new Connectors. New Findings connectors: CrowdStrike Falcon, Microsoft Defender Vulnerability Management, Microsoft Defender for Cloud, Veracode, Qualys, Rapid7 InsightVM, GitHub Advanced Security, HackerOne, Contrast, Google Cloud Security Command Center, Shodan, Wazuh, Cloudflare, Censys, Docker Scout, and Have I Been Pwned. New asset connectors: GitLab, Atlassian JSM Assets, Bitbucket Cloud, Azure DevOps, Backstage, and Group-IB ASM. Added a GitGuardian secrets connector.
 * **(Integrations)** Added new outbound integrators for Jira (Cloud and Data Center, with per-transition custom fields, ticket templates, and a test-render path), PagerDuty, Shortcut, and Bitbucket Cloud. Jira integrations now support setting fields on close/reopen transitions and Jira Cloud OAuth.
@@ -493,7 +493,7 @@ Additional features:
 * **(Tools)** Checkmarx One parser now handles explicit null scanner sections in filtered reports, and the CSV universal parser no longer strips backticks from imported values.
 * **(Bug Fixes)** After deleting the object you were viewing, the Pro UI now lands on its parent context instead of erroring; a background sub-fetch 404 no longer ejects authorized users to the 404 page; the global loader no longer gets stuck open in bulk menus; and audit-log history context is now JSON-safe before Celery dispatch.
 
-### July 7, 2026: v3.1.0
+#### July 7, 2026: v3.1.0
 
 * **(Insights)** Added export functionality and per-metric descriptions to Insights charts.
 * **(Connectors)** Added Connectors filtering\
@@ -508,7 +508,7 @@ Additional features:
 * **(Tools)** Added an Alert Logic CSV parser and a Garak (NVIDIA LLM vulnerability scanner) parser. The GitHub Vulnerability parser now sets `fix_available`; Dependency-Track FPF Findings now include `analysis.detail` in the description; the Trivy parser no longer crashes on legacy reports missing the `Class` field; govulncheck now rejects SARIF reports with a clear error pointing to the SARIF scan type; and JFrog Xray impact paths are now deterministic.
 * **(Performance)** Faster imports and deduplication: batched `Vulnerability_Id` and `BurpRawRequestResponse` inserts, skip-unchanged-row and `VALUES` fast-write dedup paths, batched prefetching of Pro relations, Watson search index prefetch with async indexing, a new `sla_expiration_date` index for the global finding list, a case-insensitive product-name index, and a fix for finding-group Jira push N+1 queries.
 
-### June 29, 2026: v3.0.200
+#### June 29, 2026: v3.0.200
 
 * **(Reports)** Added a Graph block type to the Pro Report Builder, letting you embed Insights chart-catalog visualizations directly in reports.
 * **(Pro UI)** Dashboard V2 can now be exported as a branded, paginated PDF.
@@ -522,7 +522,7 @@ Additional features:
 * **(Tools)** Xygeni parser no longer deduplicates distinct SAST/Secrets Findings in the same file (now keyed on `uniqueHash`). SARIF parser now unwraps BlackDuck nested fingerprint values.
 * **(Tags)** User-set tags are now preserved when creating a Finding under product tag inheritance.
 
-### June 22, 2026: v3.0.100
+#### June 22, 2026: v3.0.100
 
 * **(Pro UI)** Added native Excel (`.xlsx`) export for Findings, Engagements, and Users.
 * **(Pro UI)** Bulk "Add to Existing Finding Group" no longer fails with an "Invalid pk 'None'" error.
@@ -533,14 +533,14 @@ Additional features:
 * **(Tools)** Added a Govulncheck Scanner V2 parser.
 * **(Tools)** cargo-audit parser now parses CVSS vectors and derives severity from them.
 
-### June 18, 2026: v3.0.2
+#### June 18, 2026: v3.0.2
 
 * **(SSO)** SAML now keeps the Pro group-mapping backend as the active authentication backend.
 * **(API)** Restored `members` and `authorization_groups` fields on the Asset and Organization serializers.
 * **(API)** Registered the `asset_*` / `organization_*` RBAC alias routes.
 * **(API)** Restored RBAC fields on `/api/v2/user_profile/`.
 
-### June 17, 2026: v3.0.1
+#### June 17, 2026: v3.0.1
 
 * **(Pro UI)** Calendar sidebar now honors the "Enable Calendar" system setting.
 * **(Pro UI)** Keyword search no longer blanks the Components table.
@@ -550,7 +550,7 @@ Additional features:
 * **(API)** Fixed a 500 error when deleting an Organization/Asset that still has deprecated endpoints; the new-UI banner now points at 3.3.0.
 * **(API)** Refactored and enhanced API permissions.
 
-### June 15, 2026: v3.0.0
+#### June 15, 2026: v3.0.0
 
 * **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
 * **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic: API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
@@ -563,26 +563,26 @@ Additional features:
 
 ## May 2026: v2.58
 
-### May 26, 2026: v2.58.4
+#### May 26, 2026: v2.58.4
 
 * **(Pro UI)** Migrated the Pro UI select buttons to the new shared component for consistent behavior across forms.
 * **(Reports)** Lowered the minimum permission required to access reporting, so more roles can reach reports without elevated privileges.
 * **(Tools)** CycloneDX parser no longer drops the `vector` field on import.
 
-### May 18, 2026: v2.58.3
+#### May 18, 2026: v2.58.3
 
 * **(Licensing)** Pro features are now blocked at 130% license usage, with weekly finding-usage enforcement backed by a new auditable multi-enforcement License Policy. The capacity alert threshold was raised from 80% to 90%.
 * **(Pro UI)** Added UI support for relative location relationships.
 * **(Permissions)** Finding duplicate API actions now enforce object-level permission checks, report views are scoped to the requesting user's authorized products, and location finding references are anchored to the finding's own product.
 
-### May 11, 2026: v2.58.2
+#### May 11, 2026: v2.58.2
 
 * **(Connectors)** Connectors now support subtypes, so a single connector type can be configured against multiple flavors of the same upstream tool.
 * **(Pro UI)** Jira push success/error messages are now displayed correctly in the Pro UI, so it's clear whether the push actually reached Jira.
 * **(MCP)** MCP acknowledgement settings are now consistent across superusers, so toggling acknowledgement no longer drifts between admin accounts.
 * **(Classic UI)** The Celery Status page is now gated behind the `celery_status` feature flag, off by default.
 
-### May 6, 2026: v2.58.1
+#### May 6, 2026: v2.58.1
 
 * **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
 * **(Pro UI)** Anchor links now open in a new tab as expected, so following a reference no longer pulls you away from the page you were working on.
@@ -590,7 +590,7 @@ Additional features:
 * **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default, forcing you to reorder columns every session.
 * **(API)** Fixed a 500 error when fetching vulnerable endpoints (`GET /api/vue/endpoints/{id}/vulnerable/`), restoring reliable access to vulnerability data for an endpoint.
 
-### May 4, 2026: v2.58.0
+#### May 4, 2026: v2.58.0
 
 * **(Pro UI)** Added shared table preferences so saved column/filter configurations on list views can be shared across users.
 * **(Pro UI)** Markdown content now wraps text correctly, preventing horizontal overflow on long lines.
@@ -609,7 +609,7 @@ Additional features:
 
 ## Apr 2026: v2.57
 
-### Apr 27, 2026: v2.57.3
+#### Apr 27, 2026: v2.57.3
 
 * **(Pro UI)** Asset menu now shows the Permissions tab for users with an inherited Organization role.
 * **(Pro UI)** Added an Environment column to the Test list and Findings list.
@@ -625,7 +625,7 @@ Additional features:
 * **(Tools)** Dependency Track parser no longer drops vulnerability IDs when `aliases` is empty.
 * **(Tools)** Added WatchGuard security advisories as a supported Vulnerability ID source.
 
-### Apr 20, 2026: v2.57.2
+#### Apr 20, 2026: v2.57.2
 
 * **(Pro UI)** Search and filter state is now preserved when closing a Finding from a Finding list, so you don't lose your place after editing.
 * **(Risk Acceptance)** Bulk Edit no longer leaves Simple Risk Acceptance Findings in an inconsistent "Active + Risk Accepted" state. Reactivating a previously risk-accepted Finding now behaves correctly.
@@ -637,7 +637,7 @@ Additional features:
 * **(Reports)** Fixed a CSS overflow issue in rendered reports. Cleaned up endpoint template rendering for user fields.
 * **(Tools)** `govulncheck` parser now records `fix_available` and `fix_version`. Risk Recon parser now validates URLs via a shared SSRF utility. Added Mozilla Foundation security advisories as a supported Vulnerability ID source.
 
-### Apr 13, 2026: v2.57.1
+#### Apr 13, 2026: v2.57.1
 
 * **(Pro UI)** Object-level history views no longer default to a 31-day date filter, so the full history is visible on load.
 * **(Pro UI)** Audit Log "changes" filter now searches only the names of changed fields, reducing false matches.
@@ -651,7 +651,7 @@ Additional features:
 * **(Tools)** `govulncheck` parser fixed for NDJSON output.
 * **(Tools)** Added CNNVD as a supported Vulnerability ID source.
 
-### Apr 7, 2026: v2.57.0
+#### Apr 7, 2026: v2.57.0
 
 * **(Custom Enrichment)** On-prem administrators can now configure custom URLs for EPSS and KEV enrichment data sources under **Settings → Finding Enrichment Settings**. Each source (EPSS scores and CISA Known Exploited Vulnerabilities) can be independently enabled and pointed to an internal mirror or proxy. A **Test Configuration** button validates connectivity before saving. Findings with CVE IDs are automatically enriched with EPSS score/percentile and KEV status during enrichment runs.
 * **(Performance)** Optimized API response times across all endpoints with selective field loading and conditional prefetches.
@@ -665,13 +665,13 @@ Additional features:
 
 ## Mar 2026: v2.56
 
-### Mar 30, 2026: v2.56.4
+#### Mar 30, 2026: v2.56.4
 
 * **(Deduplication)** Fixed an issue where cross-tool deduplication could silently fail to match duplicates when Findings were imported across different scan tools.
 * **(Pro UI)** Audit Log table now supports global search and query parameter–based filtering.
 * **(Pro UI)** Improved page load performance for large listing tables (Findings, Endpoints, etc.) by reducing unnecessary computation during pagination.
 
-### Mar 23, 2026: v2.56.3
+#### Mar 23, 2026: v2.56.3
 
 * **(MFA)** All authenticated users can now access their own MFA settings page, regardless of role.
 * **(Pro UI)** Alerts table now uses server-side filtering, sorting, and pagination for improved performance.
@@ -681,7 +681,7 @@ Additional features:
 * **(Pro UI)** Standardized the Test field label to "Title" across all screens.
 * **(Rules Engine)** Fixed a timeout (502 error) that could occur when previewing rules against a large number of Findings.
 
-### Mar 16, 2026: v2.56.2
+#### Mar 16, 2026: v2.56.2
 
 * **(API)** Added pagination limit enforcement and deprecation warnings for unpaginated API requests.
 * **(Jira)** Custom field values are now properly encoded and decoded as JSON, with validation errors shown for invalid input.
@@ -689,13 +689,13 @@ Additional features:
 * **(Pro UI)** Improved handling of Group membership and permissions in the UI.
 * **(SBOM)** SBOM imports are now processed asynchronously, improving upload responsiveness for large files.
 
-### Mar 12, 2026: v2.56.1
+#### Mar 12, 2026: v2.56.1
 
 * **(Pro UI)** Finding Groups can now be filtered by computed status: resolved, active, or risk-accepted.
 * **(Users)** Filters selected on the Users List are now included when exporting to CSV, so your export reflects the current view.
 * **(Jira)** Basic auth failures with Jira are now surfaced as warnings, making it easier to diagnose connection issues.
 
-### Mar 5, 2026: v2.56.0
+#### Mar 5, 2026: v2.56.0
 
 * **(API)** Restricted Note Types are now accessible via the API.
 * **(Connectors)** Added **IriusRisk** connector: see [tools reference](/connectors/toolreference/upstream/) for configuration instructions.
@@ -706,11 +706,11 @@ Additional features:
 
 ## Feb 2026: v2.55
 
-### Feb 26, 2026: v2.55.5
+#### Feb 26, 2026: v2.55.5
 
 * **(Rules Engine)** Rules Engine now automatically retries when encountering database lock contention or serialization conflicts, reducing the likelihood of a rule run failing due to temporary load on the system.
 
-### Feb 24, 2026: v2.55.4
+#### Feb 24, 2026: v2.55.4
 
 * **(Connectors)** Added Akamai API Security, JFrog Xray to Connectors.
 * **(Surveys)** Anonymous surveys: users can now access surveys without logging in when anonymous surveys are enabled.
@@ -718,43 +718,43 @@ Additional features:
 * **(Rules Engine)** Added **Set Mitigation Policy** action type: Rules can now assign a pre-configured Mitigation Policy to matching Findings.
 * **(Rules Engine)** Added **Add to Risk Acceptance** action type: Rules can now add matching Findings to an existing Risk Acceptance record, automatically setting them as risk-accepted and inactive, and handling Jira integration and endpoint statuses.
 
-### Feb 17, 2026: v2.55.3
+#### Feb 17, 2026: v2.55.3
 
 * **(Pro UI)** Added “Scheduled” status to Engagements to enhances the tracking and management of Engagements.
 
-### Feb 10, 2026: v2.55.2
+#### Feb 10, 2026: v2.55.2
 
 * **(Pro UI)** Enhanced Organization addition permissions with configuration checks.
 
-### Feb 4, 2026: v2.55.1
+#### Feb 4, 2026: v2.55.1
 
 * **(Pro UI)** Findings: Added support for Custom Fields; key-value pairs that can be added to Findings.
 * **(Pro UI)** Fixed an issue where a date filter could throw a 500 error.
 
-### Feb 2, 2026: v2.55.0
+#### Feb 2, 2026: v2.55.0
 
 * **(Pro UI)** Risk Acceptances can now have Notes added.
 * **(Pro UI)** Note Types are now available in the Pro UI.
 
 ## Jan 2026: v2.54
 
-### Jan 27, 2026: v2.54.3
+#### Jan 27, 2026: v2.54.3
 
 * **(Connectors)** Added a "Pending" status to Connectors when Sync or Discovery operations are in progress.
 * **(Pro UI)** Findings Under Review can now be Mitigated when clearing Review.
 * **(Pro UI)** An Asset's Parent and Child Assets can now be quickly added to a Pro Metrics query.
 
 
-### Jan 20, 2026: v2.54.2
+#### Jan 20, 2026: v2.54.2
 
 * **(Pro UI)** corrected a bug where unordered lists would display as ordered lists in editor forms.
 * **(Smart Upload)** introduced severity filtering to the Smart Importer to skip Findings below a specified severity level. Added detailed logging throughout the Findings processing to improve traceability and debugging.
 
-### Jan 12, 2026: v2.54.1
+#### Jan 12, 2026: v2.54.1
 
 * **(AI Tools)** added Risk Scores to schema for MCP processing.
 
-### Jan 5, 2026: v2.54.0
+#### Jan 5, 2026: v2.54.0
 
 No significant UX changes.
 
