@@ -21,11 +21,12 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
+from dojo.utils import get_product, user_is_contacts
 import dojo.jira_link.helper as jira_helper
 from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.risk_pending import search_finding_correlated, add_finding_correlated
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_permission, user_has_global_permission
 import dojo.authorization.helper as authorization_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -1095,6 +1096,32 @@ class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
         fields = "__all__"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['permissions'] = []
+        product_type_obj = Product_Type.objects.get(id=representation.get("id"))
+        all_permissions = [Permissions.Product_Type_View,
+                            Permissions.Product_Type_Edit,
+                            Permissions.Product_Type_Delete,
+                            Permissions.Product_Type_Add]
+        user = self.context["request"].user
+        for permission in all_permissions:
+            if user.is_superuser:
+                representation['permissions'].append(permission.name)
+
+            elif user_has_global_permission(user, permission):
+                representation['permissions'].append(permission.name)
+
+            elif user_has_permission(
+                    user,
+                    product_type_obj,
+                    permission):
+                    representation['permissions'].append(permission.name)
+
+        return representation
+
+     
 
 class ProductTypeBasicSerializer(serializers.ModelSerializer):
     environment = serializers.CharField(read_only=True)
