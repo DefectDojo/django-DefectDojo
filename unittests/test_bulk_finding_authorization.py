@@ -265,3 +265,16 @@ class TestMergeFindingDeleteRequiresStaff(DojoTestCase):
         )
         self._merge_as(staff, "delete")
         self.assertFalse(Finding.objects.filter(id=self.target.id).exists())
+
+    def test_merge_delete_promotes_a_new_original_for_the_duplicate_cluster(self):
+        staff = Dojo_User.objects.create(
+            username="merge_delete_cluster_staff", is_active=True, is_staff=True,
+        )
+        duplicate = Finding.objects.exclude(test=self.test).first()
+        Finding.objects.filter(id=duplicate.id).update(duplicate=True, duplicate_finding=self.target)
+        self._merge_as(staff, "delete")
+        duplicate.refresh_from_db()
+        self.assertFalse(
+            duplicate.duplicate,
+            msg=f"duplicate of the deleted finding was not promoted, persisted duplicate_finding_id={duplicate.duplicate_finding_id}",
+        )
