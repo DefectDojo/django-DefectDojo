@@ -37,7 +37,7 @@ Old bookmarks and deep links keep working: the legacy **API Connectors** and **I
 ## Who can see what
 
 * **Upstream Connectors** is visible to users with a Global Role of Reader or higher.
-* **Downstream Connectors** is visible to users whose Global Role grants the **Integration: View** permission, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances. Adding, editing, or deleting a Downstream Connector, or its mappings and assignments, requires **Integration: Edit**.
+* **Downstream Connectors** is visible to users whose Global Role grants the **Integration: View** permission, and is currently in **Beta** for Cloud-hosted DefectDojo Pro instances. Adding, editing, or deleting a Downstream Connector, or its mappings and assignments, requires **Integration: Edit**. An Issue Tracker Assignment also follows the permissions of the Asset or Engagement it targets: see [Who can see and change an Assignment](/connectors/downstream/about/#who-can-see-and-change-an-assignment).
 
 None of the built-in roles grants either Integration permission, so Downstream Connectors is available to superusers and to users whose Global Role is a [custom role](/admin/user_management/pro__custom_rbac_roles/) that includes them. A user with **Integration: View** but not **Integration: Edit** sees the configured and available connectors, but is not offered the add, edit, and delete actions.
 
