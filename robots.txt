@@ -1,3 +1,10 @@
 User-agent: *
 Disallow:
 Sitemap: https://docs.defectdojo.com/sitemap.xml
+Sitemap: https://docs.defectdojo.com/de/sitemap.xml
+Sitemap: https://docs.defectdojo.com/es/sitemap.xml
+Sitemap: https://docs.defectdojo.com/fr/sitemap.xml
+Sitemap: https://docs.defectdojo.com/ja/sitemap.xml
+Sitemap: https://docs.defectdojo.com/pt-br/sitemap.xml
+Sitemap: https://docs.defectdojo.com/zh-hans/sitemap.xml
+Sitemap: https://docs.defectdojo.com/it/sitemap.xml
