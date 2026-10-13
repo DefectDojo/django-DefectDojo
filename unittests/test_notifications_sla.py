@@ -16,6 +16,15 @@ from dojo.notifications.helper import sla_compute_and_notify
 from dojo.notifications.models import Alerts, Notifications
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
+#: Set by the test of FINDING_SLA_NOTIFY_QUERYSET_METHOD: the finding the hook below leaves out.
+_HOOK_EXCLUDES = {"id": None, "calls": 0}
+
+
+def _sla_notify_queryset_hook(findings):
+    """Stands in for what a FINDING_SLA_PERIOD_METHOD provider would add to the run's query."""
+    _HOOK_EXCLUDES["calls"] += 1
+    return findings.exclude(id=_HOOK_EXCLUDES["id"])
+
 
 @override_settings(SLA_NOTIFY_PRE_BREACH=3, SLA_NOTIFY_POST_BREACH=7)
 class SlaNotifyTestBase(DojoTestCase):
@@ -453,3 +462,30 @@ class TestSlaNotificationBatching(SlaNotifyTestBase):
         retries = notifications_helper.NotificationManager.MAX_CONSECUTIVE_ALERT_FAILURES
         self.assertEqual(bulk.call_count, 1 + retries + 1, msg="one batch INSERT, the single-row retries, one fallback")
         self.assertEqual(len(fallback_writes), 1, msg=f"fallback writes: {fallback_writes}")
+
+
+@versioned_fixtures
+class TestSlaNotifyQuerysetHook(SlaNotifyTestBase):
+
+    # A FINDING_SLA_PERIOD_METHOD can read more of each finding than the run loads (DefectDojo
+    # Pro's reads a companion row). The companion setting lets it add that to the run's query, so
+    # it arrives with each chunk instead of costing one query per finding.
+    @patch("dojo.notifications.helper.create_notification")
+    def test_the_run_reads_findings_through_the_configured_queryset_method(self, mock_create_notification):
+        kept = self._finding("kept", -1)
+        left_out = self._finding("left out by the hook", -1)
+        _HOOK_EXCLUDES.update(id=left_out.id, calls=0)
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._sla_notify_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(_HOOK_EXCLUDES["calls"], 1)
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), [kept.id])
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_without_the_setting_the_run_is_unchanged(self, mock_create_notification):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+
+        sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))

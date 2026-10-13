@@ -1493,8 +1493,14 @@ def sla_compute_and_notify(*args, **kwargs):
                     "test__engagement__product__prod_type",
                     "test__engagement__product__sla_configuration",
                     Prefetch("finding_group_set", queryset=Finding_Group.objects.select_related("jira_issue")),
-                ) \
-                .iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+                )
+            # A FINDING_SLA_PERIOD_METHOD can read more of each finding than is loaded above.
+            # Its FINDING_SLA_NOTIFY_QUERYSET_METHOD adds that to the query, so it arrives with
+            # each chunk instead of costing a query per finding.
+            from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+            if queryset_method := get_custom_method("FINDING_SLA_NOTIFY_QUERYSET_METHOD"):
+                findings = queryset_method(findings)
+            findings = findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
 
             # Whatever was collected before a failure to read further (a lost connection, say)
             # is still sent, rather than dropped along with the rest of the run.
