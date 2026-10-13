@@ -13,8 +13,9 @@ each finding, a small what-if calculator, and follow-up questions you can pick w
 When an answer suggests a change, such as marking findings as verified, it offers a button, and
 nothing changes until you confirm.
 
-Ask Sensei is in beta and is switched on per instance. It requires the Sensei license and the
-global **Maintainer** or **Owner** role.
+Ask Sensei is in beta and is switched on per instance. It requires the Sensei license. Any
+signed-in user can ask: answers draw only on data that user can see, and an answer offers a
+change only on findings that user can edit.
 
 ## Asking a question
 
@@ -52,15 +53,57 @@ not what the data says now. Ask again for current numbers.
 
 ## Changing findings from an answer
 
-An answer can offer to mark findings as **verified**, **false positive**, **out of scope** or
-**mitigated**, but only findings that its own queries returned and showed as open (and, for
-**verified**, not yet verified). An answer never offers to change a closed finding. Clicking the button shows how
-many findings the change covers and asks you to confirm. The change runs with your
-permissions, exactly like the same change made from the findings bulk-edit panel: findings you
-cannot edit are skipped.
+An answer can offer to change findings: mark them **verified**, **false positive**, **out of
+scope** or **mitigated**, set their severity, add a note, add tags, or push them to Jira. It
+offers a change only on findings its own queries returned and that you can edit. A status change
+is offered only on findings shown as open (and, for **verified**, not yet verified), so an
+answer never offers to reopen a closed finding. Clicking the button shows what will change and
+lists the findings by title, and nothing changes until you confirm. The change runs with your
+permissions, exactly like the same change made from the findings bulk-edit panel.
 
 Each change is recorded in the audit log like any other, with a marker linking it to the
-question that proposed it, and the answer shows that it was applied.
+question that proposed it and whether that question was typed or spoken, and the answer shows
+that it was applied.
+
+An answer can also offer to open a page: a list such as findings, Assets or risk acceptances,
+the dashboard, or a record its queries returned. Ask Sensei cannot delete anything or change
+users, groups, roles, settings, credentials or the license. Asked to, it says so and offers to
+open the closest page instead.
+
+## Voice
+
+Where voice is switched on for the instance, the panel shows a microphone next to **Ask**.
+Press it, or **Ctrl+Shift+Space** while the panel is open, and speak a question. The words
+appear in the question box for you to check and edit before you press **Ask**. Turn on **Send
+When Recognized** to send a spoken question as soon as it is recognized.
+
+By default speech is recognized on your own computer: the audio never leaves it, and only the
+text of the question reaches DefectDojo. This works in Chrome and Edge on the desktop, which
+download a speech model for your language the first time. Other browsers show the microphone
+with a note that they cannot recognize speech on the device. An administrator can instead have
+short recordings transcribed by the instance's AI provider (Gemini on Vertex, or an
+OpenAI-compatible provider); the recording is sent once to that provider and is not stored. On
+self-hosted installations this is the `DD_ASSISTANT_VOICE_ENGINE` setting: `on_device` (the
+default), `provider`, or `off` to remove the microphone.
+
+The microphone listens only after you press it, for one sentence, and never while Sensei is
+speaking. You can also say the label of a button in the latest answer, such as "Open Top
+Finding", to press it:
+
+- A button that only opens a page opens it.
+- A change to one finding that is easy to undo asks you to say **confirm** or **cancel**, after
+  reading back the change and the finding's title. Sensei listens once for the answer.
+- A change to several findings, a false positive (which can spread through false-positive
+  history) or a push to Jira opens the confirmation dialog and waits for a click. Voice cannot
+  confirm these.
+
+When a spoken question's answer only takes you somewhere ("open the dashboard"), the panel
+goes there without a click.
+
+**Read Answers Aloud**, off by default, reads a one- or two-sentence summary of each answer with
+a voice installed on your computer. Every number in that summary is filled in by DefectDojo from
+the same queries the answer shows. Languages with no voice installed on the computer are not
+read aloud.
 
 ## What is sent to the AI model
 
@@ -78,7 +121,7 @@ offers a button, and buttons only lead to pages inside DefectDojo.
 ## Limits and cost
 
 Each instance has an allowance of answers in its license, and each person can ask a limited
-number of questions per hour. One question per person is answered at a time; **Stop** cancels
+number of questions per hour (40 by default). One question per person is answered at a time; **Stop** cancels
 one in progress. Questions that fail do not count against the allowance.
 
 On self-hosted installations Ask Sensei uses the AI provider configured under
