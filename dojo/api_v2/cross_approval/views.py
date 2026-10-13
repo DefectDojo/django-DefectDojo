@@ -21,6 +21,7 @@ from dojo.api_v2.cross_approval.serializers import (
     CrossApprovalExclusionSerializer,
     CrossApprovalDiscussionSerializer,
     CrossApprovalRequestSerializer,
+    find_identical_exclusion,
 )
 from dojo.models import GeneralSettings
 
@@ -64,27 +65,46 @@ class CrossApprovalRequestViewSet(DeletePreviewModelMixin, ModelViewSet):
             f"Cross-approval request {instance.pk} created",
         )
 
-    @action(detail=False, methods=["get"], url_path="validate-vulnerability-id")
+    @action(detail=False, methods=["get", "post"], url_path="validate-vulnerability-id")
     def validate_vulnerability_id(self, request):
-        vulnerability_id = request.query_params.get("vulnerability_id", "").strip()
-        owner = request.query_params.get("owner", "").strip()
-        if not vulnerability_id:
-            return Response({"detail": "vulnerability_id is required."}, status=400)
+        exclusion = None
+        if request.method == "POST":
+            owner_value = request.data.get("owner", "")
+            owner = owner_value.strip() if isinstance(owner_value, str) else ""
+            exclusion_data = request.data.get("exclusion")
+            if not isinstance(exclusion_data, dict):
+                return Response({"detail": "exclusion is required."}, status=400)
+            exclusion_serializer = CrossApprovalExclusionSerializer(data=exclusion_data)
+            exclusion_serializer.is_valid(raise_exception=True)
+            exclusion = exclusion_serializer.validated_data
+            vulnerability_id = exclusion["vulnerability_id"]
+        else:
+            vulnerability_id = request.query_params.get("vulnerability_id", "").strip()
+            owner = request.query_params.get("owner", "").strip()
+            if not vulnerability_id:
+                return Response({"detail": "vulnerability_id is required."}, status=400)
         if not owner:
             return Response({"detail": "owner is required."}, status=400)
 
-        exclusions = CrossApprovalExclusion.objects.filter(
-            vulnerability_id=vulnerability_id,
-            request__owner=owner,
-        ).select_related("request")
-        exclude_request_id = request.query_params.get("exclude_request_id")
-        if exclude_request_id:
-            exclusions = exclusions.exclude(request_id=exclude_request_id)
-
-        conflicts = [
-            {"request_id": exclusion.request_id, "status": exclusion.request.status}
-            for exclusion in exclusions
-        ]
+        if exclusion is not None:
+            exclude_request_id = request.data.get("exclude_request_id")
+            conflict = find_identical_exclusion(owner, exclusion, exclude_request_id)
+            conflicts = [] if not conflict else [{
+                "request_id": conflict.request_id,
+                "status": conflict.request.status,
+            }]
+        else:
+            exclusions = CrossApprovalExclusion.objects.filter(
+                vulnerability_id=vulnerability_id,
+                request__owner=owner,
+            ).select_related("request")
+            exclude_request_id = request.query_params.get("exclude_request_id")
+            if exclude_request_id:
+                exclusions = exclusions.exclude(request_id=exclude_request_id)
+            conflicts = [
+                {"request_id": exclusion.request_id, "status": exclusion.request.status}
+                for exclusion in exclusions
+            ]
         return Response({"vulnerability_id": vulnerability_id, "conflicts": conflicts})
 
     @action(detail=False, methods=["get"], url_path="owners")
@@ -335,7 +355,10 @@ class CrossApprovalRequestViewSet(DeletePreviewModelMixin, ModelViewSet):
         with transaction.atomic():
             if instance.status == "approved":
                 for exclusion in instance.exclusions.all():
-                    revert_cross_approval_exclusion(exclusion)
+                    revert_cross_approval_exclusion(
+                        exclusion,
+                        exclude_request_id=instance.pk,
+                    )
             notify_request_status(
                 instance,
                 "cross_approval_deleted",

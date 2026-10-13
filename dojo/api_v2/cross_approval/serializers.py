@@ -28,6 +28,75 @@ def parse_cross_approval_date(value):
     raise serializers.ValidationError("Use DDMMYYYY or YYYY-MM-DD for dates.")
 
 
+def _exclusion_value(exclusion, field_name):
+    if isinstance(exclusion, dict):
+        return exclusion.get(field_name)
+    return getattr(exclusion, field_name)
+
+
+def _normalized_multi_values(value, all_is_empty=False):
+    if isinstance(value, str):
+        values = value.split(CROSS_APPROVAL_CSV_SEPARATOR)
+    elif isinstance(value, (list, tuple)):
+        values = value
+    else:
+        values = []
+
+    normalized_values = {
+        item.strip().casefold()
+        for item in values
+        if isinstance(item, str) and item.strip()
+    }
+    if all_is_empty and normalized_values == {CROSS_APPROVAL_DEFAULT_WHERE}:
+        return ()
+    return tuple(sorted(normalized_values))
+
+
+def _exclusion_identity(exclusion):
+    return (
+        _exclusion_value(exclusion, "vulnerability_id"),
+        (_exclusion_value(exclusion, "component_type") or "").strip().casefold(),
+        _normalized_multi_values(_exclusion_value(exclusion, "component_values")),
+        _normalized_multi_values(_exclusion_value(exclusion, "where"), all_is_empty=True),
+        _exclusion_value(exclusion, "create_date"),
+        _exclusion_value(exclusion, "expired_date"),
+        _normalized_multi_values(_exclusion_value(exclusion, "priority")),
+        _normalized_multi_values(_exclusion_value(exclusion, "severity")),
+        _exclusion_value(exclusion, "hu"),
+        _exclusion_value(exclusion, "reason"),
+    )
+
+
+def _existing_exclusions_by_identity(owner, exclusions, exclude_request_id=None):
+    vulnerability_ids = {
+        _exclusion_value(exclusion, "vulnerability_id")
+        for exclusion in exclusions
+    }
+    if not vulnerability_ids:
+        return {}
+
+    queryset = CrossApprovalExclusion.objects.filter(
+        vulnerability_id__in=vulnerability_ids,
+        request__owner=owner,
+    ).select_related("request")
+    if exclude_request_id:
+        queryset = queryset.exclude(request_id=exclude_request_id)
+
+    existing_exclusions = {}
+    for exclusion in queryset:
+        existing_exclusions.setdefault(_exclusion_identity(exclusion), exclusion)
+    return existing_exclusions
+
+
+def find_identical_exclusion(owner, exclusion, exclude_request_id=None):
+    identity = _exclusion_identity(exclusion)
+    return _existing_exclusions_by_identity(
+        owner,
+        [exclusion],
+        exclude_request_id,
+    ).get(identity)
+
+
 class CrossApprovalExclusionSerializer(serializers.ModelSerializer):
     exclusion_id = serializers.IntegerField(source="pk", read_only=True)
     id = serializers.CharField(source="vulnerability_id")
@@ -183,28 +252,30 @@ class CrossApprovalRequestSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         exclusions = attrs.get("exclusions", [])
         owner = attrs.get("owner") or (self.instance.owner if self.instance else None)
-        vulnerability_ids = [exclusion["vulnerability_id"] for exclusion in exclusions]
-        duplicate_ids = {
-            vulnerability_id for vulnerability_id in vulnerability_ids
-            if vulnerability_ids.count(vulnerability_id) > 1
-        }
-        if duplicate_ids:
+        exclusion_identities = [_exclusion_identity(exclusion) for exclusion in exclusions]
+        if len(exclusion_identities) != len(set(exclusion_identities)):
             raise serializers.ValidationError({
-                "exclusions": f"Vulnerability ID {min(duplicate_ids)} is duplicated in this request.",
+                "exclusions": "An identical exclusion is duplicated in this request.",
             })
 
-        conflicts = CrossApprovalExclusion.objects.filter(
-            vulnerability_id__in=vulnerability_ids,
-            request__owner=owner,
+        existing_exclusions = _existing_exclusions_by_identity(
+            owner,
+            exclusions,
+            self.instance.pk if self.instance else None,
         )
-        if self.instance:
-            conflicts = conflicts.exclude(request=self.instance)
-        conflict = conflicts.select_related("request").first()
+        conflict = next(
+            (
+                existing_exclusions[identity]
+                for identity in exclusion_identities
+                if identity in existing_exclusions
+            ),
+            None,
+        )
         if conflict:
             raise serializers.ValidationError({
                 "exclusions": (
-                    f"Vulnerability ID {conflict.vulnerability_id} already exists in request "
-                    f"{conflict.request_id} ({conflict.request.status})."
+                    f"An identical exclusion for Vulnerability ID {conflict.vulnerability_id} "
+                    "already exists for this owner."
                 ),
             })
         return attrs

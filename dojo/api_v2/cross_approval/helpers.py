@@ -69,11 +69,11 @@ def _filter_findings_by_where(findings, exclusion):
     return findings.filter(where_filter).distinct()
 
 
-def _get_findings(exclusion):
-    findings = Finding.objects.filter(
-        get_unique_ids_filter(exclusion.vulnerability_id),
-        active=True,
-    ).prefetch_related("tags", "notes")
+def _get_findings(exclusion, active_only=True):
+    finding_filters = [get_unique_ids_filter(exclusion.vulnerability_id)]
+    if active_only:
+        finding_filters.append(Q(active=True))
+    findings = Finding.objects.filter(*finding_filters).prefetch_related("tags", "notes")
     findings = _filter_findings_by_component(findings, exclusion)
     findings = _filter_findings_by_where(findings, exclusion)
 
@@ -118,7 +118,7 @@ def apply_cross_approval_exclusion(exclusion_id):
         finding.save(update_fields=["active", "risk_status"])
 
 
-def revert_cross_approval_exclusion(exclusion):
+def revert_cross_approval_exclusion(exclusion, exclude_request_id=None):
     system_user = get_user(settings.SYSTEM_USER)
     note = get_note(
         system_user,
@@ -130,7 +130,25 @@ def revert_cross_approval_exclusion(exclusion):
         risk_status=Constants.ON_WHITELIST.value,
         tags__name=request_owner,
     ).prefetch_related("tags")
+    other_exclusions = CrossApprovalExclusion.objects.filter(
+        vulnerability_id=exclusion.vulnerability_id,
+        request__owner=request_owner,
+        request__status="approved",
+        expired_at__isnull=True,
+        expired_date__gte=timezone.localdate(),
+    )
+    if exclude_request_id:
+        other_exclusions = other_exclusions.exclude(request_id=exclude_request_id)
+    else:
+        other_exclusions = other_exclusions.exclude(pk=exclusion.pk)
+    findings_covered_by_other_exclusions = {
+        finding.pk
+        for other_exclusion in other_exclusions
+        for finding in _get_findings(other_exclusion, active_only=False)
+    }
     for finding in findings:
+        if finding.pk in findings_covered_by_other_exclusions:
+            continue
         finding.tags.remove(request_owner)
         if "white_list" in finding.tags:
             finding.tags.remove("white_list")
