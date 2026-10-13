@@ -1,7 +1,8 @@
 import datetime
 from unittest.mock import patch
 
-from dojo.location.feature import locations_enabled
+from django.test import override_settings
+
 from dojo.models import Finding, Test
 from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -236,9 +237,7 @@ add_core(ptr, offset, val);
         with (get_unit_tests_scans_path("sarif") / "njsscan.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
-            # The second result is reported at two lines of the same file. With Locations
-            # it is one finding carrying both; without, each line is its own finding.
-            self.assertEqual(2 if locations_enabled() else 3, len(findings))
+            self.assertEqual(3, len(findings))
             # finding 0
             finding = findings[0]
             self.assertEqual(
@@ -257,8 +256,6 @@ add_core(ptr, offset, val);
             self.assertEqual(235, finding.line)
             self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.UTC), finding.date)
             self.assertEqual(798, finding.cwe)
-            if locations_enabled():
-                self.assertEqual([235, 239], [loc.data["line"] for loc in finding.unsaved_locations])
             for finding in findings:
                 self.common_checks(finding)
 
@@ -315,9 +312,7 @@ add_core(ptr, offset, val);
         with (get_unit_tests_scans_path("sarif") / "mobsfscan.json").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
-            # Nine results, three of them multi-location (8 + 2 + 2 locations): one finding
-            # per result with Locations, one per location without.
-            self.assertEqual(9 if locations_enabled() else 18, len(findings))
+            self.assertEqual(18, len(findings))
             for finding in findings:
                 self.common_checks(finding)
 
@@ -671,6 +666,7 @@ add_core(ptr, offset, val);
     # Regression: a SARIF result with several locations was imported as one finding per
     # location, so a 19-result report carrying 84 locations produced 84 findings instead
     # of 19 findings that each list every affected file and line range.
+    @override_settings(SARIF_ONE_FINDING_PER_RESULT=True)
     def test_multi_location_result_is_one_finding_carrying_every_location(self):
         with (
             patch.dict("dojo.location.feature._RESOLVER", {"fn": lambda: True}),
@@ -715,10 +711,34 @@ add_core(ptr, offset, val);
         for finding in findings:
             self.common_checks(finding)
 
+    @override_settings(SARIF_ONE_FINDING_PER_RESULT=False)
+    def test_multi_location_result_splits_per_location_by_default(self):
+        """
+        Control: without opting in, every location is still its own finding, each carrying
+        exactly its own location, so existing integrations see no change.
+        """
+        with (
+            patch.dict("dojo.location.feature._RESOLVER", {"fn": lambda: True}),
+            (get_unit_tests_scans_path("sarif") / "multi_location_result.sarif").open(encoding="utf-8") as testfile,
+        ):
+            findings = SarifParser().get_findings(testfile, Test())
+        self.assertEqual(7, len(findings), msg=f"expected the default per-location split, got {len(findings)}")
+        self.assertEqual(
+            ["StubFile01.java", "StubFile02.java", "StubFile03.java", "StubFile04.java", "StubFile05.java", "StubFile06.xml", "StubFile07.java"],
+            [f.file_path.rsplit("/", 1)[-1] for f in findings],
+        )
+        for finding in findings:
+            self.assertEqual([(finding.file_path, finding.line)], [(loc.data["file_path"], loc.data["line"]) for loc in finding.unsaved_locations])
+            self.common_checks(finding)
+        # The repeated fingerprint of a split result is dropped; the single-location one is kept.
+        self.assertEqual([None] * 6, [f.unique_id_from_tool for f in findings[:6]])
+        self.assertIsNotNone(findings[6].unique_id_from_tool)
+
+    @override_settings(SARIF_ONE_FINDING_PER_RESULT=True)
     def test_multi_location_result_still_splits_per_location_without_locations_feature(self):
         """
         Control: with the Locations feature off there is no record to hold several code
-        coordinates, so the legacy one-finding-per-location behaviour is preserved.
+        coordinates, so the opt-in has no effect and the per-location split is preserved.
         """
         with (
             patch.dict("dojo.location.feature._RESOLVER", {"fn": lambda: False}),
@@ -727,15 +747,7 @@ add_core(ptr, offset, val);
             findings = SarifParser().get_findings(testfile, Test())
         self.assertEqual(7, len(findings), msg=f"expected legacy per-location split, got {len(findings)}")
         self.assertEqual(
-            [
-                "StubFile01.java",
-                "StubFile02.java",
-                "StubFile03.java",
-                "StubFile04.java",
-                "StubFile05.java",
-                "StubFile06.xml",
-                "StubFile07.java",
-            ],
+            ["StubFile01.java", "StubFile02.java", "StubFile03.java", "StubFile04.java", "StubFile05.java", "StubFile06.xml", "StubFile07.java"],
             [f.file_path.rsplit("/", 1)[-1] for f in findings],
         )
         for finding in findings:

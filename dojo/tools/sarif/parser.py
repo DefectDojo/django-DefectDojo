@@ -4,6 +4,7 @@ import re
 import textwrap
 
 import dateutil.parser
+from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dojo.location.feature import locations_enabled
@@ -191,12 +192,14 @@ class SarifParser:
         if not files:
             files.append((None, None, None))
 
-        # With Locations enabled a finding carries every code coordinate of the result, so
-        # a multi-location result stays one finding (its fingerprint identifies the result,
-        # not a location). Without Locations a finding only holds one file_path/line, so
-        # each location still becomes its own finding.
+        # By default every location becomes its own finding. With Locations enabled a
+        # finding can carry every code coordinate of the result, so an operator can opt in
+        # (SARIF_ONE_FINDING_PER_RESULT) to one finding per result, which also keeps the
+        # result's fingerprint unique inside the report. Opt-in because integrations may
+        # rely on the per-location findings.
         locations_on = locations_enabled()
-        groups = [files] if locations_on else [[entry] for entry in files]
+        one_per_result = locations_on and getattr(settings, "SARIF_ONE_FINDING_PER_RESULT", False)
+        groups = [files] if one_per_result else [[entry] for entry in files]
 
         result_items = []
 

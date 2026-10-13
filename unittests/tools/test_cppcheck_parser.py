@@ -1,4 +1,3 @@
-from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Test
 from dojo.tools.cppcheck.parser import CppcheckParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -43,14 +42,14 @@ class TestCppcheckParser(DojoTestCase):
 
     def test_many_vuln(self):
         """
-        Seven SARIF results, two of them reported at several lines.
+        Ten findings from seven SARIF results.
 
-        With Locations enabled the shared SARIF parser keeps one finding per result and attaches every
-        line as a location, so the count is seven. Without Locations a finding can only hold one
-        file_path/line, so the parser emits one finding per location and the count is ten.
+        A cppcheck result can carry several locations - the same null-dereference-on-allocation-failure
+        reported at more than one line - and the shared SARIF parser emits one finding per location. That
+        is the behaviour worth pinning, because a naive count of `results` would say seven.
         """
         findings = self.parse("cppcheck_many_vuln.sarif")
-        self.assertEqual(7 if locations_enabled() else 10, len(findings))
+        self.assertEqual(10, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
             self.assertEqual("cc_many.c", finding.file_path)
@@ -84,18 +83,13 @@ class TestCppcheckParser(DojoTestCase):
 
     def test_many_vuln_multi_location_result_expands(self):
         """
-        The nullPointerOutOfMemory result is reported at three locations. With Locations it is one finding
-        carrying all three lines; without, it becomes three findings. Either way a reader sees every line
-        the defect applies to rather than just the first.
+        The nullPointerOutOfMemory result is reported at three locations and becomes three findings, so a
+        reader sees every line the defect applies to rather than just the first.
         """
         findings = self.parse("cppcheck_many_vuln.sarif")
         out_of_memory = [f for f in findings if f.vuln_id_from_tool == "nullPointerOutOfMemory"]
-        if locations_enabled():
-            self.assertEqual(1, len(out_of_memory))
-            self.assertEqual([6, 6, 7], sorted(loc.data["line"] for loc in out_of_memory[0].unsaved_locations))
-        else:
-            self.assertEqual(3, len(out_of_memory))
-            self.assertEqual([6, 6, 7], sorted(f.line for f in out_of_memory))
+        self.assertEqual(3, len(out_of_memory))
+        self.assertEqual([6, 6, 7], sorted(f.line for f in out_of_memory))
 
     def test_many_vuln_line_numbers(self):
         findings = self.parse("cppcheck_many_vuln.sarif")
@@ -106,4 +100,4 @@ class TestCppcheckParser(DojoTestCase):
         self.assertEqual([8], by_rule["memleak"])
         self.assertEqual([12], by_rule["arrayIndexOutOfBounds"])
         self.assertEqual([17], by_rule["uninitvar"])
-        self.assertEqual([21] if locations_enabled() else [21, 22], sorted(by_rule["nullPointer"]))
+        self.assertEqual([21, 22], sorted(by_rule["nullPointer"]))
