@@ -50,6 +50,20 @@ safe (missing keys fall back to English).
 Terminology comes from the product UI catalogs (`dojo/locale/<lang>/`), so a
 severity or status word reads the same in the docs as it does in DefectDojo.
 
+## Sending readers to their language
+
+A reader who arrives on an English page from outside the docs (a search
+result, a link, a bookmark) is sent to the same page in their language when
+one exists. The language is the one they last picked in the header language
+menu, or else the first of their browser's preferred languages that we
+translate. If English comes first in their browser list, they stay on
+English. Clicks within the docs never redirect, so a reader can always pick
+English and stay there. Crawlers are not redirected.
+
+The script is `layouts/_partials/head/language-redirect.html`. Each
+language's pages are also listed in its own sitemap (`/<lang>/sitemap.xml`),
+and `robots.txt` names all of them.
+
 ## Adding a language
 
 Languages are added to `config/_default/languages.toml` **only once their
