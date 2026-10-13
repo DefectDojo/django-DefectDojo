@@ -3,8 +3,10 @@
 <script type="application/javascript">
     $(function () {
         $(function () {
-            $('.similar-filters select[multiple]').not('[data-tagulous]').each(function () {
-                $(this).select2();
+            $('.similar-filters select[multiple], .filter-form-control[multiple]').not('[data-tagulous]').each(function () {
+                if (!$(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2();
+                }
             })
             $('input[data-tagulous]').each(function () {
                 Tagulous.select2($(this))
