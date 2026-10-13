@@ -19,6 +19,7 @@ from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from dojo.api_v2.transfer_finding.filters import TransferFindidingFilter
 from drf_spectacular.renderers import OpenApiJsonRenderer2
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
@@ -2097,6 +2098,11 @@ class ProductViewSet(
         permissions.UserHasProductPermission,
     )
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return serializers.ProductSerializer
+        return serializers.ProductBasicSerializer
+
     def get_queryset(self):
         return get_authorized_products(Permissions.Product_View).distinct()
 
@@ -2298,6 +2304,11 @@ class ProductTypeViewSet(
         IsAuthenticated,
         permissions.UserHasProductTypePermission,
     )
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return serializers.ProductTypeSerializer
+        return serializers.ProductTypeBasicSerializer
 
     def get_queryset(self):
         return get_authorized_product_types(
@@ -3676,14 +3687,8 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasTransferFindingPermission,)
     serializer_class = TransferFindingSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id",
-                        "destination_product_type",
-                        "destination_engagement",
-                        "destination_product",
-                        "origin_product_type",
-                        "origin_product",
-                        "origin_engagement",
-                        "owner"]
+    filterset_class = TransferFindidingFilter
+
 
     def get_serializer_class(self):
         if self.action == "retrieve":

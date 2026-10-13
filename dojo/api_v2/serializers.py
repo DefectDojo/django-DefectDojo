@@ -21,11 +21,12 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
+from dojo.utils import get_product, user_is_contacts
 import dojo.jira_link.helper as jira_helper
 from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.risk_pending import search_finding_correlated, add_finding_correlated
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_permission, user_has_global_permission
 import dojo.authorization.helper as authorization_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -1090,8 +1091,51 @@ class ProductTypeGroupSerializer(serializers.ModelSerializer):
         return data
 
 
-class ProductTypeSerializer(serializers.ModelSerializer):
+
+
+class PermissionPayloadMixin:
+    permission_registry = ()
+
+    def get_permission_payload(self, instance):
+        request = self.context.get("request")
+        if request is None:
+            return []
+
+        user = request.user
+        payload = []
+        for permission in self.permission_registry:
+            if user.is_superuser:
+                payload.append(permission.name)
+                continue
+
+            if user_has_global_permission(user, permission):
+                payload.append(permission.name)
+                continue
+
+            if instance is not None and user_has_permission(user, instance, permission):
+                payload.append(permission.name)
+
+        return payload
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["permissions"] = self.get_permission_payload(instance)
+        return representation
+
+
+class ProductTypeSerializer(PermissionPayloadMixin, serializers.ModelSerializer):
     environment = serializers.CharField(read_only=True)
+    permission_registry = Permissions.get_product_type_permissions()
+
+    class Meta:
+        model = Product_Type
+        fields = "__all__"
+
+     
+
+class ProductTypeBasicSerializer(serializers.ModelSerializer):
+    environment = serializers.CharField(read_only=True)
+
     class Meta:
         model = Product_Type
         fields = "__all__"
@@ -1139,7 +1183,7 @@ class ProductContactsSerializer(serializers.Serializer):
         }
 
 
-class EngagementSerializer(serializers.ModelSerializer):
+class EngagementSerializer(PermissionPayloadMixin, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     product_name = serializers.CharField(read_only=True, required=False)
     product_type_name = serializers.CharField(read_only=True, required=False)
@@ -1147,6 +1191,7 @@ class EngagementSerializer(serializers.ModelSerializer):
     class_id = serializers.CharField(read_only=True, required=False)
     item_class_id = serializers.CharField(read_only=True, required=False)
     last_time_scanned = serializers.CharField(read_only=True, required=False)
+    permission_registry = Permissions.get_engagement_permissions()
 
     class Meta:
         model = Engagement
@@ -2322,13 +2367,27 @@ class EngagementByProductResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Engagement
         fields = ["id", "name"]
-        
-class ProductSerializer(serializers.ModelSerializer):
+
+class ProductBasicSerializer(serializers.ModelSerializer):
+    tags = TagListSerializerField(required=False)
+    product_meta = ProductMetaSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Product
+        exclude = (
+            "tid",
+            "updated",
+            "async_updating",
+        )
+
+class ProductSerializer(PermissionPayloadMixin, serializers.ModelSerializer):
     # findings_count = serializers.SerializerMethodField()
     # findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
+    permission_registry = Permissions.get_product_permissions()
+
 
     class Meta:
         model = Product

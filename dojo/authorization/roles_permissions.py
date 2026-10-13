@@ -353,6 +353,14 @@ class Permissions(IntEnum):
         return {Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
 
     @classmethod
+    def get_product_permissions(cls):
+        return {
+            Permissions.Product_View,
+            Permissions.Product_Edit,
+            Permissions.Product_Delete,
+        }
+
+    @classmethod
     def get_product_member_permissions(cls):
         return {
             Permissions.Product_View,
@@ -369,6 +377,13 @@ class Permissions(IntEnum):
             Permissions.Product_Type_Member_Delete,
         }
 
+    @classmethod
+    def get_product_type_permissions(cls):
+        return {
+            Permissions.Product_Type_View,
+            Permissions.Product_Type_Edit,
+            Permissions.Product_Type_Delete
+        }
     @classmethod
     def get_product_group_permissions(cls):
         return {Permissions.Product_Group_View, Permissions.Product_Group_Edit, Permissions.Product_Group_Delete}
