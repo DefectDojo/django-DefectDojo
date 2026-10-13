@@ -1,0 +1,89 @@
+{{- /*
+  Send readers to the docs in their own language.
+
+  Only English pages that have a translation get this script. When a reader
+  arrives on one from outside the site (a search result, a link, a bookmark),
+  we pick a language in this order:
+
+    1. The language they last chose in the header language menu.
+    2. Their browser's preferred languages, in order. If English comes first
+       in that list we stop and keep English.
+
+  If that language has a translation of this page we replace the URL, keeping
+  the query string and anchor, so the back button never bounces between the
+  two versions.
+
+  We never redirect when the reader got here by clicking within the docs. A
+  translated page links to English for the sections we don't translate
+  (releases, supported_tools), and a reader who picks English in the language
+  menu must be able to stay there. Picking any language in that menu is saved
+  and wins over the browser setting from then on.
+
+  Crawlers are left alone: every version is listed through hreflang links and
+  the per-language sitemaps, so search engines index each language on its own
+  URL.
+*/ -}}
+{{- if and (eq .Lang "en") .IsTranslated }}
+{{- $translations := dict }}
+{{- range .Translations }}
+{{- $translations = merge $translations (dict .Lang .RelPermalink) }}
+{{- end }}
+<script>
+  (function () {
+    var KEY = 'dd-docs-lang';
+    var translations = {{ $translations | jsonify | safeJS }};
+
+    // Map a browser language tag (de-AT, pt-BR, zh-CN) to a docs language, or
+    // "en" for English. Traditional Chinese has no docs translation, so it
+    // gets nothing rather than Simplified.
+    function docsLang(tag) {
+      tag = String(tag || '').toLowerCase();
+      var base = tag.split('-')[0];
+      if (base === 'en') return 'en';
+      if (base === 'pt') return 'pt-br';
+      if (base === 'zh') {
+        return /^zh(-hans)?(-(cn|sg))?$|^zh-hans-/.test(tag) ? 'zh-hans' : null;
+      }
+      return base;
+    }
+
+    function saved() {
+      try { return localStorage.getItem(KEY); } catch (e) { return null; }
+    }
+
+    function fromBrowser() {
+      var list = navigator.languages && navigator.languages.length
+        ? navigator.languages : [navigator.language];
+      for (var i = 0; i < list.length; i++) {
+        var lang = docsLang(list[i]);
+        if (lang === 'en') return null;
+        if (lang && translations[lang]) return lang;
+      }
+      return null;
+    }
+
+    function cameFromDocs() {
+      try {
+        return !!document.referrer && new URL(document.referrer).host === location.host;
+      } catch (e) { return false; }
+    }
+
+    var bot = navigator.webdriver ||
+      /bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(navigator.userAgent);
+    if (bot || cameFromDocs()) return;
+
+    var lang = saved() || fromBrowser();
+    if (!lang || lang === 'en' || !translations[lang]) return;
+    location.replace(translations[lang] + location.search + location.hash);
+  })();
+</script>
+{{- end }}
+<script>
+  // Remember the language a reader picks in the header language menu, so the
+  // redirect above follows their choice instead of the browser setting.
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('[aria-labelledby="doks-languages"] a[hreflang]');
+    if (!link) return;
+    try { localStorage.setItem('dd-docs-lang', link.getAttribute('hreflang')); } catch (e) {}
+  });
+</script>
