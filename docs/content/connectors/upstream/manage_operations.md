@@ -27,7 +27,7 @@ The **Manage Records and Operations** page can also be used to handle Records; w
 Each entry on the Operations Page's table is a record of an operation event, with the following traits:
 
 * **Type** describes whether the event was a **Sync** or a **Discover** operation.
-* **Status** describes whether the event ran successfully.
+* **Status** describes how the event went: **Success**, **Error** or **Timeout** once it has finished, or **Pending** while it is still running. The **Status** filter offers all four.
 * **Trigger** describes how the event was triggered \- was it a **Scheduled** operation which ran automatically, or a **Manual** operation which was triggered by a DefectDojo user?
 * The **Start \& End Time** of each operation is recorded here, along with the **Duration**.
 
@@ -69,7 +69,7 @@ Each time your Connector runs a **Discover** operation, it will look for new **V
 
 ### Run Discover Manually
 
-**Discover** operations will automatically run on a regular basis, but they can also be run manually. If you're setting up this Connector for the first time, you can click the **Discover** button next to the **Unmapped Records** header. After you refresh the page, you will see your initial list of **Records**.
+**Discover** operations will automatically run on a regular basis, but they can also be run manually. If you're setting up this Connector for the first time, you can click the **Discover** button next to the **Unmapped Records** header. Discover runs in the background: when it finishes, the page reloads its Records and Operations on its own, and your initial list of **Records** appears.
 
 ![image](images/operations_discover_3.png)
 
@@ -103,6 +103,17 @@ To have DefectDojo run a Sync operation off\-schedule:
 2. From this page, click the **Sync** button. This button is located next to the **Mapped Records** header.
 
 ![image](images/operations_sync.png)
+
+Sync runs in the background. When it finishes, the page reloads its Records and Operations on its own.
+
+The connectors service runs one operation at a time across all Connectors, so a manual run can wait while another Connector's operation finishes. The page keeps checking for up to two hours. If the run has still not started by then, a message says so; refresh the page later to see its results. Operations that start on their schedule while the page is open appear the next time the page loads.
+
+## When a manual run is refused
+
+If DefectDojo cannot start a manual Discover or Sync, a message says why. The two most common reasons are:
+
+* **Request was throttled**: a user can start at most three Discover runs and three Sync runs a minute, across all Connectors. The message says how many seconds to wait before trying again.
+* **The connectors service could not be reached**: the service that runs Connector operations is not answering. Try again in a few minutes. If the message persists, ask an administrator to check that the connectors service is running.
 
 ## Getting told when a Connector stops working
 

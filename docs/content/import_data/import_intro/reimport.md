@@ -59,6 +59,8 @@ If you’re using a triage\-less scanner, or you don’t otherwise want Closed F
 * Set **do\_not\_reactivate** to **True** if using the API
 * Check the **Do Not Reactivate** checkbox if using the UI
 
+With **Do Not Reactivate** on, a Closed Finding that appears again in the report stays Closed, and DefectDojo adds a note to it saying reactivation was skipped. New Findings are still created, and Findings that are already open are handled as usual.
+
 ### Force Active and Force Verified behavior
 
 Setting `active=true` (UI: **Force Active**) or `verified=true` (UI: **Force Verified**) on a Reimport will set the corresponding status on every matched Finding, **including findings that would otherwise be Inactive because they were Mitigated**. This is the same reactivation behavior described above, just made explicit on every incoming Finding.
@@ -74,6 +76,10 @@ Force Active and Force Verified do **not** override statuses that represent an e
 | Out of Scope | No | Same reasoning as Risk Accepted — an explicit triage decision |
 
 If you want a Risk Accepted or Duplicate Finding to become Active again, you need to remove the Risk Acceptance or the Duplicate marker first. Force Active alone will not do it.
+
+### Scan Date
+
+The **Scan Date** field on the Reimport form starts empty. Left empty, each Finding that the Reimport creates keeps the date from the report (or today's date if the report has none). If you select a Scan Date, it is applied to every Finding the Reimport creates. Findings that already exist in the Test keep their dates either way.
 
 ## Opening the Reimport form
 
@@ -111,5 +117,7 @@ If you are seeing Reimport close old Findings and create new Findings when only 
 ## Reimport via API - special note
 
 Note that the /reimport API endpoint can both **extend an existing Test** (apply the method in this article) **or create a new Test** with new data \- an initial call to `/import`, or setting up a Test in advance is not required.
+
+When a `/reimport-scan` call also creates the Engagement (with `auto_create_context`), `deduplication_on_engagement` sets that new Engagement's deduplication scope. It never changes an existing Engagement, which is why the Reimport form does not offer it. To change the scope of an existing Engagement, edit **Deduplication on Engagement** on the Engagement itself.
 
 To learn more about creating an automated CI/CD pipeline using DefectDojo, see our guide [here](/automation/api/api-v2-docs/).

@@ -82,6 +82,8 @@ If a user has already been added as an Organization member, and does not require
 ​
 ![image](images/Set_a_User's_Permissions_5.png)
 
+The **Owner** Role is only listed for users who are themselves allowed to grant it, such as Owners and Superusers, both here and when editing a Member's Role.
+
 Users cannot be assigned as Members on an Asset or Organization without also having a Role. If you're not sure which Role you want a new user to have, **Reader** is a good 'default' option. This will keep your Asset state secure until you make your final decision about their Role.
 
 ### Edit Or Delete a Member

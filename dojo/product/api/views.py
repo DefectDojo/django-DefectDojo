@@ -1,4 +1,3 @@
-from datetime import datetime
 from functools import partial
 
 from django.db.models import OuterRef, Value
@@ -35,14 +34,12 @@ from dojo.utils import async_delete, get_setting
 
 
 # Authorization: object-based
-# Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
 @extend_schema_view(**schema_with_prefetch())
 class ProductAPIScanConfigurationViewSet(
     DeprecationNoticeMixin,
     PrefetchDojoModelViewSet,
 ):
-    deprecated = True
-    end_of_life_date = datetime(2026, 11, 1)
+    deprecation = "api_scan_configuration"
     serializer_class = ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)

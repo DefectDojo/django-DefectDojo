@@ -93,9 +93,15 @@ class EngagementViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
+        # prefetch_related keeps EngagementSerializer from issuing a query per
+        # row: tags are serialized for every engagement (TagListSerializerField),
+        # and notes/risk_acceptance/files are serialized as nested objects.
+        # Without the "tags" prefetch the list view's query count grows with the
+        # number of engagements returned. TestsViewSet prefetches "tags" for the
+        # same reason.
         return (
             get_authorized_engagements("view")
-            .prefetch_related(notes_prefetch(), "risk_acceptance", "files")
+            .prefetch_related(notes_prefetch(), "risk_acceptance", "files", "tags")
             .distinct()
         )
 

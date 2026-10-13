@@ -210,6 +210,8 @@ env = environ.FileAwareEnv(
     DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
+    # Give each Qualys WAS finding the scanner's UNIQUE_ID instead of grouping findings by QID
+    DD_QUALYS_WAS_UNIQUE_ID=(bool, False),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
@@ -243,6 +245,8 @@ env = environ.FileAwareEnv(
     DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(bool, False),
     # Enable Rate Limiting for the login page
     DD_RATE_LIMITER_ENABLED=(bool, False),
+    # Account-recovery emails (password reset, forgot username) sent to one address per hour. 0 disables the limit.
+    DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR=(int, 5),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
     DD_RATE_LIMITER_RATE=(str, "5/m"),
     # Block the requests after rate limit is exceeded
@@ -635,6 +639,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # https://django-ratelimit.readthedocs.io/en/stable/index.html
 RATE_LIMITER_ENABLED = env("DD_RATE_LIMITER_ENABLED")
+ACCOUNT_RECOVERY_EMAILS_PER_HOUR = env("DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR")
 RATE_LIMITER_RATE = env("DD_RATE_LIMITER_RATE")  # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
 RATE_LIMITER_BLOCK = env("DD_RATE_LIMITER_BLOCK")  # Block the requests after rate limit is exceeded
 RATE_LIMITER_ACCOUNT_LOCKOUT = env("DD_RATE_LIMITER_ACCOUNT_LOCKOUT")  # Forces the user to change password on next login.
@@ -781,7 +786,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
+        "dojo.user.authentication.DojoBasicAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.DjangoModelPermissions",
@@ -2112,8 +2117,9 @@ SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
 # Create a unique finding for all findings in qualys WAS parser
-# If using this, lines for Qualys WAS deduplication functions must be un-commented
-QUALYS_WAS_UNIQUE_ID = False
+# If using this, also set DD_DEDUPLICATION_ALGORITHM_PER_PARSER={"Qualys Webapp Scan": "unique_id_from_tool"}
+# so reimport matches findings by their Qualys unique ID (see the Qualys Webapp Scan parser docs)
+QUALYS_WAS_UNIQUE_ID = env("DD_QUALYS_WAS_UNIQUE_ID")
 
 SERIALIZATION_MODULES = {
     "xml": "django_tagulous.serializers.xml_serializer",
