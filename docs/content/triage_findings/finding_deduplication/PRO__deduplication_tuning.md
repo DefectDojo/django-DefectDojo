@@ -175,13 +175,15 @@ A common situation when first tuning matching is having a large backlog of Findi
 
 **Changing the hash fields re-hashes the backlog.** DefectDojo queues a background job to recompute the stored hash for every Finding from that tool, because the fields determine that value. The impact review tells you how many Findings that is before you apply.
 
-- The job runs asynchronously. On large instances (millions of Findings), this takes time and you will not see immediate changes in the Findings table.
+- The job runs asynchronously, one batch of Findings at a time. On large instances (millions of Findings) it takes a while, and you will not see immediate changes in the Findings table. While it runs, a **Rehash Progress** card at the top of **Settings > Finding Workflow > Matching Configuration** shows each tool being re-hashed, how many of its batches are done, and whether it is queued, running or completed. A finished re-hash stays on the card for an hour.
 - Until it finishes, that tool's Findings are hashed under two different definitions and may not match each other.
 - Existing duplicate links are not revisited. Re-hashing changes what future comparisons produce, not what was already decided.
 
 If you make several changes in quick succession, each queues its own job. Allow the previous one to finish before evaluating results, especially when comparing Finding counts before and after.
 
 > **Note for self-hosted Pro:** the job runs in the Celery worker pool. If workers are starved or backlogged, the re-hash takes longer than expected. Check worker health if results do not appear within the timeframe you would expect for your instance size.
+>
+> Each batch runs in its own short-lived process, so a worker does not keep the memory a batch used. If a worker is killed partway through (for example, by the out-of-memory killer), the batches it held go back on the queue and run again once the broker's visibility timeout passes (one hour by default), and the re-hash is not queued a second time. Re-running a batch is safe. The batch size is `DD_REHASH_SHARD_SIZE` (default 50,000 Finding IDs per batch); worker memory depends on how many batches run at once, not on this size.
 
 **Changing the algorithm re-hashes nothing**, by design: it selects which already-stored value is compared, so there is nothing to recompute. It decides what the next import compares, and existing duplicate links are left as they are.
 
