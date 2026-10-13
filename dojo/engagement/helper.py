@@ -25,3 +25,14 @@ def close_all_finding_by_engagement(engagement_id: int):
     except Exception as e:
         logger.error("CLOSE_ENGAGEMENT: "
                      f"An error occurred while closing findings: {e}")
+
+@app.task
+def close_all_finding_by_engagement_task():
+    """Review if there are open findings in closed engagements"""
+    try:
+        closed_engagements = Engagement.objects.filter(status="Closed")
+        for engagement in closed_engagements:
+            close_all_finding_by_engagement(engagement.id)
+    except Exception as e:
+        logger.error("CLOSE_ENGAGEMENT_TASK: "
+                     f"An error occurred while closing findings for closed engagements: {e}")
