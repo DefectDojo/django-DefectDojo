@@ -41,6 +41,8 @@ The App Tour is listed under **This Page** on Home and under **General** everywh
 
 The tour works with whatever you can see. With no finding to open, it skips the steps that open one; with no asset either, it skips those too. Its last step then says that the rest of the tour is there to take once there are findings to open. This covers a new, empty instance and a user who has not been given access to anything yet.
 
+When the [sandbox](/admin/sandbox/pro__sandbox/) is turned on, a tour that has nothing to open also says so on its first and last steps, with an **Open the Sandbox** button. The sandbox usually holds sample data, and the button starts the App Tour again there, with every step. The tour you were taking ends when you leave for the sandbox, and the note does not appear inside the sandbox itself.
+
 The tour starts with whichever asset and finding it finds first, but you can open any other row in the list instead. The rest of the tour follows the record you opened.
 
 If the sidebar is collapsed to its icon rail, the tour expands it for the sidebar step and collapses it again when the tour ends.
