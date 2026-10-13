@@ -114,6 +114,17 @@ Two things about scope are worth understanding, and both hold for either kind of
 
 For an event trigger, scope acts as a second gate: the Findings or Assets named in the event are matched against it, and only those that pass enter the graph.
 
+#### Scoping a rule to servers or subnets
+
+A Finding rule can be scoped to where a Finding was seen. Open the **Endpoints** column filter (or the **Locations** column filter, when Locations are enabled) on the Findings list and add one or more entries to the **Host, IP address or CIDR network** field:
+
+* A hostname or a bare IP address (`web01.example.com`, `10.20.30.5`) matches Findings seen on exactly that host.
+* A CIDR network (`10.20.30.0/24`, `2001:db8::/32`) matches Findings seen on any IP address inside it. Hostnames are never matched against a network.
+
+Entries are combined with OR, and the scope is stored as a single `location_host` filter. A rule that reacts to **On Finding Event** with this scope and ends in an **Accept Risk** node is how to risk-accept, at import time, everything found on a set of servers that will not be fixed for now, without opening each Endpoint by hand. A malformed network (`10.20.30.0/99`) is rejected when the rule is saved rather than matching nothing at run time.
+
+An **Accept Risk** node in its simple mode only accepts Findings on Assets that have **Simple Risk Acceptance** enabled; on any other Asset the run reports the Finding as unchanged. Enable it in the Asset's settings, or use the node's acceptance mode to add the Findings to an existing Risk Acceptance instead.
+
 ### Scheduling
 
 A rule whose trigger is **On a Schedule** is scheduled from the rule itself. Setting the schedule needs Rule Edit, the same permission as editing the rule, because a schedule-triggered rule does nothing at all until it has one.
