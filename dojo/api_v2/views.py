@@ -2098,6 +2098,11 @@ class ProductViewSet(
         permissions.UserHasProductPermission,
     )
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return serializers.ProductSerializer
+        return serializers.ProductBasicSerializer
+
     def get_queryset(self):
         return get_authorized_products(Permissions.Product_View).distinct()
 
