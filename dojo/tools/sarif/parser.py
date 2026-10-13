@@ -191,9 +191,17 @@ class SarifParser:
         if not files:
             files.append((None, None, None))
 
+        # With Locations enabled a finding carries every code coordinate of the result, so
+        # a multi-location result stays one finding (its fingerprint identifies the result,
+        # not a location). Without Locations a finding only holds one file_path/line, so
+        # each location still becomes its own finding.
+        locations_on = locations_enabled()
+        groups = [files] if locations_on else [[entry] for entry in files]
+
         result_items = []
 
-        for file_path, line, location in files:
+        for group in groups:
+            file_path, line, location = group[0]
             # test rule link
             rule = rules.get(result.get("ruleId"))
 
@@ -219,18 +227,21 @@ class SarifParser:
                 references=get_references(rule),
             )
 
-            if locations_enabled() and file_path:
-                end_line = None
-                if location and "physicalLocation" in location:
-                    end_line = location["physicalLocation"].get("region", {}).get("endLine")
-                finding.unsaved_locations.append(
-                    LocationData.code(
-                        file_path=file_path,
-                        line=line,
-                        end_line=end_line,
-                        snippet=get_snippet(location) or "",
-                    ),
-                )
+            if locations_on:
+                for group_file_path, group_line, group_location in group:
+                    if not group_file_path:
+                        continue
+                    end_line = None
+                    if group_location and "physicalLocation" in group_location:
+                        end_line = group_location["physicalLocation"].get("region", {}).get("endLine")
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=group_file_path,
+                            line=group_line,
+                            end_line=end_line,
+                            snippet=get_snippet(group_location) or "",
+                        ),
+                    )
 
             if "ruleId" in result:
                 finding.vuln_id_from_tool = result["ruleId"]

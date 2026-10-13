@@ -10,6 +10,15 @@ supported by many tools. More details about the format here:
 
 Current implementation will aggregate all the findings in the SARIF file into a single report.
 
+## Results With Several Locations
+
+A SARIF result can list several `locations`, for example a hard-coded secret that appears in six files, or a race condition reported at two lines of the same file.
+
+- With the Locations feature enabled, each result becomes **one Finding** that carries every reported file and line range as a Location. The Finding's own file path and line are taken from the first location, and the SARIF fingerprint identifies the result as a whole, so deduplication keeps working on it.
+- Without the Locations feature, a Finding can only hold a single file path and line, so each location becomes its **own Finding**.
+
+Earlier releases always created one Finding per location. After upgrading with Locations enabled, the first reimport of a report matches each result to the Finding that held its first location and closes the other per-location Findings as no longer present.
+
 ## How Test Types Are Determined
 
 Unlike most parsers in DefectDojo, the SARIF parser has a **report-defined Test Type**. When you import a SARIF file with `scan_type=SARIF`, DefectDojo reads the tool name from within the SARIF file at `runs[].tool.driver.name` and uses it to construct the Test Type name.

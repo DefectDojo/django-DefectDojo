@@ -1,0 +1,181 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Stub Scanner",
+          "version": "0.1.0",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Stub rule 00. Categories: stub-category-00."
+              },
+              "help": {
+                "markdown": "Stub rule 00. Categories: stub-category-00.\n\n## Remediation\n\nStub remediation text.",
+                "text": "Stub rule 00. Categories: stub-category-00.\n\nRemediation:\n\nStub remediation text."
+              },
+              "id": "stub-rule-00",
+              "name": "Stub rule 00",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-862",
+                  "security",
+                  "stub-category-00"
+                ]
+              },
+              "shortDescription": {
+                "text": "Stub rule 00"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Stub rule 17. Categories: stub-category-17."
+              },
+              "help": {
+                "markdown": "Stub rule 17. Categories: stub-category-17.\n\n## Remediation\n\nStub remediation text.",
+                "text": "Stub rule 17. Categories: stub-category-17.\n\nRemediation:\n\nStub remediation text."
+              },
+              "id": "stub-rule-17",
+              "name": "Stub rule 17",
+              "properties": {
+                "security-severity": "8.0",
+                "tags": [
+                  "external/cwe/cwe-312",
+                  "external/cwe/cwe-522",
+                  "external/cwe/cwe-532",
+                  "security",
+                  "stub-category-17"
+                ]
+              },
+              "shortDescription": {
+                "text": "Stub rule 17"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/src/main/java/com/example/stub/StubFile01.java"
+                },
+                "region": {
+                  "endLine": 201,
+                  "startLine": 61
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/src/main/java/com/example/stub/StubFile02.java"
+                },
+                "region": {
+                  "endLine": 202,
+                  "startLine": 61
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/src/main/java/com/example/stub/StubFile03.java"
+                },
+                "region": {
+                  "endLine": 131,
+                  "startLine": 56
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/src/main/java/com/example/stub/StubFile04.java"
+                },
+                "region": {
+                  "endLine": 24,
+                  "startLine": 14
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/src/main/java/com/example/stub/StubFile05.java"
+                },
+                "region": {
+                  "endLine": 25,
+                  "startLine": 14
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/src/main/resources/StubFile06.xml"
+                },
+                "region": {
+                  "endLine": 38,
+                  "startLine": 24
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Stub finding 01\n\nStub description of a finding.\n\nSeverity: high\n\nCategory: stub-category-17\n\nWeaknesses: CWE-532, CWE-522, CWE-312\n\nRemediation:\nStub remediation text."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:4e6b6d3623422b50a50ee192dfe76cb5a8d96d89c5b134b1023479ff4e0e5b25"
+          },
+          "properties": {
+            "category": "stub-category-17",
+            "confidence": "high",
+            "findingId": "csf_stub00000000000000000001",
+            "occurrenceId": "occ_stub00000000000000000001",
+            "severity": "high"
+          },
+          "ruleId": "stub-rule-17",
+          "ruleIndex": 1
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/src/main/java/com/example/stub/StubFile07.java"
+                },
+                "region": {
+                  "endLine": 717,
+                  "startLine": 560
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Stub finding 02\n\nStub description of a finding.\n\nSeverity: medium\n\nCategory: stub-category-00\n\nWeaknesses: CWE-862\n\nRemediation:\nStub remediation text."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:5ae9571b7322589f3a04c194d2afa07571cfcfa850fd390ac9438a6c39a1cfba"
+          },
+          "properties": {
+            "category": "stub-category-00",
+            "confidence": "high",
+            "findingId": "csf_stub00000000000000000002",
+            "occurrenceId": "occ_stub00000000000000000002",
+            "severity": "medium"
+          },
+          "ruleId": "stub-rule-00",
+          "ruleIndex": 0
+        }
+      ]
+    }
+  ]
+}

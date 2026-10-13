@@ -29,9 +29,11 @@ cleanly as zero findings, which looks like a passing scan rather than a mistake.
 **No CWE.** Cppcheck's SARIF output carries no CWE taxonomy, so findings have an empty `cwe`. The scan
 type is registered in `HASHCODE_ALLOWS_NULL_CWE` for that reason.
 
-**One finding per location.** A cppcheck result can list several locations — the same
-null-dereference-on-allocation-failure reported at more than one line — and each becomes its own
-finding, so every affected line is visible. A report with 7 results can therefore yield 10 findings.
+**Results with several locations.** A cppcheck result can list several locations — the same
+null-dereference-on-allocation-failure reported at more than one line. With the Locations feature
+enabled, the result is one finding that carries every line as a Location. Without it, each location
+becomes its own finding, so a report with 7 results yields 10 findings. See the
+[SARIF parser](sarif.md) page for details.
 
 ### Sample Scan Data
 
