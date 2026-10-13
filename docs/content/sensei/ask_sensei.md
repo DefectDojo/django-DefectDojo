@@ -91,11 +91,13 @@ speaking. You can also say the label of a button in the latest answer, such as "
 Finding", to press it:
 
 - A button that only opens a page opens it.
-- A change to one finding that is easy to undo asks you to say **confirm** or **cancel**, after
-  reading back the change and the finding's title. Sensei listens once for the answer.
-- A change to several findings, a false positive (which can spread through false-positive
-  history) or a push to Jira opens the confirmation dialog and waits for a click. Voice cannot
-  confirm these.
+- A change to one finding that stays in DefectDojo and is easy to undo (verifying it, setting
+  its severity, adding a note or tags) asks you to say **confirm** or **cancel**, after reading
+  back the change and the finding's title. Sensei listens once for the answer.
+- Anything else opens the confirmation dialog and waits for a click: a change to several
+  findings, a false positive (which can spread through false-positive history), marking a finding
+  mitigated or out of scope (which closes it, and can close its Jira issue), or a push to Jira.
+  Voice cannot confirm these.
 
 When a spoken question's answer only takes you somewhere ("open the dashboard"), the panel
 goes there without a click.
