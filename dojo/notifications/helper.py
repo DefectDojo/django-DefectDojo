@@ -14,6 +14,7 @@ from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage, get_connection
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q, QuerySet
+from django.db.utils import InterfaceError, OperationalError
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import get_script_prefix, reverse
@@ -929,6 +930,7 @@ class NotificationManager(NotificationManagerHelpers):
         self._alert_writes_given_up = False
         self._alert_failure_streak = 0
         self._alert_failure_notifications = set()
+        self._alert_connection_failure_streak = 0
         self._alerts_not_written = 0
         self._last_alert_exception = None
         try:
@@ -943,11 +945,16 @@ class NotificationManager(NotificationManagerHelpers):
                 if self._alerts_not_written:
                     # One report for the whole batch, never one per row or per flush.
                     logger.error("%s alerts of this notification batch could not be written", self._alerts_not_written)
-                    self._log_alert(
-                        self._last_alert_exception,
-                        "Alert Notification",
-                        description=f"{self._alerts_not_written} alerts could not be written: {self._last_alert_exception}",
-                    )
+                    # Written exactly when the database has been refusing writes, so it can fail
+                    # too; that must not escape the caller (or hide an exception already raised).
+                    try:
+                        self._log_alert(
+                            self._last_alert_exception,
+                            "Alert Notification",
+                            description=f"{self._alerts_not_written} alerts could not be written: {self._last_alert_exception}",
+                        )
+                    except Exception:
+                        logger.exception("Unable to report the alerts this notification batch could not write")
 
     def flush_alerts(self) -> None:
         """Write the alerts a batch has collected, once a full batch of them is waiting."""
@@ -970,22 +977,35 @@ class NotificationManager(NotificationManagerHelpers):
         not written is reported once, when the batch ends.
         """
         logger.warning("Writing %s alerts in one INSERT failed, writing them one at a time", len(alerts))
+        logged_traceback = False
         for position, alert in enumerate(alerts):
             try:
                 with transaction.atomic():
                     Alerts.objects.bulk_create([alert])
                 self._alert_failure_streak = 0
                 self._alert_failure_notifications.clear()
+                self._alert_connection_failure_streak = 0
             except Exception as exception:
-                logger.exception("Unable to create Alert Notification %r", alert.title)
+                # One traceback per flush; the rest of its failures are one line each.
+                if logged_traceback:
+                    logger.warning("Unable to create Alert Notification %r: %s", alert.title, exception)
+                else:
+                    logger.exception("Unable to create Alert Notification %r", alert.title)
+                    logged_traceback = True
                 self._alerts_not_written += 1
                 self._last_alert_exception = exception
                 self._alert_failure_streak += 1
                 # One notification's alerts are adjacent and share its title and url.
                 self._alert_failure_notifications.add((alert.title, alert.url))
-                if (
-                    self._alert_failure_streak >= self.MAX_CONSECUTIVE_ALERT_FAILURES
-                    and len(self._alert_failure_notifications) > 1
+                # A lost or refused connection is the database's fault whichever notification the
+                # row belongs to; a data error (a bad value, a deleted user) may be just this one's.
+                if isinstance(exception, (OperationalError, InterfaceError)):
+                    self._alert_connection_failure_streak += 1
+                else:
+                    self._alert_connection_failure_streak = 0
+                if self._alert_failure_streak >= self.MAX_CONSECUTIVE_ALERT_FAILURES and (
+                    len(self._alert_failure_notifications) > 1
+                    or self._alert_connection_failure_streak >= self.MAX_CONSECUTIVE_ALERT_FAILURES
                 ):
                     remaining = len(alerts) - position - 1
                     self._alerts_not_written += remaining
@@ -1124,6 +1144,9 @@ class NotificationManager(NotificationManagerHelpers):
             return self._get_user_to_send_notifications_to()
         key = (getattr(self.product, "id", None), getattr(self.product_type, "id", None))
         if key not in cache:
+            # A batch notifies one product's findings after another, so only the current
+            # product's recipients are kept rather than every product's for the whole run.
+            cache.clear()
             cache[key] = list(self._get_user_to_send_notifications_to())
         return cache[key]
 
@@ -1360,6 +1383,34 @@ def process_tag_notifications(request, note, parent_url, parent_title, parent=No
         requested_by=crum.get_current_user())
 
 
+_NOTHING_READ = object()
+
+
+def _read_sla_findings(findings, plain_findings):
+    """
+    Stream the SLA run's findings in chunks.
+
+    ``findings`` is the query as FINDING_SLA_NOTIFY_QUERYSET_METHOD left it. A query that cannot
+    be read at all (one that does not compile, a related name that does not exist, something that
+    is not a query) only shows itself on the first chunk, so the first chunk is read here and, if
+    that fails, the plain query is read instead. A failure on a later chunk is the caller's, as
+    for the plain query.
+    """
+    if findings is plain_findings:
+        yield from plain_findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+        return
+    try:
+        chunks = findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+        first = next(chunks, _NOTHING_READ)
+    except Exception:
+        logger.exception("Reading findings through FINDING_SLA_NOTIFY_QUERYSET_METHOD failed; reading them without it")
+        yield from plain_findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+        return
+    if first is not _NOTHING_READ:
+        yield first
+        yield from chunks
+
+
 def sla_compute_and_notify(*args, **kwargs):
     """
     The SLA computation and notification will be disabled if the user opts out
@@ -1537,17 +1588,16 @@ def sla_compute_and_notify(*args, **kwargs):
             # A FINDING_SLA_PERIOD_METHOD can read more of each finding than is loaded above.
             # Its FINDING_SLA_NOTIFY_QUERYSET_METHOD adds that to the query, so it arrives with
             # each chunk instead of costing a query per finding.
-            # A hook that cannot run must not cost the run, so it is tried and its query compiled
-            # here, and the run reads its findings without it when either fails.
+            # A hook that cannot run must not cost the run: if calling it fails, or its query
+            # cannot be read at all, the run reads its findings without it.
             from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+            plain_findings = findings
             try:
                 if queryset_method := get_custom_method("FINDING_SLA_NOTIFY_QUERYSET_METHOD"):
-                    hooked = queryset_method(findings)
-                    str(hooked.query)
-                    findings = hooked
+                    findings = queryset_method(findings)
             except Exception:
                 logger.exception("FINDING_SLA_NOTIFY_QUERYSET_METHOD failed; reading findings without it")
-            findings = findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+            findings = _read_sla_findings(findings, plain_findings)
 
             # Whatever was collected before a failure to read further (a lost connection, say)
             # is still sent, rather than dropped along with the rest of the run.

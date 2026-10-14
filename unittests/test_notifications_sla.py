@@ -33,6 +33,16 @@ def _raising_queryset_hook(findings):
     raise RuntimeError(msg)
 
 
+def _prefetch_broken_queryset_hook(findings):
+    # Compiles fine; fails only when the first chunk's related rows are fetched.
+    return findings.prefetch_related("no_such_relation")
+
+
+def _emptying_queryset_hook(findings):
+    # A valid query that matches nothing: the run must respect it, not fall back to every finding.
+    return findings.filter(id__in=[])
+
+
 def _lazily_broken_queryset_hook(findings):
     # Valid to call; fails only once the query is compiled.
     return findings.select_related("no_such_relation")
@@ -576,6 +586,55 @@ class TestSlaNotificationBatching(SlaNotifyTestBase):
         self.assertEqual(mock_lookup.call_count, 1, msg="the id found for the first notification is reused")
         self.assertGreaterEqual(mock_post.call_count, 3)
 
+    def test_an_outage_costs_the_same_writes_however_many_recipients_a_notification_has(self):
+        # Regression: the outage bound waited for failures from a second notification, so every
+        # recipient of the first one was tried on its own first. A connection-level error is the
+        # database's fault whatever notification it belongs to.
+        def outage_attempts(extra_superusers):
+            for i in range(extra_superusers):
+                User.objects.create(username=f"sla_outage_{extra_superusers}_{i}", is_superuser=True, is_active=True)
+            self._finding(f"finding for {extra_superusers}", -1)
+
+            def bulk_create(alerts, *args, **kwargs):
+                if all(a.source == "Alert Notification" for a in alerts):
+                    return alerts
+                msg = "simulated database outage"
+                raise OperationalError(msg)
+
+            with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create) as bulk:
+                sla_compute_and_notify()
+            Finding.objects.filter(active=True).update(active=False)
+            return bulk.call_count
+
+        # Both runs have more alert rows than the bound, so both must stop at it.
+        few = outage_attempts(4)
+        many = outage_attempts(16)
+        bound = 1 + notifications_helper.NotificationManager.MAX_CONSECUTIVE_ALERT_FAILURES + 1
+        self.assertEqual(many, few, msg=f"write attempts: few recipients {few}, many recipients {many}")
+        self.assertEqual(many, bound, msg="one batch INSERT, the single-row retries, one fallback report")
+
+    def test_a_failure_writing_the_batch_report_does_not_escape_the_run(self):
+        # The report of unwritten alerts is written exactly when the database is struggling.
+        self._finding("finding", -1)
+
+        def bulk_create(alerts, *args, **kwargs):
+            msg = "simulated database outage"
+            raise OperationalError(msg)
+
+        with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create), \
+                patch.object(notifications_helper.NotificationManager, "_log_alert", side_effect=OperationalError("connection lost")):
+            sla_compute_and_notify()  # must not raise
+
+    def test_only_the_current_products_recipients_are_kept(self):
+        manager = notifications_helper.NotificationManager()
+        first = self.create_product("SLA cache first")
+        second = self.create_product("SLA cache second")
+        with manager.batch():
+            for product in (first, second, first):
+                manager.product, manager.product_type = product, None
+                manager._recipients_for_current_scope()
+                self.assertEqual(list(manager._recipients_by_scope), [(product.id, None)])
+
 
 @versioned_fixtures
 class TestSlaNotifyQuerysetHook(SlaNotifyTestBase):
@@ -629,3 +688,22 @@ class TestSlaNotifyQuerysetHook(SlaNotifyTestBase):
             sla_compute_and_notify()
 
         self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_a_hook_whose_prefetch_fails_falls_back_to_the_plain_query(self, mock_create_notification):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._prefetch_broken_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_a_hook_that_matches_nothing_is_respected(self, mock_create_notification):
+        for i in range(2):
+            self._finding(f"finding {i}", -1)
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._emptying_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), [])
