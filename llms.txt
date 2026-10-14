@@ -25,6 +25,7 @@ Key facts:
 - [Set up an additional Cloud instance (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/additional-cloud-instance/): Add a test, dev, or other DefectDojo instance to your account
 - [Cloud Architecture (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/cloud-architecture/): How DefectDojo Cloud is deployed and isolated on Google Kubernetes Engine.
 - [Egress IP Addresses (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/egress-ip-addresses/): The outbound IP addresses DefectDojo Cloud connects from, for allowlisting in your external firewalls.
+- [Migrating from Open Source to DefectDojo Cloud (Pro)](https://docs.defectdojo.com/get_started/pro/cloud/migrating_from_open_source/): Move your open source DefectDojo data into a DefectDojo Cloud instance
 - [Self-Hosting DefectDojo Pro](https://docs.defectdojo.com/get_started/pro/onprem/installation_options/): The self-hosted deployment models for DefectDojo Pro (Docker Compose and Kubernetes), what you need before you start, and how the rest of this section fits
 - [Hardware Sizing for Self-Hosted DefectDojo Pro](https://docs.defectdojo.com/get_started/pro/onprem/hardware_sizing/): General guidance for sizing compute, memory, and storage for a self-hosted DefectDojo Pro deployment
 - [Migrating from Open Source to Self-Hosted DefectDojo Pro](https://docs.defectdojo.com/get_started/pro/onprem/migrating_from_open_source/): Move your open source DefectDojo database and media files into a self-hosted DefectDojo Pro deployment
