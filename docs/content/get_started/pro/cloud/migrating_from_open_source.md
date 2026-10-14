@@ -21,7 +21,7 @@ Two exceptions:
 - If you run 3.0.0, 3.0.1, 3.0.2, or 3.0.100, upgrade to [3.0.200](/releases/os_upgrading/3.0.200/) or later before you take the dump.
 - If your instance still runs on MySQL, it has to be converted to PostgreSQL first. MySQL support was [removed in 2.37.0](/releases/os_upgrading/2.37/). Contact support if this applies to you.
 
-Also note your PostgreSQL major version. Run `SELECT version();` in `psql`, or read the image tag of your database container. A dump can't be restored into an older major version of PostgreSQL, so support checks your version against your Cloud instance before scheduling the migration.
+Also note your PostgreSQL major version. Run `SELECT version();` in `psql`, or read the image tag of your database container. The DefectDojo team uses it to plan the restore. You don't need to change it.
 
 ## What you prepare
 
@@ -30,7 +30,7 @@ You produce two files and collect two keys.
 1. **A database dump in custom format.** Use `pg_dump -Fc`, as shown in [Step 1: Export your database](/get_started/pro/onprem/migrating_from_open_source/#step-1-export-your-database). That step covers a database in a container and one on a separate host or managed service.
 2. **A tarball of your media files.** These are the attachments and other files your users uploaded. See [Step 2: Export your media files](/get_started/pro/onprem/migrating_from_open_source/#step-2-export-your-media-files).
 3. **Your version in both file names.** See [Step 3: Name your files](/get_started/pro/onprem/migrating_from_open_source/#step-3-name-your-files). The version tells the DefectDojo team where the schema upgrade starts.
-4. **Your encryption keys.** Record the `DD_SECRET_KEY` and `DD_CREDENTIAL_AES_256_KEY` values your open source instance runs with. Credentials saved under Tool Configuration are encrypted with `DD_CREDENTIAL_AES_256_KEY`, and an instance with a different key can't read them. Support will tell you whether your Cloud instance can run with your existing key. If it can't, re-enter your Tool Configuration credentials after the cutover.
+4. **Your encryption keys.** Record the `DD_SECRET_KEY` and `DD_CREDENTIAL_AES_256_KEY` values your open source instance runs with. Credentials saved under Tool Configuration are encrypted with `DD_CREDENTIAL_AES_256_KEY`, and an instance with a different key can't read them. When you send both keys, the DefectDojo team configures your Cloud instance with them, so those credentials keep working. If you don't send them, re-enter your Tool Configuration credentials after the cutover.
 
 Skip Steps 4 to 6 of the self-hosted guide. On Cloud, the DefectDojo team does the restore and the configuration.
 
