@@ -1604,7 +1604,7 @@ class ApiProductFilter(DojoFilter):
     product_manager = NumberInFilter(field_name="product_manager", lookup_expr="in")
     technical_contact = NumberInFilter(field_name="technical_contact", lookup_expr="in")
     team_manager = NumberInFilter(field_name="team_manager", lookup_expr="in")
-    prod_type = NumberInFilter(field_name="prod_type", lookup_expr="in")
+    prod_type = NumberInFilter(field_name="prod_type_id", lookup_expr="in")
     tid = NumberInFilter(field_name="tid", lookup_expr="in")
     prod_numeric_grade = NumberInFilter(field_name="prod_numeric_grade", lookup_expr="in")
     user_records = NumberInFilter(field_name="user_records", lookup_expr="in")
@@ -1636,6 +1636,7 @@ class ApiProductFilter(DojoFilter):
             ("id", "id"),
             ("tid", "tid"),
             ("name", "name"),
+            ("product", "product"),
             ("created", "created"),
             ("prod_numeric_grade", "prod_numeric_grade"),
             ("business_criticality", "business_criticality"),
