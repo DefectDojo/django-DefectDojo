@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 from django.test import SimpleTestCase
 from django.utils import timezone
+from rest_framework.parsers import JSONParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.test import APIRequestFactory
@@ -13,6 +14,7 @@ from dojo.api_v2.cross_approval.permissions import IsCrossApprovalReviewer, IsCr
 from dojo.api_v2.cross_approval.helpers import (
     _get_findings,
     check_new_findings_to_cross_approval_exclusion_list,
+    revert_cross_approval_exclusion,
 )
 from dojo.api_v2.cross_approval.serializers import (
     CrossApprovalExclusionSerializer,
@@ -150,7 +152,7 @@ class CrossApprovalRequestSerializerTest(SimpleTestCase):
 
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
-    def test_rejects_duplicate_vulnerability_ids_in_one_request(self):
+    def test_rejects_identical_exclusions_in_one_request(self):
         payload = CrossApprovalExclusionSerializerTest().valid_payload()
         serializer = CrossApprovalRequestSerializer(data={
             "owner": "x86",
@@ -158,6 +160,49 @@ class CrossApprovalRequestSerializerTest(SimpleTestCase):
         })
 
         self.assertFalse(serializer.is_valid())
+        self.assertIn("exclusions", serializer.errors)
+
+    def test_allows_same_vulnerability_id_with_different_exclusion_fields(self):
+        payload = CrossApprovalExclusionSerializerTest().valid_payload()
+        second_payload = {**payload, "reason": "Different reason"}
+        with patch(
+            "dojo.api_v2.cross_approval.serializers.CrossApprovalExclusion.objects.filter"
+        ) as exclusions_filter:
+            serializer = CrossApprovalRequestSerializer(data={
+                "owner": "x86",
+                "exclusions": [payload, second_payload],
+            })
+
+            self.assertTrue(serializer.is_valid(), serializer.errors)
+        exclusions_filter.assert_called_once_with(
+            vulnerability_id__in={"#sym:vulnerability_id"},
+            request__owner="x86",
+        )
+
+    def test_rejects_identical_exclusion_already_created_for_owner(self):
+        payload = CrossApprovalExclusionSerializerTest().valid_payload()
+        existing_exclusion = SimpleNamespace(
+            vulnerability_id="#sym:vulnerability_id",
+            component_type="image",
+            component_values=["registry.example.com/base:1.0"],
+            where="all",
+            create_date=datetime.strptime("2026-08-23", "%Y-%m-%d").date(),
+            expired_date=datetime.strptime("2026-08-24", "%Y-%m-%d").date(),
+            priority="high",
+            severity="medium",
+            hu="HU-1",
+            reason="Supplier exception",
+        )
+        with patch(
+            "dojo.api_v2.cross_approval.serializers.CrossApprovalExclusion.objects.filter"
+        ) as exclusions_filter:
+            exclusions_filter.return_value.select_related.return_value = [existing_exclusion]
+            serializer = CrossApprovalRequestSerializer(data={
+                "owner": "x86",
+                "exclusions": [payload],
+            })
+
+            self.assertFalse(serializer.is_valid())
         self.assertIn("exclusions", serializer.errors)
 
     def test_conflict_validation_is_scoped_by_owner(self):
@@ -174,7 +219,7 @@ class CrossApprovalRequestSerializerTest(SimpleTestCase):
 
             self.assertTrue(serializer.is_valid(), serializer.errors)
             exclusions_filter.assert_called_once_with(
-                vulnerability_id__in=["#sym:vulnerability_id"],
+                vulnerability_id__in={"#sym:vulnerability_id"},
                 request__owner="ace",
             )
 
@@ -222,6 +267,36 @@ class CrossApprovalHelpersTest(SimpleTestCase):
         self.assertIn("prisma", str(findings.filter.call_args_list[1].args[0]))
         self.assertIn("gitleaks", str(findings.filter.call_args_list[1].args[0]))
 
+    def test_revert_keeps_whitelist_when_another_active_exclusion_covers_finding(self):
+        finding = MagicMock(pk=10)
+        exclusion = SimpleNamespace(
+            pk=3,
+            vulnerability_id="VULN-1",
+            request_id=7,
+            request=SimpleNamespace(owner="x86"),
+        )
+        other_exclusion = SimpleNamespace(pk=4)
+        findings = MagicMock()
+        findings.prefetch_related.return_value = [finding]
+
+        with (
+            patch("dojo.api_v2.cross_approval.helpers.get_user"),
+            patch("dojo.api_v2.cross_approval.helpers.get_note"),
+            patch("dojo.api_v2.cross_approval.helpers.Finding.objects.filter", return_value=findings),
+            patch(
+                "dojo.api_v2.cross_approval.helpers.CrossApprovalExclusion.objects.filter"
+            ) as exclusions_filter,
+            patch(
+                "dojo.api_v2.cross_approval.helpers._get_findings",
+                return_value=[finding],
+            ) as get_findings,
+        ):
+            exclusions_filter.return_value.exclude.return_value = [other_exclusion]
+            revert_cross_approval_exclusion(exclusion)
+
+        get_findings.assert_called_once_with(other_exclusion, active_only=False)
+        finding.tags.remove.assert_not_called()
+
     def test_check_new_findings_queues_current_approved_exclusions(self):
         exclusions = [SimpleNamespace(pk=3), SimpleNamespace(pk=5)]
 
@@ -240,6 +315,28 @@ class CrossApprovalHelpersTest(SimpleTestCase):
 
 
 class CrossApprovalRequestValidationViewTest(SimpleTestCase):
+    def test_post_validates_a_complete_exclusion(self):
+        payload = CrossApprovalExclusionSerializerTest().valid_payload()
+        request = Request(APIRequestFactory().post(
+            "/api/v2/crossapproval_requests/validate-vulnerability-id/",
+            {"owner": "x86", "exclusion": payload},
+            format="json",
+        ), parsers=[JSONParser()])
+        with patch(
+            "dojo.api_v2.cross_approval.views.find_identical_exclusion",
+            return_value=None,
+        ) as find_identical:
+            response = CrossApprovalRequestViewSet().validate_vulnerability_id(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["vulnerability_id"], "#sym:vulnerability_id")
+        self.assertEqual(response.data["conflicts"], [])
+        self.assertEqual(find_identical.call_args.args[0], "x86")
+        self.assertEqual(
+            find_identical.call_args.args[1]["component_values"],
+            ["registry.example.com/base:1.0"],
+        )
+
     def test_reports_conflicting_request_id_and_status(self):
         request = Request(APIRequestFactory().get(
             "/api/v2/crossapproval_requests/validate-vulnerability-id/",
@@ -680,7 +777,7 @@ class CrossApprovalRequestWorkflowViewTest(SimpleTestCase):
         ):
             view.perform_destroy(instance)
 
-        revert.assert_called_once_with(exclusion)
+        revert.assert_called_once_with(exclusion, exclude_request_id=7)
         notify.assert_called_once_with(
             instance,
             "cross_approval_deleted",
