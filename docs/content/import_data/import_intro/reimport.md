@@ -9,6 +9,8 @@ When a Test is created in DefectDojo (either in advance or by importing a scan f
 
 For example, let’s say you have a CI/CD pipeline, which is designed to send a new report to DefectDojo every day. Rather than create a new Test or Engagement for each ‘run’ of the pipeline, you could have each report flow into the same Test using **Reimport**.
 
+A Reimport creates Findings that are new in the report, leaves matching Findings in place, can close Findings that are missing from the report, and reopens closed Findings that come back. Each of these outcomes, and the settings that turn closing and reopening off, is described under [Reimport Logic](#reimport-logic-create-ignore-close-or-reopen). Whether an incoming item matches an existing Finding is decided by [Reimport Deduplication](#reimport-deduplication). To start a Reimport from the UI, see [Opening the Reimport form](#opening-the-reimport-form).
+
 ## Reimport: Process Summary
 
 Reimporting data does not replace any old data in the Test, instead, it compares the incoming scan file with the existing scan data in a test to make informed decisions:
@@ -81,6 +83,14 @@ If you want a Risk Accepted or Duplicate Finding to become Active again, you nee
 
 The **Scan Date** field on the Reimport form starts empty. Left empty, each Finding that the Reimport creates keeps the date from the report (or today's date if the report has none). If you select a Scan Date, it is applied to every Finding the Reimport creates. Findings that already exist in the Test keep their dates either way.
 
+## Reimport Deduplication
+
+Reimport decides whether an incoming item matches an existing Finding using **[Reimport Deduplication](/triage_findings/finding_deduplication/about_deduplication/)** settings. This is separate from “Same Tool Deduplication” and “Cross Tool Deduplication,” which operate after Findings exist. [How DefectDojo Deduplicates Findings Across Security Tools](/triage_findings/finding_deduplication/deduplication_across_tools/) explains how the two steps fit together.
+
+If you are seeing Reimport close old Findings and create new Findings when only a minor attribute changes (for example, a line number shift), tune **Reimport Deduplication** for that tool to use stable identifiers that ignore those attributes (such as Unique ID From Tool).
+
+**DefectDojo Pro** can solve this directly for tools without reliable unique IDs: enabling **[Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/)** makes Reimport recognize a Finding whose location moved (a line shift, file rename, URL move, or dependency version bump) as the *same* Finding, updating it in place and preserving its location history.
+
 ## Opening the Reimport form
 
 The **Re\-Import Findings** form can be accessed on any Test page, under the **⚙️Gear** drop\-down menu.
@@ -105,14 +115,6 @@ This header indicates the actions taken by an Import/Reimport.
 * **\# closed shows the number of Findings that were closed by a Reimport (due to not existing in the incoming report).**
 * **\# left untouched shows the count of Open Findings which were unchanged by a Reimport (because they also existed in the incoming report).**
 * **\#** **reactivated** shows any Closed Findings which were reopened by an incoming Reimport.
-
-## Reimport Deduplication
-
-Reimport decides whether an incoming item matches an existing Finding using **[Reimport Deduplication](/triage_findings/finding_deduplication/about_deduplication/)** settings. This is separate from “Same Tool Deduplication” and “Cross Tool Deduplication,” which operate after Findings exist. [How DefectDojo Deduplicates Findings Across Security Tools](/triage_findings/finding_deduplication/deduplication_across_tools/) explains how the two steps fit together.
-
-If you are seeing Reimport close old Findings and create new Findings when only a minor attribute changes (for example, a line number shift), tune **Reimport Deduplication** for that tool to use stable identifiers that ignore those attributes (such as Unique ID From Tool).
-
-**DefectDojo Pro** can solve this directly for tools without reliable unique IDs: enabling **[Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/)** makes Reimport recognize a Finding whose location moved — a line shift, file rename, URL move, or dependency version bump — as the *same* Finding, updating it in place and preserving its location history.
 
 ## Reimport via API - special note
 
