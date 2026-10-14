@@ -112,7 +112,7 @@ opentelemetry-proto==1.45.1
 opentelemetry-sdk==1.45.1
 opentelemetry-semantic-conventions==0.66b1
 opentelemetry-util-http==0.66b1
-orjson==3.12.0
+orjson==3.13.0
 packageurl-python==0.17.6
 packaging==26.3
 pandas==3.0.6
