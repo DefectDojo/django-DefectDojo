@@ -122,6 +122,7 @@ from dojo.models import (
     TransferFinding,
     Component,
     GeneralSettings,
+    Product_Type_Member
 )
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
@@ -631,12 +632,37 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
             raise ValidationError(msg)
         return super().validate(data)
 
-
 class UserStubSerializer(serializers.ModelSerializer):
+    role = serializers.SerializerMethodField()
     class Meta:
         model = Dojo_User
-        fields = ("id", "username", "first_name", "last_name")
+        fields = ("id", "username", "first_name", "last_name", "role")
+    
+    def get_role(self, obj):
+        request = self.context.get("request")
+        product_type_id = None
 
+        if request:
+            product_type_id = request.query_params.get("product_type_id")
+
+        if product_type_id:
+            membership = (
+                Product_Type_Member.objects
+                .filter(user=obj, product_type_id=product_type_id)
+                .select_related("role")
+                .first()
+            )
+        else:
+            membership = (
+                Product_Type_Member.objects
+                .filter(user=obj)
+                .select_related("role")
+                .first()
+            )
+
+        if membership and membership.role:
+            return membership.role.name
+        return None
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -848,7 +874,12 @@ class NoteTypeSerializer(serializers.ModelSerializer):
         model = Note_Type
         fields = "__all__"
 
+class DojoGroupBasicSerializer(serializers.ModelSerializer):
+    users = UserStubSerializer(many=True, read_only=True)
 
+    class Meta:
+        model = Dojo_Group
+        fields = ["name", "users"]
 class NoteHistorySerializer(serializers.ModelSerializer):
     current_editor = UserStubSerializer(read_only=True)
     note_type = NoteTypeSerializer(read_only=True, many=False)
@@ -3602,3 +3633,4 @@ class FindingExclusionSerializer(serializers.ModelSerializer):
             "reviewed_by_username",
             "accepted_by_username",
         ]
+
