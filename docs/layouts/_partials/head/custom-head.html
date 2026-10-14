@@ -34,6 +34,9 @@
       version = forced ? pageAudience : 'opensource';
     }
     document.documentElement.dataset.ddVersion = version;
+    // custom.js reads this to move the reader off an edition-specific page
+    // when they toggle to the other edition.
+    if (forced) document.documentElement.dataset.ddPageAudience = pageAudience;
   })();
 </script>
 <meta name="theme-color" content="#003038">
