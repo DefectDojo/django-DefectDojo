@@ -640,6 +640,12 @@ class RoleSerializer(serializers.ModelSerializer):
         model = Role
         fields = "__all__"
 
+class DojoGroupBasicSerializer(serializers.ModelSerializer):
+    users = UserStubSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Dojo_Group
+        fields = ["name", "users"]
 
 class DojoGroupSerializer(serializers.ModelSerializer):
     configuration_permissions = serializers.PrimaryKeyRelatedField(
