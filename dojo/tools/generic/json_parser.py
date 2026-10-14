@@ -1,8 +1,11 @@
 import base64
 import math
+from functools import cache
 
 import dateutil
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db.models import CharField
 
 from dojo.finding.cwe import cwe_number
 from dojo.location.feature import locations_enabled
@@ -37,6 +40,20 @@ def to_number(value, converter):
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) else None
+
+
+@cache
+def _finding_max_lengths() -> dict[str, int]:
+    """
+    Column widths of the Finding text fields, read from the model so a width change needs no parser change.
+
+    ``title`` is left out: the model truncates it itself on save.
+    """
+    return {
+        field.name: field.max_length
+        for field in Finding._meta.get_fields()
+        if isinstance(field, CharField) and field.max_length and field.name != "title"
+    }
 
 
 class GenericJSONParser:
@@ -154,6 +171,17 @@ class GenericJSONParser:
                 raise ValueError(msg)
 
             self._normalize_numeric_fields(item)
+            # A value wider than its column would only fail at INSERT time, deep in the
+            # importer, as a DataError the API reports as a 500. Reject it here instead so
+            # the caller gets a 400 naming the field and the limit.
+            too_long = [
+                f"{key} is {len(value)} characters, the maximum is {max_length}"
+                for key, max_length in _finding_max_lengths().items()
+                if isinstance(value := item.get(key), str) and len(value) > max_length
+            ]
+            if too_long:
+                msg = f"Field values exceed the maximum length: {too_long}"
+                raise ValidationError(msg)
             finding = Finding(**item)
 
             # manage endpoints

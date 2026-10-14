@@ -1,4 +1,7 @@
 import datetime
+import json
+
+from django.core.exceptions import ValidationError
 
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
@@ -862,6 +865,36 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
 # Regression: the generic CSV parser read "FALSE" as true for known_exploited /
 # ransomware_used / fix_available, never read CVSSV3_score, and aborted the whole
 # import on an empty numeric or date cell.
+
+    # Regression: a JSON finding whose component_name exceeded the Finding column
+    # width reached the database and failed the import with a 500 (DataError:
+    # value too long for type character varying(500)) instead of a 400.
+    def test_parse_json_field_longer_than_model_max_length_raises_validation_error(self):
+        field = Finding._meta.get_field("component_name")
+        for length, should_raise in ((field.max_length, False), (field.max_length + 1, True)):
+            with self.subTest(length=length):
+                content = json.dumps({"findings": [{
+                    "title": "Polyfill Detected",
+                    "severity": "Low",
+                    "description": "component_name carries a very long URL",
+                    "component_name": "https://example.com/page/?q=" + "x" * (length - len("https://example.com/page/?q=")),
+                }]})
+                file = TestFile("findings.json", content)
+                parser = GenericParser()
+                if should_raise:
+                    with self.assertRaises(ValidationError) as cm:
+                        parser.get_findings(file, self.test)
+                    message = str(cm.exception)
+                    self.assertIn("component_name", message, msg=f"expected the field name in the error, got: {message}")
+                    self.assertIn(str(field.max_length), message, msg=f"expected the max length in the error, got: {message}")
+                else:
+                    findings = parser.get_findings(file, self.test)
+                    self.assertEqual(
+                        length, len(findings[0].component_name),
+                        msg=f"expected component_name of exactly {length} chars to be accepted, got {len(findings[0].component_name)}",
+                    )
+
+
 class TestGenericCSVParserCellValues(DojoTestCase):
 
     def parse(self, content):
