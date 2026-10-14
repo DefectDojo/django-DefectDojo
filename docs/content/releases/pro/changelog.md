@@ -18,6 +18,68 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## October 2026: v3.4
 
+### October 12, 2026: v3.4.100
+
+New features:
+* **(Search)** Global Search (Cmd/Ctrl+K) is rebuilt as a palette with two modes: Search finds records by type (Findings, Assets, Organizations, Engagements, Tests, Locations), and Navigate jumps to any page in the sidebar.
+* **(Sensei)** 1,000 free Sensei fixes for every Pro instance from October 14 through November 13. Free fixes are used before your license quota and do not count toward pay-as-you-go spend.
+* **(Sensei)** Reachability analysis runs after default-branch scans and can be started from the asset menu. An import can now carry several reachability verdicts, each source goes stale on its own, and a reimport retracts verdicts that no longer apply.
+* **(Sensei)** When the Model setting is blank, Sensei uses Claude Sonnet 5.5 and falls back to Sonnet 4.6, then 4.5.
+* **(AI)** Amazon Bedrock is available as a provider for the in-app AI features.
+* **(Compliance)** Posture scans count as configuration evidence, with PCI DSS Requirement 2. Security Hub and Wiz findings are tagged with the compliance requirements they map to, and Prowler compliance mappings are kept on cloud scan results.
+* **(Compliance)** For findings that cite no security control, DefectDojo suggests control mappings for a person to confirm.
+* **(Threat Intelligence)** Findings and the Vulnerability Explorer show source ratings from the signed threat-intel bundle, and the finding's evidence chip shows the date a CVE was added to CISA KEV.
+* **(Locations)** Cloud resources are listed under Attack Surface.
+* **(Licensing)** View and delete the legacy endpoints that still count toward your license after the move to Locations.
+* **(Air-Gapped)** The Airgapped instance flag, or the new `DD_AIRGAPPED` setting, now stops every default outbound call: the version check, external tools, announcements, threat intel, and diagnostics.
+* **(Deprecations)** Each deprecation is declared once, with its release calendar, and shown on every surface where it applies.
+* **(Tables)** Tables show when their columns or filters have unsaved changes.
+* **(Navigation)** Pinned sidebar entries are prefixed with their parent group.
+* **(UI)** DefectDojo asks before copying, duplicating, or moving a record.
+* **(Connectors)** Security Hub ECR repository tags become asset tags for resource grouping.
+* **(MCP)** The MCP server can render DefectDojo results as MCP Apps views.
+* **(API)** `locations` is advertised as a prefetch option on findings and products.
+
+Enhancements:
+* **(UI)** Pages work better on narrow screens and phones: detail page headers wrap, dialogs stay inside the viewport, the Permissions dialog fits, and Home and the connection tiles no longer scroll sideways.
+* **(UI)** Labels and copy are reworded and title-cased consistently in all 27 languages, and forms, tables, and dialogs across the UI (including the Command Center, Report Builder, and Sensei pages) share one style.
+* **(SSO)** When an identity provider's certificate cannot be verified, sign-in shows an actionable message, and Validate Config names the CA bundle it checked against.
+* **(Performance)** Removed per-row queries from the tests, endpoints, locations, assets, engagements, and findings lists and from findings exports. Reimport closes old findings in bulk and looks up only the endpoints a report can match, the endpoint meta import is batched, notification cost stays flat as recipients grow, and prioritization rescores a product in a worker after import.
+
+Bug fixes:
+* **(Login)** A failed SSO sign-in no longer loops on the auto-redirect, and the login page reports a login service that returns an unexpected response.
+* **(Connectors)** Finding tags sent by connectors are saved, `nb_occurrences` maps onto the finding, a corrupt gzip chunk returns 400 instead of 500, and moved assets' records are no longer marked stale when their original organization is deleted. Discover and Sync say why a run was refused and refresh the records when it ends, and Push to Connector says whether anything was sent. Downstream connector controls follow Integration permissions instead of requiring a superuser.
+* **(Connectors)** Cyberwatch authenticates with HTTP basic auth, Cycode streams violation pages, and Snyk treats a missing `links` object as the end of pagination.
+* **(Deduplication)** Security Hub connector findings match on their finding ARN, and the same CVE in two container images stays two findings.
+* **(VEX)** The asset VEX export never applies one host's `not_affected` to another host.
+* **(Sensei)** Fixes that cannot succeed are refused up front, patch-mismatch evidence is kept, only fixable candidates are staged, and spend is recorded on failed fixes. Sensei targets refresh after a status sync, and Scan History is back.
+* **(Importers)** Import no longer overwrites a report's scan date, and misleading import and reimport fields are corrected. A scan with a missing request or response in a request/response pair imports, and an orphaned location reference returns 400 instead of 500.
+* **(Parsers)** SonarQube REST API imports store the issue key as `unique_id_from_tool`, and Qualys WAS honors the `QUALYS_WAS_WEAKNESS_IS_VULN` and `QUALYS_WAS_UNIQUE_ID` settings.
+* **(Risk Acceptance)** The default expiration date applies to every new risk acceptance, the forms offer the engagement's findings, and accepting risk stays fast on tables without statistics.
+* **(Findings)** The SLA of a finding due today is shown, and creating a finding group no longer returns 500 for non-superusers.
+* **(Reporting)** Organization users can open Generated Reports, report toasts link to the report, and a failed report shows why.
+* **(Triage Engine)** New rules start disabled and Run Now runs them, and a rule with a disabled schedule says so instead of showing a next run.
+* **(Locations)** Old Endpoint links redirect instead of returning 404.
+* **(Notifications)** Notification and Quick Action links point at pages that exist.
+* **(Permissions)** A refused member add shows the server's reason, and the Owner role is offered only to users who can grant it.
+* **(Settings)** The default group can be cleared, and Tool Configurations keep stored credentials when they are left blank on edit.
+* **(API)** The SonarQube issue and transition endpoints are served from the right viewsets, and the API v2 Token page shows a refusal once and has a corrected Python sample.
+* **(Threat Intelligence)** EPSS and receipt links refresh on records whose score did not change.
+* **(Licensing)** A license date without a timezone is read as UTC instead of failing.
+* **(UI)** Actions the server would refuse are hidden, a failure shows one toast, PSIRT toasts no longer show error codes, the Regulatory Scope severity counts show in every language, and the Command Center respects reduced motion.
+
+Security fixes:
+* **(Authentication)** API token settings apply to API v3 token auth, HTTP Basic auth on the API follows the token endpoint's account rules, the login rate limiter and account lockout are adjusted, account-recovery emails are limited per address, the report cover page requires a login, and changing a JIRA instance URL requires its password.
+* **(Authorization)** Object permissions are enforced on the questionnaire answer view, the API v3 import permission check, `delete_preview` on configuration viewsets, notification recipients, Issue Tracker Assignments, and report selectors and endpoint counts for shared locations.
+* **(Hardening)** The upload file type check covers parser-supplied attachments, three parser regular expressions are bounded, new system checks flag settings left at their shipped values, and the FIPS images apply Debian security updates.
+
+Upgrade notes:
+* **(Compose)** The separate-db and containerized-db bundles now require per-install values for `DD_ORCH_SECRET` and `DD_SENSEI_SHARED_SECRET`. A current `dojo-compose-cli` generates both. The bundles also ship upgrade notes that `dojo-compose-cli` checks before an upgrade, and the first admin's email is read from `DD_ADMIN_MAIL`.
+* **(Deployment)** uWSGI now uses harakiri to recycle wedged workers, configurable with `DD_UWSGI_HARAKIRI` (Compose) or per uWSGI pool (Helm).
+* **(Deployment)** A forward proxy and a private CA are honored by every container, `NO_PROXY` has built-in defaults, and `/api/v2/health_check/light/` answers 503 instead of 400 when it fails. Self-hosted defaults for diagnostics, the portal secret, and initializer exit codes are corrected.
+* **(Helm)** New values: an opt-in `dojo.migrationCheck` gate that holds pods until migrations finish, `license.existingSecretKey`, `ddorch.tls.existingSecret` for GitOps and cert-manager, and GKE `django.service.loadBalancerSourceRanges`, SSL policy, and Cloud Armor settings. The values templates ship inside the chart, and the OCI chart is the documented install source.
+* **(Helm)** The ddorch TLS private key is stored in a Secret instead of a ConfigMap, the webhook gateway has its own trust anchor, the mirror, proxy, and CA settings reach every workload, django pods roll without load-balancer errors, and `helm upgrade --reuse-values` from 3.3.x renders.
+
 ### October 5, 2026: v3.4.0
 
 New features:

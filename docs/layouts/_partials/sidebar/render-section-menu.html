@@ -52,7 +52,7 @@
       {{- end }}
     {{- end }}
 
-    <li {{- with $liClass }} class="{{ . }}" {{ end -}}>
+    <li {{- with $liClass }} class="{{ . }}" {{ end -}} {{- with $node.Page }}{{ with .Params.audience }} data-audience="{{ . }}"{{ end }}{{ end -}}>
       {{- with $node.Page.Pages }}
         <details{{- with $ariaCurrent }} open{{- end }}{{- if ne $node.Page.Params.sidebar.collapsed true }} open{{- end }}>
           <summary>{{ $linkContent }}{{ $proBadge | safeHTML }}</summary>
