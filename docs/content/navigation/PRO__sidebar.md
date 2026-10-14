@@ -1,6 +1,6 @@
 ---
 title: "The Sidebar Menu"
-description: "How the DefectDojo Pro sidebar is organized, how to search it, pinning pages, collapsing it to an icon rail, the All Settings directory page, and how to switch between the current and previous layouts"
+description: "How the DefectDojo Pro sidebar is organized, how to search it, pinning pages, collapsing it to an icon rail, the All Settings directory page, and where pages from the classic sidebar now sit"
 weight: 6
 audience: pro
 aliases:
@@ -9,7 +9,7 @@ aliases:
 
 The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and (at the bottom) your account, alerts and the light/dark switch. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
 
-The menu groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. This layout is the default on every instance from DefectDojo Pro 3.2.200 onwards. An administrator can switch back to the previous layout at any time (see [Switching layouts](#switching-layouts)).
+The menu groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. It is the only layout; the classic sidebar has been removed (see [The classic sidebar](#the-classic-sidebar)).
 
 Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
 
@@ -153,7 +153,7 @@ The **UI Defaults** group collects the settings that control how much of the int
 
 ## What moved
 
-If you are used to the previous layout:
+If you are used to the classic sidebar:
 
 | Previously | Now |
 | --- | --- |
@@ -208,17 +208,11 @@ Three sidebar entries can be removed from [Feature Flags](/admin/feature_flags/p
 | **Smart Upload** | Smart Upload and Unassigned Findings, from Connect > Import |
 | **PSIRT** | the whole PSIRT section |
 
-The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off, and the System Settings checkbox disappears once the reorganized menu is on. Instances still on the previous layout keep using that checkbox.
+The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 
-## Switching layouts
+## The classic sidebar
 
-**Menu 2.0** on the [Feature Flags](/admin/feature_flags/pro__feature_flags/) page controls which layout is active. Turning it on or off reshapes the sidebar immediately; no restart is needed and nothing else about your instance changes.
-
-Menu 2.0 is on by default everywhere as of DefectDojo Pro 3.2.200. An instance that turned it off earlier keeps that choice through upgrades, and the toggle stays available if your team prefers the previous layout.
-
-While it is off, the **All Settings** page is unavailable and its URL returns Not Found.
-
-> **Menu 2.0 becomes the standard in the 3.3.0 release (September 8, 2026).** That release removes the classic sidebar and this toggle, so every instance moves to Menu 2.0. An instance still on the classic layout switches automatically on upgrade; turn Menu 2.0 on beforehand if you would rather move on your own schedule. In the patch releases leading up to 3.3.0, a banner in the app reminds anyone still on the classic layout.
+This layout is the only sidebar. The classic sidebar it replaced, and the **Menu 2.0** toggle on the Feature Flags page that switched between the two, have been removed. An instance that was still on the classic layout moves to this one on upgrade. Every page keeps its URL, so bookmarks and links continue to work; use the tables above to find where a page now sits in the menu, or search for it with **Cmd+K** / **Ctrl+K**.
 
 ## Related
 
