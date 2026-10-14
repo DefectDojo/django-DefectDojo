@@ -26,9 +26,9 @@ The suite has four items, because a Finding can carry three independent kinds of
 3. **Findings to Code Locations backfill** — turns each Finding's `file_path` / `line` into a **[Source Code Location](/asset_modelling/locations/pro__source_code_locations/)**.
 4. **Identity rehash** — recomputes the deduplication identity for scan types whose identity digest changed when the flag flipped, so future reimports match the migrated Locations instead of closing and re-opening findings.
 
-The identity rehash queues one background re-hash per affected scan type, and those run on after the item itself has queued them. The item reads **Running** with a count of re-hashed batches and an estimate of the time left until every one of them has finished, then reports how many scan types it re-hashed. The same re-hashes are listed on **Settings > Finding Workflow > Matching Configuration** while they run.
-
 The three backfills are independent and can run in any order. The **Identity rehash stays locked until all three backfills have completed**, because the identity it recomputes folds in every location type; running it against a half-migrated database would bake an incomplete identity. Only one item runs at a time.
+
+The identity rehash queues one background rehash for each affected scan type and matching kind, and those rehashes keep running after the item has queued them. Until they have all finished, the item reads **Running**, with a count of rehashed batches and an estimate of the time left once the first batch is done, and it cannot be canceled. It then reports how many rehashes it ran, or **Failed** if any of them lost a batch. The same rehashes are listed on **Settings > Finding Workflow > Matching Configuration** while they run.
 
 Each backfill is also available as a management command for scripted or air-gapped runs:
 
