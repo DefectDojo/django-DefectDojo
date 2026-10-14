@@ -1,0 +1,102 @@
+{
+  "total": 3,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 3
+  },
+  "issues": [
+    {
+      "key": "AZb-issue-16115-1",
+      "rule": "java:S2068",
+      "severity": "BLOCKER",
+      "component": "example-project:src/app/Login.java",
+      "project": "example-project",
+      "line": 12,
+      "textRange": {
+        "startLine": 12,
+        "endLine": 12,
+        "startOffset": 4,
+        "endOffset": 20
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Revoke and change this password, as it is compromised.",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2025-06-02T10:00:00+0000",
+      "type": "VULNERABILITY",
+      "scope": "MAIN",
+      "quickFixAvailable": false
+    },
+    {
+      "key": "AZb-issue-16115-2",
+      "rule": "java:S1192",
+      "severity": "MINOR",
+      "component": "example-project:src/app/Login.java",
+      "project": "example-project",
+      "line": 30,
+      "textRange": {
+        "startLine": 30,
+        "endLine": 30,
+        "startOffset": 4,
+        "endOffset": 20
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2025-06-02T10:00:00+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false
+    },
+    {
+      "key": "AZb-issue-16115-3",
+      "rule": "java:S2259",
+      "severity": "MAJOR",
+      "component": "example-project:src/app/Login.java",
+      "project": "example-project",
+      "line": 44,
+      "textRange": {
+        "startLine": 44,
+        "endLine": 44,
+        "startOffset": 4,
+        "endOffset": 20
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Make sure this long message is truncated xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2025-06-02T10:00:00+0000",
+      "type": "BUG",
+      "scope": "MAIN",
+      "quickFixAvailable": false
+    }
+  ],
+  "components": [
+    {
+      "key": "example-project:src/app/Login.java",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "Login.java",
+      "longName": "src/app/Login.java",
+      "path": "src/app/Login.java"
+    },
+    {
+      "key": "example-project",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "example-project",
+      "longName": "example-project"
+    }
+  ],
+  "facets": []
+}

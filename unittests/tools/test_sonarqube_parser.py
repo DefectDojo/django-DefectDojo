@@ -572,7 +572,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(5, len(findings))
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Filename: package:1.1.2 | Reference: CVE-2024-2529 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .", item.title)
         self.assertEqual("fjioefjwoefijo", item.unique_id_from_tool)
         self.assertEqual("Medium", item.severity)
         self.assertEqual("CVE-2024-2529", item.unsaved_vulnerability_ids[0])
@@ -582,14 +582,14 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("1.1.2", item.component_version)
         self.assertEqual("2023-10-16", item.date)
         item = findings[1]
-        self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
+        self.assertEqual("Add a description to this table.", item.title)
         self.assertEqual("asdfwfewfwefewf", item.unique_id_from_tool)
         self.assertEqual("Low", item.severity)
         self.assertEqual(0, item.cwe)
         self.assertIsNone(item.cvssv3_score)
         self.assertEqual("2023-07-25", item.date)
         item = findings[2]
-        self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
+        self.assertEqual('Replace this "Boolean" wrapper object with primitive type "boolean".', item.title)
         self.assertEqual("fjoiewfjoweifjoihugu-", item.unique_id_from_tool)
         self.assertEqual("Low", item.severity)
         self.assertEqual("2024-01-29", item.date)
@@ -625,16 +625,16 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(4, len(findings))
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertEqual("typescript:7777_fwafewef", item.title)
+        self.assertEqual("Make sure disabling asdfbuilt-in sanitization is safe here.", item.title)
         self.assertEqual("fwafewef", item.unique_id_from_tool)
         self.assertEqual("High", item.severity)
         self.assertEqual("2024-02-13", item.date)
         item = findings[1]
-        self.assertEqual("Web:1222_cyxcvyxcvyxv", item.title)
+        self.assertEqual("Make sure nasdfre.", item.title)
         self.assertEqual("Low", item.severity)
         self.assertEqual("2023-07-27", item.date)
         item = findings[2]
-        self.assertEqual("Web:9876_werrwerwerwer", item.title)
+        self.assertEqual("Make sure no123123.", item.title)
         self.assertEqual("Low", item.severity)
         self.assertEqual("2023-07-27", item.date)
         my_file_handle.close()
@@ -666,14 +666,14 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(6, len(findings))
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Filename: package:1.1.2 | Reference: CVE-2024-259 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .", item.title)
         self.assertEqual("testapplication", item.file_path)
         self.assertEqual("Medium", item.severity)
         item = findings[3]
-        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)
+        self.assertEqual("Filename: package:1.1.2 | Reference: CVE-2024-259 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .", item.title)
         self.assertEqual("Low", item.severity)
         item = findings[5]
-        self.assertEqual("typescript:S112533_fjoiewfjo1235gweifjoihugu-", item.title)
+        self.assertEqual('Replace this "Boolean" wrapper object with primitive type "boolean".', item.title)
         self.assertEqual("Medium", item.severity)
         my_file_handle.close()
 
@@ -688,4 +688,28 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("High", item.severity)
         item = findings[2]
         self.assertEqual("Medium", item.severity)
+        my_file_handle.close()
+
+    def test_parse_json_file_issue_16115_title_from_message(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("sonarqube") / "issue_16115.json",
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(3, len(findings))
+        with self.subTest(case="message"):
+            item = findings[0]
+            self.assertEqual("Revoke and change this password, as it is compromised.", item.title)
+            self.assertEqual("AZb-issue-16115-1", item.unique_id_from_tool)
+            self.assertEqual("High", item.severity)
+        with self.subTest(case="empty message falls back to rule_key"):
+            item = findings[1]
+            self.assertEqual("java:S1192_AZb-issue-16115-2", item.title)
+            self.assertEqual("AZb-issue-16115-2", item.unique_id_from_tool)
+        with self.subTest(case="long message is truncated"):
+            item = findings[2]
+            self.assertEqual(510, len(item.title))
+            self.assertTrue(item.title.startswith("Make sure this long message is truncated "))
+            self.assertTrue(item.title.endswith("..."))
+            self.assertIn("**rule:** java:S2259", item.description)
         my_file_handle.close()
