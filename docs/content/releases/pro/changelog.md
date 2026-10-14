@@ -27,8 +27,8 @@ New features:
 
 Enhancements:
 * **(Tables)** The column picker uses the same checkboxes as the column filter.
-* **(Forms)** Every multi-step form uses the same stepper, with Submit available on every step.
-* **(Connections)** Vendor logos are drawn at one size in the brand duotone.
+* **(UI)** Every multi-step form uses the same stepper, with Submit available on every step.
+* **(Connectors)** Vendor logos on the Connections page are drawn at one size in the brand duotone.
 * **(UI)** The app works better on phones: Dashboards 2.0 widgets and Home's stat cards stack in one column, Home's brief stays whole, and the app shell fits the screen (gutter, breadcrumb trail, rail height).
 
 Bug fixes:
@@ -36,15 +36,15 @@ Bug fixes:
 * **(Sensei)** A scan target is verified again after its host changes, and the DAST targets list uses the same verification rule as launch.
 * **(Importers)** The import file pickers accept `.ckl`, `.cklb`, and `.jsonl` files.
 * **(Settings)** A Tuner settings save applies in every worker on its next request, and Tool Configurations keep stored credentials on edit.
-* **(UI)** Numbers are formatted in the language picked in the app, the Jira project popover keeps its width, content after a table stays inside its card, removing a dedupe pool member moves into a row menu, and the compliance evidence mode no longer overlaps the Evidence button on narrow screens.
+* **(UI)** Numbers are formatted in the language picked in the app, the Jira project popover keeps its width, content after a table stays inside its card, removing a Dedupe Pool member moves into a row menu, and the compliance evidence mode no longer overlaps the Evidence button on narrow screens.
 
 Security fixes:
-* **(Authentication)** MFA and password reset rules apply to every sign-in path, exports require sign-in, and initialization no longer logs the generated admin password or the Jira webhook secret.
-* **(Authorization)** Permissions are now checked for LDAP settings, the update check, reminder snoozes, finding group writes, and finding actions. Only authorized users can grant group configuration permissions and owner-level roles. Shared location edits and deletes, and runtime AgentSec runs, are limited to the caller's assets. Related IDs in API requests (including merge, scan, review, and recipient IDs) resolve only through records the caller can access.
-* **(Hardening)** Connectors reuse a stored credential only when the host is unchanged. Export columns are limited to list fields, text cells are written as text, and user-supplied patterns are bounded. Markdown attributes are tightened, every portal endpoint refuses the placeholder portal secret, and DefectDojo warns when the Sensei engine secret is a shipped default.
+* **(Authentication)** MFA and password reset rules apply to every sign-in path, exports require sign-in, and the generated admin password and Jira webhook secret no longer appear in logs.
+* **(Authorization)** LDAP settings, the update check, reminder snoozes, Finding Groups, and Finding actions are checked against the user's permissions. Only authorized users can grant group configuration permissions and owner-level roles. Edits and deletes of shared Locations are limited to the user's Assets, and API requests can only reference records the user can access.
+* **(Hardening)** Connectors reuse a stored credential only when the host is unchanged, exports are hardened, and Markdown rendering is stricter. The licensing portal refuses the placeholder portal secret, and DefectDojo warns when the Sensei engine secret is a shipped default.
 
 Upgrade notes:
-* **(Deployment)** dd-orch is verified against its own CA when `REQUESTS_CA_BUNDLE` is set, and the Helm chart includes the dd-orch root CA in the combined CA bundle.
+* **(Deployment)** The Orchestrator is verified against its own CA when `REQUESTS_CA_BUNDLE` is set, and the Helm chart includes the Orchestrator root CA in the combined CA bundle.
 * **(Deployment)** The AI inventory catalogue, presets, and FedRAMP VDR data are included in the package.
 * **(Connectors)** The `pro.W001` system check hint now gives the manual secret step that works today.
 
