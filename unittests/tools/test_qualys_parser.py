@@ -4,7 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Test
 from dojo.tools.qualys.parser import QualysParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestQualysParser(DojoTestCase):
@@ -139,6 +139,18 @@ class TestQualysParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.validate_locations(findings)
             self.assertEqual(1, len(findings))
+
+    @skip_unless_v3
+    def test_parse_file_attaches_host_os(self):
+        with (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").open(encoding="utf-8") as testfile:
+            findings = QualysParser().get_findings(testfile, Test())
+        host_os = {
+            location.host: location.get_association_data().relationship_data.get("os")
+            for finding in findings
+            for location in self.get_unsaved_locations(finding)
+        }
+        self.assertEqual("Ubuntu / Tiny Core Linux / Linux 2.6.x", host_os["demo13.s02.sjc01.qualys.com"])
+        self.assertEqual("Windows 2012 Standard", host_os["trn-win2012-dc.trn.qualys.com"])
 
     def test_parse_file_with_cvss_values_and_scores(self):
         with (

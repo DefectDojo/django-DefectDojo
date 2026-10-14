@@ -3,7 +3,7 @@ from datetime import datetime
 
 from dojo.models import Test
 from dojo.tools.qualys_infrascan_webgui.parser import QualysInfrascanWebguiParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestQualysInfrascanWebguiParser(DojoTestCase):
@@ -31,6 +31,13 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
             self.assertEqual("Oracle Java SE Critical Patch Update - January 2015", finding.title)
             self.assertEqual("Critical", finding.severity)  # Negligible is translated to Informational
             self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=zoneinfo.ZoneInfo("UTC")), finding.date)
+
+    @skip_unless_v3
+    def test_parse_file_attaches_host_os(self):
+        with (get_unit_tests_scans_path("qualys_infrascan_webgui") / "qualys_infrascan_webgui_1.xml").open(encoding="utf-8") as testfile:
+            findings = QualysInfrascanWebguiParser().get_findings(testfile, Test())
+        location = self.get_unsaved_locations(findings[0])[0]
+        self.assertEqual({"os": "Ubuntu 11"}, location.get_association_data().relationship_data)
 
     # Sample with Multiple Test
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!-- Nmap 7.94 scan initiated Mon Oct 12 10:00:00 2026 as: nmap -O -oX os.xml 10.0.0.10 10.0.0.20 -->
+<nmaprun scanner="nmap" args="nmap -O -oX os.xml 10.0.0.10 10.0.0.20" start="1791799200" startstr="Mon Oct 12 10:00:00 2026" version="7.94" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1000" services="1-1000"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1791799200" endtime="1791799210"><status state="up" reason="echo-reply" reason_ttl="127"/>
+<address addr="10.0.0.10" addrtype="ipv4"/>
+<hostnames>
+<hostname name="win-dc01.corp.example" type="PTR"/>
+</hostnames>
+<ports>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="microsoft-ds" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="445"/>
+<osmatch name="Microsoft Windows Server 2019" accuracy="96" line="78123">
+<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2019" accuracy="96"/>
+</osmatch>
+<osmatch name="Microsoft Windows 10 1809 - 21H2" accuracy="92" line="77001">
+<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10" accuracy="92"/>
+</osmatch>
+</os>
+</host>
+<host starttime="1791799200" endtime="1791799210"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="10.0.0.20" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="ssh" method="table" conf="3"/></port>
+</ports>
+</host>
+<runstats><finished time="1791799210" timestr="Mon Oct 12 10:00:10 2026" elapsed="10.00" summary="Nmap done at Mon Oct 12 10:00:10 2026; 2 IP addresses (2 hosts up) scanned in 10.00 seconds" exit="success"/><hosts up="2" down="0" total="2"/>
+</runstats>
+</nmaprun>
