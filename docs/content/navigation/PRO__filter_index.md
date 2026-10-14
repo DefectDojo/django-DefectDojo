@@ -40,6 +40,12 @@ List filters whose options come from a search box, such as the Asset and Organiz
 - The selection is stored as the search text, so a table URL or a saved table preference carries it compactly however many options match.
 - **Deselect all** also clears any options you picked one by one.
 
+## How text filters are evaluated
+
+Text columns such as **Name**, **Component**, **File Path**, **Hostname** and **Asset** offer a match operator alongside the value. **Contains**, **Not Contains**, **Exact**, **Not Exact**, **Starts With**, **Ends With**, **Regex Match** and **Not Regex Match** take one value. **In List** and **Not in List** take several: type or paste the values, separated by commas, new lines or tabs, and each becomes a chip. **In List** keeps the rows whose value equals any chip, and **Not in List** removes them. A pasted list from a spreadsheet, a ticket or a CMDB export works as it is.
+
+Every text operator, the list ones included, matches case-insensitively. **In List** compares whole values, not fragments: a chip of `api` matches a component named `API` but not one named `api-gateway`. A chip is trimmed, empty chips are ignored, and a list with no chips left applies no filter, the same as an empty text box. The list is stored in the table URL and in a saved table preference as the comma-joined values, so a value that itself contains a comma cannot be listed.
+
 ## How number filters are evaluated
 
 Numeric filters — including **Age** and **SLA** — offer a match operator alongside the value: **Equals**, **Not Equals**, **Greater Than**, **Greater Than or Equal To**, **Less Than**, **Less Than or Equal To**, **In List**, and **Not in List**. Entering a value without choosing an operator matches on **Equals**.
