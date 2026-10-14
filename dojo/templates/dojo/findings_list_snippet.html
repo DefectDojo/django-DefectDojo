@@ -570,12 +570,11 @@
                                                 {% if finding.locations.exists %}
                                                     <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-content="
                                                     {% for ref in finding.locations.all %}
-                                                        {% if ref.status == "Mitigated" %} &#10003; {{ ref.location }}
-                                                            <br/>
-                                                        {% else %}
-                                                                &#10005; {{ ref.location }}
-                                                                <br/>
-                                                        {% endif %}
+                                                        {% if ref.status == "Mitigated" %} &#10003; {% else %} &#10005; {% endif %}
+                                                        {% if ref|host_os_matches:request.GET.location_os %}<b>{{ ref.location }}</b>{% else %}{{ ref.location }}{% endif %}
+                                                        {% comment %} Double-escaped: the popover renders data-content as HTML {% endcomment %}
+                                                        {% if ref.relationship_data.os %} ({{ ref.relationship_data.os|force_escape|force_escape }}){% endif %}
+                                                        <br/>
                                                     {% endfor %}
                                                     "></i>
                                                 {% endif %}

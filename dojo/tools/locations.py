@@ -8,6 +8,7 @@ from typing import Any
 class LocationData:
     type: str
     data: dict[str, Any] | None = None
+    association: LocationAssociationData | None = None
 
     def __post_init__(self) -> None:
         if not self.data:
@@ -26,6 +27,7 @@ class LocationData:
         query: str = "",
         fragment: str = "",
         user_info: str = "",
+        association: LocationAssociationData | None = None,
     ) -> LocationData:
         return cls(
             type="url",
@@ -39,6 +41,7 @@ class LocationData:
                 "fragment": fragment,
                 "user_info": user_info,
             },
+            association=association,
         )
 
     @classmethod
@@ -179,3 +182,9 @@ class LocationAssociationData:
 
     def __bool__(self) -> bool:
         return bool(self.relationship_type) or bool(self.relationship_data)
+
+    @classmethod
+    def host_os(cls, os_name: str | None) -> LocationAssociationData:
+        """Association recording the host operating system a scanner reported; empty (falsey) when unknown."""
+        os_name = (os_name or "").strip()
+        return cls(relationship_data={"os": os_name}) if os_name else cls()
