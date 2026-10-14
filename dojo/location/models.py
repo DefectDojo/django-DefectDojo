@@ -410,7 +410,10 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         if location_data.type != cls.get_location_type():
             error_message = f"Cannot create instance of {cls} from LocationData of type {location_data.type}"
             raise ValueError(error_message)
-        return cls._from_location_data_impl(location_data)
+        location = cls._from_location_data_impl(location_data)
+        if location_data.association:
+            location._association_data = location_data.association
+        return location
 
     @classmethod
     def _from_location_data_impl(cls, location_data: LocationData) -> Self:
