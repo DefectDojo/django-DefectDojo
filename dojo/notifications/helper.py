@@ -117,7 +117,8 @@ class AlertBuffer:
 
     Written every ``ALERT_BULK_CREATE_BATCH_SIZE`` alerts rather than only when the fan-out
     ends, so memory stays bounded and a worker stopped mid fan-out keeps what it had built. A
-    batch whose INSERT fails is written again row by row, so a bad row costs only itself.
+    failed INSERT costs that batch of alerts, except in a notification batch
+    (NotificationManager.batch), where the rows are written again one at a time.
     """
 
     def __init__(self, write, *, auto_flush: bool = True) -> None:
@@ -191,13 +192,30 @@ def notification_batch():
     those are read once, once per product, and in shared bulk INSERTs. Yields the manager,
     whose ``flush_alerts()`` writes the alerts collected so far once a full batch is waiting.
     """
-    manager = get_manager_class_instance()
+    try:
+        manager = get_manager_class_instance()
+    except Exception:
+        logger.exception("Unable to build the notification manager for a batch; sending each notification on its own")
+        manager = None
+    if not hasattr(manager, "batch"):
+        # A custom NOTIFICATION_MANAGER that predates batching (or one that could not be built)
+        # sends each notification on its own, as before.
+        yield _UnbatchedNotifications()
+        return
     with manager.batch():
         token = _open_batch.set(manager)
         try:
             yield manager
         finally:
             _open_batch.reset(token)
+
+
+class _UnbatchedNotifications:
+
+    """What notification_batch yields when it cannot batch: every notification goes out on its own."""
+
+    def flush_alerts(self) -> None:
+        pass
 
 
 def create_notification(
@@ -415,6 +433,9 @@ class SlackNotificationManger(NotificationManagerHelpers):
                             )
                             slack_user_save.slack_user_id = slack_user_id
                             slack_user_save.save()
+                            # The same user object can serve many notifications (a batch reuses
+                            # its recipients), so keep the id on it too rather than looking it up again.
+                            user.usercontactinfo.slack_user_id = slack_user_id
                     # only send notification if we managed to find the slack_user_id
                     if slack_user_id:
                         channel = f"@{slack_user_id}"
@@ -904,6 +925,12 @@ class NotificationManager(NotificationManagerHelpers):
         self._open_fanout({}, auto_flush_alerts=False)
         self._in_batch = True
         self._recipients_by_scope = {}
+        # Alert-write failures, tracked across the batch's flushes (see _write_alerts_one_at_a_time).
+        self._alert_writes_given_up = False
+        self._alert_failure_streak = 0
+        self._alert_failure_notifications = set()
+        self._alerts_not_written = 0
+        self._last_alert_exception = None
         try:
             yield self
         finally:
@@ -913,6 +940,14 @@ class NotificationManager(NotificationManagerHelpers):
             finally:
                 self._in_batch = False
                 self._recipients_by_scope = None
+                if self._alerts_not_written:
+                    # One report for the whole batch, never one per row or per flush.
+                    logger.error("%s alerts of this notification batch could not be written", self._alerts_not_written)
+                    self._log_alert(
+                        self._last_alert_exception,
+                        "Alert Notification",
+                        description=f"{self._alerts_not_written} alerts could not be written: {self._last_alert_exception}",
+                    )
 
     def flush_alerts(self) -> None:
         """Write the alerts a batch has collected, once a full batch of them is waiting."""
@@ -928,34 +963,35 @@ class NotificationManager(NotificationManagerHelpers):
         """
         Write a batch's alerts one by one after their shared INSERT failed.
 
-        A batch's alerts belong to many notifications, so one bad row must not cost all the
-        others. The rows that cannot be written are reported in one fallback alert, never one
-        per row, and when several fail in a row the database is the problem, not a row, so the
-        rest are given up rather than each tried in turn.
+        A batch's alerts belong to many notifications, so one bad row, or one notification whose
+        every row is bad, must not cost all the others. When rows of more than one notification
+        fail in a row (across flushes too), the database is the problem rather than a row: the
+        rest of the batch's alerts are given up instead of each being tried in turn. Everything
+        not written is reported once, when the batch ends.
         """
         logger.warning("Writing %s alerts in one INSERT failed, writing them one at a time", len(alerts))
-        failed = consecutive = 0
-        last_exception = None
         for position, alert in enumerate(alerts):
             try:
                 with transaction.atomic():
                     Alerts.objects.bulk_create([alert])
-                consecutive = 0
+                self._alert_failure_streak = 0
+                self._alert_failure_notifications.clear()
             except Exception as exception:
                 logger.exception("Unable to create Alert Notification %r", alert.title)
-                failed += 1
-                consecutive += 1
-                last_exception = exception
-                if consecutive >= self.MAX_CONSECUTIVE_ALERT_FAILURES:
-                    failed += len(alerts) - position - 1
-                    logger.error("%s alert writes failed in a row, giving up the remaining %s", consecutive, len(alerts) - position - 1)
-                    break
-        if failed:
-            self._log_alert(
-                last_exception,
-                "Alert Notification",
-                description=f"{failed} of {len(alerts)} alerts could not be written: {last_exception}",
-            )
+                self._alerts_not_written += 1
+                self._last_alert_exception = exception
+                self._alert_failure_streak += 1
+                # One notification's alerts are adjacent and share its title and url.
+                self._alert_failure_notifications.add((alert.title, alert.url))
+                if (
+                    self._alert_failure_streak >= self.MAX_CONSECUTIVE_ALERT_FAILURES
+                    and len(self._alert_failure_notifications) > 1
+                ):
+                    remaining = len(alerts) - position - 1
+                    self._alerts_not_written += remaining
+                    self._alert_writes_given_up = True
+                    logger.error("%s alert writes failed in a row, giving up the remaining %s and the rest of this batch", self._alert_failure_streak, remaining)
+                    return
 
     def _open_fanout(self, kwargs: dict, *, auto_flush_alerts: bool = True) -> None:
         self._alert_buffer = AlertBuffer(lambda alerts: self._flush_alerts(alerts, kwargs), auto_flush=auto_flush_alerts)
@@ -973,6 +1009,10 @@ class NotificationManager(NotificationManagerHelpers):
 
     def _flush_alerts(self, alerts: list, kwargs: dict) -> None:
         if not alerts:
+            return
+        if getattr(self, "_in_batch", False) and self._alert_writes_given_up:
+            # The database refused alert after alert earlier in this batch; it was reported then.
+            self._alerts_not_written += len(alerts)
             return
         try:
             # A savepoint, so a failed INSERT leaves the caller's transaction usable for
@@ -1497,9 +1537,16 @@ def sla_compute_and_notify(*args, **kwargs):
             # A FINDING_SLA_PERIOD_METHOD can read more of each finding than is loaded above.
             # Its FINDING_SLA_NOTIFY_QUERYSET_METHOD adds that to the query, so it arrives with
             # each chunk instead of costing a query per finding.
+            # A hook that cannot run must not cost the run, so it is tried and its query compiled
+            # here, and the run reads its findings without it when either fails.
             from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
-            if queryset_method := get_custom_method("FINDING_SLA_NOTIFY_QUERYSET_METHOD"):
-                findings = queryset_method(findings)
+            try:
+                if queryset_method := get_custom_method("FINDING_SLA_NOTIFY_QUERYSET_METHOD"):
+                    hooked = queryset_method(findings)
+                    str(hooked.query)
+                    findings = hooked
+            except Exception:
+                logger.exception("FINDING_SLA_NOTIFY_QUERYSET_METHOD failed; reading findings without it")
             findings = findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
 
             # Whatever was collected before a failure to read further (a lost connection, say)
