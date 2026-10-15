@@ -797,6 +797,7 @@ class CrossApprovalRequestWorkflowViewTest(SimpleTestCase):
                 "dojo.api_v2.cross_approval.helpers.CrossApprovalRequest.objects.filter",
                 return_value=request_queryset,
             ),
+            patch("dojo.api_v2.cross_approval.helpers.transaction.atomic", return_value=nullcontext()),
             patch("dojo.api_v2.cross_approval.helpers.revert_cross_approval_exclusion") as revert,
             patch("dojo.api_v2.cross_approval.helpers.notify_request_status") as notify,
         ):
