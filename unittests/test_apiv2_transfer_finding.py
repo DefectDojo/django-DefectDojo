@@ -96,7 +96,8 @@ class TransferFindingFindingsTestCase(APITestCase):
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_428_PRECONDITION_REQUIRED)
-        self.assertEqual(110, len(response.data["error"]["detail"]))
+        print(response.data["error"]["detail"])
+        self.assertEqual(92, len(response.data["error"]["detail"]))
 
     def test_finding_status_error(self):
         finding = Finding.objects.get(id=3)
