@@ -10,7 +10,7 @@ from dojo.models import Finding
 from dojo.notifications.helper import create_notification
 from dojo.user.queries import get_user
 
-from .models import CrossApprovalExclusion, CrossApprovalRequestLog
+from .models import CrossApprovalExclusion, CrossApprovalRequest, CrossApprovalRequestLog
 
 
 CROSS_APPROVAL_CSV_SEPARATOR = ","
@@ -184,6 +184,31 @@ def reopen_cross_approval_exclusion(exclusion, user):
 def revert_cross_approval_exclusion_task(exclusion_id):
     exclusion = CrossApprovalExclusion.objects.select_related("request").get(pk=exclusion_id)
     expire_cross_approval_exclusion(exclusion, get_user(settings.SYSTEM_USER))
+
+
+@app.task(autoretry_for=(Exception,), retry_backoff=True, max_retries=5)
+def delete_cross_approval_request_task(request_id, was_approved):
+    cross_approval_request = CrossApprovalRequest.objects.filter(
+        pk=request_id,
+        status="deleting",
+    ).first()
+    if cross_approval_request is None:
+        return
+
+    if was_approved:
+        for exclusion in cross_approval_request.exclusions.iterator(chunk_size=100):
+            revert_cross_approval_exclusion(
+                exclusion,
+                exclude_request_id=cross_approval_request.pk,
+            )
+
+    with transaction.atomic():
+        notify_request_status(
+            cross_approval_request,
+            "cross_approval_deleted",
+            f"Cross-approval request {cross_approval_request.pk} deleted",
+        )
+        cross_approval_request.delete()
 
 
 def apply_request_exclusions(request):

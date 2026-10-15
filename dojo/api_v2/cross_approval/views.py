@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.cross_approval.helpers import (
     apply_request_exclusions,
+    delete_cross_approval_request_task,
     expire_cross_approval_exclusion,
     expire_request_exclusions,
     log_status_change,
@@ -34,7 +35,7 @@ class CrossApprovalRequestViewSet(DeletePreviewModelMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().exclude(status="deleting")
         request_id = self.request.query_params.get("id") if self.request else None
         vulnerability_id = self.request.query_params.get("cve") if self.request else None
         status = self.request.query_params.get("status") if self.request else None
@@ -353,15 +354,11 @@ class CrossApprovalRequestViewSet(DeletePreviewModelMixin, ModelViewSet):
 
     def perform_destroy(self, instance):
         with transaction.atomic():
-            if instance.status == "approved":
-                for exclusion in instance.exclusions.all():
-                    revert_cross_approval_exclusion(
-                        exclusion,
-                        exclude_request_id=instance.pk,
-                    )
-            notify_request_status(
-                instance,
-                "cross_approval_deleted",
-                f"Cross-approval request {instance.pk} deleted",
+            was_approved = instance.status == "approved"
+            instance.status = "deleting"
+            instance.save(update_fields=["status"])
+            transaction.on_commit(
+                lambda request_id=instance.pk, was_approved=was_approved: (
+                    delete_cross_approval_request_task.delay(request_id, was_approved)
+                )
             )
-            instance.delete()
