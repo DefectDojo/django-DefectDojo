@@ -1,12 +1,43 @@
 ---
 title: "Customizing Tables"
-description: "Sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables"
+description: "Filter, sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables, and switch between the table and the grid"
 weight: 8
 ---
 
 Most data tables in the DefectDojo Pro UI (Findings, Assets, Engagements, and the other list views) can be tailored to how you work. You can choose which columns are visible, reorder them, adjust their widths, and save any combination as a named table preference that you can switch between or share with your team.
 
 All of these controls live in the table toolbar, above the list.
+
+## Filtering with the filter bar
+
+The Findings list carries a filter bar between the toolbar and the rows. It shows every active filter as a chip that reads as a sentence: the field, the operator, and the value, such as **Severity is any of Critical, High** or **Age is greater than 30**.
+
+- **Add Filter** opens a list of every field the table can filter on, grouped the way the column picker groups them. Type in the search box to narrow the list, then pick a field to open its editor. The editor is the same control the column header offers for that field: a match mode where the field has one, a value or a list of values, and **Submit** and **Clear**.
+- Select a chip to reopen its editor and change the value or the match mode. Select the **x** on a chip to remove that filter.
+- The count on the right of the bar is how many records match. **Sort** beside it opens the same sort the column headers offer, up to three levels, so a view with no headers (the grid, below) can still be ordered.
+- The keyword search stays in the toolbar. It narrows the list on top of the chips and is not a chip itself.
+- **Clear Filters** in the toolbar removes every chip, resets the match mode (below), and clears the keyword search.
+
+The column header filters keep working. A filter applied from a header appears as a chip, and a chip removed from the bar clears the header, because both edit the same filters. Filters set through the bar are part of the page URL, so a bookmarked or shared link opens the list filtered the same way.
+
+### Matching all filters or any filter
+
+With two or more chips, the word between them is the connective. It reads **and** by default: a record must match every filter. Select it to switch the list to **or**, drawn in the accent color: a record matches when it satisfies at least one filter. Select it again to go back to **and**.
+
+Three things never join the **or** group, because they define the page rather than narrow it: the context a page arrives with (the asset whose findings you are looking at), the keyword search, and your own permissions. A list in **or** mode can never show a record you could not see with no filters at all.
+
+The match mode is part of the page URL and of a saved table preference, so a shared link or a shared preference opens in the mode it was saved in. Exports started from the table use the same mode as the rows on screen.
+
+## Switching between the table and the grid
+
+The Findings list can be read as a table or as a grid of cards. The two buttons beside the keyword search switch between them. The grid shows the same page of records, under the same filters, sort, and keyword search, so switching never changes what the list contains, only how each record is drawn.
+
+A card shows the finding's severity, status, and title, where it lives (organization, asset, engagement, and test), its scores (CVSS, EPSS, priority, age, SLA, and CWE), the signals that matter when they apply (known exploited, ransomware, exploit maturity, reachability, a Sensei fix, a Jira issue, connector tickets), its tags and vulnerability ids, and a footer with the date found, the scanner, and the other dates and people on it. A card omits what is empty: a finding that is not in KEV and has no tags does not spend lines on them. The first two lines of the description appear as a summary when the comfortable density is on.
+
+- The **Columns** button becomes **Fields** in the grid and chooses which fields a card shows. The grid keeps its own selection, with a default made for cards; the table's columns are untouched.
+- The density toggle applies to cards too: compact cards are smaller and fit one more per row.
+- Select a card's checkbox to select it; the bulk actions appear above the grid as they do above the table, and the checkbox at the start of the filter bar selects every card on the page.
+- The view is remembered per table in your browser and is part of the page URL (`view=grid`), so a shared link opens in the view it was shared from. On a phone-sized screen a first visit opens the grid.
 
 ## Choosing which columns are visible
 
@@ -39,11 +70,11 @@ Like column order and visibility, a width change applies to the current session 
 
 ## Saving table preferences
 
-Column visibility, column order, column widths, page size, filters, and sort order can be saved together as a named table preference. Open the preferences menu from the toolbar (the button showing the active view's name) to manage them.
+Column visibility, column order, column widths, page size, filters, sort order, the match mode of the filter bar, the card fields, and the view (table or grid) can be saved together as a named table preference. A preference that was saved in the grid opens in the grid; one saved in the table opens in the table. Open the preferences menu from the toolbar (the button showing the active view's name) to manage them.
 
 - **Save as New Preference**: capture the current table setup under a new name. You can optionally set it as your default and, if you have permission, share it with other users.
-- **Save Column Layout**: update the active preference's columns only (visibility, order, widths, and page size), leaving its saved filters and sort untouched.
-- **Save Filters and Sort**: update the active preference's filters and sort only, leaving its column layout untouched.
+- **Save Column Layout**: update the active preference's columns only (visibility, order, widths, page size, the card fields, and the view), leaving its saved filters and sort untouched.
+- **Save Filters and Sort**: update the active preference's filters, sort, and match mode only, leaving its column layout untouched.
 - **Set Preference as Default**: load this preference automatically whenever you open the table.
 - **Duplicate Preference**: copy the active preference (including its column widths) to a new name so you can adjust it without changing the original.
 - **Update Preference Label**: rename the active preference.
