@@ -3,22 +3,66 @@ from unittest.mock import Mock, patch
 
 from django.db import connection
 from django.db.models import query as django_query
-from django.db.utils import OperationalError
+from django.db.utils import DataError, OperationalError
 from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+from dojo.authorization.roles_permissions import Roles
 from dojo.jira.models import JIRA_Issue
-from dojo.models import Finding, Test_Type
+from dojo.models import Dojo_User, Finding, Product_Member, Role, Test_Type, User
+from dojo.notifications import helper as notifications_helper
 from dojo.notifications.helper import sla_compute_and_notify
+from dojo.notifications.models import Alerts, Notifications
+from dojo.user.models import UserContactInfo
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
-# Regression: the daily SLA task ended the whole run at the first finding that raised, so no
-# SLA notification went out for any finding, and it loaded every open finding into memory.
-@versioned_fixtures
+class _ManagerWithoutBatch:
+
+    """A NOTIFICATION_MANAGER that predates batching: it only has create_notification."""
+
+    calls: list = []
+
+    def create_notification(self, event=None, **kwargs):
+        _ManagerWithoutBatch.calls.append((event, kwargs.get("finding")))
+
+
+def _raising_queryset_hook(findings):
+    msg = "simulated broken FINDING_SLA_NOTIFY_QUERYSET_METHOD"
+    raise RuntimeError(msg)
+
+
+def _prefetch_broken_queryset_hook(findings):
+    # Compiles fine; fails only when the first chunk's related rows are fetched.
+    return findings.prefetch_related("no_such_relation")
+
+
+def _emptying_queryset_hook(findings):
+    # A valid query that matches nothing: the run must respect it, not fall back to every finding.
+    return findings.filter(id__in=[])
+
+
+def _lazily_broken_queryset_hook(findings):
+    # Valid to call; fails only once the query is compiled.
+    return findings.select_related("no_such_relation")
+
+
+#: Set by the test of FINDING_SLA_NOTIFY_QUERYSET_METHOD: the finding the hook below leaves out.
+_HOOK_EXCLUDES = {"id": None, "calls": 0}
+
+
+def _sla_notify_queryset_hook(findings):
+    """Stands in for what a FINDING_SLA_PERIOD_METHOD provider would add to the run's query."""
+    _HOOK_EXCLUDES["calls"] += 1
+    return findings.exclude(id=_HOOK_EXCLUDES["id"])
+
+
 @override_settings(SLA_NOTIFY_PRE_BREACH=3, SLA_NOTIFY_POST_BREACH=7)
-class TestSlaComputeAndNotify(DojoTestCase):
+class SlaNotifyTestBase(DojoTestCase):
+
+    """One product with findings pinned at chosen distances from their SLA deadline."""
+
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
@@ -61,6 +105,12 @@ class TestSlaComputeAndNotify(DojoTestCase):
             for call in mock_create_notification.call_args_list
             if call.kwargs.get("event") == "sla_breach"
         )
+
+
+# Regression: the daily SLA task ended the whole run at the first finding that raised, so no
+# SLA notification went out for any finding, and it loaded every open finding into memory.
+@versioned_fixtures
+class TestSlaComputeAndNotify(SlaNotifyTestBase):
 
     @patch("dojo.notifications.helper.create_notification")
     def test_one_failing_finding_does_not_stop_notifications_for_the_rest(self, mock_create_notification):
@@ -309,3 +359,351 @@ class TestSlaComputeAndNotify(DojoTestCase):
         self.assertEqual(notified, sorted([first.id, second.id]), msg=f"in-app notifications: {notified}")
         commented = sorted(call.args[1].id for call in mock_add_comment.call_args_list)
         self.assertEqual(commented, sorted(issues[f.id].id for f in (first, second)), msg=f"JIRA comment attempts: {commented}")
+
+
+# The notifications of one SLA run go out through one manager: recipients are resolved once per
+# product and alerts are written in batches, instead of all of that once per finding.
+@versioned_fixtures
+class TestSlaNotificationBatching(SlaNotifyTestBase):
+
+    def setUp(self):
+        super().setUp()
+        Alerts.objects.all().delete()
+        # Every notification goes to the active superusers and, through the system notifications
+        # row (whose user is None), to one more alert without a user.
+        self.recipient_ids = {*User.objects.filter(is_superuser=True, is_active=True).values_list("id", flat=True), None}
+
+    def _sla_alerts(self):
+        return Alerts.objects.filter(title__contains="SLA breached")
+
+    def test_query_count_does_not_grow_with_notified_findings(self):
+        # Real notifications, nothing mocked: the per-finding cost used to be the system
+        # notifications row, the product's recipients and an alert INSERT, every time.
+        self._finding("one", -1)
+        with CaptureQueriesContext(connection) as one:
+            sla_compute_and_notify()
+
+        for i in range(4):
+            self._finding(f"more {i}", -1)
+        Alerts.objects.all().delete()
+        with CaptureQueriesContext(connection) as five:
+            sla_compute_and_notify()
+
+        def data_queries(ctx):
+            return [q["sql"] for q in ctx.captured_queries if "SAVEPOINT" not in q["sql"]]
+
+        self.assertEqual(
+            len(data_queries(five)), len(data_queries(one)),
+            msg=f"queries with 1 notified finding: {len(data_queries(one))}, with 5: {len(data_queries(five))}\n"
+            + "\n".join(q[:160] for q in data_queries(five)),
+        )
+        self.assertEqual(self._sla_alerts().count(), 5 * len(self.recipient_ids))
+
+    def test_every_finding_gets_its_own_alert_for_every_recipient(self):
+        findings = [self._finding(f"finding {i}", -1) for i in range(3)]
+
+        sla_compute_and_notify()
+
+        got = sorted(((a.user_id_id or 0), a.title) for a in self._sla_alerts())
+        expected = sorted(
+            ((user_id or 0), f"Finding {f.id} - SLA breached by 1 day! Overdue notice")
+            for f in findings for user_id in self.recipient_ids
+        )
+        self.assertEqual(got, expected)
+
+    def test_recipients_are_resolved_per_product(self):
+        # A reader of one product only must get that product's alerts, never the other's,
+        # even though the recipients are now looked up once per product and reused.
+        reader = User.objects.create_user(username="sla_batch_reader", password="not-a-real-secret")  # noqa: S106 - test fixture user
+        Product_Member.objects.create(user=reader, product=self.test.engagement.product, role=Role.objects.get(id=Roles.Reader))
+        self.test.engagement.product.authorized_users.add(Dojo_User.objects.get(pk=reader.pk))
+        Notifications.objects.create(user=reader, sla_breach=["alert"])
+
+        visible = self._finding("on the reader's product", -1)
+        other_product = self.create_product("SLA notify other product")
+        other_engagement = self.create_engagement("SLA notify other engagement", other_product)
+        other_test = self.create_test(engagement=other_engagement, scan_type="SLA notify scan", title="other")
+        hidden = self._finding("on another product", -1)
+        Finding.objects.filter(pk=hidden.pk).update(test=other_test)
+
+        sla_compute_and_notify()
+
+        reader_titles = sorted(self._sla_alerts().filter(user_id=reader).values_list("title", flat=True))
+        self.assertEqual(reader_titles, [f"Finding {visible.id} - SLA breached by 1 day! Overdue notice"], msg=f"reader alerts: {reader_titles}")
+        for superuser_id in self.recipient_ids - {None}:
+            superuser_findings = sorted(t.split(" ")[1] for t in self._sla_alerts().filter(user_id=superuser_id).values_list("title", flat=True))
+            self.assertEqual(superuser_findings, sorted([str(visible.id), str(hidden.id)]))
+
+    def test_one_bad_alert_row_does_not_lose_the_rest_of_its_batch(self):
+        findings = [self._finding(f"finding {i}", -1) for i in range(4)]
+        bad_title = f"Finding {findings[1].id} - "
+        real_bulk_create = Alerts.objects.bulk_create
+
+        def bulk_create(alerts, *args, **kwargs):
+            if any(a.title.startswith(bad_title) for a in alerts):
+                msg = "simulated bad alert row"
+                raise DataError(msg)
+            return real_bulk_create(alerts, *args, **kwargs)
+
+        with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create):
+            sla_compute_and_notify()
+
+        notified = sorted({int(t.split(" ")[1]) for t in self._sla_alerts().values_list("title", flat=True)})
+        expected = sorted(f.id for f in findings if f.id != findings[1].id)
+        self.assertEqual(notified, expected, msg=f"findings with alerts: {notified}")
+
+    @patch("dojo.notifications.helper.ALERT_BULK_CREATE_BATCH_SIZE", 3)
+    def test_a_failing_notification_does_not_roll_back_alerts_written_for_others(self):
+        # Alerts of several findings are written together. If that write happened inside the
+        # savepoint of a finding that then fails, rolling it back would erase the others too.
+        findings = [self._finding(f"finding {i}", -1) for i in range(4)]
+        failing = findings[1]
+        real_send = notifications_helper.AlertNotificationManger.send_alert_notification
+
+        def send_alert_notification(manager, event, user=None, **kwargs):
+            real_send(manager, event, user=user, **kwargs)
+            finding = kwargs.get("finding")
+            if event == "sla_breach" and finding is not None and finding.id == failing.id:
+                msg = "simulated failure after this finding's alert was built"
+                raise RuntimeError(msg)
+
+        with patch.object(notifications_helper.AlertNotificationManger, "send_alert_notification", autospec=True, side_effect=send_alert_notification):
+            sla_compute_and_notify()
+
+        notified = {int(t.split(" ")[1]) for t in self._sla_alerts().values_list("title", flat=True)}
+        missing = sorted({f.id for f in findings if f.id != failing.id} - notified)
+        self.assertEqual(missing, [], msg=f"findings that lost their alerts: {missing}")
+
+    def test_a_database_outage_costs_a_bounded_number_of_writes(self):
+        # Retrying row by row is for one bad row. When every write fails the database is the
+        # problem: the batch must give up after a few rows and report it once, not once per row.
+        for i in range(4):
+            self._finding(f"finding {i}", -1)
+        fallback_writes = []
+
+        def bulk_create(alerts, *args, **kwargs):
+            if all(a.source == "Alert Notification" for a in alerts):
+                fallback_writes.append(len(alerts))
+                return alerts
+            msg = "simulated database outage"
+            raise OperationalError(msg)
+
+        with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create) as bulk:
+            sla_compute_and_notify()
+
+        retries = notifications_helper.NotificationManager.MAX_CONSECUTIVE_ALERT_FAILURES
+        self.assertEqual(bulk.call_count, 1 + retries + 1, msg="one batch INSERT, the single-row retries, one fallback")
+        self.assertEqual(len(fallback_writes), 1, msg=f"fallback writes: {fallback_writes}")
+
+    def test_the_system_notification_still_reaches_the_system_destination(self):
+        # Regression: merging a superuser's notification settings returned the shared system row
+        # itself and set its user to that superuser, so in a batch every later notification's
+        # system-level copy went to the superuser instead of the system destination.
+        Notifications.objects.filter(user__isnull=False).delete()
+        findings = [self._finding(f"finding {i}", -1) for i in range(3)]
+
+        sla_compute_and_notify()
+
+        system_titles = sorted(
+            self._sla_alerts().filter(user_id__isnull=True).values_list("title", flat=True),
+        )
+        expected = sorted(f"Finding {f.id} - SLA breached by 1 day! Overdue notice" for f in findings)
+        self.assertEqual(system_titles, expected, msg=f"system-level alerts: {system_titles}")
+
+    def test_a_notification_whose_every_row_fails_does_not_cost_the_others(self):
+        # One notification's alerts sit next to each other in the batch. If they all fail (its
+        # title, say), that is one bad notification, not a database outage, however many
+        # recipients it has.
+        for i in range(6):
+            User.objects.create(username=f"sla_batch_superuser_{i}", is_superuser=True, is_active=True)
+        bad = self._finding("a finding whose alerts cannot be written", -1)
+        healthy = [self._finding(f"b healthy {i}", -1) for i in range(3)]
+        bad_title = f"Finding {bad.id} - "
+        real_bulk_create = Alerts.objects.bulk_create
+
+        def bulk_create(alerts, *args, **kwargs):
+            if any(a.title.startswith(bad_title) for a in alerts):
+                msg = "simulated bad alert rows"
+                raise DataError(msg)
+            return real_bulk_create(alerts, *args, **kwargs)
+
+        with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create):
+            sla_compute_and_notify()
+
+        notified = sorted({int(t.split(" ")[1]) for t in self._sla_alerts().values_list("title", flat=True)})
+        self.assertEqual(notified, sorted(f.id for f in healthy), msg=f"findings with alerts: {notified}")
+
+    @patch("dojo.notifications.helper.ALERT_BULK_CREATE_BATCH_SIZE", 3)
+    def test_an_outage_is_bounded_for_the_whole_run_not_each_flush(self):
+        # With small flushes the run writes its alerts many times. An outage must cost the same
+        # number of write attempts however many findings the run has, and be reported once.
+        def outage_run(findings):
+            for i in range(findings):
+                self._finding(f"finding {findings}-{i}", -1)
+            fallback_writes = []
+
+            def bulk_create(alerts, *args, **kwargs):
+                if all(a.source == "Alert Notification" for a in alerts):
+                    fallback_writes.append(len(alerts))
+                    return alerts
+                msg = "simulated database outage"
+                raise OperationalError(msg)
+
+            with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create) as bulk:
+                sla_compute_and_notify()
+            Finding.objects.filter(active=True).update(active=False)
+            return bulk.call_count, fallback_writes
+
+        small_attempts, small_fallbacks = outage_run(6)
+        large_attempts, large_fallbacks = outage_run(12)
+
+        self.assertEqual(large_attempts, small_attempts, msg=f"write attempts: 6 findings {small_attempts}, 12 findings {large_attempts}")
+        self.assertEqual(len(small_fallbacks), 1, msg=f"fallback writes: {small_fallbacks}")
+        self.assertEqual(len(large_fallbacks), 1, msg=f"fallback writes: {large_fallbacks}")
+
+    def test_a_manager_without_batch_support_still_sends_every_notification(self):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+        _ManagerWithoutBatch.calls = []
+
+        with override_settings(NOTIFICATION_MANAGER=f"{__name__}._ManagerWithoutBatch"):
+            sla_compute_and_notify()
+
+        notified = sorted(f.id for event, f in _ManagerWithoutBatch.calls if event == "sla_breach")
+        self.assertEqual(notified, sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.SlackNotificationManger._post_slack_message")
+    @patch("dojo.notifications.helper.SlackNotificationManger._get_slack_user_id", return_value="U123")
+    def test_a_slack_user_id_is_looked_up_once_per_run(self, mock_lookup, mock_post):
+        self.system_settings(enable_slack_notifications=True)
+        slack_user = User.objects.create(username="sla_batch_slack", is_superuser=True, is_active=True)
+        UserContactInfo.objects.update_or_create(user=slack_user, defaults={"slack_username": "slack@example.com", "slack_user_id": None})
+        Notifications.objects.filter(user=slack_user).update(sla_breach=["slack"], sla_breach_combined=[])
+        for i in range(3):
+            self._finding(f"finding {i}", -1)
+
+        sla_compute_and_notify()
+
+        self.assertEqual(mock_lookup.call_count, 1, msg="the id found for the first notification is reused")
+        self.assertGreaterEqual(mock_post.call_count, 3)
+
+    def test_an_outage_costs_the_same_writes_however_many_recipients_a_notification_has(self):
+        # Regression: the outage bound waited for failures from a second notification, so every
+        # recipient of the first one was tried on its own first. A connection-level error is the
+        # database's fault whatever notification it belongs to.
+        def outage_attempts(extra_superusers):
+            for i in range(extra_superusers):
+                User.objects.create(username=f"sla_outage_{extra_superusers}_{i}", is_superuser=True, is_active=True)
+            self._finding(f"finding for {extra_superusers}", -1)
+
+            def bulk_create(alerts, *args, **kwargs):
+                if all(a.source == "Alert Notification" for a in alerts):
+                    return alerts
+                msg = "simulated database outage"
+                raise OperationalError(msg)
+
+            with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create) as bulk:
+                sla_compute_and_notify()
+            Finding.objects.filter(active=True).update(active=False)
+            return bulk.call_count
+
+        # Both runs have more alert rows than the bound, so both must stop at it.
+        few = outage_attempts(4)
+        many = outage_attempts(16)
+        bound = 1 + notifications_helper.NotificationManager.MAX_CONSECUTIVE_ALERT_FAILURES + 1
+        self.assertEqual(many, few, msg=f"write attempts: few recipients {few}, many recipients {many}")
+        self.assertEqual(many, bound, msg="one batch INSERT, the single-row retries, one fallback report")
+
+    def test_a_failure_writing_the_batch_report_does_not_escape_the_run(self):
+        # The report of unwritten alerts is written exactly when the database is struggling.
+        self._finding("finding", -1)
+
+        def bulk_create(alerts, *args, **kwargs):
+            msg = "simulated database outage"
+            raise OperationalError(msg)
+
+        with patch.object(Alerts.objects, "bulk_create", side_effect=bulk_create), \
+                patch.object(notifications_helper.NotificationManager, "_log_alert", side_effect=OperationalError("connection lost")):
+            sla_compute_and_notify()  # must not raise
+
+    def test_only_the_current_products_recipients_are_kept(self):
+        manager = notifications_helper.NotificationManager()
+        first = self.create_product("SLA cache first")
+        second = self.create_product("SLA cache second")
+        with manager.batch():
+            for product in (first, second, first):
+                manager.product, manager.product_type = product, None
+                manager._recipients_for_current_scope()
+                self.assertEqual(list(manager._recipients_by_scope), [(product.id, None)])
+
+
+@versioned_fixtures
+class TestSlaNotifyQuerysetHook(SlaNotifyTestBase):
+
+    # A FINDING_SLA_PERIOD_METHOD can read more of each finding than the run loads (DefectDojo
+    # Pro's reads a companion row). The companion setting lets it add that to the run's query, so
+    # it arrives with each chunk instead of costing one query per finding.
+    @patch("dojo.notifications.helper.create_notification")
+    def test_the_run_reads_findings_through_the_configured_queryset_method(self, mock_create_notification):
+        kept = self._finding("kept", -1)
+        left_out = self._finding("left out by the hook", -1)
+        _HOOK_EXCLUDES.update(id=left_out.id, calls=0)
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._sla_notify_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(_HOOK_EXCLUDES["calls"], 1)
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), [kept.id])
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_without_the_setting_the_run_is_unchanged(self, mock_create_notification):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+
+        sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_a_hook_that_raises_falls_back_to_the_plain_query(self, mock_create_notification):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._raising_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_a_misnamed_hook_falls_back_to_the_plain_query(self, mock_create_notification):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._no_such_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_a_hook_whose_query_cannot_compile_falls_back_to_the_plain_query(self, mock_create_notification):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._lazily_broken_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_a_hook_whose_prefetch_fails_falls_back_to_the_plain_query(self, mock_create_notification):
+        findings = [self._finding(f"finding {i}", -1) for i in range(2)]
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._prefetch_broken_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), sorted(f.id for f in findings))
+
+    @patch("dojo.notifications.helper.create_notification")
+    def test_a_hook_that_matches_nothing_is_respected(self, mock_create_notification):
+        for i in range(2):
+            self._finding(f"finding {i}", -1)
+
+        with override_settings(FINDING_SLA_NOTIFY_QUERYSET_METHOD=f"{__name__}._emptying_queryset_hook"):
+            sla_compute_and_notify()
+
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), [])
