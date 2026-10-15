@@ -39,7 +39,7 @@ This constraint is what makes reimport's comparison logic reliable: when a Findi
 
 ## Vulnerability IDs
 
-A Finding gets a CVE as its vulnerability ID when the result's `ruleId` contains one. Many dependency scanners key a result by another identifier, such as a GHSA or RUSTSEC id, and list the CVE as a tag instead. So DefectDojo also reads the `tags` in the rule's and the result's `properties`: every tag that is exactly a CVE id (`CVE-2021-44228`) or a GHSA id (`GHSA-jfh8-c2jp-5v3q`) becomes a vulnerability ID, CVEs first. These tags stay on the Finding as tags too.
+A Finding gets a CVE as its vulnerability ID when the result's `ruleId` contains one. Many dependency scanners key a result by another identifier, such as a GHSA or RUSTSEC id, and list the CVE as a tag instead. So DefectDojo also reads the `tags` in the rule's and the result's `properties`: every tag that is a CVE id (`CVE-2021-44228`) or a GHSA id (`GHSA-jfh8-c2jp-5v3q`) and nothing else becomes a vulnerability ID, as does a `ruleId` that is itself a GHSA id. Matching ignores case and surrounding spaces, and the ID is stored in its standard form (`CVE-...` upper case, `GHSA-...` with a lower-case suffix). CVEs come first, so a CVE from the `ruleId` stays the primary one. The tags stay on the Finding as tags too.
 
 ## Support for Deduplication (Fingerprinting)
 

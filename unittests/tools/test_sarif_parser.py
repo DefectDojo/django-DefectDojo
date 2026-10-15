@@ -1,7 +1,7 @@
 import datetime
 
 from dojo.models import Finding, Test
-from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes
+from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes, vulnerability_id_from_tag
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -668,8 +668,8 @@ add_core(ptr, offset, val);
         self.assertEqual(4, len(findings))
         by_rule = {finding.vuln_id_from_tool: finding for finding in findings}
         expected = {
-            # GHSA rule id, CVE in the rule tags
-            "GHSA-jfh8-c2jp-5v3q": ["CVE-2021-44228"],
+            # GHSA rule id, CVE in the rule tags: the CVE first, then the rule's own GHSA
+            "GHSA-jfh8-c2jp-5v3q": ["CVE-2021-44228", "GHSA-jfh8-c2jp-5v3q"],
             # rule and result tags combine; a lower-case CVE is normalized; CVEs come first
             "RUSTSEC-2021-0078": ["CVE-2021-32715", "CVE-2021-32714", "GHSA-f3pg-qwvg-p99c"],
             # a CVE rule id that is repeated in the tags is not listed twice
@@ -687,3 +687,27 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
         with self.subTest("ids stay in the tags too"):
             self.assertIn("CVE-2021-44228", by_rule["GHSA-jfh8-c2jp-5v3q"].unsaved_tags)
+
+    def test_vulnerability_id_from_tag(self):
+        cases = {
+            "CVE-2021-44228": "CVE-2021-44228",
+            "cve-2021-44228": "CVE-2021-44228",
+            " CVE-2021-44228 ": "CVE-2021-44228",
+            "GHSA-JFH8-C2JP-5V3Q": "GHSA-jfh8-c2jp-5v3q",
+            "ghsa-jfh8-c2jp-5v3q": "GHSA-jfh8-c2jp-5v3q",
+            # not ids: other text, an id inside a longer tag, a short segment
+            "CVE-check": None,
+            "fix CVE-2021-44228 now": None,
+            "GHSA-jfh8-c2jp-5v3": None,
+            # non-ASCII digits and letters that only look like an id
+            "CVE-\uff12\uff10\uff12\uff11-\uff14\uff14\uff12\uff12\uff18": None,
+            "CVE-\u0662\u0660\u0662\u0661-\u0664\u0664\u0662\u0662\u0668": None,
+            "GHSA-\u212aaaa-bbbb-cccc": None,
+            "GHSA-\u0130aaa-bbbb-cccc": None,
+            # not a string at all
+            None: None,
+            42: None,
+        }
+        for tag, expected in cases.items():
+            with self.subTest(tag=tag):
+                self.assertEqual(expected, vulnerability_id_from_tag(tag))

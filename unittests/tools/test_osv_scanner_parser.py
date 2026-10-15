@@ -1,3 +1,5 @@
+import io
+import json
 
 from dojo.models import Test
 from dojo.tools.osv_scanner.parser import OSVScannerParser
@@ -69,3 +71,27 @@ class TestOSVScannerParser(DojoTestCase):
             with (get_unit_tests_scans_path("osv_scanner") / "some_findings.json").open(encoding="utf-8") as testfile:
                 finding = OSVScannerParser().get_findings(testfile, Test())[0]
             self.assertEqual(["MAL-2023-1035", "GHSA-8348-2q94-ffjx"], finding.unsaved_vulnerability_ids)
+
+    def test_malformed_aliases_are_ignored(self):
+        def parse(aliases):
+            vulnerability = {"id": "GHSA-jfh8-c2jp-5v3q"}
+            if aliases != "absent":
+                vulnerability["aliases"] = aliases
+            report = {"results": [{"packages": [{"package": {"name": "log4j-core"}, "vulnerabilities": [vulnerability]}]}]}
+            return OSVScannerParser().get_findings(io.StringIO(json.dumps(report)), Test())[0].unsaved_vulnerability_ids
+
+        cases = {
+            "absent": ["GHSA-jfh8-c2jp-5v3q"],
+            "null": ["GHSA-jfh8-c2jp-5v3q"],
+            "a string, not a list": ["GHSA-jfh8-c2jp-5v3q"],
+            "non-strings and blanks dropped, whitespace stripped": ["GHSA-jfh8-c2jp-5v3q", "CVE-2021-44228"],
+        }
+        inputs = {
+            "absent": "absent",
+            "null": None,
+            "a string, not a list": "CVE-2021-44228",
+            "non-strings and blanks dropped, whitespace stripped": [5, {"x": 1}, None, " ", " CVE-2021-44228 ", "GHSA-jfh8-c2jp-5v3q"],
+        }
+        for name, expected in cases.items():
+            with self.subTest(name):
+                self.assertEqual(expected, parse(inputs[name]))

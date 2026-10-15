@@ -303,14 +303,13 @@ class SarifParser:
             finding.unsaved_tags = tags
 
             # Some tools key a vulnerability by a non-CVE rule id (a GHSA, a RUSTSEC) and carry its
-            # CVE/GHSA aliases as tags. Promote those to vulnerability ids too, CVEs first.
-            tag_ids = [
-                vuln_id for tag in get_properties_tags(rule) + get_properties_tags(result)
-                if (vuln_id := vulnerability_id_from_tag(tag))
-            ]
-            if tag_ids:
-                tag_ids.sort(key=lambda vuln_id: not vuln_id.startswith("CVE-"))
-                finding.unsaved_vulnerability_ids = list(dict.fromkeys((finding.unsaved_vulnerability_ids or []) + tag_ids))
+            # CVE/GHSA aliases as tags. Promote those to vulnerability ids too, along with a rule id
+            # that is itself a GHSA id, CVEs first.
+            candidates = [result.get("ruleId"), *get_properties_tags(rule), *get_properties_tags(result)]
+            extra_ids = [vuln_id for value in candidates if (vuln_id := vulnerability_id_from_tag(value))]
+            if extra_ids:
+                extra_ids.sort(key=lambda vuln_id: not vuln_id.startswith("CVE-"))
+                finding.unsaved_vulnerability_ids = list(dict.fromkeys((finding.unsaved_vulnerability_ids or []) + extra_ids))
 
             # manage fingerprints
             # fingerprinting in SARIF is more complete than in current implementation
@@ -536,12 +535,14 @@ def cve_try(val):
 
 
 def vulnerability_id_from_tag(tag):
-    # A tag counts only when the whole tag is a CVE or GHSA id, so a tag like "CVE-check" is not one
+    # A tag counts only when the whole (stripped) tag is a CVE or GHSA id, so "CVE-check" is not one.
+    # ASCII only: a non-ASCII digit or a letter that merely looks like one must not make an id.
     if not isinstance(tag, str):
         return None
-    if re.fullmatch(r"CVE-\d{4}-\d{4,}", tag, re.IGNORECASE):
+    tag = tag.strip()
+    if re.fullmatch(r"CVE-[0-9]{4}-[0-9]{4,}", tag, re.IGNORECASE | re.ASCII):
         return tag.upper()
-    if re.fullmatch(r"GHSA(-[a-z0-9]{4}){3}", tag, re.IGNORECASE):
+    if re.fullmatch(r"GHSA(-[a-z0-9]{4}){3}", tag, re.IGNORECASE | re.ASCII):
         return "GHSA" + tag[4:].lower()
     return None
 

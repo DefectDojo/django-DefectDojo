@@ -157,8 +157,11 @@ class OSVScannerParser:
                         finding.mitigation = mitigation_text
 
                     # The OSV id first, then its aliases: a GHSA-keyed advisory names its CVE only there
-                    vulnerability_ids = [vulnerabilityid, *vulnerability.get("aliases", [])]
-                    vulnerability_ids = list(dict.fromkeys(x for x in vulnerability_ids if x))
+                    aliases = vulnerability.get("aliases") or []
+                    if not isinstance(aliases, list):
+                        aliases = []
+                    vulnerability_ids = [vulnerabilityid, *aliases]
+                    vulnerability_ids = list(dict.fromkeys(x.strip() for x in vulnerability_ids if isinstance(x, str) and x.strip()))
                     if vulnerability_ids:
                         finding.unsaved_vulnerability_ids = vulnerability_ids
                     if unsaved_cwes:
