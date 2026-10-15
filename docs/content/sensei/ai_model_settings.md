@@ -69,8 +69,9 @@ All secrets are **encrypted at rest** and are **write-only**: once saved, the fo
 whether a secret is set, never its value. Leave a secret field blank when saving to keep the
 stored value; type a new value to replace it. The one exception is the **API Base URL**: a saved
 API key is kept only for the base URL it was saved with, so changing the base URL to a new
-gateway means entering the key again (clearing the base URL does not). **Test Connection** follows
-the same rule.
+gateway means entering the key again (clearing the base URL does not). For Amazon Bedrock the same
+applies to the AWS Secret Access Key, and a saved Session Token is cleared when the base URL
+changes unless you enter it again. **Test Connection** follows the same rule.
 
 ### Claude (Anthropic) and OpenAI
 
