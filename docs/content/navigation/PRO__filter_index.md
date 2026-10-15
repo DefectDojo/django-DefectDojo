@@ -46,6 +46,7 @@ The same searchable list filters offer **Paste List** above their options. Selec
 
 - Names match whole and case-insensitively: `payments-api` finds the asset named `Payments-API`, not one named `payments-api-v2`.
 - A number is looked up as an ID as well as a name, so a list of asset IDs works too.
+- A comma separates names, so a name that itself contains a comma cannot be pasted; pick it from the search box instead.
 - Names the filter cannot find stay in the box and are counted beneath it, so a typo can be corrected and added again. A name is also "not found" when it belongs to an asset or organization you do not have access to.
 - The resolved options are ordinary selections: they appear as chips, combine with any options you picked by hand, and follow the **Include** / **Exclude** switch. While a **Select all N matching** selection is active, **Paste List** is not offered, because that selection covers every match rather than a list of picks.
 
