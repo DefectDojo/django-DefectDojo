@@ -200,7 +200,7 @@ Runs when deduplication matches a newly imported Finding to an existing one. Use
 | **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
 | **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
 
-With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. Matches inside one Asset are always marked as duplicates, and deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
 
 Each item carries the match on `ctx`:
 
@@ -356,19 +356,21 @@ Gives the Finding the status of the Finding deduplication matched it to in anoth
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Statuses** | all | Which statuses to carry: `False Positive`, `Out of Scope`, `Risk Accepted`, `Mitigated`, `Reopened`. `Reopened` carries an open status to a Finding that is closed for one of the other reasons. |
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry: `False Positive`, `Out of Scope`, `Risk Accepted`, `Mitigated`, `Reopened`. `Reopened` carries an open status to a Finding that is closed for one of the other reasons. |
 
-A status is read in this order: false positive, out of scope, risk accepted, mitigated, and otherwise open. A risk acceptance is carried as a new acceptance on the Finding's own engagement, with the same expiration date, so either one can later be extended or revoked on its own. If the Asset only allows simple risk acceptance, the Finding is accepted the simple way, which has no expiration. The rule owner needs permission to edit the Finding (and to add a risk acceptance, for that status); Findings they cannot edit are left alone, and so are duplicates.
+`Mitigated` and `Reopened` are off by default. They follow what each Asset's scans report rather than a decision someone made: a fix that reaches staging first would mitigate the production Finding while the issue is still live in production, and the next production scan would reopen it and send the reopen back. Turn them on only where both Assets are scanned together.
+
+A status is read in this order: false positive, out of scope, risk accepted, mitigated, and otherwise open. A risk acceptance is carried as a new acceptance on the Finding's own engagement, with the same expiration date, so either one can later be extended or revoked on its own. If the Asset only allows simple risk acceptance, the Finding is accepted the simple way, which has no expiration. The rule owner must be able to see the Finding the status comes from (the note names it) and edit the Finding it goes to, and to add a risk acceptance for that status; anything else is left alone, and so are duplicates. It does nothing after **On Dedupe Match** in **Mark as Duplicate** mode, because the new Finding is then a duplicate.
 
 ### Apply Status to Linked Findings
 
 `finding.apply_status_to_linked`
 
-Gives every Finding linked to this one by **On Dedupe Match** the same status, and adds a note to each naming this Finding. Use it after **On Finding Event**, so a triage decision made in one Asset reaches the matching Findings in the others. Links are followed in both directions, and through a chain of Assets.
+Gives every Finding linked to this one by **On Dedupe Match** the same status, and adds a note to each naming this Finding. Use it after **On Finding Event**, so a triage decision made in one Asset reaches the matching Findings in the others. Links are followed in both directions, and through a chain of Assets, but only through Findings the rule owner can see.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Statuses** | all | Which statuses to carry, as for **Copy Status from Matched Finding**. |
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
 
 The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
 
