@@ -109,6 +109,7 @@ Key facts:
 - [EPSS / KEV (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/epss_kev/): How DefectDojo Pro enriches Findings with EPSS and CISA KEV data, when it syncs, and how it drives priority
 - [Reachability (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/reachability/): How DefectDojo Pro records whether a Finding's vulnerable code is actually reachable, and how that verdict adjusts priority
 - [Asset Exposure (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/asset_exposure/): How DefectDojo Pro records whether an asset is reachable from outside, whether a Finding is deployed in production, and how both adjust priority
+- [Remediation Center (Pro)](https://docs.defectdojo.com/triage_findings/remediation_center/pro__remediation_center/): Group open Findings by the change that resolves them, one remediation action per change per location, with a due date, owners, workflow status and campaign rollups
 
 ## Model Your Assets
 
@@ -149,6 +150,7 @@ Key facts:
 - [Framework Presets (Pro)](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/framework_presets/): Apply a published scheme's patch windows and scan cadence as one preset, preview the plan first, and revert it later
 - [Asset Health Grade](https://docs.defectdojo.com/asset_modelling/pro_hierarchy/asset_health_grade/): How DefectDojo calculates an Asset Health Grade
 - [Locations Overview (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__locations_overview/): What Locations are and why they replace Endpoints
+- [Location Map (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__location_map/): See every Location an Asset has on one map, grouped by what the Locations share, with active finding counts on every node
 - [Migrating from Endpoints (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/): What happens when you migrate existing Endpoint data to Locations
 - [Working with URLs (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__working_with_urls/): Day-to-day use of URL Locations as the Endpoints replacement
 - [Working with SBOMs (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__working_with_sboms/): Manage software dependencies and SBOMs as Locations
@@ -395,6 +397,8 @@ Key facts:
 - [Control Coverage (Pro)](https://docs.defectdojo.com/federal_compliance/control_coverage/): Which 800-53 controls your scanners test, and open weaknesses per control
 - [FDA Cyber Device Evidence Pack (Pro)](https://docs.defectdojo.com/federal_compliance/fda_cyber_device_pack/): Record a cyber device profile, track the section 524B lifecycle metrics, and export the evidence pack an assessor reviews
 - [PCI DSS Evidence Packs (Pro)](https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/): Assess a cardholder data environment against the PCI DSS vulnerability management requirements and export the workbook an assessor reviews
+- [Certification Control Catalogs (Pro)](https://docs.defectdojo.com/federal_compliance/certification_catalogs/): Assess an Asset against ISO/IEC 27001:2022 Annex A, the SOC 2 Trust Services Criteria and the NIS2 technical requirements, and see one body of evidence answer all three
+- [Regulatory Profile (Pro)](https://docs.defectdojo.com/federal_compliance/regulatory_profile/): Record the CRA, DORA and NIS2 facts for an Asset: critical or important function, CRA product class, support period, and where vulnerability reports go
 
 ## Automation
 
@@ -454,6 +458,7 @@ Key facts:
 - [LDAP Authentication (Pro)](https://docs.defectdojo.com/admin/sso/pro__ldap/): Configure LDAP authentication in DefectDojo Pro
 - [SCIM Provisioning (Pro)](https://docs.defectdojo.com/admin/sso/pro__scim/): Provision and deprovision DefectDojo Pro users from your identity provider
 - [Sandbox (Pro)](https://docs.defectdojo.com/admin/sandbox/pro__sandbox/): Practice on sample data in a copy of DefectDojo Pro that never reaches production
+- [Celery Status (Pro)](https://docs.defectdojo.com/admin/pro__celery_status/): Check the health of DefectDojo's background-task queue, see which tasks are waiting, and purge stuck work
 
 ## Navigating DefectDojo
 
