@@ -117,7 +117,7 @@ packageurl-python==0.17.6
 packaging==26.3
 pandas==3.0.6
 parameterized==0.9.0
-pikepdf==10.13.0.post1
+pikepdf==10.17.0
 pilkit==3.0
 pillow==12.3.0
 prometheus_client==0.26.0
