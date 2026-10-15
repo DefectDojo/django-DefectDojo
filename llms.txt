@@ -223,6 +223,7 @@ Key facts:
 - [Elastic Security (Pro)](https://docs.defectdojo.com/connectors/toolreference/elastic_security/): How to set up the Elastic Security Upstream Connector for DefectDojo
 - [Endor Labs (Pro)](https://docs.defectdojo.com/connectors/toolreference/endor_labs/): How to set up the Endor Labs Upstream Connector for DefectDojo
 - [Escape (Pro)](https://docs.defectdojo.com/connectors/toolreference/escape/): How to set up the Escape Upstream Connector for DefectDojo
+- [StackHawk (Pro)](https://docs.defectdojo.com/connectors/toolreference/stackhawk/): How to set up the StackHawk Upstream Connector for DefectDojo
 - [Fairwinds Insights (Pro)](https://docs.defectdojo.com/connectors/toolreference/fairwinds_insights/): How to set up the Fairwinds Insights Upstream Connector for DefectDojo
 - [Finite State (Pro)](https://docs.defectdojo.com/connectors/toolreference/finite_state/): How to set up the Finite State Upstream Connector for DefectDojo
 - [Fleet (Pro)](https://docs.defectdojo.com/connectors/toolreference/fleet/): How to set up the Fleet Upstream Connector for DefectDojo
