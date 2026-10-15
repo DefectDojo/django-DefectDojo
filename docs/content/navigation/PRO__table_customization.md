@@ -34,7 +34,7 @@ The Findings list can be read as a table or as a grid of cards. The two buttons 
 
 A card shows the finding's severity, status, and title, where it lives (organization, asset, engagement, and test), its scores (CVSS, EPSS, priority, age, SLA, and CWE), the signals that matter when they apply (known exploited, ransomware, exploit maturity, reachability, a Sensei fix, a Jira issue, connector tickets), its tags and vulnerability ids, and a footer with the date found, the scanner, and the other dates and people on it. A card omits what is empty: a finding that is not in KEV and has no tags does not spend lines on them. The first two lines of the description appear as a summary when the comfortable density is on.
 
-- The **Columns** button becomes **Fields** in the grid and chooses which fields a card shows. The grid keeps its own selection, with a default made for cards; the table's columns are untouched.
+- The **Columns** button becomes **Fields** in the grid. It is the same selection in both views: the columns chosen for the table are the fields a card shows, and a field only a card can show (the summary) is offered in the grid.
 - The density toggle applies to cards too: compact cards are smaller and fit one more per row.
 - Select a card's checkbox to select it; the bulk actions appear above the grid as they do above the table, and the checkbox at the start of the filter bar selects every card on the page.
 - The view is remembered per table in your browser and is part of the page URL (`view=grid`), so a shared link opens in the view it was shared from. On a phone-sized screen a first visit opens the grid.
@@ -70,10 +70,10 @@ Like column order and visibility, a width change applies to the current session 
 
 ## Saving table preferences
 
-Column visibility, column order, column widths, page size, filters, sort order, the match mode of the filter bar, the card fields, and the view (table or grid) can be saved together as a named table preference. A preference that was saved in the grid opens in the grid; one saved in the table opens in the table. Open the preferences menu from the toolbar (the button showing the active view's name) to manage them.
+Column visibility, column order, column widths, page size, filters, sort order, the match mode of the filter bar, and the view (table or grid) can be saved together as a named table preference. A preference that was saved in the grid opens in the grid; one saved in the table opens in the table. Open the preferences menu from the toolbar (the button showing the active view's name) to manage them.
 
 - **Save as New Preference**: capture the current table setup under a new name. You can optionally set it as your default and, if you have permission, share it with other users.
-- **Save Column Layout**: update the active preference's columns only (visibility, order, widths, page size, the card fields, and the view), leaving its saved filters and sort untouched.
+- **Save Column Layout**: update the active preference's columns only (visibility, order, widths, page size, and the view), leaving its saved filters and sort untouched.
 - **Save Filters and Sort**: update the active preference's filters, sort, and match mode only, leaving its column layout untouched.
 - **Set Preference as Default**: load this preference automatically whenever you open the table.
 - **Duplicate Preference**: copy the active preference (including its column widths) to a new name so you can adjust it without changing the original.
