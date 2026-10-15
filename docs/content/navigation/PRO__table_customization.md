@@ -43,7 +43,7 @@ A card shows the finding's severity, status, and title, where it lives (organiza
 
 Select the **Columns** button in the toolbar to open the column picker, then check or uncheck a column to show or hide it. Use the search box at the top of the picker to find a column by its header. A few structural columns (the selection checkbox and the row-action menu) are always present and are not listed in the picker.
 
-**Select All** and **Deselect All** at the top of the picker turn every listed column on or off in one click. To build a narrow view, select **Deselect All** and then check only the columns you want. When the search box holds text, both actions apply only to the columns that match the search, so you can, for example, search for "date" and select **Select All** to add every date column.
+The checkbox beside the search box selects or clears every listed column in one click. It works the same way as the select-all checkbox in a column filter, and it is checked when every listed column is shown. To build a narrow view, clear the checkbox so no columns are shown, then check only the columns you want. If only some columns are shown, the first click selects them all and the second clears them. When the search box holds text, the checkbox applies only to the columns that match the search: search for "date" and check it to add every date column. Columns hidden by the search keep their current state.
 
 ## Sorting columns
 
