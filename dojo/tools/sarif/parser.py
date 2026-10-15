@@ -302,6 +302,16 @@ class SarifParser:
             tags = [s.removeprefix("external/cwe/") for s in tags]
             finding.unsaved_tags = tags
 
+            # Some tools key a vulnerability by a non-CVE rule id (a GHSA, a RUSTSEC) and carry its
+            # CVE/GHSA aliases as tags. Promote those to vulnerability ids too, CVEs first.
+            tag_ids = [
+                vuln_id for tag in get_properties_tags(rule) + get_properties_tags(result)
+                if (vuln_id := vulnerability_id_from_tag(tag))
+            ]
+            if tag_ids:
+                tag_ids.sort(key=lambda vuln_id: not vuln_id.startswith("CVE-"))
+                finding.unsaved_vulnerability_ids = list(dict.fromkeys((finding.unsaved_vulnerability_ids or []) + tag_ids))
+
             # manage fingerprints
             # fingerprinting in SARIF is more complete than in current implementation
             # SARIF standard make it possible to have multiple version in the same report
@@ -522,6 +532,17 @@ def cve_try(val):
     cveSearch = re.search(r"(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
     if cveSearch:
         return cveSearch.group(1).upper()
+    return None
+
+
+def vulnerability_id_from_tag(tag):
+    # A tag counts only when the whole tag is a CVE or GHSA id, so a tag like "CVE-check" is not one
+    if not isinstance(tag, str):
+        return None
+    if re.fullmatch(r"CVE-\d{4}-\d{4,}", tag, re.IGNORECASE):
+        return tag.upper()
+    if re.fullmatch(r"GHSA(-[a-z0-9]{4}){3}", tag, re.IGNORECASE):
+        return "GHSA" + tag[4:].lower()
     return None
 
 

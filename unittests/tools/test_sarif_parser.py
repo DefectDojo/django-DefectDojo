@@ -659,3 +659,31 @@ add_core(ptr, offset, val);
             "5c1f36e0a9de13c3c96c26fa9a1a02a5d5be0c4a3ad9d0f27b3c4d2f8f4a91aa",
             keeper[0].unique_id_from_tool,
         )
+
+    # Regression: CVE/GHSA ids carried in rule or result tags were kept only as tags, never as
+    # vulnerability ids, so a finding keyed by a non-CVE rule id (a GHSA, a RUSTSEC) had no CVE.
+    def test_vulnerability_ids_from_tags(self):
+        with (get_unit_tests_scans_path("sarif") / "vulnerability_ids_in_tags.sarif").open(encoding="utf-8") as testfile:
+            findings = SarifParser().get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+        by_rule = {finding.vuln_id_from_tool: finding for finding in findings}
+        expected = {
+            # GHSA rule id, CVE in the rule tags
+            "GHSA-jfh8-c2jp-5v3q": ["CVE-2021-44228"],
+            # rule and result tags combine; a lower-case CVE is normalized; CVEs come first
+            "RUSTSEC-2021-0078": ["CVE-2021-32715", "CVE-2021-32714", "GHSA-f3pg-qwvg-p99c"],
+            # a CVE rule id that is repeated in the tags is not listed twice
+            "CVE-2022-42003": ["CVE-2022-42003", "GHSA-jjjh-jjxp-wpff"],
+            # control: no tag is an id ("CVE-check" is not one), so nothing changes
+            "java.lang.security.audit.sqli.jdbc-sqli": None,
+        }
+        for rule_id, vulnerability_ids in expected.items():
+            with self.subTest(rule_id=rule_id):
+                finding = by_rule[rule_id]
+                self.assertEqual(
+                    vulnerability_ids, finding.unsaved_vulnerability_ids,
+                    msg=f"rule {rule_id}: expected {vulnerability_ids}, parsed {finding.unsaved_vulnerability_ids}",
+                )
+                self.common_checks(finding)
+        with self.subTest("ids stay in the tags too"):
+            self.assertIn("CVE-2021-44228", by_rule["GHSA-jfh8-c2jp-5v3q"].unsaved_tags)

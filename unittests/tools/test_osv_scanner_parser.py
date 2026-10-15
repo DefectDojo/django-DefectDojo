@@ -51,3 +51,21 @@ class TestOSVScannerParser(DojoTestCase):
             self.assertEqual(finding.references, "https://nvd.nist.gov/vuln/detail/CVE-2021-45115\nhttps://docs.djangoproject.com/en/4.0/releases/security\nhttps://github.com/django/django\nhttps://groups.google.com/forum/#!forum/django-announce\nhttps://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/B4SQG2EAF4WCI2SLRL6XRDJ3RPK3ZRDV\nhttps://security.netapp.com/advisory/ntap-20220121-0005\nhttps://www.djangoproject.com/weblog/2022/jan/04/security-releases\n")
             self.assertEqual(finding.title, "GHSA-53qw-q765-4fww_django")
             self.assertEqual(finding.mitigation, "**Upgrade to versions**:\n\tECOSYSTEM :\n\t\t- 2.2.26\n")
+
+    # Regression: the OSV `aliases` (the CVE for a GHSA-keyed advisory) were dropped, so an
+    # OSV finding carried only the OSV id and never its CVE.
+    def test_aliases_become_vulnerability_ids(self):
+        with (get_unit_tests_scans_path("osv_scanner") / "many_findings.json").open(encoding="utf-8") as testfile:
+            findings = OSVScannerParser().get_findings(testfile, Test())
+        expected = {
+            0: ["GHSA-25mq-v84q-4j7r", "CVE-2022-31090"],
+            17: ["GHSA-53qw-q765-4fww", "BIT-django-2021-45115", "CVE-2021-45115", "PYSEC-2022-1"],
+        }
+        for index, vulnerability_ids in expected.items():
+            with self.subTest(finding=index):
+                parsed = findings[index].unsaved_vulnerability_ids
+                self.assertEqual(vulnerability_ids, parsed, msg=f"finding {index}: expected {vulnerability_ids}, parsed {parsed}")
+        with self.subTest("a non-CVE id keeps its GHSA alias"):
+            with (get_unit_tests_scans_path("osv_scanner") / "some_findings.json").open(encoding="utf-8") as testfile:
+                finding = OSVScannerParser().get_findings(testfile, Test())[0]
+            self.assertEqual(["MAL-2023-1035", "GHSA-8348-2q94-ffjx"], finding.unsaved_vulnerability_ids)

@@ -37,6 +37,10 @@ Each Test in DefectDojo represents results from a single tool. SARIF results fro
 
 This constraint is what makes reimport's comparison logic reliable: when a Finding is absent from a new report, DefectDojo can safely assume it has been resolved. If results from multiple tools were mixed in a single Test, DefectDojo would not be able to distinguish between a resolved Finding and a Finding that simply isn't covered by the current tool.
 
+## Vulnerability IDs
+
+A Finding gets a CVE as its vulnerability ID when the result's `ruleId` contains one. Many dependency scanners key a result by another identifier, such as a GHSA or RUSTSEC id, and list the CVE as a tag instead. So DefectDojo also reads the `tags` in the rule's and the result's `properties`: every tag that is exactly a CVE id (`CVE-2021-44228`) or a GHSA id (`GHSA-jfh8-c2jp-5v3q`) becomes a vulnerability ID, CVEs first. These tags stay on the Finding as tags too.
+
 ## Support for Deduplication (Fingerprinting)
 
 The SARIF parser takes into account data for fingerprinting, based on the `fingerprints` and `partialFingerprints` properties in the SARIF file. It's possible to activate deduplication based on this data by customizing settings:
