@@ -428,6 +428,7 @@ class CrossApprovalRequestValidationViewTest(SimpleTestCase):
             {"id": "7", "cve": "CVE-1", "status": "approved", "owner": "x86"},
         ))
         queryset = MagicMock()
+        queryset.exclude.return_value = queryset
         queryset.filter.return_value = queryset
         queryset.distinct.return_value = queryset
         view = CrossApprovalRequestViewSet()
@@ -449,6 +450,7 @@ class CrossApprovalRequestValidationViewTest(SimpleTestCase):
             {"id": "not-a-number"},
         ))
         queryset = MagicMock()
+        queryset.exclude.return_value = queryset
         queryset.none.return_value = queryset
         queryset.distinct.return_value = queryset
         view = CrossApprovalRequestViewSet()
@@ -772,15 +774,14 @@ class CrossApprovalRequestWorkflowViewTest(SimpleTestCase):
         with (
             patch("dojo.api_v2.cross_approval.views.transaction.atomic", return_value=nullcontext()),
             patch("dojo.api_v2.cross_approval.views.transaction.on_commit") as on_commit,
-            patch("dojo.api_v2.cross_approval.views.delete_cross_approval_request_task.delay") as delete_task,
+            patch("dojo.api_v2.cross_approval.views.delete_cross_approval_request_task") as delete_task,
         ):
             view.perform_destroy(instance)
-
-        self.assertEqual(instance.status, "deleting")
-        instance.save.assert_called_once_with(update_fields=["status"])
-        on_commit.assert_called_once()
-        on_commit.call_args.args[0]()
-        delete_task.assert_called_once_with(7, True)
+            self.assertEqual(instance.status, "deleting")
+            instance.save.assert_called_once_with(update_fields=["status"])
+            on_commit.assert_called_once()
+            on_commit.call_args.args[0]()
+            delete_task.delay.assert_called_once_with(7, True)
 
     def test_delete_task_reverts_exclusions_before_deleting_request(self):
         exclusion = SimpleNamespace(pk=3)
