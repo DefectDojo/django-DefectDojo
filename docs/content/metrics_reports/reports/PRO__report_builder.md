@@ -87,6 +87,8 @@ Fields render in the order they are listed. Selecting a field adds it to the end
 
 When Locations are enabled, each of the Organization, Asset, Engagement, Test, and Finding entities offers a **Location Count** field. An Asset counts the locations it references directly and a Finding counts the locations attached to it. An Organization rolls up the distinct locations across its Assets, and an Engagement or Test counts the distinct locations touched by its Findings, so a host shared by several findings counts once. The counts respect the viewer's permissions, so a user who can only see some Assets in an Organization sees only those Assets' locations in its count.
 
+The Finding entity additionally offers a **Locations** field that names the affected systems rather than counting them: each Finding's row lists the values of its Locations, comma-separated and in a stable order. This is the column to pick when a report has to pair each Finding with its vulnerable hosts, such as a per-Test findings table handed to a platform team for patching. Like the counts, it only names Locations the viewer has permission to see.
+
 ### Reporting which Assets a location belongs to
 
 DefectDojo stores each location once, so a single host or URL can belong to several Assets, and those Assets can sit in different Organizations. There are two ways to report on that link, and you can use either one in the same report.
