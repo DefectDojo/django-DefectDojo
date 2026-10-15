@@ -296,6 +296,19 @@ def metrics_panel_tenable(request: HttpRequest) -> HttpResponse:
         'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/metrics/tenable{base_params}",
         'user': user})
 
+@dojo_ratelimit_view()
+def metrics_ia_recommendation(request: HttpRequest) -> HttpResponse:
+    page_name = ('Metrics Ia recommendation')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=True, request=request)
+    return render(request, 'dojo/generic_view.html', {
+        'actions': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}metrics/ia-recommendation{base_params}",
+        'user': user})
+
 
 # @cache_page(60 * 5)  # cache for 5 minutes
 # @vary_on_cookie

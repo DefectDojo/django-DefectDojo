@@ -157,6 +157,7 @@ class Permissions(IntEnum):
     Metrics_DevSecOps = 2709
     Metrics_Panel_Admin = 2710
     Metrics_Scan_Cycle = 2711  
+    Metrics_Ia_Recommendation = 2712
 
     Transfer_Finding_View = 2801
     Transfer_Finding_Edit = 2802
@@ -466,6 +467,7 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Ia_Recommendation,
             Permissions.Metrics_Scan_Cycle,
             Permissions.Finding_Add_Recommendation,
             Permissions.Finding_Remediation_Add,
@@ -654,6 +656,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Delete,
             Permissions.Metrics_DevSecOps,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Ia_Recommendation,
             Permissions.Metrics_Scan_Cycle,
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Edit,
@@ -888,6 +891,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Finding_Accept,
             Permissions.Transfer_Finding_Finding_Reject,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Ia_Recommendation,
             Permissions.Metrics_Scan_Cycle,
             Permissions.Finding_Add_Recommendation,
             Permissions.Finding_Remediation_Add,
@@ -925,6 +929,7 @@ def get_roles_with_permissions():
             Permissions.Risk_Acceptance_Refresh_Permission_key,
             Permissions.Finding_Code_Review,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Ia_Recommendation,
             Permissions.Metrics_Scan_Cycle,
             Permissions.Finding_Add_Recommendation,
             Permissions.Finding_Remediation_Add,
@@ -968,6 +973,7 @@ def get_roles_with_permissions():
             Permissions.Risk_Acceptance_Expire_Date_Edit,
             Permissions.Risk_Acceptance_Bulk,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Ia_Recommendation,
             Permissions.Metrics_Scan_Cycle,
             Permissions.Risk_Acceptance_Send_Email,
             Permissions.Risk_Acceptance_Refresh_Permission_key,

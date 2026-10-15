@@ -575,6 +575,13 @@
                                                         {% trans "Metrics Panel Tenable" %}
                                                     </a>
                                                 </li>
+                                                {% if "Metrics_Ia_Recommendation"|has_role_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_ia_recommendation' %}">
+                                                            {% trans "Metrics Ia recommendation" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                                 {% if "Metrics_Panel_Admin"|has_role_permission %}
                                                     <li>
                                                         <a rel="noopener noreferrer" href="{% url 'metrics_panel_admin' %}">
