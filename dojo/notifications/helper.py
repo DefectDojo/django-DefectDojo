@@ -3,6 +3,7 @@ import json
 import logging
 import re
 from contextlib import suppress
+from datetime import timedelta
 
 import crum
 import requests
@@ -24,11 +25,13 @@ from dojo.models import (
     Dojo_User,
     Engagement,
     Finding,
+    Finding_Group,
     Product,
     Product_Type,
     System_Settings,
     Test,
     UserContactInfo,
+    get_current_date,
     get_current_datetime,
 )
 from dojo.notifications.models import Alerts, Notification_Webhooks, Notifications
@@ -39,6 +42,10 @@ from dojo.user.queries import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Findings fetched per round trip by the daily SLA run, which streams them instead of
+# holding every open finding in memory.
+SLA_NOTIFY_CHUNK_SIZE = 2000
 
 # Rows per INSERT when a notification's in-app alerts are written together.
 ALERT_BULK_CREATE_BATCH_SIZE = 1000
@@ -1200,19 +1207,20 @@ def sla_compute_and_notify(*args, **kwargs):
     from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
 
     class NotificationEntry:
-        def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
+        def __init__(self, finding=None, jira_issue=None, jira_instance=None, *, do_jira_sla_comment=False):
             self.finding = finding
             self.jira_issue = jira_issue
+            self.jira_instance = jira_instance
             self.do_jira_sla_comment = do_jira_sla_comment
 
-    def _add_notification(finding, kind):
-        # jira_issue, do_jira_sla_comment are taken from the context
+    def _add_notification(finding, kind, jira_issue, jira_instance, *, do_jira_sla_comment):
         # kind can be one of: breached, prebreach, breaching
         if finding.test.engagement.product.disable_sla_breach_notifications:
             return
 
         notification = NotificationEntry(finding=finding,
                                          jira_issue=jira_issue,
+                                         jira_instance=jira_instance,
                                          do_jira_sla_comment=do_jira_sla_comment)
 
         pt = finding.test.engagement.product.prod_type.name
@@ -1256,33 +1264,47 @@ def sla_compute_and_notify(*args, **kwargs):
                     findings_list = []
 
                     for n in comb_notif_kind:
-                        sla_age = n.finding.sla_days_remaining()
-                        title = _notification_title_for_finding(n.finding, kind, sla_age)
-                        create_notification(
-                            event="sla_breach",
-                            title=title,
-                            finding=n.finding,
-                            sla_age=sla_age,
-                            url=reverse("view_finding", args=(n.finding.id,)),
-                        )
-
-                        if n.do_jira_sla_comment:
-                            logger.info("Creating JIRA comment to notify of SLA breach information.")
-                            jira_services.add_simple_comment(jira_instance, n.jira_issue, title)
-
                         findings_list.append(n.finding)
+                        # one finding that cannot be notified must not stop the others; the
+                        # savepoint keeps a database error here from aborting the run's transaction
+                        title = None
+                        try:
+                            sla_age = n.finding.sla_days_remaining()
+                            title = _notification_title_for_finding(n.finding, kind, sla_age)
+                            with transaction.atomic():
+                                create_notification(
+                                    event="sla_breach",
+                                    title=title,
+                                    finding=n.finding,
+                                    sla_age=sla_age,
+                                    url=reverse("view_finding", args=(n.finding.id,)),
+                                )
+                        except Exception:
+                            logger.exception("SLA notification failed for Finding %s, continuing with the next one", n.finding.id)
+
+                        # kept apart, so a JIRA failure does not undo the notification above
+                        if n.do_jira_sla_comment and title:
+                            try:
+                                logger.info("Creating JIRA comment to notify of SLA breach information.")
+                                jira_services.add_simple_comment(n.jira_instance, n.jira_issue, title)
+                            except Exception:
+                                logger.exception("JIRA SLA comment failed for Finding %s, continuing with the next one", n.finding.id)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
-                    product = comb_notif_kind[0].finding.test.engagement.product
-                    create_notification(
-                        event="sla_breach_combined",
-                        title=title_combined,
-                        product=product,
-                        findings=findings_list,
-                        breach_kind=kind,
-                        base_url=get_script_prefix(),
-                    )
+                    try:
+                        title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
+                        product = comb_notif_kind[0].finding.test.engagement.product
+                        with transaction.atomic():
+                            create_notification(
+                                event="sla_breach_combined",
+                                title=title_combined,
+                                product=product,
+                                findings=findings_list,
+                                breach_kind=kind,
+                                base_url=get_script_prefix(),
+                            )
+                    except Exception:
+                        logger.exception("Combined SLA notification failed for %s / %s (%s)", prodtype, prod, kind)
 
     # exit early on flags
     system_settings = System_Settings.objects.get()
@@ -1290,8 +1312,6 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Will not notify on SLA breach per user configured settings")
         return
 
-    jira_issue = None
-    jira_instance = None
     # notifications list per product per product type
     combined_notifications = {}
     try:
@@ -1306,10 +1326,24 @@ def sla_compute_and_notify(*args, **kwargs):
                 query = Q(active=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: %s", query)
 
-            no_jira_findings = {}
             if system_settings.enable_notify_sla_jira_only:
                 logger.debug("Ignoring findings that are not linked to a JIRA issue")
-                no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
+                query &= Q(jira_issue__isnull=False)
+
+            # Only a finding whose SLA ends between SLA_NOTIFY_POST_BREACH days ago and
+            # SLA_NOTIFY_PRE_BREACH days from now can be notified, so leave the rest in the
+            # database instead of evaluating every open finding in Python. A finding without an
+            # expiration date is treated as breaching today below, and sla_days_remaining()
+            # counts from the mitigated date when one is set, so both stay in.
+            today = get_current_date()
+            query &= (
+                Q(sla_expiration_date__isnull=True)
+                | Q(mitigated__isnull=False)
+                | Q(
+                    sla_expiration_date__gte=today - timedelta(days=settings.SLA_NOTIFY_POST_BREACH),
+                    sla_expiration_date__lte=today + timedelta(days=settings.SLA_NOTIFY_PRE_BREACH),
+                )
+            )
 
             total_count = 0
             pre_breach_count = 0
@@ -1317,86 +1351,115 @@ def sla_compute_and_notify(*args, **kwargs):
             post_breach_no_notify_count = 0
             jira_count = 0
             at_breach_count = 0
+            error_count = 0
 
-            # Taking away for now, since the prefetch is not efficient
-            # .select_related('jira_issue') \
-            # .prefetch_related(Prefetch('test__engagement__product__jira_project_set__jira_instance')) \
             # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
+            # Streamed in chunks; the prefetches share one Product (and its SLA configuration) per
+            # chunk instead of loading it again for every finding.
             findings = Finding.objects \
                 .filter(query) \
                 .exclude(severity="Info") \
-                .exclude(id__in=no_jira_findings)
+                .exclude(test__engagement__product__disable_sla_breach_notifications=True) \
+                .select_related("jira_issue") \
+                .prefetch_related(
+                    "test__engagement__product__prod_type",
+                    "test__engagement__product__sla_configuration",
+                    Prefetch("finding_group_set", queryset=Finding_Group.objects.select_related("jira_issue")),
+                ) \
+                .iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
 
-            for finding in findings:
-                total_count += 1
-                sla_age = finding.sla_days_remaining()
+            # Whatever was collected before a failure to read further (a lost connection, say)
+            # is still sent, rather than dropped along with the rest of the run.
+            try:
+                for finding in findings:
+                    total_count += 1
+                    # one finding that cannot be evaluated must not stop the run
+                    try:
+                        # a savepoint, so a database error on this finding cannot abort the
+                        # transaction (if any) that the rest of the run depends on
+                        with transaction.atomic():
+                            # Finding.finding_group runs its own query; answer it from the prefetch
+                            finding.finding_group = min(finding.finding_group_set.all(), key=lambda group: group.id, default=None)
 
-                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
-                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
-                severity, enforce = finding.get_sla_period()
-                if not enforce:
-                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
-                    continue
+                            sla_age = finding.sla_days_remaining()
 
-                # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
-                if sla_age is None:
-                    sla_age = 0
+                            # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                            # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                            severity, enforce = finding.get_sla_period()
+                            if not enforce:
+                                logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                                continue
 
-                if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
-                    post_breach_no_notify_count += 1
-                    # Skip finding notification if breached for too long
-                    logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
-                    continue
+                            # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
+                            if sla_age is None:
+                                sla_age = 0
 
-                do_jira_sla_comment = False
-                jira_issue = None
-                if finding.has_jira_issue:
-                    jira_issue = finding.jira_issue
-                elif finding.has_jira_group_issue:
-                    jira_issue = finding.finding_group.jira_issue
+                            if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
+                                post_breach_no_notify_count += 1
+                                # Skip finding notification if breached for too long
+                                logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
+                                continue
 
-                if jira_issue:
-                    jira_count += 1
-                    jira_instance = jira_services.get_instance(finding)
-                    if jira_instance is not None:
-                        logger.debug("JIRA config for finding is %s", jira_instance)
-                        # global config or product config set, product level takes precedence
-                        try:
-                            # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
-                            product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
-                        except Exception as e:
-                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error("Error is: %s", e)
+                            do_jira_sla_comment = False
+                            jira_issue = None
+                            jira_instance = None
+                            if finding.has_jira_issue:
+                                jira_issue = finding.jira_issue
+                            elif finding.has_jira_group_issue:
+                                jira_issue = finding.finding_group.jira_issue
 
-                        jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
+                            if jira_issue:
+                                jira_count += 1
+                                jira_instance = jira_services.get_instance(finding)
+                                if jira_instance is not None:
+                                    logger.debug("JIRA config for finding is %s", jira_instance)
+                                    # global config or product config set, product level takes precedence
+                                    product_jira_sla_comment_enabled = False
+                                    try:
+                                        # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
+                                        product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
+                                    except Exception as e:
+                                        logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
+                                        logger.error("Error is: %s", e)
 
-                        if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
-                            logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
-                            do_jira_sla_comment = True
-                            logger.debug(f"JIRA issue is {jira_issue.jira_key}")
+                                    jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
-                logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
-                if (sla_age < 0):
-                    post_breach_count += 1
-                    logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
-                    abs_sla_age = abs(sla_age)
-                    if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
-                        _add_notification(finding, "breached")
-                    else:
-                        logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
-                # The finding is within the pre-breach period
-                elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
-                    pre_breach_count += 1
-                    logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
-                    _add_notification(finding, "prebreach")
-                # The finding breaches the SLA today
-                elif (sla_age == 0):
-                    at_breach_count += 1
-                    logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
-                    _add_notification(finding, "breaching")
+                                    if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                                        logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
+                                        do_jira_sla_comment = True
+                                        logger.debug(f"JIRA issue is {jira_issue.jira_key}")
+
+                            logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
+                            kind = None
+                            if (sla_age < 0):
+                                post_breach_count += 1
+                                logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
+                                abs_sla_age = abs(sla_age)
+                                if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
+                                    kind = "breached"
+                                else:
+                                    logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
+                            # The finding is within the pre-breach period
+                            elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                                pre_breach_count += 1
+                                logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
+                                kind = "prebreach"
+                            # The finding breaches the SLA today
+                            elif (sla_age == 0):
+                                at_breach_count += 1
+                                logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
+                                kind = "breaching"
+
+                            if kind:
+                                _add_notification(finding, kind, jira_issue, jira_instance, do_jira_sla_comment=do_jira_sla_comment)
+                    except Exception:
+                        error_count += 1
+                        logger.exception("SLA evaluation failed for Finding %s, continuing with the next one", finding.id)
+            except Exception:
+                logger.exception("SLA run stopped reading findings after %s; sending the notifications collected so far", total_count)
 
             _create_notifications()
-            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, total_count)
+            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, errors: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, error_count, total_count)
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")

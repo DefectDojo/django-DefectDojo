@@ -28,6 +28,8 @@ The suite has four items, because a Finding can carry three independent kinds of
 
 The three backfills are independent and can run in any order. The **Identity rehash stays locked until all three backfills have completed**, because the identity it recomputes folds in every location type; running it against a half-migrated database would bake an incomplete identity. Only one item runs at a time.
 
+The identity rehash queues one background rehash for each affected scan type and matching kind, and those rehashes keep running after the item has queued them. Until they have all finished, the item reads **Running**, with a count of rehashed batches and an estimate of the time left once the first batch is done, and it cannot be canceled. It then reports how many rehashes it ran, or **Failed** if any of them lost a batch. The same rehashes are listed on **Settings > Finding Workflow > Matching Configuration** while they run. Running the item again does not repeat a failed rehash, because the new identity was recorded when the rehash was queued; re-hash that scan type as described in [Running Deduplication Retroactively on Existing Data](/triage_findings/finding_deduplication/pro__deduplication_tuning/#running-deduplication-retroactively-on-existing-data).
+
 Each backfill is also available as a management command for scripted or air-gapped runs:
 
 ```bash
