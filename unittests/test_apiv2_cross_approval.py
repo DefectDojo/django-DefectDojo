@@ -14,6 +14,7 @@ from dojo.api_v2.cross_approval.permissions import IsCrossApprovalReviewer, IsCr
 from dojo.api_v2.cross_approval.helpers import (
     _get_findings,
     check_new_findings_to_cross_approval_exclusion_list,
+    delete_cross_approval_request_task,
     revert_cross_approval_exclusion,
 )
 from dojo.api_v2.cross_approval.serializers import (
@@ -760,30 +761,53 @@ class CrossApprovalRequestWorkflowViewTest(SimpleTestCase):
             "Cross-approval request 7 created",
         )
 
-    def test_destroy_reverts_approved_exclusions_before_deletion(self):
-        exclusion = SimpleNamespace(pk=3)
+    def test_destroy_queues_approved_request_deletion_after_commit(self):
         instance = SimpleNamespace(
             pk=7,
             status="approved",
-            exclusions=SimpleNamespace(all=Mock(return_value=[exclusion])),
-            delete=Mock(),
+            save=Mock(),
         )
         view = CrossApprovalRequestViewSet()
 
         with (
             patch("dojo.api_v2.cross_approval.views.transaction.atomic", return_value=nullcontext()),
-            patch("dojo.api_v2.cross_approval.views.revert_cross_approval_exclusion") as revert,
-            patch("dojo.api_v2.cross_approval.views.notify_request_status") as notify,
+            patch("dojo.api_v2.cross_approval.views.transaction.on_commit") as on_commit,
+            patch("dojo.api_v2.cross_approval.views.delete_cross_approval_request_task.delay") as delete_task,
         ):
             view.perform_destroy(instance)
 
+        self.assertEqual(instance.status, "deleting")
+        instance.save.assert_called_once_with(update_fields=["status"])
+        on_commit.assert_called_once()
+        on_commit.call_args.args[0]()
+        delete_task.assert_called_once_with(7, True)
+
+    def test_delete_task_reverts_exclusions_before_deleting_request(self):
+        exclusion = SimpleNamespace(pk=3)
+        cross_approval_request = SimpleNamespace(
+            pk=7,
+            exclusions=SimpleNamespace(iterator=Mock(return_value=[exclusion])),
+            delete=Mock(),
+        )
+        request_queryset = SimpleNamespace(first=Mock(return_value=cross_approval_request))
+
+        with (
+            patch(
+                "dojo.api_v2.cross_approval.helpers.CrossApprovalRequest.objects.filter",
+                return_value=request_queryset,
+            ),
+            patch("dojo.api_v2.cross_approval.helpers.revert_cross_approval_exclusion") as revert,
+            patch("dojo.api_v2.cross_approval.helpers.notify_request_status") as notify,
+        ):
+            delete_cross_approval_request_task.run(7, True)
+
         revert.assert_called_once_with(exclusion, exclude_request_id=7)
         notify.assert_called_once_with(
-            instance,
+            cross_approval_request,
             "cross_approval_deleted",
             "Cross-approval request 7 deleted",
         )
-        instance.delete.assert_called_once_with()
+        cross_approval_request.delete.assert_called_once_with()
 
     def test_expire_exclusion_serializes_a_refreshed_request(self):
         exclusion = SimpleNamespace(pk=3)
