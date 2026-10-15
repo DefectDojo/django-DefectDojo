@@ -176,7 +176,8 @@ model must be enabled in that project's Model Garden.
 
 - For **Claude** / **OpenAI**, it makes a minimal authenticated call to the provider.
 - For **Amazon Bedrock with static keys**, it lists the region's foundation models to confirm the
-  credentials work.
+  credentials work. If an **API Base URL** is set, it sends a minimal request to the configured
+  model through that endpoint instead, because that is the endpoint scans and fixes use.
 - For **Amazon Bedrock without static keys**, it reports that the engine's instance IAM role is
   used at runtime — DefectDojo can't validate that role on the engine's behalf, so confirm
   Bedrock access from the engine's own environment.
