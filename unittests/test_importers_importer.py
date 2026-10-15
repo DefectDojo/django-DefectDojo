@@ -94,6 +94,66 @@ class TestDojoDefaultImporter(DojoTestCase):
             for finding in new_findings:
                 self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
 
+    def _generic_importer(self):
+        """Build a DefaultImporter with the minimal engagement its constructor requires."""
+        product_type, _ = Product_Type.objects.get_or_create(name="vuln-id-sanitizer-test")
+        product, _ = Product.objects.get_or_create(
+            name="vuln-id-sanitizer-test",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="vuln-id-sanitizer-test",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        return DefaultImporter(
+            scan_type="Generic Findings Import",
+            engagement=engagement,
+            environment=environment,
+        )
+
+    def test_sanitize_vulnerability_ids_drops_non_string_entries(self):
+        """
+        A parser can hand the importer a vulnerability id that is not a string --
+        a dict, for example, when a report nests objects under "vulnerability_ids".
+        The sanitizer must drop those undesired values instead of raising
+        AttributeError: 'dict' object has no attribute 'strip'. Regression test for
+        a 500 raised from sanitize_vulnerability_ids during an async generic import.
+        """
+        importer = self._generic_importer()
+        finding = Finding(title="t", severity="High")
+        finding.unsaved_vulnerability_ids = [
+            "CVE-2021-1234",
+            {"vulnerability_id": "CVE-2021-5678"},
+            "   ",
+            None,
+            "CVE-2021-9999",
+        ]
+        importer.sanitize_vulnerability_ids(finding)
+        self.assertEqual(
+            finding.unsaved_vulnerability_ids,
+            ["CVE-2021-1234", "CVE-2021-9999"],
+        )
+
+    def test_process_cve_with_non_string_vulnerability_ids(self):
+        """
+        process_cve() runs the sanitizer first, so a leading non-string entry must
+        not become the finding's cve or crash the import; the first valid string id
+        is promoted to cve instead.
+        """
+        importer = self._generic_importer()
+        finding = Finding(title="t", severity="High")
+        finding.unsaved_vulnerability_ids = [
+            {"vulnerability_id": "CVE-2021-0001"},
+            "CVE-2021-0002",
+        ]
+        importer.process_cve(finding)
+        self.assertEqual(finding.cve, "CVE-2021-0002")
+        self.assertEqual(finding.unsaved_vulnerability_ids, ["CVE-2021-0002"])
+
     def test_import_scan(self):
         with (get_unit_tests_path() / "scans" / "sarif" / "spotbugs.sarif").open(encoding="utf-8") as scan:
             scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method

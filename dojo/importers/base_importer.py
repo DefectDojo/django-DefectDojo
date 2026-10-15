@@ -1186,7 +1186,15 @@ class BaseImporter(ImporterOptions):
     def sanitize_vulnerability_ids(self, finding) -> None:
         """Remove undisired vulnerability id values"""
         if finding.unsaved_vulnerability_ids:
-            finding.unsaved_vulnerability_ids = [x for x in finding.unsaved_vulnerability_ids if x.strip()]
+            # A vulnerability id is expected to be a string. A parser (notably
+            # Generic Findings Import, which passes "vulnerability_ids" through
+            # unchanged) can supply a non-string entry such as a dict; drop those
+            # instead of raising AttributeError on .strip().
+            finding.unsaved_vulnerability_ids = [
+                vulnerability_id
+                for vulnerability_id in finding.unsaved_vulnerability_ids
+                if isinstance(vulnerability_id, str) and vulnerability_id.strip()
+            ]
 
     def process_cve(
         self,
