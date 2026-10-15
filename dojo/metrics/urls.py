@@ -30,6 +30,6 @@ urlpatterns = [
         name="metrics_panel_admin"),
     re_path(r'^metrics/panel_tenable$', views.metrics_panel_tenable,
         name="metrics_panel_tenable"),
-    re_path(r'^metrics/ia-recommendation$', views.metrics_ia_recommendation,
-        name="metrics_ia_recommendation"),
+    re_path(r'^metrics/ia$', views.ia_metrics,
+        name="ia_metrics"),
 ]

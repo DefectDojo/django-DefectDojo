@@ -297,8 +297,8 @@ def metrics_panel_tenable(request: HttpRequest) -> HttpResponse:
         'user': user})
 
 @dojo_ratelimit_view()
-def metrics_ia_recommendation(request: HttpRequest) -> HttpResponse:
-    page_name = ('Metrics Ia recommendation')
+def ia_metrics(request: HttpRequest) -> HttpResponse:
+    page_name = ('IA Metrics')
     user = request.user.id
     cookie_csrftoken = get_token(request)
     cookie_sessionid = request.COOKIES.get('sessionid', '')
@@ -306,7 +306,7 @@ def metrics_ia_recommendation(request: HttpRequest) -> HttpResponse:
     add_breadcrumb(title=page_name, top_level=True, request=request)
     return render(request, 'dojo/generic_view.html', {
         'actions': page_name,
-        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}metrics/ia-recommendation{base_params}",
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/metrics/ia-recommendation{base_params}",
         'user': user})
 
 

@@ -575,10 +575,10 @@
                                                         {% trans "Metrics Panel Tenable" %}
                                                     </a>
                                                 </li>
-                                                {% if "Metrics_Ia_Recommendation"|has_role_permission %}
+                                                {% if "Ia_Metrics"|has_role_permission %}
                                                     <li>
-                                                        <a rel="noopener noreferrer" href="{% url 'metrics_ia_recommendation' %}">
-                                                            {% trans "Metrics Ia recommendation" %}
+                                                        <a rel="noopener noreferrer" href="{% url 'ia_metrics' %}">
+                                                            {% trans "IA Metrics " %}
                                                         </a>
                                                     </li>
                                                 {% endif %}

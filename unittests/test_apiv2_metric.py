@@ -15,7 +15,7 @@ class MetricIARecommendationApiViewTestCase(APITestCase):
         token = Token.objects.get(user__username="admin")
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-        self.url = reverse('metrics_ia_recommendation')
+        self.url = reverse('Ia_Metrics')
 
         self.user = User.objects.get(username="admin")
         findings = Finding.objects.all()
