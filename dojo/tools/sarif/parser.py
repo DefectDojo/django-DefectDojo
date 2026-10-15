@@ -4,7 +4,6 @@ import re
 import textwrap
 
 import dateutil.parser
-from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dojo.location.feature import locations_enabled
@@ -192,24 +191,20 @@ class SarifParser:
         if not files:
             files.append((None, None, None))
 
-        # By default every location becomes its own finding. With Locations enabled a
-        # finding can carry every code coordinate of the result, so an operator can opt in
-        # (SARIF_ONE_FINDING_PER_RESULT) to one finding per result, which also keeps the
-        # result's fingerprint unique inside the report. Opt-in because integrations may
-        # rely on the per-location findings.
         locations_on = locations_enabled()
-        one_per_result = locations_on and getattr(settings, "SARIF_ONE_FINDING_PER_RESULT", False)
-        groups = [files] if one_per_result else [[entry] for entry in files]
-
         result_items = []
 
-        for group in groups:
+        for group in self.group_result_locations(files):
             file_path, line, location = group[0]
             # test rule link
             rule = rules.get(result.get("ruleId"))
 
             # Get description from parser (uses inheritance)
             description = self.get_finding_description(result, rule, location)
+            # Without Locations there is no record to hold the other coordinates of a grouped
+            # result, so list them in the description instead of losing them.
+            if not locations_on and len(group) > 1:
+                description += "\n" + get_locations_description(group)
 
             # Get title from parser (uses inheritance)
             title = self.get_finding_title(result, rule, location)
@@ -234,14 +229,11 @@ class SarifParser:
                 for group_file_path, group_line, group_location in group:
                     if not group_file_path:
                         continue
-                    end_line = None
-                    if group_location and "physicalLocation" in group_location:
-                        end_line = group_location["physicalLocation"].get("region", {}).get("endLine")
                     finding.unsaved_locations.append(
                         LocationData.code(
                             file_path=group_file_path,
                             line=group_line,
-                            end_line=end_line,
+                            end_line=get_end_line(group_location),
                             snippet=get_snippet(group_location) or "",
                         ),
                     )
@@ -339,6 +331,14 @@ class SarifParser:
             result_items.append(finding)
 
         return result_items
+
+    def group_result_locations(self, files):
+        """
+        Hook method for subclasses to decide how the locations of one result map to findings.
+        Returns a list of groups; each group becomes one finding whose own file_path and line
+        come from the group's first entry. The default makes every location its own finding.
+        """
+        return [[entry] for entry in files]
 
     def get_finding_cwes(self, result):
         """
@@ -537,6 +537,27 @@ def cve_try(val):
     if cveSearch:
         return cveSearch.group(1).upper()
     return None
+
+
+def get_end_line(location):
+    if location and "physicalLocation" in location:
+        return location["physicalLocation"].get("region", {}).get("endLine")
+    return None
+
+
+def get_locations_description(group):
+    lines = ["**Locations:**"]
+    for file_path, line, location in group:
+        if not file_path:
+            continue
+        end_line = get_end_line(location)
+        if line is None:
+            lines.append(f"- {file_path}")
+        elif end_line and end_line != line:
+            lines.append(f"- {file_path}:{line}-{end_line}")
+        else:
+            lines.append(f"- {file_path}:{line}")
+    return "\n".join(lines)
 
 
 def get_snippet(location):

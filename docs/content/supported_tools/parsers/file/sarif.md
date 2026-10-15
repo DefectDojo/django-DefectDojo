@@ -12,17 +12,9 @@ Current implementation will aggregate all the findings in the SARIF file into a 
 
 ## Results With Several Locations
 
-A SARIF result can list several `locations`, for example a hard-coded secret that appears in six files, or a race condition reported at two lines of the same file. By default each location becomes its **own Finding**, so a report with 19 results and 84 locations imports as 84 Findings.
+A SARIF result can list several `locations`, for example a hard-coded secret that appears in six files, or a race condition reported at two lines of the same file. The **SARIF** scan type makes each location its **own Finding**, so a report with 19 results and 84 locations imports as 84 Findings.
 
-With the Locations feature enabled you can opt in to **one Finding per result** instead:
-
-```bash
-DD_SARIF_ONE_FINDING_PER_RESULT=True
-```
-
-Each result then becomes a single Finding that carries every reported file and line range as a Location. The Finding's own file path and line are taken from the first location, and the SARIF fingerprint identifies the result as a whole, so deduplication keeps working on it. Parsers built on the SARIF parser (cppcheck, CodeQL, DevSkim, Flawfinder, Mayhem, Psalm, Snyk Code) follow the same setting.
-
-The setting is off by default because integrations may rely on the per-location Findings. Turning it on changes what a reimport matches: the first reimport after enabling it matches each result to the Finding that held its first location and closes the other per-location Findings as no longer present.
+To import each result as a single Finding that lists every location instead, use the **[SARIF Aggregated](../sarif_aggregated)** scan type.
 
 ## How Test Types Are Determined
 
