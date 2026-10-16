@@ -81,6 +81,21 @@ If you want a Risk Accepted or Duplicate Finding to become Active again, you nee
 
 The **Scan Date** field on the Reimport form starts empty. Left empty, each Finding that the Reimport creates keeps the date from the report (or today's date if the report has none). If you select a Scan Date, it is applied to every Finding the Reimport creates. Findings that already exist in the Test keep their dates either way.
 
+## Why Findings Close and Reopen
+
+A Finding that keeps closing and coming back is usually reimport doing exactly what it was asked to, on data that does not match what the user expects. The evidence is on two pages:
+
+* the **Import History** on the Test page counts the Findings each Reimport **closed** and **reactivated** (see [Actions](#actions));
+* the Finding's **Notes** say which Reimport changed it: "Mitigated by *scan type* re-upload." when a Reimport closed it, and "Re-activated by *scan type* re-upload." when one reopened it. A Finding closed by hand has neither note.
+
+Three causes account for most cases:
+
+* **A partial scan reimported into a Test that holds a full one.** Close Old Findings is on by default for Reimport, so every Finding the partial scan did not report is closed, and reopened again when the next full scan reports it. Reimport each scope into its own Test, or turn off **Close Old Findings** for the partial run.
+* **A Finding closed by hand while the scanner still reports it.** Closing a Finding does not tell the scanner anything: the next Reimport finds it in the report and reopens it. To keep a Finding closed while the scanner still reports it, mark it **False Positive**, **Out of Scope** or **Risk Accepted** instead. Reimport never reopens a Finding with one of those statuses.
+* **A Finding whose location moved.** When a line number or file path is part of how Reimport matches a tool's Findings, a Finding that moves no longer matches: the old one is closed and an identical new one is created. See [Reimport Deduplication](#reimport-deduplication) for how to match on stable fields, and Track Findings as Locations Change in DefectDojo Pro.
+
+For a scanner that reports every Finding on every run and is triaged elsewhere, **Do Not Reactivate** keeps Closed Findings closed (see [Reopen Findings](#reopen-findings)).
+
 ## Opening the Reimport form
 
 The **Re\-Import Findings** form can be accessed on any Test page, under the **⚙️Gear** drop\-down menu.
