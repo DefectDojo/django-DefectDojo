@@ -439,6 +439,18 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                     finding_group.findings.add(*findings)
 
 
+def mark_tests_under_import(test_ids):
+    """
+    Refresh ``updated`` on tests an import is working on.
+
+    Called when a reimport starts and for each deduplication batch. The excess-duplicate delete
+    (dojo.tasks.async_dupe_delete) leaves a test's duplicates alone until
+    DUPE_DELETE_GRACE_MINUTES after this, because the import is still writing their child rows. Only ``updated`` changes, which the Test audit history
+    ignores, so this records no history event.
+    """
+    Test.objects.filter(id__in=test_ids).update(updated=timezone.now())
+
+
 @app.task
 def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
@@ -574,6 +586,8 @@ def post_process_findings_batch(
 
             # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
             if dedupe_option and system_settings.enable_deduplication:
+                if system_settings.delete_duplicates:
+                    mark_tests_under_import({finding.test_id for finding in findings})
                 dedupe_batch_of_findings(findings)
 
             if system_settings.false_positive_history:

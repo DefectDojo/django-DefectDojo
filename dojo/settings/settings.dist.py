@@ -219,6 +219,9 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # Minutes a duplicate must sit untouched, in a test with no import activity, before the
+    # excess-duplicate delete may remove it. 0 deletes as soon as a finding is marked duplicate.
+    DD_DUPE_DELETE_GRACE_MINUTES=(int, 30),
     # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
     # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
     # because backdating a mitigation can distort SLA-compliance metrics. Changing this
@@ -1974,6 +1977,7 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
+DUPE_DELETE_GRACE_MINUTES = env("DD_DUPE_DELETE_GRACE_MINUTES")
 
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 

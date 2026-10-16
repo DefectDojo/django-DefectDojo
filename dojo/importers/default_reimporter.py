@@ -16,7 +16,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
-from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.base_importer import BaseImporter, Parser, reports_a_deleted_target
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
@@ -26,6 +26,7 @@ from dojo.models import (
     Finding,
     Finding_Group,
     Notes,
+    System_Settings,
     Test,
     Test_Import,
 )
@@ -91,6 +92,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         )
         self.location_handler = LocationHandler(self.test.engagement.product)
 
+    @reports_a_deleted_target
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
@@ -116,6 +118,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
+        # The excess-duplicate delete leaves an active test's duplicates alone; this one is about
+        # to have its findings matched and written, so say so before the first match.
+        if System_Settings.objects.get().delete_duplicates:
+            finding_helper.mark_tests_under_import([self.test.id])
         (
             new_findings,
             reactivated_findings,
@@ -1176,7 +1182,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
         # don't dedupe before endpoints/locations are added, postprocessing will be done on next save (in calling method)
-        existing_finding.save_no_options()
+        if not self.save_matched_finding(existing_finding, no_options=True):
+            return existing_finding, True
 
         if existing_finding.duplicate:
             note_entry = f"Un-mitigated by {self.scan_type} re-upload but kept inactive because the finding is a duplicate."
@@ -1228,7 +1235,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
-                existing_finding.save_no_options()
+                if not self.save_matched_finding(existing_finding, no_options=True):
+                    return existing_finding, True
                 existing_finding.notes.create(
                     author=self.user,
                     entry=f"Mitigated by {self.test.test_type} re-upload.",
@@ -1248,7 +1256,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
-                existing_finding.save_no_options()
+                if not self.save_matched_finding(existing_finding, no_options=True):
+                    return existing_finding, True
                 existing_finding.notes.create(
                     author=self.user,
                     entry=f"Mitigated by {self.test.test_type} re-upload.",
@@ -1266,7 +1275,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
-            existing_finding.save_no_options()
+            if not self.save_matched_finding(existing_finding, no_options=True):
+                return existing_finding, True
         # Return False here to make sure further processing happens
         return existing_finding, False
 
@@ -1450,7 +1460,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # update, and saving here would insert it early -- defeating the buffering and splitting
         # one batched INSERT into per-finding ones. The value rides along when the buffer flushes.
         if finding.cve != old_cve and finding.pk:
-            finding.save()
+            self.save_matched_finding(finding)
         return finding
 
     def process_groups_for_all_findings(

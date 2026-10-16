@@ -170,6 +170,14 @@ For example, let’s say that you had your Maximum Duplicates field set to ‘1�
 2. **Later, you import Test 2 contains the same vulnerability. This will be recorded as Finding B, and Finding B will be marked as a duplicate of Finding A.**
 3. Later still, you import **Test 3** which also contains that vulnerability. This will be recorded as Finding C, which will be marked as a duplicate of Finding A. At this time, Finding B will be deleted from DefectDojo as the threshold for maximum duplicates has been crossed.
 
+### When duplicates are deleted
+
+Excess duplicates are deleted by a background task that runs every minute. A duplicate is only deleted once it has settled: the Finding has not been changed, and nothing has been imported into its Test, for 30 minutes. This gives an import or reimport time to finish with the Findings it just created or matched before any of them are removed, so a running import never loses Findings it is still working on.
+
+A **Maximum Duplicates** value of 0 therefore means "delete every duplicate once it has settled", not "delete it the moment it is marked".
+
+Self-hosted instances can change the wait with the `DD_DUPE_DELETE_GRACE_MINUTES` environment variable. Setting it to `0` deletes duplicates as soon as they are marked, which can make imports fail while the task is deleting Findings they are still writing.
+
 ### Applying this setting
 
 Applying **Delete Deduplicate Findings** will begin a deletion process immediately. This setting can be applied on the **System Settings** page. See Enabling Deduplication for more information.

@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
-from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.base_importer import BaseImporter, Parser, reports_a_deleted_target
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
@@ -90,6 +90,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         return self.test
 
+    @reports_a_deleted_target
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
