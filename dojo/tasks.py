@@ -1,4 +1,6 @@
 import logging
+from datetime import timedelta
+from itertools import batched
 
 import pghistory
 from celery import Task
@@ -8,18 +10,24 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.core.management import call_command
+from django.db import transaction
 from django.db.models import Count, IntegerField, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.finding.helper import bulk_delete_findings, fix_loop_duplicates
+from dojo.importers.import_lock import tests_under_import_now, tests_with_import_lock_held
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Finding, System_Settings
 from dojo.utils import schedule_product_grade
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+# Findings locked and re-checked per transaction by _delete_excess_duplicates.
+DUPE_DELETE_CHUNK_SIZE = 1000
 
 
 from dojo.notifications.tasks import (  # noqa: E402, F401  -- backward compat
@@ -120,12 +128,26 @@ def _async_dupe_delete_impl():
         output_field=IntegerField(),
     )
 
+    # A finding is still being written for a while after deduplication marks it duplicate: the
+    # import or the create request that produced or matched it goes on to write its child rows
+    # (found_by, cwe, tags, locations, vulnerability ids, companions). Those FKs are DEFERRABLE
+    # INITIALLY DEFERRED, so the writer takes no lock on the finding that a delete would wait
+    # for; it only fails at its COMMIT, losing the whole import. So a duplicate is a candidate
+    # only once it has settled: the finding has not been saved for the grace period. An import
+    # also holds a lock on its test for as long as it runs, and the delete skips that test's
+    # duplicates until it ends (see dojo.importers.import_lock).
+    settled = _settled_duplicates()
+    # Leave the tests under import out of the selection too, before the per-run cap applies: their
+    # duplicates would only be skipped below, and enough of them would use up every run.
+    if busy_tests := tests_with_import_lock_held():
+        settled &= ~Q(test_id__in=busy_tests)
+
     # Single query: excess (oldest) duplicates, newest-first within each original group.
     # select_related avoids N+1 queries when collecting affected products below.
     # only() limits Finding columns fetched; test_id is required for the select_related join.
     excess_dupes = (
         Finding.objects
-        .filter(duplicate=True, duplicate_finding__in=originals_with_excess)
+        .filter(settled, duplicate=True, duplicate_finding__in=originals_with_excess)
         .annotate(newer_cnt=Coalesce(newer_siblings_subq, 0))
         .filter(newer_cnt__gte=dupe_max)
         .select_related("test__engagement__product")
@@ -134,23 +156,22 @@ def _async_dupe_delete_impl():
         [:total_duplicate_delete_count_max_per_run]
     )
 
-    ids_to_delete = []
-    affected_products = set()
-    for finding in excess_dupes:
-        ids_to_delete.append(finding.id)
-        affected_products.add(finding.test.engagement.product)
+    product_by_finding = {finding.id: finding.test.engagement.product for finding in excess_dupes}
+    ids_to_delete = list(product_by_finding)
 
     logger.info("total number of excess duplicates to delete: %s", len(ids_to_delete))
 
-    if ids_to_delete:
-        # Inbound duplicate_finding references from surviving findings are resolved inside
-        # each chunk's transaction by bulk_delete_findings itself -- see
-        # resolve_inbound_duplicate_references.
-        # order_desc=True deletes higher ids before lower ids, consistent with how
-        # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
-        bulk_delete_findings(Finding.objects.filter(id__in=ids_to_delete), order_desc=True)
+    # Inbound duplicate_finding references from surviving findings are resolved inside
+    # each chunk's transaction by bulk_delete_findings itself -- see
+    # resolve_inbound_duplicate_references.
+    # order_desc=True deletes higher ids before lower ids, consistent with how
+    # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
+    deleted_ids = _delete_excess_duplicates(ids_to_delete)
 
-    logger.info("total number of excess duplicates deleted: %s", len(ids_to_delete))
+    logger.info("total number of excess duplicates deleted: %s", len(deleted_ids))
+
+    # Grade only the products that lost a duplicate: a skipped one changed nothing.
+    affected_products = {product_by_finding[finding_id] for finding_id in deleted_ids}
 
     # Batch product grading for all affected products
     if affected_products:
@@ -159,6 +180,45 @@ def _async_dupe_delete_impl():
             logger.info("performing batch product grading for %s products", len(affected_products))
             for product in affected_products:
                 schedule_product_grade(product.id)
+
+
+def _settled_duplicates():
+    """The duplicates that have not been saved for the grace period, as a Q on Finding."""
+    if (grace_minutes := settings.DUPE_DELETE_GRACE_MINUTES) <= 0:
+        return Q()
+    cutoff = timezone.now() - timedelta(minutes=grace_minutes)
+    return Q(updated__lt=cutoff) | Q(updated__isnull=True)
+
+
+def _delete_excess_duplicates(ids_to_delete):
+    """
+    Delete the selected duplicates, except those an import is writing or a save has just touched.
+
+    The selection ran without locks, so each chunk checks again inside its transaction. It first
+    takes the import lock on the chunk's tests that are free (tests_under_import_now), which never
+    waits; an import that starts on one of them now waits for the chunk to commit, when these rows
+    are gone and cannot be matched. Only then does it row-lock findings, and only those of the free
+    tests, so a test under import has none of its rows locked by the delete and its import never
+    waits on it. A finding saved since the selection is left for a later run too.
+
+    Returns the ids of the findings deleted.
+    """
+    deleted_ids = []
+    for chunk in batched(sorted(ids_to_delete), DUPE_DELETE_CHUNK_SIZE, strict=False):
+        with transaction.atomic():
+            test_by_finding = dict(Finding.objects.filter(id__in=chunk).values_list("id", "test_id"))
+            busy_tests = tests_under_import_now(set(test_by_finding.values()))
+            free = [finding_id for finding_id, test_id in test_by_finding.items() if test_id not in busy_tests]
+            candidates = Finding.objects.filter(id__in=free)
+            if settings.DUPE_DELETE_GRACE_MINUTES > 0:
+                candidates = candidates.filter(_settled_duplicates())
+            still_settled = list(candidates.order_by("id").select_for_update().values_list("id", flat=True)) if free else []
+            if skipped := len(chunk) - len(still_settled):
+                logger.info("skipping %s excess duplicates that an import is writing, or that were saved or deleted since they were selected", skipped)
+            if still_settled:
+                bulk_delete_findings(Finding.objects.filter(id__in=still_settled), order_desc=True)
+                deleted_ids.extend(still_settled)
+    return deleted_ids
 
 
 @app.task(ignore_result=False, base=Task)
