@@ -30,7 +30,7 @@ Each sync imports the web application's **open** findings: those Qualys reports 
 |---|---|
 | Unique ID From Tool | the finding's Qualys unique ID |
 | Vulnerability ID From Tool | QID |
-| Severity | 1–2 Low, 3 Medium, 4 High, 5 Critical |
+| Severity | the CVSS v3 base score (below 4.0 Low, 4.0–6.9 Medium, 7.0–8.9 High, 9.0 and up Critical); when a finding has no CVSS score, the Qualys severity (1–2 Low, 3 Medium, 4 High, 5 Critical) |
 | CWE, CVSS v3 Score | CWE, CVSS v3 base score |
 | Endpoint | the finding's URL |
 | Parameter, Payload | the vulnerable parameter and the payload that triggered it |
