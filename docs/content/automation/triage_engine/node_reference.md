@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Triage Engine ships 44 nodes in five categories. This page documents all of them.
+Triage Engine ships 47 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -189,6 +189,34 @@ Two egress settings are built for these items. **Generate a Report** has a **Fin
 
 The shipped template **Report when a group of scans has landed** wires all of this: the group trigger, a report on `complete`, and an email naming the missing scans on `incomplete`.
 
+### On Dedupe Match
+
+`trigger.dedupe`
+
+Runs when deduplication matches a newly imported Finding to an existing one. Use it when the same scans are imported into more than one Asset (for example a staging Asset and a production Asset in one Dedupe Pool) and each Asset needs its own active Findings and SLAs, with triage decisions carried between them.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
+| **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
+
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+
+Each item carries the match on `ctx`:
+
+```
+ctx.matched_finding_id   the existing Finding this one matched
+ctx.kept_active          true when deduplication kept this Finding active
+```
+
+**Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
+
+#### Example: keep staging and production in step
+
+1. Put the staging Asset and the production Asset in the same Dedupe Pool.
+2. Create a rule with **On Dedupe Match**, set to **Keep Both Active**, scoped to both Assets, followed by **Copy Status from Matched Finding**. A Finding imported into production now starts with the status its staging match already has, and the other way around.
+3. Create a second rule with **On Finding Event** (`closed` or `reopened`, or `any`), followed by **Apply Status to Linked Findings**. A Finding marked as a false positive in production is then marked as a false positive in staging too.
+
 ### On an Inbound Webhook
 
 `trigger.webhook`
@@ -319,6 +347,32 @@ Moves the Finding to a status.
 |---------|---------|-------|
 | **Status** | none | `active`, `inactive`, `verified`, `unverified`, `false_positive`, `mitigated`, `reopen`. |
 | **Note** | empty | An optional note recorded alongside the status change. |
+
+### Copy Status from Matched Finding
+
+`finding.copy_matched_status`
+
+Gives the Finding the status of the Finding deduplication matched it to in another Asset, and adds a note naming that Finding. Use it after **On Dedupe Match**. Outside that trigger it uses the link deduplication recorded, so it does nothing for a Finding that was never kept active.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry: `False Positive`, `Out of Scope`, `Risk Accepted`, `Mitigated`, `Reopened`. `Reopened` carries an open status to a Finding that is closed for one of the other reasons. |
+
+`Mitigated` and `Reopened` are off by default. They follow what each Asset's scans report rather than a decision someone made: a fix that reaches staging first would mitigate the production Finding while the issue is still live in production, and the next production scan would reopen it and send the reopen back. Turn them on only where both Assets are scanned together.
+
+A status is read in this order: false positive, out of scope, risk accepted, mitigated, and otherwise open. A risk acceptance is carried as a new acceptance on the Finding's own engagement, with the same expiration date, so either one can later be extended or revoked on its own. If the Asset only allows simple risk acceptance, the Finding is accepted the simple way, which has no expiration. The rule owner must be able to see the Finding the status comes from (the note names it) and edit the Finding it goes to, and to add a risk acceptance for that status; anything else is left alone, and so are duplicates. It does nothing after **On Dedupe Match** in **Mark as Duplicate** mode, because the new Finding is then a duplicate. A Finding already closed for a different reason takes the new status in place of the old one, so the two Findings end up with the same status.
+
+### Apply Status to Linked Findings
+
+`finding.apply_status_to_linked`
+
+Gives every Finding linked to this one by **On Dedupe Match** the same status, and adds a note to each naming this Finding. Use it after **On Finding Event**, so a triage decision made in one Asset reaches the matching Findings in the others. Links are followed in both directions, and through a chain of Assets, but only through Findings the rule owner can see.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
+
+The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
 
 ### Add Tags
 
