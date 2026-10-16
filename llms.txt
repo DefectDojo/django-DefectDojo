@@ -285,6 +285,7 @@ Key facts:
 - [Promptfoo (Pro)](https://docs.defectdojo.com/connectors/toolreference/promptfoo/): How to set up the Promptfoo Upstream Connector for DefectDojo
 - [Prowler (Pro)](https://docs.defectdojo.com/connectors/toolreference/prowler/): How to set up the Prowler Upstream Connector for DefectDojo
 - [Qualys (Pro)](https://docs.defectdojo.com/connectors/toolreference/qualys/): How to set up the Qualys Upstream Connector for DefectDojo
+- [Qualys TotalAppSec (Pro)](https://docs.defectdojo.com/connectors/toolreference/qualys_totalappsec/): How to set up the Qualys TotalAppSec Upstream Connector for DefectDojo
 - [Quay (Pro)](https://docs.defectdojo.com/connectors/toolreference/quay/): How to set up the Quay Upstream Connector for DefectDojo
 - [Qwiet AI (Pro)](https://docs.defectdojo.com/connectors/toolreference/qwiet_ai/): How to set up the Qwiet AI Upstream Connector for DefectDojo
 - [Rapid7 InsightAppSec (Pro)](https://docs.defectdojo.com/connectors/toolreference/rapid7_insightappsec/): How to set up the Rapid7 InsightAppSec Upstream Connector for DefectDojo
