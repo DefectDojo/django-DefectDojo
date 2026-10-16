@@ -69,7 +69,17 @@ class UserHasLocationRefPermission(BasePermission):
     """Permission class for Location(Product|Finding)Reference model access."""
 
     def has_object_permission(self, request, view, obj):
-        # obj is a URL instance, check permission on its location
+        # The viewset rows are LocationProductReference / LocationFindingReference
+        # join rows. The authorization layer resolves products, findings and
+        # locations, but not these join rows, so authorize through the row's
+        # product / finding -- mirroring the native Pro
+        # Location(Product|Finding)ReferencePermission classes. Handing the raw
+        # join row to the authorization layer raised NoAuthorizationImplementedError
+        # (HTTP 500) for every authorized non-superuser reaching a detail route.
+        if isinstance(obj, LocationFindingReference):
+            obj = obj.finding
+        elif isinstance(obj, LocationProductReference):
+            obj = obj.product
         return check_object_permission(
             request,
             obj,
