@@ -101,12 +101,16 @@ def risk_accepted_succesfully(
         return True
     if risk_acceptance.long_term_acceptance:
         finding.tags.add("long_term_risk_acceptance")
-    finding.risk_status = "Risk Accepted"
-    finding.risk_accepted = True
-    finding.active = False
     acceptance_days, __, __ = update_expiration_risk_accepted(finding,
                                                               risk_acceptance)
-    finding.save()
+    finding.update_fields(
+        risk_status="Risk Accepted",
+        risk_accepted=True,
+        active=False,
+        sla_expiration_date=timezone.now().date() + relativedelta(
+            days=acceptance_days
+            )
+    )
     ra_helper.handle_from_provider_risk(finding, acceptance_days)
 
     system_settings = System_Settings.objects.get()

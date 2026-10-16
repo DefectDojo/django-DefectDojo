@@ -210,7 +210,13 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
             finding.risk_accepted = True
             finding.accepted_by = user.username
             finding.risk_status = "Risk Accepted"
-            finding.save(dedupe_option=False)
+            finding.update_fields(
+                active=False,
+                risk_accepted=True,
+                accepted_by=user.username,
+                risk_status="Risk Accepted",
+                sla_expiration_date=risk_acceptance.expiration_date,
+            )
             hp_transfer_finding.close_or_reactive_related_finding(
                 event="accepted",
                 parent_finding=finding,

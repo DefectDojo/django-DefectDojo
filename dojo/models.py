@@ -2944,6 +2944,9 @@ class Finding(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.title[:80] + '...' if len(self.title) > 80 else self.title}"
+    
+    def update_fields(self, **kwargs):
+         self.__class__.objects.filter(pk=self.pk).update(**kwargs)
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
@@ -3018,7 +3021,8 @@ class Finding(models.Model):
             self.static_finding = True
 
         # update the SLA expiration date last, after all other finding fields have been updated
-        self.set_sla_expiration_date()
+        if self.active is False:
+            self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super().save(*args, **kwargs)
@@ -3375,10 +3379,27 @@ class Finding(models.Model):
         if self.sla_start_date:
             return self.sla_start_date
         return self.date
+    
+    def get_sla_by_expiration_date(self):
+        sla_days = (self.expiration_date - timezone.now()).days
+        return SLA_Configuration(critical=sla_days, high=sla_days, medium=sla_days, low=999)
 
     def get_sla_configuration(self):
         return self.test.engagement.product.sla_configuration
-    
+        # if self.risk_status is None or self.sla_expiration_date is None:
+        #     return self.test.engagement.product.sla_configuration
+        # else:
+        #     sla_flow_rule = {
+        #         "Risk Accepted": SLA_Configuration.objects.filter(name="RiskAcceptanceExpiration")[0],
+        #         "Transfer Accepted": SLA_Configuration.objects.filter(name="TransferFindingExpiration")[0],
+        #         "Risk Active": SLA_Configuration.objects.filter(name="Default")[0],
+        #         "On Whitelist": self.get_sla_by_expiration_date()
+        #     }
+        #     if self.risk_status in sla_flow_rule:
+        #         return sla_flow_rule[self.risk_status]
+        #     else:
+        #         return self.test.engagement.product.sla_configuration
+
     def _calculate_severity_priority(self, tags, priority) -> int:
         priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
         if tags:
