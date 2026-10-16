@@ -56,7 +56,7 @@ When `DD_INITIALIZE=false` skips the migrations, exit code `2` still means a sys
 
 ### The initializer needs a valid license
 
-From release 3.4.200, the initializer checks for a DefectDojo Pro license before it migrates anything. It looks in three places, and one valid license in any of them is enough:
+From release 3.4.200, the initializer checks for a DefectDojo Pro license before it migrates anything, on a first install as well as on every upgrade. It looks in three places, and one valid license in any of them is enough:
 
 - the `DD_LICENSE` environment variable;
 - the license file `/opt/dojo/pro/dojopro.lic`, which the Helm chart mounts from its license Secret and Docker Compose mounts from the install's `license/` directory;
@@ -71,6 +71,6 @@ An expired license still counts: expiry is handled by the application as before.
   - the database has no Pro license table yet (a new or Community database)
 ```
 
-Provide the license and start the initializer again. This also applies when converting a Community database to Pro: the license must be in place before the first Pro initializer runs. To check without starting the initializer, run `python manage.py check_license_present` in a DefectDojo container.
+Provide the license and start the initializer again. The license must be in place before the first Pro initializer runs: when converting a Community database to Pro, and on a new Helm install, where leaving `license.contents` at the chart's placeholder value now stops the install instead of starting it without a license. To check without starting the initializer, run `python manage.py check_license_present` in a DefectDojo container.
 
 If you have questions about upgrading your on-premise deployment, contact [support@defectdojo.com](mailto:support@defectdojo.com).
