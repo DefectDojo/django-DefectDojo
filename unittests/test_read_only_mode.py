@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.celery import app
+from dojo.context_processors import globalize_vars
 from dojo.middleware import READ_ONLY_MODE_MESSAGE, ReadOnlyModeMiddleware, get_cached_system_settings
 from dojo.models import Product_Type, System_Settings, User
 from dojo.system_settings.ui.forms import SystemSettingsForm
@@ -191,3 +192,37 @@ class TestReadOnlyModeBeatTasks(DojoTestCase):
         set_read_only_mode(True)
         read_only_plain_probe()
         self.assertEqual(["plain"], PROBE_CALLS)
+
+
+READ_ONLY_BANNER = {
+    "source": "read_only_mode",
+    "message": str(READ_ONLY_MODE_MESSAGE),
+    "style": "warning",
+    "url": "",
+    "link_text": "",
+    "expanded_html": "",
+    "dismissible": False,
+    "dismiss_token": "",
+}
+
+
+@versioned_fixtures
+class TestReadOnlyModeBanner(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def test_banner_in_context_when_locked(self):
+        set_read_only_mode(True)
+        context = globalize_vars(RequestFactory().get("/"))
+        self.assertEqual(READ_ONLY_BANNER, context["additional_banners"][0])
+
+    def test_no_banner_when_off(self):
+        set_read_only_mode(False)
+        context = globalize_vars(RequestFactory().get("/"))
+        sources = [banner["source"] for banner in context.get("additional_banners", [])]
+        self.assertNotIn("read_only_mode", sources)
+
+    def test_banner_renders_on_home(self):
+        set_read_only_mode(True)
+        self.client.force_login(User.objects.get(username="admin"))
+        response = self.client.get(reverse("home"), follow=True)
+        self.assertContains(response, str(READ_ONLY_MODE_MESSAGE))
