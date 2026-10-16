@@ -7,6 +7,7 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from dojo.celery import app
 from dojo.middleware import READ_ONLY_MODE_MESSAGE, ReadOnlyModeMiddleware, get_cached_system_settings
 from dojo.models import Product_Type, System_Settings, User
 from dojo.system_settings.ui.forms import SystemSettingsForm
@@ -152,3 +153,41 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
         with self.assertNumQueries(0):
             response = rf_middleware("/api/v2/product_types/")
         self.assertEqual(200, response.status_code)
+
+
+PROBE_CALLS = []
+
+
+@app.task
+def read_only_beat_probe():
+    PROBE_CALLS.append("beat")
+
+
+@app.task
+def read_only_plain_probe():
+    PROBE_CALLS.append("plain")
+
+
+@versioned_fixtures
+@override_settings(CELERY_BEAT_SCHEDULE={"probe": {"task": read_only_beat_probe.name, "schedule": 60}})
+class TestReadOnlyModeBeatTasks(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        PROBE_CALLS.clear()
+
+    def test_beat_task_skipped_when_locked(self):
+        set_read_only_mode(True)
+        read_only_beat_probe()
+        self.assertEqual([], PROBE_CALLS)
+
+    def test_beat_task_runs_when_off(self):
+        set_read_only_mode(False)
+        read_only_beat_probe()
+        self.assertEqual(["beat"], PROBE_CALLS)
+
+    def test_non_beat_task_runs_when_locked(self):
+        set_read_only_mode(True)
+        read_only_plain_probe()
+        self.assertEqual(["plain"], PROBE_CALLS)
