@@ -135,7 +135,7 @@ gunzip -c defectdojo-v<VERSION>-backup.sql.gz | \
   psql -h <db-endpoint> -U <master_user> -d defectdojo
 ```
 
-3. Turn off read-only mode in the restored database. If you turned on read-only mode before the dump (see [Planning the cutover](#planning-the-cutover)), the restored copy is locked too, and DefectDojo Pro rejects sign-ins and changes until you clear the setting:
+3. Turn off read-only mode in the restored database. If you turned on read-only mode before the dump (see [Planning the cutover](#planning-the-cutover)), the restored copy is locked too. Clear the setting before you start DefectDojo Pro:
 
 ```bash
 psql -h <db-endpoint> -U <master_user> -d defectdojo \

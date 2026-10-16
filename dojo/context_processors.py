@@ -29,16 +29,7 @@ def globalize_vars(request):
     additional_banners = []
 
     if System_Settings.objects.get().read_only_mode:
-        additional_banners.append({
-            "source": "read_only_mode",
-            "message": str(READ_ONLY_MODE_MESSAGE),
-            "style": "warning",
-            "url": "",
-            "link_text": "",
-            "expanded_html": "",
-            "dismissible": False,
-            "dismiss_token": "",
-        })
+        additional_banners.append({"source": "read_only_mode", "message": str(READ_ONLY_MODE_MESSAGE), "style": "warning"})
 
     if (os_banner := get_os_banner()) is not None:
         token = os_banner.get("dismiss_token", "")

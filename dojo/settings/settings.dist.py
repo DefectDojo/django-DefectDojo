@@ -624,8 +624,9 @@ LOGIN_EXEMPT_URLS = (
 )
 
 # Unsafe requests that still pass while read-only mode is on: sign-in and System Settings,
-# so a superuser can always turn the mode off again. LOGIN_URL is added by the middleware.
+# so a superuser can always turn the mode off again.
 READ_ONLY_MODE_EXEMPT_URLS = (
+    rf"^{URL_PREFIX}login$",
     rf"^{URL_PREFIX}logout$",
     r"complete/",
     r"oauth2/idpresponse",

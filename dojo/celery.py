@@ -47,8 +47,10 @@ class DojoAsyncTask(Task):
         """
         from dojo.caching import reset_l1_cache  # noqa: PLC0415
         from dojo.request_cache import begin_task_cache, end_task_cache  # noqa: PLC0415
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         reset_l1_cache()
-        if self._skipped_by_read_only_mode():
+        beat_tasks = {entry["task"] for entry in settings.CELERY_BEAT_SCHEDULE.values()}
+        if self.name in beat_tasks and get_system_setting("read_only_mode"):
             logger.info("Read-only mode is on: skipped scheduled task %s", self.name)
             return None
         # Install a fresh task-scoped request-cache (begin) and drop it afterwards
@@ -69,12 +71,6 @@ class DojoAsyncTask(Task):
                 return super().__call__(*args, **kwargs)
         finally:
             end_task_cache()
-
-    def _skipped_by_read_only_mode(self):
-        if self.name not in {entry["task"] for entry in settings.CELERY_BEAT_SCHEDULE.values()}:
-            return False
-        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
-        return bool(get_system_setting("read_only_mode"))
 
     def apply_async(self, args=None, kwargs=None, **options):
         """Override apply_async to inject user context and track tasks."""
