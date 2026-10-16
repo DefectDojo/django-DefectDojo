@@ -16,15 +16,15 @@ You will also need your subscription's **Qualys API URL**, which differs per sub
 
 #### Connector Mappings
 
-1. Enter your Qualys API URL in the **Location** field (for example `https://qualysapi.qg2.apps.qualys.com`).
+1. Enter your Qualys API URL in the **Location** field (for example `https://qualysapi.qg2.apps.qualys.com`). The URL must use `https`.
 2. Enter the Qualys API username in the **Username** field.
 3. Enter the Qualys API password in the **Password** field.
 4. Optionally, restrict discovery with **Web Application Tags** (see below).
 5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
-**Web Application Tags** is a comma\-separated list of Qualys tag names, for example `dast-in-scope, Production`. A web application is discovered if it carries **any** of the listed tags. Tag names are matched exactly, with no wildcards. Leave the field blank to discover every web application the API user can see; on a large subscription we recommend setting it.
+**Web Application Tags** is a comma\-separated list of Qualys tag names, for example `dast-in-scope, Production`. A web application is discovered if it carries **any** of the listed tags. Tag names are matched exactly, with no wildcards. Spaces around the commas are ignored; spaces inside a tag name are kept. Leave the field blank to discover every web application the API user can see; on a large subscription we recommend setting it. **Testing the connection** ignores this field, so it still confirms your username and password even when the tag names are wrong.
 
-Each sync imports the web application's **open** findings: those Qualys reports as New, Active or Reopened, of type Vulnerability or Sensitive Content. Information Gathered items are scan metadata and are not imported. A finding Qualys marks Fixed drops out of the next sync and is closed in DefectDojo.
+Each sync imports the web application's **open** findings: those Qualys reports as New, Active or Reopened, of type Vulnerability or Sensitive Content. Information Gathered items are scan metadata and are not imported. A finding Qualys marks Fixed drops out of the next sync and is closed in DefectDojo. The exception is a web application's last open finding: when it is fixed, the sync returns no findings, and DefectDojo does not close findings on an empty sync (an empty result cannot be told apart from a temporary Qualys problem). Those findings stay open until the web application reports a finding again, or until you close them by hand.
 
 | DefectDojo | Qualys TotalAppSec |
 |---|---|
@@ -44,5 +44,5 @@ Findings are imported under the **Qualys WAS \- Connectors Import** test type an
 
 #### Notes
 
-* A Qualys ignore status is applied when a finding is first imported. After that, triage each finding in one place: a finding closed in DefectDojo but still open in Qualys is reopened on the next sync, and a finding ignored (or un\-ignored) in Qualys after its first sync keeps its DefectDojo status.
+* A Qualys ignore status is applied when a finding is first imported. After that, triage each finding in one place: a finding you close (mitigate) in DefectDojo while it is still open in Qualys is reopened on the next sync, a finding you mark False Positive, Risk Accepted or Out of Scope in DefectDojo keeps that status, and a finding ignored (or un\-ignored) in Qualys after its first sync keeps its DefectDojo status.
 * Findings imported earlier from Qualys WAS XML reports with the **Qualys Webapp Scan** parser are a different test type, so they are not de\-duplicated against findings from this connector.
