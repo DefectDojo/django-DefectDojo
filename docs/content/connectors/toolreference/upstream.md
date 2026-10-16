@@ -150,6 +150,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Google Cloud, JSM Assets, Mi
 - [Socket](/connectors/toolreference/socket/)
 - [Sonatype IQ](/connectors/toolreference/sonatype_iq/)
 - [SOOS](/connectors/toolreference/soos/)
+- [StackHawk](/connectors/toolreference/stackhawk/)
 - [Sysdig Secure](/connectors/toolreference/sysdig_secure/)
 - [Tenable.io](/connectors/toolreference/tenable_io/)
 - [Tenable Web App Scanning](/connectors/toolreference/tenable_web_app_scanning/)
