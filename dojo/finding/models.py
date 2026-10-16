@@ -511,6 +511,14 @@ class Finding(BaseModel):
                 fields=["test", "date"],
                 name="idx_finding_testid_date",
             ),
+            # A test's findings ordered by numerical_severity with an id tiebreaker
+            # running the same direction (both ascending, or both descending) as an
+            # index walk + LIMIT, instead of sorting every finding in the test or
+            # walking the severity-only index.
+            models.Index(
+                fields=["test", "numerical_severity", "id"],
+                name="idx_finding_test_numsev",
+            ),
             models.Index(
                 fields=["sla_expiration_date", "test"],
                 name="idx_finding_sla_open_cov",
