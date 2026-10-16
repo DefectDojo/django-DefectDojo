@@ -103,7 +103,7 @@ Findings require the following metadata:
 
 In addition to metadata corresponding to the tables in a Finding’s view, optional metadata fields include: 
 - **Tags**: Any tags that have been added to the Finding.
-- **Owners**: The group of users that will be responsible for the selected Finding.
+- **Owners**: The group of users that will be responsible for the selected Finding. The Findings list shows it in the **Owner (Team)** column, hidden by default, with a filter that lists the groups you can view. Through the API, `/api/v2/findings/?owners=<group id>` filters by the same group, and `?assignee=<user id>` or `?is_assigned=false` by individual assignees.
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
 - **Push to Connector**: Pushes the Finding to the issue tracker assigned to its Asset or Engagement through a [Downstream Connector](/connectors/downstream/about/). When no Issue Tracker Assignment covers either, nothing is sent and DefectDojo says so.
 - **Risk and priority settings**: Offers the option to override DefectDojo’s automatic calculation of the Finding’s risk and priority. 

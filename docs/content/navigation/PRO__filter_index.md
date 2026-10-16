@@ -102,6 +102,7 @@ These DefectDojo functions can be used to further organize your Findings or trac
 
 * Finding Tags
 * Reviewers (Assigned User)
+* Owner (Team) (the group responsible for the Finding, set under **Owners** on the Finding form; the column is hidden by default, turn it on from the column picker)
 * Has Notes (True/False)
 * Group (refers to the [Finding Group](/triage_findings/findings_workflows/editing_findings/#finding-group-actions), if one exists)
 * Risk Acceptance (select one or more existing Risk Acceptances from the list)
