@@ -69,8 +69,9 @@ All secrets are **encrypted at rest** and are **write-only**: once saved, the fo
 whether a secret is set, never its value. Leave a secret field blank when saving to keep the
 stored value; type a new value to replace it. The one exception is the **API Base URL**: a saved
 API key is kept only for the base URL it was saved with, so changing the base URL to a new
-gateway means entering the key again (clearing the base URL does not). **Test Connection** follows
-the same rule.
+gateway means entering the key again (clearing the base URL does not). For Amazon Bedrock the same
+applies to the AWS Secret Access Key, and a saved Session Token is cleared when the base URL
+changes unless you enter it again. **Test Connection** follows the same rule.
 
 ### Claude (Anthropic) and OpenAI
 
@@ -176,7 +177,8 @@ model must be enabled in that project's Model Garden.
 
 - For **Claude** / **OpenAI**, it makes a minimal authenticated call to the provider.
 - For **Amazon Bedrock with static keys**, it lists the region's foundation models to confirm the
-  credentials work.
+  credentials work. If an **API Base URL** is set, it sends a minimal request to the configured
+  model through that endpoint instead, because that is the endpoint scans and fixes use.
 - For **Amazon Bedrock without static keys**, it reports that the engine's instance IAM role is
   used at runtime — DefectDojo can't validate that role on the engine's behalf, so confirm
   Bedrock access from the engine's own environment.
