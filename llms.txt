@@ -466,7 +466,7 @@ Key facts:
 - [Filter Index](https://docs.defectdojo.com/navigation/pro__filter_index/): Reference for all filters in DefectDojo
 - [The Sidebar Menu (Pro)](https://docs.defectdojo.com/navigation/pro__sidebar/): How the DefectDojo Pro sidebar is organized, how to search it, pinning pages, collapsing it to an icon rail, the All Settings directory page, and where pages from the classic sidebar now sit
 - [Menu Badges (Pro)](https://docs.defectdojo.com/navigation/pro__menu_badges/): What the SOON, NEW, BETA, LOCKED, LEGACY and DEPRECATED tags in the DefectDojo Pro sidebar mean, and what each one asks you to do
-- [Customizing Tables](https://docs.defectdojo.com/navigation/pro__table_customization/): Sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables
+- [Customizing Tables](https://docs.defectdojo.com/navigation/pro__table_customization/): Filter, sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables, and switch between the table and the grid
 - [Customizing Page Layouts (Pro)](https://docs.defectdojo.com/navigation/pro__page_layouts/): Arrange the widgets on DefectDojo Pro view pages, then save, share, or set a layout as the default
 - [In-App Walkthroughs (Pro)](https://docs.defectdojo.com/navigation/pro__walkthroughs/): Guided, step-by-step tours of the DefectDojo Pro UI: the App Tour, the first-visit offer, and turning the offer off per user
 - [Configuring Forms (Pro)](https://docs.defectdojo.com/navigation/pro__form_configuration/): Choose which fields the DefectDojo Pro create and edit forms show, which are required, and the order they appear in
