@@ -69,4 +69,5 @@ The **Tags** field imports only findings that carry at least one of the tags you
 ##### Changing the scope later
 
 * A project that a newly narrowed project filter excludes is no longer discovered. Its existing Record follows the normal lifecycle for assets the tool stops reporting: a **mapped** Record is flagged `MISSING`, and an unmapped `NEW` Record is removed. A Sync that runs before discovery catches up skips the Record rather than importing an empty result, so its findings are not closed by accident.
-* Findings already imported for a category or project you later exclude are **not closed automatically**. Close or delete them in DefectDojo if you no longer want them.
+* **Turning off an issue category closes its findings** in projects that still have findings in the other category. Both categories are imported into the same test, so the next Sync's reimport closes the findings it no longer sees. A project whose findings were **all** in the category you turned off syncs empty, and its findings stay open; close or delete them in DefectDojo if you no longer want them.
+* Findings already imported from a project that a project filter later excludes are **not closed automatically**, because its Record is skipped rather than synced. Close or delete them in DefectDojo if you no longer want them.

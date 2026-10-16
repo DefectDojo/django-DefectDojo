@@ -72,7 +72,7 @@ Product: Web Portal, Product: Billing API
 the connector creates two Records, `Product: Web Portal` and `Product: Billing API`, each holding the findings of every host carrying that tag.
 
 * **Type each tag exactly as it appears in Qualys.** Hosts carrying none of the listed tags are not imported.
-* A host carrying several listed tags contributes its findings to each of those Records.
+* A host carrying more than one listed tag has its findings imported into **each** of those tag assets, so they count once per asset. Totals added up across tag assets can therefore be higher than the number of distinct detections.
 * A listed tag that no host carries creates no Record.
 * Each Record is named with the tag **as Qualys spells it**. If an asset already exists with exactly that name, auto-mapping routes the tag's findings to it, so you can create or rename assets to match your Qualys tags ahead of time.
 * Every finding carries its **host as an endpoint**, whatever **Create Endpoints From Hosts** is set to. Without it, the same QID on two hosts would look like two identical findings on one asset.
