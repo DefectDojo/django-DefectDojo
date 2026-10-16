@@ -82,7 +82,7 @@ humanize==4.16.0
 hyperframe==6.1.0
 hyperlink==21.0.0
 idna==3.20
-ijson==3.5.1
+ijson==3.6.0
 importlib_metadata==9.0.1
 inflection==0.5.1
 isal==1.8.0
