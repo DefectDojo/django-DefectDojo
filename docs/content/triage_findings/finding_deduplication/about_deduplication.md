@@ -172,11 +172,18 @@ For example, let’s say that you had your Maximum Duplicates field set to ‘1�
 
 ### When duplicates are deleted
 
-Excess duplicates are deleted by a background task that runs every minute. A duplicate is only deleted once it has settled: the Finding has not been changed, and nothing has been imported into its Test, for 30 minutes. This gives an import or reimport time to finish with the Findings it just created or matched before any of them are removed, so a running import never loses Findings it is still working on.
+Excess duplicates are deleted by a background task that runs every minute. Two kinds of duplicate wait for a later run:
 
-A **Maximum Duplicates** value of 0 therefore means "delete every duplicate once it has settled", not "delete it the moment it is marked".
+- Duplicates in a Test that an import or reimport is working on right now. The import holds a database lock on its Test until it finishes, and the task skips that Test's duplicates while the lock is held. The next run after the import ends deletes them, so a Test that is reimported every few minutes is still cleaned up between reimports.
+- A Finding saved in the last minute, so a request that is still writing it (for example a Finding created through the API) can finish first.
 
-Self-hosted instances can change the wait with the `DD_DUPE_DELETE_GRACE_MINUTES` environment variable. Setting it to `0` deletes duplicates as soon as they are marked, which can make imports fail while the task is deleting Findings they are still writing.
+Every other excess duplicate is deleted on the next run, as before.
+
+Self-hosted instances can tune this with three environment variables:
+
+- `DD_DUPE_DELETE_GRACE_MINUTES` (default `1`) sets how long after its last save a duplicate waits. `0` turns the wait off.
+- `DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT` (default `True`) turns the import lock on. Set it to `False` only if DefectDojo reaches PostgreSQL through a connection pooler in transaction mode (such as PgBouncer with `pool_mode = transaction`), where the lock cannot be held across an import. Without the lock, an import can fail if the task deletes Findings it is still writing.
+- `DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES` (default `30`) is a safety valve. If every connection holding a Test's import lock has been idle for this long, no import is running, so the task deletes that Test's duplicates anyway and logs a warning naming the database connections involved. `0` turns the valve off.
 
 ### Applying this setting
 

@@ -118,6 +118,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: for fresh imports, parse_findings() calls create_test() internally,
         # so self.test is guaranteed to be set after this call.
         parsed_findings = self.parse_findings(scan, parser) or []
+        # The excess-duplicate delete leaves the duplicates of a test being imported alone.
+        self.lock_test_under_import(self.test)
         new_findings = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs

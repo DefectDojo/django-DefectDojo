@@ -9,7 +9,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.core.management import call_command
-from django.db import connection, transaction
+from django.db import transaction
 from django.db.models import Count, IntegerField, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
@@ -17,6 +17,7 @@ from django.utils import timezone
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.finding.helper import bulk_delete_findings, fix_loop_duplicates
+from dojo.importers.import_lock import tests_under_import_now
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Finding, System_Settings
 from dojo.utils import schedule_product_grade
@@ -103,9 +104,9 @@ def _async_dupe_delete_impl():
     # (found_by, cwe, tags, locations, vulnerability ids, companions). Those FKs are DEFERRABLE
     # INITIALLY DEFERRED, so the writer takes no lock on the finding that a delete would wait
     # for; it only fails at its COMMIT, losing the whole import. So a duplicate is a candidate
-    # only once it has settled: the finding has not been saved, and its test has seen no import
-    # activity (a reimport's start and every deduplication batch refresh test.updated, see
-    # mark_tests_under_import), for the grace period.
+    # only once it has settled: the finding has not been saved for the grace period. An import
+    # also holds a lock on its test for as long as it runs, and the delete skips that test's
+    # duplicates until it ends (see dojo.importers.import_lock).
     settled = _settled_duplicates()
 
     # Single query: excess (oldest) duplicates, newest-first within each original group.
@@ -149,25 +150,22 @@ def _async_dupe_delete_impl():
 
 
 def _settled_duplicates():
-    """The duplicates that have been left alone for the grace period, as a Q on Finding."""
+    """The duplicates that have not been saved for the grace period, as a Q on Finding."""
     if (grace_minutes := settings.DUPE_DELETE_GRACE_MINUTES) <= 0:
         return Q()
     cutoff = timezone.now() - timedelta(minutes=grace_minutes)
-    return (
-        (Q(updated__lt=cutoff) | Q(updated__isnull=True))
-        & (Q(test__updated__lt=cutoff) | Q(test__updated__isnull=True))
-    )
+    return Q(updated__lt=cutoff) | Q(updated__isnull=True)
 
 
 def _delete_excess_duplicates(ids_to_delete):
     """
-    Delete the selected duplicates that are still settled.
+    Delete the selected duplicates, except those an import is writing or a save has just touched.
 
-    The selection ran without locks, so a reimport can have started on one of these tests since.
-    A reimport marks its test active before it matches anything (mark_tests_under_import), so
-    each chunk locks its findings, then their tests, and re-checks: a reimport that marked its
-    test first is seen here and its duplicates are left alone, and one that marks it later waits
-    on the test lock until this chunk commits, when these rows are gone and cannot be matched.
+    The selection ran without locks, so each chunk locks its findings and then checks again under
+    that lock: a test an import is running on (its import lock is held) keeps its duplicates for
+    this run, and an import that starts on one of these tests while the chunk runs waits for the
+    chunk to commit, when these rows are gone and cannot be matched. A finding saved since the
+    selection is left for a later run too.
 
     Returns the number of findings deleted.
     """
@@ -177,20 +175,16 @@ def _delete_excess_duplicates(ids_to_delete):
             locked = list(
                 Finding.objects.filter(id__in=chunk).order_by("id").select_for_update().values_list("id", "test_id"),
             )
-            if settings.DUPE_DELETE_GRACE_MINUTES > 0 and locked:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT id FROM dojo_test WHERE id = ANY(%s) ORDER BY id FOR SHARE",
-                        [sorted({test_id for _, test_id in locked})],
-                    )
+            busy_tests = tests_under_import_now({test_id for _, test_id in locked})
+            candidates = [finding_id for finding_id, test_id in locked if test_id not in busy_tests]
+            if settings.DUPE_DELETE_GRACE_MINUTES > 0 and candidates:
                 still_settled = list(
-                    Finding.objects.filter(_settled_duplicates(), id__in=[finding_id for finding_id, _ in locked])
-                    .values_list("id", flat=True),
+                    Finding.objects.filter(_settled_duplicates(), id__in=candidates).values_list("id", flat=True),
                 )
             else:
-                still_settled = [finding_id for finding_id, _ in locked]
+                still_settled = candidates
             if skipped := len(locked) - len(still_settled):
-                logger.info("skipping %s excess duplicates that were saved, or whose test had import activity, since they were selected", skipped)
+                logger.info("skipping %s excess duplicates that an import is writing or that were saved since they were selected", skipped)
             if still_settled:
                 bulk_delete_findings(Finding.objects.filter(id__in=still_settled), order_desc=True)
                 deleted_count += len(still_settled)

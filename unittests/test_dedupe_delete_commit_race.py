@@ -36,7 +36,7 @@ from unittest.mock import patch
 from crum import impersonate
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import IntegrityError, OperationalError, connection, connections, transaction
+from django.db import DatabaseError, IntegrityError, OperationalError, connection, connections, transaction
 from django.test import SimpleTestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -47,8 +47,10 @@ from dojo.finding import deduplication
 from dojo.finding import helper as finding_helper
 from dojo.finding.deduplication import _flush_duplicate_changes  # noqa: PLC2701
 from dojo.finding.helper import bulk_delete_findings
+from dojo.importers import import_lock
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.importers.import_lock import TEST_IMPORT_LOCK_CLASS
 from dojo.models import (
     Alerts,
     Development_Environment,
@@ -129,6 +131,94 @@ class _ConcurrentThread(threading.Thread):
             raise self.error
 
 
+def _integer_keyed_tables():
+    """Every table with a single integer primary key, with that key's column."""
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT cls.relname, att.attname
+            FROM pg_index AS idx
+            JOIN pg_class AS cls ON cls.oid = idx.indrelid
+            JOIN pg_namespace AS ns ON ns.oid = cls.relnamespace
+            JOIN pg_attribute AS att ON att.attrelid = cls.oid AND att.attnum = idx.indkey[0]
+            WHERE idx.indisprimary AND idx.indnatts = 1 AND ns.nspname = current_schema()
+              AND att.atttypid IN ('int2'::regtype, 'int4'::regtype, 'int8'::regtype)
+            """,
+        )
+        return cursor.fetchall()
+
+
+def _high_water_marks():
+    """The highest primary key in every integer-keyed table, before a test commits anything."""
+    marks = {}
+    with connection.cursor() as cursor:
+        for table, column in _integer_keyed_tables():
+            cursor.execute(f'SELECT COALESCE(MAX("{column}"), 0) FROM "{table}"')
+            marks[table, column] = cursor.fetchone()[0]
+    return marks
+
+
+def _delete_rows_added_since(marks):
+    """
+    Delete every row committed since ``marks``, in every table.
+
+    These tests commit real rows (that is the point of them), and the database is kept between
+    test modules, so anything left behind -- a second "Development" environment, a tag, a location,
+    a history event -- changes what later tests see. The foreign keys are deferred, so the order of
+    the deletes does not matter; deleting audited rows records history events, which the next pass
+    removes.
+    """
+    for _ in range(3):
+        deleted = 0
+        with transaction.atomic(), connection.cursor() as cursor:
+            cursor.execute("SET CONSTRAINTS ALL DEFERRED")
+            for (table, column), mark in marks.items():
+                cursor.execute(f'DELETE FROM "{table}" WHERE "{column}" > %s', [mark])
+                deleted += cursor.rowcount
+        if not deleted:
+            return
+
+
+@contextmanager
+def _import_lock_held_elsewhere(test_id):
+    """Hold a test's import lock on another connection, as an import running in another worker does."""
+    held = threading.Event()
+    release = threading.Event()
+
+    def hold():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_lock_shared(%s, %s)", [TEST_IMPORT_LOCK_CLASS, test_id])
+        held.set()
+        release.wait(WAIT_TIMEOUT_SECONDS)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_unlock_shared(%s, %s)", [TEST_IMPORT_LOCK_CLASS, test_id])
+
+    holder = _ConcurrentThread(hold)
+    holder.start()
+    if not held.wait(WAIT_TIMEOUT_SECONDS):
+        msg = "the other connection never took the import lock"
+        raise AssertionError(msg)
+    try:
+        yield
+    finally:
+        release.set()
+        holder.join(WAIT_TIMEOUT_SECONDS)
+
+
+def _import_lock_is_held(test_id):
+    """Ask from another connection, as the delete would, whether an import holds this test's lock."""
+    def in_a_transaction():
+        with transaction.atomic():
+            return bool(dojo_tasks.tests_under_import_now({test_id}))
+
+    probe = _ConcurrentThread(in_a_transaction)
+    probe.start()
+    probe.join(WAIT_TIMEOUT_SECONDS)
+    if probe.error is not None:
+        raise probe.error
+    return probe.result
+
+
 class _CommittedFindingsMixin:
 
     """Create committed findings for one test and remove them afterwards."""
@@ -137,6 +227,8 @@ class _CommittedFindingsMixin:
 
     def setUp(self):
         super().setUp()
+        # Registered first so it runs last, after the targeted cleanups below.
+        self.addCleanup(_delete_rows_added_since, _high_water_marks())
         suffix = uuid.uuid4().hex[:12]
         self.suffix = suffix
         self.notification_ids_before = set(Notifications.objects.values_list("id", flat=True))
@@ -657,7 +749,7 @@ class TestBulkDeleteRacesConcurrentM2MWriter(_CommittedFindingsMixin, SimpleTest
 # writing that finding's child rows (found_by, cwe, tags, locations, companions, ...).
 # The per-run cap is lifted so duplicates committed by other tests in the kept database cannot
 # crowd this test's own rows out of a run.
-@override_settings(DUPE_DELETE_GRACE_MINUTES=30, DUPE_DELETE_MAX_PER_RUN=1_000_000)
+@override_settings(DUPE_DELETE_GRACE_MINUTES=1, DUPE_DELETE_MAX_PER_RUN=1_000_000)
 class TestDupeDeleteRacesInFlightWriter(_CommittedFindingsMixin, SimpleTestCase):
 
     """The excess-duplicate delete must leave alone duplicates an import may still be writing to."""
@@ -675,12 +767,9 @@ class TestDupeDeleteRacesInFlightWriter(_CommittedFindingsMixin, SimpleTestCase)
             duplicate=True, active=False, verified=False, duplicate_finding=original,
         )
 
-    def _backdate(self, *, finding_ids=(), test=None, minutes=120):
+    def _backdate(self, *, finding_ids, minutes=120):
         past = timezone.now() - timedelta(minutes=minutes)
-        if finding_ids:
-            Finding.objects.filter(id__in=finding_ids).update(created=past, updated=past)
-        if test is not None:
-            Test.objects.filter(id=test.id).update(updated=past)
+        Finding.objects.filter(id__in=finding_ids).update(created=past, updated=past)
 
     def _write_found_by_and_commit(self, finding_id):
         """The writer's next step after deduplication: a child row for the finding, committed."""
@@ -695,7 +784,7 @@ class TestDupeDeleteRacesInFlightWriter(_CommittedFindingsMixin, SimpleTestCase)
     def test_new_duplicate_survives_while_its_import_is_still_writing(self):
         """A finding created and marked duplicate moments ago is not deleted before its writer finishes."""
         original, new_duplicate = self._create_findings("Dupe delete original", "Dupe delete new duplicate")
-        self._backdate(finding_ids=[original.id], test=self.test)  # only the duplicate itself is fresh
+        self._backdate(finding_ids=[original.id])  # only the duplicate itself is fresh
         self._commit_as_duplicate(new_duplicate, original)
 
         self._run_dupe_delete()  # the per-minute beat task fires between dedupe and the child write
@@ -709,21 +798,38 @@ class TestDupeDeleteRacesInFlightWriter(_CommittedFindingsMixin, SimpleTestCase)
     def test_matched_duplicate_survives_while_its_test_is_being_imported(self):
         """An old finding a reimport matched and deduplication newly marked duplicate is not deleted mid-import."""
         original, matched = self._create_findings("Dupe delete original", "Dupe delete matched duplicate")
-        self._backdate(finding_ids=[original.id, matched.id])  # both rows are old ...
-        Test.objects.filter(id=self.test.id).update(updated=timezone.now())  # ... but their test is under import
         self._commit_as_duplicate(matched, original)
+        self._backdate(finding_ids=[original.id, matched.id])  # both rows are old ...
 
-        self._run_dupe_delete()
+        with _import_lock_held_elsewhere(self.test.id):  # ... but an import is running on their test
+            self._run_dupe_delete()
 
         self._write_found_by_and_commit(matched.id)
         persisted = Finding.objects.filter(id=matched.id).first()
         self.assertIsNotNone(persisted, msg="a matched duplicate in a test under import was deleted mid-import")
 
+    def test_duplicate_of_a_test_just_reimported_is_deleted_once_the_import_has_ended(self):
+        """
+        Control, and the reason for the lock: a test reimported every few minutes still has its
+        excess duplicates deleted between reimports. Recent import activity alone holds nothing back.
+        """
+        original, matched = self._create_findings("Dupe delete original", "Dupe delete recently reimported")
+        self._commit_as_duplicate(matched, original)
+        self._backdate(finding_ids=[original.id, matched.id])
+        Test.objects.filter(id=self.test.id).update(updated=timezone.now())  # a reimport finished just now
+
+        self._run_dupe_delete()
+
+        self.assertFalse(
+            Finding.objects.filter(id=matched.id).exists(),
+            msg="an excess duplicate of a test with no import running was kept because the test was reimported recently",
+        )
+
     def test_settled_duplicate_is_still_deleted(self):
-        """Control: a duplicate whose finding and test have been quiet past the grace period is deleted."""
+        """Control: a duplicate whose finding has been quiet past the grace period is deleted."""
         original, settled = self._create_findings("Dupe delete original", "Dupe delete settled duplicate")
         self._commit_as_duplicate(settled, original)
-        self._backdate(finding_ids=[original.id, settled.id], test=self.test)
+        self._backdate(finding_ids=[original.id, settled.id])
 
         self._run_dupe_delete()
 
@@ -740,49 +846,127 @@ class TestDupeDeleteRacesInFlightWriter(_CommittedFindingsMixin, SimpleTestCase)
 
         self.assertFalse(Finding.objects.filter(id=new_duplicate.id).exists(), msg="grace 0 must delete at once")
 
-    def test_deduplication_batch_marks_its_test_as_under_import(self):
-        """Deduplicating a batch refreshes the test's activity time when duplicate deletion is on."""
-        (finding,) = self._create_findings("Dupe delete heartbeat")
-        self._backdate(test=self.test)
-        before = Test.objects.get(id=self.test.id).updated
-        settings_on = SimpleNamespace(
-            delete_duplicates=True, max_dupes=0, enable_deduplication=True, false_positive_history=False,
-            enable_product_grade=False,
+    def _post_process_batch(self, finding, *, delete_duplicates, while_deduplicating):
+        """Run a deduplication batch for ``finding``, calling ``while_deduplicating`` in its dedupe step."""
+        system_settings = SimpleNamespace(
+            delete_duplicates=delete_duplicates, max_dupes=0, enable_deduplication=True,
+            false_positive_history=False, enable_product_grade=False,
         )
-
         with (
-            patch("dojo.finding.helper.System_Settings.objects.get", return_value=settings_on),
-            patch.object(finding_helper, "dedupe_batch_of_findings"),
+            patch("dojo.finding.helper.System_Settings.objects.get", return_value=system_settings),
+            patch("dojo.importers.import_lock.System_Settings.objects.get", return_value=system_settings),
+            patch.object(finding_helper, "dedupe_batch_of_findings", side_effect=lambda _: while_deduplicating()),
         ):
             finding_helper.post_process_findings_batch(
                 [finding.id], dedupe_option=True, rules_option=False, product_grading_option=False,
                 issue_updater_option=False,
             )
 
-        after = Test.objects.get(id=self.test.id).updated
-        self.assertGreater(after, before, msg=f"test.updated before={before} after={after}")
+    def test_deduplication_batch_holds_the_import_lock_while_it_runs(self):
+        """A deduplication batch keeps the delete off its test until the batch is done, and no longer."""
+        (finding,) = self._create_findings("Dupe delete batch lock")
+        seen = []
 
-    def test_deduplication_batch_leaves_the_test_alone_when_duplicate_deletion_is_off(self):
-        """Control: with duplicate deletion off (the default) the batch adds no write."""
-        (finding,) = self._create_findings("Dupe delete no heartbeat")
-        self._backdate(test=self.test)
-        before = Test.objects.get(id=self.test.id).updated
-        settings_off = SimpleNamespace(
-            delete_duplicates=False, max_dupes=10, enable_deduplication=True, false_positive_history=False,
-            enable_product_grade=False,
+        self._post_process_batch(
+            finding, delete_duplicates=True, while_deduplicating=lambda: seen.append(_import_lock_is_held(self.test.id)),
         )
 
-        with (
-            patch("dojo.finding.helper.System_Settings.objects.get", return_value=settings_off),
-            patch.object(finding_helper, "dedupe_batch_of_findings"),
-        ):
-            finding_helper.post_process_findings_batch(
-                [finding.id], dedupe_option=True, rules_option=False, product_grading_option=False,
-                issue_updater_option=False,
+        self.assertEqual(seen, [True], msg="the batch did not hold its test's import lock while deduplicating")
+        self.assertFalse(_import_lock_is_held(self.test.id), msg="the batch left its test locked after it finished")
+
+    def test_deduplication_batch_takes_no_lock_when_duplicate_deletion_is_off(self):
+        """Control: with duplicate deletion off (the default) the batch takes no lock."""
+        (finding,) = self._create_findings("Dupe delete no batch lock")
+        seen = []
+
+        self._post_process_batch(
+            finding, delete_duplicates=False, while_deduplicating=lambda: seen.append(_import_lock_is_held(self.test.id)),
+        )
+
+        self.assertEqual(seen, [False], msg="the batch locked its test although duplicate deletion is off")
+
+
+# Regression guard: the import lock must never outlive the import that took it. A lock nobody
+# releases would keep the excess-duplicate delete off that test for good, so each way one could
+# be left behind is bounded: a release that fails drops its connection, a release that finds no
+# lock (a pooler in transaction mode) says so, and a lock whose holder has sat idle far longer
+# than any import would is treated as abandoned.
+@override_settings(DUPE_DELETE_GRACE_MINUTES=0, DUPE_DELETE_MAX_PER_RUN=1_000_000)
+class TestImportLockCannotOutliveItsImport(_CommittedFindingsMixin, SimpleTestCase):
+
+    """No failure leaves a test locked against the excess-duplicate delete for good."""
+
+    DELETE_ALL_DUPLICATES = SimpleNamespace(delete_duplicates=True, max_dupes=0, enable_product_grade=False)
+
+    def _run_dupe_delete(self):
+        with patch("dojo.tasks.System_Settings.objects.get", return_value=self.DELETE_ALL_DUPLICATES):
+            _async_dupe_delete_impl()
+
+    def _old_excess_duplicate(self):
+        original, duplicate = self._create_findings("Abandoned lock original", "Abandoned lock duplicate")
+        past = timezone.now() - timedelta(minutes=120)
+        Finding.objects.filter(id=duplicate.id).update(duplicate=True, active=False, duplicate_finding=original)
+        Finding.objects.filter(id__in=[original.id, duplicate.id]).update(created=past, updated=past)
+        return duplicate
+
+    def test_a_release_that_fails_drops_the_connection_and_the_lock_with_it(self):
+        """
+        An import whose transaction aborted cannot run the release. The lock must go when the request
+        or task ends, even on a connection Django would otherwise keep open indefinitely.
+        """
+        with patch.object(import_lock, "import_lock_enabled", return_value=True):
+            locked = import_lock.lock_tests_under_import([self.test.id])
+        self.assertTrue(_import_lock_is_held(self.test.id), msg="setup: the import holds its test's lock")
+        connection.close_at = None  # a persistent connection (CONN_MAX_AGE=None) is never closed for its age
+
+        with transaction.atomic():
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT 1 / 0")  # the error that aborts the import's transaction
+            except DatabaseError:
+                pass
+            import_lock.unlock_tests_under_import(locked)  # cannot run in an aborted transaction
+            transaction.set_rollback(True)
+        connection.close_if_unusable_or_obsolete()  # what Django and Celery run after every request and task
+
+        self.assertFalse(
+            _import_lock_is_held(self.test.id),
+            msg="a failed release left the import lock held on a connection that stays open",
+        )
+
+    def test_a_release_that_finds_no_lock_says_how_to_fix_it(self):
+        """Behind a pooler in transaction mode the release runs on another server connection and finds nothing."""
+        with self.assertLogs(import_lock.logger, level="ERROR") as logs:
+            import_lock.unlock_tests_under_import([self.test.id])  # never locked on this connection
+        self.assertIn("DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT", "\n".join(logs.output))
+
+    @override_settings(DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES=0.001)
+    def test_duplicates_are_deleted_when_the_lock_holder_has_been_idle_too_long(self):
+        """A lock whose holder has done nothing for longer than any import would is not an import running."""
+        duplicate = self._old_excess_duplicate()
+
+        with _import_lock_held_elsewhere(self.test.id):
+            time.sleep(0.5)  # the holder's connection sits idle past the (shortened) threshold
+            self._run_dupe_delete()
+
+            self.assertFalse(
+                Finding.objects.filter(id=duplicate.id).exists(),
+                msg="an abandoned import lock kept the excess-duplicate delete off the test",
             )
 
-        after = Test.objects.get(id=self.test.id).updated
-        self.assertEqual(after, before, msg=f"test.updated before={before} after={after}")
+    @override_settings(DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES=30)
+    def test_duplicates_are_kept_while_the_lock_holder_is_within_the_threshold(self):
+        """Control: a holder idle for less than the threshold is an import between statements."""
+        duplicate = self._old_excess_duplicate()
+
+        with _import_lock_held_elsewhere(self.test.id):
+            time.sleep(0.5)
+            self._run_dupe_delete()
+
+            self.assertTrue(
+                Finding.objects.filter(id=duplicate.id).exists(),
+                msg="the duplicate of a test whose import is running was deleted",
+            )
 
 
 class _DupeDeleteDuringWriteMixin(_CommittedFindingsMixin):
@@ -882,7 +1066,11 @@ class _DupeDeleteDuringWriteMixin(_CommittedFindingsMixin):
         def deduplicate_then_delete_excess_duplicates(*args, **kwargs):
             result = real(*args, **kwargs)
             before = set(Finding.objects.filter(test__engagement=self.engagement).values_list("id", flat=True))
-            _async_dupe_delete_impl()
+            # On its own connection, as the beat task runs in another worker: the import lock is
+            # per connection, so a delete on the import's own connection would not see it.
+            deleter = _ConcurrentThread(_async_dupe_delete_impl)
+            deleter.start()
+            deleter.join_or_fail(self)
             after = set(Finding.objects.filter(test__engagement=self.engagement).values_list("id", flat=True))
             self.deleted_by_dupe_delete.extend(sorted(before - after))
             return result
@@ -896,7 +1084,8 @@ class _DupeDeleteDuringWriteMixin(_CommittedFindingsMixin):
 # dojo_locationfindingreference / pro_enhanced_finding / dojo_finding_tags ... Key (finding_id)=(N)
 # is not present in table dojo_finding", or silently lost its import history, when the
 # excess-duplicate delete removed findings the import had just deduplicated.
-@override_settings(DUPE_DELETE_GRACE_MINUTES=30, DUPE_DELETE_MAX_PER_RUN=1_000_000)
+# The grace period is off, so the import lock alone has to protect the run.
+@override_settings(DUPE_DELETE_GRACE_MINUTES=0, DUPE_DELETE_MAX_PER_RUN=1_000_000)
 class TestImportRacesDupeDelete(_DupeDeleteDuringWriteMixin, SimpleTestCase):
 
     """An import or reimport must complete with every finding and history row when dupe-delete fires mid-run."""
@@ -964,9 +1153,9 @@ class TestImportRacesDupeDelete(_DupeDeleteDuringWriteMixin, SimpleTestCase):
 # grace period matched that test's settled duplicates while an excess-duplicate delete run that
 # had already selected them was still going, and failed at its batch flush with the same
 # "Key (finding_id)=(N) is not present in table dojo_finding". The delete must re-check, under a
-# lock, that each candidate is still settled, and the reimport must mark its test as active
-# before it matches anything.
-@override_settings(DUPE_DELETE_GRACE_MINUTES=30, DUPE_DELETE_MAX_PER_RUN=1_000_000)
+# lock, that no import has started on each candidate's test, and the reimport must take its
+# test's import lock before it matches anything.
+@override_settings(DUPE_DELETE_GRACE_MINUTES=0, DUPE_DELETE_MAX_PER_RUN=1_000_000)
 class TestReimportStartRacesDupeDeleteSelection(_DupeDeleteDuringWriteMixin, SimpleTestCase):
 
     """A delete run's stale selection must not remove duplicates a reimport that started since has matched."""
@@ -978,7 +1167,6 @@ class TestReimportStartRacesDupeDeleteSelection(_DupeDeleteDuringWriteMixin, Sim
         settled = set(Finding.objects.filter(test=target).values_list("id", flat=True))
         past = timezone.now() - timedelta(minutes=120)
         Finding.objects.filter(id__in=settled).update(created=past, updated=past)
-        Test.objects.filter(id=target.id).update(updated=past)
 
         selected = threading.Event()
         release = threading.Event()
@@ -1025,7 +1213,6 @@ class TestReimportStartRacesDupeDeleteSelection(_DupeDeleteDuringWriteMixin, Sim
         settled = set(Finding.objects.filter(test=target).values_list("id", flat=True))
         past = timezone.now() - timedelta(minutes=120)
         Finding.objects.filter(id__in=settled).update(created=past, updated=past)
-        Test.objects.filter(id=target.id).update(updated=past)
 
         _async_dupe_delete_impl()
 
@@ -1370,7 +1557,7 @@ class TestReimportRacesMatchedFindingDelete(_DupeDeleteDuringWriteMixin, SimpleT
 # (finding_id)=(N) is not present in table dojo_finding". The create commits the finding and
 # deduplicates it inside Finding.save(), then writes found_by, cwe and vulnerability ids; the
 # excess-duplicate delete removed the new duplicate in between.
-@override_settings(DUPE_DELETE_GRACE_MINUTES=30, DUPE_DELETE_MAX_PER_RUN=1_000_000)
+@override_settings(DUPE_DELETE_GRACE_MINUTES=1, DUPE_DELETE_MAX_PER_RUN=1_000_000)
 class TestFindingCreateRacesDupeDelete(_DupeDeleteDuringWriteMixin, SimpleTestCase):
 
     """A finding create must succeed with its M2M rows when dupe-delete fires right after its deduplication."""

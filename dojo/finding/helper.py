@@ -30,6 +30,7 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
+from dojo.importers.import_lock import lock_tests_of_findings_under_import, unlock_tests_under_import
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
@@ -439,18 +440,6 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                     finding_group.findings.add(*findings)
 
 
-def mark_tests_under_import(test_ids):
-    """
-    Refresh ``updated`` on tests an import is working on.
-
-    Called when a reimport starts and for each deduplication batch. The excess-duplicate delete
-    (dojo.tasks.async_dupe_delete) leaves a test's duplicates alone until
-    DUPE_DELETE_GRACE_MINUTES after this, because the import is still writing their child rows. Only ``updated`` changes, which the Test audit history
-    ignores, so this records no history event.
-    """
-    Test.objects.filter(id__in=test_ids).update(updated=timezone.now())
-
-
 @app.task
 def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
@@ -561,6 +550,33 @@ def post_process_findings_batch(
     if not finding_ids:
         return
 
+    # Deduplication may mark these findings duplicate, and everything below goes on writing them,
+    # so hold the import lock on their tests until it is done (see dojo.importers.import_lock).
+    locked_tests = lock_tests_of_findings_under_import(finding_ids)
+    try:
+        _post_process_findings_batch(
+            finding_ids,
+            dedupe_option=dedupe_option,
+            product_grading_option=product_grading_option,
+            issue_updater_option=issue_updater_option,
+            push_to_jira=push_to_jira,
+            jira_instance_id=jira_instance_id,
+            force_sync=force_sync,
+        )
+    finally:
+        unlock_tests_under_import(locked_tests)
+
+
+def _post_process_findings_batch(
+    finding_ids,
+    *,
+    dedupe_option,
+    product_grading_option,
+    issue_updater_option,
+    push_to_jira,
+    jira_instance_id,
+    force_sync,
+):
     system_settings = System_Settings.objects.get()
 
     # The status-changing dedup / false-positive-history writes below update dojo_finding
@@ -586,8 +602,6 @@ def post_process_findings_batch(
 
             # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
             if dedupe_option and system_settings.enable_deduplication:
-                if system_settings.delete_duplicates:
-                    mark_tests_under_import({finding.test_id for finding in findings})
                 dedupe_batch_of_findings(findings)
 
             if system_settings.false_positive_history:

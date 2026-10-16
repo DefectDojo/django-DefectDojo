@@ -26,7 +26,6 @@ from dojo.models import (
     Finding,
     Finding_Group,
     Notes,
-    System_Settings,
     Test,
     Test_Import,
 )
@@ -118,10 +117,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
-        # The excess-duplicate delete leaves an active test's duplicates alone; this one is about
-        # to have its findings matched and written, so say so before the first match.
-        if System_Settings.objects.get().delete_duplicates:
-            finding_helper.mark_tests_under_import([self.test.id])
+        # The excess-duplicate delete leaves the duplicates of a test being imported alone; this
+        # one is about to have its findings matched and written, so say so before the first match.
+        self.lock_test_under_import(self.test)
         (
             new_findings,
             reactivated_findings,

@@ -3,6 +3,7 @@ import binascii
 import logging
 import re
 import time
+from contextlib import contextmanager
 from functools import wraps
 from itertools import batched
 from pathlib import Path
@@ -31,6 +32,7 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.finding.cwe import finding_cwe_labels
+from dojo.importers.import_lock import lock_tests_under_import, unlock_tests_under_import
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
 from dojo.jira.services import is_keep_in_sync
@@ -121,7 +123,8 @@ def reports_a_deleted_target(process_scan):
     @wraps(process_scan)
     def wrapper(self, *args, **kwargs):
         try:
-            return process_scan(self, *args, **kwargs)
+            with self.import_lock_scope():
+                return process_scan(self, *args, **kwargs)
         except IntegrityError as exception:
             test = getattr(self, "test", None)
             missing = _missing_referenced_row(exception) if is_foreign_key_conflict(exception) else None
@@ -884,6 +887,40 @@ class BaseImporter(ImporterOptions):
         raise in turn and bury the error that actually needs reporting.
         """
         return type(exception) is DatabaseError and "did not affect any rows" in str(exception)
+
+    @contextmanager
+    def import_lock_scope(self):
+        """
+        Hold the import lock taken by lock_test_under_import until the outermost scope exits.
+
+        process_scan opens one; a caller that goes on writing this import's findings after
+        process_scan returns opens its own around the call, and the lock is held until that one
+        exits. See dojo.importers.import_lock.
+        """
+        depth = getattr(self, "_import_lock_depth", 0)
+        self._import_lock_depth = depth + 1
+        try:
+            yield
+        finally:
+            self._import_lock_depth = depth
+            if depth == 0:
+                unlock_tests_under_import(getattr(self, "_import_locked_tests", []))
+                self._import_locked_tests = []
+
+    def lock_test_under_import(self, test: Test) -> None:
+        """
+        Tell the excess-duplicate delete this test is being imported, until the import ends.
+
+        Call before the first finding is created or matched. Waits if a delete is removing this
+        test's duplicates right now, so the import starts from what that delete left.
+        """
+        if getattr(self, "_import_lock_depth", 0) == 0:
+            msg = "lock_test_under_import must run inside import_lock_scope"
+            raise RuntimeError(msg)
+        locked = getattr(self, "_import_locked_tests", [])
+        if test is None or test.pk is None or test.pk in locked:
+            return
+        self._import_locked_tests = locked + lock_tests_under_import([test.pk])
 
     def save_matched_finding(self, finding: Finding, *, no_options: bool = False) -> bool:
         """
