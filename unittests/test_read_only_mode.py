@@ -16,9 +16,9 @@ from dojo.system_settings.ui.forms import SystemSettingsForm
 from .dojo_test_case import DojoTestCase, versioned_fixtures
 
 
-def set_read_only_mode(value: bool) -> None:
+def set_read_only_mode(*, enabled: bool) -> None:
     system_settings = System_Settings.objects.get(no_cache=True)
-    system_settings.read_only_mode = value
+    system_settings.read_only_mode = enabled
     system_settings.save()
 
 
@@ -68,24 +68,24 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
         return self.api.post("/api/v2/product_types/", {"name": name}, format="json")
 
     def test_api_write_rejected_with_423(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         response = self.create_product_type("Blocked")
         self.assertEqual(423, response.status_code)
         self.assertEqual(str(READ_ONLY_MODE_MESSAGE), response.json()["detail"])
         self.assertFalse(Product_Type.objects.filter(name="Blocked").exists())
 
     def test_api_write_allowed_when_off(self):
-        set_read_only_mode(False)
+        set_read_only_mode(enabled=False)
         self.assertEqual(201, self.create_product_type("Allowed").status_code)
 
     def test_safe_methods_pass_when_locked(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         for method in ("get", "head", "options"):
             with self.subTest(method=method):
                 self.assertEqual(200, getattr(self.api, method)("/api/v2/product_types/").status_code)
 
     def test_page_post_redirects_back_with_message(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         referer = "http://testserver" + reverse("product_type")
         response = self.client.post(reverse("add_product_type"), {"name": "Blocked"}, HTTP_REFERER=referer)
         self.assertEqual(302, response.status_code)
@@ -94,12 +94,12 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
         self.assertFalse(Product_Type.objects.filter(name="Blocked").exists())
 
     def test_foreign_referer_falls_back_to_home(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         response = self.client.post(reverse("add_product_type"), {"name": "Blocked"}, HTTP_REFERER="https://evil.example/x")
         self.assertEqual(reverse("home"), response["Location"])
 
     def test_machine_clients_get_423(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         cases = [
             ("/api/v3/organizations/", {}),
             ("/finding/1/edit", {"HTTP_HX_REQUEST": "true"}),
@@ -112,7 +112,7 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
                 self.assertEqual(str(READ_ONLY_MODE_MESSAGE), json.loads(response.content)["detail"])
 
     def test_exempt_paths_pass_when_locked(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         paths = [
             "/login",
             "/logout",
@@ -132,7 +132,7 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
                 self.assertEqual(b"OK", response.content)
 
     def test_unlock_through_api_while_locked(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         settings_id = System_Settings.objects.get(no_cache=True).id
         response = self.api.patch(f"/api/v2/system_settings/{settings_id}/", {"read_only_mode": False}, format="json")
         self.assertEqual(200, response.status_code, response.content)
@@ -140,16 +140,16 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
         self.assertEqual(201, self.create_product_type("After unlock").status_code)
 
     def test_lock_change_seen_by_next_request(self):
-        set_read_only_mode(False)
+        set_read_only_mode(enabled=False)
         self.assertEqual(201, self.create_product_type("Before lock").status_code)
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         self.assertEqual(423, self.create_product_type("During lock").status_code)
-        set_read_only_mode(False)
+        set_read_only_mode(enabled=False)
         self.assertEqual(201, self.create_product_type("After lock").status_code)
 
     @override_settings(SETTINGS_CACHE_L1_TTL=30)
     def test_no_extra_query_on_write(self):
-        set_read_only_mode(False)
+        set_read_only_mode(enabled=False)
         get_cached_system_settings()
         with self.assertNumQueries(0):
             response = rf_middleware("/api/v2/product_types/")
@@ -179,17 +179,17 @@ class TestReadOnlyModeBeatTasks(DojoTestCase):
         PROBE_CALLS.clear()
 
     def test_beat_task_skipped_when_locked(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         read_only_beat_probe()
         self.assertEqual([], PROBE_CALLS)
 
     def test_beat_task_runs_when_off(self):
-        set_read_only_mode(False)
+        set_read_only_mode(enabled=False)
         read_only_beat_probe()
         self.assertEqual(["beat"], PROBE_CALLS)
 
     def test_non_beat_task_runs_when_locked(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         read_only_plain_probe()
         self.assertEqual(["plain"], PROBE_CALLS)
 
@@ -211,18 +211,18 @@ class TestReadOnlyModeBanner(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
     def test_banner_in_context_when_locked(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         context = globalize_vars(RequestFactory().get("/"))
         self.assertEqual(READ_ONLY_BANNER, context["additional_banners"][0])
 
     def test_no_banner_when_off(self):
-        set_read_only_mode(False)
+        set_read_only_mode(enabled=False)
         context = globalize_vars(RequestFactory().get("/"))
         sources = [banner["source"] for banner in context.get("additional_banners", [])]
         self.assertNotIn("read_only_mode", sources)
 
     def test_banner_renders_on_home(self):
-        set_read_only_mode(True)
+        set_read_only_mode(enabled=True)
         self.client.force_login(User.objects.get(username="admin"))
         response = self.client.get(reverse("home"), follow=True)
         self.assertContains(response, str(READ_ONLY_MODE_MESSAGE))
