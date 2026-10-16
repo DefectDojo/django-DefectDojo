@@ -632,6 +632,7 @@ READ_ONLY_MODE_EXEMPT_URLS = (
     rf"^{URL_PREFIX}password_reset/",
     rf"^{URL_PREFIX}reset/",
     rf"^{URL_PREFIX}forgot_username",
+    rf"^{URL_PREFIX}change_password$",
     rf"^{URL_PREFIX}api/v2/api-token-auth/",
     rf"^{URL_PREFIX}system_settings$",
     rf"^{URL_PREFIX}api/v2/system_settings/",

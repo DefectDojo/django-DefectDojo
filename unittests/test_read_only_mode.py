@@ -121,6 +121,7 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
             "/password_reset/",
             "/reset/a/b/",
             "/forgot_username",
+            "/change_password",
             "/api/v2/api-token-auth/",
             "/system_settings",
             "/api/v2/system_settings/1/",
@@ -140,11 +141,13 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
         self.assertEqual(201, self.create_product_type("After unlock").status_code)
 
     def test_lock_change_seen_by_next_request(self):
-        set_read_only_mode(enabled=False)
+        # update() fires no post_save, like a save in another worker process.
+        system_settings = System_Settings.objects.filter(pk=System_Settings.objects.get(no_cache=True).pk)
+        system_settings.update(read_only_mode=False)
         self.assertEqual(201, self.create_product_type("Before lock").status_code)
-        set_read_only_mode(enabled=True)
+        system_settings.update(read_only_mode=True)
         self.assertEqual(423, self.create_product_type("During lock").status_code)
-        set_read_only_mode(enabled=False)
+        system_settings.update(read_only_mode=False)
         self.assertEqual(201, self.create_product_type("After lock").status_code)
 
     @override_settings(SETTINGS_CACHE_L1_TTL=30)
