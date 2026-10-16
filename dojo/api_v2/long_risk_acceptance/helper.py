@@ -6,7 +6,7 @@ from dojo.models import Finding, System_Settings
 from dojo.api_v2.api_error import ApiError
 from dojo.celery import app
 from dojo.api_v2.long_risk_acceptance.models import RiskAcceptanceEngagement 
-from dojo.models import Finding, Notes
+from dojo.models import Finding, Notes, Risk_Acceptance
 from django.utils import timezone
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
@@ -125,17 +125,19 @@ def active_findings_long_risk_acceptance(finding_qs: QuerySet[Finding]):
         finding.tags.remove("long_term_risk_acceptance")
 
 
-def _accept_findings(finding_qs: QuerySet[Finding], ra_engagement_id: int):
+def _accept_findings(finding_qs: QuerySet[Finding], ra_engagement: Risk_Acceptance):
     """Mark findings as accepted and add long_term_risk_acceptance tag."""
     for finding in finding_qs.iterator(chunk_size=200):
-        finding.risk_status = "Risk Accepted"
-        finding.active = False
-        finding.risk_accepted = True
-        finding.save(update_fields=["risk_status", "active", "risk_accepted"])
+        finding.update_fields(
+            risk_status="Risk Accepted",
+            active=False,
+            risk_accepted=True,
+            sla_expiration_date=ra_engagement.expiration_date
+        )
         finding.tags.add("long_term_risk_acceptance")
         logger.debug(
             f"finding {finding.id} accepted flow long term risk acceptance "
-            f"of engagement {ra_engagement_id}"
+            f"of engagement {ra_engagement.id}"
         )
 
 
@@ -177,7 +179,7 @@ def _handle_accept(ra_engagement: RiskAcceptanceEngagement,
     
     _update_ra_engagement(ra_engagement, {"risk_status": "Risks Accepted"})
     add_note("Long Risk Acceptance Accepted", ra_engagement, user)
-    _accept_findings(finding_qs, ra_engagement.id)
+    _accept_findings(finding_qs, ra_engagement)
     Notification.risk_acceptance_approved(long_risk_acceptance=ra_engagement)
     return True
 

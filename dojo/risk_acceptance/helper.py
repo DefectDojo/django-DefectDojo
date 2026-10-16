@@ -206,10 +206,6 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
             add_severity_to_risk_acceptance(risk_acceptance, finding.get_severity_related_to_priority())
-            finding.active = False
-            finding.risk_accepted = True
-            finding.accepted_by = user.username
-            finding.risk_status = "Risk Accepted"
             finding.update_fields(
                 active=False,
                 risk_accepted=True,
