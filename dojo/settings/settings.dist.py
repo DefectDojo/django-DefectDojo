@@ -623,6 +623,20 @@ LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}reset/",
 )
 
+# Unsafe requests that still pass while read-only mode is on: sign-in and System Settings,
+# so a superuser can always turn the mode off again. LOGIN_URL is added by the middleware.
+READ_ONLY_MODE_EXEMPT_URLS = (
+    rf"^{URL_PREFIX}logout$",
+    r"complete/",
+    r"oauth2/idpresponse",
+    rf"^{URL_PREFIX}password_reset/",
+    rf"^{URL_PREFIX}reset/",
+    rf"^{URL_PREFIX}forgot_username",
+    rf"^{URL_PREFIX}api/v2/api-token-auth/",
+    rf"^{URL_PREFIX}system_settings$",
+    rf"^{URL_PREFIX}api/v2/system_settings/",
+)
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "dojo.user.validators.DojoCommonPasswordValidator",
@@ -944,6 +958,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
+    "dojo.middleware.ReadOnlyModeMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.authorization.middleware.AuthorizationMiddleware",
