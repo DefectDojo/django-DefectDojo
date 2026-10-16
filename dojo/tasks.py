@@ -17,7 +17,7 @@ from django.utils import timezone
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.finding.helper import bulk_delete_findings, fix_loop_duplicates
-from dojo.importers.import_lock import tests_under_import_now
+from dojo.importers.import_lock import tests_under_import_now, tests_with_import_lock_held
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Finding, System_Settings
 from dojo.utils import schedule_product_grade
@@ -108,6 +108,10 @@ def _async_dupe_delete_impl():
     # also holds a lock on its test for as long as it runs, and the delete skips that test's
     # duplicates until it ends (see dojo.importers.import_lock).
     settled = _settled_duplicates()
+    # Leave the tests under import out of the selection too, before the per-run cap applies: their
+    # duplicates would only be skipped below, and enough of them would use up every run.
+    if busy_tests := tests_with_import_lock_held():
+        settled &= ~Q(test_id__in=busy_tests)
 
     # Single query: excess (oldest) duplicates, newest-first within each original group.
     # select_related avoids N+1 queries when collecting affected products below.
@@ -123,11 +127,8 @@ def _async_dupe_delete_impl():
         [:total_duplicate_delete_count_max_per_run]
     )
 
-    ids_to_delete = []
-    affected_products = set()
-    for finding in excess_dupes:
-        ids_to_delete.append(finding.id)
-        affected_products.add(finding.test.engagement.product)
+    product_by_finding = {finding.id: finding.test.engagement.product for finding in excess_dupes}
+    ids_to_delete = list(product_by_finding)
 
     logger.info("total number of excess duplicates to delete: %s", len(ids_to_delete))
 
@@ -136,9 +137,12 @@ def _async_dupe_delete_impl():
     # resolve_inbound_duplicate_references.
     # order_desc=True deletes higher ids before lower ids, consistent with how
     # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
-    deleted_count = _delete_excess_duplicates(ids_to_delete)
+    deleted_ids = _delete_excess_duplicates(ids_to_delete)
 
-    logger.info("total number of excess duplicates deleted: %s", deleted_count)
+    logger.info("total number of excess duplicates deleted: %s", len(deleted_ids))
+
+    # Grade only the products that lost a duplicate: a skipped one changed nothing.
+    affected_products = {product_by_finding[finding_id] for finding_id in deleted_ids}
 
     # Batch product grading for all affected products
     if affected_products:
@@ -161,34 +165,31 @@ def _delete_excess_duplicates(ids_to_delete):
     """
     Delete the selected duplicates, except those an import is writing or a save has just touched.
 
-    The selection ran without locks, so each chunk locks its findings and then checks again under
-    that lock: a test an import is running on (its import lock is held) keeps its duplicates for
-    this run, and an import that starts on one of these tests while the chunk runs waits for the
-    chunk to commit, when these rows are gone and cannot be matched. A finding saved since the
-    selection is left for a later run too.
+    The selection ran without locks, so each chunk checks again inside its transaction. It first
+    takes the import lock on the chunk's tests that are free (tests_under_import_now), which never
+    waits; an import that starts on one of them now waits for the chunk to commit, when these rows
+    are gone and cannot be matched. Only then does it row-lock findings, and only those of the free
+    tests, so a test under import has none of its rows locked by the delete and its import never
+    waits on it. A finding saved since the selection is left for a later run too.
 
-    Returns the number of findings deleted.
+    Returns the ids of the findings deleted.
     """
-    deleted_count = 0
+    deleted_ids = []
     for chunk in batched(sorted(ids_to_delete), DUPE_DELETE_CHUNK_SIZE, strict=False):
         with transaction.atomic():
-            locked = list(
-                Finding.objects.filter(id__in=chunk).order_by("id").select_for_update().values_list("id", "test_id"),
-            )
-            busy_tests = tests_under_import_now({test_id for _, test_id in locked})
-            candidates = [finding_id for finding_id, test_id in locked if test_id not in busy_tests]
-            if settings.DUPE_DELETE_GRACE_MINUTES > 0 and candidates:
-                still_settled = list(
-                    Finding.objects.filter(_settled_duplicates(), id__in=candidates).values_list("id", flat=True),
-                )
-            else:
-                still_settled = candidates
-            if skipped := len(locked) - len(still_settled):
-                logger.info("skipping %s excess duplicates that an import is writing or that were saved since they were selected", skipped)
+            test_by_finding = dict(Finding.objects.filter(id__in=chunk).values_list("id", "test_id"))
+            busy_tests = tests_under_import_now(set(test_by_finding.values()))
+            free = [finding_id for finding_id, test_id in test_by_finding.items() if test_id not in busy_tests]
+            candidates = Finding.objects.filter(id__in=free)
+            if settings.DUPE_DELETE_GRACE_MINUTES > 0:
+                candidates = candidates.filter(_settled_duplicates())
+            still_settled = list(candidates.order_by("id").select_for_update().values_list("id", flat=True)) if free else []
+            if skipped := len(chunk) - len(still_settled):
+                logger.info("skipping %s excess duplicates that an import is writing, or that were saved or deleted since they were selected", skipped)
             if still_settled:
                 bulk_delete_findings(Finding.objects.filter(id__in=still_settled), order_desc=True)
-                deleted_count += len(still_settled)
-    return deleted_count
+                deleted_ids.extend(still_settled)
+    return deleted_ids
 
 
 @app.task(ignore_result=False, base=Task)

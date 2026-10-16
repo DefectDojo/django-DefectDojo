@@ -166,7 +166,8 @@ def _delete_rows_added_since(marks):
     test modules, so anything left behind -- a second "Development" environment, a tag, a location,
     a history event -- changes what later tests see. The foreign keys are deferred, so the order of
     the deletes does not matter; deleting audited rows records history events, which the next pass
-    removes.
+    removes. It assumes this test is the only writer to the database while it runs, as the test
+    runner guarantees: a row another writer committed in the meantime would be deleted too.
     """
     for _ in range(3):
         deleted = 0
@@ -967,6 +968,124 @@ class TestImportLockCannotOutliveItsImport(_CommittedFindingsMixin, SimpleTestCa
                 Finding.objects.filter(id=duplicate.id).exists(),
                 msg="the duplicate of a test whose import is running was deleted",
             )
+
+
+# Regression (review of the import lock): the excess-duplicate delete row-locked every finding of
+# a chunk before it checked which tests were being imported, and kept those row locks on the
+# findings it then skipped. An import writing its own duplicate during the chunk waited on them, and
+# one tagging it with a tag the chunk was deleting deadlocked and was aborted. Separately, the
+# per-run cap was applied before tests under import were dropped, so a test being imported that
+# held the lowest ids kept every other test's duplicates from ever being deleted.
+@override_settings(DUPE_DELETE_GRACE_MINUTES=0, DUPE_DELETE_MAX_PER_RUN=1_000_000)
+class TestDupeDeleteLeavesImportedTestsAlone(_CommittedFindingsMixin, SimpleTestCase):
+
+    """The delete takes nothing from a test under import: no rows, no locks, no share of the run."""
+
+    DELETE_ALL_DUPLICATES = SimpleNamespace(delete_duplicates=True, max_dupes=0, enable_product_grade=False)
+
+    def _run_dupe_delete(self):
+        with patch("dojo.tasks.System_Settings.objects.get", return_value=self.DELETE_ALL_DUPLICATES):
+            _async_dupe_delete_impl()
+
+    def _old_duplicates_in_two_tests(self, label):
+        """An original, a duplicate in the test under import, and one in a second, idle test."""
+        original, in_busy_test = self._create_findings(f"{label} original", f"{label} busy test duplicate")
+        idle_test = Test.objects.create(
+            engagement=self.engagement, test_type=self.test.test_type,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        (in_idle_test,) = Finding.objects.bulk_create([Finding(
+            test=idle_test, title=f"{label} idle test duplicate", severity="High", numerical_severity="S1",
+            description="Test", mitigation="Test", impact="Test", reporter=self.user,
+        )])
+        duplicates = [in_busy_test.id, in_idle_test.id]
+        past = timezone.now() - timedelta(minutes=120)
+        Finding.objects.filter(id__in=duplicates).update(duplicate=True, active=False, duplicate_finding=original)
+        Finding.objects.filter(id__in=[original.id, *duplicates]).update(created=past, updated=past)
+        self.addCleanup(lambda: Finding.objects.filter(test=idle_test).update(duplicate=False, duplicate_finding=None))
+        return in_busy_test, in_idle_test
+
+    @override_settings(DUPE_DELETE_MAX_PER_RUN=1)
+    def test_a_test_under_import_does_not_use_up_the_run(self):
+        """The busy test holds the lowest id; with a cap of one, the run must still reach the idle test."""
+        in_busy_test, in_idle_test = self._old_duplicates_in_two_tests("Starve")
+        self.assertLess(in_busy_test.id, in_idle_test.id, msg="setup: the busy test's duplicate is selected first")
+
+        with _import_lock_held_elsewhere(self.test.id):
+            self._run_dupe_delete()
+
+            self.assertFalse(
+                Finding.objects.filter(id=in_idle_test.id).exists(),
+                msg="a test under import used up the run, so a test with no import running was not cleaned up",
+            )
+            self.assertTrue(Finding.objects.filter(id=in_busy_test.id).exists(), msg="the busy test is skipped")
+
+    def _delete_while(self, writer_fn):
+        """Run the delete and, inside its chunk, ``writer_fn`` on another connection as the import."""
+        real_delete = dojo_tasks.bulk_delete_findings
+        writer = _ConcurrentThread(writer_fn)
+
+        def delete_while_the_import_writes(queryset, **kwargs):
+            writer.start()
+            writer.join(WAIT_TIMEOUT_SECONDS)
+            return real_delete(queryset, **kwargs)
+
+        with patch.object(dojo_tasks, "bulk_delete_findings", delete_while_the_import_writes):
+            self._run_dupe_delete()
+        writer.join_or_fail(self)
+
+    def test_the_import_can_write_its_duplicate_while_a_chunk_deletes_others(self):
+        """A duplicate the chunk skips is not row-locked, so its import is never made to wait."""
+        in_busy_test, in_idle_test = self._old_duplicates_in_two_tests("Row lock")
+
+        def the_import_saves_its_duplicate():
+            with connection.cursor() as cursor:
+                cursor.execute("SET lock_timeout = '1s'")
+            Finding.objects.filter(id=in_busy_test.id).update(title="matched save by the import")
+
+        with _import_lock_held_elsewhere(self.test.id):
+            try:
+                self._delete_while(the_import_saves_its_duplicate)
+            except OperationalError as exc:
+                self.fail(f"the import waited on a row the delete skipped but kept locked: {exc}")
+
+        self.assertFalse(Finding.objects.filter(id=in_idle_test.id).exists(), msg="the idle test is cleaned up")
+
+    def test_the_import_tagging_its_duplicate_is_not_aborted_by_the_chunk(self):
+        """Tagging a skipped duplicate with a tag the chunk is deleting must not deadlock the import."""
+        in_busy_test, in_idle_test = self._old_duplicates_in_two_tests("Deadlock")
+        tag_name = f"shared-{self.suffix}"
+        Finding.objects.get(id=in_idle_test.id).tags.add(tag_name)
+
+        def the_import_tags_its_duplicate():
+            with transaction.atomic():
+                bulk_add_tags_to_instances([tag_name], [Finding.objects.get(id=in_busy_test.id)])
+                with connection.cursor() as cursor:
+                    cursor.execute("SET CONSTRAINTS ALL IMMEDIATE")  # the FK check its COMMIT would run
+
+        with _import_lock_held_elsewhere(self.test.id), patch.object(finding_helper, "BULK_DELETE_RETRY_DELAY", 0.01):
+            try:
+                self._delete_while(the_import_tags_its_duplicate)
+            except OperationalError as exc:
+                self.fail(f"the import under the lock was aborted by the delete: {exc}")
+
+        self.assertTrue(Finding.objects.filter(id=in_busy_test.id).exists(), msg="the busy test is skipped")
+
+
+class TestAbandonedImportLockDecision(SimpleTestCase):
+
+    """Which locked tests the delete may treat as abandoned, from the holders the database reports."""
+
+    THRESHOLD_SECONDS = 1800
+
+    def test_a_holder_whose_state_is_hidden_counts_as_a_live_import(self):
+        """Another database role's backend shows no state. It must keep its test, even beside an idle holder."""
+        holders = [(7, 101, "idle", 7200.0), (7, 102, None, None)]
+        self.assertEqual(import_lock.abandoned_tests(holders, self.THRESHOLD_SECONDS), set())
+
+    def test_every_holder_idle_past_the_threshold_is_abandoned(self):
+        holders = [(7, 101, "idle", 7200.0), (7, 102, "idle", 1801.0), (8, 103, "idle", 60.0), (9, 104, "active", 9000.0)]
+        self.assertEqual(import_lock.abandoned_tests(holders, self.THRESHOLD_SECONDS), {7})
 
 
 class _DupeDeleteDuringWriteMixin(_CommittedFindingsMixin):
