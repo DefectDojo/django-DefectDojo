@@ -97,15 +97,16 @@ Amazon Inspector reports the vulnerable packages of the images that it monitors 
 If the toggle is on, the connector checks each finding on an ECR container image. It imports the finding only if Amazon Inspector reports the image in an ECS task or an EKS pod. The connector asks Inspector at each Sync.
 
 * The connector imports findings on every other resource as before. This includes the ECR repository's own findings.
+* Only Amazon ECS tasks and Amazon EKS pods count, also on AWS Fargate. An image that runs anywhere else counts as not running. This includes AWS Lambda, AWS App Runner, Docker on EC2 and self-managed Kubernetes.
 * Amazon Inspector updates the in-use data once a day. For a new image, the data can take up to 36 hours to show.
 * Amazon Inspector supplies in-use data only for ECR repositories that use continuous scanning. If a repository uses scan on push, the next Sync closes its image findings, even if the image runs.
 * At the next Sync, DefectDojo closes the imported findings of images that do not run. If an image runs again, its findings reopen at a later Sync.
 * A scheduled job can run for a short time only. Its image findings can then open and close between Syncs.
 * Under the **Resource** grouping, some ECR repositories do not become a Record. This applies to a repository with no running image and no finding of its own.
-* Security Hub does not show which images run. The connector reads this from Amazon Inspector with `inspector2:ListCoverage`. It reads once per account and region for each Record that it syncs. Under a finer grouping, discovery also reads once per account and region.
+* Security Hub does not show which images run. The connector reads this from Amazon Inspector with `inspector2:ListCoverage`. It reads once per account and region for each Record that it syncs. For an ECR repository Record, it reads only that repository. Under a finer grouping, discovery also reads once per account and region.
 * For member accounts, the access key must belong to the Amazon Inspector delegated administrator account in each region.
-* If the permission is missing, the Sync of each Record with image findings fails. Under a finer grouping, discovery also fails. The findings stay as they were.
-* If Inspector shows no images for an account and region with image findings, the connector skips that Record. Its findings stay as they were, and the connector logs a warning. Discovery leaves out the image findings of that account and region.
+* If the toggle is on, saving the connection checks the `inspector2:ListCoverage` permission. If the permission goes missing later, the Sync of each Record with image findings fails. Under a finer grouping, discovery also fails. The findings stay as they were.
+* If Inspector shows no images for an account and region, the connector skips its Records with image findings. The findings of a skipped Record stay as they were, and the connector logs a warning. The skip covers all findings of the Record, not only image findings. Under the default grouping, the EC2, IAM and AWS Config findings of that account and region also stop syncing. This lasts until Inspector can see the account. Under the **Resource Type** grouping, only the ECR repository Record skips. Under the **Resource** grouping, the connector asks Inspector about each ECR repository on its own. If Inspector shows no image for a repository, only the Record of that repository skips. Discovery leaves out the image findings of an account and region that Inspector cannot see.
 * The connector never imports every image as a fallback.
 * The connector still reads every finding from Security Hub. That part of a Sync takes as long as before. Each Record with image findings adds at least one Amazon Inspector request. Under the **Resource** grouping, that means about one request per ECR repository Record. Only the number of imported findings goes down.
 
