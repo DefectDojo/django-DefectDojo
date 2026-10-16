@@ -33,21 +33,11 @@ def admin_api_client() -> APIClient:
 class TestReadOnlyModeSetting(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
-    def setUp(self):
-        super().setUp()
-        self.api = admin_api_client()
-
     def test_read_only_mode_defaults_off(self):
         self.assertFalse(System_Settings.objects.get(no_cache=True).read_only_mode)
 
     def test_form_shows_read_only_mode(self):
         self.assertIn("read_only_mode", SystemSettingsForm().fields)
-
-    def test_api_patch_sets_read_only_mode(self):
-        settings_id = System_Settings.objects.get(no_cache=True).id
-        response = self.api.patch(f"/api/v2/system_settings/{settings_id}/", {"read_only_mode": True}, format="json")
-        self.assertEqual(200, response.status_code, response.content)
-        self.assertTrue(System_Settings.objects.get(no_cache=True).read_only_mode)
 
 
 def rf_middleware(path, **headers):
@@ -92,6 +82,9 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
         self.assertEqual(referer, response["Location"])
         self.assertIn(str(READ_ONLY_MODE_MESSAGE), [str(m) for m in get_messages(response.wsgi_request)])
         self.assertFalse(Product_Type.objects.filter(name="Blocked").exists())
+        # The API-key page starts with "api/" but is a page, not an API route.
+        response = self.client.post("/api/key-v2", {}, HTTP_REFERER=referer)
+        self.assertEqual(referer, response["Location"])
 
     def test_foreign_referer_falls_back_to_home(self):
         set_read_only_mode(enabled=True)
@@ -132,12 +125,11 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
                 self.assertEqual(200, response.status_code)
                 self.assertEqual(b"OK", response.content)
 
-    def test_unlock_through_api_while_locked(self):
-        set_read_only_mode(enabled=True)
-        settings_id = System_Settings.objects.get(no_cache=True).id
-        response = self.api.patch(f"/api/v2/system_settings/{settings_id}/", {"read_only_mode": False}, format="json")
-        self.assertEqual(200, response.status_code, response.content)
-        self.assertFalse(System_Settings.objects.get(no_cache=True).read_only_mode)
+    def test_lock_and_unlock_through_api(self):
+        settings_url = f"/api/v2/system_settings/{System_Settings.objects.get(no_cache=True).id}/"
+        self.assertEqual(200, self.api.patch(settings_url, {"read_only_mode": True}, format="json").status_code)
+        self.assertEqual(423, self.create_product_type("During lock").status_code)
+        self.assertEqual(200, self.api.patch(settings_url, {"read_only_mode": False}, format="json").status_code)
         self.assertEqual(201, self.create_product_type("After unlock").status_code)
 
     def test_lock_change_seen_by_next_request(self):
@@ -197,16 +189,7 @@ class TestReadOnlyModeBeatTasks(DojoTestCase):
         self.assertEqual(["plain"], PROBE_CALLS)
 
 
-READ_ONLY_BANNER = {
-    "source": "read_only_mode",
-    "message": str(READ_ONLY_MODE_MESSAGE),
-    "style": "warning",
-    "url": "",
-    "link_text": "",
-    "expanded_html": "",
-    "dismissible": False,
-    "dismiss_token": "",
-}
+READ_ONLY_BANNER = {"source": "read_only_mode", "message": str(READ_ONLY_MODE_MESSAGE), "style": "warning"}
 
 
 @versioned_fixtures

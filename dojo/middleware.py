@@ -136,10 +136,7 @@ class ReadOnlyModeMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
-        self.exempt_urls = [
-            re.compile(pattern)
-            for pattern in [settings.LOGIN_URL.lstrip("/"), *settings.READ_ONLY_MODE_EXEMPT_URLS]
-        ]
+        self.exempt_urls = [re.compile(pattern) for pattern in settings.READ_ONLY_MODE_EXEMPT_URLS]
 
     def __call__(self, request):
         if request.method in SAFE_METHODS:
@@ -151,7 +148,7 @@ class ReadOnlyModeMiddleware:
             return self.get_response(request)
 
         if (
-            path.startswith(f"{settings.URL_PREFIX}api/")
+            path.startswith(f"{settings.URL_PREFIX}api/v")
             or request.headers.get("HX-Request") == "true"
             or request.headers.get("X-Requested-With") == "XMLHttpRequest"
         ):
