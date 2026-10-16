@@ -98,7 +98,7 @@ If the toggle is on, the connector checks each finding on an ECR container image
 
 * The connector imports findings on every other resource as before. This includes the ECR repository's own findings.
 * Amazon Inspector updates the in-use data once a day. For a new image, the data can take up to 36 hours to show.
-* Amazon Inspector supplies in-use data only for ECR repositories that use continuous scanning.
+* Amazon Inspector supplies in-use data only for ECR repositories that use continuous scanning. If a repository uses scan on push, the next Sync closes its image findings, even if the image runs.
 * At the next Sync, DefectDojo closes the imported findings of images that do not run. If an image runs again, its findings reopen at a later Sync.
 * A scheduled job can run for a short time only. Its image findings can then open and close between Syncs.
 * Under the **Resource** grouping, some ECR repositories do not become a Record. This applies to a repository with no running image and no finding of its own.
@@ -107,7 +107,7 @@ If the toggle is on, the connector checks each finding on an ECR container image
 * If the permission is missing, the Sync of each Record with image findings fails. Under a finer grouping, discovery also fails. The findings stay as they were.
 * If Inspector shows no images for an account and region with image findings, the connector skips that Record. Its findings stay as they were, and the connector logs a warning. Discovery leaves out the image findings of that account and region.
 * The connector never imports every image as a fallback.
-* The connector still reads every finding from Security Hub. A Sync takes about as long as before. Only the number of imported findings goes down.
+* The connector still reads every finding from Security Hub. That part of a Sync takes as long as before. Each Record with image findings adds at least one Amazon Inspector request. Under the **Resource** grouping, that means about one request per ECR repository Record. Only the number of imported findings goes down.
 
 #### Organization Placement (optional)
 
