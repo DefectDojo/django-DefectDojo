@@ -54,4 +54,23 @@ To see the code after the fact:
 
 When `DD_INITIALIZE=false` skips the migrations, exit code `2` still means a system check failed, and the database is unchanged.
 
+### The initializer needs a valid license
+
+From release 3.4.200, the initializer checks for a DefectDojo Pro license before it migrates anything. It looks in three places, and one valid license in any of them is enough:
+
+- the `DD_LICENSE` environment variable;
+- the license file `/opt/dojo/pro/dojopro.lic`, which the Helm chart mounts from its license Secret and Docker Compose mounts from the install's `license/` directory;
+- the license already stored in the database by an earlier install or a license update.
+
+An expired license still counts: expiry is handled by the application as before. When none of the three holds a valid license, the initializer exits `1` without changing the database and lists what it checked:
+
+```
+[NO_VALID_LICENSE] No valid DefectDojo Pro license was found, so nothing was migrated and the database is as it was. Checked:
+  - DD_LICENSE is not set
+  - /opt/dojo/pro/dojopro.lic does not exist
+  - the database has no Pro license table yet (a new or Community database)
+```
+
+Provide the license and start the initializer again. This also applies when converting a Community database to Pro: the license must be in place before the first Pro initializer runs. To check without starting the initializer, run `python manage.py check_license_present` in a DefectDojo container.
+
 If you have questions about upgrading your on-premise deployment, contact [support@defectdojo.com](mailto:support@defectdojo.com).
