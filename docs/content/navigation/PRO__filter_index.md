@@ -40,6 +40,34 @@ List filters whose options come from a search box, such as the Asset and Organiz
 - The selection is stored as the search text, so a table URL or a saved table preference carries it compactly however many options match.
 - **Deselect all** also clears any options you picked one by one.
 
+## Filtering on a list of values
+
+### In List and Not in List on text filters
+
+Text filters such as **Title**, **Component Name** and **File Path** offer **In List** and **Not in List** next to **Contains**, **Exact** and the other operators. Enter the values separated by commas.
+
+- Case is ignored, and so are spaces around each value. Blank entries are skipped.
+- Each value is matched exactly as written. Characters such as `%`, `*` and `^` are not wildcards.
+- **Not in List** keeps Findings that have no value in that field.
+
+### Include and Exclude on multi-select filters
+
+Every multi-select filter has an **Include** / **Exclude** switch. **Include** keeps the rows that match a selected value. **Exclude** keeps every row except those, so "all but these three scanners" is three picks instead of unticking everything else. Rows with no value in that column are kept under **Exclude**.
+
+### Pasting a list into the Asset and Organization filters
+
+The Asset and Organization filters on the Findings, Engagements, Tests and Endpoints tables have a **Paste List** button. Paste the names or IDs copied from a ticket or a CMDB export into the box it opens, separated by commas, new lines or tabs, then add them. Every Asset or Organization they name joins the filter.
+
+- A name matches whatever its case. A number also matches the Asset or Organization with that ID.
+- Only Assets and Organizations you are allowed to see are matched.
+- Names that match nothing stay in the box, and a note under it says how many, so you can correct them and add them again.
+
+### Long lists
+
+The table sends its filters in the address of each request, and that address has a size limit. In practice a filter of a few hundred values is the most the table can apply. Past that, it shows **Filter Too Long** and loads nothing until you remove some values. This covers every list filter: In List, a long Paste List, and a large selection under Include or Exclude.
+
+The server takes up to 1,000 values in one In List and refuses a longer list with an error rather than shortening it.
+
 ## How number filters are evaluated
 
 Numeric filters — including **Age** and **SLA** — offer a match operator alongside the value: **Equals**, **Not Equals**, **Greater Than**, **Greater Than or Equal To**, **Less Than**, **Less Than or Equal To**, **In List**, and **Not in List**. Entering a value without choosing an operator matches on **Equals**.
