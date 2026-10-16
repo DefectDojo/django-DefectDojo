@@ -778,6 +778,7 @@ Posts to a Slack channel over a Messaging Connector. The connection carries the 
 | **One Message per Finding** | off | Off sends one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. How many Findings the message lists before it says how many more there were. |
+| **Card Facts** | empty | Metadata names and custom field keys to show as facts on the message, comma-separated. See [Card facts](#card-facts). |
 
 ### Send a Microsoft Teams Message
 
@@ -792,6 +793,16 @@ Posts a card over a Messaging Connector. The connection carries the Power Automa
 | **One Message per Finding** | off | Off sends one card about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. |
+| **Card Facts** | empty | Metadata names and custom field keys to show as facts on the message, comma-separated. See [Card facts](#card-facts). |
+
+#### Card facts
+
+**Card Facts** puts values from the Asset and the Finding on the message itself: a fact set on a Teams card, a fields block in Slack. Each entry is part of a key, matched without regard to case, against the Asset's [metadata](../building_rules/#asset-metadata) names, the Asset's [custom field](../building_rules/#custom-fields) keys, the Asset's [contacts](../building_rules/#asset-contacts) (`product_manager`, `technical_contact`, `team_manager`) and the Finding's custom field keys. So `team` shows `team_owner`, `owning_team` and `team_manager`, and `*` shows everything the item holds. A contact shows as their name and email address, and an unset contact is left out.
+
+- A message about one Finding shows its Asset's values and its own.
+- A batch message shows the Asset's values only when every Finding in the batch is on that one Asset, and never a Finding's own. A batch over several Assets has no single value to show, so it shows none.
+- When the same key is both a metadata name and a custom field key, the second is titled with its full path, such as `product.custom_fields.owner`, so neither value is lost.
+- Slack and Teams show at most ten facts, and a batch message's severity counts are among them. The order on the card is not the order you typed.
 
 ### Send an Email
 
@@ -822,6 +833,8 @@ POSTs JSON to a webhook endpoint.
 | | | One of the two above is required. |
 | **Signing Secret** | empty | Signs the body as `X-DefectDojo-Signature: sha256=HMAC`. |
 | **One Message per Finding** | off | Off posts the whole batch in one request. |
+
+Each Finding in the body carries its own `custom_fields`, and the `product` block with the Asset's `meta` and `custom_fields`. Each Asset carries `meta`, `custom_fields` and its three contacts directly. All of them are always present, empty when there is nothing to send. A contact carries the user's `id`, `username`, `name` and `email`.
 
 Two things to know. A signing secret typed here is stored with the rule, so for anything sensitive prefer a configured endpoint and its own header. And a webhook called by a rule never changes that endpoint's own health status, so a rule cannot disable your notification webhooks by failing.
 
