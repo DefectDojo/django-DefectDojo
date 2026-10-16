@@ -190,7 +190,7 @@ def _delete_excess_duplicates(ids_to_delete):
             else:
                 still_settled = [finding_id for finding_id, _ in locked]
             if skipped := len(locked) - len(still_settled):
-                logger.info("skipping %s excess duplicates whose test an import started on since they were selected", skipped)
+                logger.info("skipping %s excess duplicates that were saved, or whose test had import activity, since they were selected", skipped)
             if still_settled:
                 bulk_delete_findings(Finding.objects.filter(id__in=still_settled), order_desc=True)
                 deleted_count += len(still_settled)
