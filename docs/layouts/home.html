@@ -41,7 +41,6 @@
         {{ if $releaseName }}
         <p class="mt-3 mb-0"><a href="/releases/pro/changelog/" class="text-muted">{{ i18n "whats_new" (dict "release" ($releaseName | htmlEscape)) }} →</a></p>
         {{ end }}
-        {{ .Content }}
       </div>
     </div>
   </div>
@@ -130,6 +129,17 @@
     </div>
   </div>
 </div>
+{{ with .Content }}
+<section class="section home-about">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        {{ . }}
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}
 {{ end }}
 
 {{ define "sidebar-prefooter" }}

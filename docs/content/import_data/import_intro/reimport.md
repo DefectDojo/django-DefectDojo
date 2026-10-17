@@ -1,10 +1,12 @@
 ---
 title: "Reimport"
-description: "Learn how to import data manually, through the API, or via a connector"
+description: "Reimport sends each new scan of the same target into one DefectDojo Test, so it can close Findings that are fixed and reopen ones that come back."
 weight: 2
 aliases:
   - /en/connecting_your_tools/import_scan_files/using_reimport
 ---
+Reimport is how DefectDojo keeps one current picture of a target that you scan again and again. Each new scan file goes into the same Test. DefectDojo matches it against what is already there, adds new Findings, can close Findings the scanner no longer reports, and reopens Findings that come back, so your team works from one list instead of a new pile of results after every run.
+
 When a Test is created in DefectDojo (either in advance or by importing a scan file), the Test can be extended with new Finding data.
 
 For example, let’s say you have a CI/CD pipeline, which is designed to send a new report to DefectDojo every day. Rather than create a new Test or Engagement for each ‘run’ of the pipeline, you could have each report flow into the same Test using **Reimport**.
