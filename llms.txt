@@ -366,6 +366,7 @@ Key facts:
 - [AI Agent Red Teaming (Pro)](https://docs.defectdojo.com/sensei/ai_agent_redteam/): Onboard a deployed AI agent, attack it automatically to find where it breaks, and vet an agent's actions at runtime
 - [Sensei Advisor (Pro)](https://docs.defectdojo.com/sensei/sensei_advisor/): Let Sensei analyze your instance and recommend deduplication and prioritization settings you review and apply.
 - [Threat Modeling (Pro)](https://docs.defectdojo.com/sensei/threat_modeling/): Generate a threat model, attack paths and security requirements from a feature design, before the code exists
+- [Ask Sensei (Pro)](https://docs.defectdojo.com/sensei/ask_sensei/): Ask a question from any page and get an answer built from live, interactive views of your own data.
 - [Dynamic Scanning (DAST) (Pro)](https://docs.defectdojo.com/sensei/dynamic_scanning/): Point dynamic scans at a deployed environment of a repository Sensei already knows, once you have proven you own the domain.
 - [Sensei Reference (Pro)](https://docs.defectdojo.com/sensei/sensei_reference/): Statuses, row actions, quotas, and troubleshooting
 - [Tier Advisor (Pro)](https://docs.defectdojo.com/sensei/tier_advisor/): Project how many findings your instance will process in a year, and see which tier covers it.
