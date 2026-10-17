@@ -53,6 +53,10 @@ Rows with no value in the sorted column always appear at the end, whichever dire
 
 To sort by more than one column, hold Ctrl (Cmd on macOS) while clicking additional headers. Each header shows its position in the sort. The sort is part of the page URL, so a bookmarked or shared link opens the table sorted the same way.
 
+## Filtering columns
+
+Click the filter icon in a column header to open that column's filter. Enter a value, pick a date, or check the options you want, then click **Apply** or press Enter. Enter works from the text, number, and date fields and from a multi-select option list after you check an option. In an option list, Space checks or unchecks the highlighted option and Enter applies the filter. Pressing Enter while **Clear** has focus clears the filter instead.
+
 ## Reordering columns
 
 Drag a column header left or right to move that column. The new order takes effect immediately for the current session.
