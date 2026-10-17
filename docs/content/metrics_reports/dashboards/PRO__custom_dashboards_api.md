@@ -127,7 +127,7 @@ The response is shaped like this (truncated):
 
 Each entry also carries `surfaces`. Every widget lists `dashboard`; the ones a report can also draw additionally list `report`, and those are exactly the widget types a `widget` report block may name (see the [Report Builder API](../../reports/report-builder-api/)).
 
-Use a widget's `type` as the widget's `type`, and its `config_example` as the starting point for the widget's `config`. The catalog lists 26 widget types across the four categories.
+Use a widget's `type` as the widget's `type`, and its `config_example` as the starting point for the widget's `config`. The catalog lists 27 widget types across the four categories.
 
 ### Group-by dimensions and record metrics
 
@@ -158,6 +158,36 @@ curl -s -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" -H "Accept: appl
 ```
 
 The `kind` matters: a `time` dimension (like `date`) requires you to also send a `time_bucket` (`day`/`week`/`month`/`quarter`/`year`); a `categorical` or `banded` dimension does not. The `priority` field is intentionally **not** a group-by dimension (it is a continuous score) — use the `risk` dimension for a banded view, or the dedicated **Priority Histogram** widget.
+
+### Aggregations
+
+The same `dimensions/` response also lists the **aggregation operators** valid for the model, under `aggregations`. `count` (one unit per record) is valid for every model; the finding model additionally offers the distinct operators, which count unique issues rather than findings:
+
+```json
+{
+  "model": "finding",
+  "dimensions": [ ... ],
+  "aggregations": [
+    {"key": "count",                     "label": "Count"},
+    {"key": "distinct_cwe",              "label": "Unique CWEs"},
+    {"key": "distinct_vulnerability_id", "label": "Unique Vulnerability IDs"},
+    {"key": "distinct_issue",            "label": "Unique Issues (Vulnerability ID or CWE)"}
+  ]
+}
+```
+
+| Aggregation | One unit is |
+|-------------|-------------|
+| `count` | A record of the model. |
+| `distinct_cwe` | A distinct `cwe` value across the filtered findings (`0` and `null` mean "no CWE" and are not counted). |
+| `distinct_vulnerability_id` | A distinct vulnerability identifier across the filtered findings, compared case-insensitively. |
+| `distinct_issue` | A distinct issue: the vulnerability identifier when the finding has one, else `CWE-<n>`. |
+
+Pass the key as `aggregation` to `count/` and `aggregate/`, or in a `count`, `graph`, or `severity_tiles` widget's `config`. Sending a distinct operator for a non-finding model is a `400`.
+
+### Including child assets
+
+`count/`, `aggregate/`, and the `count`, `graph`, and `severity_tiles` widget configs accept `include_child_assets: true`. When the filters carry a `product` filter, the scope widens to that asset plus every asset under it by the hierarchy's rollup relationships (parent and contains), the same traversal the Insights pages use for "include child assets". Without a `product` filter the flag has no effect. The equivalent finding list filter is `product_subtree`, which `filter_contract/` lists.
 
 ### Filters
 
@@ -261,7 +291,15 @@ curl -s -X POST \
   -H "Accept: application/json" -H "Content-Type: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_data/count/" \
   -d '{"model": "finding", "filters": {"status_any": "Active", "severity": "Critical"}}'
-# → {"count": 42}
+# → {"count": 42, "aggregation": "count"}
+
+# The same tile counting unique vulnerability IDs on asset 7 and everything under it:
+curl -s -X POST \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_data/count/" \
+  -d '{"model": "finding", "filters": {"status_any": "Active", "severity": "High", "product": "7"}, "aggregation": "distinct_vulnerability_id", "include_child_assets": true}'
+# → {"count": 2, "aggregation": "distinct_vulnerability_id"}
 ```
 
 **A group-by aggregation** (`POST`), the data behind a Graph:
@@ -283,17 +321,21 @@ curl -s -X POST \
   "model": "finding",
   "model_label": "Findings",
   "aggregation": "count",
+  "aggregation_label": "Count",
+  "total": 63,
   "time_bucket": null
 }
 ```
+
+`total` is the aggregation applied to the whole filtered set. For `count` it equals the sum of the buckets (before any `limit`); for a distinct operator it does not, because an issue present at two severities is counted once overall. The **Severity Tiles** widget reads `aggregate/` with `group_by: "severity"` and shows `total` as its last tile.
 
 The full set of `widget_data` actions:
 
 | Action | Method | Key payload / params | Returns |
 |--------|--------|----------------------|---------|
-| `count` | POST | `model`, `filters` | `{count}` |
-| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?` | `{labels, series, ...}` |
-| `dimensions` | GET | `?model=` | valid group-by dimensions |
+| `count` | POST | `model`, `filters`, `aggregation?`, `include_child_assets?` | `{count, aggregation}` |
+| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `include_child_assets?` | `{labels, series, total, ...}` |
+| `dimensions` | GET | `?model=` | valid group-by dimensions and aggregations |
 | `top_records` | POST | `model`, `filters`, `metric`, `limit?`, `sort?` | `{labels, series, ...}` |
 | `record_metrics` | GET | `?model=` | valid records-mode metrics |
 | `rate_chart` | POST | `model`, `filters`, `pass_filters`, `group_by`, `limit?`, `sort?`, `min_denominator?`, `metric_label?` | rate / numerator / denominator series |
