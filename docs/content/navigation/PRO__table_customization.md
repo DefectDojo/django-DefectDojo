@@ -24,7 +24,7 @@ The column header filters keep working. A filter applied from a header appears a
 
 With two or more chips, the word between them is the connective. It reads **and** by default: a record must match every filter. Select it to switch the list to **or**, drawn in the accent color: a record matches when it satisfies at least one filter. Select it again to go back to **and**.
 
-Three things never join the **or** group, because they define the page rather than narrow it: the context a page arrives with (the asset whose findings you are looking at), the keyword search, and your own permissions. A list in **or** mode can never show a record you could not see with no filters at all.
+Three things never join the **or** group, because they define the page rather than narrow it: the context a page arrives with (the asset whose findings you are looking at, or the status a status page lists), the keyword search, and your own permissions. A context the page sets as a filter, such as **Status is any of Active** on the Active Findings page, shows as a locked chip ahead of the connective; it has no remove button, and the connective only joins the filters you add. A list in **or** mode can never show a record you could not see with no filters at all.
 
 The match mode is part of the page URL and of a saved table preference, so a shared link or a shared preference opens in the mode it was saved in. Exports started from the table use the same mode as the rows on screen.
 
