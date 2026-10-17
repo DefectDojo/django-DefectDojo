@@ -7,6 +7,7 @@ from celery import Task
 from celery.utils.log import get_task_logger
 from django.apps import apps
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.core.management import call_command
 from django.db import transaction
@@ -41,11 +42,39 @@ def flush_auditlog(*args, **kwargs):
     run_flush_auditlog()
 
 
+# Only one excess-duplicate deletion may run at a time. The beat schedule fires this task
+# every 60s (CELERY_BEAT_SCHEDULE "dedupe-delete"), but on a large instance a single run --
+# deleting up to settings.DUPE_DELETE_MAX_PER_RUN findings and cascading each into its child
+# rows -- can take longer than that interval. The beat `expires` option only drops a run that
+# was never *started* in time; it does nothing once a run is executing. Without a guard the
+# next scheduled run begins while the previous one is still deleting, and the two select
+# overlapping excess-duplicate sets whose cascades touch shared child rows (notably
+# dojo_test_import_finding_action), which deadlocks in Postgres. The per-chunk transient-conflict
+# retry in _bulk_delete_findings_internal then has to absorb that self-inflicted contention on
+# top of any real concurrent import, and under sustained load its retry budget is exhausted and
+# the deadlock surfaces as a task failure. Serializing the task to one run at a time removes the
+# self-collision entirely and leaves the per-chunk retry to cover only genuine external writers.
+DUPE_DELETE_LOCK_KEY = "dojo:async_dupe_delete:running"
+
+
 @app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
-    # Wrap with pghistory context for audit trail
-    with pghistory.context(source="dupe_delete_task"):
-        _async_dupe_delete_impl()
+    # cache.add is atomic (an NX set on the shared cache), so the first run takes the marker and
+    # any overlapping run exits immediately -- mirroring the cache.add coalescing in
+    # dojo.utils.schedule_product_grade. The timeout bounds the marker so a worker that dies
+    # mid-run (and never reaches the finally) cannot block deletion forever: it expires and the
+    # next cycle proceeds. It is set well above a normal run's duration so it never releases the
+    # lock out from under an in-flight run. With the LocMem cache (no DD_CACHE_URL) the marker is
+    # per process, which is harmless: that configuration is single-process and cannot overlap.
+    if not cache.add(DUPE_DELETE_LOCK_KEY, value=True, timeout=settings.DUPE_DELETE_LOCK_EXPIRE):
+        logger.info("async_dupe_delete: a previous run is still in progress; skipping this cycle")
+        return
+    try:
+        # Wrap with pghistory context for audit trail
+        with pghistory.context(source="dupe_delete_task"):
+            _async_dupe_delete_impl()
+    finally:
+        cache.delete(DUPE_DELETE_LOCK_KEY)
 
 
 def _async_dupe_delete_impl():
