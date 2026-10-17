@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
-from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.base_importer import BaseImporter, Parser, reports_a_deleted_target
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
@@ -90,6 +90,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         return self.test
 
+    @reports_a_deleted_target
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
@@ -117,6 +118,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: for fresh imports, parse_findings() calls create_test() internally,
         # so self.test is guaranteed to be set after this call.
         parsed_findings = self.parse_findings(scan, parser) or []
+        # The excess-duplicate delete leaves the duplicates of a test being imported alone.
+        self.lock_test_under_import(self.test)
         new_findings = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
