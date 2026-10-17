@@ -837,29 +837,39 @@ class Finding(BaseModel):
 
         # Check if all needed settings are defined
         if not hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER") or not hasattr(settings, "HASHCODE_ALLOWS_NULL_CWE") or not hasattr(settings, "HASHCODE_ALLOWED_FIELDS"):
-            deduplicationLogger.debug("no or incomplete configuration per hash_code found; using legacy algorithm")
+            deduplicationLogger.warning(
+                "No or incomplete HASHCODE_* configuration found; falling back to legacy hash algorithm. "
+                "Ensure HASHCODE_FIELDS_PER_SCANNER, HASHCODE_ALLOWS_NULL_CWE, and HASHCODE_ALLOWED_FIELDS are all set.")
             return self.compute_hash_code_legacy()
 
         hash_code_fields = self.test.hash_code_fields
 
         # Check if hash_code fields are found in the settings
         if not hash_code_fields:
-            deduplicationLogger.debug(
-                "No configuration for hash_code computation found; using default fields for " + ("dynamic" if self.dynamic_finding else "static") + " scanners")
+            scan_type = getattr(self.test.test_type, "name", "<unknown>")
+            deduplicationLogger.warning(
+                "No hash_code field configuration found for scan type '%s' (%s finding); falling back to legacy algorithm.",
+                scan_type,
+                "dynamic" if self.dynamic_finding else "static")
             return self.compute_hash_code_legacy()
 
         # Check if all elements of HASHCODE_FIELDS_PER_SCANNER are in HASHCODE_ALLOWED_FIELDS
         if not (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hash_code_fields)):
-            deduplicationLogger.debug(
-                "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
-                "Using default fields")
+            scan_type = getattr(self.test.test_type, "name", "<unknown>")
+            bad_fields = [f for f in hash_code_fields if f not in settings.HASHCODE_ALLOWED_FIELDS]
+            deduplicationLogger.warning(
+                "Hash configuration error for scan type '%s': field(s) %s are not in HASHCODE_ALLOWED_FIELDS. "
+                "Falling back to legacy algorithm.",
+                scan_type, bad_fields)
             return self.compute_hash_code_legacy()
 
         # Make sure that we have a cwe if we need one
         if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
-            deduplicationLogger.debug(
-                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path)
-                + "'. Fallback to legacy mode for this finding.")
+            scan_type = getattr(self.test.test_type, "name", "<unknown>")
+            deduplicationLogger.warning(
+                "Cannot compute hash_code for scan type '%s': cwe is 0 for finding '%s' (file '%s') "
+                "and HASHCODE_ALLOWS_NULL_CWE is False. Falling back to legacy algorithm.",
+                scan_type, self.title, self.file_path)
             return self.compute_hash_code_legacy()
 
         deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " based on: " + ", ".join(hash_code_fields))
@@ -1044,7 +1054,7 @@ class Finding(BaseModel):
 
         logger.debug("fields_to_hash      : %s", fields_to_hash)
         logger.debug("fields_to_hash lower: %s", fields_to_hash.lower())
-        return hashlib.sha256(fields_to_hash.casefold().encode("utf-8").strip()).hexdigest()
+        return hashlib.sha256(fields_to_hash.casefold().strip().encode("utf-8")).hexdigest()
 
     def duplicate_finding_set(self):
         if self.duplicate:

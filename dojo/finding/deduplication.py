@@ -110,7 +110,11 @@ def do_dedupe_finding_task_internal(new_finding, *args, **kwargs):
         elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
             deduplicate_uid_or_hash_code(new_finding)
         else:
-            deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
+            scan_type = getattr(new_finding.test.test_type, "name", "<unknown>")
+            deduplicationLogger.warning(
+                "No deduplication algorithm configured for scan type '%s'; falling back to legacy algorithm. "
+                "Add an entry to DEDUPLICATION_ALGORITHM_PER_PARSER to suppress this warning.",
+                scan_type)
             deduplicate_legacy(new_finding)
     else:
         deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
