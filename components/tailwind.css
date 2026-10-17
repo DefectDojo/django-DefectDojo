@@ -1317,6 +1317,12 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
+/* index.js turns the <br> of data-html="true" popovers into newlines */
+.has-popover[data-html="true"][data-content]:hover::after,
+.has-popover[data-html="true"][data-content]:focus::after,
+.has-popover[data-html="true"][data-content]:focus-within::after {
+  white-space: pre-line;
+}
 
 /* ============================================================
    Bootstrap collapse compat shim (outside layer for priority)
