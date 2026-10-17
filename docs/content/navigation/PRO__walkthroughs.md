@@ -1,6 +1,6 @@
 ---
 title: "In-App Walkthroughs"
-description: "Guided, step-by-step tours of the DefectDojo Pro UI: the App Tour, the first-visit offer, and turning the offer off per user"
+description: "Guided, step-by-step tours of the DefectDojo Pro UI: the App Tour, the tours for each area, the first-visit offer, and turning the offer off per user"
 weight: 9
 audience: pro
 ---
@@ -57,6 +57,24 @@ If the sidebar is collapsed to its icon rail, the tour expands it for the sideba
 * Once you finish, the lightbulb offers **Retake the Tour**, and you can take it as often as you like.
 
 On a phone-sized screen the card becomes a sheet along the bottom of the screen, or along the top when the outlined area is in the lower half, so it never covers what it points at.
+
+## Tours by area
+
+Beyond the App Tour, each area that people ask about most has its own tour. A tour is listed in the lightbulb under **This Page** on the pages it covers, and the ones marked *General* are also listed everywhere else. Like the App Tour, each one works with whatever you can see: it picks a real record to walk through, and skips the steps that need one when there is none. A step that needs a permission you do not have is skipped too.
+
+| Tour | Listed on | What it covers | Who sees it |
+|---|---|---|---|
+| **Why Findings Close and Reopen** | A Test and a Finding | The Import History counts, the notes a Reimport writes, the three causes behind most reopened Findings, the statuses a Reimport never reopens, and how Reimport matching works | Anyone who can view the Test. The last step, Matching Configuration, needs permission to view Dedupe Pools |
+| **Organizations, Assets, Engagements and Tests** (or Product Types, Products, Engagements and Tests) | Organization, Asset, Engagement and Test pages; *General* | How the four levels fit together, from the Organization list down to a Test's Import History, and where an import puts its Test | Anyone. The import step needs permission to import scan results |
+| **Finding Statuses, SLAs and Risk Acceptance** | The Findings lists, Risk Accepted Findings, Risk Acceptances and a Finding | What each status means, where an SLA deadline comes from, closing without a fix, and the two lists that show accepted risk | Anyone. The Risk Acceptances steps need permission to view risk acceptances |
+| **The Findings List** | Every Findings status list | Filters and sort, Keyword Search, saved Views, Columns, and selecting Findings for bulk actions | Anyone. Views and Columns are skipped when page layouts are locked |
+| **Exporting Findings** | Every Findings list | That an export follows the list's filters, the Export menu and its formats, and choosing the fields | Anyone who can view Findings |
+| **API Access** | The API token page; *General* | Where the API key is, the header it goes in, regenerating it, getting it from a script, the API docs, and automating against `/api/v2/` | Anyone |
+| **Reports** | The Reporting pages | Templates, blocks and themes, generating a report, output formats, and finding the file under Generated Reports | Users who can view generated reports, when Reporting is turned on |
+| **SSO and Login** | Authorization and the login and provider settings pages | Configured versus enabled providers, the password and auto-redirect switches, creating users on first login, keeping a way back in, and why a new SSO user sees nothing yet | Users who can view identity providers. The login switches need permission to change them |
+| **Classic Jira or the Jira Connector** | The Downstream connector and Jira pages | Which Jira integration is which, whether to move to the connector, and which push to use on a Finding | Users who can view integrations, when Downstream connectors are turned on |
+| **Locations** | The Locations pages | What replaced Endpoints, where the Locations lists are, and a Location's status, the Assets that reference it and its open Findings | Users who can view Locations, when Locations are turned on |
+| **Upstream Connectors** | The Upstream connector and records pages | Configured and available connectors, a connector's unmapped and mapped records, and its Operations history | Users who can view connectors |
 
 ## The first-visit offer
 
