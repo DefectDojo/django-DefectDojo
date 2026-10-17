@@ -283,6 +283,8 @@ Pages that show a list of Findings or a list of Engagements have a CSV and Excel
 
 The CSV and Excel export dialog lets you choose which fields to include and which field to sort by. Findings exports can include **Priority**, **Risk** and **Risk Score**, the same values shown in the Findings table. **Export From Table Preference** selects them when the Risk and Priority columns are visible in the table, and carries a Risk or Priority sort from the table into the export. Risk is exported as its label (for example, Needs Action), so sort by Risk Score to order an export by risk.
 
+Findings exports can also name the systems each Finding affects. With Locations enabled, select the **Locations** field: each row lists the values of the Finding's Locations, and you only see Locations you have permission to view. (On instances still using Endpoints, the equivalent field is **Endpoints**.) The Locations column of a report template's Findings table carries the same values, so a scheduled or templated report can pair each Finding with its affected hosts.
+
 Selecting Quick Export opens a dialog with three choices:
 
 - **Template**: the report template to apply. This defaults to the standard Findings table, so you can export without choosing one.
