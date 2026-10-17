@@ -34,7 +34,7 @@ Wenn eine einzelne Organization alle relevanten Informationen für einen bestimm
 
 Wenn ein bestimmtes Softwareprojekt viele unterschiedliche Deployments oder Versionen hat, kann es sinnvoll sein, eine einzelne Organization zu erstellen, die den Geltungsbereich des gesamten Projekts abdeckt, wobei jede Version als eigenständiges Asset existiert. In manchen Workflows werden Organizations auch verwendet, um Phasen des Software-Lebenszyklus zu trennen: eine Organization für „In Development“, eine Organization für „In Production“ usw.
 
-Organizations können verwendet werden, um für RBAC-Zwecke den Zugriff auf Tochtergesellschaften, übernommene Unternehmen oder andere regulierte Geschäftseinheiten festzulegen. In komplexen Unternehmen mit vielen individuellen Projekten und unterschiedlichen Zugriffsregeln sind Organizations besonders relevant.
+Organizations können verwendet werden, um zu Zwecken der Zugriffskontrolle den Zugriff auf Tochtergesellschaften, übernommene Unternehmen oder andere regulierte Geschäftseinheiten festzulegen. In komplexen Unternehmen mit vielen individuellen Projekten und unterschiedlichen Zugriffsregeln sind Organizations besonders relevant.
 
 Letztlich hängt die Entscheidung, wie Sie Organizations und Assets einsetzen, davon ab, wie Sie Ihre individuelle Organisationsstruktur und die Anforderungen Ihres Sicherheitsteams am besten abbilden möchten. 
 
@@ -110,7 +110,7 @@ Organizations sollen strukturelle Zuständigkeiten oder Berichtsgrenzen abbilden
 
 ## Organization-Grenzen 
 
-Organizations legen sowohl Berichts- als auch Zugriffsgrenzen innerhalb von DefectDojo fest. Da Integrationen, RBAC-Berechtigungen, Zuständigkeiten, Metriken und Deduplizierungsmodelle häufig die Struktur der Organizations übernehmen, hilft eine frühzeitig klar gestaltete Grenzziehung dabei, spätere Hierarchie-Wildwuchs und fragmentierte Berichterstattung zu vermeiden.
+Organizations legen sowohl Berichts- als auch Zugriffsgrenzen innerhalb von DefectDojo fest. Da Integrationen, Zugriffsberechtigungen, Zuständigkeiten, Metriken und Deduplizierungsmodelle häufig die Struktur der Organizations übernehmen, hilft eine frühzeitig klar gestaltete Grenzziehung dabei, spätere Hierarchie-Wildwuchs und fragmentierte Berichterstattung zu vermeiden.
 
 ### Befunde und Automatisierung 
 
@@ -118,7 +118,7 @@ Obwohl Integrationen üblicherweise auf untergeordneten Objekten wie Assets, Eng
 
 Berechtigungen werden nach unten vererbt, das heißt, der Zugriff auf eine Organization gewährt automatisch Zugriff auf alle Objekte innerhalb dieser Organization (z. B. Assets, Engagements, Tests und Befunde). 
 
-Das RBAC-Modell von DefectDojo kann verwendet werden, um den Zugriff menschlicher Benutzer zu steuern, aber auch, um den Zugriff von API-Tokens auf bestimmte Organizations zu beschränken.
+Die Liste der [Authorized Users](/admin/user_management/os__authorized_users/) einer Organization steuert den Zugriff menschlicher Benutzer. API-Tokens agieren als der Benutzer, zu dem sie gehören, sodass ein Token nur die Organizations erreichen kann, für die sein Benutzer autorisiert ist.
 
 Weitere Informationen zu Benutzerrollen finden Sie in unserem Artikel [Permissions](/admin/user_management/os__authorized_users/).
 

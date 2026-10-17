@@ -35,3 +35,15 @@ Hinweise zu **Track Scanned Branches**:
 - Ein Branch, der nicht mehr gescannt wird (gemergt oder gelöscht), erhält keine Updates mehr: Sein Engagement bleibt mit den zuletzt bekannten Befunden sichtbar, die Sie prüfen und gesammelt schließen können.
 - Den Schalter später wieder auszuschalten ist unbedenklich: Die Branch-spezifischen Engagements erhalten dann einfach keine Importe mehr, und beim nächsten Sync wird wieder das Standard-Engagement verwendet.
 - Connectors gleichen den Zustand nach dem Sync-Zeitplan ab. Branch-Tracking macht jeden Sync über alle Branches hinweg vollständig; es macht die Daten zwischen den Syncs jedoch nicht in Echtzeit verfügbar.
+
+#### **Befunde mit der Checkmarx-Scan-ID taggen**
+
+Die **Unique ID From Tool** jedes Checkmarx-One-Befunds ist sein Checkmarx-Result-Hash. Ein Result-Hash allein findet einen Befund in Checkmarx nicht; dazu wird zusätzlich die ID eines Scans benötigt, der ihn enthält. Aktivieren Sie **Tag Findings With Scan ID**, um diese Scan-ID an den vom Connector importierten Befunden zu speichern.
+
+Ist der Schalter aktiviert, erhält jeder Befund, den ein Sync importiert (SAST, SCA, KICS und DAST), den Tag `scan-id:<Scan-ID>`. Die ID ist die des Checkmarx-Scans, aus dem der Connector den Befund abgerufen hat. Bei aktiviertem **Track Scanned Branches** tragen die Befunde jedes Branches die ID des Scans genau dieses Branches. Sie können Befunde nach dem Tag filtern oder ihn zusammen mit Unique ID From Tool über die API auslesen.
+
+Hinweise:
+
+- Der Schalter ist **standardmäßig deaktiviert**, und das Aktivieren ändert die Deduplizierung nicht: Die Scan-ID ist nur ein Tag. Sie wird niemals in Unique ID From Tool oder die Beschreibung aufgenommen.
+- **Der Tag hält den Scan fest, mit dem DefectDojo den Befund zuerst importiert hat.** Ein späterer Sync, der einen vorhandenen Befund zuordnet, behält dessen Tags bei; der Tag wird also nicht bei jedem neuen Scan ersetzt. Dieser Scan enthält den Befund und findet ihn daher weiterhin in Checkmarx, sofern die Datenaufbewahrung von Checkmarx den Scan nicht inzwischen gelöscht hat.
+- Befunde, die beim Aktivieren des Schalters bereits in DefectDojo vorhanden sind, erhalten den Tag nicht. Nur Befunde, die durch spätere Syncs angelegt werden, erhalten ihn.

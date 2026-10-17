@@ -28,7 +28,7 @@ deliverable it produces. Open the Asset that represents your system boundary, go
 
 ### Choosing a scan item policy
 
-Past-due-only is the FedRAMP ConMon minimum. **Include all open items** is the more conservative
+Past-due-only is the FedRAMP ConMon minimum. **Include All Open Items** is the more conservative
 choice, and is the default.
 
 ## Saving and syncing
@@ -49,11 +49,14 @@ Two profile settings are not on the form and are set through the compliance API:
   *do* carry their own control references are mapped from those instead; see
   [Control Coverage](../control_coverage).
 * **Configuration test types** — the test types whose findings are treated as configuration items,
-  which is what drives CM-6 consolidation in the ledger. Adding the **DISA STIG Checklist** test
-  type here rolls a checklist's failed items into the single consolidated CM-6 item rather than
-  filing one POA&M item per rule — see
-  [DISA STIG Checklists](/import_data/pro/specialized_import/stig_checklists/). Whether checklist
-  items are configuration items is a per-system decision, so it is not set for you.
+  which is what drives CM-6 consolidation in the ledger. A new profile starts with the posture scan
+  types selected: Wazuh SCA, Fleet policies, Elastic posture, DISA STIG Checklist, OpenSCAP, Lynis,
+  kube-bench, docker-bench, Cloud Posture Scan and Cortex Cloud posture. Their failed checks roll
+  into the single consolidated CM-6 item rather than one POA&M item per rule (see
+  [DISA STIG Checklists](/import_data/pro/specialized_import/stig_checklists/)). Whether a scan's
+  findings are configuration items is still a per-system decision, so remove any type that should
+  file ordinary POA&M items for this system. A profile created before these defaults existed keeps
+  the types it already had.
 
 ## Auditability
 

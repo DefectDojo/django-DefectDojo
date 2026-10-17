@@ -2,7 +2,7 @@
 title: Referencia de nodos
 description: Todos los nodos con los que se distribuye Triage Engine, y qué hace
   cada uno
-weight: 3
+weight: 4
 audience: pro
 aliases:
 - /es/automation/rules_engine_v2/node_reference/

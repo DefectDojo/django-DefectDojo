@@ -35,3 +35,15 @@ Notas sobre **Track Scanned Branches**:
 - Un branch que deja de escanearse (fusionado o eliminado) deja de recibir actualizaciones: su Compromiso permanece visible con sus últimos hallazgos conocidos, que puede revisar y cerrar en bloque.
 - Deshabilitar la opción más adelante es seguro: los Compromisos por branch simplemente dejan de recibir importaciones y el Compromiso predeterminado se reanuda en la siguiente sincronización.
 - Los Conectores concilian el estado según el programa de sincronización. El seguimiento de branches hace que cada sincronización sea completa entre branches; no hace que los datos sean en tiempo real entre sincronizaciones.
+
+#### **Etiquetar hallazgos con el ID de escaneo de Checkmarx**
+
+El **Unique ID From Tool** de cada hallazgo de Checkmarx One es su hash de resultado de Checkmarx. Un hash de resultado por sí solo no localiza un hallazgo en Checkmarx; también se necesita el ID de un escaneo que lo contenga. Active **Tag Findings With Scan ID** para registrar ese ID de escaneo en los hallazgos que importa el conector.
+
+Con la opción activada, cada hallazgo que importa una sincronización (SAST, SCA, KICS y DAST) se etiqueta `scan-id:<ID de escaneo>`, donde el ID es el del escaneo de Checkmarx del que el conector obtuvo el hallazgo. Con **Track Scanned Branches** activado, los hallazgos de cada branch llevan el ID del escaneo de ese mismo branch. Puede filtrar hallazgos por la etiqueta o leerla mediante la API junto con Unique ID From Tool.
+
+Notas:
+
+- La opción está **desactivada de forma predeterminada**, y activarla no cambia la deduplicación: el ID de escaneo es solo una etiqueta. Nunca se añade a Unique ID From Tool ni a la descripción.
+- **La etiqueta registra el escaneo en el que DefectDojo importó el hallazgo por primera vez.** Una sincronización posterior que coincide con un hallazgo existente conserva sus etiquetas, por lo que la etiqueta no se sustituye con cada nuevo ID de escaneo. Ese escaneo contiene el hallazgo, así que sigue localizándolo en Checkmarx, salvo que la retención de datos de Checkmarx haya eliminado el escaneo.
+- Los hallazgos que ya existen en DefectDojo al activar la opción no reciben la etiqueta. Solo la reciben los hallazgos creados por sincronizaciones posteriores.

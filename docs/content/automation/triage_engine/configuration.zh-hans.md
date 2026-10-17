@@ -1,7 +1,7 @@
 ---
 title: 配置
 description: Triage Engine 的部署层面设置
-weight: 7
+weight: 8
 audience: pro
 aliases:
 - /zh-hans/automation/rules_engine_v2/configuration/

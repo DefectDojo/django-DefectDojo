@@ -11,8 +11,8 @@ templates, not a SPA) run via Docker Compose, with a Postgres DB and a Valkey br
 the loop below against a **running local stack** — do not reason about behavior from the
 code alone when you can exercise it.
 
-Read `AGENTS.md` first for the branch/release-line policy: bug fixes target `bugfix`,
-features target `dev`, and `master` is off-limits without explicit confirmation (the
+Read `AGENTS.md` first for the branch/release-line policy: bug fixes and features both
+target `dev`, and `master` is off-limits without explicit confirmation (the
 `.claude/hooks/branch-guard.sh` hook enforces this). Put the work on the right branch
 before editing.
 
@@ -153,7 +153,7 @@ A recurring PR category touches the Helm chart (`helm/defectdojo/`), nginx confi
 still apply (security defaults, backward compatibility), but the checks are different:
 
 - **The branch/release-line policy applies to chart and docker PRs too** — they are not
-  exempt. A fix still targets `bugfix`, a feature `dev`, never `master`. Defer to `AGENTS.md`.
+  exempt. Fixes and features both target `dev`, never `master`. Defer to `AGENTS.md`.
 - **Know the three Helm CI jobs** (`.github/workflows/test-helm-chart.yml`) — each is an
   automatic blocker when it fails:
   - **`Lint chart (version)`** includes an **`artifacthub.io/changes` annotation check**: it

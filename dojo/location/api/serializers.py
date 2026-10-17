@@ -59,8 +59,8 @@ class LocationFindingReferenceSerializer(BaseModelSerializer):
 
     """Serializer for the LocationFindingReference model with serializers for the related objects."""
 
-    location_type = CharField(read_only=True)
-    location_value = CharField(read_only=True)
+    location_type = CharField(source="location.location_type", read_only=True)
+    location_value = CharField(source="location.location_value", read_only=True)
 
     class Meta:
 
@@ -74,8 +74,8 @@ class LocationProductReferenceSerializer(BaseModelSerializer):
 
     """Serializer for the LocationProductReference model with serializers for the related objects."""
 
-    location_type = CharField(read_only=True)
-    location_value = CharField(read_only=True)
+    location_type = CharField(source="location.location_type", read_only=True)
+    location_value = CharField(source="location.location_value", read_only=True)
 
     class Meta:
 

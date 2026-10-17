@@ -1,7 +1,7 @@
 ---
 title: 設定
 description: Triage Engine のデプロイメントレベルの設定
-weight: 7
+weight: 8
 audience: pro
 aliases:
 - /ja/automation/rules_engine_v2/configuration/

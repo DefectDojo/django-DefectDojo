@@ -12,7 +12,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                   <div class="clearfix">
-                    <h3 class="pull-left">{% trans "Description" %}</h3>
+                    <h3 class="pull-left"><i class="fa-solid fa-align-left dd-card-icon" aria-hidden="true"></i>{% trans "Description" %}</h3>
                     <div class="dropdown pull-right">
                       <div class="btn-group">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" label="Actions" data-toggle="dropdown" aria-expanded="true" aria-label="{{ labels.ORG_LABEL }} options">
@@ -54,7 +54,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h4 class="pull-left">{{ labels.ASSET_PLURAL_LABEL }}</h4>
+                        <h4 class="pull-left"><i class="fa-solid fa-list-ul dd-card-icon" aria-hidden="true"></i>{{ labels.ASSET_PLURAL_LABEL }}</h4>
                         <div class="dropdown pull-right">
                             <div class="btn-group">
                                 <button name="Show Filters" id="show-filters" aria-label="{% trans 'Filters' %}" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
@@ -135,7 +135,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="clearfix">
-                            <h4 class="pull-left">{% trans "Authorized Users" %}</h4>
+                            <h4 class="pull-left"><i class="fa-solid fa-users dd-card-icon" aria-hidden="true"></i>{% trans "Authorized Users" %}</h4>
                             &nbsp;
                             {% if pt|has_object_permission:"staff_only" %}
                             <div class="dropdown pull-right">
@@ -213,7 +213,7 @@
         <div class="col-md-4">
             <div class="panel panel-default-secondary">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>
+                    <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw dd-card-icon" aria-hidden="true"></span>
                         {{ pt.name }}
                     </h3>
                 </div>

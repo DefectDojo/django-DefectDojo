@@ -2,7 +2,7 @@
 title: Consegne
 description: Il registro di tutto ciò che le regole inviano verso l'esterno, e come
   funzionano i nuovi tentativi e i reinvii
-weight: 5
+weight: 6
 audience: pro
 aliases:
 - /it/automation/rules_engine_v2/deliveries/

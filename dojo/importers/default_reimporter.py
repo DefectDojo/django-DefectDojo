@@ -16,7 +16,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
-from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.base_importer import BaseImporter, Parser, reports_a_deleted_target
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
@@ -91,6 +91,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         )
         self.location_handler = LocationHandler(self.test.engagement.product)
 
+    @reports_a_deleted_target
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
@@ -116,6 +117,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
+        # The excess-duplicate delete leaves the duplicates of a test being imported alone; this
+        # one is about to have its findings matched and written, so say so before the first match.
+        self.lock_test_under_import(self.test)
         (
             new_findings,
             reactivated_findings,
@@ -793,7 +797,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             return []
         findings: list[Finding] = []
         for chunk in batched(finding_ids, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
-            for finding in Finding.objects.filter(id__in=chunk).prefetch_related("finding_group_set"):
+            # jira_issue and the group's are read for every finding to decide the JIRA push
+            for finding in (
+                Finding.objects.filter(id__in=chunk)
+                .select_related("jira_issue")
+                .prefetch_related("finding_group_set__jira_issue")
+            ):
                 finding.test = self.test
                 findings.append(finding)
         return findings
@@ -869,19 +878,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # state of the finding as it stands at this moment (django-DefectDojo #12291).
         # This also drops any candidate whose row was deleted in the meantime.
         findings = self._sync_close_old_finding_status_fields(findings)
-        # Determine if pushing to jira or if the finding groups are enabled
-        mitigated_findings = []
-        for finding in findings:
-            # Ensure the finding is not already closed
-            if not finding.mitigated or not finding.is_mitigated:
-                logger.debug("mitigating finding: %i:%s", finding.id, finding)
-                self.mitigate_finding(
-                    finding,
-                    f"Mitigated by {self.test.test_type} re-upload.",
-                    finding_groups_enabled=self.findings_groups_enabled,
-                    product_grading_option=False,
-                )
-                mitigated_findings.append(finding)
+        # Ensure the finding is not already closed
+        mitigated_findings = [finding for finding in findings if not finding.mitigated or not finding.is_mitigated]
+        logger.debug("mitigating %i findings", len(mitigated_findings))
+        self.mitigate_findings(
+            mitigated_findings,
+            f"Mitigated by {self.test.test_type} re-upload.",
+            finding_groups_enabled=self.findings_groups_enabled,
+            product_grading_option=False,
+        )
         # Persist any accumulated location/endpoint status changes
         self.location_handler.persist()
         self.flush_vulnerability_ids()
@@ -1175,7 +1180,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
         # don't dedupe before endpoints/locations are added, postprocessing will be done on next save (in calling method)
-        existing_finding.save_no_options()
+        if not self.save_matched_finding(existing_finding, no_options=True):
+            return existing_finding, True
 
         if existing_finding.duplicate:
             note_entry = f"Un-mitigated by {self.scan_type} re-upload but kept inactive because the finding is a duplicate."
@@ -1227,7 +1233,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
-                existing_finding.save_no_options()
+                if not self.save_matched_finding(existing_finding, no_options=True):
+                    return existing_finding, True
                 existing_finding.notes.create(
                     author=self.user,
                     entry=f"Mitigated by {self.test.test_type} re-upload.",
@@ -1247,7 +1254,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
-                existing_finding.save_no_options()
+                if not self.save_matched_finding(existing_finding, no_options=True):
+                    return existing_finding, True
                 existing_finding.notes.create(
                     author=self.user,
                     entry=f"Mitigated by {self.test.test_type} re-upload.",
@@ -1265,7 +1273,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
-            existing_finding.save_no_options()
+            if not self.save_matched_finding(existing_finding, no_options=True):
+                return existing_finding, True
         # Return False here to make sure further processing happens
         return existing_finding, False
 
@@ -1449,7 +1458,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # update, and saving here would insert it early -- defeating the buffering and splitting
         # one batched INSERT into per-finding ones. The value rides along when the buffer flushes.
         if finding.cve != old_cve and finding.pk:
-            finding.save()
+            self.save_matched_finding(finding)
         return finding
 
     def process_groups_for_all_findings(

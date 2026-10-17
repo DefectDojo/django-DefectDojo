@@ -13,8 +13,10 @@ Backstage コネクタは**asset connector**です。検出事項をインポー
 | **System** | 製品タイプ(System を持たない Component は、設定可能な「Backstage / Uncategorized」製品タイプの下にグループ化されます) |
 | **Component** | 製品 — エンティティの `title`(なければ `name` にフォールバック)から命名され、カタログの description が付与されます |
 | **Owning Group**(`ownedBy` リレーション) | 製品に紐づく DefectDojo のグループ(デフォルトのロール: Maintainer、設定変更可能) |
+| **Owning Group** の `metadata.description` | DefectDojo グループの説明。新しいグループ、または説明が空かコネクターのプレースホルダーのままのグループに設定され、その後の Backstage での変更にも追従します。管理者が書いた説明は置き換えられません。 |
 | **Owner email**(グループプロファイルの email、または User オーナーの email) | 同じ email を持つ DefectDojo ユーザーが既に存在する場合、そのユーザーが製品メンバーになります(ユーザーが新規作成されることはありません) |
 | `metadata.tags`、`spec.type`、`spec.lifecycle`、namespace、domain | `backstage:` プレフィックス付きの製品タグ |
+| `spec.lifecycle` | 製品の **Lifecycle**: `experimental` は Construction、`production` は Production、`deprecated` は Retirement になります。それ以外の値はスキップされます。DefectDojo で手動設定された Lifecycle は上書きされません。 |
 | `metadata.annotations` | レコードに(上限付きで)保存されます。特定の annotation は **Annotation Mappings** を通じて第一級の属性やタグに昇格できます |
 
 レコードはエンティティのサーバー側で割り当てられた `metadata.uid` をキーとするため、Backstage 上でのリネームは次回の同期でマッピング済みの製品を**その場で**更新します。重複は発生しません。製品名は常にカタログに追従します。このコネクタが管理する製品をリネームするには、Backstage 上で Component をリネームしてください(DefectDojo 側でのリネーム、または手動マッピング時に付けたカスタム名は、他の製品と衝突しない限り、次回の同期でカタログ名に合わせて調整されます)。所有者の変更は、製品のグループ割り当てを移動させます。カタログから消えた(または `backstage.io/orphan` annotation が付いた)Component は **MISSING** としてマークされます。DefectDojo が自ら製品を削除することはありません。Domain と Group の階層(親チーム)はタグ/メタデータとしてのみ記録され、追加の階層レベルを作成することはありません。

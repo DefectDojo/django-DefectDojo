@@ -23,6 +23,7 @@ from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
+from dojo.endpoint.queries import get_import_form_endpoints
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter
@@ -41,11 +42,10 @@ from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
-from dojo.location.models import Location
+from dojo.location.queries import get_import_form_locations
 from dojo.models import (
     BurpRawRequestResponse,
     Dojo_User,
-    Endpoint,
     Finding,
     Finding_Group,
     Finding_Template,
@@ -197,7 +197,7 @@ class ViewTest(View):
             # Make a notification for this actions
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
-            process_tag_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title, parent=test)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -886,10 +886,10 @@ class ReImportScanResultsView(View):
         product_tab.setEngagement(test.engagement)
         # Get the import form with some initial data in place
         if locations_enabled():
-            endpoints = Location.objects.filter(products__product__id=product_tab.product.id)
+            endpoints = get_import_form_locations(product_tab.product, request.user)
         else:
             # TODO: Delete this after the move to Locations
-            endpoints = Endpoint.objects.filter(product__id=product_tab.product.id)
+            endpoints = get_import_form_endpoints(product_tab.product, request.user)
         form = self.get_form(
             request,
             test,

@@ -74,6 +74,12 @@ class JIRAInstanceSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
         }
 
+    def validate(self, data):
+        # Keep the stored password only while the URL stays the same, as the UI does.
+        if self.instance is not None and "url" in data and not data.get("password") and not jira_services.url_unchanged(self.instance, data["url"]):
+            raise serializers.ValidationError({"password": "This field is required when changing the URL."})
+        return super().validate(data)
+
 
 class JIRAProjectSerializer(serializers.ModelSerializer):
     class Meta:

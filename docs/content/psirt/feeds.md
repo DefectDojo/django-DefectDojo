@@ -35,7 +35,7 @@ Each source shows a clearance state:
 
 - **Cleared** — the publisher's terms permit this use; you can enable it after
   accepting the terms.
-- **Pending clearance** — DefectDojo is completing a licensing agreement with
+- **Pending Clearance** — DefectDojo is completing a licensing agreement with
   the publisher, or the publisher's terms are under legal review. These
   sources are visible but cannot be enabled yet; each one explains what
   unlocks it. Sources unlock in product updates as clearances land.

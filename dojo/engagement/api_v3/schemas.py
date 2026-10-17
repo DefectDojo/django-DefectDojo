@@ -29,7 +29,7 @@ from dojo.api_v3.refs import Ref, to_ref
 from dojo.models import Engagement
 from dojo.product.api_v3.schemas import AssetSlim
 from dojo.product_type.api_v3.schemas import OrganizationSlim
-from dojo.user.api_v3.schemas import UserSlim
+from dojo.user.api_v3.schemas import UserStub
 
 
 class EngagementSlim(Schema):
@@ -72,7 +72,7 @@ class EngagementSlim(Schema):
 EngagementSlim.EXPANDABLE = {
     "asset": ExpandRel(attr="product", path="product", schema=AssetSlim),
     "organization": ExpandRel(attr="product.prod_type", path="product__prod_type", schema=OrganizationSlim),
-    "lead": ExpandRel(attr="lead", path="lead", schema=UserSlim),
+    "lead": ExpandRel(attr="lead", path="lead", schema=UserStub),
 }
 
 

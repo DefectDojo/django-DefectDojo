@@ -34,7 +34,7 @@ Se avete un'unica Organizzazione che contiene tutte le informazioni rilevanti pe
 
 Se un particolare progetto software presenta molte distribuzioni o versioni distinte, può valere la pena creare un'unica Organizzazione che copra l'ambito dell'intero progetto e far sì che ogni versione esista come Asset individuali. In alcuni flussi di lavoro, le Organizzazioni possono anche essere usate per separare le fasi del ciclo di vita del software: un'Organizzazione per “In sviluppo”, un'Organizzazione per “In produzione”, ecc.
 
-Le Organizzazioni possono essere usate per determinare l'accesso a filiali, società acquisite o altre unità aziendali regolamentate ai fini RBAC. Nelle aziende complesse, dove esistono molti progetti unici con regole di accesso diverse, le Organizzazioni sono particolarmente rilevanti.
+Le Organizzazioni possono essere usate per determinare l'accesso a filiali, società acquisite o altre unità aziendali regolamentate ai fini del controllo degli accessi. Nelle aziende complesse, dove esistono molti progetti unici con regole di accesso diverse, le Organizzazioni sono particolarmente rilevanti.
 
 In definitiva, la decisione su come usare Organizzazioni e Asset dipende da come preferite riflettere la vostra struttura organizzativa unica e le esigenze del vostro team di sicurezza.
 
@@ -110,7 +110,7 @@ Le Organizzazioni hanno lo scopo di rappresentare la responsabilità strutturale
 
 ## Confini delle Organizzazioni
 
-Le Organizzazioni stabiliscono sia i confini di reporting sia quelli di accesso all'interno di DefectDojo. Poiché integrazioni, permessi RBAC, proprietà, metriche e modelli di deduplicazione ereditano spesso la struttura delle Organizzazioni, progettare confini chiari fin dall'inizio aiuta a evitare una proliferazione della gerarchia e una frammentazione del reporting in seguito.
+Le Organizzazioni stabiliscono sia i confini di reporting sia quelli di accesso all'interno di DefectDojo. Poiché integrazioni, permessi di accesso, proprietà, metriche e modelli di deduplicazione ereditano spesso la struttura delle Organizzazioni, progettare confini chiari fin dall'inizio aiuta a evitare una proliferazione della gerarchia e una frammentazione del reporting in seguito.
 
 ### Riscontri e automazione
 
@@ -118,9 +118,9 @@ Sebbene le integrazioni siano tipicamente configurate su oggetti di livello infe
 
 I permessi si propagano verso il basso, il che significa che l'accesso a un'Organizzazione concede automaticamente l'accesso a tutti gli oggetti al suo interno (ad es. Asset, Engagement, Test e Riscontri).
 
-Il modello RBAC di DefectDojo può essere usato per limitare l'accesso degli utenti umani, ma può anche limitare l'accesso dei token API a particolari Organizzazioni.
+L'elenco [Authorized Users](/admin/user_management/os__authorized_users/) di un'Organizzazione controlla l'accesso degli utenti umani. I token API agiscono come l'utente a cui appartengono, quindi un token può raggiungere solo le Organizzazioni per cui il suo utente è autorizzato.
 
-Per maggiori informazioni sui ruoli utente, consultate il nostro articolo [Permessi](/admin/user_management/os__authorized_users/).
+Per maggiori informazioni, consultate il nostro articolo [Permessi](/admin/user_management/os__authorized_users/).
 
 ### Proprietà
 

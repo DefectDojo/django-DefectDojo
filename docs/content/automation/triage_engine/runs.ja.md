@@ -1,7 +1,7 @@
 ---
 title: 実行
 description: ルールがどのように実行されるか、実行が何を記録するか、カスケードがどのように制限されるか
-weight: 4
+weight: 5
 audience: pro
 aliases:
 - /ja/automation/rules_engine_v2/runs/

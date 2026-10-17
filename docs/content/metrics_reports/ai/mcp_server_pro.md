@@ -114,6 +114,7 @@ Toolsets are enabled under **Settings → Feature Flags**, nested below the **MC
 | `hierarchy` | **MCP: Asset Hierarchy** | the **Asset Hierarchy** feature — see [Asset Hierarchy Toolset](#asset-hierarchy-toolset) |
 | `reporting` | **MCP: Reporting** | the **Reporting** feature (the Report Builder) — see [Reporting Toolset](#reporting-toolset) |
 | `dashboards` | **MCP: Dashboards 2.0** | the **Dashboards 2.0** feature ([Customizable Dashboards](../../dashboards/custom-dashboards/)) — see [Dashboards Toolset](#dashboards-toolset) |
+| `psirt` | **MCP: PSIRT** | the **PSIRT** feature (which itself requires **Locations**) and the **PSIRT Advisory Engine** licence entitlement ([PSIRT](../../../psirt/)) — see [PSIRT Toolset](#psirt-toolset) |
 
 More toolsets appear in the Feature Flags menu as they are released. A toolset's flag only controls what the MCP Server offers: it does not change the REST API, and every tool call still runs with the permissions of the API token that connects.
 
@@ -127,7 +128,8 @@ Add a `toolsets` query parameter to the MCP endpoint URL. Names are comma-separa
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy` | `core` plus the Asset Hierarchy toolset. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=reporting` | `core` plus the Reporting toolset. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=dashboards` | `core` plus the Dashboards toolset. |
-| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy,reporting,dashboards` | `core` plus every named toolset. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=psirt` | `core` plus the PSIRT toolset. |
+| `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=hierarchy,reporting,dashboards,psirt` | `core` plus every named toolset. |
 | `https://[YOUR-INSTANCE].defectdojo.com/mcp?toolsets=all` | `core` plus every toolset enabled on the instance. Requires the `Authorization` header to be sent when connecting, because the server reads the instance's Feature Flags with your token to resolve `all`. |
 
 Any selection with a `toolsets` parameter also offers `get_instance_info`, a tool that reports the DefectDojo Pro version, which toolsets are enabled (`mcp_toolsets_enabled`), each Feature Flag's state, and whether the instance names its objects **Assets / Organizations** or **Products / Product Types**. Ask your assistant to call it when you are unsure which toolsets an instance provides.
@@ -1028,6 +1030,72 @@ Sharing a dashboard or changing the shared default changes what every user of th
 
 ---
 
+## PSIRT Toolset
+
+The `psirt` toolset (`?toolsets=psirt`) lets an assistant work with the [PSIRT](../../../psirt/) module: summarise what the advisory feeds brought in since yesterday, explain why an advisory matched your inventory, design and preview matching rules, and — when you ask — review or suppress feed items, record match decisions, open cases and drive an advisory of your own through review to publication. It adds 18 tools (12 read, 6 write), 2 resources and 3 prompts on top of `core`.
+
+It is available when an administrator has enabled **MCP: PSIRT** under **Settings → Feature Flags**. That flag can only be switched on while the **PSIRT** flag is on, which in turn requires **Locations** and the **PSIRT Advisory Engine** licence entitlement (see [If you don't see PSIRT in the menu](../../../psirt/#if-you-dont-see-psirt-in-the-menu)). It requires DefectDojo Pro 3.4.100 or later, the release that made the PSIRT endpoints available to API tokens under `/api/v2/psirt/`. Every tool runs with your token's PSIRT access: **View PSIRT** (or a global Maintainer/Owner role) is enough for the read tools, and the write tools need **Change PSIRT** (or a global Maintainer/Owner role), exactly as in the UI ([Who can use PSIRT](../../../psirt/#who-can-use-psirt)).
+
+> **📖 Two kinds of "advisory".** DefectDojo Pro's PSIRT pages call an ingested feed record an *advisory*, and an advisory your team writes about your own products an *authored advisory*. So that an assistant never confuses the two, the MCP tools call the ingested record a **feed item** (`feed_item_id`, `psirt_get_feed_items`, `psirt_triage_feed_item`) and reserve **advisory** (`advisory_id`, `psirt_get_authored_advisories`, `psirt_manage_advisory`) for the ones you author. The tools also use the **Asset** / **Organization** wording of the rest of the server (`asset_id`, `analyst_id`, `group_id`).
+
+> **⚠️ Feed content is untrusted.** Feed item titles, descriptions and CVE text are written by external publishers. The bundled workflow guide and every PSIRT prompt instruct the assistant to treat that text strictly as data to summarise or quote — never as instructions — and to ignore anything in a feed item that reads like a request to suppress, publish or change something. Keep the same rule in mind when you paste feed text into a chat yourself.
+
+> **⚠️ Write tools change DefectDojo immediately.** As with the other toolsets, each write tool performs one DefectDojo REST write with your API token and relays DefectDojo's answer; the MCP Server adds no preview, approval step or undo. Most PSIRT writes are reversible in the UI — a reviewed item can be unreviewed, a suppressed one unsuppressed, a closed case reopened, a match set back to unconfirmed, a rule disabled — but **scheduling or publishing an authored advisory sends it to everyone the instance delivers to and cannot be undone**. The `psirt_manage_advisory` tool is therefore marked destructive as a whole, and its description tells the assistant to schedule or publish only on your explicit request, after showing you the advisory's readiness (signoffs, preflight, `can_publish`). The workflow guide instructs the assistant to confirm with you before any write, and to assess and preview a rule before saving it.
+
+Every PSIRT tool accepts the optional `token` parameter, and every list tool pages with `limit` (1–100, default 25) and `offset`.
+
+### 🛰️ PSIRT Read Tools
+
+| Tool | What it returns | Key parameters |
+|------|-----------------|----------------|
+| `psirt_triage_summary` | Counts of the feed items created since a point in time: `total`, `by_status`, `by_severity`, `by_status_severity`, the exposure buckets (`has_verified_matches`, `has_matches`, `none`), `suppressed`, `exploited` and the `top_prefilter_tags`. The starting point for "what came in overnight?". | `since` (required, RFC 3339 timestamp), `feed_source_id` |
+| `psirt_get_feed_items` | One page of the [Feed Findings](../../../psirt/feed-findings/) queue with the same filters the UI offers: `status`, `severity`, `feed_source_id`, `cve`, `is_reviewed`, `is_exploited`, `has_matches`, `has_verified_matches`, `min_cvss`, `min_epss`, `prefilter_matched`, `prefilter_favorite`, `prefilter_tag`, `created_after` (a date; the time part is ignored) and `order_by`. Suppressed items are hidden unless `include_suppressed` is true, so the list matches the queue you see. Each row carries a `url` to the feed page. | the filters above, `include_suppressed` |
+| `psirt_get_feed_item` | One feed item as the publisher described it — CVEs, affected products, severity, CVSS/EPSS, exploitation — with its component matches embedded (the first 25; the answer says when more exist). `include: ["revisions"]` adds the revision history. | `feed_item_id`, `include` |
+| `psirt_get_feed_sources` | The [Advisory Feeds](../../../psirt/feeds/) configured on the instance: `enabled`, `source_type`, `clearance_state` and health. `include_runs: true` adds each source's last five ingest runs and is allowed only when `limit` is 10 or less. | `enabled`, `source_type`, `clearance_state`, `include_runs` |
+| `psirt_get_rules` | One page of definitions of one `kind`: `rule` ([Matching Rules](../../../psirt/matching-rules/); optionally within one `group_id`), `group` (rule groups and templates) or `prefilter` ([Feed Rules](../../../psirt/feed-rules/); optionally for one `feed_source_id`). | `kind` (required), `enabled`, `group_id`, `feed_source_id` |
+| `psirt_get_rule` | One rule, group or pre-filter. `include: ["effectiveness"]` on a rule adds its lifetime and 30-day hit counts and false-positive rate; `include: ["applies_to"]` on a group lists the Assets it is subscribed to. | `kind`, `rule_id`, `include` |
+| `psirt_preview_rule` | Replays a saved rule or group (`target: rule` or `group` with `rule_id`), unsaved rule `conditions` (`target: unsaved_rule`) or unsaved pre-filter `conditions` (`target: prefilter`) over the feed items of the last `lookback_days` (1–365, default 30) and returns hit counts and up to `sample_limit` (1–20) sample hits. Nothing is saved — this is the UI's [Preview](../../../psirt/matching-rules/#preview-what-would-this-rule-do) from the chat. | `target` (required), `rule_id` or `conditions`, `condition_logic`/`match_logic`, `feed_source_id`, `lookback_days`, `sample_limit` |
+| `psirt_assess_rule` | DefectDojo Pro's quality grade of unsaved rule `conditions`: whether the rule [could be enabled](../../../psirt/matching-rules/#a-rule-graded-weak-cannot-be-enabled), the lint flags and the suggestions. Nothing is saved. | `conditions` (required), `condition_logic`, `target_mode` |
+| `psirt_get_matches` | One page of component matches — which dependency on which Asset a feed item hit, the evidence (`match_type`, `match_source`, `confidence`, `version_verified`) and the analyst's `status`. | `feed_item_id`, `asset_id`, `status`, `min_confidence`, `version_verified`, `order_by` |
+| `psirt_get_cases` | `mode: list` (default) pages [cases](../../../psirt/cases/) with `reference_id`, `disclosure_status`, `mitigation_status`, `mitigation_priority`, `analyst_id`, `is_open` and `unassigned` filters; `mode: detail` answers one case; `mode: suggestions` answers DefectDojo Pro's grouping of unassigned confirmed matches into case candidates. | `mode`, `case_id`, the list filters |
+| `psirt_get_authored_advisories` | `mode: list` (default) pages the [advisories](../../../psirt/advisories/) your team authors (`status`, `author_id`, `public_id`, `scheduled`, `embargoed`); `mode: detail` answers one; `mode: readiness` reduces that detail to the publish-readiness fields — `status`, `signoff_state`, `preflight`, `can_publish`, `available_transitions`, `delivery_state`, `locked_by`, `scheduled_publish_at` — and adds its signoffs. Read `readiness` before any transition. | `mode`, `advisory_id`, the list filters |
+| `psirt_get_sla_clocks` | One page of the [SLA clocks](../../../psirt/cases/#the-sla-clock) on cases and matches: `subject_kind` + `subject_id`, `clock_code`, `state`, `breached`, `live`. | the filters above |
+
+`psirt_preview_rule` and `psirt_assess_rule` are read tools even though DefectDojo receives the conditions to evaluate in the body of the request; they store nothing and are not subject to the write confirmation rule. Feed items have no per-item page in the PSIRT UI, so their `url` opens the feed queue; cases open the cases page; an authored advisory's `url` opens that advisory.
+
+### ✏️ PSIRT Write Tools
+
+| Tool | What it does in DefectDojo | Key parameters |
+|------|----------------------------|----------------|
+| `psirt_triage_feed_item` | One [triage action](../../../psirt/feed-findings/#triage-actions) on a feed item: `review` / `unreview`, `suppress` / `unsuppress`, or `rematch` (re-runs component matching; DefectDojo may answer that it has been queued, so the assistant re-reads the item afterwards). Each pair undoes the other. | `feed_item_id`, `operation` |
+| `psirt_write_rule` | Creates, updates, enables or disables a matching rule (`kind: rule` — `name`, `description`, `group_id`, `rule_type`, `pattern`, `component_field`, `condition_logic`, `target_mode`, `priority`, `enabled`, `conditions`, `actions`) or a rule group (`kind: group` — `name`, `description`, `operator`, `enabled`, `priority`, `is_template`, `is_default`). DefectDojo validates the conditions and refuses to enable a rule it grades too broad, answering 400 with `field_errors`. | `kind`, `operation` (`create`, `update`, `enable`, `disable`), `rule_id`, the fields |
+| `psirt_write_prefilter` | The same four operations for a [feed pre-filter](../../../psirt/feed-rules/): `conditions` (`field`, `operator`, `value`), `match_logic` (`any`/`all`), `actions` (score, tag, favourite, suppress), `priority`, `fallthrough`, `weight`, and `feed_source_id` (null for every source). | `operation`, `rule_id`, the fields |
+| `psirt_set_match_status` | Records the analyst decision on one match or up to 25 (`confirmed`, `false_positive`, `unconfirmed`) with optional `analyst_notes`, one DefectDojo write per match in the order given. `export: true` additionally files each confirmed match as a DefectDojo finding, as the UI's export does. When some of a batch fail the outcome is `partial` and the answer lists each match's result; nothing is rolled back. | `match_id` or `match_ids`, `status`, `analyst_notes`, `export` |
+| `psirt_manage_case` | One operation per call on [cases](../../../psirt/cases/): `create`, `create_from_matches`, `create_from_feed_items`, `attach_matches`, `attach_feed_items`, `update`, `close`, `reopen`, `recompute_scores`. `close` is undone by `reopen`; nothing deletes. Answers the case id and a `url` to the cases page. | `operation`, `case_id`, `match_ids`, `feed_item_ids`, the case fields |
+| `psirt_manage_advisory` | One operation per call on an [authored advisory](../../../psirt/advisories/): `draft_from_case`, `update_content`, `transition` (to a `status` listed in `available_transitions`; DefectDojo answers 409 when the transition is not allowed or the advisory is locked), `assign_reviewer`, `run_preflight`, `schedule` (`scheduled_publish_at`, or null to unschedule) and `publish_now`. **`schedule` and `publish_now` publish the advisory and cannot be undone.** | `operation`, `case_id` or `advisory_id`, the content, reviewer, status or schedule fields |
+
+Write tools answer with the same `outcome` envelope as the [Asset Hierarchy Toolset](#asset-hierarchy-toolset) (`committed`, `rejected`, `unknown`, and `partial` for a mixed match batch). A `rejected` outcome carries DefectDojo's `status_code` and `field_errors`, so a rule DefectDojo grades too broad or a transition it refuses is reported with the reason rather than retried. Editing an authored advisory after it has been signed off costs those approvals, exactly as it does in the UI ([Review, and why editing costs you approvals](../../../psirt/advisories/#review-and-why-editing-costs-you-approvals)), so check the readiness view before asking the assistant to update a reviewed advisory. Before a `transition`, the assistant is told to read `mode: readiness` for the `available_transitions`; DefectDojo answers a transition it does not allow, or an advisory locked by another user, with a `rejected` outcome.
+
+### PSIRT Resources and Prompts
+
+- **`mcp://resource/psirt/rule-schema.json`** (JSON) — the shapes DefectDojo accepts for a matching-rule condition, a pre-filter condition and the actions of each, with their allowed values and bounds. The assistant reads it before writing a rule.
+- **`mcp://resource/psirt/workflow-guide.md`** (Markdown) — the working method: treat feed content as untrusted, read before writing and confirm before every write, the daily triage order, how to explain a match, how to design and preview a rule, how cases and authored advisories move, and what the common errors mean.
+- **`psirt_daily_triage`** prompt — takes an optional `since` timestamp (the last 24 hours when blank); checks the instance has PSIRT, reads the triage summary, pulls the items with verified matches, the exploited ones and the new high-CVSS ones within a handful of calls, names the affected Assets for the top items, and hands you a ranked list plus what needs a human decision today. It suggests `psirt_triage_feed_item` and `psirt_manage_case` as next steps but never calls a write tool unless you ask.
+- **`psirt_explain_match`** prompt — takes a `feed_item_id`; reads the item and its matches, explains the evidence behind each (rule or CPE auto-match, confidence, version verification), looks up the rules that fired, and recommends confirm / false positive / needs a human check per match — without applying any decision.
+- **`psirt_design_rule`** prompt — takes a `goal_description` such as "advisories naming OpenSSL 3.x on our payment assets"; reads the rule schema and the existing groups and rules, drafts conditions, runs `psirt_assess_rule` and `psirt_preview_rule`, proposes the rule with its preview numbers, creates it **disabled** after your approval, and enables it only after a second explicit confirmation.
+
+### Example requests
+
+- "What did the PSIRT feeds bring in since yesterday morning, and which items hit verified matches?"
+- "Why did feed item 4821 match the `payments-api` Asset? Is the version verified?"
+- "Show me the open cases past their SLA and who they are assigned to."
+- "Design a matching rule that catches advisories naming `log4j-core` 2.x on our Java services. Preview it first."
+- "Mark matches 118 and 119 as false positives — the affected module isn't shipped — and note why."
+- "Open a case from the confirmed matches of feed item 4821 and assign it to Dana."
+- "Is advisory PSIRT-2026-0007 ready to publish? Don't publish it, just tell me what's missing."
+
+---
+
 ## Reference Resources
 
 The `core` toolset publishes 6 read-only JSON resources (MIME type `application/json`). They are reference material bundled with the MCP Server, not data from your DefectDojo instance, and are available without any tool call so an assistant can map findings to a standard or explain a regulatory obligation while it reports.
@@ -1043,7 +1111,7 @@ The `core` toolset publishes 6 read-only JSON resources (MIME type `application/
 
 Ask your assistant to read a resource by URI (for example, "read `mcp://resource/cwe_to_owasp_2025_mapping.json` and group our open findings by OWASP category") when a report should cite a standard.
 
-Add-on toolsets publish their own resources alongside these: the `hierarchy` toolset adds `mcp://resource/hierarchy/workflow-guide.md` (see [Asset Hierarchy Toolset](#asset-hierarchy-toolset)), the `reporting` toolset adds three under `mcp://resource/reporting/` (see [Reporting Toolset](#reporting-toolset)), and the `dashboards` toolset adds `mcp://resource/dashboards/widget-schema.json` and `mcp://resource/dashboards/workflow-guide.md` (see [Dashboards Toolset](#dashboards-toolset)).
+Add-on toolsets publish their own resources alongside these: the `hierarchy` toolset adds `mcp://resource/hierarchy/workflow-guide.md` (see [Asset Hierarchy Toolset](#asset-hierarchy-toolset)), the `reporting` toolset adds three under `mcp://resource/reporting/` (see [Reporting Toolset](#reporting-toolset)), the `dashboards` toolset adds `mcp://resource/dashboards/widget-schema.json` and `mcp://resource/dashboards/workflow-guide.md` (see [Dashboards Toolset](#dashboards-toolset)), and the `psirt` toolset adds `mcp://resource/psirt/rule-schema.json` and `mcp://resource/psirt/workflow-guide.md` (see [PSIRT Toolset](#psirt-toolset)).
 
 ---
 
@@ -1084,7 +1152,7 @@ The DefectDojo MCP Server includes pre-configured prompts that demonstrate best 
 
 > **💡 Using Prompts:** To invoke a prompt, simply ask your AI assistant: "Create a SAST Review Report" or "Generate a Security Landscape Report using DefectDojo data"
 
-The `hierarchy` toolset adds two more prompts, `explore_hierarchy` and `hierarchy_cleanup_review`, described under [Asset Hierarchy Toolset](#asset-hierarchy-toolset); the `reporting` toolset adds `build_report_template`, `run_report` and `check_report_run`, described under [Reporting Toolset](#reporting-toolset); and the `dashboards` toolset adds `summarize_dashboard` and `build_dashboard`, described under [Dashboards Toolset](#dashboards-toolset). Unlike the two `core` prompts, most of these take arguments, which your client asks for when you invoke them.
+The `hierarchy` toolset adds two more prompts, `explore_hierarchy` and `hierarchy_cleanup_review`, described under [Asset Hierarchy Toolset](#asset-hierarchy-toolset); the `reporting` toolset adds `build_report_template`, `run_report` and `check_report_run`, described under [Reporting Toolset](#reporting-toolset); the `dashboards` toolset adds `summarize_dashboard` and `build_dashboard`, described under [Dashboards Toolset](#dashboards-toolset); and the `psirt` toolset adds `psirt_daily_triage`, `psirt_explain_match` and `psirt_design_rule`, described under [PSIRT Toolset](#psirt-toolset). Unlike the two `core` prompts, most of these take arguments, which your client asks for when you invoke them.
 
 ---
 
@@ -1388,7 +1456,7 @@ Verify these items when experiencing connection issues:
 
 **Solutions:**
 
-1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature; for `dashboards`, **MCP: Dashboards 2.0**, which also needs the **Dashboards 2.0** feature)
+1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature; for `dashboards`, **MCP: Dashboards 2.0**, which also needs the **Dashboards 2.0** feature; for `psirt`, **MCP: PSIRT**, which also needs the **PSIRT** feature)
 2. Or remove the toolset from the `toolsets` parameter and reconnect
 3. Ask your assistant to call `get_instance_info` to see which toolsets the instance has enabled
 

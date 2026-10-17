@@ -7,7 +7,7 @@ audience: pro
 
 Once you have an SSO provider working, **Login Settings** controls how the DefectDojo login page itself behaves — whether username/password login is still offered, whether visitors are sent straight to your identity provider, how long a session lasts, and whether SSO can create accounts on the fly. Open-source DefectDojo does not include these controls — see [Authorized Users](/admin/user_management/os__authorized_users/).
 
-Find it under **Enterprise Settings > Login Settings**. Only a **Superuser** can change it.
+Find it under **Connect > Authorization > Login Settings**. Only a **Superuser** can change it.
 
 ![Login Settings](images/pro_login_settings.png)
 

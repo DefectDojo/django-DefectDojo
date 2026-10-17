@@ -2,7 +2,7 @@
 title: Entregas
 description: O registro de tudo que as regras enviam para fora, e como funcionam as
   tentativas e a reprodução
-weight: 5
+weight: 6
 audience: pro
 aliases:
 - /pt-br/automation/rules_engine_v2/deliveries/

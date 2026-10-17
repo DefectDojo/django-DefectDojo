@@ -22,7 +22,7 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h3 class="pull-left finding-title">
-                    {{ finding.title }}
+                    <i class="fa-solid fa-bug dd-card-icon" aria-hidden="true"></i>{{ finding.title }}
                     {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                     {% if finding.last_reviewed %}
                         <small>Last Reviewed {{ finding.last_reviewed | naturalday }}
@@ -744,7 +744,7 @@
         <div id="duplicate_cluster" style="padding-top: 6em; margin-top: -6em;"></div>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Duplicate Cluster ({{ finding|finding_duplicate_cluster_size }})<span class="pull-right"><a data-toggle="collapse" id="duplicate_tree_toggle" href="#duplicate_tree"><i class="fa-solid fa-chevron-down"></i></a></span></h4>
+                <h4><i class="fa-solid fa-clone dd-card-icon" aria-hidden="true"></i>Duplicate Cluster ({{ finding|finding_duplicate_cluster_size }})<span class="pull-right"><a data-toggle="collapse" id="duplicate_tree_toggle" href="#duplicate_tree"><i class="fa-solid fa-chevron-down"></i></a></span></h4>
             </div>
             <div id="duplicate_tree" class="panel-body collapse">
                 {% if finding.duplicate_finding %}
@@ -759,7 +759,7 @@
     {% if similar_findings_enabled %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
+                <h4 class="has-filters"><i class="fa-solid fa-clone dd-card-icon" aria-hidden="true"></i>Similar Findings ({{ similar_findings.paginator.count }})
                     <i class="fa-solid fa-circle-question has-popover"
                        data-content="Opening this panel shows findings in this Asset that are not exact duplicates,
                         but have similar values for Vulnerability Id, CWE, file_path, line number, unique_id_from_tool.
@@ -799,7 +799,7 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="has-filters">
-                        {% trans "Import History" %} ({{ test_import_finding_actions_count }})
+                        <i class="fa-solid fa-clock-rotate-left dd-card-icon" aria-hidden="true"></i>{% trans "Import History" %} ({{ test_import_finding_actions_count }})
                         <i class="fa-solid fa-circle-question has-popover"
                         data-content="List of imports/reimports that created/closed/reactivated this finding in any test.">
                         </i>
@@ -971,7 +971,7 @@
     <div class="view-finding">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Description <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i
+                <h4><i class="fa-solid fa-align-left dd-card-icon" aria-hidden="true"></i>Description <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i
                         class="fa-solid fa-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
@@ -984,7 +984,7 @@
                 <div class="col-md-12" id="cred">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4>Files<span class="pull-right">
+                            <h4><i class="fa-solid fa-paperclip dd-card-icon" aria-hidden="true"></i>Files<span class="pull-right">
                             <a data-toggle="collapse" href="#add_feat_files">
                                 <i class="fa-solid fa-chevron-down"></i></a></span>
                             <a title="{% trans 'Manage Files' %}" name="Manage Files" class="btn btn-sm btn-primary pull-right"
@@ -1019,7 +1019,7 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Mitigation <span class="pull-right"><a data-toggle="collapse" href="#vuln_mitigation"><i
+                <h4><i class="fa-solid fa-shield-halved dd-card-icon" aria-hidden="true"></i>Mitigation <span class="pull-right"><a data-toggle="collapse" href="#vuln_mitigation"><i
                         class="fa-solid fa-chevron-{% if finding.mitigation %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_mitigation" class="panel-body collapse {% if finding.mitigation %}in{%endif%}">
@@ -1029,14 +1029,14 @@
         {% if finding.burprawrequestresponse_set.all %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Request / Response Pairs <span class="pull-right"><a data-toggle="collapse" href="#vuln_req_res">
+                    <h4><i class="fa-solid fa-right-left dd-card-icon" aria-hidden="true"></i>Request / Response Pairs <span class="pull-right"><a data-toggle="collapse" href="#vuln_req_res">
                         <i class="fa-solid fa-chevron-down"></i></a></span></h4>
                 </div>
                 <div id="vuln_req_res" class="panel-body collapse">
                     {% for req_resp in finding.burprawrequestresponse_set.all %}
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h4>Request #{{ forloop.counter }}<span class="pull-right">
+                                <h4><i class="fa-solid fa-arrow-right dd-card-icon" aria-hidden="true"></i>Request #{{ forloop.counter }}<span class="pull-right">
                                     <a data-toggle="collapse" href="#vuln_req_{{ forloop.counter }}">
                                         <i class="fa-solid fa-chevron-down"></i></a></span></h4>
                             </div>
@@ -1046,7 +1046,7 @@
                         </div>
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h4>Response #{{ forloop.counter }}<span class="pull-right">
+                                <h4><i class="fa-solid fa-arrow-left dd-card-icon" aria-hidden="true"></i>Response #{{ forloop.counter }}<span class="pull-right">
                                     <a data-toggle="collapse" href="#vuln_res_{{ forloop.counter }}">
                                         <i class="fa-solid fa-chevron-down"></i></a></span></h4>
                             </div>
@@ -1061,7 +1061,7 @@
         {% endif %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Impact <span class="pull-right"><a data-toggle="collapse" href="#vuln_impact"><i
+                <h4><i class="fa-solid fa-burst dd-card-icon" aria-hidden="true"></i>Impact <span class="pull-right"><a data-toggle="collapse" href="#vuln_impact"><i
                         class="fa-solid fa-chevron-{% if finding.impact %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_impact" class="panel-body collapse {% if finding.impact %}in{%endif%}">
@@ -1071,7 +1071,7 @@
 
         <div class="panel panel-default" id="steps">
             <div class="panel-heading">
-                <h4>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_reproduce"><i
+                <h4><i class="fa-solid fa-list-ol dd-card-icon" aria-hidden="true"></i>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_reproduce"><i
                         class="fa-solid fa-chevron-{% if finding.steps_to_reproduce %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_reproduce" class="panel-body collapse {% if finding.steps_to_reproduce %}in{%endif%}">
@@ -1081,7 +1081,7 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#sev_just"><i
+                <h4><i class="fa-solid fa-gauge-high dd-card-icon" aria-hidden="true"></i>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#sev_just"><i
                         class="fa-solid fa-chevron-{% if finding.severity_justification %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="sev_just" class="panel-body collapse {% if finding.severity_justification %}in{%endif%}">
@@ -1091,7 +1091,7 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
+                <h4><i class="fa-solid fa-link dd-card-icon" aria-hidden="true"></i>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
                         class="fa-solid fa-chevron-{% if finding.references %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse {% if finding.references %}in{%endif%}">

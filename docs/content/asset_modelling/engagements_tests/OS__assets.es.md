@@ -36,7 +36,7 @@ Los Activos pueden volverse aún más granulares según las necesidades de su or
 - “ExampleAsset 1.0” usa componentes de software completamente diferentes de “ExampleAsset 2.0”, y ambas versiones cuentan con soporte activo por parte de su empresa.
 - El equipo asignado para trabajar en “ExampleAsset version A” es distinto del equipo de Activo asignado para trabajar en “ExampleAsset version B”, y por ello necesita tener asignados permisos de seguridad diferentes.
 
-Si bien también puede optar por representar estas variaciones como Compromisos dentro de un único Activo, el RBAC solo puede configurarse a nivel de Activos u Organizaciones, lo que puede limitar el acceso de los usuarios al Compromiso correspondiente (así como a los Tests y Hallazgos dentro de esos Compromisos) si se organizan de esa manera. Para obtener más información sobre RBAC y permisos en DefectDojo, haga clic [aquí](/admin/user_management/about_perms_and_roles/).
+Si bien también puede optar por representar estas variaciones como Compromisos dentro de un único Activo, el acceso solo puede otorgarse a nivel de Activos u Organizaciones, lo que puede limitar el acceso de los usuarios al Compromiso correspondiente (así como a los Tests y Hallazgos dentro de esos Compromisos) si se organizan de esa manera. Para obtener más información, consulte [Permisos de código abierto](/admin/user_management/os__authorized_users/).
 
 ## Datos del Activo 
 
@@ -69,11 +69,11 @@ Se puede acceder a los Activos a través de la barra lateral. El submenú tambi�
 
 ### Permisos 
 
-Los Activos pueden tener reglas de Control de acceso basado en roles (RBAC) aplicadas, que limitan la capacidad de los miembros del equipo para verlos e interactuar con ellos.
+El acceso a un Activo se otorga a través de su lista de [Usuarios autorizados](/admin/user_management/os__authorized_users/), que limita quién puede verlo e interactuar con él.
 
 Los permisos se propagan en cascada hacia abajo, lo que significa que el acceso a un Activo otorga automáticamente acceso a todos los objetos dentro de ese Activo (por ejemplo, Compromisos, Tests y Hallazgos).
 
-Para obtener más información sobre los roles de usuario, consulte nuestro [artículo de introducción a los roles](/admin/user_management/about_perms_and_roles/).
+Para obtener más información, consulte [Permisos de código abierto](/admin/user_management/os__authorized_users/).
 
 ## Vista del Activo 
 

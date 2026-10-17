@@ -5,7 +5,6 @@ import copy
 import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
-from itertools import chain
 from pathlib import Path
 
 import pghistory
@@ -94,7 +93,6 @@ from dojo.models import (
     Test,
     Test_Import,
     Test_Import_Finding_Action,
-    User,
 )
 from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
@@ -638,7 +636,7 @@ class ViewFinding(View):
                 reverse("view_finding", args=(finding.id,)),
             )
             title = f"Finding: {finding.title}"
-            process_tag_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title, parent=finding)
             # Add a message to the request
             messages.add_message(
                 request, messages.SUCCESS, _("Note saved."), extra_tags="alert-success",
@@ -1560,6 +1558,12 @@ def request_finding_review(request, fid):
     # in order to review a finding, we need to capture why a review is needed
     # we can do this with a Note
     if request.method == "POST":
+        if finding.under_review:
+            messages.add_message(request, messages.ERROR, _("This finding is already under review."), extra_tags="alert-danger")
+            return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
+        # Requesting a review on a closed or mitigated finding reopens it, so that needs edit access.
+        if not finding.active or finding.is_mitigated:
+            user_has_permission_or_403(request.user, finding, "edit")
         form = ReviewFindingForm(request.POST, finding=finding, user=user)
 
         if form.is_valid():
@@ -2057,72 +2061,6 @@ def ensure_template_tags_in_finding_model(template):
         )
 
 
-def apply_cwe_mitigation(apply_to_findings, template, *, update=True):
-    count = 0
-    if apply_to_findings and template.template_match and template.cwe is not None:
-        # Update active, verified findings with the CWE template
-        # If CWE only match only update issues where there isn't a CWE + Title match
-        if template.template_match_title:
-            count = Finding.objects.filter(
-                active=True,
-                verified=True,
-                cwe=template.cwe,
-                title__icontains=template.title,
-            ).update(
-                mitigation=template.mitigation,
-                impact=template.impact,
-                references=template.references,
-            )
-        else:
-            finding_templates = Finding_Template.objects.filter(
-                cwe=template.cwe, template_match=True, template_match_title=True,
-            )
-
-            finding_ids = None
-            result_list = None
-            # Exclusion list
-            for title_template in finding_templates:
-                finding_ids = Finding.objects.filter(
-                    active=True,
-                    verified=True,
-                    cwe=title_template.cwe,
-                    title__icontains=title_template.title,
-                ).values_list("id", flat=True)
-                result_list = finding_ids if result_list is None else list(chain(result_list, finding_ids))
-
-            # If result_list is None the filter exclude won't work
-            if result_list:
-                count = Finding.objects.filter(
-                    active=True, verified=True, cwe=template.cwe,
-                ).exclude(id__in=result_list)
-            else:
-                count = Finding.objects.filter(
-                    active=True, verified=True, cwe=template.cwe,
-                )
-
-            if update:
-                # MySQL won't allow an 'update in statement' so loop will have to do
-                for finding in count:
-                    finding.mitigation = template.mitigation
-                    finding.impact = template.impact
-                    finding.references = template.references
-                    template.last_used = timezone.now()
-                    template.save()
-                    new_note = Notes()
-                    new_note.entry = (
-                        f"CWE remediation text applied to finding for CWE: {template.cwe} using template: {template.title}."
-                    )
-                    new_note.author, _created = User.objects.get_or_create(
-                        username="System",
-                    )
-                    new_note.save()
-                    finding.notes.add(new_note)
-                    finding.save()
-
-            count = count.count()
-    return count
-
-
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == "POST":
@@ -2289,6 +2227,8 @@ def download_finding_pic(request, token):
             raise Http404
         size = access_token.size
         access_token.delete()
+        if access_token.user_id != request.user.id:
+            raise PermissionDenied
     except Exception:
         raise PermissionDenied
 
@@ -2943,7 +2883,6 @@ def finding_bulk_update_all(request, pid=None):
         )
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        prods = set(find.test.engagement.product for find in finds)  # noqa: C401
         if request.POST.get("delete_bulk_findings"):
             _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_find_count)
         elif form.is_valid() and finding_to_update:
@@ -2957,6 +2896,7 @@ def finding_bulk_update_all(request, pid=None):
             finds = get_authorized_findings_for_queryset(
                 "edit", finds,
             ).distinct()
+            prods = {find.test.engagement.product for find in finds}
 
             skipped_find_count = total_find_count - finds.count()
             updated_find_count = finds.count()
@@ -3205,7 +3145,7 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
             finding.duplicate_finding.duplicate = True
             finding.duplicate_finding.save(dedupe_option=False)
 
-        for cluster_member in finding.duplicate_finding_set():
+        for cluster_member in finding.duplicate_finding_set().filter(test__engagement__product=finding.test.engagement.product):
             if cluster_member != new_original:
                 logger.debug(
                     "setting new original for %i to %i",
@@ -3336,6 +3276,8 @@ def push_to_jira(request, fid):
 # precalculate because we need related_actions to be set
 def duplicate_cluster(request, finding):
     duplicate_cluster = finding.duplicate_finding_set()
+    if duplicate_cluster:
+        duplicate_cluster = get_authorized_findings_for_queryset("view", duplicate_cluster)
 
     duplicate_cluster = prefetch_for_findings(duplicate_cluster)
 

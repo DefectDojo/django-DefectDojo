@@ -2,7 +2,7 @@
 title: Zustellungen
 description: Das Protokoll aller ausgehenden Sendungen von Regeln sowie der Funktionsweise
   von Wiederholungsversuchen und erneutem Senden
-weight: 5
+weight: 6
 audience: pro
 aliases:
 - /de/automation/rules_engine_v2/deliveries/

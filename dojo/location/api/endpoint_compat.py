@@ -6,7 +6,7 @@ models while using the new URL and LocationFindingReference models underneath.
 """
 import datetime
 
-from django.db.models import OuterRef, Value
+from django.db.models import OuterRef, Prefetch, Value
 from django.db.models.functions import Coalesce
 from django_filters import BooleanFilter, CharFilter, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
@@ -35,8 +35,9 @@ from dojo.location.api.tag_filters import (
     ReadableTagFilter,
     ReadableTagInFilter,
 )
-from dojo.location.models import LocationFindingReference, LocationProductReference
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.queries import (
+    annotate_tags_readable,
     authorized_finding_references,
     get_authorized_location_finding_reference,
     get_authorized_location_product_reference,
@@ -175,7 +176,16 @@ class V3EndpointCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin, view
             location__location_type=URL.LOCATION_TYPE,
         ).annotate(
             active_finding_count=Coalesce(active_finding_subquery, Value(0)),
-        ).distinct()
+        ).prefetch_related(
+            # No DISTINCT: nothing here repeats a row (location and URL are one-to-one, the
+            # authorization and tag filters are semi-joins), and a DISTINCT made the pagination
+            # count deduplicate every reference.
+            # The serializer reads location, location.url and the location's readable tags per row.
+            Prefetch(
+                "location",
+                queryset=annotate_tags_readable(Location.objects.select_related("url")).prefetch_related("tags"),
+            ),
+        )
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,

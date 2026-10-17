@@ -53,7 +53,7 @@ As the containers that organize testing activity, Engagements can store or track
 
 ## Accessing Engagements 
 
-Engagements are accessible via the sidebar. The submenu provides access to Active Engagements and All Engagements, as well as the option to create new Engagements.
+Engagements are accessible from the sidebar under **Act > Explore > Engagements**. The submenu provides access to **Active** and **All** Engagements; new Engagements are created with the **New Engagement** button at the top of either list.
 
 ![image](images/engagement_ss13.png)
 
@@ -73,7 +73,7 @@ Before creating an Engagement, you must first have [created an Asset](/asset_mod
 
 There are several ways to create an Engagement: 
 
-- Within the Engagements dropdown in the Manage section of the sidebar
+- From the **New Engagement** button at the top of the Engagement list (**Act > Explore > Engagements > All**)
     - You will have to select the Asset to which to attribute the Engagement when completing the New Engagement form
 
 ![image](images/engagement_ss1.png)
@@ -94,7 +94,7 @@ Every Engagement must have the following fields defined:
 - Type (Interactive or CI/CD)
 - A unique name 
 - Target start and end dates 
-    - This will determine the Engagement’s appearance in the Calendar section
+    - This will determine the Engagement’s appearance in the Calendar (**Overview > Calendar**)
 - Asset 
 - Status 
 
@@ -127,11 +127,15 @@ Engagements can be edited by clicking **Edit Engagement** from within the gear m
 
 All ensuing fields that can be edited are also available when the Engagement is being created. 
 
+Changing the Asset field moves the Engagement, along with its Tests and Findings, to the selected Asset. Before saving that change, DefectDojo asks you to confirm the move and names both the current and the new Asset.
+
 ![image](images/engagements_ss99.png)
 
 ### Copy Engagements 
 
 You can easily duplicate Engagements by selecting “Copy Engagement” within the Engagement’s settings. This will create an exact copy of the original Engagement within the parent Asset, including the metadata, Tests, and Findings within it.
+
+Because the copy is always added to the same Asset, DefectDojo asks you to confirm before it copies anything. Once the copy is made, a notification confirms it and the new Engagement opens. To place an Engagement under a different Asset, edit the Engagement and change its Asset instead (see **Edit Engagements** above).
 
 ### Close Engagements 
 

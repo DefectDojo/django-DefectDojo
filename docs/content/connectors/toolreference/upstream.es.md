@@ -34,7 +34,7 @@ La mayoría de los Conectores importan **hallazgos** desde una herramienta de se
 * Tanto **Discover** como **Sync** concilian la lista de activos. Los activos nuevos aparecen como Registros `NEW`; una vez asignados (automáticamente, si la asignación automática está habilitada), DefectDojo crea el Producto y lo agrupa bajo un Tipo de producto derivado de la herramienta — por ejemplo, el namespace de GitLab o el proyecto de Azure DevOps.
 * Si más adelante se elimina un activo en el origen (por ejemplo, se elimina un repositorio), su Registro asignado se marca como `MISSING` en la siguiente Sync para que su equipo pueda triarlo. DefectDojo nunca elimina un Producto de forma silenciosa.
 
-Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Assets y ServiceNow CMDB son Conectores de activos. runZero es principalmente un Conector de activos, pero opcionalmente puede importar vulnerabilidades como hallazgos. Todos los demás Conectores listados a continuación importan hallazgos.
+Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Google Cloud, Jira Service Management Assets y ServiceNow CMDB son Conectores de activos. runZero es principalmente un Conector de activos, pero opcionalmente puede importar vulnerabilidades como hallazgos. Todos los demás Conectores listados a continuación importan hallazgos.
 
 # **Conectores compatibles**
 
@@ -68,6 +68,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Asse
 - [GitHub](/connectors/toolreference/github/#upstream-connector)
 - [GitHub Advanced Security](/connectors/toolreference/github_advanced_security/)
 - [GitLab](/connectors/toolreference/gitlab/#upstream-connector)
+- [Google Cloud](/connectors/toolreference/google_cloud/)
 - [Google Cloud Security Command Center](/connectors/toolreference/google_cloud_scc/)
 - [Group-IB ASM](/connectors/toolreference/group_ib_asm/)
 - [HackerOne](/connectors/toolreference/hackerone/)

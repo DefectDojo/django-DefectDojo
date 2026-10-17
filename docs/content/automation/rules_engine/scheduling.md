@@ -32,7 +32,7 @@ Examples of valid schedules:
 
 ## Creating a Schedule for a Rule
 
-1. Navigate to the **All Rules** page from the **Rules Engine** menu in the sidebar.
+1. Open **Act > Triage Engine > Classic Rules** in the sidebar.
 2. Find the rule you want to schedule, and open its action menu (**⋮**).
 3. Click **Schedule Rule**.  This option is only visible if the Scheduling Service is enabled and you have the required permission.
 4. In the **Schedule Rule** modal, fill in the following fields:

@@ -1,7 +1,7 @@
 ---
 title: "Configuration"
 description: "Deployment level settings for Triage Engine"
-weight: 7
+weight: 8
 audience: pro
 aliases:
   - /automation/rules_engine_v2/configuration/
@@ -130,6 +130,99 @@ The most per-item sends a single egress node will record in one run.
 A node with **One Message per Item** turned on, and **Generate a Report** with One Report per Finding or per Asset, produces one delivery row and one queued task per item. Because a run has no item cap, a rule with a very broad scope and per-item sending on would otherwise mean an unbounded number of both. The ceiling is per node per run and counts items of either kind: a Finding rule's Findings and an Asset rule's Assets spend the same budget.
 
 Past this ceiling the node records a **visible skip** saying how many items it did not send about. It does not fail the run, and it does not silently stop.
+
+## Webhook receivers
+
+These settings bound what a [webhook receiver](../webhook_receivers/) accepts.
+
+### `DD_RULES_V2_WEBHOOK_MAX_BODY_BYTES`
+
+**Default: 1048576 (1 MiB).**
+
+The largest body a receiver accepts. A larger delivery is refused and recorded as a rejected receipt. The Docker Compose bundles and the Helm chart (`webhookGateway.maxBodyBytes`) feed this one value to DefectDojo, to the gateway and to nginx's limit on receiver URLs, so change it in one place: set it in the deployment's environment (or the chart value), not on one container.
+
+### `DD_RULES_V2_WEBHOOK_DEDUPE_WINDOW_SECONDS`
+
+**Default: 86400 (one day). `0` turns it off.**
+
+Without the gateway, how long DefectDojo remembers a delivery so a sender's retry is recorded once. With a dedupe header on the receiver, a repeat is the same header value with the same body. Without one, two identical bodies within the window count once. With the gateway, the gateway recognizes a sender's retries (by the dedupe header together with a hash of the body) and DefectDojo records each gateway event once, so this setting is unused. See [Retries of the same event](../webhook_receivers/#retries-of-the-same-event).
+
+### `DD_RULES_V2_WEBHOOK_RATE_LIMIT`
+
+**Default: 600. `0` turns it off.**
+
+Without the gateway, the most deliveries one receiver accepts per minute. Past it, a delivery is answered `429` with a `Retry-After` header, and refused deliveries count too. Deliveries from the gateway skip it, because the gateway limits what it accepts itself (see [Rate limits](#rate-limits)).
+
+### `DD_RULES_V2_RECEIPT_RETENTION_DAYS`
+
+**Default: 180.**
+
+How many days a receipt is kept. `0` keeps receipts forever.
+
+### The webhook gateway
+
+The gateway runs as its own `webhook-gateway` service. nginx sends receiver URLs to it, and it delivers to DefectDojo over nginx's internal listener, signing each delivery so DefectDojo accepts deliveries only from it. It stores every delivery in DefectDojo's own database, in a schema of its own.
+
+DefectDojo itself defaults to serving receiver URLs directly (`DD_WEBHOOK_GATEWAY_MODE=direct`). The gateway is turned on explicitly where it is deployed: the Docker Compose bundles set `DD_WEBHOOK_GATEWAY_MODE=whook` and `WEBHOOK_GATEWAY_ENABLED=true`, and the Helm chart does the same when `webhookGateway.enabled` is on. The ECS task definitions run without it, in direct mode. Upgrading an existing installation to a release with the gateway is covered in [Adding the Webhook Gateway on Upgrade](/releases/pro/webhook-gateway/).
+
+To stop inbound webhook traffic without redeploying, turn off the **Inbound Webhooks** feature flag. See [Turning inbound webhooks off](../webhook_receivers/#turning-inbound-webhooks-off).
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| `DD_WEBHOOK_GATEWAY_MODE` | `direct` | `whook` puts the gateway in front of every receiver. `direct` has DefectDojo answer receiver URLs itself, with no durability during an outage. The Docker Compose bundles set `whook`. |
+| `WEBHOOK_GATEWAY_ENABLED` | `true` in the Docker Compose bundles | On the nginx and gateway containers: whether nginx routes receiver URLs to the gateway. Off, the gateway idles. Set it together with `DD_WEBHOOK_GATEWAY_MODE`: `true` with `whook`, `false` with `direct`. |
+| `DD_WEBHOOK_GATEWAY_URL` | `http://webhook-gateway:8080` | The gateway's admin address. Never routed by nginx. |
+| `DD_WEBHOOK_GATEWAY_DELIVER_BASE_URL` | `https://nginx:7443` | Where the gateway delivers. It must be reachable from the gateway and must not be public. |
+| `DD_WEBHOOK_GATEWAY_MAX_ATTEMPTS` | `12` | Delivery attempts before the gateway gives up on an event and keeps it as a dead letter. The wait starts at 2 seconds and triples each time, up to an hour, so twelve attempts cover about four and a half hours. |
+| `DD_WEBHOOK_GATEWAY_SCHEMA` | `whook` | The schema inside DefectDojo's database that holds the gateway's tables. DefectDojo's initializer and the gateway both read it, so set it once for the whole deployment. Empty skips creating it, for a deployment that creates it itself. |
+| `DD_WEBHOOK_GATEWAY_DB_ROLE` | `auto` | The gateway's own database login role. `auto` names it after DefectDojo's database (`<database>_webhook_gateway`), so installations that share one PostgreSQL server never share a role. Set a name to choose it yourself. Empty (not unset) has the gateway use DefectDojo's database credentials instead. |
+| `DD_WEBHOOK_GATEWAY_ADMIN_TOKEN` | derived | The token DefectDojo uses to configure the gateway. |
+| `DD_WEBHOOK_GATEWAY_SECRET_KEY` | derived | The key the gateway encrypts stored receiver tokens with. |
+| `DD_WEBHOOK_GATEWAY_DELIVERY_SECRET` | derived | The key the gateway signs its deliveries to DefectDojo with. |
+| `DD_WEBHOOK_GATEWAY_DB_PASSWORD` | derived | The password of the gateway's database role. |
+
+Every ten minutes, whenever a worker starts, and whenever the gateway refuses DefectDojo's admin token, DefectDojo reconciles the gateway with its receivers, so a gateway that lost its configuration recovers on its own. `manage.py reconcile_webhook_gateway` does the same on demand, and `--replay-dead-letters` also sends every enabled receiver's dead letters back to the gateway's delivery queue.
+
+#### Gateway secrets
+
+Each installation derives its own gateway secrets from `DD_SECRET_KEY`, one per purpose (the admin token, the secret key, the delivery secret and the database role's password), so there is nothing to generate or ship. A variable from the table above that is set and not empty is used instead of the derived value. In the Docker Compose bundles, DefectDojo's `init` container writes the resolved values to a volume only it and the gateway mount (`webhook_gateway_secrets`), so the gateway never receives `DD_SECRET_KEY` itself. The Helm chart derives them from `dojo.secretKey` and renders them into its Secret; see the chart's installation guide for an existing Secret.
+
+Because the gateway secrets follow `DD_SECRET_KEY`, they are only as private as it is. DefectDojo warns at startup (system check `pro.W002`) while the gateway is in use and `DD_SECRET_KEY` is still a value shipped in DefectDojo's deployment files.
+
+#### Changing the secret key or the gateway secrets
+
+Changing `DD_SECRET_KEY`, or any explicit gateway secret, changes what DefectDojo and the gateway have to agree on. While they disagree, the gateway answers senders with a server error when it cannot decrypt a receiver's stored secret, and DefectDojo answers the gateway's deliveries with a server error when their signature does not verify. Both are retried, so nothing is dropped, but keep the gap short:
+
+1. Restart DefectDojo (the web containers and every Celery worker) and the gateway together. In the Docker Compose bundles, let `init` run first: it writes the new secrets and sets the gateway role's new password.
+2. DefectDojo re-registers every receiver with the gateway when a worker starts, so the gateway reseals each receiver's token with the new key. To do it at once, run `manage.py reconcile_webhook_gateway`.
+
+The same reconcile also runs every ten minutes and after the gateway refuses DefectDojo's admin token, so an installation that restarted out of step catches up on its own.
+
+#### Database role and schema
+
+DefectDojo's initializer creates the gateway's login role (`DD_WEBHOOK_GATEWAY_DB_ROLE`) and its schema (`DD_WEBHOOK_GATEWAY_SCHEMA`), owned by that role, inside DefectDojo's database. The role can use its own schema and nothing else of DefectDojo's.
+
+- Creating the role needs `CREATEROLE` on DefectDojo's database user. Without it, the gateway uses DefectDojo's credentials, confined to its schema by `search_path` only, and the initializer logs the statements a database administrator can run to give it a role of its own.
+- Creating the schema needs `CREATE` on DefectDojo's database. Without it, the initializer logs the exact `CREATE SCHEMA` (or `GRANT`) statement to run, the gateway refuses to start and prints the same statement, and the receivers list shows the gateway as **Not Started**.
+- PostgreSQL roles belong to the whole server, not to one database, so the initializer marks the role it creates with a comment naming DefectDojo's database. It never changes the password of, or grants anything to, an existing role marked for a different database (or not marked at all), which may belong to another installation on the same server. It uses such a role as it is only when the role already accepts the configured password; otherwise the gateway uses DefectDojo's credentials and the initializer logs why.
+
+The statements, with your own database, user and password:
+
+```sql
+CREATE ROLE <database>_webhook_gateway LOGIN PASSWORD '<password>';
+GRANT CONNECT ON DATABASE <database> TO <database>_webhook_gateway;
+CREATE SCHEMA IF NOT EXISTS whook AUTHORIZATION <database>_webhook_gateway;
+```
+
+Then set `DD_WEBHOOK_GATEWAY_DB_PASSWORD` to that password. Without a dedicated role, `CREATE SCHEMA IF NOT EXISTS whook AUTHORIZATION <DefectDojo's database user>;` is enough.
+
+#### Connection budget
+
+The gateway holds at most `WHOOK_DB_MAX_CONNS` connections (default 5; `webhookGateway.database.maxConnections` in the Helm chart) on DefectDojo's database server, on top of DefectDojo's own. Count them against the server's `max_connections`, or a managed database's connection limit.
+
+#### Rate limits
+
+nginx allows each sender address `DD_WEBHOOK_RECEIVER_RATE` receiver requests (default `100r/s`, burst `DD_WEBHOOK_RECEIVER_BURST`, default 1000), and the gateway accepts `WHOOK_INGEST_RATE` deliveries per second per receiver (default 100, burst `WHOOK_INGEST_BURST`, default 1000). Both answer `429` above the limit, which senders retry.
 
 ## Related settings
 

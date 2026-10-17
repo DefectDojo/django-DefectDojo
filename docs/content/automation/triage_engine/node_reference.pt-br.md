@@ -1,7 +1,7 @@
 ---
 title: Referência de Nós
 description: Todos os nós com que o Triage Engine vem, e o que cada um faz
-weight: 3
+weight: 4
 audience: pro
 aliases:
 - /pt-br/automation/rules_engine_v2/node_reference/

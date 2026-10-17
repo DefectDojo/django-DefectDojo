@@ -26,7 +26,7 @@ The user record itself is kept. Findings, notes and history reference the people
 
 ## Setup
 
-1. Open **Connect > Authorization** and select **SCIM Provisioning**. SCIM is listed alongside your login providers because it connects to the same identity provider, and is tagged **Provisioning** to distinguish it from the providers that put a button on the login page.
+1. Open **Connect > Authorization > Providers** and select **SCIM Provisioning**. SCIM is listed alongside your login providers because it connects to the same identity provider, and is tagged **Provisioning** to distinguish it from the providers that put a button on the login page.
 
 2. Check **Enable SCIM Provisioning** and submit. While this is off, the SCIM endpoints behave as though they do not exist, so a connection test from your identity provider reports the address as not found.
 
@@ -119,7 +119,7 @@ Deleting a group through SCIM removes the group and its memberships. It never de
 
 By default, SCIM will not deactivate a superuser account. The common failure in any provisioning setup is an identity provider scoped more broadly than intended, and superusers are how you get back into DefectDojo when something goes wrong.
 
-If you want your identity provider to manage superusers as well, enable **Allow SCIM to deactivate superusers** on the SCIM settings page. Even then, DefectDojo refuses to deactivate the last remaining active superuser, so provisioning cannot leave the instance without an administrator.
+If you want your identity provider to manage superusers as well, enable **Allow SCIM to Deactivate Superusers** on the SCIM settings page. Even then, DefectDojo refuses to deactivate the last remaining active superuser, so provisioning cannot leave the instance without an administrator.
 
 ## Limitations
 

@@ -1,7 +1,7 @@
 ---
 title: Konfiguration
 description: Einstellungen auf Deployment-Ebene für Triage Engine
-weight: 7
+weight: 8
 audience: pro
 aliases:
 - /de/automation/rules_engine_v2/configuration/

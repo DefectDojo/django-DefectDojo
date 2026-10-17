@@ -22,6 +22,17 @@ The REST API JSON output can be uploaded to DefectDojo with "SonarQube Scan".
 ### ZIP
 If you have too many findings in one project, you can implement a small script to handle pagination and put all JSON files in a .zip file. This zip file can also be parsed from DefectDojo with "SonarQube Scan". 
 
+### Deduplication
+Each issue or hotspot imported from the REST API keeps its SonarQube `key` in `unique_id_from_tool`. "SonarQube Scan" still deduplicates on the hashcode fields listed below by default. If several issues of the same severity are reported in the same file (for example vulnerabilities without a CWE in their message), they can share a hash code and be merged or closed on reimport. To match on the SonarQube key instead, set:
+
+```
+DD_DEDUPLICATION_ALGORITHM_PER_PARSER='{"SonarQube Scan": "unique_id_from_tool"}'
+```
+
+Findings imported before the key was stored don't have it, so the first reimport after switching re-creates them.
+
+See [Deduplication Tuning (Open Source)](/triage_findings/finding_deduplication/os__deduplication_tuning/) for details.
+
 ## Soprasteria
 ### Soprasteria SonarQube Scan (Aggregates findings per cwe, title, description, file\_path.)
 

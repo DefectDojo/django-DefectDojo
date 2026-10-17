@@ -10,12 +10,12 @@ If you have difficulty accessing your DefectDojo instance, here are some steps y
 
 ## I can access the site, but I can't log in
 
-1. You can reset the password for your account from the login page: **yourcompanyinstance.cloud.defectdojo.com/login**. Click 'I forgot my password' in order to begin the process.  
+1. You can reset the password for your account from **yourcompanyinstance.cloud.defectdojo.com/ui/password-reset**.  
 ​
 
 ![image](images/Connectivity_Troubleshooting.png)
 
-2. Enter your email address, and click "Reset my password".  
+2. Enter your email address and submit the form.  
 ​
 3. You should receive an email with the subject header "`Password reset on yourcompanyinstance.cloud.defectdojo.com`". This email contains a link which you can click to set a new password.  
   
@@ -30,7 +30,7 @@ If you don't receive an email, please check your Spam folder. Failing that, have
 
 If your company's cloud.defectdojo site does not load in your browser, or times out, it may be necessary for your company to change your firewall rules in order to accept your connection.
 
-Firewall rules can be changed in your Cloud Manager at <https://cloud.defectdojo.com/accounts/manage_subscriptions>.
+Firewall rules can be changed in your Cloud Manager: open <https://cloud.defectdojo.com/subscriptions>, select the subscription, and edit its **Firewall rules**. See [Using the Cloud Manager](../using-cloud-manager/#changing-your-firewall-settings).
 
 If your company uses a shared VPN, proxy server or a similar tool, make sure it’s authorized to connect to DefectDojo and that the IP address is included in DefectDojo's Firewall rules.
 
@@ -40,7 +40,7 @@ If the problem persists, please contact [support@defectdojo.com](mailto:support@
 
 ## I can't log in to the Cloud Manager
 
-If you can’t access the Cloud Manager, navigate to the Login page at <https://cloud.defectdojo.com/accounts/login/> and click **“Forgot your password?”**
+If you can’t access the Cloud Manager, navigate to the Login page at <https://cloud.defectdojo.com/login> and select **“Forgot your password?”**
 
 
 ![image](images/Connectivity_Troubleshooting_3.png)  

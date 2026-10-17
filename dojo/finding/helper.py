@@ -30,6 +30,7 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
+from dojo.importers.import_lock import lock_tests_of_findings_under_import, unlock_tests_under_import
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
@@ -549,6 +550,33 @@ def post_process_findings_batch(
     if not finding_ids:
         return
 
+    # Deduplication may mark these findings duplicate, and everything below goes on writing them,
+    # so hold the import lock on their tests until it is done (see dojo.importers.import_lock).
+    locked_tests = lock_tests_of_findings_under_import(finding_ids)
+    try:
+        _post_process_findings_batch(
+            finding_ids,
+            dedupe_option=dedupe_option,
+            product_grading_option=product_grading_option,
+            issue_updater_option=issue_updater_option,
+            push_to_jira=push_to_jira,
+            jira_instance_id=jira_instance_id,
+            force_sync=force_sync,
+        )
+    finally:
+        unlock_tests_under_import(locked_tests)
+
+
+def _post_process_findings_batch(
+    finding_ids,
+    *,
+    dedupe_option,
+    product_grading_option,
+    issue_updater_option,
+    push_to_jira,
+    jira_instance_id,
+    force_sync,
+):
     system_settings = System_Settings.objects.get()
 
     # The status-changing dedup / false-positive-history writes below update dojo_finding

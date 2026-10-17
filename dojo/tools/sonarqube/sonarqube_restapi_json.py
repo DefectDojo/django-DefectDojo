@@ -52,6 +52,7 @@ class SonarQubeRESTAPIJSON:
                     description += self.returncomponent(json_content, component)
                     item = Finding(
                         title=rule + "_" + key,
+                        unique_id_from_tool=key,
                         description=description,
                         test=test,
                         severity=self.severitytranslator(issue.get("severity")),
@@ -91,7 +92,7 @@ class SonarQubeRESTAPIJSON:
                     component_name = None
                     component_version = None
                     if "Filename: " in message and " | " in message:
-                        component_pattern = r"Filename: .* \| "
+                        component_pattern = r"Filename: [^|]* \| "
                         comp = re.findall(component_pattern, message)
                         if comp:
                             component_result = comp[0].split("Filename: ")[1].split(" | ")[0]
@@ -123,6 +124,7 @@ class SonarQubeRESTAPIJSON:
                     description += self.returncomponent(json_content, component)
                     item = Finding(
                         title=rule + "_" + key,
+                        unique_id_from_tool=key,
                         description=description,
                         test=test,
                         severity=self.severitytranslator(issue.get("severity")),
@@ -204,6 +206,7 @@ class SonarQubeRESTAPIJSON:
                     description += self.returncomponent(json_content, component)
                     item = Finding(
                         title=rule + "_" + key,
+                        unique_id_from_tool=key,
                         description=description,
                         test=test,
                         severity=self.severitytranslator(issue.get("severity")),
@@ -257,6 +260,7 @@ class SonarQubeRESTAPIJSON:
                 description += self.returncomponent(json_content, component)
                 item = Finding(
                     title=ruleKey + "_" + key,
+                    unique_id_from_tool=key,
                     description=description,
                     test=test,
                     severity=self.severitytranslator(hotspot.get("vulnerabilityProbability")),

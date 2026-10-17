@@ -19,7 +19,7 @@ Once the feature is enabled, **Global Component** becomes available as an **Algo
 
 ## Configuring Global Component Deduplication
 
-Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration** (**Settings > Pro Settings > Deduplication Settings > Matching Configuration** on instances still using the previous menu layout; see [The Sidebar Menu](/navigation/pro__sidebar/)).
+Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplication, or both, and is configured per security tool from **Settings > Finding Workflow > Matching Configuration**.
 
 > **A pooled Asset is bounded to its pool.** "Across all Assets" holds while an Asset is not in a
 > [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) for the matching kind
@@ -33,7 +33,7 @@ Global Component can be applied to Same-Tool Deduplication, Cross-Tool Deduplica
 
 Use Same-Tool Deduplication with the Global Component algorithm when you want to deduplicate findings from a single SCA tool across multiple Assets.
 
-1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same tool** cell.
+1. Open **Settings > Finding Workflow > Matching Configuration** and select the tool's **Same Tool** cell.
 2. Set the **Algorithm** to **Global Component**.
 3. Review the impact and confirm.
 
@@ -46,7 +46,7 @@ Use Cross-Tool Deduplication with the Global Component algorithm when you want t
 Cross-tool matching requires Global Component to be configured on **each** tool that should participate.
 
 1. Open **Settings > Finding Workflow > Matching Configuration**.
-2. For each tool to include: select its **Cross tool** cell, set the **Algorithm** to **Global Component**, review the impact and confirm.
+2. For each tool to include: select its **Cross Tool** cell, set the **Algorithm** to **Global Component**, review the impact and confirm.
 
 ## How Matching Works
 

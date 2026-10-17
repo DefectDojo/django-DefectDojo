@@ -31,10 +31,10 @@ Complete the following steps in your GitHub Enterprise Server before configuring
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **GitHub Enterprise**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **GitHub Enterprise**, and fill in the form:
 
 - **GitHub Enterprise OAuth Key** — enter your **Client ID**.
-- **GitHub Enterprise OAuth Secret** — enter your **Client secret**.
+- **GitHub Enterprise OAuth Secret** — enter your **Client secret**. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID or either GitHub Enterprise URL.
 - **GitHub Enterprise URL** — your GitHub Enterprise base URL, e.g. `https://github.yourcompany.com/`.
 - **GitHub Enterprise API URL** — your GitHub Enterprise API URL, e.g. `https://github.yourcompany.com/api/v3/`.
 

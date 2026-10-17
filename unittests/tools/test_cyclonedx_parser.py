@@ -2,10 +2,96 @@ import datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.cyclonedx.parser import CycloneDXParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestCyclonedxParser(DojoTestCase):
+    @skip_unless_v3
+    def test_dependency_locations_carry_the_component_type(self):
+        with (get_unit_tests_scans_path("cyclonedx") / "log4j.json").open(encoding="utf-8") as file:
+            findings = CycloneDXParser().get_findings(file, Test())
+        location = findings[0].unsaved_locations[0]
+        self.assertEqual("dependency", location.type)
+        self.assertEqual("library", location.data["component_type"])
+
+    @staticmethod
+    def _component_types(filename):
+        """Parse a fixture and return {purl or name: component_type} for finding-level and product-level locations."""
+        test = Test()
+        with (get_unit_tests_scans_path("cyclonedx") / filename).open(encoding="utf-8") as file:
+            findings = CycloneDXParser().get_findings(file, test)
+        finding_level = {
+            location.data["purl"] or location.data["name"]: location.data["component_type"]
+            for finding in findings
+            for location in finding.unsaved_locations
+        }
+        product_level = {location.data["purl"]: location.data["component_type"] for location in test.unsaved_metadata}
+        return finding_level, product_level
+
+    @skip_unless_v3
+    def test_xml_dependency_locations_carry_the_component_type(self):
+        # A non-library type, so the assertion cannot pass on a library default, and one component
+        # with no type attribute, which carries an empty string (unknown).
+        for filename in ("component_types_1.4.xml", "component_types_1.6.xml"):
+            finding_level, product_level = self._component_types(filename)
+            with self.subTest(filename=filename, level="finding"):
+                self.assertEqual(
+                    {
+                        "pkg:huggingface/example-org/example-model@1.0": "machine-learning-model",
+                        "pkg:pypi/urllib3@2.0.0": "",
+                    },
+                    finding_level,
+                )
+            with self.subTest(filename=filename, level="product"):
+                self.assertEqual(
+                    {
+                        "pkg:huggingface/example-org/example-model@1.0": "machine-learning-model",
+                        "pkg:pypi/requests@2.31.0": "library",
+                        "pkg:pypi/urllib3@2.0.0": "",
+                    },
+                    product_level,
+                )
+
+    @skip_unless_v3
+    def test_xml_legacy_extension_dependency_locations_carry_the_component_type(self):
+        # Covers both legacy paths: a vulnerability embedded in its component, and a
+        # root-level vulnerability resolved through the bom-ref.
+        finding_level, product_level = self._component_types("component_types_legacy.xml")
+        expected = {
+            "pkg:huggingface/example-org/example-model@1.0": "machine-learning-model",
+            "pkg:generic/example-dataset@2.0": "data",
+            "pkg:pypi/urllib3@2.0.0": "",
+        }
+        with self.subTest(level="finding"):
+            self.assertEqual(expected, finding_level)
+        with self.subTest(level="product"):
+            self.assertEqual(expected, product_level)
+
+    @skip_unless_v3
+    def test_json_dependency_locations_carry_the_component_type(self):
+        # A missing type and an explicit null both carry an empty string, so the value is always a str.
+        finding_level, product_level = self._component_types("component_types.json")
+        with self.subTest(level="finding"):
+            self.assertEqual(
+                {
+                    "pkg:huggingface/example-org/example-model@1.0": "machine-learning-model",
+                    "pkg:pypi/urllib3@2.0.0": "",
+                    "pkg:pypi/idna@3.4": "",
+                    "example-dataset": "data",
+                },
+                finding_level,
+            )
+        with self.subTest(level="product"):
+            self.assertEqual(
+                {
+                    "pkg:huggingface/example-org/example-model@1.0": "machine-learning-model",
+                    "pkg:pypi/requests@2.31.0": "library",
+                    "pkg:pypi/urllib3@2.0.0": "",
+                    "pkg:pypi/idna@3.4": "",
+                },
+                product_level,
+            )
+
     def test_grype_report(self):
         with (get_unit_tests_scans_path("cyclonedx") / "grype_dd_1_14_1.xml").open(encoding="utf-8") as file:
             parser = CycloneDXParser()

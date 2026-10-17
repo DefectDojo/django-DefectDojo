@@ -1,7 +1,7 @@
 ---
 title: Configuración
 description: Ajustes a nivel de despliegue para Triage Engine
-weight: 7
+weight: 8
 audience: pro
 aliases:
 - /es/automation/rules_engine_v2/configuration/

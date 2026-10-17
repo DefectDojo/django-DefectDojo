@@ -20,7 +20,7 @@ Rules Engine is in Beta and is off by default. A superuser can turn it on from *
 
 Currently, Rules can only be created for Findings, however more object types will be supported in the future.
 
-Rules can be triggered manually from the **All Rules** page, or scheduled to run automatically on a recurring schedule.  When a rule is triggered, it will be applied to all existing Findings that match the filter conditions set.
+Rules can be triggered manually from the **Classic Rules** page, or scheduled to run automatically on a recurring schedule.  When a rule is triggered, it will be applied to all existing Findings that match the filter conditions set.
 
 ## Possible Rule Actions
 Each Rule can apply one or more of these changes to a Finding when it is triggered successfully (i.e. matches the set Filter conditions).
@@ -47,7 +47,7 @@ Each Rule can apply one or more of these changes to a Finding when it is trigger
 Rules are automatically triggered when a Finding meets specific Filter conditions. For more information on Filters that can be used to create Rule Actions, see the [Filter Index](/navigation/pro__filter_index) page.
 
 ## Creating a New Rule
-Start this process from the New Rule page.  In the [Pro UI](/get_started/about/ui_pro_vs_os/), under **Manage Category**, Expand the **Rules Engine** dropdown and click **+ New Rule**.
+In the [Pro UI](/get_started/about/ui_pro_vs_os/), open **Act > Triage Engine > Classic Rules** and select **New Rule**.
 
 ![image](images/rules_engine_1.png)
 
@@ -102,7 +102,7 @@ For example, in the screenshot above we have a list of Findings that will be aff
 You will be prompted again to confirm that you want your Rule to be created.  Note that the **Rule will not be applied immediately**, and must be triggered manually.
 
 ## Running a Rule
-From the All Rules page, you can select a Rule you wish to run.  Click on the title of the rule to view it in more detail.
+From the **Classic Rules** page (**Act > Triage Engine > Classic Rules**), you can select a Rule you wish to run.  Click on the title of the rule to view it in more detail.
 
 ![image](images/rules_engine_6.png)
 

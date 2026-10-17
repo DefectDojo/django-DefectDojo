@@ -7,7 +7,7 @@ aliases:
 ---
 Normally, most of the Findings in your environment will be imported from other security tools. If you wish, you can add manual Finding entries as well, if you have vulnerabilities or work you wish to manage that was not created from a scan tool.
 
-1. From the DefectDojo Sidebar, open the New Finding link by clicking **Manage \> Findings \> New Finding**.  
+1. From the DefectDojo sidebar, open **Act > Explore > Findings** and select **New Finding**.  
 ​
 ![image](images/Creating_Findings_Manually.png)
   

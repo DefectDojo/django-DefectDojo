@@ -18,7 +18,7 @@ Please note that Open/Closed are not **explicit** Status types for Findings.  Ce
 
 Once a Finding is **Active**, it will be labeled as an **Open** Finding, regardless of whether or not it has been **Verified.**
 
-Open Findings can be seen from the **Findings \> Open Findings** view of DefectDojo.
+Open Findings can be seen from the Findings list (**Classic UI: Findings > Open Findings**, **Pro UI: Act > Explore > Findings > Active**).
 
 ### **Active Findings**
 

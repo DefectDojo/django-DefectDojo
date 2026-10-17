@@ -10,7 +10,7 @@ In DefectDojo, Components represent third-party libraries, software components, 
 
 ## Component Views
 
-DefectDojo Pro includes a dedicated table view for Components, which can be found in the sidebar.  This view shows Active Findings, Duplicate Findings, and Total Findings for each Component.  These figures include all Assets on the DefectDojo instance.
+DefectDojo Pro includes a dedicated table view for Components, which can be found in the sidebar under **Act > Explore > Attack Surface > Components**.  This view shows Active Findings, Duplicate Findings, and Total Findings for each Component.  These figures include all Assets on the DefectDojo instance.
 
 An individual Asset's Components can be seen on the Asset view.
 

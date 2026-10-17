@@ -35,7 +35,7 @@ Assets can become even more granular depending on the needs of your organization
 - “ExampleAsset 1.0” uses completely different software components from “ExampleAsset 2.0”, and both versions are actively supported by your company.
 - The team assigned to work on “ExampleAsset version A” is different from the Asset team assigned to work on “ExampleAsset version B”, and needs to have different security permissions assigned as a result.
 
-While you may also elect to represent these variations as Engagements within a single Asset, RBAC can only be set at the level of Assets or Organizations, which may limit users’ access to the appropriate Engagement (as well as the Tests and Findings within those Engagements) if they’re organized as such. For more information on RBAC and permissions in DefectDojo, click [here](/admin/user_management/about_perms_and_roles/).
+While you may also elect to represent these variations as Engagements within a single Asset, access can only be granted at the level of Assets or Organizations, which may limit users’ access to the appropriate Engagement (as well as the Tests and Findings within those Engagements) if they’re organized as such. For more information, see [Open-Source Permissions](/admin/user_management/os__authorized_users/).
 
 ## Asset Data 
 
@@ -68,11 +68,11 @@ Assets are accessible via the sidebar. The submenu also provides the option to c
 
 ### Permissions 
 
-Assets can have Role-Based Access Control (RBAC) rules applied, which limit team members’ ability to view and interact with them.
+Access to an Asset is granted through its [Authorized Users](/admin/user_management/os__authorized_users/) list, which limits who can view and interact with it.
 
 Permissions cascade downward, meaning that access to an Asset automatically grants access to all objects within that Asset (e.g., Engagements, Tests, and Findings).
 
-For more information on user roles, see our [Introduction To Roles article](/admin/user_management/about_perms_and_roles/).
+For more information on access, see [Open-Source Permissions](/admin/user_management/os__authorized_users/).
 
 ## Asset View 
 

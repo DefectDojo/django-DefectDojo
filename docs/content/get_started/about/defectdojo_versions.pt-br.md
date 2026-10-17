@@ -15,7 +15,7 @@ weight: 1
 | Gerenciamento essencial de vulnerabilidades | ✔️ Importe, rastreie e gerencie achados de mais de 500 ferramentas de segurança | ✔️ Tudo do open-source, otimizado para escala |
 | Deduplicação de achados | ✔️ Deduplicação padrão | ✔️ Deduplicação avançada e configurável |
 | API REST | ✔️ API REST completa | ✔️ API REST completa |
-| Autenticação e controle de acesso | ✔️ Autenticação local e RBAC básico | ✔️ SSO (SAML/OAuth), MFA, RBAC avançado |
+| Autenticação e controle de acesso | ✔️ Contas locais e listas de acesso por Ativo | ✔️ SSO (SAML, OIDC, OAuth), LDAP, MFA, controle de acesso baseado em papéis |
 | Interface do usuário | ✔️ UI da Community | ✔️ UI moderna do Pro com melhorias de performance |
 | Painéis e relatórios | ✔️ Painéis e relatórios básicos | ✔️ Painéis avançados e personalizáveis, e relatórios executivos |
 | Automação e fluxos de trabalho | ❌ Não incluído | ✔️ Rules Engine e fluxos de trabalho automatizados |

@@ -88,7 +88,14 @@ class LocationData:
         artifact_hashes: dict[str, list[str]] | None = None,
         license_expression: str = "",
         file_path: str = "",
+        component_type: str = "",
     ) -> LocationData:
+        """
+        A software component. ``component_type`` is the CycloneDX ``component.type``
+        (library, application, machine-learning-model, ...) when the report says;
+        empty means unknown, which a consumer reads as library. It describes the
+        component, it is not part of its identity (the purl is).
+        """
         return cls(
             type="dependency",
             data={
@@ -102,6 +109,7 @@ class LocationData:
                 "artifact_hashes": artifact_hashes or {},
                 "license_expression": license_expression,
                 "file_path": file_path,
+                "component_type": component_type,
             },
         )
 

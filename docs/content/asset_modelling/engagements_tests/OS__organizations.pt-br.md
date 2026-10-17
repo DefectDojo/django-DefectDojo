@@ -34,7 +34,7 @@ Se você tem uma única Organização que contém todas as informações relevan
 
 Se um determinado projeto de software tem muitas implantações ou versões distintas, pode valer a pena criar uma única Organização que cubra o escopo de todo o projeto e deixar cada versão existir como Ativos individuais. Em alguns fluxos de trabalho, as Organizações também podem ser usadas para separar estágios do ciclo de vida do software: uma Organização para "Em Desenvolvimento", outra Organização para "Em Produção", etc.
 
-As Organizações podem ser usadas para determinar o acesso a subsidiárias, empresas adquiridas ou outras unidades de negócio regulamentadas para fins de RBAC. Em empresas complexas, onde há muitos projetos únicos com regras de acesso diferentes, as Organizações são particularmente relevantes.
+As Organizações podem ser usadas para determinar o acesso a subsidiárias, empresas adquiridas ou outras unidades de negócio regulamentadas para fins de controle de acesso. Em empresas complexas, onde há muitos projetos únicos com regras de acesso diferentes, as Organizações são particularmente relevantes.
 
 Em última análise, a decisão de como usar Organizações e Ativos depende de como você deseja melhor refletir sua estrutura organizacional exclusiva e as necessidades da sua equipe de segurança.
 
@@ -110,7 +110,7 @@ As Organizações têm como objetivo representar a propriedade estrutural ou os 
 
 ## Limites das Organizações
 
-As Organizações estabelecem tanto limites de relatórios quanto de acesso dentro do DefectDojo. Como integrações, permissões de RBAC, propriedade, métricas e modelos de deduplicação frequentemente herdam a estrutura das Organizações, projetar limites claros desde o início ajuda a evitar a expansão descontrolada da hierarquia e a fragmentação de relatórios mais tarde.
+As Organizações estabelecem tanto limites de relatórios quanto de acesso dentro do DefectDojo. Como integrações, permissões de acesso, propriedade, métricas e modelos de deduplicação frequentemente herdam a estrutura das Organizações, projetar limites claros desde o início ajuda a evitar a expansão descontrolada da hierarquia e a fragmentação de relatórios mais tarde.
 
 ### Achados e automação
 
@@ -118,9 +118,9 @@ Embora as integrações normalmente sejam configuradas em objetos de nível infe
 
 As permissões são propagadas para baixo, o que significa que o acesso a uma Organização concede automaticamente acesso a todos os objetos dentro dessa Organização (por exemplo, Ativos, Engajamentos, Testes e Achados).
 
-O modelo de RBAC do DefectDojo pode ser usado para controlar o acesso de usuários humanos, mas também pode restringir o acesso de tokens de API a Organizações específicas.
+A lista de [Usuários Autorizados](/admin/user_management/os__authorized_users/) de uma Organização controla o acesso de usuários humanos. Os tokens de API atuam como o usuário ao qual pertencem, portanto um token só consegue acessar as Organizações para as quais o seu usuário está autorizado.
 
-Para mais informações sobre funções de usuário, consulte nosso artigo [Permissões](/admin/user_management/os__authorized_users/).
+Para mais informações, consulte nosso artigo [Permissões](/admin/user_management/os__authorized_users/).
 
 ### Propriedade
 

@@ -24,5 +24,5 @@ Todos esses recursos podem ser automatizados, e como o DefectDojo suporta mais d
 
 ### Recursos do Open-Source
 - Sua organização usa Jira? Aprenda a usar nossa [integração com Jira](/connectors/os_jira/os__jira_guide/) para criar tickets no Jira a partir dos dados que você importa.
-- Você planeja compartilhar o DefectDojo com muitos usuários na sua organização? Confira nossos guias de [gerenciamento de usuários](/admin/user_management/about_perms_and_roles/) e configure o controle de acesso baseado em papéis (RBAC).
+- Você planeja compartilhar o DefectDojo com muitos usuários na sua organização? Veja [Permissões do Open Source](/admin/user_management/os__authorized_users/) para controlar quem pode ver cada Produto e Product Type.
 - Pronto para mergulhar na automação? Aprenda a usar a [API do DefectDojo](/import_data/import_scan_files/api_pipeline_modelling/) para importar automaticamente novos dados e construir um pipeline de CI/CD robusto.

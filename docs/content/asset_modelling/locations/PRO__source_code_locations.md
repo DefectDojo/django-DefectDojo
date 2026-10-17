@@ -19,7 +19,7 @@ Findings that already existed before Locations was enabled get their code locati
 
 ## Where to Find Them
 
-- **All Source Code** in the sidebar lists every code location in the instance, with the same filtering and tagging as URLs and Dependencies.
+- **Source Code** under **Act > Explore > Attack Surface** in the sidebar lists every code location in the instance, with the same filtering and tagging as URLs and Dependencies.
 - **View Source Code** in an Asset's Locations menu scopes the list to one asset.
 - A finding's page shows its current code location and, when the finding has moved, its **location history**.
 

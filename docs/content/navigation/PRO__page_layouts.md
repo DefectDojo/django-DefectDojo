@@ -27,7 +27,7 @@ A **layout** is a saved arrangement of widgets for one page type. A layout you b
 Layouts come from three places:
 
 - **Shipped With DefectDojo**: a built-in layout for each of the six pages. This is what you see before you change anything.
-- **Your Layouts**: layouts you have created.
+- **Saved Layouts**: layouts you have created.
 - **Shared Templates**: layouts someone has published for everyone on the instance.
 
 ## The Page Layout menu
@@ -42,7 +42,7 @@ Layouts in the list carry a marker showing where they came from: shipped with De
 
 ## Making your first change
 
-The shipped layouts are read only, so the first time you customize a page DefectDojo offers to make you a copy to work in. A **Create Your Own Layout** prompt appears, you give the layout a name, and **Create and Edit** puts you straight into edit mode on your new copy. The shipped layout is left untouched, so you can always go back to it.
+The shipped layouts are read only, so the first time you customize a page DefectDojo offers to make you a copy to work in. A **Create a Personal Layout** prompt appears, you give the layout a name, and **Create and Edit** puts you straight into edit mode on your new copy. The shipped layout is left untouched, so you can always go back to it.
 
 ## Editing a layout
 
@@ -54,7 +54,7 @@ In edit mode:
 - **Remove Widget** takes it off the layout. You can add it back later.
 - **Add Widget** opens the catalog of widgets available for that page.
 
-**Your changes are saved as you go.** There is no separate save step. **Done** leaves edit mode, and anything you changed is already stored.
+**Your changes are saved as you go.** There is no separate save step. **Done Editing** leaves edit mode, and anything you changed is already stored.
 
 ## Creating a layout from scratch
 
@@ -68,7 +68,7 @@ In edit mode:
 | --- | --- |
 | **Use Layout** | Switch to that layout. |
 | **Rename** | Change a layout's name. |
-| **Clone** | Copy a layout, including a shared or shipped one, into Your Layouts. |
+| **Clone** | Copy a layout, including a shared or shipped one, into Saved Layouts. |
 | **Delete** | Remove one of your layouts. |
 | **Set Default** / **Clear Default** | Choose which layout you personally land on for this page. |
 | **Share** / **Unshare** | Publish one of your layouts as a shared template, or withdraw it. |
@@ -115,3 +115,5 @@ Which widgets a page offers depends on the page, and **Add Widget** shows what i
 - **Charts** plot the record's data, such as severity breakdowns and counts over time.
 
 Some widgets appear only when the feature behind them is available to you. For example, the **Automation History** widget on the Asset and Finding pages shows what the rules engine did to that record and why, so it is offered only when Triage Engine is turned on and you hold Rule View.
+
+The record cards at the top of the Asset page (**Organization Memberships**, **Asset Identity**, **Exposure** and **Regulatory**) and the **Member Assets** table at the top of the Organization page are widgets as well. The shipped layouts place them first, and layouts saved before they were widgets have them added at the top, above their own widgets, so nothing that was on the page goes missing. Like any widget you can move, resize or remove them. Each one is shown only while the feature behind it is turned on.

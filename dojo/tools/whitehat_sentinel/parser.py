@@ -110,7 +110,7 @@ class WhiteHatSentinelParser:
         description_ref = {"description": "", "reference_link": ""}
 
         # The references section is always between <h2> or <strong> tags
-        reference_heading_regex = "<.+>References<.+>"
+        reference_heading_regex = "<[^<>]+>References<[^<>]+>"
 
         description_chunks = re.split(
             reference_heading_regex,

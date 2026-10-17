@@ -1,7 +1,7 @@
 ---
 title: Migración desde Rules Engine
 description: Migrar reglas existentes de Rules Engine a grafos de Triage Engine
-weight: 6
+weight: 7
 audience: pro
 aliases:
 - /es/automation/rules_engine_v2/converting_from_rules_engine/

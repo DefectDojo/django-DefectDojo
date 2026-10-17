@@ -73,6 +73,8 @@ def view_finding_group(request, fgid):
     filter_name = finding_group.name
 
     if request.method == "POST":
+        # The page itself only needs view access; changing the group needs edit.
+        user_has_permission_or_403(request.user, finding_group, "edit")
         edit_finding_group_form = EditFindingGroupForm(request.POST, instance=finding_group)
         if edit_finding_group_form.is_valid():
             finding_group.name = edit_finding_group_form.cleaned_data.get("name", "")

@@ -22,7 +22,7 @@ Environments are accessible from the Engagements submenu in the sidebar.
 
 ### Permissions 
 
-All Users can view the list of existing Environments, regardless of their global role.
+All Users can view the list of existing Environments.
 
 However, creating, editing, and deleting Environments is limited to Users with Superuser and Staff status.
 

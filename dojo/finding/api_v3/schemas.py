@@ -42,7 +42,7 @@ from dojo.models import Finding
 from dojo.product.api_v3.schemas import AssetSlim
 from dojo.product_type.api_v3.schemas import OrganizationSlim
 from dojo.test.api_v3.schemas import EnvironmentSlim, TestSlim, TestTypeSlim
-from dojo.user.api_v3.schemas import UserSlim
+from dojo.user.api_v3.schemas import UserSlim, UserStub
 from dojo.vulnerability.queries import finding_vulnerability_id_strings, vulnerability_id_prefetch
 
 __all__ = [
@@ -162,7 +162,7 @@ def _finding_location_edges(finding) -> list[dict]:
 
 FindingSlim.EXPANDABLE = {
     "test": ExpandRel(attr="test", path="test", schema=TestSlim),
-    "reporter": ExpandRel(attr="reporter", path="reporter", schema=UserSlim),
+    "reporter": ExpandRel(attr="reporter", path="reporter", schema=UserStub),
     "engagement": ExpandRel(attr="test.engagement", path="test__engagement", schema=EngagementSlim),
     "asset": ExpandRel(attr="test.engagement.product", path="test__engagement__product", schema=AssetSlim),
     "organization": ExpandRel(

@@ -102,6 +102,7 @@ class RiskAcceptanceViewSet(
                         reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)),
                     ),
                     parent_title=f"Risk Acceptance: {risk_acceptance.name}",
+                    parent=engagement,
                 )
 
             serialized_note = api_v2_serializers.NoteSerializer(

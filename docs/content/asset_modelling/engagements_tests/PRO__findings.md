@@ -24,9 +24,9 @@ In addition to storing the vulnerability data and providing a remediation framew
 Overall, Findings are designed to work with the Asset Hierarchy to standardize your efforts, and apply a consistent method to each Asset.
 
 ## Accessing Findings 
-Findings are accessible via the sidebar. The submenu provides access to Active and Mitigated Findings, All Findings (regardless of Open or Closed status), Finding Groups, Finding Templates, and the New Finding workflow. Individual Findings are also accessible from within the Test that contains them. 
+Findings are accessible from the sidebar under **Act > Explore > Findings**. The submenu provides access to **Active** and **Mitigated** Findings, **All** Findings (regardless of Open or Closed status), Finding **Groups**, **Risk Accepted** Findings and Finding **Templates**; new Findings are created with the **New Finding** button at the top of a Findings list. Individual Findings are also accessible from within the Test that contains them. 
 
-[Risk Accepted Findings] (/triage_findings/findings_workflows/os__risk_acceptance/) are accessible from the **Risk Acceptances** section of the sidebar. 
+[Risk Accepted Findings](/triage_findings/findings_workflows/os__risk_acceptance/) are listed under **Act > Explore > Findings > Risk Accepted**; the Risk Acceptance records themselves are managed from **Act > Risk Acceptances** in the sidebar. 
 
 ![image](images/profindings_ss1.png)
 
@@ -42,7 +42,7 @@ Finding views contain a variety of tables to help interpret a Finding’s status
 - **Description**: The description of the Finding (added automatically depending on the type of Finding, or created manually). 
 - **Mitigation**: Suggested steps to mitigate.
 - **General Mitigation Policy**: The standardized mitigation policy for the selected Finding. 
-Mitigation policies can be found and edited in the sidebar under **Configuration** → **Mitigation Policies**.
+Mitigation policies can be found and edited in the sidebar under **Settings > Finding Workflow > Mitigation Policies**.
 - **Impact**: Potential impact of leaving the Finding unresolved.
 - **References**: URL to cross-reference the third-party scan tool’s specific description of the Finding. For example, References could be links to a relevant entry in a Finding catalog, or a single advisory URL. 
 - **Files**: Any files that have been added to contextualize the Finding. 
@@ -84,7 +84,7 @@ Mitigation policies can be found and edited in the sidebar under **Configuration
     - The EPSS and KEV values are maintained by the [EPSS / KEV sync](/triage_findings/finding_scoring/epss_kev/). They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms; on a Finding that references a CVE, the next sync overwrites what was entered.
 - **Found By**: The type of tool that identified the vulnerability.
 - **CVSSv3 and CVSSv4 Vector and Score**: The CVSS3 and CVSS4 vector and score of the selected Finding.
-- **Integrator Tickets**: Third-party issue tracker ticket numbers associated with the Finding. 
+- **Connector Tickets**: Third-party issue tracker ticket numbers associated with the Finding. In the Findings list this column is hidden by default; turn it on from the column picker.
 
 ### Vulnerable Endpoints 
 This section includes a table of the Endpoints that the selected Finding affects, along with any relevant metadata.
@@ -105,7 +105,7 @@ In addition to metadata corresponding to the tables in a Finding’s view, optio
 - **Tags**: Any tags that have been added to the Finding.
 - **Owners**: The group of users that will be responsible for the selected Finding.
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
-- **Push to Integrator**: Pushes the Finding to any integrated third-party issue trackers.
+- **Push to Connector**: Pushes the Finding to the issue tracker assigned to its Asset or Engagement through a [Downstream Connector](/connectors/downstream/about/). When no Issue Tracker Assignment covers either, nothing is sent and DefectDojo says so.
 - **Risk and priority settings**: Offers the option to override DefectDojo’s automatic calculation of the Finding’s risk and priority. 
 - **Endpoints to add**: Vulnerable endpoints that may be affected by the selected Finding that are not reflected in the preceding list of systems/endpoints.
 - **Defect review requested by**: Records who requested a defect review for the flaw in question.
@@ -146,12 +146,12 @@ More information about Statuses can be found [here](/triage_findings/findings_wo
 ### Creating Findings 
 While most Findings are generated automatically through scan imports and integrations, DefectDojo also supports the manual creation of Findings. Manual Findings are useful for tracking vulnerabilities and security concerns identified through penetration testing, architecture reviews, compliance assessments, bug bounty programs, consultant engagements, or other activities that do not produce scanner output. 
 
-Findings can be manually added by either clicking **New Finding** within the **Findings** section of the sidebar, or by selecting **Add Finding** within the gear menu of the Test you wish to add the Finding to. 
+Findings can be manually added by either opening a Findings list (**Act > Explore > Findings**) and selecting **New Finding**, or by selecting **Add Finding** within the gear menu of the Test you wish to add the Finding to. 
 
 ### Editing Findings 
 The ⋮ kebab menu next to Findings contains the following functions: 
 - **Edit Finding**: Edit the Finding.
-- **Copy Finding**: Creates a copy of the Finding in another Test. The copy can be saved to any Test within the same Engagement that you have permission to edit. Copying is useful when the same vulnerability needs to be tracked separately in more than one Test context.
+- **Move or Copy Finding**: Moves the Finding to another Test, or copies it there and leaves the original in place. The Test can be in the same Engagement, another Engagement, or another Asset you can add Findings to. The dialog has the same **Move / Copy** toggle and destination fields as Bulk Edit, and offers **Move** only if you can edit the Finding. After a copy, the new Finding opens. See [Move or Copy](/triage_findings/findings_workflows/pro__bulk_edit_findings/#move-or-copy) for what a move changes and what a copy carries.
 - **Close Finding**: Initiates the process of closing the Finding.
 - **Request Review**: Initiates the Peer Review process and changes the Finding’s status to “Under Review.” More information about Peer Reviews can be found [here](/triage_findings/findings_workflows/finding_status_definitions/#under-review).
 - **Add Risk Acceptance**: Initiates the Risk Acceptance process. More information can be found [here](/triage_findings/findings_workflows/pro__risk_acceptance/).
@@ -159,7 +159,7 @@ The ⋮ kebab menu next to Findings contains the following functions:
 - **Add Note**: Initiates the process to add a note to the Finding. 
 - **Add Custom Field**: Adds a free-form metadata field to the Finding. With the typed [Custom Fields](/asset_modelling/pro__custom_fields/) feature enabled, this becomes **Custom Fields** and opens the typed editor, where you fill in a value for each field an administrator has defined for Findings. 
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
-- **Push to Integrator**: Pushes the Finding to any integrated third-party issue trackers.
+- **Push to Connector**: Pushes the Finding to the issue tracker assigned to its Asset or Engagement through a [Downstream Connector](/connectors/downstream/about/). When no Issue Tracker Assignment covers either, nothing is sent and DefectDojo says so.
 - **Delete Finding**: Deletes the selected Finding. 
 - **Finding History**: Reveals the history of the selected Finding.
 
@@ -178,9 +178,11 @@ To attach a file to a Finding, click **Add File** from within either the ⋮ keb
 The file will then appear in the Files section of the **Test Overview** table within the Finding’s view.
 
 #### Bulk Edit Findings 
-Findings can be edited in bulk from a Finding List, such as the table of All Findings accessible from the sidebar, or from the table of Findings within a specific Test.
+Findings can be edited in bulk from a Finding List, such as the table of All Findings (**Act > Explore > Findings > All** in the sidebar), or from the table of Findings within a specific Test.
 
 More information about how to bulk edit Findings can be found [here](/triage_findings/findings_workflows/editing_findings/#bulk-edit-findings). 
+
+Bulk edit is also how you move or copy several Findings to another Test at once — see [Move or Copy](/triage_findings/findings_workflows/pro__bulk_edit_findings/#move-or-copy). 
 
 ### Closing Findings 
 Once the work on a Finding is complete, you can manually close it by clicking **Close Finding** within the Finding’s ⋮ kebab menu or gear menu. Alternatively, if a scan is re-imported into DefectDojo which does not contain a previously-recorded Finding, the previously-recorded Finding will automatically close.
@@ -203,7 +205,7 @@ For example, a scan might produce 10 SQL injection Findings across different end
 A Finding Group does not replace the individual Findings. Each Finding still exists with its own severity, status, metadata, comments, and remediation history. A Finding Group simply provides an additional organizational layer above the Findings it contains.
 
 ### Accessing Finding Groups 
-Finding Groups can be accessed via the sidebar. The submenu provides access to Open and Closed Finding Groups as well as All Finding Groups (regardless of Open status).
+Finding Groups can be accessed from the sidebar under **Act > Explore > Findings > Groups**, which lists Open and Closed Finding Groups as well as All Finding Groups (regardless of Open status).
 
 ![image](images/profindings_ss1.png)
 
@@ -220,7 +222,7 @@ To manually perform Finding Group actions:
 4. Click the corresponding action you wish to complete.
     - **Add to New Finding Group**: Creates a new Finding Group that includes the selected Findings.
     - **Add to Existing Finding Group**: Adds the selected Findings to a preexisting Finding Group.
-    - **Remove from Finding Group**: Removes the selected Findings from any Finding Groups they were previously a part of.
+    - **Remove From Finding Group**: Removes the selected Findings from any Finding Groups they were previously a part of.
 5. Click **Submit**.
 
 Note that grouping will be disabled unless every selected finding is editable, ungrouped, and in the same Test. 
@@ -230,7 +232,7 @@ Further, note that the only possible action when selecting Findings from the All
 #### Automatic Finding Groups 
 When importing a scan, the **Group By** feature within the collapsible **Optional Fields** menu can automatically create Finding Groups based on a chosen grouping method. This is useful when a scanner produces many related Findings that should be managed together.
 
-The adjoining **Create Finding Groups for all Findings** checkbox performs two functions: 
+The adjoining **Create Finding Groups for All Findings** checkbox performs two functions: 
 - **Checked**: Creates a Finding Group for every imported Finding, even if that Finding is the only member of the group.
 - **Unchecked**: Creates Finding Groups only when there are actually multiple Findings to group together.
 
@@ -248,7 +250,7 @@ If a scan is imported that reveals 10 Findings that are not grouped and the same
 Finding Templates are most useful in situations where Users need to create manual Findings repeatedly and want to avoid re-entering the same supporting information each time.
 
 ### Accessing Finding Templates 
-Finding Templates are found within the Findings submenu in the sidebar. 
+Finding Templates are found in the sidebar under **Act > Explore > Findings > Templates**. 
 
 ![image](images/profindings_ss1.png)
 
@@ -287,6 +289,6 @@ Selecting Quick Export opens a dialog with three choices:
 - **Report name**: the name the finished report is stored under. It arrives prefilled, and you can edit it before running the export.
 - **Format**: whether the report is produced as HTML or PDF.
 
-The export runs in the background, and the finished report appears in your Generated Reports list under the name you chose.
+The export runs in the background, and the finished report appears in your Generated Reports list under the name you chose. The export opens in a new tab, which shows the report once it is ready. If the export fails, the tab says why. If it takes longer than about a minute, the tab says the report is still being generated and links to its row in the Generated Reports list, where it finishes in the background.
 
 The prefilled name describes what you exported, followed by where you exported it from in parentheses. It carries no date, because the Generated Reports list already shows when each report was requested and completed. Exporting from a Findings list that is not scoped to anything gives just the content name. 

@@ -21,14 +21,14 @@ It also decides which mode you are editing: the Interface Colors section changes
 
 The preset is the starting point for every color on the page.
 
-* **DefectDojo** is the current DefectDojo look: warm surfaces in light mode, deep teal in dark mode, and an orange accent.
+* **DefectDojo** is the current DefectDojo look: warm surfaces in light mode, deep teal in dark mode, an orange accent for actions, and a teal secondary for links, selection, focus rings, and checked controls.
 * **Legacy** is the previous blue and gray look.
 
 Colors you have customized are kept when you switch presets. **Reset All Colors** clears every customized color and returns to the preset, without changing which preset is selected.
 
 ## Primary color
 
-The primary color is used for buttons, links, highlights, and focus states. You pick one color and a full range of lighter and darker shades is generated from it for both modes.
+The primary color is used for buttons and for the current page in the navigation. With the **Legacy** preset it also colors links, selection, focus rings, and checked controls such as checkboxes and toggles. The **DefectDojo** preset draws those in its teal secondary instead (a dark teal in light mode, a pale teal in dark mode), so the primary color stays the color of actions. You pick one color and a full range of lighter and darker shades is generated from it for both modes.
 
 The text shown on buttons is chosen for you so that it stays readable against the primary color you pick, in both light and dark mode.
 
@@ -44,7 +44,7 @@ Interface colors are set separately for light mode and dark mode, so each mode c
 | **Components** | Form field background and border, menus and dialogs, menu hover, and selection. |
 | **Operational Status** | The live status indicators on the Command Center: healthy, degraded, and down. These are separate from finding severity colors. |
 
-Each color shows **Preset** until you change it. Select **Use preset** under a customized color to return it to the preset, or use the reset button on a group to clear the whole group for the mode you are editing.
+Each color shows **Preset** until you change it. Select **Use Preset** under a customized color to return it to the preset, or use the reset button on a group to clear the whole group for the mode you are editing.
 
 ## Legibility
 

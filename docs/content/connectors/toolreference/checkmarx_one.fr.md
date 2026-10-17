@@ -35,3 +35,15 @@ Remarques sur **Track Scanned Branches** :
 - Une branche qui cesse d'être analysée (fusionnée ou supprimée) cesse de recevoir des mises à jour : son engagement reste visible avec ses dernières constatations connues, que vous pouvez examiner et fermer en masse.
 - Désactiver l'option ultérieurement est sans risque : les engagements par branche cessent simplement de recevoir des imports, et l'engagement par défaut reprend lors de la prochaine synchronisation.
 - Les Connecteurs réconcilient l'état selon le calendrier de synchronisation. Le suivi des branches rend chaque synchronisation complète à travers les branches ; il ne rend pas les données en temps réel entre deux synchronisations.
+
+#### **Étiqueter les constatations avec l'ID de scan Checkmarx**
+
+L'**Unique ID From Tool** de chaque constatation Checkmarx One est son hash de résultat Checkmarx. Un hash de résultat seul ne permet pas de retrouver une constatation dans Checkmarx ; il faut aussi l'ID d'un scan qui la contient. Activez **Tag Findings With Scan ID** pour enregistrer cet ID de scan sur les constatations importées par le Connecteur.
+
+Lorsque l'option est activée, chaque constatation importée par une synchronisation (SAST, SCA, KICS et DAST) reçoit l'étiquette `scan-id:<ID de scan>`, où l'ID est celui du scan Checkmarx dont le Connecteur a tiré la constatation. Avec **Track Scanned Branches** activé, les constatations de chaque branche portent l'ID du scan de cette même branche. Vous pouvez filtrer les constatations par cette étiquette, ou la lire via l'API avec Unique ID From Tool.
+
+Remarques :
+
+- L'option est **désactivée par défaut**, et l'activer ne modifie pas la déduplication : l'ID de scan n'est qu'une étiquette. Il n'est jamais ajouté à Unique ID From Tool ni à la description.
+- **L'étiquette enregistre le scan lors duquel DefectDojo a importé la constatation pour la première fois.** Une synchronisation ultérieure qui rapproche une constatation existante conserve ses étiquettes ; l'étiquette n'est donc pas remplacée à chaque nouvel ID de scan. Ce scan contient la constatation et permet donc toujours de la retrouver dans Checkmarx, sauf si la conservation des données de Checkmarx a entre-temps supprimé le scan.
+- Les constatations déjà présentes dans DefectDojo au moment de l'activation ne reçoivent pas l'étiquette. Seules les constatations créées par les synchronisations suivantes la reçoivent.

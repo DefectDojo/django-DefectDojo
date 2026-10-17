@@ -2,15 +2,19 @@ import importlib
 import json
 import logging
 import re
-from contextlib import suppress
+from contextlib import contextmanager, suppress
+from contextvars import ContextVar
+from datetime import timedelta
 
 import crum
 import requests
 import yaml
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, get_connection
+from django.db import transaction
 from django.db.models import Count, Prefetch, Q, QuerySet
+from django.db.utils import InterfaceError, OperationalError
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import get_script_prefix, reverse
@@ -23,20 +27,132 @@ from dojo.models import (
     Dojo_User,
     Engagement,
     Finding,
+    Finding_Group,
     Product,
     Product_Type,
     System_Settings,
     Test,
     UserContactInfo,
+    get_current_date,
     get_current_datetime,
 )
 from dojo.notifications.models import Alerts, Notification_Webhooks, Notifications
+from dojo.notifications.render_cache import NotificationRenderCache
 from dojo.user.queries import (
     get_authorized_users_for_product_and_product_type,
     get_authorized_users_for_product_type,
 )
 
 logger = logging.getLogger(__name__)
+
+# Findings fetched per round trip by the daily SLA run, which streams them instead of
+# holding every open finding in memory.
+SLA_NOTIFY_CHUNK_SIZE = 2000
+
+# Rows per INSERT when a notification's in-app alerts are written together.
+ALERT_BULK_CREATE_BATCH_SIZE = 1000
+
+# Mails sent over one SMTP session before it is closed and a new one opened. A fan-out
+# reuses the session instead of connecting (and logging in) once per recipient, but stays
+# within the per-session message limits mail servers commonly enforce (Exchange receive
+# connectors default to 20). A relay with a lower limit, or one that drops an idle session,
+# is covered by the retry in EmailNotificationManger._send_email.
+MAIL_MESSAGES_PER_CONNECTION = 20
+
+
+class MailConnectionBatch:
+
+    """
+    One mail connection shared by the messages of a fan-out.
+
+    Opened on the first message, replaced every ``messages_per_connection`` messages, and
+    dropped after a failed send so the next recipient starts a fresh session, as each did
+    when every message opened its own.
+    """
+
+    def __init__(self, factory, messages_per_connection: int | None = None) -> None:
+        self._factory = factory
+        if messages_per_connection is None:
+            messages_per_connection = MAIL_MESSAGES_PER_CONNECTION
+        self._limit = max(1, messages_per_connection)
+        self._connection = None
+        self._sent = 0
+
+    def connection(self):
+        """The connection for the next message, opened if needed."""
+        if self._connection is not None and self._sent >= self._limit:
+            self.close()
+        if self._connection is None:
+            connection = self._factory()
+            # Opened here rather than by send_messages(), which closes a connection it opened
+            # itself after one message, and keeps one that was already open.
+            connection.open()
+            self._connection = connection
+            self._sent = 0
+        self._sent += 1
+        return self._connection
+
+    @property
+    def reused(self) -> bool:
+        """Whether the current message is not the first its connection carries."""
+        return self._connection is not None and self._sent > 1
+
+    def discard(self) -> None:
+        """Drop the connection after a failed send; the next message opens a new one."""
+        self.close()
+
+    def close(self) -> None:
+        connection, self._connection = self._connection, None
+        if connection is None:
+            return
+        try:
+            connection.close()
+        except Exception:
+            logger.exception("Unable to close the notification mail connection")
+
+
+class AlertBuffer:
+
+    """
+    The in-app alerts of one fan-out, written in batches instead of one INSERT per recipient.
+
+    Written every ``ALERT_BULK_CREATE_BATCH_SIZE`` alerts rather than only when the fan-out
+    ends, so memory stays bounded and a worker stopped mid fan-out keeps what it had built. A
+    failed INSERT costs that batch of alerts, except in a notification batch
+    (NotificationManager.batch), where the rows are written again one at a time.
+    """
+
+    def __init__(self, write, *, auto_flush: bool = True) -> None:
+        self._write = write
+        self._pending: list = []
+        # False when the owner decides when to write (see NotificationManager.batch).
+        self._auto_flush = auto_flush
+
+    def append(self, alert) -> None:
+        self._pending.append(alert)
+        if self._auto_flush and self.full():
+            self.flush()
+
+    def full(self) -> bool:
+        return len(self._pending) >= ALERT_BULK_CREATE_BATCH_SIZE
+
+    def flush(self) -> None:
+        pending, self._pending = self._pending, []
+        if pending:
+            self._write(pending)
+
+
+class WebhookOwners:
+
+    """Which users own a webhook endpoint, read once per fan-out instead of once per recipient."""
+
+    def __init__(self) -> None:
+        self._owner_ids = None
+
+    def has_endpoints(self, user: Dojo_User | None) -> bool:
+        if self._owner_ids is None:
+            self._owner_ids = set(Notification_Webhooks.objects.values_list("owner_id", flat=True).distinct())
+        return (user.id if user is not None else None) in self._owner_ids
 
 
 labels = get_labels()
@@ -62,6 +178,47 @@ def get_manager_class_instance():
     return notification_manager_class()
 
 
+#: The manager of the notification batch open in this context, if any (see notification_batch).
+_open_batch: ContextVar = ContextVar("notification_batch", default=None)
+
+
+@contextmanager
+def notification_batch():
+    """
+    Send every notification created inside the block through one manager.
+
+    For a caller that creates one notification per object, such as the daily SLA run. Each
+    notification is otherwise a fan-out of its own: a new manager reads the system
+    notifications row, resolves the product's recipients and writes its alerts. In a batch
+    those are read once, once per product, and in shared bulk INSERTs. Yields the manager,
+    whose ``flush_alerts()`` writes the alerts collected so far once a full batch is waiting.
+    """
+    try:
+        manager = get_manager_class_instance()
+    except Exception:
+        logger.exception("Unable to build the notification manager for a batch; sending each notification on its own")
+        manager = None
+    if not hasattr(manager, "batch"):
+        # A custom NOTIFICATION_MANAGER that predates batching (or one that could not be built)
+        # sends each notification on its own, as before.
+        yield _UnbatchedNotifications()
+        return
+    with manager.batch():
+        token = _open_batch.set(manager)
+        try:
+            yield manager
+        finally:
+            _open_batch.reset(token)
+
+
+class _UnbatchedNotifications:
+
+    """What notification_batch yields when it cannot batch: every notification goes out on its own."""
+
+    def flush_alerts(self) -> None:
+        pass
+
+
 def create_notification(
     event: str | None = None,
     title: str | None = None,
@@ -79,7 +236,7 @@ def create_notification(
     **kwargs: dict,
 ) -> None:
     """Create an instance of a NotificationManager and dispatch the notification."""
-    get_manager_class_instance().create_notification(
+    (_open_batch.get() or get_manager_class_instance()).create_notification(
         event=event,
         title=title,
         finding=finding,
@@ -149,6 +306,11 @@ class NotificationManagerHelpers:
 
         return kwargs["description"]
 
+    #: Shared by every channel manager of one fan-out (see NotificationManager.create_notification):
+    #: a message rendered for one recipient is reused for the next one that reads the same.
+    #: None renders every message directly.
+    render_cache: NotificationRenderCache | None = None
+
     def _create_notification_message(
         self,
         event: str,
@@ -156,9 +318,7 @@ class NotificationManagerHelpers:
         notification_type: str,
         kwargs: dict,
     ) -> str:
-        template = f"notifications/{notification_type}/{event.replace('/', '')}.tpl"
         kwargs.update({"user": user})
-        notification_message = None
 
         # TODO: This may be deleted
         # if (title := kwargs.get("title")) is not None:
@@ -167,6 +327,19 @@ class NotificationManagerHelpers:
         if kwargs.get("description") is None:
             kwargs.update({"description": self._create_description(event, kwargs)})
 
+        if self.render_cache is None:
+            return self._render_notification_message(event, notification_type, kwargs)
+        return self.render_cache.render(
+            self,
+            event,
+            notification_type,
+            kwargs,
+            lambda context: self._render_notification_message(event, notification_type, context),
+        )
+
+    def _render_notification_message(self, event: str, notification_type: str, kwargs: dict) -> str:
+        template = f"notifications/{notification_type}/{event.replace('/', '')}.tpl"
+        notification_message = None
         try:
             notification_message = render_to_string(template, kwargs)
             logger.debug("Rendering from the template %s", template)
@@ -203,6 +376,12 @@ class NotificationManagerHelpers:
         # persistence failure is logged and swallowed per superuser -- for instance when the
         # dojo_alerts primary-key sequence reaches its maximum, every save() fails, and
         # re-raising would take the import down with it.
+        #
+        # One INSERT for every superuser rather than one per superuser: a channel that
+        # fails for each recipient calls this once per recipient, so a per-superuser
+        # write (plus the foreign-key probe clean_fields ran for each) made a channel
+        # outage cost recipients x superusers queries.
+        alerts = []
         for user in Dojo_User.objects.filter(is_superuser=True):
             try:
                 alert = Alerts(
@@ -213,11 +392,18 @@ class NotificationManagerHelpers:
                     icon="exclamation-triangle",
                     source=notification_type[:100] if notification_type else kwargs.get("source", "unknown")[:100],
                 )
-                # relative urls will fail validation
-                alert.clean_fields(exclude=["url"])
-                alert.save()
+                # relative urls will fail validation; the user was just read from the database
+                alert.clean_fields(exclude=["url", "user_id"])
+                alerts.append(alert)
             except Exception:
-                logger.exception("Unable to persist fallback Alert for user %s", user)
+                logger.exception("Unable to build fallback Alert for user %s", user)
+        if not alerts:
+            return
+        try:
+            with transaction.atomic():
+                Alerts.objects.bulk_create(alerts, batch_size=ALERT_BULK_CREATE_BATCH_SIZE)
+        except Exception:
+            logger.exception("Unable to persist fallback Alerts for %s superusers", len(alerts))
 
 
 class SlackNotificationManger(NotificationManagerHelpers):
@@ -248,6 +434,9 @@ class SlackNotificationManger(NotificationManagerHelpers):
                             )
                             slack_user_save.slack_user_id = slack_user_id
                             slack_user_save.save()
+                            # The same user object can serve many notifications (a batch reuses
+                            # its recipients), so keep the id on it too rather than looking it up again.
+                            user.usercontactinfo.slack_user_id = slack_user_id
                     # only send notification if we managed to find the slack_user_id
                     if slack_user_id:
                         channel = f"@{slack_user_id}"
@@ -389,6 +578,41 @@ class EmailNotificationManger(NotificationManagerHelpers):
 
     """Manger for email notifications and their helpers."""
 
+    #: The connection a fan-out's mails share (see NotificationManager.create_notification).
+    #: None sends each message on its own connection.
+    mail_batch: MailConnectionBatch | None = None
+
+    def _new_mail_connection(self):
+        """A new connection for a batch of notification mails."""
+        return get_connection()
+
+    def _mail_connection(self):
+        """The shared connection for this message, or None for a connection of its own."""
+        return self.mail_batch.connection() if self.mail_batch is not None else None
+
+    def _discard_mail_connection(self) -> None:
+        if self.mail_batch is not None:
+            self.mail_batch.discard()
+
+    def _send_email(self, email: EmailMessage) -> None:
+        """
+        Send one notification mail, on the fan-out's shared connection when there is one.
+
+        A shared SMTP session can end under the message: the server caps messages per
+        session, or drops a session that sat idle while a slow Slack or webhook call ran. So
+        a send that fails on a connection that already carried a message is retried once on
+        a new connection; only a failure there is the recipient's own.
+        """
+        try:
+            email.send(fail_silently=False)
+        except Exception:
+            if self.mail_batch is None or not self.mail_batch.reused:
+                raise
+            logger.warning("Notification mail failed on a reused connection, retrying on a new one", exc_info=True)
+            self.mail_batch.discard()
+            email.connection = self.mail_batch.connection()
+            email.send(fail_silently=False)
+
     def send_mail_notification(
         self,
         event: str,
@@ -410,18 +634,21 @@ class EmailNotificationManger(NotificationManagerHelpers):
             if (title := kwargs.get("title")) is not None:
                 subject += f": {title}"
 
+            body = self._create_notification_message(event, user, "mail", kwargs)
             email = EmailMessage(
                 subject,
-                self._create_notification_message(event, user, "mail", kwargs),
+                body,
                 self.system_settings.email_from,
                 [address],
                 headers={"From": f"{self.system_settings.email_from}"},
+                connection=self._mail_connection(),
             )
             email.content_subtype = "html"
             logger.debug("sending email alert")
-            email.send(fail_silently=False)
+            self._send_email(email)
 
         except Exception as exception:
+            self._discard_mail_connection()
             logger.exception("Unable to send Email Notification")
             self._log_alert(
                 exception,
@@ -438,6 +665,9 @@ class WebhookNotificationManger(NotificationManagerHelpers):
 
     ERROR_PERMANENT = "permanent"
     ERROR_TEMPORARY = "temporary"
+
+    #: Endpoint owners, shared across a fan-out so a recipient without an endpoint costs no query.
+    webhook_owners: WebhookOwners | None = None
 
     def send_webhooks_notification(
         self,
@@ -511,7 +741,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         user: Dojo_User | None = None,
     ) -> QuerySet[Notification_Webhooks]:
         endpoints = Notification_Webhooks.objects.filter(owner=user)
-        if not endpoints.exists():
+        if (self.webhook_owners is not None and not self.webhook_owners.has_endpoints(user)) or not endpoints.exists():
             if user:
                 logger.info(
                     "URLs for Webhooks not configured for user '%s': skipping user notification", user,
@@ -591,6 +821,12 @@ class AlertNotificationManger(NotificationManagerHelpers):
 
     """Manger for alert notifications and their helpers."""
 
+    #: When a NotificationManager fans one notification out to many recipients it
+    #: hands every alert manager the same AlertBuffer, which collects the built alerts
+    #: and writes them with one bulk INSERT per batch. None (a manager built on its own)
+    #: writes each alert as it is built.
+    alert_buffer: AlertBuffer | None = None
+
     def send_alert_notification(
         self,
         event: str,
@@ -614,7 +850,9 @@ class AlertNotificationManger(NotificationManagerHelpers):
                     "alert",
                     kwargs,
                 )[:2000],
-                url=kwargs.get("url", reverse("alerts")),
+                # Only resolved when the caller gave no url: a default argument to get() is
+                # evaluated on every call, once per recipient of a fan-out.
+                url=kwargs["url"] if "url" in kwargs else reverse("alerts"),
                 icon=icon[:25],
                 source=source,
             )
@@ -625,7 +863,10 @@ class AlertNotificationManger(NotificationManagerHelpers):
             # LIMIT 1`` round-trip every ForeignKey.validate would issue
             # is pure overhead at fan-out time.
             alert.clean_fields(exclude=["url", "user_id"])
-            alert.save()
+            if self.alert_buffer is not None:
+                self.alert_buffer.append(alert)
+            else:
+                alert.save()
         except Exception as exception:
             logger.exception("Unable to create Alert Notification")
             self._log_alert(
@@ -645,6 +886,168 @@ class NotificationManager(NotificationManagerHelpers):
         NotificationManagerHelpers.__init__(self, *args, **kwargs)
 
     def create_notification(self, event: str | None = None, **kwargs: dict) -> None:
+        # Every recipient's in-app alert is collected while the notification fans out and
+        # written in bulk INSERTs of ALERT_BULK_CREATE_BATCH_SIZE (the rest when the fan-out
+        # ends), instead of one INSERT per recipient. A nested call on the same manager
+        # joins the outer batch.
+        #
+        # The other per-recipient costs are shared the same way for the duration of the
+        # fan-out: each channel's message is rendered once and reused for every recipient
+        # it reads the same for (NotificationRenderCache), the mails go out over one SMTP
+        # session per batch instead of one per recipient, and webhook endpoint owners are
+        # read once.
+        if getattr(self, "_alert_buffer", None) is not None:
+            if getattr(self, "_in_batch", False):
+                # The notifications of a batch are about different objects, so each renders
+                # its own messages rather than reusing another notification's.
+                self._render_cache = NotificationRenderCache()
+            self._create_notification(event, **kwargs)
+            return
+        self._open_fanout(kwargs)
+        try:
+            self._create_notification(event, **kwargs)
+        finally:
+            self._close_fanout()
+
+    @contextmanager
+    def batch(self):
+        """
+        Send many notifications through this manager as one fan-out (see notification_batch).
+
+        The system notifications row was read when the manager was built, each product's
+        recipients are resolved once, and the alerts of every notification share bulk INSERTs.
+        Alerts are written only by ``flush_alerts()`` and when the batch ends, never in the
+        middle of a notification, so a caller can keep each notification in its own savepoint
+        without one notification's rollback erasing alerts written for the others.
+        """
+        if getattr(self, "_alert_buffer", None) is not None:
+            msg = "A notification batch or fan-out is already open on this manager"
+            raise RuntimeError(msg)
+        self._open_fanout({}, auto_flush_alerts=False)
+        self._in_batch = True
+        self._recipients_by_scope = {}
+        # Alert-write failures, tracked across the batch's flushes (see _write_alerts_one_at_a_time).
+        self._alert_writes_given_up = False
+        self._alert_failure_streak = 0
+        self._alert_failure_notifications = set()
+        self._alert_connection_failure_streak = 0
+        self._alerts_not_written = 0
+        self._last_alert_exception = None
+        try:
+            yield self
+        finally:
+            try:
+                # Still a batch while its last alerts are written.
+                self._close_fanout()
+            finally:
+                self._in_batch = False
+                self._recipients_by_scope = None
+                if self._alerts_not_written:
+                    # One report for the whole batch, never one per row or per flush.
+                    logger.error("%s alerts of this notification batch could not be written", self._alerts_not_written)
+                    # Written exactly when the database has been refusing writes, so it can fail
+                    # too; that must not escape the caller (or hide an exception already raised).
+                    try:
+                        self._log_alert(
+                            self._last_alert_exception,
+                            "Alert Notification",
+                            description=f"{self._alerts_not_written} alerts could not be written: {self._last_alert_exception}",
+                        )
+                    except Exception:
+                        logger.exception("Unable to report the alerts this notification batch could not write")
+
+    def flush_alerts(self) -> None:
+        """Write the alerts a batch has collected, once a full batch of them is waiting."""
+        buffer = getattr(self, "_alert_buffer", None)
+        if buffer is not None and buffer.full():
+            buffer.flush()
+
+    #: In a batch, how many single-row writes may fail in a row before the failure is taken to
+    #: be the database's rather than one row's, and the rest of the alerts are given up.
+    MAX_CONSECUTIVE_ALERT_FAILURES = 5
+
+    def _write_alerts_one_at_a_time(self, alerts: list) -> None:
+        """
+        Write a batch's alerts one by one after their shared INSERT failed.
+
+        A batch's alerts belong to many notifications, so one bad row, or one notification whose
+        every row is bad, must not cost all the others. When rows of more than one notification
+        fail in a row (across flushes too), the database is the problem rather than a row: the
+        rest of the batch's alerts are given up instead of each being tried in turn. Everything
+        not written is reported once, when the batch ends.
+        """
+        logger.warning("Writing %s alerts in one INSERT failed, writing them one at a time", len(alerts))
+        logged_traceback = False
+        for position, alert in enumerate(alerts):
+            try:
+                with transaction.atomic():
+                    Alerts.objects.bulk_create([alert])
+                self._alert_failure_streak = 0
+                self._alert_failure_notifications.clear()
+                self._alert_connection_failure_streak = 0
+            except Exception as exception:
+                # One traceback per flush; the rest of its failures are one line each.
+                if logged_traceback:
+                    logger.warning("Unable to create Alert Notification %r: %s", alert.title, exception)
+                else:
+                    logger.exception("Unable to create Alert Notification %r", alert.title)
+                    logged_traceback = True
+                self._alerts_not_written += 1
+                self._last_alert_exception = exception
+                self._alert_failure_streak += 1
+                # One notification's alerts are adjacent and share its title and url.
+                self._alert_failure_notifications.add((alert.title, alert.url))
+                # A lost or refused connection is the database's fault whichever notification the
+                # row belongs to; a data error (a bad value, a deleted user) may be just this one's.
+                if isinstance(exception, (OperationalError, InterfaceError)):
+                    self._alert_connection_failure_streak += 1
+                else:
+                    self._alert_connection_failure_streak = 0
+                if self._alert_failure_streak >= self.MAX_CONSECUTIVE_ALERT_FAILURES and (
+                    len(self._alert_failure_notifications) > 1
+                    or self._alert_connection_failure_streak >= self.MAX_CONSECUTIVE_ALERT_FAILURES
+                ):
+                    remaining = len(alerts) - position - 1
+                    self._alerts_not_written += remaining
+                    self._alert_writes_given_up = True
+                    logger.error("%s alert writes failed in a row, giving up the remaining %s and the rest of this batch", self._alert_failure_streak, remaining)
+                    return
+
+    def _open_fanout(self, kwargs: dict, *, auto_flush_alerts: bool = True) -> None:
+        self._alert_buffer = AlertBuffer(lambda alerts: self._flush_alerts(alerts, kwargs), auto_flush=auto_flush_alerts)
+        self._render_cache = NotificationRenderCache()
+        self._mail_batch = MailConnectionBatch(lambda: self._get_manager_instance("mail")._new_mail_connection())
+        self._webhook_owners = WebhookOwners()
+
+    def _close_fanout(self) -> None:
+        pending, self._alert_buffer = self._alert_buffer, None
+        mail_batch, self._mail_batch = self._mail_batch, None
+        self._render_cache = None
+        self._webhook_owners = None
+        mail_batch.close()
+        pending.flush()
+
+    def _flush_alerts(self, alerts: list, kwargs: dict) -> None:
+        if not alerts:
+            return
+        if getattr(self, "_in_batch", False) and self._alert_writes_given_up:
+            # The database refused alert after alert earlier in this batch; it was reported then.
+            self._alerts_not_written += len(alerts)
+            return
+        try:
+            # A savepoint, so a failed INSERT leaves the caller's transaction usable for
+            # the fallback alert below and for whatever the caller does next.
+            with transaction.atomic():
+                Alerts.objects.bulk_create(alerts, batch_size=ALERT_BULK_CREATE_BATCH_SIZE)
+        except Exception as exception:
+            if getattr(self, "_in_batch", False) and len(alerts) > 1:
+                self._write_alerts_one_at_a_time(alerts)
+                return
+            logger.exception("Unable to create %s Alert Notifications", len(alerts))
+            details = {key: kwargs[key] for key in ("title", "url") if kwargs.get(key) is not None}
+            self._log_alert(exception, "Alert Notification", description=str(exception), **details)
+
+    def _create_notification(self, event: str | None = None, **kwargs: dict) -> None:
         # Process the notifications for a given list of recipients
         if kwargs.get("recipients") is not None:
             recipients = kwargs.get("recipients", [])
@@ -671,17 +1074,15 @@ class NotificationManager(NotificationManagerHelpers):
             if kwargs.get("no_users", False) is False:
                 # get users with either global notifications, or a product specific notification
                 # and all admin/superuser, they will always be notified
-                for user in self._get_user_to_send_notifications_to():
+                for user in self._recipients_for_current_scope():
                     self._send_single_notification_to_user(user, event=event, **kwargs)
 
     def _process_recipients(self, event: str | None = None, **kwargs: dict) -> None:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug("creating notifications for recipients: %s", kwargs["recipients"])
-        for recipient_notifications in Notifications.objects.filter(
-            user__username__in=kwargs["recipients"],
-            user__is_active=True,
-            product=None,
-        ):
+        # Callers pass usernames or Dojo_User instances; the lookup needs usernames.
+        recipients = [getattr(recipient, "username", recipient) for recipient in kwargs["recipients"]]
+        for recipient_notifications in self._get_recipient_notifications(recipients):
             if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
                 # merge the system level notifications with the personal level
                 # this allows for system to trump the personal
@@ -703,6 +1104,14 @@ class NotificationManager(NotificationManagerHelpers):
                     notifications=recipient_notifications,
                     **kwargs,
                 )
+
+    def _get_recipient_notifications(self, recipients: list) -> QuerySet[Notifications]:
+        """The global Notifications rows of the named, active recipients, with their user loaded."""
+        return Notifications.objects.filter(
+            user__username__in=recipients,
+            user__is_active=True,
+            product=None,
+        ).select_related("user")
 
     def _process_objects(self, **kwargs: dict) -> None:
         """Extract the product and product type from the kwargs."""
@@ -727,6 +1136,19 @@ class NotificationManager(NotificationManagerHelpers):
             from dojo.utils import get_product  # noqa: PLC0415 circular import
             self.product = get_product(obj)
             logger.debug("Defined product of obj %s", self.product)
+
+    def _recipients_for_current_scope(self):
+        """The users to notify for the current product, resolved once per product in a batch."""
+        cache = getattr(self, "_recipients_by_scope", None)
+        if cache is None:
+            return self._get_user_to_send_notifications_to()
+        key = (getattr(self.product, "id", None), getattr(self.product_type, "id", None))
+        if key not in cache:
+            # A batch notifies one product's findings after another, so only the current
+            # product's recipients are kept rather than every product's for the whole run.
+            cache.clear()
+            cache[key] = list(self._get_user_to_send_notifications_to())
+        return cache[key]
 
     def _get_user_to_send_notifications_to(
         self,
@@ -781,7 +1203,8 @@ class NotificationManager(NotificationManagerHelpers):
         logger.debug("Authorized user for the product %s", user)
         # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
         # kwargs.update({'user': user})
-        applicable_notifications = user.applicable_notifications
+        # A copy: in a batch the same user object is reused for every notification.
+        applicable_notifications = list(user.applicable_notifications)
         if user.is_superuser and not applicable_notifications:
             # Superusers are included as recipients even with no notification
             # settings of their own, so fall back to the system defaults for them.
@@ -808,18 +1231,34 @@ class NotificationManager(NotificationManagerHelpers):
             "system_settings": self.system_settings,
         }
         if alert_type == "slack":
-            return SlackNotificationManger(**kwargs)
+            return self._share_fanout_state(SlackNotificationManger(**kwargs))
         if alert_type == "msteams":
-            return MSTeamsNotificationManger(**kwargs)
+            return self._share_fanout_state(MSTeamsNotificationManger(**kwargs))
         if alert_type == "mail":
-            return EmailNotificationManger(**kwargs)
+            return self._share_fanout_state(EmailNotificationManger(**kwargs))
         if alert_type == "webhooks":
-            return WebhookNotificationManger(**kwargs)
+            return self._share_fanout_state(WebhookNotificationManger(**kwargs))
         if alert_type == "alert":
-            return AlertNotificationManger(**kwargs)
+            return self._share_fanout_state(AlertNotificationManger(**kwargs))
 
         msg = f"Unsupported alert type: {alert_type}"
         raise TypeError(msg)
+
+    def _share_fanout_state(self, manager: NotificationManagerHelpers) -> NotificationManagerHelpers:
+        """
+        Hand a channel manager what this fan-out shares across recipients.
+
+        Outside ``create_notification`` everything is None and the manager works on its own,
+        exactly as before. A subclass that builds its own channel manager passes it through here.
+        """
+        manager.render_cache = getattr(self, "_render_cache", None)
+        if isinstance(manager, AlertNotificationManger):
+            manager.alert_buffer = getattr(self, "_alert_buffer", None)
+        if isinstance(manager, EmailNotificationManger):
+            manager.mail_batch = getattr(self, "_mail_batch", None)
+        if isinstance(manager, WebhookNotificationManger):
+            manager.webhook_owners = getattr(self, "_webhook_owners", None)
+        return manager
 
     def _process_notifications(
         self,
@@ -858,8 +1297,11 @@ class NotificationManager(NotificationManagerHelpers):
         # task body. Dispatching inner Celery tasks would require JSON-serializable kwargs, but
         # callers pass model instances (finding/test/engagement/product/...) and refetching every
         # one of them per channel would multiply DB queries; running synchronously avoids both.
+        # They go straight to this manager's channel helpers with the recipient already loaded:
+        # going through the send_*_notification task bodies re-read the user and rebuilt a
+        # whole manager (system notifications row, system settings) per recipient per channel.
         if not alert_only:
-            user_id = getattr(notifications.user, "id", None)
+            user = notifications.user
             if self.system_settings.enable_slack_notifications and "slack" in getattr(
                 notifications,
                 event,
@@ -867,7 +1309,7 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending Slack Notification")
                 try:
-                    send_slack_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("slack").send_slack_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send Slack notification for event %s", event)
 
@@ -878,7 +1320,7 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending MSTeams Notification")
                 try:
-                    send_msteams_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("msteams").send_msteams_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send MSTeams notification for event %s", event)
 
@@ -889,7 +1331,7 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending Mail Notification")
                 try:
-                    send_mail_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("mail").send_mail_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send Mail notification for event %s", event)
 
@@ -900,12 +1342,12 @@ class NotificationManager(NotificationManagerHelpers):
             ):
                 logger.debug("Sending Webhooks Notification")
                 try:
-                    send_webhooks_notification.run(event, user_id=user_id, **kwargs)
+                    self._get_manager_instance("webhooks").send_webhooks_notification(event, user=user, **kwargs)
                 except Exception:
                     logger.exception("Failed to send Webhooks notification for event %s", event)
 
 
-def process_tag_notifications(request, note, parent_url, parent_title):
+def process_tag_notifications(request, note, parent_url, parent_title, parent=None):
     # Django usernames may contain "@ . + - _" in addition to word characters (see
     # Django's username validators), so capture that whole set instead of only \w.
     # The leading (?:\A|\s)@ anchor keeps email addresses written in prose from
@@ -920,6 +1362,11 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         for username in usernames_to_check
         if Dojo_User.objects.filter(is_active=True, username=username).exists()
     ]
+    if parent is not None:
+        # Only users who can see the object the note is attached to get the mention.
+        from dojo.authorization.authorization import user_has_permission  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        users_to_notify = [user for user in users_to_notify if user_has_permission(user, parent, "view")]
 
     if len(note.entry) > 200:
         note.entry = note.entry[:200]
@@ -936,6 +1383,34 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         requested_by=crum.get_current_user())
 
 
+_NOTHING_READ = object()
+
+
+def _read_sla_findings(findings, plain_findings):
+    """
+    Stream the SLA run's findings in chunks.
+
+    ``findings`` is the query as FINDING_SLA_NOTIFY_QUERYSET_METHOD left it. A query that cannot
+    be read at all (one that does not compile, a related name that does not exist, something that
+    is not a query) only shows itself on the first chunk, so the first chunk is read here and, if
+    that fails, the plain query is read instead. A failure on a later chunk is the caller's, as
+    for the plain query.
+    """
+    if findings is plain_findings:
+        yield from plain_findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+        return
+    try:
+        chunks = findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+        first = next(chunks, _NOTHING_READ)
+    except Exception:
+        logger.exception("Reading findings through FINDING_SLA_NOTIFY_QUERYSET_METHOD failed; reading them without it")
+        yield from plain_findings.iterator(chunk_size=SLA_NOTIFY_CHUNK_SIZE)
+        return
+    if first is not _NOTHING_READ:
+        yield first
+        yield from chunks
+
+
 def sla_compute_and_notify(*args, **kwargs):
     """
     The SLA computation and notification will be disabled if the user opts out
@@ -947,19 +1422,20 @@ def sla_compute_and_notify(*args, **kwargs):
     from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
 
     class NotificationEntry:
-        def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
+        def __init__(self, finding=None, jira_issue=None, jira_instance=None, *, do_jira_sla_comment=False):
             self.finding = finding
             self.jira_issue = jira_issue
+            self.jira_instance = jira_instance
             self.do_jira_sla_comment = do_jira_sla_comment
 
-    def _add_notification(finding, kind):
-        # jira_issue, do_jira_sla_comment are taken from the context
+    def _add_notification(finding, kind, jira_issue, jira_instance, *, do_jira_sla_comment):
         # kind can be one of: breached, prebreach, breaching
         if finding.test.engagement.product.disable_sla_breach_notifications:
             return
 
         notification = NotificationEntry(finding=finding,
                                          jira_issue=jira_issue,
+                                         jira_instance=jira_instance,
                                          do_jira_sla_comment=do_jira_sla_comment)
 
         pt = finding.test.engagement.product.prod_type.name
@@ -991,7 +1467,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
         return title
 
-    def _create_notifications():
+    def _create_notifications(batch):
+        # Alerts are written between notifications, outside their savepoints (see
+        # NotificationManager.batch), so one notification's rollback cannot erase another's.
         for prodtype, comb_notif_prodtype in combined_notifications.items():
             for prod, comb_notif_prod in comb_notif_prodtype.items():
                 for kind, comb_notif_kind in comb_notif_prod.items():
@@ -1003,33 +1481,49 @@ def sla_compute_and_notify(*args, **kwargs):
                     findings_list = []
 
                     for n in comb_notif_kind:
-                        sla_age = n.finding.sla_days_remaining()
-                        title = _notification_title_for_finding(n.finding, kind, sla_age)
-                        create_notification(
-                            event="sla_breach",
-                            title=title,
-                            finding=n.finding,
-                            sla_age=sla_age,
-                            url=reverse("view_finding", args=(n.finding.id,)),
-                        )
-
-                        if n.do_jira_sla_comment:
-                            logger.info("Creating JIRA comment to notify of SLA breach information.")
-                            jira_services.add_simple_comment(jira_instance, n.jira_issue, title)
-
                         findings_list.append(n.finding)
+                        # one finding that cannot be notified must not stop the others; the
+                        # savepoint keeps a database error here from aborting the run's transaction
+                        title = None
+                        try:
+                            sla_age = n.finding.sla_days_remaining()
+                            title = _notification_title_for_finding(n.finding, kind, sla_age)
+                            with transaction.atomic():
+                                create_notification(
+                                    event="sla_breach",
+                                    title=title,
+                                    finding=n.finding,
+                                    sla_age=sla_age,
+                                    url=reverse("view_finding", args=(n.finding.id,)),
+                                )
+                        except Exception:
+                            logger.exception("SLA notification failed for Finding %s, continuing with the next one", n.finding.id)
+                        batch.flush_alerts()
+
+                        # kept apart, so a JIRA failure does not undo the notification above
+                        if n.do_jira_sla_comment and title:
+                            try:
+                                logger.info("Creating JIRA comment to notify of SLA breach information.")
+                                jira_services.add_simple_comment(n.jira_instance, n.jira_issue, title)
+                            except Exception:
+                                logger.exception("JIRA SLA comment failed for Finding %s, continuing with the next one", n.finding.id)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
-                    product = comb_notif_kind[0].finding.test.engagement.product
-                    create_notification(
-                        event="sla_breach_combined",
-                        title=title_combined,
-                        product=product,
-                        findings=findings_list,
-                        breach_kind=kind,
-                        base_url=get_script_prefix(),
-                    )
+                    try:
+                        title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
+                        product = comb_notif_kind[0].finding.test.engagement.product
+                        with transaction.atomic():
+                            create_notification(
+                                event="sla_breach_combined",
+                                title=title_combined,
+                                product=product,
+                                findings=findings_list,
+                                breach_kind=kind,
+                                base_url=get_script_prefix(),
+                            )
+                    except Exception:
+                        logger.exception("Combined SLA notification failed for %s / %s (%s)", prodtype, prod, kind)
+                    batch.flush_alerts()
 
     # exit early on flags
     system_settings = System_Settings.objects.get()
@@ -1037,8 +1531,6 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Will not notify on SLA breach per user configured settings")
         return
 
-    jira_issue = None
-    jira_instance = None
     # notifications list per product per product type
     combined_notifications = {}
     try:
@@ -1053,10 +1545,24 @@ def sla_compute_and_notify(*args, **kwargs):
                 query = Q(active=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: %s", query)
 
-            no_jira_findings = {}
             if system_settings.enable_notify_sla_jira_only:
                 logger.debug("Ignoring findings that are not linked to a JIRA issue")
-                no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
+                query &= Q(jira_issue__isnull=False)
+
+            # Only a finding whose SLA ends between SLA_NOTIFY_POST_BREACH days ago and
+            # SLA_NOTIFY_PRE_BREACH days from now can be notified, so leave the rest in the
+            # database instead of evaluating every open finding in Python. A finding without an
+            # expiration date is treated as breaching today below, and sla_days_remaining()
+            # counts from the mitigated date when one is set, so both stay in.
+            today = get_current_date()
+            query &= (
+                Q(sla_expiration_date__isnull=True)
+                | Q(mitigated__isnull=False)
+                | Q(
+                    sla_expiration_date__gte=today - timedelta(days=settings.SLA_NOTIFY_POST_BREACH),
+                    sla_expiration_date__lte=today + timedelta(days=settings.SLA_NOTIFY_PRE_BREACH),
+                )
+            )
 
             total_count = 0
             pre_breach_count = 0
@@ -1064,86 +1570,130 @@ def sla_compute_and_notify(*args, **kwargs):
             post_breach_no_notify_count = 0
             jira_count = 0
             at_breach_count = 0
+            error_count = 0
 
-            # Taking away for now, since the prefetch is not efficient
-            # .select_related('jira_issue') \
-            # .prefetch_related(Prefetch('test__engagement__product__jira_project_set__jira_instance')) \
             # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
+            # Streamed in chunks; the prefetches share one Product (and its SLA configuration) per
+            # chunk instead of loading it again for every finding.
             findings = Finding.objects \
                 .filter(query) \
                 .exclude(severity="Info") \
-                .exclude(id__in=no_jira_findings)
+                .exclude(test__engagement__product__disable_sla_breach_notifications=True) \
+                .select_related("jira_issue") \
+                .prefetch_related(
+                    "test__engagement__product__prod_type",
+                    "test__engagement__product__sla_configuration",
+                    Prefetch("finding_group_set", queryset=Finding_Group.objects.select_related("jira_issue")),
+                )
+            # A FINDING_SLA_PERIOD_METHOD can read more of each finding than is loaded above.
+            # Its FINDING_SLA_NOTIFY_QUERYSET_METHOD adds that to the query, so it arrives with
+            # each chunk instead of costing a query per finding.
+            # A hook that cannot run must not cost the run: if calling it fails, or its query
+            # cannot be read at all, the run reads its findings without it.
+            from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+            plain_findings = findings
+            try:
+                if queryset_method := get_custom_method("FINDING_SLA_NOTIFY_QUERYSET_METHOD"):
+                    findings = queryset_method(findings)
+            except Exception:
+                logger.exception("FINDING_SLA_NOTIFY_QUERYSET_METHOD failed; reading findings without it")
+            findings = _read_sla_findings(findings, plain_findings)
 
-            for finding in findings:
-                total_count += 1
-                sla_age = finding.sla_days_remaining()
+            # Whatever was collected before a failure to read further (a lost connection, say)
+            # is still sent, rather than dropped along with the rest of the run.
+            try:
+                for finding in findings:
+                    total_count += 1
+                    # one finding that cannot be evaluated must not stop the run
+                    try:
+                        # a savepoint, so a database error on this finding cannot abort the
+                        # transaction (if any) that the rest of the run depends on
+                        with transaction.atomic():
+                            # Finding.finding_group runs its own query; answer it from the prefetch
+                            finding.finding_group = min(finding.finding_group_set.all(), key=lambda group: group.id, default=None)
 
-                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
-                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
-                severity, enforce = finding.get_sla_period()
-                if not enforce:
-                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
-                    continue
+                            sla_age = finding.sla_days_remaining()
 
-                # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
-                if sla_age is None:
-                    sla_age = 0
+                            # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                            # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                            severity, enforce = finding.get_sla_period()
+                            if not enforce:
+                                logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                                continue
 
-                if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
-                    post_breach_no_notify_count += 1
-                    # Skip finding notification if breached for too long
-                    logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
-                    continue
+                            # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
+                            if sla_age is None:
+                                sla_age = 0
 
-                do_jira_sla_comment = False
-                jira_issue = None
-                if finding.has_jira_issue:
-                    jira_issue = finding.jira_issue
-                elif finding.has_jira_group_issue:
-                    jira_issue = finding.finding_group.jira_issue
+                            if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
+                                post_breach_no_notify_count += 1
+                                # Skip finding notification if breached for too long
+                                logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
+                                continue
 
-                if jira_issue:
-                    jira_count += 1
-                    jira_instance = jira_services.get_instance(finding)
-                    if jira_instance is not None:
-                        logger.debug("JIRA config for finding is %s", jira_instance)
-                        # global config or product config set, product level takes precedence
-                        try:
-                            # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
-                            product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
-                        except Exception as e:
-                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error("Error is: %s", e)
+                            do_jira_sla_comment = False
+                            jira_issue = None
+                            jira_instance = None
+                            if finding.has_jira_issue:
+                                jira_issue = finding.jira_issue
+                            elif finding.has_jira_group_issue:
+                                jira_issue = finding.finding_group.jira_issue
 
-                        jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
+                            if jira_issue:
+                                jira_count += 1
+                                jira_instance = jira_services.get_instance(finding)
+                                if jira_instance is not None:
+                                    logger.debug("JIRA config for finding is %s", jira_instance)
+                                    # global config or product config set, product level takes precedence
+                                    product_jira_sla_comment_enabled = False
+                                    try:
+                                        # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
+                                        product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
+                                    except Exception as e:
+                                        logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
+                                        logger.error("Error is: %s", e)
 
-                        if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
-                            logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
-                            do_jira_sla_comment = True
-                            logger.debug(f"JIRA issue is {jira_issue.jira_key}")
+                                    jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
-                logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
-                if (sla_age < 0):
-                    post_breach_count += 1
-                    logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
-                    abs_sla_age = abs(sla_age)
-                    if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
-                        _add_notification(finding, "breached")
-                    else:
-                        logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
-                # The finding is within the pre-breach period
-                elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
-                    pre_breach_count += 1
-                    logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
-                    _add_notification(finding, "prebreach")
-                # The finding breaches the SLA today
-                elif (sla_age == 0):
-                    at_breach_count += 1
-                    logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
-                    _add_notification(finding, "breaching")
+                                    if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                                        logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
+                                        do_jira_sla_comment = True
+                                        logger.debug(f"JIRA issue is {jira_issue.jira_key}")
 
-            _create_notifications()
-            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, total_count)
+                            logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
+                            kind = None
+                            if (sla_age < 0):
+                                post_breach_count += 1
+                                logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
+                                abs_sla_age = abs(sla_age)
+                                if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
+                                    kind = "breached"
+                                else:
+                                    logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
+                            # The finding is within the pre-breach period
+                            elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                                pre_breach_count += 1
+                                logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
+                                kind = "prebreach"
+                            # The finding breaches the SLA today
+                            elif (sla_age == 0):
+                                at_breach_count += 1
+                                logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
+                                kind = "breaching"
+
+                            if kind:
+                                _add_notification(finding, kind, jira_issue, jira_instance, do_jira_sla_comment=do_jira_sla_comment)
+                    except Exception:
+                        error_count += 1
+                        logger.exception("SLA evaluation failed for Finding %s, continuing with the next one", finding.id)
+            except Exception:
+                logger.exception("SLA run stopped reading findings after %s; sending the notifications collected so far", total_count)
+
+            # One manager for the whole run: the system notifications row is read once, each
+            # product's recipients once, and the alerts go out in shared bulk INSERTs.
+            with notification_batch() as batch:
+                _create_notifications(batch)
+            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, errors: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, error_count, total_count)
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")

@@ -170,6 +170,21 @@ For example, let’s say that you had your Maximum Duplicates field set to ‘1�
 2. **Later, you import Test 2 contains the same vulnerability. This will be recorded as Finding B, and Finding B will be marked as a duplicate of Finding A.**
 3. Later still, you import **Test 3** which also contains that vulnerability. This will be recorded as Finding C, which will be marked as a duplicate of Finding A. At this time, Finding B will be deleted from DefectDojo as the threshold for maximum duplicates has been crossed.
 
+### When duplicates are deleted
+
+Excess duplicates are deleted by a background task that runs every minute. Two kinds of duplicate wait for a later run:
+
+- Duplicates in a Test that an import or reimport is working on right now. The import holds a database lock on its Test until it finishes, and the task skips that Test's duplicates while the lock is held. The next run after the import ends deletes them, so a Test that is reimported every few minutes is still cleaned up between reimports.
+- A Finding saved in the last minute, so a request that is still writing it (for example a Finding created through the API) can finish first.
+
+Every other excess duplicate is deleted on the next run, as before.
+
+Self-hosted instances can tune this with three environment variables:
+
+- `DD_DUPE_DELETE_GRACE_MINUTES` (default `1`) sets how long after its last save a duplicate waits. `0` turns the wait off.
+- `DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT` (default `True`) turns the import lock on. Set it to `False` only if DefectDojo reaches PostgreSQL through a connection pooler in transaction mode (such as PgBouncer with `pool_mode = transaction`), where the lock cannot be held across an import. Without the lock, an import can fail if the task deletes Findings it is still writing.
+- `DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES` (default `30`) is a safety valve. If every connection holding a Test's import lock has been idle for this long, no import is running, so the task deletes that Test's duplicates anyway and logs a warning naming the database connections involved. `0` turns the valve off.
+
 ### Applying this setting
 
 Applying **Delete Deduplicate Findings** will begin a deletion process immediately. This setting can be applied on the **System Settings** page. See Enabling Deduplication for more information.

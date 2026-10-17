@@ -22,9 +22,9 @@ Smart Upload handles this by sorting incoming findings based on the Endpoints di
 
 ## Smart Upload menu options
 
-The Smart Upload menu is stored in a collapsible section of the sidebar.
+The Smart Upload pages are under **Connect > Import** in the sidebar:
 
-* **Add Findings allows you to import a new scan file, similar to DefectDojo’s Import Scan method**
+* **Smart Upload allows you to import a new scan file, similar to DefectDojo’s Import Scan method**
 * **Unassigned Findings lists all Findings from Smart Upload which have yet to be assigned to an Asset.**
 
 ![image](images/smart_upload.png)

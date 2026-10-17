@@ -2,7 +2,7 @@
 title: Conversione da Rules Engine
 description: Spostare le regole esistenti di Rules Engine nei grafi di Rules Engine
   2.0
-weight: 6
+weight: 7
 audience: pro
 aliases:
 - /it/automation/rules_engine_v2/converting_from_rules_engine/

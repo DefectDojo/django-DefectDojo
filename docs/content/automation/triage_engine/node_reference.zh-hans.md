@@ -1,7 +1,7 @@
 ---
 title: 节点参考
 description: Triage Engine 内置的每一个节点及其作用
-weight: 3
+weight: 4
 audience: pro
 aliases:
 - /zh-hans/automation/rules_engine_v2/node_reference/

@@ -21,12 +21,12 @@
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
                     {% if host_view %}
-                        <span title="{{ endpoint.host }}">
+                        <i class="fa-solid fa-server dd-card-icon" aria-hidden="true"></i><span title="{{ endpoint.host }}">
                             Host: {{ endpoint.host|url_shortener }} -
                             {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} mitigated endpoints
                         </span>
                     {% else %}
-                        <span title="{{ endpoint }}">
+                        <i class="fa-solid fa-sitemap dd-card-icon" aria-hidden="true"></i><span title="{{ endpoint }}">
                             Endpoint: {{ endpoint|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %} -
                             {% if endpoint.mitigated %}
                                 Mitigated
@@ -171,7 +171,7 @@
 
     <div class="panel panel-default table-responsive">
         {% if host_view %}
-            <div class="panel-heading"><h4>Endpoints</h4></div>
+            <div class="panel-heading"><h4><i class="fa-solid fa-sitemap dd-card-icon" aria-hidden="true"></i>Endpoints</h4></div>
             {% if endpoints %}
                 {% colgroup endpoints into 3 cols as grouped_items %}
                 <table class="table-striped table table table-condensed table-hover finding-endpoints">
@@ -199,7 +199,7 @@
                 </div>
             {% endif %}
         {% else %}
-            <div class="panel-heading"><h4>Host</h4></div>
+            <div class="panel-heading"><h4><i class="fa-solid fa-server dd-card-icon" aria-hidden="true"></i>Host</h4></div>
             <div id="vuln_endpoints" class="panel-body table-responsive">
                 <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}"
                    title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host|url_shortener }}</a>
@@ -210,7 +210,7 @@
     {% if not host_view and endpoint.tags.all %}
         <div class="panel panel-default tags">
             <div class="panel-heading">
-                <h4>Tags</h4>
+                <h4><i class="fa-solid fa-tags dd-card-icon" aria-hidden="true"></i>Tags</h4>
             </div>
             <div class="tags panel-body">
                 {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
@@ -223,7 +223,7 @@
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
-                        <h4>Additional Information
+                        <h4><i class="fa-solid fa-circle-info dd-card-icon" aria-hidden="true"></i>Additional Information
                             <div class="btn-group pull-right">
                                 <a title="{% trans 'Edit Information' %}" class="btn btn-sm btn-primary"
                                    href="{% url 'edit_endpoint_meta_data' endpoint.id %}">
@@ -253,7 +253,7 @@
 
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4>Open Findings</h4>
+            <h4><i class="fa-solid fa-bug dd-card-icon" aria-hidden="true"></i>Open Findings</h4>
         </div>
     {% if findings %}
     <div class="clearfix pagination-in-panel">

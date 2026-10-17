@@ -1,7 +1,7 @@
 ---
 title: Knotenreferenz
 description: Jeder Knoten, den Triage Engine mitbringt, und was er jeweils tut
-weight: 3
+weight: 4
 audience: pro
 aliases:
 - /de/automation/rules_engine_v2/node_reference/

@@ -11,6 +11,10 @@ on:
         required: true
 
 env:
+  # Pull and tag images straight from Docker Hub, never through registry.defectdojo.com:
+  # the images CI built itself are tagged defectdojo/... (= docker.io/defectdojo/...), and CI
+  # pulls must not count as installs.
+  DD_IMAGE_REGISTRY: docker.io
   release_version: ${{ github.event.inputs.version || github.event.inputs.release_number }}
 
 jobs:
@@ -80,7 +84,7 @@ jobs:
         run: docker compose down
 
       - name: Upload oas.${{ matrix.file-type }} as artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: oas-${{ matrix.file-type }}
           path: oas.${{ matrix.file-type }}

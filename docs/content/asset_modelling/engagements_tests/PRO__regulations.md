@@ -15,7 +15,7 @@ Importantly, **Regulations serve only as reference information** and do not them
 
 ### Accessing Regulations 
 
-Regulations are accessible from within the Configuration submenu of the sidebar.
+Regulations are accessible from **Settings > Configuration > Regulations** in the sidebar.
 
 ![image](images/regulations_ss1.png)
 

@@ -2,7 +2,7 @@
 title: Livraisons
 description: Le registre de tout ce que les règles envoient vers l'extérieur, ainsi
   que le fonctionnement des nouvelles tentatives et de la relecture
-weight: 5
+weight: 6
 audience: pro
 aliases:
 - /fr/automation/rules_engine_v2/deliveries/

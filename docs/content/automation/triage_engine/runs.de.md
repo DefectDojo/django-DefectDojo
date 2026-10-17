@@ -2,7 +2,7 @@
 title: Läufe
 description: Wie eine Regel ausgeführt wird, was ein Lauf aufzeichnet und wie die
   Kaskadierung begrenzt wird
-weight: 4
+weight: 5
 audience: pro
 aliases:
 - /de/automation/rules_engine_v2/runs/

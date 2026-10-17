@@ -15,7 +15,7 @@ weight: 1
 | Kernfunktionen für das Schwachstellenmanagement | ✔️ Import, Verfolgung und Verwaltung von Befunden aus 500+ Sicherheitstools | ✔️ Alles aus Open-Source, optimiert für den Enterprise-Einsatz |
 | Deduplizierung von Befunden | ✔️ Standard-Deduplizierung | ✔️ Erweiterte, konfigurierbare Deduplizierung |
 | REST-API | ✔️ Vollständige REST-API | ✔️ Vollständige REST-API |
-| Authentifizierung und Zugriffskontrolle | ✔️ Lokale Authentifizierung und grundlegendes RBAC | ✔️ SSO (SAML/OAuth), MFA, erweitertes RBAC |
+| Authentifizierung und Zugriffskontrolle | ✔️ Lokale Konten und Zugriffslisten pro Asset | ✔️ SSO (SAML, OIDC, OAuth), LDAP, MFA, rollenbasierte Zugriffskontrolle |
 | Benutzeroberfläche | ✔️ Community-UI | ✔️ Moderne Pro-UI mit Performance-Verbesserungen |
 | Dashboards und Reporting | ✔️ Einfache Dashboards und Berichte | ✔️ Erweiterte, anpassbare Dashboards und Executive-Reporting |
 | Automatisierung und Workflows | ❌ Nicht enthalten | ✔️ Rules Engine und automatisierte Workflows |

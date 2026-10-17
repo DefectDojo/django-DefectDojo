@@ -73,7 +73,7 @@ In every case the values arrive without a re-import, and the daily run remains t
 
 ## Viewing KEV/EPSS in the Vulnerability Explorer
 
-The **Vulnerability Explorer** lists one row per vulnerability ID, with the same five KEV/EPSS columns you get on the Findings table — **EPSS Score**, **EPSS Percentile**, **Known Exploited**, **Ransomware Used** and **KEV Date**:
+The **Vulnerability Explorer** (**Act > Vulnerability Explorer** in the sidebar) lists one row per vulnerability ID, with the same five KEV/EPSS columns you get on the Findings table — **EPSS Score**, **EPSS Percentile**, **Known Exploited**, **Ransomware Used** and **KEV Date**:
 
 ![image](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
@@ -123,7 +123,7 @@ This matters because "we have not looked yet" and "we looked and it is not explo
 
 ## Running a sync on demand
 
-You do not have to wait for the daily cycle. The **Sync KEV/EPSS data** button at the top of the Vulnerability Explorer starts a sync immediately:
+You do not have to wait for the daily cycle. The **Sync KEV/EPSS Data** button at the top of the Vulnerability Explorer starts a sync immediately:
 
 ![image](images/Pro_EPSS_KEV_Sync_Started.png)
 

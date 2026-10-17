@@ -36,7 +36,7 @@ Gli Asset possono diventare ancora più granulari a seconda delle esigenze della
 - “ExampleAsset 1.0” utilizza componenti software completamente diversi da “ExampleAsset 2.0”, ed entrambe le versioni sono attivamente supportate dalla propria azienda.
 - Il team assegnato a lavorare su “ExampleAsset version A” è diverso dal team Asset assegnato a lavorare su “ExampleAsset version B”, e di conseguenza necessita di permessi di sicurezza diversi.
 
-Sebbene sia possibile scegliere di rappresentare queste variazioni come Engagement all'interno di un unico Asset, l'RBAC può essere impostato solo a livello di Asset o Organizations, il che può limitare l'accesso degli Utenti all'Engagement appropriato (così come ai Test e ai Riscontri all'interno di quegli Engagement) se organizzati in questo modo. Per maggiori informazioni su RBAC e permessi in DefectDojo, fare clic [qui](/admin/user_management/about_perms_and_roles/).
+Sebbene sia possibile scegliere di rappresentare queste variazioni come Engagement all'interno di un unico Asset, l'accesso può essere concesso solo a livello di Asset o Organizations, il che può limitare l'accesso degli Utenti all'Engagement appropriato (così come ai Test e ai Riscontri all'interno di quegli Engagement) se organizzati in questo modo. Per maggiori informazioni, vedere [Permessi Open Source](/admin/user_management/os__authorized_users/).
 
 ## Dati dell'Asset 
 
@@ -69,11 +69,11 @@ Gli Asset sono accessibili dalla barra laterale. Il sottomenu offre anche l'opzi
 
 ### Permessi 
 
-Agli Asset possono essere applicate regole di controllo degli accessi basato sui ruoli (RBAC), che limitano la capacità dei membri del team di visualizzarli e interagire con essi.
+L'accesso a un Asset viene concesso tramite il relativo elenco [Authorized Users](/admin/user_management/os__authorized_users/), che limita chi può visualizzarlo e interagire con esso.
 
 I permessi si propagano verso il basso, il che significa che l'accesso a un Asset concede automaticamente l'accesso a tutti gli oggetti al suo interno (ad es. Engagement, Test e Riscontri).
 
-Per maggiori informazioni sui ruoli Utente, consulta il nostro [articolo di introduzione ai ruoli](/admin/user_management/about_perms_and_roles/).
+Per maggiori informazioni, consulta [Permessi Open Source](/admin/user_management/os__authorized_users/).
 
 ## Vista Asset 
 

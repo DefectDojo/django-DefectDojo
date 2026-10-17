@@ -1,7 +1,7 @@
 ---
 title: Configuração
 description: Configurações em nível de implantação para o Triage Engine
-weight: 7
+weight: 8
 audience: pro
 aliases:
 - /pt-br/automation/rules_engine_v2/configuration/

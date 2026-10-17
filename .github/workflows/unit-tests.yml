@@ -6,11 +6,10 @@ on:
     branches:
       - master
       - dev
-      - bugfix
       - release/**
       - hotfix/**
     # No paths/paths-ignore here, ever. `Unit Tests Complete` below is a required
-    # check on bugfix, and a required check whose workflow never triggers sits as
+    # check on dev, and a required check whose workflow never triggers sits as
     # "Expected -- waiting for status to be reported" forever. A PR must pass its
     # required checks BEFORE it can enter the merge queue, so a trigger-level
     # docs/** filter left docs-only PRs unqueueable for anyone without ruleset
@@ -22,7 +21,7 @@ on:
   # point ever evaluates their union.
   #
   # The queue that emits these events is the "Merge Queue" ruleset (id 20466211),
-  # active on bugfix: SQUASH, ALLGREEN grouping, max 3 entries building, and it
+  # active on dev: SQUASH, ALLGREEN grouping, max 3 entries building, and it
   # requires `ruff-linting` and `Unit Tests Complete` on the merge group. Two
   # operational notes recorded here so they survive the people who know them:
   #
@@ -44,6 +43,9 @@ on:
 jobs:
   # hard gate: linting must pass before we spend any time building images or running tests
   ruff:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     uses: ./.github/workflows/ruff.yml
     secrets: inherit
 
@@ -53,6 +55,9 @@ jobs:
   # output stays empty, and every `!= 'true'` guard runs the full suite -- the
   # queue always tests the complete matrix on the speculative merge commit.
   changes:
+    # Release PRs and merge-backs are merged without waiting for CI. Skip when the
+    # head is release/merge-* AND the PR has release-management.
+    if: ${{ !(startsWith(github.head_ref, 'release/merge-') && contains(github.event.pull_request.labels.*.name, 'release-management')) }}
     runs-on: ubuntu-latest
     outputs:
       docs_only: ${{ steps.filter.outputs.docs_only }}
@@ -154,7 +159,10 @@ jobs:
     # always() so this still reports when something upstream fails -- without it
     # the job would be skipped, and a skipped required check blocks the queue
     # instead of failing it.
-    if: always()
+    # `changes` is skipped only by the release guard above. Skip this job too,
+    # so a release PR does not report a failure. Release PRs are admin-merged,
+    # so the skipped required check does not block them.
+    if: ${{ always() && needs.changes.result != 'skipped' }}
     needs:
       - changes
       - ruff

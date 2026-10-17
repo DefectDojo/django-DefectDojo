@@ -125,7 +125,7 @@ If the database now has a different name, or lives on a different server, point 
 sudo -E dojo-compose-cli environment add -k DD_DATABASE_URL -v 'postgres://<db_user>:<password>@<db_host>:5432/<new_name>'
 ```
 
-If your backup came from the `dojo-db-backup` tool, it is a gzipped plain SQL dump of the main database only. Create the database first and name it with `-d`. Without `-d`, `psql` loads every table into the `postgres` database and still reports success:
+If your backup came from the `dojo-backup` utility, it is a gzipped plain SQL dump of the main database only. Create the database first and name it with `-d`. Without `-d`, `psql` loads every table into the `postgres` database and still reports success:
 
 ```bash
 gunzip defectdojo-db_<timestamp>.sql.gz

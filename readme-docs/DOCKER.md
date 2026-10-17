@@ -82,7 +82,7 @@ docker compose build nginx
 > **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
 
 ## Run with Docker Compose in release mode
-To run the application based on previously built image (or based on dockerhub images if none was locally built), run:
+To run the application based on previously built image (or based on the published images if none was locally built, see [Image registry](#image-registry)), run:
 
 ```zsh
 docker/setEnv.sh release
@@ -226,6 +226,25 @@ CONTAINER ID        IMAGE                                 COMMAND               
 aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
 ...
 ```
+
+## Image registry
+`docker-compose.yml` pulls the DefectDojo images through `registry.defectdojo.com`, run by DefectDojo, Inc.,
+so that our images don't count against your Docker Hub rate limits. No image is stored there: layers come
+straight from Docker Hub. Each pull is logged (time, image, Docker client and IP address). The address is used
+to identify the organization or network and then deleted within three days, and the rest of the record is
+kept for up to 13 months. DefectDojo uses these logs to see which organizations download DefectDojo and may
+reach out to them about its products or to ask for feedback. Details, including how to opt out of contact or
+have your data removed, are in section 1.4 of the [privacy policy](https://defectdojo.com/privacy-policy).
+
+To pull straight from Docker Hub, or from your own mirror, set `DD_IMAGE_REGISTRY` before running Docker
+Compose (in your shell or in `.env`):
+
+```zsh
+export DD_IMAGE_REGISTRY=docker.io            # Docker Hub
+export DD_IMAGE_REGISTRY=mirror.example.com   # or your own registry mirror
+```
+
+Images you build locally are tagged with the same name, so building and running works the same either way.
 
 ## Clean up Docker Compose
 

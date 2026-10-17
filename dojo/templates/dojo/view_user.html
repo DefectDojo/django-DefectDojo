@@ -11,7 +11,7 @@
         <div class="panel panel-default">
             <div class="panel-heading tight">
                 <div class="clearfix">
-                    <h3 class="pull-left">{% trans "Default Information" %}</h3>
+                    <h3 class="pull-left"><i class="fa-solid fa-id-card dd-card-icon" aria-hidden="true"></i>{% trans "Default Information" %}</h3>
                     <div class="dropdown pull-right">
                         <div class="btn-group">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -67,7 +67,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">{% trans "Contact Information" %}</h4>
+                    <h4 class="pull-left"><i class="fa-solid fa-address-book dd-card-icon" aria-hidden="true"></i>{% trans "Contact Information" %}</h4>
                 </div>
             </div>
             <div class="table-responsive">
@@ -105,7 +105,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">{{ labels.ORG_USERS_LABEL }}</h4>
+                    <h4 class="pull-left"><i class="fa-solid fa-users dd-card-icon" aria-hidden="true"></i>{{ labels.ORG_USERS_LABEL }}</h4>
                     {% if request.user.is_staff %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="{% trans 'Actions' %}" type="button" id="dropdownMenuAddProductTypeMember"
@@ -175,7 +175,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">{{ labels.ASSET_USERS_ACCESS_LABEL }}</h4>
+                    <h4 class="pull-left"><i class="fa-solid fa-users dd-card-icon" aria-hidden="true"></i>{{ labels.ASSET_USERS_ACCESS_LABEL }}</h4>
                     {% if request.user.is_staff %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="{% trans 'Actions' %}" type="button" id="dropdownMenuAddProductMember"
@@ -244,7 +244,7 @@
     <div class="col-md-4">
         <div class="panel panel-default-secondary">
             <div class="panel-heading">
-                <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>
+                <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw dd-card-icon" aria-hidden="true"></span>
                     {% trans "Metadata" %}
                 </h3>
             </div>
@@ -321,7 +321,7 @@
         {% if not user.is_superuser %}
         <div class="panel panel-default-secondary" id="edit_permissions">
             <div class="panel-heading">
-                <h3 class="panel-title"><span class="fa-solid fa-lock-open-alt" aria-hidden="true"></span>&nbsp;&nbsp;{% trans "Configuration Permissions" %}</h3>
+                <h3 class="panel-title"><span class="fa-solid fa-lock-open-alt dd-card-icon" aria-hidden="true"></span>&nbsp;{% trans "Configuration Permissions" %}</h3>
             </div>
             <form id="edit_permissions_form" class="" method="post" action="{% url 'edit_user_permissions' user.id %}">{% csrf_token %}
             <div class="table-responsive">

@@ -97,7 +97,7 @@ classifies every mapping change before applying it:
   default, as does writing `unique_id_from_tool`.
 
 Which fields are identity-relevant follows **your** deduplication settings for that scan type
-under **Enterprise Settings**, not a fixed list, so it tracks any change you make there.
+under **Settings > Finding Workflow > Matching Configuration**, not a fixed list, so it tracks any change you make there.
 
 ### Do not map a vulnerability ID straight into `unique_id_from_tool`
 
@@ -138,16 +138,18 @@ Each row is one mapping: the **Target Field** to write, the **Expression** to wr
 and an optional **Strip Pattern**. The target list is the set of finding fields DefectDojo will
 accept, so you cannot select one that would be rejected on save.
 
-Fields that reach identity for this scan type are tagged **identity** as you select them. That
+Fields that reach identity for this scan type are tagged **Identity** as you select them. That
 tag follows your deduplication settings for the scan type, so it reflects what this instance
 actually hashes rather than a fixed list. Two rows may not target the same field, and the
 editor will say so before you continue.
 
 ### Review the impact, then save
 
-**Review Impact** classifies the change without applying it, and this is the step the screen
-exists for. It tells you whether the edit is presentation-only or identity-relevant, which
-fields are moving, and how many findings are already stored under this scan type.
+**Next** opens the **Review Impact** step, which classifies the change without applying it, and
+this is the step the screen exists for. It tells you whether the edit is presentation-only or
+identity-relevant, which fields are moving, and how many findings are already stored under this
+scan type. **Submit** on the mapping step opens the same review rather than saving, so a change
+is never saved without it; **Submit** on the review step saves.
 
 An identity-relevant edit cannot be saved until you tick the box confirming you understand it
 opens a transition window. A presentation-only edit saves without that step — the confirmation

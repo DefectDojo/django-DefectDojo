@@ -14,7 +14,7 @@
     {% if risk_acceptance.is_expired %}
         <div class="danger-zone panel panel-danger">
             <div class="panel-heading">
-                <h3>Expired</h3>
+                <h3><i class="fa-solid fa-hourglass-end dd-card-icon" aria-hidden="true"></i>Expired</h3>
             </div>
         </div>
     {% endif %}
@@ -23,7 +23,7 @@
             <div class="panel-heading tight">
                 <div class="clearfix">
                     <h3 class="pull-left">
-                        Risk Acceptance</small>
+                        <i class="fa-solid fa-handshake dd-card-icon" aria-hidden="true"></i>Risk Acceptance</small>
                     </h3>
                 </div>
             </div>
@@ -46,7 +46,7 @@
             <div class="panel-heading tight">
                 <div class="clearfix">
                     <h3 class="pull-left">
-                        Risk Acceptance <small>added by {{ risk_acceptance.owner.get_full_name }}, Updated {{ risk_acceptance.updated|naturaltime|default_if_none:"" }}, Created {{ risk_acceptance.created|naturaltime|default_if_none:"" }}</small>
+                        <i class="fa-solid fa-handshake dd-card-icon" aria-hidden="true"></i>Risk Acceptance <small>added by {{ risk_acceptance.owner.get_full_name }}, Updated {{ risk_acceptance.updated|naturaltime|default_if_none:"" }}, Created {{ risk_acceptance.created|naturaltime|default_if_none:"" }}</small>
                     </h3>
 
                     <div class="dropdown pull-right">
@@ -124,7 +124,7 @@
 
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h3>Decision & Recommendation</h3>
+                <h3><i class="fa-solid fa-check-to-slot dd-card-icon" aria-hidden="true"></i>Decision & Recommendation</h3>
             </div>
             <table class="table table-condensed">
                 <thead>
@@ -157,7 +157,7 @@
 
     <div id="risk_acceptance" class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h3>Findings Accepted</h3>
+            <h3><i class="fa-solid fa-bug dd-card-icon" aria-hidden="true"></i>Findings Accepted</h3>
         </div>
         {% if accepted_findings %}
             <table id="open_findings" class="table table-condensed table-striped">
@@ -217,7 +217,7 @@
     {% if engagement|has_object_permission:"edit" %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3>Accept Additional Findings</h3>
+                <h3><i class="fa-solid fa-bug dd-card-icon" aria-hidden="true"></i>Accept Additional Findings</h3>
             </div>
             <br/>
             <form method="post" class="">{% csrf_token %}
@@ -239,7 +239,7 @@
 
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h3>Uploaded Proof</h3>
+            <h3><i class="fa-solid fa-paperclip dd-card-icon" aria-hidden="true"></i>Uploaded Proof</h3>
         </div>
         <table id="doc" class="tablesorter-bootstrap table table-condensed table-striped">
             <thead>
@@ -283,7 +283,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3>Notes</h3>
+            <h3><i class="fa-solid fa-note-sticky dd-card-icon" aria-hidden="true"></i>Notes</h3>
         </div>
         {% if notes %}
             <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">

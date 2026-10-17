@@ -1,7 +1,7 @@
 ---
 title: "Node Reference"
 description: "Every node Triage Engine ships with, and what each one does"
-weight: 3
+weight: 4
 audience: pro
 aliases:
   - /automation/rules_engine_v2/node_reference/
@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Triage Engine ships 43 nodes in five categories. This page documents all of them.
+Triage Engine ships 47 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -58,7 +58,7 @@ Sweeps everything in scope on a schedule. The schedule is configured on the rule
 
 `trigger.manual`
 
-Sweeps everything in scope when you press **Run** on the rule.
+Sweeps everything in scope when you press **Run Now** on the rule.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -154,7 +154,7 @@ A group is three separate decisions, and the settings keep them apart: **which s
 | **Settle (minutes)** | `2` | A quiet period after the last expected scan lands before the rule fires, so a report is not built while that import is still being deduplicated. Zero fires as soon as the last scan lands. |
 | **When a Scan Fails** | `Keep waiting for the deadline` | What a failed import of an expected scan type does to the group. See below. |
 
-**How a group waits.** The first expected scan to land opens a *cycle* for its asset (and engagement, when narrowed; and correlation key, when grouping by one). Each further expected scan is recorded in that cycle; a scan type that lands twice keeps the latest import, so an hourly scanner and a daily one in the same group produce "the latest hourly result at the moment the daily one landed". When every required scan has arrived and the settle delay has passed, the cycle closes `complete`. When the maximum wait passes first, or the rule's schedule ticks (for **At each tick of this rule's schedule**), it closes `incomplete`. A scan landing after the cycle closed opens the next one. Pressing **Run** on the rule closes every open cycle as it stands, which is how you fire a group that is never going to complete.
+**How a group waits.** The first expected scan to land opens a *cycle* for its asset (and engagement, when narrowed; and correlation key, when grouping by one). Each further expected scan is recorded in that cycle; a scan type that lands twice keeps the latest import, so an hourly scanner and a daily one in the same group produce "the latest hourly result at the moment the daily one landed". When every required scan has arrived and the settle delay has passed, the cycle closes `complete`. When the maximum wait passes first, or the rule's schedule ticks (for **At each tick of this rule's schedule**), it closes `incomplete`. A scan landing after the cycle closed opens the next one. Pressing **Run Now** on the rule closes every open cycle as it stands, which is how you fire a group that is never going to complete.
 
 **When a scan fails.** A failed import of an expected scan type is recorded against the cycle, and what happens next is the policy:
 
@@ -189,13 +189,68 @@ Two egress settings are built for these items. **Generate a Report** has a **Fin
 
 The shipped template **Report when a group of scans has landed** wires all of this: the group trigger, a report on `complete`, and an email naming the missing scans on `incomplete`.
 
+### On Dedupe Match
+
+`trigger.dedupe`
+
+Runs when deduplication matches a newly imported Finding to an existing one. Use it when the same scans are imported into more than one Asset (for example a staging Asset and a production Asset in one Dedupe Pool) and each Asset needs its own active Findings and SLAs, with triage decisions carried between them.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
+| **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
+
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+
+Each item carries the match on `ctx`:
+
+```
+ctx.matched_finding_id   the existing Finding this one matched
+ctx.kept_active          true when deduplication kept this Finding active
+```
+
+**Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
+
+#### Example: keep staging and production in step
+
+1. Put the staging Asset and the production Asset in the same Dedupe Pool.
+2. Create a rule with **On Dedupe Match**, set to **Keep Both Active**, scoped to both Assets, followed by **Copy Status from Matched Finding**. A Finding imported into production now starts with the status its staging match already has, and the other way around.
+3. Create a second rule with **On Finding Event** (`closed` or `reopened`, or `any`), followed by **Apply Status to Linked Findings**. A Finding marked as a false positive in production is then marked as a false positive in staging too.
+
+### On an Inbound Webhook
+
+`trigger.webhook`
+
+Runs when a [webhook receiver](../webhook_receivers/) records a delivery. The payload never travels in the event that wakes the rule: the trigger reads it from the receipt.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Webhook Receiver** | required | The receiver whose deliveries wake this rule. Only receivers the rule owner can see are offered. |
+| **Items From** | empty | A dot path to the object, or list of objects, that become items, for example `issues`. Empty makes the whole payload one item. A list becomes one item per element. |
+| **Fields** | empty | Named values read from each item into `webhook.fields.<name>`. Each row takes a path, a template or a fixed value, an optional transform, an optional type (`string`, `int`, `float`, `bool`, `datetime`, `string_list`, `severity`), a default, and whether it is required. A later row can read an earlier one. |
+| **Drop Items Missing a Required Field** | off | Skip an item whose required field has no value, instead of passing it on. |
+
+Each item carries the payload under `webhook`:
+
+```
+webhook.payload.*      the item's object, for example webhook.payload.issue.key
+webhook.root.*         the whole payload, when Items From picked something inside it
+webhook.fields.*       the named, typed fields
+webhook.headers.*      the request headers the receiver keeps
+webhook.receiver.*     id, label, slug and kind of the receiver
+ctx.receipt_id         the receipt this run came from
+ctx.item_index         the item's position when Items From is a list
+```
+
+A webhook item has no Finding yet, so a **Findings** node does nothing to it until **Find Findings by a Value** has found one. A value that does not fit its type becomes empty and is counted in the node's trace; it never fails the run.
+
 ## Logic
 
 ### If / Filter
 
 `filter.if`
 
-Routes each item down the **true** or the **false** branch, by conditions. This is the only node with two outputs, and it is how a graph branches.
+Routes each item down the **true** or the **false** branch, by conditions. It is how a graph branches.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -225,6 +280,36 @@ Keeps the first item per key and drops later ones carrying the same key. Scoped 
 | **Key Path** | `finding.hash_code` | The item path whose value identifies a duplicate. |
 
 A common use is `finding.component_name`, to notify once per affected component instead of once per Finding.
+
+### Find Findings by a Value
+
+`lookup.finding`
+
+Looks up the Findings a value names, such as a ticket key from a webhook, and passes them on. It has two outputs: **found** carries one item per Finding, and **not found** carries the items that named nothing, so a rule can alert on "this ticket is not linked to any Finding".
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Match By** | Downstream Connector Ticket | What the value identifies: a Downstream Connector ticket, a classic Jira issue (key or id), a Finding id, `unique_id_from_tool`, a hash code, or a tag. |
+| **Value** | required | The value to look up, for example `{{webhook.fields.issue_key}}`. |
+| **Fallback Value** | empty | Looked up instead when Value renders empty or finds nothing, for example `{{webhook.fields.issue_id}}`. |
+| **Connection** | empty | For a Downstream Connector ticket: only tickets this connection created. Set it whenever two connections could share ticket keys, such as two Jira sites. The rule owner must be able to see the connection. |
+| **Require a Connection** | off | For a Downstream Connector ticket: fail the run instead of matching every connection's tickets when no connection is set. |
+| **Connector** | any | For a Downstream Connector ticket: only tickets of this connector type. |
+| **Jira Site** | empty | For a classic Jira issue: the Jira base URL the event came from, for example `{{webhook.fields.site}}`. Only issues of the classic Jira instance configured for that site match, so the instance's URL must be the site's base URL. |
+| **Include Finding Group Members** | on | A ticket or classic Jira issue for a Finding Group finds every Finding in the group. |
+| **Limit** | `1000` | The most Findings one run may find. Items past it go to **not found**. |
+
+The lookup runs with the rule owner's visibility: a Finding the owner cannot see is indistinguishable from one that does not exist. A ticket is matched by its key first and by the ticket system's numeric id only when the key finds nothing, and a classic Jira issue by its numeric id first. A classic Jira issue that is an engagement epic is reported as not found, as the classic webhook ignores epics too. With **Jira Site** set and several classic Jira instances, an event whose site matches none of them is reported as not found. Found items keep their `webhook` block and gain:
+
+```
+ctx.lookup_via                  finding, or finding_group when found through a group ticket
+ctx.lookup_value                the value that matched
+ctx.ticket_link_id              the Downstream Connector ticket that matched
+ctx.issue_tracker_mapping_id    its issue tracker mapping
+ctx.jira_issue_id               the classic Jira issue that matched
+ctx.jira_instance_id            its classic Jira instance
+ctx.lookup_reason               on not found items: empty_value, no_match, engagement_epic, other_jira_site or limit_reached
+```
 
 ## Findings
 
@@ -263,6 +348,32 @@ Moves the Finding to a status.
 | **Status** | none | `active`, `inactive`, `verified`, `unverified`, `false_positive`, `mitigated`, `reopen`. |
 | **Note** | empty | An optional note recorded alongside the status change. |
 
+### Copy Status from Matched Finding
+
+`finding.copy_matched_status`
+
+Gives the Finding the status of the Finding deduplication matched it to in another Asset, and adds a note naming that Finding. Use it after **On Dedupe Match**. Outside that trigger it uses the link deduplication recorded, so it does nothing for a Finding that was never kept active.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry: `False Positive`, `Out of Scope`, `Risk Accepted`, `Mitigated`, `Reopened`. `Reopened` carries an open status to a Finding that is closed for one of the other reasons. |
+
+`Mitigated` and `Reopened` are off by default. They follow what each Asset's scans report rather than a decision someone made: a fix that reaches staging first would mitigate the production Finding while the issue is still live in production, and the next production scan would reopen it and send the reopen back. Turn them on only where both Assets are scanned together.
+
+A status is read in this order: false positive, out of scope, risk accepted, mitigated, and otherwise open. A risk acceptance is carried as a new acceptance on the Finding's own engagement, with the same expiration date, so either one can later be extended or revoked on its own. If the Asset only allows simple risk acceptance, the Finding is accepted the simple way, which has no expiration. The rule owner must be able to see the Finding the status comes from (the note names it) and edit the Finding it goes to, and to add a risk acceptance for that status; anything else is left alone, and so are duplicates. It does nothing after **On Dedupe Match** in **Mark as Duplicate** mode, because the new Finding is then a duplicate. A Finding already closed for a different reason takes the new status in place of the old one, so the two Findings end up with the same status.
+
+### Apply Status to Linked Findings
+
+`finding.apply_status_to_linked`
+
+Gives every Finding linked to this one by **On Dedupe Match** the same status, and adds a note to each naming this Finding. Use it after **On Finding Event**, so a triage decision made in one Asset reaches the matching Findings in the others. Links are followed in both directions, and through a chain of Assets, but only through Findings the rule owner can see.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
+
+The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
+
 ### Add Tags
 
 `finding.add_tags`
@@ -282,6 +393,45 @@ Adds a note to the Finding.
 | Setting | Notes |
 |---------|-------|
 | **Note** | The note text. Supports placeholders. |
+
+### Apply the Ticket's Status
+
+`finding.apply_status_mapping`
+
+Closes, reopens, false-positives or risk accepts each Finding to match its linked ticket. The ticket's state and close reason are read through four lists: **closed states**, **open states**, **false positive reasons** and **accepted risk reasons**. Each list comes from the ticket's own issue tracker mapping (**Coming Back From** on the connector's status mapping) where it is set. For a classic Jira issue, the resolution lists come from its own classic Jira instance. Otherwise this node's lists apply. For Jira, the two state lists hold status category keys (`new`, `indeterminate`, `done`) and the reason lists hold resolution names.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Ticket State** | required | The ticket's state, for example `{{webhook.fields.state}}`. |
+| **Close Reason** | empty | The ticket's close reason or resolution. |
+| **Ticket Last Updated** | empty | The ticket's own last-modified time, for example `{{webhook.fields.updated}}`. An event older than the last one applied to the ticket is ignored. |
+| **Ticket Key** | empty | Names the ticket in a risk acceptance created from it. |
+| **Accepted By** | empty | Who a risk acceptance created from the ticket names as accepting it, for example the assignee. |
+| **Use the Connector's Status Mapping** | on | Read the lists from the ticket's mapping where it sets them. |
+| **Closed States**, **Open States**, **False Positive Reasons**, **Accepted Risk Reasons** | empty | The lists to use when the mapping does not say. Comma separated, matched regardless of case. |
+| **Close Findings** | on | Apply closures. |
+| **Reopen Findings** | on | Reopen a closed Finding whose ticket is open again. |
+| **Also Reopen Finding Groups** | off | A ticket cannot say which member of a group should reopen, so this is off by default. |
+| **Note** | empty | Added to each Finding that changed. `{{ctx.ticket_change}}` says what changed in words, such as "Closed as a false positive" or "Reopened", and `{{ctx.ticket_status}}` is its code. |
+
+A close reason only ever classifies a closed state: false positive first, then accepted risk, then plain mitigation. A reopened ticket that still carries its old resolution reopens. Findings already in the target state are left alone.
+
+An accepted risk works the way the classic Jira webhook does: it creates a full risk acceptance where the Finding's product allows one, a simple risk acceptance where only that is allowed, and otherwise closes the Finding as mitigated. Reopening or false-positiving a risk-accepted Finding removes its risk acceptance first. A status change is only made on a Finding the rule owner may edit (and, for a risk acceptance, may accept risk on).
+
+### Add a Ticket Comment as a Note
+
+`finding.add_ticket_comment`
+
+Adds a comment made on the linked ticket as a note on the Finding, once. A comment DefectDojo posted to the ticket itself is recognized by its comment id, or by its text while the id is still on its way, and skipped. A comment on a Finding Group's ticket is added to every Finding in the group.
+
+| Setting | Notes |
+|---------|-------|
+| **Comment ID** | The ticket system's id for the comment, for example `{{webhook.fields.comment_id}}`. |
+| **Comment Text** | The comment as the ticket system sent it. |
+| **Comment Author** | The author's identities, comma separated. For a classic Jira issue, a comment whose author is the classic Jira instance's user is DefectDojo's own and is skipped. |
+| **Note** | The note to add, for example `({{webhook.fields.commenter}}): {{webhook.fields.comment_body}}`. |
+
+Notes this node adds are never pushed back to the ticket.
 
 ### Set Owners
 
@@ -328,8 +478,8 @@ so a person decides. They stay active and counted the whole time. With that feat
 review state to use, so they are simply left alone — never accepted, which is the point of the
 limit. A rule preview creates nothing, as with every other action.
 
-Two behaviours worth knowing: a severity the rule cannot recognise counts as *over* the limit (if it
-cannot be ranked it cannot be called safe), while a *limit* that cannot be recognised is ignored
+Two behaviors worth knowing: a severity the rule cannot recognize counts as *over* the limit (if it
+cannot be ranked it cannot be called safe), while a *limit* that cannot be recognized is ignored
 rather than blocking everything, because a rule that silently stops working is harder to notice than
 one that keeps going.
 
@@ -389,7 +539,7 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 
 The value is checked against the field's current definition when the rule is saved and again on every run, so a rule can never write a value the field's data type refuses. A text template that renders empty for a Finding leaves that Finding untouched (removal is the Clear node's job), setting a multi-select replaces the whole stored list, and Findings already holding the value are left alone.
 
-Three behaviours worth knowing:
+Three behaviors worth knowing:
 
 * **Scope is the boundary.** Like every Findings node, the write applies to every Finding the trigger produced under the rule owner's visibility.
 * **A custom field write is not a Finding save.** Nothing that follows a Finding save runs: no SLA recomputation, no deduplication, no re-prioritization. A custom field edited by hand on a Finding's page does not wake **On Finding Event** rules either. A write made by a rule does cascade: other rules see it as an `updated` event, and later nodes in the same run read the new value.
@@ -432,9 +582,33 @@ Moves the Asset to a different Organization (Product Type). Its primary organiza
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Organization** | none | The destination. |
+| **Destination** | `A Fixed Organization` | `A Fixed Organization`, or `Computed From Each Asset` to work the Organization out per Asset. |
+| **Organization** | none | The destination, for a fixed destination. |
+| **Computed Destination** | none | How each Asset's Organization is worked out, for a computed destination. See [Computed destinations](#computed-destinations). |
 
-The permission gate mirrors the Asset form: the rule owner needs edit permission on each Asset, and the add-asset permission on the destination Organization. Without the latter the run fails up front, before anything moves.
+The permission gate mirrors the Asset form: the rule owner needs edit permission on each Asset, and the add-asset permission on the destination Organization. For a fixed destination, a missing add-asset permission fails the run up front, before anything moves. For a computed destination, an Asset whose value names an Organization the owner cannot add Assets to is skipped with the reason `not_permitted`, and the rest still move.
+
+### Add Organization Membership
+
+`asset.add_membership`
+
+Adds the Asset to another Organization alongside its primary one, or removes a membership a rule added. This is how one Asset belongs to a team, a compliance scope and a portfolio at once. The node is only offered while non-exclusive Organizations are turned on for the instance (`DD_V3_ORGANIZATION_NONEXCLUSIVE`); in a rule saved before that setting was turned off, it changes nothing and counts every Asset as `skipped_flag_off`.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Action** | `Add Membership` | `Add Membership` or `Remove Membership`. |
+| **Destination** | `A Fixed Organization` | `A Fixed Organization`, or `Computed From Each Asset`. |
+| **Organization** | none | The Organization to join, for a fixed destination. |
+| **Computed Destination** | none | For a computed destination. Unlike the other nodes, one Asset can join several Organizations: an Asset tagged `scope:pci` and `scope:sox` joins both. See [Computed destinations](#computed-destinations). |
+
+What it will and will not touch:
+
+* It only ever writes memberships of its own kind (rule memberships). A membership a person pinned by hand, or one a connector created, is never claimed, changed or removed, and the Asset's primary Organization is out of its reach entirely.
+* Adding a membership the Asset already holds, by whatever means, changes nothing and counts the Asset as unchanged. Removing only takes away rule memberships.
+* It needs the same permissions as pinning an Asset into an Organization by hand: edit on the Asset and edit on the Organization. A fixed Organization the owner cannot edit fails the run; a computed one is skipped as `not_permitted`.
+* Removing never creates an Organization, whatever the computed destination says.
+
+This node replaces the older tag-to-Organization membership rules, which could only be managed from the Django admin. Those keep working for the Organizations they already target, and this node leaves those Organizations alone (it counts them as `membership_rule`), so the two never fight over the same membership. To move one over, write the equivalent rule here and then delete the old membership rule.
 
 ### Add Tags
 
@@ -464,8 +638,9 @@ Places the Asset under a parent in the Asset hierarchy, or removes its parent. A
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Action** | `Set Parent` | `Set Parent` or `Remove Parent`. |
+| **Action** | `Set Parent` | `Set Parent`, `Set Parent Computed From Each Asset`, or `Remove Parent`. |
 | **Parent** | none | The Asset to place these under. Shown while the action is Set Parent. |
+| **Computed Destination** | none | How each Asset's parent is worked out, by Asset name. Shown for the computed action. With **Create It When Missing** on, a parent that does not exist yet is created as a plain Asset in the child's Organization. See [Computed destinations](#computed-destinations). |
 
 ### Set a Custom Field
 
@@ -478,7 +653,7 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 | **Field** | Which custom field to write. One entry per Asset custom field defined on the instance. |
 | **Value** | Typed to the field. |
 
-Two behaviours of its own: Assets the rule owner may not edit are counted on the node trace as `skipped_unauthorized` rather than touched, and the write lands on the custom field value rather than the Asset row itself, so nothing that follows an Asset edit runs. A custom field edited by hand does not wake **On Asset Event** rules; a write made by a rule still cascades as an `updated` event.
+Two behaviors of its own: Assets the rule owner may not edit are counted on the node trace as `skipped_unauthorized` rather than touched, and the write lands on the custom field value rather than the Asset row itself, so nothing that follows an Asset edit runs. A custom field edited by hand does not wake **On Asset Event** rules; a write made by a rule still cascades as an `updated` event.
 
 ### Clear a Custom Field
 
@@ -502,7 +677,9 @@ Assigns an SLA configuration to every Asset that reaches it. Findings under that
 
 | Setting | Notes |
 |---------|-------|
-| **SLA Configuration** | Which SLA configuration to assign. Required. |
+| **Destination** | `A Fixed SLA Configuration` (the default), or `Computed From Each Asset` to pick the configuration by name per Asset. |
+| **SLA Configuration** | Which SLA configuration to assign, for a fixed destination. |
+| **Computed Destination** | For a computed destination. The name resolves among the configurations the owner may use, and a name that matches none skips the Asset: this node never creates an SLA configuration. See [Computed destinations](#computed-destinations). |
 
 **An Asset already recalculating is skipped, not silently dropped.** If a person, or another rule, is already recalculating the same Asset's SLA dates when this node reaches it, writing here would not change anything and would be reverted, so the node counts that Asset as skipped instead of changed. The run's node summary reports the skip by name, alongside how many Assets were actually changed.
 
@@ -529,6 +706,72 @@ Makes the Asset deduplicate together with the rest of a [dedupe pool](/triage_fi
 | **Action** | `Assign to Pool` | `Assign to Pool` or `Remove from Pool`. |
 | **Pool** | none | Shown for `Assign to Pool`. The pool these Assets should deduplicate within. Required. |
 | **Matching** | `Same tool` | Which kind of matching this membership governs: `Same tool` or `Cross tool`. Reimport matching is not offered, because a pool has no effect on it. |
+
+### Computed destinations
+
+**Set Organization**, **Add Organization Membership**, **Set Parent** and **Assign SLA Configuration** can work their destination out from each Asset instead of taking one fixed choice. "Assets tagged `team:payments` go to the Payments Organization" then becomes one rule, rather than one rule per team or a move per Asset.
+
+A computed destination reads a value off the Asset, optionally maps it through a table, shapes it, and then finds the destination with that **name**:
+
+| Setting | Notes |
+|---------|-------|
+| **Read the Value From** | Where the value comes from: `Tag`, `Field`, `Custom Field`, `Connector Attribute` or `Name Segment`. |
+| **Tag Key** | For `Tag`. The key of a key/value tag: `team` reads both `team:payments` and `team=payments`. Tags synced from AWS resources arrive as `aws:<key>:<value>`, so the key `aws:team` reads `aws:team:payments`. A key ending in `:` or `=` is used as an exact prefix. |
+| **Field** | For `Field`: the Asset's `name`, `business_criticality`, `platform`, `lifecycle`, `origin` or `kind`. |
+| **Custom Field** | For `Custom Field`: one of the Asset [custom fields](/asset_modelling/pro__custom_fields/). A multi-select field contributes each selected option. |
+| **Connector** and **Attribute** | For `Connector Attribute`: an attribute of the connector records mapped to the Asset, for example `AWS_ACCOUNT_NAME`. Leave the connector on `Any Connector` to read whichever record reports it, or pick one. See [Connector attributes](../building_rules/#connector-attributes). |
+| **Split On** and **Keep Segment** | Split the value on a fixed delimiter and keep one segment, counting from `0`; `-1` is the last segment. `Name Segment` always splits the Asset's name, so `payments-checkout-api` split on `-` keeps `payments` at `0` and `api` at `-1`. Leave the delimiter empty to use the whole value. |
+| **Value Mapping** | Optional rows of value and destination name. Matching ignores case. A value ending in `*` matches everything that starts with it (`pay*` matches `payments` and `pay-eu`); an exact row wins over a `*` row, and the longest `*` row wins among those. |
+| **Values Not in the Table** | With a mapping table: `Use the Value` (the default) passes an unmapped value through, `Skip` skips the Asset. |
+| **Letter Case**, **Prefix** and **Suffix** | Shape a value the table did not map: `Title Case` turns `payments` into `Payments`, a prefix of `Team ` makes it `Team Payments`. A mapped value is used exactly as the table writes it. |
+| **Create It When Missing** | For Organizations and parent Assets only. When nothing has the name, create it: an Organization of the chosen **Type**, or a plain parent Asset in the child's Organization. |
+| **Type** | The Organization type a created Organization gets: Team, Business Application, Compliance Scope, Portfolio or Custom (the default). |
+
+**How a name is found.** An Organization or parent Asset whose name matches exactly is used; otherwise the match ignores case. Two Organizations whose names differ only by case, with neither matching exactly, are ambiguous and skip the Asset. Only destinations the rule owner may use are found, and creating one needs the same permission creating it by hand does, so a computed destination never reaches further than its owner can. Each distinct name is looked up once per batch, however many Assets share it.
+
+**An Asset with nowhere to go is skipped, never an error.** One Asset without a `team` tag does not stop the rest of a sweep. The node trace counts skipped Assets as `skipped_unresolved` and says why under `skip_reasons`:
+
+| Reason | Meaning |
+|--------|---------|
+| `no_value` | The Asset has no such tag, field, attribute or segment. |
+| `ambiguous_value` | It has several, and the action takes one destination (for example two `team` tags on a **Set Organization**). |
+| `unmapped` | The value is not in the mapping table, and unmapped values are skipped. |
+| `invalid_name` | The shaped name is longer than a destination name can be. |
+| `not_found` | Nothing has that name, and creating it is off. |
+| `ambiguous_destination` | Several destinations match the name, differing only by case. |
+| `not_permitted` | The destination exists, but the rule owner may not use it. |
+| `cannot_create` | Creating it is on, but the rule owner may not create one. |
+| `membership_rule` | **Add Organization Membership** only: the Organization is still managed by an older membership rule. |
+
+There is no free-form pattern matching. Splitting on a delimiter and `*` prefixes cover the common naming conventions, and every value is length-capped, so a rule's matching cost grows only with the size of its input.
+
+**Preview shows where every Asset would go.** Alongside the list of changes, **Preview** lists each sampled Asset a computed destination looked at: the value it read, the destination that value names, whether the run would create that destination (marked **New**), and, for the Assets it would leave alone, whether they are already there or why they were skipped. Nothing Preview creates survives it.
+
+#### Example: place assets by team tag
+
+Teams tag their Assets `team:payments`, `team:search` and so on, and each team has an Organization of the same name.
+
+1. Add a **Manual Run** or **On a Schedule** trigger that sweeps Assets, scoped to the Organization new Assets land in. To catch Assets as they arrive instead, use **On Asset Event**.
+2. Add **Set Organization** and set **Destination** to `Computed From Each Asset`.
+3. Set **Read the Value From** to `Tag` and **Tag Key** to `team`.
+4. Set **Letter Case** to `Title Case`, so `team:payments` names `Payments`.
+5. Optionally turn on **Create It When Missing** with **Type** `Team`, so a new team's first Asset creates its Organization.
+6. **Preview**. Every Asset with a `team` tag is listed with its destination; untagged Assets show as skipped with `no_value`.
+
+If a few teams' Organizations are named differently from their tags, add mapping rows for just those (`pay*` to `Payments Platform`), and leave **Values Not in the Table** on `Use the Value` for the rest.
+
+#### Example: place AWS accounts by OU
+
+AWS organizes accounts into organizational units, and a common goal is one Organization per OU. The Security Hub connector does not report an account's OU, but it does report the account's id and, where AWS Organizations permits it, its name (`AWS_ACCOUNT_NAME`), and account names usually encode the OU (`payments-prod`, `payments-dev`, `platform-shared`).
+
+1. Add a trigger that sweeps Assets, scoped to the Organization your Security Hub connector places accounts in.
+2. Add **Set Organization** with **Destination** `Computed From Each Asset`.
+3. Set **Read the Value From** to `Connector Attribute`, **Connector** to Security Hub and **Attribute** to `AWS_ACCOUNT_NAME`.
+4. Set **Split On** to `-` and **Keep Segment** to `0`, so `payments-prod` reads `payments`.
+5. Add one mapping row per OU (`payments` to `Payments OU`, `platform` to `Platform OU`) and set **Values Not in the Table** to `Skip`, so an account that follows no convention stays where it is until somebody maps it.
+6. **Preview**, then run it.
+
+When account names do not encode the OU, map account ids instead: read `AWS_ACCOUNT_ID`, leave **Split On** empty, and add one row per account id. To keep the account in its current Organization and also make it a member of its OU's Organization, use **Add Organization Membership** with the same computed destination instead of **Set Organization**.
 
 ## Egress
 
@@ -589,6 +832,7 @@ Posts to a Slack channel over a Messaging Connector. The connection carries the 
 | **One Message per Finding** | off | Off sends one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. How many Findings the message lists before it says how many more there were. |
+| **Card Facts** | empty | Metadata names and custom field keys to show as facts on the message, comma-separated. See [Card facts](#card-facts). |
 
 ### Send a Microsoft Teams Message
 
@@ -603,6 +847,16 @@ Posts a card over a Messaging Connector. The connection carries the Power Automa
 | **One Message per Finding** | off | Off sends one card about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. |
+| **Card Facts** | empty | Metadata names and custom field keys to show as facts on the message, comma-separated. See [Card facts](#card-facts). |
+
+#### Card facts
+
+**Card Facts** puts values from the Asset and the Finding on the message itself: a fact set on a Teams card, a fields block in Slack. Each entry is part of a key, matched without regard to case, against the Asset's [metadata](../building_rules/#asset-metadata) names, the Asset's [custom field](../building_rules/#custom-fields) keys, the Asset's [contacts](../building_rules/#asset-contacts) (`product_manager`, `technical_contact`, `team_manager`) and the Finding's custom field keys. So `team` shows `team_owner`, `owning_team` and `team_manager`, and `*` shows everything the item holds. A contact shows as their name and email address, and an unset contact is left out.
+
+- A message about one Finding shows its Asset's values and its own.
+- A batch message shows the Asset's values only when every Finding in the batch is on that one Asset, and never a Finding's own. A batch over several Assets has no single value to show, so it shows none.
+- When the same key is both a metadata name and a custom field key, the second is titled with its full path, such as `product.custom_fields.owner`, so neither value is lost.
+- Slack and Teams show at most ten facts, and a batch message's severity counts are among them. The order on the card is not the order you typed.
 
 ### Send an Email
 
@@ -633,6 +887,8 @@ POSTs JSON to a webhook endpoint.
 | | | One of the two above is required. |
 | **Signing Secret** | empty | Signs the body as `X-DefectDojo-Signature: sha256=HMAC`. |
 | **One Message per Finding** | off | Off posts the whole batch in one request. |
+
+Each Finding in the body carries its own `custom_fields`, and the `product` block with the Asset's `meta` and `custom_fields`. Each Asset carries `meta`, `custom_fields` and its three contacts directly. All of them are always present, empty when there is nothing to send. A contact carries the user's `id`, `username`, `name` and `email`.
 
 Two things to know. A signing secret typed here is stored with the rule, so for anything sensitive prefer a configured endpoint and its own header. And a webhook called by a rule never changes that endpoint's own health status, so a rule cannot disable your notification webhooks by failing.
 
@@ -683,7 +939,7 @@ Generates a report from a template, scoped to the Findings that reached this nod
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.
 
-**One report per Finding or per Asset.** Build a report template for a single Finding (or a single Asset) using [template variables](/metrics_reports/reports/report-builder/#template-variables), then pick `each_finding` or `each_asset`. Each report fills the template's variables from its own item: `each_finding` supplies the Finding, its Asset and its primary vulnerability ID; `each_asset` supplies the Asset. Each generated report is named after its template and item, for example `Single Finding: SQL Injection in Login Form (Payments Portal)`, so two reports on the same issue in different Assets stay distinct. A template with no variables is still scoped to the item, by pinning its Finding blocks to that Finding (or to that Asset's matched Findings) the way `batch_findings` does.
+**One report per Finding or per Asset.** Build a report template for a single Finding (or a single Asset) using [template variables](/metrics_reports/reports/report-builder/#template-variables), then pick `each_finding` or `each_asset`. Each report fills the template's variables from its own item: `each_finding` supplies the Finding, its Asset and its primary vulnerability ID; `each_asset` supplies the Asset. Each generated report is named after its template and item, for example `Single Finding: SQL Injection in Login Form (Payments Portal)`, so two reports on the same issue in different Assets stay distinct. A template with no variables is still scoped to the item, by pinning its Finding blocks to that Finding (or to that Asset's matched Findings) the way `batch_findings` does. Once a template uses a variable anywhere, including in a Widget Block's filters, only the Blocks that use one are narrowed to the item, and the others keep their own filters.
 
 A template that uses a variable the chosen scope cannot fill, such as `{{finding.id}}` with `batch_findings`, is refused when the rule is saved, with a message naming the variable and the scope that fills it. A Finding with no vulnerability ID is skipped, with a reason, when the template uses `{{vulnerability_id}}`.
 

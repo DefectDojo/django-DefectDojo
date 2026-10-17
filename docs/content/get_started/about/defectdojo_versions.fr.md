@@ -15,7 +15,7 @@ weight: 1
 | Gestion des vulnérabilités de base | ✔️ Importe, suit et gère les Constatations depuis plus de 500 outils de sécurité | ✔️ Tout ce qui est inclus dans l'Open-Source, optimisé pour la montée en charge |
 | Déduplication des Constatations | ✔️ Déduplication standard | ✔️ Déduplication avancée et configurable |
 | API REST | ✔️ API REST complète | ✔️ API REST complète |
-| Authentification et contrôle d'accès | ✔️ Authentification locale et RBAC basique | ✔️ SSO (SAML/OAuth), MFA, RBAC avancé |
+| Authentification et contrôle d'accès | ✔️ Comptes locaux et listes d'accès par Actif | ✔️ SSO (SAML, OIDC, OAuth), LDAP, MFA, contrôle d'accès basé sur les rôles |
 | Interface utilisateur | ✔️ Interface Community | ✔️ Interface Pro moderne avec des performances améliorées |
 | Tableaux de bord et rapports | ✔️ Tableaux de bord et rapports basiques | ✔️ Tableaux de bord avancés et personnalisables, et rapports destinés aux dirigeants |
 | Automatisation et flux de travail | ❌ Non inclus | ✔️ Moteur de règles et flux de travail automatisés |

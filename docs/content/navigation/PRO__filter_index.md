@@ -9,6 +9,10 @@ aliases:
 
 Here is a list of filters that can be applied in the DefectDojo Pro UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, building custom [dashboards](/metrics_reports/dashboards/custom-dashboards/), or creating automation via [Rules Engine](/automation/rules_engine/about).
 
+## Where filters are applied
+
+Every filter below can be set from a column's header or from the filter bar above the Findings list, which shows each active filter as a chip and offers **Add Filter** for the rest. With more than one filter active, the connective between the chips chooses whether a Finding must match **all** of them (the default) or **any** of them. See [Customizing Tables](/navigation/table_customization/) for the bar, the match mode, and the grid view of the list.
+
 ## How date filters are evaluated
 
 Filters that take a date — **Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below — offer five operators:
@@ -42,7 +46,7 @@ List filters whose options come from a search box, such as the Asset and Organiz
 
 ## How number filters are evaluated
 
-Numeric filters — including **Age** and **SLA** — offer a match operator alongside the value: **Equals**, **Not Equals**, **Greater Than**, **Greater Than or Equal To**, **Less Than**, **Less Than or Equal To**, **In List**, and **Not In List**. Entering a value without choosing an operator matches on **Equals**.
+Numeric filters — including **Age** and **SLA** — offer a match operator alongside the value: **Equals**, **Not Equals**, **Greater Than**, **Greater Than or Equal To**, **Less Than**, **Less Than or Equal To**, **In List**, and **Not in List**. Entering a value without choosing an operator matches on **Equals**.
 
 ## SLA filters
 

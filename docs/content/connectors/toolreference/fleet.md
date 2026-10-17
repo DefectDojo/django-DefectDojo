@@ -18,8 +18,8 @@ A Fleet **API token**, from **Account Settings \> Get API token**. The connector
 
 1. Enter your Fleet server URL in the **Location** field.
 2. Enter the API token in the **API Token** field.
-3. Optionally, enable **Skip software vulnerabilities** to leave out CVEs found on installed software. Leave it off to import them.
-4. Optionally, enable **Skip compliance policies** to leave out failing osquery policy checks. Leave it off to import them under their own scan type.
+3. Optionally, enable **Skip Software Vulnerabilities** to leave out CVEs found on installed software. Leave it off to import them.
+4. Optionally, enable **Skip Compliance Policies** to leave out failing osquery policy checks. Leave it off to import them under their own scan type.
 5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Both imports are on by default — the two toggles exist to turn each off if you only want one kind of finding in DefectDojo.

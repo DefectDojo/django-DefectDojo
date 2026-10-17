@@ -53,6 +53,16 @@ class BaseLocationManager(ABC):
     def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         """Record items on this finding for mitigation."""
 
+    def record_mitigations_for_findings(self, findings: list[Finding], user: Dojo_User) -> None:
+        """
+        Record items on all of these findings for mitigation.
+
+        Same outcome as record_mitigations_for_finding() per finding. A manager whose
+        per-finding call reads the database overrides this with a set-based lookup.
+        """
+        for finding in findings:
+            self.record_mitigations_for_finding(finding, user)
+
     @abstractmethod
     def get_locations_for_tagging(self, findings: list[Finding]):
         """Return a queryset of taggable objects linked to the given findings."""
@@ -112,6 +122,9 @@ class LocationHandler:
 
     def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         return self._manager.record_mitigations_for_finding(finding, user)
+
+    def record_mitigations_for_findings(self, findings: list[Finding], user: Dojo_User) -> None:
+        return self._manager.record_mitigations_for_findings(findings, user)
 
     def get_locations_for_tagging(self, findings: list[Finding]):
         return self._manager.get_locations_for_tagging(findings)

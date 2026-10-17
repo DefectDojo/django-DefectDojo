@@ -24,7 +24,7 @@ Locations fix all three by introducing a **base `Location` object** with a typed
 - **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
 - **[Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)**: the container image a finding was found in, identified by registry, repository and digest, together with the assets that run it and the repository that built it. Scan-managed, behind its own flag.
 
-Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and container images as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
+Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and from asset connectors when **Connector Location Inventory** is on. **Cloud Resources** under **Explore > Attack Surface** in the sidebar lists them. Container images arrive as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
 
 ## Key Concepts
 

@@ -58,6 +58,7 @@ Actualmente admitimos Conectores ascendentes para las siguientes herramientas, c
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
+* **Google Cloud**
 * **Google Cloud Security Command Center**
 * **Group-IB ASM**
 * **HackerOne**
@@ -103,7 +104,7 @@ Actualmente admitimos Conectores ascendentes para las siguientes herramientas, c
 
 Para obtener instrucciones de configuración paso a paso de cada herramienta, consulte la referencia de [Configuración de conectores específicos por herramienta](../../toolreference/upstream/).
 
-La mayoría de los Conectores importan **hallazgos**. Unos pocos son **Conectores de activos** que en su lugar importan su **inventario de activos** — creando y manteniendo su jerarquía de Producto (Activo) y Tipo de Producto (Organización) en lugar de importar hallazgos: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets** y **ServiceNow CMDB**. (**runZero** es principalmente un Conector de activos, pero opcionalmente también puede importar vulnerabilidades como hallazgos.)
+La mayoría de los Conectores importan **hallazgos**. Unos pocos son **Conectores de activos** que en su lugar importan su **inventario de activos** — creando y manteniendo su jerarquía de Producto (Activo) y Tipo de Producto (Organización) en lugar de importar hallazgos: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Google Cloud**, **Jira Service Management Assets** y **ServiceNow CMDB**. (**runZero** es principalmente un Conector de activos, pero opcionalmente también puede importar vulnerabilidades como hallazgos.)
 
 Estas conexiones ofrecen una integración a velocidad de API con DefectDojo, y se pueden usar para incorporar y organizar automáticamente los datos de vulnerabilidades de la herramienta.
 

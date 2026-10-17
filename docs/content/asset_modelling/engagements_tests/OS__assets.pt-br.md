@@ -36,7 +36,7 @@ Os Ativos podem se tornar ainda mais granulares dependendo das necessidades da s
 - “ExampleAsset 1.0” usa componentes de software completamente diferentes de “ExampleAsset 2.0”, e ambas as versões são ativamente mantidas pela sua empresa.
 - A equipe designada para trabalhar em “ExampleAsset versão A” é diferente da equipe de Ativo designada para trabalhar em “ExampleAsset versão B”, e por isso precisa ter permissões de segurança diferentes atribuídas.
 
-Embora você também possa optar por representar essas variações como Engajamentos dentro de um único Ativo, o RBAC só pode ser definido no nível de Ativos ou Organizações, o que pode limitar o acesso dos usuários ao Engajamento apropriado (assim como aos Testes e Achados dentro desses Engajamentos) se estiverem organizados dessa forma. Para mais informações sobre RBAC e permissões no DefectDojo, clique [aqui](/admin/user_management/about_perms_and_roles/).
+Embora você também possa optar por representar essas variações como Engajamentos dentro de um único Ativo, o acesso só pode ser concedido no nível de Ativos ou Organizações, o que pode limitar o acesso dos usuários ao Engajamento apropriado (assim como aos Testes e Achados dentro desses Engajamentos) se estiverem organizados dessa forma. Para mais informações, veja [Permissões do Open Source](/admin/user_management/os__authorized_users/).
 
 ## Dados do Ativo
 
@@ -69,11 +69,11 @@ Os Ativos são acessíveis pela barra lateral. O submenu também oferece a opç�
 
 ### Permissões
 
-Os Ativos podem ter regras de Controle de Acesso Baseado em Função (RBAC) aplicadas, o que limita a capacidade dos membros da equipe de visualizá-los e interagir com eles.
+O acesso a um Ativo é concedido por meio da sua lista de [Usuários Autorizados](/admin/user_management/os__authorized_users/), que limita quem pode visualizá-lo e interagir com ele.
 
 As permissões se propagam em cascata, o que significa que o acesso a um Ativo concede automaticamente acesso a todos os objetos dentro desse Ativo (por exemplo, Engajamentos, Testes e Achados).
 
-Para mais informações sobre funções de usuário, veja nosso [artigo de Introdução às Funções](/admin/user_management/about_perms_and_roles/).
+Para mais informações, veja [Permissões do Open Source](/admin/user_management/os__authorized_users/).
 
 ## Visualização do Ativo
 

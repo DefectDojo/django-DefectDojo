@@ -38,7 +38,7 @@ class GCloudArtifactScanParser:
                     description += "packageIssue: " + str(vuln["vulnerability"]["packageIssue"]) + "\n"
                     description += "CVE: " + str(vuln["vulnerability"]["shortDescription"]) + "\n"
                     reference = ""
-                    for ref in vuln["vulnerability"]["relatedUrls"]:
+                    for ref in vuln["vulnerability"].get("relatedUrls", []):
                         reference += ref["url"] + "\n"
                     finding = Finding(
                         title=vuln["noteName"],

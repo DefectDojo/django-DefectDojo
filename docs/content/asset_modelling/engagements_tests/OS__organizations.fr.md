@@ -34,7 +34,7 @@ Si vous disposez d'une seule Organisation contenant toutes les informations pert
 
 Si un projet logiciel particulier comporte de nombreux déploiements ou versions distincts, il peut être utile de créer une seule Organisation couvrant l'ensemble du périmètre du projet et de faire exister chaque version en tant qu'Actif individuel. Dans certains flux de travail, les Organisations peuvent également être utilisées pour séparer les étapes du cycle de vie logiciel : une Organisation pour « En développement », une Organisation pour « En production », etc.
 
-Les Organisations peuvent servir à déterminer l'accès aux filiales, aux entreprises acquises ou à d'autres unités commerciales réglementées à des fins de RBAC. Dans les entreprises complexes, où il existe de nombreux projets uniques avec des règles d'accès différentes, les Organisations sont particulièrement pertinentes.
+Les Organisations peuvent servir à déterminer l'accès aux filiales, aux entreprises acquises ou à d'autres unités commerciales réglementées à des fins de contrôle d'accès. Dans les entreprises complexes, où il existe de nombreux projets uniques avec des règles d'accès différentes, les Organisations sont particulièrement pertinentes.
 
 En définitive, la décision quant à la façon d'utiliser les Organisations et les Actifs dépend de la meilleure manière dont vous souhaitez refléter votre structure organisationnelle unique et les besoins de votre équipe de sécurité. 
 
@@ -110,7 +110,7 @@ Les Organisations sont destinées à représenter des responsabilités structure
 
 ## Frontières des Organisations 
 
-Les Organisations établissent à la fois des frontières de reporting et d'accès au sein de DefectDojo. Comme les intégrations, les permissions RBAC, la propriété, les métriques et les modèles de déduplication héritent fréquemment de la structure des Organisations, définir des frontières claires dès le départ permet d'éviter par la suite une prolifération de la hiérarchie et une fragmentation du reporting.
+Les Organisations établissent à la fois des frontières de reporting et d'accès au sein de DefectDojo. Comme les intégrations, les permissions d'accès, la propriété, les métriques et les modèles de déduplication héritent fréquemment de la structure des Organisations, définir des frontières claires dès le départ permet d'éviter par la suite une prolifération de la hiérarchie et une fragmentation du reporting.
 
 ### Constatations et automatisation 
 
@@ -118,9 +118,9 @@ Bien que les intégrations soient généralement configurées sur des objets de 
 
 Les permissions se propagent vers le bas, ce qui signifie que l'accès à une Organisation accorde automatiquement l'accès à tous les objets qu'elle contient (par ex., Actifs, Engagements, Tests et Constatations). 
 
-Le modèle RBAC de DefectDojo peut être utilisé pour contrôler l'accès des utilisateurs humains, mais peut également restreindre l'accès des jetons API à des Organisations particulières.
+La liste [Authorized Users](/admin/user_management/os__authorized_users/) d'une Organisation contrôle l'accès des utilisateurs humains. Les jetons API agissent en tant qu'utilisateur auquel ils appartiennent, de sorte qu'un jeton ne peut accéder qu'aux Organisations pour lesquelles son utilisateur est autorisé.
 
-Pour plus d'informations sur les rôles utilisateur, consultez notre article [Permissions](/admin/user_management/os__authorized_users/).
+Pour plus d'informations, consultez notre article [Permissions](/admin/user_management/os__authorized_users/).
 
 ### Propriété 
 

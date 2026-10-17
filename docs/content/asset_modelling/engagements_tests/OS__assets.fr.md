@@ -36,7 +36,7 @@ Les Actifs peuvent devenir encore plus granulaires selon les besoins de votre or
 - « ExampleAsset 1.0 » utilise des composants logiciels complètement différents de « ExampleAsset 2.0 », et les deux versions sont activement prises en charge par votre entreprise.
 - L'équipe chargée de travailler sur « ExampleAsset version A » est différente de l'équipe d'Actif chargée de travailler sur « ExampleAsset version B », et doit se voir attribuer des permissions de sécurité différentes en conséquence.
 
-Bien que vous puissiez également choisir de représenter ces variations sous forme d'Engagements au sein d'un seul Actif, le RBAC ne peut être défini qu'au niveau des Actifs ou des Organisations, ce qui peut limiter l'accès des utilisateurs à l'Engagement approprié (ainsi qu'aux Tests et Constatations au sein de ces Engagements) s'ils sont organisés ainsi. Pour plus d'informations sur le RBAC et les permissions dans DefectDojo, cliquez [ici](/admin/user_management/about_perms_and_roles/).
+Bien que vous puissiez également choisir de représenter ces variations sous forme d'Engagements au sein d'un seul Actif, l'accès ne peut être accordé qu'au niveau des Actifs ou des Organisations, ce qui peut limiter l'accès des utilisateurs à l'Engagement approprié (ainsi qu'aux Tests et Constatations au sein de ces Engagements) s'ils sont organisés ainsi. Pour plus d'informations, consultez [Permissions Open Source](/admin/user_management/os__authorized_users/).
 
 ## Données d'Actif
 
@@ -69,11 +69,11 @@ Les Actifs sont accessibles depuis la barre latérale. Le sous-menu offre égale
 
 ### Permissions
 
-Des règles de contrôle d'accès basé sur les rôles (RBAC) peuvent être appliquées aux Actifs, ce qui limite la capacité des membres de l'équipe à les consulter et à interagir avec eux.
+L'accès à un Actif est accordé via sa liste [Authorized Users](/admin/user_management/os__authorized_users/), qui limite les personnes pouvant le consulter et interagir avec lui.
 
 Les permissions se propagent vers le bas, ce qui signifie que l'accès à un Actif accorde automatiquement l'accès à tous les objets au sein de cet Actif (par ex. Engagements, Tests et Constatations).
 
-Pour plus d'informations sur les rôles utilisateur, consultez notre [article d'introduction aux rôles](/admin/user_management/about_perms_and_roles/).
+Pour plus d'informations, consultez [Permissions Open Source](/admin/user_management/os__authorized_users/).
 
 ## Vue d'Actif
 

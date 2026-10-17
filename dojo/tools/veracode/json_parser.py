@@ -381,7 +381,7 @@ class VeracodeJSONParser:
         # Trim out the trailing spaces in each section
         sections = [section.strip() for section in sections if len(section) > 0]
         # Iterate over the references to find the link and label for each entry
-        regex_search = 'href=\\"(.*)\\">(.*)</a>'
+        regex_search = 'href=\\"([^"]*)\\">([^<]*)</a>'
         references = [matches.groups() for reference in sections if (matches := re.search(regex_search, reference))]
         # Build a markdown string for the references text
         reference_string = ""

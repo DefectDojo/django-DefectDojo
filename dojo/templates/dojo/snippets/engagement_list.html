@@ -6,7 +6,7 @@
 <div class="col-md-12">
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} Engagements ({{ count }})
+            <h4> <i class="fa-solid fa-inbox dd-card-icon" aria-hidden="true"></i>{% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} Engagements ({{ count }})
                 <div class="dropdown pull-right">
                     <button id="show-filters-{{status}}" data-toggle="collapse" data-target="#the-filters-{{status}}" class="btn btn-primary toggle-filters" aria-label="{% trans 'Filter' %}"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-label="{% trans 'Add Engagement' %}"

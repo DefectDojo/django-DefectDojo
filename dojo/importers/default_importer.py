@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
-from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.base_importer import BaseImporter, Parser, reports_a_deleted_target
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
@@ -90,6 +90,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         return self.test
 
+    @reports_a_deleted_target
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
@@ -117,6 +118,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: for fresh imports, parse_findings() calls create_test() internally,
         # so self.test is guaranteed to be set after this call.
         parsed_findings = self.parse_findings(scan, parser) or []
+        # The excess-duplicate delete leaves the duplicates of a test being imported alone.
+        self.lock_test_under_import(self.test)
         new_findings = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
@@ -446,20 +449,25 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 new_hash_codes.append(hash_code)
             if (unique_id_from_tool := finding.get("unique_id_from_tool")) is not None:
                 new_unique_ids_from_tool.append(unique_id_from_tool)
-        old_findings = self.get_close_old_findings_queryset(new_hash_codes, new_unique_ids_from_tool)
+        # jira_issue and the group's are read for every finding to decide the JIRA push, and
+        # the test chain for its SLA and tool issue updater
+        old_findings = (
+            self.get_close_old_findings_queryset(new_hash_codes, new_unique_ids_from_tool)
+            .select_related("jira_issue", "test__test_type", "test__engagement__product")
+            .prefetch_related("finding_group_set__jira_issue")
+        )
         # Update the status of the findings and any locations
-        for old_finding in old_findings:
-            url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
-            test_title = str(self.test.title)
-            self.mitigate_finding(
-                old_finding,
-                (
-                    'This Finding has been automatically closed by the Test: \n "' + test_title + '"\n' + url +
-                    "\n\nThis is because this Finding is not present anymore in recent scans."
-                ),
-                finding_groups_enabled=self.findings_groups_enabled,
-                product_grading_option=False,
-            )
+        url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
+        test_title = str(self.test.title)
+        self.mitigate_findings(
+            list(old_findings),
+            (
+                'This Finding has been automatically closed by the Test: \n "' + test_title + '"\n' + url +
+                "\n\nThis is because this Finding is not present anymore in recent scans."
+            ),
+            finding_groups_enabled=self.findings_groups_enabled,
+            product_grading_option=False,
+        )
         # Persist any accumulated location/endpoint status changes
         self.location_handler.persist()
         self.flush_vulnerability_ids()

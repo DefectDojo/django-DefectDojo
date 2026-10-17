@@ -1,5 +1,6 @@
 import datetime
 
+from django.db import connection
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
@@ -121,6 +122,34 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         for ra in self.engagement_2b.risk_acceptance.all():
             for finding in ra.accepted_findings.all():
                 self.assertEqual(self.engagement_2a.product, finding.test.engagement.product)
+
+    def test_finding_accept_risks_bounded_without_table_statistics(self):
+        """
+        Regression: accept_risks must not depend on the planner having statistics.
+
+        Test databases are vacuumed but never analyzed (test data is always rolled back), which
+        leaves pg_class claiming these tables are empty. The planner then estimated one row per
+        table and ran the old "id IN (SELECT ... FROM dojo_finding ...)" UPDATE as nested
+        sequential scans, about a minute per statement, which hung the CI unit test job.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")
+            if not cursor.fetchone()[0]:
+                self.skipTest("needs a superuser to fake table statistics in pg_class")
+            # Rolled back with the test transaction, like everything else here.
+            cursor.execute(
+                "UPDATE pg_class SET relpages = 1, reltuples = 0 WHERE oid = ANY(%s::regclass[])",
+                [["dojo_finding", "dojo_test", "dojo_engagement", "dojo_findingvulnerabilityreference",
+                  "dojo_vulnerability", "dojo_risk_acceptance_accepted_findings"]],
+            )
+            cursor.execute("SET LOCAL statement_timeout = '10s'")
+
+        accepted_risks = [{"vulnerability_id": f"CVE-1999-{i}", "justification": "Demonstration purposes",
+                           "accepted_by": "King of the Internet"} for i in range(60, 140)]
+        result = self.client.post(reverse("finding-accept-risks"), data=accepted_risks, format="json")
+        self.assertEqual(result.status_code, 201)
+        self.assertEqual(len(result.json()), 106)
+        self.assertEqual(Finding.unaccepted_open_findings().count(), 62)
 
 
 class TestBulkRiskAcceptanceRbac(APITestCase):

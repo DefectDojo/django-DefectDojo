@@ -2,7 +2,7 @@
 title: Exécutions
 description: Comment une règle s'exécute, ce qu'une exécution enregistre, et comment
   l'enchaînement est limité
-weight: 4
+weight: 5
 audience: pro
 aliases:
 - /fr/automation/rules_engine_v2/runs/

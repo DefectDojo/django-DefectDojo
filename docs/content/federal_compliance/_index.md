@@ -26,7 +26,7 @@ Everything described in this section lives on the **Compliance** tab of an Asset
 ## Enabling the feature
 
 Federal Compliance ships behind the **Compliance** feature flag, which is in beta and off by
-default. An administrator turns it on from the feature flags menu — see
+default. An administrator turns it on from **Settings > Feature Flags** — see
 [Feature Flags](/admin/feature_flags/pro__feature_flags/). Once enabled, a Compliance tab
 appears on each Asset.
 
@@ -53,4 +53,6 @@ purpose.
 | [Setting Up PAIN Ratings](pain_ratings_setup) | A step-by-step walkthrough: turn tiering on, assign a rating, and check the deadlines against the matrix |
 | [CMMC Level 2 Assessments](cmmc_assessments) | Scoring a self-assessment against NIST 800-171 Rev 2 |
 | [CRA and DORA Evidence Packs](eu_evidence_packs) | Assessing an Asset against authored EU regulatory catalogs and exporting its evidence |
+| [Regulatory Profile](regulatory_profile) | Recording an Asset's CRA, DORA and NIS2 facts: critical or important function, CRA product class, support period, and vulnerability report contacts |
 | [Control Coverage](control_coverage) | Which 800-53 controls your scanners test, and open weaknesses per control |
+| [Certification Control Catalogs](certification_catalogs) | Assessing an Asset against ISO/IEC 27001, SOC 2 and NIS2, and the cross-framework Shared Evidence view |

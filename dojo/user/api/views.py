@@ -45,7 +45,17 @@ class UsersViewSet(
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
     def get_queryset(self):
-        return User.objects.all().order_by("id")
+        # select_related / prefetch_related keep UserSerializer from issuing a
+        # query per row for the contact info (token/password last-reset), the
+        # auth token (token expiry) and the configuration permissions. Without
+        # them the list view scales its query count with the number of users,
+        # producing 300+ queries for a single page on large instances.
+        return (
+            User.objects.all()
+            .select_related("usercontactinfo", "auth_token")
+            .prefetch_related("user_permissions")
+            .order_by("id")
+        )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

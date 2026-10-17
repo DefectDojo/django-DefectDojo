@@ -51,6 +51,12 @@ DefectDojo Pro's **Sensei** (BETA) is an AI-powered scan-and-fix capability: con
 
 See our [Sensei Guide](/sensei/about_sensei/) for more info.
 
+### AI Inventory and Governance (Beta)
+
+See the AI in every scanned repository: coding assistants and their rules files, MCP servers, models, AI packages, AI service endpoints, agent skills and AI provider keys. Policies mark each component authorized, unauthorized or needing review, unauthorized components become Findings, and each Asset exports its AI inventory as a CycloneDX AI bill of materials.
+
+See [AI Inventory](/asset_modelling/locations/pro__ai_inventory/), [AI Governance Policies](/triage_findings/findings_workflows/pro__ai_governance_policies/) and [Exporting an AIBOM](/asset_modelling/locations/pro__exporting_an_aibom/).
+
 ### Pro Dashboards and Reporting
 
 Generate [instant reports and metrics](/get_started/about/ui_pro_vs_os/#new-dashboards) to share the security posture of your apps and repos, evaluate your security tools and analyze your team's performance in addressing security issues.

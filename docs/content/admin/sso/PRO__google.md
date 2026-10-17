@@ -33,10 +33,10 @@ Complete the following steps in the Google Cloud Console before configuring Defe
 
 ## Configuration
 
-In DefectDojo, go to **Enterprise Settings > OAuth Settings**, select **Google**, and fill in the form:
+In DefectDojo, go to **Connect > Authorization > Providers**, select **Google**, and fill in the form:
 
 - **Google OAuth Key** — enter your **Client ID**.
-- **Google OAuth Secret** — enter your **Client secret**.
+- **Google OAuth Secret** — enter your **Client secret**. After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID.
 - **Whitelisted Domains** — enter one or more email-address domains (e.g. `yourcompany.com`) allowed to sign in. **Comma-separated, with no spaces.**
 - **Whitelisted Email Addresses** — alternatively, enter specific addresses allowed to sign in (e.g. `user1@yourcompany.com,user2@yourcompany.com`). **Comma-separated, with no spaces.**
 
