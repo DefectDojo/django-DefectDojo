@@ -1206,6 +1206,12 @@ class BaseImporter(ImporterOptions):
         # the cve field is not needed anymore and can be removed.
         # Remove undisired vulnerability ids
         self.sanitize_vulnerability_ids(finding)
+        # A cve that is not a non-empty string is malformed input (same rule as
+        # sanitize_vulnerability_ids). Normalize it to None so it is not re-added to
+        # unsaved_vulnerability_ids below, where a non-string value would otherwise
+        # crash the dedup hash and the reimport reconciler.
+        if not (isinstance(finding.cve, str) and finding.cve.strip()):
+            finding.cve = None
         if finding.unsaved_vulnerability_ids and finding.cve:
             # Make sure the first entry of the list is the value of the cve field
             finding.unsaved_vulnerability_ids.insert(0, finding.cve)
