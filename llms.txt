@@ -65,6 +65,7 @@ Key facts:
 
 - [Import Method Comparison](https://docs.defectdojo.com/import_data/import_intro/comparison/): Learn how to import data manually, through the API, or via a connector
 - [Reimport](https://docs.defectdojo.com/import_data/import_intro/reimport/): Learn how to import data manually, through the API, or via a connector
+- [Knowledge Check (Pro)](https://docs.defectdojo.com/import_data/import_intro/quiz/): Test what you know about Import and Reimport with 20 multiple-choice questions
 - [Add Findings form (Pro)](https://docs.defectdojo.com/import_data/import_scan_files/pro__import_scan_ui/)
 - [Import Scan form (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/os__import_scan_ui/)
 - [Endpoint Meta Importer (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/endpoint_meta_importer/): Bulk-apply tags and custom fields to endpoints via CSV
@@ -418,6 +419,7 @@ Key facts:
 - [Deliveries (Pro)](https://docs.defectdojo.com/automation/triage_engine/deliveries/): The ledger of everything rules send outward, and how retries and replay work
 - [Converting from Rules Engine (Pro)](https://docs.defectdojo.com/automation/triage_engine/converting_from_rules_engine/): Move existing Rules Engine rules across to Triage Engine graphs
 - [Configuration (Pro)](https://docs.defectdojo.com/automation/triage_engine/configuration/): Deployment level settings for Triage Engine
+- [Knowledge Check (Pro)](https://docs.defectdojo.com/automation/triage_engine/quiz/): Test what you know about Triage Engine with 20 multiple-choice questions
 
 ## Admin
 
