@@ -18,6 +18,7 @@ from dojo.url.models import URL
 
 if TYPE_CHECKING:
     from dojo.models import Dojo_User, Finding, Product
+    from dojo.tools.locations import LocationAssociationData
 
 logger = logging.getLogger(__name__)
 
@@ -209,18 +210,20 @@ class LocationManager(BaseLocationManager):
                 ))
                 existing_product_refs.add(location.location_id)
 
-        # Determine necessary finding refs to create
+        # Determine necessary finding refs to create (and existing ones whose association data changed)
+        refs_to_update: dict[int, LocationFindingReference] = {}
         if self._locations_by_finding:
             all_finding_ids = [finding.id for finding, _ in self._locations_by_finding]
             # Strictly speaking this returns more rows than we need (it's the cross of the location/finding lists rather
             # than scoped per-finding), but more straightforward than constructing a per-finding lookup. We won't create
             # any unwanted associations below anyway.
-            existing_finding_ref_keys: set[tuple[int, int]] = set(
-                LocationFindingReference.objects.filter(
+            existing_finding_refs: dict[tuple[int, int], LocationFindingReference] = {
+                (ref.finding_id, ref.location_id): ref
+                for ref in LocationFindingReference.objects.filter(
                     location_id__in=all_location_ids,
                     finding_id__in=all_finding_ids,
-                ).values_list("finding_id", "location_id"),
-            )
+                ).only("id", "finding_id", "location_id", "relationship", "relationship_data")
+            }
 
             for finding, cleaned_locations in self._locations_by_finding:
                 # Locations were already cleaned at record time — identity_hash is set, so we can
@@ -228,16 +231,21 @@ class LocationManager(BaseLocationManager):
                 for location in cleaned_locations:
                     saved_loc = saved_by_key[type(location), location.identity_hash]
                     finding_ref_key = (finding.id, saved_loc.location_id)
-                    if finding_ref_key not in existing_finding_ref_keys:
-                        assoc = saved_loc.get_association_data()
-                        all_finding_refs.append(LocationFindingReference(
+                    # Association data is per finding, so read it from this finding's own location object rather
+                    # than the deduplicated saved one (which only carries the data of one of its duplicates).
+                    assoc = location.get_association_data()
+                    if (existing_ref := existing_finding_refs.get(finding_ref_key)) is None:
+                        new_ref = LocationFindingReference(
                             location_id=saved_loc.location_id,
                             finding=finding,
                             status=FindingLocationStatus.Active,
                             relationship=assoc.relationship_type,
-                            relationship_data=assoc.relationship_data,
-                        ))
-                        existing_finding_ref_keys.add(finding_ref_key)
+                            relationship_data=dict(assoc.relationship_data),
+                        )
+                        all_finding_refs.append(new_ref)
+                        existing_finding_refs[finding_ref_key] = new_ref
+                    elif assoc and self._merge_association_data(existing_ref, assoc) and existing_ref.pk:
+                        refs_to_update[existing_ref.pk] = existing_ref
 
         # Bulk create references
         all_finding_refs = self._drop_finding_refs_for_missing_findings(all_finding_refs)
@@ -248,6 +256,10 @@ class LocationManager(BaseLocationManager):
         if all_product_refs:
             LocationProductReference.objects.bulk_create(
                 all_product_refs, batch_size=1000, ignore_conflicts=True,
+            )
+        if refs_to_update:
+            LocationFindingReference.objects.bulk_update(
+                refs_to_update.values(), ["relationship", "relationship_data"], batch_size=1000,
             )
 
         # Trigger bulk tag inheritance only when the Location's product
@@ -318,6 +330,23 @@ class LocationManager(BaseLocationManager):
         self._locations_by_finding.clear()
         self._location_slot_by_finding.clear()
         self._product_locations.clear()
+
+    @staticmethod
+    def _merge_association_data(ref: LocationFindingReference, assoc: LocationAssociationData) -> bool:
+        """
+        Merge parser-supplied association data into an existing finding ref. Keys the parser supplies overwrite stored
+        values; keys it omits are kept, so a report lacking e.g. host OS doesn't erase a previously reported one.
+        Returns True if the ref changed.
+        """
+        changed = False
+        if assoc.relationship_type and ref.relationship != assoc.relationship_type:
+            ref.relationship = assoc.relationship_type
+            changed = True
+        merged = {**(ref.relationship_data or {}), **assoc.relationship_data}
+        if merged != ref.relationship_data:
+            ref.relationship_data = merged
+            changed = True
+        return changed
 
     def _persist_status_updates(self) -> None:
         """

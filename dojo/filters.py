@@ -493,6 +493,23 @@ def filter_endpoints_base(queryset, name, value, statuses=None, host=None):
     return queryset.filter(**filters_kwargs)
 
 
+def filter_location_os_base(queryset, name, value, statuses=None, host=None, endpoint_id=None):
+    """
+    Apply `location_os` filter (the host OS a scanner reported for a finding's location), and if location_status,
+    host or endpoints are present, combine them on the same row. Uses Exists() so a finding with several matching
+    hosts is returned once.
+    """
+    filters_kwargs = {"locations__relationship_data__os__icontains": value}
+    if endpoint_id:
+        filters_kwargs["locations__location"] = endpoint_id
+    if statuses:
+        filters_kwargs["locations__status__in"] = statuses
+    if host:
+        filters_kwargs["locations__location__url__host__icontains"] = host
+
+    return queryset.filter(Exists(queryset.model.objects.filter(pk=OuterRef("pk"), **filters_kwargs)))
+
+
 def filter_endpoints_host_base(queryset, name, value, statuses=None, endpoint_id=None):
     """
     Apply `endpoints__host` filter, and if endpoints or location_status

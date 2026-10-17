@@ -8,7 +8,7 @@ from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.tools.locations import LocationData
+from dojo.tools.locations import LocationAssociationData, LocationData
 
 
 class NexposeParser:
@@ -207,6 +207,27 @@ class NexposeParser:
                 vulns[vid] = vuln
         return vulns
 
+    @staticmethod
+    def parse_os_fingerprint(node):
+        """Return the node's most certain OS fingerprint as e.g. 'Microsoft Windows Server 2019', or '' if none."""
+        best = None
+        for os_element in node.findall("fingerprints/os"):
+            try:
+                certainty = float(os_element.get("certainty", 0))
+            except ValueError:
+                certainty = 0.0
+            if best is None or certainty > best[0]:
+                best = (certainty, os_element)
+        if best is None:
+            return ""
+        os_element = best[1]
+        vendor = os_element.get("vendor", "")
+        product = os_element.get("product", "")
+        # Avoid "Linux Linux" when the vendor is already part of the product name
+        parts = [vendor] if vendor and not product.lower().startswith(vendor.lower()) else []
+        parts += [product, os_element.get("version", "")]
+        return " ".join(part for part in parts if part)
+
     def get_items(self, tree, vulns, test):
         hosts = []
         for nodes in tree.findall("nodes"):
@@ -214,7 +235,7 @@ class NexposeParser:
                 host = {}
                 host["name"] = node.get("address")
                 host["hostnames"] = set()
-                host["os"] = ""
+                host["os"] = self.parse_os_fingerprint(node)
                 host["services"] = []
                 host["vulns"] = self.parse_tests_type(node, vulns)
 
@@ -289,7 +310,7 @@ class NexposeParser:
                 find = self.findings(dupe_key, dupes, vuln)
 
                 if locations_enabled():
-                    location = LocationData.url(host=host["name"])
+                    location = LocationData.url(host=host["name"], association=LocationAssociationData.host_os(host["os"]))
                     find.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -316,6 +337,7 @@ class NexposeParser:
                             else None,
                             # A little dirty hack but in case of DNS it is
                             # important to know if vulnerability is on TCP or UDP
+                            association=LocationAssociationData.host_os(host["os"]),
                         )
                         find.unsaved_locations.append(location)
                     else:
