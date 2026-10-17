@@ -216,3 +216,10 @@ jobs:
              kubectl logs deployment/defectdojo-django --all-pods=true --all-containers=true --tail=100
              echo "And all pod status one more time"
              kubectl get pods
+             # The API auth check intermittently restarts the uwsgi container mid-request. Record why
+             # it last terminated (e.g. OOMKilled, exit code/signal) and what the dead container logged.
+             echo "Last termination state of the django pod containers:"
+             kubectl get pod -l defectdojo.org/component=django \
+               -o jsonpath='{range .items[*].status.containerStatuses[*]}{.name}{": restarts="}{.restartCount}{" lastState="}{.lastState}{"\n"}{end}'
+             echo "Logs of the previous (terminated) uwsgi container, if any:"
+             kubectl logs -l defectdojo.org/component=django -c uwsgi --previous --tail=100 || true
