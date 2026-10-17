@@ -7,6 +7,7 @@ from django.contrib import messages
 from dojo.announcement.os_message import OS_MESSAGE_DISMISSED_KEY, get_os_banner
 from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
+from dojo.middleware import READ_ONLY_MODE_MESSAGE
 from dojo.models import System_Settings, UserAnnouncement
 
 
@@ -26,6 +27,9 @@ def globalize_vars(request):
     }
 
     additional_banners = []
+
+    if System_Settings.objects.get().read_only_mode:
+        additional_banners.append({"source": "read_only_mode", "message": str(READ_ONLY_MODE_MESSAGE), "style": "warning"})
 
     if (os_banner := get_os_banner()) is not None:
         token = os_banner.get("dismiss_token", "")
