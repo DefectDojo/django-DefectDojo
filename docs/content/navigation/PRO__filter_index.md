@@ -39,6 +39,12 @@ Note that **Before** and **After** are deliberately not mirror images of each ot
 
 List filters whose options come from a search box, such as the Asset and Organization filters on the Findings, Engagements, Tests, and Endpoints tables, can hold thousands of options, so checking them one at a time is not practical. Type a search into the filter, and once the results load the filter offers **Select all N matching**, where N is the number of matching options. Selecting it filters the table to every option whose name contains the search text (case-insensitive), not just the options loaded on screen.
 
+### Exclude the selected values
+
+Every multi-select filter, the search-box ones included, has an **Include** / **Exclude** switch at the top of its menu. **Include**, the default, keeps the rows matching any selected value. **Exclude** keeps every other row: select the demo and lab assets, or the test organizations, under **Exclude**, and the table shows everything except them. A row with no value for that column (a finding with no assignee, under an excluded assignee) is kept, because it matches none of the selected values.
+
+The switch applies to a **Select all N matching** selection too, so "everything except the assets whose name contains `lab`" is one filter. The mode travels with the values in the table URL and in a saved table preference, and clearing the filter puts it back to **Include**.
+
 - The selection appears as a single **All matching "text"** chip. Remove the chip, or select **Deselect all**, to go back to picking individual options.
 - While a match selection is active, the individual options are locked, because the selection covers every match rather than a list of picks.
 - The selection is stored as the search text, so a table URL or a saved table preference carries it compactly however many options match.
