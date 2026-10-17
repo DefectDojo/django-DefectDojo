@@ -2374,8 +2374,12 @@ def merge_finding_product(request, pid):
                         )
                     elif form.cleaned_data["finding_action"] == "delete":
                         finding_action = "deleted"
+                        # Detach the target first, or the cluster cascade delete can remove it.
+                        Finding.objects.filter(
+                            pk=finding_to_merge_into.pk, duplicate_finding__in=findings_to_merge,
+                        ).update(duplicate=False, duplicate_finding=None)
                         for finding_to_delete in findings_to_merge:
-                            finding_to_delete.delete()
+                            finding_helper.delete_finding_with_conflict_retry(finding_to_delete, push_to_jira=None)
 
                     notes_entry = ("Finding consists of merged findings from the following "
                                    f"findings which have been {finding_action}: {notes_entry[:-1]}")
