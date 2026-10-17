@@ -22,7 +22,7 @@ class SonarQubeRESTAPIJSON:
                     textRange = issue.get("textRange", {})
                     flows = issue.get("flows", [])
                     status = issue.get("status")
-                    message = issue.get("message")
+                    message = issue.get("message") or ""
                     tags = issue.get("tags", [])
                     bugtype = issue.get("type")
                     scope = issue.get("scope")
@@ -51,7 +51,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**scope:** " + scope + "\n"
                     description += self.returncomponent(json_content, component)
                     item = Finding(
-                        title=rule + "_" + key,
+                        title=self.get_title(message, rule, key, mode),
                         unique_id_from_tool=key,
                         description=description,
                         test=test,
@@ -69,7 +69,7 @@ class SonarQubeRESTAPIJSON:
                     project = issue.get("project")
                     flows = issue.get("flows", [])
                     status = issue.get("status")
-                    message = issue.get("message")
+                    message = issue.get("message") or ""
                     line = issue.get("line")
                     cwe = None
                     cwes = []
@@ -123,7 +123,7 @@ class SonarQubeRESTAPIJSON:
                         description += "**tags:** " + ", ".join(tags) + "\n"
                     description += self.returncomponent(json_content, component)
                     item = Finding(
-                        title=rule + "_" + key,
+                        title=self.get_title(message, rule, key, mode),
                         unique_id_from_tool=key,
                         description=description,
                         test=test,
@@ -174,7 +174,7 @@ class SonarQubeRESTAPIJSON:
                     textRange = issue.get("textRange", {})
                     flows = issue.get("flows", [])
                     status = issue.get("status")
-                    message = issue.get("message")
+                    message = issue.get("message") or ""
                     tags = issue.get("tags", [])
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
@@ -205,7 +205,7 @@ class SonarQubeRESTAPIJSON:
                         description += "**codeVariants:** " + ", ".join(codeVariants) + "\n"
                     description += self.returncomponent(json_content, component)
                     item = Finding(
-                        title=rule + "_" + key,
+                        title=self.get_title(message, rule, key, mode),
                         unique_id_from_tool=key,
                         description=description,
                         test=test,
@@ -230,7 +230,7 @@ class SonarQubeRESTAPIJSON:
                 securityCategory = hotspot.get("securityCategory")
                 status = hotspot.get("status")
                 line = hotspot.get("line")
-                message = hotspot.get("message")
+                message = hotspot.get("message") or ""
                 textRange = hotspot.get("textRange", {})
                 flows = hotspot.get("flows", [])
                 ruleKey = hotspot.get("ruleKey")
@@ -259,7 +259,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**messageFormattings:** " + ", ".join(messageFormattings) + "\n"
                 description += self.returncomponent(json_content, component)
                 item = Finding(
-                    title=ruleKey + "_" + key,
+                    title=self.get_title(message, ruleKey, key, mode),
                     unique_id_from_tool=key,
                     description=description,
                     test=test,
@@ -277,6 +277,15 @@ class SonarQubeRESTAPIJSON:
                 item.unsaved_tags = ["hotspot"]
                 items.append(item)
         return items
+
+    def get_title(self, message, rule, key, mode):
+        # "SonarQube Scan" falls back to the title-based legacy hash for findings without a CWE,
+        # so its titles stay rule_key to keep existing findings matching on reimport.
+        # "SonarQube Scan detailed" deduplicates on unique_id_from_tool, so it can use the
+        # human-readable message, like the SonarQube API import does.
+        if mode != "detailed" or not message.strip():
+            return rule + "_" + key
+        return message[0:507] + "..." if len(message) > 511 else message
 
     def severitytranslator(self, severity):
         if severity == "BLOCKER":
