@@ -2279,3 +2279,194 @@ class TestDedupeRelatedMethods(DojoTestCase):
         # This used to explode when it tried to prefetch Endpoints when they are disabled, now fixed
         finding = build_candidate_scope_queryset(test).filter(id=finding.id).first()
         self.assertTrue(finding)
+
+
+# ---------------------------------------------------------------------------
+# Phase 1 regression tests — hash normalisation fix and legacy fallback warnings
+# ---------------------------------------------------------------------------
+
+
+class TestHashFieldsNormalisation(unittest.TestCase):
+    """
+    Unit tests for Finding.hash_fields() covering the Phase 1 fix:
+
+        OLD (buggy):  casefold().encode("utf-8").strip()   -- str.strip on bytes
+        NEW (fixed):  casefold().strip().encode("utf-8")   -- str.strip on str
+
+    These tests run without a database and without Django fixtures.
+    They exercise hash_fields() directly via a bare Finding() instance whose
+    unsaved_* attributes are set to the values hash_fields() needs.
+    """
+
+    def _make_finding(self):
+        """Return a minimal unsaved Finding with no HASH_CODE_FIELDS_ALWAYS effect."""
+        f = Finding.__new__(Finding)
+        # hash_fields() only reads settings.HASH_CODE_FIELDS_ALWAYS; keep it clean
+        return f
+
+    def _hash(self, text):
+        """Call hash_fields() on a bare finding with the given pre-concatenated text."""
+        f = self._make_finding()
+        # Patch out HASH_CODE_FIELDS_ALWAYS so it doesn't try to getattr an unsaved model
+        with override_settings(HASH_CODE_FIELDS_ALWAYS=[]):
+            return f.hash_fields(text)
+
+    # ------------------------------------------------------------------
+    # Correctness: strip must happen before encode so that Unicode
+    # whitespace is removed, not left as multi-byte UTF-8 sequences.
+    # ------------------------------------------------------------------
+
+    def test_plain_ascii_hash_is_deterministic(self):
+        """Same input always yields the same hash (basic sanity)."""
+        h1 = self._hash("XSS in login form")
+        h2 = self._hash("XSS in login form")
+        self.assertEqual(h1, h2)
+
+    def test_case_folding_is_applied(self):
+        """casefold() means upper and lower case inputs hash identically."""
+        self.assertEqual(
+            self._hash("SQL Injection"),
+            self._hash("sql injection"),
+        )
+        self.assertEqual(
+            self._hash("SQL Injection"),
+            self._hash("SQL INJECTION"),
+        )
+
+    def test_ascii_whitespace_stripped_before_encode(self):
+        """Leading/trailing ASCII whitespace is removed — same hash as the trimmed form."""
+        self.assertEqual(self._hash("xss"), self._hash("  xss  "))
+        self.assertEqual(self._hash("xss"), self._hash("\txss\t"))
+        self.assertEqual(self._hash("xss"), self._hash("\nxss\n"))
+
+    def test_unicode_whitespace_stripped_before_encode(self):
+        """
+        Regression for the bytes.strip() bug: str.strip() removes Unicode
+        whitespace (U+00A0 NBSP, U+2003 EM SPACE, etc.) which bytes.strip()
+        would NOT remove (it only strips bytes 0x00–0x1f and 0x20).
+
+        With the old code these hashes differed from the trimmed form.
+        With the fix they are all identical.
+        """
+        nbsp = "\u00a0"          # non-breaking space — U+00A0, encoded as 0xC2 0xA0
+        em_space = "\u2003"      # EM SPACE — U+2003, encoded as 0xE2 0x80 0x83
+        base = self._hash("xss")
+        self.assertEqual(base, self._hash(f"xss{nbsp}"),
+                         "Trailing NBSP should be stripped")
+        self.assertEqual(base, self._hash(f"{nbsp}xss"),
+                         "Leading NBSP should be stripped")
+        self.assertEqual(base, self._hash(f"xss{em_space}"),
+                         "Trailing EM SPACE should be stripped")
+        self.assertEqual(base, self._hash(f"{em_space}xss{nbsp}"),
+                         "Mixed Unicode whitespace should be stripped")
+
+    def test_internal_whitespace_is_preserved(self):
+        """
+        Strip only touches leading/trailing whitespace; internal spaces are
+        part of the value and must NOT be removed.
+        """
+        self.assertNotEqual(self._hash("sql injection"), self._hash("sqlinjection"))
+        self.assertNotEqual(self._hash("x ss"), self._hash("xss"))
+
+    def test_output_is_64_char_hex_sha256(self):
+        """hash_fields() always returns a 64-character lowercase hex string."""
+        h = self._hash("anything")
+        self.assertEqual(len(h), 64)
+        self.assertRegex(h, r"^[0-9a-f]{64}$")
+
+    def test_known_value_regression(self):
+        """
+        Pin a known-good SHA-256 for a representative legacy input so that any
+        future change to hash_fields() that alters its output is immediately
+        visible.  Value computed with: sha256("high impact test finding".encode())
+        where "High Impact Test Finding" casefolds to "high impact test finding"
+        (no Unicode whitespace, so old and new code agreed here).
+        """
+        import hashlib
+        expected = hashlib.sha256("high impact test finding".encode("utf-8")).hexdigest()
+        self.assertEqual(self._hash("High Impact Test Finding"), expected)
+
+
+class TestLegacyFallbackWarnings(unittest.TestCase):
+    """
+    Regression tests for the Phase 1 WARNING promotions in compute_hash_code()
+    and do_dedupe_finding_task_internal().
+
+    These run without a database.  They assert that warning messages are emitted
+    (not silently swallowed at DEBUG) when the hash or dedup code falls back to
+    the legacy algorithm.
+    """
+
+    # ------------------------------------------------------------------
+    # compute_hash_code() fallback #2: scan type not in HASHCODE_FIELDS_PER_SCANNER
+    # ------------------------------------------------------------------
+
+    def test_missing_scanner_config_logs_warning_with_scan_type(self):
+        """
+        When HASHCODE_FIELDS_PER_SCANNER is set but the scan type has no entry,
+        a WARNING is logged that names the scan type.
+
+        We patch Finding.test at the class level for the duration of this test
+        using unittest.mock.patch so that the compute_hash_code() code path that
+        reads self.test.hash_code_fields and self.test.test_type.name works
+        without needing a real database row.
+        """
+        from unittest.mock import MagicMock, PropertyMock, patch
+
+        mock_test_type = MagicMock()
+        mock_test_type.name = "UnregisteredScanner"
+        mock_test = MagicMock()
+        mock_test.test_type = mock_test_type
+        mock_test.hash_code_fields = []   # triggers the "no config" branch
+        mock_test.hash_code_allows_null_cwe = True
+
+        finding = Finding.__new__(Finding)
+        finding.__dict__.update({"id": None, "dynamic_finding": False, "static_finding": True})
+
+        with override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={"SomeOtherScanner": ["title"]},
+            HASHCODE_ALLOWS_NULL_CWE={},
+            HASHCODE_ALLOWED_FIELDS=["title", "severity", "cwe"],
+        ):
+            with self.assertLogs("dojo.specific-loggers.deduplication", level="WARNING") as cm:
+                with patch.object(Finding, "compute_hash_code_legacy", return_value="abc123"):
+                    # Patch the 'test' property at the type level for this one call
+                    with patch.object(type(finding), "test",
+                                      new_callable=PropertyMock, return_value=mock_test):
+                        finding.compute_hash_code()
+
+        # At least one warning must mention the scan type by name
+        self.assertTrue(
+            any("UnregisteredScanner" in line for line in cm.output),
+            f"Expected scan type name in warnings. Got: {cm.output}",
+        )
+
+    def test_missing_scanner_config_warning_not_just_debug(self):
+        """
+        The legacy fallback must NOT be silent (not merely DEBUG-level).
+        assertLogs with level=WARNING will fail if only DEBUG lines are emitted.
+        """
+        from unittest.mock import MagicMock, PropertyMock, patch
+
+        mock_test_type = MagicMock()
+        mock_test_type.name = "AnotherUnregisteredScanner"
+        mock_test = MagicMock()
+        mock_test.test_type = mock_test_type
+        mock_test.hash_code_fields = []
+        mock_test.hash_code_allows_null_cwe = True
+
+        finding = Finding.__new__(Finding)
+        finding.__dict__.update({"id": None, "dynamic_finding": False, "static_finding": True})
+
+        with override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={"SomeOtherScanner": ["title"]},
+            HASHCODE_ALLOWS_NULL_CWE={},
+            HASHCODE_ALLOWED_FIELDS=["title"],
+        ):
+            # assertLogs(level="WARNING") raises AssertionError if no WARNING-level
+            # (or higher) messages are emitted — confirming the fallback is not silent.
+            with self.assertLogs("dojo.specific-loggers.deduplication", level="WARNING"):
+                with patch.object(Finding, "compute_hash_code_legacy", return_value="abc123"):
+                    with patch.object(type(finding), "test",
+                                      new_callable=PropertyMock, return_value=mock_test):
+                        finding.compute_hash_code()

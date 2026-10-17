@@ -72,6 +72,39 @@ toward Unknown. This is also how exposure *closure* works for sources that repor
 but never report it ending: rather than leaving an asset flagged forever on the strength of
 one old observation, the claim ages out.
 
+## The reachability probe
+
+Besides reading what scanners and connectors report, DefectDojo Pro can check for itself.
+The **reachability probe** opens a TCP connection to each address an asset is already
+known by and records which ones answer. Nothing is sent to the service: the connection is
+opened, the result noted, and the connection closed. Its verdicts appear in the asset's
+Exposure panel under the source **DefectDojo reachability probe**.
+
+The addresses come from the asset's URL locations when Locations is enabled, and from its
+endpoints otherwise. The probe never invents a target: an address with no port is skipped
+rather than guessed at.
+
+A superuser configures the probe under **Settings > Reachability Probe**, which appears
+once Asset Exposure is enabled. The probe does nothing until all three of these are set:
+
+| Setting | What it decides |
+|---|---|
+| **Enable Reachability Probing** | Whether the scheduled probe runs at all. |
+| **Where This Prober Sits** | **Outside the Perimeter (Public Internet)** or **Inside the Network**. A completed connection from outside records **Externally Exposed**; from inside it records only **Internally Reachable**. DefectDojo cannot work out its own position on the network, so it will not probe until this is declared. |
+| **Addresses in Scope** | The hostnames, addresses and CIDR ranges the probe may connect to. Nothing outside this list is ever contacted, and an empty list probes nothing. |
+
+**Connection Timeout (Seconds)** sets how long to wait before treating an address as
+unanswered, and **Maximum Addresses per Run** caps how many addresses one run may try, so a
+broad scope cannot become an unbounded scan.
+
+While the probe cannot run, the page says why. After each run it shows when the run happened
+and how many addresses were attempted, how many answered, how many did not, and how many
+assets received a verdict.
+
+A probe that gets no answer records nothing. A refused or timed-out connection is equally
+consistent with a firewall, a stopped service or a blocked address, so silence is never
+treated as evidence that an asset is isolated.
+
 ## Overriding exposure
 
 Each asset has an **exposure override**, set on the asset's Exposure panel by anyone with

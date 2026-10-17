@@ -143,6 +143,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **SonarQube**
 * **Sonatype IQ**
 * **SOOS**
+* **StackHawk**
 * **Sysdig Secure**
 * **Tenable.io**
 * **Tenable Web App Scanning**
