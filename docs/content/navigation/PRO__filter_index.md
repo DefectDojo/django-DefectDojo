@@ -44,6 +44,16 @@ List filters whose options come from a search box, such as the Asset and Organiz
 - The selection is stored as the search text, so a table URL or a saved table preference carries it compactly however many options match.
 - **Deselect all** also clears any options you picked one by one.
 
+### Pasting a list of names or IDs
+
+The same searchable list filters offer **Paste List** above their options. Select it, paste the names (or IDs) you want, separated by commas, new lines or tabs, and select **Add N Values**. Every name the filter can find becomes a selected option, so a list copied from a ticket or a CMDB export is applied in one step rather than one search per name.
+
+- Names match whole and case-insensitively: `payments-api` finds the asset named `Payments-API`, not one named `payments-api-v2`.
+- A number is looked up as an ID as well as a name, so a list of asset IDs works too.
+- A comma separates names, so a name that itself contains a comma cannot be pasted; pick it from the search box instead.
+- Names the filter cannot find stay in the box and are counted beneath it, so a typo can be corrected and added again. A name is also "not found" when it belongs to an asset or organization you do not have access to.
+- The resolved options are ordinary selections: they appear as chips, combine with any options you picked by hand, and follow the **Include** / **Exclude** switch. While a **Select all N matching** selection is active, **Paste List** is not offered, because that selection covers every match rather than a list of picks.
+
 ## How number filters are evaluated
 
 Numeric filters — including **Age** and **SLA** — offer a match operator alongside the value: **Equals**, **Not Equals**, **Greater Than**, **Greater Than or Equal To**, **Less Than**, **Less Than or Equal To**, **In List**, and **Not in List**. Entering a value without choosing an operator matches on **Equals**.
