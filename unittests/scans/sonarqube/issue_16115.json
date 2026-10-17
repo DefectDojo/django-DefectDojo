@@ -1,11 +1,11 @@
 {
-  "total": 3,
+  "total": 5,
   "p": 1,
   "ps": 500,
   "paging": {
     "pageIndex": 1,
     "pageSize": 500,
-    "total": 3
+    "total": 5
   },
   "issues": [
     {
@@ -79,6 +79,53 @@
       "type": "BUG",
       "scope": "MAIN",
       "quickFixAvailable": false
+    },
+    {
+      "key": "AZb-issue-16115-4",
+      "rule": "java:S108",
+      "severity": "MAJOR",
+      "component": "example-project:src/app/Login.java",
+      "project": "example-project",
+      "line": 30,
+      "textRange": {
+        "startLine": 30,
+        "endLine": 30,
+        "startOffset": 4,
+        "endOffset": 20
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "   ",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2025-06-02T10:00:00+0000",
+      "type": "BUG",
+      "scope": "MAIN",
+      "quickFixAvailable": false
+    },
+    {
+      "key": "AZb-issue-16115-5",
+      "rule": "java:S2068",
+      "severity": "BLOCKER",
+      "component": "example-project:src/app/Login.java",
+      "project": "example-project",
+      "line": 30,
+      "textRange": {
+        "startLine": 30,
+        "endLine": 30,
+        "startOffset": 4,
+        "endOffset": 20
+      },
+      "flows": [],
+      "status": "OPEN",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2025-06-02T10:00:00+0000",
+      "type": "VULNERABILITY",
+      "scope": "MAIN",
+      "quickFixAvailable": false
     }
   ],
   "components": [
@@ -98,5 +145,49 @@
       "longName": "example-project"
     }
   ],
-  "facets": []
+  "facets": [],
+  "hotspots": [
+    {
+      "key": "AZb-hotspot-16115-1",
+      "component": "example-project:src/app/Login.java",
+      "project": "example-project",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 12,
+      "message": "Make sure this weak hash algorithm is not used in a sensitive context here.",
+      "creationDate": "2025-06-02T10:00:00+0000",
+      "updateDate": "2025-06-02T10:00:00+0000",
+      "textRange": {
+        "startLine": 12,
+        "endLine": 12,
+        "startOffset": 8,
+        "endOffset": 30
+      },
+      "flows": [],
+      "ruleKey": "java:S4790",
+      "messageFormattings": []
+    },
+    {
+      "key": "AZb-hotspot-16115-2",
+      "component": "example-project:src/app/Login.java",
+      "project": "example-project",
+      "securityCategory": "auth",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 12,
+      "message": null,
+      "creationDate": "2025-06-02T10:00:00+0000",
+      "updateDate": "2025-06-02T10:00:00+0000",
+      "textRange": {
+        "startLine": 12,
+        "endLine": 12,
+        "startOffset": 8,
+        "endOffset": 30
+      },
+      "flows": [],
+      "ruleKey": "java:S2245",
+      "messageFormattings": []
+    }
+  ]
 }
