@@ -10,6 +10,12 @@ supported by many tools. More details about the format here:
 
 Current implementation will aggregate all the findings in the SARIF file into a single report.
 
+## Results With Several Locations
+
+A SARIF result can list several `locations`, for example a hard-coded secret that appears in six files, or a race condition reported at two lines of the same file. The **SARIF** scan type makes each location its **own Finding**, so a report with 19 results and 84 locations imports as 84 Findings.
+
+To import each result as a single Finding that lists every location instead, use the **[SARIF Aggregated](../sarif_aggregated)** scan type.
+
 ## How Test Types Are Determined
 
 Unlike most parsers in DefectDojo, the SARIF parser has a **report-defined Test Type**. When you import a SARIF file with `scan_type=SARIF`, DefectDojo reads the tool name from within the SARIF file at `runs[].tool.driver.name` and uses it to construct the Test Type name.

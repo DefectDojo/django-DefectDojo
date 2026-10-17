@@ -1561,6 +1561,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AWS Security Hub Scan": True,
     "Meterian Scan": True,
     "SARIF": True,
+    "SARIF Aggregated": True,
     # These three parsers read SARIF, where a rule is not obliged to carry a CWE, so they are listed
     # for the same reason "SARIF" is above. Note that this setting only takes effect for a scan type
     # that ALSO has an entry in HASHCODE_FIELDS_PER_SCANNER - without one the legacy algorithm runs
@@ -1788,6 +1789,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
     "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "SARIF Aggregated": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Flawfinder Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Cppcheck Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "DevSkim Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,

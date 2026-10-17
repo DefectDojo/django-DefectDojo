@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch
 
 from dojo.models import Finding, Test
 from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes, vulnerability_id_from_tag
@@ -659,6 +660,29 @@ add_core(ptr, offset, val);
             "5c1f36e0a9de13c3c96c26fa9a1a02a5d5be0c4a3ad9d0f27b3c4d2f8f4a91aa",
             keeper[0].unique_id_from_tool,
         )
+
+    def test_multi_location_result_splits_per_location(self):
+        """
+        The SARIF scan type keeps one finding per location, each carrying exactly its own
+        location. Aggregating a result into one finding is the "SARIF Aggregated" scan type's job.
+        """
+        with (
+            patch.dict("dojo.location.feature._RESOLVER", {"fn": lambda: True}),
+            (get_unit_tests_scans_path("sarif") / "multi_location_result.sarif").open(encoding="utf-8") as testfile,
+        ):
+            findings = SarifParser().get_findings(testfile, Test())
+        self.assertEqual(7, len(findings), msg=f"expected the per-location split, got {len(findings)}")
+        self.assertEqual(
+            ["StubFile01.java", "StubFile02.java", "StubFile03.java", "StubFile04.java", "StubFile05.java", "StubFile06.xml", "StubFile07.java"],
+            [f.file_path.rsplit("/", 1)[-1] for f in findings],
+        )
+        for finding in findings:
+            self.assertEqual([(finding.file_path, finding.line)], [(loc.data["file_path"], loc.data["line"]) for loc in finding.unsaved_locations])
+            self.assertNotIn("**Locations:**", finding.description)
+            self.common_checks(finding)
+        # The repeated fingerprint of a split result is dropped; the single-location one is kept.
+        self.assertEqual([None] * 6, [f.unique_id_from_tool for f in findings[:6]])
+        self.assertIsNotNone(findings[6].unique_id_from_tool)
 
     # Regression: CVE/GHSA ids carried in rule or result tags were kept only as tags, never as
     # vulnerability ids, so a finding keyed by a non-CVE rule id (a GHSA, a RUSTSEC) had no CVE.
