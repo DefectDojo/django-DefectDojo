@@ -262,7 +262,7 @@ def build_files_router(
     def create_file(
         request: HttpRequest,
         parent_id: int,
-        title: str = Form(...),
+        title: str = Form(..., max_length=100),
         file: UploadedFile = File(...),  # noqa: B008 -- ninja's declarative param default
     ):
         parent = _resolve_parent(request, get_parent_queryset, parent_label, parent_id)

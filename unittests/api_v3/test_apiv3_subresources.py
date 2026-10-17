@@ -190,6 +190,19 @@ class TestApiV3SubresourcesFiles(_SubResourceBase):
                 self.assertEqual(201, response.status_code, response.content[:400])
         self.assertEqual(2, FileUpload.objects.filter(title="os5 dup title").count())
 
+    # Regression: a title over 100 characters returned a 500 instead of a 400
+    def test_overlong_title_is_400(self):
+        before = FileUpload.objects.count()
+        response = self.client.post(
+            self.v3_url(f"findings/{self.finding.pk}/files"),
+            {"title": "x" * 101, "file": _txt()}, format="multipart",
+        )
+        self.assertEqual(400, response.status_code, response.content[:400])
+        self.assertEqual("application/problem+json", response["Content-Type"])
+        self.assertIn("title", response.json()["fields"])
+        persisted = FileUpload.objects.count()
+        self.assertEqual(before, persisted, msg=f"expected {before} uploads, persisted={persisted}")
+
     def test_download_missing_file_is_404(self):
         response = self.client.get(self.v3_url(f"findings/{self.finding.pk}/files/9999999/download"))
         self.assertEqual(404, response.status_code)
