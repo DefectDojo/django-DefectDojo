@@ -12,7 +12,7 @@ All of these controls live in the table toolbar, above the list.
 
 The Findings list carries a filter bar between the toolbar and the rows. It shows every active filter as a chip that reads as a sentence: the field, the operator, and the value, such as **Severity is any of Critical, High** or **Age is greater than 30**.
 
-- **Add Filter** opens a list of every field the table can filter on, grouped the way the column picker groups them. Type in the search box to narrow the list, then pick a field to open its editor. The editor is the same control the column header offers for that field: a match mode where the field has one, a value or a list of values, and **Submit** and **Clear**. Pressing Enter submits the editor, the same way it applies a column header filter (see [Filtering columns](#filtering-columns)).
+- **Add Filter** opens a list of every field the table can filter on, grouped the way the column picker groups them. Type in the search box to narrow the list, then pick a field to open its editor. The editor is the same control the column header offers for that field: a match mode where the field has one, a value or a list of values, and **Submit** and **Clear**. Pressing Enter submits the editor from the same fields that apply a column header filter (see [Filtering columns](#filtering-columns)).
 - Select a chip to reopen its editor and change the value or the match mode. Select the **x** on a chip to remove that filter.
 - The count on the right of the bar is how many records match. **Sort** beside it opens the same sort the column headers offer, up to three levels, so a view with no headers (the grid, below) can still be ordered.
 - The keyword search stays in the toolbar. It narrows the list on top of the chips and is not a chip itself.
@@ -55,7 +55,7 @@ To sort by more than one column, hold Ctrl (Cmd on macOS) while clicking additio
 
 ## Filtering columns
 
-Click the filter icon in a column header to open that column's filter. Enter a value, pick a date, or check the options you want, then click **Apply** or press Enter. Enter works from the text, number, and date fields and from a multi-select option list after you check an option. In an option list, Space checks or unchecks the highlighted option and Enter applies the filter. Pressing Enter while **Clear** has focus clears the filter instead.
+Click the filter icon in a column header to open that column's filter. Enter a value, pick a date, or check the options you want, then click **Apply** or press Enter. Enter applies the filter from a text or number field, from a typed date, and from a multi-select option list. In an option list, Space checks or unchecks the highlighted option and Enter applies the filter. In an "is one of" list, the first Enter adds the typed value to the list and a second Enter applies the filter. On the calendar, Enter selects the highlighted day instead, so click **Apply** after picking a date there. Pressing Enter while **Clear** has focus clears the filter instead.
 
 ## Reordering columns
 
