@@ -1,8 +1,10 @@
+import hashlib
 import json
 import logging
 import unittest
 from pathlib import Path
 from unittest import skip
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from crum import impersonate
 from django.conf import settings
@@ -2287,6 +2289,7 @@ class TestDedupeRelatedMethods(DojoTestCase):
 
 
 class TestHashFieldsNormalisation(unittest.TestCase):
+
     """
     Unit tests for Finding.hash_fields() covering the Phase 1 fix:
 
@@ -2300,9 +2303,8 @@ class TestHashFieldsNormalisation(unittest.TestCase):
 
     def _make_finding(self):
         """Return a minimal unsaved Finding with no HASH_CODE_FIELDS_ALWAYS effect."""
-        f = Finding.__new__(Finding)
         # hash_fields() only reads settings.HASH_CODE_FIELDS_ALWAYS; keep it clean
-        return f
+        return Finding.__new__(Finding)
 
     def _hash(self, text):
         """Call hash_fields() on a bare finding with the given pre-concatenated text."""
@@ -2343,7 +2345,7 @@ class TestHashFieldsNormalisation(unittest.TestCase):
         """
         Regression for the bytes.strip() bug: str.strip() removes Unicode
         whitespace (U+00A0 NBSP, U+2003 EM SPACE, etc.) which bytes.strip()
-        would NOT remove (it only strips bytes 0x00–0x1f and 0x20).
+        would NOT remove (it only strips bytes 0x00-0x1f and 0x20).
 
         With the old code these hashes differed from the trimmed form.
         With the fix they are all identical.
@@ -2382,12 +2384,12 @@ class TestHashFieldsNormalisation(unittest.TestCase):
         where "High Impact Test Finding" casefolds to "high impact test finding"
         (no Unicode whitespace, so old and new code agreed here).
         """
-        import hashlib
-        expected = hashlib.sha256("high impact test finding".encode("utf-8")).hexdigest()
+        expected = hashlib.sha256(b"high impact test finding").hexdigest()
         self.assertEqual(self._hash("High Impact Test Finding"), expected)
 
 
 class TestLegacyFallbackWarnings(unittest.TestCase):
+
     """
     Regression tests for the Phase 1 WARNING promotions in compute_hash_code()
     and do_dedupe_finding_task_internal().
@@ -2411,8 +2413,6 @@ class TestLegacyFallbackWarnings(unittest.TestCase):
         reads self.test.hash_code_fields and self.test.test_type.name works
         without needing a real database row.
         """
-        from unittest.mock import MagicMock, PropertyMock, patch
-
         mock_test_type = MagicMock()
         mock_test_type.name = "UnregisteredScanner"
         mock_test = MagicMock()
@@ -2423,17 +2423,18 @@ class TestLegacyFallbackWarnings(unittest.TestCase):
         finding = Finding.__new__(Finding)
         finding.__dict__.update({"id": None, "dynamic_finding": False, "static_finding": True})
 
-        with override_settings(
-            HASHCODE_FIELDS_PER_SCANNER={"SomeOtherScanner": ["title"]},
-            HASHCODE_ALLOWS_NULL_CWE={},
-            HASHCODE_ALLOWED_FIELDS=["title", "severity", "cwe"],
+        with (
+            override_settings(
+                HASHCODE_FIELDS_PER_SCANNER={"SomeOtherScanner": ["title"]},
+                HASHCODE_ALLOWS_NULL_CWE={},
+                HASHCODE_ALLOWED_FIELDS=["title", "severity", "cwe"],
+            ),
+            self.assertLogs("dojo.specific-loggers.deduplication", level="WARNING") as cm,
+            patch.object(Finding, "compute_hash_code_legacy", return_value="abc123"),
+            # Patch the 'test' property at the type level for this one call
+            patch.object(type(finding), "test", new_callable=PropertyMock, return_value=mock_test),
         ):
-            with self.assertLogs("dojo.specific-loggers.deduplication", level="WARNING") as cm:
-                with patch.object(Finding, "compute_hash_code_legacy", return_value="abc123"):
-                    # Patch the 'test' property at the type level for this one call
-                    with patch.object(type(finding), "test",
-                                      new_callable=PropertyMock, return_value=mock_test):
-                        finding.compute_hash_code()
+            finding.compute_hash_code()
 
         # At least one warning must mention the scan type by name
         self.assertTrue(
@@ -2446,8 +2447,6 @@ class TestLegacyFallbackWarnings(unittest.TestCase):
         The legacy fallback must NOT be silent (not merely DEBUG-level).
         assertLogs with level=WARNING will fail if only DEBUG lines are emitted.
         """
-        from unittest.mock import MagicMock, PropertyMock, patch
-
         mock_test_type = MagicMock()
         mock_test_type.name = "AnotherUnregisteredScanner"
         mock_test = MagicMock()
@@ -2458,15 +2457,16 @@ class TestLegacyFallbackWarnings(unittest.TestCase):
         finding = Finding.__new__(Finding)
         finding.__dict__.update({"id": None, "dynamic_finding": False, "static_finding": True})
 
-        with override_settings(
-            HASHCODE_FIELDS_PER_SCANNER={"SomeOtherScanner": ["title"]},
-            HASHCODE_ALLOWS_NULL_CWE={},
-            HASHCODE_ALLOWED_FIELDS=["title"],
+        # assertLogs(level="WARNING") raises AssertionError if no WARNING-level
+        # (or higher) messages are emitted — confirming the fallback is not silent.
+        with (
+            override_settings(
+                HASHCODE_FIELDS_PER_SCANNER={"SomeOtherScanner": ["title"]},
+                HASHCODE_ALLOWS_NULL_CWE={},
+                HASHCODE_ALLOWED_FIELDS=["title"],
+            ),
+            self.assertLogs("dojo.specific-loggers.deduplication", level="WARNING"),
+            patch.object(Finding, "compute_hash_code_legacy", return_value="abc123"),
+            patch.object(type(finding), "test", new_callable=PropertyMock, return_value=mock_test),
         ):
-            # assertLogs(level="WARNING") raises AssertionError if no WARNING-level
-            # (or higher) messages are emitted — confirming the fallback is not silent.
-            with self.assertLogs("dojo.specific-loggers.deduplication", level="WARNING"):
-                with patch.object(Finding, "compute_hash_code_legacy", return_value="abc123"):
-                    with patch.object(type(finding), "test",
-                                      new_callable=PropertyMock, return_value=mock_test):
-                        finding.compute_hash_code()
+            finding.compute_hash_code()
