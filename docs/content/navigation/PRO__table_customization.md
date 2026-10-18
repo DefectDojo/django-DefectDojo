@@ -55,7 +55,7 @@ To sort by more than one column, hold Ctrl (Cmd on macOS) while clicking additio
 
 ## Filtering columns
 
-Click the filter icon in a column header to open that column's filter. Enter a value, pick a date, or check the options you want, then click **Apply** or press Enter. Enter applies the filter from a text or number field, from a typed date, and from a multi-select option list. In an option list, Space checks or unchecks the highlighted option and Enter applies the filter. In an "is one of" list, the first Enter adds the typed value to the list and a second Enter applies the filter. On the calendar, Enter selects the highlighted day instead, so click **Apply** after picking a date there. Pressing Enter while **Clear** has focus clears the filter instead.
+Click the filter icon in a column header to open that column's filter, set the value, then click **Apply** (**Submit** in the filter bar editor). You can also press Enter to apply the filter from a text or number field, from a date you type, or from a multi-select option list. In a multi-select list, Space checks or unchecks the highlighted option and Enter applies the filter; in a single-select list, Enter picks the option. Enter does not apply the filter in two places: on the calendar, Enter selects the highlighted day, and in an **In List** or **Not in List** field, Enter adds the typed value to the list. Click **Apply** after either one. Pressing Enter while **Clear** has focus clears the filter instead.
 
 ## Reordering columns
 
