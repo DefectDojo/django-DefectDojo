@@ -11,7 +11,7 @@ document -- only discovered forward ForeignKeys and many-to-many fields, so
 These tests pin the advertised option: it is listed for findings and products while
 Locations is enabled and absent while it is disabled, the OpenAPI schema enumerates it
 and points at the reference component, and a list/detail request returns the
-references keyed by the same ids the finding's ``endpoints`` field carries.
+references keyed by their ids.
 """
 
 from unittest import skipUnless
@@ -138,9 +138,9 @@ class PrefetchLocationsOptionTest(DojoAPITestCase):
         prefetched = payload["prefetch"]["locations"]
 
         expected_ids = {reference.pk for reference in self.finding_references}
-        # The finding's ``endpoints`` field carries LocationFindingReference ids under V3,
-        # and the prefetch payload is keyed by those same ids.
-        self.assertEqual(expected_ids, set(finding_data["endpoints"]))
+        # The prefetch payload is keyed by the finding's LocationFindingReference ids. (The
+        # finding's ``endpoints`` field carries /api/v2/endpoints/ ids instead; see
+        # test_v3_finding_endpoints_field.)
         self.assertEqual({str(pk) for pk in expected_ids}, set(prefetched))
 
         for reference in self.finding_references:

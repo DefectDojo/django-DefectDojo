@@ -164,6 +164,7 @@ Each Endpoint row is one URL Location on one Asset (a `LocationProductReference`
 - `GET /api/v2/endpoint_status/` and `GET /api/v2/endpoint_status/{id}/` return rows that look like Endpoint Statuses, with the `mitigated`, `false_positive`, `out_of_scope` and `risk_accepted` flags reconstructed from the Location status. The `endpoint` field is the `id` that `/api/v2/endpoints/` shows for that row, so the two routes join the way they did before.
 - Filtering by `protocol`, `host`, `port`, `path`, `query`, `fragment`, `product` and `tag(s)` works on Endpoints, and by the four flags, `mitigated_by`, `finding` and `endpoint` on Endpoint Statuses. `?endpoint=` returns that Asset's statuses only.
 - The `generate_report` action on an Endpoint works.
+- A Finding's `endpoints` field (`/api/v2/findings/`) lists the `/api/v2/endpoints/` IDs of the URLs the Finding is on.
 
 ### Writes
 
@@ -198,7 +199,7 @@ A few things behave differently from the original Endpoint API:
 - **Default ports are filled in.** A URL without a port reads back with the protocol's default port (`443` for `https`), where an Endpoint returned `null`.
 - **`endpoint_to_add` on imports takes a `location_id`.** On `/api/v2/import-scan/` and `/api/v2/reimport-scan/`, `endpoint_to_add` names a Location. Pass the `location_id` of the `/api/v2/endpoints/` row, not its `id`.
 - **`mitigated` returned a date before 3.2.400.** On releases before 3.2.400 the `mitigated` field of `/api/v2/endpoint_status/` returned the record's creation date instead of a boolean. From 3.2.400 the field is a boolean that is true only when the Location status is `Mitigated`.
-- **Before 3.5.0, writes answer 403.** On earlier releases `POST`, `PUT`, `PATCH` and `DELETE` on `/api/v2/endpoints/` and `/api/v2/endpoint_status/` return `HTTP 403` with the body `Writes to this endpoint are deprecated when V3_FEATURE_LOCATIONS is enabled`.
+- **Before 3.5.0, writes answer 403.** On earlier releases `POST`, `PUT`, `PATCH` and `DELETE` on `/api/v2/endpoints/` and `/api/v2/endpoint_status/` return `HTTP 403` with the body `Writes to this endpoint are deprecated when V3_FEATURE_LOCATIONS is enabled`, and a Finding's `endpoints` field lists Endpoint Status IDs.
 - **Pagination and ordering.** Available ordering fields on `/api/v2/endpoints/` are `host`, `product`, `id`, and `active_finding_count`.
 
 ### If a Route Returns 410

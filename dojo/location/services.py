@@ -258,3 +258,44 @@ def delete_finding_reference(reference: LocationFindingReference) -> None:
     with transaction.atomic():
         reference.delete()
         sync_product_reference_status(location, product)
+
+
+def finding_endpoint_references(finding: Finding) -> list[LocationProductReference]:
+    """
+    A finding's endpoints: its product's references to the URL Locations the finding is on.
+
+    Reads ``finding.locations`` and each Location's product references, so a caller that
+    prefetched ``locations__location__products`` pays no query per finding.
+    """
+    product_id = finding.test.engagement.product_id
+    return [
+        product_reference
+        for finding_reference in finding.locations.all()
+        if finding_reference.location.location_type == URL.LOCATION_TYPE
+        for product_reference in finding_reference.location.products.all()
+        if product_reference.product_id == product_id
+    ]
+
+
+def set_finding_endpoints(finding: Finding, product_references: list[LocationProductReference]) -> None:
+    """
+    Make a finding's URL locations exactly those of ``product_references``.
+
+    The legacy ``endpoints`` field on a finding replaced its endpoint set: endpoints still in
+    the list kept their status, the others were unlinked, and new ones were linked. Only URL
+    references are touched; code and dependency locations are not endpoints.
+    """
+    wanted = {reference.location_id: reference.location for reference in product_references}
+    product = finding.test.engagement.product
+    with transaction.atomic():
+        current = LocationFindingReference.objects.filter(finding=finding, location__location_type=URL.LOCATION_TYPE)
+        unlinked = current.exclude(location_id__in=wanted)
+        changed = set(unlinked.values_list("location_id", flat=True))
+        unlinked.delete()
+        linked = set(current.values_list("location_id", flat=True))
+        for location_id, location in wanted.items():
+            if location_id not in linked:
+                location.associate_with_finding(finding)
+                changed.add(location_id)
+        for location in Location.objects.filter(pk__in=changed):
+            sync_product_reference_status(location, product)

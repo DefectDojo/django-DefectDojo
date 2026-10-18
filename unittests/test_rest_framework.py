@@ -2171,7 +2171,9 @@ class FindingsTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
             "file_path": "",
             "static_finding": False,
             "dynamic_finding": False,
-            "endpoints": [1, 2],
+            # /api/v2/endpoints/ ids. The Locations fixture has one endpoint row (product 1's
+            # reference to http://bar.foo).
+            "endpoints": [1] if settings.V3_FEATURE_LOCATIONS else [1, 2],
             "files": [],
             "tags": ["tag1", "tag_2"],
         }

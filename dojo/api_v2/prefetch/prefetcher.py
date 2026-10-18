@@ -15,6 +15,7 @@ from dojo.location.api.serializers import (
 )
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.services import finding_endpoint_references
 from dojo.models import FileUpload, Finding
 
 # Related objects that a prefetched model's serializer reads, so they are fetched in the same query
@@ -108,7 +109,9 @@ class _Prefetcher:
         """
         if locations_enabled():
             if isinstance(model_instance, Finding) and field_name == "endpoints":
-                return model_instance.locations, True
+                # The endpoints field lists the finding's product references, so prefetch those.
+                references = finding_endpoint_references(model_instance)
+                return LocationProductReference.objects.filter(pk__in=[reference.pk for reference in references]), True
         return None
 
     def get_field_value(self, model_instance, field_name):
