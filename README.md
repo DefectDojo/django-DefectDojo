@@ -88,6 +88,18 @@ Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for detail
 
 Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+## Contributors
+
+We're incredibly appreciative of our contributors. DefectDojo exists in its current form because of the people below,
+and contributing to it is a great way to understand the tangled web that is cybersecurity.
+
+<a href="https://github.com/DefectDojo/django-DefectDojo/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=DefectDojo/django-DefectDojo" alt="DefectDojo contributors" />
+</a>
+
+Want to join them? Read the [contributing guidelines](readme-docs/CONTRIBUTING.md), then pick up a
+[good first issue](https://github.com/DefectDojo/django-DefectDojo/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22).
+
 ## Pro Edition
 
 [Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, risk-based vulnerability management, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
