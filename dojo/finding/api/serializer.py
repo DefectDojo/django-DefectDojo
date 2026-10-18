@@ -27,8 +27,9 @@ from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
 from dojo.jira.api.serializers import JIRAIssueSerializer
 from dojo.location.feature import locations_enabled
-from dojo.location.models import LocationFindingReference
-from dojo.location.queries import get_authorized_location_finding_reference
+from dojo.location.models import LocationProductReference
+from dojo.location.queries import get_authorized_location_product_reference
+from dojo.location.services import finding_endpoint_references, set_finding_endpoints
 from dojo.models import (
     SEVERITIES,
     Development_Environment,
@@ -49,6 +50,7 @@ from dojo.models import (
     Vulnerability,
 )
 from dojo.notifications.helper import async_create_notification
+from dojo.url.models import URL
 from dojo.user.queries import get_authorized_users
 
 logger = logging.getLogger(__name__)
@@ -382,6 +384,20 @@ class FindingCweSerializer(serializers.ModelSerializer):
         fields = ["cwe"]
 
 
+class FindingEndpointsField(serializers.ManyRelatedField):
+
+    """
+    A finding's endpoints with Locations enabled, by the ids ``/api/v2/endpoints/`` shows.
+
+    Each one is the finding's product's reference to a URL Location the finding is on, so
+    the ids join back to ``/api/v2/endpoints/`` the way legacy Endpoint ids did. Writing the
+    field replaces the finding's endpoint set, keeping the status of the endpoints it keeps.
+    """
+
+    def get_attribute(self, instance):
+        return finding_endpoint_references(instance)
+
+
 class FindingSerializer(serializers.ModelSerializer):
     mitigated = serializers.DateTimeField(required=False, allow_null=True)
     mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
@@ -417,11 +433,10 @@ class FindingSerializer(serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all(),
     )
-    endpoints = serializers.PrimaryKeyRelatedField(
+    endpoints = FindingEndpointsField(
         source="locations",
-        many=True,
         required=False,
-        queryset=LocationFindingReference.objects.all(),
+        child_relation=serializers.PrimaryKeyRelatedField(queryset=LocationProductReference.objects.none()),
     )
 
     class Meta:
@@ -459,10 +474,13 @@ class FindingSerializer(serializers.ModelSerializer):
                 queryset=get_authorized_endpoints("view", user=user) if user else Endpoint.objects.none(),
             )
         else:
-            self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
-                source="locations", many=True, required=False,
-                queryset=get_authorized_location_finding_reference("view", user=user)
-                if user else LocationFindingReference.objects.none(),
+            self.fields["endpoints"] = FindingEndpointsField(
+                source="locations", required=False,
+                child_relation=serializers.PrimaryKeyRelatedField(
+                    queryset=get_authorized_location_product_reference("view", user=user).filter(
+                        location__location_type=URL.LOCATION_TYPE,
+                    ) if user else LocationProductReference.objects.none(),
+                ),
             )
 
     def get_accepted_risks(self, obj):
@@ -578,10 +596,7 @@ class FindingSerializer(serializers.ModelSerializer):
             save_cwes(instance)
 
         if locations_enabled() and locations is not None:
-            for location_ref in instance.locations.all():
-                location_ref.location.disassociate_from_finding(instance)
-            for location_ref in locations:
-                location_ref.location.associate_with_finding(instance)
+            set_finding_endpoints(instance, locations)
 
         if push_to_jira or jira_services.is_keep_in_sync(instance):
             # Push synchronously so that we can see jira errors in real time

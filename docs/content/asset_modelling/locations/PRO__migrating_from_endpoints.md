@@ -9,7 +9,7 @@ When you enable Locations on an existing DefectDojo Pro instance, the data alrea
 
 Note that migration is **one-way**. There is no automated rollback path that re-creates Endpoints from Locations.
 
-> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations. The Endpoints pages go away in **3.6.0 (December 2026)**. The read-only Endpoint API (`/api/v2/endpoints/`, `/api/v2/endpoint_status/`) stays until its own deprecation announcement. The Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables carry a deprecation banner. Enable Locations and run the migration below before 3.6.0.
+> **Endpoints are deprecated.** As of **3.2.201**, Endpoints are deprecated in favour of Locations. The Endpoints pages go away in **3.6.0 (December 2026)**. The Endpoint API (`/api/v2/endpoints/`, `/api/v2/endpoint_status/`) stays until its own deprecation announcement. The Endpoints menu, the Endpoint list pages, and a Finding's endpoint tables carry a deprecation banner. Enable Locations and run the migration below before 3.6.0.
 
 ## Running the migration from the Feature Flags page
 
@@ -154,32 +154,53 @@ Add `--apply` to delete. The command asks you to confirm before it deletes anyth
 
 ## Endpoint API After Migration
 
-Once Locations is enabled, the legacy Endpoint API enters a **read-compatibility** mode designed to keep existing automations working without code changes — but only for read traffic.
+Once Locations is enabled, `/api/v2/endpoints/` and `/api/v2/endpoint_status/` are served from Locations. Automation written against the Endpoint API keeps working for reads and, from 3.5.0, for writes: a legacy payload is applied to the Location rows it stands for.
 
-### What still works
+Each Endpoint row is one URL Location on one Asset (a `LocationProductReference`), and each Endpoint Status row is one Finding on one URL Location (a `LocationFindingReference`). A Location is shared by every Asset that recorded the same URL, which an Endpoint never was, so every write below acts on one Asset's rows and leaves the other Assets' rows for the same URL alone.
 
-- `GET /api/v2/endpoints/` — Returns rows that *look like* Endpoints but are actually projected from `LocationProductReference` rows joined to URL Locations. The familiar fields (`protocol`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present.
-- `GET /api/v2/endpoints/{id}/`: Single-Endpoint retrieval works the same way. Each row is one URL Location on one Asset, so the `id` is that Asset Reference's ID, not the original Endpoint ID, and `location_id` names the Location.
-- `GET /api/v2/endpoint_status/` and `GET /api/v2/endpoint_status/{id}/` — Returns rows projected from `LocationFindingReference`. The legacy `mitigated`, `false_positive`, `out_of_scope`, and `risk_accepted` boolean fields are reconstructed.
-- Filtering by `protocol`, `host`, `port`, `path`, `query`, `fragment`, `product`, and `tag(s)` continues to work.
-- The `generate_report` action on individual Endpoints continues to work.
+### Reads
 
-### What returns 403
+- `GET /api/v2/endpoints/` and `GET /api/v2/endpoints/{id}/` return rows that look like Endpoints. The familiar fields (`protocol`, `userinfo`, `host`, `port`, `path`, `query`, `fragment`, `tags`, `product`, `active_finding_count`) are all present. The `id` is the Asset Reference's ID, not the original Endpoint ID, and `location_id` names the Location.
+- `GET /api/v2/endpoint_status/` and `GET /api/v2/endpoint_status/{id}/` return rows that look like Endpoint Statuses, with the `mitigated`, `false_positive`, `out_of_scope` and `risk_accepted` flags reconstructed from the Location status. The `endpoint` field is the `id` that `/api/v2/endpoints/` shows for that row, so the two routes join the way they did before.
+- Filtering by `protocol`, `host`, `port`, `path`, `query`, `fragment`, `product` and `tag(s)` works on Endpoints, and by the four flags, `mitigated_by`, `finding` and `endpoint` on Endpoint Statuses. `?endpoint=` returns that Asset's statuses only.
+- The `generate_report` action on an Endpoint works.
+- A Finding's `endpoints` field (`/api/v2/findings/`) lists the `/api/v2/endpoints/` IDs of the URLs the Finding is on.
 
-- `POST`, `PUT`, `PATCH`, and `DELETE` on `/api/v2/endpoints/` and `/api/v2/endpoint_status/` all return `HTTP 403` with the body:
+### Writes
 
-  > Writes to this endpoint are deprecated when V3_FEATURE_LOCATIONS is enabled
+| Request | What it does |
+| --- | --- |
+| `POST /api/v2/endpoints/` | Records the URL on the Asset named by `product`, reusing the URL Location if another Asset already recorded it. Answers `400` if the Asset already has that URL, as it did for a duplicate Endpoint. |
+| `PUT` / `PATCH /api/v2/endpoints/{id}/` | Changes the URL. If no other Asset uses the Location and the new URL is not recorded yet, the Location itself changes and keeps its ID, tags and metadata. Otherwise only this Asset's row moves to the new URL, taking its Findings and metadata with it. `product` cannot be changed. |
+| `DELETE /api/v2/endpoints/{id}/` | Removes the URL from the Asset, with its Findings' statuses and its metadata. The Location is deleted when nothing else uses it. |
+| `POST /api/v2/endpoint_status/` | Puts the Finding on the Endpoint. The Finding and the Endpoint must belong to the same Asset. |
+| `PUT` / `PATCH /api/v2/endpoint_status/{id}/` | Sets the status from the flags: see below. `endpoint` and `finding` cannot be changed. |
+| `DELETE /api/v2/endpoint_status/{id}/` | Takes the Finding off the Endpoint. The Endpoint stays on the Asset. |
+| `POST /api/v2/endpoint_meta_import/` | Unchanged: applies the CSV's tags and metadata to the Asset's URL Locations, creating Locations for new hosts. |
 
-  Clients that write Endpoint data must move to the new Reference endpoints (`POST /api/v2/location_findings/`, `POST /api/v2/location_products/`) and to the URL endpoint (`POST /api/v2/urls/`).
+Writes need the same permissions as before: adding an Endpoint needs permission to add to the Asset, changing or deleting one needs edit or delete on it, and changing an Endpoint Status needs edit on its Finding.
+
+**Flags become one status.** A Location status holds one value, so the flags map onto it:
+
+- A flag set to `true` in the request becomes the status, so `{"mitigated": true}` mitigates a row that was False Positive. When a request sets more than one flag, the first in the table above wins (Risk Accepted, then False Positive, then Out of Scope, then Mitigated).
+- Setting the current flag to `false` makes the row Active again. Setting a flag that is not the current one to `false` changes nothing.
+- A change of status records who made it and when. For Mitigated, `mitigated_by` names the user if you send it, otherwise it is you, and `mitigated_time` is the time of the request.
+- The Asset's row for the URL is Active while any of its Findings on that URL is Active, and Mitigated otherwise.
+
+**Tags are shared.** A Location has one tag set, seen by every Asset that uses the URL. You can change it only if you can edit every one of those Assets; otherwise the request answers `400` and nothing changes. Superusers can always change it.
 
 ### Behavioural Differences to Watch For
 
 A few things behave differently from the original Endpoint API:
 
-- **Single status instead of flags.** Locations have one status at a time. If your code relied on a Finding being *both* `mitigated=True` *and* `false_positive=True` simultaneously on an Endpoint_Status, that is no longer representable — the migration picks the highest-priority flag (the order shown in the table above).
-- **`endpoint` field on Endpoint_Status.** The legacy `endpoint` field is reconstructed by looking up the matching Asset Reference. In rare cases where a Finding's Asset no longer matches its Location's Asset references, this field may be null.
-- **`mitigated` returned a date before 3.2.400.** On releases before 3.2.400 the `mitigated` field of `/api/v2/endpoint_status/` returned the record's creation date instead of a boolean. Because a date string is truthy, `mitigated_time` and `mitigated_by` answered as though every status was mitigated. From 3.2.400 the field is a boolean that is true only when the Location status is `Mitigated`. If you poll for mitigated statuses, upgrade before you trust this field.
-- **Pagination and ordering.** Available ordering fields on the read-compat shim are `host`, `product`, `id`, and `active_finding_count`. If your client orders by another field, switch to one of these or move to the new Locations endpoints.
+- **Single status instead of flags.** A Finding cannot be *both* `mitigated=true` *and* `false_positive=true` on one Endpoint. The flags read back as the single status the rules above produced.
+- **IDs changed at migration.** Endpoint and Endpoint Status IDs are the Location reference IDs, not the IDs your automation stored before the migration. Look rows up again by `host` and `product` rather than reusing stored IDs.
+- **`date` is not stored.** The `date` field of an Endpoint Status is accepted on writes and ignored. Reads return the day the row was created.
+- **Default ports are filled in.** A URL without a port reads back with the protocol's default port (`443` for `https`), where an Endpoint returned `null`.
+- **`endpoint_to_add` on imports takes a `location_id`.** On `/api/v2/import-scan/` and `/api/v2/reimport-scan/`, `endpoint_to_add` names a Location. Pass the `location_id` of the `/api/v2/endpoints/` row, not its `id`.
+- **`mitigated` returned a date before 3.2.400.** On releases before 3.2.400 the `mitigated` field of `/api/v2/endpoint_status/` returned the record's creation date instead of a boolean. From 3.2.400 the field is a boolean that is true only when the Location status is `Mitigated`.
+- **Before 3.5.0, writes answer 403.** On earlier releases `POST`, `PUT`, `PATCH` and `DELETE` on `/api/v2/endpoints/` and `/api/v2/endpoint_status/` return `HTTP 403` with the body `Writes to this endpoint are deprecated when V3_FEATURE_LOCATIONS is enabled`, and a Finding's `endpoints` field lists Endpoint Status IDs.
+- **Pagination and ordering.** Available ordering fields on `/api/v2/endpoints/` are `host`, `product`, `id`, and `active_finding_count`.
 
 ### If a Route Returns 410
 
@@ -188,7 +209,7 @@ Any remaining `/api/v2/` path that reaches the old Endpoint data answers `HTTP 4
 ```json
 {
   "code": "endpoint_api_sunset",
-  "message": "The Endpoint API is not available on instances with Locations enabled. Reads are served from Locations; writes are not available.",
+  "message": "This route still reads the deprecated Endpoint model, which is not available on instances with Locations enabled. /api/v2/endpoints/ and /api/v2/endpoint_status/ are served from Locations, for reads and writes.",
   "replacement": "/api/v2/location/",
   "docs": "https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/"
 }

@@ -5,6 +5,7 @@ import django_tagulous as tagulous
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -63,6 +64,7 @@ from dojo.finding.ui.views import (
 )
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
+from dojo.location.models import LocationProductReference
 from dojo.models import (
     BurpRawRequestResponse,
     DojoMeta,
@@ -211,6 +213,11 @@ class FindingViewSet(
                 "view",
             ).prefetch_related(
                 "locations__location__url",
+                # The endpoints field reads each location's reference to the finding's product.
+                Prefetch(
+                    "locations__location__products",
+                    queryset=LocationProductReference.objects.only("id", "location_id", "product_id"),
+                ),
                 "reviewers",
                 "found_by",
                 notes_prefetch(),

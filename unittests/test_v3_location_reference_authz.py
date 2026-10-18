@@ -72,6 +72,9 @@ class V3LocationReferenceAuthzTests(DojoAPITestCase):
         url_a = URL.get_or_create_from_object(URL.from_value("https://a.example.test/ok"))
         cls.lfr_a = url_a.location.associate_with_finding(cls.finding_a_extra)
         cls.location_a = url_a.location
+        # The finding endpoints field takes /api/v2/endpoints/ ids: each product's reference.
+        cls.endpoint_a = LocationProductReference.objects.get(location=cls.location_a, product=cls.product_a)
+        cls.endpoint_b = LocationProductReference.objects.get(location=cls.location_b, product=cls.product_b)
 
         # A location associated with both products, with an active reference from product_b.
         url_shared = URL.get_or_create_from_object(URL.from_value("https://shared.example.test/s"))
@@ -95,7 +98,7 @@ class V3LocationReferenceAuthzTests(DojoAPITestCase):
         self.client.force_authenticate(user=self.user_a)
         response = self.client.patch(
             reverse("finding-list") + f"{self.finding_a.id}/",
-            {"endpoints": [self.lfr_b.id], "push_to_jira": False}, format="json", secure=True,
+            {"endpoints": [self.endpoint_b.id], "push_to_jira": False}, format="json", secure=True,
         )
         self.assertEqual(response.status_code, 400)
         self.assertFalse(
@@ -106,7 +109,7 @@ class V3LocationReferenceAuthzTests(DojoAPITestCase):
         self.client.force_authenticate(user=self.user_a)
         response = self.client.patch(
             reverse("finding-list") + f"{self.finding_a.id}/",
-            {"endpoints": [self.lfr_a.id], "push_to_jira": False}, format="json", secure=True,
+            {"endpoints": [self.endpoint_a.id], "push_to_jira": False}, format="json", secure=True,
         )
         self.assertEqual(response.status_code, 200)
 
