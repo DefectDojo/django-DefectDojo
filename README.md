@@ -1,28 +1,53 @@
-# DefectDojo
+<h1 align="center">
+  <a href="https://www.defectdojo.com/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/static/svgs/logo-darkmode.svg">
+      <img src="docs/static/svgs/logo-lightmode.svg" alt="DefectDojo" width="420">
+    </picture>
+  </a>
+</h1>
 
-<table>
-    <tr styl="margin: 0; position: absolute; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
-        <th>
-            <a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
-                <img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg"
-                alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
-            </a>
-        </th>
-        <th>
-            <p>
-                <a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project"><img src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship"></a>
-                <a href="https://github.com/DefectDojo/django-DefectDojo/releases/latest"><img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a>
-                <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a>
-                <a href="https://twitter.com/defectdojo/"><img src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow"></a>
-            </p>
-            <p>
-                <a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master" alt="Unit Tests"></a>
-                <a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/integration-tests.yml/badge.svg?branch=master" alt="Integration Tests"></a>
-                <a href="https://bestpractices.coreinfrastructure.org/projects/2098"><img src="https://bestpractices.coreinfrastructure.org/projects/2098/badge" alt="CII Best Practices"></a>
-            </p>
-        </th>
-    </tr>
- </table>
+<p align="center">
+  <strong>Open-source vulnerability management, DevSecOps and ASPM</strong>
+</p>
+
+<p align="center">
+  <a href="https://pro.demo.defectdojo.com/?utm_source=github&amp;utm_medium=readme"><strong>Pro demo</strong></a> ·
+  <a href="https://demo.defectdojo.org/?utm_source=github&amp;utm_medium=readme"><strong>Community demo</strong></a> ·
+  <a href="https://docs.defectdojo.com/">Docs</a> ·
+  <a href="https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA">Slack</a> ·
+  <a href="https://community-defectdojo.tightknit.community/">Community</a> ·
+  <a href="https://www.defectdojo.com/">Website</a>
+</p>
+
+<p align="center">
+  <a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project"><img src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship"></a>
+  <a href="https://github.com/DefectDojo/django-DefectDojo/releases/latest"><img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a>
+  <a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master" alt="Unit Tests"></a>
+  <a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/integration-tests.yml/badge.svg?branch=master" alt="Integration Tests"></a>
+  <a href="https://bestpractices.coreinfrastructure.org/projects/2098"><img src="https://bestpractices.coreinfrastructure.org/projects/2098/badge" alt="CII Best Practices"></a>
+  <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a>
+  <a href="https://twitter.com/defectdojo/"><img src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow"></a>
+</p>
+
+<p align="center">
+  <a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
+    <img src="https://opensourcesecurityindex.io/badge.svg" alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://pro.demo.defectdojo.com/?utm_source=github&amp;utm_medium=readme">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="readme-docs/images/pro-home-dark.png">
+      <img src="readme-docs/images/pro-home-light.png" alt="The DefectDojo Pro home page: findings from each scan source, the overall risk score, and outcomes">
+    </picture>
+  </a>
+  <br>
+  <em><strong>DefectDojo Pro</strong> home page. Try it on the <a href="https://pro.demo.defectdojo.com/?utm_source=github&amp;utm_medium=readme">live Pro demo</a>.
+  The Community Edition demo is at <a href="https://demo.defectdojo.org/?utm_source=github&amp;utm_medium=readme">demo.defectdojo.org</a>.
+  Sign-in details for both are under <a href="#demo">Demo</a>.</em>
+</p>
 
 [DefectDojo](https://www.defectdojo.com/) is a DevSecOps, ASPM (application security posture management), and
 vulnerability management tool.  DefectDojo orchestrates end-to-end security testing, vulnerability tracking,
