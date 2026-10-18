@@ -1,6 +1,6 @@
 ---
 title: "In-App Walkthroughs"
-description: "Guided, step-by-step tours of the DefectDojo Pro UI: the App Tour, the tours for each area, the first-visit offer, and turning the offer off per user"
+description: "Guided, step-by-step tours and tasks in the DefectDojo Pro UI: the App Tour, the tours for each area, the task walkthroughs, the first-visit offer, and turning the offer off per user"
 weight: 9
 audience: pro
 ---
@@ -75,6 +75,29 @@ Beyond the App Tour, each area that people ask about most has its own tour. A to
 | **Classic Jira or the Jira Connector** | The Downstream connector and Jira pages | Which Jira integration is which, whether to move to the connector, and which push to use on a Finding | Users who can view integrations, when Downstream connectors are turned on |
 | **Locations** | The Locations pages | What replaced Endpoints, where the Locations lists are, and a Location's status, the Assets that reference it and its open Findings | Users who can view Locations, when Locations are turned on |
 | **Upstream Connectors** | The Upstream connector and records pages | Configured and available connectors, a connector's unmapped and mapped records, and its Operations history | Users who can view connectors |
+
+## Task walkthroughs
+
+A task walkthrough goes one step further than a tour: you do the job for real while it guides you, and what you create or change stays. Each step outlines the control to use, the card says what it does, and the walkthrough moves on when the action has actually succeeded, such as when a form is saved or a record opens. If the action fails, the walkthrough waits on the same step until it works.
+
+Because a task changes real data, it practices on the record you started it from when it can, and otherwise on the least important one it finds, such as the lowest-severity active Finding. Its last card says how to undo what it did. The [sandbox](/admin/sandbox/pro__sandbox/) is a good place to try one first.
+
+A few things work differently from a tour:
+
+* The lightbulb entry reads **Start**, **Resume**, **Do It Again** or **Start Over**.
+* Stopping asks first. The **X** on the card, or the **Escape** key, asks whether to stop; the progress made so far is kept either way.
+* A task does not pick up again on another page if one of its steps could not be found. Start it again from the lightbulb.
+
+| Task | Start it from | What you do | Who sees it |
+|---|---|---|---|
+| **Import and Reimport a Scan** | The Import page and a Test | Import a scan into a new Test, read its Import History, then reimport a newer scan into the same Test and read what changed | Users who can import scan results |
+| **Create an Asset and Import Into It** (or Create a Product and Import Into It) | The Organizations list | Open or create an Organization, add an Asset in it, add an Engagement in that, and import a first scan, each from the gear menu of the level above | Users who can add Assets to an Organization. The import steps need permission to import scan results |
+| **Add an Engagement and Import Into It** | An Asset | Add an Engagement to an existing Asset from its gear menu, then import a first scan into it, for users who cannot create Assets | Users who can add Engagements. The import steps need permission to import scan results |
+| **Mark a Finding a False Positive** | A Finding | Close the Finding as a false positive with the note it needs, and see what keeps it a false positive on later imports | Users who can edit Findings |
+| **Accept the Risk of a Finding** | A Finding | Add a full risk acceptance with its owner, decision and expiry, see what happens when it expires, find the Finding on Risk Accepted Findings, and, where the Asset allows it, where simple risk acceptance is set instead | Users who can edit Findings and add risk acceptances |
+| **Close Findings in Bulk** | Every Findings status list | Filter the list, save the view, select the page, and close the Findings on it with one Bulk Edit and a note | Users who can edit Findings. The view step is skipped when page layouts are locked |
+| **Give a User Access to an Asset** (or a Product) | An Asset and an Organization | Open Permissions from the gear menu, add a user with a role, find their row, see where groups are added, and what a role on an Asset or an Organization covers | Users who can manage an Asset's members. The groups step needs permission to add groups |
+| **Build and Generate a Report** | The report templates list | Create a template with a new block, choose the block's fields and filters, save both, generate a report, and find it on Generated Reports | Users with a global role that can add report templates and generate reports, when Reporting is turned on |
 
 ## The first-visit offer
 
