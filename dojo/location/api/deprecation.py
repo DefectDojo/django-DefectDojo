@@ -5,8 +5,9 @@ SUNSET_CODE = "endpoint_api_sunset"
 DOCS_URL = "https://docs.defectdojo.com/asset_modelling/locations/pro__migrating_from_endpoints/"
 
 SUNSET_MESSAGE = (
-    "The Endpoint API is not available on instances with Locations enabled. "
-    "Reads are served from Locations; writes are not available."
+    "This route still reads the deprecated Endpoint model, which is not available on "
+    "instances with Locations enabled. /api/v2/endpoints/ and /api/v2/endpoint_status/ "
+    "are served from Locations, for reads and writes."
 )
 
 DEFAULT_REPLACEMENT = "/api/v2/location/"

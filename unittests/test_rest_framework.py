@@ -1449,6 +1449,10 @@ class EndpointTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+# The legacy EndpointStatusTest and EndpointTest above, run against the Location-backed
+# compatibility viewsets that serve /api/v2/endpoint_status and /api/v2/endpoints when
+# V3_FEATURE_LOCATIONS is on. The fixture has no Endpoint rows, so each case names the
+# Location rows that play the same part.
 @skip_unless_v3
 class V3EndpointStatusTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata_locations.json"]
@@ -1458,9 +1462,11 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         self.endpoint_path = "endpoint_status"
         self.viewname = "endpoint_status"
         self.viewset = V3EndpointStatusCompatibleViewSet
+        # Endpoint 1 is product 1's reference to http://bar.foo; finding 226 is in product 1
+        # and not on that URL yet.
         self.payload = {
             "endpoint": 1,
-            "finding": 3,
+            "finding": 226,
             "mitigated": False,
             "false_positive": False,
             "risk_accepted": False,
@@ -1476,59 +1482,120 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    def test_create(self):
-        length = self.endpoint_model.objects.count()
-        response = self.client.post(self.url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
+    def _endpoint_status_on_endpoint_1(self):
+        """The status row for finding 227 on endpoint 1 (product 1, http://bar.foo)."""
+        response = self.client.get(self.url, {"endpoint": 1}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        rows = [row for row in response.data["results"] if row["finding"] == 227]
+        self.assertEqual(1, len(rows), response.data)
+        return rows[0]
 
-    @patch("dojo.authorization.api_permissions.user_has_permission")
-    def test_create_object_not_authorized(self, mock):
-        length = self.endpoint_model.objects.count()
-        response = self.client.post(self.url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
+    def test_create_unsuccessful(self):
+        unsucessful_payload = self.payload.copy()
+        unsucessful_payload["finding"] = 227
+        response = self.client.post(self.url, unsucessful_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
 
-    def test_delete(self):
-        length = self.endpoint_model.objects.count()
-        if delete_id := getattr(self, "delete_id", None):
-            relative_url = f"{self.url}{delete_id}/"
-        else:
-            current_objects = self.client.get(self.url, format="json").data
-            relative_url = f"{self.url}{current_objects['results'][-1]['id']}/"
-        response = self.client.delete(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
-
-    @patch("dojo.authorization.api_permissions.user_has_permission")
-    def test_delete_object_not_authorized(self, mock):
-        length = self.endpoint_model.objects.count()
-        current_objects = self.client.get(self.url, format="json").data
-        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
-        response = self.client.delete(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
+    def test_create_other_product_rejected(self):
+        other_product_payload = self.payload.copy()
+        other_product_payload["finding"] = 3
+        response = self.client.post(self.url, other_product_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("endpoint and finding must belong to the same product", response.content.decode("utf-8"))
 
     def test_update(self):
-        current_objects = self.client.get(self.url, format="json").data
-        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+        # Override the base-class PATCH+PUT cycle: PUT must preserve the row's
+        # endpoint/finding because the serializer freezes them after creation.
+        first = self._endpoint_status_on_endpoint_1()
+        relative_url = self.url + "{}/".format(first["id"])
 
         response = self.client.patch(relative_url, self.update_fields)
-        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.check_schema_response("patch", "200", response, detail=True)
+        self.assertTrue(response.data["mitigated"])
 
-        response = self.client.put(relative_url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
+        put_payload = self.payload.copy()
+        put_payload["endpoint"] = first["endpoint"]
+        put_payload["finding"] = first["finding"]
+        response = self.client.put(relative_url, put_payload)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.check_schema_response("put", "200", response, detail=True)
+        self.assertFalse(response.data["mitigated"])
 
-    @patch("dojo.authorization.api_permissions.user_has_permission")
-    def test_update_object_not_authorized(self, mock):
-        current_objects = self.client.get(self.url, format="json").data
-        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+    def test_patch_endpoint_change_rejected(self):
+        first = self._endpoint_status_on_endpoint_1()
+        # ssh://127.0.0.1 is on no finding yet, so the pair is new and only the change is refused.
+        other_endpoint = Location.objects.get(id=3).associate_with_product(Product.objects.get(id=1))
+        self.assertNotEqual(other_endpoint.id, first["endpoint"])
 
-        response = self.client.patch(relative_url, self.update_fields)
-        self.assertEqual(403, response.status_code, response.content[:1000])
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {"endpoint": other_endpoint.id},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("endpoint cannot be changed after creation", response.content.decode("utf-8"))
 
-        response = self.client.put(relative_url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
+    def test_patch_finding_change_rejected(self):
+        first = self._endpoint_status_on_endpoint_1()
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {"finding": 226},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("finding cannot be changed after creation", response.content.decode("utf-8"))
+
+    def test_patch_same_endpoint_and_finding_succeeds(self):
+        # PATCH that re-sends the existing FK values (no change) must still pass.
+        first = self._endpoint_status_on_endpoint_1()
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {
+                "endpoint": first["endpoint"],
+                "finding": first["finding"],
+                "false_positive": not first.get("false_positive", False),
+            },
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+    def test_create_minimal(self):
+        # This call should not fail even if there is not date defined
+        minimal_payload = {
+            "endpoint": 1,
+            "finding": 226,
+        }
+        response = self.client.post(self.url, minimal_payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
+    def _two_rows_on_endpoint_1(self):
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+        rows = self.client.get(self.url, {"endpoint": 1}, format="json").data["results"]
+        self.assertEqual(2, len(rows), rows)
+        return rows
+
+    def test_update_patch_unsuccessful(self):
+        object1, object2 = self._two_rows_on_endpoint_1()
+        unsucessful_payload = {
+            "endpoint": object2["endpoint"],
+            "finding": object2["finding"],
+        }
+        response = self.client.patch(self.url + "{}/".format(object1["id"]), unsucessful_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
+
+    def test_update_put_unsuccessful(self):
+        object1, object2 = self._two_rows_on_endpoint_1()
+        unsucessful_payload = {
+            "endpoint": object2["endpoint"],
+            "finding": object2["finding"],
+        }
+        response = self.client.put(self.url + "{}/".format(object1["id"]), unsucessful_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
 
 
 @skip_unless_v3
@@ -1559,56 +1626,33 @@ class V3EndpointTest(BaseClass.BaseClassTest):
         self.delete_id = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    def test_create(self):
-        length = self.endpoint_model.objects.count()
+    def test_create_stores_the_tags(self):
+        # LocationProductReference has no tags of its own, so the base test_create skips this.
         response = self.client.post(self.url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+        self.assertEqual(["mytag", "yourtag"], response.data["tags"])
+        location = LocationProductReference.objects.get(id=response.data["id"]).location
+        self.assertEqual({"mytag", "yourtag"}, {tag.name for tag in location.tags.all()})
 
-    def test_create_object_not_authorized(self):
-        length = self.endpoint_model.objects.count()
+    def test_create_duplicate_rejected(self):
         response = self.client.post(self.url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("already exists for this product", response.content.decode("utf-8"))
 
-    def test_delete(self):
-        length = self.endpoint_model.objects.count()
-        if delete_id := getattr(self, "delete_id", None):
-            relative_url = f"{self.url}{delete_id}/"
-        else:
-            current_objects = self.client.get(self.url, format="json").data
-            relative_url = f"{self.url}{current_objects['results'][-1]['id']}/"
-        response = self.client.delete(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
+    def test_create_without_product_rejected(self):
+        # The legacy permission check needs the product before validation runs, as before.
+        payload = self.payload.copy()
+        del payload["product"]
+        response = self.client.post(self.url, payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("Attribute 'product' is required", response.content.decode("utf-8"))
 
-    def test_delete_object_not_authorized(self):
-        length = self.endpoint_model.objects.count()
-        current_objects = self.client.get(self.url, format="json").data
-        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
-        response = self.client.delete(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length)
-
-    def test_update(self):
-        current_objects = self.client.get(self.url, format="json").data
-        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
-
-        response = self.client.patch(relative_url, self.update_fields)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-        response = self.client.put(relative_url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-    def test_update_object_not_authorized(self):
-        current_objects = self.client.get(self.url, format="json").data
-        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
-
-        response = self.client.patch(relative_url, self.update_fields)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-        response = self.client.put(relative_url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
+    def test_patch_product_change_rejected(self):
+        response = self.client.patch(self.url + "1/", {"product": 2}, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("Change of product is not possible", response.content.decode("utf-8"))
 
 
 @skip_unless_v3

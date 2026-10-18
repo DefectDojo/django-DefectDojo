@@ -719,6 +719,25 @@ def report_generate(request, obj, options):
             ),
         )
 
+    elif isinstance(obj, LocationProductReference):
+        # A row of /api/v2/endpoints/ with Locations enabled: one product's URL. Report on that
+        # host within the product, as the Endpoint report above does.
+        endpoint = obj
+        report_template = "dojo/endpoint_pdf_report.html"
+        report_title = "Endpoint Report"
+        host = obj.location.url.host
+        report_name = "Endpoint Report: " + host
+        endpoints = _report_url_location_refs(obj.product, user=request.user).filter(location__url__host=host)
+        findings = report_finding_filter_class(
+            request.GET,
+            queryset=prefetch_related_findings_for_report(
+                Finding.objects.filter(
+                    test__engagement__product=obj.product,
+                    locations__location__in=endpoints.values("location"),
+                ).distinct(),
+            ),
+        )
+
     elif isinstance(obj, DjangoQuerySet):
         # Support any Django QuerySet (including Tagulous CastTaggedQuerySet)
         report_template = "dojo/finding_pdf_report.html"
@@ -779,7 +798,7 @@ def report_generate(request, obj, options):
         result["finding_notes"] = finding_notes
 
     # Generating Executive summary based on obj type
-    if include_executive_summary and type(obj).__name__ != "Endpoint":
+    if include_executive_summary and not isinstance(obj, (Endpoint, LocationProductReference)):
         executive_summary = {}
 
         # Declare all required fields for executive summary

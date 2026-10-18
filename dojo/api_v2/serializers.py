@@ -1139,6 +1139,7 @@ class ReportGenerateSerializer(serializers.Serializer):
                 V3EndpointCompatibleSerializer,
             )
             self.fields["endpoints"] = V3EndpointCompatibleSerializer(many=True, read_only=True)
+            self.fields["endpoint"] = V3EndpointCompatibleSerializer(many=False, read_only=True)
         else:
             # TODO: Delete this after the move to Locations
             self.fields["endpoints"] = EndpointSerializer(many=True, read_only=True)

@@ -205,15 +205,16 @@ class ApiV2EndpointSunsetBackstop(DojoTestCase):
 
         self.assertEqual(response.status_code, 500)
 
-    def test_the_shipped_403_on_writes_is_unchanged(self):
+    def test_writes_to_the_compat_routes_are_not_sunset(self):
         """
-        The backstop must not move the documented write contract.
+        The backstop must not catch writes to the two routes Locations serves.
 
-        Writes answer 403 today and the migration guide says so. Changing that is
-        a separate decision for a minor release.
+        Writes to /api/v2/endpoints/ and /api/v2/endpoint_status/ used to answer 403. They
+        now write through to Locations, so a legacy payload answers what it answered before
+        Locations: 201 on a create, and the legacy 400 when the product is missing.
         """
         admin = User.objects.create(
-            username="apiv2_sunset_403_admin",
+            username="apiv2_sunset_write_admin",
             is_staff=True,
             is_superuser=True,
         )
@@ -227,5 +228,14 @@ class ApiV2EndpointSunsetBackstop(DojoTestCase):
             {"host": "write.example.com"},
             format="json",
         )
+        self.assertEqual(response.status_code, 400, response.content)
+        self.assertIn("Attribute 'product' is required", response.content.decode())
 
-        self.assertEqual(response.status_code, 403, response.content)
+        product_type = Product_Type.objects.create(name="Sunset Write Org")
+        product = Product.objects.create(name="Sunset Write Product", description="x", prod_type=product_type)
+        response = api_client.post(
+            f"{BASE_API_URL}/endpoints/",
+            {"host": "write.example.com", "product": product.id},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
