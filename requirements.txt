@@ -177,7 +177,7 @@ vcrpy==8.3.0
 vcrpy-unittest==0.1.7
 vine==5.1.0
 vobject==0.9.9
-vulners==4.0.0
+vulners==4.4.0
 watchdog==6.0.0
 wcwidth==0.9.2
 webencodings==0.6.1
