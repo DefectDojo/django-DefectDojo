@@ -216,7 +216,7 @@ Once the application is running against the restored database:
 
 ## Planning the cutover
 
-The dump is a point-in-time snapshot, so anything created in the open source instance after you take it will not be in the Pro deployment. To avoid losing data, turn on read-only mode in the open source instance before the final dump or the final sync. Read-only mode is available in DefectDojo 3.4.200 and later.
+The dump is a point-in-time snapshot, so anything created in the open source instance after you take it will not be in the Pro deployment. To avoid losing data, turn on read-only mode in the open source instance before the final dump or the final sync. Read-only mode is available in DefectDojo 3.4.300 and later.
 
 1. Go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**.
 2. Wait until **Configuration > Celery Status** shows no queued tasks. Then run `celery --app=dojo inspect active` in the Celery worker container, and wait until it reports `empty` for every worker. Tasks that started before the lock still write until they finish.
