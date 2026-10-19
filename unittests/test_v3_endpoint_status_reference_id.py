@@ -8,6 +8,9 @@ often coincide, so it mostly looked right, but where they differ an id copied fr
 ``endpoint_status`` named the wrong endpoint or none. The field also ran one query per row.
 """
 
+import re
+from collections import Counter
+
 from django.db import connection
 from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
@@ -94,12 +97,19 @@ class V3EndpointStatusReferenceIdTests(DojoTestCase):
         self.assertIsNone(self._get(f"endpoint_status/{orphan.id}")["endpoint"])
 
     def test_the_list_costs_the_same_queries_for_more_rows(self):
-        def count():
-            with CaptureQueriesContext(connection) as queries:
+        def queries():
+            with CaptureQueriesContext(connection) as captured:
                 self._get("endpoint_status", limit=100)
-            return len(queries)
+            return [query["sql"] for query in captured.captured_queries]
 
-        before = count()
+        queries()  # warm the per-request caches, so the comparison counts rows only
+        before = queries()
         for n in range(4):
             self._status(self.second, f"status_ref_more_{n}")
-        self.assertEqual(count(), before, "the endpoint field must not query per row")
+        after = queries()
+
+        def shapes(sqls):
+            return Counter(re.sub(r"'[^']*'|\d+", "?", sql)[:200] for sql in sqls)
+
+        grown = "\n".join(f"{count}x {shape}" for shape, count in (shapes(after) - shapes(before)).items())
+        self.assertEqual(len(after), len(before), f"the endpoint field must not query per row; grew:\n{grown}")

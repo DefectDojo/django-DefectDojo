@@ -311,7 +311,8 @@ class V3EndpointStatusCompatibleSerializer(ModelSerializer):
     risk_accepted = SerializerMethodField()
 
     endpoint = SerializerMethodField()
-    location_id = IntegerField(source="location.id")
+    # The column itself: reading location.id would load each row's Location, one query per row.
+    location_id = IntegerField(read_only=True)
 
     def get_date(self, obj) -> datetime.date | None:
         return obj.created.date() if obj.created else None
