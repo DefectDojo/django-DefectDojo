@@ -50,7 +50,11 @@ Once these components are configured, Findings and Finding Groups can be sent to
 
 - **Manually**: Findings and Finding Groups have a **Push to Connector** action: in the gear menu, as a checkbox on the edit form, and in **Bulk Edit** for several Findings at once. When an **Issue Tracker Assignment** covers the Finding's Engagement or Asset, this creates an Issue in the Issue Tracker with the corresponding Finding/Finding Group information, or updates the Issue it already has.
 
-    When no Issue Tracker Assignment covers the Engagement or the Asset, nothing is sent. Pushing a Finding or a Finding Group then shows a warning that no connector is assigned to its Asset or Engagement, and **Bulk Edit** reports how many of the selected Findings were not sent. To push them, assign an Issue Tracker Mapping to the Asset or the Engagement first.
+    The gear menu offers **Push to Connector** only when an Issue Tracker Assignment covers the Finding's or Finding Group's Engagement or Asset. When none does, nothing would be sent, so the action is not shown; assign an Issue Tracker Mapping to the Asset or the Engagement first. The edit form and **Bulk Edit** still offer the push: a push that nothing covers shows a warning that no connector is assigned to its Asset or Engagement, and **Bulk Edit** reports how many of the selected Findings were not sent, and why.
+
+    A Finding that belongs to a Finding Group is pushed as its group, so its Issue is the group's, and the result says the Finding was sent as part of its Finding Group. When a push reaches some connectors but not others, the result says how many it could not be sent to.
+
+    A push can take several seconds per connector. While it runs, the gear shows a spinner and does not open, so the same push cannot be started twice.
 
     A push only hands the Finding or Finding Group to the connector: the Issue is created or updated in the background, so it can take a moment to appear in the **Connector Tickets** column.
 
@@ -83,6 +87,8 @@ An Issue Tracker Assignment belongs to the Asset or Engagement it targets, so on
 - You see an Assignment, in lists and in the Assignment counts on the connector and mapping lists, only when you can view its Asset or Engagement.
 - Creating, changing, or deleting an Assignment for an Asset requires permission to edit that Asset, such as the Maintainer or Owner role on it. For an Engagement, it requires permission to edit that Engagement, such as the Writer role or higher.
 - Moving an Assignment to a different Asset or Engagement requires edit permission on both the current and the new one.
+- The Asset and Engagement pickers on the Assignment form list only the ones you can edit, and an Assignment's **Edit** and **Delete** actions are shown only when you can edit its Asset or Engagement.
+- Deleting an Issue Tracker Mapping, or a connector, also deletes its Assignments. When any of them targets an Asset or Engagement you cannot edit, the delete is refused and nothing is removed.
 
 ## Issue Tracker Ticket Representation
 
@@ -127,6 +133,8 @@ in debugging these errors, each Issue Tracker Mapping has a table of errors that
 occurred, and the Finding or Finding Group that failed to be pushed.
 
 These errors can be found by looking at the All Issue Tracker Mappings & Assignments page, under the ⚠️ Total Errors column.
+
+Opening the Downstream Connectors pages requires the global Integration View permission. An error, and an Issue's link to a Finding or Finding Group, is listed and counted only when you can view that Finding or Finding Group; errors about the connection itself, tied to no Finding, are listed for everyone who can open the page.
 
 ![image](images/integrators_4.png)
 
