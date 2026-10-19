@@ -56,6 +56,8 @@ Text filters such as **Title**, **Component Name** and **File Path** offer **In 
 - Case is ignored, and so are spaces around each value. Blank entries are skipped.
 - Each value is matched whole and exactly as written: `api` matches a component named `API` but not one named `api-gateway`, and characters such as `%`, `*` and `^` are not wildcards.
 - **Not in List** keeps Findings that have no value in that field.
+- A list with no values left applies no filter, the same as an empty text box.
+- The list is saved in the table's address and in a saved table preference, so it is still there after a reload or when you return to the table.
 
 ### Include and Exclude on multi-select filters
 
@@ -68,6 +70,7 @@ The Asset and Organization filters on the Findings, Engagements, Tests and Endpo
 - A name matches whatever its case, and a name in digits is still a name: `2024` matches the Asset named `2024`, never the Asset whose ID is 2024.
 - When you paste names, the filter checks them. A name that matches takes the spelling stored in DefectDojo, and one that matches nothing is left out and listed under the box (**Not found: ...**), so a typo can be corrected and added again.
 - Only Assets and Organizations you are allowed to see are matched. A name that belongs to one you cannot see is reported as not found.
+- Picking options and listing names are separate: switching between **Include** / **Exclude** and **In List** / **Not in List** starts the filter afresh, so names and picked options are never combined.
 
 ### Long lists
 
