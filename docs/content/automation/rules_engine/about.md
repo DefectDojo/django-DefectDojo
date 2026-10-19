@@ -57,7 +57,7 @@ Enter a Label as the identifier for the new rule, and click Next.
 ![image](images/rules_engine_2.png)
 
 ### Step 2: Set trigger conditions with a Filter
-You will see an All Findings table.  Using the All Findings Table, set the Filter conditions to filter the set of Findings that you want your rule to apply to.  For more information on applying Filters to a table, see [our guide to the Pro UI](/get_started/about/ui_pro_vs_os/#navigational-changes).
+You will see an All Findings table.  Using the All Findings Table, set the Filter conditions to filter the set of Findings that you want your rule to apply to.  For more information on applying Filters to a table, see [our guide to the Pro UI](/get_started/about/ui_pro_vs_os/#tables).
 
 The table will preview the list of existing Findings that you have filtered.
 

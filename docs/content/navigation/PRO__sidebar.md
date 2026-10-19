@@ -9,21 +9,22 @@ aliases:
 
 The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and (at the bottom) your account, alerts and the light/dark switch. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
 
-The menu groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. It is the only layout; the classic sidebar has been removed (see [The classic sidebar](#the-classic-sidebar)).
+The menu groups every page in the product into six sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you browse follow in their own section. It is the only layout; the classic sidebar has been removed (see [The classic sidebar](#the-classic-sidebar)).
 
-Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
+**Every page keeps the same URL** whichever section it sits in. Bookmarks, saved links and anything in your own runbooks continue to work.
 
-## The five sections
+## The six sections
 
 | Section | What it holds |
 | --- | --- |
-| **Overview** | Dashboards, Insights, My Work, Reporting, Calendar |
-| **Sensei + AI** | Sensei, CSPM, Threat Modeling, MCP, AI Model Settings |
+| **Overview** | Home, Dashboard, Insights, My Work, Reporting, Calendar |
+| **Sensei + AI** | Sensei, Threat Modeling, Advisor, AI Proposals, MCP, AI Model Settings |
 | **Connect** | Upstream, Downstream, Jira, Authorization, Diagnostics, Import |
-| **Act** | Triage Engine, Vulnerability Explorer, Root Causes, Risk Acceptances, PSIRT, Explore |
-| **Settings** | All Settings, plus the eight groups described under [The Settings section](#the-settings-section) |
+| **Act** | Triage Engine, Vulnerability Explorer, Root Causes, Remediation Center, Risk Acceptances, the compliance records, PSIRT |
+| **Explore** | Attack Surface, Organizations, Assets, Engagements, Tests, Findings, Surveys |
+| **Settings** | All Settings, Feature Flags, plus the eight groups described under [The Settings section](#the-settings-section) |
 
-You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
+You only ever see the entries your account has permission to open, your license includes, and your [Feature Flags](/admin/feature_flags/pro__feature_flags/) switch on. A group disappears entirely when none of its pages are available to you.
 
 ## Searching
 
@@ -36,13 +37,13 @@ Page results match more than the entry's label. Each destination is also searcha
 
 Before you type anything, the dialog offers your **recent places**, one **Enter** away; in Navigate mode your pinned pages come first. Recents are kept in your browser for each user, and cleared when you log out.
 
-Move through results with the arrow keys, open one with **Enter** (or in a new tab with **Cmd+Enter** / **Ctrl+Enter**), and close the search with **Escape**. Entries that open in the Classic UI are marked and open in a new tab. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically, and it follows whichever menu layout is active.
+Move through results with the arrow keys, open one with **Enter** (or in a new tab with **Cmd+Enter** / **Ctrl+Enter**), and close the search with **Escape**. The search only ever lists pages you could also reach through the sidebar: permissions, feature flags, and license entitlements apply to it identically.
 
-Three conventions run through the whole menu:
+Four conventions run through the whole menu:
 
 - **There are no separate "New" entries.** Each list page has a **New** button (**New Asset**, **New Finding**, and so on) that opens the create form, so the menu carries one entry per catalog instead of two. If your account can create a record but not list them, the menu entry takes you straight to the create form.
 - **Nothing nests more than one level below a section.** Reaching a page is at most section, group, page.
-- **A feature occupies one entry, not one per screen.** PSIRT's nine pages, the Triage Engine's four and the record catalogs all sit behind a single entry each, instead of spreading across the menu.
+- **A feature occupies one entry, not one per screen.** PSIRT's ten pages, the Triage Engine's four and the record catalogs all sit behind a single entry each, instead of spreading across the menu.
 - **An entry is not repeated inside itself.** Where a group already names the thing, its entries do not name it again: **Findings** holds Active, Mitigated and All rather than "All Findings", and **Attack Surface** holds Endpoints and Hosts rather than "All Endpoints".
 
 ## Pinned pages
@@ -57,7 +58,7 @@ Pins are stored per user on the server, so they survive a browser reset and foll
 
 ## Your preferences follow you
 
-The shape you give the shell is stored per user on the server, not just in the browser: pinned pages, folded sections, whether the rail is collapsed, and the light/dark choice (which is shared with the Classic UI, so the two interfaces always agree). Clearing your browser or signing in on a new machine brings it all back on the next sign-in. The first time you sign in on an instance that has this, whatever shape your browser already had is imported automatically, so nothing resets.
+The shape you give the shell is stored per user on the server, not just in the browser: pinned pages, folded sections, whether the rail is collapsed, and the light/dark choice. Clearing your browser or signing in on a new machine brings it all back on the next sign-in. The first time you sign in on an instance that has this, whatever shape your browser already had is imported automatically, so nothing resets.
 
 ## Collapsing the sidebar
 
@@ -79,39 +80,56 @@ The rail also follows your page as you navigate: opening a page that lives insid
 
 The AI capabilities sit together in their own section rather than being spread through the dashboards.
 
-**Sensei** opens the Sensei hub, the scan-and-fix capability that was previously listed under Dashboards. The page and its URL are unchanged.
+**Sensei** opens the Sensei hub, the scan-and-fix capability that was previously listed under Dashboards. One entry covers everything Sensei scans: a **Code | Cloud | All** selector on the page switches between source-control repositories and cloud accounts.
 
-**CSPM** carries a gold `SOON` badge. Cloud security posture management is not available yet, so the entry does not open a page. Selecting it explains that the capability is on the way. Nothing needs enabling, and no license unlocks it early. The entry starts working when the capability ships.
+**Threat Modeling** and **Advisor** ([Sensei Advisor](/sensei/sensei_advisor/)) ship under the Sensei license and show a `LOCKED` badge without it.
 
-**Threat Modeling**, **MCP** and **AI Model Settings** are unchanged apart from where they live. AI Model Settings appears only on on-premise instances, because DefectDojo manages the model credentials on Cloud.
+**AI Proposals** lists the verdicts the Triage Engine's AI steps have left for a person to confirm. It appears only when your license includes Sensei.
+
+**MCP** is shown to superusers, and to everyone once the MCP server is enabled. **AI Model Settings** appears only on on-premise instances, because DefectDojo manages the model credentials on Cloud.
 
 ## Act
 
-Act holds the work: the things you open to decide what matters, and the records behind them. The **Triage Engine**, the **Vulnerability Explorer**, **Root Causes**, **Risk Acceptances** and **PSIRT** come first, and the record catalogs sit behind a single **Explore** entry. That ordering is deliberate: the Organization to Finding chain is how DefectDojo stores your data, but it is not how most people navigate to the work in front of them.
+Act holds the work: the views you open to decide what matters and what to do next. In order: the **Triage Engine**, the **Vulnerability Explorer**, **Root Causes**, the [Remediation Center](/triage_findings/remediation_center/pro__remediation_center/), **Risk Acceptances**, the compliance records, and **PSIRT**. Every entry here depends on a permission, a feature flag or a license, so the section only appears when at least one of them is available to you.
+
+The record catalogs these views route to (Organizations through Findings) are in the separate [Explore](#explore) section. That split is deliberate: the Organization to Finding chain is how DefectDojo stores your data, but it is not how most people navigate to the work in front of them.
 
 ### Triage Engine
 
-One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs and Deliveries. When both engines are turned on, the classic engine appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide; when only one is on, only its pages are listed and no badge appears.
+One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs, Deliveries and Webhook Receivers. When both engines are turned on, the classic engine appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide; when only one is on, only its pages are listed and no badge appears.
+
+### Remediation Center
+
+Turns what Root Causes shows into assigned, dated work, with an **Overview**, an **Action Queue** and **Campaigns**. It appears once an administrator turns on the **Remediation Center** feature flag.
 
 ### Risk Acceptances
 
 A top-level entry rather than a page inside Findings. A risk acceptance is a decision with an owner, an expiry and an approval trail, so it is a record in its own right. **Risk Accepted**, inside Findings, is the separate thing: the state a finding is in once an acceptance covers it.
 
+### Compliance records
+
+Three entries sit beside Risk Acceptances because each one is a justified decision or a statutory record with an owner:
+
+- **Targeted Risk Analyses** and **PCI Scan Evidence**, for PCI DSS, appear when the **PCI DSS** feature flag is on.
+- **CRA Article 14 Reports** appear when the regulatory profile feature is on.
+
 ### PSIRT
 
-Product Security Incident Response, with its nine pages in three groups, ordered the way the work is done:
+Product Security Incident Response, with its ten pages in three groups, ordered the way the work is done:
 
 | Group | Pages |
 | --- | --- |
-| **Sources & Inventory** | Import SBOM, Advisory Feeds, Components, Matching Rules |
+| **Sources & Inventory** | Import SBOM, Advisory Feeds, Components, Feed Rules, Matching Rules |
 | **Triage** | Feed Findings, Cases, Advisories |
 | **Configuration** | SLA Policies, PSIRT Settings |
 
-Setup leads because nothing reaches the triage queue until there is an inventory to match against: import an SBOM, choose the publishers to poll, look at what came in, then tune matching for advisories that publish nothing machine-readable to compare. The entry carries a `BETA` badge, or a `LOCKED` one if your licence does not include the PSIRT Advisory Engine. See [Menu Badges](/navigation/pro__menu_badges/).
+Setup leads because nothing reaches the triage queue until there is an inventory to match against: import an SBOM, choose the publishers to poll, look at what came in, then tune matching for advisories that publish nothing machine-readable to compare. PSIRT appears once the **PSIRT** feature flag is on, which in turn needs Locations to be enabled. The entry carries a `LOCKED` badge if your licence does not include the PSIRT Advisory Engine. See [Menu Badges](/navigation/pro__menu_badges/).
 
-### Explore
+## Explore
 
-The record catalogs, behind one entry: **Attack Surface**, Organizations, Assets, Engagements, Tests, Findings and Surveys.
+The record catalogs: **Attack Surface**, Organizations, Assets, Engagements, Tests, Findings and Surveys. Explore began as a single entry inside Act and became its own section, because these lists are half of how the product is used and one extra click made the most-visited pages the slowest to reach. Fold the section when you do not need it, and it takes a single line.
+
+**Assets** holds the Asset **Hierarchy**, **Change Plans**, **All** Assets, and the Assets that **Need Attention**. **Findings** holds Active, Mitigated and All, plus Groups, Risk Accepted and Templates.
 
 **Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the location pages (Locations, URLs, Dependencies, Source Code and Cloud Resources, with Images and AI Inventory when those features are on) when your instance uses Locations, or the endpoint pages when it does not.
 
@@ -130,11 +148,13 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 | **System** | System Settings, Appearance, Announcement Banner, Login Banner, and on on-premise instances, Email |
 | **UI Defaults** | Form Configuration, Layout Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
-| **Finding Workflow** | Dedupe Pools, Matching Configuration, Finding Enrichment, Service Level Agreements, Prioritization Engines, Mitigation Policies |
-| **Configuration** | Environments, Platforms, Lifecycles, Origins, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
+| **Finding Workflow** | Dedupe Pools, Matching Configuration, Finding Enrichment (on-premise), Reachability Probe, Service Level Agreements, Framework Presets, Remediation Center, Prioritization Engines, Mitigation Policies, AI Governance Policies |
+| **Configuration** | Custom Fields, Environments, Platforms, Lifecycles, Origins, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
 | **Notifications** | Personal Notifications, System Notifications, Notification Template, Notification Webhooks |
-| **Operations** | Audit Logs, Usage Logs, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal, Firewall Rules, Maintenance Windows |
-| **License & Support** | License Manager, Support, and on on-premise instances, Version Manager |
+| **Operations** | Audit Logs, Usage Logs, Scan Cadence, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal and Firewall Rules |
+| **License & Support** | License Manager, Support, Offboarding Export, and on on-premise instances, Version Manager |
+
+Several of these entries appear only when the feature behind them is on: Reachability Probe, Framework Presets, Remediation Center, AI Governance Policies, Custom Fields, Scan Cadence and Celery Status each follow their own feature flag, and Offboarding Export follows your license. Tool Types and Tool Configurations carry a `DEPRECATED` badge.
 
 **Feature Flags sits above the groups**, directly under All Settings, rather than inside any of them. It is the page administrators open most often, and it reads alongside All Settings: one lists what exists, the other controls what is switched on. It is still filed under System in the All Settings directory.
 
@@ -160,19 +180,19 @@ If you are used to the classic sidebar:
 | Dashboards | Overview |
 | Dashboards > Sensei | Sensei + AI > Sensei |
 | Dashboards > Threat Modeling / MCP / AI Model Settings | Sensei + AI |
-| Dashboards > PSIRT Feeds, and the eight other PSIRT entries | The PSIRT section |
+| Dashboards > PSIRT Feeds, and the other PSIRT entries | Act > PSIRT |
 | Dashboards > Metrics | Overview > Insights |
-| Dashboards > Reporting > Report Templates > All / New | Overview > Reporting > Report Templates |
+| Dashboards > Reporting > Report Templates > All / New | Overview > Reporting > Templates |
 | Import > *(whole section)* | Connect > Import *(last entry)* |
 | Import > Smart Upload > Add Findings | Connect > Import > Smart Upload |
 | Manage | Act |
-| Manage > Endpoints / Locations / Components | Act > Explore > Attack Surface |
-| Manage > Organizations / Assets / Engagements / Tests / Findings / Surveys | Act > Explore |
+| Manage > Endpoints / Locations / Components | Explore > Attack Surface |
+| Manage > Organizations / Assets / Engagements / Tests / Findings / Surveys | Explore |
 | Manage > Risk Acceptances | Act > Risk Acceptances |
 | Manage > Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
 | Manage > Rules Engine and Rules Engine 2.0 | Act > Triage Engine |
 | Manage > *(any)* > New *(record)* | The **New** *(record)* button on the matching list page |
-| Dashboards > Home | Overview > Dashboards *(when Dashboards 2.0 is on)* |
+| Dashboards > Home | Overview > Dashboard (**Dashboards** when Dashboards 2.0 is on). **Overview > Home** is now the [Command Center](/metrics_reports/dashboards/command-center/) |
 | Settings > *(top level)* > Feature Flags | Unchanged: still at the top level, below All Settings |
 | Settings > Pro Settings > System Settings | Settings > System > System Settings |
 | Settings > Pro Settings > Appearance | Settings > System > Appearance |
@@ -200,13 +220,14 @@ The group that was named after your license package, **Pro Settings** on a Pro i
 
 ## Turning entries off
 
-Three sidebar entries can be removed from [Feature Flags](/admin/feature_flags/pro__feature_flags/) by an administrator. All three are on by default, and turning one off removes the entry without changing any data behind it.
+Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/pro__feature_flags/) page. Two of them are on by default and are there so an administrator can remove them; turning one off removes the entry without changing any data behind it.
 
 | Flag | Removes |
 | --- | --- |
 | **Calendar** | Calendar, from Overview |
 | **Smart Upload** | Smart Upload and Unassigned Findings, from Connect > Import |
-| **PSIRT** | the whole PSIRT section |
+
+The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Triage Engine, the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
 
 The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 
