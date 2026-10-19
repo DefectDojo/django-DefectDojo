@@ -82,9 +82,8 @@ Okta's **org authorization server** (an endpoint of `https://<your-org>.okta.com
     - **Include in**: **Any scope**
 3. On the **Access Policies** tab, make sure a policy applies to your DefectDojo application and has a rule that allows the **Authorization Code** grant. Okta requires a policy and rule before any client can use the server.
 4. On the **Token Preview** tab, preview a token for a user who belongs to one of the groups, using your DefectDojo application and the scopes `openid profile email`. The ID token should contain `groups` with the exact group names. If it does not, DefectDojo will not see them either.
-5. In DefectDojo, set **Endpoint** to the server's issuer (`https://<your-org>.okta.com/oauth2/<server id>`), enter the client secret again, and submit.
-6. Restart DefectDojo. The provider's discovery document is cached for up to 24 hours in each running DefectDojo process, so until a restart, sign-ins keep going to the previous endpoint even though **Validate Config** already reports the new one.
-7. Have a user sign out and sign back in. Group mapping runs on every login, so existing users get their groups the next time they sign in.
+5. In DefectDojo, set **Endpoint** to the server's issuer (`https://<your-org>.okta.com/oauth2/<server id>`), enter the client secret again, and submit. The new endpoint is used from the next sign-in; no restart is needed.
+6. Have a user sign out and sign back in. Group mapping runs on every login, so existing users get their groups the next time they sign in.
 
 Every user who signs in must be assigned to the Okta application, directly or through a group. Otherwise Okta stops the sign-in with *User is not assigned to the client application*.
 
@@ -92,5 +91,5 @@ Every user who signs in must be assigned to the Okta application, directly or th
 
 - Check that the user's ID token or userinfo response actually carries the claim, using your provider's token preview (in Okta, the **Token Preview** tab above).
 - Check that the names in the claim match the DefectDojo group names exactly.
-- If you changed **Endpoint** recently, restart DefectDojo (see step 6 above).
+- If sign-ins still go to the previous endpoint after you changed **Endpoint**, check the DefectDojo version. Releases before 3.4.300 cache the provider's discovery document for up to 24 hours in each running DefectDojo process, so on those releases restart DefectDojo after changing the endpoint.
 - **Validate Config** reports whether the provider lists your group claim in its advertised `claims_supported`. Treat that check as a hint only. Providers often leave claims out of that list: Okta does not list `groups` there even when the claim is set up correctly and arrives in the ID token, so the warning appears either way.
