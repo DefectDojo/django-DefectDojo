@@ -26,3 +26,9 @@ See the [Censys Platform API documentation](https://docs.censys.com/reference/ge
 5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 DefectDojo creates a Record for each host and imports its exposed services as findings.
+
+#### Asset Exposure
+
+With [Asset Exposure](/triage_findings/finding_scoring/asset_exposure/) enabled, each sync also records every matching host as **Externally Exposed**, at full confidence: Censys reached the host from the internet and enumerated its services, so the record is itself the evidence. The asset's Exposure panel lists each service Censys saw, with its port and protocol.
+
+A host that stops matching your search query is not marked as closed. Censys not seeing a service is not evidence that it is gone, so the exposure ages out of the asset after 30 days without a fresh observation.
