@@ -84,7 +84,8 @@ def reinstate(risk_acceptance, old_expiration_date):
         feature_flag = True
         for finding in risk_acceptance.accepted_findings.all():
             if feature_flag:
-                from dojo.risk_acceptance.risk_pending import update_expiration_risk_accepted 
+                from dojo.risk_acceptance.risk_pending import update_expiration_risk_accepted
+                feature_flag=False
                 expiration_delta_days, __, __ = update_expiration_risk_accepted(finding, risk_acceptance)
                 risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
                 risk_acceptance.expiration_date_handled = None
