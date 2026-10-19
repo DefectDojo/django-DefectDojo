@@ -9,8 +9,9 @@ aliases:
 DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
-[`/api/v2/oa3/swagger-ui`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/) and can be accessed by choosing the API v2
-Docs link on the user drop down menu in the header.
+[`/api/v2/oa3/swagger-ui`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/) and can be accessed from the **API v2 Docs**
+link in the user menu. In DefectDojo Pro, the user menu opens from your username at the bottom of the sidebar; in the
+Open Source UI, it is in the header.
 
 > **Naming:** The UI labels these objects **Assets** and **Organizations**. The API v2 wire surface keeps the original names — an Asset is `product` and an Organization is `product_type`. Endpoint paths, field names and event names are unchanged.
 
@@ -20,8 +21,8 @@ The documentation is generated using [drf-spectacular](https://drf-spectacular.r
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v3 spec.
 
 To interact with the documentation, a valid Authorization header value
-is needed. Visit the `/api/key-v2` view to generate your
-API Key (`Token <api_key>`) and copy the header value provided.
+is needed. Open **API v2 Token** from the same menu (**API v2 Key** in the Open Source UI), or go to `/api/key-v2`,
+to see your API Key (`Token <api_key>`), and copy the header value provided.
 
 ![image](images/api_v2_2.png)
 
@@ -49,6 +50,8 @@ If you use [an alternative authentication method](/admin/sso/) for users, you ma
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
+With API tokens disabled, the DefectDojo Pro **API v2 Token** page shows the reason, "API tokens are disabled.", instead of a key.
+
 ### Token management
 
 DefectDojo provides API endpoints to revoke and set expiry on API tokens programmatically.
@@ -65,7 +68,7 @@ Content-Type: application/json
 {"key": "<token_to_revoke>"}
 ```
 
-Returns 204 on success. The token is deleted, any per-user expiry override is cleared, and the owner is notified that their token was revoked. The owner will need to generate a new token via the UI (`/api/key-v2`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
+Returns 204 on success. The token is deleted, any per-user expiry override is cleared, and the owner is notified that their token was revoked. The owner will need to generate a new token from the **API v2 Token** page (`/api/key-v2`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
 
 Returns 404 if no token matches the supplied key, 400 if `key` is missing, and 403 for non-superusers.
 
@@ -103,7 +106,7 @@ Resetting or revoking a token clears the per-user override, because that value d
 
 **Switching this setting on is retroactive.** Because expiry is evaluated when a token is used rather than recorded when it is issued, raising the value above `0` immediately invalidates every token on the instance that is already older than the window. That includes your own API token and any token driving a CI/CD pipeline.
 
-Plan the change before making it: pick a window, ask token owners to rotate first, then enable the setting. If you do lock yourself out of the API, the UI is unaffected because it uses session authentication, and you can issue a new token from `/api/key-v2`.
+Plan the change before making it: pick a window, ask token owners to rotate first, then enable the setting. If you do lock yourself out of the API, the UI is unaffected because it uses session authentication, and you can issue a new token from the **API v2 Token** page (`/api/key-v2`).
 
 ## Sample Code
 

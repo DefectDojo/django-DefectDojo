@@ -9,6 +9,10 @@ aliases:
 
 Here is a list of filters that can be applied in the DefectDojo Pro UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, building custom [dashboards](/metrics_reports/dashboards/custom-dashboards/), or creating automation via [Rules Engine](/automation/rules_engine/about).
 
+## Where filters are applied
+
+Every filter below can be set from a column's header or from the filter bar above the Findings list, which shows each active filter as a chip and offers **Add Filter** for the rest. With more than one filter active, the connective between the chips chooses whether a Finding must match **all** of them (the default) or **any** of them. See [Customizing Tables](/navigation/table_customization/) for the bar, the match mode, and the grid view of the list.
+
 ## How date filters are evaluated
 
 Filters that take a date — **Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below — offer five operators:
@@ -102,6 +106,7 @@ These DefectDojo functions can be used to further organize your Findings or trac
 
 * Finding Tags
 * Reviewers (Assigned User)
+* Owner (Team) (the group responsible for the Finding, set under **Owners** on the Finding form; the column is hidden by default, turn it on from the column picker)
 * Has Notes (True/False)
 * Group (refers to the [Finding Group](/triage_findings/findings_workflows/editing_findings/#finding-group-actions), if one exists)
 * Risk Acceptance (select one or more existing Risk Acceptances from the list)

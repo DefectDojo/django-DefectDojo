@@ -1,3 +1,5 @@
+import copy
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
@@ -69,7 +71,9 @@ class Notifications(models.Model):
         for notifications in notifications_list:
             if result is None:
                 # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
-                result = notifications
+                # A copy, not the instance: callers set .user on the result, and the first entry can be
+                # a shared row (the system notifications row a manager reuses for every notification).
+                result = copy.copy(notifications)
                 # result.pk = None # detach from db
             else:
                 result.product_type_added = {*result.product_type_added, *notifications.product_type_added}

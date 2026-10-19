@@ -37,6 +37,32 @@ Beyond the card, the intelligence is a working surface across the app:
   exploit evidence, such as landing in CISA KEV or gaining a Metasploit module. Upgrades
   only — evidence quietly aging out never notifies.
 
+## Source ratings
+
+Each piece of evidence behind a CVE is rated, so you can judge how far to trust it. The
+**Source Ratings** panel on the finding page, and the **Source Ratings** section of the
+vulnerability's page in the Vulnerability Explorer, list every rated source (a KEV entry, an
+Exploit-DB exploit, a Metasploit module, a Nuclei template, a public proof of concept, a
+vendor security advisory) with:
+
+* its **source reliability**, from A (completely reliable) to F (reliability cannot be
+  judged), and its **information credibility**, from 1 (confirmed by other sources) to 6
+  (truth cannot be judged), on the Admiralty grading scale used in intelligence analysis
+* the **attack surface** it targets: endpoint, identity, cloud, network, web application or
+  supply chain
+* where exploitation could be **detected**: EDR, SIEM or event logs, network monitoring, or
+  nowhere practical
+* the model version that rated it, and when
+
+DefectDojo rates public threat intelligence centrally, when the signed intelligence bundle is
+built, and the ratings ship inside that bundle. Your instance, air-gapped or not, never sends
+anything to a model to get them. Every answer carries a confidence: one below the confidence
+threshold is shown as **Unrated** instead of a guess, and hovering a rating shows what it means
+and how confident it is.
+
+Ratings are informational. They do not change Priority or Risk. The panel stays hidden on a
+finding whose CVE has no rated sources.
+
 ## How it changes scoring
 
 The Priority engine already combined severity, business context, and an "external score"

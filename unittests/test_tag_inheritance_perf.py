@@ -654,8 +654,8 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # (which took 12 import / 6 reimport-with-new queries off the per-recipient path)
     # measures the same with and without the pin on this path.
     EXPECTED_ZAP_IMPORT_V2 = 289
-    EXPECTED_ZAP_IMPORT_V3 = 314
+    EXPECTED_ZAP_IMPORT_V3 = 315
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 80
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
     EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 159
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 188

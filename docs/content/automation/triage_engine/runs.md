@@ -17,7 +17,7 @@ A **run** is one execution of one rule. Every run is recorded, whether it succee
 |-------|---------|
 | **Rule** | The rule that executed. |
 | **Trigger** | The event that started it, for example `finding.created`, `schedule` or `manual`. |
-| **Triggered by** | The person who set it off, when a person did: whoever pressed Run, or whoever saved the Finding that triggered it. Empty for a schedule, and for a change nobody was present for such as an import or an API call with no user. This is distinct from the rule's owner, which is who the run executed **as**. |
+| **Triggered by** | The person who set it off, when a person did: whoever pressed Run Now, or whoever saved the Finding that triggered it. Empty for a schedule, and for a change nobody was present for such as an import or an API call with no user. This is distinct from the rule's owner, which is who the run executed **as**. |
 | **Status** | `Running`, `Success` or `Error`. |
 | **Started** and **Finished** | When it ran. Finished is empty only while it is still running. |
 | **Error** | The error that ended it, if it failed. |
@@ -104,9 +104,19 @@ Both windows are configurable, and either can be set to keep records indefinitel
 
 ## Running a rule by hand
 
-A rule whose trigger is **Manual Run** is executed with the **Run** action on the rule list. Rules with other triggers run when their trigger fires.
+**Run Now** runs a rule straight away, whatever its trigger, except a webhook trigger. It is on the editor's toolbar and in each rule's menu on the rule list, for the rule's owner when they hold Rule Edit, and for superusers. What a hand-started run works on depends on the trigger:
 
-**Preview**, in the editor, is the other way to execute a graph. It runs the real engine and then rolls everything back, records no run, and forces egress to simulate. Use preview while building, and runs to see what actually happened.
+* **Manual Run** and **On a Schedule** sweep everything in scope, Findings or Assets per the **Sweep Over** setting, exactly as a scheduled run does.
+* **On Finding Event** and **On Asset Event** replay the rule over the Findings or Assets currently in the trigger's scope, as if the trigger's event had just happened to each of them. A replay covers at most 500 of them, lowest id first.
+* **On a Missing Scan** checks for overdue scans now, and **When a Group of Scans Has Landed** closes every open cycle as it stands.
+* **When a Scan Has Landed** and **On DAST Scan Completed** act only on the scan that woke them, so a hand-started run of either has nothing to work on and records a run that changed nothing.
+* A webhook rule has no Run Now. It acts on what a sender delivered, and a hand-started run has no delivery. Use **Preview** with the receiver's sample or a pasted payload instead, or replay a stored delivery from the receiver.
+
+The run happens on a worker, not in your browser. The editor waits for it and shows the counts on each node; from the rule list, open **Runs** to follow it. The run records you as **Triggered by**, and it follows the rule's mode: in Simulate, its Finding and Asset edits are real and only outbound sends are held back.
+
+Run Now works on a disabled rule too, AI steps included, so you can try a rule by hand before you enable it. Enabling a rule is what lets its trigger start it on its own. A run started with Run Now that is still waiting to start does not run if, by then, the rule is disabled and has changed since you pressed it: it was disabled, edited, or taken over by someone else.
+
+**Preview**, in the editor, is the only dry run. It runs the real engine and then rolls everything back, records no run, and forces egress to simulate. Use Preview while building, and runs to see what actually happened.
 
 ## Provenance on a Finding
 

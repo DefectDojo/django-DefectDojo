@@ -210,6 +210,8 @@ env = environ.FileAwareEnv(
     DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
+    # Give each Qualys WAS finding the scanner's UNIQUE_ID instead of grouping findings by QID
+    DD_QUALYS_WAS_UNIQUE_ID=(bool, False),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
@@ -217,6 +219,21 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # Seconds the async_dupe_delete singleton marker is held. A run holds it for its whole
+    # duration and releases it when it finishes; this timeout is only the ceiling for a worker
+    # that dies mid-run without releasing it. It must comfortably exceed a normal run so the
+    # lock is never released out from under an in-flight run (default 30 minutes).
+    DD_DUPE_DELETE_LOCK_EXPIRE=(int, 1800),
+    # Minutes since a duplicate was last saved before the excess-duplicate delete may remove it,
+    # which covers a create request still writing the finding's child rows. 0 turns the wait off.
+    DD_DUPE_DELETE_GRACE_MINUTES=(int, 1),
+    # The excess-duplicate delete skips the duplicates of a test while an import is writing it
+    # (a PostgreSQL advisory lock the import holds until it ends; see dojo/importers/import_lock.py).
+    # Turn off behind a connection pooler in transaction mode, where session locks do not hold.
+    DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT=(bool, True),
+    # An import lock whose every holder has been idle this many minutes is treated as abandoned (left
+    # behind by a host that died, or by a pooler) and no longer holds the delete back. 0 never does.
+    DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES=(int, 30),
     # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
     # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
     # because backdating a mitigation can distort SLA-compliance metrics. Changing this
@@ -243,6 +260,8 @@ env = environ.FileAwareEnv(
     DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(bool, False),
     # Enable Rate Limiting for the login page
     DD_RATE_LIMITER_ENABLED=(bool, False),
+    # Account-recovery emails (password reset, forgot username) sent to one address per hour. 0 disables the limit.
+    DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR=(int, 5),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
     DD_RATE_LIMITER_RATE=(str, "5/m"),
     # Block the requests after rate limit is exceeded
@@ -635,6 +654,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # https://django-ratelimit.readthedocs.io/en/stable/index.html
 RATE_LIMITER_ENABLED = env("DD_RATE_LIMITER_ENABLED")
+ACCOUNT_RECOVERY_EMAILS_PER_HOUR = env("DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR")
 RATE_LIMITER_RATE = env("DD_RATE_LIMITER_RATE")  # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
 RATE_LIMITER_BLOCK = env("DD_RATE_LIMITER_BLOCK")  # Block the requests after rate limit is exceeded
 RATE_LIMITER_ACCOUNT_LOCKOUT = env("DD_RATE_LIMITER_ACCOUNT_LOCKOUT")  # Forces the user to change password on next login.
@@ -781,7 +801,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
+        "dojo.user.authentication.DojoBasicAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.DjangoModelPermissions",
@@ -1969,6 +1989,10 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
+DUPE_DELETE_LOCK_EXPIRE = env("DD_DUPE_DELETE_LOCK_EXPIRE")
+DUPE_DELETE_GRACE_MINUTES = env("DD_DUPE_DELETE_GRACE_MINUTES")
+DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT = env("DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT")
+DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES = env("DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES")
 
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
@@ -2112,8 +2136,9 @@ SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
 # Create a unique finding for all findings in qualys WAS parser
-# If using this, lines for Qualys WAS deduplication functions must be un-commented
-QUALYS_WAS_UNIQUE_ID = False
+# If using this, also set DD_DEDUPLICATION_ALGORITHM_PER_PARSER={"Qualys Webapp Scan": "unique_id_from_tool"}
+# so reimport matches findings by their Qualys unique ID (see the Qualys Webapp Scan parser docs)
+QUALYS_WAS_UNIQUE_ID = env("DD_QUALYS_WAS_UNIQUE_ID")
 
 SERIALIZATION_MODULES = {
     "xml": "django_tagulous.serializers.xml_serializer",

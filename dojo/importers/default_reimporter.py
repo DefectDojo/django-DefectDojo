@@ -16,7 +16,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
-from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.base_importer import BaseImporter, Parser, reports_a_deleted_target
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
@@ -91,6 +91,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         )
         self.location_handler = LocationHandler(self.test.engagement.product)
 
+    @reports_a_deleted_target
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
@@ -116,6 +117,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
+        # The excess-duplicate delete leaves the duplicates of a test being imported alone; this
+        # one is about to have its findings matched and written, so say so before the first match.
+        self.lock_test_under_import(self.test)
         (
             new_findings,
             reactivated_findings,
@@ -395,6 +399,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if self.service is not None:
                 sanitized.service = self.service
             self.location_handler.clean_unsaved(sanitized)
+            # Drop non-string vulnerability ids before hashing so reimport hashes the
+            # same sanitized list the importer does (the importer sanitizes via
+            # process_cve before computing the hash). Otherwise a non-string id is
+            # str()-ed into the reimport hash only (Finding.get_vulnerability_ids), which
+            # produces a duplicate finding on every reimport for scanners that hash on
+            # vulnerability_ids.
+            self.sanitize_vulnerability_ids(sanitized)
             # Calculate the hash code to be used to identify duplicates
             sanitized.hash_code = self.calculate_unsaved_finding_hash_code(sanitized)
             deduplicationLogger.debug(f"unsaved finding's hash_code: {sanitized.hash_code}")
@@ -1176,7 +1187,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
         # don't dedupe before endpoints/locations are added, postprocessing will be done on next save (in calling method)
-        existing_finding.save_no_options()
+        if not self.save_matched_finding(existing_finding, no_options=True):
+            return existing_finding, True
 
         if existing_finding.duplicate:
             note_entry = f"Un-mitigated by {self.scan_type} re-upload but kept inactive because the finding is a duplicate."
@@ -1228,7 +1240,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
-                existing_finding.save_no_options()
+                if not self.save_matched_finding(existing_finding, no_options=True):
+                    return existing_finding, True
                 existing_finding.notes.create(
                     author=self.user,
                     entry=f"Mitigated by {self.test.test_type} re-upload.",
@@ -1248,7 +1261,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
-                existing_finding.save_no_options()
+                if not self.save_matched_finding(existing_finding, no_options=True):
+                    return existing_finding, True
                 existing_finding.notes.create(
                     author=self.user,
                     entry=f"Mitigated by {self.test.test_type} re-upload.",
@@ -1266,7 +1280,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
-            existing_finding.save_no_options()
+            if not self.save_matched_finding(existing_finding, no_options=True):
+                return existing_finding, True
         # Return False here to make sure further processing happens
         return existing_finding, False
 
@@ -1361,8 +1376,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Accumulates changes into pending_vuln_id_deletes / pending_vulnerability_ids
         for batch flush at the batch boundary via flush_vulnerability_ids().
         """
+        # A non-string vulnerability id (e.g. a dict nested under "vulnerability_ids"
+        # in a Generic Findings Import report) is unhashable for dict.fromkeys and has
+        # no .strip(); drop such entries first so reimport does not 500 on the same
+        # input the importer already tolerates.
+        self.sanitize_vulnerability_ids(finding)
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
-        vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
         # Reconcile CWEs independently of the vulnerability_ids early-exit below (CWEs may change
         # while vulnerability_ids do not, and vice versa).
@@ -1450,7 +1469,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # update, and saving here would insert it early -- defeating the buffering and splitting
         # one batched INSERT into per-finding ones. The value rides along when the buffer flushes.
         if finding.cve != old_cve and finding.pk:
-            finding.save()
+            self.save_matched_finding(finding)
         return finding
 
     def process_groups_for_all_findings(
