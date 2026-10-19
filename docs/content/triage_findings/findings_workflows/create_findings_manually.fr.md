@@ -4,6 +4,8 @@ description: Suivre les informations de vulnérabilité sans utiliser d’outil 
 weight: 2
 aliases:
 - /fr/en/working_with_findings/findings_workflows/create_findings_manually
+- /import_data/import_scan_files/os__create_findings_manually
+- /import_data/import_scan_files/pro__create_findings_manually
 ---
 
 Généralement, la plupart des constatations de votre environnement seront importées depuis d’autres outils de sécurité. Si vous le souhaitez, vous pouvez également ajouter des constatations manuelles si vous avez des vulnérabilités ou des tâches à gérer qui n’ont pas été créées à partir d’un outil d’analyse.
