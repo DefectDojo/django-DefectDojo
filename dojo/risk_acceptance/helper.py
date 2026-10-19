@@ -81,15 +81,25 @@ def reinstate(risk_acceptance, old_expiration_date):
         risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
 
         reinstated_findings = []
+        feature_flag = True
         for finding in risk_acceptance.accepted_findings.all():
+            if feature_flag:
+                from dojo.risk_acceptance.risk_pending import update_expiration_risk_accepted 
+                expiration_delta_days, __, __ = update_expiration_risk_accepted(finding, risk_acceptance)
+                risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
+                risk_acceptance.expiration_date_handled = None
+                risk_acceptance.expiration_date_warned = None
+                risk_acceptance.save()
             if finding.active:
                 logger.debug("%i:%s: accepting a.k.a. deactivating finding", finding.id, finding)
-                finding.active = False
-                finding.risk_accepted = True
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=True)
                 # this method both saves and pushed to JIRA (no other post processing)
-                finding.save(dedupe_option=False)
+                finding.update_fields(
+                    risk_accepted=True,
+                    active=False,
+                    risk_status="Risk Accepted",
+                    sla_expiration_date=risk_acceptance.expiration_date)
                 if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
                     logger.info("pushing finding to JIRA after reinstating risk acceptance")
                     jira_helper.push_to_jira(finding)
@@ -100,9 +110,10 @@ def reinstate(risk_acceptance, old_expiration_date):
         # best effort JIRA integration, no status changes, just a comment
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), reinstation_message_creator)
 
-    risk_acceptance.expiration_date_handled = None
-    risk_acceptance.expiration_date_warned = None
-    risk_acceptance.save()
+        if feature_flag:
+            risk_acceptance.expiration_date_handled = None
+            risk_acceptance.expiration_date_warned = None
+            risk_acceptance.save()
 
 
 def delete(eng, risk_acceptance):
@@ -157,9 +168,10 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     for finding in findings:
         add_severity_to_risk_acceptance(risk_pending, finding.get_severity_related_to_priority())
         if not finding.duplicate:
-            finding.risk_status = "Risk Pending"
-            finding.acceptend_by = ""
-            finding.save(dedupe_option=False)
+            finding.update_fields(
+                risk_status="Risk Pending",
+                accepted_by="",
+            )
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:

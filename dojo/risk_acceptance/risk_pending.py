@@ -107,9 +107,7 @@ def risk_accepted_succesfully(
         risk_status="Risk Accepted",
         risk_accepted=True,
         active=False,
-        sla_expiration_date=timezone.now().date() + relativedelta(
-            days=acceptance_days
-            )
+        sla_expiration_date=risk_acceptance.expiration_date
     )
     ra_helper.handle_from_provider_risk(finding, acceptance_days)
 

@@ -65,8 +65,9 @@ class TransferFindingFindingCreateSerializer(serializers.ModelSerializer):
                 raise ApiError.precondition_required(
                     "It is not possible to transfer to a finding the same engagement." +
                     f"Finding {finding.id}, engagment_id: {destination_engagement.id}",)
-            finding.risk_status = "Transfer Pending"
-            finding.save()
+            finding.update_fields(
+                risk_status="Transfer Pending"
+            )
             transfer_finding_finding = TransferFindingFinding.objects.create(
                     findings=finding,
                     transfer_findings=transfer_finding_request,
