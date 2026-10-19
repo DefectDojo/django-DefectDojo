@@ -108,7 +108,9 @@ Tool output is recorded only when a rule matched it, so a tool call usually appe
 
 ### What Is Stored
 
-DefectDojo never stores the matched text, file contents or tool output. An event keeps the start of the prompt or command (or the file path or URL of a tool call) with every match masked, the names of the rules and detectors that fired, and how often each fired. To store no excerpt at all, turn off **Record Excerpts** on the policy. Events then keep only who, when, which tool and what was decided.
+DefectDojo never stores file contents or tool output. An event keeps the start of the prompt or command (or the file path or URL of a tool call), the names of the rules and detectors that fired, and how often each fired.
+
+The excerpt is masked before it is stored. Anything a built-in detector matched is replaced with a marker, and so is any secret the built-in detectors recognize, even where no rule looks for one. A custom pattern's match is masked in prompts and tool output, but stays readable in shell commands and other tool input, so a blocked `git push --force` shows what was stopped. To store no excerpt at all, turn off **Record Excerpts** on the policy. Events then keep only who, when, which tool and what was decided.
 
 A blocked prompt never reaches the model, but Claude Code still keeps it in the developer's local prompt history and transcript.
 
