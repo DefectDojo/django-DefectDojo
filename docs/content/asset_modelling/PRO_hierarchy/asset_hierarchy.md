@@ -120,19 +120,26 @@ The buttons at the bottom left of the diagram zoom in and out, and fit the whole
 
 Assets are connected by labelled arrows, which represent the kind of relationship each node has to the other.
 
-Three relationship types ship by default:
+Four relationship types ship by default:
 
 | Label | Meaning | Rolls up? |
 | --- | --- | --- |
 | `parent` | The tree relationship you build from the Asset Hierarchy screen. An Asset has at most one parent. | Yes |
 | `contains` | Composition — the source Asset is made up of the target. Unlike `parent`, the same Asset can be contained by several others. | Yes |
 | `derived_from` | Lineage — the source Asset was built from the target, as a container image is built from a base image. | **No** |
+| `deploys_to` | Deployment: the source Asset runs on the target, as a service runs on a cluster. The diagram labels the edge "deploys to" one way and "hosts" the other. | **No** |
 
 "Rolls up" is what decides whether a relationship aggregates upward: it controls both the
 indirect counts described below and the **Include child assets** option on metrics. `derived_from`
 deliberately does not roll up. A base image's Findings are not the derived Asset's own exposure,
 and attributing them to every Asset built from it multiplies the same Finding across your whole
-estate.
+estate. `deploys_to` does not roll up for the same reason: a cluster's Findings are not the
+Findings of every service deployed on it.
+
+`deploys_to` is the one relationship that carries [Asset Exposure](/triage_findings/finding_scoring/asset_exposure/#exposure-inherited-from-where-an-asset-runs):
+a service deployed onto an internet-facing cluster shows the cluster's exposure as its effective
+exposure. No other relationship carries exposure, so an Asset that `contains` an exposed Asset
+is not itself treated as reachable.
 
 Each node is coloured by where it came from: one colour for the Assets you selected in the list, another for Assets the diagram loaded because they are related to your selection. The **Legend** in the left panel names both.
 

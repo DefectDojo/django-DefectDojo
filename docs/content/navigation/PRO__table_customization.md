@@ -10,9 +10,9 @@ All of these controls live in the table toolbar, above the list.
 
 ## Filtering with the filter bar
 
-The Findings list carries a filter bar between the toolbar and the rows. It shows every active filter as a chip that reads as a sentence: the field, the operator, and the value, such as **Severity is any of Critical, High** or **Age is greater than 30**.
+The Findings, Assets, Organizations, Engagements and Tests lists carry a filter bar between the toolbar and the rows. It shows every active filter as a chip that reads as a sentence: the field, the operator, and the value, such as **Severity is any of Critical, High** or **Age is greater than 30**.
 
-- **Add Filter** opens a list of every field the table can filter on, grouped the way the column picker groups them. Type in the search box to narrow the list, then pick a field to open its editor. The editor is the same control the column header offers for that field: a match mode where the field has one, a value or a list of values, and **Submit** and **Clear**.
+- **Add Filter** opens a list of every field the table can filter on, grouped the way the column picker groups them. Type in the search box to narrow the list, then pick a field to open its editor. The editor is the same control the column header offers for that field: a match mode where the field has one, a value or a list of values, and **Submit** and **Clear**. Pressing Enter submits the editor from the same fields that apply a column header filter (see [Filtering columns](#filtering-columns)).
 - Select a chip to reopen its editor and change the value or the match mode. Select the **x** on a chip to remove that filter.
 - The count on the right of the bar is how many records match. **Sort** beside it opens the same sort the column headers offer, up to three levels, so a view with no headers (the grid, below) can still be ordered.
 - The keyword search stays in the toolbar. It narrows the list on top of the chips and is not a chip itself.
@@ -30,9 +30,18 @@ The match mode is part of the page URL and of a saved table preference, so a sha
 
 ## Switching between the table and the grid
 
-The Findings list can be read as a table or as a grid of cards. The two buttons beside the keyword search switch between them. The grid shows the same page of records, under the same filters, sort, and keyword search, so switching never changes what the list contains, only how each record is drawn.
+The Findings, Assets, Organizations, Engagements and Tests lists can each be read as a table or as a grid of cards. The two buttons beside the keyword search switch between them. The grid shows the same page of records, under the same filters, sort, and keyword search, so switching never changes what the list contains, only how each record is drawn.
 
-A card shows the finding's severity, status, and title, where it lives (organization, asset, engagement, and test), its scores (CVSS, EPSS, priority, age, SLA, and CWE), the signals that matter when they apply (known exploited, ransomware, exploit maturity, reachability, a Sensei fix, a Jira issue, connector tickets), its tags and vulnerability ids, and a footer with the date found, the scanner, and the other dates and people on it. A card omits what is empty: a finding that is not in KEV and has no tags does not spend lines on them. The first two lines of the description appear as a summary when the comfortable density is on.
+A card shows the finding's severity, status, and title, where it lives (organization, asset, engagement, and test), its scores (CVSS, EPSS, priority, age, SLA, and CWE), the signals that matter when they apply (known exploited, ransomware, exploit maturity, reachability, a Sensei fix, a Jira issue, connector tickets), its tags and vulnerability ids, and a footer with the date found, the scanner, and the other dates and people on it. A card omits what is empty: a finding that is not in KEV and has no tags does not spend lines on them. The first two lines of the description appear as a summary when the **Summary** field is picked.
+
+The other lists draw their records the same way, each with its own fields:
+
+- An **asset** card shows its business criticality and grade, its organization and parent asset, its active findings, locations and child assets, the lifecycle, origin and platform it was classified with, whether it is internet accessible or has an external audience, its Jira project and issue tracker mappings, its tags, and its managers, technical contact and last scan date.
+- An **organization** card shows whether it is critical or key, and its assets, active findings and verified findings.
+- An **engagement** card shows its status and type, its organization and asset, its findings counts (active, verified, fixable, mitigated, risk accepted and duplicate), an overdue marker once its end date has passed, its tags, and its dates and lead.
+- A **test** card shows its test type and status, where it lives (organization, asset, engagement and environment), its findings counts, its notes, its tags, and its dates, lead and reimport count.
+
+Each findings count on a card links to that findings list, scoped to the record.
 
 - The **Columns** button becomes **Fields** in the grid. It is the same selection in both views: the columns chosen for the table are the fields a card shows, and a field only a card can show (the summary) is offered in the grid.
 - The density toggle applies to cards too: compact cards are smaller and fit one more per row.
@@ -52,6 +61,10 @@ Click a column header to sort the table by that column. The first click on a num
 Rows with no value in the sorted column always appear at the end, whichever direction you sort in, so a "highest first" sort starts with real values rather than blanks.
 
 To sort by more than one column, hold Ctrl (Cmd on macOS) while clicking additional headers. Each header shows its position in the sort. The sort is part of the page URL, so a bookmarked or shared link opens the table sorted the same way.
+
+## Filtering columns
+
+Click the filter icon in a column header to open that column's filter, set the value, then click **Apply** (**Submit** in the filter bar editor). You can also press Enter to apply the filter from a text or number field, from a date you type, or from a multi-select option list. In a multi-select list, Space checks or unchecks the highlighted option and Enter applies the filter; in a single-select list, Enter picks the option. Enter does not apply the filter in two places: on the calendar, Enter selects the highlighted day, and in an **In List** or **Not in List** field, Enter adds the typed value to the list. Click **Apply** after either one. Pressing Enter while **Clear** has focus clears the filter instead.
 
 ## Reordering columns
 

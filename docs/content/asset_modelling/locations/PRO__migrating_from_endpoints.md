@@ -91,10 +91,23 @@ Once Locations is enabled, the Endpoint pages are gone. A bookmark or a shared l
 
 | Old page | Opens |
 | --- | --- |
-| All Endpoints, Vulnerable Endpoints, All Hosts, Vulnerable Hosts, one Host, or a dashboard tile's Endpoint list | **All URLs** |
+| All Endpoints, All Hosts, one Host, or a dashboard tile's Endpoint list | **All URLs** |
+| Vulnerable Endpoints or Vulnerable Hosts | **All URLs**, filtered to URLs with active Findings |
 | An Asset's or a Finding's Endpoints or Hosts | That Asset's or Finding's **URLs** |
 | New Endpoint | **New URL** |
 | One Endpoint, or its edit page | Its **Location** (see below) |
+
+A link to an Endpoint list keeps the filters the URL list also has, and they show in its column filters:
+
+| Endpoint list filter | URL list filter |
+| --- | --- |
+| Host | Host |
+| Endpoint | URL |
+| Tags | Tags |
+| Active Findings count | Active Findings |
+| Keyword search | Keyword search |
+
+The match mode (contains, exact, starts with, and so on) carries over too. Filters the URL list does not have (Organization, Asset, Asset tags, Finding, the verified Findings count and Status) are dropped, so the list can show more URLs than the old link did.
 
 A link to one Endpoint can carry either kind of ID, and DefectDojo tries them in this order:
 
@@ -177,7 +190,7 @@ Once Locations is enabled, the legacy Endpoint API enters a **read-compatibility
 A few things behave differently from the original Endpoint API:
 
 - **Single status instead of flags.** Locations have one status at a time. If your code relied on a Finding being *both* `mitigated=True` *and* `false_positive=True` simultaneously on an Endpoint_Status, that is no longer representable — the migration picks the highest-priority flag (the order shown in the table above).
-- **`endpoint` field on Endpoint_Status.** The legacy `endpoint` field is reconstructed by looking up the matching Asset Reference. In rare cases where a Finding's Asset no longer matches its Location's Asset references, this field may be null.
+- **`endpoint` field on Endpoint_Status.** The `endpoint` field is the `id` that `/api/v2/endpoints/` lists for the Finding's Asset: the Asset Reference of that Location on that Asset, the same ID `?endpoint=` filters by. The Location itself is in `location_id`. The field is null when the Finding's Asset has no reference to the Location, or when you cannot view that reference. Filtering with `?endpoint=` returns only the statuses of Findings on that reference's Asset, as an Endpoint_Status always belonged to its Endpoint's Asset.
 - **`mitigated` returned a date before 3.2.400.** On releases before 3.2.400 the `mitigated` field of `/api/v2/endpoint_status/` returned the record's creation date instead of a boolean. Because a date string is truthy, `mitigated_time` and `mitigated_by` answered as though every status was mitigated. From 3.2.400 the field is a boolean that is true only when the Location status is `Mitigated`. If you poll for mitigated statuses, upgrade before you trust this field.
 - **Pagination and ordering.** Available ordering fields on the read-compat shim are `host`, `product`, `id`, and `active_finding_count`. If your client orders by another field, switch to one of these or move to the new Locations endpoints.
 

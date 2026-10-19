@@ -46,8 +46,21 @@ jobs:
       platform: ${{ matrix.platform }}
     secrets: inherit
 
-  publish-container-digests:
+  # Adds the release's schema snapshot to every django image before anything is tagged: the merge
+  # below tags the layered digests this replaces.
+  add-schema-snapshot:
     needs: publish-docker-containers
+    permissions:
+      contents: read
+    uses: ./.github/workflows/release-x-manual-add-schema-snapshot.yml
+    with:
+      release_number: ${{ inputs.release_number }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  publish-container-digests:
+    needs: add-schema-snapshot
     uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
       release_number: ${{ inputs.release_number }}
@@ -76,3 +89,27 @@ jobs:
     with:
       version: ${{ inputs.release_number }}
     secrets: inherit
+
+  # The snapshot the django images now carry, as release assets: CI layers the latest release's onto
+  # the images it builds and tests (build-docker-images-for-testing.yml), without pulling an image.
+  add-schema-snapshot-to-release:
+    needs: [add-schema-snapshot, release-drafter]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Load the schema snapshot from artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: schema-snapshot
+
+      - name: Upload the schema snapshot to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NUMBER: ${{ inputs.release_number }}
+        run: |
+          mv migrated.sql schema-snapshot.sql
+          mv manifest.json schema-snapshot.manifest.json
+          gh release upload "${RELEASE_NUMBER}" \
+            schema-snapshot.sql schema-snapshot.manifest.json \
+            --clobber --repo "${GITHUB_REPOSITORY}"

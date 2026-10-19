@@ -6,7 +6,7 @@ models while using the new URL and LocationFindingReference models underneath.
 """
 import datetime
 
-from django.db.models import OuterRef, Prefetch, Value
+from django.db.models import OuterRef, Prefetch, Subquery, Value
 from django.db.models.functions import Coalesce
 from django_filters import BooleanFilter, CharFilter, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
@@ -277,11 +277,19 @@ class V3EndpointStatusCompatibleFilterSet(FilterSet):
         return queryset.filter(status=FindingLocationStatus.Mitigated, auditor__iexact=value)
 
     def filter_endpoint(self, queryset, name, value):
-        # A Location is shared, so match only against references the caller may see.
-        visible = get_authorized_location_product_reference(
+        # The value is an /api/v2/endpoints/ id: one product's reference to a Location. A Location
+        # is shared, so match only against a reference the caller may see, and only the statuses
+        # of that product's findings, as a legacy Endpoint_Status always belonged to its
+        # endpoint's product.
+        reference = get_authorized_location_product_reference(
             "view", user=getattr(getattr(self, "request", None), "user", None),
-        ).filter(id=value)
-        return queryset.filter(location__products__in=visible)
+        ).filter(id=value).values("location_id", "product_id").first()
+        if reference is None:
+            return queryset.none()
+        return queryset.filter(
+            location_id=reference["location_id"],
+            finding__test__engagement__product_id=reference["product_id"],
+        )
 
     class Meta:
         model = LocationFindingReference
@@ -303,7 +311,8 @@ class V3EndpointStatusCompatibleSerializer(ModelSerializer):
     risk_accepted = SerializerMethodField()
 
     endpoint = SerializerMethodField()
-    location_id = IntegerField(source="location.id")
+    # The column itself: reading location.id would load each row's Location, one query per row.
+    location_id = IntegerField(read_only=True)
 
     def get_date(self, obj) -> datetime.date | None:
         return obj.created.date() if obj.created else None
@@ -327,11 +336,8 @@ class V3EndpointStatusCompatibleSerializer(ModelSerializer):
         return obj.status == FindingLocationStatus.RiskAccepted
 
     def get_endpoint(self, obj) -> int | None:
-        product_ref = LocationProductReference.objects.filter(
-            location=obj.location,
-            product=obj.finding.test.engagement.product,
-        ).first()
-        return product_ref.location.id if product_ref else None
+        # The id /api/v2/endpoints/ lists for this finding's product, annotated by the viewset.
+        return getattr(obj, "endpoint_reference_id", None)
 
     class Meta:
         model = LocationFindingReference
@@ -355,4 +361,14 @@ class V3EndpointStatusCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin
 
     def get_queryset(self):
         """Get authorized URLs using Endpoint authorization logic."""
-        return get_authorized_location_finding_reference("view").filter(location__location_type=URL.LOCATION_TYPE).distinct()
+        # `endpoint` is the product reference /api/v2/endpoints/ lists for the finding's own
+        # product, read once in SQL rather than once per row, and only when the caller may view it.
+        endpoint_reference = get_authorized_location_product_reference("view", user=self.request.user).filter(
+            location=OuterRef("location"),
+            product=OuterRef("finding__test__engagement__product"),
+        ).order_by("id").values("id")[:1]
+        return get_authorized_location_finding_reference("view").filter(
+            location__location_type=URL.LOCATION_TYPE,
+        ).annotate(
+            endpoint_reference_id=Subquery(endpoint_reference),
+        ).distinct()
