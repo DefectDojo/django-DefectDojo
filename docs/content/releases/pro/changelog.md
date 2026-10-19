@@ -18,6 +18,58 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## October 2026: v3.4
 
+### October 19, 2026: v3.4.200
+
+New features:
+* **(UI)** The Pro UI has in-app walkthroughs. A lightbulb in the lower right of every page lists the walkthroughs for that page: the App Tour, plus task walkthroughs for importing, triage, access, reports, admin setup, the Jira connector, and the Triage Engine. First-time users are offered the App Tour on Home. Requires the **In-App Walkthroughs** feature flag, on by default. See [In-App Walkthroughs](/navigation/pro__walkthroughs/).
+* **(Tables)** The Findings list has a grid view, a filter bar, and a Match Any mode. The Assets, Organizations, Engagements, and Tests lists get the same grid view and filter bar.
+* **(Triage Engine)** A new On Dedupe Match trigger decides what deduplication does with a match in another Asset: mark it a duplicate as before, or keep both Findings active with their own SLAs and link them. Two new actions, Copy Status from Matched Finding and Apply Status to Linked Findings, carry false positive, out of scope, and risk accepted decisions between linked Findings.
+* **(Connectors)** [StackHawk](/connectors/toolreference/stackhawk/) and [Qualys TotalAppSec](/connectors/toolreference/qualys_totalappsec/) connectors are available.
+* **(Connectors)** Connectors set an Asset's type from the vendor's data when a record is mapped and on every sync, and Triage Engine rules can set it too. A type chosen by a person or a rule is never overwritten.
+
+Enhancements:
+* **(Tables)** Text column filters gain In List and Not in List modes, every multi-select column filter has an Include / Exclude switch, and the Asset and Organization pick-list filters accept a pasted list. Pressing Enter applies a column filter or the filter bar editor.
+* **(Findings)** A Finding's risk is shown as a meter that marks its band, instead of a written level. The Findings list has an Owner (Team) column and filter, and the API can filter Findings by owner and assignee.
+* **(Triage Engine)** Rules can use Asset metadata, custom fields, and contacts in notifications, and select fields support partial matching.
+* **(Connectors)** Wiz reports network exposure as asset exposure evidence, FOSSA syncs can be limited by issue category and by project label or title, and Qualys imports host tags and can group Assets by tag. Push to Connector is offered only when a connector covers the Finding, and says what each push sent.
+* **(Assets)** The reachability probe checks the addresses held in Locations, and superusers configure it under **Settings > Reachability Probe**. See [Asset Exposure](/triage_findings/finding_scoring/asset_exposure/).
+* **(Deduplication)** A rehash keeps going when a worker stops, and shows its progress.
+* **(Settings)** Every flag on the [Feature Flags](/admin/feature_flags/pro__feature_flags/) page links to its documentation.
+* **(Performance)** The Pro UI loads its application state once and fetches only what changed as you navigate. The daily SLA run batches its notifications and loads its data up front, the asset page, Findings list, and Command Center no longer recount large Finding sets, list filters stay fast at scale, approved Sensei fix candidates are delivered in the background, and saving a Finding no longer runs one query per vulnerability id.
+* **(UI)** Form checks show their messages in the app language, and errors the server returns appear under the field they name. Tags have readable contrast in light and dark themes, with corrected Medium and High colors, table column headers use the monospace label font, the asset hierarchy and Location map editors stack on phones, and a failed table preference save shows one toast.
+
+Bug fixes:
+* **(Findings)** Merging Findings deletes each merged Finding on its own, so duplicates and Jira stay in sync, and the merge counts bulk-selected Findings. Users mentioned in a review request are notified, and review notes are cleared.
+* **(Jira)** Findings closed because a threat model superseded them are closed in Jira too.
+* **(Importers)** Imports and reimports no longer fail when Findings are deleted while they run, and vulnerability ids that are not strings are accepted.
+* **(Deduplication)** Excess duplicate deletion runs one at a time, so overlapping runs no longer deadlock, and it only waits for imports in the same database.
+* **(Parsers)** SARIF tags and OSV aliases supply CVE and GHSA ids.
+* **(Threat Intelligence)** A matched Finding gets KEV and EPSS data when a reimport adds its CVE.
+* **(Notifications)** The daily SLA run continues when one Finding fails.
+* **(Sensei)** Sensei no longer offers fixes for Findings with no file, and a GitHub 404 from a deleted App or a missing installation is explained. Fixes and the Bedrock connection test use the API Base URL set in AI Model Settings for Claude, OpenAI, and Bedrock. Reachability analysis on Go repositories completes.
+* **(Connectors)** An un-ignored mapped record returns to Good and syncs again, and a mapping save with duplicate values no longer fails. Snyk follows every results page, Cyberwatch reads live server data, and Cycode accepts one language or a list. The Jira sign-in flow for Downstream connectors says why it failed.
+* **(MCP)** Toolset selection works, and MCP server upgrades no longer interrupt `/mcp`.
+* **(Compliance)** Hand-entered POA&M items stay open across syncs and can carry a scheduled completion date, the POA&M artifacts API honors its snapshot and kind filters, and DAST connector scan types count as web application assessments.
+* **(Assets)** Every user who can view an Asset sees its Organization and contact names.
+* **(Locations)** Old Endpoint list links keep their filters, **New Location** and **Add Existing** show only for users who can edit the Asset (and work for member Writers), the Location Map is translated, and the endpoint status API identifies endpoints by the id the endpoints API lists.
+* **(Tables)** A page's pinned filter stays locked outside an OR group, child pages pin only the parent, and multi-select options apply on click without a search.
+* **(Permissions)** Group Owners and Maintainers can list and open the groups they belong to, and member errors are complete, translated sentences.
+* **(Settings)** The Pro UI loads on databases migrated from open source whose settings record is not the first row, and the Pro settings record is created only once.
+* **(API)** API v3 file uploads accept a title that another file already uses, and a title over 100 characters returns 400. The custom field values API filters by Asset. The admin error email for an unexpected API error includes the traceback.
+* **(UI)** In the classic UI, multi-select filter fields render as searchable dropdowns.
+
+Security fixes:
+* **(Authorization)** Changing or removing an Owner on an Asset, Organization, or group requires permission to grant the Owner role. Downstream connector errors and ticket links show only Findings the user can view, deleting a mapping or connector requires edit access to the Assets it targets, and the Jira sign-in flow re-checks the user's permission. Legacy Endpoint detail views check access through the Asset or Finding.
+
+Behavior changes:
+* **(Navigation)** The classic sidebar and the Menu 2.0 toggle are removed, and every user gets the current [sidebar](/navigation/pro__sidebar/).
+* **(Findings)** The Findings list opens with nine columns: Severity, Risk, Finding, Asset, Status, Age, SLA, Found By, and Tags. The rest are in the Columns picker. Saved table preferences keep their columns, and columns added after a preference was saved start hidden.
+
+Upgrade notes:
+* **(Deployment)** The initializer refuses to migrate without a valid license in `DD_LICENSE`, the mounted license file, or the database. An expired license still passes. Please see [the upgrade guide](/get_started/pro/onprem/upgrading/#the-initializer-needs-a-valid-license) before upgrading.
+* **(Deployment)** A fresh install loads a schema built for its release instead of running every migration, so the first start is much faster. Upgrades are unchanged. `DD_SCHEMA_DUMP_PATH` overrides the schema file's path, and an empty value turns this off.
+* **(Helm)** The Orchestrator TLS private key is kept only in its Secret and no longer copied into the ConfigMap. `mcp-server` rolls out with no downtime, with a preStop wait set by `lifecycle.preStop.waitSeconds.mcpServer`, nginx forwards the query string on `/mcp`, and Django and Celery receive the Sensei Vertex project and region.
+
 ### October 14, 2026: v3.4.101
 
 New features:
