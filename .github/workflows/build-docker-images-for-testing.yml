@@ -51,6 +51,38 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
+      # The django image every test job runs carries the latest release's schema snapshot, so its
+      # initializer (UI and k8s jobs) or the unit-test entrypoint loads the snapshot into the empty
+      # database and applies only the migrations this branch added since that release, instead of
+      # every migration from zero (dojo/management/commands/schema_snapshot.py). Published images
+      # carry their own release's snapshot (release-x-manual-add-schema-snapshot.yml); CI builds
+      # from source, so it adds the latest release's here, from the release assets, as one more
+      # stage on top of the Dockerfile's last one. Until a release has a snapshot, the image is
+      # built as before and every job migrates from zero.
+      - name: Fetch the latest release's schema snapshot
+        id: snapshot
+        if: matrix.docker-image == 'django'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OS: ${{ matrix.os }}
+        run: |
+          dir="${RUNNER_TEMP}/schema-snapshot"
+          mkdir -p "${dir}"
+          if ! gh release download --repo "${GITHUB_REPOSITORY}" --dir "${dir}" \
+              --pattern schema-snapshot.sql --pattern schema-snapshot.manifest.json; then
+            echo "::notice::The latest release has no schema snapshot: building the django image without one"
+            exit 0
+          fi
+          dockerfile="${RUNNER_TEMP}/Dockerfile.django-${OS}"
+          cp "Dockerfile.django-${OS}" "${dockerfile}"
+          printf '%s\n' '' \
+            'FROM django-unittests AS django-unittests-schema-snapshot' \
+            'COPY --from=schema-snapshot schema-snapshot.sql /schema-snapshot/migrated.sql' \
+            'COPY --from=schema-snapshot schema-snapshot.manifest.json /schema-snapshot/manifest.json' \
+            >> "${dockerfile}"
+          echo "file=${dockerfile}" >> "$GITHUB_OUTPUT"
+          echo "context=schema-snapshot=${dir}" >> "$GITHUB_OUTPUT"
+
       - name: Build
         id: docker_build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -61,7 +93,8 @@ jobs:
           context: .
           push: false
           tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }},${{ env.IMAGE_REPOSITORY }}/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
-          file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
+          file: ${{ steps.snapshot.outputs.file || format('Dockerfile.{0}-{1}', matrix.docker-image, matrix.os) }}
+          build-contexts: ${{ steps.snapshot.outputs.context }}
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}-${{ env.PLATFORM }}_img
 
       # export docker images to be used in next jobs below
