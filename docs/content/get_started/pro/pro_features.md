@@ -59,7 +59,7 @@ See [AI Inventory](/asset_modelling/locations/pro__ai_inventory/), [AI Governanc
 
 ### Pro Dashboards and Reporting
 
-Generate [instant reports and metrics](/get_started/about/ui_pro_vs_os/#new-dashboards) to share the security posture of your apps and repos, evaluate your security tools and analyze your team's performance in addressing security issues.
+Generate [instant reports and metrics](/get_started/about/ui_pro_vs_os/#insights-dashboards) to share the security posture of your apps and repos, evaluate your security tools and analyze your team's performance in addressing security issues.
 
 The graphics on the landing page can be exported as SVG files, and the data used to create the graphics can also be exported as a table. 
 
