@@ -18,3 +18,9 @@ You will need a Shodan API key, found on your Shodan **Account** page. Host sear
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each matching host becomes a Record, and each CVE Shodan detected on that host's exposed services is imported as a finding — severity is derived from the CVSS score, with EPSS and CISA KEV context included where available. Each page of search results consumes one Shodan query credit.
+
+#### Asset Exposure
+
+With [Asset Exposure](/triage_findings/finding_scoring/asset_exposure/) enabled, each sync also records every matching host as **Externally Exposed**, at full confidence: Shodan reached the host from the internet and a service answered, so the record is itself the evidence. The asset's Exposure panel lists each service Shodan saw, with its address, port and transport.
+
+A host that stops matching your search query is not marked as closed. Shodan not seeing a service is not evidence that it is gone, so the exposure ages out of the asset after 30 days without a fresh observation.

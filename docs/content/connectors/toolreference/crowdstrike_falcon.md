@@ -20,3 +20,11 @@ Create the API client in the CID that holds the hosts you want to import. If you
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each Falcon host becomes a Record, named for its hostname, OS, and type. Only **open** and **reopened** Spotlight vulnerabilities are imported, so reimport closes remediated findings.
+
+#### Asset Exposure
+
+With [Asset Exposure](/triage_findings/finding_scoring/asset_exposure/) enabled, each sync also reads Spotlight's internet exposure assessment for the host. When Spotlight reports the host as internet-facing, the asset records **Externally Exposed**, with the hostname as evidence.
+
+Spotlight's other answers record nothing. **Pending** means CrowdStrike has not finished assessing the host. **No** means only that the host is not internet-facing, which does not say whether it is isolated or reachable over a VPN or another network, so it is not treated as either.
+
+The assessment comes from the host's Spotlight vulnerabilities, so it needs the **Vulnerabilities (Spotlight): Read** scope, and a host with no open Spotlight vulnerabilities at or above the connector's **Minimum Severity** reports no exposure. A client without that scope logs a warning and syncs everything else normally.
