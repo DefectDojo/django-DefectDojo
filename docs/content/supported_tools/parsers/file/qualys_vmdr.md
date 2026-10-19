@@ -128,6 +128,8 @@ The parser creates Endpoint objects from IP addresses:
 - Multiple IPv4 addresses (comma-separated) create multiple endpoints
 - Falls back to IPv6 if no IPv4 address is present
 
+With Locations enabled, each IP address becomes a URL location in the same way. In DefectDojo Pro, the Asset Name also becomes a **Host** location, so findings on the same system are grouped under its system name even when its IP address changes. The Operating System column is recorded on that host. The host's name is stored exactly as Qualys reports it. Open source installs keep only the URL locations.
+
 ### CSV Format Handling
 
 Qualys VMDR exports use a non-standard CSV format where each row is wrapped in outer quotes and fields are delimited by `,""` instead of standard `","`. The parser automatically detects and handles both standard and non-standard CSV formats.

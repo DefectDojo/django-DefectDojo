@@ -57,6 +57,7 @@ The optional **Create Endpoints From Hosts** toggle attaches each finding's Qual
 * The endpoint host is the Qualys host's **DNS name**, or its **NetBIOS name** when there is no DNS name, or its **IP address** when there is neither — the same preference order the connector uses to name the Record.
 * When the detection reports a **port**, it is included, so `web01.example.com:443` and `web01.example.com:8443` remain distinct endpoints.
 * If the asset already has a matching endpoint, the finding is attached to it; otherwise the endpoint is created. No duplicate endpoints are created either way.
+* With Locations enabled, the finding also gets a **Host** location named after the Qualys host's DNS name, or its NetBIOS name when there is no DNS name. A host known only by its IP address gets the endpoint and no Host location. The host's operating system is recorded on the Host location.
 
 The toggle is **off by default**, which keeps the connector's historical behavior: findings stay asset-only. It can be changed after the connection is created, and takes effect on the next Sync — existing open findings gain their endpoints then too, since a Sync reimports them.
 

@@ -51,6 +51,8 @@ class QualysVMDRQIDParser:
             finding.unsaved_locations = parse_locations(
                 row.get("Asset IPV4", ""),
                 row.get("Asset IPV6", ""),
+                asset_name=row.get("Asset Name", ""),
+                operating_system=row.get("Operating System", ""),
             )
         else:
             # TODO: Delete this after the move to Locations

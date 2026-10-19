@@ -114,6 +114,33 @@ class LocationData:
         )
 
     @classmethod
+    def host(
+        cls,
+        *,
+        hostname: str,
+        os_family: str = "",
+        os_version: str = "",
+        kernel: str = "",
+        architecture: str = "",
+    ) -> LocationData:
+        """
+        A machine identified by its name: the system name, NetBIOS name or DNS name a
+        scanner reports, stored exactly as reported. Identity is the hostname alone; the
+        other keys describe the machine and are not part of its identity. Report a host's
+        IP addresses as ``url`` locations alongside this one, not in ``hostname``.
+        """
+        return cls(
+            type="host",
+            data={
+                "hostname": hostname,
+                "os_family": os_family,
+                "os_version": os_version,
+                "kernel": kernel,
+                "architecture": architecture,
+            },
+        )
+
+    @classmethod
     def image(
         cls,
         *,
