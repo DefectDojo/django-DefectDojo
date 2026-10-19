@@ -13,7 +13,7 @@ from django.utils.http import urlencode
 
 # from unittest import skip
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.models import Finding, Risk_Acceptance, System_Settings
+from dojo.models import Finding, Risk_Acceptance, System_Settings, SLA_Configuration
 from dojo.utils import get_system_setting
 
 from .dojo_test_case import DojoTestCase
@@ -49,6 +49,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def setUp(self):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
+        self.sla_configuration = SLA_Configuration.objects.create(name="RiskAcceptanceExpiration", critical=40, high=50, medium=60, low=999)
 
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
 

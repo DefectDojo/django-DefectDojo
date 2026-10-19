@@ -329,6 +329,7 @@ class EconomicImpactViewSet(prefetch.PrefetchListMixin,
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "id",
+        "risk_acceptance_engagement"
     ]
     pagination_class = LimitOffsetPagination
 
