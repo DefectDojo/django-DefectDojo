@@ -16,6 +16,7 @@ from dojo.models import (
     Engagement,
     Product,
     Product_Type,
+    SLA_Configuration,
     User)
 from dojo.utils import get_system_setting
 from .dojo_test_case import DojoTestCase
@@ -194,6 +195,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
 
 
     def test_reinstate_risk_acceptance_findings_accepted(self):
+        SLA_Configuration.objects.create(name="RiskAcceptanceExpiration", critical=40, high=50, medium=60, low=999)
         # first create an expired risk acceptance
         self.test_expire_risk_acceptance_findings_active()
         ra = Risk_Acceptance.objects.last()

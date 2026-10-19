@@ -208,6 +208,8 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertTrue(all(finding.sla_start_date == timezone.now().date() for finding in findings))
 
     def test_reinstate_risk_acceptance_findings_accepted(self):
+        SLA_Configuration.objects.create(name="RiskAcceptanceExpiration", critical=40, high=50, medium=60, low=999)
+
         # first create an expired risk acceptance
         self.test_expire_risk_acceptance_findings_active()
         ra = Risk_Acceptance.objects.last()
