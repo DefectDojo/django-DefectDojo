@@ -49,7 +49,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def setUp(self):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
-        self.sla_configuration = SLA_Configuration.objects.create(name="RiskAcceptanceExpiration", critical=40, high=50, medium=60, low=999)
+        self.create_sla_configuration(name="RiskAcceptanceExpiration")
 
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
 
@@ -208,8 +208,6 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertTrue(all(finding.sla_start_date == timezone.now().date() for finding in findings))
 
     def test_reinstate_risk_acceptance_findings_accepted(self):
-        SLA_Configuration.objects.create(name="RiskAcceptanceExpiration", critical=40, high=50, medium=60, low=999)
-
         # first create an expired risk acceptance
         self.test_expire_risk_acceptance_findings_active()
         ra = Risk_Acceptance.objects.last()

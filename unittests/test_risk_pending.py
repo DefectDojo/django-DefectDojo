@@ -52,6 +52,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
     def setUp(self):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
+        self.create_sla_configuration(name="RiskAcceptanceExpiration")
 
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid):
         args = (eid, fid, )

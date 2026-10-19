@@ -116,12 +116,7 @@ def active_findings_long_risk_acceptance(finding_qs: QuerySet[Finding]):
         finding.risk_status = "Risk Active"
         finding.active = True
         finding.risk_accepted = False
-
-        finding.save(update_fields=[
-            "risk_status",
-            "active",
-            "risk_accepted"
-        ])
+        finding.save()
         finding.tags.remove("long_term_risk_acceptance")
 
 
