@@ -110,10 +110,9 @@ def reinstate(risk_acceptance, old_expiration_date):
         # best effort JIRA integration, no status changes, just a comment
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), reinstation_message_creator)
 
-        if feature_flag:
-            risk_acceptance.expiration_date_handled = None
-            risk_acceptance.expiration_date_warned = None
-            risk_acceptance.save()
+        risk_acceptance.expiration_date_handled = None
+        risk_acceptance.expiration_date_warned = None
+        risk_acceptance.save()
 
 
 def delete(eng, risk_acceptance):
