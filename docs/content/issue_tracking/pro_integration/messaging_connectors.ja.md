@@ -5,7 +5,7 @@ weight: 4
 audience: pro
 ---
 
-**利用可否:** メッセージングコネクタはベータ機能です。Feature Flagsページで**Messaging Connectors**を有効にしてください。アラートはルールによってルーティングされるため、**Triage Engine**も併せて有効にする必要があります。
+**利用可否:** メッセージングコネクタは一般提供(GA)されており、アラートをルーティングする[Triage Engine](/automation/triage_engine/about/)とともに、CloudとOn-Premiseの両方のすべてのDefectDojo Proインスタンスでオンになっています。有効化の操作は不要で、どちらもFeature Flagsページには表示されなくなりました。接続と、その接続に送信するルールを作成するまでは、何も送信されません。
 
 メッセージングコネクタは、DefectDojoからチャットサービス、メールアドレス、またはAmazon SNSトピックへアラートを送信します。同じ**Downstream Connectors**ページ上で、チケッティングコネクタやインシデント管理コネクタと並んで配置されており、設定方法も同様です。まず接続を一度作成し、その後何を送信するかを決めます。
 

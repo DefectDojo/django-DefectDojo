@@ -32,6 +32,11 @@ La page répertorie les fonctionnalités que vous pouvez choisir d'adopter. Deux
 * **Downstream Connectors** — voir [Downstream Connectors](/connectors/downstream/about/)
 * **Universal Parser** — voir [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
 * **Asset Hierarchy** — voir [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
+* **Triage Engine** (anciennement répertoriée sous le nom **Rules Engine 2.0 (Graph Editor)**) — voir [À propos de Triage Engine](/automation/triage_engine/about/)
+* **Messaging Connectors** — voir [Connecteurs de messagerie](/issue_tracking/pro_integration/messaging_connectors/)
+* **Customizable Dashboards** (anciennement répertoriée sous le nom **Dashboards 2.0**) — voir [Tableaux de bord personnalisables](/metrics_reports/dashboards/custom-dashboards/)
+* **Customizable Page Layouts** — voir [Customizing Page Layouts](/navigation/pro__page_layouts/)
+* **AI Threat Modeling** — voir [Modélisation des menaces](/sensei/threat_modeling/). La génération d'un modèle de menaces nécessite toujours la licence Sensei.
 * **Appearance** et **Feature Flags** — les deux pages de Paramètres portant ce nom
 
 Rien ne change pour votre instance si l'une de ces fonctionnalités était déjà activée. Si l'une d'elles était désactivée, elle est désormais activée : ces fonctionnalités font désormais partie intégrante de DefectDojo Pro plutôt que d'être optionnelles. Contactez le [support DefectDojo](mailto:support@defectdojo.com) si cela pose problème pour votre instance.

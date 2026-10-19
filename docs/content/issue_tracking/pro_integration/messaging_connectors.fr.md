@@ -6,7 +6,7 @@ weight: 4
 audience: pro
 ---
 
-**Disponibilité :** les connecteurs de messagerie sont une fonctionnalité bêta. Activez **Messaging Connectors** sur la page Feature Flags. Comme les alertes sont acheminées par des règles, **Triage Engine** doit également être activé.
+**Disponibilité :** les connecteurs de messagerie sont disponibles pour tous et activés sur chaque instance DefectDojo Pro, aussi bien Cloud qu'On-Premise, tout comme [Triage Engine](/automation/triage_engine/about/), qui achemine leurs alertes. Il n'y a rien à activer, et aucun des deux ne figure plus sur la page Feature Flags. Rien n'est envoyé tant que vous n'avez pas créé une connexion et une règle qui lui envoie des alertes.
 
 Les connecteurs de messagerie envoient des alertes de DefectDojo vers un service de chat, une adresse e-mail ou un topic Amazon SNS. Ils se trouvent à côté des connecteurs de ticketing et de gestion des incidents sur la même page **Downstream Connectors**, et se configurent de la même manière : créez une connexion une fois, puis décidez ce qui doit lui être envoyé.
 

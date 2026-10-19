@@ -5,7 +5,7 @@ weight: 4
 audience: pro
 ---
 
-**Disponibilità:** i Connettori di messaggistica sono una funzionalità beta. Abilita **Messaging Connectors** nella pagina Feature Flags. Poiché gli avvisi vengono instradati tramite regole, è necessario abilitare anche **Triage Engine**.
+**Disponibilità:** i Connettori di messaggistica sono disponibili a livello generale e attivi su ogni istanza DefectDojo Pro, sia Cloud che On-Premise, insieme a [Triage Engine](/automation/triage_engine/about/), che ne instrada gli avvisi. Non c'è nulla da abilitare, e nessuno dei due compare più nella pagina Feature Flags. Non viene inviato nulla finché non crei una connessione e una regola che invii verso di essa.
 
 I Connettori di messaggistica inviano avvisi da DefectDojo a un servizio di chat, a un indirizzo email o a un topic Amazon SNS. Si trovano accanto ai connettori di ticketing e di gestione degli incidenti nella stessa pagina **Downstream Connectors** e si configurano allo stesso modo: si crea una connessione una sola volta, poi si decide cosa inviarle.
 

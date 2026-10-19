@@ -55,7 +55,7 @@ Every page that belongs to a `DEPRECATED` feature opens with a warning banner. T
 **`LEGACY`**
 
 * **Connect > Jira** — the original per-Asset Jira integration, superseded by the downstream connector for Jira. See [Pro Integrations](/connectors/downstream/about/).
-* **Act > Triage Engine > Classic Rules** is the original Rules Engine, superseded by Triage Engine. It carries the badge only on instances that have both engines turned on, since there is nothing to move to otherwise. See the [conversion guide](/automation/triage_engine/converting_from_rules_engine/).
+* **Act > Triage Engine > Classic Rules** is the original Rules Engine, superseded by Triage Engine. It appears, with the badge, only on instances that have the original Rules Engine turned on. See the [conversion guide](/automation/triage_engine/converting_from_rules_engine/).
 
 **`DEPRECATED`**
 

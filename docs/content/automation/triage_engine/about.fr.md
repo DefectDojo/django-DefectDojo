@@ -1,6 +1,6 @@
 ---
 title: À propos de Triage Engine
-description: Ce qu'est Triage Engine, comment l'activer, et les concepts sur lesquels
+description: Ce qu'est Triage Engine, où le trouver, et les concepts sur lesquels
   il repose
 weight: 1
 audience: pro
@@ -24,13 +24,13 @@ Le [Rules Engine](/automation/rules_engine/about/) d'origine applique une liste 
 * **La traçabilité.** Chaque exécution est enregistrée nœud par nœud sous forme d'[Exécution](../runs/), et chaque envoi sortant est enregistré comme une [Livraison](../deliveries/) qui indique exactement ce qui a été envoyé, où cela a été envoyé, et comment cela s'est terminé.
 * **Un mode de simulation.** Une règle peut enregistrer précisément ce qu'elle aurait envoyé sans rien envoyer réellement, ce qui permet de la tester en toute sécurité avant de la laisser agir à l'extérieur.
 
-Les deux moteurs fonctionnent côte à côte. Activer Triage Engine ne désactive ni ne convertit vos règles existantes, et il existe un [convertisseur](../converting_from_rules_engine/) pour le jour où vous voudrez les faire migrer.
+Les deux moteurs fonctionnent côte à côte. Triage Engine ne désactive ni ne convertit vos règles existantes, et il existe un [convertisseur](../converting_from_rules_engine/) pour le jour où vous voudrez les faire migrer.
 
-## Activer Triage Engine
+## Où trouver Triage Engine
 
-Triage Engine est en version bêta et est désactivé par défaut. Un superutilisateur l'active depuis **Settings > Feature Flags** (Paramètres > Indicateurs de fonctionnalités), aussi bien sur les instances Cloud que sur les instances On-Premise. Voir [Indicateurs de fonctionnalités](/admin/feature_flags/pro__feature_flags/).
+Triage Engine est disponible pour tous et activé sur chaque instance DefectDojo Pro, aussi bien Cloud qu'On-Premise. Il n'y a rien à activer, et il ne figure plus sur la page Feature Flags. Le fait qu'il soit activé ne déclenche aucun traitement à lui seul : les nouvelles règles, ainsi que les règles converties depuis le Rules Engine d'origine, sont créées désactivées.
 
-Une fois l'indicateur activé, une section **Triage Engine** apparaît dans la barre latérale avec trois pages :
+La section **Triage Engine** de la barre latérale comporte trois pages :
 
 | Page | À quoi elle sert |
 |------|----------------|

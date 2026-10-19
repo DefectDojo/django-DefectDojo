@@ -96,7 +96,7 @@ The record catalogs these views route to (Organizations through Findings) are in
 
 ### Triage Engine
 
-One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs, Deliveries and Webhook Receivers. When both engines are turned on, the classic engine appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide; when only one is on, only its pages are listed and no badge appears.
+One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs, Deliveries and Webhook Receivers. When the original Rules Engine is also turned on, it appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide; otherwise only the Triage Engine pages are listed and no badge appears.
 
 ### Remediation Center
 
@@ -192,7 +192,7 @@ If you are used to the classic sidebar:
 | Manage > Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
 | Manage > Rules Engine and Rules Engine 2.0 | Act > Triage Engine |
 | Manage > *(any)* > New *(record)* | The **New** *(record)* button on the matching list page |
-| Dashboards > Home | Overview > Dashboard (**Dashboards** when Dashboards 2.0 is on). **Overview > Home** is now the [Command Center](/metrics_reports/dashboards/command-center/) |
+| Dashboards > Home | Overview > Dashboards. **Overview > Home** is now the [Command Center](/metrics_reports/dashboards/command-center/) |
 | Settings > *(top level)* > Feature Flags | Unchanged: still at the top level, below All Settings |
 | Settings > Pro Settings > System Settings | Settings > System > System Settings |
 | Settings > Pro Settings > Appearance | Settings > System > Appearance |
@@ -227,7 +227,7 @@ Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/
 | **Calendar** | Calendar, from Overview |
 | **Smart Upload** | Smart Upload and Unassigned Findings, from Connect > Import |
 
-The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Triage Engine, the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
+The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
 
 The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 

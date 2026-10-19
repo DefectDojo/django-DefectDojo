@@ -7,7 +7,7 @@ weight: 11
 slug: custom-dashboards-api
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">注: カスタムダッシュボードREST API（レイアウト、ウィジェットカタログ、ウィジェットデータ）はDefectDojo Proの機能です。デフォルトでは無効になっており、スーパーユーザーがCloudおよびOn-Premiseの両方のインスタンスで**設定 > 機能フラグ**からカスタムダッシュボードを有効にできます。</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">注: カスタムダッシュボードREST API（レイアウト、ウィジェットカタログ、ウィジェットデータ）はDefectDojo Proの機能で、CloudおよびOn-Premiseの両方のすべてのProインスタンスで利用できます。</span>
 
 カスタムダッシュボードREST APIを使うと、[ダッシュボードUI](../custom-dashboards/)で手動で組み立てるのと同じダッシュボードを、すべてコードから構築できます。ウィジェットカタログを調べたり、レイアウトを作成・更新したり、デフォルトを設定したり、レイアウトをチームと共有したり、DefectDojoのフィルタリングを再実装することなくウィジェットのデータをオンデマンドでレンダリングしたりできます。レイアウト機能は、ダッシュボードを構築するAIエージェントのための主要な入口として設計されているため、リクエストの形式は意図的に内省しやすい構造になっています。
 
@@ -45,8 +45,6 @@ curl -s \
   -H "Accept: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
-
-> **🔑 重要:** ダッシュボードAPI全体はカスタムダッシュボード機能に依存しています。有効になるまでは、すべてのエンドポイントが`403 Dashboards 2.0 is not enabled.`を返します。詳細は[カスタムダッシュボードの有効化](../custom-dashboards/#enabling-customizable-dashboards)を参照してください。
 
 > **⚠️ セキュリティに関する注意:** APIトークンはDefectDojoデータへの完全なアクセス権を付与します。チャット、スクリーンショット、チケット、コミットされたファイルには絶対に貼り付けないでください。環境変数から読み込み、万一漏えいした場合はローテーションし、可能な限りサービスアカウントにトークンのスコープを限定してください。
 

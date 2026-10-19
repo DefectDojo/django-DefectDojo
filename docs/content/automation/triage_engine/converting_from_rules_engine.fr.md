@@ -11,7 +11,7 @@ aliases:
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : Triage Engine est une fonctionnalité réservée à DefectDojo Pro.</span>
 
-Les deux moteurs fonctionnent côte à côte. Activer Triage Engine ne change rien à vos règles [Rules Engine](/automation/rules_engine/about/) existantes, et il n'y a aucune échéance à laquelle vous devriez les faire migrer.
+Les deux moteurs fonctionnent côte à côte. Triage Engine ne change rien à vos règles [Rules Engine](/automation/rules_engine/about/) existantes, et il n'y a aucune échéance à laquelle vous devriez les faire migrer.
 
 Lorsque vous souhaitez les faire migrer, un convertisseur est disponible. Il traduit une règle Rules Engine (un filtre associé à une liste ordonnée d'actions) en un graphe Triage Engine équivalent.
 
@@ -80,7 +80,7 @@ Une règle dont le propriétaire n'est pas défini se convertit, avec un avertis
 
 ## Un ordre suggéré
 
-1. Activez Triage Engine et laissez vos règles existantes en cours d'exécution.
+1. Laissez vos règles existantes en cours d'exécution.
 2. Exécutez le convertisseur avec `--dry-run` et lisez le rapport.
 3. Convertissez. Tout est créé désactivé.
 4. Ouvrez chaque règle convertie, vérifiez le graphe, et laissez le mode sur **Simulate**.

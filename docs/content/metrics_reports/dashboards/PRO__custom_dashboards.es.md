@@ -11,7 +11,7 @@ aliases:
 - /es/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: los Paneles personalizables (diseños, widgets y el catálogo de widgets) son una función de DefectDojo Pro. Están desactivados de forma predeterminada: un Superusuario puede activarlos desde **Configuración > Feature Flags** tanto en instancias Cloud como On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: los Paneles personalizables (diseños, widgets y el catálogo de widgets) son una función de DefectDojo Pro, activada en todas las instancias Pro, tanto Cloud como On-Premise.</span>
 
 Los Paneles personalizables de DefectDojo Pro permiten que cada usuario arme su propia página principal a partir de **widgets** (contadores, gráficos, tablas de clasificación, feeds y notas) organizados en una cuadrícula de arrastrar y soltar. En lugar de un único panel fijo para todos, usted construye los **diseños** que le resultan útiles: una vista general ejecutiva, una cola de triaje, un tablero de velocidad de remediación, una vista de eficacia de escáneres. Puede mantener los diseños privados, publicarlos para todo su equipo, establecer uno como página de inicio predeterminada y clonar cualquier diseño (propio o una plantilla compartida) como punto de partida.
 
@@ -25,13 +25,13 @@ DefectDojo Pro reemplaza esa página fija por **paneles personalizables por usua
 
 > **💡 Tip:** en DefectDojo Pro, los **Activos** antes se llamaban **Productos** y las **Organizaciones** antes eran **Tipos de producto**. La interfaz usa la nueva terminología, pero algunas configuraciones de widgets subyacentes todavía usan los nombres antiguos; por ejemplo, la mayoría de los widgets toman un `model` de `finding`, `product`, `engagement` o `test`. Donde esto sea relevante, se indicará más adelante.
 
-## Activación de los Paneles personalizables
+## Dónde encontrar los Paneles personalizables
 
-Los Paneles personalizables están desactivados de forma predeterminada. Un Superusuario puede activarlos desde **Configuración > Feature Flags**, tanto en instancias Cloud como On-Premise. Consulte [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Los Paneles personalizables están disponibles de forma general y activados en todas las instancias de DefectDojo Pro, tanto Cloud como On-Premise. No hay nada que activar, y ya no aparecen en la página de Feature Flags.
 
-Una vez activada, la página **🏠 Inicio** muestra su panel personalizable y queda disponible la [API REST de paneles](../custom-dashboards-api/).
+La página **🏠 Inicio** muestra su panel personalizable, que sustituye al panel clásico de mosaicos. La [API REST de paneles](../custom-dashboards-api/) está disponible en todas las instancias.
 
-> **🔑 Important:** mientras la función esté desactivada, la página de inicio conserva el panel anterior y todos los endpoints `/api/v2/dashboards/` devuelven `403 Dashboards 2.0 is not enabled.` Activarla **no** cambia el acceso a los datos de nadie: cada widget sigue respetando el control de acceso basado en roles de DefectDojo, de modo que cada usuario solo ve los Hallazgos, Activos y demás registros que está autorizado a ver.
+> **🔑 Important:** los Paneles personalizables **no** cambian el acceso a los datos de nadie: cada widget respeta el control de acceso basado en roles de DefectDojo, de modo que cada usuario solo ve los Hallazgos, Activos y demás registros que está autorizado a ver.
 
 ## Conceptos fundamentales
 

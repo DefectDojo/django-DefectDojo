@@ -8,7 +8,7 @@ weight: 12
 slug: custom-dashboards-llm
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Automatizar Painéis Personalizáveis com a API REST e uma LLM é um recurso do DefectDojo Pro. Ele vem desativado por padrão — um superusuário pode ativar os Painéis Personalizáveis em **Settings > Feature Flags** tanto em instâncias Cloud quanto On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Automatizar Painéis Personalizáveis com a API REST e uma LLM é um recurso do DefectDojo Pro, disponível em todas as instâncias Pro, tanto Cloud quanto On-Premise.</span>
 
 Os Painéis Personalizáveis do DefectDojo Pro são totalmente controlados pela API REST — e a superfície de layouts foi projetada com agentes de IA em mente. Isso significa que você pode delegar todo o trabalho a uma LLM: cole um único prompt autocontido no Claude, ChatGPT ou qualquer outro modelo capaz, descreva os painéis que você quer, e ele vai consultar o catálogo de widgets ativo do seu tenant, propor layouts, gerar um script Python executável, criar os layouts, verificá-los e, opcionalmente, definir seu padrão.
 
@@ -24,9 +24,7 @@ Este guia complementa o [guia da API de Painéis](../custom-dashboards-api/), qu
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 ```
 
-2. **Confirme que o recurso está ativado.** Os Painéis Personalizáveis precisam estar ativados na sua instância em **Settings > Feature Flags** — caso contrário, toda chamada de API retorna `403`.
-
-3. **Decida seus painéis.** A LLM vai perguntar o que você quer. Escolhas comuns:
+2. **Decida seus painéis.** A LLM vai perguntar o que você quer. Escolhas comuns:
 
    - **Executive Overview** — contagens principais, distribuição de severidade e conformidade de SLA em uma única visão.
    - **Daily Triage** — críticos/altos ativos, histograma de prioridade, burndown de SLA e sua fila "My Work".

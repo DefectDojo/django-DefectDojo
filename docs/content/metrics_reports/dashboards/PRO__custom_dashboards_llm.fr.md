@@ -8,7 +8,7 @@ weight: 12
 slug: custom-dashboards-llm
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : automatiser les tableaux de bord personnalisables avec l'API REST et un LLM est une fonctionnalité de DefectDojo Pro. Elle est désactivée par défaut — un superutilisateur peut activer les tableaux de bord personnalisables depuis **Settings > Feature Flags**, aussi bien sur les instances Cloud que On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : automatiser les tableaux de bord personnalisables avec l'API REST et un LLM est une fonctionnalité de DefectDojo Pro, disponible sur chaque instance Pro, aussi bien Cloud que On-Premise.</span>
 
 Les tableaux de bord personnalisables de DefectDojo Pro sont entièrement pilotés par l'API REST — et la surface des mises en page a été conçue en pensant aux agents d'IA. Cela signifie que vous pouvez confier toute la tâche à un LLM : collez un seul prompt autonome dans Claude, ChatGPT ou tout autre modèle compétent, décrivez les tableaux de bord que vous voulez, et il interrogera le catalogue de widgets en direct de votre tenant, proposera des mises en page, produira un script Python exécutable, créera les mises en page, les vérifiera et, en option, définira votre mise en page par défaut.
 
@@ -24,9 +24,7 @@ Ce guide va de pair avec le [guide de l'API des tableaux de bord](../custom-dash
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 ```
 
-2. **Confirmez que la fonctionnalité est activée.** Les tableaux de bord personnalisables doivent être activés pour votre instance depuis **Settings > Feature Flags** — sinon chaque appel API renvoie `403`.
-
-3. **Décidez de vos tableaux de bord.** Le LLM vous demandera ce que vous voulez. Choix courants :
+2. **Décidez de vos tableaux de bord.** Le LLM vous demandera ce que vous voulez. Choix courants :
 
    - **Executive Overview** — comptages principaux, répartition par sévérité et conformité SLA en un coup d'œil.
    - **Daily Triage** — critiques/élevées actives, histogramme de priorité, burndown SLA, et votre file « My Work ».

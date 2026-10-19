@@ -11,7 +11,7 @@ aliases:
 - /it/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: le Dashboard personalizzabili (layout, widget e catalogo widget) sono una funzionalità di DefectDojo Pro. Sono disattivate per impostazione predefinita — un Superuser può attivarle da **Impostazioni > Feature Flags** sia su Cloud che su istanze On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: le Dashboard personalizzabili (layout, widget e catalogo widget) sono una funzionalità di DefectDojo Pro, attiva su ogni istanza Pro, sia Cloud che On-Premise.</span>
 
 Le Dashboard personalizzabili di DefectDojo Pro consentono a ogni utente di comporre la propria home page a partire da **widget** — conteggi, grafici, classifiche, feed e note — disposti su una griglia drag-and-drop. Invece di un'unica dashboard fissa per tutti, costruisci i **layout** che contano per te: una panoramica esecutiva, una coda di triage, una board sulla velocità di remediation, una vista sull'efficacia degli scanner. Puoi mantenere i layout privati, pubblicarli per l'intero team, impostarne uno come pagina di destinazione predefinita e clonare qualsiasi layout (tuo o un template condiviso) come punto di partenza.
 
@@ -25,13 +25,13 @@ DefectDojo Pro sostituisce quella pagina fissa con **dashboard personalizzabili 
 
 > **💡 Tip:** In DefectDojo Pro, gli **Asset** erano precedentemente chiamati **Prodotti** e le **Organizzazioni** erano precedentemente **Tipi di prodotto**. L'interfaccia utilizza la nuova terminologia, ma alcune impostazioni sottostanti dei widget usano ancora i nomi legacy — ad esempio, la maggior parte dei widget accetta un `model` pari a `finding`, `product`, `engagement`, o `test`. Dove ciò è rilevante, viene indicato di seguito.
 
-## Attivare le Dashboard personalizzabili
+## Dove trovare le Dashboard personalizzabili
 
-Le Dashboard personalizzabili sono disattivate per impostazione predefinita. Un superuser può attivarle da **Impostazioni > Feature Flags**, sia su Cloud che su istanze On-Premise. Consulta [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Le Dashboard personalizzabili sono disponibili a livello generale e attive su ogni istanza DefectDojo Pro, sia Cloud che On-Premise. Non c'è nulla da abilitare, e non compaiono più nella pagina Feature Flags.
 
-Una volta attivata, la pagina **🏠 Home** mostra la tua dashboard personalizzabile e la [REST API delle Dashboard](../custom-dashboards-api/) diventa disponibile.
+La pagina **🏠 Home** mostra la tua dashboard personalizzabile, che sostituisce la classica dashboard a riquadri. La [REST API delle Dashboard](../custom-dashboards-api/) è disponibile su ogni istanza.
 
-> **🔑 Important:** Finché la funzionalità è disattivata, la home page mantiene la dashboard precedente e ogni endpoint `/api/v2/dashboards/` restituisce `403 Dashboards 2.0 is not enabled.` L'attivazione **non** modifica in alcun modo l'accesso ai dati di nessuno — ogni widget continua a rispettare il controllo degli accessi basato sui ruoli di DefectDojo, quindi ogni utente vede sempre e solo i Riscontri, gli Asset e gli altri record che è autorizzato a visualizzare.
+> **🔑 Important:** Le Dashboard personalizzabili **non** modificano in alcun modo l'accesso ai dati di nessuno — ogni widget rispetta il controllo degli accessi basato sui ruoli di DefectDojo, quindi ogni utente vede sempre e solo i Riscontri, gli Asset e gli altri record che è autorizzato a visualizzare.
 
 ## Concetti fondamentali
 

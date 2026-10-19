@@ -8,7 +8,7 @@ weight: 12
 slug: custom-dashboards-llm
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Automatizar los Paneles personalizables con la API REST y un LLM es una función de DefectDojo Pro. Está desactivada de forma predeterminada: un superusuario puede activar los Paneles personalizables desde **Settings > Feature Flags** tanto en instancias Cloud como On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Automatizar los Paneles personalizables con la API REST y un LLM es una función de DefectDojo Pro, disponible en todas las instancias Pro, tanto Cloud como On-Premise.</span>
 
 Los Paneles personalizables de DefectDojo Pro están totalmente impulsados por la API REST, y la superficie de diseños fue pensada teniendo en cuenta a los agentes de IA. Eso significa que puede delegar todo el trabajo a un LLM: pegue un único prompt autocontenido en Claude, ChatGPT o cualquier otro modelo capaz, describa los paneles que desea, y el modelo interrogará el catálogo de widgets en vivo de su tenant, propondrá diseños, generará un script de Python ejecutable, creará los diseños, los verificará y, opcionalmente, establecerá su predeterminado.
 
@@ -24,9 +24,7 @@ Esta guía complementa la [guía de la API de Paneles](../custom-dashboards-api/
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 ```
 
-2. **Confirme que la función esté activada.** Los Paneles personalizables deben estar activados para su instancia desde **Settings > Feature Flags**; de lo contrario, cada llamada a la API devuelve `403`.
-
-3. **Decida sus paneles.** El LLM le preguntará qué desea. Las opciones más comunes son:
+2. **Decida sus paneles.** El LLM le preguntará qué desea. Las opciones más comunes son:
 
    - **Panorama ejecutivo** — conteos principales, distribución de severidad y cumplimiento de SLA de un vistazo.
    - **Triage diario** — críticas/altas activas, histograma de prioridad, SLA burndown y su cola "My Work".

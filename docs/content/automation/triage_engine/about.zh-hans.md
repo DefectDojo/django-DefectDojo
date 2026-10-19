@@ -1,6 +1,6 @@
 ---
 title: 关于 Triage Engine
-description: Triage Engine 是什么、如何启用它，以及它所基于的核心概念
+description: Triage Engine 是什么、在哪里找到它，以及它所基于的核心概念
 weight: 1
 audience: pro
 aliases:
@@ -23,13 +23,13 @@ Triage Engine 只能通过 [Pro UI](/get_started/about/ui_pro_vs_os/) 访问。
 * **可追溯性。** 每次执行都会作为一次[运行（Run）](../runs/)按节点逐一记录，每次出站发送都会作为一条[投递记录（Delivery）](../deliveries/)记录下来，准确说明发送了什么、发到了哪里、结果如何。
 * **模拟模式。** 规则可以精确记录它本会发送的内容而不实际发送，这就是在让规则接触外部世界之前安全测试它的方式。
 
-两套引擎并行运行。启用 Triage Engine 不会禁用或转换您现有的规则，并且提供了一个[转换器](../converting_from_rules_engine/)，供您在想要迁移规则时使用。
+两套引擎并行运行。Triage Engine 不会禁用或转换您现有的规则，并且提供了一个[转换器](../converting_from_rules_engine/)，供您在想要迁移规则时使用。
 
-## 启用 Triage Engine
+## 在哪里找到 Triage Engine {#where-to-find-triage-engine}
 
-Triage Engine 处于 Beta 阶段，默认关闭。超级用户可以在 **Settings > Feature Flags** 中启用它，云端和本地部署实例均适用。参见[功能标志](/admin/feature_flags/pro__feature_flags/)。
+Triage Engine 已正式发布（GA），在每个 DefectDojo Pro 实例上均已开启，云端和本地部署实例都是如此。无需任何启用操作，它也不再出现在 Feature Flags 页面上。开启本身不会启动任何工作：新建的规则，以及从原有 Rules Engine 转换而来的规则，创建时都处于禁用状态。
 
-标志启用后，侧边栏会出现一个 **Triage Engine** 区块，下面有三个页面：
+侧边栏中的 **Triage Engine** 区块下有三个页面：
 
 | Page | What it is for |
 |------|----------------|

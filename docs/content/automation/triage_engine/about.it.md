@@ -1,6 +1,6 @@
 ---
 title: Informazioni su Triage Engine
-description: Cos'è Triage Engine, come attivarlo e i concetti su cui si basa
+description: Cos'è Triage Engine, dove trovarlo e i concetti su cui si basa
 weight: 1
 audience: pro
 aliases:
@@ -23,13 +23,13 @@ Il [Rules Engine](/automation/rules_engine/about/) originale applica un elenco o
 * **Tracciabilità.** Ogni esecuzione viene registrata nodo per nodo come [Run](../runs/), e ogni invio in uscita viene registrato come [Delivery](../deliveries/) che indica esattamente cosa è stato inviato, dove è andato e come è terminato.
 * **Una modalità di simulazione.** Una regola può registrare esattamente cosa avrebbe inviato senza inviare nulla, ed è così che la si testa in sicurezza prima che tocchi il mondo esterno.
 
-I due motori funzionano fianco a fianco. Attivare Triage Engine non disabilita né converte le regole esistenti, ed esiste un [convertitore](../converting_from_rules_engine/) per quando si vuole spostarle.
+I due motori funzionano fianco a fianco. Triage Engine non disabilita né converte le regole esistenti, ed esiste un [convertitore](../converting_from_rules_engine/) per quando si vuole spostarle.
 
-## Abilitare Triage Engine
+## Dove trovare Triage Engine
 
-Triage Engine è in Beta ed è disattivato per impostazione predefinita. Un superuser lo attiva da **Settings > Feature Flags**, sia sulle istanze Cloud che On-Premise. Vedere [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Triage Engine è disponibile a livello generale ed è attivo su ogni istanza DefectDojo Pro, sia Cloud che On-Premise. Non c'è nulla da abilitare, e non compare più nella pagina Feature Flags. Il fatto che sia attivo non avvia di per sé alcuna elaborazione: le nuove regole, e quelle convertite dal Rules Engine originale, vengono create disabilitate.
 
-Una volta attivato il flag, nella barra laterale compare una sezione **Triage Engine** con tre pagine:
+La sezione **Triage Engine** nella barra laterale ha tre pagine:
 
 | Pagina | A cosa serve |
 |------|----------------|

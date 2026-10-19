@@ -1,7 +1,7 @@
 ---
 title: Über Triage Engine
-description: Was Triage Engine ist, wie man sie aktiviert, und die Konzepte, auf
-  denen sie aufbaut
+description: Was Triage Engine ist, wo man sie findet, und die Konzepte, auf denen
+  sie aufbaut
 weight: 1
 audience: pro
 aliases:
@@ -24,13 +24,13 @@ Die ursprüngliche [Rules Engine](/automation/rules_engine/about/) wendet eine g
 * **Nachvollziehbarkeit.** Jede Ausführung wird Knoten für Knoten als [Ausführung](../runs/) erfasst, und jeder ausgehende Versand wird als [Zustellung](../deliveries/) erfasst, die genau angibt, was gesendet wurde, wohin es ging und wie es endete.
 * **Ein Simulationsmodus.** Eine Regel kann exakt erfassen, was sie senden würde, ohne tatsächlich etwas zu senden – so testen Sie eine Regel sicher, bevor sie mit der Außenwelt in Berührung kommt.
 
-Beide Engines laufen nebeneinander. Das Aktivieren von Triage Engine deaktiviert oder konvertiert Ihre bestehenden Regeln nicht, und es gibt einen [Konverter](../converting_from_rules_engine/), falls Sie sie übertragen möchten.
+Beide Engines laufen nebeneinander. Triage Engine deaktiviert oder konvertiert Ihre bestehenden Regeln nicht, und es gibt einen [Konverter](../converting_from_rules_engine/), falls Sie sie übertragen möchten.
 
-## Triage Engine aktivieren
+## Wo Sie Triage Engine finden
 
-Triage Engine befindet sich in der Beta-Phase und ist standardmäßig ausgeschaltet. Ein Superuser aktiviert sie unter **Settings > Feature Flags**, sowohl auf Cloud- als auch auf On-Premise-Instanzen. Siehe [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Triage Engine ist allgemein verfügbar und auf jeder DefectDojo-Pro-Instanz aktiviert, sowohl in der Cloud als auch On-Premise. Es muss nichts aktiviert werden, und sie wird nicht mehr auf der Seite „Feature Flags" aufgeführt. Allein dadurch, dass sie aktiviert ist, wird noch nichts ausgeführt: Neue Regeln und aus der ursprünglichen Rules Engine konvertierte Regeln werden deaktiviert angelegt.
 
-Sobald das Flag aktiviert ist, erscheint in der Seitenleiste ein Abschnitt **Triage Engine** mit drei Seiten:
+Der Abschnitt **Triage Engine** in der Seitenleiste enthält drei Seiten:
 
 | Page | What it is for |
 |------|----------------|

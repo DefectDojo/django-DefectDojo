@@ -1,6 +1,6 @@
 ---
 title: Sobre o Triage Engine
-description: O que é o Triage Engine, como ativá-lo e os conceitos em que se baseia
+description: O que é o Triage Engine, onde encontrá-lo e os conceitos em que se baseia
 weight: 1
 audience: pro
 aliases:
@@ -23,13 +23,13 @@ O [Rules Engine](/automation/rules_engine/about/) original aplica uma lista orde
 * **Rastreabilidade.** Cada execução é registrada nó a nó como uma [Execução](../runs/), e cada envio de saída é registrado como uma [Entrega](../deliveries/) que informa exatamente o que foi enviado, para onde foi e como terminou.
 * **Um modo de simulação.** Uma regra pode registrar exatamente o que enviaria sem enviar nada de fato, o que permite testá-la com segurança antes de deixá-la tocar o mundo externo.
 
-Os dois mecanismos funcionam lado a lado. Ativar o Triage Engine não desativa nem converte suas regras existentes, e há um [conversor](../converting_from_rules_engine/) para quando você quiser migrá-las.
+Os dois mecanismos funcionam lado a lado. O Triage Engine não desativa nem converte suas regras existentes, e há um [conversor](../converting_from_rules_engine/) para quando você quiser migrá-las.
 
-## Ativando o Triage Engine
+## Onde encontrar o Triage Engine
 
-O Triage Engine está em Beta e vem desativado por padrão. Um superusuário o ativa em **Settings > Feature Flags**, tanto em instâncias Cloud quanto On-Premise. Veja [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+O Triage Engine está em disponibilidade geral e ativo em todas as instâncias do DefectDojo Pro, tanto Cloud quanto On-Premise. Não há nada a ativar, e ele não aparece mais na página Feature Flags. Estar ativo não inicia nenhum trabalho por si só: novas regras, e regras convertidas do Rules Engine original, são criadas desativadas.
 
-Assim que a flag é ativada, uma seção **Triage Engine** aparece na barra lateral com três páginas:
+A seção **Triage Engine** na barra lateral tem três páginas:
 
 | Página | Para que serve |
 |------|----------------|

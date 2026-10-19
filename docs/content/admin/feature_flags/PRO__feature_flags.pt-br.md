@@ -36,6 +36,11 @@ deixa de ser listado, pois não há mais decisão a tomar:
 * **Downstream Connectors** — consulte [Downstream Connectors](/connectors/downstream/about/)
 * **Universal Parser** — consulte [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
 * **Asset Hierarchy** — consulte [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
+* **Triage Engine** (antes listado como **Rules Engine 2.0 (Graph Editor)**) — consulte [About Triage Engine](/automation/triage_engine/about/)
+* **Messaging Connectors** — consulte [Messaging Connectors](/issue_tracking/pro_integration/messaging_connectors/)
+* **Customizable Dashboards** (antes listado como **Dashboards 2.0**) — consulte [Customizable Dashboards](/metrics_reports/dashboards/custom-dashboards/)
+* **Customizable Page Layouts** — consulte [Customizing Page Layouts](/navigation/pro__page_layouts/)
+* **AI Threat Modeling** — consulte [Threat Modeling](/sensei/threat_modeling/). Gerar um modelo de ameaças ainda exige a licença do Sensei.
 * **Appearance** e **Feature Flags** — as duas páginas de Settings com o mesmo nome
 
 Nada muda na sua instância se você já tinha um desses recursos ativado. Se você tinha algum desativado, ele

@@ -6,7 +6,7 @@ weight: 4
 audience: pro
 ---
 
-**Disponibilidad:** los Conectores de mensajería son una función en beta. Active **Messaging Connectors** en la página Feature Flags. Como las alertas se enrutan mediante reglas, **Triage Engine** también debe estar activado.
+**Disponibilidad:** los Conectores de mensajería están disponibles de forma general y activados en todas las instancias de DefectDojo Pro, tanto Cloud como On-Premise, junto con [Triage Engine](/automation/triage_engine/about/), que enruta sus alertas. No hay nada que activar, y ninguno de los dos aparece ya en la página Feature Flags. No se envía nada hasta que cree una conexión y una regla que envíe a ella.
 
 Los Conectores de mensajería envían alertas desde DefectDojo a un servicio de chat, a una dirección de correo electrónico o a un topic de Amazon SNS. Se ubican junto a los conectores de tickets y de gestión de incidentes en la misma página **Downstream Connectors**, y se configuran de la misma manera: cree una conexión una vez y luego decida qué se debe enviar a ella.
 

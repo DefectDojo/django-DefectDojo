@@ -11,7 +11,7 @@ aliases:
 - /pt-br/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Observação: os Painéis Personalizáveis (layouts, widgets e o catálogo de widgets) são um recurso do DefectDojo Pro. Eles ficam desativados por padrão — um superusuário pode ativá-los em **Settings > Feature Flags**, tanto em instâncias Cloud quanto On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Observação: os Painéis Personalizáveis (layouts, widgets e o catálogo de widgets) são um recurso do DefectDojo Pro, ativo em todas as instâncias Pro, tanto Cloud quanto On-Premise.</span>
 
 Os Painéis Personalizáveis do DefectDojo Pro permitem que cada usuário monte sua própria página inicial a partir de **widgets** — contadores, gráficos, rankings, feeds e notas — organizados em uma grade de arrastar e soltar. Em vez de um único painel fixo para todos, você constrói os **layouts** que fazem sentido para você: uma visão executiva, uma fila de triagem, um painel de velocidade de remediação, uma visão de eficácia de scanners. Você pode manter layouts privados, publicá-los para toda a sua equipe, definir um deles como sua página inicial padrão e clonar qualquer layout (seu ou um modelo compartilhado) como ponto de partida.
 
@@ -25,13 +25,13 @@ O DefectDojo Pro substitui essa página fixa por **painéis personalizáveis por
 
 > **💡 Tip:** No DefectDojo Pro, **Ativos** eram anteriormente chamados de **Produtos**, e **Organizações** eram anteriormente **Tipos de Produto**. A interface usa a nova nomenclatura, mas algumas configurações internas de widgets ainda usam os nomes antigos — por exemplo, a maioria dos widgets recebe um `model` com valor `finding`, `product`, `engagement` ou `test`. Quando isso for relevante, será indicado abaixo.
 
-## Ativando os Painéis Personalizáveis
+## Onde encontrar os Painéis Personalizáveis
 
-Os Painéis Personalizáveis ficam desativados por padrão. Um superusuário pode ativá-los em **Settings > Feature Flags**, tanto em instâncias Cloud quanto On-Premise. Consulte [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Os Painéis Personalizáveis estão em disponibilidade geral e ativos em todas as instâncias do DefectDojo Pro, tanto Cloud quanto On-Premise. Não há nada a ativar, e eles não aparecem mais na página Feature Flags.
 
-Depois de ativado, a página **🏠 Home** exibe seu painel personalizável, e a [Dashboards REST API](../custom-dashboards-api/) fica disponível.
+A página **🏠 Home** exibe seu painel personalizável, que substitui o painel clássico de blocos. A [Dashboards REST API](../custom-dashboards-api/) está disponível em todas as instâncias.
 
-> **🔑 Important:** Enquanto o recurso estiver desativado, a página inicial mantém o painel anterior e todo endpoint `/api/v2/dashboards/` retorna `403 Dashboards 2.0 is not enabled.` Ativar o recurso **não** altera o acesso de ninguém aos dados — cada widget continua respeitando o controle de acesso baseado em função do DefectDojo, portanto cada usuário só verá os Achados, Ativos e outros registros que estiver autorizado a visualizar.
+> **🔑 Important:** Os Painéis Personalizáveis **não** alteram o acesso de ninguém aos dados — cada widget respeita o controle de acesso baseado em função do DefectDojo, portanto cada usuário só verá os Achados, Ativos e outros registros que estiver autorizado a visualizar.
 
 ## Conceitos fundamentais
 

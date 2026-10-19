@@ -1,7 +1,7 @@
 ---
 title: Acerca de Triage Engine
-description: Qué es Triage Engine, cómo activarlo y los conceptos en los que se
-  basa
+description: Qué es Triage Engine, dónde encontrarlo y los conceptos en los que
+  se basa
 weight: 1
 audience: pro
 aliases:
@@ -24,13 +24,13 @@ El [Rules Engine](/automation/rules_engine/about/) original aplica una lista ord
 * **Trazabilidad.** Cada ejecución se registra nodo por nodo como una [Ejecución](../runs/), y cada envío saliente se registra como una [Entrega](../deliveries/) que indica exactamente qué se envió, adónde fue y cómo terminó.
 * **Un modo de simulación.** Una regla puede registrar con precisión lo que enviaría sin enviar realmente nada, que es la forma de probarla de manera segura antes de que llegue al mundo exterior.
 
-Ambos motores funcionan en paralelo. Activar Triage Engine no desactiva ni convierte las reglas existentes, y existe un [conversor](../converting_from_rules_engine/) para cuando se quiera migrarlas.
+Ambos motores funcionan en paralelo. Triage Engine no desactiva ni convierte las reglas existentes, y existe un [conversor](../converting_from_rules_engine/) para cuando se quiera migrarlas.
 
-## Activación de Triage Engine
+## Dónde encontrar Triage Engine
 
-Triage Engine está en Beta y viene desactivado de forma predeterminada. Un superusuario lo activa desde **Settings > Feature Flags**, tanto en instancias Cloud como On-Premise. Consulte [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Triage Engine está disponible de forma general y activado en todas las instancias de DefectDojo Pro, tanto Cloud como On-Premise. No hay nada que activar, y ya no aparece en la página de Feature Flags. Estar activado no inicia ningún trabajo por sí solo: las reglas nuevas, y las reglas convertidas desde el Rules Engine original, se crean desactivadas.
 
-Una vez activado el indicador, aparece una sección **Triage Engine** en la barra lateral con tres páginas:
+La sección **Triage Engine** de la barra lateral tiene tres páginas:
 
 | Página | Para qué sirve |
 |------|----------------|

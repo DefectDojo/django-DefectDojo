@@ -10,7 +10,7 @@ aliases:
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：Triage Engine 是 DefectDojo Pro 专属功能。</span>
 
-两套引擎并行运行。启用 Triage Engine 不会改变您现有的 [Rules Engine](/automation/rules_engine/about/) 规则中的任何内容，也没有必须迁移它们的截止时间。
+两套引擎并行运行。Triage Engine 不会改变您现有的 [Rules Engine](/automation/rules_engine/about/) 规则中的任何内容，也没有必须迁移它们的截止时间。
 
 当您确实想要迁移时，有一个转换器可以使用。它会将一条 Rules Engine 规则（一个过滤器加一份有序的动作列表）转换为一张等价的 Triage Engine 图。
 
@@ -79,7 +79,7 @@ python manage.py convert_rules_to_v2
 
 ## 建议的操作顺序
 
-1. 启用 Triage Engine，并让您现有的规则继续运行。
+1. 让您现有的规则继续运行。
 2. 用 `--dry-run` 运行转换器，并阅读报告。
 3. 执行转换。所有结果都会以禁用状态落地。
 4. 打开每一条转换后的规则，检查其图，并将模式保持为 **Simulate**。

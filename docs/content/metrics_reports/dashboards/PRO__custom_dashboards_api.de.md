@@ -8,7 +8,7 @@ weight: 11
 slug: custom-dashboards-api
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Die REST-API für anpassbare Dashboards (Layouts, Widget-Katalog und Widget-Daten) ist eine DefectDojo-Pro-Funktion. Sie ist standardmäßig deaktiviert – ein Superuser kann anpassbare Dashboards unter **Einstellungen > Feature-Flags** sowohl in Cloud- als auch in On-Premise-Instanzen aktivieren.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Die REST-API für anpassbare Dashboards (Layouts, Widget-Katalog und Widget-Daten) ist eine DefectDojo-Pro-Funktion und auf jeder Pro-Instanz verfügbar, sowohl in der Cloud als auch On-Premise.</span>
 
 Die REST-API für anpassbare Dashboards ermöglicht es Ihnen, dieselben Dashboards, die Sie manuell in der [Dashboard-Benutzeroberfläche](../custom-dashboards/) zusammenstellen, vollständig per Code zu erstellen. Sie können den Widget-Katalog erkunden, Layouts erstellen und aktualisieren, Ihr Standard-Layout festlegen, Layouts mit Ihrem Team teilen und sogar die Daten eines Widgets bei Bedarf rendern, ohne die Filterung von DefectDojo neu zu implementieren. Die Layout-Oberfläche wurde als primärer Einstiegspunkt für KI-Agenten konzipiert, die Dashboards erstellen, weshalb die Anfragestrukturen bewusst introspektierbar gestaltet sind.
 
@@ -46,8 +46,6 @@ curl -s \
   -H "Accept: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
-
-> **🔑 Wichtig:** Die gesamte Dashboards-API hängt von der Funktion für anpassbare Dashboards ab. Solange sie nicht aktiviert ist, liefert jeder Endpunkt `403 Dashboards 2.0 is not enabled.` – siehe [Anpassbare Dashboards aktivieren](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Sicherheitshinweis:** Ihr API-Token gewährt vollständigen Zugriff auf Ihre DefectDojo-Daten. Fügen Sie es niemals in einen Chat, einen Screenshot, ein Ticket oder eine committete Datei ein. Lesen Sie es aus einer Umgebungsvariable, rotieren Sie es, falls es jemals offengelegt wird, und beschränken Sie Tokens nach Möglichkeit auf Service-Konten.
 

@@ -8,7 +8,7 @@ weight: 12
 slug: custom-dashboards-llm
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Die Automatisierung anpassbarer Dashboards mit der REST-API und einem LLM ist eine DefectDojo-Pro-Funktion. Sie ist standardmäßig deaktiviert – ein Superuser kann anpassbare Dashboards unter **Einstellungen > Feature-Flags** sowohl in Cloud- als auch in On-Premise-Instanzen aktivieren.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Die Automatisierung anpassbarer Dashboards mit der REST-API und einem LLM ist eine DefectDojo-Pro-Funktion und auf jeder Pro-Instanz verfügbar, sowohl in der Cloud als auch On-Premise.</span>
 
 Die anpassbaren Dashboards von DefectDojo Pro werden vollständig über die REST-API gesteuert – und die Layout-Oberfläche wurde mit Blick auf KI-Agenten entwickelt. Das bedeutet, dass Sie die gesamte Aufgabe einem LLM übergeben können: Fügen Sie einen einzigen, in sich geschlossenen Prompt in Claude, ChatGPT oder ein anderes leistungsfähiges Modell ein, beschreiben Sie die gewünschten Dashboards, und es wird den Live-Widget-Katalog Ihres Mandanten abfragen, Layouts vorschlagen, ein lauffähiges Python-Skript erzeugen, die Layouts erstellen, verifizieren und optional Ihren Standard festlegen.
 
@@ -24,9 +24,7 @@ Dieser Leitfaden ergänzt den [Dashboards-API-Leitfaden](../custom-dashboards-ap
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 ```
 
-2. **Bestätigen Sie, dass die Funktion aktiviert ist.** Anpassbare Dashboards müssen für Ihre Instanz unter **Einstellungen > Feature-Flags** aktiviert werden – andernfalls liefert jeder API-Aufruf `403`.
-
-3. **Entscheiden Sie sich für Ihre Dashboards.** Das LLM wird fragen, was Sie möchten. Gängige Optionen:
+2. **Entscheiden Sie sich für Ihre Dashboards.** Das LLM wird fragen, was Sie möchten. Gängige Optionen:
 
    - **Übersicht für die Geschäftsführung** – Kennzahlen auf einen Blick, Verteilung nach Schweregrad und SLA-Einhaltung.
    - **Tägliche Triage** – aktive Kritisch-/Hoch-Befunde, Prioritäts-Histogramm, SLA-Burndown und Ihre „Meine Arbeit"-Warteschlange.

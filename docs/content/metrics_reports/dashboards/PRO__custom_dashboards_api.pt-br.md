@@ -8,7 +8,7 @@ weight: 11
 slug: custom-dashboards-api
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: A API REST de Painéis Personalizáveis (layouts, catálogo de widgets e dados de widgets) é um recurso do DefectDojo Pro. Ela vem desativada por padrão — um superusuário pode ativar os Painéis Personalizáveis em **Settings > Feature Flags** tanto em instâncias Cloud quanto On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: A API REST de Painéis Personalizáveis (layouts, catálogo de widgets e dados de widgets) é um recurso do DefectDojo Pro, disponível em todas as instâncias Pro, tanto Cloud quanto On-Premise.</span>
 
 A API REST de Painéis Personalizáveis permite criar, inteiramente a partir de código, os mesmos painéis que você monta manualmente na [interface de Painéis](../custom-dashboards/). Você pode descobrir o catálogo de widgets, criar e atualizar layouts, definir seu padrão, compartilhar layouts com sua equipe e até renderizar os dados de um widget sob demanda sem reimplementar a filtragem do DefectDojo. A superfície de layouts foi projetada como o ponto de entrada principal para agentes de IA que constroem painéis, portanto os formatos de requisição são deliberadamente introspectáveis.
 
@@ -46,8 +46,6 @@ curl -s \
   -H "Accept: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
-
-> **🔑 Importante:** Toda a API de Painéis depende do recurso Painéis Personalizáveis. Até que ele seja ativado, todo endpoint retorna `403 Dashboards 2.0 is not enabled.` — veja [Ativando Painéis Personalizáveis](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Aviso de Segurança:** Seu token de API concede acesso total aos seus dados do DefectDojo. Nunca o cole em um chat, captura de tela, chamado ou arquivo versionado. Leia-o a partir de uma variável de ambiente, revogue-o (rotacione) se ele for exposto e restrinja tokens a contas de serviço sempre que possível.
 

@@ -5,7 +5,7 @@ weight: 4
 audience: pro
 ---
 
-**Availability:** Messaging Connectors are a beta feature. Enable **Messaging Connectors** on the Feature Flags page. Because alerts are routed by rules, **Triage Engine** must be enabled as well.
+**Availability:** Messaging Connectors are generally available and on for every DefectDojo Pro instance, both Cloud and On-Premise, together with [Triage Engine](/automation/triage_engine/about/), which routes their alerts. There is nothing to enable, and neither is listed on the Feature Flags page any more. Nothing is sent until you create a connection and a rule that sends to it.
 
 Messaging Connectors send alerts from DefectDojo to a chat service, to an email address, or to an Amazon SNS topic. They sit beside the ticketing and incident-management connectors on the same **Downstream Connectors** page, and they are configured the same way: create a connection once, then decide what should be sent to it.
 

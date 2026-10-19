@@ -32,6 +32,11 @@ La pagina elenca le funzionalità che puoi scegliere di adottare. Due tipi di fu
 * **Downstream Connectors** — vedi [Downstream Connectors](/connectors/downstream/about/)
 * **Universal Parser** — vedi [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
 * **Asset Hierarchy** — vedi [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
+* **Triage Engine** (in precedenza elencato come **Rules Engine 2.0 (Graph Editor)**) — vedi [Informazioni su Triage Engine](/automation/triage_engine/about/)
+* **Messaging Connectors** — vedi [Connettori di messaggistica](/issue_tracking/pro_integration/messaging_connectors/)
+* **Customizable Dashboards** (in precedenza elencata come **Dashboards 2.0**) — vedi [Dashboard personalizzabili](/metrics_reports/dashboards/custom-dashboards/)
+* **Customizable Page Layouts** — vedi [Personalizzare i layout di pagina](/navigation/pro__page_layouts/)
+* **AI Threat Modeling** — vedi [Threat Modeling](/sensei/threat_modeling/). La generazione di un threat model richiede comunque la licenza Sensei.
 * **Appearance** e **Feature Flags** — le due pagine Settings con lo stesso nome
 
 Non cambia nulla per la tua istanza se una di queste era già attiva. Se invece era disattivata, ora è attiva: queste funzionalità fanno parte di DefectDojo Pro anziché essere opzionali. Contatta il [supporto DefectDojo](mailto:support@defectdojo.com) se questo rappresenta un problema per la tua istanza.

@@ -11,7 +11,7 @@ aliases:
 - /fr/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : les tableaux de bord personnalisables (dispositions, widgets et catalogue de widgets) sont une fonctionnalité de DefectDojo Pro. Ils sont désactivés par défaut — un superutilisateur peut les activer depuis **Paramètres > Feature Flags**, aussi bien sur les instances Cloud que On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : les tableaux de bord personnalisables (dispositions, widgets et catalogue de widgets) sont une fonctionnalité de DefectDojo Pro, activée sur chaque instance Pro, aussi bien Cloud que On-Premise.</span>
 
 Les tableaux de bord personnalisables de DefectDojo Pro permettent à chaque utilisateur d'assembler sa propre page d'accueil à partir de **widgets** — compteurs, graphiques, classements, flux et notes — disposés sur une grille glisser-déposer. Au lieu d'un tableau de bord unique et fixe pour tout le monde, vous construisez les **dispositions** (layouts) qui comptent pour vous : une vue d'ensemble pour la direction, une file de triage, un tableau de vitesse de remédiation, une vue d'efficacité des scanners. Vous pouvez garder vos dispositions privées, les publier pour toute votre équipe, en définir une comme page d'accueil par défaut, et cloner n'importe quelle disposition (la vôtre ou un modèle partagé) comme point de départ.
 
@@ -25,13 +25,13 @@ DefectDojo Pro remplace cette page fixe par des **tableaux de bord personnalisab
 
 > **💡 Astuce :** Dans DefectDojo Pro, les **Assets** s'appelaient auparavant des **Produits**, et les **Organisations** s'appelaient auparavant des **Product Types**. L'interface utilise désormais la nouvelle terminologie, mais certains paramètres de widgets sous-jacents utilisent encore les anciens noms — par exemple, la plupart des widgets prennent un `model` valant `finding`, `product`, `engagement` ou `test`. Lorsque cela a une importance, c'est signalé ci-dessous.
 
-## Activation des tableaux de bord personnalisables
+## Où trouver les tableaux de bord personnalisables
 
-Les tableaux de bord personnalisables sont désactivés par défaut. Un superutilisateur peut les activer depuis **Paramètres > Feature Flags**, aussi bien sur les instances Cloud que On-Premise. Voir [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Les tableaux de bord personnalisables sont disponibles pour tous et activés sur chaque instance DefectDojo Pro, aussi bien Cloud que On-Premise. Il n'y a rien à activer, et ils ne figurent plus sur la page Feature Flags.
 
-Une fois activée, la page **🏠 Accueil** affiche votre tableau de bord personnalisable, et l'[API REST des tableaux de bord](../custom-dashboards-api/) devient disponible.
+La page **🏠 Accueil** affiche votre tableau de bord personnalisable, qui remplace l'ancien tableau de bord à tuiles. L'[API REST des tableaux de bord](../custom-dashboards-api/) est disponible sur chaque instance.
 
-> **🔑 Important :** Tant que la fonctionnalité est désactivée, la page d'accueil conserve l'ancien tableau de bord et chaque point de terminaison `/api/v2/dashboards/` renvoie `403 Dashboards 2.0 is not enabled.` L'activer ne modifie **pas** l'accès aux données de qui que ce soit — chaque widget continue de respecter le contrôle d'accès basé sur les rôles de DefectDojo, de sorte que chaque utilisateur ne voit jamais que les Constatations, Assets et autres enregistrements qu'il est autorisé à consulter.
+> **🔑 Important :** Les tableaux de bord personnalisables ne modifient **pas** l'accès aux données de qui que ce soit — chaque widget respecte le contrôle d'accès basé sur les rôles de DefectDojo, de sorte que chaque utilisateur ne voit jamais que les Constatations, Assets et autres enregistrements qu'il est autorisé à consulter.
 
 ## Concepts fondamentaux
 

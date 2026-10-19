@@ -31,6 +31,11 @@ audience: pro
 * **Downstream Connectors** — [Downstream Connectors](/connectors/downstream/about/)を参照
 * **Universal Parser** — [Universal Parser](/import_data/pro/specialized_import/universal_parser/)を参照
 * **Asset Hierarchy** — [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)を参照
+* **Triage Engine**(以前は**Rules Engine 2.0 (Graph Editor)**として表示) — [About Triage Engine](/automation/triage_engine/about/)を参照
+* **Messaging Connectors** — [Messaging Connectors](/issue_tracking/pro_integration/messaging_connectors/)を参照
+* **Customizable Dashboards**(以前は**Dashboards 2.0**として表示) — [Customizable Dashboards](/metrics_reports/dashboards/custom-dashboards/)を参照
+* **Customizable Page Layouts** — [Customizing Page Layouts](/navigation/pro__page_layouts/)を参照
+* **AI Threat Modeling** — [Threat Modeling](/sensei/threat_modeling/)を参照。脅威モデルの生成には引き続きSenseiライセンスが必要です。
 * **Appearance**と**Feature Flags** — 同名の2つのSettingsページ
 
 これらの機能をすでにオンにしていた場合、インスタンスに変化はありません。オフにしていた場合は、現在はオンになっています。これらの機能はオプトインではなく、DefectDojo Proの一部となったためです。インスタンスにとって問題がある場合は、[DefectDojo Support](mailto:support@defectdojo.com)にお問い合わせください。

@@ -11,7 +11,7 @@ aliases:
 - /de/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Anpassbare Dashboards (Layouts, Widgets und der Widget-Katalog) sind eine DefectDojo-Pro-Funktion. Sie sind standardmäßig deaktiviert — ein Superuser kann sie unter **Settings > Feature Flags** sowohl auf Cloud- als auch auf On-Premise-Instanzen aktivieren.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Anpassbare Dashboards (Layouts, Widgets und der Widget-Katalog) sind eine DefectDojo-Pro-Funktion und auf jeder Pro-Instanz aktiviert, sowohl in der Cloud als auch On-Premise.</span>
 
 Mit den anpassbaren Dashboards von DefectDojo Pro kann jeder Benutzer seine eigene Startseite aus **Widgets** zusammenstellen — Zählern, Diagrammen, Bestenlisten, Feeds und Notizen —, die per Drag-and-Drop auf einem Raster angeordnet werden. Anstelle eines einzigen festen Dashboards für alle erstellen Sie die **Layouts**, die für Sie relevant sind: eine Management-Übersicht, eine Triage-Warteschlange, ein Board zur Behebungsgeschwindigkeit, eine Ansicht zur Scanner-Effektivität. Sie können Layouts privat halten, sie für Ihr gesamtes Team veröffentlichen, eines als Standard-Startseite festlegen und jedes Layout (Ihr eigenes oder eine gemeinsame Vorlage) als Ausgangspunkt klonen.
 
@@ -25,13 +25,13 @@ DefectDojo Pro ersetzt diese feste Seite durch **benutzerindividuelle, anpassbar
 
 > **💡 Tipp:** In DefectDojo Pro wurden **Assets** früher **Produkte** und **Organisationen** früher **Produkttypen** genannt. Die Benutzeroberfläche verwendet die neue Terminologie, aber einige zugrunde liegende Widget-Einstellungen verwenden weiterhin die alten Namen — beispielsweise erwarten die meisten Widgets ein `model` mit dem Wert `finding`, `product`, `engagement` oder `test`. Wo dies relevant ist, wird es unten erläutert.
 
-## Anpassbare Dashboards aktivieren
+## Wo Sie anpassbare Dashboards finden
 
-Anpassbare Dashboards sind standardmäßig deaktiviert. Ein Superuser kann sie unter **Settings > Feature Flags** aktivieren, sowohl auf Cloud- als auch auf On-Premise-Instanzen. Siehe [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Anpassbare Dashboards sind allgemein verfügbar und auf jeder DefectDojo-Pro-Instanz aktiviert, sowohl in der Cloud als auch On-Premise. Es muss nichts aktiviert werden, und sie werden nicht mehr auf der Seite „Feature Flags“ aufgeführt.
 
-Sobald die Funktion aktiviert ist, zeigt die Seite **🏠 Home** Ihr anpassbares Dashboard an, und die [Dashboards-REST-API](../custom-dashboards-api/) wird verfügbar.
+Die Seite **🏠 Home** zeigt Ihr anpassbares Dashboard an, das das klassische Kachel-Dashboard ersetzt. Die [Dashboards-REST-API](../custom-dashboards-api/) ist auf jeder Instanz verfügbar.
 
-> **🔑 Wichtig:** Solange die Funktion deaktiviert ist, behält die Startseite das bisherige Dashboard bei, und jeder `/api/v2/dashboards/`-Endpunkt gibt `403 Dashboards 2.0 is not enabled.` zurück. Das Aktivieren ändert **nicht** den Datenzugriff eines Benutzers — jedes Widget respektiert weiterhin die rollenbasierte Zugriffskontrolle von DefectDojo, sodass jeder Benutzer stets nur die Befunde, Assets und anderen Datensätze sieht, für die er berechtigt ist.
+> **🔑 Wichtig:** Anpassbare Dashboards ändern **nicht** den Datenzugriff eines Benutzers — jedes Widget respektiert die rollenbasierte Zugriffskontrolle von DefectDojo, sodass jeder Benutzer stets nur die Befunde, Assets und anderen Datensätze sieht, für die er berechtigt ist.
 
 ## Grundkonzepte
 

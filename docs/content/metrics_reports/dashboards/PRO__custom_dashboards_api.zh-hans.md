@@ -7,7 +7,7 @@ weight: 11
 slug: custom-dashboards-api
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">注意：可自定义仪表板 REST API（布局、小组件目录和小组件数据）是 DefectDojo Pro 功能。该功能默认处于关闭状态——超级用户可以在云端和本地部署实例上通过 **设置 > 功能开关** 启用可自定义仪表板。</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">注意：可自定义仪表板 REST API（布局、小组件目录和小组件数据）是 DefectDojo Pro 功能，在每个 Pro 实例上均可用，云端和本地部署实例都是如此。</span>
 
 可自定义仪表板 REST API 让您完全通过代码构建与在 [仪表板界面](../custom-dashboards/) 中手动组装相同的仪表板。您可以发现小组件目录、创建和更新布局、设置默认布局、与团队共享布局，甚至按需渲染小组件的数据，而无需重新实现 DefectDojo 的筛选逻辑。布局接口的设计初衷是作为 AI 智能体构建仪表板的主要入口，因此请求结构特意做到了可自省。
 
@@ -45,8 +45,6 @@ curl -s \
   -H "Accept: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
-
-> **🔑 重要提示：** 整个仪表板 API 都依赖于可自定义仪表板功能。在该功能启用之前，每个端点都会返回 `403 Dashboards 2.0 is not enabled.` —— 参见[启用可自定义仪表板](../custom-dashboards/#enabling-customizable-dashboards)。
 
 > **⚠️ 安全提示：** 您的 API 令牌拥有对您 DefectDojo 数据的完全访问权限。切勿将其粘贴到聊天记录、屏幕截图、工单或已提交的文件中。请从环境变量中读取它，一旦泄露就立即轮换，并尽可能将令牌的权限范围限定在服务账户内。
 

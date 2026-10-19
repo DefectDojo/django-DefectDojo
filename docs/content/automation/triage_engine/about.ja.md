@@ -1,6 +1,6 @@
 ---
 title: Triage Engine について
-description: Triage Engine とは何か、有効化の方法、基盤となる概念について
+description: Triage Engine とは何か、どこにあるか、基盤となる概念について
 weight: 1
 audience: pro
 aliases:
@@ -23,13 +23,13 @@ Triage Engine には [Pro UI](/get_started/about/ui_pro_vs_os/) からのみア�
 * **トレーサビリティ。** すべての実行はノードごとに [Run](../runs/) として記録され、すべての送信は [Delivery](../deliveries/) として記録されます。Delivery には、何が送信され、どこへ送られ、どのように終了したかが正確に記録されます。
 * **Simulate モード。** ルールは、実際には何も送信せずに、送信するはずだった内容を正確に記録できます。これにより、外部に影響を与える前にルールを安全にテストできます。
 
-両方のエンジンは並行して動作します。Triage Engine を有効にしても、既存のルールが無効化されたり変換されたりすることはありません。ルールを移行したい場合のために [converter](../converting_from_rules_engine/) が用意されています。
+両方のエンジンは並行して動作します。Triage Engine によって既存のルールが無効化されたり変換されたりすることはありません。ルールを移行したい場合のために [converter](../converting_from_rules_engine/) が用意されています。
 
-## Triage Engine の有効化
+## Triage Engine の場所
 
-Triage Engine はベータ版であり、デフォルトでは無効になっています。スーパーユーザーが、Cloud インスタンス・On-Premise インスタンスの両方で **Settings > Feature Flags** から有効化します。[Feature Flags](/admin/feature_flags/pro__feature_flags/) を参照してください。
+Triage Engine は一般提供(GA)されており、Cloud・On-Premise を問わず、すべての DefectDojo Pro インスタンスでオンになっています。有効化の操作は不要で、Feature Flags ページにも表示されなくなりました。オンになっているだけで処理が始まることはありません。新しいルールも、従来の Rules Engine から変換されたルールも、無効な状態で作成されます。
 
-フラグが有効になると、サイドバーに **Triage Engine** セクションが表示され、次の3つのページが含まれます。
+サイドバーの **Triage Engine** セクションには、次の3つのページがあります。
 
 | ページ | 用途 |
 |------|----------------|

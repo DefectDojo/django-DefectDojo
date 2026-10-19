@@ -8,7 +8,7 @@ weight: 11
 slug: custom-dashboards-api
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: La API REST de Paneles personalizables (diseños, catálogo de widgets y datos de widgets) es una función de DefectDojo Pro. Está desactivada de forma predeterminada: un superusuario puede activar los Paneles personalizables desde **Settings > Feature Flags** tanto en instancias Cloud como On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: La API REST de Paneles personalizables (diseños, catálogo de widgets y datos de widgets) es una función de DefectDojo Pro, disponible en todas las instancias Pro, tanto Cloud como On-Premise.</span>
 
 La API REST de Paneles personalizables le permite crear los mismos paneles que ensambla manualmente en la [interfaz de Paneles](../custom-dashboards/), completamente desde código. Puede descubrir el catálogo de widgets, crear y actualizar diseños, establecer su predeterminado, compartir diseños con su equipo e incluso renderizar los datos de un widget bajo demanda sin volver a implementar el filtrado de DefectDojo. La superficie de diseños fue pensada como el punto de entrada principal para los agentes de IA que crean paneles, por lo que las formas de las solicitudes son deliberadamente introspectables.
 
@@ -46,8 +46,6 @@ curl -s \
   -H "Accept: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
-
-> **🔑 Importante:** Toda la API de Paneles depende de la función Paneles personalizables. Hasta que se active, cada endpoint devuelve `403 Dashboards 2.0 is not enabled.` — consulte [Habilitación de los Paneles personalizables](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Aviso de seguridad:** Su token de API otorga acceso completo a sus datos de DefectDojo. Nunca lo pegue en un chat, una captura de pantalla, un ticket o un archivo confirmado en el repositorio. Léalo desde una variable de entorno, rótelo si alguna vez se expone, y limite el alcance de los tokens a cuentas de servicio cuando sea posible.
 

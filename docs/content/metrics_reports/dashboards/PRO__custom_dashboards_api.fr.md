@@ -9,7 +9,7 @@ weight: 11
 slug: custom-dashboards-api
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : l'API REST des tableaux de bord personnalisables (mises en page, catalogue de widgets et données de widgets) est une fonctionnalité de DefectDojo Pro. Elle est désactivée par défaut — un superutilisateur peut activer les tableaux de bord personnalisables depuis **Settings > Feature Flags**, aussi bien sur les instances Cloud que On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : l'API REST des tableaux de bord personnalisables (mises en page, catalogue de widgets et données de widgets) est une fonctionnalité de DefectDojo Pro, disponible sur chaque instance Pro, aussi bien Cloud que On-Premise.</span>
 
 L'API REST des tableaux de bord personnalisables vous permet de construire, entièrement depuis du code, les mêmes tableaux de bord que vous assemblez à la main dans l'[interface des tableaux de bord](../custom-dashboards/). Vous pouvez découvrir le catalogue de widgets, créer et mettre à jour des mises en page, définir votre mise en page par défaut, partager des mises en page avec votre équipe, et même générer à la demande les données d'un widget sans réimplémenter le filtrage de DefectDojo. La surface des mises en page a été conçue comme le point d'entrée principal pour les agents d'IA qui construisent des tableaux de bord ; les formes de requête sont donc délibérément introspectables.
 
@@ -47,8 +47,6 @@ curl -s \
   -H "Accept: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
-
-> **🔑 Important :** L'ensemble de l'API des tableaux de bord dépend de la fonctionnalité des tableaux de bord personnalisables. Tant qu'elle n'est pas activée, chaque point de terminaison renvoie `403 Dashboards 2.0 is not enabled.` — voir [Activer les tableaux de bord personnalisables](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Avis de sécurité :** Votre jeton API donne un accès complet à vos données DefectDojo. Ne le collez jamais dans un chat, une capture d'écran, un ticket ou un fichier versionné. Lisez-le depuis une variable d'environnement, faites-le tourner s'il est un jour exposé, et limitez la portée des jetons à des comptes de service lorsque c'est possible.
 

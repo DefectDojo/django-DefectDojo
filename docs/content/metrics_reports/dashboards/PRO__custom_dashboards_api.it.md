@@ -8,7 +8,7 @@ weight: 11
 slug: custom-dashboards-api
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: la REST API delle Dashboard personalizzabili (layout, catalogo widget e dati dei widget) è una funzionalità di DefectDojo Pro. È disattivata per impostazione predefinita: un superuser può attivare le Dashboard personalizzabili da **Impostazioni > Flag delle funzionalità** sia sulle istanze Cloud sia On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: la REST API delle Dashboard personalizzabili (layout, catalogo widget e dati dei widget) è una funzionalità di DefectDojo Pro, disponibile su ogni istanza Pro, sia Cloud sia On-Premise.</span>
 
 La REST API delle Dashboard personalizzabili ti permette di creare, interamente da codice, le stesse dashboard che assembleresti a mano nella [UI delle Dashboard](../custom-dashboards/). Puoi scoprire il catalogo dei widget, creare e aggiornare i layout, impostare quello predefinito, condividere i layout con il tuo team e persino visualizzare i dati di un widget su richiesta senza dover reimplementare il filtraggio di DefectDojo. La superficie dei layout è stata progettata come punto di ingresso principale per gli agenti AI che costruiscono dashboard, quindi le forme delle richieste sono deliberatamente introspezionabili.
 
@@ -46,8 +46,6 @@ curl -s \
   -H "Accept: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
-
-> **🔑 Important:** L'intera API delle Dashboard dipende dalla funzionalità Dashboard personalizzabili. Finché non viene attivata, ogni endpoint restituisce `403 Dashboards 2.0 is not enabled.` — vedi [Attivare le Dashboard personalizzabili](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Security Notice:** il tuo token API garantisce l'accesso completo ai tuoi dati DefectDojo. Non incollarlo mai in una chat, uno screenshot, un ticket o un file sottoposto a commit. Leggilo da una variabile d'ambiente, ruotalo se viene mai esposto e, quando possibile, assegna i token ad account di servizio con ambito limitato.
 

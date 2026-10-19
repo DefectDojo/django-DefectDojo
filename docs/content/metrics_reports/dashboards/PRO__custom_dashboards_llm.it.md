@@ -8,7 +8,7 @@ weight: 12
 slug: custom-dashboards-llm
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: automatizzare le Dashboard personalizzabili con la REST API e un LLM è una funzionalità di DefectDojo Pro. È disattivata per impostazione predefinita: un superuser può attivare le Dashboard personalizzabili da **Impostazioni > Flag delle funzionalità** sia sulle istanze Cloud sia On-Premise.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Nota: automatizzare le Dashboard personalizzabili con la REST API e un LLM è una funzionalità di DefectDojo Pro, disponibile su ogni istanza Pro, sia Cloud sia On-Premise.</span>
 
 Le Dashboard personalizzabili di DefectDojo Pro sono interamente guidate dalla REST API — e la superficie dei layout è stata progettata pensando agli agenti AI. Questo significa che puoi affidare l'intero lavoro a un LLM: incolla un unico prompt autosufficiente in Claude, ChatGPT o un altro modello capace, descrivi le dashboard che desideri, e interrogherà il catalogo widget in tempo reale del tuo tenant, proporrà i layout, produrrà uno script Python eseguibile, creerà i layout, li verificherà e, facoltativamente, imposterà il tuo predefinito.
 
@@ -24,9 +24,7 @@ Questa guida si affianca alla [guida API delle Dashboard](../custom-dashboards-a
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 ```
 
-2. **Conferma che la funzionalità sia attiva.** Le Dashboard personalizzabili devono essere attivate per la tua istanza da **Impostazioni > Flag delle funzionalità** — altrimenti ogni chiamata API restituisce `403`.
-
-3. **Decidi le tue dashboard.** L'LLM ti chiederà cosa desideri. Le scelte più comuni sono:
+2. **Decidi le tue dashboard.** L'LLM ti chiederà cosa desideri. Le scelte più comuni sono:
 
    - **Panoramica esecutiva** — conteggi principali, distribuzione per gravità e conformità SLA a colpo d'occhio.
    - **Triage giornaliero** — critiche/alte attive, istogramma priorità, burndown SLA e la tua coda "Il mio lavoro".

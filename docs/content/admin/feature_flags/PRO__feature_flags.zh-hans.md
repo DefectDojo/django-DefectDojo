@@ -31,6 +31,11 @@ audience: pro
 * **下游连接器**——参见[下游连接器](/connectors/downstream/about/)
 * **通用解析器**——参见[通用解析器](/import_data/pro/specialized_import/universal_parser/)
 * **资产层级结构**——参见[资产层级结构](/asset_modelling/pro_hierarchy/asset_hierarchy/)
+* **Triage Engine**(原先列为 **Rules Engine 2.0 (Graph Editor)**)——参见[关于 Triage Engine](/automation/triage_engine/about/)
+* **消息连接器**——参见[消息连接器](/issue_tracking/pro_integration/messaging_connectors/)
+* **可自定义仪表板**(原先列为 **Dashboards 2.0**)——参见[可自定义仪表板](/metrics_reports/dashboards/custom-dashboards/)
+* **可自定义页面布局**——参见[自定义页面布局](/navigation/pro__page_layouts/)
+* **AI 威胁建模**——参见[威胁建模](/sensei/threat_modeling/)。生成威胁模型仍需要 Sensei 许可证。
 * **外观**和**功能标志**——两个同名的设置页面
 
 如果您之前已经开启了其中某项功能,对您的实例不会有任何变化。如果您之前将其关闭,那么现在它已被开启:这些功能属于 DefectDojo Pro 的固有部分,而非可选启用项。如果这会给您的实例带来问题,请联系 [DefectDojo 支持](mailto:support@defectdojo.com)。

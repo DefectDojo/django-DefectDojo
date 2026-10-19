@@ -7,7 +7,7 @@ weight: 12
 slug: custom-dashboards-llm
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">注意：通过 REST API 与 LLM 自动化可自定义仪表板是 DefectDojo Pro 功能。该功能默认处于关闭状态——超级用户可以在云端和本地部署实例上通过 **设置 > 功能开关** 启用可自定义仪表板。</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">注意：通过 REST API 与 LLM 自动化可自定义仪表板是 DefectDojo Pro 功能，在每个 Pro 实例上均可用，云端和本地部署实例都是如此。</span>
 
 DefectDojo Pro 的可自定义仪表板完全由 REST API 驱动——布局接口在设计时就充分考虑了 AI 智能体的使用场景。这意味着您可以将整个任务交给 LLM 来完成：将一段自包含的提示词粘贴给 Claude、ChatGPT 或其他任何有能力的模型，描述您想要的仪表板，它就会查询您租户的实时小组件目录、提出布局方案、生成可运行的 Python 脚本、创建布局、进行验证，并可选择将其设为默认布局。
 
@@ -23,9 +23,7 @@ DefectDojo Pro 的可自定义仪表板完全由 REST API 驱动——布局接�
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 ```
 
-2. **确认功能已启用。** 必须在您的实例上通过 **设置 > 功能开关** 启用可自定义仪表板——否则每次 API 调用都会返回 `403`。
-
-3. **确定您需要的仪表板。** LLM 会询问您的需求。常见的选择包括：
+2. **确定您需要的仪表板。** LLM 会询问您的需求。常见的选择包括：
 
    - **高管概览** —— 一览关键指标计数、严重程度分布和 SLA 合规情况。
    - **每日分诊** —— 活动的严重/高危发现项、优先级直方图、SLA 倒计时，以及您的“我的工作”队列。
