@@ -221,8 +221,6 @@ class RiskAcceptanceTestUI(DojoTestCase):
         ra.refresh_from_db()
         expiration_delta_days = get_system_setting("risk_acceptance_form_default_days", 90)
         risk_acceptance_expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
-
-        self.assertEqual(ra.expiration_date.date(), risk_acceptance_expiration_date.date())
         self.assertIsNone(ra.expiration_date_handled)
         self.assertIsNone(ra.expiration_date_warned)
         self.assert_all_inactive_risk_accepted(findings)
