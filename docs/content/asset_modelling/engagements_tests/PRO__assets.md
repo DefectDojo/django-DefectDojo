@@ -222,6 +222,38 @@ Asset's name at the top of the Asset page, and as an icon in front of each node'
 repository, the service built from it, or the host it runs on. The hierarchy view's field picker
 (the eye control, top left) can also show the type's label under each node's name.
 
+### Types Set by Connectors and Rules
+
+Connectors that know what an Asset is set its type for you, on mapping and on every Sync:
+
+| Connector | Type |
+|---|---|
+| CrowdStrike Falcon, Palo Alto Cortex XDR, Wazuh, Censys, Shodan | Host |
+| GitHub, GitHub Advanced Security, GitLab, Bitbucket, Azure DevOps | Repository |
+| NeuVector, Quay | Container Image |
+| Orca Security | Cloud Account |
+| Have I Been Pwned | Domain |
+| Qualys | Host, for the default one-record-per-host grouping (a record grouped by tag is left unclassified) |
+| runZero | From the asset's type: machines are hosts, network gear and IoT are devices, anything else is a host |
+| ServiceNow CMDB | From the CI class: servers and computers are hosts, applications and services are services, network gear is a device |
+| CyCognito | IPs are hosts, domains are domains, web apps are services |
+| Jit | Repositories, APIs (services) and cloud accounts |
+| JSM Assets | From the object type's name, for the common names (Server, Application, Business Service, ...) |
+| Backstage | From the Component's type: `service` and `website` are services, `library` is a package |
+| Deepfence ThreatMapper | Hosts, container images and cloud accounts |
+
+A connector never overwrites a type a person chose. It fills in an Asset that has no type, and
+it keeps the type it set up to date when the source system reclassifies the item. Once someone
+sets a different type (on the Asset form, through the API, in a bulk edit, or with a rule), the
+connector leaves that Asset's type alone. When records from several connectors, or several
+records from one connector, map onto the same Asset, the first one to classify it keeps it and
+the others leave it alone. If the record that classified an Asset is later removed, the type stays
+as it is; change it on the Asset form to reclassify. A vendor value DefectDojo has no type for (a
+CyCognito certificate, a custom CI class) leaves the Asset unclassified.
+
+To classify Assets no connector types, use the Triage Engine's **Set a Field** node on Assets
+with the **Type** field. It can set any type, including ones you added.
+
 Asset types are available through the API at `/api/v2/asset_types/` (read-only) and as the
 `asset_type` field on `/api/v2/assets/` and `/api/v2/products/`.
 

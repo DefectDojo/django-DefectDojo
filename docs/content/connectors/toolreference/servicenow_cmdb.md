@@ -36,3 +36,7 @@ Two rules keep the sync from overruling anyone:
 * **A value the mapping does not cover is skipped,** with a warning in the sync log, rather than guessed at. The Asset keeps the Criticality it had.
 
 A change in Criticality recalculates the Priority of the Asset's Findings.
+
+#### Asset Type
+
+The CI class also sets each Asset's [type](/asset_modelling/engagements_tests/pro__assets/#asset-types): servers and computers (for example `cmdb_ci_server`, `cmdb_ci_linux_server`, `cmdb_ci_computer`) are hosts, applications and services (`cmdb_ci_business_app`, `cmdb_ci_service`, `cmdb_ci_appl`) are services, and network gear (`cmdb_ci_netgear`, `cmdb_ci_ip_router`, `cmdb_ci_ip_switch`) is a device. A class DefectDojo does not map leaves the Asset unclassified, and a type someone set by hand is never overwritten.
