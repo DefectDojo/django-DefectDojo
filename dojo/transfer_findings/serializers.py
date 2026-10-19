@@ -1,3 +1,4 @@
+import logging
 from crum import get_current_user
 from dojo.utils import get_product, user_is_contacts
 from dojo.api_v2.api_error import ApiError
@@ -6,6 +7,8 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.models import TransferFinding, Finding, TransferFindingFinding, Product, Product_Type, Engagement, Dojo_User
 from dojo.authorization.authorization import user_has_permission, user_has_global_permission
 from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
+
+logger = logging.getLogger(__name__)
 
 
 class FindingTfSerlilizer(serializers.ModelSerializer):
@@ -56,15 +59,17 @@ class TransferFindingFindingCreateSerializer(serializers.ModelSerializer):
             if finding.risk_status is not None:
                 finding.risk_status = finding.risk_status.strip()
             if finding.risk_status not in ["Risk Active", None, ""]:
-                raise ApiError.precondition_required("The finding status must be Risk Active, Finding ID: " + str(finding.id))
+                message = "The finding status must be Risk Active, Finding ID: " + str(finding.id)
+                logger.error(message)
+                raise ApiError.precondition_required(message)
             if TransferFindingFinding.objects.filter(findings=finding.id).exists():
-                raise ApiError.precondition_required(
-                    "It is not possible to transfer to a finding that has already been transferred." +
-                    f"Finding {finding.id} is already transferred")
+                message = "It is not possible to transfer to a finding that has already been transferred. Finding ID: " + str(finding.id)
+                logger.error(message)
+                raise ApiError.precondition_required(message)
             if destination_engagement is not None and finding.test.engagement.id == destination_engagement.id:
-                raise ApiError.precondition_required(
-                    "It is not possible to transfer to a finding the same engagement." +
-                    f"Finding {finding.id}, engagment_id: {destination_engagement.id}",)
+                message = "It is not possible to transfer to a finding the same engagement." + f"Finding {finding.id}, engagment_id: {destination_engagement.id}"
+                logger.error(message)
+                raise ApiError.precondition_required(message)
             finding.update_fields(
                 risk_status="Transfer Pending"
             )

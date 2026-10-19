@@ -6,6 +6,7 @@ class CrossApprovalRequest(models.Model):
         ("pending", "Pending"),
         ("approved", "Approved"),
         ("rejected", "Rejected"),
+        ("deleting", "Deleting"),
     )
 
     owner = models.CharField(max_length=50, default="x86")
