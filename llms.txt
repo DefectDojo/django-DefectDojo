@@ -859,6 +859,7 @@ Key facts:
 ## Optional
 
 - [Open Source Upgrading](https://docs.defectdojo.com/releases/os_upgrading/upgrading_guide/): Release specific upgrading instructions
+- [Upgrading to DefectDojo Version 3.4.300](https://docs.defectdojo.com/releases/os_upgrading/3.4.300/): The endpoint field of /api/v2/endpoint_status/ carries the ID /api/v2/endpoints/ lists.
 - [Upgrading to DefectDojo Version 3.4.200](https://docs.defectdojo.com/releases/os_upgrading/3.4.200/): DefectDojo Pro removes the classic sidebar and the Menu 2.0 toggle.
 - [Upgrading to DefectDojo Version 3.4.100](https://docs.defectdojo.com/releases/os_upgrading/3.4.100/): The deprecated Tool Type, Tool Configuration, and API Scan Configuration API endpoints send a corrected end-of-life date and a single-sentence Classic UI warning.
 - [Upgrading to DefectDojo Version 3.5.x](https://docs.defectdojo.com/releases/os_upgrading/3.5/): No special instructions.
