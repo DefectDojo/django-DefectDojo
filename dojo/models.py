@@ -3385,19 +3385,6 @@ class Finding(models.Model):
 
     def get_sla_configuration(self):
         return self.test.engagement.product.sla_configuration
-        # if self.risk_status is None or self.sla_expiration_date is None:
-        #     return self.test.engagement.product.sla_configuration
-        # else:
-        #     sla_flow_rule = {
-        #         "Risk Accepted": SLA_Configuration.objects.filter(name="RiskAcceptanceExpiration")[0],
-        #         "Transfer Accepted": SLA_Configuration.objects.filter(name="TransferFindingExpiration")[0],
-        #         "Risk Active": SLA_Configuration.objects.filter(name="Default")[0],
-        #         "On Whitelist": self.get_sla_by_expiration_date()
-        #     }
-        #     if self.risk_status in sla_flow_rule:
-        #         return sla_flow_rule[self.risk_status]
-        #     else:
-        #         return self.test.engagement.product.sla_configuration
 
     def _calculate_severity_priority(self, tags, priority) -> int:
         priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
