@@ -66,8 +66,9 @@ and OSCAL outputs. They are managed through the compliance API rather than on th
 Add an item for a weakness no scanner reports. Hand-created items behave like synced ones: they
 take the next sequence number, accept deviations and milestones, and appear on the next snapshot.
 
-Two things differ. Sync never closes a hand-entered item, because no finding backs it: close it
-yourself, by setting its `status`, `closure_reason` and `closed_date` through `/api/v2/poam_items/`.
+Two things differ. Sync never closes a hand-entered item, even one that cites findings: close it
+yourself through `/api/v2/poam_items/` by setting `status` to `closed`, with a `closure_reason` (for
+example `manual`) and a `closed_date`.
 The other difference is the **Scheduled Completion Date**. A synced item takes it from the finding's
 remediation deadline when the item is created, and the date never changes after that (see
 [Rate before the first POA&M sync](../pain_ratings_setup/#rate-before-the-first-poam-sync)). A
