@@ -79,13 +79,6 @@ jobs:
           helm package helm/defectdojo/ --destination ./build
           echo "chart_version=$(ls build | cut -d '-' -f 2,3 | sed 's|\.tgz||')" >> $GITHUB_ENV
 
-      - name: Publish Helm chart to GHCR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          printf '%s' "$GITHUB_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          helm push "./build/defectdojo-${{ env.chart_version }}.tgz" oci://ghcr.io/defectdojo
-
       - name: Create release ${{ inputs.release_number }}
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
@@ -119,3 +112,11 @@ jobs:
           git add ./index.yaml
           git commit -m "Update index.yaml - ${{ inputs.release_number }}"
           git push -u origin helm-charts
+
+      - name: Publish Helm chart to GHCR
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GITHUB_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          helm push "./build/defectdojo-${chart_version}.tgz" oci://ghcr.io/defectdojo
