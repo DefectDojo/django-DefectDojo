@@ -173,10 +173,10 @@ datatables.net@3.1.2:
   resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.2.tgz#a5a50257bf87b0f70eca710f6ef0feeb763c5556"
   integrity sha512-6PnhPw9lrPASP2n1t13zW595aKB41j3Qt6iykFVV6aohGtSF3CTjwQ+RsdlrGUQTj/Ji0or8+9Q7mMpf4YY1cQ==
 
-datatables.net@^3.1, datatables.net@^3.1.3:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.3.tgz#e8f0b0b8eb52abbc9cd6967c59a1e63a494e0739"
-  integrity sha512-B34/A+KAkKQnl6si+SgmB8grhDepfHDXEFyQxJanqY70dB4ab0pHTF1aHZvLKKruuUoL815/y3YeTSYUr/pAOw==
+datatables.net@^3.1, datatables.net@^3.1.4:
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.4.tgz#b737343bef9ec0acfd4c6a3b5774a0925f83411f"
+  integrity sha512-tnk14y/AOr0Z1d7avIUvCcOGgqZpeo7B6g6RQiycMQckEMq2FaaZTG1Q1xD6Kci5gpAvdjZInDmbscoiVSTyGw==
 
 delegate@^3.1.2:
   version "3.2.0"
