@@ -42,7 +42,7 @@ class InputFlow(models.Model):
 
 class InputURL(models.Model):
     flow = models.ForeignKey("InputFlow",related_name="urls",on_delete=models.CASCADE)
-    url = models.URLField(max_length=500)
+    url = models.CharField(max_length=500)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     
