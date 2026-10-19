@@ -1,4 +1,8 @@
+from unittest.mock import patch
+
 from dojo.models import Test
+from dojo.tools.locations import LocationData
+from dojo.tools.qualys_vmdr.helpers import parse_locations
 from dojo.tools.qualys_vmdr.parser import QualysVMDRParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -289,3 +293,37 @@ class TestQualysVMDRParser(DojoTestCase):
             parser = QualysVMDRParser()
             findings = parser.get_findings(testfile, Test())
             self.validate_locations(findings)
+
+    def test_asset_name_becomes_a_host_location_beside_the_ip(self):
+        # Qualys VMDR keys an asset by its name, so the name is a host location. The
+        # IP stays a URL location, which is all an install without the host type keeps.
+        locations = parse_locations("10.0.0.1", "", asset_name="TESTSERVER01", operating_system="Windows Server 2019")
+        self.assertEqual(
+            [
+                LocationData.host(hostname="TESTSERVER01", os_version="Windows Server 2019"),
+                LocationData.url(host="10.0.0.1"),
+            ],
+            locations,
+        )
+
+    def test_a_missing_asset_name_gives_only_ip_locations(self):
+        for blank in ("", "  ", "'-"):
+            with self.subTest(asset_name=blank):
+                self.assertEqual([LocationData.url(host="10.0.0.1")], parse_locations("10.0.0.1", "", asset_name=blank))
+
+    def test_a_null_operating_system_is_left_blank(self):
+        locations = parse_locations("", "", asset_name="HOST1", operating_system="'-")
+        self.assertEqual([LocationData.host(hostname="HOST1")], locations)
+
+    def test_qid_and_cve_rows_carry_the_asset_name_as_a_host_location(self):
+        for scan, module in (
+            ("one_vuln_qid.csv", "dojo.tools.qualys_vmdr.qid_parser"),
+            ("one_vuln_cve.csv", "dojo.tools.qualys_vmdr.cve_parser"),
+        ):
+            with self.subTest(scan=scan), (get_unit_tests_scans_path("qualys_vmdr") / scan).open(
+                encoding="utf-8",
+            ) as testfile, patch(f"{module}.locations_enabled", return_value=True):
+                findings = QualysVMDRParser().get_findings(testfile, Test())
+                hosts = [location for location in findings[0].unsaved_locations if location.type == "host"]
+                self.assertEqual(1, len(hosts))
+                self.assertEqual(findings[0].component_name, hosts[0].data["hostname"])
