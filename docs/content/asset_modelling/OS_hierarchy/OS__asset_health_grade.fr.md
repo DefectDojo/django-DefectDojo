@@ -4,8 +4,8 @@ description: Comment DefectDojo calcule la Note de santé d'un Actif
 weight: 7
 audience: opensource
 aliases:
-- /fr/asset_modelling/os_hierarchy/product_health_grade/
-- /fr/en/asset_modelling/os_hierarchy/product_health_grade/
+- /asset_modelling/os_hierarchy/product_health_grade/
+- /en/asset_modelling/os_hierarchy/product_health_grade/
 ---
 
 DefectDojo peut calculer une note pour vos Actifs en fonction du nombre de Constatations qu'ils contiennent. Les notes vont de A à F.

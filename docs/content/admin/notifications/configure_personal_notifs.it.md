@@ -2,7 +2,7 @@
 title: Impostare le notifiche personali
 description: Configurare le notifiche per un account personale
 aliases:
-- /it/en/customize_dojo/notifications/configure_personal_notifs
+- /en/customize_dojo/notifications/configure_personal_notifs
 ---
 
 ## Configurare le notifiche personali

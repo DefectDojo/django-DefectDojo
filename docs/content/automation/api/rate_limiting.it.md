@@ -5,7 +5,7 @@ description: Configura la limitazione della frequenza nella pagina di accesso pe
 weight: 4
 audience: opensource
 aliases:
-- /it/en/open_source/rate_limiting
+- /en/open_source/rate_limiting
 ---
 
 DefectDojo include la limitazione della frequenza nella pagina di accesso per proteggere dagli attacchi di forza bruta, basata su [Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html).

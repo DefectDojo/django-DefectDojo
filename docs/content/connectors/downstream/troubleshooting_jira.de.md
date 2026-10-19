@@ -3,8 +3,8 @@ title: Fehlerbehebung bei Jira-Fehlern (Legacy)
 description: Beheben von Problemen mit einer Jira-Integration
 weight: 2
 aliases:
-- /de/issue_tracking/jira/troubleshooting_jira/
-- /de/en/share_your_findings/troubleshooting_jira/
+- /issue_tracking/jira/troubleshooting_jira/
+- /en/share_your_findings/troubleshooting_jira/
 ---
 
 Es folgt eine Liste häufiger Probleme mit der Jira-Integration und Möglichkeiten, sie zu beheben.

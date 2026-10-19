@@ -2,8 +2,8 @@
 title: 管理操作
 description: 查看连接器发现和同步操作的状态
 aliases:
-- /zh-hans/import_data/pro/connectors/manage_operations/
-- /zh-hans/en/connecting_your_tools/connectors/manage_operations
+- /import_data/pro/connectors/manage_operations/
+- /en/connecting_your_tools/connectors/manage_operations
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：上游连接器（Upstream Connectors）是 DefectDojo Pro 专属功能。</span>

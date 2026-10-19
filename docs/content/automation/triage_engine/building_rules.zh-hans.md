@@ -4,8 +4,8 @@ description: 图形编辑器、触发器、作用范围、条件和消息模板
 weight: 2
 audience: pro
 aliases:
-- /zh-hans/automation/rules_engine_v2/building_rules/
-- /zh-hans/automation/rules_engine_2/building_rules/
+- /automation/rules_engine_v2/building_rules/
+- /automation/rules_engine_2/building_rules/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：Triage Engine 是 DefectDojo Pro 专属功能。</span>

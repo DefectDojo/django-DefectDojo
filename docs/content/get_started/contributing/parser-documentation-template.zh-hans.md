@@ -4,7 +4,7 @@ toc_hide: true
 weight: 2
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/contributing/parser-documentation-template
+- /en/open_source/contributing/parser-documentation-template
 ---
 
 本模板用于记录新解析器或现有解析器的文档。欢迎补充任何有助于其他安全从业者的额外信息。

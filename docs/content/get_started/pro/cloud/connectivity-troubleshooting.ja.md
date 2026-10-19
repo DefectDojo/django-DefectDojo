@@ -4,7 +4,7 @@ description: DefectDojo インスタンスへの接続を復旧する
 weight: 2
 audience: pro
 aliases:
-- /ja/en/cloud_management/connectivity-troubleshooting
+- /en/cloud_management/connectivity-troubleshooting
 ---
 
 DefectDojo インスタンスへのアクセスに問題がある場合は、以下の手順に従って接続を復旧できます。

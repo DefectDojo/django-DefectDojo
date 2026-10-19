@@ -2,7 +2,7 @@
 title: Nota de Integridade do Produto
 description: Como o DefectDojo calcula a Nota de Integridade do Produto
 aliases:
-- /pt-br/en/working_with_findings/organizing_engagements_tests/product_health_grade
+- /en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
 
 O DefectDojo pode calcular uma nota para seus Produtos com base na quantidade de Achados neles contidos. As notas variam de A a F.

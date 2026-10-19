@@ -5,7 +5,7 @@ draft: 'false'
 weight: 2
 chapter: true
 aliases:
-- /es/en/about_defectdojo/examples_of_use
+- /en/about_defectdojo/examples_of_use
 ---
 
 Este artículo se basa en el Office Hours de febrero de 2025 de DefectDojo, Inc.: «Abordando casos de uso comunes».

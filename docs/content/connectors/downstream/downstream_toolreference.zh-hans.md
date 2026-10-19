@@ -4,8 +4,8 @@ description: 下游连接器的详细设置指南
 weight: 1
 audience: pro
 aliases:
-- /zh-hans/en/share_your_findings/integrations_toolreference
-- /zh-hans/issue_tracking/pro_integration/integrations_toolreference/
+- /en/share_your_findings/integrations_toolreference
+- /issue_tracking/pro_integration/integrations_toolreference/
 ---
 
 以下是有关如何为第三方问题跟踪器设置 DefectDojo 下游连接器的具体说明。

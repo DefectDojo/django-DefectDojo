@@ -5,7 +5,7 @@ draft: false
 weight: 2
 audience: opensource
 aliases:
-- /fr/en/open_source/installation/configuration
+- /en/open_source/installation/configuration
 ---
 
 ## dojo/settings/settings.dist.py

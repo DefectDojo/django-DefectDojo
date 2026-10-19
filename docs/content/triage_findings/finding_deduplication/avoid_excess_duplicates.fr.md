@@ -3,7 +3,7 @@ title: Éviter les doublons excessifs
 description: ''
 weight: 4
 aliases:
-- /fr/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
+- /en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
 ---
 
 L'un des atouts de DefectDojo est que son modèle de données peut s'adapter à de nombreux cas d'usage et applications différents. Vous serez probablement amené à modifier votre approche à mesure que vous maîtriserez le logiciel et découvrirez des moyens d'optimiser votre flux de travail.

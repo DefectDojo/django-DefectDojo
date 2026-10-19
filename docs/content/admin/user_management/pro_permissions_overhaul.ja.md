@@ -4,7 +4,7 @@ description: 権限設定の刷新、Pro機能
 weight: 3
 audience: pro
 aliases:
-- /ja/en/customize_dojo/user_management/pro_permissions_overhaul
+- /en/customize_dojo/user_management/pro_permissions_overhaul
 ---
 
 ## 権限の種類の概要

@@ -5,7 +5,7 @@ description: Comment attribuer des rôles et des autorisations à un utilisateur
 weight: 2
 audience: pro
 aliases:
-- /fr/en/customize_dojo/user_management/set_user_permissions
+- /en/customize_dojo/user_management/set_user_permissions
 ---
 
 > **Fonctionnalité DefectDojo Pro.** Le système RBAC Membres / Groupes / Rôles globaux décrit sur cette page fait partie de DefectDojo Pro. La version open source de DefectDojo utilise le modèle [Utilisateurs autorisés](../os__authorized_users/) — consultez cette page pour le contrôle d'accès en version open source, ainsi que les [notes de mise à niveau 3.0](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) si vous passez d'une édition à l'autre.

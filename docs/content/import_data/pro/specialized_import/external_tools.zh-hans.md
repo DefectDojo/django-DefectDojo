@@ -5,7 +5,7 @@ draft: false
 weight: 2
 audience: pro
 aliases:
-- /zh-hans/en/connecting_your_tools/external_tools
+- /en/connecting_your_tools/external_tools
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：以下外部工具仅为 DefectDojo Pro 功能。除非连接到具有 DefectDojo Pro 许可证的实例，否则这些二进制文件将无法运行。</span>

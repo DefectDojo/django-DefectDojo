@@ -3,7 +3,7 @@ title: フィルターインデックス
 description: DefectDojoのすべてのフィルターに関するリファレンス
 weight: 5
 aliases:
-- /ja/en/working_with_findings/organizing_engagements_tests/filter_index
+- /en/working_with_findings/organizing_engagements_tests/filter_index
 ---
 
 **注: 現在この記事では、DefectDojo Pro UIで利用可能な検出事項フィルターのみを扱っていますが、今後はOpen-Sourceのフィルターも含め、より多くのオブジェクトタイプを対象とするよう拡張される予定です。**

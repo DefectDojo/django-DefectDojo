@@ -16,8 +16,8 @@ seo:
   robots: ''
 pro-feature: true
 aliases:
-- /es/import_data/pro/connectors/about_connectors/
-- /es/en/connecting_your_tools/connectors/about_connectors
+- /import_data/pro/connectors/about_connectors/
+- /en/connecting_your_tools/connectors/about_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: los Conectores ascendentes son una función exclusiva de DefectDojo Pro.</span>

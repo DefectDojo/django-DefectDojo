@@ -16,8 +16,8 @@ seo:
   robots: ''
 pro-feature: true
 aliases:
-- /zh-hans/import_data/pro/connectors/about_connectors/
-- /zh-hans/en/connecting_your_tools/connectors/about_connectors
+- /import_data/pro/connectors/about_connectors/
+- /en/connecting_your_tools/connectors/about_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：上游连接器（Upstream Connectors）是 DefectDojo Pro 专属功能。</span>

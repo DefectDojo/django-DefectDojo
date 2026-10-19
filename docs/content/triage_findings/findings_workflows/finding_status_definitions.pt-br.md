@@ -3,7 +3,7 @@ title: Definições de Status de Achado
 description: 'Uma referência rápida aos status de Achado: Aberto, Verificado, Aceito..'
 weight: 2
 aliases:
-- /pt-br/en/working_with_findings/findings_workflows/finding_status_definitions
+- /en/working_with_findings/findings_workflows/finding_status_definitions
 ---
 
 Cada Achado criado no DefectDojo tem um Status que comunica informações relevantes. Os status ajudam sua equipe a acompanhar o progresso na resolução dos problemas.

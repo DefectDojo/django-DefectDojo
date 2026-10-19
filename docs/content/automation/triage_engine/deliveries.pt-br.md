@@ -5,8 +5,8 @@ description: O registro de tudo que as regras enviam para fora, e como funcionam
 weight: 6
 audience: pro
 aliases:
-- /pt-br/automation/rules_engine_v2/deliveries/
-- /pt-br/automation/rules_engine_2/deliveries/
+- /automation/rules_engine_v2/deliveries/
+- /automation/rules_engine_2/deliveries/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: o Triage Engine é um recurso exclusivo do DefectDojo Pro.</span>

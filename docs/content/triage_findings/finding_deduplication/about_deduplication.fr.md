@@ -3,9 +3,9 @@ title: À propos de la déduplication
 description: Principes fondamentaux et concepts clés de la déduplication
 weight: 1
 aliases:
-- /fr/en/working_with_findings/finding_deduplication/about_deduplication
-- /fr/en/working_with_findings/finding_deduplication/delete_deduplicates
-- /fr/en/working_with_findings/findings_workflows/manage_duplicate_findings
+- /en/working_with_findings/finding_deduplication/about_deduplication
+- /en/working_with_findings/finding_deduplication/delete_deduplicates
+- /en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 DefectDojo est conçu pour ingérer des rapports en masse provenant d'outils, créant une ou plusieurs Constatations en fonction du contenu du rapport. Lorsque vous utilisez DefectDojo, vous serez très probablement amené à ingérer régulièrement des rapports provenant du même outil, ce qui rend les Constatations en double hautement probables.

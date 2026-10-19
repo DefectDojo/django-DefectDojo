@@ -5,7 +5,7 @@ description: Ajoutez une instance de test, de développement ou toute autre inst
 weight: 3
 audience: pro
 aliases:
-- /fr/en/cloud_management/additional-cloud-instance
+- /en/cloud_management/additional-cloud-instance
 ---
 
 Le processus d'ajout d'une deuxième instance Cloud est plus ou moins le même que celui de l'ajout de votre première instance. Ce guide suppose que vous avez déjà configuré votre serveur DefectDojo initial et que vous avez un accord avec notre équipe commerciale pour ajouter une autre instance.

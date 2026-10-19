@@ -17,17 +17,17 @@ seo:
 exclude_search: true
 pro-feature: true
 aliases:
-- /fr/admin/user_management/configure_sso/
-- /fr/admin/sso/os__saml/
-- /fr/admin/sso/os__auth0/
-- /fr/admin/sso/os__azure_ad/
-- /fr/admin/sso/os__github_enterprise/
-- /fr/admin/sso/os__gitlab/
-- /fr/admin/sso/os__google/
-- /fr/admin/sso/os__keycloak/
-- /fr/admin/sso/os__oidc/
-- /fr/admin/sso/os__okta/
-- /fr/admin/sso/os__remote_user/
+- /admin/user_management/configure_sso/
+- /admin/sso/os__saml/
+- /admin/sso/os__auth0/
+- /admin/sso/os__azure_ad/
+- /admin/sso/os__github_enterprise/
+- /admin/sso/os__gitlab/
+- /admin/sso/os__google/
+- /admin/sso/os__keycloak/
+- /admin/sso/os__oidc/
+- /admin/sso/os__okta/
+- /admin/sso/os__remote_user/
 ---
 
 L'authentification unique est une fonctionnalité de **DefectDojo Pro**. Depuis DefectDojo 3.0, l'ensemble du périmètre SSO — SAML, OIDC et les fournisseurs OAuth intégrés — n'est disponible que dans DefectDojo Pro. La version open source de DefectDojo utilise une connexion locale par nom d'utilisateur/mot de passe et le flux de réinitialisation de mot de passe.

@@ -3,7 +3,7 @@ title: 再インポート
 description: データを手動、API経由、またはコネクター経由でインポートする方法を学びます
 weight: 2
 aliases:
-- /ja/en/connecting_your_tools/import_scan_files/using_reimport
+- /en/connecting_your_tools/import_scan_files/using_reimport
 ---
 
 DefectDojo でテストが作成されると(事前に作成する場合でも、スキャンファイルをインポートする場合でも)、そのテストに新しい検出事項データを追加して拡張することができます。

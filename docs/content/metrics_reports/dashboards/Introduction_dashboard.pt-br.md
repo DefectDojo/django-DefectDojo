@@ -4,8 +4,8 @@ description: Trabalhando com a página inicial do DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /pt-br/en/customize_dojo/dashboards/Introduction_dashboard
-- /pt-br/en/customize_dojo/dashboards/pro_dashboards
+- /en/customize_dojo/dashboards/Introduction_dashboard
+- /en/customize_dojo/dashboards/pro_dashboards
 ---
 
 O Painel é provavelmente a primeira página que você verá ao abrir o DefectDojo. Ele resume o desempenho da sua equipe e oferece ferramentas de acompanhamento para monitorar áreas específicas do seu ambiente de gestão de vulnerabilidades.

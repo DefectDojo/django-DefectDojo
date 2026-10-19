@@ -3,7 +3,7 @@ title: Reimportação
 description: Aprenda a importar dados manualmente, pela API, ou via um connector
 weight: 2
 aliases:
-- /pt-br/en/connecting_your_tools/import_scan_files/using_reimport
+- /en/connecting_your_tools/import_scan_files/using_reimport
 ---
 
 Quando um Teste é criado no DefectDojo (seja com antecedência ou pela importação de um arquivo de scan), o Teste pode ser estendido com novos dados de Achados.

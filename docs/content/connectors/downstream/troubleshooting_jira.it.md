@@ -3,8 +3,8 @@ title: Risoluzione dei problemi con Jira (Legacy)
 description: Risolvere i problemi con l'integrazione di Jira
 weight: 2
 aliases:
-- /it/issue_tracking/jira/troubleshooting_jira/
-- /it/en/share_your_findings/troubleshooting_jira/
+- /issue_tracking/jira/troubleshooting_jira/
+- /en/share_your_findings/troubleshooting_jira/
 ---
 
 Ecco alcuni problemi comuni con l'integrazione di Jira e i modi per risolverli.

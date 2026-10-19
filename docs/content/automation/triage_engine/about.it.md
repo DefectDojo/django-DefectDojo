@@ -4,8 +4,8 @@ description: Cos'è Triage Engine, come attivarlo e i concetti su cui si basa
 weight: 1
 audience: pro
 aliases:
-- /it/automation/rules_engine_v2/about/
-- /it/automation/rules_engine_2/about/
+- /automation/rules_engine_v2/about/
+- /automation/rules_engine_2/about/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Triage Engine è una funzionalità disponibile solo in DefectDojo Pro.</span>

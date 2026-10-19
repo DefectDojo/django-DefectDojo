@@ -5,7 +5,7 @@ draft: 'false'
 weight: 6
 pro-feature: true
 aliases:
-- /zh-hans/en/about_defectdojo/request_a_trial
+- /en/about_defectdojo/request_a_trial
 ---
 
 如果您的团队需要本地部署(on-premise)的 DefectDojo,请通过邮件 → [hello@defectdojo.com](mailto:hello@defectdojo.com) 联系我们的销售团队。此试用申请流程仅适用于 DefectDojo Cloud 用户。

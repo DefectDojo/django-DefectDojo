@@ -4,7 +4,7 @@ description: Configure Acordos de Nível de Serviço para diferentes Produtos
 weight: 2
 audience: opensource
 aliases:
-- /pt-br/en/working_with_findings/sla_configuration
+- /en/working_with_findings/sla_configuration
 ---
 
 Cada Produto no DefectDojo pode ter sua própria configuração de Acordo de Nível de Serviço (SLA), que representa os dias que sua organização tem para remediar ou, de outra forma, gerenciar um Achado.

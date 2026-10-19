@@ -15,5 +15,5 @@ seo:
 exclude_search: true
 audience: pro
 aliases:
-- /pt-br/issue_tracking/pro_integration/
+- /issue_tracking/pro_integration/
 ---

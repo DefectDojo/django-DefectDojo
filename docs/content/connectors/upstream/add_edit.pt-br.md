@@ -2,8 +2,8 @@
 title: Adicionar ou Editar Conectores Upstream
 description: Conecte-se a uma ferramenta de segurança suportada
 aliases:
-- /pt-br/import_data/pro/connectors/add_edit_connectors/
-- /pt-br/en/connecting_your_tools/connectors/add_edit_connectors
+- /import_data/pro/connectors/add_edit_connectors/
+- /en/connecting_your_tools/connectors/add_edit_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Conectores Upstream são um recurso exclusivo do DefectDojo Pro.</span>

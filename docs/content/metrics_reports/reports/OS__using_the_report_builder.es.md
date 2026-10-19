@@ -7,8 +7,8 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
-- /es/en/share_your_findings/pro_reports/working_with_generated_reports
-- /es/metrics_reports/reports/working_with_generated_reports
+- /en/share_your_findings/pro_reports/working_with_generated_reports
+- /metrics_reports/reports/working_with_generated_reports
 ---
 
 DefectDojo's report builder lets you assemble a custom report from a set of content widgets, run it, and export the result (for example, by printing it to PDF). Custom reports can summarize the Findings or Endpoints you want to share with an external audience, and can include branding and boilerplate text.

@@ -5,7 +5,7 @@ draft: false
 weight: 4
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/installation/running-in-production
+- /en/open_source/installation/running-in-production
 ---
 
 ## 生产环境使用（配合 Docker compose）

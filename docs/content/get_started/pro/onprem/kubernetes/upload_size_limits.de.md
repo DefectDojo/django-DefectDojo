@@ -6,7 +6,7 @@ draft: false
 weight: 5
 audience: pro
 aliases:
-  - /de/get_started/pro/onprem/upload_size_limits/
+  - /get_started/pro/onprem/upload_size_limits/
 ---
 
 Eine große Scan-Datei kann an mehr als einem Limit an unterschiedlichen Stellen im Anfragepfad abgelehnt werden, und der angezeigte Fehler verrät Ihnen, welches Limit Sie erreicht haben. Diese Seite beschreibt, wo sich diese Limits befinden und wie Sie sie in einem selbst gehosteten Deployment anheben.

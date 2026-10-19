@@ -2,7 +2,7 @@
 title: 关于通知和 🔔 提醒
 description: 了解通知和应用内提醒
 aliases:
-- /zh-hans/en/customize_dojo/notifications/about_notifications
+- /en/customize_dojo/notifications/about_notifications
 ---
 
 DefectDojo 通过多种方式让您随时掌握最新情况。系统可针对即将到来的测试活动、[用户提及](/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions)、SLA 到期以及软件中的其他事件发送通知。

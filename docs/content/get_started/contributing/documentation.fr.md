@@ -5,7 +5,7 @@ draft: false
 weight: 4
 audience: opensource
 aliases:
-- /fr/en/open_source/contributing/documentation
+- /en/open_source/contributing/documentation
 ---
 
 La documentation est construite avec [Hugo](https://gohugo.io/) et utilise une variante du thème [Doks](https://getdoks.org/).

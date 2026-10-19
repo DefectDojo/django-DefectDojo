@@ -4,7 +4,7 @@ description: 如何为用户授予角色和权限,以及超级用户身份
 weight: 2
 audience: pro
 aliases:
-- /zh-hans/en/customize_dojo/user_management/set_user_permissions
+- /en/customize_dojo/user_management/set_user_permissions
 ---
 
 > **DefectDojo Pro 功能。** 本页介绍的成员/组/全局角色 RBAC 系统是 DefectDojo Pro 的一部分。开源版 DefectDojo 使用[已授权用户](../os__authorized_users/)模型——有关开源版访问控制,请参阅该页面;如果您正在版本之间迁移,请参阅[3.0 升级说明](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization)。

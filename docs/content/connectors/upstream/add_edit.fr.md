@@ -2,8 +2,8 @@
 title: Ajouter ou modifier un Connecteur en amont
 description: Se connecter à un outil de sécurité pris en charge
 aliases:
-- /fr/import_data/pro/connectors/add_edit_connectors/
-- /fr/en/connecting_your_tools/connectors/add_edit_connectors
+- /import_data/pro/connectors/add_edit_connectors/
+- /en/connecting_your_tools/connectors/add_edit_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : les Connecteurs en amont sont une fonctionnalité réservée à DefectDojo Pro.</span>

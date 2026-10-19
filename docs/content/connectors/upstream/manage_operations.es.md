@@ -2,8 +2,8 @@
 title: Gestión de operaciones
 description: Consulte el estado de las operaciones Discover y Sync de su Conector
 aliases:
-- /es/import_data/pro/connectors/manage_operations/
-- /es/en/connecting_your_tools/connectors/manage_operations
+- /import_data/pro/connectors/manage_operations/
+- /en/connecting_your_tools/connectors/manage_operations
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: los Conectores ascendentes son una función exclusiva de DefectDojo Pro.</span>

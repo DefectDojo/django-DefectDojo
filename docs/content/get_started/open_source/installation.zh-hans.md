@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/installation/installation
+- /en/open_source/installation/installation
 ---
 
 ## **推荐选项**

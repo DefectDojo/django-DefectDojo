@@ -4,7 +4,7 @@ description: 访问 DefectDojo 对象的审计日志
 weight: 1
 audience: opensource
 aliases:
-- /zh-hans/en/customize_dojo/user_management/audit_logging
+- /en/customize_dojo/user_management/audit_logging
 ---
 
 DefectDojo 的审计日志可以通过几种不同的方式访问。

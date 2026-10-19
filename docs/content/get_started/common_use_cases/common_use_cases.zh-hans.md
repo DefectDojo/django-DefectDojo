@@ -5,7 +5,7 @@ draft: 'false'
 weight: 2
 chapter: true
 aliases:
-- /zh-hans/en/about_defectdojo/examples_of_use
+- /en/about_defectdojo/examples_of_use
 ---
 
 本文基于 DefectDojo, Inc. 2025 年 2 月 Office Hours 活动:“处理常见用例”。

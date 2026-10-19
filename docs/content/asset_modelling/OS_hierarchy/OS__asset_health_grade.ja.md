@@ -4,8 +4,8 @@ description: DefectDojoがアセットヘルスグレードを算出する方法
 weight: 7
 audience: opensource
 aliases:
-- /ja/asset_modelling/os_hierarchy/product_health_grade/
-- /ja/en/asset_modelling/os_hierarchy/product_health_grade/
+- /asset_modelling/os_hierarchy/product_health_grade/
+- /en/asset_modelling/os_hierarchy/product_health_grade/
 ---
 
 DefectDojoは、アセットに含まれる検出事項の量に基づいてアセットのグレードを算出できます。グレードはAからFの範囲でランク付けされます。

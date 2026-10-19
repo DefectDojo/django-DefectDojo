@@ -6,7 +6,7 @@ draft: false
 weight: 5
 audience: pro
 aliases:
-  - /pt-br/get_started/pro/onprem/upload_size_limits/
+  - /get_started/pro/onprem/upload_size_limits/
 ---
 
 Um arquivo de scan grande pode ser rejeitado por mais de um limite, em pontos diferentes do caminho da requisição, e o erro que você recebe indica qual deles você atingiu. Esta página aborda onde esses limites ficam e como aumentá-los em uma implantação self-hosted.

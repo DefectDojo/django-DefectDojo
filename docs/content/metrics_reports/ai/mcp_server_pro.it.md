@@ -6,7 +6,7 @@ draft: false
 audience: pro
 weight: 23
 aliases:
-- /it/en/ai/mcp_server_pro
+- /en/ai/mcp_server_pro
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: le funzionalità di IA sono disponibili solo in DefectDojo Pro.</span>

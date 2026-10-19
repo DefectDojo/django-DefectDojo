@@ -4,7 +4,7 @@ description: Revisione, funzionalità Pro
 weight: 3
 audience: pro
 aliases:
-- /it/en/customize_dojo/user_management/pro_permissions_overhaul
+- /en/customize_dojo/user_management/pro_permissions_overhaul
 ---
 
 ## Introduzione ai tipi di autorizzazione

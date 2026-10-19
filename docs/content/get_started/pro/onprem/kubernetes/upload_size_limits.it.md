@@ -6,7 +6,7 @@ draft: false
 weight: 5
 audience: pro
 aliases:
-  - /it/get_started/pro/onprem/upload_size_limits/
+  - /get_started/pro/onprem/upload_size_limits/
 ---
 
 Un file di scansione di grandi dimensioni può essere rifiutato da più di un limite, in punti diversi del percorso della richiesta, e l'errore che ricevi indica quale limite hai raggiunto. Questa pagina descrive dove si trovano questi limiti e come aumentarli in un deployment self-hosted.

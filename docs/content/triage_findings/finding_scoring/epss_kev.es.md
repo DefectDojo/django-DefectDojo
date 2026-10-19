@@ -5,7 +5,7 @@ description: Cómo DefectDojo Pro enriquece los Hallazgos con datos de EPSS y CI
 audience: pro
 weight: 2
 aliases:
-- /es/triage_findings/epss_kev/
+- /triage_findings/epss_kev/
 ---
 
 DefectDojo Pro enriquece automáticamente sus Hallazgos con dos fuentes externas de inteligencia de amenazas — **EPSS** y **CISA KEV** — de modo que la priorización refleje qué tan probable es que se explote una vulnerabilidad, y no solo su severidad CVSS. Ambas fuentes coinciden con los Hallazgos por **CVE**, se actualizan según una **programación diaria** y alimentan directamente la puntuación de **prioridad** calculada de cada Hallazgo.

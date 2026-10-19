@@ -4,7 +4,7 @@ description: 在 DefectDojo Pro 中配置 LDAP 身份验证
 weight: 20
 audience: pro
 aliases:
-- /zh-hans/en/open_source/ldap-authentication
+- /en/open_source/ldap-authentication
 ---
 
 DefectDojo Pro 支持从**企业设置**界面配置 LDAP 身份验证——无需自定义 Docker 镜像或配置文件。

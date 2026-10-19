@@ -4,7 +4,7 @@ description: Arbeiten mit der Rules Engine-Automatisierung
 weight: 1
 audience: pro
 aliases:
-- /de/en/customize_dojo/rules_engine
+- /en/customize_dojo/rules_engine
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Rules Engine ist eine reine DefectDojo-Pro-Funktion.</span>

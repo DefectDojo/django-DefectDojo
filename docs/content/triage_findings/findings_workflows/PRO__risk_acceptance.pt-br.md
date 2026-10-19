@@ -4,7 +4,7 @@ description: Aproveitando as Aceitações de Risco no DefectDojo Pro
 audience: pro
 weight: 2
 aliases:
-- /pt-br/en/working_with_findings/findings_workflows/risk_acceptances/
+- /en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 **Aceitações de Risco** são um status especial que pode ser aplicado a Achados usando objetos de **Aceitação de Risco Completa** ou o fluxo de **Aceitação de Risco Simples**. As Aceitações de Risco são usadas para documentar formalmente e operacionalizar a decisão de reconhecer um Achado vulnerável sem corrigi-lo imediatamente.

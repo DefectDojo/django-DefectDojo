@@ -5,7 +5,7 @@ draft: false
 weight: 3
 audience: pro
 aliases:
-  - /ja/get_started/pro/onprem/air_gapped_install/
+  - /get_started/pro/onprem/air_gapped_install/
 ---
 
 このページは、DefectDojo Pro のライセンスに付属するインストール手順を補足するものです。対象ホストがインターネットに接続できない場合に変更が必要となる点のみを扱います。ホストの前提条件や PostgreSQL のセットアップを含め、それ以外はすべて標準の手順に従います。

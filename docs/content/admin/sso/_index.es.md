@@ -17,17 +17,17 @@ seo:
 exclude_search: true
 pro-feature: true
 aliases:
-- /es/admin/user_management/configure_sso/
-- /es/admin/sso/os__saml/
-- /es/admin/sso/os__auth0/
-- /es/admin/sso/os__azure_ad/
-- /es/admin/sso/os__github_enterprise/
-- /es/admin/sso/os__gitlab/
-- /es/admin/sso/os__google/
-- /es/admin/sso/os__keycloak/
-- /es/admin/sso/os__oidc/
-- /es/admin/sso/os__okta/
-- /es/admin/sso/os__remote_user/
+- /admin/user_management/configure_sso/
+- /admin/sso/os__saml/
+- /admin/sso/os__auth0/
+- /admin/sso/os__azure_ad/
+- /admin/sso/os__github_enterprise/
+- /admin/sso/os__gitlab/
+- /admin/sso/os__google/
+- /admin/sso/os__keycloak/
+- /admin/sso/os__oidc/
+- /admin/sso/os__okta/
+- /admin/sso/os__remote_user/
 ---
 
 El inicio de sesión único es una función de **DefectDojo Pro**. A partir de DefectDojo 3.0, la superficie de SSO — SAML, OIDC y los proveedores de OAuth incluidos — está disponible únicamente en DefectDojo Pro. DefectDojo de código abierto usa el inicio de sesión local con nombre de usuario/contraseña y el flujo de restablecimiento de contraseña.

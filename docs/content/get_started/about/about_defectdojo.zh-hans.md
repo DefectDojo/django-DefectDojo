@@ -5,7 +5,7 @@ draft: false
 type: docs
 weight: 1
 aliases:
-- /zh-hans/en/about_defectdojo/about_docs
+- /en/about_defectdojo/about_docs
 ---
 
 <div class="version-opensource">

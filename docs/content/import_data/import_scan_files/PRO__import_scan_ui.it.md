@@ -4,7 +4,7 @@ description: ''
 weight: 1
 audience: pro
 aliases:
-- /it/en/connecting_your_tools/import_scan_files/import_scan_ui
+- /en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
 
 Se disponi di una nuova istanza di DefectDojo, il modulo di importazione della scansione (Import Scan Form) è un logico primo passo per imparare a conoscere il software e configurare il tuo ambiente. Da questo modulo puoi caricare un file di scansione da uno strumento supportato, che creerà dei Riscontri per rappresentare quelle vulnerabilità. Durante la compilazione del modulo, puoi decidere se:

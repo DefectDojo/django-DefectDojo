@@ -5,8 +5,8 @@ description: Faire migrer les règles Rules Engine existantes vers des graphes R
 weight: 7
 audience: pro
 aliases:
-- /fr/automation/rules_engine_v2/converting_from_rules_engine/
-- /fr/automation/rules_engine_2/converting_from_rules_engine/
+- /automation/rules_engine_v2/converting_from_rules_engine/
+- /automation/rules_engine_2/converting_from_rules_engine/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : Triage Engine est une fonctionnalité réservée à DefectDojo Pro.</span>

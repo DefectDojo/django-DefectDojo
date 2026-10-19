@@ -3,7 +3,7 @@ title: Index des filtres
 description: Référence de tous les filtres dans DefectDojo
 weight: 5
 aliases:
-- /fr/en/working_with_findings/organizing_engagements_tests/filter_index
+- /en/working_with_findings/organizing_engagements_tests/filter_index
 ---
 
 **Remarque : cet article ne couvre actuellement que les filtres de Constatations disponibles dans l'interface DefectDojo Pro, mais il sera étendu à l'avenir pour couvrir davantage de types d'objets, ainsi que les filtres Open-Source.**

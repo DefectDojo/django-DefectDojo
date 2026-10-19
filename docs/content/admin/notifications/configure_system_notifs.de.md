@@ -2,7 +2,7 @@
 title: Systemweite Benachrichtigungen festlegen
 description: So konfigurieren Sie persönliche und Systembenachrichtigungen
 aliases:
-- /de/en/customize_dojo/notifications/configure_system_notifs
+- /en/customize_dojo/notifications/configure_system_notifs
 ---
 
 DefectDojo verfügt über zwei verschiedene Arten von Benachrichtigungen: **Persönliche** (werden an ein einzelnes Konto gesendet) und **System** (werden an alle Benutzer gesendet).

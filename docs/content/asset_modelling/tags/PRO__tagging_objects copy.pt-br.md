@@ -6,7 +6,7 @@ weight: 2
 exclude_search: false
 audience: pro
 aliases:
-- /pt-br/en/working_with_findings/organizing_engagements_tests/tagging_objects
+- /en/working_with_findings/organizing_engagements_tests/tagging_objects
 ---
 
 Tags são ideais para agrupar objetos de forma que possam ser filtrados em blocos menores e mais fáceis de analisar.  Podem ser usadas para indicar status ou para criar conjuntos personalizados de Tipo de Produto, Produtos, Engajamentos ou Achados em todo o modelo de dados.

@@ -4,8 +4,8 @@ description: Come DefectDojo calcola il Grado di salute dell'Asset
 weight: 7
 audience: opensource
 aliases:
-- /it/asset_modelling/os_hierarchy/product_health_grade/
-- /it/en/asset_modelling/os_hierarchy/product_health_grade/
+- /asset_modelling/os_hierarchy/product_health_grade/
+- /en/asset_modelling/os_hierarchy/product_health_grade/
 ---
 
 DefectDojo può calcolare un grado per i tuoi Asset in base alla quantità di Riscontri in essi contenuti. I gradi sono classificati da A \- F.

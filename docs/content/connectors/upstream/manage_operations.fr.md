@@ -2,8 +2,8 @@
 title: Gestion des opérations
 description: Vérifier le statut des opérations Discover et Sync de votre connecteur
 aliases:
-- /fr/import_data/pro/connectors/manage_operations/
-- /fr/en/connecting_your_tools/connectors/manage_operations
+- /import_data/pro/connectors/manage_operations/
+- /en/connecting_your_tools/connectors/manage_operations
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : les Connecteurs en amont sont une fonctionnalité réservée à DefectDojo Pro.</span>

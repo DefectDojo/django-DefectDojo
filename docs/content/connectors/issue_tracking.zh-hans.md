@@ -3,9 +3,9 @@ title: 问题跟踪集成
 description: 将 DefectDojo 发现项与您的问题跟踪系统同步，简化修复流程并明确责任归属。
 weight: 5
 aliases:
-- /zh-hans/issue_tracking/
-- /zh-hans/issue_tracking/intro/
-- /zh-hans/issue_tracking/intro/intro/
+- /issue_tracking/
+- /issue_tracking/intro/
+- /issue_tracking/intro/intro/
 ---
 
 ## 概述

@@ -4,8 +4,8 @@ description: Ajustes a nivel de despliegue para Triage Engine
 weight: 8
 audience: pro
 aliases:
-- /es/automation/rules_engine_v2/configuration/
-- /es/automation/rules_engine_2/configuration/
+- /automation/rules_engine_v2/configuration/
+- /automation/rules_engine_2/configuration/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Triage Engine es una función exclusiva de DefectDojo Pro.</span>

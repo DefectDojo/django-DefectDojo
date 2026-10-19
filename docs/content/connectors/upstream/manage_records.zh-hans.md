@@ -2,8 +2,8 @@
 title: 管理记录
 description: 控制数据从您的工具流入 DefectDojo 的方式
 aliases:
-- /zh-hans/import_data/pro/connectors/manage_records/
-- /zh-hans/en/connecting_your_tools/connectors/manage_records
+- /import_data/pro/connectors/manage_records/
+- /en/connecting_your_tools/connectors/manage_records
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意:上游连接器是 DefectDojo Pro 专属功能。</span>

@@ -3,7 +3,7 @@ title: 筛选器索引
 description: DefectDojo 中所有筛选器的参考
 weight: 5
 aliases:
-- /zh-hans/en/working_with_findings/organizing_engagements_tests/filter_index
+- /en/working_with_findings/organizing_engagements_tests/filter_index
 ---
 
 **注意:目前本文仅涵盖 DefectDojo Pro UI 中可用的发现项筛选器,未来本文将扩展到涵盖更多对象类型,以及开源版筛选器。**

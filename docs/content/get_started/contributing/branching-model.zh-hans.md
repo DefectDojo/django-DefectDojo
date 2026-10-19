@@ -5,7 +5,7 @@ draft: false
 weight: 3
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/contributing/branching-model
+- /en/open_source/contributing/branching-model
 ---
 
 ## 常规发布

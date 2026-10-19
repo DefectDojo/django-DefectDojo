@@ -4,7 +4,7 @@ description: Cómo habilitar la deduplicación a nivel de Producto o de Compromi
 weight: 2
 audience: pro
 aliases:
-- /es/en/working_with_findings/finding_deduplication/enabling_product_deduplication
+- /en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
 
 La deduplicación puede aplicarse a nivel de todo el Producto, o limitarse de forma más específica a un solo Compromiso.

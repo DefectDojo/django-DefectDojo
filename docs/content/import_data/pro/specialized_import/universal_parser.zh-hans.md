@@ -5,7 +5,7 @@ draft: 'false'
 weight: 1
 audience: pro
 aliases:
-- /zh-hans/en/connecting_your_tools/universal_parser
+- /en/connecting_your_tools/universal_parser
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：通用解析器仅在 DefectDojo Pro 中提供。</span>

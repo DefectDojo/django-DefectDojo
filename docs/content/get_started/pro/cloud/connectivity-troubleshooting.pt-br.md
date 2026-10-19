@@ -4,7 +4,7 @@ description: Reconecte-se à sua instância do DefectDojo
 weight: 2
 audience: pro
 aliases:
-- /pt-br/en/cloud_management/connectivity-troubleshooting
+- /en/cloud_management/connectivity-troubleshooting
 ---
 
 Se você tiver dificuldade para acessar sua instância do DefectDojo, aqui estão algumas etapas que você pode seguir para se reconectar:

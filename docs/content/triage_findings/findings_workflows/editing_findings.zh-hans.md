@@ -3,7 +3,7 @@ title: 编辑发现项
 description: 更改发现项的状态,或在解决问题时添加更多元数据
 weight: 2
 aliases:
-- /zh-hans/en/working_with_findings/findings_workflows/editing_findings
+- /en/working_with_findings/findings_workflows/editing_findings
 ---
 
 如果您想为发现项添加备注,或更新其描述文字以更贴合当前情况,可以通过“编辑发现项”表单来完成。

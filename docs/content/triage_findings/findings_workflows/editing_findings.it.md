@@ -4,7 +4,7 @@ description: Modifica lo Stato di un Riscontro o aggiungi altri metadati durante
   risoluzione di un problema
 weight: 2
 aliases:
-- /it/en/working_with_findings/findings_workflows/editing_findings
+- /en/working_with_findings/findings_workflows/editing_findings
 ---
 
 Se desideri aggiungere note o aggiornare il testo di un Riscontro per renderlo più pertinente alla situazione attuale, puoi farlo tramite il modulo di modifica del Riscontro.

@@ -3,9 +3,9 @@ title: 关于去重
 description: 去重的基础知识与关键概念
 weight: 1
 aliases:
-- /zh-hans/en/working_with_findings/finding_deduplication/about_deduplication
-- /zh-hans/en/working_with_findings/finding_deduplication/delete_deduplicates
-- /zh-hans/en/working_with_findings/findings_workflows/manage_duplicate_findings
+- /en/working_with_findings/finding_deduplication/about_deduplication
+- /en/working_with_findings/finding_deduplication/delete_deduplicates
+- /en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 DefectDojo 旨在批量导入来自各类工具的报告，并根据报告内容创建一个或多个发现项。在使用 DefectDojo 时，您很可能会定期导入来自同一工具的报告，这意味着重复发现项的出现是很常见的。

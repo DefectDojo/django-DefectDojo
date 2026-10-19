@@ -4,8 +4,8 @@ description: 'DefectDojo Open Sourceでの重複排除の設定: アルゴリズ
 weight: 5
 audience: opensource
 aliases:
-- /ja/en/working_with_findings/finding_deduplication/deduplication_tuning_os
-- /ja/en/working_with_findings/finding_deduplication/deduplication_algorithms
+- /en/working_with_findings/finding_deduplication/deduplication_tuning_os
+- /en/working_with_findings/finding_deduplication/deduplication_algorithms
 ---
 
 DefectDojoのOpen Source版では、設定ファイルと環境変数を使用して重複排除を調整します。

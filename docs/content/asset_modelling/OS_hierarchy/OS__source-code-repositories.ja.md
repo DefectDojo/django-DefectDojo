@@ -5,7 +5,7 @@ draft: false
 weight: 5
 audience: opensource
 aliases:
-- /ja/en/working_with_findings/organizing_engagements_tests/source-code-repositories
+- /en/working_with_findings/organizing_engagements_tests/source-code-repositories
 ---
 
 一部のツール（特にSASTツール）は、脆弱性データに関連するファイル名と行番号を含みます。エンゲージメントでソースコードのリポジトリが指定されている場合、DefectDojoはファイルパスをリンクとして表示し、ユーザーは脆弱性の場所に直接移動できます。

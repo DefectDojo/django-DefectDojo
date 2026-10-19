@@ -3,8 +3,8 @@ title: Guida di riferimento per gli strumenti degli Upstream Connector
 description: Il nostro elenco di strumenti Connector supportati e come configurarli
   con DefectDojo
 aliases:
-- /it/import_data/pro/connectors/connectors_tool_reference/
-- /it/en/connecting_your_tools/connectors/connectors_tool_reference
+- /import_data/pro/connectors/connectors_tool_reference/
+- /en/connecting_your_tools/connectors/connectors_tool_reference
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: gli Upstream Connector sono una funzionalità esclusiva di DefectDojo Pro.</span>

@@ -4,7 +4,7 @@ description: Accedi ai log di audit per gli oggetti di DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /it/en/customize_dojo/user_management/audit_logging
+- /en/customize_dojo/user_management/audit_logging
 ---
 
 I log di audit di DefectDojo sono accessibili in diversi modi.

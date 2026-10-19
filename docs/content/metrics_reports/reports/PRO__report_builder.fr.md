@@ -7,8 +7,8 @@ audience: pro
 weight: 20
 slug: report-builder
 aliases:
-- /fr/en/share_your_findings/pro_reports/using_the_report_builder
-- /fr/metrics_reports/reports/using_the_report_builder
+- /en/share_your_findings/pro_reports/using_the_report_builder
+- /metrics_reports/reports/using_the_report_builder
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : le Générateur de rapports réutilisable (Thèmes, Blocs, Modèles et Rapports générés enregistrés) est une fonctionnalité de DefectDojo Pro, actuellement en version bêta.</span>

@@ -4,8 +4,8 @@ description: DefectDojo Pro - 製品階層の刷新
 audience: pro
 weight: 1
 aliases:
-- /ja/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
-- /ja/asset_modelling/pro_hierarchy/assets_organizations
+- /en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
+- /asset_modelling/pro_hierarchy/assets_organizations
 ---
 
 DefectDojo Proは、データモデルの柔軟性を高めるために、製品/製品タイプのオブジェクトクラスを拡張しています。

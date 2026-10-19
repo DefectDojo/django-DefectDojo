@@ -4,8 +4,8 @@ description: Wie DefectDojo Ihre Befunde einstuft
 weight: 1
 audience: pro
 aliases:
-- /de/en/working_with_findings/finding_priority
-- /de/en/working_with_findings/priority_adjustments
+- /en/working_with_findings/finding_priority
+- /en/working_with_findings/priority_adjustments
 ---
 
 ![image](images/pro_finding_priority.png)

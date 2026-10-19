@@ -2,7 +2,7 @@
 title: Persönliche Benachrichtigungen festlegen
 description: Benachrichtigungen für ein persönliches Konto konfigurieren
 aliases:
-- /de/en/customize_dojo/notifications/configure_personal_notifs
+- /en/customize_dojo/notifications/configure_personal_notifs
 ---
 
 ## Persönliche Benachrichtigungen konfigurieren

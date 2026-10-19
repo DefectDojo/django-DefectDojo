@@ -2,8 +2,8 @@
 title: Agregar o editar Conectores ascendentes
 description: Conéctese a una herramienta de seguridad compatible
 aliases:
-- /es/import_data/pro/connectors/add_edit_connectors/
-- /es/en/connecting_your_tools/connectors/add_edit_connectors
+- /import_data/pro/connectors/add_edit_connectors/
+- /en/connecting_your_tools/connectors/add_edit_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: los Conectores ascendentes son una función exclusiva de DefectDojo Pro.</span>

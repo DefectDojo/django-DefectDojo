@@ -5,7 +5,7 @@ description: Partager et maintenir les autorisations pour de nombreux utilisateu
 weight: 3
 audience: pro
 aliases:
-- /fr/en/customize_dojo/user_management/create_user_group
+- /en/customize_dojo/user_management/create_user_group
 ---
 
 > **Fonctionnalité DefectDojo Pro.** Les User Groups et le système RBAC sous-jacent font partie de DefectDojo Pro. DefectDojo Open-Source utilise le modèle [Authorized Users](../os__authorized_users/) — consultez cette page pour le contrôle d'accès en Open-Source, ainsi que les [notes de mise à niveau 3.0](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) si vous passez d'une édition à l'autre.

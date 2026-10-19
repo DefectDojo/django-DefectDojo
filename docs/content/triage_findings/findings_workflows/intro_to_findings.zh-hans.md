@@ -3,7 +3,7 @@ title: 发现项简介
 description: DefectDojo 的主要工作流程和漏洞跟踪系统
 weight: 1
 aliases:
-- /zh-hans/en/working_with_findings/intro_to_findings
+- /en/working_with_findings/intro_to_findings
 ---
 
 发现项是 DefectDojo 用来规范和指导安全工具报告与修复流程的主要方式。无论漏洞是由 SonarQube、Acunetix 还是您团队自定义的工具报告的，发现项都能让您以同样的方式管理每一个漏洞。

@@ -4,8 +4,8 @@ description: 规则如何执行、一次运行会记录哪些内容，以及级�
 weight: 5
 audience: pro
 aliases:
-- /zh-hans/automation/rules_engine_v2/runs/
-- /zh-hans/automation/rules_engine_2/runs/
+- /automation/rules_engine_v2/runs/
+- /automation/rules_engine_2/runs/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：规则引擎 2.0 是 DefectDojo Pro 专属功能。</span>

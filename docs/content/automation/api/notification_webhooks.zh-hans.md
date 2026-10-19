@@ -4,7 +4,7 @@ description: 在 DefectDojo 事件发生时向外部服务器发送 HTTP webhook
 weight: 8
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/notification_webhooks/how_to
+- /en/open_source/notification_webhooks/how_to
 ---
 
 **这是一项实验性的开源功能 — 其行为可能会在未来版本中发生变化。**

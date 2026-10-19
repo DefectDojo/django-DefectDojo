@@ -6,7 +6,7 @@ draft: false
 weight: 4
 audience: pro
 aliases:
-  - /de/get_started/pro/onprem/adding_storage_for_uploads/
+  - /get_started/pro/onprem/adding_storage_for_uploads/
 ---
 
 Hochgeladene Dateien befinden sich im media-Verzeichnis auf dem Host, und bei einer Docker-Compose-Bereitstellung entspricht der dafür verfügbare Speicherplatz dem, was auf der Festplatte der VM noch frei ist. Große Uploads wie SBOMs können diese Festplatte füllen. Diese Seite beschreibt, wie Sie den Speicherplatz erweitern, ohne die Bereitstellung selbst zu verändern.

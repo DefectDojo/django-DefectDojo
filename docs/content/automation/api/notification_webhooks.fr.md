@@ -5,7 +5,7 @@ description: Envoyer des notifications webhook HTTP vers un serveur externe lors
 weight: 8
 audience: opensource
 aliases:
-- /fr/en/open_source/notification_webhooks/how_to
+- /en/open_source/notification_webhooks/how_to
 ---
 
 **Il s'agit d'une fonctionnalité Open Source expérimentale — son comportement peut évoluer dans les prochaines versions.**

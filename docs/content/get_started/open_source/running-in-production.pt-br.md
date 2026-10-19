@@ -6,7 +6,7 @@ draft: false
 weight: 4
 audience: opensource
 aliases:
-- /pt-br/en/open_source/installation/running-in-production
+- /en/open_source/installation/running-in-production
 ---
 
 ## Uso em produção (com Docker compose)

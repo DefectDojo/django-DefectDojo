@@ -3,9 +3,9 @@ title: Sobre a Deduplicação
 description: Fundamentos e conceitos-chave da deduplicação
 weight: 1
 aliases:
-- /pt-br/en/working_with_findings/finding_deduplication/about_deduplication
-- /pt-br/en/working_with_findings/finding_deduplication/delete_deduplicates
-- /pt-br/en/working_with_findings/findings_workflows/manage_duplicate_findings
+- /en/working_with_findings/finding_deduplication/about_deduplication
+- /en/working_with_findings/finding_deduplication/delete_deduplicates
+- /en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 O DefectDojo foi projetado para ingerir relatórios em massa de ferramentas, criando um ou mais Achados com base no conteúdo do relatório. Ao usar o DefectDojo, é muito provável que você esteja ingerindo relatórios da mesma ferramenta regularmente, o que significa que Achados duplicados são altamente prováveis.

@@ -4,9 +4,9 @@ description: 対応している Connector ツールの一覧と、DefectDojo で
 weight: 1
 audience: pro
 aliases:
-- /ja/connectors/upstream/toolreference/
-- /ja/import_data/pro/connectors/connectors_tool_reference/
-- /ja/en/connecting_your_tools/connectors/connectors_tool_reference
+- /connectors/upstream/toolreference/
+- /import_data/pro/connectors/connectors_tool_reference/
+- /en/connecting_your_tools/connectors/connectors_tool_reference
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: Upstream Connectors は DefectDojo Pro 限定の機能です。</span>

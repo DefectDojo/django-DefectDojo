@@ -4,8 +4,8 @@ description: 了解 DefectDojo OS 中的组织
 audience: opensource
 weight: 1
 aliases:
-- /zh-hans/asset_modelling/engagements_tests/os_producttype/
-- /zh-hans/en/asset_modelling/engagements_tests/os_producttype/
+- /asset_modelling/engagements_tests/os_producttype/
+- /en/asset_modelling/engagements_tests/os_producttype/
 ---
 
 **组织** → 资产 → 测试活动 → 测试 → 发现项

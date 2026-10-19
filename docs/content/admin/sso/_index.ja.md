@@ -16,17 +16,17 @@ seo:
 exclude_search: true
 pro-feature: true
 aliases:
-- /ja/admin/user_management/configure_sso/
-- /ja/admin/sso/os__saml/
-- /ja/admin/sso/os__auth0/
-- /ja/admin/sso/os__azure_ad/
-- /ja/admin/sso/os__github_enterprise/
-- /ja/admin/sso/os__gitlab/
-- /ja/admin/sso/os__google/
-- /ja/admin/sso/os__keycloak/
-- /ja/admin/sso/os__oidc/
-- /ja/admin/sso/os__okta/
-- /ja/admin/sso/os__remote_user/
+- /admin/user_management/configure_sso/
+- /admin/sso/os__saml/
+- /admin/sso/os__auth0/
+- /admin/sso/os__azure_ad/
+- /admin/sso/os__github_enterprise/
+- /admin/sso/os__gitlab/
+- /admin/sso/os__google/
+- /admin/sso/os__keycloak/
+- /admin/sso/os__oidc/
+- /admin/sso/os__okta/
+- /admin/sso/os__remote_user/
 ---
 
 シングルサインオンは **DefectDojo Pro** の機能です。DefectDojo 3.0 以降、SAML、OIDC、バンドルされた OAuth プロバイダーを含む SSO 機能一式は DefectDojo Pro でのみ利用可能です。オープンソース版の DefectDojo は、ローカルのユーザー名/パスワードによるログインとパスワードリセットのフローを使用します。

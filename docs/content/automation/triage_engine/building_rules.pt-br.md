@@ -4,8 +4,8 @@ description: O editor de grafos, gatilhos, escopo, condições e modelos de mens
 weight: 2
 audience: pro
 aliases:
-- /pt-br/automation/rules_engine_v2/building_rules/
-- /pt-br/automation/rules_engine_2/building_rules/
+- /automation/rules_engine_v2/building_rules/
+- /automation/rules_engine_2/building_rules/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: O Triage Engine é um recurso exclusivo do DefectDojo Pro.</span>

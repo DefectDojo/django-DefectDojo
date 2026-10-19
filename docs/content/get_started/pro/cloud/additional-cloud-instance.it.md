@@ -5,7 +5,7 @@ description: Aggiungi un'istanza DefectDojo di test, di sviluppo o di altro tipo
 weight: 3
 audience: pro
 aliases:
-- /it/en/cloud_management/additional-cloud-instance
+- /en/cloud_management/additional-cloud-instance
 ---
 
 Il processo per aggiungere una seconda istanza Cloud è più o meno lo stesso di quando hai aggiunto la tua prima istanza. Questa guida presuppone che tu abbia già configurato il tuo server DefectDojo iniziale e che tu abbia un accordo con il nostro team Sales per aggiungere un'altra istanza.

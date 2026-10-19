@@ -4,7 +4,7 @@ description: Invia notifiche webhook HTTP a un server esterno sugli eventi di De
 weight: 8
 audience: opensource
 aliases:
-- /it/en/open_source/notification_webhooks/how_to
+- /en/open_source/notification_webhooks/how_to
 ---
 
 **Questa è una funzionalità Open Source sperimentale — il comportamento potrebbe cambiare nelle release future.**

@@ -3,7 +3,7 @@ title: Índice de filtros
 description: Referencia de todos los filtros en DefectDojo
 weight: 5
 aliases:
-- /es/en/working_with_findings/organizing_engagements_tests/filter_index
+- /en/working_with_findings/organizing_engagements_tests/filter_index
 ---
 
 **Nota: Actualmente este artículo solo cubre los filtros de Hallazgos disponibles en la interfaz de DefectDojo Pro, pero se ampliará en el futuro para abarcar más tipos de objetos, junto con los filtros de código abierto.** 

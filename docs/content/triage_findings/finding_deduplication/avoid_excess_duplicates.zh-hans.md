@@ -3,7 +3,7 @@ title: 避免产生过多重复项
 description: ''
 weight: 4
 aliases:
-- /zh-hans/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
+- /en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
 ---
 
 DefectDojo 的优势之一在于其数据模型能够适应许多不同的使用场景和应用方式。随着您逐渐掌握该软件并发现优化工作流程的方法，您的使用方式也可能随之改变。

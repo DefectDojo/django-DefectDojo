@@ -5,7 +5,7 @@ draft: 'false'
 pro-feature: true
 weight: 7
 aliases:
-- /pt-br/en/about_defectdojo/contact_defectdojo_support
+- /en/about_defectdojo/contact_defectdojo_support
 ---
 
 Precisa de ajuda com o DefectDojo? Aqui estão algumas formas de obter assistência.

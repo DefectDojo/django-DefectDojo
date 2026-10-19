@@ -4,9 +4,9 @@ description: 了解组织、资产、测试活动、测试和发现项
 weight: 1
 audience: opensource
 aliases:
-- /zh-hans/en/working_with_findings/organizing_engagements_tests/product_hierarchy
-- /zh-hans/asset_modelling/os_hierarchy/product_hierarchy/
-- /zh-hans/en/asset_modelling/os_hierarchy/product_hierarchy/
+- /en/working_with_findings/organizing_engagements_tests/product_hierarchy
+- /asset_modelling/os_hierarchy/product_hierarchy/
+- /en/asset_modelling/os_hierarchy/product_hierarchy/
 ---
 
 DefectDojo 使用五个主要的数据类来组织您的工作：**组织、资产**、**测试活动**、**测试**和**发现项**。

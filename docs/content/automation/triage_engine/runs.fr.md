@@ -5,8 +5,8 @@ description: Comment une règle s'exécute, ce qu'une exécution enregistre, et 
 weight: 5
 audience: pro
 aliases:
-- /fr/automation/rules_engine_v2/runs/
-- /fr/automation/rules_engine_2/runs/
+- /automation/rules_engine_v2/runs/
+- /automation/rules_engine_2/runs/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : le Moteur de règles 2.0 est une fonctionnalité réservée à DefectDojo Pro.</span>

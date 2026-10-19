@@ -5,8 +5,8 @@ description: Das Protokoll aller ausgehenden Sendungen von Regeln sowie der Funk
 weight: 6
 audience: pro
 aliases:
-- /de/automation/rules_engine_v2/deliveries/
-- /de/automation/rules_engine_2/deliveries/
+- /automation/rules_engine_v2/deliveries/
+- /automation/rules_engine_2/deliveries/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Triage Engine ist eine Funktion, die nur in DefectDojo Pro verfügbar ist.</span>

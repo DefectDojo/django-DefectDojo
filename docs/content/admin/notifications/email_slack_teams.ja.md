@@ -2,7 +2,7 @@
 title: メール、Slack、Teams通知の設定
 description: Microsoft Teamsで通知を受信するための設定
 aliases:
-- /ja/en/customize_dojo/notifications/email_slack_teams
+- /en/customize_dojo/notifications/email_slack_teams
 ---
 
 **このプロセスを完了するには、システム設定ページを使用するためのスーパーユーザー権限が必要です。**

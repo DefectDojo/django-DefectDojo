@@ -4,8 +4,8 @@ description: グラフエディター、トリガー、スコープ、条件、�
 weight: 2
 audience: pro
 aliases:
-- /ja/automation/rules_engine_v2/building_rules/
-- /ja/automation/rules_engine_2/building_rules/
+- /automation/rules_engine_v2/building_rules/
+- /automation/rules_engine_2/building_rules/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: Triage Engine は DefectDojo Pro 専用の機能です。</span>

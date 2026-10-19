@@ -4,8 +4,8 @@ description: 了解 DefectDojo OS 中的资产
 audience: opensource
 weight: 2
 aliases:
-- /zh-hans/asset_modelling/engagements_tests/os__products/
-- /zh-hans/en/asset_modelling/engagements_tests/os__products/
+- /asset_modelling/engagements_tests/os__products/
+- /en/asset_modelling/engagements_tests/os__products/
 ---
 
 组织 → **资产** → 测试活动 → 测试 → 发现项

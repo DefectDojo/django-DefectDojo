@@ -4,7 +4,7 @@ description: Aprenda a importar datos manualmente, mediante la API o a través d
   conector
 weight: 1
 aliases:
-- /es/en/connecting_your_tools/import_intro
+- /en/connecting_your_tools/import_intro
 ---
 
 Una de las cosas que entendemos en DefectDojo es que las necesidades de seguridad de cada empresa son completamente diferentes. No existe un enfoque único que sirva para todos. A medida que su organización cambia, contar con un enfoque flexible es clave, y DefectDojo le permite conectar sus herramientas de seguridad de forma flexible para adaptarse a esos cambios.

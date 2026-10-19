@@ -4,9 +4,9 @@ description: Sincronizza i riscontri di DefectDojo con il tuo sistema di issue t
   per semplificare la remediation e la responsabilità.
 weight: 5
 aliases:
-- /it/issue_tracking/
-- /it/issue_tracking/intro/
-- /it/issue_tracking/intro/intro/
+- /issue_tracking/
+- /issue_tracking/intro/
+- /issue_tracking/intro/intro/
 ---
 
 ## Panoramica

@@ -4,8 +4,8 @@ description: Cómo entender las Organizaciones en DefectDojo OS
 audience: opensource
 weight: 1
 aliases:
-- /es/asset_modelling/engagements_tests/os_producttype/
-- /es/en/asset_modelling/engagements_tests/os_producttype/
+- /asset_modelling/engagements_tests/os_producttype/
+- /en/asset_modelling/engagements_tests/os_producttype/
 ---
 
 **ORGANIZACIONES** → Activos → Compromisos → Tests → Hallazgos

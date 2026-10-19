@@ -4,8 +4,8 @@ description: Triage Engineに搭載されているすべてのノードと、そ
 weight: 4
 audience: pro
 aliases:
-- /ja/automation/rules_engine_v2/node_reference/
-- /ja/automation/rules_engine_2/node_reference/
+- /automation/rules_engine_v2/node_reference/
+- /automation/rules_engine_2/node_reference/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: Triage Engine は DefectDojo Pro 限定の機能です。</span>

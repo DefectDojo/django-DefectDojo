@@ -5,7 +5,7 @@ draft: false
 weight: 4
 audience: pro
 aliases:
-  - /ja/get_started/pro/onprem/adding_storage_for_uploads/
+  - /get_started/pro/onprem/adding_storage_for_uploads/
 ---
 
 アップロードされたファイルはホスト上のmediaディレクトリに保存され、Docker Composeデプロイメントでは、それらに利用できる容量はVMのディスクの残り容量に依存します。SBOMのような大きなアップロードは、そのディスクを満杯にしてしまうことがあります。このページでは、デプロイ自体を変更することなく容量を拡張する方法について説明します。

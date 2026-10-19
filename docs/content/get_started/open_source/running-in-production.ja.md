@@ -5,7 +5,7 @@ draft: false
 weight: 4
 audience: opensource
 aliases:
-- /ja/en/open_source/installation/running-in-production
+- /en/open_source/installation/running-in-production
 ---
 
 ## 本番環境での使用(Docker Composeを使用)

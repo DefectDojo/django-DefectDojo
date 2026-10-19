@@ -4,7 +4,7 @@ description: clocツールを使用して製品の言語構成データをイン
 weight: 3
 audience: opensource
 aliases:
-- /ja/en/open_source/languages
+- /en/open_source/languages
 ---
 
 DefectDojoでは、[cloc](https://github.com/AlDanial/cloc)(Count Lines of Code)ツールのレポートをAPI経由でインポートすることで、製品のプログラミング言語とコード行数の内訳を表示できます。

@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: opensource
 aliases:
-- /ja/en/open_source/contributing/how-to-write-a-parser
+- /en/open_source/contributing/how-to-write-a-parser
 ---
 
 すべてのコマンドは、クローンしたdjango-DefectDojoリポジトリのルートにいることを前提としています。

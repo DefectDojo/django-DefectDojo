@@ -7,8 +7,8 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
-- /pt-br/en/share_your_findings/pro_reports/working_with_generated_reports
-- /pt-br/metrics_reports/reports/working_with_generated_reports
+- /en/share_your_findings/pro_reports/working_with_generated_reports
+- /metrics_reports/reports/working_with_generated_reports
 ---
 
 O construtor de relatórios do DefectDojo permite montar um relatório personalizado a partir de um conjunto de widgets de conteúdo, executá-lo e exportar o resultado (por exemplo, imprimindo-o em PDF). Relatórios personalizados podem resumir os Achados ou Endpoints que você deseja compartilhar com um público externo, e podem incluir identidade visual e texto padrão.

@@ -5,7 +5,7 @@ weight: 1
 collapsed: true
 audience: pro
 aliases:
-- /it/en/cloud_management/using-cloud-manager
+- /en/cloud_management/using-cloud-manager
 ---
 
 Accedendo al Cloud Manager di DefectDojo puoi configurare le impostazioni del tuo account e gestire il tuo abbonamento a DefectDojo Cloud.

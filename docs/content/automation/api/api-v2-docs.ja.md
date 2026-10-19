@@ -4,7 +4,7 @@ description: DefectDojoのAPIを使用すると、CI/CDパイプラインでの�
 draft: false
 weight: 2
 aliases:
-- /ja/en/api/api-v2-docs
+- /en/api/api-v2-docs
 ---
 
 DefectDojoのAPIは[Django Rest

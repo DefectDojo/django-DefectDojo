@@ -4,8 +4,8 @@ description: Come DefectDojo classifica i tuoi Riscontri
 weight: 1
 audience: pro
 aliases:
-- /it/en/working_with_findings/finding_priority
-- /it/en/working_with_findings/priority_adjustments
+- /en/working_with_findings/finding_priority
+- /en/working_with_findings/priority_adjustments
 ---
 
 ![image](images/pro_finding_priority.png)

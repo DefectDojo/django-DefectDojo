@@ -5,7 +5,7 @@ description: Configure a limitação de taxa na página de login para mitigar at
 weight: 4
 audience: opensource
 aliases:
-- /pt-br/en/open_source/rate_limiting
+- /en/open_source/rate_limiting
 ---
 
 O DefectDojo inclui limitação de taxa (rate limiting) na página de login para proteger contra ataques de força bruta, com tecnologia do [Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html).

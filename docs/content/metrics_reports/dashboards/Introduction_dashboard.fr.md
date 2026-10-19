@@ -4,8 +4,8 @@ description: Utilisation de la page d'accueil de DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /fr/en/customize_dojo/dashboards/Introduction_dashboard
-- /fr/en/customize_dojo/dashboards/pro_dashboards
+- /en/customize_dojo/dashboards/Introduction_dashboard
+- /en/customize_dojo/dashboards/pro_dashboards
 ---
 
 Le Tableau de bord est probablement la première page que vous verrez en ouvrant DefectDojo. Il résume les performances de votre équipe et fournit des outils de suivi pour surveiller des aspects spécifiques de votre environnement de gestion des vulnérabilités.

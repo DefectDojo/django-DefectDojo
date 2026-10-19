@@ -5,7 +5,7 @@ description: Envie notificações de webhook HTTP para um servidor externo em ev
 weight: 8
 audience: opensource
 aliases:
-- /pt-br/en/open_source/notification_webhooks/how_to
+- /en/open_source/notification_webhooks/how_to
 ---
 
 **Este é um recurso experimental do Open Source — o comportamento pode mudar em versões futuras.**

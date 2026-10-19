@@ -3,7 +3,7 @@ title: Confronto dei metodi di importazione
 description: Scopri come importare i dati manualmente, tramite API o tramite un connettore
 weight: 1
 aliases:
-- /it/en/connecting_your_tools/import_intro
+- /en/connecting_your_tools/import_intro
 ---
 
 Una delle cose che comprendiamo bene in DefectDojo è che le esigenze di sicurezza di ogni azienda sono completamente diverse. Non esiste un approccio universale valido per tutti. Man mano che la tua organizzazione cambia, avere un approccio flessibile è fondamentale, e DefectDojo ti permette di collegare i tuoi strumenti di sicurezza in modo flessibile per adattarti a questi cambiamenti.

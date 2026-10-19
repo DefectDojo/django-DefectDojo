@@ -4,7 +4,7 @@ description: Le principal flux de travail et système de suivi des vulnérabilit
   DefectDojo
 weight: 1
 aliases:
-- /fr/en/working_with_findings/intro_to_findings
+- /en/working_with_findings/intro_to_findings
 ---
 
 Les Constatations sont le principal moyen par lequel DefectDojo standardise et guide le processus de signalement et de remédiation de vos outils de sécurité. Qu'une vulnérabilité ait été signalée dans SonarQube, Acunetix, ou l'outil personnalisé de votre équipe, les Constatations vous permettent de gérer chaque vulnérabilité de la même manière.

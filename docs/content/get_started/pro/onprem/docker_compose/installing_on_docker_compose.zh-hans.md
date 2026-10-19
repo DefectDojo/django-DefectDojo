@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: pro
 aliases:
-  - /zh-hans/get_started/pro/onprem/installing_on_docker_compose/
+  - /get_started/pro/onprem/installing_on_docker_compose/
 ---
 
 本页介绍如何在 Docker Compose 上安装 DefectDojo Pro，这是两种自托管模式中较为简单的一种，如果您尚未运行 Kubernetes，这是正确的选择。

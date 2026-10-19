@@ -4,9 +4,9 @@ description: 組織、アセット、エンゲージメント、テスト、検�
 weight: 1
 audience: opensource
 aliases:
-- /ja/en/working_with_findings/organizing_engagements_tests/product_hierarchy
-- /ja/asset_modelling/os_hierarchy/product_hierarchy/
-- /ja/en/asset_modelling/os_hierarchy/product_hierarchy/
+- /en/working_with_findings/organizing_engagements_tests/product_hierarchy
+- /asset_modelling/os_hierarchy/product_hierarchy/
+- /en/asset_modelling/os_hierarchy/product_hierarchy/
 ---
 
 DefectDojoは、作業を整理するために5つの主要なデータクラスを使用します: **組織、アセット**、**エンゲージメント**、**テスト**、**検出事項**です。

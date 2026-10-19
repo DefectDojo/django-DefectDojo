@@ -5,7 +5,7 @@ description: Configurez la façon dont DefectDojo identifie et gère les constat
 weight: 4
 audience: pro
 aliases:
-- /fr/en/working_with_findings/finding_deduplication/tune_deduplication
+- /en/working_with_findings/finding_deduplication/tune_deduplication
 ---
 
 Le réglage de la déduplication est une fonctionnalité de DefectDojo Pro qui vous donne un contrôle précis sur la façon dont les constatations sont dédupliquées, ce qui vous permet d'optimiser la détection des doublons pour votre flux de travail spécifique de tests de sécurité.

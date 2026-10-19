@@ -5,8 +5,8 @@ description: Como uma regra é executada, o que uma execução registra e como o
 weight: 5
 audience: pro
 aliases:
-- /pt-br/automation/rules_engine_v2/runs/
-- /pt-br/automation/rules_engine_2/runs/
+- /automation/rules_engine_v2/runs/
+- /automation/rules_engine_2/runs/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Observação: o Triage Engine é um recurso exclusivo do DefectDojo Pro.</span>

@@ -4,8 +4,8 @@ description: ルールがどのように実行されるか、実行が何を記�
 weight: 5
 audience: pro
 aliases:
-- /ja/automation/rules_engine_v2/runs/
-- /ja/automation/rules_engine_2/runs/
+- /automation/rules_engine_v2/runs/
+- /automation/rules_engine_2/runs/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: Triage EngineはDefectDojo Pro限定機能です。</span>

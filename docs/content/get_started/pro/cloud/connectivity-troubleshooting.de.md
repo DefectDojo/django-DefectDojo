@@ -4,7 +4,7 @@ description: Erneut mit Ihrer DefectDojo-Instanz verbinden
 weight: 2
 audience: pro
 aliases:
-- /de/en/cloud_management/connectivity-troubleshooting
+- /en/cloud_management/connectivity-troubleshooting
 ---
 
 Wenn Sie Schwierigkeiten haben, auf Ihre DefectDojo-Instanz zuzugreifen, finden Sie hier einige Schritte, mit denen Sie die Verbindung wiederherstellen können:

@@ -4,7 +4,7 @@ description: Découvrez comment importer des données manuellement, via l'API, o
   un connecteur
 weight: 2
 aliases:
-- /fr/en/connecting_your_tools/import_scan_files/using_reimport
+- /en/connecting_your_tools/import_scan_files/using_reimport
 ---
 
 Lorsqu'un Test est créé dans DefectDojo (soit à l'avance, soit en important un fichier de scan), le Test peut être étendu avec de nouvelles données de Constatation.

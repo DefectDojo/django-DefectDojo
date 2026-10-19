@@ -4,7 +4,7 @@ description: 以 CSV 或 Excel 格式导出发现项和测试活动
 weight: 4
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/exporting
+- /en/open_source/exporting
 ---
 
 显示发现项列表或测试活动列表的页面,在右上角的下拉菜单中提供 CSV 和 Excel 导出选项。

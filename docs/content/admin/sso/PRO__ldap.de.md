@@ -4,7 +4,7 @@ description: Konfigurieren Sie die LDAP-Authentifizierung in DefectDojo Pro
 weight: 20
 audience: pro
 aliases:
-- /de/en/open_source/ldap-authentication
+- /en/open_source/ldap-authentication
 ---
 
 DefectDojo Pro unterstützt die LDAP-Authentifizierung über die Benutzeroberfläche der **Enterprise Settings** — es sind keine benutzerdefinierten Docker-Images oder Konfigurationsdateien erforderlich.

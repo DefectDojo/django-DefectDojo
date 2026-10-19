@@ -4,7 +4,7 @@ description: DefectDojo が重複した検出事項を識別および管理す�
 weight: 4
 audience: pro
 aliases:
-- /ja/en/working_with_findings/finding_deduplication/tune_deduplication
+- /en/working_with_findings/finding_deduplication/tune_deduplication
 ---
 
 Deduplication Tuning は、検出事項の重複排除方法をきめ細かく制御できる DefectDojo Pro の機能で、特定のセキュリティテストワークフローに合わせて重複検出を最適化できます。

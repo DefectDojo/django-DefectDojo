@@ -4,7 +4,7 @@ description: Tieni traccia delle informazioni sulle vulnerabilità senza utilizz
   uno strumento di scansione
 weight: 2
 aliases:
-- /it/en/working_with_findings/findings_workflows/create_findings_manually
+- /en/working_with_findings/findings_workflows/create_findings_manually
 - /import_data/import_scan_files/os__create_findings_manually
 - /import_data/import_scan_files/pro__create_findings_manually
 ---

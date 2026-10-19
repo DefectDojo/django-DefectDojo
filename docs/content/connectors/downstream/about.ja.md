@@ -3,8 +3,8 @@ title: Downstream Connectors
 weight: 1
 audience: pro
 aliases:
-- /ja/en/share_your_findings/integrations
-- /ja/issue_tracking/pro_integration/integrations/
+- /en/share_your_findings/integrations
+- /issue_tracking/pro_integration/integrations/
 ---
 
 **提供状況:** ダウンストリームコネクタは一般提供されており、Cloud・On-Premiseを問わずすべてのDefectDojo Proインスタンスで有効になっています。有効化の操作は不要で、Feature Flagsページにも表示されなくなりました。

@@ -4,8 +4,8 @@ description: Guide dettagliate alla configurazione dei Downstream Connectors
 weight: 1
 audience: pro
 aliases:
-- /it/en/share_your_findings/integrations_toolreference
-- /it/issue_tracking/pro_integration/integrations_toolreference/
+- /en/share_your_findings/integrations_toolreference
+- /issue_tracking/pro_integration/integrations_toolreference/
 ---
 
 Di seguito sono riportate istruzioni specifiche su come configurare un Downstream Connector di DefectDojo con un Issue Tracker di terze parti.

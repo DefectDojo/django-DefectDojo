@@ -5,7 +5,7 @@ draft: 'false'
 weight: 2
 chapter: true
 aliases:
-- /ja/en/about_defectdojo/examples_of_use
+- /en/about_defectdojo/examples_of_use
 ---
 
 この記事は、DefectDojo, Inc. が2025年2月に開催したOffice Hours「よくある利用事例への対応」を基にしています。

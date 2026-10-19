@@ -4,7 +4,7 @@ description: Utilisation de l'automatisation du Moteur de règles
 weight: 1
 audience: pro
 aliases:
-- /fr/en/customize_dojo/rules_engine
+- /en/customize_dojo/rules_engine
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : le Moteur de règles est une fonctionnalité réservée à DefectDojo Pro.</span>

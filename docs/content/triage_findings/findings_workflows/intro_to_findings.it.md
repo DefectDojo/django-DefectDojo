@@ -4,7 +4,7 @@ description: Il flusso di lavoro principale e il sistema di tracciamento delle v
   di DefectDojo
 weight: 1
 aliases:
-- /it/en/working_with_findings/intro_to_findings
+- /en/working_with_findings/intro_to_findings
 ---
 
 I Riscontri sono il modo principale in cui DefectDojo standardizza e guida il processo di segnalazione e correzione dei tuoi strumenti di sicurezza. Che una vulnerabilità sia stata segnalata in SonarQube, Acunetix o dallo strumento personalizzato del tuo team, i Riscontri ti danno la possibilità di gestire ogni vulnerabilità nello stesso modo.

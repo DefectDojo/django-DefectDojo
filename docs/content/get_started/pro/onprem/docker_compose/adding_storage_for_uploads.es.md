@@ -6,7 +6,7 @@ draft: false
 weight: 4
 audience: pro
 aliases:
-  - /es/get_started/pro/onprem/adding_storage_for_uploads/
+  - /get_started/pro/onprem/adding_storage_for_uploads/
 ---
 
 Los archivos subidos residen en el directorio media del host, y en un despliegue de Docker Compose el espacio disponible para ellos es el que le quede libre al disco de la VM. Las cargas grandes, como los SBOM, pueden llenar ese disco. Esta página explica cómo ampliar el espacio sin modificar el despliegue en sí.

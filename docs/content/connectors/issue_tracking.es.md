@@ -4,9 +4,9 @@ description: Sincronice los hallazgos de DefectDojo con su sistema de seguimient
   de incidencias para agilizar la remediación y la rendición de cuentas.
 weight: 6
 aliases:
-- /es/issue_tracking/
-- /es/issue_tracking/intro/
-- /es/issue_tracking/intro/intro/
+- /issue_tracking/
+- /issue_tracking/intro/
+- /issue_tracking/intro/intro/
 ---
 
 ## Descripción general

@@ -4,8 +4,8 @@ description: Triage Engine とは何か、有効化の方法、基盤となる�
 weight: 1
 audience: pro
 aliases:
-- /ja/automation/rules_engine_v2/about/
-- /ja/automation/rules_engine_2/about/
+- /automation/rules_engine_v2/about/
+- /automation/rules_engine_2/about/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: Triage Engine は DefectDojo Pro 専用の機能です。</span>

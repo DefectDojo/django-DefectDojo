@@ -2,7 +2,7 @@
 title: 产品健康评级
 description: DefectDojo 如何计算产品健康评级
 aliases:
-- /zh-hans/en/working_with_findings/organizing_engagements_tests/product_health_grade
+- /en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
 
 DefectDojo 可以根据产品中包含的发现项数量为您的产品计算评级。评级从 A 到 F 排列。

@@ -3,8 +3,8 @@ title: Connettori a valle
 weight: 1
 audience: pro
 aliases:
-- /it/en/share_your_findings/integrations
-- /it/issue_tracking/pro_integration/integrations/
+- /en/share_your_findings/integrations
+- /issue_tracking/pro_integration/integrations/
 ---
 
 **Disponibilità:** i Connettori a valle sono generalmente disponibili e attivi su ogni istanza di DefectDojo Pro, sia Cloud che On-Premise. Non c'è nulla da abilitare e non sono più elencati nella pagina Feature Flags.

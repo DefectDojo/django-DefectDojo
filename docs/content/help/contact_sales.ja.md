@@ -5,7 +5,7 @@ draft: 'false'
 weight: 6
 pro-feature: true
 aliases:
-- /ja/en/about_defectdojo/request_a_trial
+- /en/about_defectdojo/request_a_trial
 ---
 
 チームがオンプレミスのDefectDojoインストールを必要とする場合は、→ [hello@defectdojo.com](mailto:hello@defectdojo.com) までメールで営業チームにご連絡ください。このトライアル設定プロセスはDefectDojo Cloudユーザーにのみ適用されます。

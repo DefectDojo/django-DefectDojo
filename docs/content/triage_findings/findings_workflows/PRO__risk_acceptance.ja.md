@@ -4,7 +4,7 @@ description: DefectDojo Pro におけるリスク受容の活用
 audience: pro
 weight: 2
 aliases:
-- /ja/en/working_with_findings/findings_workflows/risk_acceptances/
+- /en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 **リスク受容(Risk Acceptance)** は、**Full Risk Acceptance** オブジェクトまたは **Simple Risk Acceptance** ワークフローのいずれかを使用して検出事項に適用できる特別なステータスです。リスク受容は、脆弱性のある検出事項を直ちに修復せずに容認するという判断を正式に文書化し、運用できるようにするために使用します。

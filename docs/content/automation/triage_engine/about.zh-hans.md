@@ -4,8 +4,8 @@ description: Triage Engine 是什么、如何启用它，以及它所基于的�
 weight: 1
 audience: pro
 aliases:
-- /zh-hans/automation/rules_engine_v2/about/
-- /zh-hans/automation/rules_engine_2/about/
+- /automation/rules_engine_v2/about/
+- /automation/rules_engine_2/about/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：Triage Engine 是 DefectDojo Pro 专属功能。</span>

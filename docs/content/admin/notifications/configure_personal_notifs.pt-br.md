@@ -2,7 +2,7 @@
 title: Definir Notificações Pessoais
 description: Configure notificações para uma conta pessoal
 aliases:
-- /pt-br/en/customize_dojo/notifications/configure_personal_notifs
+- /en/customize_dojo/notifications/configure_personal_notifs
 ---
 
 ## Configurar Notificações Pessoais

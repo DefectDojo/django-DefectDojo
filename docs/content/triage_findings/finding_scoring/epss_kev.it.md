@@ -5,7 +5,7 @@ description: Come DefectDojo Pro arricchisce i Riscontri con i dati EPSS e CISA 
 audience: pro
 weight: 2
 aliases:
-- /it/triage_findings/epss_kev/
+- /triage_findings/epss_kev/
 ---
 
 DefectDojo Pro arricchisce automaticamente i tuoi Riscontri con due fonti esterne di threat intelligence — **EPSS** e **CISA KEV** — in modo che la definizione delle priorità rifletta quanto sia probabile che una vulnerabilità venga sfruttata, non solo la sua gravità CVSS. Entrambe le fonti vengono associate ai Riscontri tramite **CVE**, si aggiornano con una **pianificazione giornaliera** e alimentano direttamente il punteggio di **priorità** calcolato per ogni Riscontro.

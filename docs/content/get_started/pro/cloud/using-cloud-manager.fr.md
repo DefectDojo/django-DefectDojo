@@ -5,7 +5,7 @@ weight: 1
 collapsed: true
 audience: pro
 aliases:
-- /fr/en/cloud_management/using-cloud-manager
+- /en/cloud_management/using-cloud-manager
 ---
 
 Se connecter au Cloud Manager de DefectDojo vous permet de configurer les paramètres de votre compte et de gérer votre abonnement à DefectDojo Cloud.

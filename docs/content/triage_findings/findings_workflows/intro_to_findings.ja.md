@@ -3,7 +3,7 @@ title: 検出事項の概要
 description: DefectDojoの主要なワークフローおよび脆弱性追跡システム
 weight: 1
 aliases:
-- /ja/en/working_with_findings/intro_to_findings
+- /en/working_with_findings/intro_to_findings
 ---
 
 検出事項(Findings)は、DefectDojoがセキュリティツールのレポートおよび修復プロセスを標準化し導くための主要な手段です。脆弱性がSonarQube、Acunetix、あるいはチーム独自のツールのいずれで報告された場合でも、検出事項を使うことですべての脆弱性を同じ方法で管理できます。

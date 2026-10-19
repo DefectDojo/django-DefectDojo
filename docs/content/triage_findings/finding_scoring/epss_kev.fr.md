@@ -5,7 +5,7 @@ description: Comment DefectDojo Pro enrichit les Constatations avec les données
 audience: pro
 weight: 2
 aliases:
-- /fr/triage_findings/epss_kev/
+- /triage_findings/epss_kev/
 ---
 
 DefectDojo Pro enrichit automatiquement vos Constatations à l'aide de deux sources externes de renseignement sur les menaces — **EPSS** et **CISA KEV** — afin que la priorisation reflète la probabilité qu'une vulnérabilité soit exploitée, et pas seulement sa sévérité CVSS. Les deux sources se rattachent aux Constatations par **CVE**, sont actualisées selon une **planification quotidienne**, et alimentent directement le score de **priorité** calculé pour chaque Constatation.

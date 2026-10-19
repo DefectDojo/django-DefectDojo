@@ -7,7 +7,7 @@ weight: 2
 exclude_search: false
 audience: pro
 aliases:
-- /fr/en/working_with_findings/organizing_engagements_tests/tagging_objects
+- /en/working_with_findings/organizing_engagements_tests/tagging_objects
 ---
 
 Les étiquettes sont idéales pour regrouper des objets de manière à pouvoir les filtrer en ensembles plus petits et plus faciles à assimiler.  Elles peuvent être utilisées pour indiquer un statut, ou pour créer des ensembles personnalisés de Type de produit, Produits, Engagements ou Constatations dans l'ensemble du modèle de données.

@@ -5,7 +5,7 @@ draft: false
 weight: 2
 audience: pro
 aliases:
-- /ja/en/connecting_your_tools/external_tools
+- /en/connecting_your_tools/external_tools
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: 以下の外部ツールはDefectDojo Pro限定の機能です。これらのバイナリは、DefectDojo Proライセンスを持つインスタンスに接続されていない限り動作しません。</span>

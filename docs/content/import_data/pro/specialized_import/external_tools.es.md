@@ -5,7 +5,7 @@ draft: false
 weight: 2
 audience: pro
 aliases:
-- /es/en/connecting_your_tools/external_tools
+- /en/connecting_your_tools/external_tools
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Las siguientes herramientas externas son funciones exclusivas de DefectDojo Pro. Estos binarios no funcionarán a menos que estén conectados a una instancia con una licencia de DefectDojo Pro.</span>

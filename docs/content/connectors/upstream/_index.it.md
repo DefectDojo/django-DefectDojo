@@ -15,5 +15,5 @@ seo:
 audience: pro
 exclude_search: true
 aliases:
-- /it/import_data/pro/connectors/
+- /import_data/pro/connectors/
 ---

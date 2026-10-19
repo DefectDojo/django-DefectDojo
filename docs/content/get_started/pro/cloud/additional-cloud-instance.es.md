@@ -5,7 +5,7 @@ description: Agregue una instancia de prueba, desarrollo u otra instancia de Def
 weight: 3
 audience: pro
 aliases:
-- /es/en/cloud_management/additional-cloud-instance
+- /en/cloud_management/additional-cloud-instance
 ---
 
 El proceso para agregar una segunda instancia de Cloud es más o menos el mismo que para agregar su primera instancia. Esta guía asume que ya ha configurado su servidor inicial de DefectDojo y que tiene un acuerdo con nuestro equipo de Ventas para agregar otra instancia.

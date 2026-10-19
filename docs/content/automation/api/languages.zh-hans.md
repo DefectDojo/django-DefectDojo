@@ -4,7 +4,7 @@ description: 使用 cloc 工具导入产品的语言组成数据
 weight: 3
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/languages
+- /en/open_source/languages
 ---
 
 DefectDojo 可以显示某个产品的编程语言构成和代码行数明细，这些数据通过 API 导入 [cloc](https://github.com/AlDanial/cloc)（Count Lines of Code）工具生成的报告来填充。

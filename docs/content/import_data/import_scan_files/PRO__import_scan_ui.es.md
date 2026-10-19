@@ -4,7 +4,7 @@ description: ''
 weight: 1
 audience: pro
 aliases:
-- /es/en/connecting_your_tools/import_scan_files/import_scan_ui
+- /en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
 
 Si tiene una instancia de DefectDojo completamente nueva, el Formulario de importación de escaneo es un primer paso lógico para aprender el software y configurar su entorno. Desde este formulario, puede cargar un archivo de escaneo de una herramienta compatible, lo que creará Hallazgos que representen esas vulnerabilidades. Al completar el formulario, puede decidir si desea:

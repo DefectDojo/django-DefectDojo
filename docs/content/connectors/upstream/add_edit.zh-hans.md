@@ -2,8 +2,8 @@
 title: 添加或编辑上游连接器
 description: 连接到受支持的安全工具
 aliases:
-- /zh-hans/import_data/pro/connectors/add_edit_connectors/
-- /zh-hans/en/connecting_your_tools/connectors/add_edit_connectors
+- /import_data/pro/connectors/add_edit_connectors/
+- /en/connecting_your_tools/connectors/add_edit_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：上游连接器（Upstream Connectors）是 DefectDojo Pro 专属功能。</span>

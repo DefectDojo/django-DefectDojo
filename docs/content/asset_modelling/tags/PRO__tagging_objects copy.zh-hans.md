@@ -6,7 +6,7 @@ weight: 2
 exclude_search: false
 audience: pro
 aliases:
-- /zh-hans/en/working_with_findings/organizing_engagements_tests/tagging_objects
+- /en/working_with_findings/organizing_engagements_tests/tagging_objects
 ---
 
 标签非常适合以可筛选的方式对对象进行分组,将其拆分为更小、更易于理解的片段。它们可用于标注状态,也可用于在整个数据模型中创建产品类型、产品、测试活动或发现项的自定义集合。

@@ -4,8 +4,8 @@ description: Todos os nós com que o Triage Engine vem, e o que cada um faz
 weight: 4
 audience: pro
 aliases:
-- /pt-br/automation/rules_engine_v2/node_reference/
-- /pt-br/automation/rules_engine_2/node_reference/
+- /automation/rules_engine_v2/node_reference/
+- /automation/rules_engine_2/node_reference/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: o Triage Engine é um recurso exclusivo do DefectDojo Pro.</span>

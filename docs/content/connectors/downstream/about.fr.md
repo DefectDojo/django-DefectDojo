@@ -3,8 +3,8 @@ title: Connecteurs en aval
 weight: 1
 audience: pro
 aliases:
-- /fr/en/share_your_findings/integrations
-- /fr/issue_tracking/pro_integration/integrations/
+- /en/share_your_findings/integrations
+- /issue_tracking/pro_integration/integrations/
 ---
 
 **Disponibilité :** Les connecteurs en aval sont disponibles en version générale et activés pour toutes les instances DefectDojo Pro, aussi bien Cloud que sur site (On-Premise). Il n'y a rien à activer, et ils ne figurent plus sur la page Feature Flags.

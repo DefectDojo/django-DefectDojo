@@ -4,7 +4,7 @@ description: 为不同产品配置服务级别协议
 weight: 2
 audience: opensource
 aliases:
-- /zh-hans/en/working_with_findings/sla_configuration
+- /en/working_with_findings/sla_configuration
 ---
 
 DefectDojo 中的每个产品都可以拥有自己的服务级别协议（SLA）配置，该配置表示您的组织修复或以其他方式管理某个发现项所拥有的天数。

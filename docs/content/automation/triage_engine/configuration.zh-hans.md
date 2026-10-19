@@ -4,8 +4,8 @@ description: Triage Engine 的部署层面设置
 weight: 8
 audience: pro
 aliases:
-- /zh-hans/automation/rules_engine_v2/configuration/
-- /zh-hans/automation/rules_engine_2/configuration/
+- /automation/rules_engine_v2/configuration/
+- /automation/rules_engine_2/configuration/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：Triage Engine 是 DefectDojo Pro 专属功能。</span>

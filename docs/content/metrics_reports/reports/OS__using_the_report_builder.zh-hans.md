@@ -6,8 +6,8 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
-- /zh-hans/en/share_your_findings/pro_reports/working_with_generated_reports
-- /zh-hans/metrics_reports/reports/working_with_generated_reports
+- /en/share_your_findings/pro_reports/working_with_generated_reports
+- /metrics_reports/reports/working_with_generated_reports
 ---
 
 DefectDojo 的报告生成器允许您使用一组内容小组件组装自定义报告、运行报告，并导出结果（例如打印为 PDF）。自定义报告可以汇总您希望与外部受众共享的发现项或端点，还可以包含品牌标识和样板文字。

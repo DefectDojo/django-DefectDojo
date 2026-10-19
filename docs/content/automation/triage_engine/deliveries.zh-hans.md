@@ -4,8 +4,8 @@ description: 记录规则所有对外发送内容的台账，以及重试和重�
 weight: 6
 audience: pro
 aliases:
-- /zh-hans/automation/rules_engine_v2/deliveries/
-- /zh-hans/automation/rules_engine_2/deliveries/
+- /automation/rules_engine_v2/deliveries/
+- /automation/rules_engine_2/deliveries/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：Triage Engine 是 DefectDojo Pro 专属功能。</span>

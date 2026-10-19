@@ -6,8 +6,8 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
-- /ja/en/share_your_findings/pro_reports/working_with_generated_reports
-- /ja/metrics_reports/reports/working_with_generated_reports
+- /en/share_your_findings/pro_reports/working_with_generated_reports
+- /metrics_reports/reports/working_with_generated_reports
 ---
 
 DefectDojoのレポートビルダーを使用すると、一連のコンテンツウィジェットからカスタムレポートを組み立て、実行し、結果をエクスポートできます（たとえば、PDFに印刷するなど）。カスタムレポートは、社外の関係者と共有したい検出事項やエンドポイントをまとめることができ、ブランディングや定型文を含めることもできます。

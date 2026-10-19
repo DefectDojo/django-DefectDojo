@@ -4,7 +4,7 @@ description: 自动将传入的发现项路由到正确的产品
 weight: 3
 audience: pro
 aliases:
-- /zh-hans/en/connecting_your_tools/import_scan_files/smart_upload
+- /en/connecting_your_tools/import_scan_files/smart_upload
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：智能上传仅在 DefectDojo Pro 中提供。</span>

@@ -5,7 +5,7 @@ description: Riepilogo dettagliato di tutte le opzioni di autorizzazione di Defe
 weight: 2
 audience: pro
 aliases:
-- /it/en/customize_dojo/user_management/about_perms_and_roles
+- /en/customize_dojo/user_management/about_perms_and_roles
 ---
 
 > **Funzionalità di DefectDojo Pro.** Il sistema RBAC basato su Membri / Gruppi / Ruoli globali descritto in questa pagina fa parte di DefectDojo Pro. DefectDojo open-source utilizza il modello [Utenti autorizzati](../os__authorized_users/) — consulta quella pagina per il controllo degli accessi in open-source, e le [note di aggiornamento alla 3.0](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) se stai passando da un'edizione all'altra.

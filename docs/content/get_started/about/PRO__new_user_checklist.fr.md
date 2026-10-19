@@ -5,7 +5,7 @@ draft: 'false'
 weight: 3
 audience: pro
 aliases:
-- /fr/en/about_defectdojo/new_user_checklist
+- /en/about_defectdojo/new_user_checklist
 ---
 
 L'essence de DefectDojo est d'importer des données de sécurité, de les organiser, et de les présenter aux personnes qui ont besoin de les connaître.  Voici un aide-mémoire rapide que vous pouvez utiliser pour garantir une mise en œuvre réussie, d'une page blanche jusqu'à une application pleinement fonctionnelle.

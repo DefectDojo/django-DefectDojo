@@ -3,7 +3,7 @@ title: インポート方法の比較
 description: データを手動、API経由、またはコネクター経由でインポートする方法を学びます
 weight: 1
 aliases:
-- /ja/en/connecting_your_tools/import_intro
+- /en/connecting_your_tools/import_intro
 ---
 
 DefectDojo が理解していることの一つは、企業ごとにセキュリティ要件がまったく異なるということです。万能なアプローチというものは存在しません。組織が変化するにつれて柔軟なアプローチを持つことが重要であり、DefectDojo ではその変化に合わせてセキュリティツールを柔軟な方法で連携させることができます。

@@ -6,7 +6,7 @@ draft: false
 weight: 5
 audience: pro
 aliases:
-  - /es/get_started/pro/onprem/upload_size_limits/
+  - /get_started/pro/onprem/upload_size_limits/
 ---
 
 Un archivo de escaneo grande puede ser rechazado por más de un límite, en distintos puntos de la ruta de la solicitud, y el error que recibe le indica cuál alcanzó. Esta página explica dónde están esos límites y cómo aumentarlos en una implementación autoalojada.

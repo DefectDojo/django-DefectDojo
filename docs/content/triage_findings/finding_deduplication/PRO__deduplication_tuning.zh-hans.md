@@ -4,7 +4,7 @@ description: 配置 DefectDojo 识别和管理重复发现项的方式
 weight: 4
 audience: pro
 aliases:
-- /zh-hans/en/working_with_findings/finding_deduplication/tune_deduplication
+- /en/working_with_findings/finding_deduplication/tune_deduplication
 ---
 
 去重调优是 DefectDojo Pro 的一项功能，可让您对发现项的去重方式进行精细控制，从而针对您特定的安全测试工作流程优化重复检测。

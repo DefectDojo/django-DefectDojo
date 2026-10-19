@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: opensource
 aliases:
-- /zh-hans/en/open_source/contributing/how-to-write-a-parser
+- /en/open_source/contributing/how-to-write-a-parser
 ---
 
 所有命令均假设您位于 django-DefectDojo 克隆仓库的根目录下。

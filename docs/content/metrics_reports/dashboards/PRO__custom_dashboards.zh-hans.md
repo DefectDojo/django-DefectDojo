@@ -6,8 +6,8 @@ audience: pro
 weight: 10
 slug: custom-dashboards
 aliases:
-- /zh-hans/en/customize_dojo/dashboards/about_custom_dashboard_tiles
-- /zh-hans/metrics_reports/dashboards/about_custom_dashboard_tiles
+- /en/customize_dojo/dashboards/about_custom_dashboard_tiles
+- /metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：可自定义仪表板（布局、小组件和小组件目录）是 DefectDojo Pro 的功能。此功能默认关闭——超级用户可以在云端和本地部署实例中通过**设置 > 功能开关**将其开启。</span>

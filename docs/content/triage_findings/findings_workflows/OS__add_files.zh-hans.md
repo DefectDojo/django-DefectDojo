@@ -4,7 +4,7 @@ description: 在 DefectDojo OS 中为发现项、测试活动或测试上传屏�
 audience: opensource
 weight: 3
 aliases:
-- /zh-hans/triage_findings/findings_workflows/add_files/
+- /triage_findings/findings_workflows/add_files/
 ---
 
 您可以为**发现项**、**测试活动**或**测试**附加文件以提供支持性背景信息——例如概念验证截图、原始扫描器报告、网络拓扑图,或用于佐证结果的电子表格。

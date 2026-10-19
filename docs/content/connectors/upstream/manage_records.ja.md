@@ -2,8 +2,8 @@
 title: レコードの管理
 description: ツールから DefectDojo へのデータフローを制御する
 aliases:
-- /ja/import_data/pro/connectors/manage_records/
-- /ja/en/connecting_your_tools/connectors/manage_records
+- /import_data/pro/connectors/manage_records/
+- /en/connecting_your_tools/connectors/manage_records
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: アップストリームコネクタは DefectDojo Pro 限定の機能です。</span>

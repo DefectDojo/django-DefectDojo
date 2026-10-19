@@ -3,7 +3,7 @@ title: 過剰な重複を避ける
 description: ''
 weight: 4
 aliases:
-- /ja/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
+- /en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
 ---
 
 DefectDojoの強みの1つは、データモデルがさまざまなユースケースやアプリケーションに対応できることです。ソフトウェアを使いこなし、ワークフローを最適化する方法を見つけるにつれて、アプローチを変えていくことになるでしょう。

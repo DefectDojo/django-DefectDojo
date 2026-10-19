@@ -4,7 +4,7 @@ description: O principal fluxo de trabalho e sistema de rastreamento de vulnerab
   do DefectDojo
 weight: 1
 aliases:
-- /pt-br/en/working_with_findings/intro_to_findings
+- /en/working_with_findings/intro_to_findings
 ---
 
 Os Achados são a principal forma pela qual o DefectDojo padroniza e orienta o processo de relatório e remediação das suas ferramentas de segurança. Independentemente de uma vulnerabilidade ter sido relatada no SonarQube, no Acunetix ou na ferramenta personalizada da sua equipe, os Achados oferecem a capacidade de gerenciar cada vulnerabilidade da mesma forma.

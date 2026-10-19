@@ -5,7 +5,7 @@ draft: 'false'
 weight: 5
 audience: pro
 aliases:
-- /zh-hans/en/about_defectdojo/ui_pro_vs_os
+- /en/about_defectdojo/ui_pro_vs_os
 ---
 
 2023 年末，DefectDojo, Inc. 为 DefectDojo Pro 发布了全新的 UI，该 UI 现已成为该版本的默认 UI。

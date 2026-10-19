@@ -7,7 +7,7 @@ chapter: true
 exclude_search: true
 audience: pro
 aliases:
-- /it/en/about_defectdojo/pro_features
+- /en/about_defectdojo/pro_features
 ---
 
 Ecco un elenco delle numerose funzionalità aggiuntive di DefectDojo Pro, con link alla documentazione per vederle in azione:

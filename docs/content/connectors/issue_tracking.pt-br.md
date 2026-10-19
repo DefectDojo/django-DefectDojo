@@ -4,9 +4,9 @@ description: Sincronize os achados do DefectDojo com seu sistema de rastreamento
   problemas para agilizar a remediação e a responsabilização.
 weight: 5
 aliases:
-- /pt-br/issue_tracking/
-- /pt-br/issue_tracking/intro/
-- /pt-br/issue_tracking/intro/intro/
+- /issue_tracking/
+- /issue_tracking/intro/
+- /issue_tracking/intro/intro/
 ---
 
 ## Visão geral

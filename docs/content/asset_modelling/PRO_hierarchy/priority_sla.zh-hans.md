@@ -4,8 +4,8 @@ description: DefectDojo 如何对您的发现项进行排名
 weight: 1
 audience: pro
 aliases:
-- /zh-hans/en/working_with_findings/finding_priority
-- /zh-hans/en/working_with_findings/priority_adjustments
+- /en/working_with_findings/finding_priority
+- /en/working_with_findings/priority_adjustments
 ---
 
 ![image](images/pro_finding_priority.png)

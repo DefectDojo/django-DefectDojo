@@ -2,8 +2,8 @@
 title: アップストリームコネクタの追加または編集
 description: サポートされているセキュリティツールに接続する
 aliases:
-- /ja/import_data/pro/connectors/add_edit_connectors/
-- /ja/en/connecting_your_tools/connectors/add_edit_connectors
+- /import_data/pro/connectors/add_edit_connectors/
+- /en/connecting_your_tools/connectors/add_edit_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: アップストリームコネクタは DefectDojo Pro 限定の機能です。</span>

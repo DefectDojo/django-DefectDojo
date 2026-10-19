@@ -4,7 +4,7 @@ description: 如何在产品或测试活动级别启用去重
 weight: 2
 audience: pro
 aliases:
-- /zh-hans/en/working_with_findings/finding_deduplication/enabling_product_deduplication
+- /en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
 
 去重功能可应用于整个产品\-范围，也可以更精细地限定到单个测试活动。

@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: pro
 aliases:
-  - /ja/get_started/pro/onprem/installing_on_docker_compose/
+  - /get_started/pro/onprem/installing_on_docker_compose/
 ---
 
 このページでは、セルフホスト型の二つのモデルのうちよりシンプルな方法であり、すでにKubernetesを運用していない場合に適した選択肢である、Docker ComposeへのDefectDojo Proのインストールについて説明します。

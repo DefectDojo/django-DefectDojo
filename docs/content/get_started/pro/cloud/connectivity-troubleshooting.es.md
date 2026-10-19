@@ -4,7 +4,7 @@ description: Vuelva a conectarse a su instancia de DefectDojo
 weight: 2
 audience: pro
 aliases:
-- /es/en/cloud_management/connectivity-troubleshooting
+- /en/cloud_management/connectivity-troubleshooting
 ---
 
 Si tiene dificultades para acceder a su instancia de DefectDojo, estos son algunos pasos que puede seguir para volver a conectarse:

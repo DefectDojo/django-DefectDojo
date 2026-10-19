@@ -4,7 +4,7 @@ description: DefectDojo Pro が EPSS と CISA KEV のデータで検出事項を
 audience: pro
 weight: 2
 aliases:
-- /ja/triage_findings/epss_kev/
+- /triage_findings/epss_kev/
 ---
 
 DefectDojo Pro は、2つの外部脅威インテリジェンスソースである **EPSS** と **CISA KEV** を使用して検出事項を自動的に強化し、優先順位付けが脆弱性のCVSS深刻度だけでなく、実際に悪用される可能性を反映するようにします。どちらのソースも **CVE** によって検出事項と照合され、**毎日のスケジュール**で更新され、各検出事項の算出される**優先度(priority)**スコアに直接反映されます。

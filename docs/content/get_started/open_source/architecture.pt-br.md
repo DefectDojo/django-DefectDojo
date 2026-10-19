@@ -6,7 +6,7 @@ draft: false
 weight: 1
 audience: opensource
 aliases:
-- /pt-br/en/open_source/installation/architecture
+- /en/open_source/installation/architecture
 ---
 
 ![image](images/dd-architecture.png)

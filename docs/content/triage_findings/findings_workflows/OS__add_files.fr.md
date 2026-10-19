@@ -5,7 +5,7 @@ description: Téléversez des captures d'écran, des rapports ou d'autres fichie
 audience: opensource
 weight: 3
 aliases:
-- /fr/triage_findings/findings_workflows/add_files/
+- /triage_findings/findings_workflows/add_files/
 ---
 
 Vous pouvez joindre des fichiers à une **Constatation**, un **Engagement**, ou un **Test** pour fournir
