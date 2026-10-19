@@ -19,6 +19,9 @@ from django.utils import timezone
 
 from dojo.finding.deduplication import (
     _dedupe_batch_hash_code,  # noqa: PLC2701
+    _dedupe_batch_legacy,  # noqa: PLC2701
+    _dedupe_batch_uid_or_hash,  # noqa: PLC2701
+    _dedupe_batch_unique_id,  # noqa: PLC2701
     build_candidate_scope_queryset,
     do_false_positive_history_batch,
     find_candidates_for_deduplication_hash,
@@ -457,3 +460,83 @@ class TestInjectableFalsePositiveHistoryScope(_TwoProductFixture):
         self.sibling.refresh_from_db()
         self.assertFalse(self.sibling.false_p)
         self.assertEqual(_FP_SCOPE_CALLS, [], "a caller that said where to search is not second-guessed")
+
+
+class TestInjectableMarkDuplicate(_TwoProductFixture):
+
+    """
+    A caller may decide what happens to a match instead of letting the engine mark a duplicate.
+
+    Every batch loop hands its decided match to ``mark_duplicate``, which defaults to
+    set_duplicate. These run each algorithm with a recorder that keeps the finding active, and
+    check the default still marks the duplicate.
+    """
+
+    def _keep_both(self, calls):
+        def mark(new_finding, existing_finding, *, save=True):
+            calls.append((new_finding.id, existing_finding.id, save))
+            return []
+        return mark
+
+    def _assert_kept_active(self, dedupe, original, newer):
+        calls = []
+        dedupe([newer], candidate_qs=Finding.objects.all(), mark_duplicate=self._keep_both(calls))
+
+        self.assertEqual(calls, [(newer.id, original.id, False)], "the decided match should be handed over once")
+        newer.refresh_from_db()
+        self.assertFalse(newer.duplicate, "a match the caller handled must not be marked a duplicate")
+        self.assertTrue(newer.active)
+        self.assertIsNone(newer.duplicate_finding_id)
+
+    def _static(self, finding):
+        Finding.objects.filter(pk=finding.pk).update(static_finding=True, file_path="src/app.py", line=7)
+        finding.refresh_from_db()
+        return finding
+
+    def test_hash_code_hands_the_match_over(self):
+        original = self._create_finding(self.test_b, "Mark hash original")
+        newer = self._create_finding(self.test_a, "Mark hash newer")
+        self._assert_kept_active(_dedupe_batch_hash_code, original, newer)
+
+    def test_unique_id_hands_the_match_over(self):
+        original = self._create_finding(self.test_b, "Mark uid original", unique_id="MARK-UID-1")
+        newer = self._create_finding(self.test_a, "Mark uid newer", unique_id="MARK-UID-1")
+        self._assert_kept_active(_dedupe_batch_unique_id, original, newer)
+
+    def test_uid_or_hash_hands_the_match_over(self):
+        original = self._create_finding(self.test_b, "Mark uid or hash original", unique_id="MARK-UID-2")
+        newer = self._create_finding(self.test_a, "Mark uid or hash newer", unique_id="MARK-UID-2")
+        self._assert_kept_active(_dedupe_batch_uid_or_hash, original, newer)
+
+    def test_legacy_hands_the_match_over(self):
+        original = self._static(self._create_finding(self.test_b, "Mark legacy finding", cwe=79))
+        newer = self._static(self._create_finding(self.test_a, "Mark legacy finding", cwe=79))
+        self._assert_kept_active(_dedupe_batch_legacy, original, newer)
+
+    def test_a_raising_marker_moves_on_to_the_next_candidate(self):
+        """Raising means "not this one", as it does for set_duplicate's own guards."""
+        first = self._create_finding(self.test_b, "Mark raise first")
+        second = self._create_finding(self.test_b, "Mark raise second")
+        newer = self._create_finding(self.test_a, "Mark raise newer")
+        tried = []
+
+        def mark(new_finding, existing_finding, *, save=True):
+            tried.append(existing_finding.id)
+            if existing_finding.id == first.id:
+                msg = "not this one"
+                raise ValueError(msg)
+            return []
+
+        _dedupe_batch_hash_code([newer], candidate_qs=Finding.objects.all(), mark_duplicate=mark)
+
+        self.assertEqual(tried, [first.id, second.id])
+
+    def test_the_default_still_marks_the_duplicate(self):
+        original = self._create_finding(self.test_b, "Mark default original")
+        newer = self._create_finding(self.test_a, "Mark default newer")
+
+        _dedupe_batch_hash_code([newer], candidate_qs=Finding.objects.all())
+
+        newer.refresh_from_db()
+        self.assertTrue(newer.duplicate)
+        self.assertEqual(newer.duplicate_finding_id, original.id)

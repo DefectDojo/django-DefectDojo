@@ -1,12 +1,12 @@
 {
   "name": "defectdojo",
-  "version": "3.4.101",
+  "version": "3.4.200",
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
     "@fontsource-variable/inter": "^5.2",
     "@fontsource-variable/jetbrains-mono": "^5.2",
-    "@scalar/api-reference": "1.72.4",
+    "@scalar/api-reference": "1.73.1",
     "bootstrap-wysiwyg": "^2.0.0",
     "chart.js": "^4.4",
     "chartjs-adapter-moment": "^1.0",

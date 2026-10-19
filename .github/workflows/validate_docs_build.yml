@@ -5,6 +5,18 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/*'
+  # Build the docs on the merge queue's speculative merge commit too, so a docs
+  # PR shows this check in the queue and a docs break is caught before landing.
+  # merge_group does not support paths filters, so this runs on every merge
+  # group. That is deliberate: the in-app link check below reads dojo/, so a
+  # code-only PR can break this build as well. It runs in parallel with the
+  # unit tests, which take far longer, so on a code merge group it adds no
+  # queue time.
+  #
+  # Not a required check: the queue does not wait for it unless the "Merge
+  # Queue" ruleset requires it. Requiring it also needs the pull_request paths
+  # filter above removed, or non-docs PRs never report it and cannot queue.
+  merge_group:
 
 jobs:
   deploy:
@@ -20,7 +32,7 @@ jobs:
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24.21.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
