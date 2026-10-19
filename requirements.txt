@@ -182,7 +182,7 @@ watchdog==6.0.0
 wcwidth==0.9.2
 webencodings==0.6.1
 whitenoise==5.2.0
-wrapt==2.4.1
+wrapt==2.5.1
 xmlschema==2.5.1
 yarl==1.25.1
 zipp==4.1.1
