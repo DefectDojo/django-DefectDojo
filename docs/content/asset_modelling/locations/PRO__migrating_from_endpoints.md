@@ -91,10 +91,23 @@ Once Locations is enabled, the Endpoint pages are gone. A bookmark or a shared l
 
 | Old page | Opens |
 | --- | --- |
-| All Endpoints, Vulnerable Endpoints, All Hosts, Vulnerable Hosts, one Host, or a dashboard tile's Endpoint list | **All URLs** |
+| All Endpoints, All Hosts, one Host, or a dashboard tile's Endpoint list | **All URLs** |
+| Vulnerable Endpoints or Vulnerable Hosts | **All URLs**, filtered to URLs with active Findings |
 | An Asset's or a Finding's Endpoints or Hosts | That Asset's or Finding's **URLs** |
 | New Endpoint | **New URL** |
 | One Endpoint, or its edit page | Its **Location** (see below) |
+
+A link to an Endpoint list keeps the filters the URL list also has, and they show in its column filters:
+
+| Endpoint list filter | URL list filter |
+| --- | --- |
+| Host | Host |
+| Endpoint | URL |
+| Tags | Tags |
+| Active Findings count | Active Findings |
+| Keyword search | Keyword search |
+
+The match mode (contains, exact, starts with, and so on) carries over too. Filters the URL list does not have (Organization, Asset, Asset tags, Finding, the verified Findings count and Status) are dropped, so the list can show more URLs than the old link did.
 
 A link to one Endpoint can carry either kind of ID, and DefectDojo tries them in this order:
 
