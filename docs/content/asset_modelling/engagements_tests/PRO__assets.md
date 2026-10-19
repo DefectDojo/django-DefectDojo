@@ -244,7 +244,9 @@ Connectors that know what an Asset is set its type for you, on mapping and on ev
 A connector never overwrites a type a person chose. It fills in an Asset that has no type, and
 it keeps the type it set up to date when the source system reclassifies the item. Once someone
 sets a different type (on the Asset form, through the API, in a bulk edit, or with a rule), the
-connector leaves that Asset's type alone. A vendor value DefectDojo has no type for (a
+connector leaves that Asset's type alone. When records from several connectors, or several
+records from one connector, map onto the same Asset, the first one to classify it keeps it and
+the others leave it alone. A vendor value DefectDojo has no type for (a
 CyCognito certificate, a custom CI class) leaves the Asset unclassified.
 
 To classify Assets no connector types, use the Triage Engine's **Set a Field** node on Assets
