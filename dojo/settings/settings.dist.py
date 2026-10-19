@@ -219,6 +219,21 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # Seconds the async_dupe_delete singleton marker is held. A run holds it for its whole
+    # duration and releases it when it finishes; this timeout is only the ceiling for a worker
+    # that dies mid-run without releasing it. It must comfortably exceed a normal run so the
+    # lock is never released out from under an in-flight run (default 30 minutes).
+    DD_DUPE_DELETE_LOCK_EXPIRE=(int, 1800),
+    # Minutes since a duplicate was last saved before the excess-duplicate delete may remove it,
+    # which covers a create request still writing the finding's child rows. 0 turns the wait off.
+    DD_DUPE_DELETE_GRACE_MINUTES=(int, 1),
+    # The excess-duplicate delete skips the duplicates of a test while an import is writing it
+    # (a PostgreSQL advisory lock the import holds until it ends; see dojo/importers/import_lock.py).
+    # Turn off behind a connection pooler in transaction mode, where session locks do not hold.
+    DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT=(bool, True),
+    # An import lock whose every holder has been idle this many minutes is treated as abandoned (left
+    # behind by a host that died, or by a pooler) and no longer holds the delete back. 0 never does.
+    DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES=(int, 30),
     # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
     # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
     # because backdating a mitigation can distort SLA-compliance metrics. Changing this
@@ -1974,6 +1989,10 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
+DUPE_DELETE_LOCK_EXPIRE = env("DD_DUPE_DELETE_LOCK_EXPIRE")
+DUPE_DELETE_GRACE_MINUTES = env("DD_DUPE_DELETE_GRACE_MINUTES")
+DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT = env("DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT")
+DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES = env("DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES")
 
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 

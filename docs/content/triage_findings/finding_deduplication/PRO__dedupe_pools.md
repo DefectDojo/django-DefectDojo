@@ -124,6 +124,10 @@ The Rules Engine action **Assign to a Dedupe Pool** puts an Asset into a pool, o
 
 Like the subtree toggle, it leaves an Asset already pooled elsewhere for that kind unchanged rather than moving it. An Asset's pool is a deliberate decision, and a rule that silently relocated it would change which Findings deduplicate against each other with nothing in the run saying so.
 
+## Keeping matching Findings active in each Asset
+
+A pool makes a Finding in one Asset a duplicate of the matching Finding in another, so the newer one becomes inactive. When each Asset needs its own active Findings (the same scans imported into a staging Asset and a production Asset, each with its own SLA), use a Triage Engine rule with the **On Dedupe Match** trigger set to **Keep Both Active**. Matches between Assets in the rule's scope then stay active and are linked instead, and the rule can copy the matched Finding's status (false positive, out of scope, risk accepted, mitigated or reopened) to the new one. A second rule can apply later status changes to the linked Findings, in either direction. See [On Dedupe Match](/automation/triage_engine/node_reference/#on-dedupe-match).
+
 ## Permissions
 
 Pools are governed by the **Dedupe Pool** row of the roles editor, four global permissions that take effect only through a global role:

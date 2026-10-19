@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Triage Engine ships 44 nodes in five categories. This page documents all of them.
+Triage Engine ships 47 nodes in five categories. This page documents all of them.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -189,6 +189,34 @@ Two egress settings are built for these items. **Generate a Report** has a **Fin
 
 The shipped template **Report when a group of scans has landed** wires all of this: the group trigger, a report on `complete`, and an email naming the missing scans on `incomplete`.
 
+### On Dedupe Match
+
+`trigger.dedupe`
+
+Runs when deduplication matches a newly imported Finding to an existing one. Use it when the same scans are imported into more than one Asset (for example a staging Asset and a production Asset in one Dedupe Pool) and each Asset needs its own active Findings and SLAs, with triage decisions carried between them.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
+| **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
+
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+
+Each item carries the match on `ctx`:
+
+```
+ctx.matched_finding_id   the existing Finding this one matched
+ctx.kept_active          true when deduplication kept this Finding active
+```
+
+**Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
+
+#### Example: keep staging and production in step
+
+1. Put the staging Asset and the production Asset in the same Dedupe Pool.
+2. Create a rule with **On Dedupe Match**, set to **Keep Both Active**, scoped to both Assets, followed by **Copy Status from Matched Finding**. A Finding imported into production now starts with the status its staging match already has, and the other way around.
+3. Create a second rule with **On Finding Event** (`closed` or `reopened`, or `any`), followed by **Apply Status to Linked Findings**. A Finding marked as a false positive in production is then marked as a false positive in staging too.
+
 ### On an Inbound Webhook
 
 `trigger.webhook`
@@ -319,6 +347,32 @@ Moves the Finding to a status.
 |---------|---------|-------|
 | **Status** | none | `active`, `inactive`, `verified`, `unverified`, `false_positive`, `mitigated`, `reopen`. |
 | **Note** | empty | An optional note recorded alongside the status change. |
+
+### Copy Status from Matched Finding
+
+`finding.copy_matched_status`
+
+Gives the Finding the status of the Finding deduplication matched it to in another Asset, and adds a note naming that Finding. Use it after **On Dedupe Match**. Outside that trigger it uses the link deduplication recorded, so it does nothing for a Finding that was never kept active.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry: `False Positive`, `Out of Scope`, `Risk Accepted`, `Mitigated`, `Reopened`. `Reopened` carries an open status to a Finding that is closed for one of the other reasons. |
+
+`Mitigated` and `Reopened` are off by default. They follow what each Asset's scans report rather than a decision someone made: a fix that reaches staging first would mitigate the production Finding while the issue is still live in production, and the next production scan would reopen it and send the reopen back. Turn them on only where both Assets are scanned together.
+
+A status is read in this order: false positive, out of scope, risk accepted, mitigated, and otherwise open. A risk acceptance is carried as a new acceptance on the Finding's own engagement, with the same expiration date, so either one can later be extended or revoked on its own. If the Asset only allows simple risk acceptance, the Finding is accepted the simple way, which has no expiration. The rule owner must be able to see the Finding the status comes from (the note names it) and edit the Finding it goes to, and to add a risk acceptance for that status; anything else is left alone, and so are duplicates. It does nothing after **On Dedupe Match** in **Mark as Duplicate** mode, because the new Finding is then a duplicate. A Finding already closed for a different reason takes the new status in place of the old one, so the two Findings end up with the same status.
+
+### Apply Status to Linked Findings
+
+`finding.apply_status_to_linked`
+
+Gives every Finding linked to this one by **On Dedupe Match** the same status, and adds a note to each naming this Finding. Use it after **On Finding Event**, so a triage decision made in one Asset reaches the matching Findings in the others. Links are followed in both directions, and through a chain of Assets, but only through Findings the rule owner can see.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
+
+The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
 
 ### Add Tags
 
@@ -515,8 +569,10 @@ Sets a field on the Asset. Assets already holding the value are left alone, and 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Field** | none | One of: `description`, `business_criticality`, `platform`, `lifecycle`, `origin`, `user_records`, `revenue`, `external_audience`, `internet_accessible`. |
+| **Field** | none | One of: `description`, `business_criticality`, `platform`, `lifecycle`, `origin`, `user_records`, `revenue`, `external_audience`, `internet_accessible`, `asset_type`. |
 | **Value** | none | The control follows the field: a template for description (with `{{product.name}}` style placeholders), a picker for the choice fields, a number or a toggle for the rest. |
+
+For `asset_type`, the value is a type's code (`host`, `repository`, `service`, ...). The picker lists the types DefectDojo ships; a saved rule may name a type you added, and a code that names no type fails the node. A type a rule sets counts as chosen by a person, so connectors do not overwrite it. In conditions, the Asset's type is `product.kind`.
 
 Two fields are deliberately not offered: `name` (it is unique, so one rendered value written across a sweep cannot work) and the SLA configuration (it drives an asynchronous recalculation with its own write lock, and belongs to a dedicated flow).
 
@@ -778,6 +834,7 @@ Posts to a Slack channel over a Messaging Connector. The connection carries the 
 | **One Message per Finding** | off | Off sends one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. How many Findings the message lists before it says how many more there were. |
+| **Card Facts** | empty | Metadata names and custom field keys to show as facts on the message, comma-separated. See [Card facts](#card-facts). |
 
 ### Send a Microsoft Teams Message
 
@@ -792,6 +849,16 @@ Posts a card over a Messaging Connector. The connection carries the Power Automa
 | **One Message per Finding** | off | Off sends one card about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. |
+| **Card Facts** | empty | Metadata names and custom field keys to show as facts on the message, comma-separated. See [Card facts](#card-facts). |
+
+#### Card facts
+
+**Card Facts** puts values from the Asset and the Finding on the message itself: a fact set on a Teams card, a fields block in Slack. Each entry is part of a key, matched without regard to case, against the Asset's [metadata](../building_rules/#asset-metadata) names, the Asset's [custom field](../building_rules/#custom-fields) keys, the Asset's [contacts](../building_rules/#asset-contacts) (`product_manager`, `technical_contact`, `team_manager`) and the Finding's custom field keys. So `team` shows `team_owner`, `owning_team` and `team_manager`, and `*` shows everything the item holds. A contact shows as their name and email address, and an unset contact is left out.
+
+- A message about one Finding shows its Asset's values and its own.
+- A batch message shows the Asset's values only when every Finding in the batch is on that one Asset, and never a Finding's own. A batch over several Assets has no single value to show, so it shows none.
+- When the same key is both a metadata name and a custom field key, the second is titled with its full path, such as `product.custom_fields.owner`, so neither value is lost.
+- Slack and Teams show at most ten facts, and a batch message's severity counts are among them. The order on the card is not the order you typed.
 
 ### Send an Email
 
@@ -822,6 +889,8 @@ POSTs JSON to a webhook endpoint.
 | | | One of the two above is required. |
 | **Signing Secret** | empty | Signs the body as `X-DefectDojo-Signature: sha256=HMAC`. |
 | **One Message per Finding** | off | Off posts the whole batch in one request. |
+
+Each Finding in the body carries its own `custom_fields`, and the `product` block with the Asset's `meta` and `custom_fields`. Each Asset carries `meta`, `custom_fields` and its three contacts directly. All of them are always present, empty when there is nothing to send. A contact carries the user's `id`, `username`, `name` and `email`.
 
 Two things to know. A signing secret typed here is stored with the rule, so for anything sensitive prefer a configured endpoint and its own header. And a webhook called by a rule never changes that endpoint's own health status, so a rule cannot disable your notification webhooks by failing.
 

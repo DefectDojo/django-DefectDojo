@@ -105,7 +105,7 @@ Every trigger takes a **Scope**, and scope is how you narrow what the rule consi
 
 A Finding trigger's scope is the same filter vocabulary the original Rules Engine uses, roughly sixty filters spanning Findings and the objects around them, so a filter you already know how to write there means the same thing here. An Asset trigger's scope is the filter vocabulary the Assets list itself uses instead — name, tags, Organization, criticality, lifecycle and the rest of that list's filters — and the scope editor is that list, so picking one works the same way it does for a Finding rule.
 
-Asset type is not one of those filters. The scope picker offers exactly what the Assets list can filter on, and type is not among them today. To act on Assets of one type, scope broadly and add an **If / Filter** node with a condition on `product.asset_type`, which compares the type's code rather than its display label.
+Asset type is not one of those filters. The scope picker offers exactly what the Assets list can filter on, and type is not among them today. To act on Assets of one type, scope broadly and add an **If / Filter** node with a condition on `product.kind`, which compares the type's code rather than its display label.
 
 Two things about scope are worth understanding, and both hold for either kind of rule:
 
@@ -202,7 +202,7 @@ Each item carries a fixed set of Finding fields. This list is a contract, so it 
 | Classification | `cwe`, `vulnerability_ids`, `tags` |
 | Reachability | `reachability`, `reachability_confidence` |
 
-Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`, `internet_accessible`, `business_criticality`, `exposure`), `product_type` (`id`, `name`), and `ctx`.
+Alongside `finding`, each item carries `test` (`id`, `title`, `scan_type`), `engagement` (`id`, `name`), `product` (`id`, `name`, `internet_accessible`, `business_criticality`, `exposure`, plus the Asset's [contacts](#asset-contacts), [metadata](#asset-metadata) and [custom fields](#custom-fields)), `product_type` (`id`, `name`), and `ctx`.
 
 Dates are ISO-8601 strings, and they are compared as dates rather than as text. Some of them (`date`, `sla_expiration_date`, `kev_date`, `kev_due_date`) hold a calendar day; the rest (`mitigated`, `last_status_update`, `risk_acceptance_expiration_date`) hold a moment, including a time of day.
 
@@ -250,13 +250,14 @@ An Asset item carries no `finding`, `test` or `engagement` block at all — thos
 
 | Group | Fields |
 |-------|--------|
-| Identity | `id`, `name`, `asset_type` |
+| Identity | `id`, `name`, `description`, `kind` |
 | Classification | `business_criticality`, `platform`, `lifecycle`, `origin`, `tags` |
-| Exposure | `external_audience`, `internet_accessible`, `user_records` |
-| SLA and Risk Priority | `sla_configuration_id`, `sla_configuration_name`, `prioritization_engine_id`, `prioritization_engine_name` |
+| Exposure and impact | `external_audience`, `internet_accessible`, `user_records`, `revenue` |
+| Posture | `grade`, `findings_count` |
+| Contacts | `product_manager`, `technical_contact`, `team_manager` (see [Asset contacts](#asset-contacts)) |
 | Dates | `created`, `updated` |
 
-`asset_type` is the type's code, not its display label.
+`kind` is the Asset type's code, not its display label (the key is older than the name *Asset type*, which is why the two differ). `grade` is the Asset's numeric grade, and `findings_count` is how many active Findings on it the rule's owner can see, the same number the Assets list shows.
 
 Alongside `product`, an Asset item carries `product_type` (`id`, `name`) and `ctx`. Because the key names match, a condition or template written against `product.name` or `product_type.name` means the same thing whichever kind of rule it is in.
 
@@ -274,6 +275,35 @@ connector.by_name.security-hub.AWS_REGION    an attribute, from one connector's 
 An Asset mapped from more than one connector carries all of their attributes. When two records report the same attribute, `connector.attributes` keeps the value from the record discovered first, and `connector.by_name` keeps each connector's own. An Asset no connector record maps to has empty `connector` paths, so a condition that `connector.attributes.AWS_REGION` **is not set** matches it.
 
 The condition builder and the insert menu offer the attributes of the connectors configured on the instance. Any other attribute works typed by hand. A rule that never mentions `connector` does not pay for reading the records at all, and one that does reads them once per batch of Assets. Attribute values are text, capped at 4,000 characters each.
+
+#### Asset contacts
+
+Every item, whether it is about a Finding, an Asset or an alert, carries the Asset's three contacts. Each is the user set in that field on the Asset:
+
+```
+product.product_manager.name       first and last name, or the username when neither is set
+product.product_manager.email
+product.product_manager.username
+product.technical_contact.email
+product.team_manager.name
+```
+
+A contact that is not set has every part empty, so `product.technical_contact.email not_exists` finds Assets with nobody assigned. A message can say who to ask, for example `Owner: {{product.technical_contact.name}} ({{product.technical_contact.email}})`. Contacts cost a rule nothing extra to read: they are fetched with the Asset.
+
+Contacts are user records, and their email addresses go wherever a rule sends them: a chat channel, an email, an SNS topic or a webhook. Point rules that use them at destinations that may hold those addresses.
+
+#### Asset metadata
+
+An Asset's metadata (the name and value pairs on its **Metadata** tab) is readable from every kind of rule, under `product.meta`:
+
+```
+product.meta.owner
+product.meta.Business Unit
+```
+
+Finding, Asset and alert items all carry it, so a Finding rule can route or word a message by what its Asset's metadata says. Names are matched exactly as written, including case and spaces. A name containing a dot cannot be addressed by a path, but still reaches a webhook, which sends the whole block. An Asset with no value for a name reads as not set, so `product.meta.owner not_exists` finds Assets nobody has assigned an owner. Values are text.
+
+The condition builder and the insert menu offer the metadata names on the Assets you can view, up to 200 of them. Any other name works typed by hand, and is not flagged when you save. A rule that never mentions `product.meta` (and sends no webhook or card facts) does not read metadata at all; one that does reads it once per batch.
 
 ### Conditions
 
@@ -334,9 +364,11 @@ finding.custom_fields.cost_center
 product.custom_fields.owner_team
 ```
 
-A rule over Findings reads the Finding's custom fields and a rule over Assets reads the Asset's; there is no cross-kind path. A record holding no value for a field reads as not set, so `exists` and `not_exists` are how you condition on a field being filled in at all. The same paths work as `{{ }}` placeholders in templates.
+A rule over Assets reads the Asset's custom fields. A rule over Findings reads the Finding's, and its Asset's as well under `product.custom_fields`, so a Finding rule can say where to send by what the Asset is; alert rules read the Asset's the same way. A record holding no value for a field reads as not set, so `exists` and `not_exists` are how you condition on a field being filled in at all. The same paths work as `{{ }}` placeholders in templates.
 
 A **multi-select** field holds several options at once, so it is a list field like `tags` and takes the same operators. `has` (*includes*) matches when the compared option is one of the stored ones, whole and exact: a Finding holding only `gdpr-eu` is not matched by `has gdpr`, where `contains` would match on the fragment. `not_has` (*does not include*) is its negation.
+
+Single- and multi-select fields also take part of a value: `contains`, `not_contains`, `startswith` and `endswith`, compared without regard to case. On a multi-select they match when any one stored option does, so `product.custom_fields.teams startswith payments` matches an Asset holding `payments-core` among its options. The value box is free text for these four, because a fragment is rarely one of the options, while the other operators keep the picker over the field's own options.
 
 "Includes **any of** several options" is one **If / Filter** node with one `has` row per option and **Match** set to `any`. To combine that with conditions that must all hold, chain two **If / Filter** nodes: the any-of rows in the first (Match `any`), everything else in the second (Match `all`).
 
