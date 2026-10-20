@@ -3021,7 +3021,8 @@ class Finding(models.Model):
             self.static_finding = True
 
         # update the SLA expiration date last, after all other finding fields have been updated
-        self.set_sla_expiration_date()
+        if self.active:
+            self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super().save(*args, **kwargs)
