@@ -48,6 +48,22 @@ By default, the connector imports findings in every Checkmarx result state excep
 - If a finding leaves a listed state, the next sync closes it in DefectDojo.
 - If no finding has a listed state, the sync imports nothing and closes the findings that the connector imported before. Check the spelling against your Checkmarx custom states before you save.
 
+#### **Triage state, Exploitable Path and comments**
+
+The connector carries three pieces of Checkmarx triage data onto each finding, so you can filter on them in the Findings list, in Custom Dashboards and in the Report Builder.
+
+- **State.** Every finding (SAST, SCA, IaC and DAST) is tagged `cx-state:<state>` with its Checkmarx result state in lowercase: `cx-state:to_verify`, `cx-state:confirmed`, `cx-state:urgent`, `cx-state:proposed_not_exploitable`. A custom state such as `DD Ready` becomes `cx-state:dd_ready`. There is always exactly one state tag per finding.
+- **Exploitable Path.** When [Exploitable Path](https://docs.checkmarx.com/en/34965-19120-exploitable-path.html) is enabled on the Checkmarx project and a SAST scan has run, each SCA finding is tagged `exploitable-path:found` if Checkmarx found a call path from your code to the vulnerable method, or `exploitable-path:none` if it looked and found no path. A finding with neither tag was not analysed, which is different from being safe.
+- **Comments.** The comment a Checkmarx user wrote when triaging a result is stored in the finding's **Severity Justification**, prefixed with `Checkmarx comment:`. It is shown on the finding page and in Report Builder detail blocks. SCA and DAST results carry comments today; SAST results do not, because the Checkmarx SAST results API does not return them.
+
+Unlike other tags, **the state and Exploitable Path tags follow the tool.** When a sync matches a finding that already exists, DefectDojo replaces that finding's `cx-state:` and `exploitable-path:` tags with the ones the sync reports, so a result moved from To Verify to Confirmed in Checkmarx shows as `cx-state:confirmed` here after the next sync. Tags outside those two families, including ones you added yourself, are never touched. The Severity Justification is refreshed the same way, unless someone edited it in DefectDojo, in which case your edit is kept.
+
+Notes:
+
+- The tags do not change deduplication and are never added to Unique ID From Tool or the description.
+- Findings that already existed before this version gain the tags and the comment on their next sync.
+- A finding whose state changes to Not Exploitable is still closed on the next sync, as before; it is not kept with a `cx-state:not_exploitable` tag.
+
 #### **Tagging findings with the Checkmarx scan ID**
 
 Each Checkmarx One finding's **Unique ID From Tool** is its Checkmarx result hash. A result hash alone does not locate a finding in Checkmarx; you also need the ID of a scan that contains it. Turn on **Tag Findings With Scan ID** to record that scan ID on the findings the connector imports.
