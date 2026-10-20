@@ -20,6 +20,7 @@ from dojo.export.api.serializers import (
     export_file,
     export_proof,
 )
+from dojo.export.api.views import COUNT_KEYS
 from dojo.finding.api.serializer import FindingSerializer
 from dojo.location.feature import locations_enabled
 from dojo.location.status import FindingLocationStatus
@@ -36,6 +37,7 @@ from dojo.models import (
     Risk_Acceptance,
     System_Settings,
     Test,
+    Test_Type,
     UserContactInfo,
 )
 from dojo.system_settings.ui.forms import SystemSettingsForm
@@ -374,3 +376,98 @@ class TestProductExportStream(DojoAPITestCase):
             else:
                 for key in ("mitigated", "false_positive", "out_of_scope", "risk_accepted", "date"):
                     self.assertIn(key, entry["status"])
+
+
+@versioned_fixtures
+class TestExportManifest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.client = admin_client()
+        admin = Dojo_User.objects.get(username="admin")
+        finding = Finding.objects.filter(test__engagement__product_id=2).order_by("id").first()
+        finding.notes.add(Notes.objects.create(entry="secret", author=admin, private=True))
+        file_upload = FileUpload.objects.create(title="poc.txt", file=ContentFile(b"hello", name="poc.txt"))
+        self.addCleanup(file_upload.file.storage.delete, file_upload.file.name)
+        finding.files.add(file_upload)
+        Finding_Group.objects.create(name="grp", test=finding.test, creator=admin).findings.add(finding)
+        risk_acceptance = Risk_Acceptance.objects.create(
+            name="ra", owner=admin, path=ContentFile(b"proof", name="waiver.txt"),
+        )
+        self.addCleanup(risk_acceptance.path.storage.delete, risk_acceptance.path.name)
+        risk_acceptance.accepted_findings.add(finding)
+        finding.test.engagement.risk_acceptance.add(risk_acceptance)
+        self.url = reverse("export-manifest")
+        self.manifest = self.client.get(self.url).json()
+
+    def product_entry(self, product_id, manifest=None):
+        return next(entry for entry in (manifest or self.manifest)["products"] if entry["id"] == product_id)
+
+    def test_manifest_top_level_keys(self):
+        self.assertEqual(
+            {
+                "schema", "generated_at", "source", "max_file_bytes", "token", "scan_types", "reference",
+                "product_types", "products", "totals",
+            },
+            set(self.manifest),
+        )
+        self.assertEqual(1, self.manifest["schema"])
+        self.assertEqual(str(System_Settings.objects.get(no_cache=True).install_id), self.manifest["source"]["install_id"])
+
+    def test_token_block(self):
+        token = self.manifest["token"]
+        self.assertIsInstance(token["expires_at"], str | None)
+        self.assertEqual({"username": "admin", "is_superuser": True, "expires_at": token["expires_at"]}, token)
+
+    def test_product_counts_match_the_database(self):
+        counts = self.product_entry(2)["counts"]
+        self.assertEqual(Finding.objects.filter(test__engagement__product_id=2).count(), counts["findings"])
+        self.assertEqual(Engagement.objects.filter(product_id=2).count(), counts["engagements"])
+        self.assertEqual(Test.objects.filter(engagement__product_id=2).count(), counts["tests"])
+        self.assertEqual(1, counts["risk_acceptances"])
+        self.assertEqual(1, counts["finding_groups"])
+        self.assertGreaterEqual(counts["notes"], 1)
+        self.assertEqual(1, counts["files"])
+        for entry in self.manifest["products"]:
+            self.assertEqual(set(COUNT_KEYS), set(entry["counts"]))
+
+    def test_product_type_counts_roll_up(self):
+        products = self.manifest["products"]
+        for product_type in self.manifest["product_types"]:
+            members = [entry for entry in products if entry["prod_type"] == product_type["id"]]
+            self.assertEqual(sum(entry["counts"]["findings"] for entry in members), product_type["counts"]["findings"])
+            self.assertEqual(
+                Product.objects.filter(prod_type_id=product_type["id"]).count(), product_type["counts"]["products"],
+            )
+        self.assertEqual(sum(entry["counts"]["findings"] for entry in products), self.manifest["totals"]["findings"])
+
+    def test_files_over_cap_counted(self):
+        manifest = self.client.get(self.url, {"max_file_bytes": 4}).json()
+        self.assertEqual(1, self.product_entry(2, manifest)["counts"]["files_over_cap"])
+        self.assertEqual(0, self.product_entry(2)["counts"]["files_over_cap"])
+
+    def test_reference_data(self):
+        reference = self.manifest["reference"]
+        self.assertEqual(
+            {"sla_configurations", "development_environments", "regulations", "test_types", "note_types", "users"},
+            set(reference),
+        )
+        self.assertEqual(Dojo_User.objects.count(), len(reference["users"]))
+        user1 = next(user for user in reference["users"] if user["username"] == "user1")
+        self.assertNotIn("password", user1)
+        self.assertIn("email", user1)
+        self.assertFalse(user1["is_superuser"])
+        self.assertEqual(Test_Type.objects.count(), len(reference["test_types"]))
+
+    def test_scan_types_are_distinct_and_sorted(self):
+        self.assertEqual(
+            sorted(set(Test.objects.exclude(scan_type=None).values_list("scan_type", flat=True))),
+            self.manifest["scan_types"],
+        )
+
+    def test_products_and_types_sorted_by_id(self):
+        for key in ("products", "product_types"):
+            ids = [entry["id"] for entry in self.manifest[key]]
+            self.assertTrue(ids)
+            self.assertEqual(sorted(set(ids)), ids)

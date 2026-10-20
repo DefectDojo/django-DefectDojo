@@ -1,10 +1,13 @@
+from collections import defaultdict
 from collections.abc import Iterator
 
 from django.conf import settings
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Count, Prefetch, QuerySet
+from django.db.models.functions import Coalesce
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import BaseRenderer, JSONRenderer
@@ -12,7 +15,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from dojo import __version__
+from dojo.api_v2.serializers import SLAConfigurationSerializer
 from dojo.authorization.api_permissions import IsSuperUser
+from dojo.development_environment.api.serializer import DevelopmentEnvironmentSerializer
 from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
     MAX_FILE_BYTES_DEFAULT,
@@ -21,15 +26,41 @@ from dojo.export.api.serializers import (
     ExportProductSerializer,
     ExportRiskAcceptanceSerializer,
     ExportTestSerializer,
+    ExportUserSerializer,
 )
 from dojo.location.feature import locations_enabled
-from dojo.models import Engagement, Finding, Product, Risk_Acceptance, Test
+from dojo.location.models import LocationProductReference
+from dojo.models import (
+    Development_Environment,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    FileUpload,
+    Finding,
+    Finding_Group,
+    Note_Type,
+    Notes,
+    Product,
+    Product_Type,
+    Regulation,
+    Risk_Acceptance,
+    SLA_Configuration,
+    Test,
+    Test_Type,
+)
+from dojo.note_type.api.serializer import NoteTypeSerializer
 from dojo.notes.helper import notes_prefetch
+from dojo.regulations.api.serializer import RegulationSerializer
+from dojo.test.api.serializer import TestTypeSerializer
+from dojo.user.authentication import token_expires_at
 from dojo.utils import get_system_setting
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 EXPORT_CHUNK_SIZE = 500
 SCHEMA_VERSION = 1
+COUNT_KEYS = (
+    "engagements", "tests", "findings", "endpoints", "notes", "files", "files_over_cap", "risk_acceptances", "finding_groups",
+)
 FINDING_PREFETCH = (
     notes_prefetch(),
     vulnerability_id_prefetch(),
@@ -163,6 +194,92 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
     yield render({"type": "end", "counts": counts})
 
 
+def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
+    counts = defaultdict(lambda: dict.fromkeys(COUNT_KEYS, 0))
+    sources = (
+        ("engagements", Engagement, "product_id"),
+        ("tests", Test, "engagement__product_id"),
+        ("findings", Finding, "test__engagement__product_id"),
+        ("endpoints", LocationProductReference if locations_enabled() else Endpoint, "product_id"),
+        ("notes", Notes, "engagement__product_id"),
+        ("notes", Notes, "test__engagement__product_id"),
+        ("notes", Notes, "finding__test__engagement__product_id"),
+        ("notes", Notes, "risk_acceptance__engagement__product_id"),
+        ("files", FileUpload, "engagement__product_id"),
+        ("files", FileUpload, "test__engagement__product_id"),
+        ("files", FileUpload, "finding__test__engagement__product_id"),
+        ("risk_acceptances", Risk_Acceptance, "engagement__product_id"),
+        ("finding_groups", Finding_Group, "test__engagement__product_id"),
+    )
+    for key, model, product_path in sources:
+        # order_by() drops default orderings, which would otherwise split the GROUP BY per row.
+        rows = model.objects.order_by().values_list(product_path).annotate(n=Count("id", distinct=True))
+        for product_id, n in rows:
+            if product_id is not None:
+                counts[product_id][key] += n
+    storage = FileUpload._meta.get_field("file").storage
+    files = (
+        FileUpload.objects.annotate(
+            product_id=Coalesce(
+                "finding__test__engagement__product_id", "test__engagement__product_id", "engagement__product_id",
+            ),
+        )
+        .filter(product_id__isnull=False)
+        .values_list("id", "file", "product_id")
+        .distinct()
+    )
+    for _, name, product_id in files:
+        if storage.exists(name) and storage.size(name) > max_file_bytes:
+            counts[product_id]["files_over_cap"] += 1
+    return counts
+
+
+def _summed(products: list[dict]) -> dict[str, int]:
+    return {key: sum(product["counts"][key] for product in products) for key in COUNT_KEYS}
+
+
+def build_manifest(request, max_file_bytes: int) -> dict:
+    counts = product_counts(max_file_bytes)
+    products = [
+        {"id": pk, "name": name, "prod_type": prod_type_id, "counts": counts[pk]}
+        for pk, name, prod_type_id in Product.objects.order_by("id").values_list("id", "name", "prod_type_id")
+    ]
+    members = defaultdict(list)
+    for product in products:
+        members[product["prod_type"]].append(product)
+    product_types = [
+        {"id": pk, "name": name, "counts": {"products": len(members[pk]), **_summed(members[pk])}}
+        for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
+    ]
+    token = request.auth if isinstance(request.auth, Token) else None
+    users = Dojo_User.objects.select_related("usercontactinfo", "auth_token").order_by("id")
+    return {
+        "schema": SCHEMA_VERSION,
+        "generated_at": timezone.now().isoformat(),
+        "source": source_block(),
+        "max_file_bytes": max_file_bytes,
+        "token": {
+            "username": request.user.username,
+            "is_superuser": request.user.is_superuser,
+            "expires_at": token_expires_at(token) if token else None,
+        },
+        "scan_types": sorted(set(Test.objects.exclude(scan_type=None).values_list("scan_type", flat=True))),
+        "reference": {
+            "sla_configurations": SLAConfigurationSerializer(SLA_Configuration.objects.order_by("id"), many=True).data,
+            "development_environments": DevelopmentEnvironmentSerializer(
+                Development_Environment.objects.order_by("id"), many=True,
+            ).data,
+            "regulations": RegulationSerializer(Regulation.objects.order_by("id"), many=True).data,
+            "test_types": TestTypeSerializer(Test_Type.objects.order_by("id"), many=True).data,
+            "note_types": NoteTypeSerializer(Note_Type.objects.order_by("id"), many=True).data,
+            "users": ExportUserSerializer(users, many=True).data,
+        },
+        "product_types": product_types,
+        "products": products,
+        "totals": {"product_types": len(product_types), "products": len(products), **_summed(products)},
+    }
+
+
 class ProductExportView(APIView):
     permission_classes = (IsAuthenticated, IsSuperUser)
     renderer_classes = (JSONRenderer, NDJSONRenderer)
@@ -182,4 +299,4 @@ class ExportManifestView(APIView):
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
     def get(self, request):
-        return Response({})
+        return Response(build_manifest(request, max_file_bytes_from(request)))
