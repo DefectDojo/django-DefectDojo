@@ -64,10 +64,11 @@ some point in the previous 30 days. Hover the chip to see when the run of empty 
 
 A few things keep the chip honest:
 
-* A record that has not imported anything in the last 30 days is treated as a clean project, not
-  a failure, and does not count toward the chip.
-* One record that still imports Findings is enough to keep the chip off: an empty project among
-  busy ones is normal.
+* Each scan type of a record is counted on its own, because each one syncs separately. A scan
+  type that has not imported anything in the last 30 days is treated as a clean project, not a
+  failure, and does not count toward the chip.
+* One record, or one scan type, that still imports Findings is enough to keep the chip off: an
+  empty project among busy ones is normal.
 * A single empty Sync is not reported. Two in a row is.
 
 The chip clears on the next Sync that imports anything. The usual causes are the same as for
