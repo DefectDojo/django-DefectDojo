@@ -10,7 +10,7 @@ from dojo.engine_tools.helpers import (
     add_findings_to_whitelist, 
     get_reviewers_members, 
     Constants, 
-    expire_finding_exclusion_immediately,
+    expire_finding_exclusion,
     send_mail_to_cybersecurity,
     has_valid_comments,
     add_findings_to_exclusion,
@@ -494,12 +494,12 @@ def expire_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         raise PermissionDenied
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
     
-    expire_finding_exclusion_immediately.apply_async(args=(str(finding_exclusion.uuid),))
+    expire_finding_exclusion.apply_async(args=(str(finding_exclusion.uuid),))
 
     messages.add_message(   
             request,
             messages.SUCCESS,
-            f"Finding Exclusion {finding_exclusion.uuid} expired.",
+            f"Finding Exclusion {finding_exclusion.uuid} expiration queued.",
             extra_tags="alert-success")
     
     return redirect('finding_exclusion', fxid=fxid)

@@ -319,69 +319,75 @@ def remove_finding_from_list(finding: Finding, note: Notes, type: str) -> Findin
 
 @app.task
 def expire_finding_exclusion(expired_fex_id: str) -> None:
-    expired_fex = FindingExclusion.objects.get(uuid=expired_fex_id)
-    try:
-        system_user = get_user(settings.SYSTEM_USER)
-        FindingExclusionLog.objects.create(
-            finding_exclusion=expired_fex,
-            changed_by=system_user,
-            previous_status=expired_fex.status,
-            current_status="Expired",
+    system_user = get_user(settings.SYSTEM_USER)
+    if system_user is None:
+        raise ValueError(
+            f"Configured system user {settings.SYSTEM_USER!r} does not exist"
         )
 
-        with transaction.atomic():
+    with transaction.atomic():
+        expired_fex = FindingExclusion.objects.select_for_update().get(
+            uuid=expired_fex_id
+        )
+        previous_status = expired_fex.status
+        if previous_status != "Expired":
             expired_fex.status = "Expired"
-            expired_fex.save()
-            logger.info(f"Expired finding exclusion: {expired_fex}")
-            note = get_note(
-                system_user,
-                f"Finding has been removed from the {expired_fex.type} as it has expired.",
+            expired_fex.save(update_fields=["status", "last_status_update"])
+            FindingExclusionLog.objects.create(
+                finding_exclusion=expired_fex,
+                changed_by=system_user,
+                previous_status=previous_status,
+                current_status="Expired",
+            )
+    logger.info(f"Expired finding exclusion: {expired_fex}")
+
+    with transaction.atomic():
+        note = get_note(
+            system_user,
+            f"Finding has been removed from the {expired_fex.type} as it has expired.",
+        )
+
+        risk_status = Constants.EXCLUSION_TYPE.value.get(expired_fex.type)
+
+        findings = Finding.objects.filter(
+            get_unique_ids_filter(expired_fex.unique_id_from_tool),
+            risk_status=risk_status,
+        ).prefetch_related("tags", "notes")
+
+        engagement_ids = expired_fex.engagements.values_list("id", flat=True)
+
+        if expired_fex.product and not engagement_ids:
+            findings = findings.filter(
+                test__engagement__product=expired_fex.product
             )
 
-            risk_status = Constants.EXCLUSION_TYPE.value.get(expired_fex.type)
+        if engagement_ids:
+            findings = findings.filter(test__engagement__in=list(engagement_ids))
 
+        findings_to_update = []
 
-            findings = Finding.objects.filter(
-                get_unique_ids_filter(expired_fex.unique_id_from_tool),
-                risk_status=risk_status,
-            ).prefetch_related("tags", "notes")
+        for finding in findings:
+            finding = remove_finding_from_list(finding, note, expired_fex.type)
+            findings_to_update.append(finding)
+            logger.info(f"Removed finding {finding.id} from {expired_fex.type}.")
 
-            engagement_ids = expired_fex.engagements.values_list("id", flat=True)
+        Finding.objects.bulk_update(
+            findings_to_update, ["active", "risk_status"], 1000
+        )
 
-            if expired_fex.product and not engagement_ids:
-                findings = findings.filter(
-                    test__engagement__product=expired_fex.product
-                )
+        maintainers = get_reviewers_members()
+        approvers = get_approvers_members()
 
-            if engagement_ids:
-                findings = findings.filter(test__engagement__in=list(engagement_ids))
-
-            findings_to_update = []
-
-            for finding in findings:
-                finding = remove_finding_from_list(finding, note, expired_fex.type)
-                findings_to_update.append(finding)
-                logger.info(f"Removed finding {finding.id} from {expired_fex.type}.")
-
-            Finding.objects.bulk_update(
-                findings_to_update, ["active", "risk_status"], 1000
-            )
-
-            maintainers = get_reviewers_members()
-            approvers = get_approvers_members()
-
-            create_notification(
-                event="finding_exclusion_expired",
-                subject=f"⚠️Finding Exclusion Expired - {expired_fex.get_unique_ids_summary()}",
-                title=f"The finding exclusion for {expired_fex.get_unique_ids_summary()} has expired.",
-                description=f"All findings added via this finding exclusion {expired_fex.get_unique_ids_display()} will be removed from the {expired_fex.type}.",
-                url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
-                recipients=maintainers + approvers + [expired_fex.created_by.username],
-                icon="exclamation-triangle",
-                color_icon="#FABC5C",
-            )
-    except Exception as e:
-        logger.error(f"Error processing expired exclusion {expired_fex.uuid}: {str(e)}")
+        create_notification(
+            event="finding_exclusion_expired",
+            subject=f"⚠️Finding Exclusion Expired - {expired_fex.get_unique_ids_summary()}",
+            title=f"The finding exclusion for {expired_fex.get_unique_ids_summary()} has expired.",
+            description=f"All findings added via this finding exclusion {expired_fex.get_unique_ids_display()} will be removed from the {expired_fex.type}.",
+            url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
+            recipients=maintainers + approvers + [expired_fex.created_by.username],
+            icon="exclamation-triangle",
+            color_icon="#FABC5C",
+        )
 
 
 @app.task

@@ -1,6 +1,7 @@
 # Dojo
 from dojo.models import Dojo_User, Notifications, Finding
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
+from dojo.engine_tools.helpers import expire_finding_exclusion
 from .dojo_test_case import DojoTestCase
 
 # Utils
@@ -274,6 +275,31 @@ class FindingExclusionViewsTestCase(DojoTestCase):
         
         self.assertEqual(updated_exclusion.status, 'Rejected')
         self.assertEqual(updated_exclusion.final_status, 'Rejected')
+
+    @patch('dojo.engine_tools.views.expire_finding_exclusion.apply_async')
+    def test_expire_finding_exclusion_request_queues_task(self, mock_apply_async):
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse('expire_finding_exclusion_request', args=[str(self.exclusion2.uuid)])
+        )
+
+        self.assertRedirects(response, reverse('finding_exclusion', args=[str(self.exclusion2.uuid)]))
+        mock_apply_async.assert_called_once_with(args=(str(self.exclusion2.uuid),))
+
+    def test_expire_finding_exclusion_keeps_expired_status_when_notification_fails(self):
+        with patch('dojo.engine_tools.helpers.create_notification', side_effect=RuntimeError('notification failed')), \
+                patch('dojo.engine_tools.helpers.get_reviewers_members', return_value=[]), \
+                patch('dojo.engine_tools.helpers.get_approvers_members', return_value=[]):
+            self.client.force_login(self.user)
+            self.exclusion2.type = 'white_list'
+            self.exclusion2.save()
+
+            with self.assertRaises(RuntimeError):
+                expire_finding_exclusion.run(str(self.exclusion2.uuid))
+
+            self.exclusion2.refresh_from_db()
+            self.assertEqual(self.exclusion2.status, 'Expired')
 
     def test_get_request_redirects(self):
         self.client.login(username='testuser', password='12345')
