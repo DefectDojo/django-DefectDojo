@@ -120,6 +120,8 @@ A rule whose trigger is **On a Schedule** is scheduled from the rule itself. Set
 
 Schedules are limited to quarter-hour marks. The minute field of a cron expression must be `0`, `15`, `30` or `45`.
 
+The **Rules** table shows each scheduled rule's **Expected Next Run**, the time the scheduling service will next run it, and sorts by it. When that time is more than fifteen minutes in the past while the rule and its schedule are both enabled, the cell carries a red **Overdue** chip: the schedule has stopped firing, and the scheduling service is the place to look. A rule that is disabled, has a disabled schedule or is not schedule-triggered leaves the cell empty. Both values come from the scheduling service, so the column stays empty on an instance that does not run it.
+
 Valid examples:
 
 ```

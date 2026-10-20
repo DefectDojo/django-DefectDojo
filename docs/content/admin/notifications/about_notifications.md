@@ -89,12 +89,13 @@ It is aggregated per person rather than per Finding: assigning a hundred Finding
 
 A Connector that stops working is quiet about it. Nothing in DefectDojo fails, and the only sign is on the **Upstream Connectors** page, which nobody is watching. The **Connector Health Warning** notification is the message that finds you instead.
 
-It covers the two ways a Connector goes quiet:
+It covers the three ways a Connector goes quiet:
 
 * **Its runs start failing.** A Discover or Sync ends in error or times out against your tool. The message names the Connector and carries the tool's own error, which is usually an expired or narrowed credential.
 * **Its tool stops returning data.** A run succeeds, but every record the Connector holds is now **Missing**. The run reports success, so this state raises no error anywhere. See [Managing Operations](/connectors/upstream/manage_operations/) for what that state means and how it clears.
+* **Its Syncs return zero results.** The records are still there and every Sync succeeds, but every actively mapped record has returned zero Findings for two Syncs in a row, after importing Findings in the previous 30 days. Records with nothing imported in that window are clean projects and do not count, and one record that still imports keeps the message from going out. See [Zero Results](/connectors/upstream/manage_operations/#zero-results).
 
-Both messages arrive once, not once per run. A Connector with a dead credential on an hourly schedule sends one message when it starts failing, then stays quiet until its runs succeed again. A Connector that lost visibility sends one message per day while it stays blind, and re-arms once the records come back.
+None of these messages arrives once per run. A Connector with a dead credential on an hourly schedule sends one message when it starts failing, then stays quiet until its runs succeed again. A Connector that lost visibility, or keeps returning zero results, sends one message per day while the condition lasts, and re-arms once a Sync imports data again.
 
 The notification is on **🔔 Alerts** by default. Set it to Email, Slack or Teams on your notification settings page, under **Connections**. A Connector that is set up correctly but has never seen any data is a separate case, and it warns you when you save it rather than later.
 
