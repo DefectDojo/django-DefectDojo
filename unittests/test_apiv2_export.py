@@ -392,12 +392,12 @@ class TestExportManifest(DojoAPITestCase):
         self.addCleanup(file_upload.file.storage.delete, file_upload.file.name)
         finding.files.add(file_upload)
         Finding_Group.objects.create(name="grp", test=finding.test, creator=admin).findings.add(finding)
-        risk_acceptance = Risk_Acceptance.objects.create(
+        self.risk_acceptance = Risk_Acceptance.objects.create(
             name="ra", owner=admin, path=ContentFile(b"proof", name="waiver.txt"),
         )
-        self.addCleanup(risk_acceptance.path.storage.delete, risk_acceptance.path.name)
-        risk_acceptance.accepted_findings.add(finding)
-        finding.test.engagement.risk_acceptance.add(risk_acceptance)
+        self.addCleanup(self.risk_acceptance.path.storage.delete, self.risk_acceptance.path.name)
+        self.risk_acceptance.accepted_findings.add(finding)
+        finding.test.engagement.risk_acceptance.add(self.risk_acceptance)
         self.url = reverse("export-manifest")
         self.manifest = self.client.get(self.url).json()
 
@@ -441,6 +441,25 @@ class TestExportManifest(DojoAPITestCase):
                 Product.objects.filter(prod_type_id=product_type["id"]).count(), product_type["counts"]["products"],
             )
         self.assertEqual(sum(entry["counts"]["findings"] for entry in products), self.manifest["totals"]["findings"])
+
+    def test_shared_notes_and_files_count_per_owner_like_the_stream(self):
+        first, second = Finding.objects.filter(test__engagement__product_id=2).order_by("id")[:2]
+        note = Notes.objects.create(entry="shared", author=Dojo_User.objects.get(username="admin"))
+        file_upload = FileUpload.objects.create(title="shared.txt", file=ContentFile(b"hello", name="shared.txt"))
+        self.addCleanup(file_upload.file.storage.delete, file_upload.file.name)
+        for finding in (first, second):
+            finding.notes.add(note)
+            finding.files.add(file_upload)
+        first.test.files.add(file_upload)
+        self.risk_acceptance.notes.add(note)
+        Engagement.objects.filter(product_id=2).exclude(id=first.test.engagement_id).first().risk_acceptance.add(
+            self.risk_acceptance,
+        )
+        params = {"max_file_bytes": 4}
+        counts = self.product_entry(2, self.client.get(self.url, params).json())["counts"]
+        end = ndjson_lines(self.client.get(reverse("export-product", args=[2]), params))[-1]["counts"]
+        for key in ("notes", "files", "files_over_cap"):
+            self.assertEqual(end[key], counts[key], key)
 
     def test_files_over_cap_counted(self):
         manifest = self.client.get(self.url, {"max_file_bytes": 4}).json()

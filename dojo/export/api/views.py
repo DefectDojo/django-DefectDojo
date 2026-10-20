@@ -3,7 +3,6 @@ from collections.abc import Iterator
 
 from django.conf import settings
 from django.db.models import Count, Prefetch, QuerySet
-from django.db.models.functions import Coalesce
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -39,7 +38,6 @@ from dojo.models import (
     Finding,
     Finding_Group,
     Note_Type,
-    Notes,
     Product,
     Product_Type,
     Regulation,
@@ -201,13 +199,11 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
         ("tests", Test, "engagement__product_id"),
         ("findings", Finding, "test__engagement__product_id"),
         ("endpoints", LocationProductReference if locations_enabled() else Endpoint, "product_id"),
-        ("notes", Notes, "engagement__product_id"),
-        ("notes", Notes, "test__engagement__product_id"),
-        ("notes", Notes, "finding__test__engagement__product_id"),
-        ("notes", Notes, "risk_acceptance__engagement__product_id"),
-        ("files", FileUpload, "engagement__product_id"),
-        ("files", FileUpload, "test__engagement__product_id"),
-        ("files", FileUpload, "finding__test__engagement__product_id"),
+        # Count M2M through rows: the stream counts a shared note once per owner, not once.
+        ("notes", Engagement.notes.through, "engagement__product_id"),
+        ("notes", Test.notes.through, "test__engagement__product_id"),
+        ("notes", Finding.notes.through, "finding__test__engagement__product_id"),
+        ("notes", Risk_Acceptance.notes.through, "risk_acceptance__engagement__product_id"),
         ("risk_acceptances", Risk_Acceptance, "engagement__product_id"),
         ("finding_groups", Finding_Group, "test__engagement__product_id"),
     )
@@ -218,19 +214,19 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
             if product_id is not None:
                 counts[product_id][key] += n
     storage = FileUpload._meta.get_field("file").storage
-    files = (
-        FileUpload.objects.annotate(
-            product_id=Coalesce(
-                "finding__test__engagement__product_id", "test__engagement__product_id", "engagement__product_id",
-            ),
-        )
-        .filter(product_id__isnull=False)
-        .values_list("id", "file", "product_id")
-        .distinct()
+    over_cap = {}
+    file_sources = (
+        (Engagement.files.through, "engagement__product_id"),
+        (Test.files.through, "test__engagement__product_id"),
+        (Finding.files.through, "finding__test__engagement__product_id"),
     )
-    for _, name, product_id in files:
-        if storage.exists(name) and storage.size(name) > max_file_bytes:
-            counts[product_id]["files_over_cap"] += 1
+    for through, product_path in file_sources:
+        for product_id, file_id, name in through.objects.values_list(product_path, "fileupload_id", "fileupload__file"):
+            if file_id not in over_cap:
+                over_cap[file_id] = storage.exists(name) and storage.size(name) > max_file_bytes
+            counts[product_id]["files"] += 1
+            if over_cap[file_id]:
+                counts[product_id]["files_over_cap"] += 1
     return counts
 
 
