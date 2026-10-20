@@ -55,6 +55,25 @@ restores the records to **Good**, your existing mappings are reused, and Sync re
 You do not need to recreate the Connector. To check a fix immediately rather than waiting for the
 next scheduled run, use [Run Discover Manually](#run-discover-manually).
 
+### Zero Results
+
+A Connector can also keep its records and keep syncing successfully while every Sync imports
+nothing. The tile shows an orange **Zero Results: *n* Runs** chip when every actively mapped
+record has returned zero Findings for at least two Syncs in a row, after importing Findings at
+some point in the previous 30 days. Hover the chip to see when the run of empty Syncs began.
+
+A few things keep the chip honest:
+
+* A record that has not imported anything in the last 30 days is treated as a clean project, not
+  a failure, and does not count toward the chip.
+* One record that still imports Findings is enough to keep the chip off: an empty project among
+  busy ones is normal.
+* A single empty Sync is not reported. Two in a row is.
+
+The chip clears on the next Sync that imports anything. The usual causes are the same as for
+missing records: a credential whose scope was narrowed, or a filter in the tool that now excludes
+everything.
+
 ## Discover Operations
 
 The first step a DefectDojo Connector needs to take is to **Discover** your tool's environment to see how you're organizing your scan data.
@@ -117,6 +136,6 @@ If DefectDojo cannot start a manual Discover or Sync, a message says why. The tw
 
 ## Getting told when a Connector stops working
 
-The Operations Page is a record, not an alarm. If you do not want to check it, turn on the **Connector Health Warning** notification, which messages you when a Connector's runs start failing and when its tool stops returning the records it used to return.
+The Operations Page is a record, not an alarm. If you do not want to check it, turn on the **Connector Health Warning** notification, which messages you when a Connector's runs start failing, when its tool stops returning the records it used to return, and when its Syncs start returning zero results.
 
 Set it on your notification settings page, under **Connections**. See [Connector Health Notifications](/admin/notifications/about_notifications/#connector-health-notifications-pro) for what each message covers and how often it arrives.
