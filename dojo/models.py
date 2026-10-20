@@ -2944,6 +2944,9 @@ class Finding(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.title[:80] + '...' if len(self.title) > 80 else self.title}"
+    
+    def update_fields(self, **kwargs):
+         self.__class__.objects.filter(pk=self.pk).update(**kwargs)
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
@@ -3375,10 +3378,14 @@ class Finding(models.Model):
         if self.sla_start_date:
             return self.sla_start_date
         return self.date
+    
+    def get_sla_by_expiration_date(self):
+        sla_days = (self.expiration_date - timezone.now()).days
+        return SLA_Configuration(critical=sla_days, high=sla_days, medium=sla_days, low=999)
 
     def get_sla_configuration(self):
         return self.test.engagement.product.sla_configuration
-    
+
     def _calculate_severity_priority(self, tags, priority) -> int:
         priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
         if tags:

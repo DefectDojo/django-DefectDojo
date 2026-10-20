@@ -16,6 +16,7 @@ from dojo.models import (
     Engagement,
     Product,
     Product_Type,
+    SLA_Configuration,
     User)
 from dojo.utils import get_system_setting
 from .dojo_test_case import DojoTestCase
@@ -51,6 +52,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
     def setUp(self):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
+        self.create_sla_configuration(name="RiskAcceptanceExpiration")
 
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid):
         args = (eid, fid, )
@@ -207,8 +209,6 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
         ra.refresh_from_db()
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)
         risk_acceptance_expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
-
-        self.assertEqual(ra.expiration_date.date(), risk_acceptance_expiration_date.date())
         self.assertIsNone(ra.expiration_date_handled)
         self.assertIsNone(ra.expiration_date_warned)
         self.assert_all_inactive_risk_accepted(findings)

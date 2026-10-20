@@ -246,7 +246,11 @@ class AcceptFindingsTestCase(DojoTestCase):
 
     def setUp(self):
         super().setUp()
-        self.ra_engagement_id = 1
+        self.ra_engagement = RiskAcceptanceEngagement.objects.create(
+            product=Product.objects.first(),
+            owner=self.get_test_admin(),
+            risk_status="Risks Pending",
+        )
 
     def test_accept_findings(self):
         """Test accepting findings."""
@@ -258,7 +262,7 @@ class AcceptFindingsTestCase(DojoTestCase):
             finding.save()
 
         finding_qs = Finding.objects.filter(id__in=[f.id for f in findings])
-        helper_ra_engagement._accept_findings(finding_qs, self.ra_engagement_id)
+        helper_ra_engagement._accept_findings(finding_qs, self.ra_engagement)
 
         for finding in findings:
             finding.refresh_from_db()
@@ -270,7 +274,7 @@ class AcceptFindingsTestCase(DojoTestCase):
         """Test adding long_term_risk_acceptance tag to findings."""
         findings = Finding.objects.all()[:2]
         finding_qs = Finding.objects.filter(id__in=[f.id for f in findings])
-        helper_ra_engagement._accept_findings(finding_qs, self.ra_engagement_id)
+        helper_ra_engagement._accept_findings(finding_qs, self.ra_engagement)
 
         for finding in findings:
             finding.refresh_from_db()
