@@ -10,6 +10,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 import dojo
+from dojo.endpoint.api.serializer import EndpointStatusSerializer
 from dojo.export.api.serializers import (
     MAX_FILE_BYTES_DEFAULT,
     ExportFindingSerializer,
@@ -22,6 +23,7 @@ from dojo.export.api.serializers import (
 )
 from dojo.export.api.views import COUNT_KEYS
 from dojo.finding.api.serializer import FindingSerializer
+from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
@@ -109,6 +111,11 @@ class TestExportSerializers(DojoAPITestCase):
         self.addCleanup(risk_acceptance.path.storage.delete, risk_acceptance.path.name)
         return risk_acceptance
 
+    def endpoint_entries(self, finding):
+        if locations_enabled():
+            return export_endpoint_entries(finding, LocationFindingReferenceSerializer(), locations=True)
+        return export_endpoint_entries(finding, EndpointStatusSerializer(), locations=False)
+
     def test_export_file_inlines_small_file(self):
         entry = export_file(self.make_file_upload(), 10)
         self.assertEqual(b"hello", base64.b64decode(entry["data_base64"]))
@@ -130,6 +137,11 @@ class TestExportSerializers(DojoAPITestCase):
         self.assertIsNone(entry["size"])
         self.assertEqual("missing", entry["error"])
 
+    def test_export_file_marks_an_empty_name_missing(self):
+        entry = export_file(FileUpload(title="empty", file=""), MAX_FILE_BYTES_DEFAULT)
+        self.assertIsNone(entry["size"])
+        self.assertEqual("missing", entry["error"])
+
     def test_export_proof_reads_the_proof(self):
         proof = export_proof(self.make_risk_acceptance(), MAX_FILE_BYTES_DEFAULT)
         self.assertEqual("waiver.txt", proof["filename"])
@@ -142,7 +154,7 @@ class TestExportSerializers(DojoAPITestCase):
             finding = Finding.objects.filter(locations__isnull=False).order_by("id").first()
         else:
             finding = Finding.objects.filter(endpoints__isnull=False).order_by("id").first()
-        entries = export_endpoint_entries(finding)
+        entries = self.endpoint_entries(finding)
         self.assertTrue(entries)
         for entry in entries:
             self.assertEqual({"id", "uri", "location_type", "tags", "status"}, set(entry))
@@ -157,7 +169,7 @@ class TestExportSerializers(DojoAPITestCase):
 
     def test_endpoint_entries_empty_for_a_finding_without_endpoints(self):
         finding = Finding.objects.filter(endpoints__isnull=True, locations__isnull=True).order_by("id").first()
-        self.assertEqual([], export_endpoint_entries(finding))
+        self.assertEqual([], self.endpoint_entries(finding))
 
     def test_finding_serializer_swaps_only_the_nested_fields(self):
         Risk_Acceptance.objects.get(id=1).accepted_findings.add(self.finding)
@@ -261,6 +273,11 @@ class TestProductExportStream(DojoAPITestCase):
                 response = self.client.get(self.url, params)
                 self.assertEqual(400, response.status_code, response.content[:1000])
                 self.assertIn("max_file_bytes", response.json())
+
+    def test_huge_max_file_bytes_is_400(self):
+        response = self.client.get(self.url, {"max_file_bytes": "1" * 5000})
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("max_file_bytes", response.json())
 
     def test_response_streams_ndjson(self):
         response = self.client.get(self.url)

@@ -22,7 +22,7 @@ MAX_FILE_BYTES_DEFAULT = 10485760
 def _file_payload(field_file, max_file_bytes: int) -> dict:
     name = field_file.name
     payload = {"size": None, "content_type": mimetypes.guess_type(name)[0], "data_base64": None}
-    if not field_file.storage.exists(name):
+    if not name or not field_file.storage.exists(name):
         payload["error"] = "missing"
         return payload
     payload["size"] = field_file.storage.size(name)
@@ -42,9 +42,8 @@ def export_proof(risk_acceptance: Risk_Acceptance, max_file_bytes: int) -> dict 
     return {"filename": risk_acceptance.filename(), **_file_payload(risk_acceptance.path, max_file_bytes)}
 
 
-def export_endpoint_entries(finding: Finding) -> list[dict]:
-    if locations_enabled():
-        status = LocationFindingReferenceSerializer()
+def export_endpoint_entries(finding: Finding, status: serializers.Serializer, *, locations: bool) -> list[dict]:
+    if locations:
         return [
             {
                 "id": reference.location.id,
@@ -55,7 +54,6 @@ def export_endpoint_entries(finding: Finding) -> list[dict]:
             }
             for reference in finding.locations.all()
         ]
-    status = EndpointStatusSerializer()
     return [
         {
             "id": row.endpoint.id,
@@ -98,9 +96,11 @@ class ExportFindingSerializer(ExportFilesMixin, FindingSerializer):
         super().__init__(*args, **kwargs)
         # FindingSerializer.__init__ replaces "endpoints" after get_fields, so a declared field would not survive.
         self.fields["endpoints"] = serializers.SerializerMethodField()
+        self._locations = locations_enabled()
+        self._endpoint_status = LocationFindingReferenceSerializer() if self._locations else EndpointStatusSerializer()
 
     def get_endpoints(self, obj) -> list[dict]:
-        return export_endpoint_entries(obj)
+        return export_endpoint_entries(obj, self._endpoint_status, locations=self._locations)
 
 
 class ExportRiskAcceptanceSerializer(RiskAcceptanceSerializer):

@@ -72,20 +72,6 @@ SCHEMA_VERSION = 1
 COUNT_KEYS = (
     "engagements", "tests", "findings", "endpoints", "notes", "files", "files_over_cap", "risk_acceptances", "finding_groups",
 )
-FINDING_PREFETCH = (
-    notes_prefetch(),
-    vulnerability_id_prefetch(),
-    "finding_cwe_set",
-    "reviewers",
-    "found_by",
-    "risk_acceptance_set",
-    "tags",
-    "jira_issue",
-    "finding_group_set__jira_issue",
-    "files",
-    "burprawrequestresponse_set",
-    "finding_meta",
-)
 
 
 class NDJSONRenderer(BaseRenderer):
@@ -106,12 +92,34 @@ def source_block() -> dict:
 
 
 def max_file_bytes_from(request) -> int:
-    value = request.query_params.get("max_file_bytes")
-    if value is None:
+    raw = request.query_params.get("max_file_bytes")
+    if raw is None:
         return MAX_FILE_BYTES_DEFAULT
-    if not value.isdecimal():
-        raise ValidationError({"max_file_bytes": "Must be an integer of 0 or more."})
-    return int(value)
+    message = {"max_file_bytes": "Must be an integer of 0 or more."}
+    try:
+        value = int(raw)
+    except ValueError:
+        raise ValidationError(message) from None
+    if value < 0:
+        raise ValidationError(message)
+    return value
+
+
+def finding_prefetch() -> tuple:
+    return (
+        notes_prefetch(),
+        vulnerability_id_prefetch(),
+        "finding_cwe_set",
+        "reviewers",
+        "found_by",
+        "risk_acceptance_set",
+        "tags",
+        "jira_issue",
+        "finding_group_set__jira_issue",
+        "files",
+        "burprawrequestresponse_set",
+        "finding_meta",
+    )
 
 
 def finding_queryset(product: Product) -> QuerySet:
@@ -133,7 +141,7 @@ def finding_queryset(product: Product) -> QuerySet:
             "test__engagement__product",
             "test__engagement__product__prod_type",
         )
-        .prefetch_related(*FINDING_PREFETCH, endpoints)
+        .prefetch_related(*finding_prefetch(), endpoints)
     )
 
 
@@ -159,7 +167,9 @@ def risk_acceptance_queryset(product: Product) -> QuerySet:
         Risk_Acceptance.objects.filter(engagement__product=product)
         .distinct()
         .order_by("id")
-        .prefetch_related(notes_prefetch(), "engagement_set", "accepted_findings")
+        .prefetch_related(
+            notes_prefetch(), "engagement_set", Prefetch("accepted_findings", queryset=Finding.objects.only("id")),
+        )
     )
 
 
@@ -184,9 +194,7 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
         "source": source_block(),
         "product": ExportProductSerializer(product, context=context).data,
     })
-    counts = dict.fromkeys(
-        ("engagements", "tests", "findings", "endpoints", "notes", "files", "files_over_cap", "risk_acceptances"), 0,
-    )
+    counts = dict.fromkeys(COUNT_KEYS, 0)
     finding_groups = set()
     sections = (
         ("engagement", "engagements", ExportEngagementSerializer, engagement_queryset),
@@ -236,7 +244,7 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
     for through, product_path in file_sources:
         for product_id, file_id, name in through.objects.values_list(product_path, "fileupload_id", "fileupload__file"):
             if file_id not in over_cap:
-                over_cap[file_id] = storage.exists(name) and storage.size(name) > max_file_bytes
+                over_cap[file_id] = name and storage.exists(name) and storage.size(name) > max_file_bytes
             counts[product_id]["files"] += 1
             if over_cap[file_id]:
                 counts[product_id]["files_over_cap"] += 1
@@ -272,7 +280,9 @@ def build_manifest(request, max_file_bytes: int) -> dict:
             "is_superuser": request.user.is_superuser,
             "expires_at": token_expires_at(token) if token else None,
         },
-        "scan_types": sorted(set(Test.objects.exclude(scan_type=None).values_list("scan_type", flat=True))),
+        "scan_types": sorted(
+            Test.objects.exclude(scan_type=None).order_by().values_list("scan_type", flat=True).distinct(),
+        ),
         "reference": {
             "sla_configurations": SLAConfigurationSerializer(SLA_Configuration.objects.order_by("id"), many=True).data,
             "development_environments": DevelopmentEnvironmentSerializer(
@@ -307,7 +317,7 @@ class ProductExportView(APIView):
         response = StreamingHttpResponse(
             product_lines(product, request, max_file_bytes), content_type="application/x-ndjson",
         )
-        response["Content-Disposition"] = f'attachment; filename="defectdojo-product-{pk}-export.ndjson"'
+        response["Content-Disposition"] = f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"'
         return response
 
 
