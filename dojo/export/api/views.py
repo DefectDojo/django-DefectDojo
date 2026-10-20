@@ -8,10 +8,8 @@ from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import BaseRenderer, JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,33 +20,29 @@ from dojo.authorization.api_permissions import IsSuperUser
 from dojo.development_environment.api.serializer import DevelopmentEnvironmentSerializer
 from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
-    MAX_FILE_BYTES_DEFAULT,
     ExportEngagementSerializer,
     ExportFindingSerializer,
+    ExportParamsSerializer,
     ExportProductSerializer,
     ExportRiskAcceptanceSerializer,
     ExportTestSerializer,
     ExportUserSerializer,
+    file_size,
 )
 from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.models import (
     BurpRawRequestResponse,
-    Development_Environment,
     Dojo_User,
     Endpoint,
     Engagement,
     FileUpload,
     Finding,
     Finding_Group,
-    Note_Type,
     Product,
     Product_Type,
-    Regulation,
     Risk_Acceptance,
-    SLA_Configuration,
     Test,
-    Test_Type,
 )
 from dojo.note_type.api.serializer import NoteTypeSerializer
 from dojo.notes.helper import notes_prefetch
@@ -57,7 +51,6 @@ from dojo.product_attributes.api.serializer import (
     ProductOriginSerializer,
     ProductPlatformSerializer,
 )
-from dojo.product_attributes.models import Product_Lifecycle, Product_Origin, Product_Platform
 from dojo.regulations.api.serializer import RegulationSerializer
 from dojo.test.api.serializer import TestTypeSerializer
 from dojo.user.authentication import token_expires_at
@@ -66,20 +59,20 @@ from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 EXPORT_CHUNK_SIZE = 500
 DOCS_URL = "https://docs.defectdojo.com/automation/api/product_export/"
-MAX_FILE_BYTES_PARAMETER = OpenApiParameter(
-    "max_file_bytes",
-    OpenApiTypes.INT,
-    OpenApiParameter.QUERY,
-    description=(
-        "File size cap in bytes. The product export carries a file of this size or less inline as base64, "
-        "and a larger file keeps its size with no data. The manifest counts larger files in files_over_cap."
-    ),
-    default=MAX_FILE_BYTES_DEFAULT,
-)
 SCHEMA_VERSION = 1
 COUNT_KEYS = (
     "engagements", "tests", "findings", "endpoints", "notes", "files", "files_over_cap", "risk_acceptances", "finding_groups",
 )
+REFERENCE_SERIALIZERS = {
+    "sla_configurations": SLAConfigurationSerializer,
+    "development_environments": DevelopmentEnvironmentSerializer,
+    "regulations": RegulationSerializer,
+    "test_types": TestTypeSerializer,
+    "note_types": NoteTypeSerializer,
+    "product_platforms": ProductPlatformSerializer,
+    "product_lifecycles": ProductLifecycleSerializer,
+    "product_origins": ProductOriginSerializer,
+}
 
 
 class NDJSONRenderer(BaseRenderer):
@@ -113,34 +106,9 @@ def source_block() -> dict:
 
 
 def max_file_bytes_from(request) -> int:
-    raw = request.query_params.get("max_file_bytes")
-    if raw is None:
-        return MAX_FILE_BYTES_DEFAULT
-    message = {"max_file_bytes": "Must be an integer of 0 or more."}
-    try:
-        value = int(raw)
-    except ValueError:
-        raise ValidationError(message) from None
-    if value < 0:
-        raise ValidationError(message)
-    return value
-
-
-def finding_prefetch() -> tuple:
-    return (
-        notes_prefetch(),
-        vulnerability_id_prefetch(),
-        "finding_cwe_set",
-        "reviewers",
-        "found_by",
-        "risk_acceptance_set",
-        "tags",
-        "jira_issue",
-        "finding_group_set__jira_issue",
-        "files",
-        Prefetch("burprawrequestresponse_set", queryset=BurpRawRequestResponse.objects.order_by("id")),
-        "finding_meta",
-    )
+    params = ExportParamsSerializer(data=request.query_params)
+    params.is_valid(raise_exception=True)
+    return params.validated_data["max_file_bytes"]
 
 
 def finding_queryset(product: Product) -> QuerySet:
@@ -153,55 +121,23 @@ def finding_queryset(product: Product) -> QuerySet:
         )
     return (
         Finding.objects.filter(test__engagement__product=product)
-        .order_by("id")
-        .select_related(
-            "test",
-            "test__test_type",
-            "test__engagement",
-            "test__environment",
-            "test__engagement__product",
-            "test__engagement__product__prod_type",
-        )
-        .prefetch_related(*finding_prefetch(), endpoints)
-    )
-
-
-def engagement_queryset(product: Product) -> QuerySet:
-    return (
-        Engagement.objects.filter(product=product)
-        .order_by("id")
-        .prefetch_related(notes_prefetch(), "risk_acceptance", "files", "tags")
-    )
-
-
-def test_queryset(product: Product) -> QuerySet:
-    return (
-        Test.objects.filter(engagement__product=product)
-        .order_by("id")
-        .select_related("test_type")
-        .prefetch_related(notes_prefetch(), "files", "tags", "finding_group_set__jira_issue")
-    )
-
-
-def risk_acceptance_queryset(product: Product) -> QuerySet:
-    return (
-        Risk_Acceptance.objects.filter(engagement__product=product)
-        .distinct()
-        .order_by("id")
+        .select_related("test", "test__test_type")
         .prefetch_related(
-            notes_prefetch(), "engagement_set", Prefetch("accepted_findings", queryset=Finding.objects.only("id")),
+            notes_prefetch(),
+            vulnerability_id_prefetch(),
+            "finding_cwe_set",
+            "reviewers",
+            "found_by",
+            "risk_acceptance_set",
+            "tags",
+            "jira_issue",
+            "finding_group_set__jira_issue",
+            "files",
+            Prefetch("burprawrequestresponse_set", queryset=BurpRawRequestResponse.objects.order_by("id")),
+            "finding_meta",
+            endpoints,
         )
     )
-
-
-def _tally(counts: dict, finding_groups: set, line_type: str, data: dict) -> None:
-    counts["notes"] += len(data["notes"])
-    files = data.get("files", [])
-    counts["files"] += len(files)
-    counts["files_over_cap"] += sum(1 for entry in files if entry["data_base64"] is None and "error" not in entry)
-    if line_type == "finding":
-        counts["endpoints"] += len(data["endpoints"])
-        finding_groups.update(group["id"] for group in data["finding_groups"])
 
 
 def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[bytes]:
@@ -218,17 +154,41 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
     counts = dict.fromkeys(COUNT_KEYS, 0)
     finding_groups = set()
     sections = (
-        ("engagement", "engagements", ExportEngagementSerializer, engagement_queryset),
-        ("test", "tests", ExportTestSerializer, test_queryset),
-        ("finding", "findings", ExportFindingSerializer, finding_queryset),
-        ("risk_acceptance", "risk_acceptances", ExportRiskAcceptanceSerializer, risk_acceptance_queryset),
+        (
+            "engagement",
+            ExportEngagementSerializer,
+            Engagement.objects.filter(product=product).prefetch_related(notes_prefetch(), "risk_acceptance", "files", "tags"),
+        ),
+        (
+            "test",
+            ExportTestSerializer,
+            Test.objects.filter(engagement__product=product)
+            .select_related("test_type")
+            .prefetch_related(notes_prefetch(), "files", "tags", "finding_group_set__jira_issue"),
+        ),
+        ("finding", ExportFindingSerializer, finding_queryset(product)),
+        (
+            "risk_acceptance",
+            ExportRiskAcceptanceSerializer,
+            Risk_Acceptance.objects.filter(engagement__product=product)
+            .distinct()
+            .prefetch_related(
+                notes_prefetch(), "engagement_set", Prefetch("accepted_findings", queryset=Finding.objects.only("id")),
+            ),
+        ),
     )
-    for line_type, count_key, serializer_class, queryset in sections:
+    for line_type, serializer_class, queryset in sections:
         serializer = serializer_class(context=context)
-        for obj in queryset(product).iterator(chunk_size=EXPORT_CHUNK_SIZE):
+        for obj in queryset.order_by("id").iterator(chunk_size=EXPORT_CHUNK_SIZE):
             data = serializer.to_representation(obj)
-            counts[count_key] += 1
-            _tally(counts, finding_groups, line_type, data)
+            files = data.get("files", [])
+            counts[f"{line_type}s"] += 1
+            counts["notes"] += len(data["notes"])
+            counts["files"] += len(files)
+            counts["files_over_cap"] += sum(1 for entry in files if entry["data_base64"] is None and "error" not in entry)
+            if line_type == "finding":
+                counts["endpoints"] += len(data["endpoints"])
+                finding_groups.update(group["id"] for group in data["finding_groups"])
             yield render({"type": line_type, "data": data})
     counts["finding_groups"] = len(finding_groups)
     yield render({"type": "end", "counts": counts})
@@ -265,7 +225,8 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
     for through, product_path in file_sources:
         for product_id, file_id, name in through.objects.values_list(product_path, "fileupload_id", "fileupload__file"):
             if file_id not in over_cap:
-                over_cap[file_id] = name and storage.exists(name) and storage.size(name) > max_file_bytes
+                size = file_size(storage, name)
+                over_cap[file_id] = size is not None and size > max_file_bytes
             counts[product_id]["files"] += 1
             if over_cap[file_id]:
                 counts[product_id]["files_over_cap"] += 1
@@ -289,7 +250,6 @@ def build_manifest(request, max_file_bytes: int) -> dict:
         {"id": pk, "name": name, "counts": {"products": len(members[pk]), **_summed(members[pk])}}
         for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
     ]
-    token = request.auth if isinstance(request.auth, Token) else None
     users = Dojo_User.objects.select_related("usercontactinfo", "auth_token").order_by("id")
     return {
         "schema": SCHEMA_VERSION,
@@ -299,22 +259,16 @@ def build_manifest(request, max_file_bytes: int) -> dict:
         "token": {
             "username": request.user.username,
             "is_superuser": request.user.is_superuser,
-            "expires_at": token_expires_at(token) if token else None,
+            "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
         "scan_types": sorted(
             Test.objects.exclude(scan_type=None).order_by().values_list("scan_type", flat=True).distinct(),
         ),
         "reference": {
-            "sla_configurations": SLAConfigurationSerializer(SLA_Configuration.objects.order_by("id"), many=True).data,
-            "development_environments": DevelopmentEnvironmentSerializer(
-                Development_Environment.objects.order_by("id"), many=True,
-            ).data,
-            "regulations": RegulationSerializer(Regulation.objects.order_by("id"), many=True).data,
-            "test_types": TestTypeSerializer(Test_Type.objects.order_by("id"), many=True).data,
-            "note_types": NoteTypeSerializer(Note_Type.objects.order_by("id"), many=True).data,
-            "product_platforms": ProductPlatformSerializer(Product_Platform.objects.order_by("id"), many=True).data,
-            "product_lifecycles": ProductLifecycleSerializer(Product_Lifecycle.objects.order_by("id"), many=True).data,
-            "product_origins": ProductOriginSerializer(Product_Origin.objects.order_by("id"), many=True).data,
+            **{
+                key: serializer(serializer.Meta.model.objects.order_by("id"), many=True).data
+                for key, serializer in REFERENCE_SERIALIZERS.items()
+            },
             "users": ExportUserSerializer(users, many=True).data,
         },
         "product_types": product_types,
@@ -324,11 +278,11 @@ def build_manifest(request, max_file_bytes: int) -> dict:
 
 
 class ProductExportView(APIView):
-    permission_classes = (IsAuthenticated, IsSuperUser)
+    permission_classes = (IsSuperUser,)
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
     @extend_schema(
-        parameters=[MAX_FILE_BYTES_PARAMETER],
+        parameters=[ExportParamsSerializer],
         responses={(200, "application/x-ndjson"): OpenApiTypes.STR},
         description=(
             "Superuser only. Streams one product with its engagements, tests, findings and risk acceptances "
@@ -337,21 +291,22 @@ class ProductExportView(APIView):
     )
     def get(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
-        max_file_bytes = max_file_bytes_from(request)
-        response = StreamingHttpResponse(
-            product_lines(product, request, max_file_bytes), content_type="application/x-ndjson",
+        return StreamingHttpResponse(
+            product_lines(product, request, max_file_bytes_from(request)),
+            content_type="application/x-ndjson",
+            headers={
+                "Content-Disposition": f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"',
+                "X-Accel-Buffering": "no",
+            },
         )
-        response["Content-Disposition"] = f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"'
-        response["X-Accel-Buffering"] = "no"
-        return response
 
 
 class ExportManifestView(APIView):
-    permission_classes = (IsAuthenticated, IsSuperUser)
+    permission_classes = (IsSuperUser,)
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
     @extend_schema(
-        parameters=[MAX_FILE_BYTES_PARAMETER],
+        parameters=[ExportParamsSerializer],
         responses={200: OpenApiTypes.OBJECT},
         description=(
             "Superuser only. Lists the product types and products with their counts, the reference data "

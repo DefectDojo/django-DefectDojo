@@ -20,14 +20,27 @@ from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
 MAX_FILE_BYTES_DEFAULT = 10485760
 
 
+class ExportParamsSerializer(serializers.Serializer):
+    max_file_bytes = serializers.IntegerField(
+        min_value=0,
+        default=MAX_FILE_BYTES_DEFAULT,
+        help_text=(
+            "File size cap in bytes. The product export carries a file of this size or less inline as base64, "
+            "and a larger file keeps its size with no data. The manifest counts larger files in files_over_cap."
+        ),
+    )
+
+
+def file_size(storage, name: str) -> int | None:
+    return storage.size(name) if name and storage.exists(name) else None
+
+
 def _file_payload(field_file, max_file_bytes: int) -> dict:
-    name = field_file.name
-    payload = {"size": None, "content_type": mimetypes.guess_type(name)[0], "data_base64": None}
-    if not name or not field_file.storage.exists(name):
+    size = file_size(field_file.storage, field_file.name)
+    payload = {"size": size, "content_type": mimetypes.guess_type(field_file.name)[0], "data_base64": None}
+    if size is None:
         payload["error"] = "missing"
-        return payload
-    payload["size"] = field_file.storage.size(name)
-    if payload["size"] <= max_file_bytes:
+    elif size <= max_file_bytes:
         with field_file.open("rb") as handle:
             payload["data_base64"] = base64.b64encode(handle.read()).decode("ascii")
     return payload
@@ -49,27 +62,17 @@ def export_proof(risk_acceptance: Risk_Acceptance, max_file_bytes: int) -> dict 
 
 
 def export_endpoint_entries(finding: Finding, status: serializers.Serializer, *, locations: bool) -> list[dict]:
-    if locations:
-        return [
-            {
-                "id": reference.location.id,
-                "uri": reference.location.location_value,
-                "location_type": reference.location.location_type,
-                "tags": [tag.name for tag in reference.location.tags.all()],
-                "status": status.to_representation(reference),
-            }
-            for reference in finding.locations.all()
-        ]
-    return [
-        {
-            "id": row.endpoint.id,
-            "uri": str(row.endpoint),
-            "location_type": None,
-            "tags": [tag.name for tag in row.endpoint.tags.all()],
+    entries = []
+    for row in finding.locations.all() if locations else finding.status_finding.all():
+        target = row.location if locations else row.endpoint
+        entries.append({
+            "id": target.id,
+            "uri": str(target),
+            "location_type": target.location_type if locations else None,
+            "tags": [tag.name for tag in target.tags.all()],
             "status": status.to_representation(row),
-        }
-        for row in finding.status_finding.all()
-    ]
+        })
+    return entries
 
 
 class ExportFilesMixin(serializers.Serializer):
@@ -132,13 +135,12 @@ class ExportUserContactInfoSerializer(UserContactInfoSerializer):
 
 
 class ExportUserSerializer(UserSerializer):
-    password = None
     configuration_permissions = None
     contact_info = ExportUserContactInfoSerializer(source="usercontactinfo", read_only=True, allow_null=True)
 
     class Meta(UserSerializer.Meta):
         fields = (
-            *(name for name in UserSerializer.Meta.fields if name not in {"password", "configuration_permissions"}),
+            *(name for name in UserSerializer.Meta.fields if name != "configuration_permissions"),
             "contact_info",
         )
 

@@ -25,7 +25,7 @@ from dojo.models import (
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
-# Keyed on locations_enabled(). Each batch of findings runs one query per prefetch in finding_prefetch(): notes,
+# Keyed on locations_enabled(). Each batch of findings runs one query per prefetch in finding_queryset(): notes,
 # their history, vulnerability_references, finding_cwe_set, reviewers, found_by, risk_acceptance_set, tags,
 # jira_issue, finding_group_set, finding_group_set__jira_issue, files, burprawrequestresponse_set and finding_meta (14).
 QUERIES_PER_FINDING_BATCH = {
