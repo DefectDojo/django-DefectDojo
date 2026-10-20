@@ -402,8 +402,7 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                     list(engagement_ids),
                     [finding_exclusion.product.id] if finding_exclusion.product else []
                 )
-            )
-                    
+            )        
     except Exception as e:
         messages.add_message(
                 request,
@@ -595,7 +594,6 @@ def reopen_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
             [finding_exclusion.product.id] if finding_exclusion.product else []
         )
     )
-    
     messages.add_message(
             request,
             messages.SUCCESS,
