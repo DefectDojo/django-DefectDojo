@@ -62,10 +62,12 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Asset even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Assets rather than moving its Findings.
 
-Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
-Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
-nothing about existing Mappings: the first Discover after it is turned on records identifiers
-for the Records you already have, and later runs use them.
+Steps 1 and 2 require the **Asset Identity** feature (see
+[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off));
+until it is on, Auto-Mapping resolves by name alone, which is the historical behaviour. The
+tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
+changes nothing about existing Mappings: Records keep the Asset they are on, and later runs follow
+the identifier.
 
 Because names are matched globally, two tools that each report something called `payments` map
 to the same Asset on first sight. Recording each tool's identifier separately is what stops
@@ -98,10 +100,12 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Product even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Products rather than moving its Findings.
 
-Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
-Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
-nothing about existing Mappings: the first Discover after it is turned on records identifiers
-for the Records you already have, and later runs use them.
+Steps 1 and 2 require the **Asset Identity** feature (see
+[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off));
+until it is on, Auto-Mapping resolves by name alone, which is the historical behaviour. The
+tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
+changes nothing about existing Mappings: Records keep the Product they are on, and later runs follow
+the identifier.
 
 Because names are matched globally, two tools that each report something called `payments` map
 to the same Product on first sight. Recording each tool's identifier separately is what stops

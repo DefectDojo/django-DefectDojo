@@ -305,9 +305,25 @@ again — to stop a Connector claiming an Asset, change its mapping rather than 
 
 Adding and withdrawing an alias requires edit permission on the Asset.
 
-Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created, and the Asset
-Identity card and the **Type** field appear only when it is on; existing aliases stay readable
-whether it is on or off.
+### Turning Asset Identity on and off
+
+Aliases are controlled by the **Asset Identity** feature on the
+[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. While it is off, Connectors map
+Records by name alone, you cannot add or withdraw aliases, and the Asset Identity card and the
+**Type** field are hidden. Existing aliases stay readable through the API either way.
+
+Turning it on changes nothing about Records that are already mapped. Each Connector records its
+own identifier for a Record whenever that Record's Mapping is created or changed, whether the
+feature is on or not, so a Record you remapped by hand while it was off stays on the Asset you
+chose once it is on. A change takes effect without a restart.
+
+To go back to matching by name, turn **Asset Identity** off, or run
+`python manage.py set_feature asset_aliases False` in a DefectDojo container. The aliases are
+kept, so turning it on again later is just as safe.
+
+Earlier releases switched this with the `DD_V3_ASSET_ALIASES` deployment setting. An instance
+that had it set to `True` keeps the feature on; otherwise the setting has no effect, apart from
+standing in for the stored value when DefectDojo starts without its database.
 
 ### Container image repositories (the `oci` namespace)
 
@@ -380,8 +396,8 @@ Identity card shows them.
 
 `--connector-config <id>` limits the run to one Connector configuration, and `--json` prints
 the report as JSON. The command never merges Assets or moves Records, and running it again
-only records what is still missing. It works whether or not `DD_V3_ASSET_ALIASES` is on, so you
-can run it before turning identity on.
+only records what is still missing. It works whether or not **Asset Identity** is on, so you
+can run it before turning it on.
 
 ## Asset Versions
 
