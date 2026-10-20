@@ -126,6 +126,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Promptfoo**
 * **Prowler**
 * **Qualys**
+* **Qualys TotalAppSec**
 * **Quay**
 * **Qwiet AI**
 * **Rapid7 InsightAppSec**

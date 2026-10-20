@@ -1,0 +1,172 @@
+name: "release-X: Add schema snapshot to django images"
+
+# Runs between release-x-manual-docker-containers.yml (each image built and pushed by digest, the
+# digest uploaded as an artifact) and release-x-manual-merge-container-digests.yml (the digests
+# tagged). It builds the release's schema snapshot with the debian image it just pushed, proves it
+# (scripts/build_schema_snapshot.sh), adds it to every django image as one more layer, and replaces
+# each django digest artifact with the layered image's digest. The merge then tags the layered
+# images, unchanged. A failed gate stops the release, like a failed image build.
+#
+# The snapshot is also uploaded as the schema-snapshot artifact, which release-drafter.yml attaches
+# to the GitHub release: CI layers it onto the images it builds and tests
+# (build-docker-images-for-testing.yml).
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_number:
+        type: string
+        description: 'Release version (x.y.z format)'
+        required: true
+  workflow_call:
+    inputs:
+      release_number:
+        type: string
+        description: 'Release version (x.y.z format)'
+        required: true
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-snapshot:
+    name: Build and gate the schema snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - id: Set-docker-org
+        run: echo "DOCKER_ORG=$(echo "${GITHUB_REPOSITORY%%/*}" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - name: Checkout tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.release_number }}
+          persist-credentials: false
+
+      - name: Download the debian amd64 digest
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: digests-django-debian-linux-amd64
+          path: ${{ runner.temp }}/digests
+
+      - name: Login to DockerHub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and gate the snapshot
+        timeout-minutes: 45
+        run: |
+          digest="$(ls "${RUNNER_TEMP}/digests")"
+          image="${DOCKER_ORG}/defectdojo-django@sha256:${digest}"
+          docker pull "${image}"
+          scripts/build_schema_snapshot.sh --image "${image}" --out schema-snapshot
+
+      - name: Upload the gate logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: schema-snapshot-logs
+          path: schema-snapshot/logs
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload the snapshot
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: schema-snapshot
+          path: |
+            schema-snapshot/migrated.sql
+            schema-snapshot/manifest.json
+          if-no-files-found: error
+          retention-days: 1
+
+  add-layer:
+    name: Add the snapshot layer
+    needs: build-snapshot
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [alpine, debian]
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Set-platform
+        env:
+          MATRIX_PLATFORM: ${{ matrix.platform }}
+        run: echo "PLATFORM=${MATRIX_PLATFORM//\//-}" >> "$GITHUB_ENV"
+
+      - id: Set-docker-org
+        run: echo "DOCKER_ORG=$(echo "${GITHUB_REPOSITORY%%/*}" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - name: Checkout tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.release_number }}
+          persist-credentials: false
+
+      - name: Download this image's digest
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: digests-django-${{ matrix.os }}-${{ env.PLATFORM }}
+          path: ${{ runner.temp }}/digests
+
+      - name: Download the snapshot
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: schema-snapshot
+          path: ${{ runner.temp }}/schema-snapshot
+
+      - name: Read the base image
+        id: base
+        run: echo "image=${DOCKER_ORG}/defectdojo-django@sha256:$(ls "${RUNNER_TEMP}/digests")" >> "$GITHUB_OUTPUT"
+
+      - name: Login to DockerHub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+        # COPY only, so the arm64 image builds on this amd64 runner without emulation.
+      - name: Build and push the layered image
+        id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        env:
+          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
+        with:
+          push: true
+          context: ${{ runner.temp }}/schema-snapshot
+          file: docker/Dockerfile.schema-snapshot
+          platforms: ${{ matrix.platform }}
+          build-args: base=${{ steps.base.outputs.image }}
+          outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-django",push-by-digest=true,name-canonical=true
+
+        # The merge job tags whatever digests these artifacts name.
+      - name: Export the layered digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          rm -rf "${RUNNER_TEMP}/layered-digests"
+          mkdir -p "${RUNNER_TEMP}/layered-digests"
+          touch "${RUNNER_TEMP}/layered-digests/${DIGEST#sha256:}"
+
+      - name: Replace this image's digest artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: digests-django-${{ matrix.os }}-${{ env.PLATFORM }}
+          path: ${{ runner.temp }}/layered-digests/*
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true

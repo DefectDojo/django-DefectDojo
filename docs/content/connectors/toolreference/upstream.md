@@ -133,6 +133,7 @@ Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Google Cloud, JSM Assets, Mi
 - [Promptfoo](/connectors/toolreference/promptfoo/)
 - [Prowler](/connectors/toolreference/prowler/)
 - [Qualys](/connectors/toolreference/qualys/)
+- [Qualys TotalAppSec](/connectors/toolreference/qualys_totalappsec/)
 - [Quay](/connectors/toolreference/quay/)
 - [Qwiet AI](/connectors/toolreference/qwiet_ai/)
 - [Rapid7 InsightAppSec](/connectors/toolreference/rapid7_insightappsec/)

@@ -1,0 +1,10 @@
+# A django image plus a release's schema snapshot, which the initializer loads into an empty
+# database instead of applying every migration (dojo/management/commands/schema_snapshot.py).
+#
+# Built by .github/workflows/release-x-manual-add-schema-snapshot.yml FROM each django image the
+# release pushed by digest, for every platform. It only copies files, so no platform is emulated.
+# The build context is the output directory of scripts/build_schema_snapshot.sh, which made the
+# snapshot with the release's own debian image.
+ARG base
+FROM ${base}
+COPY migrated.sql manifest.json /schema-snapshot/

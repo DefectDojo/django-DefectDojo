@@ -3,6 +3,7 @@ import logging
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
+from django.utils.log import log_response
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -60,6 +61,24 @@ def _is_unique_violation(exc) -> bool:
 
     text = str(exc).lower()
     return any(marker in text for marker in UNIQUE_VIOLATION_MESSAGE_MARKERS)
+
+
+def _log_server_error(exc, context, response):
+    request = (context or {}).get("request")
+    if request is None:
+        logger.error(exc, exc_info=True)  # noqa: LOG014
+        return
+    # Django only attaches the traceback to its django.request record (and so to
+    # the admin error email) for exceptions it catches itself. Log it here with the
+    # exception, which also marks the response so Django does not log it again.
+    log_response(
+        "%s: %s",
+        response.reason_phrase,
+        request.path,
+        response=response,
+        request=getattr(request, "_request", request),
+        exception=exc,
+    )
 
 
 def custom_exception_handler(exc, context):
@@ -122,13 +141,13 @@ def custom_exception_handler(exc, context):
         # There is no standard error response, so we assume an unexpected
         # exception. It is logged but no details are given to the user,
         # to avoid leaking internal technical information.
-        logger.error(exc, exc_info=True)  # noqa: LOG014
         response = Response()
         response.status_code = HTTP_500_INTERNAL_SERVER_ERROR
         response.data = {}
         response.data[
             "message"
         ] = exception_message
+        _log_server_error(exc, context, response)
         ErrorPageProductAnnouncement(response=response)
     elif response.status_code < 500:
         # HTTP status codes lower than 500 are no technical errors.
@@ -143,6 +162,6 @@ def custom_exception_handler(exc, context):
     else:
         # HTTP status code 500 or higher are technical errors.
         # They get logged and we don't change the response.
-        logger.error(exc, exc_info=True)  # noqa: LOG014
+        _log_server_error(exc, context, response)
 
     return response

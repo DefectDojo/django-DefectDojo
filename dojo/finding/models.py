@@ -10,7 +10,7 @@ import dateutil
 from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -518,6 +518,14 @@ class Finding(BaseModel):
             models.Index(
                 fields=["test", "numerical_severity", "id"],
                 name="idx_finding_test_numsev",
+            ),
+            # Case-insensitive title filters (iexact, __in over upper-cased values,
+            # istartswith) compile to UPPER("title"::text), which neither the plain
+            # title index nor the trigram one can serve. text_pattern_ops also serves
+            # the LIKE 'prefix%' an istartswith renders.
+            models.Index(
+                OpClass(Upper("title"), name="text_pattern_ops"),
+                name="idx_finding_upper_title",
             ),
             models.Index(
                 fields=["sla_expiration_date", "test"],

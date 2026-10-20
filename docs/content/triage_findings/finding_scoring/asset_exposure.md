@@ -72,6 +72,60 @@ toward Unknown. This is also how exposure *closure* works for sources that repor
 but never report it ending: rather than leaving an asset flagged forever on the strength of
 one old observation, the claim ages out.
 
+### Exposure sources
+
+These sources report exposure. Connectors report on every sync of an asset's record while
+Asset Exposure is enabled; a connector with nothing to say about an asset leaves its
+exposure as it was.
+
+| Source | What it reports | Confidence |
+|---|---|---|
+| [Wiz](/connectors/toolreference/wiz/) connector | The network paths Wiz found to a resource, and the internet exposure fields Wiz sets on vulnerable assets. Can report **Externally Exposed**, **Partially Exposed** or **Internally Reachable**. | 0.9 |
+| [CrowdStrike Falcon](/connectors/toolreference/crowdstrike_falcon/) connector | **Externally Exposed** when Spotlight assesses the host as internet-facing. | 0.9 |
+| [Shodan](/connectors/toolreference/shodan/) connector | **Externally Exposed** for every host Shodan reached from the internet, with the address, port and transport of each service it saw. | 1.0 |
+| [Censys](/connectors/toolreference/censys/) connector | **Externally Exposed** for every host Censys reached from the internet, with the port and protocol of each service it saw. | 1.0 |
+| [Reachability probe](#the-reachability-probe) | **Externally Exposed** or **Internally Reachable** for each address that answers, depending on where the probe sits. | 1.0 |
+| [Universal Parser](/import_data/pro/specialized_import/universal_parser/) imports | The **Asset exposure** output field, when a parser maps a column of your scan file to it. | 1.0 |
+| [Exposure API](#submitting-verdicts-through-the-api) | Whatever positive verdict the caller submits, for scanners and tools that have no connector. | As submitted |
+
+Shodan, Censys and the probe saw a service answer, so their verdicts carry full confidence.
+Wiz and CrowdStrike report their own assessment of a cloud graph or a host, which can be
+wrong about the network in front of it, so their verdicts carry slightly less.
+
+No other connector or import reports exposure. An asset none of these sources covers stays
+**Unknown** until one of them reports on it or somebody sets an override.
+
+### Submitting verdicts through the API
+
+A tool without a connector can report exposure with `POST /api/v2/exposure/verdicts/`. Each
+call carries one source's whole current opinion of one asset:
+
+```json
+{
+  "product": 42,
+  "source": "perimeter-scanner",
+  "items": [
+    {
+      "verdict": "exposed_public",
+      "confidence": 1.0,
+      "evidence": [
+        {"channel": "observed", "ip": "203.0.113.10", "port_range": "443", "protocol": "tcp"}
+      ]
+    }
+  ]
+}
+```
+
+`product` is the asset's ID. `verdict` is `exposed_public`, `exposed_limited` or
+`reachable_private`. Like every automated source, the API cannot assert isolation: a request
+carrying `internal_only` is refused with a validation error. `confidence` defaults to 1.0. Several items collapse to the
+strongest verdict with their evidence merged. Every evidence field is optional: `channel`,
+`ip`, `port_range`, `protocol`, `url`, `entity_name`, `entity_type`, `vendor_resource_id` and
+`observed_at`.
+
+The caller needs permission to import scan results into the asset. The response reports how
+many items were received, accepted and rejected, with a sample of the rejections and why.
+
 ## The reachability probe
 
 Besides reading what scanners and connectors report, DefectDojo Pro can check for itself.
