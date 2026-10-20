@@ -6,7 +6,7 @@ Import a SARIF 2.1.0 report with **one Finding per SARIF result**, using the **S
 
 A SARIF result can list several `locations`, for example a hard-coded secret that appears in six files, or a race condition reported at two lines of the same file. The **[SARIF](../sarif)** scan type makes each of those locations its own Finding. SARIF Aggregated keeps the result whole:
 
-- The Finding's own file path and line come from the result's **first** location.
+- The Finding's own file path and line come from the location with the lowest file path and line, so they do not change when a tool reports the same locations in a different order. Locations without a file path are never used for this.
 - With the Locations feature enabled, **every** location of the result is attached to the Finding as a code Location, with its start line, end line and snippet.
 - With the Locations feature disabled, every location is listed in the Finding description instead, as `path:startLine-endLine`.
 
@@ -20,7 +20,7 @@ SARIF and SARIF Aggregated produce different Test Types, so reimporting an exist
 
 ### Support for Deduplication (Fingerprinting)
 
-SARIF Aggregated deduplicates on the result's `fingerprints` or `partialFingerprints` (`DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE`) by default. Because a multi-location result is one Finding, its fingerprint is unique inside the report and is always kept. With the SARIF scan type the same fingerprint repeats across the per-location Findings and is dropped from them.
+SARIF Aggregated deduplicates on the result's `fingerprints` or `partialFingerprints` (`DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE`) by default. Because a multi-location result is one Finding, its fingerprint is normally unique inside the report and is kept. With the SARIF scan type the same fingerprint repeats across the per-location Findings and is dropped from them. If two separate results in one report share a fingerprint, it is dropped from both, as with any scan type.
 
 When a result carries no fingerprint, the hash code falls back to these fields:
 
@@ -31,4 +31,4 @@ When a result carries no fingerprint, the hash code falls back to these fields:
 - description
 
 ### Sample Scan Data
-A sample report with a multi-location result can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sarif/multi_location_result.sarif).
+A sample report with a multi-location result can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sarif_aggregated/multi_location_result.sarif).

@@ -1,3 +1,5 @@
+import io
+import json
 from unittest.mock import patch
 
 from dojo.models import Finding, Test
@@ -29,7 +31,7 @@ class TestSarifAggregatedParser(DojoTestCase):
     def parse_multi_location_report(self, *, locations):
         with (
             patch.dict("dojo.location.feature._RESOLVER", {"fn": lambda: locations}),
-            (get_unit_tests_scans_path("sarif") / "multi_location_result.sarif").open(encoding="utf-8") as testfile,
+            (get_unit_tests_scans_path("sarif_aggregated") / "multi_location_result.sarif").open(encoding="utf-8") as testfile,
         ):
             return SarifAggregatedParser().get_findings(testfile, Test())
 
@@ -82,8 +84,56 @@ class TestSarifAggregatedParser(DojoTestCase):
             self.common_checks(finding)
 
     def test_get_tests_names_the_test_after_the_tool(self):
-        with (get_unit_tests_scans_path("sarif") / "multi_location_result.sarif").open(encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif_aggregated") / "multi_location_result.sarif").open(encoding="utf-8") as testfile:
             tests = SarifAggregatedParser().get_tests("SARIF Aggregated", testfile)
         self.assertEqual(1, len(tests))
         self.assertEqual("Stub Scanner", tests[0].type)
         self.assertEqual(2, len(tests[0].findings))
+
+    def parse_result_locations(self, result_locations, *, locations):
+        result = {"ruleId": "R1", "level": "error", "message": {"text": "m"}}
+        if result_locations is not ...:
+            result["locations"] = result_locations
+        report = {
+            "version": "2.1.0",
+            "runs": [{"tool": {"driver": {"name": "Stub Scanner", "rules": [{"id": "R1"}]}}, "results": [result]}],
+        }
+        with patch.dict("dojo.location.feature._RESOLVER", {"fn": lambda: locations}):
+            return SarifAggregatedParser().get_findings(io.StringIO(json.dumps(report)), Test())
+
+    @staticmethod
+    def physical(uri, start_line, end_line=None):
+        region = {"startLine": start_line}
+        if end_line is not None:
+            region["endLine"] = end_line
+        return {"physicalLocation": {"artifactLocation": {"uri": uri}, "region": region}}
+
+    def test_primary_location_does_not_depend_on_report_order(self):
+        ordered = [self.physical("a.py", 3, 5), self.physical("a.py", 10), self.physical("b.py", 1)]
+        for locations in (True, False):
+            with self.subTest(locations=locations):
+                expected = self.parse_result_locations(ordered, locations=locations)[0]
+                reordered = self.parse_result_locations(ordered[::-1], locations=locations)[0]
+                self.assertEqual(("a.py", 3), (expected.file_path, expected.line))
+                self.assertEqual(
+                    (expected.file_path, expected.line, expected.description),
+                    (reordered.file_path, reordered.line, reordered.description),
+                )
+
+    def test_location_without_a_file_is_never_the_primary_location(self):
+        logical_only = {"logicalLocations": [{"fullyQualifiedName": "Stub.method"}]}
+        findings = self.parse_result_locations([logical_only, self.physical("b.py", 3)], locations=True)
+        self.assertEqual(1, len(findings))
+        self.assertEqual(("b.py", 3), (findings[0].file_path, findings[0].line))
+        self.assertEqual([("b.py", 3)], [(loc.data["file_path"], loc.data["line"]) for loc in findings[0].unsaved_locations])
+
+    def test_end_line_before_start_line_is_not_listed(self):
+        findings = self.parse_result_locations([self.physical("a.py", 9, 2), self.physical("b.py", 1)], locations=False)
+        self.assertIn("**Locations:**\n- a.py:9\n- b.py:1", findings[0].description)
+
+    def test_missing_or_null_locations(self):
+        for result_locations in (..., None, []):
+            with self.subTest(result_locations=result_locations):
+                findings = self.parse_result_locations(result_locations, locations=True)
+                self.assertEqual(1, len(findings))
+                self.assertIsNone(findings[0].file_path)

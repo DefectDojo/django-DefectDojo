@@ -169,7 +169,7 @@ class SarifParser:
         # if there is a location get all files into files list
         files = []
 
-        if "locations" in result:
+        if result.get("locations"):
             for location in result["locations"]:
                 file_path = None
                 line = None
@@ -562,7 +562,7 @@ def get_locations_description(group):
         end_line = get_end_line(location)
         if line is None:
             lines.append(f"- {file_path}")
-        elif end_line and end_line != line:
+        elif end_line and end_line > line:
             lines.append(f"- {file_path}:{line}-{end_line}")
         else:
             lines.append(f"- {file_path}:{line}")

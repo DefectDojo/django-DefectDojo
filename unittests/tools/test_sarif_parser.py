@@ -668,7 +668,7 @@ add_core(ptr, offset, val);
         """
         with (
             patch.dict("dojo.location.feature._RESOLVER", {"fn": lambda: True}),
-            (get_unit_tests_scans_path("sarif") / "multi_location_result.sarif").open(encoding="utf-8") as testfile,
+            (get_unit_tests_scans_path("sarif_aggregated") / "multi_location_result.sarif").open(encoding="utf-8") as testfile,
         ):
             findings = SarifParser().get_findings(testfile, Test())
         self.assertEqual(7, len(findings), msg=f"expected the per-location split, got {len(findings)}")
