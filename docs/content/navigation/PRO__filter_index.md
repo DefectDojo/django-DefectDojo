@@ -37,12 +37,46 @@ Note that **Before** and **After** are deliberately not mirror images of each ot
 
 ## Selecting every match in a searchable list filter
 
-List filters whose options come from a search box, such as the Asset and Organization filters on the Findings, Engagements, Tests, and Endpoints tables, can hold thousands of options, so checking them one at a time is not practical. Type a search into the filter, and once the results load the filter offers **Select all N matching**, where N is the number of matching options. Selecting it filters the table to every option whose name contains the search text (case-insensitive), not just the options loaded on screen.
+List filters whose options come from a search box, such as the Asset and Organization filters on the Findings, Engagements, Tests, and Endpoints tables, can hold thousands of options, so checking them one at a time is not practical. Type a search into the filter, and once the results load, the checkbox beside the search box selects all N matching options, where N is the number of matches (its tooltip shows the count). Checking it filters the table to every option whose name contains the search text (case-insensitive), not just the options loaded on screen.
 
-- The selection appears as a single **All matching "text"** chip. Remove the chip, or select **Deselect all**, to go back to picking individual options.
+- The selection appears as a single checked **All matching "text"** row above the options. Clear that row, or the checkbox beside the search box, to go back to picking individual options.
 - While a match selection is active, the individual options are locked, because the selection covers every match rather than a list of picks.
 - The selection is stored as the search text, so a table URL or a saved table preference carries it compactly however many options match.
-- **Deselect all** also clears any options you picked one by one.
+- With options picked one by one, the same checkbox clears them all.
+- Options you picked are listed first when you open the filter, so you can see the current selection without scrolling.
+
+## Filtering on a list of values
+
+### In List and Not in List on text filters
+
+Text filters such as **Title**, **Component Name** and **File Path** offer **In List** and **Not in List** next to **Contains**, **Exact** and the other operators. Each value becomes a chip.
+
+- Type a value and press Enter to add it. A comma you type stays part of the value, so a title such as `Outdated OpenSSL, libcrypto` is one value.
+- Paste a list to add many at once. A single line is split at its commas, and a value in double quotes keeps its commas. Several lines, such as a column copied from a spreadsheet, are split at the line breaks, and each line is one value.
+- Case is ignored, and so are spaces around each value. Blank entries are skipped.
+- Each value is matched whole and exactly as written: `api` matches a component named `API` but not one named `api-gateway`, and characters such as `%`, `*` and `^` are not wildcards.
+- **Not in List** keeps Findings that have no value in that field.
+- A list with no values left applies no filter, the same as an empty text box.
+- The list is saved in the table's address and in a saved table preference, so it is still there after a reload or when you return to the table.
+
+### Include and Exclude on multi-select filters
+
+Every multi-select filter has an **Include** / **Exclude** choice at the top. **Include** keeps the rows that match a selected value. **Exclude** keeps every row except those, so "all but these three scanners" is three picks instead of unticking everything else. Rows with no value in that column are kept under **Exclude**. Filters that already offer **Any** / **All**, such as **Status**, do not have this choice.
+
+### Names in the Asset and Organization filters
+
+The Asset and Organization filters on the Findings, Engagements, Tests and Endpoints tables also offer **In List** and **Not in List** in that same choice at the top. Use them for a list of names copied from a ticket or a CMDB export: the names replace the option list as chips, and they work like the text filters above.
+
+- A name matches whatever its case, and a name in digits is still a name: `2024` matches the Asset named `2024`, never the Asset whose ID is 2024.
+- When you paste names, the filter checks them. A name that matches takes the spelling stored in DefectDojo, and one that matches nothing is left out and listed under the box (**Not found: ...**), so a typo can be corrected and added again.
+- Only Assets and Organizations you are allowed to see are matched. A name that belongs to one you cannot see is reported as not found.
+- Picking options and listing names are separate: switching between **Include** / **Exclude** and **In List** / **Not in List** starts the filter afresh, so names and picked options are never combined.
+
+### Long lists
+
+The table sends its filters in the address of each request, and that address has a size limit. In practice a filter of a few hundred values is the most the table can apply. Past that, it shows **Filter Too Long** and loads nothing until you remove some values. This covers every list filter: In List, names, and a large selection under Include or Exclude.
+
+The server takes up to 1,000 values in one In List and refuses a longer list with an error rather than shortening it.
 
 ## How number filters are evaluated
 
@@ -106,6 +140,7 @@ These DefectDojo functions can be used to further organize your Findings or trac
 
 * Finding Tags
 * Reviewers (Assigned User)
+* Owner (Team) (the group responsible for the Finding, set under **Owners** on the Finding form; the column is hidden by default, turn it on from the column picker)
 * Has Notes (True/False)
 * Group (refers to the [Finding Group](/triage_findings/findings_workflows/editing_findings/#finding-group-actions), if one exists)
 * Risk Acceptance (select one or more existing Risk Acceptances from the list)

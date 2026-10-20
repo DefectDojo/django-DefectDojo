@@ -219,6 +219,11 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # Seconds the async_dupe_delete singleton marker is held. A run holds it for its whole
+    # duration and releases it when it finishes; this timeout is only the ceiling for a worker
+    # that dies mid-run without releasing it. It must comfortably exceed a normal run so the
+    # lock is never released out from under an in-flight run (default 30 minutes).
+    DD_DUPE_DELETE_LOCK_EXPIRE=(int, 1800),
     # Minutes since a duplicate was last saved before the excess-duplicate delete may remove it,
     # which covers a create request still writing the finding's child rows. 0 turns the wait off.
     DD_DUPE_DELETE_GRACE_MINUTES=(int, 1),
@@ -1984,6 +1989,7 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
+DUPE_DELETE_LOCK_EXPIRE = env("DD_DUPE_DELETE_LOCK_EXPIRE")
 DUPE_DELETE_GRACE_MINUTES = env("DD_DUPE_DELETE_GRACE_MINUTES")
 DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT = env("DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT")
 DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES = env("DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES")

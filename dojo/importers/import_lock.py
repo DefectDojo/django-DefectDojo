@@ -164,6 +164,10 @@ def _import_lock_holders(test_ids=None):
 
     The state and its age are NULL for a backend this database user may not see, such as one of
     another role.
+
+    pg_locks lists the advisory locks of every database on the server, but an advisory lock only
+    conflicts within its own database, so only this database's holders count. Another DefectDojo
+    database on the same server (or another parallel test worker's) has its own test with this id.
     """
     with connection.cursor() as cursor:
         cursor.execute(
@@ -173,6 +177,7 @@ def _import_lock_holders(test_ids=None):
             FROM pg_locks AS locks
             LEFT JOIN pg_stat_activity AS activity ON activity.pid = locks.pid
             WHERE locks.locktype = 'advisory' AND locks.granted AND locks.objsubid = 2
+              AND locks.database = (SELECT oid FROM pg_database WHERE datname = current_database())
               AND locks.classid::bigint = %s AND (%s::bigint[] IS NULL OR locks.objid::bigint = ANY(%s::bigint[]))
             """,
             [TEST_IMPORT_LOCK_CLASS, test_ids, test_ids],

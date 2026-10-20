@@ -41,3 +41,30 @@ The attributes in the form are supplied as defaults and are as follows:
 - **Closed Mapping**: `Done`
 - **False Positive Mapping**: `Done`
 - **Risk Accepted Mapping**: `Done`
+
+The status values must be states that exist on the work item type in your project's process.
+For example, a project using the Scrum process template does not have a `To Do` state on
+every type - check the allowed states in Azure DevOps and adjust the mapping to match.
+
+#### Custom Field Mappings
+
+Custom field mappings set additional Azure DevOps fields on the work items DefectDojo
+creates or updates. The **Vendor Field** must be the Azure DevOps field's *reference name*
+(for example `System.AreaPath`, `System.Tags`, or `Custom.MyField` - not its display name),
+and the field must exist on the work item type in your project's process.
+
+Two mappings are especially useful for routing work items to a team:
+
+- **Area Path**: a mapping with Source `Static Value`, Vendor Field `System.AreaPath`, and a
+  value such as `My Project\My Team` routes the work item to the team that owns that area.
+- **Iteration Path**: a mapping with Vendor Field `System.IterationPath` places the work
+  item in a sprint. The value can be a static iteration path, or the special token
+  `@CurrentIteration` / `@CurrentIteration(My Team)`, which DefectDojo resolves at push time
+  into the named team's currently active sprint (the project's default team when no team is
+  given). If the team has no current sprint selected in Azure DevOps, the push fails with an
+  error saying so.
+
+Note that Azure DevOps boards and backlogs only display work item types that belong to a
+backlog level. DefectDojo creates work items of type **Issue**; if that type is not part of
+a backlog level in your project's process, the pushed items are only visible in the
+**Boards → Work items** view regardless of their area or iteration.

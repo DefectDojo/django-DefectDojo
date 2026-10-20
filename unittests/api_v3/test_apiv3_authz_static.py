@@ -68,9 +68,6 @@ OBJECTS_ALLOWLIST: dict[tuple[str, str], str] = {
     ("dojo/api_v3/subresources.py", "NoteHistory.objects.create"):
         "writes the NoteHistory row for a note just created on a parent that was authorized and "
         "permission-checked; a write of an owned sub-object, not an object read.",
-    ("dojo/api_v3/subresources.py", "FileUpload.objects.filter"):
-        "global title-uniqueness pre-check (mirrors DRF UniqueValidator -> 400) AFTER the parent "
-        "authz + add-permission gate; not object disclosure.",
     ("dojo/user/api_v3/routes.py", "Dojo_User.objects.filter"):
         "the RBAC scoping itself: the self-only fallback queryset for users lacking auth.view_user "
         "(line 100) and the username-uniqueness check AFTER the auth.add_user gate (line 181).",

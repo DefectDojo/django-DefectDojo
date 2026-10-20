@@ -18,6 +18,26 @@ aliases:
 Covers deployment on AWS EKS and OpenShift (ROSA). The workflow is the same
 for both: set up infrastructure, create secrets, install the chart.
 
+## Quick Path
+
+1. Gather the values in the [Pre-Install Checklist](#pre-install-checklist)
+   and install the tools listed under [Prerequisites](#prerequisites).
+2. [Extract the Chart Package](#extract-the-chart-package) and
+   [Prepare Your Values File](#prepare-your-values-file).
+3. [Generate Secrets](#generate-secrets) and
+   [Create Internal TLS Certificates](#create-internal-tls-certificates).
+4. Supply your [License](#license).
+5. [Validate the templates](#pre-flight-validate-templates), then
+   [Deploy](#deploy) and [Verify](#verify). To deploy through ArgoCD instead,
+   see [Deploy with ArgoCD](#deploy-with-argocd).
+
+To log in to the DefectDojo registry by hand with the key in your license, see
+[Inspecting Your License](#inspecting-your-license). If your cluster can't pull
+from the default DefectDojo registry, see
+[Private Registry / Air-Gapped Environments](#private-registry--air-gapped-environments).
+For problems after the install, see [Known Issues](#known-issues) and
+[Troubleshooting](#troubleshooting).
+
 ---
 
 ## Pre-Install Checklist

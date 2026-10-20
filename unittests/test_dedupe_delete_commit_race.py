@@ -33,6 +33,7 @@ from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import psycopg
 from crum import impersonate
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -204,6 +205,20 @@ def _import_lock_held_elsewhere(test_id):
     finally:
         release.set()
         holder.join(WAIT_TIMEOUT_SECONDS)
+
+
+@contextmanager
+def _import_lock_held_in_another_database(test_id):
+    """
+    Hold the import lock for this test id in a different database on the same server.
+
+    Advisory locks are scoped to a database, so this is another DefectDojo instance (or another
+    parallel test worker) whose own test happens to have the same id: it locks nothing here.
+    """
+    params = {**connection.get_connection_params(), "dbname": "postgres"}
+    with psycopg.connect(**params, autocommit=True) as other:
+        other.execute("SELECT pg_advisory_lock_shared(%s, %s)", [TEST_IMPORT_LOCK_CLASS, test_id])
+        yield
 
 
 def _import_lock_is_held(test_id):
@@ -808,6 +823,24 @@ class TestDupeDeleteRacesInFlightWriter(_CommittedFindingsMixin, SimpleTestCase)
         self._write_found_by_and_commit(matched.id)
         persisted = Finding.objects.filter(id=matched.id).first()
         self.assertIsNotNone(persisted, msg="a matched duplicate in a test under import was deleted mid-import")
+
+    def test_import_lock_in_another_database_does_not_hold_back_the_delete(self):
+        """
+        Regression: the selection read every import lock on the server from pg_locks, including those
+        of other databases, so a test was skipped whenever another database's test with the same id
+        was being imported (flaky under --parallel, where each worker has its own database).
+        """
+        original, duplicate = self._create_findings("Dupe delete original", "Dupe delete other database")
+        self._commit_as_duplicate(duplicate, original)
+        self._backdate(finding_ids=[original.id, duplicate.id])
+
+        with _import_lock_held_in_another_database(self.test.id):
+            self._run_dupe_delete()
+
+        self.assertFalse(
+            Finding.objects.filter(id=duplicate.id).exists(),
+            msg="an import lock held in another database kept this database's excess duplicate",
+        )
 
     def test_duplicate_of_a_test_just_reimported_is_deleted_once_the_import_has_ended(self):
         """

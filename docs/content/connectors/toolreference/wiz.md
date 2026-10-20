@@ -39,3 +39,12 @@ Two things to know before you change this setting:
 * **Deselecting a data class closes its existing findings.** The next sync sends none of that class, and DefectDojo closes what it no longer receives. Suppose you turn off Vulnerability Findings on a connector that already imported a million of them. That sync closes all one million.
 
 Minimum Severity is a separate control and cannot be changed after the connector is created.
+
+#### **Asset Exposure**
+
+With [Asset Exposure](/triage_findings/finding_scoring/asset_exposure/) enabled, each sync also reports how reachable each Wiz Project's asset is. The connector reads two things Wiz already knows and keeps the strongest result across the Project's resources:
+
+* **Network exposure**: the network paths Wiz found to a resource. A path from any internet address records **Externally Exposed**; one from a narrower internet source range, or from a custom IP range holding a public address, records **Partially Exposed**; one from another cloud account, a VPN, or a custom range of private addresses records **Internally Reachable**. A path inside the resource's own cloud account records nothing. The panel's evidence names each exposed resource with its port range and protocol.
+* **Vulnerable assets**: the internet and network exposure fields Wiz sets on each asset that carries a vulnerability. These are read only while **Vulnerability Findings** is selected.
+
+Network exposure is read on every sync whatever **Import Finding Types** says, and it never becomes a finding: it describes the asset, not a problem on it. Wiz cannot say when a path closes, so a path it stops reporting ages out of the asset's exposure after 30 days. If the service account cannot read network exposure, the sync logs a warning and reports the vulnerable-asset fields alone.

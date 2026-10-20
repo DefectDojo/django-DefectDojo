@@ -399,6 +399,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if self.service is not None:
                 sanitized.service = self.service
             self.location_handler.clean_unsaved(sanitized)
+            # Drop non-string vulnerability ids before hashing so reimport hashes the
+            # same sanitized list the importer does (the importer sanitizes via
+            # process_cve before computing the hash). Otherwise a non-string id is
+            # str()-ed into the reimport hash only (Finding.get_vulnerability_ids), which
+            # produces a duplicate finding on every reimport for scanners that hash on
+            # vulnerability_ids.
+            self.sanitize_vulnerability_ids(sanitized)
             # Calculate the hash code to be used to identify duplicates
             sanitized.hash_code = self.calculate_unsaved_finding_hash_code(sanitized)
             deduplicationLogger.debug(f"unsaved finding's hash_code: {sanitized.hash_code}")
@@ -1369,8 +1376,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Accumulates changes into pending_vuln_id_deletes / pending_vulnerability_ids
         for batch flush at the batch boundary via flush_vulnerability_ids().
         """
+        # A non-string vulnerability id (e.g. a dict nested under "vulnerability_ids"
+        # in a Generic Findings Import report) is unhashable for dict.fromkeys and has
+        # no .strip(); drop such entries first so reimport does not 500 on the same
+        # input the importer already tolerates.
+        self.sanitize_vulnerability_ids(finding)
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
-        vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
         # Reconcile CWEs independently of the vulnerability_ids early-exit below (CWEs may change
         # while vulnerability_ids do not, and vice versa).

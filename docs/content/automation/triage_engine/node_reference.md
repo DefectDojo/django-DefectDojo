@@ -569,8 +569,10 @@ Sets a field on the Asset. Assets already holding the value are left alone, and 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Field** | none | One of: `description`, `business_criticality`, `platform`, `lifecycle`, `origin`, `user_records`, `revenue`, `external_audience`, `internet_accessible`. |
+| **Field** | none | One of: `description`, `business_criticality`, `platform`, `lifecycle`, `origin`, `user_records`, `revenue`, `external_audience`, `internet_accessible`, `asset_type`. |
 | **Value** | none | The control follows the field: a template for description (with `{{product.name}}` style placeholders), a picker for the choice fields, a number or a toggle for the rest. |
+
+For `asset_type`, the value is a type's code (`host`, `repository`, `service`, ...). The picker lists the types DefectDojo ships; a saved rule may name a type you added, and a code that names no type fails the node. A type a rule sets counts as chosen by a person, so connectors do not overwrite it. In conditions, the Asset's type is `product.kind`.
 
 Two fields are deliberately not offered: `name` (it is unique, so one rendered value written across a sweep cannot work) and the SLA configuration (it drives an asynchronous recalculation with its own write lock, and belongs to a dedicated flow).
 

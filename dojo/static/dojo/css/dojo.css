@@ -1289,6 +1289,8 @@ span.endpoint_product {
 .dojo-filter-set select[multiple],
 .dojo-filter-set select[multiple=multiple] {
     width: 100%;
+    /* override the fixed .form-control height, which would clip the list to a single option row */
+    height: auto;
     min-height: 2.125rem;
     max-height: 5rem;
     font-size: 0.8125rem;
