@@ -44,6 +44,7 @@ from dojo.endpoint.api.urls import add_endpoint_urls, register_endpoint_meta_imp
 from dojo.endpoint.ui.urls import urlpatterns as endpoint_urls
 from dojo.engagement.api.urls import add_engagement_urls
 from dojo.engagement.ui.urls import urlpatterns as eng_urls
+from dojo.export.api.urls import add_export_urls
 from dojo.finding.api.urls import add_finding_urls
 from dojo.finding.ui.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
@@ -215,6 +216,7 @@ api_v2_urls = [
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
     re_path(r"^{}api/v2/api-tokens/revoke/$".format(get_system_setting("url_prefix")), RevokeApiTokenView.as_view(), name="api-token-revoke"),
 ]
+api_v2_urls = add_export_urls(api_v2_urls)
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
     if settings.API_TOKENS_ENABLED and settings.API_TOKEN_AUTH_ENDPOINT_ENABLED:
