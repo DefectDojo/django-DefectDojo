@@ -12,13 +12,10 @@ DefectDojo has two API endpoints that export data:
 - `GET /api/v2/export/manifest/` describes the instance: its product types and products with their counts, the reference data, and the users.
 - `GET /api/v2/export/products/{id}/` streams one product with its engagements, tests, findings, notes, files and risk acceptances.
 
-Use them to back up one product, or to move a product to another DefectDojo instance.
-You can also use them to keep a mirror of an instance.
-Tools that migrate or mirror a DefectDojo instance read this stream.
+Use them to back up a product, move it to another instance, or keep a mirror.
 
-Only a superuser can call these endpoints.
+Only a superuser can call these endpoints. Any other caller gets a 403.
 Authenticate with an API v2 key in the `Authorization: Token` header, as for every other [API v2](/automation/api/api-v2-docs/) endpoint.
-An anonymous request gets a 403. A user who is not a superuser also gets a 403.
 
 Because the caller is always a superuser, the export does not filter by permissions.
 Private notes cross. A product id that does not exist gets a 404.
@@ -42,28 +39,25 @@ The response is one JSON object with these keys:
 |-----|---------------|
 | `schema` | The version of the export format. It is `1`. |
 | `generated_at` | The time the server built the response, in ISO 8601. |
-| `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id that stays the same for the life of the instance. |
+| `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
-| `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire. |
+| `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
 | `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in these tables. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
 
-Each `counts` object has the keys `engagements`, `tests`, `findings`, `endpoints`, `notes`, `files`, `files_over_cap`, `risk_acceptances` and `finding_groups`.
-An example product entry, with Locations off:
+`install_id` stays the same for the life of the instance, with one exception.
+The initializer reloads the settings fixture when first boot runs again, and that load writes a new `install_id`.
+First boot runs again only when the `DD_ADMIN_USER` account does not exist.
+That re-initialization also resets every other system setting.
+
+The keys of `counts` are in [Counts](#counts). An example product entry, with Locations off:
 
 ```json
 {"id": 2, "name": "Security How-to", "prod_type": 2, "counts": {"engagements": 5, "tests": 10, "findings": 15, "endpoints": 2, "notes": 3, "files": 0, "files_over_cap": 0, "risk_acceptances": 0, "finding_groups": 0}}
 ```
-
-Four counts need a closer look when you compare the manifest with a product stream:
-
-- `endpoints` in the manifest is the number of endpoints in the product. With Locations on, it is the number of locations in the product. In the stream, `end.counts.endpoints` is the number of endpoint entries on finding lines. One endpoint on three findings counts three times in the stream. The two numbers differ on purpose.
-- `notes` counts one entry per owner on both sides. The owners are engagements, tests, findings and risk acceptances. A note on two findings counts twice.
-- `files` and `files_over_cap` count the file entries on engagements, tests and findings on both sides. A risk acceptance's proof is not counted.
-- `finding_groups` in the manifest is the number of finding groups in the product. In the stream, it is the number of distinct finding groups on finding lines. A finding group with no findings counts in the manifest and not in the stream.
 
 The manifest takes one parameter:
 
@@ -95,23 +89,23 @@ The lines come in this order:
 5. Every `risk_acceptance`, by id.
 6. One `end` line.
 
-The product and each engagement, test, finding and risk acceptance have a line of their own.
-A line does not nest one of these objects in another. It names them by id.
-For example, a test line names its engagement by id, and a finding line names its test by id.
-Notes, files, endpoint entries and finding groups are nested in the line that holds them. The product on the header line nests its product type.
+Each object has its own line and names its parent by id.
+Notes, files, endpoint entries and finding groups nest in their line.
 A stream that has no `end` line is incomplete. The connection dropped before the export finished, so export the product again.
-The number of lines is `1 + engagements + tests + findings + risk_acceptances + 1`, from `end.counts`.
+
+A line can be many MiB. One 10 MiB file makes a line of about 13.5 MiB.
+A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stops at 64 KiB by default.
 
 ### Line types
 
 | `type` | What the line holds |
 |--------|---------------------|
 | `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest) and `product`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. |
-| `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it. `files` holds file entries. |
+| `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it. `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
 | `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. |
 | `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. |
 | `risk_acceptance` | `data`: the risk acceptance as `/api/v2/risk_acceptance/` returns it, with the changes below. |
-| `end` | `counts`: what the stream wrote. |
+| `end` | `counts`: what the stream wrote. See [Counts](#counts). |
 
 An example `header` line, shortened:
 
@@ -144,13 +138,7 @@ Each endpoint entry has these keys:
 | `status` | The endpoint status object, as `/api/v2/endpoint_status/` returns it. | The location reference object of this finding. |
 
 The header's `source.locations_enabled` tells you which shape `status` has.
-An example entry with Locations off:
-
-```json
-{"id": 2, "uri": "ftp://localhost", "location_type": null, "tags": [], "status": {"id": 1, "date": "2020-07-01", "last_modified": "2020-07-01T17:45:39.791907Z", "mitigated": false, "mitigated_time": null, "false_positive": false, "out_of_scope": false, "risk_accepted": false, "mitigated_by": null, "endpoint": 2, "finding": 2}}
-```
-
-The same entry with Locations on:
+An example entry with Locations on:
 
 ```json
 {"id": 2, "uri": "ftp://localhost", "location_type": "url", "tags": [], "status": {"id": 1, "location_type": "url", "location_value": "ftp://localhost", "created": null, "updated": null, "relationship": "", "relationship_data": {}, "audit_time": null, "status": "Active", "location": 2, "finding": 2, "auditor": null}}
@@ -160,7 +148,7 @@ The same entry with Locations on:
 
 A risk acceptance line differs from `/api/v2/risk_acceptance/` in these fields:
 
-- `engagement` is the id of the engagement that holds the risk acceptance.
+- `engagement` is the id of one engagement that holds the risk acceptance. A risk acceptance can be linked to more than one engagement. The engagement lines carry every link in their `risk_acceptance` ids.
 - `notes` are nested, not ids.
 - `proof` replaces `path`. It holds `filename`, `size`, `content_type` and `data_base64`, or it is `null` when there is no proof. The proof follows the same cap and the same missing-file rule as a file entry.
 
@@ -180,24 +168,26 @@ Engagement, test and finding lines carry their files in `files`. Each file entry
 A file of `max_file_bytes` or less carries its contents.
 A larger file keeps its `size`, and `data_base64` is `null`. The export has no download link for it.
 To carry larger files, raise `max_file_bytes`. For example, `?max_file_bytes=52428800` carries files up to 50 MiB.
-While the server writes a line, it holds the files of that line and their base64 in memory. That is about four times the size of the files, for one line at a time.
+While the server writes a line, its memory use peaks at about 4.7 times the size of the files on that line.
 A file that is gone from storage has `size` and `data_base64` set to `null`, and `"error": "missing"`.
 
-### The end line
+## Counts
 
-`end.counts` holds what the stream wrote, in this order:
+The manifest gives `counts` for each product. The stream gives `counts` on its `end` line, in this order:
 
-| Key | What it counts |
-|-----|----------------|
-| `engagements` | Engagement lines. |
-| `tests` | Test lines. |
-| `findings` | Finding lines. |
-| `endpoints` | Endpoint entries on finding lines. |
-| `notes` | Notes on engagement, test, finding and risk acceptance lines. |
-| `files` | File entries on engagement, test and finding lines. |
-| `files_over_cap` | File entries over the cap. A missing file is not counted. |
-| `risk_acceptances` | Risk acceptance lines. |
-| `finding_groups` | Distinct finding groups on finding lines. |
+| Key | Manifest | Stream (`end.counts`) |
+|-----|----------|-----------------------|
+| `engagements` | Engagements in the product. | Engagement lines. |
+| `tests` | Tests in the product. | Test lines. |
+| `findings` | Findings in the product. | Finding lines. |
+| `endpoints` | Endpoints in the product. With Locations on, locations in the product. | Endpoint entries on finding lines. One endpoint on three findings counts three times. |
+| `notes` | Notes on engagements, tests, findings and risk acceptances, once per owner. A note on two findings counts twice. | The same, on the lines. |
+| `files` | File entries on engagements, tests and findings. A risk acceptance proof is not counted. | The same, on the lines. |
+| `files_over_cap` | File entries over the cap. A missing file is not counted. | The same, on the lines. |
+| `risk_acceptances` | Risk acceptances in the product. | Risk acceptance lines. |
+| `finding_groups` | Finding groups in the product. | Distinct finding groups on finding lines. |
+
+The two sides agree on every key except `endpoints` and `finding_groups`.
 
 An example `end` line:
 
@@ -208,5 +198,14 @@ An example `end` line:
 ## What does not cross
 
 - A finding group with no findings. Finding groups cross on the finding lines, so an empty group has no line.
+- Endpoints and locations that have no finding. The manifest counts them in `endpoints`.
+- The product-level status of a location.
 - Endpoint metadata. Product metadata (`product_meta` on the header) and finding metadata (`finding_meta`) do cross.
+- JIRA issue keys and JIRA project settings.
+- Product members and product groups.
+- Engagement presets, API scan configurations and tool configurations. Their ids stay on the engagement and test lines.
+- Contacts, for example an engagement's `requester`. The id stays on the engagement line.
+- Test import history, check lists, languages, technologies and benchmarks.
 - Secrets and instance settings: SSO, JIRA and tool credentials, notifications, API keys and passwords.
+
+A `duplicate_finding` id can point to a finding in another product. That id dangles in the export of this product.
