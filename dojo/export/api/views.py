@@ -6,6 +6,8 @@ from django.db.models import Count, Prefetch, QuerySet
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -55,6 +57,14 @@ from dojo.utils import get_system_setting
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 EXPORT_CHUNK_SIZE = 500
+DOCS_URL = "https://docs.defectdojo.com/automation/api/product_export/"
+MAX_FILE_BYTES_PARAMETER = OpenApiParameter(
+    "max_file_bytes",
+    OpenApiTypes.INT,
+    OpenApiParameter.QUERY,
+    description="Largest file, in bytes, that the export carries inline as base64. A larger file keeps its size and has no data.",
+    default=MAX_FILE_BYTES_DEFAULT,
+)
 SCHEMA_VERSION = 1
 COUNT_KEYS = (
     "engagements", "tests", "findings", "endpoints", "notes", "files", "files_over_cap", "risk_acceptances", "finding_groups",
@@ -280,6 +290,14 @@ class ProductExportView(APIView):
     permission_classes = (IsAuthenticated, IsSuperUser)
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
+    @extend_schema(
+        parameters=[MAX_FILE_BYTES_PARAMETER],
+        responses={(200, "application/x-ndjson"): OpenApiTypes.STR},
+        description=(
+            "Superuser only. Streams one product with its engagements, tests, findings and risk acceptances "
+            f"as NDJSON, one JSON object per line. The line shapes are documented at {DOCS_URL}"
+        ),
+    )
     def get(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         max_file_bytes = max_file_bytes_from(request)
@@ -294,5 +312,13 @@ class ExportManifestView(APIView):
     permission_classes = (IsAuthenticated, IsSuperUser)
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
+    @extend_schema(
+        parameters=[MAX_FILE_BYTES_PARAMETER],
+        responses={200: OpenApiTypes.OBJECT},
+        description=(
+            "Superuser only. Lists the product types and products with their counts, the reference data "
+            f"and the users that a product export refers to. The keys are documented at {DOCS_URL}"
+        ),
+    )
     def get(self, request):
         return Response(build_manifest(request, max_file_bytes_from(request)))
