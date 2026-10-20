@@ -119,7 +119,7 @@ pandas==3.0.6
 parameterized==0.9.0
 pikepdf==10.17.0
 pilkit==3.0
-pillow==12.3.0
+pillow==13.0.0
 prometheus_client==0.26.0
 prompt_toolkit==3.0.53
 propcache==0.5.4
