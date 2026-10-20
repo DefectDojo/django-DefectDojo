@@ -62,7 +62,10 @@ MAX_FILE_BYTES_PARAMETER = OpenApiParameter(
     "max_file_bytes",
     OpenApiTypes.INT,
     OpenApiParameter.QUERY,
-    description="Largest file, in bytes, that the export carries inline as base64. A larger file keeps its size and has no data.",
+    description=(
+        "File size cap in bytes. The product export carries a file of this size or less inline as base64, "
+        "and a larger file keeps its size with no data. The manifest counts larger files in files_over_cap."
+    ),
     default=MAX_FILE_BYTES_DEFAULT,
 )
 SCHEMA_VERSION = 1
