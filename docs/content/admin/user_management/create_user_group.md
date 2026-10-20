@@ -99,6 +99,26 @@ Users are added to a Group **one at a time**. To add several Users, repeat the s
 
 A new Member can open the Group's page from **Settings > Users & Permissions > Groups**, which lists the Groups they belong to. Seeing every Group needs the **View Group** configuration permission.
 
+### Add a User to Groups from the User page
+
+You can also add one User to several Groups at once from that User's page, which is often quicker when onboarding someone.
+
+1. Navigate to **Settings > Users & Permissions > Users** and open the User.
+
+2. In the card listing the Groups the User can access, click **Add to Group**. The button is shown to Superusers and to Users who can manage the Members of at least one Group.
+
+3. In the **Add to Group** window, open the **Groups** drop\-down and choose one or more Groups. Only Groups whose Members you can manage are listed, and Groups the User already belongs to are left out.
+
+4. Open the **Role** drop\-down and choose the Group Role the User will hold in each selected Group. The **Owner** Role is offered only when you can grant it in every selected Group.
+
+5. Click **Submit**. The new Groups appear in the card straight away.
+
+If some Groups accept the User and others refuse (for example, because your Role in one of them does not allow adding Members), the accepted Memberships are saved, the window stays open, and a message lists each refused Group with the reason. Change the selection or the Role and submit again, or close the window.
+
+To take a User out of a Group from the same card, click the "⋮" button at the start of the Group's row, select **Remove**, and confirm. The User's access through that Group ends immediately. Removing a Membership with the **Owner** Role takes the same permission as granting it.
+
+### Add Users through the API
+
 If you need to add a large number of Users, you can also create Group Members through the API. Send one `POST` request per User to the `dojo_group_members` endpoint, with the `group`, `user` and `role` of the new Member. The `role` is the numeric ID of the Role, which you can look up on the `roles` endpoint.
 
 ### Edit or Remove a Member from a User Group
