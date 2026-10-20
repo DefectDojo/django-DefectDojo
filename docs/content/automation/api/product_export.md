@@ -58,11 +58,12 @@ An example product entry, with Locations off:
 {"id": 2, "name": "Security How-to", "prod_type": 2, "counts": {"engagements": 5, "tests": 10, "findings": 15, "endpoints": 2, "notes": 3, "files": 0, "files_over_cap": 0, "risk_acceptances": 0, "finding_groups": 0}}
 ```
 
-Three counts need a closer look when you compare the manifest with a product stream:
+Four counts need a closer look when you compare the manifest with a product stream:
 
 - `endpoints` in the manifest is the number of endpoints in the product. With Locations on, it is the number of locations in the product. In the stream, `end.counts.endpoints` is the number of endpoint entries on finding lines. One endpoint on three findings counts three times in the stream. The two numbers differ on purpose.
 - `notes` counts one entry per owner on both sides. The owners are engagements, tests, findings and risk acceptances. A note on two findings counts twice.
 - `files` and `files_over_cap` count the file entries on engagements, tests and findings on both sides. A risk acceptance's proof is not counted.
+- `finding_groups` in the manifest is the number of finding groups in the product. In the stream, it is the number of distinct finding groups on finding lines. A finding group with no findings counts in the manifest and not in the stream.
 
 The manifest takes one parameter:
 
@@ -94,7 +95,10 @@ The lines come in this order:
 5. Every `risk_acceptance`, by id.
 6. One `end` line.
 
-The stream does not nest objects. A test line names its engagement by id, and a finding line names its test by id.
+The product and each engagement, test, finding and risk acceptance have a line of their own.
+A line does not nest one of these objects in another. It names them by id.
+For example, a test line names its engagement by id, and a finding line names its test by id.
+Notes, files, endpoint entries and finding groups are nested in the line that holds them. The product on the header line nests its product type.
 A stream that has no `end` line is incomplete. The connection dropped before the export finished, so export the product again.
 The number of lines is `1 + engagements + tests + findings + risk_acceptances + 1`, from `end.counts`.
 
@@ -174,6 +178,7 @@ Engagement, test and finding lines carry their files in `files`. Each file entry
 A file of `max_file_bytes` or less carries its contents.
 A larger file keeps its `size`, and `data_base64` is `null`. The export has no download link for it.
 To carry larger files, raise `max_file_bytes`. For example, `?max_file_bytes=52428800` carries files up to 50 MiB.
+While the server writes a line, it holds the files of that line and their base64 in memory. That is about four times the size of the files, for one line at a time.
 A file that is gone from storage has `size` and `data_base64` set to `null`, and `"error": "missing"`.
 
 ### The end line
