@@ -71,9 +71,9 @@ Each Full Risk Acceptance adds additional context to Risk Acceptance, such as:
 
 Expiration is unique to Full Risk Acceptance objects, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. When a Risk Acceptance expires, its Findings are set back to Active only if **Reactivate Findings on Expiration** is checked on it (it is by default). With that option unchecked, the Findings stay Risk Accepted after the expiration date.
 
-A new Risk Acceptance starts with its **Expiration Date** filled in: today plus the **Default Risk Acceptance Days** setting on the System Settings page (180 unless changed). The date sits in the main part of the form, so you can see it, change it, or clear it before submitting. A Risk Acceptance with no expiration date never expires. If the setting is 0, new Risk Acceptances start with no date.
+A new Risk Acceptance starts with its **Expiration Date** filled in: today plus the **Default Risk Acceptance Days** setting on the System Settings page (180 unless changed, and 180 when the field is left empty). The date sits in the main part of the form, so you can see it, change it, or clear it before submitting. A Risk Acceptance with no expiration date never expires. If the setting is 0, new Risk Acceptances start with no date.
 
-The API follows the same rule: a `POST /api/v2/risk_acceptance/` that leaves out `expiration_date` gets the default date, and one that sends `"expiration_date": null` creates a Risk Acceptance that never expires.
+The API follows the same rule: a `POST /api/v2/risk_acceptance/` that leaves out `expiration_date` gets the default date, and one that sends `"expiration_date": null` creates a Risk Acceptance that never expires. The `accept_risks` actions (`POST /api/v2/findings/accept_risks/`, `/api/v2/engagements/{id}/accept_risks/` and `/api/v2/tests/{id}/accept_risks/`) and a security exception request (`POST /api/v2/risk_acceptance/request/`, see [Asking for an exception](#asking-for-an-exception)) do the same.
 
 #### How to Complete a Full Risk Acceptance
 
@@ -97,6 +97,24 @@ Having opened an individual Finding, click the gear icon in the top right corner
 Having selected a Finding/Findings from within a table, click the **Risk Acceptance** button that appears at the top and select either **Add to New Risk Acceptance** or **Add to Existing Risk Acceptance** and fill out the required fields. 
 
 Findings can only be added to a single Risk Acceptance at once.  If the **Risk Acceptance** button is unclickable, it’s likely because one of the selected Findings has already been added to a Full Risk Acceptance object.
+
+##### One Risk Acceptance per Finding
+
+A Finding belongs to one Risk Acceptance at a time. A Finding that is already Risk Accepted, through another Full Risk Acceptance or a Simple Risk Acceptance, cannot be added to a second one, and with Risk Acceptances 2.0 enabled neither can a Finding that an undecided security exception request already names. The Findings step of **New Risk Acceptance** and **Add Findings** on an existing Risk Acceptance list only Findings that are not Risk Accepted, not duplicates, and not waiting on an exception request.
+
+The API applies the same rule. `POST /api/v2/risk_acceptance/`, a `PATCH` or `PUT` that adds Findings, and `POST /api/v2/risk_acceptance/request/` return `400` and name each Finding that is already held, for example:
+
+```json
+{
+    "accepted_findings": [
+        "Finding \"SQL Injection\" (1234) is already risk accepted. A finding can be in only one risk acceptance."
+    ]
+}
+```
+
+A request reports it under `findings` instead. Findings a Risk Acceptance already holds can be sent again in an update. A Finding whose Risk Acceptance has expired is no longer Risk Accepted, so it can be accepted again.
+
+Automations follow the same rule and skip a Finding that is already held rather than adding it to a second Risk Acceptance: standing acceptances (the first one that matches takes the Finding) and the Rules Engine actions that add Findings to, or create, a Risk Acceptance.
 
 ![Risk Acceptance button](images/RA_image5.png)
 
@@ -633,6 +651,15 @@ deliberately cannot move back to Proposed, so there is no transition that would 
 
 `reason` is required: a request with no argument cannot be reviewed. `justification` is optional and
 is recorded against every Finding in the request, where it can be edited per Finding afterwards.
+
+**Accept Until** starts at today plus the **Default Risk Acceptance Days** setting, as every new Risk
+Acceptance does, counted from the day of the request; whoever approves it can change the date. Clear
+it to ask for an exception that never expires. Over the API, a request that leaves out
+`expiration_date` gets the same default, and `"expiration_date": null` asks for one that never
+expires.
+
+A Finding that is already Risk Accepted, or that another undecided request already names, cannot be
+requested again (see [One Risk Acceptance per Finding](#one-risk-acceptance-per-finding)).
 
 Requesting needs the same permission as editing a Risk Acceptance, plus permission to view every
 Finding named. Deciding the request needs **Risk Acceptance Approve**, which is what keeps the
