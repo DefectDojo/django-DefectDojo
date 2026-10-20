@@ -24,7 +24,6 @@ from dojo.models import (
 )
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
-from unittests.test_apiv2_export import admin_client
 
 # Keyed on locations_enabled(). Each batch of findings runs one query per prefetch in finding_prefetch(): notes,
 # their history, vulnerability_references, finding_cwe_set, reviewers, found_by, risk_acceptance_set, tags,
@@ -43,7 +42,7 @@ class TestProductExportQueryCount(DojoAPITestCase):
 
     def setUp(self):
         super().setUp()
-        self.client = admin_client()
+        self.login_as_admin()
         self.admin = Dojo_User.objects.get(username="admin")
         self.product = Product.objects.get(id=2)
         self.url = reverse("export-product", args=[2])
