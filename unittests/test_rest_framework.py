@@ -1819,8 +1819,10 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "created": "2020-11-09T23:13:08.520000Z",
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
+            # 226 is already in the fixture's risk acceptance 1, and a finding belongs to one acceptance at a
+            # time, so the new acceptance takes 227: the same test, not yet risk accepted.
             "accepted_findings": [
-                226,
+                227,
             ],
             "notes": [],
         }
