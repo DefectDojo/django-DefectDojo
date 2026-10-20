@@ -32,6 +32,11 @@ gets pointed at two different sets of Assets. The second one is named with a suf
 **New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
 rule, because both create one.
 
+A rule started with **New Rule** has no name until you type one into the heading at the top of the
+editor, and **Save** (or **Run Now**, which saves first) refuses it until you do. Rule names are
+unique, and the name is how you find the rule again in the rule list, on **Runs** and on
+**Deliveries**. The description under the name is optional.
+
 ## The editor
 
 Open a rule to edit it, or start one of the two ways above.
