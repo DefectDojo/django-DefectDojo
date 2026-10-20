@@ -53,7 +53,7 @@ The export buttons on each stage produce the submission package in JSON, Markdow
 
 After you submit a stage on the reporting platform, record it on the stage: enter the reference the platform returned and confirm. The clock for that stage stops, marked as met, unless it had already breached its deadline, in which case it stays marked as breached. If you submitted at a time other than now, set the submission time and give a justification.
 
-Recording a submission also adds a note to each finding the report concerns, and to the engagements those findings belong to, stating the regime, the stage, the submission time and the reference. The findings are the ones on the report's Asset that carry a vulnerability ID named in **Advisory Reference** (separate several IDs with commas), plus, where the report was started from a PSIRT advisory, the findings that advisory produced. Duplicates are skipped. The notes are a record only. A submission never changes a finding's status.
+Recording a submission also adds a note to each finding the report concerns, and to the engagements those findings belong to, stating the regime, the stage, the submission time and the reference. The findings are the ones on the report's Asset that carry a vulnerability ID named in **Advisory Reference** (separate several IDs with commas or semicolons), plus, where the report was started from a PSIRT advisory, the findings that advisory produced. Duplicates are skipped. The notes are a record only. A submission never changes a finding's status.
 
 Submitting a severe incident's notification arms its final report, anchored on that submission.
 
@@ -67,7 +67,7 @@ On Dashboards, the **CRA Article 14 Deadlines** widget counts the pending stages
 
 ## Notifications
 
-A scheduled check runs every 15 minutes and marks each stage that has entered its warning window or passed its deadline, with or without PSIRT. Each one sends a notification once: **CRA deadline due soon** and **CRA deadline breached**, naming the stage, the report and the Asset. They are delivered through the channels chosen for **Other** events in notification settings; a superuser with no settings of their own receives them through the system defaults.
+A scheduled check runs every 15 minutes and marks each stage that has entered its warning window or passed its deadline, with or without PSIRT. Each one sends a notification once: **CRA deadline due soon** and **CRA deadline breached**, naming the stage, the report and the Asset. They go to the users who can view the report's Asset, through the channels each has chosen for **Other** events in notification settings, and to superusers; a superuser with no settings of their own receives them through the system defaults.
 
 A breach is recorded and does not clear. A stage submitted after its deadline closes as breached, not as met.
 
