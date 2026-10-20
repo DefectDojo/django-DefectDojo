@@ -37,6 +37,8 @@ The text you typed stays when you switch, so typing `risk`, pressing **Tab**, th
 | **Option+Enter** / **Alt+Enter** | Open the row actions menu |
 | **Esc** | Close the dialog |
 
+For the keys that work outside the dialog, press **?** on any page or see [Keyboard Shortcuts](/navigation/pro__keyboard_shortcuts/).
+
 Results are ordinary links, so a middle-click or a **Cmd**/**Ctrl**-click also opens a new tab. The row actions menu (also on the **...** button of the selected row) offers **Open**, **Open in New Tab**, **Copy Link**, **Copy ID** for records, and **Pin to Sidebar** or **Remove Sidebar Pin** for pages.
 
 Results are always **scoped to what you are authorized to view**: global search never surfaces objects you would not otherwise have access to. (Finding Templates are the one exception: like elsewhere in DefectDojo, they are visible to any signed-in user.)
