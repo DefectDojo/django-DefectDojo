@@ -36,6 +36,7 @@ from dojo.models import (
     Finding_Group,
     Notes,
     Product,
+    Product_Platform,
     Risk_Acceptance,
     System_Settings,
     Test,
@@ -486,8 +487,15 @@ class TestExportManifest(DojoAPITestCase):
     def test_reference_data(self):
         reference = self.manifest["reference"]
         self.assertEqual(
-            {"sla_configurations", "development_environments", "regulations", "test_types", "note_types", "users"},
+            {
+                "sla_configurations", "development_environments", "regulations", "test_types", "note_types",
+                "product_platforms", "product_lifecycles", "product_origins", "users",
+            },
             set(reference),
+        )
+        self.assertEqual(
+            list(Product_Platform.objects.order_by("id").values_list("value", flat=True)),
+            [platform["value"] for platform in reference["product_platforms"]],
         )
         self.assertEqual(Dojo_User.objects.count(), len(reference["users"]))
         user1 = next(user for user in reference["users"] if user["username"] == "user1")

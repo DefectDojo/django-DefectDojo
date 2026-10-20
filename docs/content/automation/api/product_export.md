@@ -46,7 +46,7 @@ The response is one JSON object with these keys:
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
-| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types` and `users`. Each user carries its `contact_info`. |
+| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in these tables. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |

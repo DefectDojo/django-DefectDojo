@@ -50,6 +50,12 @@ from dojo.models import (
 )
 from dojo.note_type.api.serializer import NoteTypeSerializer
 from dojo.notes.helper import notes_prefetch
+from dojo.product_attributes.api.serializer import (
+    ProductLifecycleSerializer,
+    ProductOriginSerializer,
+    ProductPlatformSerializer,
+)
+from dojo.product_attributes.models import Product_Lifecycle, Product_Origin, Product_Platform
 from dojo.regulations.api.serializer import RegulationSerializer
 from dojo.test.api.serializer import TestTypeSerializer
 from dojo.user.authentication import token_expires_at
@@ -291,6 +297,9 @@ def build_manifest(request, max_file_bytes: int) -> dict:
             "regulations": RegulationSerializer(Regulation.objects.order_by("id"), many=True).data,
             "test_types": TestTypeSerializer(Test_Type.objects.order_by("id"), many=True).data,
             "note_types": NoteTypeSerializer(Note_Type.objects.order_by("id"), many=True).data,
+            "product_platforms": ProductPlatformSerializer(Product_Platform.objects.order_by("id"), many=True).data,
+            "product_lifecycles": ProductLifecycleSerializer(Product_Lifecycle.objects.order_by("id"), many=True).data,
+            "product_origins": ProductOriginSerializer(Product_Origin.objects.order_by("id"), many=True).data,
             "users": ExportUserSerializer(users, many=True).data,
         },
         "product_types": product_types,
