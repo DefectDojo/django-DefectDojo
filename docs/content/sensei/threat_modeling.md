@@ -106,6 +106,8 @@ A threat model can be downloaded as **Markdown** for a design review or ticket, 
 
 The **Activity** tab lists every generation, its status and the stage it reached. Runs in progress can be **cancelled**. A failed run shows **why** it failed — a configuration problem, an input that was too long, or a temporary service error — and completed stages are checkpointed, so retrying resumes rather than starting from the beginning.
 
+A very large design can fail with a message that it is too large to extract in one answer. Retrying will not help, because the same design hits the same limit. Shorten the design, or split it into smaller parts (for example, one per subsystem) and generate a threat model for each.
+
 ## Costs
 
 Threat modeling calls a large language model, and each generation has a cost. A generation makes roughly eight calls, and usage is recorded per run alongside Sensei's other LLM usage, so you can see what a model cost to produce. Cancelling a run stops further calls at the next stage boundary.
