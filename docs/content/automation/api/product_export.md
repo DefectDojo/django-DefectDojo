@@ -130,6 +130,7 @@ A finding line differs from `/api/v2/findings/` in these fields:
 - `endpoints` is a list of endpoint entries, not ids.
 - `files` is a list of file entries, not ids.
 - `risk_acceptances` is a list of risk acceptance ids.
+- `request_response_pairs` replaces `request_response`. It holds every request and response pair of the finding, by id, as `/api/v2/request_response_pairs/` returns them: `id`, `finding`, `burpRequestBase64` and `burpResponseBase64`. The two base64 values are the stored bytes, unchanged.
 - `accepted_risks` and `related_fields` are not on the line.
 
 Each endpoint entry has these keys:
@@ -171,6 +172,7 @@ Engagement, test and finding lines carry their files in `files`. Each file entry
 |-----|---------------|
 | `id` | The file id. |
 | `title` | The file title. |
+| `filename` | The stored file name, with its extension. |
 | `size` | The size in bytes. |
 | `content_type` | The content type, from the file name. It is `null` when the file name has no known extension. |
 | `data_base64` | The file contents in base64. |

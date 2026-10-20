@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from collections.abc import Iterator
 
@@ -32,6 +33,7 @@ from dojo.export.api.serializers import (
 from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.models import (
+    BurpRawRequestResponse,
     Development_Environment,
     Dojo_User,
     Endpoint,
@@ -85,7 +87,20 @@ class NDJSONRenderer(BaseRenderer):
     format = "ndjson"
 
     def render(self, data, accepted_media_type=None, renderer_context=None) -> bytes:
-        return JSONRenderer().render(data) + b"\n"
+        try:
+            return JSONRenderer().render(data) + b"\n"
+        except ValueError:
+            return JSONRenderer().render(finite(data)) + b"\n"
+
+
+def finite(value):
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, dict):
+        return {key: finite(item) for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [finite(item) for item in value]
+    return value
 
 
 def source_block() -> dict:
@@ -123,7 +138,7 @@ def finding_prefetch() -> tuple:
         "jira_issue",
         "finding_group_set__jira_issue",
         "files",
-        "burprawrequestresponse_set",
+        Prefetch("burprawrequestresponse_set", queryset=BurpRawRequestResponse.objects.order_by("id")),
         "finding_meta",
     )
 
@@ -327,6 +342,7 @@ class ProductExportView(APIView):
             product_lines(product, request, max_file_bytes), content_type="application/x-ndjson",
         )
         response["Content-Disposition"] = f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"'
+        response["X-Accel-Buffering"] = "no"
         return response
 
 

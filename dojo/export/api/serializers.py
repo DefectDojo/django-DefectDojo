@@ -1,11 +1,12 @@
 import base64
 import mimetypes
+from pathlib import Path
 
 from rest_framework import serializers
 
 from dojo.endpoint.api.serializer import EndpointStatusSerializer
 from dojo.engagement.api.serializer import EngagementSerializer
-from dojo.finding.api.serializer import FindingSerializer
+from dojo.finding.api.serializer import BurpRawRequestResponseMultiSerializer, FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
 from dojo.models import FileUpload, Finding, Risk_Acceptance
@@ -33,7 +34,12 @@ def _file_payload(field_file, max_file_bytes: int) -> dict:
 
 
 def export_file(file_upload: FileUpload, max_file_bytes: int) -> dict:
-    return {"id": file_upload.id, "title": file_upload.title, **_file_payload(file_upload.file, max_file_bytes)}
+    return {
+        "id": file_upload.id,
+        "title": file_upload.title,
+        "filename": Path(file_upload.file.name).name,
+        **_file_payload(file_upload.file, max_file_bytes),
+    }
 
 
 def export_proof(risk_acceptance: Risk_Acceptance, max_file_bytes: int) -> dict | None:
@@ -90,6 +96,10 @@ class ExportTestSerializer(ExportFilesMixin, TestSerializer):
 class ExportFindingSerializer(ExportFilesMixin, FindingSerializer):
     accepted_risks = None
     related_fields = None
+    request_response = None
+    request_response_pairs = BurpRawRequestResponseMultiSerializer(
+        source="burprawrequestresponse_set", many=True, read_only=True,
+    )
     risk_acceptances = serializers.PrimaryKeyRelatedField(source="risk_acceptance_set", many=True, read_only=True)
 
     def __init__(self, *args, **kwargs):

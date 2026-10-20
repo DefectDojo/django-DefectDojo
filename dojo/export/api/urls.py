@@ -9,5 +9,5 @@ def add_export_urls(urls: list) -> list:
     return [
         *urls,
         re_path(rf"^{prefix}api/v2/export/manifest/$", ExportManifestView.as_view(), name="export-manifest"),
-        re_path(rf"^{prefix}api/v2/export/products/(?P<pk>\d+)/$", ProductExportView.as_view(), name="export-product"),
+        re_path(rf"^{prefix}api/v2/export/products/(?P<pk>[0-9]+)/$", ProductExportView.as_view(), name="export-product"),
     ]

@@ -2,6 +2,7 @@ import base64
 import json
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from django.core.files.base import ContentFile
 from django.test import RequestFactory
@@ -118,11 +119,13 @@ class TestExportSerializers(DojoAPITestCase):
         return export_endpoint_entries(finding, EndpointStatusSerializer(), locations=False)
 
     def test_export_file_inlines_small_file(self):
-        entry = export_file(self.make_file_upload(), 10)
+        file_upload = self.make_file_upload()
+        entry = export_file(file_upload, 10)
         self.assertEqual(b"hello", base64.b64decode(entry["data_base64"]))
         self.assertEqual(5, entry["size"])
         self.assertEqual("text/plain", entry["content_type"])
         self.assertEqual("poc.txt", entry["title"])
+        self.assertEqual(Path(file_upload.file.name).name, entry["filename"])
 
     def test_export_file_over_cap_has_no_data(self):
         entry = export_file(self.make_file_upload(), 4)
@@ -175,7 +178,8 @@ class TestExportSerializers(DojoAPITestCase):
     def test_finding_serializer_swaps_only_the_nested_fields(self):
         Risk_Acceptance.objects.get(id=1).accepted_findings.add(self.finding)
         data = ExportFindingSerializer(context=self.context).to_representation(self.finding)
-        expected = set(FindingSerializer(context=self.context).fields) - {"accepted_risks", "related_fields"} | {"risk_acceptances"}
+        expected = set(FindingSerializer(context=self.context).fields) - {"accepted_risks", "related_fields", "request_response"}
+        expected |= {"risk_acceptances", "request_response_pairs"}
         self.assertEqual(expected, set(data))
         self.assertTrue(data["endpoints"])
         for entry in data["endpoints"]:
@@ -285,6 +289,7 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertTrue(response.streaming)
         self.assertEqual("application/x-ndjson", response["Content-Type"])
         self.assertIn("defectdojo-product-2-export.ndjson", response["Content-Disposition"])
+        self.assertEqual("no", response["X-Accel-Buffering"])
 
     def test_accept_ndjson_is_not_406(self):
         for accept in ("application/x-ndjson", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"):
@@ -302,6 +307,12 @@ class TestProductExportStream(DojoAPITestCase):
         self.finding.notes.add(Notes.objects.create(entry="Bestätigt 🎯", author=self.admin))
         data = self.line_data("finding", self.finding.id, ndjson_lines(self.client.get(self.url)))
         self.assertIn("Bestätigt 🎯", [note["entry"] for note in data["notes"]])
+
+    def test_non_finite_float_is_null(self):
+        Finding.objects.filter(pk=self.finding.pk).update(cvssv3_score=float("nan"))
+        lines = ndjson_lines(self.client.get(self.url))
+        self.assertIsNone(self.line_data("finding", self.finding.id, lines)["cvssv3_score"])
+        self.assertEqual("end", lines[-1]["type"])
 
     def test_header_line(self):
         header = self.lines[0]
@@ -349,7 +360,8 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual("grp", data["finding_groups"][0]["name"])
         self.assertEqual([self.ra.id], data["risk_acceptances"])
         self.assertEqual([{"name": "k", "value": "v"}], data["finding_meta"])
-        self.assertEqual("GET / HTTP/1.1", data["request_response"]["req_resp"][0]["request"])
+        self.assertEqual(base64.b64encode(b"GET / HTTP/1.1").decode(), data["request_response_pairs"][0]["burpRequestBase64"])
+        self.assertNotIn("request_response", data)
         self.assertEqual(self.finding.test_id, data["test"])
         self.assertNotIn("accepted_risks", data)
         self.assertEqual(self.finding.hash_code, data["hash_code"])
