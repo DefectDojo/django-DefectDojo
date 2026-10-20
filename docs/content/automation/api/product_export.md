@@ -65,7 +65,8 @@ The manifest takes one parameter:
 |-----------|------|---------|--------------|
 | `max_file_bytes` | integer, 0 or more | `10485760` (10 MiB) | The file cap. A file larger than this counts in `files_over_cap`. |
 
-A value that is not a whole number of 0 or more gets a 400.
+An empty value, as in `?max_file_bytes=`, uses the default.
+Any other value that is not a whole number of 0 or more gets a 400.
 To count `files_over_cap`, the server reads the size of every file in storage. On an instance with many files, the manifest can take some time.
 
 ## The product stream: `GET /api/v2/export/products/{id}/`
@@ -203,7 +204,8 @@ An example `end` line:
 - Endpoint metadata. Product metadata (`product_meta` on the header) and finding metadata (`finding_meta`) do cross.
 - JIRA issue keys and JIRA project settings.
 - Product members and product groups.
-- Engagement presets, API scan configurations and tool configurations. Their ids stay on the engagement and test lines.
+- Engagement presets, report types and CI/CD infrastructure. Their ids stay on the engagement line: `preset`, `report_type`, `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
+- API scan configurations and the tool configurations they use. The `api_scan_configuration` id stays on the test line.
 - Contacts, for example an engagement's `requester`. The id stays on the engagement line.
 - Test import history, check lists, languages, technologies and benchmarks.
 - Secrets and instance settings: SSO, JIRA and tool credentials, notifications, API keys and passwords.

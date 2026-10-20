@@ -235,6 +235,11 @@ class TestProductExportStream(DojoAPITestCase):
                 self.assertEqual(400, response.status_code, response.content[:1000])
                 self.assertIn("max_file_bytes", response.json())
 
+    def test_empty_max_file_bytes_uses_the_default(self):
+        response = self.client.get(self.url, {"max_file_bytes": ""})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(MAX_FILE_BYTES_DEFAULT, ndjson_lines(response)[0]["max_file_bytes"])
+
     def test_response_streams_ndjson(self):
         response = self.client.get(self.url)
         self.assertTrue(response.streaming)
@@ -416,11 +421,15 @@ class TestExportManifest(DojoAPITestCase):
         Engagement.objects.filter(product_id=2).exclude(id=first.test.engagement_id).first().risk_acceptance.add(
             self.risk_acceptance,
         )
-        params = {"max_file_bytes": 4}
-        counts = self.get_results_by_id(self.client.get(self.url, params).json()["products"], 2)["counts"]
-        end = ndjson_lines(self.client.get(reverse("export-product", args=[2]), params))[-1]["counts"]
-        for key in ("engagements", "tests", "findings", "notes", "files", "files_over_cap", "risk_acceptances"):
-            self.assertEqual(end[key], counts[key], key)
+        for params in ({}, {"max_file_bytes": 4}):
+            with self.subTest(params=params):
+                counts = self.get_results_by_id(self.client.get(self.url, params).json()["products"], 2)["counts"]
+                end = ndjson_lines(self.client.get(reverse("export-product", args=[2]), params))[-1]["counts"]
+                for key in ("engagements", "tests", "findings", "notes", "files", "files_over_cap", "risk_acceptances"):
+                    self.assertEqual(end[key], counts[key], key)
+                # Every seeded file holds 5 bytes, so all are over a cap of 4 and none are over the default.
+                self.assertEqual(counts["files"] if params else 0, counts["files_over_cap"])
+                self.assertEqual(1, counts["finding_groups"])
 
     def test_reference_data(self):
         reference = self.manifest["reference"]
