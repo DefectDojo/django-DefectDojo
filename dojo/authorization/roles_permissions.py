@@ -899,6 +899,7 @@ def get_roles_with_permissions():
             Permissions.Input_Edit,
             Permissions.Input_Add,
             Permissions.Input_Delete,
+            Permissions.Input_Flow_View,
             Permissions.Long_Risk_Acceptance_Eng_View,
             Permissions.Long_Risk_Acceptance_Eng_Add,
             Permissions.Long_Risk_Acceptance_Rule_Eng_Add,
