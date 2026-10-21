@@ -1,64 +1,176 @@
 {% extends "base.html" %}
-{% load authorization_tags %}
+{% load i18n %}
 {% load static %}
 
 {% block content %}
     {{ block.super }}
-    <div class="support-page-wrapper">
-        <h2 style="color: #546474;">Options are available for teams of all sizes.</h2>
-        <br />
-        <div class="support-container">
-            <div class="support-box">
-                <div class="support-box shape community hover">
-                    <h2 style="text-align: center;">Community Support</h2>
-                    <div class="divider dark"></div>
-                    <p>What's included:</p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Support from the community via OWASP Slack</p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Community-based discussion</p>
-                </div>
-                <a href="https://owasp.org/slack/invite" target="_blank" class="btn btn-primary community support dark">Join #defectdojo</a>
+    <div class="sp">
+
+        {# ---------- Page header ---------- #}
+        <header class="sp-header">
+            <h1 class="sp-title">{% trans "Get help with DefectDojo" %}</h1>
+            <p class="sp-lede">
+                {% blocktrans trimmed %}
+                    Every open-source install is backed by the DefectDojo community. When your program needs
+                    more, DefectDojo Pro adds commercial support and capabilities built to run vulnerability
+                    management at scale.
+                {% endblocktrans %}
+            </p>
+            <nav class="sp-jump" aria-label="{% trans 'On this page' %}">
+                <a href="#sp-community"><i class="fa-solid fa-people-group"></i> {% trans "Community support" %}</a>
+                <a href="#sp-pro"><i class="fa-solid fa-rocket"></i> {% trans "DefectDojo Pro" %}</a>
+            </nav>
+        </header>
+
+        {# ---------- Community support ---------- #}
+        <section id="sp-community" class="sp-section">
+            <div class="sp-section-head">
+                <h2>{% trans "Community support" %} <span class="sp-pill">{% trans "Free" %}</span></h2>
+                <p>{% trans "Ask questions, find answers and follow the project." %}</p>
             </div>
-            
-            <div class="support-box">
-                <div class="support-box shape hover commercial">
-                    <h2 style="text-align: center;">Go Pro!</h2>
-                    <div class="divider light"></div>
-                    <p>What's included:</p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> New UI 
-                       <i class="fa-solid fa-circle-question has-popover"
-                        data-content="A modern experience using Vue.js.">
-                        </i>
-                    </p>                        
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Connectors
-                        <i class="fa-solid fa-circle-question has-popover"
-                        data-content="Automatically pull results directly from your tools.">
-                        </i>
-                    </p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Insights
-                        <i class="fa-solid fa-circle-question has-popover"
-                        data-content="Dashboards about your results, tools, and security program.">
-                        </i>
-                    </p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Data Enrichment
-                        <i class="fa-solid fa-circle-question has-popover"
-                        data-content="Pro automatically pulls EPSS and real-world data on the risk of your vulnerabilities for better prioritization.">
-                        </i>
-                    </p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Universal Importer
-                        <i class="fa-solid fa-circle-question has-popover"
-                        data-content="Add to existing CI/CD security testing process and bring visibility to your test results in Dojo.">
-                        </i>
-                    </p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Async Functions
-                        <i class="fa-solid fa-circle-question has-popover"
-                        data-content="From importing to deleting, Pro has the option to make key functions aysnc for speed and performance.">
-                        </i>
-                    </p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Support directly from the DefectDojo Team</p>
-                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Assistance with best practice and implementation</p>
+
+            <div class="sp-community">
+                <a class="sp-slack" href="https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA" target="_blank" rel="noopener noreferrer">
+                    <span class="sp-slack-icon"><i class="fa-brands fa-slack"></i></span>
+                    <span class="sp-slack-body">
+                        <span class="sp-card-title">{% trans "Ask the community on Slack" %}</span>
+                        <span class="sp-card-text">
+                            {% blocktrans trimmed %}
+                                Join the DefectDojo Community Slack, where users and maintainers answer questions
+                                about installing, configuring and using DefectDojo in the #defectdojo channel.
+                            {% endblocktrans %}
+                        </span>
+                        <span class="sp-slack-cta">{% trans "Join DefectDojo Slack" %} <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </span>
+                </a>
+
+                <div class="sp-links">
+                    <a class="sp-link" href="https://docs.defectdojo.com/" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-book sp-link-icon"></i>
+                        <span>
+                            <span class="sp-card-title">{% trans "Documentation" %}</span>
+                            <span class="sp-card-text">{% trans "Install, import, triage and report, step by step." %}</span>
+                        </span>
+                    </a>
+                    <a class="sp-link" href="https://docs.defectdojo.com/get_started/about/faq/" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-circle-question sp-link-icon"></i>
+                        <span>
+                            <span class="sp-card-title">{% trans "FAQ" %}</span>
+                            <span class="sp-card-text">{% trans "Answers to the questions people ask most." %}</span>
+                        </span>
+                    </a>
+                    <a class="sp-link" href="https://github.com/DefectDojo/django-DefectDojo" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-brands fa-github sp-link-icon"></i>
+                        <span>
+                            <span class="sp-card-title">{% trans "GitHub" %}</span>
+                            <span class="sp-card-text">{% trans "Report a bug, request a feature or contribute." %}</span>
+                        </span>
+                    </a>
+                    <a class="sp-link" href="https://owasp.org/www-project-defectdojo/" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-shield-halved sp-link-icon"></i>
+                        <span>
+                            <span class="sp-card-title">{% trans "OWASP project" %}</span>
+                            <span class="sp-card-text">{% trans "DefectDojo is an OWASP Flagship Project." %}</span>
+                        </span>
+                    </a>
                 </div>
-                <a href="https://cloud.defectdojo.com/onboarding?payg=1" target="_blank" class="btn btn-primary support commercial light">Get Pro from $100/mo</a>
             </div>
-        </div>
+        </section>
+
+        {# ---------- DefectDojo Pro ---------- #}
+        <section id="sp-pro" class="sp-pro">
+            <div class="sp-pro-hero">
+                <div class="sp-pro-copy">
+                    <p class="sp-eyebrow">{% trans "DefectDojo Pro" %}</p>
+                    <h2>{% trans "The same DefectDojo, built to run your whole program" %}</h2>
+                    <p>
+                        {% blocktrans trimmed %}
+                            Pro keeps everything you use today and adds connectors that bring findings in and push
+                            work out, prioritization by real-world exploitation, a no-code Triage Engine, AI
+                            assistance, compliance evidence and enterprise sign-on.
+                        {% endblocktrans %}
+                    </p>
+                    <div class="sp-pro-actions">
+                        <a class="sp-btn sp-btn-primary" href="https://cloud.defectdojo.com/onboarding?payg=1" target="_blank" rel="noopener noreferrer">{% trans "Get Pro from $100/mo" %}</a>
+                        <a class="sp-btn sp-btn-ghost" href="https://docs.defectdojo.com/get_started/about/defectdojo_versions/" target="_blank" rel="noopener noreferrer">{% trans "Compare editions" %} <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                    <dl class="sp-stats">
+                        <div><dt>140+</dt><dd>{% trans "upstream connectors" %}</dd></div>
+                        <div><dt>9</dt><dd>{% trans "compliance frameworks" %}</dd></div>
+                        <div><dt>24h</dt><dd>{% trans "EPSS and KEV refresh" %}</dd></div>
+                    </dl>
+                </div>
+                <figure class="sp-shot">
+                    <img src="{% static 'dojo/img/support/pro-command-center.jpg' %}"
+                         alt="{% trans 'The DefectDojo Pro Command Center, showing finding sources, the Posture Score and outcomes' %}"
+                         loading="lazy" width="1600" height="774">
+                    <figcaption>{% trans "The Pro Command Center: where findings come from, what survives deduplication and triage, and what needs action." %}</figcaption>
+                </figure>
+            </div>
+
+            <div class="sp-features">
+                <article class="sp-feature">
+                    <i class="fa-solid fa-plug sp-feature-icon"></i>
+                    <h3>{% trans "Connectors" %}</h3>
+                    <p>{% trans "Pull findings and assets from the APIs of 140+ scanners, cloud platforms and code hosts on a schedule. No export-and-upload scripts." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: export each scan and upload it" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-crosshairs sp-feature-icon"></i>
+                    <h3>{% trans "Risk-based prioritization" %}</h3>
+                    <p>{% trans "EPSS, CISA KEV and exploit data on every CVE, refreshed daily, combined with reachability and business context into one priority score." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: ordered by severity and CVSS" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-diagram-project sp-feature-icon"></i>
+                    <h3>{% trans "Triage Engine" %}</h3>
+                    <p>{% trans "No-code rules that update findings, assign owners, accept risk, open tickets and notify people. Simulate a rule before it goes live." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: routine triage by hand" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-layer-group sp-feature-icon"></i>
+                    <h3>{% trans "Cross-tool dedupe and Root Causes" %}</h3>
+                    <p>{% trans "Work the same issue once, whichever scanners report it, and group findings by the single fix that clears them across every asset." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: same-tool deduplication" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-screwdriver-wrench sp-feature-icon"></i>
+                    <h3>{% trans "Remediation and ticketing" %}</h3>
+                    <p>{% trans "Turn findings into a short list of fixes with deadlines, and send work to ServiceNow, Azure DevOps, GitLab, Linear and more." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: Jira and GitHub Issues" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-gauge-high sp-feature-icon"></i>
+                    <h3>{% trans "Dashboards and reporting" %}</h3>
+                    <p>{% trans "A Posture Score you can click through, custom dashboards, and branded report templates delivered as PDF on a schedule." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: one dashboard, HTML reports" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-wand-magic-sparkles sp-feature-icon"></i>
+                    <h3>{% trans "Sensei AI and MCP" %}</h3>
+                    <p>{% trans "AI triage suggestions a person approves, fix pull requests, threat modeling, and an MCP server for the AI assistant you already use." %}</p>
+                    <p class="sp-oss">{% trans "Sensei features need a Sensei license" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-scale-balanced sp-feature-icon"></i>
+                    <h3>{% trans "Compliance evidence" %}</h3>
+                    <p>{% trans "FedRAMP POA&Ms and OSCAL, CMMC scoring, PCI DSS evidence and EU CRA Article 14 reporting, generated from your live findings." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: regulations recorded as labels" %}</p>
+                </article>
+                <article class="sp-feature">
+                    <i class="fa-solid fa-user-shield sp-feature-icon"></i>
+                    <h3>{% trans "Enterprise access" %}</h3>
+                    <p>{% trans "Single sign-on (SAML, OIDC, Entra ID, Okta), SCIM provisioning, multi-factor authentication, custom roles and audit logs." %}</p>
+                    <p class="sp-oss">{% trans "Open-source: local accounts" %}</p>
+                </article>
+            </div>
+
+            <div class="sp-pro-footer">
+                <p>{% trans "Some Pro capabilities need an add-on license." %}
+                    <a href="https://docs.defectdojo.com/get_started/about/defectdojo_versions/" target="_blank" rel="noopener noreferrer">{% trans "See the full feature comparison" %} <i class="fa-solid fa-arrow-right"></i></a>
+                </p>
+                <a class="sp-btn sp-btn-primary" href="https://cloud.defectdojo.com/onboarding?payg=1" target="_blank" rel="noopener noreferrer">{% trans "Get Pro from $100/mo" %}</a>
+            </div>
+        </section>
     </div>
 {% endblock %}
