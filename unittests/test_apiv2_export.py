@@ -419,6 +419,7 @@ class TestExportManifest(DojoAPITestCase):
     def setUpTestData(cls):
         seed_product(cls)
         UserContactInfo.objects.get_or_create(user=Dojo_User.objects.get(username="user1"))
+        Product.objects.get(id=2).tags.add("alpha", "beta")
         cls.url = reverse("export-manifest")
         client = APIClient()
         client.force_authenticate(cls.admin)
@@ -440,6 +441,24 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(str(System_Settings.objects.get(no_cache=True).install_id), self.manifest["source"]["install_id"])
         for entry in self.manifest["products"]:
             self.assertEqual(set(COUNT_KEYS), set(entry["counts"]))
+
+    def test_product_entries_carry_the_record_fields(self):
+        entry = self.get_results_by_id(self.manifest["products"], 2)
+        product = Product.objects.get(id=2)
+        self.assertEqual(
+            {"id", "name", "prod_type", "counts", "description", "tags", "business_criticality",
+             "sla_configuration", "product_manager", "technical_contact", "team_manager"},
+            set(entry),
+        )
+        self.assertEqual(product.description, entry["description"])
+        self.assertEqual(["alpha", "beta"], sorted(entry["tags"]))
+        self.assertEqual(sorted(str(tag) for tag in product.tags.all()), sorted(entry["tags"]))
+        self.assertEqual(product.sla_configuration_id, entry["sla_configuration"])
+        self.assertEqual(product.business_criticality, entry["business_criticality"])
+        self.assertEqual(
+            (product.product_manager_id, product.technical_contact_id, product.team_manager_id),
+            (entry["product_manager"], entry["technical_contact"], entry["team_manager"]),
+        )
 
     def test_token_block(self):
         token = self.client.get(self.url).json()["token"]

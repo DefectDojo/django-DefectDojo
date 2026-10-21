@@ -255,8 +255,23 @@ def _summed(products: list[dict]) -> dict[str, int]:
 def build_manifest(request, max_file_bytes: int) -> dict:
     counts = product_counts(max_file_bytes)
     products = [
-        {"id": pk, "name": name, "prod_type": prod_type_id, "counts": counts[pk]}
-        for pk, name, prod_type_id in Product.objects.order_by("id").values_list("id", "name", "prod_type_id")
+        {
+            "id": product.id,
+            "name": product.name,
+            "prod_type": product.prod_type_id,
+            "counts": counts[product.id],
+            "description": product.description,
+            "tags": [tag.name for tag in product.tags.all()],
+            "business_criticality": product.business_criticality,
+            "sla_configuration": product.sla_configuration_id,
+            "product_manager": product.product_manager_id,
+            "technical_contact": product.technical_contact_id,
+            "team_manager": product.team_manager_id,
+        }
+        for product in Product.objects.order_by("id").prefetch_related("tags").only(
+            "id", "name", "prod_type_id", "description", "business_criticality", "sla_configuration_id",
+            "product_manager_id", "technical_contact_id", "team_manager_id",
+        )
     ]
     members = defaultdict(list)
     for product in products:

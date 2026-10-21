@@ -45,7 +45,7 @@ The response is one JSON object with these keys:
 | `scan_types` | The scan types of every test on the instance, sorted. |
 | `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in these tables. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
-| `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. |
+| `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id), `counts`, and the product fields a migration tool needs: `description`, `tags` (a list of tag names), `business_criticality`, `sla_configuration` (the SLA configuration id), `product_manager`, `technical_contact` and `team_manager` (user ids). Each value is the one `/api/v2/products/` returns, `null` where that endpoint returns `null`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
 
 `install_id` stays the same for the life of the instance, with one exception.
