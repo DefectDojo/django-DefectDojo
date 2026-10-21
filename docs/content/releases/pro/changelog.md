@@ -20,6 +20,44 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## October 2026: v3.4
 
+### October 21, 2026: v3.4.201
+
+New features:
+* **(Findings)** Keyboard Triage walks a Findings list one Finding at a time. Open it with the **Triage** button or the `t` key on any Findings list, then set each Finding's status from the keyboard. Requires the **Keyboard Triage** feature flag, on by default. See [Keyboard Triage](/triage_findings/findings_workflows/pro__keyboard_triage/).
+* **(Navigation)** The Pro UI has keyboard shortcuts. Press `?` for the full list, and use `j` and `k` to move between rows on every list. See [Keyboard Shortcuts](/navigation/pro__keyboard_shortcuts/).
+* **(Navigation)** A **What's New** button at the bottom of the sidebar opens the highlights of the release you are running. See [What's New](/navigation/pro__sidebar/#whats-new).
+* **(Locations)** Qualys VMDR imports and the Qualys connector record each host's name as a host Location, and host Locations are listed with the others.
+* **(PSIRT)** The Linux Kernel CVEs advisory feed reads the kernel CVE team's own repository. See [Linux Kernel CVEs](/psirt/feeds/#linux-kernel-cves).
+
+Enhancements:
+* **(Assets)** [Change Plans](/asset_modelling/pro_hierarchy/change_plans/) and the [Needs Attention](/asset_modelling/pro_hierarchy/finish_onboarding/) inbox are out of beta and on for every instance, and their feature flags no longer appear on the Feature Flags page. A change plan lists warnings next to its errors, shows the SLA configuration a criticality change maps to, and can be discarded, or rebuilt without the operations on Assets that are still recalculating.
+* **(Importers)** An import that names an Asset or Organization by a former name, or by the Organization an Asset was moved out of, lands in the current Asset instead of failing or creating a duplicate. Turn this off with the **Imports Follow Renames and Moves** feature flag, on by default.
+* **(Connectors)** A connector whose syncs keep importing nothing shows a **Zero Results** chip on its tile and sends a Connector Health Warning, and the Triage Engine rules table shows when each scheduled rule runs next, with an **Overdue** chip. ServiceNow PC hardware records become host Assets, and the Coverity connector accepts `http` Coverity Connect URLs.
+* **(Tables)** List filters too long to fit in a URL, such as a long pasted list, are sent in the request body and apply instead of failing.
+* **(Performance)** Organization moves are batched and recalculate only what they changed, priority recalculation runs as one set-based update, and web workers share one warmed-up application, so containers start faster and use less memory.
+* **(UI)** The Location map panels follow right-to-left languages and wrap long words, the Command Center flow ring blocks stay apart in Tamil, Telugu, and Japanese, and its first ring is labeled Processed instead of Ingested. An alert row expands to show its full title and description.
+
+Bug fixes:
+* **(Risk Acceptance)** A Finding belongs to one risk acceptance at a time, and every new risk acceptance gets a default expiration date, including those created through the API.
+* **(Compliance)** [CRA Article 14 reporting](/federal_compliance/cra_article14_reporting/) works with PSIRT turned off: statutory deadlines warn and breach, deadline notifications reach the users who can view the Asset, and a report can be started from the UI. **New Severe Incident Report** is renamed **New CRA Report**.
+* **(Sensei)** Repository scans import into the Asset linked on the repository, and a scan run is marked partial when a scanner is skipped or not installed. Code scans no longer drop results when the scanner runs without a vendor login. Sensei rejects a fix that never touches the flagged code, keeps CRLF line endings, replaces an earlier fix when a Finding is remediated again, and builds pull request links from the public DefectDojo URL. Sensei spend prices current Claude models at list rates, links a fix's usage to its run, and counts a resent usage report once. Threat modeling fits large designs into architecture extraction.
+* **(SSO)** A changed OIDC endpoint in **Settings > Tuner** applies at the next sign-in, without a restart.
+* **(Triage Engine)** A rule's trace follows an Asset run, a saved rule opens as saved, a new rule asks for its name before the first save, and the remaining "Rules Engine 2.0" text reads Triage Engine.
+* **(Tables)** Edit form pickers show the saved value, the filter bar chip names In List and Exclude filters, an empty exclude URL parameter leaves the column unfiltered, and the SLA and prioritization engine pickers lock while Findings recalculate.
+* **(Connectors)** Checkmarx One reads the CVE name when vulnerability details are present, and a protocol-relative endpoint keeps its host when Locations is off.
+* **(UI)** Documentation links point at docs.defectdojo.com.
+
+Security fixes:
+* **(Hardening)** The container images ship refreshed CA trust stores that no longer trust the emSign root CAs, and the Orchestrator, connectors, MCP server, and Sensei scan engine are built on a Go release with security fixes.
+
+Behavior changes:
+* **(Assets)** Asset Identity is switched by the **Asset Identity** feature flag, off by default, instead of the `DD_V3_ASSET_ALIASES` deployment setting. Instances that set `DD_V3_ASSET_ALIASES` to true keep it on. While the flag is off, connectors keep each record's vendor identifier current, so turning it on later does not move records back. See [Asset Identity](/asset_modelling/engagements_tests/pro__assets/#asset-identity-aliases).
+
+Upgrade notes:
+* **(Compose)** A new install generates its own internal CA and service certificates instead of using the copies shipped in the bundle, and upgrades keep them. Existing installs still on the shipped copies get a warning from `certs status`, `doctor`, and the start preflight, and the new `certs rotate-internal` command replaces them, backing up the old files first. See [Checking a Deployment](/get_started/pro/onprem/docker_compose/checking_a_deployment/).
+* **(Compose)** Sandbox mode pages load on self-hosted Compose installs, and containers no longer receive empty proxy variables when no forward proxy is set, so Sensei scans run every scanner.
+* **(Helm)** The uwsgi startup probe is on by default (`django.uwsgi.startupProbe.enabled`), as a TCP check on the uwsgi port that allows 5 minutes to start, and the import pool gets the same probe. Setting `django.uwsgi.startupProbe.path` keeps the earlier HTTP check.
+
 ### October 19, 2026: v3.4.200
 
 New features:
