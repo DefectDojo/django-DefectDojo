@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.test import override_settings
 
@@ -27,11 +27,11 @@ class TestQualysParser(DojoTestCase):
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_multiple_vuln_has_multiple_findings_first_seen(self):
         finding = self.parse_file_with_multiple_vuln_has_multiple_findings()
-        self.assertEqual(datetime.datetime(2019, 7, 31).date(), finding.date)
+        self.assertEqual(dt.datetime(2019, 7, 31).date(), finding.date)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         finding = self.parse_file_with_multiple_vuln_has_multiple_findings()
-        self.assertEqual(datetime.datetime(2019, 7, 31).date(), finding.date)
+        self.assertEqual(dt.datetime(2019, 7, 31).date(), finding.date)
 
     def parse_file_with_multiple_vuln_has_multiple_findings(self):
         with (
@@ -90,11 +90,11 @@ class TestQualysParser(DojoTestCase):
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_multiple_vuln_has_multiple_findings_csv_first_seen(self):
         finding = self.parse_file_with_multiple_vuln_has_multiple_findings_csv()
-        self.assertEqual(datetime.datetime(2021, 5, 13).date(), finding.date)
+        self.assertEqual(dt.datetime(2021, 5, 13).date(), finding.date)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings_csv(self):
         finding = self.parse_file_with_multiple_vuln_has_multiple_findings_csv()
-        self.assertEqual(datetime.datetime(2021, 5, 25).date(), finding.date)
+        self.assertEqual(dt.datetime(2021, 5, 25).date(), finding.date)
 
     def parse_file_with_multiple_vuln_has_multiple_findings_csv(self):
         with (

@@ -22,7 +22,7 @@ Setup mirrors the OSS authorization model used by the other v3 RBAC tests
 """
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
@@ -73,12 +73,12 @@ class _TwoProductWorld(ApiV3TestCase):
         product = Product.objects.create(name=name, description="x", prod_type=self.prod_type, sla_configuration_id=1)
         engagement = Engagement.objects.create(
             product=product, name=f"{name}-eng",
-            target_start=datetime.date(2026, 1, 1), target_end=datetime.date(2026, 1, 2),
+            target_start=dt.date(2026, 1, 1), target_end=dt.date(2026, 1, 2),
         )
         test = Test.objects.create(
             engagement=engagement, test_type=self.test_type,
-            target_start=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2026, 1, 2, tzinfo=datetime.UTC), lead=self.admin,
+            target_start=dt.datetime(2026, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2026, 1, 2, tzinfo=dt.UTC), lead=self.admin,
         )
         return product, test
 

@@ -10,7 +10,7 @@ so the permission check has to resolve that same target rather than the name fie
 """
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from collections import Counter
 
 from django.contrib.auth.models import Permission
@@ -139,7 +139,7 @@ class TestApiV3ImportAuthz(ApiV3TestCase):
         )
         self.engagement = Engagement.objects.create(
             name="authz victim engagement", product=product,
-            target_start=datetime.date(2026, 1, 1), target_end=datetime.date(2026, 2, 1),
+            target_start=dt.date(2026, 1, 1), target_end=dt.date(2026, 2, 1),
         )
         # Holds the self-service product-type add permission and nothing else, so the name-based
         # auto-create check passes while the engagement stays out of reach.
@@ -176,8 +176,8 @@ class TestApiV3ImportAuthz(ApiV3TestCase):
             engagement=self.engagement,
             test_type=Test_Type.objects.get_or_create(name=_GENERIC)[0],
             scan_type=_GENERIC,
-            target_start=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2026, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2026, 2, 1, tzinfo=dt.UTC),
         )
         finding = Finding.objects.create(
             test=test, title="existing", severity="High", description="x",
@@ -223,8 +223,8 @@ class TestApiV3ImportAuthz(ApiV3TestCase):
             engagement=self.engagement,
             test_type=Test_Type.objects.get_or_create(name=_GENERIC)[0],
             scan_type=_GENERIC,
-            target_start=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2026, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2026, 2, 1, tzinfo=dt.UTC),
         )
         finding = Finding.objects.create(
             test=test, title="existing", severity="High", description="x",

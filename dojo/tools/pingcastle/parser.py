@@ -1,6 +1,6 @@
 
 import contextlib
-import datetime
+import datetime as dt
 import re
 
 from defusedxml.ElementTree import parse
@@ -218,7 +218,7 @@ class PingCastleParser:
         if not text:
             return None
         with contextlib.suppress(ValueError):
-            return datetime.datetime.fromisoformat(text)
+            return dt.datetime.fromisoformat(text)
         return None
 
     @staticmethod

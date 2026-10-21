@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 
 import html2text
@@ -232,9 +232,9 @@ def parse_finding(host, tree):
         try:
             if settings.USE_FIRST_SEEN:
                 if date := vuln_details.findtext("FIRST_FOUND"):
-                    temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+                    temp["date"] = dt.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
             elif date := vuln_details.findtext("LAST_FOUND"):
-                temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+                temp["date"] = dt.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
         except Exception:
             temp["date"] = None
 
@@ -249,7 +249,7 @@ def parse_finding(host, tree):
             temp["mitigated"] = True
             last_fixed = vuln_details.findtext("LAST_FIXED")
             if last_fixed is not None:
-                temp["mitigation_date"] = datetime.datetime.strptime(
+                temp["mitigation_date"] = dt.datetime.strptime(
                     last_fixed, "%Y-%m-%dT%H:%M:%SZ",
                 )
             else:

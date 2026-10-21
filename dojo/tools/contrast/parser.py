@@ -1,5 +1,5 @@
 import csv
-import datetime
+import datetime as dt
 import io
 import sys
 
@@ -42,7 +42,7 @@ class ContrastParser:
             severity = row.get("Severity")
             if severity == "Note":
                 severity = "Info"
-            date_raw = datetime.datetime.fromtimestamp(int(row.get("First Seen")) / 1000, datetime.UTC)
+            date_raw = dt.datetime.fromtimestamp(int(row.get("First Seen")) / 1000, dt.UTC)
             finding = Finding(
                 title=title.split(" from")[0],
                 date=date_raw,

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.trufflehog3.parser import TruffleHog3Parser
@@ -41,7 +41,7 @@ class TestTruffleHog3Parser(DojoTestCase):
             # TODO: for now the date in Finding is type datetime.date we need to switch to datetime
             # self.assertEqual(datetime.datetime, type(finding.date))
             # self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), finding.date)
-            self.assertEqual(datetime.date, type(finding.date))
+            self.assertEqual(dt.date, type(finding.date))
             self.assertEqual(7, finding.nb_occurences)
 
     def test_many_vulns2_legacy(self):

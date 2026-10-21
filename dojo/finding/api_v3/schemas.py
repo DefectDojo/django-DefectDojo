@@ -26,7 +26,7 @@ service (``dojo/finding/services.py``, D7); the schemas do field typing + strict
 """
 from __future__ import annotations
 
-import datetime  # noqa: TC003 -- runtime import: pydantic resolves the schema field types
+import datetime as dt  # noqa: TC003 -- runtime import: pydantic resolves the schema field types
 from typing import ClassVar
 
 from ninja import Schema
@@ -82,7 +82,7 @@ class FindingSlim(Schema):
     risk_accepted: bool
     out_of_scope: bool
     is_mitigated: bool
-    date: datetime.date | None
+    date: dt.date | None
     cwe: int | None
     cwes: list[int]
     vulnerability_ids: list[str]
@@ -93,8 +93,8 @@ class FindingSlim(Schema):
     reporter: Ref | None
     locations_count: int
     tags: list[str]
-    created: datetime.datetime | None
-    updated: datetime.datetime | None
+    created: dt.datetime | None
+    updated: dt.datetime | None
 
     @staticmethod
     def resolve_test(obj) -> dict | None:
@@ -198,7 +198,7 @@ class FindingDetail(FindingSlim):
     references: str | None
     file_path: str | None
     line: int | None
-    mitigated: datetime.datetime | None
+    mitigated: dt.datetime | None
     mitigated_by: Ref | None
 
     @staticmethod
@@ -229,7 +229,7 @@ class FindingWrite(Schema):
     description: str
     active: bool
     verified: bool
-    date: datetime.date | None = None
+    date: dt.date | None = None
     cwe: int | None = None
     false_p: bool | None = None
     duplicate: bool | None = None
@@ -243,7 +243,7 @@ class FindingWrite(Schema):
     references: str | None = None
     file_path: str | None = None
     line: int | None = None
-    mitigated: datetime.datetime | None = None
+    mitigated: dt.datetime | None = None
     mitigated_by: int | None = None
     reporter: int | None = None
     found_by: list[int] | None = None
@@ -264,7 +264,7 @@ class FindingUpdate(Schema):
     description: str | None = None
     active: bool | None = None
     verified: bool | None = None
-    date: datetime.date | None = None
+    date: dt.date | None = None
     cwe: int | None = None
     false_p: bool | None = None
     duplicate: bool | None = None
@@ -278,7 +278,7 @@ class FindingUpdate(Schema):
     references: str | None = None
     file_path: str | None = None
     line: int | None = None
-    mitigated: datetime.datetime | None = None
+    mitigated: dt.datetime | None = None
     mitigated_by: int | None = None
     reporter: int | None = None
     found_by: list[int] | None = None
@@ -321,7 +321,7 @@ class FindingReplace(Schema):
     description: str
     active: bool
     verified: bool
-    date: datetime.date | None = None
+    date: dt.date | None = None
     cwe: int | None = None
     false_p: bool = False
     duplicate: bool = False
@@ -335,7 +335,7 @@ class FindingReplace(Schema):
     references: str | None = None
     file_path: str | None = None
     line: int | None = None
-    mitigated: datetime.datetime | None = None
+    mitigated: dt.datetime | None = None
     mitigated_by: int | None = None
     reporter: int | None = None
     found_by: list[int] | None = None

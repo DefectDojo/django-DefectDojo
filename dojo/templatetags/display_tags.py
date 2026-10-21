@@ -1,6 +1,6 @@
 import base64
 import contextlib
-import datetime
+import datetime as dt
 import logging
 import mimetypes
 import re
@@ -446,8 +446,8 @@ def datediff_time(date1, date2):
 @register.filter(name="overdue")
 def overdue(date1):
     date_str = ""
-    if date1 < datetime.datetime.now().date():
-        date_str = datediff_time(date1, datetime.datetime.now().date())
+    if date1 < dt.datetime.now().date():
+        date_str = datediff_time(date1, dt.datetime.now().date())
 
     return date_str
 

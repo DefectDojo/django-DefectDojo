@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.urls import reverse
 
@@ -35,14 +35,14 @@ class ImportFormChoicesTest(DojoTestCase):
         self.other_product = Product.objects.create(name="import form other product", prod_type=product_type, description="x")
         self.engagement = Engagement.objects.create(
             name="import form engagement", product=self.product,
-            target_start=datetime.date(2026, 1, 1), target_end=datetime.date(2026, 2, 1),
+            target_start=dt.date(2026, 1, 1), target_end=dt.date(2026, 2, 1),
         )
         self.test = Test.objects.create(
             engagement=self.engagement,
             test_type=Test_Type.objects.get_or_create(name="ZAP Scan")[0],
             scan_type="ZAP Scan",
-            target_start=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2026, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2026, 2, 1, tzinfo=dt.UTC),
         )
 
         tool_type, _ = Tool_Type.objects.get_or_create(name="import form tool type")

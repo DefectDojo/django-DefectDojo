@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 import re
 
@@ -24,7 +24,7 @@ class CheckmarxOneParser:
         if isinstance(value, str):
             return parser.parse(value)
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC)
+            return dt.datetime.fromtimestamp(value.get("seconds"), dt.UTC)
         return None
 
     def _parse_cwe(self, cwe):

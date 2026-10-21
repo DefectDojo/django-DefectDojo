@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.contrast.parser import ContrastParser
@@ -22,7 +22,7 @@ class TestContrastParser(DojoTestCase):
                 self.assertEqual("Forms Without Autocomplete Prevention on 2 pages", finding.title)
                 self.assertEqual("OMEC-Y0TI-FRLE-FJQQ", finding.unique_id_from_tool)
                 self.assertEqual(522, finding.cwe)
-                self.assertEqual(datetime.date(2018, 4, 23), finding.date.date())
+                self.assertEqual(dt.date(2018, 4, 23), finding.date.date())
                 # endpoints
                 self.assertIsNotNone(self.get_unsaved_locations(finding))
                 self.assertEqual(1, len(self.get_unsaved_locations(finding)))
@@ -72,7 +72,7 @@ class TestContrastParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual(datetime.date(2020, 5, 22), finding.date.date())
+                self.assertEqual(dt.date(2020, 5, 22), finding.date.date())
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("crypto-bad-mac", finding.vuln_id_from_tool)
                 self.assertEqual("072U-8EYA-BNSH-PGN6", finding.unique_id_from_tool)

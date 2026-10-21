@@ -16,7 +16,7 @@ principle as unknown filter/expand/fields params).
 from __future__ import annotations
 
 import csv
-import datetime
+import datetime as dt
 import io
 
 from django.conf import settings
@@ -36,8 +36,8 @@ _UNIQUE_ID_SCAN = "SonarQube Scan detailed"     # -> unique_id_from_tool + no ha
 _DEFAULT_SCAN = "V3 Nonexistent Custom Scan Type"  # -> legacy (fallback) + None
 
 
-def _now() -> datetime.datetime:
-    return datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC)
+def _now() -> dt.datetime:
+    return dt.datetime(2024, 1, 1, tzinfo=dt.UTC)
 
 
 class _DedupePolicyBase(ApiV3TestCase):

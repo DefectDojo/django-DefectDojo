@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 
 import html2text
@@ -17,10 +17,10 @@ def _parse_date(date_str):
         return None
     try:
         if "UTC" in date_str:
-            return datetime.datetime.strptime(
+            return dt.datetime.strptime(
                 date_str.split(" ")[0], "%d/%m/%Y",
             ).date()
-        return datetime.datetime.strptime(
+        return dt.datetime.strptime(
             date_str, "%d/%m/%Y %H:%M %p",
         ).date()
     except ValueError:

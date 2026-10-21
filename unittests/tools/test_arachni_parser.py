@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.arachni.parser import ArachniParser
@@ -18,7 +18,7 @@ class TestArachniParser(DojoTestCase):
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
             self.assertEqual(79, finding.cwe)
             self.assertEqual("High", finding.severity)
-            self.assertEqual(datetime.datetime(2017, 11, 14, 2, 57, 29, tzinfo=datetime.UTC), finding.date)
+            self.assertEqual(dt.datetime(2017, 11, 14, 2, 57, 29, tzinfo=dt.UTC), finding.date)
 
     def test_parser_has_many_finding(self):
         with (get_unit_tests_scans_path("arachni") / "dd.com.afr.json").open(encoding="utf-8") as testfile:
@@ -31,8 +31,8 @@ class TestArachniParser(DojoTestCase):
             self.assertEqual("Missing 'Strict-Transport-Security' header", finding.title)
             self.assertEqual(200, finding.cwe)
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual(datetime.datetime(2021, 3, 17, 19, 41, 46,
-                tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))), finding.date)
+            self.assertEqual(dt.datetime(2021, 3, 17, 19, 41, 46,
+                tzinfo=dt.timezone(dt.timedelta(seconds=3600))), finding.date)
             self.assertEqual(1, len(self.get_unsaved_locations(finding)))
             location = self.get_unsaved_locations(finding)[0]
             self.assertEqual("demo.defectdojo.org", location.host)
@@ -43,8 +43,8 @@ class TestArachniParser(DojoTestCase):
             self.assertEqual("Interesting response", finding.title)
             self.assertIsNone(finding.cwe)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual(datetime.datetime(2021, 3, 17, 19, 41, 46,
-                tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))), finding.date)
+            self.assertEqual(dt.datetime(2021, 3, 17, 19, 41, 46,
+                tzinfo=dt.timezone(dt.timedelta(seconds=3600))), finding.date)
             self.assertIn("interesting", finding.unsaved_tags)
             self.assertIn("response", finding.unsaved_tags)
             self.assertIn("server", finding.unsaved_tags)
@@ -60,8 +60,8 @@ class TestArachniParser(DojoTestCase):
             self.assertEqual("SQL Injection", finding.title)
             self.assertEqual(89, finding.cwe)
             self.assertEqual("High", finding.severity)
-            self.assertEqual(datetime.datetime(2021, 3, 18, 10, 29, 55,
-                tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))), finding.date)
+            self.assertEqual(dt.datetime(2021, 3, 18, 10, 29, 55,
+                tzinfo=dt.timezone(dt.timedelta(seconds=3600))), finding.date)
             self.assertEqual(1, len(self.get_unsaved_locations(finding)))
             location = self.get_unsaved_locations(finding)[0]
             self.assertEqual("juice-shop.herokuapp.com", location.host)
@@ -71,8 +71,8 @@ class TestArachniParser(DojoTestCase):
             finding = findings[9]
             self.assertEqual("Interesting response", finding.title)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual(datetime.datetime(2021, 3, 18, 10, 29, 55,
-                tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))), finding.date)
+            self.assertEqual(dt.datetime(2021, 3, 18, 10, 29, 55,
+                tzinfo=dt.timezone(dt.timedelta(seconds=3600))), finding.date)
             self.assertIsNone(finding.cwe)
             self.assertEqual(25, finding.nb_occurences)
             self.assertEqual(25, len(self.get_unsaved_locations(finding)))

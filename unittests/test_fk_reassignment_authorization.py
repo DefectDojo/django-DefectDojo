@@ -11,7 +11,7 @@ Covers two validation paths for FKs referenced by the serializer:
    ``api_scan_configuration`` belongs to another asset).
 """
 import base64
-import datetime
+import datetime as dt
 
 from django.conf import settings
 from django.urls import reverse
@@ -103,13 +103,13 @@ class TestFKReassignmentAuthorization(LegacyAuthMirrorMixin, DojoTestCase):
         test_type, _ = Test_Type.objects.get_or_create(name="Manual Code Review")
         cls.engagement_src = Engagement.objects.create(
             name="FK Reassign Src Eng", product=cls.product_src,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         cls.engagement_outside = Engagement.objects.create(
             name="FK Reassign Outside Eng", product=cls.product_outside,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         cls.test_src = Test.objects.create(
             engagement=cls.engagement_src, test_type=test_type,

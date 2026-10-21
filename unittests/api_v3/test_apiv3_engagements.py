@@ -1,7 +1,7 @@
 """Engagement CRUD + RBAC + contract tests for API v3 (OS3b)."""
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from unittest import mock
 
 from django.db import connection
@@ -125,7 +125,7 @@ class TestApiV3EngagementsQueryCount(ApiV3TestCase):
 
     def _bulk(self, count: int, start: int) -> None:
         product = Product.objects.first()
-        day = datetime.date(2024, 1, 1)
+        day = dt.date(2024, 1, 1)
         Engagement.objects.bulk_create([
             Engagement(name=f"qcount engagement {start + i}", product=product, target_start=day, target_end=day)
             for i in range(count)
@@ -202,7 +202,7 @@ class TestApiV3EngagementsWrite(ApiV3TestCase):
         product = Product.objects.first()
         eng = Engagement.objects.create(
             name="v3 patch engagement", product=product,
-            target_start=datetime.date(2024, 1, 1), target_end=datetime.date(2024, 2, 1),
+            target_start=dt.date(2024, 1, 1), target_end=dt.date(2024, 2, 1),
         )
         response = self.client.patch(
             self.v3_url(f"engagements/{eng.id}"), {"name": "renamed"}, format="json",
@@ -215,7 +215,7 @@ class TestApiV3EngagementsWrite(ApiV3TestCase):
         product = Product.objects.first()
         eng = Engagement.objects.create(
             name="v3 delete engagement", product=product,
-            target_start=datetime.date(2024, 1, 1), target_end=datetime.date(2024, 2, 1),
+            target_start=dt.date(2024, 1, 1), target_end=dt.date(2024, 2, 1),
         )
         response = self.client.delete(self.v3_url(f"engagements/{eng.id}"))
         self.assertEqual(204, response.status_code)
@@ -230,7 +230,7 @@ class TestApiV3EngagementsReplace(ApiV3TestCase):
         product = Product.objects.first()
         defaults = {
             "name": "v3 put engagement", "product": product,
-            "target_start": datetime.date(2024, 1, 1), "target_end": datetime.date(2024, 2, 1),
+            "target_start": dt.date(2024, 1, 1), "target_end": dt.date(2024, 2, 1),
         }
         defaults.update(kwargs)
         return Engagement.objects.create(**defaults), product

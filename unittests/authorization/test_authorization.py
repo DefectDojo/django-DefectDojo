@@ -26,7 +26,7 @@ are inert stubs in the legacy model — they exist only so transitional
 callers don't AttributeError. Tests below verify the stub contract
 (empty/False return, no exceptions).
 """
-import datetime
+import datetime as dt
 from unittest.mock import Mock, patch
 
 from django.contrib.auth.models import AnonymousUser
@@ -172,7 +172,7 @@ class TestCarrierObjectsDelegateToProduct(LegacyAuthorizationBaseTestCase):
         super().setUpTestData()
         cls.eng = Engagement.objects.create(
             product=cls.alpha, name="auth_eng",
-            target_start=datetime.date.today(), target_end=datetime.date.today(),
+            target_start=dt.date.today(), target_end=dt.date.today(),
         )
         tt, _ = Test_Type.objects.get_or_create(name="Manual Test")
         cls.test = Test.objects.create(

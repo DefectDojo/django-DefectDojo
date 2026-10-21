@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest import skip
 
 from django.contrib.auth import get_user_model
@@ -24,13 +24,13 @@ class TestOptiEndpointStatus(MigratorTestCase):
         self.product = Product.objects.create(prod_type=self.prod_type)
         self.engagement = Engagement.objects.create(
             product_id=self.product.pk,
-            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            target_start=dt.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=dt.datetime(2022, 1, 1, tzinfo=timezone.utc),
         )
         self.test = Test.objects.create(
             engagement_id=self.engagement.pk,
-            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            target_start=dt.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=dt.datetime(2022, 1, 1, tzinfo=timezone.utc),
             test_type_id=1,
         )
         user = get_user_model().objects.create().pk

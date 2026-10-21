@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dateutil.tz import tzlocal
 
@@ -25,7 +25,7 @@ class TestDetectSecretsParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Secret Keyword", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
+                self.assertEqual(dt.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
                 self.assertFalse(finding.verified)
                 self.assertEqual("modules_images", finding.file_path)
                 self.assertEqual(151, finding.line)
@@ -38,7 +38,7 @@ class TestDetectSecretsParser(DojoTestCase):
                 finding = findings[1]
                 self.assertEqual("Secret Keyword", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
+                self.assertEqual(dt.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
                 self.assertFalse(finding.verified)
                 self.assertEqual("modules_images", finding.file_path)
                 self.assertEqual(156, finding.line)
@@ -51,7 +51,7 @@ class TestDetectSecretsParser(DojoTestCase):
                 finding = findings[2]
                 self.assertEqual("Secret Keyword", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
+                self.assertEqual(dt.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
                 self.assertFalse(finding.verified)
                 self.assertEqual("example/pkg/docker_registry_watcher/docker_config.go", finding.file_path)
                 self.assertEqual(109, finding.line)
@@ -64,7 +64,7 @@ class TestDetectSecretsParser(DojoTestCase):
                 finding = findings[3]
                 self.assertEqual("Secret Keyword", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
+                self.assertEqual(dt.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
                 self.assertFalse(finding.verified)
                 self.assertEqual("example/pkg/docker_registry_watcher/docker_registry_watcher.go", finding.file_path)
                 self.assertEqual(112, finding.line)

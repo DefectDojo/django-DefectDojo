@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 from unittest import mock
 from unittest.mock import patch
@@ -105,7 +105,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
     def test_mark_old_active_as_mitigated_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
-        custom_mitigated = datetime.datetime.now(datetime.UTC)
+        custom_mitigated = dt.datetime.now(dt.UTC)
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -127,7 +127,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
     def test_update_old_mitigated_with_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
-        custom_mitigated = datetime.datetime.now(datetime.UTC)
+        custom_mitigated = dt.datetime.now(dt.UTC)
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -149,7 +149,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
     def test_update_old_mitigated_with_missing_data(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
-        custom_mitigated = datetime.datetime.now(datetime.UTC)
+        custom_mitigated = dt.datetime.now(dt.UTC)
 
         with impersonate(self.user_1):
             test = Test.objects.last()

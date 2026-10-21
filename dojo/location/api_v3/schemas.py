@@ -19,7 +19,7 @@ with its ``type`` field. (Per D11 the product location sub-resource is exposed o
 """
 from __future__ import annotations
 
-import datetime  # noqa: TC003 -- runtime import: pydantic resolves the schema field types
+import datetime as dt  # noqa: TC003 -- runtime import: pydantic resolves the schema field types
 from typing import TYPE_CHECKING, ClassVar
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -145,7 +145,7 @@ class FindingLocationEdge(Schema):
 
     location: LocationRef
     status: str
-    audit_time: datetime.datetime | None
+    audit_time: dt.datetime | None
     auditor: Ref | None
 
 

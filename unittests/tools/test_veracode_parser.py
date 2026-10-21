@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.test import override_settings
 
@@ -106,11 +106,11 @@ class TestVeracodeScannerParser(DojoTestCase):
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_multiple_finding2_first_seen(self):
         finding = self.parse_file_with_multiple_finding2()
-        self.assertEqual(datetime.datetime(2018, 2, 17, 0, 35, 18), finding.date)  # date_first_occurrence="2018-02-17 00:35:18 UTC"
+        self.assertEqual(dt.datetime(2018, 2, 17, 0, 35, 18), finding.date)  # date_first_occurrence="2018-02-17 00:35:18 UTC"
 
     def test_parse_file_with_multiple_finding2(self):
         finding = self.parse_file_with_multiple_finding2()
-        self.assertEqual(datetime.datetime.today().date(), finding.date)
+        self.assertEqual(dt.datetime.today().date(), finding.date)
 
     def parse_file_with_multiple_finding2(self):
         with (get_unit_tests_scans_path("veracode") / "veracode_scan.xml").open(encoding="utf-8") as testfile:
@@ -165,7 +165,7 @@ class TestVeracodeScannerParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("Medium", finding.severity)
             self.assertTrue(finding.is_mitigated)
-            self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
+            self.assertEqual(dt.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
             self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
             self.assertEqual(0, finding.sla_age)
 
@@ -201,16 +201,16 @@ class TestVeracodeScannerParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("Critical", finding.severity)
             self.assertTrue(finding.is_mitigated)
-            self.assertEqual(datetime.datetime(2022, 9, 12, 14, 29, 18), finding.mitigated)
+            self.assertEqual(dt.datetime(2022, 9, 12, 14, 29, 18), finding.mitigated)
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_dynamic_finding_first_seen(self):
         finding = self.parse_file_with_dynamic_finding()
-        self.assertEqual(datetime.datetime(2021, 9, 3, 10, 0, 0), finding.date)
+        self.assertEqual(dt.datetime(2021, 9, 3, 10, 0, 0), finding.date)
 
     def test_parse_file_with_dynamic_finding(self):
         finding = self.parse_file_with_dynamic_finding()
-        self.assertEqual(datetime.datetime.today().date(), finding.date)
+        self.assertEqual(dt.datetime.today().date(), finding.date)
 
     def parse_file_with_dynamic_finding(self):
         with (get_unit_tests_scans_path("veracode") / "dynamic_finding.xml").open(encoding="utf-8") as testfile:

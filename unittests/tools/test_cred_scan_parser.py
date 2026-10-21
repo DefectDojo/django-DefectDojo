@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.cred_scan.parser import CredScanParser
@@ -22,7 +22,7 @@ class TestCredScanParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("10", finding.line)
                 self.assertEqual("E:sample/dir/first/App.config", finding.file_path)
-                self.assertEqual(datetime.date(2021, 4, 10), datetime.datetime.date(finding.date))
+                self.assertEqual(dt.date(2021, 4, 10), dt.datetime.date(finding.date))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with (get_unit_tests_scans_path("cred_scan") / "cred_scan_many_vuln.csv").open(encoding="utf-8") as testfile:

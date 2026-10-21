@@ -4,7 +4,7 @@ Compatibility viewsets and serializers for Endpoint API using new Location model
 These viewsets maintain API compatibility with the legacy Endpoint and Endpoint_Status
 models while using the new URL and LocationFindingReference models underneath.
 """
-import datetime
+import datetime as dt
 
 from django.db.models import OuterRef, Prefetch, Subquery, Value
 from django.db.models.functions import Coalesce
@@ -314,13 +314,13 @@ class V3EndpointStatusCompatibleSerializer(ModelSerializer):
     # The column itself: reading location.id would load each row's Location, one query per row.
     location_id = IntegerField(read_only=True)
 
-    def get_date(self, obj) -> datetime.date | None:
+    def get_date(self, obj) -> dt.date | None:
         return obj.created.date() if obj.created else None
 
     def get_mitigated(self, obj) -> bool | None:
         return obj.status == FindingLocationStatus.Mitigated
 
-    def get_mitigated_time(self, obj) -> datetime.datetime | None:
+    def get_mitigated_time(self, obj) -> dt.datetime | None:
         return obj.audit_time if self.get_mitigated(obj) else None
 
     def get_mitigated_by(self, obj) -> int | None:

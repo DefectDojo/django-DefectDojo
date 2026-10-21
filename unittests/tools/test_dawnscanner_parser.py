@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.dawnscanner.parser import DawnScannerParser
@@ -19,7 +19,7 @@ class TestDawnScannerParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2016-6316", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual(finding.description, 'Text declared as "HTML safe" when passed as an attribute value to a tag helper will not have quotes escaped which can lead to an XSS attack.')
-                self.assertEqual(datetime.datetime(2019, 4, 1, 21, 14, 32, tzinfo=datetime.timezone(datetime.timedelta(seconds=0))), finding.date)  # 2019-04-01 21:14:32 +0000
+                self.assertEqual(dt.datetime(2019, 4, 1, 21, 14, 32, tzinfo=dt.timezone(dt.timedelta(seconds=0))), finding.date)  # 2019-04-01 21:14:32 +0000
             with self.subTest(i=2):
                 finding = findings[2]
                 self.assertEqual(False, finding.fix_available)
@@ -30,5 +30,5 @@ class TestDawnScannerParser(DojoTestCase):
                 self.assertIsNone(finding.unsaved_vulnerability_ids)
                 self.assertEqual(finding.description, 'To set a header value, simply access the response.headers object as a hash inside your controller (often in a before/after_filter). Rails 4 provides the "default_headers" functionality that will automatically apply the values supplied. This works for most headers in almost all cases.')
                 self.assertEqual("Use response headers like X-Frame-Options, X-Content-Type-Options, X-XSS-Protection in your project.", finding.mitigation)
-                self.assertEqual(datetime.datetime(2019, 4, 1, 21, 14, 32, tzinfo=datetime.timezone(datetime.timedelta(seconds=0))), finding.date)  # 2019-04-01 21:14:32 +0000
+                self.assertEqual(dt.datetime(2019, 4, 1, 21, 14, 32, tzinfo=dt.timezone(dt.timedelta(seconds=0))), finding.date)  # 2019-04-01 21:14:32 +0000
                 self.assertEqual(True, finding.fix_available)

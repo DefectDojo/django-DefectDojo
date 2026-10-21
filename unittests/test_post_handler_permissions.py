@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest.mock import patch
 
 from django.core.exceptions import PermissionDenied
@@ -28,7 +28,7 @@ class PostHandlerPermissionTest(DojoTestCase):
         engagement = Engagement.objects.get(id=1)
         risk_acceptance = Risk_Acceptance.objects.create(
             name="post handler ra", owner=self.admin, decision="A", recommendation="A",
-            expiration_date=datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30),
+            expiration_date=dt.datetime.now(dt.UTC) + dt.timedelta(days=30),
         )
         engagement.risk_acceptance.add(risk_acceptance)
         url = reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id))

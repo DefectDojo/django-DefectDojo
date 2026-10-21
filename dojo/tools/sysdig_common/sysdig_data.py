@@ -4,7 +4,7 @@ from dojo.location.feature import locations_enabled
 from dojo.tools.locations import LocationData
 
 if TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
 
 SYSDIG_TYPE_TO_PURL = {
@@ -47,7 +47,7 @@ class SysdigData:
         self.cvss_vector: str = ""
         self.vuln_link: str = ""
         self.vuln_publish_date: str = ""
-        self.vuln_fix_date: datetime.date = None
+        self.vuln_fix_date: dt.date = None
         self.vuln_fix_version: str = ""
         self.public_exploit: str = ""
         self.k8s_cluster_name: str = ""
@@ -59,7 +59,7 @@ class SysdigData:
         self.k8s_pod_count: str = 0
         self.in_use: bool = False
         self.risk_accepted: bool = False
-        self.publish_date: datetime.date = None
+        self.publish_date: dt.date = None
         self.component_version: str = ""
         self.package_suggested_fix: str = ""
         self.image_type: str = ""

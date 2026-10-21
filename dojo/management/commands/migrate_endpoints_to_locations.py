@@ -1,5 +1,5 @@
 import contextlib
-import datetime
+import datetime as dt
 import logging
 import time
 from collections import defaultdict
@@ -802,7 +802,7 @@ class Command(BaseCommand):
         # the same midnight-aware datetime in a post-save UPDATE. We
         # set it directly here: bulk_create skips auto_now_add so the
         # explicit value is honored.
-        created_dt = timezone.make_aware(datetime.datetime(
+        created_dt = timezone.make_aware(dt.datetime(
             endpoint_status.date.year,
             endpoint_status.date.month,
             endpoint_status.date.day,

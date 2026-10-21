@@ -44,10 +44,10 @@ class V3JSONEncoder(DjangoJSONEncoder):
     """
 
     def default(self, o):
-        import datetime  # noqa: PLC0415 -- localized to the encoder hot path
+        import datetime as dt  # noqa: PLC0415 -- localized to the encoder hot path
 
-        if isinstance(o, datetime.datetime) and o.tzinfo is not None:
-            o = o.astimezone(datetime.UTC)
+        if isinstance(o, dt.datetime) and o.tzinfo is not None:
+            o = o.astimezone(dt.UTC)
         return super().default(o)
 
 

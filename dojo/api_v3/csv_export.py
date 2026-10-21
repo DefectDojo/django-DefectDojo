@@ -36,7 +36,7 @@ or a TAB is prefixed with a single quote -- the standard spreadsheet formula-inj
 from __future__ import annotations
 
 import csv
-import datetime
+import datetime as dt
 import types
 import typing
 from dataclasses import dataclass
@@ -154,12 +154,12 @@ def _format_scalar(value: object) -> str:
         return ""
     if isinstance(value, bool):  # before int: bool is an int subclass
         return "true" if value else "false"
-    if isinstance(value, datetime.datetime):
+    if isinstance(value, dt.datetime):
         if value.tzinfo is not None:
-            value = value.astimezone(datetime.UTC)
+            value = value.astimezone(dt.UTC)
         text = value.isoformat()
         return text[:-6] + "Z" if text.endswith("+00:00") else text
-    if isinstance(value, datetime.date):
+    if isinstance(value, dt.date):
         return value.isoformat()
     return str(value)
 

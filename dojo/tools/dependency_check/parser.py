@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import hashlib
 import logging
 import re
@@ -427,7 +427,7 @@ class DependencyCheckParser:
             mitigation += (
                 f"Update {component_name}:{component_version} to at least the version recommended in the description"
             )
-            mitigated = datetime.datetime.now(datetime.UTC)
+            mitigated = dt.datetime.now(dt.UTC)
             is_Mitigated = True
             active = False
             tags.append("suppressed")
