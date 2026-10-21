@@ -132,12 +132,13 @@ A bulk request takes up to 1,000 Finding IDs. An ID that does not exist is skipp
 
 When a Bulk Edit changes the **Severity** or **Status** of the selected Findings, the confirmation that appears in the lower right corner has an **Undo** button. It stays for eight seconds (hovering over it pauses the countdown). Click **Undo**, or press **Cmd+Z** (**Ctrl+Z** on Windows and Linux) while the confirmation is showing and no field has focus, to put back the values each Finding had before the edit. The list reloads with the restored values.
 
-Undo restores the fields the edit wrote: the severity, and for a status the Active, Verified, False Positive, Out of Scope, Mitigated and Under Defect Review flags together with the mitigated date and the user who mitigated the Finding. Everything else in the same submit is kept: tags, notes, dates, Simple Risk Acceptance, Finding Group changes, and anything already pushed to Jira or a connector. When the submit changed any of these as well, the confirmation of the undo says that the other changes were kept. A False Positive status that was copied to matching Findings through False Positive History is not reverted on those other Findings.
+Undo restores the fields the edit wrote: the severity, and for a status the Active, Verified, False Positive, Out of Scope, Mitigated and Under Defect Review flags together with the mitigated date and the user who mitigated the Finding. Everything else in the same submit is kept: tags, notes, dates, Simple Risk Acceptance and Finding Group changes. The restored Findings are pushed the way the edit was: to Jira when the edit pushed to Jira, and to your connectors when the edit pushed to them (otherwise each connector follows its own automatic setting), so a ticket the edit closed follows its Finding back. When the submit changed any of these as well, the confirmation of the undo says that the other changes were kept. A False Positive status that was copied to matching Findings through False Positive History is not reverted on those other Findings.
 
 Each Finding is checked again when you undo:
 
 * A Finding that someone changed again after the bulk edit is left as it is, so their change is not overwritten.
 * A Finding you can no longer edit is left as it is.
+* A Finding whose risk acceptance the edit changed is left as it is. Ticking **Active** lifts a Finding's Simple Risk Acceptance, and an undo cannot accept the risk again, so restoring only its status would leave it neither active nor accepted. Accept the risk again by hand if it still applies.
 
 Both are listed in a **"One or More Findings Skipped"** warning. An edit can be undone once, by the user who made it, for up to 15 minutes; after that, or after a second attempt, DefectDojo answers that the change can no longer be undone. With two confirmations showing, **Cmd+Z** undoes the newer edit first.
 
