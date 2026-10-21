@@ -44,6 +44,8 @@ Each onboarded repository has a row-actions menu on the Sensei hub:
 - **Scan History:** view this repository's past scans.
 - **Configure:** reopen the configuration form (PR reporting, automated fixes, Asset linkage).
 - **Re-stage Candidates:** re-evaluate the repository's findings against the auto-fix criteria and stage fresh candidates.
+- **Replace Access Token:** shown for a repository linked with a pasted access token. Enter a new token; Sensei checks that it reaches the repository before storing it.
+- **Remove Access Token:** shown for the same repositories. Removes the pasted token, so jobs for the repository use its source-control connection instead.
 - **Delete:** remove the repository from Sensei. This stops scanning it; it does not delete the underlying asset or findings.
 
 ## Quotas and metering
