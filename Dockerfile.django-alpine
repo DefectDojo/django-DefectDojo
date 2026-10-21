@@ -57,6 +57,10 @@ RUN \
     && \
     rm -rf /var/cache/apk/* && \
   true
+# Upgrade the system trust store in its own layer. Release builds reuse the layer
+# above from the build cache, so an OS security fix to ca-certificates (here the
+# eMudhra key compromise, 2026-10-20) would otherwise never reach the image.
+RUN apk upgrade --no-cache ca-certificates-bundle ca-certificates
 RUN \
   --mount=from=build,src=/tmp/wheels,target=/tmp/wheels \
   --mount=from=build,src=/app/requirements.txt,target=/app/requirements.txt \
