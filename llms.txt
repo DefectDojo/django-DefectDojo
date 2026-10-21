@@ -385,7 +385,6 @@ Key facts:
 - [PSIRT dashboard](https://docs.defectdojo.com/psirt/dashboard/): A shared dashboard template that answers "am I affected?" first
 - [SLA Policies](https://docs.defectdojo.com/psirt/sla-policies/): Tune how long each severity tier gets before a PSIRT clock warns and breaches
 - [PSIRT Settings](https://docs.defectdojo.com/psirt/settings/): Case-worthiness calibration, the "new" item window, and what counts as a material change
-- [CRA Article 14 Reporting (Pro)](https://docs.defectdojo.com/psirt/cra-article14-reporting/): Track the 24 hour, 72 hour and final report deadlines the Cyber Resilience Act sets for an actively exploited vulnerability or a severe incident
 
 ## Federal Compliance
 
@@ -402,6 +401,7 @@ Key facts:
 - [PCI DSS Evidence Packs (Pro)](https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/): Assess a cardholder data environment against the PCI DSS vulnerability management requirements and export the workbook an assessor reviews
 - [Certification Control Catalogs (Pro)](https://docs.defectdojo.com/federal_compliance/certification_catalogs/): Assess an Asset against ISO/IEC 27001:2022 Annex A, the SOC 2 Trust Services Criteria and the NIS2 technical requirements, and see one body of evidence answer all three
 - [Regulatory Profile (Pro)](https://docs.defectdojo.com/federal_compliance/regulatory_profile/): Record the CRA, DORA and NIS2 facts for an Asset: critical or important function, CRA product class, support period, and where vulnerability reports go
+- [CRA Article 14 Reporting (Pro)](https://docs.defectdojo.com/federal_compliance/cra_article14_reporting/): Track the 24 hour, 72 hour and final report deadlines the Cyber Resilience Act sets for an actively exploited vulnerability or a severe incident
 
 ## Automation
 
