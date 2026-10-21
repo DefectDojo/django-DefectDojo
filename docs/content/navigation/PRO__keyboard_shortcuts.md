@@ -16,6 +16,7 @@ Shortcuts never fire while you type in a field: a search box, a form field, a dr
 | **Cmd+K** / **Ctrl+K** | Open the command palette (see [Global Search](/navigation/pro__global_search/)) |
 | **Cmd+B** / **Ctrl+B** | Show or hide the sidebar (on screens wide enough to show it) |
 | **?** | Show the Keyboard Shortcuts sheet |
+| **Cmd+Z** / **Ctrl+Z** | Undo the last change, while a confirmation with an **Undo** button is showing (see [Undoing a bulk edit](/triage_findings/findings_workflows/pro__bulk_edit_findings/#undoing-a-bulk-edit)) |
 
 ## Lists
 

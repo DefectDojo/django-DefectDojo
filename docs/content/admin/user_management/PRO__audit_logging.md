@@ -53,6 +53,8 @@ Audit Logs includes multiple columns with various data to improve traceability, 
 - **URL**: The URL used to execute the particular operation. These paths could refer to DefectDojo’s Vue UI, or to the REST API. The URL field will not be populated for back-end processes. 
 - **IP Address**: The network address of the device that made the change. This will not be populated for back-end processes.
 
+The **Context** of a Finding change made by a Bulk Edit carries `bulk_edit`. When that edit is undone (see [Undoing a bulk edit](/triage_findings/findings_workflows/pro__bulk_edit_findings/#undoing-a-bulk-edit)), the restored Findings are logged as updates whose **Context** carries `bulk_revert` and the ID of the context it reverted, so the change and its undo can be read side by side.
+
 ### Audit Logs Timeline
 
 By default, Audit Logs display entries from the previous 31 days. Older entries remain available and can be viewed by adjusting the Timestamp filter. 

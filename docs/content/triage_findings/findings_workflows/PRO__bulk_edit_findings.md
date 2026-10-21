@@ -128,6 +128,23 @@ The bulk actions queue the work instead. They check the destination and the sele
 
 A bulk request takes up to 1,000 Finding IDs. An ID that does not exist is skipped and listed, like one you may not act on.
 
+## Undoing a bulk edit
+
+When a Bulk Edit changes the **Severity** or **Status** of the selected Findings, the confirmation that appears in the lower right corner has an **Undo** button. It stays for eight seconds (hovering over it pauses the countdown). Click **Undo**, or press **Cmd+Z** (**Ctrl+Z** on Windows and Linux) while the confirmation is showing and no field has focus, to put back the values each Finding had before the edit. The list reloads with the restored values.
+
+Undo restores the fields the edit wrote: the severity, and for a status the Active, Verified, False Positive, Out of Scope, Mitigated and Under Defect Review flags together with the mitigated date and the user who mitigated the Finding. Everything else in the same submit is kept: tags, notes, dates, Simple Risk Acceptance, Finding Group changes, and anything already pushed to Jira or a connector. When the submit changed any of these as well, the confirmation of the undo says that the other changes were kept. A False Positive status that was copied to matching Findings through False Positive History is not reverted on those other Findings.
+
+Each Finding is checked again when you undo:
+
+* A Finding that someone changed again after the bulk edit is left as it is, so their change is not overwritten.
+* A Finding you can no longer edit is left as it is.
+
+Both are listed in a **"One or More Findings Skipped"** warning. An edit can be undone once, by the user who made it, for up to 15 minutes; after that, or after a second attempt, DefectDojo answers that the change can no longer be undone. With two confirmations showing, **Cmd+Z** undoes the newer edit first.
+
+Undo needs the audit log: it reads each Finding's previous values from its history, so on an instance with audit logging turned off, the confirmation has no Undo. Both the bulk edit and its undo appear in the [Audit Logs](/admin/user_management/pro__audit_logging/), the undo with `bulk_revert` in its **Context**.
+
+The **Undo Toasts** feature flag (on by default) controls the Undo button and the shortcut.
+
 ## Risk Acceptance, Finding Group, Merge, and Delete
 
 The remaining bulk-action buttons open their own dialogs:
