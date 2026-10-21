@@ -88,6 +88,7 @@ Key facts:
 - [Attaching Files (Open Source)](https://docs.defectdojo.com/triage_findings/findings_workflows/os__add_files/): Upload screenshots, reports, or other supporting files to a Finding, Engagement, or Test in DefectDojo OS
 - [Attaching Files (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__add_files/): Upload screenshots, reports, or other supporting files to a Finding, Engagement, or Test in DefectDojo Pro
 - [Bulk Editing Findings (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__bulk_edit_findings/): Apply metadata changes, tags, notes, and review to many Findings at once in the DefectDojo Pro UI
+- [Keyboard Triage (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__keyboard_triage/): Walk a Findings list one Finding at a time and decide each with a single key in DefectDojo Pro
 - [Mitigation Policies (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__mitigation_policy/): Standardize how Findings should be remediated with reusable, centrally managed Mitigation Policies
 - [AI Governance Policies (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__ai_governance_policies/): Decide which AI components are authorized where, and turn unauthorized ones into Findings
 - [Export Findings (Open Source)](https://docs.defectdojo.com/triage_findings/findings_workflows/exporting/): Export findings and engagements as CSV or Excel
@@ -473,6 +474,7 @@ Key facts:
 - [Customizing Tables](https://docs.defectdojo.com/navigation/pro__table_customization/): Filter, sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables, and switch between the table and the grid
 - [Customizing Page Layouts (Pro)](https://docs.defectdojo.com/navigation/pro__page_layouts/): Arrange the widgets on DefectDojo Pro view pages, then save, share, or set a layout as the default
 - [In-App Walkthroughs (Pro)](https://docs.defectdojo.com/navigation/pro__walkthroughs/): Guided, step-by-step tours and tasks in the DefectDojo Pro UI: the App Tour, the tours for each area, the task walkthroughs for everyday work, administration, Jira and the Triage Engine, the first-visit offer, and turning the offer off per user
+- [Keyboard Shortcuts (Pro)](https://docs.defectdojo.com/navigation/pro__keyboard_shortcuts/): The keys DefectDojo Pro answers to, and the sheet that lists them
 - [Configuring Forms (Pro)](https://docs.defectdojo.com/navigation/pro__form_configuration/): Choose which fields the DefectDojo Pro create and edit forms show, which are required, and the order they appear in
 - [Support (Pro)](https://docs.defectdojo.com/navigation/pro__support/): Filing a support request from DefectDojo Pro, the documentation and community search above the form, the community board, and the settings that cover self-hosted and airgapped instances or turn the pages off
 - [The Markdown Editor (Pro)](https://docs.defectdojo.com/navigation/pro__markdown_editor/): Format text, and paste or drag images directly into any DefectDojo Pro description, note, or other markdown field
