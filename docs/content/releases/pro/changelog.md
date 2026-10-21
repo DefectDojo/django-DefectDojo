@@ -14,6 +14,8 @@ Here are the release notes for **DefectDojo Pro**, both cloud-hosted and self-ho
 
 You can subscribe to these release notes with the [RSS feed](/releases/pro/changelog/index.xml).
 
+<!-- Authoring note: the "### <Month D, YYYY>: vX.Y.Z" release headings and the "**(Area)**" prefix on each bullet are read by the RSS feed and by the in-app What's New panel (New features and Enhancements lists). Keep both when adding a release. -->
+
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
 ## October 2026: v3.4
