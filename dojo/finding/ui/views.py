@@ -2773,6 +2773,34 @@ def _bulk_update_finding_groups(finds, form):
     return return_url, finds
 
 
+def _bulk_unlink_from_jira(request, finds):
+    """
+    Remove the DefectDojo link to the Jira issue of each finding, and of each finding group a selected finding belongs to.
+
+    The issues themselves are left untouched in Jira. Runs before _bulk_push_to_jira, so combining
+    unlink with push creates new issues in the Jira project currently configured for the product.
+    """
+    finding_groups = {finding.finding_group for finding in finds if finding.has_jira_group_issue}
+    for group in finding_groups:
+        jira_services.unlink(request, group)
+
+    unlinked_count = 0
+    for finding in finds:
+        if finding.has_jira_issue:
+            jira_services.unlink_finding(request, finding)
+            unlinked_count += 1
+
+    if finding_groups:
+        add_success_message_to_response(f"{len(finding_groups)} finding groups unlinked from JIRA successfully")
+    if unlinked_count > 0:
+        add_success_message_to_response(f"{unlinked_count} findings unlinked from JIRA successfully")
+    if not finding_groups and unlinked_count == 0:
+        add_error_message_to_response("None of the selected findings are linked to a JIRA issue")
+
+    # refresh from db so the push below does not see the deleted links
+    return finds.all()
+
+
 def _bulk_push_to_jira(finds, form, note):
     """Helper function to handle JIRA push operations."""
     error_counts = defaultdict(lambda: 0)
@@ -2822,11 +2850,6 @@ def _bulk_push_to_jira(finds, form, note):
     success_count = 0
     for finding in finds:
         tool_issue_updater.async_tool_issue_update(finding)
-
-        # not sure yet if we want to support bulk unlink, so leave as commented out for now
-        # if form.cleaned_data['unlink_from_jira']:
-        #     if finding.has_jira_issue:
-        #         jira_services.unlink_finding(request, finding)
 
         # Because we never call finding.save() in a bulk update, we need to actually
         # push the JIRA stuff here, rather than in finding.save()
@@ -2963,6 +2986,9 @@ def finding_bulk_update_all(request, pid=None):
                 # Delegate parsing and handling of strings/iterables to helper
                 bulk_add_tags_to_instances(tag_or_tags=tags, instances=finds, tag_field_name="tags")
 
+            if form.cleaned_data["unlink_from_jira"]:
+                finds = _bulk_unlink_from_jira(request, finds)
+
             _bulk_push_to_jira(finds, form, note)
 
             # Show success message if status/severity updates were made (using actually_updated_count)
@@ -2980,7 +3006,8 @@ def finding_bulk_update_all(request, pid=None):
                 or form.cleaned_data["notes"] or form.cleaned_data["risk_acceptance"]
                 or form.cleaned_data["finding_group_create"] or form.cleaned_data["finding_group_add"]
                 or form.cleaned_data["finding_group_remove"] or form.cleaned_data["finding_group_by"]
-                or form.cleaned_data["push_to_jira"] or form.cleaned_data["push_to_github"]
+                or form.cleaned_data["push_to_jira"] or form.cleaned_data["unlink_from_jira"]
+                or form.cleaned_data["push_to_github"]
             ):
                 messages.add_message(
                     request,
