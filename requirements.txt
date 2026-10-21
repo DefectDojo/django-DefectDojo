@@ -3,6 +3,7 @@ bleach==6.4.0
 bleach[css]
 celery[sqs]==5.6.3
 # pycurl and boto3 are included via celery[sqs] for Celery Broker AWS (SQS) support
+certifi==2026.10.19  # requests' CA bundle; 2026.10.19 drops emSign ECC Root CA - G3 (eMudhra intermediate key compromise)
 defusedxml==0.7.1
 django_celery_results==2.6.0
 django-auditlog==3.2.1
