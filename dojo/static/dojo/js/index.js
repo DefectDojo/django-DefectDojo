@@ -140,7 +140,7 @@ document.addEventListener('submit', function (e) {
         body: new FormData(form),
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
         credentials: 'same-origin',
-    });
+    }).catch(function () {});  // best effort: the prompt simply shows again later
 });
 
 /* ---- Collapse shim ----

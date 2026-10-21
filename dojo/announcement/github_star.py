@@ -1,7 +1,10 @@
 import datetime
+import logging
 
 from django.conf import settings
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 GITHUB_REPO_URL = "https://github.com/DefectDojo/django-DefectDojo"
 
@@ -16,6 +19,16 @@ SNOOZE_DURATION = datetime.timedelta(days=30)
 
 
 def should_show_github_star_prompt(user, now=None):
+    # Runs in a context processor on every page, so it must never raise: on any
+    # error (database unavailable, bad state blob, ...) just don't show the prompt.
+    try:
+        return _should_show_github_star_prompt(user, now)
+    except Exception:
+        logger.debug("github_star_prompt: visibility check failed", exc_info=True)
+        return False
+
+
+def _should_show_github_star_prompt(user, now):
     if not settings.GITHUB_STAR_PROMPT_ENABLED:
         return False
     if not getattr(user, "is_authenticated", False):

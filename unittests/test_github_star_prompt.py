@@ -1,10 +1,13 @@
 import datetime
 from types import SimpleNamespace
+from unittest.mock import patch
 
-from django.test import SimpleTestCase, override_settings
+from django.db import DatabaseError
+from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from dojo import context_processors
 from dojo.announcement import github_star
 from dojo.models import User, UserContactInfo
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
@@ -51,6 +54,28 @@ class TestShouldShowGithubStarPrompt(SimpleTestCase):
 
     def test_corrupt_snooze_value_is_ignored(self):
         self.assertTrue(github_star.should_show_github_star_prompt(_user(state={"snoozed_until": "nope"}), now=NOW))
+
+    def test_corrupt_state_blob_hides_prompt(self):
+        user = _user()
+        user.usercontactinfo = SimpleNamespace(user_state_details={github_star.GITHUB_STAR_PROMPT_KEY: "not-a-dict"})
+        self.assertFalse(github_star.should_show_github_star_prompt(user, now=NOW))
+
+    def test_database_error_hides_prompt(self):
+        class _UserWithDbDown(SimpleNamespace):
+            @property
+            def usercontactinfo(self):
+                msg = "db down"
+                raise DatabaseError(msg)
+
+        user = _UserWithDbDown(is_authenticated=True, date_joined=NOW - datetime.timedelta(days=30))
+        self.assertFalse(github_star.should_show_github_star_prompt(user, now=NOW))
+
+    def test_context_processor_survives_failure(self):
+        request = RequestFactory().get("/")
+        request.user = _user()
+        with patch.object(github_star, "_should_show_github_star_prompt", side_effect=DatabaseError("db down")):
+            context = context_processors.globalize_vars(request)
+        self.assertFalse(context["SHOW_GITHUB_STAR_PROMPT"])
 
 
 @versioned_fixtures
@@ -102,6 +127,16 @@ class TestGithubStarPromptView(DojoTestCase):
         response = self.client.post(self.url, {"choice": "bogus"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
         self.assertEqual(response.status_code, 204)
         self.assertIsNone(self._state())
+
+    def test_star_still_redirects_when_saving_fails(self):
+        with patch.object(UserContactInfo.objects, "get_or_create", side_effect=DatabaseError("db down")):
+            response = self.client.post(self.url, {"choice": "star"})
+        self.assertRedirects(response, github_star.GITHUB_REPO_URL, fetch_redirect_response=False)
+
+    def test_later_still_succeeds_when_saving_fails(self):
+        with patch.object(UserContactInfo.objects, "get_or_create", side_effect=DatabaseError("db down")):
+            response = self.client.post(self.url, {"choice": "later"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 204)
 
     def test_get_not_allowed(self):
         self.assertEqual(self.client.get(self.url).status_code, 405)

@@ -129,13 +129,18 @@ def github_star_prompt(request):
     new_state = github_star_prompt_state(choice)
     if new_state is not None:
         # Same row-locked read-modify-write as dismiss_os_message: other keys share this blob.
-        with transaction.atomic():
-            contact, _ = UserContactInfo.objects.get_or_create(user=request.user)
-            contact = UserContactInfo.objects.select_for_update().get(pk=contact.pk)
-            state = contact.user_state_details or {}
-            state[GITHUB_STAR_PROMPT_KEY] = new_state
-            contact.user_state_details = state
-            contact.save(update_fields=["user_state_details"])
+        # Saving the choice is best effort: if it fails the prompt just shows again later,
+        # and "star" still sends the user on to GitHub.
+        try:
+            with transaction.atomic():
+                contact, _ = UserContactInfo.objects.get_or_create(user=request.user)
+                contact = UserContactInfo.objects.select_for_update().get(pk=contact.pk)
+                state = contact.user_state_details or {}
+                state[GITHUB_STAR_PROMPT_KEY] = new_state
+                contact.user_state_details = state
+                contact.save(update_fields=["user_state_details"])
+        except Exception:
+            logger.debug("github_star_prompt: saving choice failed", exc_info=True)
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return HttpResponse(status=204)
     if choice == "star":
