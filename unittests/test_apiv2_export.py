@@ -345,7 +345,7 @@ class TestProductExportStream(DojoAPITestCase):
 
     def test_risk_acceptance_line(self):
         (data,) = [line["data"] for line in self.lines if line["type"] == "risk_acceptance"]
-        self.assertEqual("waiver.txt", data["proof"]["filename"])
+        self.assertEqual(Path(self.risk_acceptance.path.name).name, data["proof"]["filename"])
         self.assertEqual(b"proof", base64.b64decode(data["proof"]["data_base64"]))
         self.assertEqual([self.finding.id], data["accepted_findings"])
         self.assertEqual(self.finding.test.engagement_id, data["engagement"])
