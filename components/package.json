@@ -24,7 +24,7 @@
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
     "jszip": "^3.10.2",
     "moment": "^2.31.0",
-    "pdfmake": "^0.3.11"
+    "pdfmake": "^0.3.12"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3",

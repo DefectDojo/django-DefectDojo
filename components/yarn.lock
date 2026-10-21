@@ -416,12 +416,12 @@
   dependencies:
     "@tybys/wasm-util" "^0.10.1"
 
-"@noble/ciphers@^1.0.0":
+"@noble/ciphers@^1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@noble/ciphers/-/ciphers-1.3.0.tgz#f64b8ff886c240e644e5573c097f86e5b43676dc"
   integrity sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==
 
-"@noble/hashes@^1.6.0":
+"@noble/hashes@^1.8.0":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
   integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
@@ -1327,13 +1327,6 @@ brotli@^1.3.2:
   dependencies:
     base64-js "^1.1.2"
 
-browserify-zlib@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/browserify-zlib/-/browserify-zlib-0.2.0.tgz#2869459d9aa3be245fe8fe2ca1f46e2e7f54d73f"
-  integrity sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
-  dependencies:
-    pako "~1.0.5"
-
 ccount@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/ccount/-/ccount-2.0.1.tgz#17a3bf82302e0870d6da43a01311a8bc02a3ecf5"
@@ -1565,6 +1558,11 @@ fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
+
+fflate@^0.8.2, fflate@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.8.3.tgz#bc27d8eb30343d4d512abb03480202ce65d825fc"
+  integrity sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==
 
 fill-range@^7.1.1:
   version "7.1.1"
@@ -1927,11 +1925,6 @@ js-base64@^3.9.2:
   version "3.9.3"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.9.3.tgz#77b34aa20a765d150be687fc348d59fe7d022188"
   integrity sha512-uwYQp+VJ38FVvtim6qNbit6e9uT6dwWQ4Y1+H9TxhW5hcHjpHwoxlR0nMpqUmIFOmu4VqMxwdJA88gIVuZJQ/g==
-
-js-md5@^0.8.3:
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/js-md5/-/js-md5-0.8.3.tgz#921bab7efa95bfc9d62b87ee08a57f8fe4305b69"
-  integrity sha512-qR0HB5uP6wCuRMrWPTrkMaev7MJZwJuuw4fnwAzRgP4J4/F8RwtodOKpGp4XpqsLBFzzgqIO42efFAyz2Et6KQ==
 
 json-schema@^0.4.0:
   version "0.4.0"
@@ -2542,7 +2535,7 @@ pako@^0.2.5:
   resolved "https://registry.yarnpkg.com/pako/-/pako-0.2.9.tgz#f3f7522f4ef782348da8161bad9ecfd51bf83a75"
   integrity sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==
 
-pako@~1.0.2, pako@~1.0.5:
+pako@~1.0.2:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
@@ -2564,25 +2557,25 @@ pathe@^2.0.3:
   resolved "https://registry.yarnpkg.com/pathe/-/pathe-2.0.3.tgz#3ecbec55421685b70a9da872b2cff3e1cbed1716"
   integrity sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==
 
-pdfkit@^0.19.1:
-  version "0.19.1"
-  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.19.1.tgz#633d5f031ce6f1ba6ce141325c6cf87fa6acb0a2"
-  integrity sha512-6Gzk+wDwTs4VSxsR5rCMTnIl5nlmkye1oWB0l2hDB1EX6ZNSIBroKQEv+2+fPPn+stVjyqzmsqRJVDfB9fo5DA==
+pdfkit@^0.20.2:
+  version "0.20.2"
+  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.20.2.tgz#6a979d812c75b6bc1b554a0641f699228cc94e61"
+  integrity sha512-Q/w03ICAQyXfHNfTsg1udp0ADerdBN0s7a6XSPL7J7Ro6ABnafoBOCDBstIO9U02mvzHEV8HrvFIw5iV5ejIRA==
   dependencies:
-    "@noble/ciphers" "^1.0.0"
-    "@noble/hashes" "^1.6.0"
+    "@noble/ciphers" "^1.3.0"
+    "@noble/hashes" "^1.8.0"
+    fflate "^0.8.3"
     fontkit "^2.0.4"
-    js-md5 "^0.8.3"
     linebreak "^1.1.0"
-    png-js "^1.1.0"
+    png-js "^2.0.0"
 
-pdfmake@^0.3.11:
-  version "0.3.11"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.11.tgz#b4504d19b8f31fa5063dc1b847b060faa4f7c5bb"
-  integrity sha512-Uc49J9hUMyuqJk+U+PxlpBpPr96A4HOOfesGx609EPr2ue82+5/Smq/KTAkEqh0/jUGSi1fumvqZ5yAWijJTJg==
+pdfmake@^0.3.12:
+  version "0.3.12"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.12.tgz#c1f35e5f5b37f1fcc1cd8e7df63581b09438292a"
+  integrity sha512-Rhqr/IWpYeEzrKCaZJOfdNxMtBAaHb4NfVXRpTHtH8DRo++hUua9QjwP5UNau7rOsHpgE0xfQLqVtkxrpdNqJQ==
   dependencies:
     linebreak "^1.1.0"
-    pdfkit "^0.19.1"
+    pdfkit "^0.20.2"
     xmldoc "^2.0.3"
 
 picocolors@^1.1.1:
@@ -2595,12 +2588,12 @@ picomatch@^2.3.1:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.2.tgz#5a942915e26b372dc0f0e6753149a16e6b1c5601"
   integrity sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==
 
-png-js@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/png-js/-/png-js-1.1.0.tgz#60a135216601f807b88a6d61ac93bd42a32c5ee1"
-  integrity sha512-PM/uYGzGdNSzqeOgly68+6wKQDL1SY0a/N+OEa/+br6LnHWOAJB0Npiamnodfq3jd2LS/i2fMeOKSAILjA+m5Q==
+png-js@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/png-js/-/png-js-2.0.0.tgz#7bc521aea1d47f5e3bf42eeecdd77095cba98d5f"
+  integrity sha512-GdzJuUMc6ZSpxFJWVxtOH1bzYHym+TOnveqUjb+VJIbZWbZzyiRGFiKhbiielfpYbgMlhHVhsJ0FTazfuRFkMA==
   dependencies:
-    browserify-zlib "^0.2.0"
+    fflate "^0.8.2"
 
 postcss@^8.5.19:
   version "8.5.23"
