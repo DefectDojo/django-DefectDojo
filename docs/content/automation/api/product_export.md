@@ -56,7 +56,7 @@ That re-initialization also resets every other system setting.
 The keys of `counts` are in [Counts](#counts). An example product entry, with Locations off:
 
 ```json
-{"id": 2, "name": "Security How-to", "prod_type": 2, "counts": {"engagements": 5, "tests": 10, "findings": 15, "endpoints": 2, "notes": 3, "files": 0, "files_over_cap": 0, "risk_acceptances": 0, "finding_groups": 0}}
+{"id": 1, "name": "Security How-to", "prod_type": 2, "counts": {"engagements": 1, "tests": 1, "findings": 4, "endpoints": 2, "notes": 2, "files": 2, "files_over_cap": 0, "risk_acceptances": 1, "finding_groups": 0}, "description": "Security How-to", "tags": [], "business_criticality": null, "sla_configuration": 1, "product_manager": null, "technical_contact": null, "team_manager": null}
 ```
 
 The manifest takes one parameter:
