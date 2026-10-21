@@ -61,6 +61,8 @@ Unlike other tags, **the state and Exploitable Path tags follow the tool.** When
 Notes:
 
 - The tags do not change deduplication and are never added to Unique ID From Tool or the description.
+- The connector owns the `cx-state:` and `exploitable-path:` tag families. A tag you add by hand in either family is replaced by what Checkmarx reports on the next sync, so use a different prefix for your own tags.
+- This applies to connector syncs only. Reimporting a Checkmarx One file through the regular import keeps the tags and Severity Justification a finding was first imported with.
 - Findings that already existed before this version gain the tags and the comment on their next sync.
 - A finding whose state changes to Not Exploitable is still closed on the next sync, as before; it is not kept with a `cx-state:not_exploitable` tag.
 
