@@ -53,6 +53,8 @@ Editing can be turned on with the `DD_EDITABLE_MITIGATED_DATA` server setting. W
 * **Applying the setting:** `DD_EDITABLE_MITIGATED_DATA` is a server-level environment variable (see [Configuration](/get_started/open_source/configuration/)). Changing it requires a service restart to take effect.
 * **DefectDojo Cloud / Pro:** this setting cannot be changed from the UI. Contact DefectDojo Support to have it enabled for your instance.
 
+In DefectDojo Pro, a Findings list can also be worked through one Finding at a time from the keyboard: see [Keyboard Triage](/triage_findings/findings_workflows/pro__keyboard_triage/).
+
 ## Bulk Edit Findings
 
 Findings can be edited in bulk from a Finding List, which can be found either on the Findings page itself, or from within a Test. 
