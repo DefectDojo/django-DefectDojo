@@ -88,7 +88,7 @@ Key facts:
 - [Attaching Files (Open Source)](https://docs.defectdojo.com/triage_findings/findings_workflows/os__add_files/): Upload screenshots, reports, or other supporting files to a Finding, Engagement, or Test in DefectDojo OS
 - [Attaching Files (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__add_files/): Upload screenshots, reports, or other supporting files to a Finding, Engagement, or Test in DefectDojo Pro
 - [Bulk Editing Findings (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__bulk_edit_findings/): Apply metadata changes, tags, notes, and review to many Findings at once in the DefectDojo Pro UI
-- [Keyboard Triage (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__keyboard_triage/): Walk a Findings list one Finding at a time and decide each with a single key in DefectDojo Pro
+- [Keyboard Triage (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__keyboard_triage/): Walk a Findings list one Finding at a time from the keyboard, with a note for each decision, in DefectDojo Pro
 - [Mitigation Policies (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__mitigation_policy/): Standardize how Findings should be remediated with reusable, centrally managed Mitigation Policies
 - [AI Governance Policies (Pro)](https://docs.defectdojo.com/triage_findings/findings_workflows/pro__ai_governance_policies/): Decide which AI components are authorized where, and turn unauthorized ones into Findings
 - [Export Findings (Open Source)](https://docs.defectdojo.com/triage_findings/findings_workflows/exporting/): Export findings and engagements as CSV or Excel
