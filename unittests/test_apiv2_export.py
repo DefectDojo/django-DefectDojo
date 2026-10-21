@@ -7,11 +7,13 @@ from pathlib import Path
 from django.core.files.base import ContentFile
 from django.test import RequestFactory
 from django.urls import reverse
+from drf_spectacular.generators import SchemaGenerator
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 import dojo
 from dojo.endpoint.api.serializer import EndpointStatusSerializer
+from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
     MAX_FILE_BYTES_DEFAULT,
     ExportFindingSerializer,
@@ -23,6 +25,7 @@ from dojo.export.api.views import COUNT_KEYS
 from dojo.finding.api.serializer import FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
+from dojo.location.models import LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     BurpRawRequestResponse,
@@ -84,6 +87,7 @@ def seed_product(case):
     case.addClassCleanup(case.risk_acceptance.path.storage.delete, case.risk_acceptance.path.name)
     case.risk_acceptance.accepted_findings.add(case.finding)
     test.engagement.risk_acceptance.add(case.risk_acceptance)
+    case.risk_acceptance.notes.add(Notes.objects.create(entry="ra note", author=case.admin))
 
 
 @versioned_fixtures
@@ -212,9 +216,11 @@ class TestProductExportStream(DojoAPITestCase):
         )
 
     def test_anonymous_is_403(self):
-        response = APIClient().get(self.url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        self.assertEqual("Authentication credentials were not provided.", response.json()["detail"])
+        for url in (self.url, reverse("export-manifest")):
+            with self.subTest(url=url):
+                response = APIClient().get(url)
+                self.assertEqual(403, response.status_code, response.content[:1000])
+                self.assertEqual("Authentication credentials were not provided.", response.json()["detail"])
 
     def test_non_superuser_is_403(self):
         client = APIClient()
@@ -264,6 +270,17 @@ class TestProductExportStream(DojoAPITestCase):
         data = self.line_data("finding", self.finding.id, ndjson_lines(self.client.get(self.url)))
         self.assertIn("Bestätigt 🎯", [note["entry"] for note in data["notes"]])
 
+    def test_line_separator_characters_are_escaped(self):
+        # Regression: U+0085 went out raw, so str.splitlines() cut the line in two.
+        entry = "a\u0085b\u2028c\u2029d"
+        self.finding.notes.add(Notes.objects.create(entry=entry, author=self.admin))
+        body = b"".join(self.client.get(self.url).streaming_content)
+        for raw in (b"\xc2\x85", b"\xe2\x80\xa8", b"\xe2\x80\xa9"):
+            self.assertNotIn(raw, body)
+        self.assertEqual(body.decode().split("\n")[:-1], body.decode().splitlines())
+        data = self.line_data("finding", self.finding.id, [json.loads(line) for line in body.splitlines()])
+        self.assertIn(entry, [note["entry"] for note in data["notes"]])
+
     def test_non_finite_float_is_null(self):
         Finding.objects.filter(pk=self.finding.pk).update(cvssv3_score=float("nan"))
         lines = ndjson_lines(self.client.get(self.url))
@@ -306,8 +323,10 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual(sum(len(data["endpoints"]) for data in findings), counts["endpoints"])
         self.assertEqual(sum(len(data["notes"]) for data in body), counts["notes"])
         self.assertEqual(sum(len(data.get("files", [])) for data in body), counts["files"])
-        # The fixture has 3 notes and no files on product 2. seed_product adds 3 notes and 3 files.
-        self.assertEqual(6, counts["notes"])
+        status_model = LocationFindingReference if locations_enabled() else Endpoint_Status
+        self.assertEqual(status_model.objects.filter(finding__test__engagement__product_id=2).count(), counts["endpoints"])
+        # The fixture has 3 notes and no files on product 2. seed_product adds 4 notes and 3 files.
+        self.assertEqual(7, counts["notes"])
         self.assertEqual(3, counts["files"])
         self.assertEqual(1, counts["finding_groups"])
 
@@ -350,7 +369,7 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual([self.finding.id], data["accepted_findings"])
         self.assertEqual(self.finding.test.engagement_id, data["engagement"])
         self.assertEqual(self.admin.id, data["owner"])
-        self.assertEqual([], data["notes"])
+        self.assertEqual(["ra note"], [note["entry"] for note in data["notes"]])
         self.assertNotIn("path", data)
 
     def test_file_over_cap_has_no_data(self):
@@ -362,6 +381,34 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual(3, lines[-1]["counts"]["files_over_cap"])
         proof = next(line["data"]["proof"] for line in lines if line["type"] == "risk_acceptance")
         self.assertIsNone(proof["data_base64"])
+
+    def test_file_at_cap_is_inlined(self):
+        lines = ndjson_lines(self.client.get(self.url, {"max_file_bytes": 5}))
+        entry = self.line_data("finding", self.finding.id, lines)["files"][0]
+        self.assertEqual(b"hello", base64.b64decode(entry["data_base64"]))
+        self.assertEqual(0, lines[-1]["counts"]["files_over_cap"])
+        proof = next(line["data"]["proof"] for line in lines if line["type"] == "risk_acceptance")
+        self.assertEqual(b"proof", base64.b64decode(proof["data_base64"]))
+
+    def test_risk_acceptance_linked_only_through_a_finding_crosses(self):
+        # Regression: an acceptance with no engagement link got no line while the finding line named its id.
+        unlinked = Risk_Acceptance.objects.create(name="unlinked", owner=self.admin)
+        unlinked.accepted_findings.add(self.finding)
+        unlinked.notes.add(Notes.objects.create(entry="unlinked note", author=self.admin))
+        lines = ndjson_lines(self.client.get(self.url))
+        self.assertIn(unlinked.id, [line["data"]["id"] for line in lines if line["type"] == "risk_acceptance"])
+        data = self.line_data("risk_acceptance", unlinked.id, lines)
+        self.assertIsNone(data["engagement"])
+        self.assertEqual(["unlinked note"], [note["entry"] for note in data["notes"]])
+        self.assertIn(unlinked.id, self.line_data("finding", self.finding.id, lines)["risk_acceptances"])
+        before = self.lines[-1]["counts"]
+        self.assertEqual(before["risk_acceptances"] + 1, lines[-1]["counts"]["risk_acceptances"])
+        self.assertEqual(before["notes"] + 1, lines[-1]["counts"]["notes"])
+
+    def test_schema_types_the_product_id_as_an_integer(self):
+        schema = SchemaGenerator().get_schema(request=None, public=True)
+        parameters = schema["paths"]["/api/v2/export/products/{id}/"]["get"]["parameters"]
+        self.assertEqual(["integer"], [parameter["schema"]["type"] for parameter in parameters if parameter["in"] == "path"])
 
 
 @versioned_fixtures
@@ -421,15 +468,32 @@ class TestExportManifest(DojoAPITestCase):
         Engagement.objects.filter(product_id=2).exclude(id=first.test.engagement_id).first().risk_acceptance.add(
             self.risk_acceptance,
         )
-        for params in ({}, {"max_file_bytes": 4}):
-            with self.subTest(params=params):
-                counts = self.get_results_by_id(self.client.get(self.url, params).json()["products"], 2)["counts"]
-                end = ndjson_lines(self.client.get(reverse("export-product", args=[2]), params))[-1]["counts"]
-                for key in ("engagements", "tests", "findings", "notes", "files", "files_over_cap", "risk_acceptances"):
-                    self.assertEqual(end[key], counts[key], key)
-                # Every seeded file holds 5 bytes, so all are over a cap of 4 and none are over the default.
-                self.assertEqual(counts["files"] if params else 0, counts["files_over_cap"])
-                self.assertEqual(1, counts["finding_groups"])
+        unlinked = Risk_Acceptance.objects.create(name="unlinked", owner=self.admin)
+        unlinked.accepted_findings.add(second)
+        unlinked.notes.add(note)
+        cross = Risk_Acceptance.objects.create(name="cross", owner=self.admin)
+        cross.accepted_findings.add(Finding.objects.filter(test__engagement__product_id=1).order_by("id").first())
+        first.test.engagement.risk_acceptance.add(cross)
+        for product_id in (1, 2):
+            for params in ({}, {"max_file_bytes": 4}):
+                with self.subTest(product_id=product_id, params=params):
+                    counts = self.get_results_by_id(self.client.get(self.url, params).json()["products"], product_id)["counts"]
+                    end = ndjson_lines(self.client.get(reverse("export-product", args=[product_id]), params))[-1]["counts"]
+                    for key in ("engagements", "tests", "findings", "notes", "files", "files_over_cap", "risk_acceptances"):
+                        self.assertEqual(end[key], counts[key], key)
+                    # Every seeded file holds 5 bytes, so all are over a cap of 4 and none are over the default.
+                    self.assertEqual(counts["files"] if params else 0, counts["files_over_cap"])
+                    self.assertEqual(1 if product_id == 2 else 0, counts["finding_groups"])
+
+    def test_manifest_counts_a_risk_acceptance_linked_only_through_a_finding(self):
+        # Regression: the manifest counted acceptances through their engagement link only.
+        before = self.get_results_by_id(self.manifest["products"], 2)["counts"]
+        unlinked = Risk_Acceptance.objects.create(name="unlinked", owner=self.admin)
+        unlinked.accepted_findings.add(self.finding)
+        unlinked.notes.add(Notes.objects.create(entry="unlinked note", author=self.admin))
+        counts = self.get_results_by_id(self.client.get(self.url).json()["products"], 2)["counts"]
+        self.assertEqual(before["risk_acceptances"] + 1, counts["risk_acceptances"])
+        self.assertEqual(before["notes"] + 1, counts["notes"])
 
     def test_reference_data(self):
         reference = self.manifest["reference"]

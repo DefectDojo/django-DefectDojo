@@ -3,12 +3,13 @@ from collections import defaultdict
 from collections.abc import Iterator
 
 from django.conf import settings
-from django.db.models import Count, Prefetch, QuerySet
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Count, Prefetch, Q, QuerySet
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.authtoken.models import Token
 from rest_framework.renderers import BaseRenderer, JSONRenderer
 from rest_framework.response import Response
@@ -81,9 +82,11 @@ class NDJSONRenderer(BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None) -> bytes:
         try:
-            return JSONRenderer().render(data) + b"\n"
+            line = JSONRenderer().render(data)
         except ValueError:
-            return JSONRenderer().render(finite(data)) + b"\n"
+            line = JSONRenderer().render(finite(data))
+        # DRF escapes U+2028 and U+2029 but not U+0085, and str.splitlines() splits on all three.
+        return line.replace(b"\xc2\x85", b"\\u0085") + b"\n"
 
 
 def finite(value):
@@ -140,6 +143,11 @@ def finding_queryset(product: Product) -> QuerySet:
     )
 
 
+def risk_acceptance_in(product: Product, prefix: str = "") -> Q:
+    # An acceptance belongs to a product through an engagement link or through a finding it accepts.
+    return Q(**{f"{prefix}engagement__product": product}) | Q(**{f"{prefix}accepted_findings__test__engagement__product": product})
+
+
 def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[bytes]:
     context = {"request": request, "max_file_bytes": max_file_bytes}
     render = NDJSONRenderer().render
@@ -170,7 +178,7 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
         (
             "risk_acceptance",
             ExportRiskAcceptanceSerializer,
-            Risk_Acceptance.objects.filter(engagement__product=product)
+            Risk_Acceptance.objects.filter(risk_acceptance_in(product))
             .distinct()
             .prefetch_related(
                 notes_prefetch(), "engagement_set", Prefetch("accepted_findings", queryset=Finding.objects.only("id")),
@@ -205,8 +213,6 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
         ("notes", Engagement.notes.through, "engagement__product_id"),
         ("notes", Test.notes.through, "test__engagement__product_id"),
         ("notes", Finding.notes.through, "finding__test__engagement__product_id"),
-        ("notes", Risk_Acceptance.notes.through, "risk_acceptance__engagement__product_id"),
-        ("risk_acceptances", Risk_Acceptance, "engagement__product_id"),
         ("finding_groups", Finding_Group, "test__engagement__product_id"),
     )
     for key, model, product_path in sources:
@@ -215,6 +221,15 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
         for product_id, n in rows:
             if product_id is not None:
                 counts[product_id][key] += n
+    # A risk acceptance reaches a product through two paths, so collect ids per product and count the union.
+    for key, model, prefix in (("risk_acceptances", Risk_Acceptance, ""), ("notes", Risk_Acceptance.notes.through, "risk_acceptance__")):
+        ids = defaultdict(set)
+        for path in (f"{prefix}engagement__product_id", f"{prefix}accepted_findings__test__engagement__product_id"):
+            for product_id, found in model.objects.order_by().values_list(path).annotate(ids=ArrayAgg("id", distinct=True)):
+                if product_id is not None:
+                    ids[product_id].update(found)
+        for product_id, found in ids.items():
+            counts[product_id][key] += len(found)
     storage = FileUpload._meta.get_field("file").storage
     over_cap = {}
     file_sources = (
@@ -282,7 +297,7 @@ class ProductExportView(APIView):
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
     @extend_schema(
-        parameters=[ExportParamsSerializer],
+        parameters=[ExportParamsSerializer, OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH)],
         responses={(200, "application/x-ndjson"): OpenApiTypes.STR},
         description=(
             "Superuser only. Streams one product with its engagements, tests, findings and risk acceptances "

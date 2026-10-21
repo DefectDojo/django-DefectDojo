@@ -149,7 +149,7 @@ An example entry with Locations on:
 
 A risk acceptance line differs from `/api/v2/risk_acceptance/` in these fields:
 
-- `engagement` is the id of one engagement that holds the risk acceptance. A risk acceptance can be linked to more than one engagement. The engagement lines carry every link in their `risk_acceptance` ids.
+- `engagement` is the id of one engagement that holds the risk acceptance, or `null` when no engagement holds it. A risk acceptance can be linked to more than one engagement. The engagement lines carry every link in their `risk_acceptance` ids.
 - `notes` are nested, not ids.
 - `proof` replaces `path`. It holds `filename`, `size`, `content_type` and `data_base64`, or it is `null` when there is no proof. The proof follows the same cap and the same missing-file rule as a file entry.
 
@@ -185,7 +185,7 @@ The manifest gives `counts` for each product. The stream gives `counts` on its `
 | `notes` | Notes on engagements, tests, findings and risk acceptances, once per owner. A note on two findings counts twice. | The same, on the lines. |
 | `files` | File entries on engagements, tests and findings. A risk acceptance proof is not counted. | The same, on the lines. |
 | `files_over_cap` | File entries over the cap. A missing file is not counted. | The same, on the lines. |
-| `risk_acceptances` | Risk acceptances in the product. | Risk acceptance lines. |
+| `risk_acceptances` | Risk acceptances that an engagement of the product holds, or that accept a finding of the product. | Risk acceptance lines. |
 | `finding_groups` | Finding groups in the product. | Distinct finding groups on finding lines. |
 
 The two sides agree on every key except `endpoints` and `finding_groups`.
@@ -211,3 +211,4 @@ An example `end` line:
 - Secrets and instance settings: SSO, JIRA and tool credentials, notifications, API keys and passwords.
 
 A `duplicate_finding` id can point to a finding in another product. That id dangles in the export of this product.
+An `accepted_findings` id on a risk acceptance line can point to a finding in another product in the same way.
