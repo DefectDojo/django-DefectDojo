@@ -46,7 +46,21 @@ The chart renders no database password, and refuses to render when `database.pas
 
 On AWS, `database.host` must be the instance's own endpoint, not a DNS alias: the token is signed for the exact host name the application connects to.
 
-Use `sslMode: verify-full` in production. The token is the password, and `require` encrypts the connection without checking the server's identity, so anything that can intercept the traffic can present its own certificate and collect a token that stays valid until it expires. `verify-full` needs the certificate authority that signed the server certificate in `sslRootCert`; the cloud sections below say where to find it.
+In production, verify the server's certificate: `sslMode: verify-full`, or `verify-ca` on Cloud SQL (see below). The token is the password, and `require` encrypts the connection without checking the server's identity, so anything that can intercept the traffic can present its own certificate and collect a token that stays valid until it expires. A passwordless mode refuses `disable`, `allow` and `prefer`, which can fall back to an unencrypted connection.
+
+Cloud SQL and Amazon RDS certificates are signed by a private certificate authority. Put that CA in a Secret and name it in `database.sslRootCertSecret`; the chart mounts it into every pod that connects to the database and points `DD_DATABASE_SSLROOTCERT` at it:
+
+```bash
+kubectl -n <namespace> create secret generic db-server-ca --from-file=ca.crt=<CA file>
+```
+
+```yaml
+database:
+  sslMode: verify-full     # verify-ca on Cloud SQL
+  sslRootCertSecret:
+    name: db-server-ca
+    key: ca.crt
+```
 
 ## Docker Compose and other deployments
 
@@ -57,7 +71,7 @@ The same settings are environment variables. Leave `DD_DATABASE_PASSWORD` unset 
 | `DD_DATABASE_AUTH_MODE` | `password` (the default), `azure`, `aws` or `gcp` |
 | `DD_DATABASE_AUTH_AZURE_CLIENT_ID` | Azure, optional: the client ID of a user-assigned managed identity |
 | `DD_DATABASE_AUTH_AWS_REGION` | AWS, optional: the region the token is signed for; defaults to `AWS_REGION` |
-| `DD_DATABASE_SSLMODE` | `require` by default in a passwordless mode; `verify-full` with a CA bundle |
+| `DD_DATABASE_SSLMODE` | `require`, `verify-ca` or `verify-full`. Unset, a passwordless mode uses libpq's `PGSSLMODE` if that is set, and `require` otherwise |
 | `DD_DATABASE_SSLROOTCERT` | Path of the CA bundle that verifies the server, for `verify-full` |
 
 Each process gets its token through its cloud SDK's default credential chain, which on a virtual machine includes the machine's own identity: a managed identity on Azure, an instance profile on EC2, or the attached service account on Compute Engine.
@@ -121,7 +135,7 @@ Do this once, as a database administrator, before the first install.
 
   A role that holds `rds_iam`, directly or through membership, can only sign in with IAM. If the master user is still a member of one of these roles when `rds_iam` is granted, its password stops working. In that case, an IAM principal allowed `rds-db:connect` for the master user can sign in with a token from `aws rds generate-db-auth-token --username <master user>` and revoke the membership.
 - **IAM roles:** give each identity an IAM role allowed `rds-db:connect` on `arn:aws:rds-db:<region>:<account>:dbuser:<DbiResourceId>/<role name>`. Bind it to its ServiceAccount through the cluster's OIDC provider (IRSA: annotate the ServiceAccount with `eks.amazonaws.com/role-arn`) or with EKS Pod Identity.
-- **TLS:** RDS certificates chain to the Amazon RDS certificate authority, which is not in public trust stores. Use `sslMode: require`, or mount the RDS CA bundle and use `verify-full`.
+- **TLS:** RDS certificates chain to the Amazon RDS certificate authority, which is not in public trust stores. Download the bundle for your region from `https://truststore.pki.rds.amazonaws.com/<region>/<region>-bundle.pem`, put it in the `sslRootCertSecret` Secret, and use `sslMode: verify-full`: the instance endpoint matches its certificate.
 - **Token lifetime:** RDS tokens last 15 minutes. DefectDojo refreshes them before they expire.
 
 ### Google Cloud
@@ -135,7 +149,7 @@ Do this once, as a database administrator, before the first install.
   ```
 
   `<sa>@<project>.iam` is the role name for `database.user` and `webhookGateway.database.role`.
-- **TLS:** Cloud SQL server certificates come from a per-instance certificate authority. Use `sslMode: require`, or mount the instance's server CA and use `verify-full`.
+- **TLS:** Cloud SQL server certificates come from a certificate authority of the instance's own. Save it with `gcloud sql instances describe <instance> --format='value(serverCaCert.cert)' > ca.crt`, put it in the `sslRootCertSecret` Secret, and use `sslMode: verify-ca`. That CA signs only this instance's certificate, so `verify-ca` already pins the connection to it. `verify-full` fails when connecting by IP address, because the certificate names the instance's `*.sql.goog` DNS name instead; use it only when `database.host` is that name and it resolves inside the cluster.
 
 ## Switching an existing install
 
