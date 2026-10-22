@@ -5,7 +5,7 @@ audience: pro
 weight: 2
 ---
 
-A service user is a DefectDojo user meant for automation: a CI/CD pipeline, a scanner, a Kubernetes workload. It has no email address and no password, it can never sign in to the UI, and it holds one API token that is shown once, when it is created or regenerated. Everything else about it works like any other user: it is authorized through a global role, Asset and Organization memberships, groups and configuration permissions.
+A service user is a DefectDojo user meant for automation: a CI/CD pipeline, a scanner, a Kubernetes workload. It has no email address and no password, it can never sign in to the UI, and it holds one API token that is shown once, when it is created or regenerated. Everything else about it works like any other user: it is authorized through a global role, Asset and Organization memberships and groups.
 
 Service users are kept apart from people. They are managed on their own pages, not on the Users pages or in the Members tabs of Assets, Organizations and groups. They are not offered when work is assigned or a reviewer is chosen, they are not managed by SCIM, SSO or LDAP, they are never added to the default group, they receive no email, and they do not count toward the licensed user total.
 
@@ -35,7 +35,6 @@ A new service user has no access until it is given some, the same as a new user.
 
 * **Organizations** and **Assets**: select **Add Access**, pick one or more, and choose a role. **API Importer** is the role made for uploading scans: it can import and reimport, and read the Assets, Engagements, Tests and Findings it is a member of. The list offers only the Assets or Organizations where you can manage members, and adding an Owner role needs the right to add owners there.
 * **Groups**: add the service user to a group, the same as a user.
-* **Configuration Permissions**: shown to superusers, the same as on a user's page.
 
 One service user per pipeline or scanner, with the API Importer role on the Assets it uploads to, keeps each token's reach small and shows in the history which integration made each change.
 
