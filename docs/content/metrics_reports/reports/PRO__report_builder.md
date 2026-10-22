@@ -85,6 +85,8 @@ The difference is presentation: a **Tabular** block lays the records out as a ta
 
 Fields render in the order they are listed. Selecting a field adds it to the end of the list, and the **Fields** section of the block editor shows the selection as a numbered list you can rearrange: drag a field by its handle, or use the arrow buttons to move it up or down. Removing a field from that list deselects it. Columns in a Tabular block, and the label and value pairs in a Detail block, follow this order when the report is generated.
 
+The records are sorted by the block's **Order By** field, in the **Order Direction** you choose. A block saved with a sort field its entity no longer offers (one renamed since the block was built, say) is generated unsorted rather than failing the report, and the server log names the block and the field.
+
 When Locations are enabled, each of the Organization, Asset, Engagement, Test, and Finding entities offers a **Location Count** field. An Asset counts the locations it references directly and a Finding counts the locations attached to it. An Organization rolls up the distinct locations across its Assets, and an Engagement or Test counts the distinct locations touched by its Findings, so a host shared by several findings counts once. The counts respect the viewer's permissions, so a user who can only see some Assets in an Organization sees only those Assets' locations in its count.
 
 ### Reporting which Assets a location belongs to
@@ -221,7 +223,9 @@ A Generated Report moves through these statuses as it is built:
 | Pending | The report has been requested and is queued. |
 | Processing | The report is being assembled. |
 | Completed | The report is ready to download. |
-| Failed | The report could not be generated. The Generated Reports list shows why, under the status. |
+| Failed | The report could not be generated. The Generated Reports list shows why, under the status, in the language of the person who requested the report. |
+
+A reason names what the report itself could not do: a variable it was not given, a finding that no longer exists or is no longer visible, a Block that could not be built (named, with its own reason). A failure the report cannot explain, such as a database or storage error, reads "An unexpected error occurred. The server log has the details." and the full error goes to the server log rather than to the page.
 
 > **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC): users only ever see data they are authorized to view, even inside a report.
 
@@ -305,6 +309,8 @@ With your Blocks ready, build a Template. The Templates list shows your saved Te
 ![Templates list](images/pro_report_templates_list.png)
 
 In the Template editor, you select a Theme and arrange the Blocks in the order they should appear. The example below sequences Cover Page → Executive Intro → Open Findings → KEV → Page Break → Asset Inventory. Use **Add Existing Block** to reuse a Block you already built, or **Add New Block** to create one on the spot, and use the drag handles to reorder. Remember that the same Block can appear more than once — a single page-break Block can be inserted between several sections.
+
+The trash icon on a Block's row takes it out of this Template only; the Block itself stays, and other Templates that use it are unchanged. It needs the permission that saves the Template: **Report Template Edit** for an existing Template, **Report Template Add** for a new one. Deleting a whole Template or Block needs **Report Template Delete**.
 
 ![Template editor](images/pro_report_template_new.png)
 
