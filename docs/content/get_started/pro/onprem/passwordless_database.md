@@ -46,6 +46,8 @@ The chart renders no database password, and refuses to render when `database.pas
 
 On AWS, `database.host` must be the instance's own endpoint, not a DNS alias: the token is signed for the exact host name the application connects to.
 
+Use `sslMode: verify-full` in production. The token is the password, and `require` encrypts the connection without checking the server's identity, so anything that can intercept the traffic can present its own certificate and collect a token that stays valid until it expires. `verify-full` needs the certificate authority that signed the server certificate in `sslRootCert`; the cloud sections below say where to find it.
+
 ## Docker Compose and other deployments
 
 The same settings are environment variables. Leave `DD_DATABASE_PASSWORD` unset and put no password in `DD_DATABASE_URL`.
