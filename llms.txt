@@ -50,6 +50,7 @@ Key facts:
 - [Running an Airgapped Instance (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/airgapped/): Stop a self-hosted DefectDojo Pro instance from calling DefectDojo or any third-party feed when it has no route off its network
 - [Support Diagnostics (self-hosted) (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/support_diagnostics/): What a self-hosted DefectDojo Pro instance sends to DefectDojo support by default, how to opt in, and how the cloud portal secret is treated
 - [Sandbox Mode (self-hosted) (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/sandbox_mode/): Turn on the DefectDojo Pro sandbox on a self-hosted instance with one setting, and what it creates in your database
+- [Passwordless Database Authentication (Pro)](https://docs.defectdojo.com/get_started/pro/onprem/passwordless_database/): Run self-hosted DefectDojo Pro against a managed PostgreSQL server that refuses passwords, using Microsoft Entra ID, Amazon RDS IAM or Cloud SQL IAM authentication
 - [Installation (Open Source)](https://docs.defectdojo.com/get_started/open_source/installation/): DefectDojo supports various installation options.
 - [System Architecture (Open Source)](https://docs.defectdojo.com/get_started/open_source/architecture/): The DefectDojo platform consists of several components that work together closely.
 - [Configuration (Open Source)](https://docs.defectdojo.com/get_started/open_source/configuration/): DefectDojo is highly configurable.
