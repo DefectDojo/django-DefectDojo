@@ -4,8 +4,8 @@ description: 在不使用扫描工具的情况下跟踪漏洞信息
 weight: 2
 aliases:
 - /zh-hans/en/working_with_findings/findings_workflows/create_findings_manually
-- /import_data/import_scan_files/os__create_findings_manually
-- /import_data/import_scan_files/pro__create_findings_manually
+- /zh-hans/import_data/import_scan_files/os__create_findings_manually
+- /zh-hans/import_data/import_scan_files/pro__create_findings_manually
 ---
 
 通常,您环境中的大多数发现项都是从其他安全工具导入的。如果需要,您也可以手动添加发现项条目,用于管理并非由扫描工具创建的漏洞或工作项。

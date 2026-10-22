@@ -4,8 +4,8 @@ description: Schwachstelleninformationen ohne Scan-Tool erfassen
 weight: 2
 aliases:
 - /de/en/working_with_findings/findings_workflows/create_findings_manually
-- /import_data/import_scan_files/os__create_findings_manually
-- /import_data/import_scan_files/pro__create_findings_manually
+- /de/import_data/import_scan_files/os__create_findings_manually
+- /de/import_data/import_scan_files/pro__create_findings_manually
 ---
 
 Normalerweise werden die meisten Befunde in Ihrer Umgebung aus anderen Sicherheitswerkzeugen importiert. Wenn Sie möchten, können Sie zusätzlich Befunde manuell anlegen, etwa für Schwachstellen oder Arbeiten, die Sie verwalten möchten und die nicht aus einem Scan-Tool stammen.

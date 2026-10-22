@@ -5,8 +5,8 @@ description: Realice seguimiento de información de vulnerabilidades sin usar un
 weight: 2
 aliases:
 - /es/en/working_with_findings/findings_workflows/create_findings_manually
-- /import_data/import_scan_files/os__create_findings_manually
-- /import_data/import_scan_files/pro__create_findings_manually
+- /es/import_data/import_scan_files/os__create_findings_manually
+- /es/import_data/import_scan_files/pro__create_findings_manually
 ---
 
 Normalmente, la mayoría de los Hallazgos en su entorno se importarán desde otras herramientas de seguridad. Si lo desea, también puede agregar entradas de Hallazgos manuales, si tiene vulnerabilidades o tareas que desea gestionar y que no se crearon a partir de una herramienta de escaneo.
