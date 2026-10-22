@@ -464,6 +464,24 @@ def get_jira_connect_method():
     return connect_to_jira
 
 
+def get_jira_description_context_method():
+    """
+    Return the callable that may adjust the issue description's template context.
+
+    ``settings.JIRA_DESCRIPTION_CONTEXT_METHOD`` names it (``"module.function"``); it is called
+    as ``method(obj, context)`` and returns the context to render. Without the setting the
+    context is rendered as built.
+    """
+    if hasattr(settings, "JIRA_DESCRIPTION_CONTEXT_METHOD"):
+        try:
+            mn, _, fn = settings.JIRA_DESCRIPTION_CONTEXT_METHOD.rpartition(".")
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except (ModuleNotFoundError, AttributeError, ValueError):
+            pass
+    return lambda _obj, context: context
+
+
 def get_jira_connection_raw(jira_server, jira_username, jira_password):
     try:
         connect_method = get_jira_connect_method()
@@ -763,6 +781,7 @@ def jira_description(obj, **kwargs):
         kwargs["finding_group"] = obj
 
     kwargs["V3_FEATURE_LOCATIONS"] = locations_enabled()
+    kwargs = get_jira_description_context_method()(obj, kwargs)
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
     max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
