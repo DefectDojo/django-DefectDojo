@@ -135,7 +135,7 @@ Changing the Asset field moves the Engagement, along with its Tests and Findings
 
 A few fields can also be changed on the Engagement page itself, without opening Edit Engagement: the **Name** and **Tags** in the page header, and **Status**, **Lead**, **Start Date**, **End Date** and **Description** wherever the page layout shows them. Hover over a value (or reach it with the keyboard) and click the pencil, or the value, to open its editor. **Enter** or **Save** saves the change and **Esc** or **Cancel** puts the value back; clicking elsewhere saves nothing (**Ctrl+Enter** or **Cmd+Enter** saves the Description, where Enter is a new line).
 
-* **Status** offers the open statuses only. Completed and Cancelled stay with **Close Engagement** and **Reopen Engagement**, so a closed Engagement shows no status editor.
+* **Status** can be changed in place only on an Interactive Engagement, and offers the open statuses only. Completed and Cancelled stay with **Close Engagement** and **Reopen Engagement**, so a closed Engagement shows no status editor.
 * A date changed on its own still keeps the Start Date on or before the End Date.
 * If someone else changed the Engagement after you opened the page, nothing is overwritten: DefectDojo shows **Engagement Changed** and offers **Reload** or **Keep Editing**.
 
