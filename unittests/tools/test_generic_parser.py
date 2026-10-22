@@ -1,8 +1,6 @@
 import datetime
 import json
 
-from django.core.exceptions import ValidationError
-
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
@@ -861,15 +859,10 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         self.assertEqual(1, len(kept))
         self.assertEqual("dep-lodash-4.17.20", kept[0].unique_id_from_tool)
 
-
-# Regression: the generic CSV parser read "FALSE" as true for known_exploited /
-# ransomware_used / fix_available, never read CVSSV3_score, and aborted the whole
-# import on an empty numeric or date cell.
-
     # Regression: a JSON finding whose component_name exceeded the Finding column
     # width reached the database and failed the import with a 500 (DataError:
     # value too long for type character varying(500)) instead of a 400.
-    def test_parse_json_field_longer_than_model_max_length_raises_validation_error(self):
+    def test_parse_json_field_longer_than_model_max_length_raises_value_error(self):
         field = Finding._meta.get_field("component_name")
         for length, should_raise in ((field.max_length, False), (field.max_length + 1, True)):
             with self.subTest(length=length):
@@ -882,7 +875,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 file = TestFile("findings.json", content)
                 parser = GenericParser()
                 if should_raise:
-                    with self.assertRaises(ValidationError) as cm:
+                    with self.assertRaises(ValueError) as cm:
                         parser.get_findings(file, self.test)
                     message = str(cm.exception)
                     self.assertIn("component_name", message, msg=f"expected the field name in the error, got: {message}")
@@ -895,6 +888,9 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                     )
 
 
+# Regression: the generic CSV parser read "FALSE" as true for known_exploited /
+# ransomware_used / fix_available, never read CVSSV3_score, and aborted the whole
+# import on an empty numeric or date cell.
 class TestGenericCSVParserCellValues(DojoTestCase):
 
     def parse(self, content):
