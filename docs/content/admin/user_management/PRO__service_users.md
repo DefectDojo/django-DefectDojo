@@ -24,6 +24,7 @@ Open **Settings > Users & Permissions > Service Users** and select **New Service
 * **Description**: what the service user is for.
 * **Token Expires**: 30, 60, 90 or 180 days, or No Expiration. 90 days is selected by default.
 * **Global Role**: optional. A role applied everywhere, like a global role on any user. Only a superuser or a global Owner can assign one, and a service user can never be a superuser.
+
 When you submit, DefectDojo shows the token once. Copy it into the secret store your pipeline reads from (a protected CI/CD variable, a Kubernetes Secret). DefectDojo stores only a hash of the token, so it cannot show it again. If it is lost, regenerate it.
 
 Closing the token dialog opens the service user's page, where its access is added.
@@ -71,7 +72,7 @@ Select a service user's name to open its page. Each row's menu on the Service Us
 
 * **View Service User**: the service user's page.
 * **Edit Service User**: change the label, description, global role and token expiry. The username cannot be changed.
-* **Regenerate Token**: issue a new token and show it once. The current token stops working immediately.
+* **Regenerate Token**: issue a new token and show it once. The current token stops working immediately. OAuth access tokens already issued from it keep working until they expire, within the hour.
 * **Disable Service User** and **Enable Service User**: a disabled service user keeps its token, but the token is refused until the service user is enabled again.
 * **Delete Service User**: remove the service user, its token, its memberships, its groups and its global role. A service user that is recorded on findings or other records, for example as the reporter of findings it imported, cannot be deleted: disable it instead.
 
@@ -79,7 +80,7 @@ Editing, regenerating or deleting a service user needs the right to grant every 
 
 The list shows each token's first characters, when it expires, when it was last used and its status: Active, Expiring Soon (within 14 days), Expired or Disabled.
 
-The Users page's **Force Token Reset** and **Reset API Tokens** never rotate a service user's token: rotate it from the Service Users page or the API, where the new token is shown.
+A service user authenticates only with its own token. It is never given a regular API token, so features that create one for the person asking, such as generating a token for a Sensei workflow, refuse a service user. The Users page's **Force Token Reset** and **Reset API Tokens** never rotate a service user's token: rotate it from the Service Users page or the API, where the new token is shown.
 
 ## Automate with the API
 
