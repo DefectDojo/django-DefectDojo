@@ -61,7 +61,7 @@ When one Engagement gets several reports of the same scan type, give each its ow
 
 Each branch gets its own Engagement, so a pull request's scan never closes or reopens Findings on the default branch. Pull requests use their source branch, tags use the tag name, and the merge queue uses one Engagement per base branch.
 
-Engagements the action creates for anything other than the default branch deduplicate only within themselves (**Deduplicate within this Engagement only**). Without that, a Finding first seen on a branch would mark the default branch's copy as a duplicate. Branch Engagements stay in DefectDojo after the branch is merged, so run the import only on the default branch if you want to keep them out of the Asset's counts.
+Engagements the action creates for anything other than the default branch deduplicate only within themselves (**Deduplication within this engagement only**). Without that, a Finding first seen on a branch would mark the default branch's copy as a duplicate. Branch Engagements stay in DefectDojo after the branch is merged, so run the import only on the default branch if you want to keep them out of the Asset's counts.
 
 ## Fail the build
 
