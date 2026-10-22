@@ -349,6 +349,56 @@ class RiskAcceptanceTestUI(DojoTestCase):
         ra.refresh_from_db()
         self.assertEqual(ra.expiration_date.date(), requested_expiration_date.date())
 
+    def test_reinstate_leaves_out_a_finding_accepted_in_another_risk_acceptance(self):
+        """
+        A finding accepted again elsewhere after the expiry stays where it is now accepted.
+
+        Reinstating used to keep it in both risk acceptances. Expiring or deleting either one later
+        then cleared the finding's single risk_accepted flag while the other still listed it.
+        """
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        moved, *kept = list(expired.accepted_findings.order_by("id"))
+        other = Risk_Acceptance.objects.create(name="Accepted elsewhere", owner=self.get_test_admin())
+        ra_helper.add_findings_to_risk_acceptance(self.get_test_admin(), other, [moved])
+
+        ra_helper.reinstate(expired, expired.expiration_date)
+
+        expired.refresh_from_db()
+        moved.refresh_from_db()
+        self.assertNotIn(moved, expired.accepted_findings.all(), "the moved finding stays out of the reinstated acceptance")
+        self.assertIn(moved, other.accepted_findings.all())
+        self.assertTrue(moved.risk_accepted, "the other acceptance still holds the finding")
+        self.assertFalse(moved.active)
+        self.assertEqual(sorted(f.id for f in kept), sorted(expired.accepted_findings.values_list("id", flat=True)))
+        self.assert_all_inactive_risk_accepted(expired.accepted_findings.all())
+
+    def test_reinstate_leaves_out_a_finding_simply_risk_accepted_since(self):
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        moved = expired.accepted_findings.order_by("id").first()
+        product = moved.test.engagement.product
+        product.enable_simple_risk_acceptance = True
+        product.save()
+        ra_helper.simple_risk_accept(self.get_test_admin(), moved)
+
+        ra_helper.reinstate(expired, expired.expiration_date)
+
+        moved.refresh_from_db()
+        self.assertNotIn(moved, expired.accepted_findings.all())
+        self.assertTrue(moved.risk_accepted, "the simple risk acceptance still holds the finding")
+
+    def test_reinstate_keeps_members_an_acceptance_did_not_reactivate(self):
+        """Without reactivate_expired the members stay risk accepted by this acceptance, so none is left out."""
+        self.test_expire_risk_acceptance_findings_not_active()
+        expired = Risk_Acceptance.objects.last()
+        members = sorted(expired.accepted_findings.values_list("id", flat=True))
+
+        ra_helper.reinstate(expired, expired.expiration_date)
+
+        self.assertEqual(members, sorted(expired.accepted_findings.values_list("id", flat=True)))
+        self.assert_all_inactive_risk_accepted(expired.accepted_findings.all())
+
     def test_audit_note_links_to_the_risk_acceptance(self):
         """The note written when a finding is accepted carries a usable link, not empty parens."""
         self.test_add_risk_acceptance_multiple_findings_accepted()

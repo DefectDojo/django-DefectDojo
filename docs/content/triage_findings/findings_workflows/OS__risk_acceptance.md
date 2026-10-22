@@ -119,6 +119,7 @@ If the Risk Acceptance has **already expired** — meaning the periodic expirati
 
 - The Risk Acceptance is reinstated and is no longer in the expired state.
 - Every Finding linked to the Risk Acceptance that is currently Active is re-accepted (set back to Risk Accepted / Inactive).
+- A Finding that has been Risk Accepted again since the expiry, through another Risk Acceptance or a Simple Risk Acceptance, stays where it is: it is removed from the reinstated Risk Acceptance, so it is never held by two at once.
 - A comment is posted to any linked Jira issues recording the reinstate.
 
 The date you enter is the date that is saved.  The system setting **Risk Acceptance Form Default Days** (default: 180) is only used when you did not ask for a particular date — for example when you use the **Reinstate** action, which reinstates the Risk Acceptance without editing its expiration date, and therefore sets it to today + N days.
