@@ -34,6 +34,8 @@ The database user of a new Docker Compose installation with the bundled database
 SELECT rolcreaterole, rolcreatedb FROM pg_roles WHERE rolname = current_user;
 ```
 
+The sandbox is not available with [passwordless database authentication](/get_started/pro/onprem/passwordless_database/): its database roles sign in with passwords.
+
 If either is false, either have a database administrator grant them:
 
 ```sql

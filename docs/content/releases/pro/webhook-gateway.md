@@ -31,7 +31,7 @@ The ECS task definitions do not include the gateway. They set `DD_WEBHOOK_GATEWA
 
 ## The database schema and role
 
-The gateway keeps its tables in a schema of its own, `whook` by default (`DD_WEBHOOK_GATEWAY_SCHEMA`), inside DefectDojo's database. It logs in with a role of its own, named after DefectDojo's database by default (`<database>_webhook_gateway`, set with `DD_WEBHOOK_GATEWAY_DB_ROLE`), which owns that schema and can use nothing else of DefectDojo's. Because PostgreSQL roles belong to the whole server, each installation on a shared server gets its own role, and DefectDojo never changes a role that was created for another database.
+The gateway keeps its tables in a schema of its own, `whook` by default (`DD_WEBHOOK_GATEWAY_SCHEMA`), inside DefectDojo's database. It logs in with a role of its own, named after DefectDojo's database by default (`<database>_webhook_gateway`, set with `DD_WEBHOOK_GATEWAY_DB_ROLE`), which owns that schema and can use nothing else of DefectDojo's. With [passwordless database authentication](/get_started/pro/onprem/passwordless_database/), the gateway signs in with a cloud identity of its own instead, and a database administrator creates its role and schema. Because PostgreSQL roles belong to the whole server, each installation on a shared server gets its own role, and DefectDojo never changes a role that was created for another database.
 
 On startup, DefectDojo creates both when they are missing, using DefectDojo's own database user:
 
