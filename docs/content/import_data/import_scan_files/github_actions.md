@@ -25,9 +25,9 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Scan
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           format: json
@@ -56,6 +56,12 @@ Unless you set them, the action uses names from the repository and creates any t
 | Test | Scan type | `test-title` |
 
 When one Engagement gets several reports of the same scan type, give each its own `test-title` so each reimport finds its own Test.
+
+### Branches, pull requests and tags
+
+Each branch gets its own Engagement, so a pull request's scan never closes or reopens Findings on the default branch. Pull requests use their source branch, tags use the tag name, and the merge queue uses one Engagement per base branch.
+
+Engagements the action creates for anything other than the default branch deduplicate only within themselves (**Deduplicate within this Engagement only**). Without that, a Finding first seen on a branch would mark the default branch's copy as a duplicate. Branch Engagements stay in DefectDojo after the branch is merged, so run the import only on the default branch if you want to keep them out of the Asset's counts.
 
 ## Fail the build
 
