@@ -1045,6 +1045,33 @@
                 // Bootstrap-select removed — native <select> styled by @tailwindcss/forms
             });
         </script>
+        {% if SHOW_GITHUB_STAR_PROMPT %}
+            <div id="github-star-prompt" class="github-star-prompt" role="dialog" aria-labelledby="github-star-prompt-title">
+                <form method="post" action="{% url 'github_star_prompt' %}" class="github-star-prompt-form github-star-prompt-close-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="choice" value="later">
+                    <button type="submit" class="github-star-prompt-close" aria-label="{% trans 'Close' %}">&times;</button>
+                </form>
+                <h2 id="github-star-prompt-title" class="github-star-prompt-title">
+                    <i class="fa-solid fa-star" aria-hidden="true"></i> {% trans "Enjoying DefectDojo?" %}
+                </h2>
+                <p class="github-star-prompt-body">
+                    {% trans "DefectDojo is open source. If it helped today, a GitHub star helps other security engineers and developers find it!" %}
+                </p>
+                <div class="github-star-prompt-actions">
+                    <form method="post" action="{% url 'github_star_prompt' %}" target="_blank" rel="noopener" class="github-star-prompt-form github-star-prompt-star-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="choice" value="star">
+                        <button type="submit" class="btn btn-primary"><i class="fa-regular fa-star" aria-hidden="true"></i> {% trans "Star on GitHub" %}</button>
+                    </form>
+                    <form method="post" action="{% url 'github_star_prompt' %}" class="github-star-prompt-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="choice" value="later">
+                        <button type="submit" class="btn btn-secondary">{% trans "Later" %}</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
         {% block extra_javascript %}
         {% endblock %}
         {% block postscript %}

@@ -58,21 +58,23 @@ The **CRA Product Class** choices:
 | Important, Class II | `important_class_2` |
 | Critical | `critical` |
 
-PSIRT treats any value other than **Not Applicable** as in scope for the CRA (see below).
+DefectDojo treats any value other than **Not Applicable** as in scope for the CRA (see below).
 
 ## What reads the profile
 
 - **Scan cadence policies.** A policy with **Only Critical or Important Functions** checked narrows its scope to
   Assets whose profile has **Supports a Critical or Important Function** set. An Asset with no
   profile counts as not critical. See [Scan cadence policies](/sensei/scan_cadence_policies/).
-- **CRA Article 14 suggestions in PSIRT.** A PSIRT case suggests a CRA Article 14 early warning
-  when it carries a feed item known to be exploited and at least one matched component belongs
-  to an Asset whose **CRA Product Class** is not **Not Applicable**. The suggestion appears as a
-  banner on the case and on its advisory. It never starts a report; a person does. DefectDojo
-  records when the suggestion first appeared to someone.
+- **CRA Article 14 suggestions.** An open finding marked as known exploited on an Asset whose
+  **CRA Product Class** is not **Not Applicable** suggests a CRA Article 14 early warning, on the
+  Asset page and on the finding. Where PSIRT is enabled, a PSIRT case suggests one too when it
+  carries a feed item known to be exploited and a matched component on such an Asset. A
+  suggestion never starts a report; a person does. DefectDojo records when it first appeared to
+  someone.
 - **CRA Article 14 Reports.** The **CRA Article 14 Reports** page and its navigation entry
-  appear when this flag is on. The page tracks the statutory deadlines for each report.
-  Submission to the reporting platform is done by a person.
+  appear when this flag is on, with or without PSIRT. The page tracks the statutory deadlines for
+  each report. Submission to the reporting platform is done by a person. See
+  [CRA Article 14 Reporting](../cra_article14_reporting/).
 - **Regulatory Scope dashboard widget.** The widget can count, per regulation, the in-scope
   Assets whose **Support Period End** has passed or falls within the next 90 days.
 - **Criticality SLA mappings.** A mapping that moves Assets in a business-criticality band onto

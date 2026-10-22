@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from dojo.models import Finding, Test
 from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes, vulnerability_id_from_tag
+from dojo.tools.utils import AMBIGUOUS_WHEN_REPEATED, drop_repeated_unique_ids
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -164,7 +165,8 @@ add_core(ptr, offset, val);
     def test_example_report_scanlift_bash(self):
         with (get_unit_tests_scans_path("sarif") / "bash-report.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
-            findings = parser.get_findings(testfile, Test())
+            # The importer drops tool ids that repeat in one report; apply the same rule here.
+            findings = drop_repeated_unique_ids(parser.get_findings(testfile, Test()))
             self.assertEqual(27, len(findings))
             # finding 0
             item = findings[0]
@@ -367,7 +369,8 @@ add_core(ptr, offset, val);
     def test_flawfinder(self):
         with (get_unit_tests_scans_path("sarif") / "flawfinder.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
-            findings = parser.get_findings(testfile, Test())
+            # The importer drops tool ids that repeat in one report; apply the same rule here.
+            findings = drop_repeated_unique_ids(parser.get_findings(testfile, Test()))
             self.assertEqual(53, len(findings))
             for finding in findings:
                 self.common_checks(finding)
@@ -638,6 +641,23 @@ add_core(ptr, offset, val);
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(77, len(findings))
 
+    def test_repeated_fingerprints_are_reported_and_flagged(self):
+        """
+        The parser reports every fingerprint it reads and flags that a repeated one is ambiguous.
+
+        Dropping a repeated id is the importer's job (see test_importer_unique_id_rules), so the
+        parser hands the shared fingerprint over and marks its findings so the importer drops it.
+        """
+        for label, read in (
+            ("get_findings", lambda handle: SarifParser().get_findings(handle, Test())),
+            ("get_tests", lambda handle: [f for t in SarifParser().get_tests("SARIF", handle) for f in t.findings]),
+        ):
+            with self.subTest(label), (get_unit_tests_scans_path("sarif") / "sentinel_fingerprints.sarif").open(encoding="utf-8") as testfile:
+                findings = read(testfile)
+                self.assertEqual(4, len(findings))
+                self.assertTrue(all(getattr(f, AMBIGUOUS_WHEN_REPEATED, False) for f in findings))
+                self.assertTrue(all(finding.unique_id_from_tool for finding in findings))
+
     def test_repeated_fingerprints_are_dropped(self):
         """
         A fingerprint carried by several findings in one report is not an identity.
@@ -646,11 +666,12 @@ add_core(ptr, offset, val);
         fingerprint, and unique-id deduplication merged unrelated findings (SQL injection,
         committed credentials, disabled TLS verification) into one cluster. A value that
         repeats inside its own report is dropped so those findings deduplicate by hash code;
-        a fingerprint that is genuinely unique in the report is kept.
+        a fingerprint that is genuinely unique in the report is kept. The importer applies the
+        drop; this applies the same rule to the parser's output.
         """
         with (get_unit_tests_scans_path("sarif") / "sentinel_fingerprints.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = drop_repeated_unique_ids(parser.get_findings(testfile, Test()))
         self.assertEqual(4, len(findings))
         sentinel_carriers = [f for f in findings if f.unique_id_from_tool is None]
         self.assertEqual(3, len(sentinel_carriers))

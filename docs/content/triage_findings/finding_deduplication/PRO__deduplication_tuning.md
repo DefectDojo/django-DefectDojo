@@ -37,7 +37,55 @@ In a tool's row, select the algorithm shown under the matching kind you want to 
 
 Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
 
-> **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows.
+> **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows. [Grouping](#grouping-what-counts-as-one-finding) is the one exception: it can be set for a pool.
+
+## Grouping: what counts as one finding
+
+By default a finding is whatever the tool's parser produces. Some parsers merge repeated report entries themselves, and most report one entry per place a problem occurs, so the same vulnerability can show up as one finding per file, URL or package. Grouping lets you decide this per tool instead. Select the tool's **Grouping** cell on Matching Configuration to change it.
+
+| Grouping | What one finding is |
+|----------|---------------------|
+| **As the parser groups them** (default) | Whatever the parser produces, exactly as before. |
+| **One finding per location** | Each location gets its own finding, even where the parser merged several into one. Only offered for tools whose parser keeps every location when it merges. |
+| **One finding per vulnerability** | Every location of the same vulnerability is gathered into one finding. Each location keeps its own status, and the finding stays open until every location is fixed. |
+
+Both of the location-based groupings need the [Locations](/asset_modelling/locations/pro__locations_overview/) feature. Tools using a Global algorithm keep the parser's grouping.
+
+### How "one finding per vulnerability" decides what is the same vulnerability
+
+It uses the tool's own matching configuration, so there is no second list of fields to maintain:
+
+- With **Unique ID From Tool**, or **Unique ID From Tool or Hash Code** for a report entry that has an ID, entries that share the tool's ID are one vulnerability. Many tools give one result an ID and report it at several places.
+- Otherwise the tool's hash fields are used, with everything that describes a location left out (file path, line, endpoints, component version and location types). Fields listed under **Fields Left Out of the Identity** are left out too, which helps when a tool writes the location into the description.
+- **When Severities Differ** decides whether one vulnerability reported at two severities becomes one finding (at the highest severity) or stays two findings.
+
+The same rules apply across tests: when a new test on the same Asset reports a vulnerability that already has a finding, its locations are added to that finding, attributed to the new test, instead of creating a duplicate. A reimport of that test then only changes the locations it reported. The finding closes once no test reports any of its locations.
+
+On the folded finding:
+
+- the file path and line shown are those of the first location;
+- the severity is the highest among its active locations, and goes down when the highest location is fixed, unless someone set the severity by hand;
+- the SLA starts from the earliest date any of its locations was found;
+- marking the finding False Positive or Risk Accepted applies that status to every location, and a single location can still be changed afterwards.
+
+Grouping is one setting for Same Tool and Reimport, because an import and a later reimport have to agree on what a finding is. With one finding per vulnerability, reimport also tracks locations as they change, so a line that moves updates its location instead of adding a new one.
+
+### Changing a tool's grouping
+
+Choose the grouping, then select **Review Impact**. DefectDojo shows the tool's most recent tests with how many active findings each has now and how many it would have after the change. Confirm, then select **Submit**.
+
+A change into, out of or within **One finding per vulnerability** changes what identifies a finding. DefectDojo first records the new identity of every existing finding in the background, and the tool's cell shows **Pending** meanwhile. Existing findings keep matching throughout, and the new grouping takes effect once every finding has its new identity. Moving between the other two groupings takes effect on the next import.
+
+Findings imported before the change are not merged automatically. To fold them, run the consolidation command for an Asset. It reports what it would do by default, and changes nothing until you pass `--apply`:
+
+```bash
+python manage.py consolidate_folded_findings --product <asset id>
+python manage.py consolidate_folded_findings --product <asset id> --apply
+```
+
+The newest finding of each group survives, and the others' locations move onto it, keeping the test that reported each one. The others become its duplicates.
+
+To use a grouping only for some Assets, put them in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) and pick that pool under **Applies To**. Assets outside the pool keep the instance default.
 
 ## Same Tool Deduplication
 
