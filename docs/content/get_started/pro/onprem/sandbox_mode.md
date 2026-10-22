@@ -42,7 +42,7 @@ ALTER ROLE <DefectDojo database user> CREATEROLE CREATEDB;
 
 or set `DD_SANDBOX_PROVISION_URL` (Helm: `sandbox.provisionUrl`) to a connection URL for a role that has them. DefectDojo then creates the sandbox with that role and uses its own user for everything else.
 
-With [passwordless database authentication](/get_started/pro/onprem/passwordless_database/), each sandbox role signs in with a cloud identity of its own instead of a derived password. See [Sandbox](/get_started/pro/onprem/passwordless_database/#sandbox) for what to set up on each cloud.
+With [passwordless database authentication](/get_started/pro/onprem/passwordless_database/), each sandbox role signs in with a cloud identity of its own instead of a derived password. On AWS the requirements above still apply. On Azure and Google Cloud an administrator creates the two sandbox roles for their identities, so DefectDojo's user needs neither `CREATEROLE` nor `CREATEDB`. See [Sandbox](/get_started/pro/onprem/passwordless_database/#sandbox) for what to set up on each cloud.
 
 ## What it creates
 

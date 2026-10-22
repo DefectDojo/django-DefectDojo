@@ -42,7 +42,7 @@ webhookGateway:
     role: <the gateway identity's database role>
 ```
 
-The chart renders no database password, and refuses to render when `database.password`, `database.existingSecret`, `postgresql.enabled`, `sandbox.enabled` or `database.pool.enabled` is also set.
+The chart renders no database password, and refuses to render when `database.password`, `database.existingSecret`, `postgresql.enabled` or `database.pool.enabled` is also set, or when `sandbox.enabled` is set on Azure or Google Cloud without each sandbox role's own identity (see [Sandbox](#sandbox)).
 
 On AWS, `database.host` must be the instance's own endpoint, not a DNS alias: the token is signed for the exact host name the application connects to.
 
@@ -158,7 +158,7 @@ The [sandbox](/get_started/pro/onprem/sandbox_mode/) keeps its data apart from p
 ### Sandbox on Google Cloud
 
 1. Create two more service accounts, for the sandbox's app role and admin role, and give each `roles/cloudsql.instanceUser` and `roles/cloudsql.client`.
-2. Let the application's service account mint tokens for both:
+2. Let the application's service account mint tokens for both. Impersonation goes through the IAM Service Account Credentials API, so enable it in the project if it is not already (`gcloud services enable iamcredentials.googleapis.com`), then:
 
    ```bash
    gcloud iam service-accounts add-iam-policy-binding <sandbox sa email> \
