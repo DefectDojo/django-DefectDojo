@@ -3,6 +3,7 @@ import datetime
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
+from dojo.tools.utils import AMBIGUOUS_WHEN_REPEATED, drop_repeated_unique_ids
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -845,12 +846,15 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         The shipped algorithm for this scan type is hash-only, so classic matching never
         reads the field, but it is stored and consumed as a vendor identity by anything
         that does (an operator-configured unique-id algorithm, Pro's identity ledger).
-        A repeated value would merge visibly different findings there, so it is dropped
-        at parse time; a genuinely unique id is kept.
+        A repeated value would merge visibly different findings there, so the importer
+        drops it; a genuinely unique id is kept. The parser flags its JSON test so the
+        importer applies the drop, and this applies the same rule to the parser's output.
         """
         with (get_unit_tests_scans_path("generic") / "generic_repeated_unique_ids.json").open(encoding="utf-8") as file:
-            parser = GenericParser()
-            findings = parser.get_findings(file, Test())
+            tests = GenericParser().get_tests("Generic Findings Import", file)
+        self.assertEqual(1, len(tests))
+        self.assertTrue(all(getattr(f, AMBIGUOUS_WHEN_REPEATED, False) for f in tests[0].findings))
+        findings = drop_repeated_unique_ids(tests[0].findings)
         self.assertEqual(4, len(findings))
         dropped = [f for f in findings if f.unique_id_from_tool is None]
         self.assertEqual(3, len(dropped))
