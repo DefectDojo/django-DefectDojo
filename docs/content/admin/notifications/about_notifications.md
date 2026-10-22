@@ -65,7 +65,8 @@ To remove one or more Alerts from the Alerts Page, check the empty box next to i
 
 In DefectDojo Pro, the bell in the sidebar footer opens a notification inbox instead of the Alerts List menu, and the number on the bell counts your **unread** alerts rather than every alert you have.
 
-* **Grouped by record.** Unread alerts about the same Finding, Test, Engagement, Asset, Organization or Risk Acceptance are shown together under that record's name, with the number of unread alerts it carries and its three newest alerts. Click the record's name to open it. An alert that is not about a record is shown on its own.
+* **Grouped by record.** Unread alerts about the same Finding, Test, Engagement, Asset, Organization or Risk Acceptance are shown together under that record's name, with the number of unread alerts it carries and its three newest alerts. Click the record's name to open it. An alert that is not about a record is shown on its own. The inbox shows the twenty newest groups; **Load Older**, under the last one, adds the next twenty.
+* **Kept current.** The number on the bell and on each tab refreshes every 30 seconds while DefectDojo is open in a visible browser tab, and as soon as you come back to the tab. The groups in an open inbox stay where they are until you open it again.
 * **Read one at a time.** Clicking an alert marks it read and opens the record it is about; the number on the bell drops by one straight away, and stays down after a reload. Reading an alert changes nothing else: the Finding or other record is untouched and no notification is sent.
 * **Tabs.** **All** shows every unread alert; **Mentions**, **Assigned**, **Watching** and **System** each show one kind. Mentions are notes that mention you; Assigned is work assigned to you, review requests and risk acceptance requests; System is connector health, Jira and SLA alerts; Watching is everything else about a record you can see. Each tab shows how many unread alerts it holds.
 * **Mark All Read** (the double check mark in the inbox header) marks every unread alert on the open tab read. **See All Alerts** (the arrow) opens the Alerts Page, which still lists every alert you have, read or not.
@@ -86,7 +87,7 @@ With the inbox on, the Alerts Page shows whether each alert is read in a **Read*
 
 Alerts about a record you can no longer see (for example, after you lose access to its Asset) are left out of the inbox and the count.
 
-When the inbox is first turned on, every alert you already had counts as read, so the bell starts at zero. The inbox follows the **Notification Inbox** feature flag, which is on by default; turning it off brings back the Alerts List menu and the count of every alert. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+When the inbox is first turned on, every alert you already had counts as read, so the bell starts at zero.
 
 ## Narrowing Review Request Notifications (Pro)
 
