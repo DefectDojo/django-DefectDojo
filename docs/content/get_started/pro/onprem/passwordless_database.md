@@ -16,7 +16,7 @@ Every DefectDojo process that connects to the database does this: the web applic
 | AWS | Amazon RDS or Aurora PostgreSQL, with IAM database authentication | `aws` |
 | Google Cloud | Cloud SQL for PostgreSQL, with IAM database authentication | `gcp` |
 
-Not supported together with passwordless authentication: the [sandbox](/get_started/pro/onprem/sandbox_mode/), the embedded PostgreSQL container, and the optional database connection pool.
+Not supported together with passwordless authentication: the embedded PostgreSQL container and the optional database connection pool. The [sandbox](/get_started/pro/onprem/sandbox_mode/) works, with an identity of its own for each sandbox role; see [Sandbox](#sandbox).
 
 ## Kubernetes (Helm)
 
@@ -150,6 +150,83 @@ Do this once, as a database administrator, before the first install.
 
   `<sa>@<project>.iam` is the role name for `database.user` and `webhookGateway.database.role`.
 - **TLS:** Cloud SQL server certificates come from a certificate authority of the instance's own. Save it with `gcloud sql instances describe <instance> --format='value(serverCaCert.cert)' > ca.crt`, put it in the `sslRootCertSecret` Secret, and use `sslMode: verify-ca`. That CA signs only this instance's certificate, so `verify-ca` already pins the connection to it. `verify-full` fails when connecting by IP address, because the certificate names the instance's `*.sql.goog` DNS name instead; use it only when `database.host` is that name and it resolves inside the cluster.
+
+## Sandbox
+
+The [sandbox](/get_started/pro/onprem/sandbox_mode/) keeps its data apart from production in PostgreSQL itself: it signs in as roles of its own, which cannot reach the production database, and production cannot reach the sandbox. With passwordless authentication each of its two roles (the app role and the admin role, which owns the sandbox databases) signs in with a token for a cloud identity of its own, so that separation still holds. The initializer creates the sandbox databases and checks the separation in every direction on each start, as it does with passwords.
+
+### Sandbox on Google Cloud
+
+1. Create two more service accounts, for the sandbox's app role and admin role, and give each `roles/cloudsql.instanceUser` and `roles/cloudsql.client`.
+2. Let the application's service account mint tokens for both:
+
+   ```bash
+   gcloud iam service-accounts add-iam-policy-binding <sandbox sa email> \
+     --role roles/iam.serviceAccountTokenCreator \
+     --member serviceAccount:<application sa email>
+   ```
+
+3. Create a Cloud SQL IAM user for each, as for the application (`gcloud sql users create <sa>@<project>.iam --type cloud_iam_service_account`).
+4. As the `postgres` user, give the admin role what it needs to create and reset the sandbox databases:
+
+   ```sql
+   ALTER ROLE "<sandbox admin sa>@<project>.iam" CREATEDB;
+   GRANT "<sandbox app sa>@<project>.iam" TO "<sandbox admin sa>@<project>.iam";
+   ```
+
+5. Set the Helm values:
+
+   ```yaml
+   sandbox:
+     enabled: true
+     auth:
+       appUser: <sandbox app sa>@<project>.iam
+       adminUser: <sandbox admin sa>@<project>.iam
+       appGcpServiceAccount: <sandbox app sa email>
+       adminGcpServiceAccount: <sandbox admin sa email>
+   ```
+
+### Sandbox on Azure
+
+1. Create two more user-assigned managed identities, for the sandbox's app role and admin role. Give each a federated credential for the application's ServiceAccount (the same subject as the application's identity), so the application pods can get tokens for them.
+2. As the server's Microsoft Entra administrator, create a role for each with `pgaadauth_create_principal_with_oid`, as for the application, then:
+
+   ```sql
+   ALTER ROLE "<sandbox admin identity>" CREATEDB;
+   GRANT "<sandbox app identity>" TO "<sandbox admin identity>";
+   ```
+
+3. Set `sandbox.auth.appUser` and `sandbox.auth.adminUser` to the identities' names and `sandbox.auth.appAzureClientId` and `sandbox.auth.adminAzureClientId` to their client IDs.
+
+### Sandbox on AWS
+
+On AWS the sandbox needs no new identities: the application's IAM role signs a token for each sandbox role, and DefectDojo creates both roles itself.
+
+1. Allow the application's IAM role to sign in as the two sandbox roles. Their names come from the database name, so for `dojodb` they are `dojodb_sandbox` and `dojodb_sandbox_admin`. Add both to its `rds-db:connect` policy next to the application's own user:
+
+   ```text
+   arn:aws:rds-db:<region>:<account>:dbuser:<DbiResourceId>/dojodb_sandbox
+   arn:aws:rds-db:<region>:<account>:dbuser:<DbiResourceId>/dojodb_sandbox_admin
+   ```
+
+2. As the master user, let the application's role create the sandbox roles and give them IAM sign-in. Do this together with the other grants in [Prepare the database](#prepare-the-database), before `rds_iam` is granted to the application's role:
+
+   ```sql
+   ALTER ROLE <app role> CREATEROLE CREATEDB;
+   GRANT rds_iam TO <app role> WITH ADMIN OPTION;
+   ```
+
+   This replaces the plain `GRANT rds_iam TO <app role>;` for the application's role. The master user itself never becomes a member of a role that holds `rds_iam`, so its password keeps working.
+
+3. Set `sandbox.enabled: true`. Nothing goes under `sandbox.auth` on AWS.
+
+On the next start the initializer creates both roles without a password, grants them `rds_iam` and creates the sandbox databases as the admin role.
+
+### Without Helm
+
+The same settings are environment variables: `DD_SANDBOX_DATABASE_USER` and `DD_SANDBOX_ADMIN_DATABASE_USER` for the role names, and `DD_SANDBOX_DATABASE_AUTH_GCP_SERVICE_ACCOUNT` / `DD_SANDBOX_ADMIN_DATABASE_AUTH_GCP_SERVICE_ACCOUNT` or `DD_SANDBOX_DATABASE_AUTH_AZURE_CLIENT_ID` / `DD_SANDBOX_ADMIN_DATABASE_AUTH_AZURE_CLIENT_ID` for the identities. On Azure and Google Cloud, DefectDojo refuses to start with the sandbox enabled until both roles have their own identity.
+
+When a step needs a privilege DefectDojo's role does not have, the initializer stops and prints the SQL for a database administrator to run.
 
 ## Switching an existing install
 
