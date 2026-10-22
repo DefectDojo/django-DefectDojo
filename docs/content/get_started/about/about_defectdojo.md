@@ -22,6 +22,8 @@ aliases:
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo, Inc. and open-source contributors maintain this documentation to support both the Community and Pro editions of DefectDojo.</span>
 
+To try DefectDojo without installing anything, log in to one of the [Online Demos](#online-demos). To install the Open-Source edition, start with the [Installation](/get_started/open_source/installation/) guide, and for Pro, see [Self-Hosting DefectDojo Pro](/get_started/pro/onprem/installation_options/). The [Feature comparison](/get_started/about/defectdojo_versions/) lists what each edition includes.
+
 ## What is DefectDojo?
 
 DefectDojo is a Developer Security Operations (DevSecOps) platform. DefectDojo streamlines DevSecOps by serving as an automatic aggregator for your suite of security tools, allowing you to easily organize your security work and report your organization’s security posture to other stakeholders.
@@ -43,6 +45,24 @@ DefectDojo has smart features to enhance and tune the results from your security
 - Create and track Risk Acceptances for security vulnerabilities.
 
 Ultimately, DefectDojo's Asset:Engagement model allows you to take inventory of your development environment and immediately place new security Findings in context.
+
+## Online Demos
+
+Online demos for both Open-Source and Pro versions of DefectDojo are available.  Both can be accessed using the following credentials:
+
+- Username: `admin`
+- Password: `1Defectdojo@demo#appsec`
+
+These demos come loaded with sample data, and are reset on a daily basis.
+
+### Open-Source Demo
+
+A running example of DefectDojo (Open-Source Edition) is available at [https://demo.defectdojo.org/](https://demo.defectdojo.org/).
+
+### Pro Demo
+
+A running example of DefectDojo Pro is available at
+[https://pro.demo.defectdojo.com/](https://pro.demo.defectdojo.com/).
 
 ---
 Here are some examples of ways DefectDojo can be implemented, with DefectDojo co-founder and CTO Matt Tesauro:
@@ -90,27 +110,9 @@ DefectDojo, Inc. hosts a Pro edition of this software for commercial purposes.  
 * **[Priority And Risk](/asset_modelling/pro_hierarchy/priority_sla/)** to identify the Findings of highest urgency, system-wide
 * **Premium Support** and implementation guidance for your organization
 
-The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises.
+The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises: see [Self-Hosting DefectDojo Pro](/get_started/pro/onprem/installation_options/).
 
 For more information on DefectDojo Pro, check out our [Pricing page](https://defectdojo.com/pricing).
-
-## Online Demos
-
-Online demos for both Open-Source and Pro versions of DefectDojo are available.  Both can be accessed using the following credentials:
-
-- Username: `admin`
-- Password: `1Defectdojo@demo#appsec`
-
-These demos come loaded with sample data, and are reset on a daily basis.
-
-### Open-Source Demo
-
-A running example of DefectDojo (Open-Source Edition) is available at [https://demo.defectdojo.org/](https://demo.defectdojo.org/).
-
-### Pro Demo
-
-A running example of DefectDojo Pro is available at
-[https://pro.demo.defectdojo.com/](https://pro.demo.defectdojo.com/).
 
 ## Learning DefectDojo
 
@@ -123,7 +125,7 @@ Whether you’re a Pro or an Open-Source user, we have many resources to help yo
 
 To get in touch with the DefectDojo, Inc. team, you can always reach out to [hello@defectdojo.com](mailto:hello@defectdojo.com).
 
-We regularly on [LinkedIn](https://www.linkedin.com/company/33245534) and also host online presentations for AppSec professionals that can be accessed live or on demand. You can learn about upcoming events on our [Events page](https://defectdojo.com/events) or watch past presentations on our [YouTube Channel](https://www.youtube.com/@defectdojo).
+We post regularly on [LinkedIn](https://www.linkedin.com/company/33245534) and also host online presentations for AppSec professionals that can be accessed live or on demand. You can learn about upcoming events on our [Events page](https://defectdojo.com/events) or watch past presentations on our [YouTube Channel](https://www.youtube.com/@defectdojo).
 
 ### Stickers
 

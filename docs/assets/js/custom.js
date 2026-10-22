@@ -41,6 +41,7 @@ window.ddOffcanvas = Offcanvas;
     };
 
     const switchPageForVersion = (version) => {
+        let moved = false;
         Object.values(editionNavUrls).forEach((urls) => {
             const target = urls[version];
             const other = urls[version === "pro" ? "opensource" : "pro"];
@@ -48,8 +49,25 @@ window.ddOffcanvas = Offcanvas;
             // this never fires on unrelated pages or loops on the target page.
             if (target && location.pathname === other) {
                 location.assign(target);
+                moved = true;
             }
         });
+        if (moved) return;
+
+        // Any other page that belongs to one edition (audience in front matter,
+        // stamped on <html> by custom-head.html): switching to the other edition
+        // used to swap only the sidebar and leave this page on screen, so readers
+        // clicked the toggle again and again. Go to the first page of the chosen
+        // edition in this section's sidebar instead, preferring a page that
+        // belongs to that edition over a shared one.
+        const pageAudience = document.documentElement.dataset.ddPageAudience;
+        if (!pageAudience || pageAudience === version) return;
+        const menu = document.querySelector(`.version-${version}`);
+        if (!menu) return;
+        const link = menu.querySelector(`li[data-audience="${version}"] a[href]`) || menu.querySelector("a[href]");
+        if (link && link.pathname !== location.pathname) {
+            location.assign(link.href);
+        }
     };
 
     const setVersion = (version) => {
@@ -106,6 +124,64 @@ window.ddOffcanvas = Offcanvas;
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
+})();
+
+
+// Table-of-contents scrollspy vs. heading ids that start with a digit.
+//
+// Bootstrap's ScrollSpy (data-bs-spy on <body>, started on window load) looks
+// up each TOC link with element.querySelector(link.hash). A heading such as
+// "1. Register the CLI" gets the id "1-register-the-cli", and "#1-register-
+// the-cli" is not a valid CSS selector, so ScrollSpy throws and the TOC stops
+// tracking the page. Before it starts, move such a heading to a safe id and
+// repoint the links to it; an empty span keeps the old id in place so links
+// already shared with the old #fragment still land on the heading.
+(() => {
+    "use strict";
+
+    const validSelector = (sel) => {
+        try {
+            document.createDocumentFragment().querySelector(sel);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    };
+
+    const init = () => {
+        const toc = document.getElementById("toc");
+        if (!toc) return;
+        toc.querySelectorAll('a[href^="#"]').forEach((link) => {
+            let id;
+            try {
+                id = decodeURIComponent(link.hash.slice(1));
+            } catch (e) {
+                return;
+            }
+            if (!id || validSelector(`#${id}`)) return;
+            const heading = document.getElementById(id);
+            if (!heading) return;
+            let safe = `h-${id}`;
+            for (let n = 2; document.getElementById(safe); n++) safe = `h-${id}-${n}`;
+            if (!validSelector(`#${safe}`)) return;
+            heading.id = safe;
+            const keep = document.createElement("span");
+            keep.id = id;
+            keep.setAttribute("aria-hidden", "true");
+            keep.style.scrollMarginTop = getComputedStyle(heading).scrollMarginTop;
+            heading.prepend(keep);
+            const oldHref = link.getAttribute("href");
+            document.querySelectorAll("a[href]").forEach((a) => {
+                if (a.getAttribute("href") === oldHref) a.setAttribute("href", `#${safe}`);
+            });
+        });
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
 })();
 
 

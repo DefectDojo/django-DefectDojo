@@ -10,13 +10,23 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.api_permissions import UserHasRiskAcceptanceRelatedObjectPermission
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.models import Engagement, Risk_Acceptance, User
+from dojo.models import Engagement, Finding, Risk_Acceptance, User
 from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
 from dojo.vulnerability.queries import finding_ids_with_vulnerability_ids
 
-AcceptedRisk = NamedTuple("AcceptedRisk", (("vulnerability_id", str), ("justification", str), ("accepted_by", str)))
+# Stands for "the request did not name a date", which gets the default window, as distinct from an
+# explicit null, which asks for an acceptance that never expires.
+DEFAULT_EXPIRATION = object()
+
+
+class AcceptedRisk(NamedTuple):
+    vulnerability_id: str
+    justification: str
+    accepted_by: str
+    expiration_date: object = DEFAULT_EXPIRATION
 
 
 class AcceptedRiskSerializer(serializers.Serializer):
@@ -26,6 +36,14 @@ class AcceptedRiskSerializer(serializers.Serializer):
         help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposure (CVE) or from other sources.")
     justification = serializers.CharField(help_text="Justification for accepting findings with this vulnerability id")
     accepted_by = serializers.CharField(max_length=200, help_text="Name or email of person who accepts the risk")
+    expiration_date = serializers.DateTimeField(
+        required=False,
+        allow_null=True,
+        help_text=(
+            "When the risk acceptance expires. Omit it to use the number of days in the Default Risk "
+            "Acceptance Days system setting (none when that is 0); send null for one that never expires."
+        ),
+    )
 
     def create(self, validated_data):
         return AcceptedRisk(**validated_data)
@@ -88,21 +106,38 @@ class AcceptedFindingsMixin(ABC):
         return Response(status=201, data=result.data)
 
 
+def _expiration_date(risk: AcceptedRisk):
+    """The date the caller asked for, or the default window when they named none (as the classic form does)."""
+    if risk.expiration_date is not DEFAULT_EXPIRATION:
+        return risk.expiration_date
+    if ra_helper.expiration_days() > 0:
+        return ra_helper.default_expiration_date()
+    return None
+
+
 def _accept_risks(accepted_risks: list[AcceptedRisk], base_findings: QuerySet, owner: User):
     accepted = []
     for risk in accepted_risks:
-        finding_ids = finding_ids_with_vulnerability_ids(risk.vulnerability_id, lookup="exact")
-        findings = base_findings.filter(id__in=finding_ids)
-        if findings.exists():
+        # Resolve to concrete ids in two flat steps and update by primary key. Composing the
+        # vulnerability subquery into base_findings and calling update() on that makes Django
+        # emit "id IN (SELECT ... FROM dojo_finding ...)", a self-join four tables deep; when
+        # the planner underestimates these tables (e.g. vacuumed but never analyzed) it runs
+        # as nested sequential scans and a single UPDATE can take minutes.
+        vulnerability_finding_ids = list(finding_ids_with_vulnerability_ids(risk.vulnerability_id, lookup="exact"))
+        if not vulnerability_finding_ids:
+            continue
+        finding_ids = list(base_findings.filter(id__in=vulnerability_finding_ids).values_list("id", flat=True))
+        if finding_ids:
             # TODO: we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix
             name = risk.vulnerability_id + " via api at " + timezone.now().strftime("%b %d, %Y, %H:%M:%S")
             acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
                                                         decision=Risk_Acceptance.TREATMENT_ACCEPT,
                                                         decision_details=risk.justification,
-                                                        accepted_by=risk.accepted_by[:200])
-            acceptance.accepted_findings.set(findings)
-            findings.update(risk_accepted=True, active=False)
+                                                        accepted_by=risk.accepted_by[:200],
+                                                        expiration_date=_expiration_date(risk))
+            acceptance.accepted_findings.set(finding_ids)
+            Finding.objects.filter(id__in=finding_ids).update(risk_accepted=True, active=False)
             acceptance.save()
             accepted.append(acceptance)
 

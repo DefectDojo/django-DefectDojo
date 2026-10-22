@@ -71,7 +71,7 @@ With a finer grouping:
 * The account and region Records keep the same identity and become **parent assets**. They carry no findings themselves. When the Asset Hierarchy feature is enabled, DefectDojo relates each resource type asset to its account and region asset, and each resource asset to its resource type asset, with a `parent` relationship. Findings then roll up the hierarchy. Relationships created by the connector never overwrite relationships you created by hand.
 * Each finding is imported once, on the asset of the first resource it names (Security Hub lists the affected resource first). The total number of findings is the same under every grouping.
 * Resources are discovered from findings, so only resources with at least one finding that the connector would import (active, at or above the minimum severity, from an AWS service) become Records. A resource whose last finding is fixed keeps its Record for 14 days so that the next Syncs close its findings in DefectDojo, after which the Record is marked MISSING.
-* AWS resource tags reach resource assets as asset tags, prefixed `aws:` (for example `aws:team:payments`). Tags you add yourself are never touched; tags that start with `aws:` on resource assets are managed by the connector.
+* AWS resource tags reach resource assets as asset tags, prefixed `aws:` (for example `aws:team:payments`). Tags you add yourself are never touched; tags that start with `aws:` on resource assets are managed by the connector. Amazon Inspector findings on container images carry no resource tags, so for an ECR repository the connector reads the repository's own tags instead (see *Optional permissions: Amazon ECR*).
 * The connector makes one Security Hub request per Record on each Sync, paced below the Security Hub API rate limit, so a Sync with thousands of resource Records takes longer than an account and region Sync. Memory use stays low because findings are processed one page at a time.
 
 Under every grouping, including the default, findings are sent to DefectDojo one Security Hub page at a time as they arrive, so the connectors service holds about one upload chunk in memory rather than every finding of an account and region.
@@ -170,6 +170,27 @@ Account names and the OU and account tag placements read from AWS Organizations.
 
 Placement by OU or account tag makes one or two AWS Organizations requests per account on each discovery, paced to stay under the AWS Organizations rate limit, so a discovery across thousands of accounts takes several minutes longer.
 
+#### Optional permissions: Amazon ECR
+
+With the **Resource** grouping, each ECR repository asset gets the repository's own tags as `aws:` asset tags (for example `aws:env:prod`, `aws:team:payments`). Tags the findings already carry keep their values.
+
+| Permission | Used for |
+|---|---|
+| `ecr:ListTagsForResource` | **Resource** grouping: the tags of each discovered ECR repository |
+
+```
+{
+    "Sid": "AWSSecurityHubConnectorECRTags",
+    "Effect": "Allow",
+    "Action": [
+        "ecr:ListTagsForResource"
+    ],
+    "Resource": "*"
+}
+```
+
+The permission is optional. Without it, or for a repository in an account these credentials cannot read, the connector makes one refused request per account, logs the first, and leaves those repositories with only the tags their findings carry. When a lookup fails for another reason, the repository asset keeps the tags it already has until the next discovery; if Amazon ECR cannot be reached at all, or five lookups in a row fail, the remaining repositories are left the same way for that discovery. The connector makes one request per discovered repository on each discovery, paced at ten per second, so a discovery across 2,000 repositories takes about three minutes longer. The other groupings make no ECR request.
+
 #### Compliance Tags
 
 Each Finding is tagged with the compliance requirements Security Hub relates its control to, for
@@ -177,3 +198,9 @@ example `nist.800-53.r5:ac-2(1)` or `pci_dss_v4.0.1/2.2.4`. DefectDojo Pro reads
 the Finding to NIST 800-53 and PCI DSS controls (see
 [Control Coverage](/federal_compliance/control_coverage/)). The same requirements are still listed
 under **Compliance details** in the Finding's description.
+
+#### Deduplication
+
+Every Security Hub finding has an ID (its finding ARN) that stays the same for as long as Security Hub tracks the issue, and DefectDojo stores it as the finding's **Unique ID From Tool**. The connector's findings are matched with the **Unique ID or hash code** algorithm (Unique ID From Tool or Hash Code): a finding matches on that ID, or on a hash of its title, description, severity and vulnerability IDs. So when Security Hub rewrites a finding's description (Amazon Inspector lists an Amazon ECR image's tags there, so tagging an image changes it), the existing finding is matched and stays open instead of being closed and created again.
+
+This is the default on instances installed on DefectDojo Pro 3.4.100 or later. An instance upgraded from an earlier version keeps the setting it already has, **Hash code**, which matches on the hash alone. To switch, open **Settings > Finding Workflow > Matching Configuration**, find the **AWS Security Hub API Import** row, and set both its **Same Tool** and **Reimport** cells to **Unique ID or hash code** (see [Deduplication Tuning](/triage_findings/finding_deduplication/pro__deduplication_tuning/)). The hash fields stay the same, so existing findings keep matching.

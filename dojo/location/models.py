@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from datetime import datetime
 
+    from dojo.models import Test
     from dojo.tools.locations import LocationData
 
 
@@ -88,20 +89,25 @@ class Location(BaseModel):
     def __str__(self):
         return self.location_value
 
+    def _tags_are_readable(self):
+        # List querysets annotate this once per page (annotate_tags_readable); otherwise one EXISTS.
+        from dojo.location.queries import TAGS_READABLE_ANNOTATION, location_tags_readable  # noqa: PLC0415
+        readable = getattr(self, TAGS_READABLE_ANNOTATION, None)
+        if readable is None:
+            readable = location_tags_readable(self)
+        return readable
+
     @property
     def readable_tags(self):
         """Tags on this row, or none of them when another product also labels the row."""
-        # ponytail: one EXISTS per rendered row; annotate the list querysets if it shows up.
-        from dojo.location.queries import location_tags_readable  # noqa: PLC0415
-        if not location_tags_readable(self):
+        if not self._tags_are_readable():
             return []
         return list(self.tags.all())
 
     @property
     def readable_inherited_tags(self):
         """The inherited subset of :attr:`readable_tags`."""
-        from dojo.location.queries import location_tags_readable  # noqa: PLC0415
-        if not location_tags_readable(self):
+        if not self._tags_are_readable():
             return []
         return list(self.inherited_tags.all())
 
@@ -139,21 +145,24 @@ class Location(BaseModel):
         audit_time: datetime | None = None,
         relationship: str = "",
         relationship_data: dict | None = None,
+        test: Test | None = None,
     ) -> LocationFindingReference:
         """
         Get or create a LocationFindingReference for this location and finding.
         Also associates the related product.
+
+        The reference is attributed to ``test``, or to the finding's own test when none is given.
         """
-        # Check if there is an existing reference for this finding and location
+        test_id = test.id if test is not None else finding.test_id
+        # Check if there is an existing reference for this finding, location and test
         # If this method is being used to set the status
-        if LocationFindingReference.objects.filter(
+        existing = LocationFindingReference.objects.filter(
             location=self,
             finding=finding,
-        ).exists():
-            return LocationFindingReference.objects.get(
-                location=self,
-                finding=finding,
-            )
+            test_id=test_id,
+        ).first()
+        if existing is not None:
+            return existing
         # Determine the status
         if status is None:
             status = self.status_from_finding(finding)
@@ -176,6 +185,7 @@ class Location(BaseModel):
             reference = LocationFindingReference.objects.update_or_create(
                 location=self,
                 finding=finding,
+                test_id=test_id,
                 defaults=context_fields,
             )[0]
             # Now associate the product for this finding (already uses update_or_create)
@@ -619,6 +629,15 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
 
     location = ForeignKey(Location, on_delete=CASCADE, related_name="findings")
     finding = ForeignKey(Finding, on_delete=CASCADE, related_name="locations")
+    # The test that reported this location for the finding. A finding normally holds rows from its
+    # own test only, but a row per (location, finding, test) lets several tests report the same
+    # location on one finding, and a reimport of one test then changes only that test's rows.
+    test = ForeignKey(
+        "dojo.Test",
+        on_delete=CASCADE,
+        related_name="location_finding_references",
+        help_text=_("The test that reported this location for the finding"),
+    )
     auditor = ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=RESTRICT, help_text=_("The user who audited the location"))
     audit_time = DateTimeField(editable=False, null=True, blank=True, help_text=_("The time when the audit was performed"))
     status = CharField(
@@ -640,8 +659,8 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
         verbose_name_plural = "Locations - FindingReferences"
         constraints = [
             UniqueConstraint(
-                fields=["location", "finding"],
-                name="unique_location_and_finding",
+                fields=["location", "finding", "test"],
+                name="unique_location_finding_and_test",
             ),
         ]
         indexes = [
@@ -653,10 +672,17 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
         """Return the string representation of a LocationProductReference."""
         return f"{self.location} - Finding: {self.finding} ({self.status})"
 
+    def save(self, *args, **kwargs) -> None:
+        # A row created without an explicit test belongs to the finding's own test.
+        if self.test_id is None and self.finding_id is not None:
+            self.test_id = self.finding.test_id
+        super().save(*args, **kwargs)
+
     def copy(self, finding) -> Self:
         copy = copy_model_util(self)
         copy.finding = finding
         copy.location = self.location
+        copy.test_id = finding.test_id
         copy.save()
         # Re-home the shared location onto the copied finding's product. Without this a
         # finding copied/moved into a different product keeps a location that is only

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.checks import Error
 from django.core.checks import Warning as CheckWarning
+from django.core.exceptions import ImproperlyConfigured
 
 
 def check_configuration_deduplication(app_configs, **kwargs):
@@ -36,3 +37,49 @@ def check_configuration_deduplication(app_configs, **kwargs):
             if scanner not in settings.DEDUPLICATION_ALGORITHM_PER_PARSER)
 
     return errors
+
+
+# The values docker-compose.yml falls back to when DD_SECRET_KEY / DD_CREDENTIAL_AES_256_KEY are not set,
+# plus the empty settings.dist defaults. They are public, so an instance running on them is running on
+# keys anyone can read.
+SHIPPED_SECRET_KEYS = frozenset({"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"})
+SHIPPED_CREDENTIAL_KEYS = frozenset({"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw", "."})
+
+
+def _configured(name, default=None):
+    """A setting's value, or ``default`` when it is unset. Reading an empty SECRET_KEY raises, so it is caught."""
+    try:
+        return getattr(settings, name, default)
+    except ImproperlyConfigured:
+        return default
+
+
+def check_configuration_defaults(app_configs, **kwargs):
+    """
+    Warn about deployment settings left at their shipped values.
+
+    Warnings rather than errors: an existing instance encrypted its stored credentials with
+    the key it has, so forcing a new one would make those credentials unreadable. The hint
+    says what to change; the deployment decides when.
+    """
+    warnings = []
+    if _configured("SECRET_KEY") in SHIPPED_SECRET_KEYS:
+        warnings.append(CheckWarning(
+            "DD_SECRET_KEY is the value shipped in docker-compose.yml.",
+            hint="Set DD_SECRET_KEY to a long random value. Changing it signs users out and invalidates password reset links.",
+            id="dojo.W002",
+        ))
+    if _configured("CREDENTIAL_AES_256_KEY") in SHIPPED_CREDENTIAL_KEYS:
+        warnings.append(CheckWarning(
+            "DD_CREDENTIAL_AES_256_KEY is the value shipped with DefectDojo.",
+            hint="Set DD_CREDENTIAL_AES_256_KEY to a random 32-character value on a new instance. On an existing instance, "
+                 "stored tool configuration passwords are encrypted with the current key and must be re-entered after changing it.",
+            id="dojo.W003",
+        ))
+    if not _configured("DEBUG", default=False) and "*" in (_configured("ALLOWED_HOSTS") or ()):
+        warnings.append(CheckWarning(
+            "DD_ALLOWED_HOSTS contains '*'.",
+            hint="List the host names the instance is served under, for example DD_ALLOWED_HOSTS=defectdojo.example.com.",
+            id="dojo.W004",
+        ))
+    return warnings

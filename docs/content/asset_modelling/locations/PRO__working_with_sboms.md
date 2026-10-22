@@ -186,4 +186,4 @@ The inventory flows back out as well: an Asset's dependencies can be exported as
 
 - **SWID Tag SBOM format** — Not parsed. CycloneDX or SPDX is required.
 - **License risk scoring** — The `license_expression` field is captured when present in the SBOM, but DefectDojo does not yet flag findings on license incompatibility. License-based reporting is on the roadmap as a follow-up to the Locations MVP.
-- **Container image and cloud resource Locations** — Future Location subtypes. For now, libraries discovered inside a container image are recorded as Dependencies; the container image itself is not yet a first-class Location.
+- **Container images and cloud resources in an SBOM**: an uploaded SBOM records libraries as Dependencies only. Container images and cloud resources are Location types of their own, created by scans and connectors rather than by SBOM upload: see [Container Image Locations](../pro__container_image_locations/) and [Locations Overview](../pro__locations_overview/).

@@ -72,6 +72,93 @@ toward Unknown. This is also how exposure *closure* works for sources that repor
 but never report it ending: rather than leaving an asset flagged forever on the strength of
 one old observation, the claim ages out.
 
+### Exposure sources
+
+These sources report exposure. Connectors report on every sync of an asset's record while
+Asset Exposure is enabled; a connector with nothing to say about an asset leaves its
+exposure as it was.
+
+| Source | What it reports | Confidence |
+|---|---|---|
+| [Wiz](/connectors/toolreference/wiz/) connector | The network paths Wiz found to a resource, and the internet exposure fields Wiz sets on vulnerable assets. Can report **Externally Exposed**, **Partially Exposed** or **Internally Reachable**. | 0.9 |
+| [CrowdStrike Falcon](/connectors/toolreference/crowdstrike_falcon/) connector | **Externally Exposed** when Spotlight assesses the host as internet-facing. | 0.9 |
+| [Shodan](/connectors/toolreference/shodan/) connector | **Externally Exposed** for every host Shodan reached from the internet, with the address, port and transport of each service it saw. | 1.0 |
+| [Censys](/connectors/toolreference/censys/) connector | **Externally Exposed** for every host Censys reached from the internet, with the port and protocol of each service it saw. | 1.0 |
+| [Reachability probe](#the-reachability-probe) | **Externally Exposed** or **Internally Reachable** for each address that answers, depending on where the probe sits. | 1.0 |
+| [Universal Parser](/import_data/pro/specialized_import/universal_parser/) imports | The **Asset exposure** output field, when a parser maps a column of your scan file to it. | 1.0 |
+| [Exposure API](#submitting-verdicts-through-the-api) | Whatever positive verdict the caller submits, for scanners and tools that have no connector. | As submitted |
+
+Shodan, Censys and the probe saw a service answer, so their verdicts carry full confidence.
+Wiz and CrowdStrike report their own assessment of a cloud graph or a host, which can be
+wrong about the network in front of it, so their verdicts carry slightly less.
+
+No other connector or import reports exposure. An asset none of these sources covers stays
+**Unknown** until one of them reports on it or somebody sets an override.
+
+### Submitting verdicts through the API
+
+A tool without a connector can report exposure with `POST /api/v2/exposure/verdicts/`. Each
+call carries one source's whole current opinion of one asset:
+
+```json
+{
+  "product": 42,
+  "source": "perimeter-scanner",
+  "items": [
+    {
+      "verdict": "exposed_public",
+      "confidence": 1.0,
+      "evidence": [
+        {"channel": "observed", "ip": "203.0.113.10", "port_range": "443", "protocol": "tcp"}
+      ]
+    }
+  ]
+}
+```
+
+`product` is the asset's ID. `verdict` is `exposed_public`, `exposed_limited` or
+`reachable_private`. Like every automated source, the API cannot assert isolation: a request
+carrying `internal_only` is refused with a validation error. `confidence` defaults to 1.0. Several items collapse to the
+strongest verdict with their evidence merged. Every evidence field is optional: `channel`,
+`ip`, `port_range`, `protocol`, `url`, `entity_name`, `entity_type`, `vendor_resource_id` and
+`observed_at`.
+
+The caller needs permission to import scan results into the asset. The response reports how
+many items were received, accepted and rejected, with a sample of the rejections and why.
+
+## The reachability probe
+
+Besides reading what scanners and connectors report, DefectDojo Pro can check for itself.
+The **reachability probe** opens a TCP connection to each address an asset is already
+known by and records which ones answer. Nothing is sent to the service: the connection is
+opened, the result noted, and the connection closed. Its verdicts appear in the asset's
+Exposure panel under the source **DefectDojo reachability probe**.
+
+The addresses come from the asset's URL locations when Locations is enabled, and from its
+endpoints otherwise. The probe never invents a target: an address with no port is skipped
+rather than guessed at.
+
+A superuser configures the probe under **Settings > Reachability Probe**, which appears
+once Asset Exposure is enabled. The probe does nothing until all three of these are set:
+
+| Setting | What it decides |
+|---|---|
+| **Enable Reachability Probing** | Whether the scheduled probe runs at all. |
+| **Where This Prober Sits** | **Outside the Perimeter (Public Internet)** or **Inside the Network**. A completed connection from outside records **Externally Exposed**; from inside it records only **Internally Reachable**. DefectDojo cannot work out its own position on the network, so it will not probe until this is declared. |
+| **Addresses in Scope** | The hostnames, addresses and CIDR ranges the probe may connect to. Nothing outside this list is ever contacted, and an empty list probes nothing. |
+
+**Connection Timeout (Seconds)** sets how long to wait before treating an address as
+unanswered, and **Maximum Addresses per Run** caps how many addresses one run may try, so a
+broad scope cannot become an unbounded scan.
+
+While the probe cannot run, the page says why. After each run it shows when the run happened
+and how many addresses were attempted, how many answered, how many did not, and how many
+assets received a verdict.
+
+A probe that gets no answer records nothing. A refused or timed-out connection is equally
+consistent with a firewall, a stopped service or a blocked address, so silence is never
+treated as evidence that an asset is isolated.
+
 ## Overriding exposure
 
 Each asset has an **exposure override**, set on the asset's Exposure panel by anyone with

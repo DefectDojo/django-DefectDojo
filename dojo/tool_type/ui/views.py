@@ -15,7 +15,7 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@deprecated_view("Tool Type", removal_version="3.5.0", removal_date="November 2026")
+@deprecated_view("tool_type")
 def new_tool_type(request):
     if request.method == "POST":
         tform = ToolTypeForm(request.POST, instance=Tool_Type())
@@ -35,7 +35,7 @@ def new_tool_type(request):
     return render(request, "dojo/new_tool_type.html", {"tform": tform})
 
 
-@deprecated_view("Tool Type", removal_version="3.5.0", removal_date="November 2026")
+@deprecated_view("tool_type")
 def edit_tool_type(request, ttid):
     tool_type = Tool_Type.objects.get(pk=ttid)
     if request.method == "POST":
@@ -55,7 +55,7 @@ def edit_tool_type(request, ttid):
     return render(request, "dojo/edit_tool_type.html", {"tform": tform})
 
 
-@deprecated_view("Tool Type", removal_version="3.5.0", removal_date="November 2026")
+@deprecated_view("tool_type")
 def tool_type(request):
     confs = Tool_Type.objects.all().order_by("name")
     add_breadcrumb(title=_("Tool Type List"), top_level=not len(request.GET), request=request)

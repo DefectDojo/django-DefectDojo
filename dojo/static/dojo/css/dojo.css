@@ -1117,6 +1117,72 @@ span.endpoint_product {
     outline: none;
 }
 
+/* GitHub star prompt: small card pinned to the bottom-right corner */
+.github-star-prompt {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1050;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    padding: 16px 20px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.github-star-prompt-title {
+    margin: 0 24px 8px 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.github-star-prompt-title .fa-star {
+    color: #f5b301;
+}
+
+.github-star-prompt-body {
+    margin: 0 0 14px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.github-star-prompt-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.github-star-prompt-actions .github-star-prompt-star-form {
+    flex: 1;
+}
+
+.github-star-prompt-actions .github-star-prompt-star-form .btn {
+    width: 100%;
+}
+
+.github-star-prompt-close-form {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+}
+
+.github-star-prompt-close {
+    padding: 0 4px;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.6;
+}
+
+.github-star-prompt-close:hover,
+.github-star-prompt-close:focus {
+    opacity: 1;
+}
+
 /* Removed: custom-search-form media queries — old topbar search sizing */
 
 /* Removed: Old sidebar/layout media queries for #page-wrapper, #footer-wrapper,
@@ -1289,6 +1355,8 @@ span.endpoint_product {
 .dojo-filter-set select[multiple],
 .dojo-filter-set select[multiple=multiple] {
     width: 100%;
+    /* override the fixed .form-control height, which would clip the list to a single option row */
+    height: auto;
     min-height: 2.125rem;
     max-height: 5rem;
     font-size: 0.8125rem;

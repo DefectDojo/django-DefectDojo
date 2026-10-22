@@ -186,6 +186,16 @@ def readable_tag_match(location_field, user=None, **lookups):
     )
 
 
+# Read by Location.readable_tags. Its own name, so it never collides with an annotation a caller
+# (Pro's v3 router, for one) already puts on the same queryset.
+TAGS_READABLE_ANNOTATION = "caller_may_read_tags"
+
+
+def annotate_tags_readable(locations, user=None):
+    """Annotate :data:`TAGS_READABLE_ANNOTATION` (see :func:`location_tags_readable`) once per page instead of per row."""
+    return locations.annotate(**{TAGS_READABLE_ANNOTATION: readable_tag_match("pk", user=user)})
+
+
 def annotate_location_counts_and_status(locations, user=None):
     # Annotate the queryset with counts of findings
     # This aggregates the total and active findings by joining LocationFindingReference.

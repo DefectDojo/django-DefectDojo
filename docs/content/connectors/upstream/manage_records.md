@@ -62,10 +62,12 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Asset even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Assets rather than moving its Findings.
 
-Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
-Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
-nothing about existing Mappings: the first Discover after it is turned on records identifiers
-for the Records you already have, and later runs use them.
+Steps 1 and 2 require the **Asset Identity** feature (see
+[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off));
+until it is on, Auto-Mapping resolves by name alone, which is the historical behaviour. The
+tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
+changes nothing about existing Mappings: Records keep the Asset they are on, and later runs follow
+the identifier.
 
 Because names are matched globally, two tools that each report something called `payments` map
 to the same Asset on first sight. Recording each tool's identifier separately is what stops
@@ -98,10 +100,12 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Product even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Products rather than moving its Findings.
 
-Steps 1 and 2 require the identity feature to be enabled (`DD_V3_ASSET_ALIASES`); until then,
-Auto-Mapping resolves by name alone, which is the historical behaviour. Enabling it changes
-nothing about existing Mappings: the first Discover after it is turned on records identifiers
-for the Records you already have, and later runs use them.
+Steps 1 and 2 require the **Asset Identity** feature (see
+[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off));
+until it is on, Auto-Mapping resolves by name alone, which is the historical behaviour. The
+tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
+changes nothing about existing Mappings: Records keep the Product they are on, and later runs follow
+the identifier.
 
 Because names are matched globally, two tools that each report something called `payments` map
 to the same Product on first sight. Recording each tool's identifier separately is what stops
@@ -147,7 +151,7 @@ Not every state applies to every connector. **Stale** is set by the findings-imp
 
 ### New
 
-A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see our guide on [Editing Records]().
+A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to an Asset or Ignored. To Map a new Record to an Asset, see [Change the Mapping of a Record](#change-the-mapping-of-a-record).
 
 ### Good
 
@@ -185,7 +189,7 @@ Records can be Edited, Ignored or Deleted from the **Manage Records \& Operation
 
 Although Mapped and Unmapped records are located in separate tables, they can both be edited in the same way.
 
-From the Records table, click the blue ▼ Arrow next to the State column on a given Record. From there, you can select **Edit Record,** or **Delete Record.**
+From the Records table, open a Record's **⋮** menu, next to its **State**. From there, you can select **Edit Record** or **Delete Record**.
 
 ![image](images/edit_ignore_delete_records.png)
 

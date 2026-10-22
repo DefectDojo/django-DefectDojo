@@ -27,7 +27,7 @@ The **Manage Records and Operations** page can also be used to handle Records; w
 Each entry on the Operations Page's table is a record of an operation event, with the following traits:
 
 * **Type** describes whether the event was a **Sync** or a **Discover** operation.
-* **Status** describes whether the event ran successfully.
+* **Status** describes how the event went: **Success**, **Error** or **Timeout** once it has finished, or **Pending** while it is still running. The **Status** filter offers all four.
 * **Trigger** describes how the event was triggered \- was it a **Scheduled** operation which ran automatically, or a **Manual** operation which was triggered by a DefectDojo user?
 * The **Start \& End Time** of each operation is recorded here, along with the **Duration**.
 
@@ -55,6 +55,26 @@ restores the records to **Good**, your existing mappings are reused, and Sync re
 You do not need to recreate the Connector. To check a fix immediately rather than waiting for the
 next scheduled run, use [Run Discover Manually](#run-discover-manually).
 
+### Zero Results
+
+A Connector can also keep its records and keep syncing successfully while every Sync imports
+nothing. The tile shows an orange **Zero Results: *n* Runs** chip when every actively mapped
+record has returned zero Findings for at least two Syncs in a row, after importing Findings at
+some point in the previous 30 days. Hover the chip to see when the run of empty Syncs began.
+
+A few things keep the chip honest:
+
+* Each scan type of a record is counted on its own, because each one syncs separately. A scan
+  type that has not imported anything in the last 30 days is treated as a clean project, not a
+  failure, and does not count toward the chip.
+* One record, or one scan type, that still imports Findings is enough to keep the chip off: an
+  empty project among busy ones is normal.
+* A single empty Sync is not reported. Two in a row is.
+
+The chip clears on the next Sync that imports anything. The usual causes are the same as for
+missing records: a credential whose scope was narrowed, or a filter in the tool that now excludes
+everything.
+
 ## Discover Operations
 
 The first step a DefectDojo Connector needs to take is to **Discover** your tool's environment to see how you're organizing your scan data.
@@ -69,7 +89,7 @@ Each time your Connector runs a **Discover** operation, it will look for new **V
 
 ### Run Discover Manually
 
-**Discover** operations will automatically run on a regular basis, but they can also be run manually. If you're setting up this Connector for the first time, you can click the **Discover** button next to the **Unmapped Records** header. After you refresh the page, you will see your initial list of **Records**.
+**Discover** operations will automatically run on a regular basis, but they can also be run manually. If you're setting up this Connector for the first time, you can click the **Discover** button next to the **Unmapped Records** header. Discover runs in the background: when it finishes, the page reloads its Records and Operations on its own, and your initial list of **Records** appears.
 
 ![image](images/operations_discover_3.png)
 
@@ -104,8 +124,19 @@ To have DefectDojo run a Sync operation off\-schedule:
 
 ![image](images/operations_sync.png)
 
+Sync runs in the background. When it finishes, the page reloads its Records and Operations on its own.
+
+The connectors service runs one operation at a time across all Connectors, so a manual run can wait while another Connector's operation finishes. The page keeps checking for up to two hours. If the run has still not started by then, a message says so; refresh the page later to see its results. Operations that start on their schedule while the page is open appear the next time the page loads.
+
+## When a manual run is refused
+
+If DefectDojo cannot start a manual Discover or Sync, a message says why. The two most common reasons are:
+
+* **Request was throttled**: a user can start at most three Discover runs and three Sync runs a minute, across all Connectors. The message says how many seconds to wait before trying again.
+* **The connectors service could not be reached**: the service that runs Connector operations is not answering. Try again in a few minutes. If the message persists, ask an administrator to check that the connectors service is running.
+
 ## Getting told when a Connector stops working
 
-The Operations Page is a record, not an alarm. If you do not want to check it, turn on the **Connector Health Warning** notification, which messages you when a Connector's runs start failing and when its tool stops returning the records it used to return.
+The Operations Page is a record, not an alarm. If you do not want to check it, turn on the **Connector Health Warning** notification, which messages you when a Connector's runs start failing, when its tool stops returning the records it used to return, and when its Syncs start returning zero results.
 
 Set it on your notification settings page, under **Connections**. See [Connector Health Notifications](/admin/notifications/about_notifications/#connector-health-notifications-pro) for what each message covers and how often it arrives.

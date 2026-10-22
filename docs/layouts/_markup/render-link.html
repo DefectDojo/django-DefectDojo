@@ -1,0 +1,13 @@
+{{- /*
+  Override of the Doks render-link hook. The theme renders a mailto link as a
+  <script>/<noscript> pair, and the HTML minifier then drops the space after
+  it, which glued the next word onto the address
+  ("support@defectdojo.comif you..."). Render mailto links as plain anchors
+  instead, like the site footer already does. Other links render exactly as
+  the theme renders them.
+*/ -}}
+{{- if (strings.HasPrefix .Destination "mailto") -}}
+  <a href="{{ .Destination | safeURL }}">{{ with .Text }}{{ . | safeHTML }}{{ else }}{{ replace $.Destination "mailto:" "" }}{{ end }}</a>
+{{- else -}}
+  <a href="{{ .Destination | safeURL }}"{{ with .Title}} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+{{- end -}}

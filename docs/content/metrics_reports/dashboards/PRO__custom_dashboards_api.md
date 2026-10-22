@@ -291,7 +291,7 @@ curl -s -X POST \
   -H "Accept: application/json" -H "Content-Type: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_data/count/" \
   -d '{"model": "finding", "filters": {"status_any": "Active", "severity": "Critical"}}'
-# → {"count": 42, "aggregation": "count"}
+# → {"count": 42}
 
 # The same tile counting unique vulnerability IDs on asset 7 and everything under it:
 curl -s -X POST \
@@ -299,7 +299,7 @@ curl -s -X POST \
   -H "Accept: application/json" -H "Content-Type: application/json" \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_data/count/" \
   -d '{"model": "finding", "filters": {"status_any": "Active", "severity": "High", "product": "7"}, "aggregation": "distinct_vulnerability_id", "include_child_assets": true}'
-# → {"count": 2, "aggregation": "distinct_vulnerability_id"}
+# → {"count": 2}
 ```
 
 **A group-by aggregation** (`POST`), the data behind a Graph:
@@ -333,7 +333,7 @@ The full set of `widget_data` actions:
 
 | Action | Method | Key payload / params | Returns |
 |--------|--------|----------------------|---------|
-| `count` | POST | `model`, `filters`, `aggregation?`, `include_child_assets?` | `{count, aggregation}` |
+| `count` | POST | `model`, `filters`, `aggregation?`, `include_child_assets?` | `{count}` |
 | `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `include_child_assets?` | `{labels, series, total, ...}` |
 | `dimensions` | GET | `?model=` | valid group-by dimensions and aggregations |
 | `top_records` | POST | `model`, `filters`, `metric`, `limit?`, `sort?` | `{labels, series, ...}` |

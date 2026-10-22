@@ -1727,7 +1727,7 @@ def delete_product_authorized_user(request, pid, user_id):
     return HttpResponseRedirect(reverse("view_product", args=(pid,)))
 
 
-@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
+@deprecated_view("api_scan_configuration")
 def add_api_scan_configuration(request, pid):
     product = get_object_or_404(Product, id=pid)
     if request.method == "POST":
@@ -1771,7 +1771,7 @@ def add_api_scan_configuration(request, pid):
                    })
 
 
-@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
+@deprecated_view("api_scan_configuration")
 def view_api_scan_configurations(request, pid):
     product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
 
@@ -1785,7 +1785,7 @@ def view_api_scan_configurations(request, pid):
                   })
 
 
-@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
+@deprecated_view("api_scan_configuration")
 def edit_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
@@ -1831,7 +1831,7 @@ def edit_api_scan_configuration(request, pid, pascid):
                   })
 
 
-@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
+@deprecated_view("api_scan_configuration")
 def delete_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 

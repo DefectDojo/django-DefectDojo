@@ -2,7 +2,7 @@
 title: "Sandbox Mode (self-hosted)"
 description: "Turn on the DefectDojo Pro sandbox on a self-hosted instance with one setting, and what it creates in your database"
 draft: false
-weight: 10
+weight: 12
 audience: pro
 ---
 
@@ -33,6 +33,8 @@ The database user of a new Docker Compose installation with the bundled database
 ```sql
 SELECT rolcreaterole, rolcreatedb FROM pg_roles WHERE rolname = current_user;
 ```
+
+The sandbox is not available with [passwordless database authentication](/get_started/pro/onprem/passwordless_database/): its database roles sign in with passwords.
 
 If either is false, either have a database administrator grant them:
 

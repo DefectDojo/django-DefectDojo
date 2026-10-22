@@ -8,10 +8,20 @@ from dojo.api_v2.prefetch import (
 )
 from dojo.api_v2.prefetch import utils
 from dojo.api_v2.prefetch.authorized_querysets import get_authorized_queryset
-from dojo.location.api.serializers import LocationFindingReferenceSerializer, LocationSerializer
+from dojo.location.api.serializers import (
+    LocationFindingReferenceSerializer,
+    LocationProductReferenceSerializer,
+    LocationSerializer,
+)
 from dojo.location.feature import locations_enabled
-from dojo.location.models import Location, LocationFindingReference
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import FileUpload, Finding
+
+# Related objects that a prefetched model's serializer reads, so they are fetched in the same query
+_PREFETCH_SELECT_RELATED = {
+    LocationFindingReference: ("location",),
+    LocationProductReference: ("location",),
+}
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
@@ -116,8 +126,15 @@ class _Prefetcher:
 
         # Get the concrete field type
         field_meta = getattr(type(model_instance), field_name, None)
-        # Check if the field represents a many-to-many relationship as we need to instantiate the serializer accordingly
+        # Check if the field represents a to-many relationship as we need to instantiate the serializer accordingly.
+        # Both many-to-many fields and the reverse side of a ForeignKey (one-to-many) resolve to a RelatedManager,
+        # so both must be treated as 'many' -- otherwise the single-object path dereferences ``.pk`` on the manager.
         many = utils._is_many_to_many_relation(field_meta)
+        if utils._is_one_to_many_relation(field_meta):
+            # A reverse relation can be unbounded (``Test.finding_set``), so only the opted-in ones are served.
+            if not utils.is_prefetchable_reverse_relation(type(model_instance), field_name):
+                return None, False
+            many = True
         # Get the field from the instance
         return getattr(model_instance, field_name, None), many
 
@@ -131,6 +148,7 @@ class _Prefetcher:
         return {
             Location: LocationSerializer,
             LocationFindingReference: LocationFindingReferenceSerializer,
+            LocationProductReference: LocationProductReferenceSerializer,
         }.get(field_type)
 
     def _prefetch(self, entry, fields_to_fetch):
@@ -168,6 +186,10 @@ class _Prefetcher:
             # and clients can rely on the key being present whenever the
             # primary field is non-null on the entry.
             self._prefetch_data.setdefault(field_to_fetch, {})
+
+            # Serializers that read through a FK (``location.location_value``) would otherwise query once per row
+            if select_related := _PREFETCH_SELECT_RELATED.get(model_type):
+                authorized_qs = authorized_qs.select_related(*select_related)
 
             # Check related object authorizations
             if many:

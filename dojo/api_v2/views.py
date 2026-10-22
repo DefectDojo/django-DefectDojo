@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, time
 
 import pghistory
 from dateutil.relativedelta import relativedelta
@@ -37,6 +37,7 @@ from dojo.api_v2 import (
 )
 from dojo.authorization import api_permissions as permissions
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.deprecations import get_deprecation
 from dojo.endpoint.ui.views import get_endpoint_ids
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import (
@@ -166,14 +167,13 @@ class PrefetchDojoModelViewSet(
 
 class DeprecationNoticeMixin:
 
-    deprecated: bool | None = None
-    end_of_life_date: datetime | None = None
+    deprecation: str = ""
 
     def finalize_response(self, request, response, *args, **kwargs):
-        if self.deprecated is not None:
-            response["X-Deprecated"] = self.deprecated
-        if self.end_of_life_date is not None:
-            response["X-End-Of-Life-Date"] = self.end_of_life_date.isoformat()
+        notice = get_deprecation(self.deprecation)
+        if notice is not None and not notice.removed:
+            response["X-Deprecated"] = True
+            response["X-End-Of-Life-Date"] = datetime.combine(notice.removal_date, time.min).isoformat()
         return super().finalize_response(request, response, *args, **kwargs)
 
 

@@ -24,6 +24,7 @@ from dojo.location.models import (
     LocationProductReference,
 )
 from dojo.location.queries import (
+    annotate_tags_readable,
     get_authorized_location_finding_reference,
     get_authorized_location_product_reference,
     get_authorized_locations,
@@ -42,7 +43,8 @@ class LocationViewSet(ReadOnlyModelViewSet):
 
     def get_queryset(self) -> QuerySet[Location]:
         """Return the queryset of Locations the requesting user may view."""
-        return get_authorized_locations("view", Location.objects.order_by_id())
+        queryset = get_authorized_locations("view", Location.objects.order_by_id())
+        return annotate_tags_readable(queryset).prefetch_related("tags", "inherited_tags")
 
 
 class LocationFindingReferenceViewSet(PrefetchDojoModelViewSet):

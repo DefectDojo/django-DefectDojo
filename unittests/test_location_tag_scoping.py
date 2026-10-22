@@ -1,3 +1,5 @@
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -194,3 +196,53 @@ class LocationTagScopingTest(DojoTestCase):
             f"tags__name_includes={OWN_TAG}",
         ):
             self.assertEqual(self._get(f"/api/v2/location/?{query}")["count"], 2, query)
+
+    # Regression: with Locations on, both list endpoints ran about four queries per row (the row's
+    # Location and URL, one readability EXISTS per tag set, and each tag set) where the Locations-off
+    # endpoints list runs a fixed handful, so a 500-row page cost about 2,000 queries.
+    def _count_list_queries(self, url, token):
+        self._get(url, token)  # warm per-process caches so both sizes compare only per-row work
+        with CaptureQueriesContext(connection) as ctx:
+            self._get(url, token)
+        return len(ctx.captured_queries)
+
+    def _add_own_locations(self, count):
+        added = getattr(self, "_added", 0)
+        for idx in range(added, added + count):
+            loc = URL.get_or_create_from_values(protocol="https", host=f"tagscope-n{idx}.example.test", path="x").location
+            loc.associate_with_product(self.mine, status=ProductLocationStatus.Active)
+            loc.tags.set([OWN_TAG])
+        self._added = added + count
+
+    def test_list_query_count_does_not_scale_with_rows(self):
+        for url in ("/api/v2/location/", "/api/v2/endpoints/"):
+            for who, token in (("alice", self.alice_token), ("admin", self.admin_token)):
+                with self.subTest(url=url, user=who):
+                    small = self._count_list_queries(url, token)
+                    self._add_own_locations(3)
+                    large = self._count_list_queries(url, token)
+                    self.assertLessEqual(
+                        large, small,
+                        msg=f"{url} as {who}: query count scales with rows (N+1). before={small}, after 3 more rows={large}",
+                    )
+
+    # Regression: the Locations-backed endpoints list deduplicated every reference row with DISTINCT,
+    # so the pagination count wrapped a DISTINCT over every row (about 4 s per page on 5M references).
+    # No join in that queryset can repeat a row: the location and URL are one-to-one, and the
+    # authorization and tag filters are semi-joins. The rows must stay unique without it.
+    def test_endpoint_list_count_does_not_dedupe_every_row(self):
+        with CaptureQueriesContext(connection) as ctx:
+            self._get("/api/v2/endpoints/", self.alice_token)
+        counts = [q["sql"] for q in ctx.captured_queries if "COUNT(" in q["sql"].upper()]
+        self.assertTrue(counts, "expected a pagination count query")
+        for sql in counts:
+            self.assertNotIn("DISTINCT", sql.upper(), sql)
+
+    def test_endpoint_list_rows_stay_unique(self):
+        for query in ("", f"tags={OWN_TAG}", "has_tags=true", "o=host", f"product={self.mine.id}", f"not_tags={FOREIGN_TAG}"):
+            for token in (self.alice_token, self.admin_token):
+                with self.subTest(query=query, admin=token == self.admin_token):
+                    body = self._get(f"/api/v2/endpoints/?limit=1000&{query}", token)
+                    ids = [row["id"] for row in body["results"]]
+                    self.assertEqual(len(ids), len(set(ids)), ids)
+                    self.assertEqual(body["count"], len(ids))

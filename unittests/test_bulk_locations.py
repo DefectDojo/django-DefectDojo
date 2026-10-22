@@ -814,3 +814,63 @@ class TestRecordBeforeFindingIsSaved(DojoTestCase):
         mgr.record_locations_for_finding(again, [_make_url("second-cycle.example.com")])
         self.assertEqual(len(mgr._locations_by_finding), 1)
         self.assertIs(mgr._locations_by_finding[0][0], again)
+
+
+# ---------------------------------------------------------------------------
+# A LocationFindingReference is built against a finding during the import batch, then
+# bulk-inserted in persist(). If that finding is removed between the record and the insert
+# -- a delete landing mid-import, or a finding dropped from the batch -- its finding_id
+# points at a dojo_finding row that no longer exists. Django declares foreign keys
+# DEFERRABLE INITIALLY DEFERRED on PostgreSQL, so the constraint is only validated at
+# COMMIT, surfacing there as a 500 naming dojo_locationfindingreference, past every handler
+# that knew what the import was doing. Drop such references before the insert so the
+# surviving findings still get theirs. This mirrors the EnhancedFinding companion guard.
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestPersistDropsOrphanFindingRefs(DojoTestCase):
+
+    """A finding reference for a finding that no longer exists is dropped, not written."""
+
+    def test_reference_for_a_deleted_finding_is_dropped(self):
+        surviving = _make_finding()
+        product = surviving.test.engagement.product
+        doomed = Finding.objects.create(
+            test=surviving.test, title="Doomed Finding", severity="High", reporter=surviving.reporter,
+        )
+
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(
+            surviving, [LocationData(type="url", data={"url": "https://orphan-survivor.example.com"})],
+        )
+        mgr.record_locations_for_finding(
+            doomed, [LocationData(type="url", data={"url": "https://orphan-doomed.example.com"})],
+        )
+
+        # The finding is removed between the record and the persist -- the orphan-ref window.
+        doomed_pk = doomed.pk
+        Finding.objects.filter(pk=doomed_pk).delete()
+
+        # Must not raise, and must not write a reference for the finding that is gone.
+        mgr.persist()
+
+        self.assertFalse(
+            LocationFindingReference.objects.filter(finding_id=doomed_pk).exists(),
+            f"a reference for the deleted finding (id {doomed_pk}) must not be written",
+        )
+        self.assertEqual(
+            LocationFindingReference.objects.filter(finding=surviving).count(), 1,
+            "the reference for the finding that still exists must be written",
+        )
+
+    def test_all_findings_present_is_unchanged(self):
+        """Control: when every finding still exists, every reference is written."""
+        finding = _make_finding()
+        product = finding.test.engagement.product
+
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(
+            finding, [LocationData(type="url", data={"url": "https://orphan-control.example.com"})],
+        )
+        mgr.persist()
+
+        self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 1)

@@ -108,16 +108,16 @@ This is deliberate. A deployment where most services use validated cryptography 
 From version 3.3.300, one variable does both halves. `DD_FIPS_MODE` selects the `-fips` image of every service that has one, and turns on enforcement in the containers that check it, so the images and the setting cannot drift apart. Set it with the CLI, which keeps it in its own configuration, so it survives upgrades:
 
 ```bash
-dojo-compose-cli environment add -k DD_FIPS_MODE -v 1
-dojo-compose-cli app pull-images
-dojo-compose-cli app restart
+sudo -E dojo-compose-cli environment add -k DD_FIPS_MODE -v 1
+sudo -E dojo-compose-cli app pull-images
+sudo -E dojo-compose-cli app restart
 ```
 
-To turn FIPS mode off, remove the variable with `dojo-compose-cli environment remove -k DD_FIPS_MODE` and restart. Do not set it to `0`: any value selects the FIPS images.
+To turn FIPS mode off, remove the variable with `sudo -E dojo-compose-cli environment remove -k DD_FIPS_MODE` and restart. Do not set it to `0`: any value selects the FIPS images.
 
 The embedded Valkey cache and Sensei keep their standard images, since neither has a FIPS variant. For production, point DefectDojo at an external FIPS-compliant cache (see [Deployment notes](#deployment-notes)). Sensei runs only when your license includes it, and is partially covered, as described under [Coverage](#coverage).
 
-**On version 3.3.200.** The 3.3.200 deployment files predate `DD_FIPS_MODE`, so upgrade to 3.3.300 or later to use it. If you need FIPS on 3.3.200, edit `docker-compose.yml` in your install directory instead: add `-fips` after `${version}` on the `x-nginx-image`, `x-django-image`, `x-connectors-image`, `x-integrators-image`, `x-ddorch-image` and `x-mcp-server-image` lines, add `DD_FIPS_MODE: "1"` to the `x-dojo-vars` and `x-nginx-vars` blocks, then run `dojo-compose-cli app restart`. An upgrade replaces `docker-compose.yml`, so these edits do not carry forward.
+**On version 3.3.200.** The 3.3.200 deployment files predate `DD_FIPS_MODE`, so upgrade to 3.3.300 or later to use it. If you need FIPS on 3.3.200, edit `docker-compose.yml` in your install directory instead: add `-fips` after `${version}` on the `x-nginx-image`, `x-django-image`, `x-connectors-image`, `x-integrators-image`, `x-ddorch-image` and `x-mcp-server-image` lines, add `DD_FIPS_MODE: "1"` to the `x-dojo-vars` and `x-nginx-vars` blocks, then run `sudo -E dojo-compose-cli app restart`. An upgrade replaces `docker-compose.yml`, so these edits do not carry forward.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -211,5 +211,5 @@ Some parsers use MD5 to build deduplication keys. That is a non-security use and
 ## Deployment notes
 
 - **TLS termination.** If TLS terminates at a load balancer in front of DefectDojo, that device is responsible for its own FIPS posture and should be documented separately in your system security plan. The `-fips` nginx image covers TLS terminated by DefectDojo itself.
-- **Database and cache.** PostgreSQL and Redis are separate Assets. In a FIPS environment, use FIPS-compliant instances — for example a managed database offering a FIPS endpoint — and document them as inherited components.
+- **Database and cache.** PostgreSQL and Redis are separate products. In a FIPS environment, use FIPS-compliant instances (for example a managed database offering a FIPS endpoint), and document them as inherited components.
 - **Compliance scope.** DefectDojo is not itself a cryptographic module and holds no certificate of its own. What these images provide is validated cryptography performed by modules that do, running in FIPS-approved mode. Your assessor will want the module names and certificate numbers, which appear in the evidence output above.

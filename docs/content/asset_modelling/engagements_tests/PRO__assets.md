@@ -109,6 +109,8 @@ Assets can be edited by clicking **Edit Asset** from within the gear menu at the
 
 All ensuing fields that can be edited are also available when the Asset is being created.
 
+Changing the Organization field moves the Asset, along with its Engagements, Tests, Findings and any child Assets, to the selected Organization. Before saving that change, DefectDojo asks you to confirm the move and names both the current and the new Organization. [You can reorganize later](/asset_modelling/pro_hierarchy/reorganize_later/) lists everything a move changes.
+
 ![image](images/assets_ss2.png)
 
 ### Bulk Edit Assets
@@ -117,7 +119,7 @@ Several Assets can be edited in one action from the All Assets list. Select the 
 
 The Bulk Edit form applies any combination of the following to every selected Asset:
 
-- **Organization**: moves the selected Assets to a different Organization. You need permission to add Assets to the destination Organization.
+- **Organization**: moves the selected Assets to a different Organization. You need permission to add Assets to the destination Organization. Unless the move goes through a change plan review first, DefectDojo asks you to confirm it before saving.
 - **SLA Configuration**
 - **Prioritization Engine**
 - **Tags**: added on top of each Asset's existing tags — nothing is removed.
@@ -220,6 +222,38 @@ Asset's name at the top of the Asset page, and as an icon in front of each node'
 repository, the service built from it, or the host it runs on. The hierarchy view's field picker
 (the eye control, top left) can also show the type's label under each node's name.
 
+### Types Set by Connectors and Rules
+
+Connectors that know what an Asset is set its type for you, on mapping and on every Sync:
+
+| Connector | Type |
+|---|---|
+| CrowdStrike Falcon, Palo Alto Cortex XDR, Wazuh, Censys, Shodan | Host |
+| GitHub, GitHub Advanced Security, GitLab, Bitbucket, Azure DevOps | Repository |
+| NeuVector, Quay | Container Image |
+| Orca Security | Cloud Account |
+| Have I Been Pwned | Domain |
+| Qualys | Host, for the default one-record-per-host grouping (a record grouped by tag is left unclassified) |
+| runZero | From the asset's type: machines are hosts, network gear and IoT are devices, anything else is a host |
+| ServiceNow CMDB | From the CI class: servers and computers are hosts, applications and services are services, network gear is a device |
+| CyCognito | IPs are hosts, domains are domains, web apps are services |
+| Jit | Repositories, APIs (services) and cloud accounts |
+| JSM Assets | From the object type's name, for the common names (Server, Application, Business Service, ...) |
+| Backstage | From the Component's type: `service` and `website` are services, `library` is a package |
+| Deepfence ThreatMapper | Hosts, container images and cloud accounts |
+
+A connector never overwrites a type a person chose. It fills in an Asset that has no type, and
+it keeps the type it set up to date when the source system reclassifies the item. Once someone
+sets a different type (on the Asset form, through the API, in a bulk edit, or with a rule), the
+connector leaves that Asset's type alone. When records from several connectors, or several
+records from one connector, map onto the same Asset, the first one to classify it keeps it and
+the others leave it alone. If the record that classified an Asset is later removed, the type stays
+as it is; change it on the Asset form to reclassify. A vendor value DefectDojo has no type for (a
+CyCognito certificate, a custom CI class) leaves the Asset unclassified.
+
+To classify Assets no connector types, use the Triage Engine's **Set a Field** node on Assets
+with the **Type** field. It can set any type, including ones you added.
+
 Asset types are available through the API at `/api/v2/asset_types/` (read-only) and as the
 `asset_type` field on `/api/v2/assets/` and `/api/v2/products/`.
 
@@ -271,9 +305,25 @@ again — to stop a Connector claiming an Asset, change its mapping rather than 
 
 Adding and withdrawing an alias requires edit permission on the Asset.
 
-Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created, and the Asset
-Identity card and the **Type** field appear only when it is on; existing aliases stay readable
-whether it is on or off.
+### Turning Asset Identity on and off
+
+Aliases are controlled by the **Asset Identity** feature on the
+[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. While it is off, Connectors map
+Records by name alone, you cannot add or withdraw aliases, and the Asset Identity card and the
+**Type** field are hidden. Existing aliases stay readable through the API either way.
+
+Turning it on changes nothing about Records that are already mapped. Each Connector records its
+own identifier for a Record whenever that Record's Mapping is created or changed, whether the
+feature is on or not, so a Record you remapped by hand while it was off stays on the Asset you
+chose once it is on. A change takes effect without a restart.
+
+To go back to matching by name, turn **Asset Identity** off, or run
+`python manage.py set_feature asset_aliases False` in a DefectDojo container. The aliases are
+kept, so turning it on again later is just as safe.
+
+Earlier releases switched this with the `DD_V3_ASSET_ALIASES` deployment setting. An instance
+that had it set to `True` keeps the feature on; otherwise the setting has no effect, apart from
+standing in for the stored value when DefectDojo starts without its database.
 
 ### Container image repositories (the `oci` namespace)
 
@@ -346,8 +396,8 @@ Identity card shows them.
 
 `--connector-config <id>` limits the run to one Connector configuration, and `--json` prints
 the report as JSON. The command never merges Assets or moves Records, and running it again
-only records what is still missing. It works whether or not `DD_V3_ASSET_ALIASES` is on, so you
-can run it before turning identity on.
+only records what is still missing. It works whether or not **Asset Identity** is on, so you
+can run it before turning it on.
 
 ## Asset Versions
 

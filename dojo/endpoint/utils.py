@@ -16,7 +16,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
-from dojo.location.models import Location, LocationProductReference
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Endpoint
 from dojo.tags.utils import bulk_add_tag_mapping
 from dojo.url.models import URL
@@ -437,15 +438,7 @@ class _MetaImport:
 
     def create_objects(self, missing, objects_by_host):
         if self.is_location:
-            # Creating a location goes through URL identity hashing and the product reference
-            # helpers, so it stays one host at a time.
-            created = []
-            for host in missing:
-                url = URL.get_or_create_from_values(host=host)
-                url.location.associate_with_product(self.product)
-                objects_by_host[host] = [url.location]
-                created.append(url.location)
-            return created
+            return self.create_locations(missing, objects_by_host)
 
         from dojo.tags import inheritance as tag_inheritance  # noqa: PLC0415 -- avoid import cycle via dojo.forms
 
@@ -465,6 +458,47 @@ class _MetaImport:
         # gave it the product's inherited tags before any row was applied, and the rows then
         # saw (and could replace) those tags. Apply them now, before the rows, to match.
         tag_inheritance.apply_inherited_tags_for_endpoints(created)
+        return created
+
+    def create_locations(self, missing, objects_by_host):
+        """
+        Get or create a URL Location for every missing host and link it to the product, in batches.
+
+        Same result as URL.get_or_create_from_values() plus associate_with_product() per host: a
+        URL another product already holds is reused, and a new product reference gets the status
+        associate_with_product() would give it (Active only when the location has an active
+        finding in this product). Their post_save receivers only inherit product tags, which
+        apply_inheritance() does for every created object afterwards.
+        """
+        urls = URL.bulk_get_or_create([URL.from_parts(host=host) for host in missing])
+        locations = {url.location_id: url.location for url in urls}
+        linked = set(
+            LocationProductReference.objects.filter(location_id__in=list(locations), product=self.product)
+            .values_list("location_id", flat=True),
+        )
+        active = set(
+            LocationFindingReference.objects.filter(
+                location_id__in=list(locations),
+                finding__test__engagement__product=self.product,
+                status=FindingLocationStatus.Active,
+            ).values_list("location_id", flat=True),
+        )
+        LocationProductReference.objects.bulk_create(
+            [
+                LocationProductReference(
+                    location=location,
+                    product=self.product,
+                    status=ProductLocationStatus.Active if pk in active else ProductLocationStatus.Mitigated,
+                )
+                for pk, location in locations.items()
+                if pk not in linked
+            ],
+            batch_size=1000,
+        )
+        created = []
+        for host, url in zip(missing, urls, strict=True):
+            objects_by_host[host] = [url.location]
+            created.append(url.location)
         return created
 
     def shared_location_ids(self, objects):

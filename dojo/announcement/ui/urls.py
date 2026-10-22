@@ -18,4 +18,9 @@ urlpatterns = [
         views.dismiss_os_message,
         name="dismiss_os_message",
     ),
+    re_path(
+        r"^github_star_prompt$",
+        views.github_star_prompt,
+        name="github_star_prompt",
+    ),
 ]

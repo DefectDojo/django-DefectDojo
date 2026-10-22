@@ -10,7 +10,7 @@ This page describes how to move the data from an open source DefectDojo instance
 
 The examples use Amazon Web Services, with either Docker Compose on EC2 or Kubernetes on EKS, and the database on Amazon RDS for PostgreSQL. That is the combination this procedure was validated against. The same sequence applies to other providers that offer managed PostgreSQL and equivalent compute, and to on-premise hardware, with the provider-specific commands changed to suit.
 
-Because you host the deployment, your data stays inside your own environment for the whole migration. You run the export and the restore, and DefectDojo support can assist at any step. If your DefectDojo Pro instance is cloud-hosted by DefectDojo rather than self-hosted, contact [support@defectdojo.com](mailto:support@defectdojo.com) instead, because the DefectDojo team performs the restore for you.
+Because you host the deployment, your data stays inside your own environment for the whole migration. You run the export and the restore, and DefectDojo support can assist at any step. If your DefectDojo Pro instance is cloud-hosted by DefectDojo rather than self-hosted, follow [Migrating from Open Source to DefectDojo Cloud](/get_started/pro/cloud/migrating_from_open_source/) instead, because the DefectDojo team performs the restore for you.
 
 At a high level, you export the database and the media files from the open source instance, restore them into the database and the storage your Pro deployment uses, point Pro at the restored database, and then validate the result.
 

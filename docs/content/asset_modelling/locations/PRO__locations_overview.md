@@ -5,7 +5,7 @@ audience: pro
 weight: 1
 ---
 
-**Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives — whether that's a URL, a software dependency from an **SBOM**, or, in the future, a **cloud resource ID**, **container image**, or **code repository**.
+**Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives, whether that's a URL, a software dependency from an **SBOM**, a line of **source code**, a **container image**, or a **cloud resource**.
 
 Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Enabling is one-way and takes effect for new imports right away; your existing history stays as it is until you run the [migration suite](/asset_modelling/locations/pro__migrating_from_endpoints/) that appears under the flag (endpoint, dependency, and source-code backfills, then an identity rehash). If you also use the Classic UI or depend on the `/api/v2` endpoint routes, restart DefectDojo after enabling: those surfaces are decided when DefectDojo starts, and they pick up the toggle on the next start. No deployment setting needs to change.
 
@@ -23,8 +23,9 @@ Locations fix all three by introducing a **base `Location` object** with a typed
 - **Dependency Locations** — software libraries identified by [Package URL (pURL)](https://github.com/package-url/purl-spec), used to model SBOM contents.
 - **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
 - **[Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)**: the container image a finding was found in, identified by registry, repository and digest, together with the assets that run it and the repository that built it. Scan-managed, behind its own flag.
+- **Host Locations**: a machine identified by its name (a system name, NetBIOS name or DNS name), stored exactly as the scanner reports it. Scan-managed. Qualys VMDR imports create one from each finding's Asset Name, and the Qualys connector creates one from each host's DNS or NetBIOS name when **Create Endpoints From Hosts** is on. The host's IP addresses stay URL Locations beside it.
 
-Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and container images as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
+Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and from asset connectors when **Connector Location Inventory** is on. **Cloud Resources** under **Explore > Attack Surface** in the sidebar lists them. Container images arrive as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
 
 ## Key Concepts
 
@@ -45,6 +46,20 @@ Locations are not directly attached to Assets or Findings. Instead, two **Refere
 
 - **Asset References** — relationships the Location has to Assets (e.g. `libFoo` is *owned by* Asset 6, *used by* Asset 9). Each reference carries a status (`Active` or `Mitigated`) and an optional **relationship** ("Used By" or "Owned By").
 - **Finding References** — relationships the Location has to Findings. Each reference carries a richer status (`Active`, `Mitigated`, `False Positive`, `Risk Accepted`, `Out of Scope`) plus the auditor and audit time.
+
+#### Which Test reported a Location
+
+A Finding Reference also records the Test that reported the Location. There is one reference for each Location, Finding and Test, and each has its own status. Usually all of a Finding's references come from the Finding's own Test. When more than one Test reports the same Location on one Finding, each Test gets its own reference.
+
+Reimport only changes references that belong to the Test being reimported. If Test B no longer reports a Location, Test B's reference to it is set to `Mitigated`, and a reference from Test A to the same Location stays as it is.
+
+To show one status for a Location on a Finding, DefectDojo combines its references:
+
+1. If any reference is `False Positive`, `Risk Accepted` or `Out of Scope` (checked in that order), the Location has that status. A status someone set by hand always wins over a scan result.
+2. Otherwise the Location is `Active` if any Test still reports it.
+3. Otherwise it is `Mitigated`.
+
+When you upgrade, every existing reference is assigned to its Finding's Test. A reference added through the API or the UI belongs to the Finding's own Test.
 
 This separation is what allows a library to exist on an Asset *without* needing a Finding — a missing capability in the old Components model.
 

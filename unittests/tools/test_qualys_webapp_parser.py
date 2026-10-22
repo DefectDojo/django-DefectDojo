@@ -1,3 +1,5 @@
+from django.test import override_settings
+
 from dojo.models import Test
 from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -59,3 +61,27 @@ class TestQualysWebAppParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual(finding.unsaved_req_resp[0].get("req"), "POST: https://example.com/vulnerable/path\nReferer:  https://example.com/\n\nHost:  www.example.com\n\nUser-Agent:  Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15\n\nAccept:  */*\n\nContent-Length:  39\n\nContent-Type:  application/x-www-form-urlencoded REQUEST_ONE\n\nBODY: post_param=malicious_code_here\n")
+
+    def test_default_settings_leave_unique_id_unset(self):
+        with (get_unit_tests_scans_path("qualys_webapp") / "qualys_webapp_many_vuln.xml").open(encoding="utf-8") as testfile:
+            findings = QualysWebAppParser().get_findings(testfile, Test())
+        self.assertEqual(21, len(findings))
+        self.assertTrue(all(finding.unique_id_from_tool is None for finding in findings))
+
+    @override_settings(QUALYS_WAS_UNIQUE_ID=True)
+    def test_unique_id_setting_sets_unique_id_from_tool(self):
+        with (get_unit_tests_scans_path("qualys_webapp") / "qualys_webapp_many_vuln.xml").open(encoding="utf-8") as testfile:
+            findings = QualysWebAppParser().get_findings(testfile, Test())
+        self.assertGreater(len(findings), 0)
+        unique_ids = [finding.unique_id_from_tool for finding in findings]
+        self.assertTrue(all(unique_ids), unique_ids)
+        self.assertEqual(len(unique_ids), len(set(unique_ids)))
+
+    @override_settings(QUALYS_WAS_WEAKNESS_IS_VULN=True)
+    def test_weakness_setting_includes_weaknesses(self):
+        with (get_unit_tests_scans_path("qualys_webapp") / "qualys_webapp_many_vuln.xml").open(encoding="utf-8") as testfile:
+            findings = QualysWebAppParser().get_findings(testfile, Test())
+        self.validate_locations(findings)
+        # 21 non-info findings, 21 total (matches the explicit enable_weakness=True test)
+        self.assertEqual(21, len([x for x in findings if x.severity != "Info"]))
+        self.assertEqual(21, len(findings))

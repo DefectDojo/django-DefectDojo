@@ -48,14 +48,22 @@ These components are hierarchical: Each **Instance** has one or more **Mappings*
 
 Once these components are configured, Findings and Finding Groups can be sent to a given Issue Tracker in two ways; manually, or automatically.
 
-- **Manually**: Findings and Finding Groups contained in an Asset/Engagement with an assigned **Issue Tracker Mapping** will have an option to "Push to Integrator".  This will then create an Issue in the Issue Tracker with the corresponding Finding/Finding Group information.  Push to Integrator can also be used to update an existing Issue.
+- **Manually**: Findings and Finding Groups have a **Push to Connector** action: in the gear menu, as a checkbox on the edit form, and in **Bulk Edit** for several Findings at once. When an **Issue Tracker Assignment** covers the Finding's Engagement or Asset, this creates an Issue in the Issue Tracker with the corresponding Finding/Finding Group information, or updates the Issue it already has.
+
+    The gear menu offers **Push to Connector** only when an Issue Tracker Assignment covers the Finding's or Finding Group's Engagement or Asset. When none does, nothing would be sent, so the action is not shown; assign an Issue Tracker Mapping to the Asset or the Engagement first. The edit form and **Bulk Edit** still offer the push: a push that nothing covers shows a warning that no connector is assigned to its Asset or Engagement, and **Bulk Edit** reports how many of the selected Findings were not sent, and why.
+
+    A Finding that belongs to a Finding Group is pushed as its group, so its Issue is the group's, and the result says the Finding was sent as part of its Finding Group. When a push reaches some connectors but not others, the result says how many it could not be sent to.
+
+    A push can take several seconds per connector. While it runs, the gear shows a spinner and does not open, so the same push cannot be started twice.
+
+    A push only hands the Finding or Finding Group to the connector: the Issue is created or updated in the background, so it can take a moment to appear in the **Connector Tickets** column.
 
 ### Automatically Push Findings
 
 Findings can also be pushed automatically, with the **Issue Tracker Assignment** dictating how those objects will be pushed.  These are the four options:
 
 - **Only Explicitly Publish Changes to Target**: This option disables any automatic behavior in the assigned Asset or Engagement.  The only way to push a Finding or Finding Group will be explicitly, as mentioned above.
-- **Automatically Link New Finding to Target**: When new Findings or Finding Groups are **created** in the assigned Asset or Engagement, DefectDojo will automatically push the object to the Issue Tracker.  Once created, these Findings or Findings Groups will not be updated without a manual Push to Integrator action.
+- **Automatically Link New Finding to Target**: When new Findings or Finding Groups are **created** in the assigned Asset or Engagement, DefectDojo will automatically push the object to the Issue Tracker.  Once created, these Findings or Findings Groups will not be updated without a manual **Push to Connector** action.
 - **Automatically Update Existing Link on Finding Edit**: When Findings or Finding Groups are **updated** in the assigned Asset or Engagement, automatically push the object to the Issue Tracker if an existing link has already been created manually.
 - **Automatically Link New and Update Existing Link on Finding Edit**: When Findings or Finding Groups are created **or** updated in the assigned Asset or Engagement, automatically push the object to the Issue Tracker.
 
@@ -66,16 +74,27 @@ Each Issue Tracker Assignment can optionally narrow which Findings are pushed **
 - **Minimum Severity**: only automatically create tickets for Findings at or above the selected severity. Leave it blank to include every severity.
 - **Active Findings Only**: only automatically create tickets for active Findings, skipping ones that are already mitigated, false positive, or risk accepted when the assignment first sees them.
 
-These filters apply to automatic **creation** only. Updates to a Finding that already has a linked ticket are always sent, so status changes (including closures) continue to propagate. A manual **Push to Integrator** always ignores the filters. Leaving both at their defaults preserves the original behavior of pushing every Finding.
+These filters apply to automatic **creation** only. Updates to a Finding that already has a linked ticket are always sent, so status changes (including closures) continue to propagate. A manual **Push to Connector** always ignores the filters. Leaving both at their defaults preserves the original behavior of pushing every Finding.
 
 #### Assigning multiple Assets
 
 An Issue Tracker Assignment targets a single Asset or Engagement. To cover several assets, create one Assignment per Asset (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
 
+#### Who can see and change an Assignment
+
+An Issue Tracker Assignment belongs to the Asset or Engagement it targets, so on top of the Integration permissions that open Downstream Connectors, it follows that Asset's or Engagement's permissions:
+
+- You see an Assignment, in lists and in the Assignment counts on the connector and mapping lists, only when you can view its Asset or Engagement.
+- Creating, changing, or deleting an Assignment for an Asset requires permission to edit that Asset, such as the Maintainer or Owner role on it. For an Engagement, it requires permission to edit that Engagement, such as the Writer role or higher.
+- Moving an Assignment to a different Asset or Engagement requires edit permission on both the current and the new one.
+- The Asset and Engagement pickers on the Assignment form list only the ones you can edit, and an Assignment's **Edit** and **Delete** actions are shown only when you can edit its Asset or Engagement.
+- Deleting an Issue Tracker Mapping, or a connector, also deletes its Assignments. When any of them targets an Asset or Engagement you cannot edit, the delete is refused and nothing is removed.
+
 ## Issue Tracker Ticket Representation
 
-Issue Tracker Tickets are represented by a series of icons under the "Integrator Tickets" column when viewing and listing
-Findings and Finding Groups
+Issue Tracker Tickets are represented by a series of icons under the **Connector Tickets** column when viewing and listing
+Findings and Finding Groups. In the Findings list the column is hidden by default: turn it on from the column picker. The
+Finding Groups list shows it by default.
 
 Icons from left to right:
 
@@ -114,6 +133,8 @@ in debugging these errors, each Issue Tracker Mapping has a table of errors that
 occurred, and the Finding or Finding Group that failed to be pushed.
 
 These errors can be found by looking at the All Issue Tracker Mappings & Assignments page, under the ⚠️ Total Errors column.
+
+Opening the Downstream Connectors pages requires the global Integration View permission. An error, and an Issue's link to a Finding or Finding Group, is listed and counted only when you can view that Finding or Finding Group; errors about the connection itself, tied to no Finding, are listed for everyone who can open the page.
 
 ![image](images/integrators_4.png)
 

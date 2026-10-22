@@ -10,7 +10,7 @@ Entries in the DefectDojo Pro sidebar can carry a small coloured tag. Each one a
 | Badge | Colour | Means | What it asks of you |
 | --- | --- | --- | --- |
 | `SOON` | Gold | Announced, not released yet | Nothing. The entry does not open a page |
-| `NEW` | Green | Recently released | Nothing — it is there so you notice the feature |
+| `NEW` | Green | Recently released | Nothing. It is there so you notice the feature, and the sidebar's [What's New](/navigation/pro__sidebar/#whats-new) panel lists every badged entry with the release's highlights |
 | `BETA` | Brand-colored | Working, still being finished; behaviour may change between releases | Try it, and expect rough edges |
 | `LOCKED` | Grey | Not included in your license | Selecting the entry explains what unlocks it |
 | `LEGACY` | Red | Superseded by a newer feature, with no announced removal date | Prefer the replacement for new work |
@@ -32,7 +32,7 @@ The distinction is deliberate, because the two states call for different respons
 
 **`DEPRECATED`** means a removal has been announced. Hovering the badge tells you the release it goes away in, and clicking it opens the deprecation notice:
 
-> \<Feature\> is deprecated and will be removed by \<release\>. Click for the deprecation notice.
+> \<Feature\> is deprecated and will be removed by \<release\> (\<month\>). Click for the deprecation notice.
 
 **`LEGACY`** means the feature has been superseded but no removal has been scheduled. There is deliberately no date in the hover text, because inventing one would be worse than saying nothing. Instead it names the replacement and links to its documentation:
 
@@ -41,6 +41,10 @@ The distinction is deliberate, because the two states call for different respons
 A `LEGACY` feature keeps working and keeps getting fixes. It just will not gain new capability, so anything you build now is better built on the replacement.
 
 Both badges are links, because a tooltip closes the moment your pointer leaves it and so cannot hold a clickable link. Clicking either badge opens its notice in a new tab; it does not navigate the menu entry underneath.
+
+## Pages of a deprecated feature carry a banner
+
+Every page that belongs to a `DEPRECATED` feature opens with a warning banner. The banner carries the same red badge, names the release the feature goes away in, and says what to do. It reads the same announcement as the sidebar badge, so the two always agree.
 
 ## What currently carries a badge
 
@@ -55,10 +59,9 @@ Both badges are links, because a tooltip closes the moment your pointer leaves i
 
 **`DEPRECATED`**
 
-* **Settings > Configuration > Tool Types**
-* **Settings > Configuration > Tool Configurations**
-
-Both are removed in **3.5.0**, along with the API-based (pull) parsers they exist to configure. The [3.2 upgrade notes](/releases/os_upgrading/3.2/) explain what to migrate to and by when.
+* **Settings > Configuration > Tool Types** and **Tool Configurations**, removed in **3.5.0 (November 2026)** along with the API-based (pull) parsers they exist to configure. The [3.2 upgrade notes](/releases/os_upgrading/3.2/) explain what to migrate to and by when.
+* **API Scan Configurations** on an Asset, removed in **3.5.0 (November 2026)** for the same reason.
+* **Endpoints** (the Endpoints menu, the Endpoint and Host list pages, and a Finding's endpoint tables), removed in **3.6.0 (December 2026)** in favour of Locations. See [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/).
 
 ![DEPRECATED badges under Settings > Configuration](images/menu_badge_deprecated.png)
 

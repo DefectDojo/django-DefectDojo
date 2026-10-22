@@ -1819,8 +1819,10 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "created": "2020-11-09T23:13:08.520000Z",
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
+            # 226 is already in the fixture's risk acceptance 1, and a finding belongs to one acceptance at a
+            # time, so the new acceptance takes 227: the same test, not yet risk accepted.
             "accepted_findings": [
-                226,
+                227,
             ],
             "notes": [],
         }
@@ -2750,13 +2752,12 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
 
 
 @versioned_fixtures
@@ -2783,13 +2784,12 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
 
 
 @versioned_fixtures
@@ -2909,15 +2909,15 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0. The DeprecationNoticeMixin
-        # must run in finalize_response, which only happens if it precedes the base
-        # viewset in the MRO (see dojo/api_v2/views.py:DeprecationNoticeMixin).
+        # The DeprecationNoticeMixin must run in finalize_response, which only
+        # happens if it precedes the base viewset in the MRO (see
+        # dojo/api_v2/views.py:DeprecationNoticeMixin).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
 
 
 @versioned_fixtures
@@ -2966,13 +2966,12 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_deprecation_notice_header(self):
-        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
         response = self.client.get(self.url, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
 
 
 @versioned_fixtures

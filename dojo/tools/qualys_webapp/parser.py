@@ -4,22 +4,11 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
-
-try:
-    from django.conf.settings import QUALYS_WAS_WEAKNESS_IS_VULN
-except ImportError:
-    # Avoid breaking change
-    QUALYS_WAS_WEAKNESS_IS_VULN = False
-
-try:
-    from django.conf.settings import QUALYS_WAS_UNIQUE_ID
-except ImportError:
-    # Avoid breaking change
-    QUALYS_WAS_UNIQUE_ID = False
 
 # Severities are listed under WAS_SCAN_REPORT/APPENDIX/SEVERITY_CATEGORY_LIST
 # Since Info findings are not recroded in the Confirmed Vulnerability or
@@ -534,9 +523,12 @@ class QualysWebAppParser:
     def get_description_for_scan_types(self, scan_type):
         return "Qualys WebScan output files can be imported in XML format."
 
-    def get_findings(
-        self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN,
-    ):
+    def get_findings(self, file, test, enable_weakness=None):
+        # Read the settings at parse time (not import time) so the env-driven values
+        # in settings.dist.py, and override_settings in tests, are honoured.
+        if enable_weakness is None:
+            enable_weakness = getattr(settings, "QUALYS_WAS_WEAKNESS_IS_VULN", False)
+        unique = getattr(settings, "QUALYS_WAS_UNIQUE_ID", False)
         return qualys_webapp_parser(
-            file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness=enable_weakness,
+            file, test, unique, enable_weakness=enable_weakness,
         )

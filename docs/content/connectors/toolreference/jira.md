@@ -38,6 +38,8 @@ Create a dedicated app in the [Atlassian developer console](https://developer.at
 5. Copy the **Client ID** and **Client Secret** into the DefectDojo form and **Submit** to save the connection.
 6. Click **Connect With Jira** and approve the consent screen. Atlassian redirects back to DefectDojo, which stores the tokens and resolves your `cloudId` automatically. A "Connected" indicator appears when it succeeds.
 
+If the connection does not complete, DefectDojo says why when Atlassian sends you back: the authorization request expired or was started in another browser (click **Connect With Jira** again), Atlassian refused the authorization code (check the Client ID and Client Secret), access was not granted on the consent screen, or the connector was deleted in the meantime. DefectDojo also checks your permission again when you return, so an account that lost permission to edit Downstream Connectors while the consent screen was open saves nothing.
+
 > The callback host is your DefectDojo `SITE_URL`. Atlassian must be able to redirect the browser there, and the value must match what DefectDojo sends exactly — so use the real hostname your users reach DefectDojo at, not a value only reachable from inside the network.
 
 #### Minimum OAuth scopes
@@ -157,7 +159,7 @@ If Jira changes do not arrive, see [two-way sync troubleshooting](/connectors/do
 
 ### How it works
 
-- **Create / Update / Delete:** creating pushes a new issue and records the link on the Finding; updating edits the existing issue; deleting a Finding force-closes its issue (nothing is deleted in Jira). Pushes can be manual ("Push to Integrator") or automatic per the Issue Tracker Assignment.
+- **Create / Update / Delete:** creating pushes a new issue and records the link on the Finding; updating edits the existing issue; deleting a Finding force-closes its issue (nothing is deleted in Jira). Pushes can be manual (**Push to Connector**) or automatic per the Issue Tracker Assignment. A manual push only sends when an Issue Tracker Assignment covers the Finding's (or Finding Group's) Engagement or Asset; otherwise nothing is sent, and DefectDojo says that no connector is assigned.
 - **Comment:** with **Push Notes as Comments** on, a new note on a Finding is added to its issue as a comment.
 - **Status reconciliation:** after creating (and on every update) DefectDojo reads the issue's current status and, if it differs from the mapped target, finds a single workflow transition that reaches it and applies it. If no such transition exists, the mapping records an error rather than failing silently. Any transition-scoped custom fields are sent with that transition.
 - **Ticket link:** the link surfaced on the Finding is `https://your-site.atlassian.net/browse/{ISSUE-KEY}` — always your public site URL, never the internal gateway.

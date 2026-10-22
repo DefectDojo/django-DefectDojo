@@ -15,6 +15,7 @@ from django.contrib.sites.models import Site
 from django.contrib.sites.requests import RequestSite
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import serializers
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import get_connection
 from django.core.mail.backends.smtp import EmailBackend
@@ -43,7 +44,7 @@ from dojo.forms import (
 from dojo.labels import get_labels
 from dojo.middleware import set_language_cookie
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
-from dojo.user.authentication import reset_token_for_user, token_expires_at
+from dojo.user.authentication import reset_token_for_user, revoke_api_token, token_expires_at
 from dojo.user.ui.filters import UserFilter
 from dojo.user.ui.forms import (
     AddDojoUserForm,
@@ -616,9 +617,34 @@ def edit_permissions(request, uid):
     return HttpResponseRedirect(reverse("view_user", args=(uid,)))
 
 
+def account_email_allowed(kind, to_email):
+    """
+    Whether another account-recovery email of ``kind`` may go to ``to_email`` this hour.
+
+    The forms answer the same way whether or not a message is sent, so an address that has
+    reached the limit just stops receiving mail for the rest of the window.
+    """
+    limit = settings.ACCOUNT_RECOVERY_EMAILS_PER_HOUR
+    if limit <= 0:
+        return True
+    key = "dojo:account-email:" + salted_hmac(f"dojo.account-email.{kind}", (to_email or "").lower()).hexdigest()
+    cache.add(key, 0, timeout=3600)
+    try:
+        count = cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, timeout=3600)
+        count = 1
+    if count > limit:
+        logger.info("Not sending another %s email this hour: limit of %d reached for the address", kind, limit)
+        return False
+    return True
+
+
 class DojoForgotUsernameForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
+        if not account_email_allowed("forgot_username", to_email):
+            return
 
         from_email = get_system_setting("email_from")
 
@@ -645,6 +671,8 @@ class DojoForgotUsernameForm(PasswordResetForm):
 class DojoPasswordResetForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
+        if not account_email_allowed("password_reset", to_email):
+            return
 
         from_email = get_system_setting("email_from")
 
@@ -687,4 +715,7 @@ class DojoPasswordResetConfirmView(PasswordResetConfirmView):
         uci, _created = UserContactInfo.objects.get_or_create(user=user)
         uci.password_last_reset = now()
         uci.save(update_fields=["password_last_reset"])
+        # A reset through the emailed link is account recovery: the API token is a second
+        # credential the old password may have been used to obtain, so it is revoked too.
+        revoke_api_token(user)
         return response

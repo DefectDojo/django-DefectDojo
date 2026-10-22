@@ -119,6 +119,30 @@ document.addEventListener('submit', function (e) {
     });
 });
 
+/* ---- GitHub star prompt ----
+   Record the user's answer and hide the prompt. "Star on GitHub" lets the form
+   submit normally into a new tab (the view records it and redirects to GitHub);
+   "Later" / close is sent in the background. Degrades to plain POSTs without JS.
+*/
+document.addEventListener('submit', function (e) {
+    var form = e.target.closest('.github-star-prompt-form');
+    if (!form) return;
+    var prompt = document.getElementById('github-star-prompt');
+    if (prompt) {
+        // Hide now, remove later: a form detached during its own submit event is not submitted.
+        prompt.style.display = 'none';
+        setTimeout(function () { prompt.remove(); }, 0);
+    }
+    if (form.classList.contains('github-star-prompt-star-form')) return;
+    e.preventDefault();
+    fetch(form.getAttribute('action'), {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+    }).catch(function () {});  // best effort: the prompt simply shows again later
+});
+
 /* ---- Collapse shim ----
    Handles [data-toggle="collapse"] by toggling .in on the target element.
    CSS in tailwind.css:  .collapse { display:none }  .collapse.in { display:block }

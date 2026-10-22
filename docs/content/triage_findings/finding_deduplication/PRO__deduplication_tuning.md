@@ -37,7 +37,55 @@ In a tool's row, select the algorithm shown under the matching kind you want to 
 
 Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
 
-> **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows.
+> **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows. [Grouping](#grouping-what-counts-as-one-finding) is the one exception: it can be set for a pool.
+
+## Grouping: what counts as one finding
+
+By default a finding is whatever the tool's parser produces. Some parsers merge repeated report entries themselves, and most report one entry per place a problem occurs, so the same vulnerability can show up as one finding per file, URL or package. Grouping lets you decide this per tool instead. Select the tool's **Grouping** cell on Matching Configuration to change it.
+
+| Grouping | What one finding is |
+|----------|---------------------|
+| **As the parser groups them** (default) | Whatever the parser produces, exactly as before. |
+| **One finding per location** | Each location gets its own finding, even where the parser merged several into one. Only offered for tools whose parser keeps every location when it merges. |
+| **One finding per vulnerability** | Every location of the same vulnerability is gathered into one finding. Each location keeps its own status, and the finding stays open until every location is fixed. |
+
+Both of the location-based groupings need the [Locations](/asset_modelling/locations/pro__locations_overview/) feature. Tools using a Global algorithm keep the parser's grouping.
+
+### How "one finding per vulnerability" decides what is the same vulnerability
+
+It uses the tool's own matching configuration, so there is no second list of fields to maintain:
+
+- With **Unique ID From Tool**, or **Unique ID From Tool or Hash Code** for a report entry that has an ID, entries that share the tool's ID are one vulnerability. Many tools give one result an ID and report it at several places.
+- Otherwise the tool's hash fields are used, with everything that describes a location left out (file path, line, endpoints, component version and location types). Fields listed under **Fields Left Out of the Identity** are left out too, which helps when a tool writes the location into the description.
+- **When Severities Differ** decides whether one vulnerability reported at two severities becomes one finding (at the highest severity) or stays two findings.
+
+The same rules apply across tests: when a new test on the same Asset reports a vulnerability that already has a finding, its locations are added to that finding, attributed to the new test, instead of creating a duplicate. A reimport of that test then only changes the locations it reported. The finding closes once no test reports any of its locations.
+
+On the folded finding:
+
+- the file path and line shown are those of the first location;
+- the severity is the highest among its active locations, and goes down when the highest location is fixed, unless someone set the severity by hand;
+- the SLA starts from the earliest date any of its locations was found;
+- marking the finding False Positive or Risk Accepted applies that status to every location, and a single location can still be changed afterwards.
+
+Grouping is one setting for Same Tool and Reimport, because an import and a later reimport have to agree on what a finding is. With one finding per vulnerability, reimport also tracks locations as they change, so a line that moves updates its location instead of adding a new one.
+
+### Changing a tool's grouping
+
+Choose the grouping, then select **Review Impact**. DefectDojo shows the tool's most recent tests with how many active findings each has now and how many it would have after the change. Confirm, then select **Submit**.
+
+A change into, out of or within **One finding per vulnerability** changes what identifies a finding. DefectDojo first records the new identity of every existing finding in the background, and the tool's cell shows **Pending** meanwhile. Existing findings keep matching throughout, and the new grouping takes effect once every finding has its new identity. Moving between the other two groupings takes effect on the next import.
+
+Findings imported before the change are not merged automatically. To fold them, run the consolidation command for an Asset. It reports what it would do by default, and changes nothing until you pass `--apply`:
+
+```bash
+python manage.py consolidate_folded_findings --product <asset id>
+python manage.py consolidate_folded_findings --product <asset id> --apply
+```
+
+The newest finding of each group survives, and the others' locations move onto it, keeping the test that reported each one. The others become its duplicates.
+
+To use a grouping only for some Assets, put them in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) and pick that pool under **Applies To**. Assets outside the pool keep the instance default.
 
 ## Same Tool Deduplication
 
@@ -175,13 +223,17 @@ A common situation when first tuning matching is having a large backlog of Findi
 
 **Changing the hash fields re-hashes the backlog.** DefectDojo queues a background job to recompute the stored hash for every Finding from that tool, because the fields determine that value. The impact review tells you how many Findings that is before you apply.
 
-- The job runs asynchronously. On large instances (millions of Findings), this takes time and you will not see immediate changes in the Findings table.
+- The job runs asynchronously, split into batches that the worker pool processes in parallel. On large instances (millions of Findings) it takes a while, and you will not see immediate changes in the Findings table. While it runs, a **Rehash Progress** card on **Settings > Finding Workflow > Matching Configuration**, below the page header, lists each tool and matching kind being re-hashed, how many of its batches are done, and its state: Queued, Running, Completed or Failed. A completed re-hash stays on the card for an hour, and a failed one for seven days.
 - Until it finishes, that tool's Findings are hashed under two different definitions and may not match each other.
 - Existing duplicate links are not revisited. Re-hashing changes what future comparisons produce, not what was already decided.
 
-If you make several changes in quick succession, each queues its own job. Allow the previous one to finish before evaluating results, especially when comparing Finding counts before and after.
+If you make several changes in quick succession, each queues its own job. Allow the previous one to finish before evaluating results, especially when comparing Finding counts before and after. The card follows only the latest re-hash of each tool and matching kind, so an earlier job stops being shown once a newer one is queued.
 
 > **Note for self-hosted Pro:** the job runs in the Celery worker pool. If workers are starved or backlogged, the re-hash takes longer than expected. Check worker health if results do not appear within the timeframe you would expect for your instance size.
+>
+> Each batch runs in its own short-lived process, so a worker does not keep the memory a batch used. If a worker is killed partway through (for example, by the out-of-memory killer), the batches it held go back on the queue and run again, at the latest once the broker's visibility timeout passes (one hour by default for Redis, set with `DD_CELERY_BROKER_TRANSPORT_OPTIONS`). Once all of a re-hash's batches have been queued, it is not planned again. Re-running a batch is safe, and the card counts it once. The batch size is `DD_REHASH_SHARD_SIZE` (default: a range of 50,000 IDs per batch); worker memory depends on how many batches run at once, not on this size.
+>
+> A batch that fails with an error is not run again. A batch whose process is killed is retried three times, a minute apart, unless the re-hash has only one batch. Once a batch gives up, the re-hash shows **Failed**; check the worker logs for `rehash window` errors to find the cause. After fixing it, re-hash the tool from the command line with `./manage.py dedupe --parser "<scan type>" --hash_code_only`, which recomputes the stored hashes of that tool's non-duplicate Findings in the foreground. The card keeps showing the background re-hash as **Failed** afterwards. A re-hash that goes a whole day without finishing a batch (for example, because the broker lost its messages in a restart) is also shown as **Failed**; if a batch does finish later, the re-hash returns to **Running** (or **Completed**, if that was its last batch) and the count carries on from there; reload the page to see it.
 
 **Changing the algorithm re-hashes nothing**, by design: it selects which already-stored value is compared, so there is nothing to recompute. It decides what the next import compares, and existing duplicate links are left as they are.
 
