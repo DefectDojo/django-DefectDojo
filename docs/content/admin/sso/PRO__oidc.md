@@ -57,7 +57,7 @@ DefectDojo can mirror the groups your provider reports into DefectDojo groups on
 - **Group Limiter Regex Expression** — only groups matching this expression are mirrored. Use `.*` to allow all. With `.*`, every group in the claim becomes a DefectDojo group, including built-in provider groups such as Okta's `Everyone`, so prefer a pattern that matches only the groups meant for DefectDojo (for example `^DefectDojo`), or filter the claim at the provider.
 - **Remove Stale Group Memberships** — when enabled, memberships in OIDC-provisioned groups the provider no longer reports are removed on the next login. Only groups created by OIDC are affected; groups you assigned by hand, and groups provisioned by another provider such as SAML, are never touched.
 
-Groups are matched by exact name, including spaces and punctuation. If a DefectDojo group with that name already exists, the user is added to it, even if you created the group by hand; otherwise the group is created on first use. Users join mapped groups with the Reader role. A group you created by hand stays a hand-made group, so **Remove Stale Group Memberships** never removes anyone from it. If you want removals handled automatically, let group mapping create the group, or use [SCIM](/admin/sso/pro__scim/).
+Groups are matched by exact name, including spaces and punctuation. If a DefectDojo group with that name already exists, the user is added to it, even if you created the group by hand; otherwise the group is created on first use. Users join mapped groups with the Reader role. A group that group mapping creates starts with no product, product type or global permissions, so its members see nothing new until you grant the group access once in DefectDojo. A group you created by hand stays a hand-made group, so **Remove Stale Group Memberships** never removes anyone from it. If you want removals handled automatically, let group mapping create the group, or use [SCIM](/admin/sso/pro__scim/).
 
 If the claim is missing or empty for a user, group mapping changes nothing on that login, including removals.
 
@@ -73,7 +73,7 @@ DefectDojo reads the claim from the userinfo response and from the ID token, so 
 
 Okta's **org authorization server** (an endpoint of `https://<your-org>.okta.com`, with no path) does not release a groups claim for the scopes DefectDojo requests. Use a **custom authorization server** instead:
 
-1. In the Okta Admin Console, go to **Security > API > Authorization Servers** and open the server you want to use (for example `default`). Its issuer looks like `https://<your-org>.okta.com/oauth2/<server id>`.
+1. In the Okta Admin Console, go to **Security > API > Authorization Servers** and open the server you want to use (for example `default`). Its issuer looks like `https://<your-org>.okta.com/oauth2/<server id>`, and the server list shows it in the **Issuer URI** column. That issuer is the value DefectDojo needs. The **Metadata URI** on the server's **Settings** tab is a different URL, so do not use it as the endpoint.
 2. On the **Claims** tab, add a claim:
     - **Name**: `groups` (the same value as **Group Claim Name** in DefectDojo)
     - **Include in token type**: **ID Token**, **Always**
@@ -82,15 +82,27 @@ Okta's **org authorization server** (an endpoint of `https://<your-org>.okta.com
     - **Include in**: **Any scope**
 3. On the **Access Policies** tab, make sure a policy applies to your DefectDojo application and has a rule that allows the **Authorization Code** grant. Okta requires a policy and rule before any client can use the server.
 4. On the **Token Preview** tab, preview a token for a user who belongs to one of the groups, using your DefectDojo application and the scopes `openid profile email`. The ID token should contain `groups` with the exact group names. If it does not, DefectDojo will not see them either.
-5. In DefectDojo, set **Endpoint** to the server's issuer (`https://<your-org>.okta.com/oauth2/<server id>`), enter the client secret again, and submit.
-6. Restart DefectDojo. The provider's discovery document is cached for up to 24 hours in each running DefectDojo process, so until a restart, sign-ins keep going to the previous endpoint even though **Validate Config** already reports the new one.
-7. Have a user sign out and sign back in. Group mapping runs on every login, so existing users get their groups the next time they sign in.
+5. In DefectDojo, set **Endpoint** to the server's issuer (`https://<your-org>.okta.com/oauth2/<server id>`), enter the client secret again, and submit. The new endpoint is used from the next sign-in; no restart is needed.
+6. Have a user sign out and sign back in. Group mapping runs on every login, so existing users get their groups the next time they sign in.
 
 Every user who signs in must be assigned to the Okta application, directly or through a group. Otherwise Okta stops the sign-in with *User is not assigned to the client application*.
 
+The groups in the claim do not have to be assigned to the Okta application. Any group the user belongs to that matches the claim's filter is included, so a new group only needs its members added in Okta and a name that the filter matches.
+
+### Signing in from the Okta dashboard
+
+A sign-in has to start at DefectDojo, which adds a `state` value that the callback checks. When a request reaches DefectDojo's callback (`/complete/oidc/`) without one, DefectDojo logs `AuthMissingParameter: Missing needed parameter state` and sends the user back to the login page. The next sign-in from DefectDojo works normally, and these errors do not affect group mapping.
+
+If your users open DefectDojo from its tile on the Okta dashboard, make the tile start the sign-in through DefectDojo. Edit the application's **General Settings** in Okta and, under **Login**, set:
+
+- **Login initiated by**: **Either Okta or App**
+- **Login flow**: **Redirect to app to initiate login (OIDC Compliant)**
+- **Initiate login URI**: your DefectDojo base URL followed by `/login/oidc/`, for example `https://defectdojo.example.com/login/oidc/`
+
 ### If group mapping does nothing
 
+- If the group appears in DefectDojo but its members see nothing new, the mapping worked: grant the group its access (see above).
 - Check that the user's ID token or userinfo response actually carries the claim, using your provider's token preview (in Okta, the **Token Preview** tab above).
 - Check that the names in the claim match the DefectDojo group names exactly.
-- If you changed **Endpoint** recently, restart DefectDojo (see step 6 above).
+- If sign-ins still go to the previous endpoint after you changed **Endpoint**, check the DefectDojo version. Releases before 3.4.300 cache the provider's discovery document for up to 24 hours in each running DefectDojo process, so on those releases restart DefectDojo after changing the endpoint.
 - **Validate Config** reports whether the provider lists your group claim in its advertised `claims_supported`. Treat that check as a hint only. Providers often leave claims out of that list: Okta does not list `groups` there even when the claim is set up correctly and arrives in the ID token, so the warning appears either way.

@@ -4,6 +4,7 @@ import contextlib
 from django.conf import settings
 from django.contrib import messages
 
+from dojo.announcement.github_star import should_show_github_star_prompt
 from dojo.announcement.os_message import OS_MESSAGE_DISMISSED_KEY, get_os_banner
 from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
@@ -24,6 +25,7 @@ def globalize_vars(request):
         # V3 Feature Flags
         "V3_FEATURE_LOCATIONS": locations_enabled(),
         "SHOW_A11Y_REQUIRED_FIELDS_NOTICE": settings.SHOW_A11Y_REQUIRED_FIELDS_NOTICE,
+        "SHOW_GITHUB_STAR_PROMPT": should_show_github_star_prompt(getattr(request, "user", None)),
     }
 
     additional_banners = []

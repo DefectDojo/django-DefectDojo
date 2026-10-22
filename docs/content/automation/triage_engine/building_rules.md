@@ -25,12 +25,21 @@ on its own and nothing is sent until you have set its scope, finished its setup 
 deliberate: several templates raise tickets and send messages, and the first run of one across an
 unfiltered set of Assets is not something you want to discover after the fact.
 
+The gallery reads in your interface language, and so does the rule a template creates: its name,
+description, node names and the text of the notifications it sends are written in the language you
+use when you adopt it, and from then on they are yours to edit like any rule's.
+
 Templates are starting points, not links. Editing an adopted rule does not affect the template, and
 adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
 gets pointed at two different sets of Assets. The second one is named with a suffix.
 
 **New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
 rule, because both create one.
+
+A rule started with **New Rule** has no name until you type one into the heading at the top of the
+editor, and **Save** (or **Run Now**, which saves first) refuses it until you do. Rule names are
+unique, and the name is how you find the rule again in the rule list, on **Runs** and on
+**Deliveries**. The description under the name is optional.
 
 ## The editor
 
@@ -119,6 +128,10 @@ For an event trigger, scope acts as a second gate: the Findings or Assets named 
 A rule whose trigger is **On a Schedule** is scheduled from the rule itself. Setting the schedule needs Rule Edit, the same permission as editing the rule, because a schedule-triggered rule does nothing at all until it has one.
 
 Schedules are limited to quarter-hour marks. The minute field of a cron expression must be `0`, `15`, `30` or `45`.
+
+The schedule is registered with the scheduling service when you save the rule. If the scheduling service cannot register it, the schedule is not changed, and the editor says so and asks you to try again later.
+
+The **Rules** table shows each scheduled rule's **Expected Next Run**, the time the scheduling service will next run it, and sorts by it. When that time is more than fifteen minutes in the past while the rule and its schedule are both enabled, the cell carries a red **Overdue** chip: the schedule has stopped firing, and the scheduling service is the place to look. A rule that is disabled, has a disabled schedule or is not schedule-triggered leaves the cell empty. Both values come from the scheduling service, so the column stays empty on an instance that does not run it.
 
 Valid examples:
 

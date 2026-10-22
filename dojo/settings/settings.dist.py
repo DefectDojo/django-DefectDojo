@@ -170,6 +170,7 @@ env = environ.FileAwareEnv(
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_OS_MESSAGE_ENABLED=(bool, True),  # show the open-source "Upgrade to Pro" / OS message promo banner
+    DD_GITHUB_STAR_PROMPT_ENABLED=(bool, True),  # occasionally ask established users to star DefectDojo on GitHub
     # Some security policies require allowing users to have only one active session
     DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -596,6 +597,7 @@ REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 OS_MESSAGE_ENABLED = env("DD_OS_MESSAGE_ENABLED")
+GITHUB_STAR_PROMPT_ENABLED = env("DD_GITHUB_STAR_PROMPT_ENABLED")
 
 DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 
