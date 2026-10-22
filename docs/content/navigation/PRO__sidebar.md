@@ -62,7 +62,7 @@ The shape you give the shell is stored per user on the server, not just in the b
 
 ## What's New
 
-The gift button in the sidebar footer, beside **Alerts**, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. A number on the button counts the highlights you have not opened yet. Opening the panel clears it, and it stays cleared after a reload until the next release arrives. The count is remembered per browser, so a second browser counts the same release again.
+The gift button in the sidebar footer, beside **Alerts**, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. A number on the button counts the highlights you have not opened yet. Opening the panel clears it, and it stays cleared until the next release arrives. The count is remembered with your account, so it stays cleared in every browser you sign in from, including after a reload or a cleared browser cache.
 
 Below the highlights, **Badged in the Menu** lists every sidebar entry that carries a `NEW` or `BETA` badge right now (see [Menu Badges](/navigation/pro__menu_badges/)), each linking to its page, and **Full Changelog** opens the complete release notes on this site.
 
