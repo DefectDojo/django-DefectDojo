@@ -60,6 +60,10 @@ Pins are stored per user on the server, so they survive a browser reset and foll
 
 The shape you give the shell is stored per user on the server, not just in the browser: pinned pages, folded sections, whether the rail is collapsed, and the light/dark choice. Clearing your browser or signing in on a new machine brings it all back on the next sign-in. The first time you sign in on an instance that has this, whatever shape your browser already had is imported automatically, so nothing resets.
 
+## Alerts
+
+The bell in the sidebar footer opens your notification inbox: unread alerts grouped by the record they are about, with the number of unread alerts on the bell. See [Notification Inbox](/admin/notifications/about_notifications/#notification-inbox-pro).
+
 ## What's New
 
 The gift button in the sidebar footer, beside **Alerts**, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. A number on the button counts the highlights you have not opened yet. Opening the panel clears it, and it stays cleared until the next release arrives. The count is remembered with your account, so it stays cleared in every browser you sign in from, including after a reload or a cleared browser cache.

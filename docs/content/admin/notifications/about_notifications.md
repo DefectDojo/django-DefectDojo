@@ -61,6 +61,19 @@ To remove one or more Alerts from the Alerts Page, check the empty box next to i
 * Removing an Alert only affects your own Alerts List \- it will not affect any other user’s Alerts.
 * Removing an Alert does not remove any import history or activity logs from DefectDojo.
 
+## Notification Inbox (Pro)
+
+In DefectDojo Pro, the bell in the sidebar footer opens a notification inbox instead of the Alerts List menu, and the number on the bell counts your **unread** alerts rather than every alert you have.
+
+* **Grouped by record.** Unread alerts about the same Finding, Test, Engagement, Asset, Organization or Risk Acceptance are shown together under that record's name, with the number of unread alerts it carries and its three newest alerts. Click the record's name to open it. An alert that is not about a record is shown on its own.
+* **Read one at a time.** Clicking an alert marks it read and opens the record it is about; the number on the bell drops by one straight away, and stays down after a reload. Reading an alert changes nothing else: the Finding or other record is untouched and no notification is sent.
+* **Mark All Read** (the double check mark in the inbox header) marks every unread alert read at once. **See All Alerts** (the arrow) opens the Alerts Page, which still lists every alert you have, read or not.
+* **Clear All Alerts** moves from the bell to the Alerts Page toolbar. It still deletes all of your alerts, after a confirmation.
+
+Alerts about a record you can no longer see (for example, after you lose access to its Asset) are left out of the inbox and the count.
+
+When the inbox is first turned on, every alert you already had counts as read, so the bell starts at zero. The inbox follows the **Notification Inbox** feature flag, which is on by default; turning it off brings back the Alerts List menu and the count of every alert. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+
 ## Narrowing Review Request Notifications (Pro)
 
 If a review is requested from all eligible reviewers, everyone eligible on that asset is notified. That is a lot of mail for a reviewer who only looks after part of your estate.
