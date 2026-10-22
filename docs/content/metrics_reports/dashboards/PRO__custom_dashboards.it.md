@@ -7,8 +7,8 @@ audience: pro
 weight: 10
 slug: custom-dashboards
 aliases:
-- /en/customize_dojo/dashboards/about_custom_dashboard_tiles
-- /metrics_reports/dashboards/about_custom_dashboard_tiles
+- /it/en/customize_dojo/dashboards/about_custom_dashboard_tiles
+- /it/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: le Dashboard personalizzabili (layout, widget e catalogo widget) sono una funzionalità di DefectDojo Pro. Sono disattivate per impostazione predefinita — un Superuser può attivarle da **Impostazioni > Feature Flags** sia su Cloud che su istanze On-Premise.</span>

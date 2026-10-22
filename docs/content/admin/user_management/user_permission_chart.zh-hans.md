@@ -4,7 +4,7 @@ description: 详细列出所有 DefectDojo Pro 用户权限
 weight: 4
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/user_permission_chart
+- /zh-hans/en/customize_dojo/user_management/user_permission_chart
 ---
 
 > **DefectDojo Pro 功能。** 本页介绍的成员/组/全局角色 RBAC 系统是 DefectDojo Pro 的一部分。开源版 DefectDojo 使用[已授权用户](../os__authorized_users/)模型——有关开源版访问控制,请参阅该页面;如果您正在版本之间迁移,请参阅[3.0 升级说明](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization)。

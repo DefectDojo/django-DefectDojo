@@ -5,7 +5,7 @@ description: Faça upload de capturas de tela, relatórios ou outros arquivos de
 audience: opensource
 weight: 3
 aliases:
-- /triage_findings/findings_workflows/add_files/
+- /pt-br/triage_findings/findings_workflows/add_files/
 ---
 
 Você pode anexar arquivos a um **Achado**, um **Engajamento** ou um **Teste** para

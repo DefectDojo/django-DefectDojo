@@ -4,8 +4,8 @@ description: Cómo DefectDojo clasifica sus Hallazgos
 weight: 1
 audience: pro
 aliases:
-- /en/working_with_findings/finding_priority
-- /en/working_with_findings/priority_adjustments
+- /es/en/working_with_findings/finding_priority
+- /es/en/working_with_findings/priority_adjustments
 ---
 
 ![image](images/pro_finding_priority.png)

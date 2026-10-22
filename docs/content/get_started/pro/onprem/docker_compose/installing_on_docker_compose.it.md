@@ -6,7 +6,7 @@ draft: false
 weight: 1
 audience: pro
 aliases:
-  - /get_started/pro/onprem/installing_on_docker_compose/
+  - /it/get_started/pro/onprem/installing_on_docker_compose/
 ---
 
 Questa pagina descrive l'installazione di DefectDojo Pro su Docker Compose, che è il più semplice dei due modelli self-hosted ed è la scelta giusta se non si utilizza già Kubernetes.

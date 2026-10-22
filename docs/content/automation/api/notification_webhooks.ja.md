@@ -4,7 +4,7 @@ description: DefectDojoのイベント発生時に、外部サーバーへHTTP W
 weight: 8
 audience: opensource
 aliases:
-- /en/open_source/notification_webhooks/how_to
+- /ja/en/open_source/notification_webhooks/how_to
 ---
 
 **これは実験的なオープンソース機能です — 今後のリリースで動作が変更される可能性があります。**

@@ -4,7 +4,7 @@ description: 为您的账户添加测试、开发或其他 DefectDojo 实例
 weight: 3
 audience: pro
 aliases:
-- /en/cloud_management/additional-cloud-instance
+- /zh-hans/en/cloud_management/additional-cloud-instance
 ---
 
 添加第二个 Cloud 实例的流程，与添加您的第一个实例大致相同。本指南假定您已经完成了初始 DefectDojo 服务器的搭建，并已与我们的销售团队就添加另一个实例达成协议。

@@ -3,7 +3,7 @@ title: 検出事項の編集
 description: 検出事項のステータスを変更したり、問題を解決する際にメタデータを追加したりします
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/editing_findings
+- /ja/en/working_with_findings/findings_workflows/editing_findings
 ---
 
 もし検出事項にメモを追加したり、現在の状況に合わせて文言を更新したりしたい場合は、検出事項編集フォームから行うことができます。

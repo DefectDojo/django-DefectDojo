@@ -4,7 +4,7 @@ toc_hide: true
 weight: 2
 audience: opensource
 aliases:
-- /en/open_source/contributing/parser-documentation-template
+- /it/en/open_source/contributing/parser-documentation-template
 ---
 
 Questo modello è pensato per documentare un parser nuovo o esistente. Sentiti libero di migliorarlo con qualsiasi informazione aggiuntiva che possa aiutare i tuoi colleghi professionisti della sicurezza.

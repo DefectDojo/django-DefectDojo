@@ -3,8 +3,8 @@ title: 下游连接器
 weight: 1
 audience: pro
 aliases:
-- /en/share_your_findings/integrations
-- /issue_tracking/pro_integration/integrations/
+- /zh-hans/en/share_your_findings/integrations
+- /zh-hans/issue_tracking/pro_integration/integrations/
 ---
 
 **可用性：** 下游连接器现已全面开放，并在每个 DefectDojo Pro 实例（无论是云端还是本地部署）上默认启用。无需任何操作即可启用，并且它们已不再列在功能开关页面中。

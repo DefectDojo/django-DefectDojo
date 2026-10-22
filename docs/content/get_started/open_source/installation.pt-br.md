@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: opensource
 aliases:
-- /en/open_source/installation/installation
+- /pt-br/en/open_source/installation/installation
 ---
 
 ## **Opções recomendadas**

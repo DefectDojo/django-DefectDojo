@@ -5,7 +5,7 @@ draft: 'false'
 weight: 3
 audience: pro
 aliases:
-- /en/about_defectdojo/new_user_checklist
+- /zh-hans/en/about_defectdojo/new_user_checklist
 ---
 
 DefectDojo 的核心理念是导入安全数据、对其进行组织，并将其呈现给需要了解的人员。以下是一份快速参考指南，可帮助您从零开始成功实施，直至拥有一个功能齐全的应用。

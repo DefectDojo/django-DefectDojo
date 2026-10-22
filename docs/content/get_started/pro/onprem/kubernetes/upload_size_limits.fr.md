@@ -6,7 +6,7 @@ draft: false
 weight: 5
 audience: pro
 aliases:
-  - /get_started/pro/onprem/upload_size_limits/
+  - /fr/get_started/pro/onprem/upload_size_limits/
 ---
 
 Un fichier de scan volumineux peut être rejeté par plusieurs limites différentes, à différents points du chemin de la requête, et l'erreur que vous obtenez indique laquelle vous avez atteinte. Cette page explique où se trouvent ces limites et comment les augmenter dans un déploiement autohébergé.

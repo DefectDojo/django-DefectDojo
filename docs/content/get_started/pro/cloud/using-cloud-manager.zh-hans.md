@@ -5,7 +5,7 @@ weight: 1
 collapsed: true
 audience: pro
 aliases:
-- /en/cloud_management/using-cloud-manager
+- /zh-hans/en/cloud_management/using-cloud-manager
 ---
 
 登录 DefectDojo 的 Cloud Manager 可让您配置账户设置并管理您的 DefectDojo Cloud 订阅。

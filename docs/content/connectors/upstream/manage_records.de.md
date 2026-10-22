@@ -2,8 +2,8 @@
 title: Datensätze verwalten
 description: Steuern Sie den Datenfluss von Ihrem Tool zu DefectDojo
 aliases:
-- /import_data/pro/connectors/manage_records/
-- /en/connecting_your_tools/connectors/manage_records
+- /de/import_data/pro/connectors/manage_records/
+- /de/en/connecting_your_tools/connectors/manage_records
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Upstream-Connectors sind eine Funktion, die nur in DefectDojo Pro verfügbar ist.</span>

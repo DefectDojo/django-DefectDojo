@@ -4,7 +4,7 @@ description: Reformulação, recurso do Pro
 weight: 3
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/pro_permissions_overhaul
+- /pt-br/en/customize_dojo/user_management/pro_permissions_overhaul
 ---
 
 ## Introdução aos Tipos de Permissão

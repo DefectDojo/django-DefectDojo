@@ -2,7 +2,7 @@
 title: Acerca de las Notificaciones y las 🔔 Alertas
 description: Aprenda sobre las notificaciones y las alertas dentro de la aplicación
 aliases:
-- /en/customize_dojo/notifications/about_notifications
+- /es/en/customize_dojo/notifications/about_notifications
 ---
 
 DefectDojo lo mantiene al día de diversas maneras. Se pueden enviar notificaciones para Compromisos próximos, [Menciones de usuario](/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions), vencimiento de SLA y otros eventos del software.

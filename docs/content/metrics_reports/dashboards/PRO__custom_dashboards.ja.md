@@ -6,8 +6,8 @@ audience: pro
 weight: 10
 slug: custom-dashboards
 aliases:
-- /en/customize_dojo/dashboards/about_custom_dashboard_tiles
-- /metrics_reports/dashboards/about_custom_dashboard_tiles
+- /ja/en/customize_dojo/dashboards/about_custom_dashboard_tiles
+- /ja/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: カスタマイズ可能なダッシュボード(レイアウト、ウィジェット、ウィジェットカタログ)は DefectDojo Pro の機能です。デフォルトでは無効になっており、スーパーユーザーが Cloud および On-Premise の両方のインスタンスで **Settings > Feature Flags** から有効にできます。</span>

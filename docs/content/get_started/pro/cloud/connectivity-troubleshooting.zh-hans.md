@@ -4,7 +4,7 @@ description: 重新连接到您的 DefectDojo 实例
 weight: 2
 audience: pro
 aliases:
-- /en/cloud_management/connectivity-troubleshooting
+- /zh-hans/en/cloud_management/connectivity-troubleshooting
 ---
 
 如果您在访问 DefectDojo 实例时遇到困难，可以按照以下步骤重新建立连接：

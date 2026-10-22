@@ -5,7 +5,7 @@ draft: false
 weight: 5
 audience: pro
 aliases:
-  - /get_started/pro/onprem/upload_size_limits/
+  - /zh-hans/get_started/pro/onprem/upload_size_limits/
 ---
 
 大型扫描文件可能会在请求路径的不同环节被多个限制中的任意一个拒绝，您收到的错误信息会告诉您具体触发了哪一个限制。本页说明这些限制分别位于何处，以及如何在自托管部署中调高它们。

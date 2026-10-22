@@ -5,9 +5,9 @@ description: Notre liste des outils de Connecteur pris en charge, et comment les
 weight: 1
 audience: pro
 aliases:
-- /connectors/upstream/toolreference/
-- /import_data/pro/connectors/connectors_tool_reference/
-- /en/connecting_your_tools/connectors/connectors_tool_reference
+- /fr/connectors/upstream/toolreference/
+- /fr/import_data/pro/connectors/connectors_tool_reference/
+- /fr/en/connecting_your_tools/connectors/connectors_tool_reference
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : les Connecteurs Upstream sont une fonctionnalité réservée à DefectDojo Pro.</span>

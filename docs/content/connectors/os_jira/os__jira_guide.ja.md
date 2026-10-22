@@ -4,7 +4,7 @@ description: Jira連携の利用方法
 weight: 2
 audience: opensource
 aliases:
-- /issue_tracking/jira/os__jira_guide/
+- /ja/issue_tracking/jira/os__jira_guide/
 ---
 
 DefectDojoのJira連携を使用すると、検出事項のデータを1つ以上のJiraスペースにプッシュできます。これにより、DefectDojoを標準的な開発ワークフローに組み込むことができます。以下はその活用例です。

@@ -3,7 +3,7 @@ title: Definizioni degli stati dei Riscontri
 description: 'Una guida rapida agli stati dei Riscontri: Aperto, Verificato, Accettato..'
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/finding_status_definitions
+- /it/en/working_with_findings/findings_workflows/finding_status_definitions
 ---
 
 Ogni Riscontro creato in DefectDojo ha uno Stato che comunica informazioni rilevanti. Gli stati aiutano il tuo team a tenere traccia dei progressi nella risoluzione dei problemi.

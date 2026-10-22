@@ -4,7 +4,7 @@ description: Accéder aux journaux d'audit des objets DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/user_management/audit_logging
+- /fr/en/customize_dojo/user_management/audit_logging
 ---
 
 Les journaux d'audit de DefectDojo sont accessibles de plusieurs façons.

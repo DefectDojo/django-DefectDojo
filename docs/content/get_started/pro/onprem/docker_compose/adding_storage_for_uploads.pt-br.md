@@ -6,7 +6,7 @@ draft: false
 weight: 4
 audience: pro
 aliases:
-  - /get_started/pro/onprem/adding_storage_for_uploads/
+  - /pt-br/get_started/pro/onprem/adding_storage_for_uploads/
 ---
 
 Os arquivos enviados ficam no diretório media no host, e em uma implantação com Docker Compose o espaço disponível para eles é o que sobrar no disco da VM. Uploads grandes, como SBOMs, podem preencher esse disco. Esta página aborda como expandir esse espaço sem alterar a implantação em si.

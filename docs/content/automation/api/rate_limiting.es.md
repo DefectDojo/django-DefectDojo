@@ -5,7 +5,7 @@ description: Configure la limitación de tasa en la página de inicio de sesión
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/rate_limiting
+- /es/en/open_source/rate_limiting
 ---
 
 DefectDojo incluye limitación de tasa en la página de inicio de sesión para proteger contra ataques de fuerza bruta, mediante [Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html).

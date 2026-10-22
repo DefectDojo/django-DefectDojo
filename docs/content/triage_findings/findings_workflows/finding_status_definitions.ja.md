@@ -3,7 +3,7 @@ title: 検出事項ステータスの定義
 description: 検出事項ステータスのクイックリファレンス:オープン、検証済み、受容済み..
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/finding_status_definitions
+- /ja/en/working_with_findings/findings_workflows/finding_status_definitions
 ---
 
 DefectDojoで作成された各検出事項には、関連情報を伝えるステータスがあります。ステータスは、チームが問題解決の進捗状況を把握するのに役立ちます。

@@ -6,7 +6,7 @@ draft: false
 weight: 3
 audience: pro
 aliases:
-  - /get_started/pro/onprem/openshift_deployment/
+  - /es/get_started/pro/onprem/openshift_deployment/
 ---
 
 DefectDojo Pro se ejecuta en OpenShift 4.x, incluyendo OpenShift Container Platform, ROSA y OKD.

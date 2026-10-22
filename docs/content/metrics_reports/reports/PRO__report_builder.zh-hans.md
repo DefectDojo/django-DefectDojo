@@ -6,8 +6,8 @@ audience: pro
 weight: 20
 slug: report-builder
 aliases:
-- /en/share_your_findings/pro_reports/using_the_report_builder
-- /metrics_reports/reports/using_the_report_builder
+- /zh-hans/en/share_your_findings/pro_reports/using_the_report_builder
+- /zh-hans/metrics_reports/reports/using_the_report_builder
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：可复用报告生成器（主题、块、模板以及已保存的生成报告）是 DefectDojo Pro 的功能，目前处于测试阶段。</span>

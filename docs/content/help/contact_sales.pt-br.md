@@ -5,7 +5,7 @@ draft: 'false'
 weight: 6
 pro-feature: true
 aliases:
-- /en/about_defectdojo/request_a_trial
+- /pt-br/en/about_defectdojo/request_a_trial
 ---
 
 Se sua equipe precisar de uma instalação on-premise do DefectDojo, entre em contato com nossa equipe de Vendas enviando um e-mail para → [hello@defectdojo.com](mailto:hello@defectdojo.com) . Este processo de configuração de teste se aplica somente a usuários do DefectDojo Cloud.

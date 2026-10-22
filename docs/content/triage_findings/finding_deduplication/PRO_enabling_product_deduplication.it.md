@@ -4,7 +4,7 @@ description: Come abilitare la deduplicazione a livello di Prodotto o di Engagem
 weight: 2
 audience: pro
 aliases:
-- /en/working_with_findings/finding_deduplication/enabling_product_deduplication
+- /it/en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
 
 La deduplicazione può essere applicata a livello dell'intero Prodotto, oppure limitata a un singolo Engagement.

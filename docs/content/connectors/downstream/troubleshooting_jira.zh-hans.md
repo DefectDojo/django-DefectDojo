@@ -3,8 +3,8 @@ title: 排查 Jira 错误（旧版）
 description: 修复 Jira 集成问题
 weight: 2
 aliases:
-- /issue_tracking/jira/troubleshooting_jira/
-- /en/share_your_findings/troubleshooting_jira/
+- /zh-hans/issue_tracking/jira/troubleshooting_jira/
+- /zh-hans/en/share_your_findings/troubleshooting_jira/
 ---
 
 以下是 Jira 集成中一些常见问题及其解决方法。

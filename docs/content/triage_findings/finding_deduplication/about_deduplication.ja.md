@@ -3,9 +3,9 @@ title: 重複排除について
 description: 重複排除の基礎と主要な概念
 weight: 1
 aliases:
-- /en/working_with_findings/finding_deduplication/about_deduplication
-- /en/working_with_findings/finding_deduplication/delete_deduplicates
-- /en/working_with_findings/findings_workflows/manage_duplicate_findings
+- /ja/en/working_with_findings/finding_deduplication/about_deduplication
+- /ja/en/working_with_findings/finding_deduplication/delete_deduplicates
+- /ja/en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 DefectDojoは、ツールから一括レポートを取り込み、レポートの内容に基づいて1つ以上の検出事項を作成するように設計されています。DefectDojoを使用する際は、同じツールから定期的にレポートを取り込むことがほとんどであるため、重複した検出事項が発生する可能性が非常に高くなります。

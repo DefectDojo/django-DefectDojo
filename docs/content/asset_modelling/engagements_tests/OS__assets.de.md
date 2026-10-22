@@ -4,8 +4,8 @@ description: Assets in DefectDojo OS verstehen
 audience: opensource
 weight: 2
 aliases:
-- /asset_modelling/engagements_tests/os__products/
-- /en/asset_modelling/engagements_tests/os__products/
+- /de/asset_modelling/engagements_tests/os__products/
+- /de/en/asset_modelling/engagements_tests/os__products/
 ---
 
 Organizations → **ASSETS** → Engagements → Tests → Befunde

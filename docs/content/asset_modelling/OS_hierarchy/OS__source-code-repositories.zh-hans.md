@@ -5,7 +5,7 @@ draft: false
 weight: 5
 audience: opensource
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/source-code-repositories
+- /zh-hans/en/working_with_findings/organizing_engagements_tests/source-code-repositories
 ---
 
 某些工具(尤其是 SAST 工具)会在漏洞数据中包含相关的文件名和行号。如果在测试活动(Engagement)中指定了源代码的代码仓库,DefectDojo 会将文件路径显示为链接,用户可以直接跳转到该漏洞所在的位置。

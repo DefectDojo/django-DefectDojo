@@ -4,7 +4,7 @@ description: Befunde und Engagements als CSV oder Excel exportieren
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/exporting
+- /de/en/open_source/exporting
 ---
 
 Seiten, die eine Liste von Befunden oder eine Liste von Engagements zeigen, bieten im Dropdown-Menü oben rechts eine Export-Option für CSV und Excel.

@@ -6,7 +6,7 @@ weight: 2
 exclude_search: false
 audience: pro
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/tagging_objects
+- /de/en/working_with_findings/organizing_engagements_tests/tagging_objects
 ---
 
 Tags eignen sich hervorragend, um Objekte so zu gruppieren, dass sie sich in kleinere, leichter überschaubare Abschnitte filtern lassen. Sie können verwendet werden, um einen Status zu kennzeichnen oder um benutzerdefinierte Gruppen aus Produkttyp, Produkten, Engagements oder Findings über das gesamte Datenmodell hinweg zu erstellen.

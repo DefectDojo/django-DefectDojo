@@ -16,8 +16,8 @@ seo:
   robots: ''
 pro-feature: true
 aliases:
-- /import_data/pro/connectors/about_connectors/
-- /en/connecting_your_tools/connectors/about_connectors
+- /fr/import_data/pro/connectors/about_connectors/
+- /fr/en/connecting_your_tools/connectors/about_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : les Connecteurs en amont sont une fonctionnalité réservée à DefectDojo Pro.</span>

@@ -4,7 +4,7 @@ description: Acceda a los registros de auditoría de los objetos de DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/user_management/audit_logging
+- /es/en/customize_dojo/user_management/audit_logging
 ---
 
 Se puede acceder a los registros de auditoría de DefectDojo de varias maneras.

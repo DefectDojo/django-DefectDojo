@@ -2,7 +2,7 @@
 title: À propos des notifications et des 🔔 alertes
 description: Découvrez les notifications et les alertes intégrées à l'application
 aliases:
-- /en/customize_dojo/notifications/about_notifications
+- /fr/en/customize_dojo/notifications/about_notifications
 ---
 
 DefectDojo vous tient informé de diverses manières. Des notifications peuvent être envoyées pour les Engagements à venir, les [mentions d'utilisateur](/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions), l'expiration des SLA, et d'autres événements du logiciel.

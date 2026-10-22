@@ -6,7 +6,7 @@ draft: false
 weight: 4
 audience: pro
 aliases:
-  - /get_started/pro/onprem/adding_storage_for_uploads/
+  - /fr/get_started/pro/onprem/adding_storage_for_uploads/
 ---
 
 Les fichiers téléversés résident dans le répertoire media sur l'hôte, et sur un déploiement Docker Compose, l'espace disponible pour eux correspond à ce qu'il reste sur le disque de la VM. Des téléversements volumineux comme des SBOM peuvent remplir ce disque. Cette page explique comment augmenter cet espace sans modifier le déploiement lui-même.

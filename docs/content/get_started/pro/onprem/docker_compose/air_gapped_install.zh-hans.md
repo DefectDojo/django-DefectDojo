@@ -5,7 +5,7 @@ draft: false
 weight: 3
 audience: pro
 aliases:
-  - /get_started/pro/onprem/air_gapped_install/
+  - /zh-hans/get_started/pro/onprem/air_gapped_install/
 ---
 
 本页是对 DefectDojo Pro 许可证随附的安装说明的补充。内容仅涉及目标主机无法访问互联网时需要更改的部分。其余部分，包括主机的前提条件和 PostgreSQL 设置，均遵循标准说明进行。

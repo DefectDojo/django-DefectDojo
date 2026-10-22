@@ -4,9 +4,9 @@ description: Synchronisez les constatations DefectDojo avec votre système de su
   des tickets pour simplifier la remédiation et la responsabilisation.
 weight: 6
 aliases:
-- /issue_tracking/
-- /issue_tracking/intro/
-- /issue_tracking/intro/intro/
+- /fr/issue_tracking/
+- /fr/issue_tracking/intro/
+- /fr/issue_tracking/intro/intro/
 ---
 
 ## Aperçu

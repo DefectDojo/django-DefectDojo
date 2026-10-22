@@ -5,8 +5,8 @@ description: Spostare le regole esistenti di Rules Engine nei grafi di Rules Eng
 weight: 7
 audience: pro
 aliases:
-- /automation/rules_engine_v2/converting_from_rules_engine/
-- /automation/rules_engine_2/converting_from_rules_engine/
+- /it/automation/rules_engine_v2/converting_from_rules_engine/
+- /it/automation/rules_engine_2/converting_from_rules_engine/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Triage Engine è una funzionalità disponibile solo in DefectDojo Pro.</span>

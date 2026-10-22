@@ -3,7 +3,7 @@ title: 重新导入
 description: 了解如何手动、通过 API 或通过连接器导入数据
 weight: 2
 aliases:
-- /en/connecting_your_tools/import_scan_files/using_reimport
+- /zh-hans/en/connecting_your_tools/import_scan_files/using_reimport
 ---
 
 在 DefectDojo 中创建测试后（无论是提前创建的，还是通过导入扫描文件创建的），都可以为该测试补充新的发现项数据。

@@ -4,7 +4,7 @@ description: ''
 weight: 1
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/import_scan_ui
+- /zh-hans/en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
 
 如果您使用的是全新的 DefectDojo 实例，导入扫描表单是学习该软件并搭建环境的合理的第一步。通过此表单，您可以上传受支持工具生成的扫描文件，系统会据此创建代表这些漏洞的发现项。在填写表单时，您可以决定：

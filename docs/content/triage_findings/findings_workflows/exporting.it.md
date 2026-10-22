@@ -4,7 +4,7 @@ description: Esporta i riscontri e gli engagement in formato CSV o Excel
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/exporting
+- /it/en/open_source/exporting
 ---
 
 Le pagine che mostrano un elenco di riscontri o un elenco di engagement dispongono di un'opzione di esportazione in CSV ed Excel nel menu a discesa in alto a destra.

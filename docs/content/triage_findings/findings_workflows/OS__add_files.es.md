@@ -5,7 +5,7 @@ description: Cargue capturas de pantalla, informes u otros archivos de respaldo 
 audience: opensource
 weight: 3
 aliases:
-- /triage_findings/findings_workflows/add_files/
+- /es/triage_findings/findings_workflows/add_files/
 ---
 
 Puede adjuntar archivos a un **Hallazgo**, un **Compromiso** o un **Test** para aportar contexto de respaldo — por ejemplo, una captura de pantalla de una prueba de concepto, un informe sin procesar de un escáner, un diagrama de red o una hoja de cálculo que respalde un resultado.

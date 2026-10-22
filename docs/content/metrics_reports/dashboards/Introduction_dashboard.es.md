@@ -4,8 +4,8 @@ description: Cómo trabajar con la página principal de DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/dashboards/Introduction_dashboard
-- /en/customize_dojo/dashboards/pro_dashboards
+- /es/en/customize_dojo/dashboards/Introduction_dashboard
+- /es/en/customize_dojo/dashboards/pro_dashboards
 ---
 
 El Panel probablemente sea la primera página que verá al abrir DefectDojo. Resume el rendimiento de su equipo y ofrece herramientas de seguimiento para supervisar áreas específicas de su entorno de gestión de vulnerabilidades.

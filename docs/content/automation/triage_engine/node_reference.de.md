@@ -4,8 +4,8 @@ description: Jeder Knoten, den Triage Engine mitbringt, und was er jeweils tut
 weight: 4
 audience: pro
 aliases:
-- /automation/rules_engine_v2/node_reference/
-- /automation/rules_engine_2/node_reference/
+- /de/automation/rules_engine_v2/node_reference/
+- /de/automation/rules_engine_2/node_reference/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Triage Engine ist eine Funktion, die nur in DefectDojo Pro verfügbar ist.</span>

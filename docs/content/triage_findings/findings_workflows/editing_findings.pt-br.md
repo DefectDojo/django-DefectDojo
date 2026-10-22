@@ -4,7 +4,7 @@ description: Altere o Status de um Achado ou adicione mais metadados ao resolver
   problema
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/editing_findings
+- /pt-br/en/working_with_findings/findings_workflows/editing_findings
 ---
 
 Se você quiser adicionar notas ou atualizar o texto de um Achado para torná-lo mais relevante para a situação atual, pode fazer isso pelo formulário Editar Achado.

@@ -4,7 +4,7 @@ description: Instrada automaticamente i Riscontri in arrivo al Prodotto corretto
 weight: 3
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/smart_upload
+- /it/en/connecting_your_tools/import_scan_files/smart_upload
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Smart Upload è disponibile solo in DefectDojo Pro.</span>

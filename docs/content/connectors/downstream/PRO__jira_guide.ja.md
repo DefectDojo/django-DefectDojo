@@ -4,8 +4,8 @@ description: Jira 連携を利用する
 weight: 1
 audience: pro
 aliases:
-- /issue_tracking/jira/pro__jira_guide/
-- /en/share_your_findings/jira_guide
+- /ja/issue_tracking/jira/pro__jira_guide/
+- /ja/en/share_your_findings/jira_guide
 ---
 
 > **このページはレガシーな Jira 連携について説明しています。** ここで説明している製品単位の Jira 連携は、**[Jira ダウンストリームコネクタ](/connectors/downstream/about/)** に置き換えられました。このコネクタはすべての DefectDojo Pro インスタンスで一般提供されており、検出事項を Jira にプッシュする際の推奨方法です。Pro のサイドバーでは、この理由から **Connect > Jira** に `LEGACY` バッジが表示されます — 詳細は [メニューバッジ](/navigation/pro__menu_badges/) を参照してください。

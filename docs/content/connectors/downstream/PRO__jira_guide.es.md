@@ -4,8 +4,8 @@ description: Trabaje con la integración de Jira
 weight: 1
 audience: pro
 aliases:
-- /issue_tracking/jira/pro__jira_guide/
-- /en/share_your_findings/jira_guide
+- /es/issue_tracking/jira/pro__jira_guide/
+- /es/en/share_your_findings/jira_guide
 ---
 
 > **Esta página documenta la integración legacy de Jira.** La integración de Jira por producto descrita aquí ha sido reemplazada por el **[Conector descendente de Jira](/connectors/downstream/about/)**, que está disponible de forma general en todas las instancias de DefectDojo Pro y es la forma recomendada de enviar Hallazgos a Jira. En la barra lateral de Pro, **Connect > Jira** muestra una insignia `LEGACY` por este motivo — consulte [Insignias de menú](/navigation/pro__menu_badges/).

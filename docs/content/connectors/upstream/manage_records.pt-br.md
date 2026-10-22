@@ -2,8 +2,8 @@
 title: Gerenciando Registros
 description: Direcione o fluxo de dados da sua ferramenta para o DefectDojo
 aliases:
-- /import_data/pro/connectors/manage_records/
-- /en/connecting_your_tools/connectors/manage_records
+- /pt-br/import_data/pro/connectors/manage_records/
+- /pt-br/en/connecting_your_tools/connectors/manage_records
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: os Conectores Upstream são um recurso exclusivo do DefectDojo Pro.</span>

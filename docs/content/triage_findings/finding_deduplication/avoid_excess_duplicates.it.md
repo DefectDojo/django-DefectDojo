@@ -3,7 +3,7 @@ title: Evitare duplicati eccessivi
 description: ''
 weight: 4
 aliases:
-- /en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
+- /it/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
 ---
 
 Uno dei punti di forza di DefectDojo è che il modello dati può adattarsi a molti casi d'uso e applicazioni diversi. È probabile che l'approccio cambi man mano che si padroneggia il software e si scoprono modi per ottimizzare il proprio flusso di lavoro.

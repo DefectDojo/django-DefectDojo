@@ -4,8 +4,8 @@ description: Utilizzare la pagina principale di DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/dashboards/Introduction_dashboard
-- /en/customize_dojo/dashboards/pro_dashboards
+- /it/en/customize_dojo/dashboards/Introduction_dashboard
+- /it/en/customize_dojo/dashboards/pro_dashboards
 ---
 
 La Dashboard è probabilmente la prima pagina che vedrai quando apri DefectDojo. Riassume le prestazioni del tuo team e fornisce strumenti di tracciamento per monitorare aree specifiche del tuo ambiente di gestione delle vulnerabilità.

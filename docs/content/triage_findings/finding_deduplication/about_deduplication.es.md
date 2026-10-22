@@ -3,9 +3,9 @@ title: Acerca de la deduplicación
 description: Fundamentos y conceptos clave de la deduplicación
 weight: 1
 aliases:
-- /en/working_with_findings/finding_deduplication/about_deduplication
-- /en/working_with_findings/finding_deduplication/delete_deduplicates
-- /en/working_with_findings/findings_workflows/manage_duplicate_findings
+- /es/en/working_with_findings/finding_deduplication/about_deduplication
+- /es/en/working_with_findings/finding_deduplication/delete_deduplicates
+- /es/en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 DefectDojo está diseñado para ingerir informes masivos procedentes de herramientas, creando uno o más Hallazgos según el contenido del informe. Al usar DefectDojo, lo más probable es que esté ingiriendo informes de la misma herramienta de forma periódica, lo que hace muy probable la aparición de Hallazgos duplicados.

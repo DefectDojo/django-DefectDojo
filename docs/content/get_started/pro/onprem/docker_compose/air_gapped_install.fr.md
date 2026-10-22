@@ -6,7 +6,7 @@ draft: false
 weight: 3
 audience: pro
 aliases:
-  - /get_started/pro/onprem/air_gapped_install/
+  - /fr/get_started/pro/onprem/air_gapped_install/
 ---
 
 Cette page complète les instructions d'installation fournies avec votre licence DefectDojo Pro. Elle ne couvre que ce qui change lorsque l'hôte cible n'a aucun accès à Internet. Pour le reste, y compris les prérequis de l'hôte et la configuration de PostgreSQL, suivez les instructions standard.

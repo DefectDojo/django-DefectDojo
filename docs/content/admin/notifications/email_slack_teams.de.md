@@ -2,7 +2,7 @@
 title: E-Mail-, Slack- oder Teams-Benachrichtigungen einrichten
 description: Microsoft Teams für den Empfang von Benachrichtigungen einrichten
 aliases:
-- /en/customize_dojo/notifications/email_slack_teams
+- /de/en/customize_dojo/notifications/email_slack_teams
 ---
 
 **Für die Seite „Systemeinstellungen“, die für diesen Vorgang erforderlich ist, benötigen Sie Superuser-Zugriff.**

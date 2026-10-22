@@ -4,7 +4,7 @@ description: DefectDojo ProでLDAP認証を設定する
 weight: 20
 audience: pro
 aliases:
-- /en/open_source/ldap-authentication
+- /ja/en/open_source/ldap-authentication
 ---
 
 DefectDojo Proは**Enterprise Settings**のUIからLDAP認証をサポートしています。カスタムのDockerイメージや設定ファイルは不要です。

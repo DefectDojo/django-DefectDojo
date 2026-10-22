@@ -4,7 +4,7 @@ description: El principal flujo de trabajo y sistema de seguimiento de vulnerabi
   de DefectDojo
 weight: 1
 aliases:
-- /en/working_with_findings/intro_to_findings
+- /es/en/working_with_findings/intro_to_findings
 ---
 
 Los Hallazgos son la principal forma en que DefectDojo estandariza y guía el proceso de generación de informes y remediación de sus herramientas de seguridad. Independientemente de si una vulnerabilidad fue reportada en SonarQube, Acunetix o la herramienta personalizada de su equipo, los Hallazgos le brindan la capacidad de gestionar cada vulnerabilidad de la misma manera.

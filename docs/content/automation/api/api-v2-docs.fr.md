@@ -5,7 +5,7 @@ description: L'API de DefectDojo vous permet d'automatiser des tâches, par exem
 draft: false
 weight: 2
 aliases:
-- /en/api/api-v2-docs
+- /fr/en/api/api-v2-docs
 ---
 
 L'API de DefectDojo est créée avec [Django Rest

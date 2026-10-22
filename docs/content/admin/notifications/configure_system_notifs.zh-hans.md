@@ -2,7 +2,7 @@
 title: 设置系统级通知
 description: 如何配置个人通知与系统通知
 aliases:
-- /en/customize_dojo/notifications/configure_system_notifs
+- /zh-hans/en/customize_dojo/notifications/configure_system_notifs
 ---
 
 DefectDojo 有两种不同类型的通知:**个人通知**(发送给单个账户)和**系统通知**(发送给所有用户)。

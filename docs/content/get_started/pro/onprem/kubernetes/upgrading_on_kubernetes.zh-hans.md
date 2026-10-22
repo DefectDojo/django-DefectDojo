@@ -5,7 +5,7 @@ draft: false
 weight: 2
 audience: pro
 aliases:
-- /get_started/pro/onprem/upgrading_on_kubernetes/
+- /zh-hans/get_started/pro/onprem/upgrading_on_kubernetes/
 ---
 
 <!--

@@ -4,7 +4,7 @@ description: DefectDojo OS で検出事項、エンゲージメント、テス�
 audience: opensource
 weight: 3
 aliases:
-- /triage_findings/findings_workflows/add_files/
+- /ja/triage_findings/findings_workflows/add_files/
 ---
 
 **検出事項**、**エンゲージメント**、**テスト**にファイルを添付して、補足情報を提供できます。たとえば概念実証のスクリーンショット、生のスキャナーレポート、ネットワーク図、結果を裏付けるスプレッドシートなどです。

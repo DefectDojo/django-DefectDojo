@@ -4,7 +4,7 @@ description: 使用规则引擎自动化
 weight: 1
 audience: pro
 aliases:
-- /en/customize_dojo/rules_engine
+- /zh-hans/en/customize_dojo/rules_engine
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：规则引擎是 DefectDojo Pro 专属功能。</span>

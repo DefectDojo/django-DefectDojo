@@ -4,7 +4,7 @@ description: ''
 weight: 1
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/import_scan_ui
+- /pt-br/en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
 
 Se você tem uma instância novinha em folha do DefectDojo, o Formulário de Importação de Scan é um primeiro passo lógico para aprender o software e configurar seu ambiente. Nesse formulário, você envia um arquivo de scan de uma ferramenta compatível, o que criará Achados para representar essas vulnerabilidades. Ao preencher o formulário, você pode decidir se deseja:

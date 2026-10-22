@@ -2,7 +2,7 @@
 title: Calificación de Salud del Producto
 description: Cómo calcula DefectDojo la Calificación de Salud de un Producto
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_health_grade
+- /es/en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
 
 DefectDojo puede calcular una calificación para sus Productos en función de la cantidad de Hallazgos que contienen. Las calificaciones se clasifican de A \- F.

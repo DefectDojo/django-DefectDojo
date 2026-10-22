@@ -4,7 +4,7 @@ description: Exporter les constatations et les engagements au format CSV ou Exce
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/exporting
+- /fr/en/open_source/exporting
 ---
 
 Les pages affichant une liste de constatations ou une liste d’engagements proposent une option d’exportation CSV et Excel dans le menu déroulant en haut à droite.

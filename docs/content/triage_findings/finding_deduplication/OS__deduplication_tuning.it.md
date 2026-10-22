@@ -5,8 +5,8 @@ description: 'Configura la deduplicazione in DefectDojo Open Source: algoritmi, 
 weight: 5
 audience: opensource
 aliases:
-- /en/working_with_findings/finding_deduplication/deduplication_tuning_os
-- /en/working_with_findings/finding_deduplication/deduplication_algorithms
+- /it/en/working_with_findings/finding_deduplication/deduplication_tuning_os
+- /it/en/working_with_findings/finding_deduplication/deduplication_algorithms
 ---
 
 L'edizione Open Source di DefectDojo utilizza file di impostazioni e variabili d'ambiente per ottimizzare la deduplicazione.

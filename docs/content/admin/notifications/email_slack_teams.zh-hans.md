@@ -2,7 +2,7 @@
 title: 设置电子邮件、Slack 或 Teams 通知
 description: 设置 Microsoft Teams 以接收通知
 aliases:
-- /en/customize_dojo/notifications/email_slack_teams
+- /zh-hans/en/customize_dojo/notifications/email_slack_teams
 ---
 
 **您需要拥有超级用户权限才能访问系统设置页面,完成此过程需要该权限。**

@@ -4,8 +4,8 @@ description: DefectDojoが検出事項をどのようにランク付けするか
 weight: 1
 audience: pro
 aliases:
-- /en/working_with_findings/finding_priority
-- /en/working_with_findings/priority_adjustments
+- /ja/en/working_with_findings/finding_priority
+- /ja/en/working_with_findings/priority_adjustments
 ---
 
 ![image](images/pro_finding_priority.png)

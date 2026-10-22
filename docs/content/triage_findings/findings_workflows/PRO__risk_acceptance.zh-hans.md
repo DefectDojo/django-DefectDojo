@@ -4,7 +4,7 @@ description: 在 DefectDojo Pro 中利用风险接受功能
 audience: pro
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/risk_acceptances/
+- /zh-hans/en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 **风险接受**是一种特殊状态,可以通过**完整风险接受**对象或**简单风险接受**工作流应用于发现项。风险接受用于正式记录并落实这样一项决策:确认某个存在漏洞的发现项,但不立即进行修复。

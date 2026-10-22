@@ -6,7 +6,7 @@ draft: false
 weight: 5
 audience: opensource
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/source-code-repositories
+- /de/en/working_with_findings/organizing_engagements_tests/source-code-repositories
 ---
 
 Bestimmte Tools (insbesondere SAST-Tools) geben in den Schwachstellendaten den zugehörigen Dateinamen und die Zeilennummer an. Wenn das Repository des Quellcodes im Engagement angegeben ist, stellt DefectDojo den Dateipfad als Link dar, sodass der Benutzer direkt zur Stelle der Schwachstelle navigieren kann.

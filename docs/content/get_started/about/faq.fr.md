@@ -5,7 +5,7 @@ draft: 'false'
 weight: 2
 chapter: true
 aliases:
-- /en/about_defectdojo/faq
+- /fr/en/about_defectdojo/faq
 ---
 
 Voici quelques questions fréquemment posées sur l'utilisation de DefectDojo, aussi bien dans DefectDojo Pro que dans DefectDojo OS.

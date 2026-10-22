@@ -3,7 +3,7 @@ title: Filter-Index
 description: Referenz für alle Filter in DefectDojo
 weight: 5
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/filter_index
+- /de/en/working_with_findings/organizing_engagements_tests/filter_index
 ---
 
 **Hinweis: Dieser Artikel behandelt derzeit nur die in der DefectDojo Pro-UI verfügbaren Befund-Filter, wird aber in Zukunft erweitert, um weitere Objekttypen sowie Open-Source-Filter abzudecken.** 

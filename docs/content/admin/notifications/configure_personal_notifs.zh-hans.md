@@ -2,7 +2,7 @@
 title: 设置个人通知
 description: 为个人账户配置通知
 aliases:
-- /en/customize_dojo/notifications/configure_personal_notifs
+- /zh-hans/en/customize_dojo/notifications/configure_personal_notifs
 ---
 
 ## 配置个人通知

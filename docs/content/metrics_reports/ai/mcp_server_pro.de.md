@@ -6,7 +6,7 @@ draft: false
 audience: pro
 weight: 23
 aliases:
-- /en/ai/mcp_server_pro
+- /de/en/ai/mcp_server_pro
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: KI-Funktionen sind ausschließlich in DefectDojo Pro verfügbar.</span>

@@ -5,7 +5,7 @@ description: Daten zur Sprachzusammensetzung für ein Produkt mit dem Werkzeug c
 weight: 3
 audience: opensource
 aliases:
-- /en/open_source/languages
+- /de/en/open_source/languages
 ---
 
 DefectDojo kann eine Aufschlüsselung der Programmiersprachen und Codezeilen für ein Produkt anzeigen, die durch den Import eines Berichts des Werkzeugs [cloc](https://github.com/AlDanial/cloc) (Count Lines of Code) über die API gefüllt wird.

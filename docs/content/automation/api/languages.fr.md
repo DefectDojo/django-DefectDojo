@@ -5,7 +5,7 @@ description: Importer les données de composition des langages pour un Produit �
 weight: 3
 audience: opensource
 aliases:
-- /en/open_source/languages
+- /fr/en/open_source/languages
 ---
 
 DefectDojo peut afficher une répartition des langages de programmation et des lignes de code pour un Produit, alimentée par l'import d'un rapport de l'outil [cloc](https://github.com/AlDanial/cloc) (Count Lines of Code) via l'API.

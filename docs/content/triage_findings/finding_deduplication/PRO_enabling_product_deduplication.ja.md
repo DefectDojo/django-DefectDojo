@@ -4,7 +4,7 @@ description: ProductレベルまたはEngagementレベルで重複排除を有�
 weight: 2
 audience: pro
 aliases:
-- /en/working_with_findings/finding_deduplication/enabling_product_deduplication
+- /ja/en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
 
 重複排除は、Product全体に対して適用することも、単一のEngagementに絞って適用することもできます。

@@ -4,7 +4,7 @@ description: 使用 Jira 集成
 weight: 2
 audience: opensource
 aliases:
-- /issue_tracking/jira/os__jira_guide/
+- /zh-hans/issue_tracking/jira/os__jira_guide/
 ---
 
 DefectDojo 的 Jira 集成可用于将发现项数据推送到一个或多个 Jira 空间。通过这种方式，您可以将 DefectDojo 集成到标准的开发工作流程中。以下是几个使用示例：

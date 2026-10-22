@@ -5,8 +5,8 @@ description: L'editor a grafo, i trigger, lo scope, le condizioni e i template d
 weight: 2
 audience: pro
 aliases:
-- /automation/rules_engine_v2/building_rules/
-- /automation/rules_engine_2/building_rules/
+- /it/automation/rules_engine_v2/building_rules/
+- /it/automation/rules_engine_2/building_rules/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Triage Engine è una funzionalità disponibile solo in DefectDojo Pro.</span>

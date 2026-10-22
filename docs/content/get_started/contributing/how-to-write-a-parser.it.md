@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: opensource
 aliases:
-- /en/open_source/contributing/how-to-write-a-parser
+- /it/en/open_source/contributing/how-to-write-a-parser
 ---
 
 Tutti i comandi presuppongono che tu ti trovi nella radice del repository clonato django-DefectDojo.

@@ -5,7 +5,7 @@ description: Configurer la limitation de débit sur la page de connexion pour at
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/rate_limiting
+- /fr/en/open_source/rate_limiting
 ---
 
 DefectDojo intègre une limitation de débit sur la page de connexion pour se protéger contre les attaques par force brute, basée sur [Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html).

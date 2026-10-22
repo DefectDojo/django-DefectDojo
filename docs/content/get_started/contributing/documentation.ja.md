@@ -5,7 +5,7 @@ draft: false
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/contributing/documentation
+- /ja/en/open_source/contributing/documentation
 ---
 
 ドキュメントは[Hugo](https://gohugo.io/)で構築されており、[Doks](https://getdoks.org/)テーマの派生版を使用しています。

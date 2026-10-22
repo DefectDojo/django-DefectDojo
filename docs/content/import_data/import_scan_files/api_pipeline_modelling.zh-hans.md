@@ -2,7 +2,7 @@
 title: 通过 API 导入
 description: ''
 aliases:
-- /en/connecting_your_tools/import_scan_files/api_pipeline_modelling
+- /zh-hans/en/connecting_your_tools/import_scan_files/api_pipeline_modelling
 ---
 
 DefectDojo 的 API 支持构建健壮的流水线解决方案，能够自动将新的扫描结果摄取到您的实例中。此类自动化通常有以下几种形式：

@@ -5,7 +5,7 @@ draft: false
 audience: pro
 weight: 23
 aliases:
-- /en/ai/mcp_server_pro
+- /zh-hans/en/ai/mcp_server_pro
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：AI 功能仅在 DefectDojo Pro 中提供。</span>

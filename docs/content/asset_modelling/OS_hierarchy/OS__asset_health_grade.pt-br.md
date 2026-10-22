@@ -4,8 +4,8 @@ description: Como o DefectDojo calcula a Nota de Integridade do Ativo
 weight: 7
 audience: opensource
 aliases:
-- /asset_modelling/os_hierarchy/product_health_grade/
-- /en/asset_modelling/os_hierarchy/product_health_grade/
+- /pt-br/asset_modelling/os_hierarchy/product_health_grade/
+- /pt-br/en/asset_modelling/os_hierarchy/product_health_grade/
 ---
 
 O DefectDojo pode calcular uma nota para seus Ativos com base na quantidade de Achados contidos neles. As notas são classificadas de A a F.

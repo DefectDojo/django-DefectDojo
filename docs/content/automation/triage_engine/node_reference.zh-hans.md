@@ -4,8 +4,8 @@ description: Triage Engine 内置的每一个节点及其作用
 weight: 4
 audience: pro
 aliases:
-- /automation/rules_engine_v2/node_reference/
-- /automation/rules_engine_2/node_reference/
+- /zh-hans/automation/rules_engine_v2/node_reference/
+- /zh-hans/automation/rules_engine_2/node_reference/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：Triage Engine 是 DefectDojo Pro 专属功能。</span>

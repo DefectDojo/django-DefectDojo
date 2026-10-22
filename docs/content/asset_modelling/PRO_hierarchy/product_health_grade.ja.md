@@ -2,7 +2,7 @@
 title: 製品ヘルスグレード
 description: DefectDojoが製品ヘルスグレードを算出する方法
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_health_grade
+- /ja/en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
 
 DefectDojoは、含まれる検出事項の件数に基づいて製品にグレードを算出することができます。グレードはA〜Fでランク付けされます。

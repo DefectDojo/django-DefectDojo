@@ -5,7 +5,7 @@ draft: false
 weight: 5
 audience: pro
 aliases:
-  - /get_started/pro/onprem/upload_size_limits/
+  - /ja/get_started/pro/onprem/upload_size_limits/
 ---
 
 大きなスキャンファイルは、リクエスト経路上の複数の異なる箇所にある制限のいずれかによって拒否されることがあり、表示されるエラーによってどの制限に達したかがわかります。このページでは、それらの制限がどこにあるか、そしてセルフホスト型デプロイでそれらを引き上げる方法について説明します。

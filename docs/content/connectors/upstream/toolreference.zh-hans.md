@@ -2,8 +2,8 @@
 title: 上游连接器工具参考
 description: 我们支持的连接器工具列表，以及如何在 DefectDojo 中完成设置
 aliases:
-- /import_data/pro/connectors/connectors_tool_reference/
-- /en/connecting_your_tools/connectors/connectors_tool_reference
+- /zh-hans/import_data/pro/connectors/connectors_tool_reference/
+- /zh-hans/en/connecting_your_tools/connectors/connectors_tool_reference
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：上游连接器是 DefectDojo Pro 专属功能。</span>

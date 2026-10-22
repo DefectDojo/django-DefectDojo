@@ -4,9 +4,9 @@ description: Informazioni su Organizzazioni, Asset, Engagement, Test e Riscontri
 weight: 1
 audience: opensource
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_hierarchy
-- /asset_modelling/os_hierarchy/product_hierarchy/
-- /en/asset_modelling/os_hierarchy/product_hierarchy/
+- /it/en/working_with_findings/organizing_engagements_tests/product_hierarchy
+- /it/asset_modelling/os_hierarchy/product_hierarchy/
+- /it/en/asset_modelling/os_hierarchy/product_hierarchy/
 ---
 
 DefectDojo utilizza cinque classi di dati principali per organizzare il tuo lavoro: **Organizzazioni, Asset**, **Engagement**, **Test** e **Riscontri**.

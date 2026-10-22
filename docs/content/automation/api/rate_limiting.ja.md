@@ -4,7 +4,7 @@ description: ブルートフォース攻撃を軽減するため、ログイン�
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/rate_limiting
+- /ja/en/open_source/rate_limiting
 ---
 
 DefectDojoには、ブルートフォース攻撃から保護するためのログインページのレート制限機能が含まれており、[Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html)によって実現されています。

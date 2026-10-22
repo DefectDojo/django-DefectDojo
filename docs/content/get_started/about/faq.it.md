@@ -5,7 +5,7 @@ draft: 'false'
 weight: 2
 chapter: true
 aliases:
-- /en/about_defectdojo/faq
+- /it/en/about_defectdojo/faq
 ---
 
 Ecco alcune domande frequenti su come lavorare con DefectDojo, sia in DefectDojo Pro che in DefectDojo OS.

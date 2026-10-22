@@ -5,7 +5,7 @@ draft: 'false'
 weight: 3
 audience: pro
 aliases:
-- /en/about_defectdojo/new_user_checklist
+- /ja/en/about_defectdojo/new_user_checklist
 ---
 
 DefectDojoの本質は、セキュリティデータをインポートし、整理し、それを知る必要がある人々に提示することです。以下は、白紙の状態から完全に機能するアプリになるまで、実装を確実に成功させるためのクイックリファレンスです。

@@ -4,9 +4,9 @@ description: Synchronisieren Sie DefectDojo-Findings mit Ihrem Issue-Tracking-Sy
   um Behebung und Verantwortlichkeit zu optimieren.
 weight: 6
 aliases:
-- /issue_tracking/
-- /issue_tracking/intro/
-- /issue_tracking/intro/intro/
+- /de/issue_tracking/
+- /de/issue_tracking/intro/
+- /de/issue_tracking/intro/intro/
 ---
 
 ## Übersicht

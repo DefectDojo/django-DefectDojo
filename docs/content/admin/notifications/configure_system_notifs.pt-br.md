@@ -2,7 +2,7 @@
 title: Definir Notificações do Sistema
 description: Como configurar notificações Pessoais e do Sistema
 aliases:
-- /en/customize_dojo/notifications/configure_system_notifs
+- /pt-br/en/customize_dojo/notifications/configure_system_notifs
 ---
 
 O DefectDojo possui dois tipos diferentes de notificação: **Pessoal** (enviada a uma única conta) e **do Sistema** (enviada a todos os usuários).

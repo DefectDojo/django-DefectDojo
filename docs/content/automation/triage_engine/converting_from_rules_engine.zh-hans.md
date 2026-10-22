@@ -4,8 +4,8 @@ description: 将现有的 Rules Engine 规则迁移为 Triage Engine 的图
 weight: 7
 audience: pro
 aliases:
-- /automation/rules_engine_v2/converting_from_rules_engine/
-- /automation/rules_engine_2/converting_from_rules_engine/
+- /zh-hans/automation/rules_engine_v2/converting_from_rules_engine/
+- /zh-hans/automation/rules_engine_2/converting_from_rules_engine/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注意：Triage Engine 是 DefectDojo Pro 专属功能。</span>

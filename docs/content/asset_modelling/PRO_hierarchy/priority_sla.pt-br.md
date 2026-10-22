@@ -4,8 +4,8 @@ description: Como o DefectDojo classifica seus Achados
 weight: 1
 audience: pro
 aliases:
-- /en/working_with_findings/finding_priority
-- /en/working_with_findings/priority_adjustments
+- /pt-br/en/working_with_findings/finding_priority
+- /pt-br/en/working_with_findings/priority_adjustments
 ---
 
 ![image](images/pro_finding_priority.png)

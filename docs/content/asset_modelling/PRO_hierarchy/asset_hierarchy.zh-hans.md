@@ -4,8 +4,8 @@ description: DefectDojo Pro — 产品层级结构改造
 audience: pro
 weight: 1
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
-- /asset_modelling/pro_hierarchy/assets_organizations
+- /zh-hans/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
+- /zh-hans/asset_modelling/pro_hierarchy/assets_organizations
 ---
 
 DefectDojo Pro 正在扩展产品/产品类型（Product/Product Type）对象类，以便为数据模型提供更强的灵活性。

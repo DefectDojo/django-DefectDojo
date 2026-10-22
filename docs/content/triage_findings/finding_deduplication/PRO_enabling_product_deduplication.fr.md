@@ -4,7 +4,7 @@ description: Comment activer la déduplication au niveau du Produit ou de l'Enga
 weight: 2
 audience: pro
 aliases:
-- /en/working_with_findings/finding_deduplication/enabling_product_deduplication
+- /fr/en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
 
 La déduplication peut être appliquée à l'échelle d'un Produit, ou limitée plus étroitement à un seul Engagement.

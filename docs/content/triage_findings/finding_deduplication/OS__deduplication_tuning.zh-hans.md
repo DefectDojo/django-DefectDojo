@@ -4,8 +4,8 @@ description: 在 DefectDojo 开源版中配置去重：算法、哈希字段、�
 weight: 5
 audience: opensource
 aliases:
-- /en/working_with_findings/finding_deduplication/deduplication_tuning_os
-- /en/working_with_findings/finding_deduplication/deduplication_algorithms
+- /zh-hans/en/working_with_findings/finding_deduplication/deduplication_tuning_os
+- /zh-hans/en/working_with_findings/finding_deduplication/deduplication_algorithms
 ---
 
 DefectDojo 开源版使用配置文件和环境变量来调整去重设置。

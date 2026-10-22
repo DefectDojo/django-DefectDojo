@@ -4,7 +4,7 @@ description: Travailler avec l'intégration Jira
 weight: 2
 audience: opensource
 aliases:
-- /issue_tracking/jira/os__jira_guide/
+- /fr/issue_tracking/jira/os__jira_guide/
 ---
 
 L'intégration Jira de DefectDojo permet de transmettre les données de Constatations à un ou plusieurs espaces Jira. Cela vous permet d'intégrer DefectDojo à votre flux de développement standard. Voici quelques exemples de fonctionnement possible :

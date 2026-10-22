@@ -5,7 +5,7 @@ draft: 'false'
 weight: 5
 audience: pro
 aliases:
-- /en/about_defectdojo/ui_pro_vs_os
+- /ja/en/about_defectdojo/ui_pro_vs_os
 ---
 
 2023年後半、DefectDojo, Inc.はDefectDojo Pro向けの新しいUIをリリースしました。これは現在、このエディションのデフォルトUIとなっています。

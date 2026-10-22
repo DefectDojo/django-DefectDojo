@@ -4,7 +4,7 @@ description: ''
 weight: 1
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/import_scan_ui
+- /ja/en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
 
 DefectDojo の新規インスタンスをお使いの場合、Import Scan Form はソフトウェアを学び、環境をセットアップするための理にかなった最初のステップです。このフォームから、サポートされているツールのスキャンファイルをアップロードすると、それらの脆弱性を表す検出事項が作成されます。フォームの入力中に、以下のどちらにするかを決めることができます。

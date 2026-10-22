@@ -4,7 +4,7 @@ description: DefectDojo Pro 如何使用 EPSS 和 CISA KEV 数据丰富发现项
 audience: pro
 weight: 2
 aliases:
-- /triage_findings/epss_kev/
+- /zh-hans/triage_findings/epss_kev/
 ---
 
 DefectDojo Pro 会自动使用两个外部威胁情报来源——**EPSS** 和 **CISA KEV**——来丰富您的发现项,使优先级排序不仅反映 CVSS 严重程度,还反映漏洞被利用的可能性。这两个来源都通过 **CVE** 与发现项匹配,按**每日计划**刷新,并直接影响每个发现项计算得出的**优先级**分数。

@@ -4,7 +4,7 @@ description: 検出事項とエンゲージメントをCSVまたはExcelとし�
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/exporting
+- /ja/en/open_source/exporting
 ---
 
 検出事項の一覧やエンゲージメントの一覧を表示するページには、右上のドロップダウンメニューにCSVおよびExcelへのエクスポートオプションがあります。

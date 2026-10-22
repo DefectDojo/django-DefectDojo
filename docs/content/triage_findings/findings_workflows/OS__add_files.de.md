@@ -5,7 +5,7 @@ description: Laden Sie Screenshots, Berichte oder andere unterstützende Dateien
 audience: opensource
 weight: 3
 aliases:
-- /triage_findings/findings_workflows/add_files/
+- /de/triage_findings/findings_workflows/add_files/
 ---
 
 Sie können Dateien an einen **Befund**, ein **Engagement** oder einen **Test** anhängen, um unterstützenden Kontext bereitzustellen — zum Beispiel einen Proof-of-Concept-Screenshot, einen unbearbeiteten Scanner-Bericht, ein Netzwerkdiagramm oder eine Tabelle, die ein Ergebnis belegt.

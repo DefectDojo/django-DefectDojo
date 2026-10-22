@@ -3,8 +3,8 @@ title: Referência de Ferramentas de Conectores Upstream
 description: Nossa lista de ferramentas de Conector compatíveis e como configurá-las
   com o DefectDojo
 aliases:
-- /import_data/pro/connectors/connectors_tool_reference/
-- /en/connecting_your_tools/connectors/connectors_tool_reference
+- /pt-br/import_data/pro/connectors/connectors_tool_reference/
+- /pt-br/en/connecting_your_tools/connectors/connectors_tool_reference
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Upstream Connectors é um recurso exclusivo do DefectDojo Pro.</span>

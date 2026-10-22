@@ -3,7 +3,7 @@ title: Einführung in Befunde
 description: Der zentrale Workflow und das Schwachstellen-Tracking-System von DefectDojo
 weight: 1
 aliases:
-- /en/working_with_findings/intro_to_findings
+- /de/en/working_with_findings/intro_to_findings
 ---
 
 Befunde sind der wichtigste Weg, mit dem DefectDojo den Melde- und Behebungsprozess Ihrer Sicherheitstools standardisiert und steuert. Unabhängig davon, ob eine Schwachstelle in SonarQube, Acunetix oder dem individuellen Tool Ihres Teams gemeldet wurde, ermöglichen Ihnen Befunde, jede Schwachstelle auf die gleiche Weise zu verwalten.

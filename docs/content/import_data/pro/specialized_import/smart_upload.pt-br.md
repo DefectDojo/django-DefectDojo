@@ -4,7 +4,7 @@ description: Direcione automaticamente os Achados recebidos para o Produto corre
 weight: 3
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/smart_upload
+- /pt-br/en/connecting_your_tools/import_scan_files/smart_upload
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: o Smart Upload está disponível apenas no DefectDojo Pro.</span>

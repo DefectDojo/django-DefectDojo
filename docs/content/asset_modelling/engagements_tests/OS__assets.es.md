@@ -4,8 +4,8 @@ description: Comprender los Activos en DefectDojo OS
 audience: opensource
 weight: 2
 aliases:
-- /asset_modelling/engagements_tests/os__products/
-- /en/asset_modelling/engagements_tests/os__products/
+- /es/asset_modelling/engagements_tests/os__products/
+- /es/en/asset_modelling/engagements_tests/os__products/
 ---
 
 Organizations → **ACTIVOS** → Engagements → Tests → Findings

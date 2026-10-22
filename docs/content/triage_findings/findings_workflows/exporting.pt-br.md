@@ -4,7 +4,7 @@ description: Exporte achados e engajamentos como CSV ou Excel
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/exporting
+- /pt-br/en/open_source/exporting
 ---
 
 Páginas que exibem uma lista de achados ou uma lista de engajamentos têm uma opção de exportação em CSV e Excel no menu suspenso no canto superior direito.

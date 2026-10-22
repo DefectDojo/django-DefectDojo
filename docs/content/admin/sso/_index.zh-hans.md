@@ -16,17 +16,17 @@ seo:
 exclude_search: true
 pro-feature: true
 aliases:
-- /admin/user_management/configure_sso/
-- /admin/sso/os__saml/
-- /admin/sso/os__auth0/
-- /admin/sso/os__azure_ad/
-- /admin/sso/os__github_enterprise/
-- /admin/sso/os__gitlab/
-- /admin/sso/os__google/
-- /admin/sso/os__keycloak/
-- /admin/sso/os__oidc/
-- /admin/sso/os__okta/
-- /admin/sso/os__remote_user/
+- /zh-hans/admin/user_management/configure_sso/
+- /zh-hans/admin/sso/os__saml/
+- /zh-hans/admin/sso/os__auth0/
+- /zh-hans/admin/sso/os__azure_ad/
+- /zh-hans/admin/sso/os__github_enterprise/
+- /zh-hans/admin/sso/os__gitlab/
+- /zh-hans/admin/sso/os__google/
+- /zh-hans/admin/sso/os__keycloak/
+- /zh-hans/admin/sso/os__oidc/
+- /zh-hans/admin/sso/os__okta/
+- /zh-hans/admin/sso/os__remote_user/
 ---
 
 单点登录是 **DefectDojo Pro** 的功能。从 DefectDojo 3.0 起，SSO 相关能力——SAML、OIDC 以及内置的 OAuth 提供程序——仅在 DefectDojo Pro 中提供。开源版 DefectDojo 使用本地用户名/密码登录及密码重置流程。

@@ -4,7 +4,7 @@ toc_hide: true
 weight: 2
 audience: opensource
 aliases:
-- /en/open_source/contributing/parser-documentation-template
+- /ja/en/open_source/contributing/parser-documentation-template
 ---
 
 このテンプレートは、新規または既存のパーサーをドキュメント化するために作成されています。同僚のセキュリティ専門家の助けになりそうな追加情報があれば、自由に改善してください。

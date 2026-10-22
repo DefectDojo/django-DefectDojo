@@ -4,7 +4,7 @@ description: 'Une référence rapide sur les statuts de constatation : Ouvert, V
   Accepté..'
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/finding_status_definitions
+- /fr/en/working_with_findings/findings_workflows/finding_status_definitions
 ---
 
 Chaque constatation créée dans DefectDojo possède un statut qui communique des informations pertinentes. Les statuts aident votre équipe à suivre sa progression dans la résolution des problèmes.

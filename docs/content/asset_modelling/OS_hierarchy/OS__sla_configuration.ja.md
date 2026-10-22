@@ -4,7 +4,7 @@ description: 製品ごとにサービスレベルアグリーメントを設定�
 weight: 2
 audience: opensource
 aliases:
-- /en/working_with_findings/sla_configuration
+- /ja/en/working_with_findings/sla_configuration
 ---
 
 DefectDojoの各製品には、独自のサービスレベルアグリーメント(SLA)設定を持たせることができます。これは、検出事項を修復またはその他の方法で管理するために組織に与えられた日数を表します。

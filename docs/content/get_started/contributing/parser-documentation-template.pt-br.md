@@ -4,7 +4,7 @@ toc_hide: true
 weight: 2
 audience: opensource
 aliases:
-- /en/open_source/contributing/parser-documentation-template
+- /pt-br/en/open_source/contributing/parser-documentation-template
 ---
 
 Este template foi criado para documentar um parser novo ou existente. Sinta-se à vontade para melhorá-lo com qualquer informação adicional que possa ajudar seus colegas profissionais de segurança.

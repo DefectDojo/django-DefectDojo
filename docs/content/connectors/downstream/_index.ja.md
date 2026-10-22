@@ -15,5 +15,5 @@ seo:
 exclude_search: true
 audience: pro
 aliases:
-- /issue_tracking/pro_integration/
+- /ja/issue_tracking/pro_integration/
 ---

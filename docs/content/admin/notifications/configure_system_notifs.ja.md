@@ -2,7 +2,7 @@
 title: システム全体通知を設定する
 description: 個人通知とシステム通知の設定方法
 aliases:
-- /en/customize_dojo/notifications/configure_system_notifs
+- /ja/en/customize_dojo/notifications/configure_system_notifs
 ---
 
 DefectDojoには2種類の通知があります: **Personal**(単一のアカウントに送信される)と **System**(すべてのユーザーに送信される)です。

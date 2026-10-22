@@ -2,7 +2,7 @@
 title: 個人通知を設定する
 description: 個人アカウントの通知を設定する
 aliases:
-- /en/customize_dojo/notifications/configure_personal_notifs
+- /ja/en/customize_dojo/notifications/configure_personal_notifs
 ---
 
 ## 個人通知を設定する

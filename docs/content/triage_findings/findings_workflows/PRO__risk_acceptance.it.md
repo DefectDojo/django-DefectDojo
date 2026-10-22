@@ -4,7 +4,7 @@ description: Sfruttare le Accettazioni del rischio in DefectDojo Pro
 audience: pro
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/risk_acceptances/
+- /it/en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 **Accettazioni del rischio** sono uno stato speciale che può essere applicato ai Riscontri utilizzando gli oggetti **Accettazione del rischio completa** oppure il flusso di lavoro **Accettazione del rischio semplice**.  Le Accettazioni del rischio vengono utilizzate per documentare formalmente e rendere operativa la decisione di riconoscere un Riscontro vulnerabile senza rimediarvi immediatamente.

@@ -7,8 +7,8 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
-- /en/share_your_findings/pro_reports/working_with_generated_reports
-- /metrics_reports/reports/working_with_generated_reports
+- /fr/en/share_your_findings/pro_reports/working_with_generated_reports
+- /fr/metrics_reports/reports/working_with_generated_reports
 ---
 
 Le générateur de rapports de DefectDojo vous permet d'assembler un rapport personnalisé à partir d'un ensemble de widgets de contenu, de l'exécuter et d'exporter le résultat (par exemple, en l'imprimant au format PDF). Les rapports personnalisés peuvent résumer les Constatations ou les Points de terminaison que vous souhaitez partager avec un public externe, et peuvent inclure une image de marque et du texte standard.

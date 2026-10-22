@@ -4,7 +4,7 @@ description: 'Una referencia rápida a los estados de Hallazgo: Abierto, Verific
   Aceptado..'
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/finding_status_definitions
+- /es/en/working_with_findings/findings_workflows/finding_status_definitions
 ---
 
 Cada Hallazgo creado en DefectDojo tiene un Estado que comunica información relevante. Los estados ayudan a su equipo a hacer seguimiento de su progreso en la resolución de problemas.

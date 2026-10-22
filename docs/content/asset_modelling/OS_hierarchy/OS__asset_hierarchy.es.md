@@ -5,9 +5,9 @@ description: Comprenda las Organizaciones, los Activos, los Compromisos, los Tes
 weight: 1
 audience: opensource
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_hierarchy
-- /asset_modelling/os_hierarchy/product_hierarchy/
-- /en/asset_modelling/os_hierarchy/product_hierarchy/
+- /es/en/working_with_findings/organizing_engagements_tests/product_hierarchy
+- /es/asset_modelling/os_hierarchy/product_hierarchy/
+- /es/en/asset_modelling/os_hierarchy/product_hierarchy/
 ---
 
 DefectDojo utiliza cinco clases de datos principales para organizar su trabajo: **Organizaciones, Activos**, **Compromisos**, **Tests** y **Hallazgos**.

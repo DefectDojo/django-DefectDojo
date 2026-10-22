@@ -2,7 +2,7 @@
 title: Importazione tramite API
 description: ''
 aliases:
-- /en/connecting_your_tools/import_scan_files/api_pipeline_modelling
+- /it/en/connecting_your_tools/import_scan_files/api_pipeline_modelling
 ---
 
 L'API di DefectDojo consente soluzioni di pipeline robuste, che acquisiscono automaticamente nuove scansioni nella tua istanza. Un'automazione di questo tipo può assumere diverse forme:

@@ -4,7 +4,7 @@ description: Reconnectez-vous à votre instance DefectDojo
 weight: 2
 audience: pro
 aliases:
-- /en/cloud_management/connectivity-troubleshooting
+- /fr/en/cloud_management/connectivity-troubleshooting
 ---
 
 Si vous avez des difficultés à accéder à votre instance DefectDojo, voici quelques étapes à suivre pour vous reconnecter :

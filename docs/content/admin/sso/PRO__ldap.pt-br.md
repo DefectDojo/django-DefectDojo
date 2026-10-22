@@ -4,7 +4,7 @@ description: Configure a autenticação LDAP no DefectDojo Pro
 weight: 20
 audience: pro
 aliases:
-- /en/open_source/ldap-authentication
+- /pt-br/en/open_source/ldap-authentication
 ---
 
 O DefectDojo Pro oferece suporte a autenticação LDAP diretamente pela interface **Enterprise

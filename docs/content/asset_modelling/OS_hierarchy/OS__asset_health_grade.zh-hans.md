@@ -4,8 +4,8 @@ description: DefectDojo 如何计算资产健康等级
 weight: 7
 audience: opensource
 aliases:
-- /asset_modelling/os_hierarchy/product_health_grade/
-- /en/asset_modelling/os_hierarchy/product_health_grade/
+- /zh-hans/asset_modelling/os_hierarchy/product_health_grade/
+- /zh-hans/en/asset_modelling/os_hierarchy/product_health_grade/
 ---
 
 DefectDojo 可以根据资产中所包含的发现项数量，为您的资产计算等级。等级从 A 到 F 排列。

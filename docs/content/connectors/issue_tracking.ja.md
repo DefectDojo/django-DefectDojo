@@ -3,9 +3,9 @@ title: 課題管理連携
 description: DefectDojo の検出事項を課題管理システムと同期させ、修復と説明責任を効率化します。
 weight: 6
 aliases:
-- /issue_tracking/
-- /issue_tracking/intro/
-- /issue_tracking/intro/intro/
+- /ja/issue_tracking/
+- /ja/issue_tracking/intro/
+- /ja/issue_tracking/intro/intro/
 ---
 
 ## 概要

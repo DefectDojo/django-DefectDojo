@@ -5,7 +5,7 @@ description: Carica screenshot, report o altri file di supporto su un Riscontro,
 audience: opensource
 weight: 3
 aliases:
-- /triage_findings/findings_workflows/add_files/
+- /it/triage_findings/findings_workflows/add_files/
 ---
 
 Puoi allegare file a un **Riscontro**, un **Engagement** o un **Test** per fornire un contesto di supporto — ad esempio uno screenshot di proof-of-concept, un report grezzo dello scanner, uno schema di rete o un foglio di calcolo a supporto di un risultato.

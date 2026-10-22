@@ -3,7 +3,7 @@ title: Übermäßige Duplikate vermeiden
 description: ''
 weight: 4
 aliases:
-- /en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
+- /de/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
 ---
 
 Eine der Stärken von DefectDojo ist, dass das Datenmodell viele verschiedene Anwendungsfälle und Einsatzszenarien abdeckt. Wahrscheinlich werden Sie Ihr Vorgehen anpassen, sobald Sie die Software beherrschen und Möglichkeiten entdecken, Ihren Workflow zu optimieren.

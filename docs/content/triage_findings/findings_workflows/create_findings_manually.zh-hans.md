@@ -3,7 +3,7 @@ title: 手动创建发现项
 description: 在不使用扫描工具的情况下跟踪漏洞信息
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/create_findings_manually
+- /zh-hans/en/working_with_findings/findings_workflows/create_findings_manually
 - /import_data/import_scan_files/os__create_findings_manually
 - /import_data/import_scan_files/pro__create_findings_manually
 ---

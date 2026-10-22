@@ -17,8 +17,8 @@ seo:
   robots: ''
 pro-feature: true
 aliases:
-- /import_data/pro/connectors/about_connectors/
-- /en/connecting_your_tools/connectors/about_connectors
+- /pt-br/import_data/pro/connectors/about_connectors/
+- /pt-br/en/connecting_your_tools/connectors/about_connectors
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Conectores Upstream são um recurso exclusivo do DefectDojo Pro.</span>

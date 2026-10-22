@@ -4,8 +4,8 @@ description: 使用 Jira 集成
 weight: 1
 audience: pro
 aliases:
-- /issue_tracking/jira/pro__jira_guide/
-- /en/share_your_findings/jira_guide
+- /zh-hans/issue_tracking/jira/pro__jira_guide/
+- /zh-hans/en/share_your_findings/jira_guide
 ---
 
 > **本页介绍的是旧版 Jira 集成。** 这里所述的按产品配置的 Jira 集成已被 **[Jira 下游连接器](/connectors/downstream/about/)** 取代；该连接器目前已在每个 DefectDojo Pro 实例上全面提供，是将发现项推送到 Jira 的推荐方式。因此，在 Pro 侧边栏中，**Connect > Jira** 带有 `LEGACY` 徽章——详见[菜单徽章](/navigation/pro__menu_badges/)。

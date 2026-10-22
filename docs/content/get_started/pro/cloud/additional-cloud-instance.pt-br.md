@@ -5,7 +5,7 @@ description: Adicione uma instância de teste, desenvolvimento ou outra instânc
 weight: 3
 audience: pro
 aliases:
-- /en/cloud_management/additional-cloud-instance
+- /pt-br/en/cloud_management/additional-cloud-instance
 ---
 
 O processo para adicionar uma segunda instância Cloud é basicamente o mesmo processo de adicionar sua primeira instância. Este guia pressupõe que você já configurou seu servidor DefectDojo inicial e tem um acordo com nossa equipe de Vendas para adicionar outra instância.

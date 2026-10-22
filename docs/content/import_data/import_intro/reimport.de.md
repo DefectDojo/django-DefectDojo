@@ -4,7 +4,7 @@ description: Erfahren Sie, wie Sie Daten manuell, über die API oder per Connect
   importieren
 weight: 2
 aliases:
-- /en/connecting_your_tools/import_scan_files/using_reimport
+- /de/en/connecting_your_tools/import_scan_files/using_reimport
 ---
 
 Wenn in DefectDojo ein Test erstellt wird (entweder im Voraus oder durch den Import einer Scan-Datei), kann der Test um neue Befunddaten erweitert werden.

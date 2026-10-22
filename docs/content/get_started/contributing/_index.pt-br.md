@@ -5,7 +5,7 @@ weight: 5
 chapter: true
 audience: opensource
 aliases:
-- /en/open_source/contributing
+- /pt-br/en/open_source/contributing
 ---
 
 Você pode encontrar mais informações nas [diretrizes de contribuição](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md).

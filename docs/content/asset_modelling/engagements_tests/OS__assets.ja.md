@@ -4,8 +4,8 @@ description: DefectDojo OSにおけるアセットの理解
 audience: opensource
 weight: 2
 aliases:
-- /asset_modelling/engagements_tests/os__products/
-- /en/asset_modelling/engagements_tests/os__products/
+- /ja/asset_modelling/engagements_tests/os__products/
+- /ja/en/asset_modelling/engagements_tests/os__products/
 ---
 
 組織 → **アセット** → エンゲージメント → テスト → 検出事項

@@ -4,8 +4,8 @@ description: Cómo calcula DefectDojo la calificación de estado de un Activo
 weight: 7
 audience: opensource
 aliases:
-- /asset_modelling/os_hierarchy/product_health_grade/
-- /en/asset_modelling/os_hierarchy/product_health_grade/
+- /es/asset_modelling/os_hierarchy/product_health_grade/
+- /es/en/asset_modelling/os_hierarchy/product_health_grade/
 ---
 
 DefectDojo puede calcular una calificación para sus Activos según la cantidad de Hallazgos que contengan. Las calificaciones van de A \- F.

@@ -4,7 +4,7 @@ description: ''
 weight: 1
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/import_scan_ui
+- /de/en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
 
 Wenn Sie eine ganz neue DefectDojo-Instanz haben, ist das Formular „Import Scan“ ein logischer erster Schritt, um die Software kennenzulernen und Ihre Umgebung einzurichten. Über dieses Formular laden Sie eine Scan-Datei eines unterstützten Tools hoch, aus der Befunde für diese Schwachstellen erstellt werden. Beim Ausfüllen des Formulars können Sie entscheiden, ob Sie:

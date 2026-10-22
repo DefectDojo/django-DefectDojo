@@ -3,8 +3,8 @@ title: Conectores descendentes
 weight: 1
 audience: pro
 aliases:
-- /en/share_your_findings/integrations
-- /issue_tracking/pro_integration/integrations/
+- /es/en/share_your_findings/integrations
+- /es/issue_tracking/pro_integration/integrations/
 ---
 
 **Disponibilidad:** Los Conectores descendentes están disponibles de forma general y activados para todas las instancias de DefectDojo Pro, tanto en la nube (Cloud) como On-Premise. No hay nada que habilitar, y ya no aparecen en la página de Feature Flags.

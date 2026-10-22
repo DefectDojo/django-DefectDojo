@@ -17,17 +17,17 @@ seo:
 exclude_search: true
 pro-feature: true
 aliases:
-- /admin/user_management/configure_sso/
-- /admin/sso/os__saml/
-- /admin/sso/os__auth0/
-- /admin/sso/os__azure_ad/
-- /admin/sso/os__github_enterprise/
-- /admin/sso/os__gitlab/
-- /admin/sso/os__google/
-- /admin/sso/os__keycloak/
-- /admin/sso/os__oidc/
-- /admin/sso/os__okta/
-- /admin/sso/os__remote_user/
+- /it/admin/user_management/configure_sso/
+- /it/admin/sso/os__saml/
+- /it/admin/sso/os__auth0/
+- /it/admin/sso/os__azure_ad/
+- /it/admin/sso/os__github_enterprise/
+- /it/admin/sso/os__gitlab/
+- /it/admin/sso/os__google/
+- /it/admin/sso/os__keycloak/
+- /it/admin/sso/os__oidc/
+- /it/admin/sso/os__okta/
+- /it/admin/sso/os__remote_user/
 ---
 
 Il Single Sign-On è una funzionalità di **DefectDojo Pro**. A partire da DefectDojo 3.0, l'intera superficie SSO — SAML, OIDC e i provider OAuth inclusi — è disponibile solo in DefectDojo Pro. DefectDojo open source utilizza l'accesso locale con username/password e il flusso di reimpostazione della password.

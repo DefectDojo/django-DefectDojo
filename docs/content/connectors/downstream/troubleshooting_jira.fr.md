@@ -3,8 +3,8 @@ title: Dépannage des erreurs Jira (ancienne version)
 description: Résoudre les problèmes d'intégration Jira
 weight: 2
 aliases:
-- /issue_tracking/jira/troubleshooting_jira/
-- /en/share_your_findings/troubleshooting_jira/
+- /fr/issue_tracking/jira/troubleshooting_jira/
+- /fr/en/share_your_findings/troubleshooting_jira/
 ---
 
 Voici quelques problèmes courants liés à l'intégration Jira, ainsi que des solutions pour les résoudre.

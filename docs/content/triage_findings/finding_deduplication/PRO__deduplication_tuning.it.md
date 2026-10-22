@@ -5,7 +5,7 @@ description: Configura il modo in cui DefectDojo identifica e gestisce i riscont
 weight: 4
 audience: pro
 aliases:
-- /en/working_with_findings/finding_deduplication/tune_deduplication
+- /it/en/working_with_findings/finding_deduplication/tune_deduplication
 ---
 
 Deduplication Tuning è una funzionalità di DefectDojo Pro che offre un controllo granulare su come vengono deduplicati i riscontri, consentendo di ottimizzare il rilevamento dei duplicati per il proprio specifico flusso di lavoro di test di sicurezza.

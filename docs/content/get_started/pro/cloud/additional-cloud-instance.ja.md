@@ -4,7 +4,7 @@ description: アカウントにテスト用、開発用などの DefectDojo イ�
 weight: 3
 audience: pro
 aliases:
-- /en/cloud_management/additional-cloud-instance
+- /ja/en/cloud_management/additional-cloud-instance
 ---
 
 2 つ目の Cloud インスタンスを追加する手順は、最初のインスタンスを追加する場合とほぼ同じです。このガイドは、すでに最初の DefectDojo サーバーをセットアップ済みであり、追加のインスタンスについて営業チームとの合意ができていることを前提としています。

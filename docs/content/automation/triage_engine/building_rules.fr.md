@@ -5,8 +5,8 @@ description: L'éditeur de graphe, les déclencheurs, le périmètre, les condit
 weight: 2
 audience: pro
 aliases:
-- /automation/rules_engine_v2/building_rules/
-- /automation/rules_engine_2/building_rules/
+- /fr/automation/rules_engine_v2/building_rules/
+- /fr/automation/rules_engine_2/building_rules/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : Triage Engine est une fonctionnalité réservée à DefectDojo Pro.</span>

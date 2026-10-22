@@ -4,8 +4,8 @@ description: Tutti i nodi inclusi in Triage Engine, e cosa fa ciascuno
 weight: 4
 audience: pro
 aliases:
-- /automation/rules_engine_v2/node_reference/
-- /automation/rules_engine_2/node_reference/
+- /it/automation/rules_engine_v2/node_reference/
+- /it/automation/rules_engine_2/node_reference/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Triage Engine è una funzionalità disponibile solo in DefectDojo Pro.</span>

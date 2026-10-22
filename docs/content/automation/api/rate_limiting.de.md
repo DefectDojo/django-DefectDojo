@@ -5,7 +5,7 @@ description: Ratenbegrenzung auf der Anmeldeseite konfigurieren, um Brute-Force-
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/rate_limiting
+- /de/en/open_source/rate_limiting
 ---
 
 DefectDojo enthält eine Ratenbegrenzung für die Anmeldeseite zum Schutz vor Brute-Force-Angriffen, umgesetzt mit [Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html).

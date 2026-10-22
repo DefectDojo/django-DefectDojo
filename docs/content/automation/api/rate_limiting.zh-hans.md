@@ -4,7 +4,7 @@ description: 在登录页面配置速率限制以缓解暴力破解攻击
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/rate_limiting
+- /zh-hans/en/open_source/rate_limiting
 ---
 
 DefectDojo 内置了登录页面速率限制功能，以防范暴力破解攻击，该功能由 [Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html) 提供支持。

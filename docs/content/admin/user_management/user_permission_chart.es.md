@@ -4,7 +4,7 @@ description: Todos los permisos de usuario de DefectDojo Pro en detalle
 weight: 4
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/user_permission_chart
+- /es/en/customize_dojo/user_management/user_permission_chart
 ---
 
 > **Función de DefectDojo Pro.** El sistema RBAC de Miembros / Grupos / Roles Globales descrito en esta página forma parte de DefectDojo Pro. DefectDojo de código abierto utiliza el modelo de [Usuarios Autorizados](../os__authorized_users/) — consulte esa página para el control de acceso de código abierto, y las [notas de actualización a 3.0](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) si está migrando entre ediciones.

@@ -4,8 +4,8 @@ description: 使用 DefectDojo 首页
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/dashboards/Introduction_dashboard
-- /en/customize_dojo/dashboards/pro_dashboards
+- /zh-hans/en/customize_dojo/dashboards/Introduction_dashboard
+- /zh-hans/en/customize_dojo/dashboards/pro_dashboards
 ---
 
 仪表板很可能是您打开 DefectDojo 时看到的第一个页面。它汇总了您团队的整体表现，并提供跟踪工具，用于监控您的漏洞跟踪环境中的特定领域。

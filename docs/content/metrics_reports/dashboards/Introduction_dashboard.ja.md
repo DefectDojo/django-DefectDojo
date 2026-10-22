@@ -4,8 +4,8 @@ description: DefectDojo のフロントページの使い方
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/dashboards/Introduction_dashboard
-- /en/customize_dojo/dashboards/pro_dashboards
+- /ja/en/customize_dojo/dashboards/Introduction_dashboard
+- /ja/en/customize_dojo/dashboards/pro_dashboards
 ---
 
 ダッシュボードは、DefectDojo を開いたときに最初に表示されるページであることが多いです。チームのパフォーマンスを要約し、脆弱性トラッキング環境の特定領域を監視するための追跡ツールを提供します。

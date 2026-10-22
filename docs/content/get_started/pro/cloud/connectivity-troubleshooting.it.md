@@ -4,7 +4,7 @@ description: Ricollegati alla tua istanza DefectDojo
 weight: 2
 audience: pro
 aliases:
-- /en/cloud_management/connectivity-troubleshooting
+- /it/en/cloud_management/connectivity-troubleshooting
 ---
 
 Se hai difficoltà ad accedere alla tua istanza DefectDojo, ecco alcuni passaggi che puoi seguire per ricollegarti:

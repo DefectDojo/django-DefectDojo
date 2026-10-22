@@ -5,7 +5,7 @@ draft: false
 weight: 1
 audience: pro
 aliases:
-  - /get_started/pro/onprem/installing_on_kubernetes/
+  - /zh-hans/get_started/pro/onprem/installing_on_kubernetes/
 ---
 
 <!--

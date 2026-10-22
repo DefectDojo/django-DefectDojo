@@ -3,9 +3,9 @@ title: Über Deduplizierung
 description: Grundlagen und Schlüsselkonzepte der Deduplizierung
 weight: 1
 aliases:
-- /en/working_with_findings/finding_deduplication/about_deduplication
-- /en/working_with_findings/finding_deduplication/delete_deduplicates
-- /en/working_with_findings/findings_workflows/manage_duplicate_findings
+- /de/en/working_with_findings/finding_deduplication/about_deduplication
+- /de/en/working_with_findings/finding_deduplication/delete_deduplicates
+- /de/en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 DefectDojo ist darauf ausgelegt, Massenberichte von Tools zu importieren und basierend auf dem Inhalt des Berichts einen oder mehrere Befunde zu erstellen. Bei der Verwendung von DefectDojo werden Sie höchstwahrscheinlich regelmäßig Berichte desselben Tools importieren, wodurch doppelte Befunde sehr wahrscheinlich sind. 

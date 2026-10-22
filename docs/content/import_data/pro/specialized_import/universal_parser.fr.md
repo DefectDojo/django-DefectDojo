@@ -5,7 +5,7 @@ draft: 'false'
 weight: 1
 audience: pro
 aliases:
-- /en/connecting_your_tools/universal_parser
+- /fr/en/connecting_your_tools/universal_parser
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : Universal Parser n'est disponible que dans DefectDojo Pro.</span>

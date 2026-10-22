@@ -4,9 +4,9 @@ description: Entenda Organizações, Ativos, Engajamentos, Testes e Achados
 weight: 1
 audience: opensource
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_hierarchy
-- /asset_modelling/os_hierarchy/product_hierarchy/
-- /en/asset_modelling/os_hierarchy/product_hierarchy/
+- /pt-br/en/working_with_findings/organizing_engagements_tests/product_hierarchy
+- /pt-br/asset_modelling/os_hierarchy/product_hierarchy/
+- /pt-br/en/asset_modelling/os_hierarchy/product_hierarchy/
 ---
 
 O DefectDojo usa cinco classes principais de dados para organizar seu trabalho: **Organizações, Ativos**, **Engajamentos**, **Testes**, e **Achados**.

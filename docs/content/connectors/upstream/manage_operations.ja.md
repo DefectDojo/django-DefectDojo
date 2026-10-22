@@ -2,8 +2,8 @@
 title: オペレーションの管理
 description: コネクタの Discover & Sync オペレーションのステータスを確認する
 aliases:
-- /import_data/pro/connectors/manage_operations/
-- /en/connecting_your_tools/connectors/manage_operations
+- /ja/import_data/pro/connectors/manage_operations/
+- /ja/en/connecting_your_tools/connectors/manage_operations
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: アップストリームコネクタは DefectDojo Pro 限定の機能です。</span>

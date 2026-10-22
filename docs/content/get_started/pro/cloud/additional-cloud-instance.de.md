@@ -5,7 +5,7 @@ description: Eine Test-, Entwicklungs- oder weitere DefectDojo-Instanz zu Ihrem 
 weight: 3
 audience: pro
 aliases:
-- /en/cloud_management/additional-cloud-instance
+- /de/en/cloud_management/additional-cloud-instance
 ---
 
 Der Ablauf zum Hinzufügen einer zweiten Cloud-Instanz entspricht weitgehend dem Hinzufügen der ersten Instanz. Diese Anleitung setzt voraus, dass Sie Ihren ersten DefectDojo-Server bereits eingerichtet und mit unserem Sales-Team eine Vereinbarung über eine weitere Instanz getroffen haben.

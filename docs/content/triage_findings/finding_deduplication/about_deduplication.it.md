@@ -3,9 +3,9 @@ title: Informazioni sulla deduplicazione
 description: Concetti fondamentali e principi chiave della deduplicazione
 weight: 1
 aliases:
-- /en/working_with_findings/finding_deduplication/about_deduplication
-- /en/working_with_findings/finding_deduplication/delete_deduplicates
-- /en/working_with_findings/findings_workflows/manage_duplicate_findings
+- /it/en/working_with_findings/finding_deduplication/about_deduplication
+- /it/en/working_with_findings/finding_deduplication/delete_deduplicates
+- /it/en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 DefectDojo è progettato per importare in blocco report provenienti dai tool, creando uno o più Riscontri in base al contenuto del report. Quando si utilizza DefectDojo, è molto probabile importare regolarmente report dallo stesso tool, il che rende molto probabile la comparsa di Riscontri duplicati.

@@ -4,7 +4,7 @@ description: DefectDojo 的 API 可让您自动执行任务，例如在 CI/CD �
 draft: false
 weight: 2
 aliases:
-- /en/api/api-v2-docs
+- /zh-hans/en/api/api-v2-docs
 ---
 
 DefectDojo 的 API 使用 [Django Rest

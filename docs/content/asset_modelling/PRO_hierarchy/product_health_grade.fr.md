@@ -2,7 +2,7 @@
 title: Note de santé du Produit
 description: Comment DefectDojo calcule la Note de santé d'un Produit
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_health_grade
+- /fr/en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
 
 DefectDojo peut calculer une note pour vos Produits en fonction du nombre de Constatations qu'ils contiennent. Les notes sont classées de A \- F.

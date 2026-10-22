@@ -2,7 +2,7 @@
 title: Informazioni su Notifiche e 🔔 Alert
 description: Informazioni su notifiche e alert in-app
 aliases:
-- /en/customize_dojo/notifications/about_notifications
+- /it/en/customize_dojo/notifications/about_notifications
 ---
 
 DefectDojo ti tiene aggiornato in diversi modi. Le notifiche possono essere inviate per Engagement imminenti, [menzioni utente](/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions), scadenza SLA e altri eventi nel software.

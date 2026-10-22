@@ -4,7 +4,7 @@ description: Risikoakzeptanzen in DefectDojo Pro nutzen
 audience: pro
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/risk_acceptances/
+- /de/en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 **Risikoakzeptanzen** sind ein spezieller Status, der Befunden entweder über Objekte für **vollständige Risikoakzeptanz** oder den Workflow für **einfache Risikoakzeptanz** zugewiesen werden kann.  Risikoakzeptanzen dienen dazu, die Entscheidung, einen verwundbaren Befund anzuerkennen, ohne ihn sofort zu beheben, formal zu dokumentieren und operativ umzusetzen.

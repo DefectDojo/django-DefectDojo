@@ -5,8 +5,8 @@ description: Todos los nodos con los que se distribuye Triage Engine, y qué hac
 weight: 4
 audience: pro
 aliases:
-- /automation/rules_engine_v2/node_reference/
-- /automation/rules_engine_2/node_reference/
+- /es/automation/rules_engine_v2/node_reference/
+- /es/automation/rules_engine_2/node_reference/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Triage Engine es una función exclusiva de DefectDojo Pro.</span>

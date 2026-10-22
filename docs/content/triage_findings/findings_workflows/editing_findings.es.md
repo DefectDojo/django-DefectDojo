@@ -4,7 +4,7 @@ description: Cambie el Estado de un Hallazgo o agregue más metadatos a medida q
   resuelve un problema
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/editing_findings
+- /es/en/working_with_findings/findings_workflows/editing_findings
 ---
 
 Si desea agregar notas o actualizar el lenguaje de un Hallazgo para que sea más relevante a la situación actual, puede hacerlo a través del formulario Editar Hallazgo.

@@ -2,7 +2,7 @@
 title: Grado di Salute del Prodotto
 description: Come DefectDojo calcola il Grado di Salute di un Prodotto
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_health_grade
+- /it/en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
 
 DefectDojo può calcolare un grado per i tuoi Prodotti in base alla quantità di Riscontri contenuti. I gradi vanno da A \- F.

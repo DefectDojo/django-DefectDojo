@@ -4,7 +4,7 @@ description: 受信した検出事項を適切な製品に自動的に振り分�
 weight: 3
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/smart_upload
+- /ja/en/connecting_your_tools/import_scan_files/smart_upload
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: スマートアップロードはDefectDojo Proでのみご利用いただけます。</span>

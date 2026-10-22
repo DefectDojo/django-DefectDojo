@@ -4,7 +4,7 @@ description: Renovación, función de Pro
 weight: 3
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/pro_permissions_overhaul
+- /es/en/customize_dojo/user_management/pro_permissions_overhaul
 ---
 
 ## Introducción a los Tipos de Permisos

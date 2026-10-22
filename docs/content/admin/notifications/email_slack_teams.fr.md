@@ -2,7 +2,7 @@
 title: Configurer les notifications Email, Slack ou Teams
 description: Configurer Microsoft Teams pour recevoir des notifications
 aliases:
-- /en/customize_dojo/notifications/email_slack_teams
+- /fr/en/customize_dojo/notifications/email_slack_teams
 ---
 
 **Vous aurez besoin d'un accès Superuser pour utiliser la page System Settings, requise pour effectuer cette procédure.**

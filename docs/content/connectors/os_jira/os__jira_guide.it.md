@@ -4,7 +4,7 @@ description: Lavorare con l'integrazione Jira
 weight: 2
 audience: opensource
 aliases:
-- /issue_tracking/jira/os__jira_guide/
+- /it/issue_tracking/jira/os__jira_guide/
 ---
 
 L'integrazione Jira di DefectDojo può essere utilizzata per inviare i dati dei Riscontri a uno o più Spazi Jira. In questo modo è possibile integrare DefectDojo nel proprio flusso di lavoro di sviluppo standard. Ecco alcuni esempi di come questo può funzionare:

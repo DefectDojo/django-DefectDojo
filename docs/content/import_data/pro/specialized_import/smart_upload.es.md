@@ -4,7 +4,7 @@ description: Enruta automáticamente los Hallazgos entrantes al Producto correct
 weight: 3
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/smart_upload
+- /es/en/connecting_your_tools/import_scan_files/smart_upload
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Smart Upload solo está disponible en DefectDojo Pro.</span>

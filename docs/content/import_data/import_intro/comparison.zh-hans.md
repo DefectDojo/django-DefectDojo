@@ -3,7 +3,7 @@ title: 导入方式对比
 description: 了解如何手动、通过 API 或通过连接器导入数据
 weight: 1
 aliases:
-- /en/connecting_your_tools/import_intro
+- /zh-hans/en/connecting_your_tools/import_intro
 ---
 
 DefectDojo 深知，每家公司的安全需求都截然不同，不存在放之四海而皆准的方法。随着组织的变化，采取灵活的方式至关重要，而 DefectDojo 允许您以灵活的方式连接安全工具，以适应这些变化。

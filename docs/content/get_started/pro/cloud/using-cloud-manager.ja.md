@@ -5,7 +5,7 @@ weight: 1
 collapsed: true
 audience: pro
 aliases:
-- /en/cloud_management/using-cloud-manager
+- /ja/en/cloud_management/using-cloud-manager
 ---
 
 DefectDojoのCloud Managerにログインすると、アカウント設定を構成し、DefectDojo Cloudのサブスクリプションを管理できます。

@@ -5,7 +5,7 @@ draft: false
 weight: 4
 audience: pro
 aliases:
-  - /get_started/pro/onprem/adding_storage_for_uploads/
+  - /zh-hans/get_started/pro/onprem/adding_storage_for_uploads/
 ---
 
 上传的文件存放在主机的 media 目录中,在 Docker Compose 部署中,可供这些文件使用的空间取决于虚拟机磁盘的剩余容量。诸如 SBOM 这类大型上传文件可能会占满该磁盘。本页介绍如何在不更改部署本身的情况下扩展该空间。

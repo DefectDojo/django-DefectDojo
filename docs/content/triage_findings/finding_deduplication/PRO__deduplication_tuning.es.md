@@ -4,7 +4,7 @@ description: Configure cómo DefectDojo identifica y gestiona los hallazgos dupl
 weight: 4
 audience: pro
 aliases:
-- /en/working_with_findings/finding_deduplication/tune_deduplication
+- /es/en/working_with_findings/finding_deduplication/tune_deduplication
 ---
 
 El ajuste de la deduplicación es una función de DefectDojo Pro que le brinda un control detallado sobre cómo se deduplican los hallazgos, lo que le permite optimizar la detección de duplicados para su flujo de trabajo específico de pruebas de seguridad.

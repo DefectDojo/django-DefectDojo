@@ -4,7 +4,7 @@ description: ユーザーにロールと権限、およびスーパーユーザ�
 weight: 2
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/set_user_permissions
+- /ja/en/customize_dojo/user_management/set_user_permissions
 ---
 
 > **DefectDojo Pro の機能です。** このページで説明する メンバー / グループ / グローバルロール のRBACシステムは、DefectDojo Pro の一部です。オープンソース版のDefectDojoでは、[Authorized Users](../os__authorized_users/) モデルを使用します — オープンソース版のアクセス制御についてはそのページを、エディション間を移行する場合は [3.0 アップグレードノート](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) を参照してください。

@@ -3,8 +3,8 @@ title: Jira エラーのトラブルシューティング (レガシー)
 description: Jira 連携の問題を修正する
 weight: 2
 aliases:
-- /issue_tracking/jira/troubleshooting_jira/
-- /en/share_your_findings/troubleshooting_jira/
+- /ja/issue_tracking/jira/troubleshooting_jira/
+- /ja/en/share_your_findings/troubleshooting_jira/
 ---
 
 Jira 連携でよくある問題と、その対処方法を以下に示します。

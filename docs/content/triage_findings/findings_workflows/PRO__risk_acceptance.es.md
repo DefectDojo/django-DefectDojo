@@ -4,7 +4,7 @@ description: Cómo aprovechar las Aceptaciones de riesgo en DefectDojo Pro
 audience: pro
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/risk_acceptances/
+- /es/en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 Las **Aceptaciones de riesgo** son un estado especial que se puede aplicar a los Hallazgos mediante objetos de **Aceptación de riesgo completa** o el flujo de trabajo de **Aceptación de riesgo simple**. Las Aceptaciones de riesgo se utilizan para documentar y formalizar la decisión de reconocer un Hallazgo vulnerable sin remediarlo de inmediato.

@@ -4,7 +4,7 @@ description: Tirer parti des acceptations du risque dans DefectDojo Pro
 audience: pro
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/risk_acceptances/
+- /fr/en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 **Les acceptations du risque** sont un statut spécial qui peut être appliqué aux constatations à l’aide d’objets **Acceptation du risque complète** ou du workflow **Acceptation du risque simple**. Les acceptations du risque permettent de documenter formellement et d’opérationnaliser la décision d’accepter une constatation vulnérable sans la corriger immédiatement.

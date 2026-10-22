@@ -4,7 +4,7 @@ description: So gewähren Sie einem Benutzer Rollen und Berechtigungen sowie Sup
 weight: 2
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/set_user_permissions
+- /de/en/customize_dojo/user_management/set_user_permissions
 ---
 
 > **DefectDojo Pro-Funktion.** Das auf dieser Seite beschriebene RBAC-System für Mitglieder/Gruppen/Globale Rollen ist Teil von DefectDojo Pro. Open-Source-DefectDojo verwendet das Modell [Autorisierte Benutzer](../os__authorized_users/) — siehe diese Seite für die Zugriffskontrolle in der Open-Source-Version sowie die [3.0-Upgrade-Hinweise](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization), wenn Sie zwischen den Editionen wechseln.

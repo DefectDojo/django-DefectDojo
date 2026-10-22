@@ -5,7 +5,7 @@ draft: false
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/contributing/documentation
+- /zh-hans/en/open_source/contributing/documentation
 ---
 
 本文档使用 [Hugo](https://gohugo.io/) 构建，并使用 [Doks](https://getdoks.org/) 主题的一个变体。

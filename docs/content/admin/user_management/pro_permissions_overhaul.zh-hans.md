@@ -4,7 +4,7 @@ description: 权限功能改版,Pro 功能
 weight: 3
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/pro_permissions_overhaul
+- /zh-hans/en/customize_dojo/user_management/pro_permissions_overhaul
 ---
 
 ## 权限类型简介

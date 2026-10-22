@@ -4,8 +4,8 @@ description: DefectDojo Pro - Revisione della Gerarchia dei Prodotti
 audience: pro
 weight: 1
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
-- /asset_modelling/pro_hierarchy/assets_organizations
+- /it/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
+- /it/asset_modelling/pro_hierarchy/assets_organizations
 ---
 
 DefectDojo Pro sta estendendo le classi di oggetti Prodotto/Product Type per fornire maggiore flessibilità al modello dei dati.

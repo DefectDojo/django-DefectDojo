@@ -4,7 +4,7 @@ description: DefectDojoオブジェクトの監査ログへのアクセス方法
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/user_management/audit_logging
+- /ja/en/customize_dojo/user_management/audit_logging
 ---
 
 DefectDojoの監査ログには、いくつかの方法でアクセスできます。

@@ -3,7 +3,7 @@ title: 发现项状态定义
 description: 发现项状态快速参考:开放、已验证、已接受……
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/finding_status_definitions
+- /zh-hans/en/working_with_findings/findings_workflows/finding_status_definitions
 ---
 
 DefectDojo 中创建的每个发现项都有一个状态,用于传达相关信息。状态有助于您的团队跟踪问题解决的进度。

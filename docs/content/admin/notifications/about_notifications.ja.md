@@ -2,7 +2,7 @@
 title: 通知 & 🔔 アラートについて
 description: 通知とアプリ内アラートについて学ぶ
 aliases:
-- /en/customize_dojo/notifications/about_notifications
+- /ja/en/customize_dojo/notifications/about_notifications
 ---
 
 DefectDojoは、さまざまな方法で最新情報を提供します。通知は、今後予定されているエンゲージメント、[ユーザーメンション](/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions)、SLAの期限切れ、その他ソフトウェア内のイベントに対して送信されます。

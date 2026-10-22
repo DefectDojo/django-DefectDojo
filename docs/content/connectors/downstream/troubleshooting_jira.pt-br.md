@@ -3,8 +3,8 @@ title: Solução de problemas de erros do Jira (Legado)
 description: Corrigindo problemas com uma integração do Jira
 weight: 2
 aliases:
-- /issue_tracking/jira/troubleshooting_jira/
-- /en/share_your_findings/troubleshooting_jira/
+- /pt-br/issue_tracking/jira/troubleshooting_jira/
+- /pt-br/en/share_your_findings/troubleshooting_jira/
 ---
 
 Aqui estão alguns problemas comuns com a integração do Jira e formas de resolvê-los.

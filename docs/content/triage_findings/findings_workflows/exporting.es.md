@@ -4,7 +4,7 @@ description: Exporte hallazgos y compromisos como CSV o Excel
 weight: 4
 audience: opensource
 aliases:
-- /en/open_source/exporting
+- /es/en/open_source/exporting
 ---
 
 Las páginas que muestran una lista de hallazgos o una lista de compromisos tienen una opción de exportación a CSV y Excel en el menú desplegable de la esquina superior derecha.

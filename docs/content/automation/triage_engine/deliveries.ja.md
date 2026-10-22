@@ -4,8 +4,8 @@ description: ルールが外部へ送信するすべてを記録する台帳と�
 weight: 6
 audience: pro
 aliases:
-- /automation/rules_engine_v2/deliveries/
-- /automation/rules_engine_2/deliveries/
+- /ja/automation/rules_engine_v2/deliveries/
+- /ja/automation/rules_engine_2/deliveries/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: Triage Engine は DefectDojo Pro 限定の機能です。</span>

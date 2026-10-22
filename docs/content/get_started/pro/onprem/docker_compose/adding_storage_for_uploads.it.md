@@ -6,7 +6,7 @@ draft: false
 weight: 4
 audience: pro
 aliases:
-  - /get_started/pro/onprem/adding_storage_for_uploads/
+  - /it/get_started/pro/onprem/adding_storage_for_uploads/
 ---
 
 I file caricati risiedono nella directory media sull'host, e in un deployment Docker Compose lo spazio disponibile per essi corrisponde a quanto rimane sul disco della VM. Caricamenti di grandi dimensioni come gli SBOM possono riempire quel disco. Questa pagina illustra come espandere lo spazio senza modificare il deployment stesso.

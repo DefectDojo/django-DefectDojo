@@ -6,7 +6,7 @@ weight: 2
 exclude_search: false
 audience: pro
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/tagging_objects
+- /ja/en/working_with_findings/organizing_engagements_tests/tagging_objects
 ---
 
 タグは、オブジェクトをフィルタリングして、より小さく扱いやすい単位にグループ化するのに理想的です。ステータスを示すためや、データモデル全体にわたって製品タイプ、製品、エンゲージメント、検出事項のカスタムセットを作成するために使用できます。

@@ -7,8 +7,8 @@ audience: pro
 weight: 10
 slug: custom-dashboards
 aliases:
-- /en/customize_dojo/dashboards/about_custom_dashboard_tiles
-- /metrics_reports/dashboards/about_custom_dashboard_tiles
+- /fr/en/customize_dojo/dashboards/about_custom_dashboard_tiles
+- /fr/metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : les tableaux de bord personnalisables (dispositions, widgets et catalogue de widgets) sont une fonctionnalité de DefectDojo Pro. Ils sont désactivés par défaut — un superutilisateur peut les activer depuis **Paramètres > Feature Flags**, aussi bien sur les instances Cloud que On-Premise.</span>

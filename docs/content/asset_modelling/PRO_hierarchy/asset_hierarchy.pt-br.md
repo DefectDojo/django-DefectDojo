@@ -4,8 +4,8 @@ description: DefectDojo Pro - Reformulação da Hierarquia de Produtos
 audience: pro
 weight: 1
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
-- /asset_modelling/pro_hierarchy/assets_organizations
+- /pt-br/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
+- /pt-br/asset_modelling/pro_hierarchy/assets_organizations
 ---
 
 O DefectDojo Pro está estendendo as classes de objeto Produto/Tipo de Produto para oferecer maior flexibilidade ao modelo de dados.

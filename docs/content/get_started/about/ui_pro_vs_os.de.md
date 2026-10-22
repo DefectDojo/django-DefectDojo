@@ -5,7 +5,7 @@ draft: 'false'
 weight: 5
 audience: pro
 aliases:
-- /en/about_defectdojo/ui_pro_vs_os
+- /de/en/about_defectdojo/ui_pro_vs_os
 ---
 
 In late 2023, DefectDojo, Inc. veröffentlichte eine neue Benutzeroberfläche für DefectDojo Pro, die inzwischen die Standardoberfläche dieser Edition ist.

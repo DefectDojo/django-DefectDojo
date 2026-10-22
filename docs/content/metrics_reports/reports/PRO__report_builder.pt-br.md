@@ -7,8 +7,8 @@ audience: pro
 weight: 20
 slug: report-builder
 aliases:
-- /en/share_your_findings/pro_reports/using_the_report_builder
-- /metrics_reports/reports/using_the_report_builder
+- /pt-br/en/share_your_findings/pro_reports/using_the_report_builder
+- /pt-br/metrics_reports/reports/using_the_report_builder
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: O Report Builder reutilizável (Temas, Blocos, Templates e Relatórios Gerados salvos) é um recurso do DefectDojo Pro, atualmente em beta.</span>

@@ -4,7 +4,7 @@ description: 在 DefectDojo Pro 中为多个用户共享和维护权限
 weight: 3
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/create_user_group
+- /zh-hans/en/customize_dojo/user_management/create_user_group
 ---
 
 > **DefectDojo Pro 功能。**用户组及其底层的 RBAC 系统是 DefectDojo Pro 的一部分。开源版 DefectDojo 使用[已授权用户](../os__authorized_users/)模型——有关开源版的访问控制,请参阅该页面;如果您正在版本之间迁移,请参阅 [3.0 升级说明](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization)。

@@ -6,7 +6,7 @@ draft: false
 weight: 5
 audience: opensource
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/source-code-repositories
+- /es/en/working_with_findings/organizing_engagements_tests/source-code-repositories
 ---
 
 Ciertas herramientas (particularmente las herramientas SAST) incluirán el nombre de archivo asociado y el número de línea en los datos de la vulnerabilidad. Si el repositorio del código fuente está especificado en el Compromiso, DefectDojo presentará la ruta del archivo como un enlace y el usuario podrá navegar directamente hasta la ubicación de la vulnerabilidad.

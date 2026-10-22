@@ -2,8 +2,8 @@
 title: Gerenciando Operações
 description: Verifique o status das Operações de Discover e Sync do seu Conector
 aliases:
-- /import_data/pro/connectors/manage_operations/
-- /en/connecting_your_tools/connectors/manage_operations
+- /pt-br/import_data/pro/connectors/manage_operations/
+- /pt-br/en/connecting_your_tools/connectors/manage_operations
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Conectores Upstream são um recurso exclusivo do DefectDojo Pro.</span>

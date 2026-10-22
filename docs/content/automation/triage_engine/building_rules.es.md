@@ -5,8 +5,8 @@ description: El editor de grafos, los disparadores, el alcance, las condiciones 
 weight: 2
 audience: pro
 aliases:
-- /automation/rules_engine_v2/building_rules/
-- /automation/rules_engine_2/building_rules/
+- /es/automation/rules_engine_v2/building_rules/
+- /es/automation/rules_engine_2/building_rules/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Nota: Triage Engine es una función exclusiva de DefectDojo Pro.</span>

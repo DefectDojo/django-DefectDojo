@@ -4,7 +4,7 @@ description: Ändern Sie den Status eines Befunds oder fügen Sie weitere Metada
   hinzu, während Sie ein Problem beheben
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/editing_findings
+- /de/en/working_with_findings/findings_workflows/editing_findings
 ---
 
 Wenn Sie Notizen hinzufügen oder den Wortlaut eines Befunds aktualisieren möchten, damit er der aktuellen Situation besser entspricht, können Sie dies über das Formular „Befund bearbeiten“ tun.

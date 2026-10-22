@@ -6,8 +6,8 @@ audience: pro
 weight: 20
 slug: report-builder
 aliases:
-- /en/share_your_findings/pro_reports/using_the_report_builder
-- /metrics_reports/reports/using_the_report_builder
+- /ja/en/share_your_findings/pro_reports/using_the_report_builder
+- /ja/metrics_reports/reports/using_the_report_builder
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">注: 再利用可能なレポートビルダー（テーマ、ブロック、テンプレート、および保存された生成済みレポート）はDefectDojo Proの機能であり、現在ベータ版です。</span>

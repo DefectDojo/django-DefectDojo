@@ -4,7 +4,7 @@ description: Modifier le statut d’une constatation, ou ajouter des métadonné
   en résolvant un problème
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/editing_findings
+- /fr/en/working_with_findings/findings_workflows/editing_findings
 ---
 
 Si vous souhaitez ajouter des notes ou mettre à jour le texte d’une constatation pour qu’il soit plus pertinent par rapport à la situation actuelle, vous pouvez le faire via le formulaire Modifier la constatation.

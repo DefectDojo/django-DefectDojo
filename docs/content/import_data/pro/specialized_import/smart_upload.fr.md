@@ -4,7 +4,7 @@ description: Achemine automatiquement les Constatations entrantes vers le bon Pr
 weight: 3
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/smart_upload
+- /fr/en/connecting_your_tools/import_scan_files/smart_upload
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Remarque : Smart Upload n'est disponible que dans DefectDojo Pro.</span>

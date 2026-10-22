@@ -6,7 +6,7 @@ weight: 2
 exclude_search: false
 audience: pro
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/tagging_objects
+- /es/en/working_with_findings/organizing_engagements_tests/tagging_objects
 ---
 
 Las Etiquetas son ideales para agrupar objetos de manera que puedan filtrarse en fragmentos más pequeños y manejables.  Pueden usarse para indicar el estado o para crear conjuntos personalizados de Tipo de producto, Productos, Compromisos o Hallazgos en todo el modelo de datos.
