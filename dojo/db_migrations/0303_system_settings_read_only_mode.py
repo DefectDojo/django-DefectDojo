@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0300_finding_upper_title_index'),
+        ('dojo', '0302_locationfindingreference_test_required'),
     ]
 
     operations = [
