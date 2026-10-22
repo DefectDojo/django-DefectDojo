@@ -750,7 +750,7 @@ input#simple_search {
     padding: 2px 10px;
     border-radius: 999px;
     background: var(--color-green-100);
-    color: var(--color-green-700);
+    color: var(--color-green-800);
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -936,7 +936,7 @@ input#simple_search {
 }
 
 .sp a.sp-btn-primary:hover {
-    background: var(--color-dd-primary-600);
+    background: var(--color-dd-primary-800);
     color: var(--color-dd-on-primary);
 }
 
@@ -1037,7 +1037,7 @@ input#simple_search {
     margin-top: auto;
     padding-top: 12px;
     font-size: 0.75rem;
-    color: #869a99;
+    color: #9fb3b2;
 }
 
 .sp-feature p:first-of-type {
@@ -1062,6 +1062,8 @@ input#simple_search {
 
 .sp .sp-pro-footer p a {
     margin-left: 6px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
     color: var(--color-dd-primary-300);
     font-weight: 600;
 }
