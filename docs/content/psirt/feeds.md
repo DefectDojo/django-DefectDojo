@@ -41,8 +41,27 @@ Each source shows a clearance state:
   unlocks it. Sources unlock in product updates as clearances land.
 
 A few cleared sources are marked **transport coming soon**: their re-pointed,
-cleanly-licensed channels (for example the Linux kernel CVE git repository)
-need a connector that arrives in an upcoming update.
+cleanly-licensed channels (Ubuntu Security Notices and Exploit-DB) need a
+connector that arrives in an upcoming update. They cannot be enabled until then.
+
+### Linux Kernel CVEs
+
+The **Linux Kernel CVEs** source reads the Linux kernel CVE team's own
+repository, `git.kernel.org/pub/scm/linux/security/vulns.git`, over the git
+protocol. Its records are published under the
+[CVE Terms of Use](https://www.cve.org/Legal/TermsOfUse). Each published CVE
+becomes one advisory, with the kernel CNA's CVSS score, the affected kernel
+version ranges, and the stable releases that carry the fix.
+
+- **The first poll** downloads the repository's current contents (about
+  70 MB) and imports the published CVEs from the last two CVE years. It can take
+  a few minutes, so the source ships with a 300-second poll timeout.
+- **Later polls** download only what changed since the previous successful poll,
+  usually a few kilobytes.
+- Your instance needs outbound HTTPS access to `git.kernel.org`.
+- The kernel's CVE records carry no publication date. CVEs that arrive in later
+  polls are dated by when they landed in the repository; CVEs imported by the
+  first poll have no publication date.
 
 ## Enabling a feed
 

@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Triage Engine ships 47 nodes in five categories. This page documents all of them.
+Triage Engine's nodes come in five categories, which this page follows. The AI, Alerts and DAST nodes appear in the palette only when the feature or licence they depend on is enabled, and are not covered on this page.
 
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
@@ -526,6 +526,17 @@ Assigns the FedRAMP Potential Agency Impact (PAIN) rating. When PAIN tiering is 
 
 The options carry FedRAMP's own customer-effect wording rather than the bare `N1`–`N5` codes, so a rule author judges the effect rather than a number.
 
+### Set a vulnerability response fact
+
+`finding.set_response_fact`
+
+Establishes one of the three facts a vulnerability response policy grades a Finding on, records the rule as the source of that fact, and counts as the evaluation the policy requires. The usual shape is a rule that answers the routine cases from evidence the scanner already provides, and leaves the judgment calls to a person.
+
+| Setting | Options |
+|---------|---------|
+| **Fact** | `Adverse impact`, `Internet reachable`, `Credibly exploitable` |
+| **Value** | For **Adverse impact**, a level code from the governing policy's vocabulary, for example `N4`. For the other two, `true` or `false`. |
+
 ### Set a Custom Field
 
 `finding.set_custom_field`
@@ -671,7 +682,7 @@ Removes one custom field's value from the Asset, recording what it held on the A
 
 Both action nodes below only offer what their rule's owner is [permitted to see](/admin/user_management/user_permission_chart/#configuration-permission-chart) in their own picker — the same permission the SLA Configuration and Prioritization Engine settings pages themselves require. That is a picker-level convenience, not the only gate: a hand-written graph naming a configuration or engine the owner cannot see still resolves it when the rule runs, so it fails the run with an error naming it instead of silently doing nothing.
 
-### Assign SLA Configuration
+### Set SLA Configuration
 
 `asset.set_sla_configuration`
 
@@ -685,7 +696,7 @@ Assigns an SLA configuration to every Asset that reaches it. Findings under that
 
 **An Asset already recalculating is skipped, not silently dropped.** If a person, or another rule, is already recalculating the same Asset's SLA dates when this node reaches it, writing here would not change anything and would be reverted, so the node counts that Asset as skipped instead of changed. The run's node summary reports the skip by name, alongside how many Assets were actually changed.
 
-### Assign Risk Priority
+### Set Risk Priority
 
 `asset.set_risk_priority`
 
@@ -711,7 +722,7 @@ Makes the Asset deduplicate together with the rest of a [dedupe pool](/triage_fi
 
 ### Computed destinations
 
-**Set Organization**, **Add Organization Membership**, **Set Parent** and **Assign SLA Configuration** can work their destination out from each Asset instead of taking one fixed choice. "Assets tagged `team:payments` go to the Payments Organization" then becomes one rule, rather than one rule per team or a move per Asset.
+**Set Organization**, **Add Organization Membership**, **Set Parent** and **Set SLA Configuration** can work their destination out from each Asset instead of taking one fixed choice. "Assets tagged `team:payments` go to the Payments Organization" then becomes one rule, rather than one rule per team or a move per Asset.
 
 A computed destination reads a value off the Asset, optionally maps it through a table, shapes it, and then finds the destination with that **name**:
 

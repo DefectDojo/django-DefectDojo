@@ -90,6 +90,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             **kwargs,
         )
         self.location_handler = LocationHandler(self.test.engagement.product)
+        self.location_handler.set_test(self.test)
 
     @reports_a_deleted_target
     def process_scan(

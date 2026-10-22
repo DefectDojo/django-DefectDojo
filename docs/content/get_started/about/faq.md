@@ -243,7 +243,7 @@ In Pro, yes. [Compliance](/federal_compliance/) maintains POA&M items from your 
 
 In Pro, yes:
 
-- [CRA Article 14 reports](/psirt/cra-article14-reporting/) track the 24-hour early warning, the 72-hour notification and the final report from the moment you become aware of an actively exploited vulnerability or a severe incident. DefectDojo prepares each report package; you submit it to the authority.
+- [CRA Article 14 reports](/federal_compliance/cra_article14_reporting/) track the 24-hour early warning, the 72-hour notification and the final report from the moment you become aware of an actively exploited vulnerability or a severe incident. DefectDojo prepares each report package; you submit it to the authority.
 - [Evidence packs](/federal_compliance/eu_evidence_packs/) collect evidence for the CRA's vulnerability-handling requirements, and for DORA and NIS2.
 - The [PSIRT](/psirt/) Advisory Engine publishes security advisories and VEX for your products.
 
