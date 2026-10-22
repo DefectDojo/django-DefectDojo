@@ -109,6 +109,22 @@ Permissions are grouped into three tables plus a checklist.
 | Mitigation Policy | Edit |
 | Audit Log, Metering | View |
 
+**Configuration Permissions** open settings pages and instance-wide catalogs. Like the Global Feature Permissions, **they only take effect when the role is held as a Global Role**, and **only a Superuser can grant them**: a Global Owner can edit a custom role, but not add a row of this table to it, clone a role that carries one, or set such a role as a Global Role. The built-in roles carry none of them.
+
+| Row | Available actions |
+| --- | --- |
+| Users, Finding Templates, Note Types, Tool Types, Tool Configurations, SLA Configurations, Language Types, CI/CD Infrastructure, Jira Instances, Questionnaires, Prioritization Engines, Asset Platforms, Asset Lifecycles, Asset Origins | View, Add, Edit, Delete |
+| Groups | View, Add |
+| Environments, Regulations | Add, Edit, Delete |
+| Test Types | Add, Edit |
+| Questions | View, Add, Edit |
+| GitHub Configurations | View, Add, Delete |
+| Scheduling Service Schedules | View, Edit, Delete |
+| PSIRT | View, Edit |
+| Announcement, Login Banner | Edit |
+
+A row whose feature is turned off on your instance (Jira, GitHub, questionnaires, the Scheduling Service, PSIRT) is still listed, with a note that the grant has no effect until the feature is enabled. The [Configuration Permission Chart](../user_permission_chart/#configuration-permission-chart) says what each action opens.
+
 **Additional Permissions** is a checklist of capabilities that don't fit a View/Add/Edit/Delete shape:
 
 * **Configure Asset Notifications**: choose which notifications a single Asset sends, and where.
@@ -169,6 +185,16 @@ Parts of the UI are gated on a minimum Global Role rather than on an individual 
 * **Owner can never be earned this way.** Role management, and everything else gated on the Owner Global Role, stays with superusers and the built-in Owner.
 
 Coverage has to be complete, which occasionally surprises people. A role cloned from Maintainer earns the Maintainer tier. Rebuild Maintainer's permissions by hand, miss one, and the role lands on the Writer tier instead. If a custom Global Role is missing UI you expected, compare it against the built-in tier in the [Action permission charts](../user_permission_chart/).
+
+## Configuration Permissions
+
+A user's Configuration Permissions are the union of what their own Global Role carries and what the Global Roles of their Groups carry. The **Configuration Permissions** card on a User page or a Group page lists the result and is read-only. To grant a settings page to someone:
+
+1. Clone the role they hold today (for example **Reader**), or create a new one.
+2. Enable the rows you want in the **Configuration Permissions** table and save.
+3. Set the role as the user's Global Role on the **Edit User** form, or as a Group's Global Role on the **Edit Group** form, so every member holds it.
+
+Upgrading from a version where Configuration Permissions were set on the User and Group pages creates these roles for you: every user and every group that held Configuration Permissions gets a custom role, cloned from its previous Global Role (when it had one) with the permissions it held added, named after the areas it covers, such as **Reader: Users Manager** or **Configuration Viewer**, with a description listing them. The roles are ordinary custom roles: rename them, merge them, or give several holders one role, as you prefer. A Global **Owner** keeps the Owner role instead (its Owner-only abilities belong to that one role) and gets a Group named **Configuration: ...** whose Global Role carries the set; members added to an Owner Group later join that Group too, or get a role of their own. The old per-user and per-group permission forms no longer change anything and say so.
 
 ## Role history
 
