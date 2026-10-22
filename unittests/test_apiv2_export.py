@@ -308,9 +308,17 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual({0, 1, 2, 3}, set(ranks))
         self.assertEqual(sorted(ranks), ranks)
         for line_type in rank:
-            ids = [line["data"]["id"] for line in body if line["type"] == line_type]
-            self.assertEqual(sorted(set(ids)), ids)
+            rows = [line["data"] for line in body if line["type"] == line_type]
+            keys = [(row["test"], row["id"]) for row in rows] if line_type == "finding" else [row["id"] for row in rows]
+            self.assertEqual(sorted(set(keys)), keys)
         self.assertEqual("end", self.lines[-1]["type"])
+
+    def test_findings_group_by_test_even_when_ids_interleave(self):
+        first_test = Test.objects.filter(engagement__product_id=2, finding__isnull=False).order_by("id").first()
+        late = Finding.objects.create(title="late", test=first_test, reporter=self.admin, severity="Low")
+        tests = [line["data"]["test"] for line in ndjson_lines(self.client.get(self.url)) if line["type"] == "finding"]
+        self.assertEqual(sorted(tests), tests)
+        self.assertGreater(late.id, max(Finding.objects.exclude(id=late.id).values_list("id", flat=True)))
 
     def test_end_counts_match_the_database_and_the_lines(self):
         counts = self.lines[-1]["counts"]

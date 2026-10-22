@@ -187,7 +187,8 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
     )
     for line_type, serializer_class, queryset in sections:
         serializer = serializer_class(context=context)
-        for obj in queryset.order_by("id").iterator(chunk_size=EXPORT_CHUNK_SIZE):
+        ordering = ("test_id", "id") if line_type == "finding" else ("id",)
+        for obj in queryset.order_by(*ordering).iterator(chunk_size=EXPORT_CHUNK_SIZE):
             data = serializer.to_representation(obj)
             files = data.get("files", [])
             counts[f"{line_type}s"] += 1
