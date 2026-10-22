@@ -67,8 +67,20 @@ In DefectDojo Pro, the bell in the sidebar footer opens a notification inbox ins
 
 * **Grouped by record.** Unread alerts about the same Finding, Test, Engagement, Asset, Organization or Risk Acceptance are shown together under that record's name, with the number of unread alerts it carries and its three newest alerts. Click the record's name to open it. An alert that is not about a record is shown on its own.
 * **Read one at a time.** Clicking an alert marks it read and opens the record it is about; the number on the bell drops by one straight away, and stays down after a reload. Reading an alert changes nothing else: the Finding or other record is untouched and no notification is sent.
-* **Mark All Read** (the double check mark in the inbox header) marks every unread alert read at once. **See All Alerts** (the arrow) opens the Alerts Page, which still lists every alert you have, read or not.
+* **Tabs.** **All** shows every unread alert; **Mentions**, **Assigned**, **Watching** and **System** each show one kind. Mentions are notes that mention you; Assigned is work assigned to you, review requests and risk acceptance requests; System is connector health, Jira and SLA alerts; Watching is everything else about a record you can see. Each tab shows how many unread alerts it holds.
+* **Mark All Read** (the double check mark in the inbox header) marks every unread alert on the open tab read. **See All Alerts** (the arrow) opens the Alerts Page, which still lists every alert you have, read or not.
+* **The group menu** (the three dots beside a record's name) offers **Mark Group Read**, which reads that record's alerts, and **Mute This Record**.
 * **Clear All Alerts** moves from the bell to the Alerts Page toolbar. It still deletes all of your alerts, after a confirmation.
+
+### Muting a record (Pro)
+
+**Mute This Record**, in the inbox's group menu or an alert's menu on the Alerts Page, marks that record's unread alerts read, and every later alert about it arrives already read: it is still recorded, and still listed on the Alerts Page with a **Muted** tag, but it never counts on the bell. Muting changes nothing but the inbox: email, Slack and Teams notifications about the record are sent as before. System alerts (connector health, Jira and SLA alerts) cannot be muted.
+
+Your muted records are listed on your **User Profile** under **Muted Records**, each with an **Unmute** action. After unmuting, new alerts about the record count as unread again.
+
+### The Alerts Page (Pro)
+
+With the inbox on, the Alerts Page shows whether each alert is read in a **Read** column (with a **Muted** tag on alerts about a muted record), and can be filtered to unread alerts. Each alert's menu offers **Mark Read** or **Mark Unread**, and **Mute This Record**; an alert's title links to the record it is about. **Mark All Read** and **Clear All Alerts** sit on the toolbar.
 
 Alerts about a record you can no longer see (for example, after you lose access to its Asset) are left out of the inbox and the count.
 
