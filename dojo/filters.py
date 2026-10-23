@@ -401,21 +401,23 @@ def query_has_multivalued_join(query):
 
 def order_with_pk_tiebreak(queryset):
     """
-    End the queryset's ordering on the primary key (ascending) when no ordering term is already unique.
+    End a list queryset's ordering on the primary key (ascending) unless a term already is the pk.
 
     LIMIT/OFFSET over a sort key that repeats (title, severity, date, an aggregated reviewer) leaves the
-    order of tied rows to Postgres. A DISTINCT used to make the whole result go through one full sort; a
-    plain ``ORDER BY ... LIMIT`` is a top-N sort, and two pages of it can disagree on where the ties fall,
-    so a row can appear on both or on neither. The pk makes every page boundary stable. A queryset with
-    no ordering at all (``o=`` clears it) is left alone.
+    order of tied rows to Postgres. A plain ``ORDER BY ... LIMIT`` is a top-N sort, and two pages of it
+    can disagree on where the ties fall, so a row can appear on both or on neither; with no ORDER BY at
+    all (``o=`` clears the ordering) every page is a separate unordered scan. The pk makes every page
+    boundary stable, so an empty ordering becomes pk order.
+
+    Apply this where a list is paginated, not inside a filterset: filtersets also feed ``.values()``
+    aggregations, and an explicit ORDER BY column joins their GROUP BY.
     """
     query = queryset.query
     ordering = list(query.order_by) or (list(queryset.model._meta.ordering or ()) if query.default_ordering else [])
-    if not ordering:
-        return queryset
+    pk_names = {"pk", queryset.model._meta.pk.name, queryset.model._meta.pk.attname}
     for term in ordering:
         name = term.lstrip("-") if isinstance(term, str) else getattr(getattr(term, "expression", term), "name", None)
-        if name in {"pk", queryset.model._meta.pk.name, queryset.model._meta.pk.attname}:
+        if name in pk_names:
             return queryset
     return queryset.order_by(*ordering, "pk")
 

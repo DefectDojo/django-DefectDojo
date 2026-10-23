@@ -10,6 +10,7 @@ table. These tests pin the result sets to the old JOIN semantics and pin the SQL
 from urllib.parse import parse_qsl
 
 from django.contrib.auth.models import User
+from django.db.models import Count
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -224,7 +225,7 @@ class FindingTagFilterEquivalenceTest(DojoAPITestCase):
     # found_by and product): ApiFindingFilter ends each one on the pk, so page boundaries hold anyway.
     PAGE_WALK_ORDERINGS = (
         "", "&o=title", "&o=severity", "&o=-date", "&o=reviewers", "&o=-found_by", "&o=test__engagement__product__name",
-        "&o=-severity,id",
+        "&o=-severity,id", "&o=",
     )
 
     def _walk(self, query, limit=2):
@@ -287,12 +288,15 @@ class FindingTagFilterEquivalenceTest(DojoAPITestCase):
         # without the joined filter there is nothing to dedupe
         self.assertNotIn("DISTINCT", str(self.filtered(JoinedReviewerFilter, tags="alpha,beta").query).upper())
 
-    def test_ordering_ends_on_the_pk(self):
-        # The default ordering is the model's (OSS: numerical_severity, -date, title, ...), plus the pk
-        # unless it already ends on it.
+    def test_list_ordering_ends_on_the_pk(self):
+        # FindingViewSet.filter_queryset applies order_with_pk_tiebreak to the filtered queryset.
         default = list(self.base.query.order_by) or list(Finding._meta.ordering)
+        default = default if {term.lstrip("-") for term in default} & {"id", "pk"} else [*default, "pk"]
         cases = {
-            "": default if {term.lstrip("-") for term in default} & {"id", "pk"} else [*default, "pk"],
+            # the model's default ordering (OSS: numerical_severity, -date, title, ...), plus the pk;
+            # this filterset's o= keeps it
+            None: default,
+            "": default,
             "severity": ["severity", "pk"],
             "-reviewers": ["-_ord_reviewers", "pk"],
             "-date,id": ["-date", "id"],
@@ -300,10 +304,19 @@ class FindingTagFilterEquivalenceTest(DojoAPITestCase):
         }
         for value, expected in cases.items():
             with self.subTest(o=value):
-                params = {"o": value} if value else {}
-                self.assertEqual(list(self.filtered(**params).query.order_by), expected)
-        # an explicitly cleared ordering stays cleared
-        self.assertEqual(list(order_with_pk_tiebreak(self.base.order_by()).query.order_by), [])
+                params = {} if value is None else {"o": value}
+                self.assertEqual(list(order_with_pk_tiebreak(self.filtered(**params)).query.order_by), expected)
+        # An ordering filter that clears the ordering on o= (order_by() with no terms) gets pk order:
+        # an unordered LIMIT/OFFSET page is not stable either.
+        self.assertEqual(list(order_with_pk_tiebreak(self.base.order_by()).query.order_by), ["pk"])
+
+    def test_filterset_leaves_ordering_alone_for_aggregations(self):
+        # The tiebreak belongs to the list view only: a filterset also feeds .values() aggregations
+        # (dashboards, metrics), and an explicit ORDER BY pk would join their GROUP BY.
+        qs = self.filtered(o="severity", tags="alpha,beta,gamma")
+        self.assertEqual(list(qs.query.order_by), ["severity"])
+        grouped = list(qs.order_by().values("severity").annotate(n=Count("id")))
+        self.assertEqual(grouped, [{"severity": "High", "n": qs.count()}])
 
     def test_multivalued_join_detection(self):
         self.assertFalse(query_has_multivalued_join(self.base.filter(test__engagement__product__name="x").query))

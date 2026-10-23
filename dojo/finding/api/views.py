@@ -41,6 +41,7 @@ from dojo.api_v2.views import (
 )
 from dojo.authorization import api_permissions as permissions
 from dojo.db_utils import is_foreign_key_conflict
+from dojo.filters import order_with_pk_tiebreak
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
     BurpRawRequestResponseMultiSerializer,
@@ -261,6 +262,11 @@ class FindingViewSet(
         # Exists()-based as well (TagNameFilter and friends). A query-wide DISTINCT over the full wide-row finding
         # result set forces an expensive sort/hash-aggregate on every list request, so it's dropped.
         return findings
+
+    def filter_queryset(self, queryset):
+        # The list is paged by a plain ORDER BY ... LIMIT now that tag filters add no DISTINCT: end
+        # every ordering (an empty o= included) on the pk so pages never repeat or skip a finding.
+        return order_with_pk_tiebreak(super().filter_queryset(queryset))
 
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":
