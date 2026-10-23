@@ -121,6 +121,10 @@ class ApiFindingFilter(DojoFilter):
     risk_acceptance = extend_schema_field(OpenApiTypes.NUMBER)(ExistsRiskAcceptanceFilter())
 
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
+    location_os = CharFilter(
+        method="filter_location_os",
+        help_text="Operating system the scanner reported for an affected host (contains, case-insensitive)",
+    )
     tags = CharFieldInFilter(
         field_name="tags__name",
         lookup_expr="in",
@@ -233,6 +237,9 @@ class ApiFindingFilter(DojoFilter):
 
     def filter_endpoints(self, queryset, _name, value):
         return queryset.filter(self._has(endpoints__id__in=value)) if value else queryset
+
+    def filter_location_os(self, queryset, _name, value):
+        return queryset.filter(self._has(locations__relationship_data__os__icontains=value)) if value else queryset
 
     def filter_found_by(self, queryset, _name, value):
         return queryset.filter(self._has(found_by__in=value)) if value else queryset

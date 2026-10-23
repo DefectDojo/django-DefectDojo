@@ -38,6 +38,7 @@ from dojo.filters import (
     cwe_options,
     filter_endpoints_base,
     filter_endpoints_host_base,
+    filter_location_os_base,
     get_finding_filterset_fields,
     vulnerability_id_filter,
 )
@@ -121,6 +122,20 @@ class FindingFilterHelper(FilterSet):
             field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
         )
         endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+        location_os = CharFilter(
+            method="filter_location_os", label="Host OS",
+            help_text="Operating system the scanner reported for an affected host (contains, case-insensitive)",
+        )
+
+        def filter_location_os(self, queryset, name, value):
+            return filter_location_os_base(
+                queryset,
+                name,
+                value,
+                endpoint_id=self.data.get("endpoints"),
+                statuses=self.data.getlist("location_status"),
+                host=self.data.get("endpoints__host"),
+            )
 
         def filter_endpoints_host(self, queryset, name, value):
             return filter_endpoints_host_base(
