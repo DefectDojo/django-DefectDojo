@@ -13,7 +13,7 @@ Open a Finding and choose **Request Review** from the Finding menu, or select se
 
 You can request a review from named users and groups, or tick **Allow Eligible Reviewers** to ask everyone who is eligible on that asset.
 
-Requesting a review sets the Finding to **Under Review** and notifies the reviewers. The message you enter is added to the Finding as a regular note, so the reviewers can read what they are being asked to check.
+Requesting a review sets the Finding to **Under Review** and notifies the reviewers. The message you enter is added to the Finding as a regular note, so the reviewers can read what they are being asked to check. Like any other note, it can [@mention](../intro_to_findings/#notes-and-mentions) users: each mentioned user gets a user-mentioned notification, whether or not they are one of the reviewers. The same applies to the message entered when a review is cleared.
 
 ## Claiming a review
 
