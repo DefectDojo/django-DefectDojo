@@ -421,6 +421,7 @@ Key facts:
 - [Runs (Pro)](https://docs.defectdojo.com/automation/triage_engine/runs/): How a rule executes, what a run records, and how cascading is bounded
 - [Deliveries (Pro)](https://docs.defectdojo.com/automation/triage_engine/deliveries/): The ledger of everything rules send outward, and how retries and replay work
 - [Converting from Rules Engine (Pro)](https://docs.defectdojo.com/automation/triage_engine/converting_from_rules_engine/): Move existing Rules Engine rules across to Triage Engine graphs
+- [Sharing and Versions (Pro)](https://docs.defectdojo.com/automation/triage_engine/sharing_and_versions/): Export rules to a file, import them on another instance, restore an earlier version, and drive rules from the API
 - [Configuration (Pro)](https://docs.defectdojo.com/automation/triage_engine/configuration/): Deployment level settings for Triage Engine
 - [Knowledge Check (Pro)](https://docs.defectdojo.com/automation/triage_engine/quiz/): Test what you know about Triage Engine with 20 multiple-choice questions
 
