@@ -11,6 +11,12 @@ Where there is more to read, the card has a **Learn more** link to the matching 
 
 Some steps move on when you select **Next**. Others move on when you do the real thing, such as opening a menu or a record, and the card says which. The walkthrough never clicks anything for you.
 
+## The Documentation link
+
+A page that has its own documentation shows a **Documentation** button at the top right, beside the bar that shows the page's location (the breadcrumbs). It opens the matching page of this documentation in a new tab. On a narrower screen, such as a phone or a small tablet, the button is the book icon alone.
+
+The button is in the same place on every page that has one: the deduplication settings (**Matching Configuration** and **Dedupe Pools**), the connector pages, the single sign-on and login settings, notifications, SLAs, custom fields, layouts and form configuration, the PSIRT settings, and **Settings > Feature Flags**. A page that belongs to a feature behind a flag links to the same documentation as that flag's entry on **Settings > Feature Flags**, so turning a feature on puts its documentation one click from every page it adds.
+
 ## The lightbulb
 
 A yellow lightbulb in the lower right corner of every page opens the list of walkthroughs. Walkthroughs made for the page you are on come first, under **This Page**, followed by the ones you can take from anywhere, under **General**. Each entry reads **Take the Tour**, **Resume Tour** or **Retake the Tour**, depending on how far you got last time.
@@ -21,7 +27,7 @@ The list only ever holds walkthroughs for features you can use. A walkthrough fo
 
 A small dot on the lightbulb means a walkthrough in the list is one you have not seen yet. The lightbulb steps aside while a walkthrough is running, and it is not shown on phone-sized screens.
 
-To hide the lightbulb, open your **User Profile**, clear **Show the Walkthrough Lightbulb** under **Walkthroughs**, and save. Check it again to bring it back.
+To hide the lightbulb, open it and click **Hide Walkthroughs** at the bottom of the list. The lightbulb goes away at once, on every page, and a message links to your **User Profile**, where you can turn it back on. To hide or show it from the profile instead, clear or check **Show the Walkthrough Lightbulb** under **Walkthroughs**, and save. Hiding the lightbulb does not stop the first-visit offer; turn that off separately (see [Turning the offer back on](#turning-the-offer-back-on)).
 
 ## Turning walkthroughs on
 

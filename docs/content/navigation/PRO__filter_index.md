@@ -74,9 +74,11 @@ The Asset and Organization filters on the Findings, Engagements, Tests and Endpo
 
 ### Long lists
 
-The table sends its filters in the address of each request, and that address has a size limit. In practice a filter of a few hundred values is the most the table can apply. Past that, it shows **Filter Too Long** and loads nothing until you remove some values. This covers every list filter: In List, names, and a large selection under Include or Exclude.
+A filter too long for a web address, such as a few thousand pasted Asset names or a long In List, is sent in the body of the request instead, so the table shows the same rows it would for a short filter. This covers every list filter: In List, names, and a large selection under Include or Exclude.
 
-The server takes up to 1,000 values in one In List and refuses a longer list with an error rather than shortening it.
+A filter that fits in a web address stays in the page address, so a bookmarked or shared link carries it. A longer one is kept in your browser, and the page address holds a short reference to it (`filter_ref=...`) instead. A reload, or the link opened in another tab of the same browser, brings the filter back. Opened in another browser, or by someone else, the link opens the table without that filter and shows **Filters Not Available**; apply the filter again there.
+
+A text In List takes up to 1,000 values, and the Asset and Organization names filters take up to 5,000 names, the most one paste checks. A longer list is refused with an error rather than shortened.
 
 ## How number filters are evaluated
 

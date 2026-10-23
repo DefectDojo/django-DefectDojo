@@ -646,101 +646,473 @@ input#simple_search {
     width: 100%;
 }
 
-.support-page-wrapper {
+/* ============================================================
+   Support page (dojo/templates/dojo/support.html)
+   Community help on light cards, DefectDojo Pro on a Midnight band
+   that matches the Pro UI shown in the screenshot.
+   ============================================================ */
+.sp {
+    --sp-midnight: #003038;
+    --sp-midnight-deep: #001a1f;
+    --sp-on-dark: #fff8f0;
+    --sp-on-dark-muted: #a7d4dc;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8px 8px 48px;
+    color: var(--color-text);
+}
+
+.sp a,
+.sp a:hover,
+.sp a:focus {
+    text-decoration: none;
+}
+
+.sp a:focus-visible {
+    outline: 2px solid var(--color-dd-interactive-500);
+    outline-offset: 2px;
+}
+
+/* ---------- Header ---------- */
+.sp-header {
+    text-align: center;
+    padding: 16px 0 8px;
+}
+
+.sp .sp-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+    margin: 0 0 12px;
+}
+
+.sp-lede {
+    max-width: 720px;
+    margin: 0 auto 20px;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+}
+
+.sp-jump {
     display: flex;
-    flex-flow: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.sp-jump a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.sp-jump a:hover {
+    color: var(--color-dd-interactive-700);
+    border-color: var(--color-dd-interactive-300);
+}
+
+/* ---------- Sections ---------- */
+.sp-section {
+    margin-top: 40px;
+    scroll-margin-top: 80px;
+}
+
+.sp-section-head {
+    margin-bottom: 16px;
+}
+
+.sp .sp-section-head h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 4px;
+}
+
+.sp-section-head p {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.sp-pill {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--color-green-100);
+    color: var(--color-green-800);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.sp-card-title {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.sp-card-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* ---------- Community ---------- */
+.sp-community {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 16px;
+}
+
+.sp a.sp-slack {
+    display: flex;
+    gap: 16px;
+    padding: 24px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--color-dd-interactive-700), var(--color-dd-interactive-900));
+    color: var(--sp-on-dark);
+    transition: transform .2s, box-shadow .2s;
+}
+
+.sp a.sp-slack:hover {
+    color: var(--sp-on-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 57, 71, 0.25);
+}
+
+.sp-slack-icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 1.5rem;
+}
+
+.sp-slack-body {
+    min-width: 0;
+}
+
+.sp-slack .sp-card-title {
+    font-size: 1.125rem;
+}
+
+.sp-slack .sp-card-text {
+    color: var(--color-dd-interactive-100);
+}
+
+.sp-slack-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    background: var(--sp-on-dark);
+    color: var(--color-dd-interactive-800);
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+.sp-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.sp a.sp-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+}
+
+.sp a.sp-link:hover {
+    color: var(--color-text);
+    border-color: var(--color-dd-interactive-300);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 48, 56, 0.08);
+}
+
+.sp a.sp-link > span {
+    min-width: 0;
+}
+
+.sp-link .sp-card-text {
+    color: var(--color-text-muted);
+}
+
+.sp-link-icon {
+    flex: 0 0 auto;
+    width: 24px;
+    margin-top: 2px;
+    text-align: center;
+    font-size: 1.25rem;
+    color: var(--color-dd-interactive-700);
+}
+
+/* ---------- DefectDojo Pro ---------- */
+.sp-pro {
+    margin-top: 48px;
+    padding: 40px;
+    border-radius: 16px;
+    background:
+        radial-gradient(1200px 400px at 85% 0%, rgba(255, 107, 53, 0.12), transparent 60%),
+        linear-gradient(180deg, var(--sp-midnight), var(--sp-midnight-deep));
+    color: var(--sp-on-dark);
+    scroll-margin-top: 80px;
+}
+
+.sp-pro-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 40px;
     align-items: center;
 }
 
-.support-container {
-    display: flex;
-    width: 75%;
-    margin-bottom: 150px;
+.sp .sp-eyebrow {
+    margin: 0 0 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-dd-primary-400);
 }
 
-.support-box {
+.sp .sp-pro-copy h2 {
+    font-size: 1.875rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--sp-on-dark);
+    margin: 0 0 14px;
+}
+
+.sp .sp-pro-copy p {
+    color: var(--sp-on-dark-muted);
+    line-height: 1.6;
+}
+
+.sp-pro-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.sp a.sp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: background-color .2s, border-color .2s;
+}
+
+.sp a.sp-btn-primary {
+    background: var(--color-dd-primary-700);
+    color: var(--color-dd-on-primary);
+}
+
+.sp a.sp-btn-primary:hover {
+    background: var(--color-dd-primary-800);
+    color: var(--color-dd-on-primary);
+}
+
+.sp a.sp-btn-ghost {
+    border: 1px solid rgba(255, 248, 240, 0.35);
+    color: var(--sp-on-dark);
+}
+
+.sp a.sp-btn-ghost:hover {
+    border-color: var(--sp-on-dark);
+    color: var(--sp-on-dark);
+}
+
+.sp-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 28px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 248, 240, 0.12);
+}
+
+.sp-stats dt {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--sp-on-dark);
+}
+
+.sp-stats dd {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--sp-on-dark-muted);
+}
+
+.sp-shot {
+    margin: 0;
+}
+
+.sp-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 248, 240, 0.15);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.sp-shot figcaption {
+    margin-top: 10px;
+    font-size: 0.8125rem;
+    color: var(--sp-on-dark-muted);
+    text-align: center;
+}
+
+.sp-features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 40px;
+}
+
+.sp-feature {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    flex: 1;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-.support-box.shape {
+    padding: 20px;
+    border: 1px solid rgba(255, 248, 240, 0.1);
     border-radius: 12px;
-    padding: 10px 25px 25px 25px;
-    margin: 0px 10px 0px 10px;
-    transition: transform .5s;
+    background: rgba(255, 255, 255, 0.04);
+    transition: border-color .2s, background-color .2s;
 }
 
-.community {
-    color: var(--color-text);
-    background-color: var(--color-surface-3);
+.sp-feature:hover {
+    border-color: rgba(255, 138, 92, 0.5);
+    background: rgba(255, 255, 255, 0.06);
 }
 
-.community h2,
-.community p {
-    color: inherit;
+.sp-feature-icon {
+    font-size: 1.25rem;
+    color: var(--color-dd-primary-400);
+    margin-bottom: 12px;
 }
 
-.commercial {
-    color: #e7e7e7;
-    background-color: #1d4565;
+.sp .sp-feature h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--sp-on-dark);
+    margin: 0 0 6px;
 }
 
-/* Override Tailwind's explicit h2/p color inside dark commercial box */
-.commercial h2,
-.commercial p,
-.commercial i {
-    color: inherit;
+.sp .sp-feature p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--sp-on-dark-muted);
 }
 
-.support-box.hover:hover {
-    transform: translateY(-10px);
+.sp .sp-feature p.sp-oss {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 0.75rem;
+    color: #9fb3b2;
 }
 
-/* Support page responsive: stack boxes on mobile/tablet */
+.sp-feature p:first-of-type {
+    margin-bottom: 12px;
+}
+
+.sp-pro-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 248, 240, 0.12);
+}
+
+.sp .sp-pro-footer p {
+    margin: 0;
+    color: var(--sp-on-dark-muted);
+}
+
+.sp .sp-pro-footer p a {
+    margin-left: 6px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--color-dd-primary-300);
+    font-weight: 600;
+}
+
+.sp .sp-pro-footer p a:hover {
+    color: var(--color-dd-primary-200);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .sp-community,
+    .sp-pro-hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .sp-features {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
-    .support-container {
+    .sp-links,
+    .sp-features {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .sp-pro {
+        padding: 24px 16px;
+    }
+    .sp .sp-title {
+        font-size: 1.625rem;
+    }
+    .sp a.sp-slack {
         flex-direction: column;
-        width: 100%;
-    }
-    .support-box.shape {
-        margin: 0 0 1rem 0;
     }
 }
 
-.btn-primary.support {
-    font-size: 16px;
-    font-weight: 500;
-    padding: 10px;
-    border-radius: 6px;
-    margin: 20px 10px 0px 10px;
-    border: none;
-}
-
-.btn-primary.support.dark:hover {
-    color: var(--color-text-muted);
-    background-color: var(--color-surface-2);
-}
-
-.btn-primary.support.light:hover {
-    color: #e7e7e7;
-    background-color: #235175;
+@media (prefers-reduced-motion: reduce) {
+    .sp a.sp-slack,
+    .sp a.sp-link {
+        transition: none;
+    }
+    .sp a.sp-slack:hover,
+    .sp a.sp-link:hover {
+        transform: none;
+    }
 }
 
 .divider {
     border-bottom: 1px solid;
     margin: 10px 25px 15px 25px;
-}
-
-.divider.dark {
-    border-color: var(--color-text-muted);
-}
-
-.divider.light {
-    border-color: #e7e7e7;
 }
 
 .dojo-modals-wrapper {
@@ -1115,6 +1487,72 @@ span.endpoint_product {
     opacity: 1;
     background: rgba(0, 0, 0, 0.06);
     outline: none;
+}
+
+/* GitHub star prompt: small card pinned to the bottom-right corner */
+.github-star-prompt {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1050;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    padding: 16px 20px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.github-star-prompt-title {
+    margin: 0 24px 8px 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.github-star-prompt-title .fa-star {
+    color: #f5b301;
+}
+
+.github-star-prompt-body {
+    margin: 0 0 14px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.github-star-prompt-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.github-star-prompt-actions .github-star-prompt-star-form {
+    flex: 1;
+}
+
+.github-star-prompt-actions .github-star-prompt-star-form .btn {
+    width: 100%;
+}
+
+.github-star-prompt-close-form {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+}
+
+.github-star-prompt-close {
+    padding: 0 4px;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.6;
+}
+
+.github-star-prompt-close:hover,
+.github-star-prompt-close:focus {
+    opacity: 1;
 }
 
 /* Removed: custom-search-form media queries — old topbar search sizing */
