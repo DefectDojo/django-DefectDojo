@@ -219,15 +219,14 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
                 update_endpoint_statuses(finding, accept_risk=True)
                 # this method both saves and pushed to JIRA (no other post processing)
                 finding.save(dedupe_option=False)
-                if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
-                    logger.info("pushing finding to JIRA after reinstating risk acceptance")
-                    jira_services.push(finding)
+                push_to_jira_after_commit(finding, "reinstating risk acceptance")
                 reinstated_findings.append(finding)
             else:
                 logger.debug("%i:%s: already inactive, not making any changes", finding.id, finding)
 
         # best effort JIRA integration, no status changes, just a comment
-        post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), reinstation_message_creator)
+        members = list(risk_acceptance.accepted_findings.all())
+        transaction.on_commit(lambda: post_jira_comments(risk_acceptance, members, reinstation_message_creator))
 
         note_on_risk_acceptance(risk_acceptance, user, "reinstated", reason=reason)
 
@@ -292,10 +291,7 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
             update_endpoint_statuses(finding, accept_risk=True)
 
             risk_acceptance.accepted_findings.add(finding)
-
-            if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
-                logger.info("pushing finding to JIRA after adding to risk acceptance")
-                jira_services.push(finding)
+            push_to_jira_after_commit(finding, "adding to risk acceptance")
 
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
@@ -308,7 +304,20 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
             ))
     risk_acceptance.save()
     # best effort jira integration, no status changes
-    post_jira_comments(risk_acceptance, findings, accepted_message_creator)
+    findings = list(findings)
+    transaction.on_commit(lambda: post_jira_comments(risk_acceptance, findings, accepted_message_creator))
+
+
+def push_to_jira_after_commit(finding: Finding, action: str) -> None:
+    """
+    Push a finding to JIRA once the surrounding transaction commits (right away when there is none).
+
+    The push re-reads the finding, so sent from inside the transaction it could sync the status from
+    before the change; and a caller holding row locks would otherwise hold them for the JIRA call.
+    """
+    if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
+        logger.info("pushing finding to JIRA after %s", action)
+        transaction.on_commit(lambda: jira_services.push(finding))
 
 
 @app.task

@@ -424,6 +424,53 @@ class RiskAcceptanceTestUI(DojoTestCase):
                     locked.update(int(value) for value in ids.split(",") if value.strip())
         self.assertEqual(members, locked)
 
+    @patch("dojo.risk_acceptance.helper.post_jira_comments")
+    @patch("dojo.risk_acceptance.helper.jira_services")
+    def test_jira_hears_about_an_added_finding_only_after_the_commit(self, jira, comments):
+        """
+        The push and the comment go out once the acceptance is committed, not from inside its transaction.
+
+        The push task re-reads the finding, so sent earlier it could sync the status from before the
+        acceptance; and a caller holding row locks would hold them for every JIRA call.
+        """
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        finding = Finding.objects.filter(active=True, risk_accepted=False, duplicate=False).exclude(
+            id__in=ra.accepted_findings.values_list("id", flat=True)).first()
+        jira.is_push_all_issues.return_value = True
+        jira.push.reset_mock()
+        comments.reset_mock()
+
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            ra_helper.add_findings_to_risk_acceptance(None, ra, [finding])
+            jira.push.assert_not_called()
+            comments.assert_not_called()
+        for callback in callbacks:
+            callback()
+
+        jira.push.assert_called_once_with(finding)
+        comments.assert_called_once()
+
+    @patch("dojo.risk_acceptance.helper.post_jira_comments")
+    @patch("dojo.risk_acceptance.helper.jira_services")
+    def test_jira_hears_about_a_reinstate_only_after_the_commit(self, jira, comments):
+        """Reinstating pushes the re-accepted members and comments once the reinstate is committed."""
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        jira.is_push_all_issues.return_value = True
+        jira.push.reset_mock()
+        comments.reset_mock()
+
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            ra_helper.reinstate(expired, expired.expiration_date)
+            jira.push.assert_not_called()
+            comments.assert_not_called()
+        for callback in callbacks:
+            callback()
+
+        self.assertEqual(jira.push.call_count, expired.accepted_findings.count())
+        comments.assert_called_once()
+
     def test_audit_note_links_to_the_risk_acceptance(self):
         """The note written when a finding is accepted carries a usable link, not empty parens."""
         self.test_add_risk_acceptance_multiple_findings_accepted()

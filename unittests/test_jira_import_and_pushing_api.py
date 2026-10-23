@@ -423,7 +423,10 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         pre_jira_status = self.get_jira_issue_status(finding_id)
 
-        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
+        # The push goes out once the risk acceptance is committed. The view runs in autocommit, where that is
+        # straight away; a test case never commits, so run each callback as it is registered, as autocommit does.
+        with patch("dojo.risk_acceptance.helper.transaction.on_commit", side_effect=lambda func, *args, **kwargs: func()):
+            response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
         self.assertEqual("/engagement/1", response.url)
 
         # we don't do any explicit push to JIRA here as it should happen automatically
