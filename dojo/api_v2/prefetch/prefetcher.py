@@ -282,7 +282,9 @@ class _Prefetcher:
         if not authorized:
             return
         field_data = extra_serializer(**serializer_kwargs).to_representation(authorized)
-        data_by_pk = {obj.pk: data for obj, data in zip(authorized, field_data, strict=True)}
+        # Keyed by the serialized id: a list serializer that filters (VisibleNotesSerializer) may return fewer rows
+        # than it was given, and an object it dropped is then left out of the payload rather than mismatched
+        data_by_pk = {data["id"]: data for data in field_data}
         position = {obj.pk: index for index, obj in enumerate(authorized)}
         # Insert entry by entry, so the payload lists ids in the order a per-entry walk would
         for related_ids in related_ids_per_entry:

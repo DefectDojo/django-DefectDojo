@@ -14,9 +14,12 @@ things made the count grow with the page, one query (or more) per row each:
 import datetime
 import re
 from collections import Counter
+from unittest.mock import patch
 
+from crum import impersonate
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -32,6 +35,7 @@ from dojo.models import (
     Test,
     Test_Type,
 )
+from dojo.notes.api.serializer import NoteSerializer
 
 from .dojo_test_case import DojoAPITestCase
 
@@ -155,7 +159,8 @@ class ListQueryScalingTest(DojoAPITestCase):
         Finding.objects.filter(title="list-scaling-finding-3").update(test=other_test)
         fields = ["test", "reporter", "notes", "found_by"]
         for user in (self.admin, self.member):
-            with self.subTest(user=user.username):
+            # The authorization policies read the current user, as they do inside a request
+            with self.subTest(user=user.username), impersonate(user):
                 request = type("Request", (), {"user": user})()
                 findings = list(Finding.objects.filter(test__engagement=self.engagement).order_by("id"))
 
@@ -167,8 +172,36 @@ class ListQueryScalingTest(DojoAPITestCase):
                 page.prefetch_entries(list(Finding.objects.filter(id__in=[f.id for f in findings]).order_by("id")), fields)
 
                 self.assertEqual(per_entry.prefetched_data, page.prefetched_data)
+                # The user can see notes on these findings, so the comparison covers a non-empty payload
+                self.assertTrue(page.prefetched_data["notes"])
                 # Same ids in the same order, not only the same mapping.
                 for field in fields:
                     self.assertEqual(
                         list(per_entry.prefetched_data.get(field, {})), list(page.prefetched_data.get(field, {})), field,
                     )
+
+    def test_page_prefetch_leaves_out_an_object_the_serializer_filters(self):
+        """A list serializer that returns fewer rows than it was given drops that object, it does not fail."""
+        for idx in range(2):
+            self._add_finding(idx)
+        request = type("Request", (), {"user": self.admin})()
+        findings = list(Finding.objects.filter(test=self.test).order_by("id"))
+        dropped = Notes.objects.filter(entry="public 0").get()
+
+        class DroppingSerializer(serializers.ListSerializer):
+            def to_representation(self, data):
+                return super().to_representation([note for note in data if note.pk != dropped.pk])
+
+        class FilteringNoteSerializer(NoteSerializer):
+            class Meta(NoteSerializer.Meta):
+                list_serializer_class = DroppingSerializer
+
+        prefetcher = _Prefetcher(request=request)
+        with patch.object(_Prefetcher, "_find_serializer", return_value=FilteringNoteSerializer):
+            prefetcher.prefetch_entries(findings, ["notes"])
+
+        # Every note of the page except the one the serializer dropped
+        self.assertEqual(
+            ["private 0", "private 1", "public 1"],
+            sorted(note["entry"] for note in prefetcher.prefetched_data["notes"].values()),
+        )
