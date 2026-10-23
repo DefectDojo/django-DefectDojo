@@ -7,6 +7,7 @@ from django.db import connection
 from django.db.models.signals import post_init
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+from parameterized import parameterized
 
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
@@ -177,10 +178,14 @@ class TestImportersAutoFindingGroups(DojoTestCase):
         self.assertEqual([new[0].id], list(oldest.findings.values_list("id", flat=True)), msg="oldest group gets the finding")
         self.assertEqual([], list(newer.findings.values_list("id", flat=True)), msg="newer duplicate stays empty")
 
-    def test_lone_finding_without_create_all(self):
+    # One older same-name finding, and two: the per-name loop left the imported finding out of
+    # the group it created when two or more older findings shared its name (its `created` flag
+    # was overwritten by the second lookup). The imported finding belongs in the group either way.
+    @parameterized.expand([(1,), (2,)])
+    def test_lone_finding_without_create_all(self, old_count):
         # create_finding_groups_for_all_findings=False: a lone finding only forms a group when
         # another finding of the test shares its name, and otherwise stays ungrouped.
-        old = self._findings(["Paired"])[0]
+        old = self._findings(["Paired"] * old_count)
         paired = self._findings(["Paired"])
         alone = self._findings(["Alone"])
 
@@ -188,8 +193,8 @@ class TestImportersAutoFindingGroups(DojoTestCase):
 
         membership = self._membership()
         self.assertEqual(
-            {self._name("Paired"): sorted([old.id, paired[0].id])}, membership,
-            msg=f"expected only the paired group; persisted {membership}",
+            {self._name("Paired"): sorted([*(f.id for f in old), paired[0].id])}, membership,
+            msg=f"expected only the paired group, holding the imported finding {paired[0].id}; persisted {membership}",
         )
 
     def test_names_truncated_to_the_same_group_share_it(self):
