@@ -127,11 +127,13 @@ Once a Record is Mapped, DefectDojo will be ready to import your tool’s scans 
 
 * Record Mappings are designed to be non-invasive. If you map an Asset to a Record which contains existing Engagements or Findings, those existing Engagements and Findings will not be affected or overwritten by the data sync process.  
 ​
-* All data created via a connector will be stored under a single Engagement named **Global Connectors - \<label\> - \<Vendor-Equivalent Product\>**. That Engagement will create a separate Test for each Connector mapped to the Asset. The Record stays linked to that Engagement by ID, not by name: renaming the Connector's label does not create a new Engagement, and syncs keep landing in the existing one under its original name.
+* Data created by a Connector is stored in an Engagement on the Asset named **Global Connectors - \<label\> - \<Vendor-Equivalent Product\>**, so each Connector mapped to the Asset gets its own Engagement. Mappings made before this naming was introduced may use an older Engagement named **Global Connectors - \<label\>**, and syncs keep using it.  
+​
+* The Record stays linked to its Engagement by ID, not by name. Renaming the Connector's label does not create a new Engagement: syncs keep landing in the existing one under its original name. A new Engagement, named with the current label, is created only when the Record is mapped to a different Asset or its Engagement was deleted.
 
 ![image](images/manage_records_2.jpg)
 
-This makes it possible to send scan data from multiple Connectors to the same Asset. All of the data will be stored in the same Engagement, but each Connector will store data in a separate Test.
+This makes it possible to send scan data from multiple Connectors to the same Asset, with each Connector's data kept in its own Engagement.
 
 To learn more about Assets, Engagements and Tests, see our [Asset Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/).
 
