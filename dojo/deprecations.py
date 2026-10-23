@@ -69,6 +69,17 @@ def register_deprecation(entry: Deprecation, *, override: bool = False) -> None:
     _DEPRECATIONS[entry.key] = entry
 
 
+# Keys whose surfaces are wired before a removal release is named: the LEGACY state of
+# deprecation-ledger/README.md (superseded, no removal scheduled). A pending key carries no notice
+# anywhere. Declaring it with register_deprecation turns every surface on, and removes it from here.
+PENDING_DEPRECATIONS = frozenset(
+    {
+        # Product Grades: superseded by Asset Risk in Pro.
+        "product_grade",
+    },
+)
+
+
 def get_deprecation(key: str) -> Deprecation | None:
     return _DEPRECATIONS.get(key)
 

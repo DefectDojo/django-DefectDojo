@@ -16,9 +16,10 @@ from rest_framework.views import APIView
 
 import dojo
 import dojo.urls  # noqa: F401 -- loads every viewset module, so every DeprecationNoticeMixin subclass exists
-from dojo.api_v2.views import DeprecationNoticeMixin
+from dojo.api_v2.views import DeprecatedFieldsMixin, DeprecationNoticeMixin
 from dojo.decorators import deprecated_view
 from dojo.deprecations import (
+    PENDING_DEPRECATIONS,
     Deprecation,
     active_deprecations,
     get_deprecation,
@@ -207,6 +208,114 @@ class TestDeprecationHeaders(SimpleTestCase):
             response = RemovedProbe.as_view()(APIRequestFactory().get("/"))
         self.assertFalse(response.has_header("X-Deprecated"))
         self.assertFalse(response.has_header("X-End-Of-Life-Date"))
+
+
+class GradeProbe(DeprecatedFieldsMixin, APIView):
+    authentication_classes = ()
+    permission_classes = ()
+    deprecated_fields = {"grade": "tool_type", "letter": "tool_type"}
+
+    def get(self, request):
+        return Response({})
+
+    def post(self, request):
+        return Response({})
+
+
+class PendingProbe(GradeProbe):
+    deprecated_fields = {"grade": "product_grade"}
+
+
+class TestDeprecatedFieldHeaders(SimpleTestCase):
+    def sent(self, request, probe=GradeProbe):
+        response = probe.as_view()(request)
+        return response.get("X-Deprecated-Fields"), response.get("X-End-Of-Life-Date")
+
+    def test_a_read_that_never_names_the_field_sends_nothing(self):
+        self.assertEqual((None, None), self.sent(APIRequestFactory().get("/", {"name": "x", "o": "name"})))
+
+    def test_filtering_by_the_field_or_one_of_its_lookups_is_noticed(self):
+        for params in ({"grade": "90"}, {"grade__gte": "80"}):
+            with self.subTest(params=params):
+                self.assertEqual(("grade", "2026-11-02T00:00:00"), self.sent(APIRequestFactory().get("/", params)))
+
+    def test_ordering_by_the_field_is_noticed_in_either_direction(self):
+        for ordering in ("-grade", "name,grade"):
+            with self.subTest(ordering=ordering):
+                self.assertEqual("grade", self.sent(APIRequestFactory().get("/", {"o": ordering}))[0])
+
+    def test_writing_the_field_is_noticed_for_one_row_or_a_list(self):
+        factory = APIRequestFactory()
+        self.assertEqual("grade", self.sent(factory.post("/", {"grade": 90, "name": "x"}, format="json"))[0])
+        self.assertEqual("grade", self.sent(factory.post("/", [{"name": "x"}, {"grade": 90}], format="json"))[0])
+        self.assertIsNone(self.sent(factory.post("/", {"name": "x"}, format="json"))[0])
+
+    def test_every_field_used_is_named_and_the_earliest_removal_wins(self):
+        later = widgets(key="later", removal_version="3.6.0")
+        with patch.dict("dojo.deprecations._DEPRECATIONS", {"later": later, "tool_type": get_deprecation("tool_type")}):
+            class TwoReleases(GradeProbe):
+                deprecated_fields = {"grade": "later", "letter": "tool_type"}
+
+            sent = self.sent(APIRequestFactory().get("/", {"grade": "1", "o": "letter"}), probe=TwoReleases)
+        self.assertEqual(("grade, letter", "2026-11-02T00:00:00"), sent)
+
+    def test_a_body_the_parser_refuses_sends_nothing_and_never_raises(self):
+        request = APIRequestFactory().post("/", "grade=1", content_type="application/x-unknown")
+        self.assertEqual((None, None), self.sent(request))
+
+    def test_a_pending_key_sends_nothing(self):
+        self.assertEqual((None, None), self.sent(APIRequestFactory().get("/", {"grade": "1"}), probe=PendingProbe))
+
+
+class TestPendingDeprecations(SimpleTestCase):
+    def test_a_pending_key_is_not_also_declared(self):
+        declared = sorted(key for key in PENDING_DEPRECATIONS if get_deprecation(key) is not None)
+        self.assertEqual([], declared, "Declaring a pending key turns its surfaces on: remove it from PENDING_DEPRECATIONS.")
+
+    def test_a_field_mixin_subclass_names_only_declared_or_pending_keys(self):
+        offenders = []
+        for cls in mixin_subclasses(DeprecatedFieldsMixin):
+            if cls.__module__.startswith("unittests."):
+                continue
+            for field, key in getattr(cls, "deprecated_fields", {}).items():
+                if key not in PENDING_DEPRECATIONS and get_deprecation(key) is None:
+                    offenders.append(f"{cls.__module__}.{cls.__qualname__}: {field}={key!r}")
+        self.assertEqual([], offenders, "A typo here sends no deprecation header and fails silently.")
+
+    def test_the_grade_fields_wait_on_the_product_grade_key(self):
+        from dojo.asset.api.views import AssetViewSet  # noqa: PLC0415
+        from dojo.product.api.views import ProductViewSet  # noqa: PLC0415
+        from dojo.system_settings.api.views import SystemSettingsViewSet  # noqa: PLC0415
+
+        self.assertIn("product_grade", PENDING_DEPRECATIONS)
+        self.assertEqual({"prod_numeric_grade": "product_grade"}, ProductViewSet.deprecated_fields)
+        self.assertEqual({"asset_numeric_grade": "product_grade"}, AssetViewSet.deprecated_fields)
+        self.assertEqual({"product_grade"}, set(SystemSettingsViewSet.deprecated_fields.values()))
+        self.assertIn("enable_product_grade", SystemSettingsViewSet.deprecated_fields)
+
+
+class TestDeprecatedFieldSchema(SimpleTestCase):
+    def schema(self):
+        from drf_spectacular.generators import SchemaGenerator  # noqa: PLC0415
+
+        return SchemaGenerator().get_schema(request=None, public=True)
+
+    def test_a_declared_field_is_marked_on_its_components_and_filters(self):
+        grade = widgets(key="product_grade", title="Product Grades")
+        with patch.dict("dojo.deprecations._DEPRECATIONS", {"product_grade": grade}):
+            schema = self.schema()
+        components = schema["components"]["schemas"]
+        self.assertTrue(components["Product"]["properties"]["prod_numeric_grade"].get("deprecated"))
+        self.assertTrue(components["ProductRequest"]["properties"]["prod_numeric_grade"].get("deprecated"))
+        self.assertFalse(components["Product"]["properties"]["name"].get("deprecated", False))
+        self.assertTrue(components["SystemSettings"]["properties"]["enable_product_grade"].get("deprecated"))
+        parameters = {p["name"]: p for p in schema["paths"]["/api/v2/products/"]["get"]["parameters"]}
+        self.assertTrue(parameters["prod_numeric_grade"].get("deprecated"))
+        self.assertFalse(parameters["name"].get("deprecated", False))
+
+    def test_a_pending_field_is_not_marked(self):
+        schema = self.schema()
+        self.assertFalse(schema["components"]["schemas"]["Product"]["properties"]["prod_numeric_grade"].get("deprecated", False))
 
 
 HAND_TYPED_SCHEDULE = re.compile(
