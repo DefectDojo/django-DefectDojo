@@ -102,6 +102,8 @@ Findings can only be added to a single Risk Acceptance at once.  If the **Risk A
 
 A Finding belongs to one Risk Acceptance at a time. A Finding that is already Risk Accepted, through another Full Risk Acceptance or a Simple Risk Acceptance, cannot be added to a second one, and with Risk Acceptances 2.0 enabled neither can a Finding that an undecided security exception request already names. The Findings step of **New Risk Acceptance** and **Add Findings** on an existing Risk Acceptance list only Findings that are not Risk Accepted, not duplicates, and not waiting on an exception request.
 
+Approving a security exception request accepts only the Findings that nothing else holds by then. A Finding that was Risk Accepted another way while the request waited, for example by reinstating an expired Risk Acceptance that already listed it, is removed from the request and stays accepted where it is.
+
 The API applies the same rule. `POST /api/v2/risk_acceptance/`, a `PATCH` or `PUT` that adds Findings, and `POST /api/v2/risk_acceptance/request/` return `400` and name each Finding that is already held, for example:
 
 ```json
@@ -188,6 +190,7 @@ If the Risk Acceptance has **already expired** — meaning the periodic job has 
 
 - The Risk Acceptance is reinstated and is no longer in the expired state.
 - Every Finding that was linked to the Risk Acceptance and is currently Active is re-accepted (set back to Risk Accepted / Inactive).
+- A Finding that has been Risk Accepted again since the expiry, through another Risk Acceptance or a Simple Risk Acceptance, stays where it is: it is removed from the reinstated Risk Acceptance, so it is never held by two at once.
 - Endpoint statuses on those Findings are updated to reflect the re-acceptance.
 - A comment is posted to any linked Jira issues recording the reinstate.
 
