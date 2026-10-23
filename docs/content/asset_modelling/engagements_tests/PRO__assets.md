@@ -113,6 +113,15 @@ Changing the Organization field moves the Asset, along with its Engagements, Tes
 
 ![image](images/assets_ss2.png)
 
+### Change a Field in Place
+
+A few fields can also be changed on the Asset page itself, without opening Edit Asset: the **Name** and **Tags** in the page header, and **Business Criticality**, **Platform**, **Lifecycle** and **Description** wherever the page layout shows them. Hover over a value (or reach it with the keyboard) and click the pencil, or the value, to open its editor. **Enter** or **Save** saves the change and **Esc** or **Cancel** puts the value back; clicking elsewhere saves nothing (**Ctrl+Enter** or **Cmd+Enter** saves the Description, where Enter is a new line).
+
+* **Business Criticality**, **Platform** and **Lifecycle** can be cleared as well as changed. Platform and Lifecycle offer the options configured under [Editable Platform, Lifecycle and Origin Lists](/asset_modelling/pro__asset_attribute_options/).
+* If someone else changed the Asset after you opened the page, nothing is overwritten: DefectDojo shows **Asset Changed** and offers **Reload** or **Keep Editing**.
+
+Only users who can edit the Asset (a Maintainer or above on it, or its Organization) see the pencil. Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place) for the rules every page shares.
+
 ### Bulk Edit Assets
 
 Several Assets can be edited in one action from the All Assets list. Select the Assets using the checkboxes on the left of the list, then click **Bulk Edit** in the bar that appears above the table.
