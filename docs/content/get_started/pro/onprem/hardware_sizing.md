@@ -107,9 +107,9 @@ Change either one with `dojo-compose-cli environment add` and restart, as above.
 | Setting | Service | Default | Notes |
 | --- | --- | --- | --- |
 | `DD_UWSGI_IMPORT_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_RELOAD_ON_RSS`, else 800 | Replaces an import process once its imports finish. |
-| `DD_UWSGI_IMPORT_EVIL_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_EVIL_RELOAD_ON_RSS`, else 2560 | Raise it if large imports fail with a 502 and the log says `EVIL RELOAD`, keeping processes x this value below the host's free memory. |
+| `DD_UWSGI_IMPORT_EVIL_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_EVIL_RELOAD_ON_RSS`, else 2560 | Raise it if large imports fail with a 502 and the log says `EVIL RELOAD`, keeping `DD_UWSGI_NUM_OF_PROCESSES` (the import service runs the same number of processes as the web service) x this value below the host's free memory. |
 | `DD_UWSGI_IMPORT_WORKER_RELOAD_MERCY` | `dojo-import-scan` | `DD_UWSGI_WORKER_RELOAD_MERCY`, else 120 | Seconds uWSGI waits for a process it is replacing. |
-| `DD_UWSGI_IMPORT_STOP_GRACE_PERIOD` | `dojo-import-scan` | 600s | When DefectDojo stops or upgrades, the import service finishes the imports it is running before it exits, for up to this long. An idle service stops at once. |
+| `DD_UWSGI_IMPORT_STOP_GRACE_PERIOD` | `dojo-import-scan` | 600s | When DefectDojo stops or upgrades, the import service finishes the imports it is running before it exits, for up to this long. An idle service stops at once. Imports can run for up to 30 minutes: if yours run longer than about 10, raise it toward `1800s`. |
 {{< /tab >}}
 {{< /tabs >}}
 

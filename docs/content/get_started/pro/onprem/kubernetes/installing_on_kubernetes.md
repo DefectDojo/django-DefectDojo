@@ -1332,11 +1332,11 @@ django:
                            # overhead), so raising scanMaxFileSize just works.
                            # Set an integer to override.
     performance:
-      processes: 2         # concurrent imports per pod = processes x threads
+      processes: 2             # concurrent imports per pod = processes x threads
       threads: 4
-      reloadOnRss: 800     # MB: replace a worker after a request leaves it above this
-      evilReloadOnRss: 2560  # MB: kill a worker mid-request above this (see below)
-      workerReloadMercy: 120 # seconds uwsgi waits for a worker it is reloading
+      reloadOnRss: 800         # MB: replace a worker after a request leaves it above this
+      evilReloadOnRss: 2560    # MB: kill a worker mid-request above this (see below)
+      workerReloadMercy: 120   # seconds uwsgi waits for a worker it is reloading
     resources:
       requests:
         cpu: "100m"
