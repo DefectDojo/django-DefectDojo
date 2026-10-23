@@ -22,7 +22,6 @@ they hold whatever day you run this.
 | --- | --- | --- |
 | **DefectDojo Pro 3.3.100 or later** | Earlier versions carry the database field but offer no way to switch PAIN tiering on | **Use PAIN Ratings for VDR Deadlines** appears in the **FedRAMP VDR & PAIN Tiering** section of an SLA configuration |
 | Feature flag `compliance` | The Compliance tab, the POA&M ledger and the FedRAMP SLA presets | [Feature Flags](/admin/feature_flags/pro__feature_flags/) |
-| Feature flag `rules_engine_v2` | Ratings are assigned by a rule; without it there is no **Set Potential Agency Impact (PAIN)** node | [Feature Flags](/admin/feature_flags/pro__feature_flags/) |
 | Feature flag `threat_intel` | `exploit_maturity`, which the shipped FedRAMP rule templates filter on | [Feature Flags](/admin/feature_flags/pro__feature_flags/) |
 | Background task processing | Every SLA change recalculates asynchronously | On a self-hosted install, confirm the worker is running with your administrator |
 | The **FedRAMP VDR** SLA configuration | It is the only preset carrying the tiers and the matrix | **Configuration > Service Level Agreements** |

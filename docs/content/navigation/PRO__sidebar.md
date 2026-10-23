@@ -108,7 +108,7 @@ The record catalogs these views route to (Organizations through Findings) are in
 
 ### Triage Engine
 
-One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs, Deliveries and Webhook Receivers. When both engines are turned on, the classic engine appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide; when only one is on, only its pages are listed and no badge appears.
+One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs, Deliveries and Webhook Receivers. When the original Rules Engine is also turned on, it appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide.
 
 ### Remediation Center
 
@@ -149,8 +149,6 @@ The record catalogs: **Attack Surface**, Organizations, Assets, Engagements, Tes
 
 Connect answers what is connected to this instance and whether it is working. **Upstream** and **Downstream** are the connectors; **Import** now sits at the bottom, holding Add Findings, Smart Upload, Unassigned Findings, the Universal Importer and the Universal Parser. These were previously a separate Import section, which split scanning tools across two places depending on whether findings arrived by connector or by upload. It sits last because the connectors are the standing, automatic path, and a manual upload through the browser is the exception.
 
-**Smart Upload** and **Unassigned Findings** can be removed from this group with the **Smart Upload** feature flag, which is on by default. Turning it off hides both entries and changes nothing else; findings already imported through Smart Upload are unaffected.
-
 ## The Settings section
 
 Settings is divided into eight groups, named for what you are trying to do rather than for the part of the system involved.
@@ -166,7 +164,7 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 | **Operations** | Audit Logs, Usage Logs, Scan Cadence, Schedules, Celery Status, and on DefectDojo Cloud, Message Portal and Firewall Rules |
 | **License & Support** | License Manager, Support, Offboarding Export, and on on-premise instances, Version Manager |
 
-Several of these entries appear only when the feature behind them is on: Reachability Probe, Framework Presets, Remediation Center, AI Governance Policies, Custom Fields, Scan Cadence and Celery Status each follow their own feature flag, and Offboarding Export follows your license. Tool Types and Tool Configurations carry a `DEPRECATED` badge.
+Several of these entries appear only when the feature behind them is on: Reachability Probe, Framework Presets, Remediation Center, AI Governance Policies, Custom Fields and Scan Cadence each follow their own feature flag, Celery Status is shown to superusers only, and Offboarding Export follows your license. Tool Types and Tool Configurations carry a `DEPRECATED` badge.
 
 **Feature Flags sits above the groups**, directly under All Settings, rather than inside any of them. It is the page administrators open most often, and it reads alongside All Settings: one lists what exists, the other controls what is switched on. It is still filed under System in the All Settings directory.
 
@@ -204,7 +202,7 @@ If you are used to the classic sidebar:
 | Manage > Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
 | Manage > Rules Engine and Rules Engine 2.0 | Act > Triage Engine |
 | Manage > *(any)* > New *(record)* | The **New** *(record)* button on the matching list page |
-| Dashboards > Home | Overview > Dashboard (**Dashboards** when Dashboards 2.0 is on). **Overview > Home** is now the [Command Center](/metrics_reports/dashboards/command-center/) |
+| Dashboards > Home | Overview > Dashboards. **Overview > Home** is now the [Command Center](/metrics_reports/dashboards/command-center/) |
 | Settings > *(top level)* > Feature Flags | Unchanged: still at the top level, below All Settings |
 | Settings > Pro Settings > System Settings | Settings > System > System Settings |
 | Settings > Pro Settings > Appearance | Settings > System > Appearance |
@@ -232,14 +230,13 @@ The group that was named after your license package, **Pro Settings** on a Pro i
 
 ## Turning entries off
 
-Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/pro__feature_flags/) page. Two of them are on by default and are there so an administrator can remove them; turning one off removes the entry without changing any data behind it.
+Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/pro__feature_flags/) page. One of them is on by default and is there so an administrator can remove it; turning it off removes the entry without changing any data behind it.
 
 | Flag | Removes |
 | --- | --- |
 | **Calendar** | Calendar, from Overview |
-| **Smart Upload** | Smart Upload and Unassigned Findings, from Connect > Import |
 
-The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Triage Engine, the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
+The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
 
 The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 

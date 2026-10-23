@@ -58,7 +58,7 @@ A **Block** is a reusable unit of content. You build a Block once, configure wha
 | **Tabular** | A table of records drawn from a single entity. |
 | **Detail** | A per-record layout, best for long-form fields that render as markdown (for example, description, impact, mitigation, and references). |
 | **Chart** | A single chart, chosen from the same catalog of charts used on the Insights dashboards. |
-| **Widget** | A dashboard widget, rendered in the report. Requires Customizable Dashboards. |
+| **Widget** | A dashboard widget, rendered in the report. |
 
 A **Stock** block is configured by choosing one of five stock types, along with a title, subtitle, text content, or image as appropriate:
 
@@ -143,7 +143,7 @@ Charts appear in Block and Template previews and in the reports you generate, in
 
 A **Widget** block puts a [Customizable Dashboards](../../dashboards/custom-dashboards/) widget into a report. It is the same widget, configured by the same settings dialog you use on a dashboard, filters included, so a figure your team already reads on screen can go into the document you send out without being rebuilt.
 
-The block type appears only while Customizable Dashboards is enabled, because everything that configures a widget lives there. A Widget block saved earlier keeps working and keeps generating if the feature is later turned off.
+Everything that configures a widget lives in Customizable Dashboards, which is why the block uses the dashboard's own settings dialog.
 
 Choose a widget, then click **Configure Widget** to open that widget's own settings, exactly as you would from the gear icon on a dashboard tile. A Widget block keeps its filters inside the widget's settings rather than in the Block's own filter table, which is why that table is not shown for this block type. The one exception is **Variable Filters**, shown below **Configure Widget**, which narrow the widget to the finding or asset a report is generated for (see [Template variables](#template-variables)).
 

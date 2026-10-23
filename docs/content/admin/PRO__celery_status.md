@@ -8,19 +8,11 @@ draft: false
 
 Celery Status is a page that shows whether DefectDojo's background-task system is working. DefectDojo runs a lot of its work in the background with Celery: scan imports and reimports, deduplication, notifications, and other jobs that should not hold up a web request. Those jobs wait in a queue on the Redis broker until a Celery worker picks them up. When imports look stuck, duplicates are not being closed, or notifications stop arriving, this page tells you whether the broker is up, whether a worker is running, how many tasks are waiting, and which tasks they are.
 
-Celery Status is a **DefectDojo Pro** feature. It is off by default and is turned on with the **Celery Status** feature flag. The menu entry carries a **BETA** tag.
+Celery Status is a **DefectDojo Pro** feature. It is on for every instance, Cloud and On-Premise, and there is nothing to enable.
 
 ## Who can see it
 
 Only **superusers** can use Celery Status. The menu entry is hidden from everyone else, and the API behind the page refuses requests from users who are not superusers. Global Owners and other global roles do not get access.
-
-## Turning it on
-
-1. Sign in as a superuser.
-2. Go to **Settings > Feature Flags**.
-3. Find **Celery Status** (its description reads "Expose background-task queue health in the UI.") and switch the toggle on.
-
-While the flag is off, the menu entry is hidden, the page address returns a 404 error, and the API behind the page refuses every request, even from a superuser. See [Feature Flags](/admin/feature_flags/pro__feature_flags/) for more on the Feature Flags page.
 
 ## Where to find it
 

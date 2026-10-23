@@ -31,7 +31,7 @@ To hide the lightbulb, open it and click **Hide Walkthroughs** at the bottom of 
 
 ## Turning walkthroughs on
 
-Walkthroughs are a **beta** feature and are **on by default**. A superuser can turn them off for the whole instance under **Settings > Feature Flags** (**In-App Walkthroughs**). While the flag is off, no walkthrough is offered, the lightbulb is hidden, and no progress is recorded.
+Walkthroughs are on for every instance, Cloud and On-Premise, and there is nothing to enable. Each user decides for themselves whether walkthroughs are offered automatically and whether the lightbulb shows, as described above and under [Turning the offer back on](#turning-the-offer-back-on).
 
 ## The App Tour
 
