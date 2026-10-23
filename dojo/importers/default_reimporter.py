@@ -1481,14 +1481,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Add findings to a group that may or may not exist, based upon the users
         selection at import time
         """
-        for (group_name, findings) in self.group_names_to_findings_dict.items():
-            finding_helper.add_findings_to_auto_group(
-                group_name,
-                findings,
-                self.group_by,
-                create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
-                **kwargs,
-            )
+        finding_helper.add_findings_to_auto_groups(
+            self.group_names_to_findings_dict,
+            self.group_by,
+            create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
+            **kwargs,
+        )
+        for findings in self.group_names_to_findings_dict.values():
             # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
             # but this is a way to at least make it that far
             if self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False):

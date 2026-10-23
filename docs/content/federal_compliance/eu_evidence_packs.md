@@ -9,6 +9,8 @@ DefectDojo Pro includes authored catalogs for vulnerability-related obligations 
 Resilience Act (CRA) and Digital Operational Resilience Act (DORA). A regulatory assessment
 collects the operational facts DefectDojo already holds, gives an assessor space to document the
 remaining evidence, and produces a dated evidence pack.
+To set up an instance and your products for the CRA step by step, see
+[Setting Up EU CRA](../eu_cra_setup).
 
 DefectDojo does not determine whether a regulation applies to an organization, product, or
 service. The catalogs and evidence states are aids to assessment. Confirm applicability,

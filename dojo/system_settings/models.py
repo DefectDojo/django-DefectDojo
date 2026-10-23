@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -356,6 +358,11 @@ class System_Settings(models.Model):
             "Superusers can still change System Settings, so they can turn this off. "
             "Turn it on to freeze this instance before a migration.",
         ))
+    install_id = models.UUIDField(
+        default=uuid4,
+        editable=False,
+        verbose_name=_("Install id"),
+        help_text=_("A random id that identifies this instance. Exports carry it so a migration tool can tell two instances apart."))
 
     from dojo.middleware import System_Settings_Manager  # noqa: PLC0415 circular import
     objects = System_Settings_Manager()
