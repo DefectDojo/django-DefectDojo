@@ -1334,14 +1334,17 @@ django:
     performance:
       processes: 2         # concurrent imports per pod = processes x threads
       threads: 4
+      reloadOnRss: 800     # MB: replace a worker after a request leaves it above this
+      evilReloadOnRss: 2560  # MB: kill a worker mid-request above this (see below)
+      workerReloadMercy: 120 # seconds uwsgi waits for a worker it is reloading
     resources:
       requests:
         cpu: "100m"
         memory: "512Mi"
       limits:
         memory: "4Gi"
-    terminationGracePeriodSeconds: 60   # raise toward 1800 to let in-flight
-                                        # imports finish on rollouts/drains
+    terminationGracePeriodSeconds: 600  # how long running imports get to finish
+                                        # when the pod stops
     autoscaling:
       enabled: false       # scale importers on their own CPU signal
     horizontalpodautoscaler:
@@ -1356,9 +1359,23 @@ Operational notes:
   ReadWriteMany-capable storage to schedule freely across nodes. The chart's
   storage backends (`efs`, `filestore`, `gcsfuse`, `nfs`, and the default RWX
   media PVC) all qualify; a ReadWriteOnce PVC does not.
-- Importer autoscaling is off by default because a scale-down evicts whatever
-  import that pod is running once `terminationGracePeriodSeconds` expires.
-  If you enable it, raise the grace period so in-flight imports can finish.
+- When an importer pod stops (a rollout, a scale-in, a node drain), it stops
+  taking new imports and lets the ones it is running finish, for up to
+  `terminationGracePeriodSeconds`. The count includes the 20-second preStop
+  wait. An idle pod still stops right away. Imports can run for up to 30
+  minutes; raise the value toward 1800 if yours run longer than about 10
+  minutes. A cluster autoscaler scale-down waits at most 10 minutes whatever
+  the value. Before 3.4.300 a stopping pod cut off its running imports at once.
+- Importer autoscaling is off by default. If you enable it, a scale-down stops
+  an importer the same way, so keep the grace period above your longest import.
+- `evilReloadOnRss` is a safety limit: when one uwsgi worker's memory passes it,
+  uwsgi kills that worker within about a second, and every import it is running
+  (up to `threads` of them) fails with a 502. Kubernetes shows no OOMKill or
+  restart for it; the importer's log says `EVIL RELOAD`. If large imports fail
+  this way, raise it, keeping `processes x evilReloadOnRss` below
+  `resources.limits.memory` with room to spare. `reloadOnRss` replaces a worker
+  only after its imports finish, so it never fails one. The web pool has the
+  same three settings under `django.uwsgi.performance`.
 - A PodDisruptionBudget (`podDisruptionBudget.djangoImport`) protects the
   importer pool during voluntary disruptions whenever more than one importer
   runs.
