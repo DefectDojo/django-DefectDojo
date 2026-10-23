@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import django_tagulous as tagulous
 import six
 from django.apps import apps
-from django.db.models import Count, Exists, Min, OuterRef, Q
+from django.db.models import Count, Exists, ForeignObjectRel, Min, OuterRef, Q
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
 from django_filters import (
@@ -380,6 +380,46 @@ def cwe_options(queryset):
     return list(cwe.items())
 
 
+def query_has_multivalued_join(query):
+    """
+    Whether the outer query joins a to-many relation, so one base row can come back several times.
+
+    A reverse foreign key or a many-to-many hop is a Join whose ``join_field`` is the reverse
+    side of a non-unique field (Django's PathInfo marks the same hop ``m2m``). Subqueries such as
+    Exists() keep their joins in their own query, and a GROUP BY already returns one row per group.
+    """
+    if query.distinct or query.group_by is not None:
+        return False
+    for alias, join in query.alias_map.items():
+        join_field = getattr(join, "join_field", None)
+        if not query.alias_refcount.get(alias) or not isinstance(join_field, ForeignObjectRel):
+            continue
+        if not join_field.field.unique:
+            return True
+    return False
+
+
+def order_with_pk_tiebreak(queryset):
+    """
+    End the queryset's ordering on the primary key (ascending) when no ordering term is already unique.
+
+    LIMIT/OFFSET over a sort key that repeats (title, severity, date, an aggregated reviewer) leaves the
+    order of tied rows to Postgres. A DISTINCT used to make the whole result go through one full sort; a
+    plain ``ORDER BY ... LIMIT`` is a top-N sort, and two pages of it can disagree on where the ties fall,
+    so a row can appear on both or on neither. The pk makes every page boundary stable. A queryset with
+    no ordering at all (``o=`` clears it) is left alone.
+    """
+    query = queryset.query
+    ordering = list(query.order_by) or (list(queryset.model._meta.ordering or ()) if query.default_ordering else [])
+    if not ordering:
+        return queryset
+    for term in ordering:
+        name = term.lstrip("-") if isinstance(term, str) else getattr(getattr(term, "expression", term), "name", None)
+        if name in {"pk", queryset.model._meta.pk.name, queryset.model._meta.pk.attname}:
+            return queryset
+    return queryset.order_by(*ordering, "pk")
+
+
 class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -409,6 +449,11 @@ class DojoFilter(FilterSet):
             for name, f in self.filters.items():
                 if not getattr(f, "multiplies_rows", True):
                     # Exists()-based tag filters (TagExistsFilterMixin) never duplicate base rows
+                    # themselves. They used to bring a DISTINCT along with them, though, and that
+                    # DISTINCT also covered any other to-many join in the query, so keep it in
+                    # exactly that case.
+                    if self.form.cleaned_data.get(name) not in EMPTY_VALUES and query_has_multivalued_join(qs.query):
+                        return qs.distinct()
                     continue
                 field_name = getattr(f, "field_name", "") or ""
                 # Only apply distinct for tag lookups that can duplicate base rows

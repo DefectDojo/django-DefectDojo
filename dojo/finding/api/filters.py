@@ -26,6 +26,7 @@ from dojo.filters import (
     custom_filter,
     custom_vulnerability_id_filter,
     labels,
+    order_with_pk_tiebreak,
 )
 from dojo.models import Finding, Finding_Template
 
@@ -205,6 +206,11 @@ class ApiFindingFilter(DojoFilter):
         model = Finding
         exclude = ["url", "thread_id", "notes", "files",
                    "line", "cve"]
+
+    def filter_queryset(self, queryset):
+        # Tag filters no longer add a DISTINCT (see TagExistsFilterMixin), so the list is paged by a
+        # plain ORDER BY ... LIMIT: tie it off on the pk so pages never repeat or skip a finding.
+        return order_with_pk_tiebreak(super().filter_queryset(queryset))
 
     def filter_mitigated_after(self, queryset, name, value):
         if value.hour == 0 and value.minute == 0 and value.second == 0:
