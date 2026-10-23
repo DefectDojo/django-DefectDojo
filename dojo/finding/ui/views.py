@@ -2780,6 +2780,10 @@ def _bulk_unlink_from_jira(request, finds):
     The issues themselves are left untouched in Jira. Runs before _bulk_push_to_jira, so combining
     unlink with push creates new issues in the Jira project currently configured for the product.
     """
+    if not finds.exists():
+        # every selected finding was skipped for permission, which is already reported
+        return finds
+
     finding_groups = {finding.finding_group for finding in finds if finding.has_jira_group_issue}
     for group in finding_groups:
         jira_services.unlink(request, group)
@@ -2791,9 +2795,11 @@ def _bulk_unlink_from_jira(request, finds):
             unlinked_count += 1
 
     if finding_groups:
-        add_success_message_to_response(f"{len(finding_groups)} finding groups unlinked from JIRA successfully")
+        noun = "finding group" if len(finding_groups) == 1 else "finding groups"
+        add_success_message_to_response(f"{len(finding_groups)} {noun} unlinked from JIRA successfully")
     if unlinked_count > 0:
-        add_success_message_to_response(f"{unlinked_count} findings unlinked from JIRA successfully")
+        noun = "finding" if unlinked_count == 1 else "findings"
+        add_success_message_to_response(f"{unlinked_count} {noun} unlinked from JIRA successfully")
     if not finding_groups and unlinked_count == 0:
         add_error_message_to_response("None of the selected findings are linked to a JIRA issue")
 
@@ -2986,7 +2992,8 @@ def finding_bulk_update_all(request, pid=None):
                 # Delegate parsing and handling of strings/iterables to helper
                 bulk_add_tags_to_instances(tag_or_tags=tags, instances=finds, tag_field_name="tags")
 
-            if form.cleaned_data["unlink_from_jira"]:
+            # the checkbox is only shown when Jira is enabled; ignore a request that sends it anyway
+            if form.cleaned_data["unlink_from_jira"] and system_settings.enable_jira:
                 finds = _bulk_unlink_from_jira(request, finds)
 
             _bulk_push_to_jira(finds, form, note)
@@ -3006,7 +3013,7 @@ def finding_bulk_update_all(request, pid=None):
                 or form.cleaned_data["notes"] or form.cleaned_data["risk_acceptance"]
                 or form.cleaned_data["finding_group_create"] or form.cleaned_data["finding_group_add"]
                 or form.cleaned_data["finding_group_remove"] or form.cleaned_data["finding_group_by"]
-                or form.cleaned_data["push_to_jira"] or form.cleaned_data["unlink_from_jira"]
+                or form.cleaned_data["push_to_jira"]
                 or form.cleaned_data["push_to_github"]
             ):
                 messages.add_message(

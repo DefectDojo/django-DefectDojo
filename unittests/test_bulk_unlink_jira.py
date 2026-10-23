@@ -90,7 +90,7 @@ class TestBulkUnlinkFromJira(DojoTestCase):
 
         self.assertFalse(JIRA_Issue.objects.filter(id=self.linked_issue.id).exists())
         self.assertTrue(JIRA_Issue.objects.filter(id=self.other_issue.id).exists())
-        self.assertIn("1 findings unlinked from JIRA successfully", messages)
+        self.assertIn("1 finding unlinked from JIRA successfully", messages)
 
     def test_unlinks_the_finding_group_of_a_selected_finding(self):
         group = Finding_Group.objects.create(name="component: openssl", test=self.test, creator=self.user)
@@ -100,12 +100,30 @@ class TestBulkUnlinkFromJira(DojoTestCase):
         messages = self._bulk_edit([self.never_linked])
 
         self.assertFalse(JIRA_Issue.objects.filter(id=group_issue.id).exists())
-        self.assertIn("1 finding groups unlinked from JIRA successfully", messages)
+        self.assertIn("1 finding group unlinked from JIRA successfully", messages)
 
     def test_nothing_linked_is_reported(self):
         messages = self._bulk_edit([self.never_linked])
 
         self.assertIn("None of the selected findings are linked to a JIRA issue", messages)
+        self.assertNotIn("Bulk update of 1 findings was successful.", messages)
+
+    def test_a_user_who_cannot_edit_is_told_why_not_that_nothing_is_linked(self):
+        outsider = User.objects.create(username="bulk-unlink-outsider", is_staff=False)
+        self.client.force_login(outsider)
+
+        messages = self._bulk_edit([self.linked])
+
+        self.assertTrue(JIRA_Issue.objects.filter(id=self.linked_issue.id).exists())
+        self.assertIn("Skipped update of 1 findings because you are not authorized.", messages)
+        self.assertNotIn("None of the selected findings are linked to a JIRA issue", messages)
+
+    def test_jira_disabled_ignores_the_unlink(self):
+        self.system_settings(enable_jira=False)
+
+        self._bulk_edit([self.linked])
+
+        self.assertTrue(JIRA_Issue.objects.filter(id=self.linked_issue.id).exists())
 
     def test_unlink_runs_before_the_push(self):
         """The push sees no issue, so it creates one in the current project rather than updating OLD-1."""
