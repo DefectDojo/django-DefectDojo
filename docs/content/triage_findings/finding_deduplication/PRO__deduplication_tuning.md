@@ -56,8 +56,15 @@ Both of the location-based groupings need the [Locations](/asset_modelling/locat
 It uses the tool's own matching configuration, so there is no second list of fields to maintain:
 
 - With **Unique ID From Tool**, or **Unique ID From Tool or Hash Code** for a report entry that has an ID, entries that share the tool's ID are one vulnerability. Many tools give one result an ID and report it at several places.
-- Otherwise the tool's hash fields are used, with everything that describes a location left out (file path, line, endpoints, component version and location types). Fields listed under **Fields Left Out of the Identity** are left out too, which helps when a tool writes the location into the description.
+- Otherwise the tool's Same Tool hash fields are used, with everything that describes a location left out (file path, line, endpoints, component version and location types). Fields listed under **Fields Left Out of the Identity** are left out too, which helps when a tool writes the location into the description.
 - **When Severities Differ** decides whether one vulnerability reported at two severities becomes one finding (at the highest severity) or stays two findings.
+
+DefectDojo refuses a setting that would change nothing, with a message saying what to set:
+
+- **One finding per vulnerability on a tool with no Same Tool hash fields.** Without them the hash falls back to one that includes the file and line, so nothing would fold. Many tools ship without hash fields, so set them first; Title, CWE, File Path and Line is a common choice.
+- **Keep Severities Apart when Severity is not part of the identity.** Severity has to be one of the hash fields and must not be listed under **Fields Left Out of the Identity**. It is also refused for tools matched on **Unique ID From Tool**, because the tool's ID ignores severity. With **Unique ID From Tool or Hash Code**, report entries without an ID fold on the hash, so the same rules apply to them as to hash code. Entries that carry an ID still fold on that ID whatever their severity, so Keep Severities Apart splits only the entries without one.
+
+A pool's grouping is checked against the instance's hash fields, because those are the ones its hash uses, and changing the instance's hash fields or algorithm checks again every pool that relies on them. A grouping change that is still Pending is checked the same way. Settings saved before these checks existed are left as they are. An edit to them is refused until they meet the checks, and so is a change to the instance's hash fields or algorithm while a pool still holds one. Other instance edits are not blocked by an older pool setting.
 
 The same rules apply across tests: when a new test on the same Asset reports a vulnerability that already has a finding, its locations are added to that finding, attributed to the new test, instead of creating a duplicate. A reimport of that test then only changes the locations it reported. The finding closes once no test reports any of its locations.
 
@@ -68,7 +75,7 @@ On the folded finding:
 - the SLA starts from the earliest date any of its locations was found;
 - marking the finding False Positive or Risk Accepted applies that status to every location, and a single location can still be changed afterwards.
 
-Grouping is one setting for Same Tool and Reimport, because an import and a later reimport have to agree on what a finding is. With one finding per vulnerability, reimport also tracks locations as they change, so a line that moves updates its location instead of adding a new one.
+Grouping is one setting for Same Tool and Reimport, because an import and a later reimport have to agree on what a finding is. With one finding per vulnerability, reimport also tracks locations as they change, so the finding stays the same when a line moves: the old location is mitigated and marked with where it moved, and the new one is added.
 
 ### Changing a tool's grouping
 
