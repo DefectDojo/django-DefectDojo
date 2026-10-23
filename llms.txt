@@ -70,8 +70,6 @@ Key facts:
 - [Add Findings form (Pro)](https://docs.defectdojo.com/import_data/import_scan_files/pro__import_scan_ui/)
 - [Import Scan form (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/os__import_scan_ui/)
 - [Endpoint Meta Importer (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/endpoint_meta_importer/): Bulk-apply tags and custom fields to endpoints via CSV
-- [](https://docs.defectdojo.com/import_data/import_scan_files/os__create_findings_manually/)
-- [](https://docs.defectdojo.com/import_data/import_scan_files/pro__create_findings_manually/)
 - [Import from API](https://docs.defectdojo.com/import_data/import_scan_files/api_pipeline_modelling/)
 - [Universal Parser (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/universal_parser/)
 - [Universal Importer & DefectDojo-CLI (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/external_tools/): Import files to DefectDojo from the command line
@@ -107,6 +105,7 @@ Key facts:
 - [Location Drift Matching (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__location_drift_matching/): Track findings as their locations change across reimports: line shifts, file renames, URL moves, and dependency version bumps no longer close and recreate findings
 - [False Positive History](https://docs.defectdojo.com/triage_findings/finding_deduplication/false_positive_history/): Automatically mark new Findings as false positive when a matching Finding was already triaged that way
 - [Dedupe Pools (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__dedupe_pools/): Group Assets so their Findings deduplicate against each other, per matching kind
+- [Knowledge Check (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/quiz/): Test what you know about Deduplication with 25 multiple-choice questions
 - [Root Cause Correlation (Pro)](https://docs.defectdojo.com/triage_findings/finding_correlation/pro__root_cause_correlation/): Group Findings that share a root cause -- the same vulnerable component, CVE, infrastructure resource, or weakness at a URL -- so one fix can be traced to every Finding it resolves
 - [CVSS Version Support](https://docs.defectdojo.com/triage_findings/finding_scoring/cvss_support/): Which CVSS versions DefectDojo stores, displays, and accepts on Findings
 - [EPSS / KEV (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/epss_kev/): How DefectDojo Pro enriches Findings with EPSS and CISA KEV data, when it syncs, and how it drives priority
@@ -162,6 +161,7 @@ Key facts:
 - [Container Image Locations (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__container_image_locations/): Container Image locations model the image a finding was found in, identified by registry, repository and digest, and the assets that run it
 - [AI Inventory (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__ai_inventory/): See the AI in every scanned repository: coding assistants, MCP servers, models, AI packages, AI services, agent skills and AI provider keys
 - [Exporting an AIBOM (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__exporting_an_aibom/): Export an Asset's AI inventory as a CycloneDX 1.6 AI bill of materials, with evidence and authorization decisions
+- [Knowledge Check (Pro)](https://docs.defectdojo.com/asset_modelling/locations/quiz/): Test what you know about Locations with 19 multiple-choice questions
 - [Components (Pro)](https://docs.defectdojo.com/asset_modelling/components/pro__components/): Tracking third-party libraries and software components in DefectDojo Pro
 - [Services](https://docs.defectdojo.com/asset_modelling/components/services/): Tracking Microservices
 - [Custom Fields (Pro)](https://docs.defectdojo.com/asset_modelling/pro__custom_fields/): Define typed custom fields per record type, fill them in on the forms and on each record, and turn them on as typed table columns
