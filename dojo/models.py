@@ -158,6 +158,7 @@ from dojo.product.models import (  # noqa: E402 -- re-export; class-body FKs bel
     Product_Line,  # noqa: F401 -- re-export
 )
 from dojo.product_type.models import Product_Type  # noqa: E402, F401 -- re-export
+from dojo.query_hooks import HookedManager, UnfilteredManager  # noqa: E402
 from dojo.reports.models import Report_Type  # noqa: E402, F401 -- re-export
 from dojo.test.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
     IMPORT_ACTIONS,  # noqa: F401 -- re-export
@@ -202,6 +203,14 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name="location_meta_scope")
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         unique_together = (("product", "name"),
@@ -530,6 +539,14 @@ class Languages(models.Model):
     code = models.IntegerField(blank=True, null=True, verbose_name=_("Number of code lines"))
     created = models.DateTimeField(auto_now_add=True, null=False)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         unique_together = [("language", "product")]
 
@@ -549,6 +566,14 @@ class App_Analysis(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         indexes = [
