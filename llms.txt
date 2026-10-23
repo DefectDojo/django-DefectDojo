@@ -411,6 +411,7 @@ Key facts:
 - [DefectDojo API v3 (alpha)](https://docs.defectdojo.com/automation/api/api-v3-alpha-docs/): A new, parallel API mounted alongside v2 with refs/expand/fields, one list envelope, and a documented filter contract. Alpha — the contract may change.
 - [Languages and Lines of Code (Open Source)](https://docs.defectdojo.com/automation/api/languages/): Import language composition data for an Asset using the cloc tool
 - [Rate Limiting (Open Source)](https://docs.defectdojo.com/automation/api/rate_limiting/): Configure rate limiting on the login page to mitigate brute force attacks
+- [Product export](https://docs.defectdojo.com/automation/api/product_export/): Export one product with its engagements, tests, findings, notes, files and risk acceptances as NDJSON.
 - [Notification Webhooks (Open Source)](https://docs.defectdojo.com/automation/api/notification_webhooks/): Send HTTP webhook notifications to an external server on DefectDojo events
 - [Rules Engine Automation (Pro)](https://docs.defectdojo.com/automation/rules_engine/about/): Working with Rules Engine Automation
 - [Scheduling Rules (Pro)](https://docs.defectdojo.com/automation/rules_engine/scheduling/): Automatically run Rules Engine rules on a recurring or one-time schedule
