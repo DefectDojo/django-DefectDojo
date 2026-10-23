@@ -98,7 +98,7 @@ If the toggle is on, the connector checks each finding on an ECR container image
 
 * The connector imports findings on every other resource as before. This includes the ECR repository's own findings.
 * Only Amazon ECS tasks and Amazon EKS pods count, also on AWS Fargate. An image that runs anywhere else counts as not running. This includes AWS Lambda, AWS App Runner, Docker on EC2 and self-managed Kubernetes.
-* Amazon Inspector updates the in-use data once a day. For a new image, the data can take up to 36 hours to show. See [Mapping container images to running containers](https://docs.aws.amazon.com/inspector/latest/user/scanning-ecr.html#ecr-mapping-container-images) in the Amazon Inspector documentation.
+* Amazon Inspector updates the in-use data once a day. For a new image, the data can take up to 36 hours to show. After an image stops, its findings can stay open for up to two days. See [Mapping container images to running containers](https://docs.aws.amazon.com/inspector/latest/user/scanning-ecr.html#ecr-mapping-container-images) in the Amazon Inspector documentation.
 * Amazon Inspector ECR scanning must be on in every region that you sync. Amazon Inspector supplies in-use data only for ECR repositories that use continuous scanning. If a repository uses scan on push, the next Sync closes its image findings, even if the image runs.
 * Amazon Inspector does not support last-in-use tracking for multi-architecture images. Before you rely on the toggle for such an image, check that Amazon Inspector shows it as in use.
 * At the next Sync, DefectDojo closes the imported findings of images that do not run. If an image runs again, its findings reopen at a later Sync.
