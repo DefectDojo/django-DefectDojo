@@ -94,7 +94,9 @@ class Location(BaseModel):
         from dojo.location.queries import TAGS_READABLE_ANNOTATION, location_tags_readable  # noqa: PLC0415
         readable = getattr(self, TAGS_READABLE_ANNOTATION, None)
         if readable is None:
+            # Cached on the instance: a serializer reads both tag sets, and each would repeat the check.
             readable = location_tags_readable(self)
+            setattr(self, TAGS_READABLE_ANNOTATION, readable)
         return readable
 
     @property

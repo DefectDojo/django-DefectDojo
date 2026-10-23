@@ -1,3 +1,5 @@
+import re
+
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework.authtoken.models import Token
@@ -271,7 +273,9 @@ class LocationTagScopingTest(DojoTestCase):
         self.assertEqual(len(walks), 1, walks)
         self.assertNotIn("COUNT(", walks[0].upper())
         self.assertNotIn("OFFSET", walks[0].upper())
-        self.assertIn(f"IN ({page_ids[0]}, {page_ids[1]})", walks[0])
+        bound = re.search(r'"dojo_location"\."id" IN \(([\d, ]+)\)', walks[0])
+        self.assertIsNotNone(bound, walks[0])
+        self.assertEqual(sorted(int(pk) for pk in bound.group(1).split(",")), page_ids)
 
     def test_location_list_readability_holds_on_every_page(self):
         expected = {FOREIGN: [], INHERIT: [], OWN: [OWN_TAG], BOTH_MINE: [OWN_TAG]}
@@ -283,6 +287,15 @@ class LocationTagScopingTest(DojoTestCase):
             if host:
                 seen[host] = row["tags"]
         self.assertEqual(seen, expected)
+
+    def test_location_detail_checks_readability_once(self):
+        # The serializer reads both tag sets; the readability check must not run once per set.
+        for who, token, walks in (("alice", self.alice_token, 1), ("admin", self.admin_token, 0)):
+            with self.subTest(user=who):
+                _, queries = self._list_sql(f"/api/v2/location/{self.foreign.id}/", token)
+                product_checks = [sql for sql in queries if sql.startswith('SELECT 1 AS "a" FROM "dojo_product" WHERE NOT')]
+                self.assertEqual(len(product_checks), 1, product_checks)
+                self.assertEqual(len([sql for sql in queries if "dojo_locationfindingreference" in sql]), walks)
 
     def test_location_detail_readability(self):
         cases = (
