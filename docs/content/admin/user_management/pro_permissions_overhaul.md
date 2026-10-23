@@ -47,8 +47,8 @@ When looking at Organization or Asset, you can open the Permissions window to se
 2. Here, you can select a user or group to add to the Asset, and select  the [Role](../about_perms_and_roles) that you want that user to have.
 3. On the lower table, you can see a list of all users or groups who have access to this object.  You can also quickly assign a new role for one of these users or groups from the drop-down menu.
 
-## Setting Configuration Permissions through the User view
+## Reading Configuration Permissions on the User view
 
-A user's configuration permissions can now be set in a more user-friendly approach. From the Users View, all configuration permissions are displayed in a dropdown, then grouped by the permission type. If the selection of configuration permissions is different from their current value, an “Update Configuration Permissions” button is displayed. When clicked, the user will be asked to confirm they would like to update the permissions for the selected group before an update is made.
+A user's Configuration Permissions come from Roles: the user's own Global Role and the Global Roles of their Groups. The **Configuration Permissions** card on the User page lists what the user holds, grouped by area, and says where it comes from. The card is read-only. To change what a user holds, a Superuser edits or clones a Role on the **Roles** page, enables rows in its **Configuration Permissions** table, and sets that Role as the user's Global Role. See [Custom Roles](../pro__custom_rbac_roles/#configuration-permissions).
 
 ![image](images/pro_user_view.png)

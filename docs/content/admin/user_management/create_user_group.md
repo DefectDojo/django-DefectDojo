@@ -14,8 +14,8 @@ If you have a significant number of DefectDojo users, you may want to create one
 Groups can work in multiple ways:
 
 * Set one, or many different Asset or Organization level Roles for all Group Members, allowing specific control over which Assets or Organizations can be accessed and edited by the Group.
-* Set a Global Role for all Group Members, giving them visibility and access to all Asset or Organizations.
-* Set Configuration Permissions for a Group, allowing them to change specific functionality around DefectDojo.
+* Set Global Roles for all Group Members, giving them visibility and access to all Asset or Organizations.
+* Give a Group a Global Role that carries Configuration Permissions, beside its other Global Roles, allowing its Members to reach specific settings pages in DefectDojo.
 
 For more information on Roles, please refer to our **Introduction To Roles** article.
 
@@ -32,16 +32,12 @@ Users with the **View Group** configuration permission see every Group. A Member
 
 ## Viewing A Group
 
-Viewing a group displays all Group information, such as ID, name, description, global role, etc. The Group Members, Organizations, and Assets associated with the group are also displayed. Additionally, configuration permissions tied to a Group can be updated directly from the “View Group” page.
+Viewing a group displays all Group information, such as ID, name, description, global roles, etc. The Group Members, Organizations, and Assets associated with the group are also displayed.
 
 ![image](images/group_view_pro_ui.png)
 
-* All configuration permissions are displayed in a dropdown which is grouped into subcategories. If the selection of configuration permissions is different from their current value, an “Update Configuration Permissions” button is displayed.
+* The **Configuration Permissions** card lists the Configuration Permissions the Group's Global Roles carry, grouped by area. It is read-only: to change them, a Superuser edits the Role on the **Roles** page or changes the Group's Global Roles.
 * A Group's history, opened from the ⚙️ menu, is shown only to Users with the **View Group** configuration permission, because it also lists the Group's past Asset and Organization Roles.
-
-![image](images/groups_pro_configuration_permissions.png)
-
-* Once a few additional permissions have been selected, the user will be asked to confirm they would like to update the permissions for the selected group before an update is made.
 
 ## Create a User Group
 
@@ -51,7 +47,7 @@ Viewing a group displays all Group information, such as ID, name, description, g
 
 3. In the **New Group** window, set the Name for this Group, and add a Description if you wish.
 
-   You can also select a Global Role that you wish to apply to this Group. Adding a Global Role to the Group will give all Group Members access to all DefectDojo data, along with a limited amount of edit access depending on the Global Role you choose. See our **Introduction To Roles** article for more information.
+   You can also select the Global Roles that you wish to apply to this Group. Adding a Global Role to the Group will give all Group Members access to all DefectDojo data, along with a limited amount of edit access depending on the Global Role you choose; several Global Roles add up. See our **Introduction To Roles** article for more information.
 
 4. Click **Submit**.
 
@@ -59,7 +55,7 @@ Viewing a group displays all Group information, such as ID, name, description, g
 
 The account that initially creates a Group will have an Owner Role for the Group by Default.
 
-To change a Group's Name, Description, email address or Global Role later, open the Group page, click the ⚙️ button in the top right corner, and select **Edit Group**.
+To change a Group's Name, Description, email address or Global Roles later, open the Group page, click the ⚙️ button in the top right corner, and select **Edit Group**.
 
 ### Set an email address to receive reports
 
@@ -130,7 +126,7 @@ In the **Members** table of the **Permissions for Group** window:
 
 ## Manage a Group's Permissions
 
-Note that only Superusers can edit a Group's permissions (Asset / Organization, or Configuration).
+Note that only Superusers can edit a Group's permissions (Asset / Organization, or the Global Roles that carry its Configuration Permissions).
 
 ### Add Asset Roles or Organization Roles for a Group
 
@@ -156,6 +152,9 @@ As with Group Members, a Group's Role on an Asset or Organization can be changed
 
 ### Assign Configuration Permissions to a Group
 
-If you want the Members in your Group to access Configuration functions, and control certain aspects of DefectDojo, you can assign these responsibilities from the Group page, using the **Configuration Permissions** drop\-down described in [Viewing A Group](#viewing-a-group).
+If you want the Members in your Group to access Configuration functions, and control certain aspects of DefectDojo, give the Group a Global Role that carries those Configuration Permissions. Every Member of the Group then holds them.
 
-Select the permissions you want from the drop\-down, click **Update Configuration Permissions**, and confirm the change.
+1. On the **Settings > Users & Permissions > Roles** page, create a Role for the settings pages (or open one that already carries them) and enable the rows you want in its **Configuration Permissions** table. See [Custom Roles](../pro__custom_rbac_roles/#configuration-permissions).
+2. Open the Group, choose **Edit Group** from the ⚙️ menu, and add that Role under the Group's **Global Roles**. The Group's other Global Roles stay as they are.
+
+The Group page's **Configuration Permissions** card shows the result. Only a Superuser can grant Configuration Permissions this way.

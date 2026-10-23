@@ -109,6 +109,22 @@ Permissions are grouped into three tables plus a checklist.
 | Mitigation Policy | Edit |
 | Audit Log, Metering | View |
 
+**Configuration Permissions** open settings pages and instance-wide catalogs. Like the Global Feature Permissions, **they only take effect when the role is held as a Global Role**, and **only a Superuser can grant them**: a Global Owner can edit a custom role, but not add a row of this table to it, clone a role that carries one, or set such a role as a Global Role. The built-in roles carry none of them.
+
+| Row | Available actions |
+| --- | --- |
+| Users, Finding Templates, Note Types, Tool Types, Tool Configurations, SLA Configurations, Language Types, CI/CD Infrastructure, Jira Instances, Questionnaires, Prioritization Engines, Asset Platforms, Asset Lifecycles, Asset Origins | View, Add, Edit, Delete |
+| Groups | View, Add |
+| Environments, Regulations | Add, Edit, Delete |
+| Test Types | Add, Edit |
+| Questions | View, Add, Edit |
+| GitHub Configurations | View, Add, Delete |
+| Scheduling Service Schedules | View, Edit, Delete |
+| PSIRT | View, Edit |
+| Announcement, Login Banner | Edit |
+
+A row whose feature is turned off on your instance (Jira, GitHub, questionnaires, the Scheduling Service, PSIRT) is still listed, with a note that the grant has no effect until the feature is enabled. The [Configuration Permission Chart](../user_permission_chart/#configuration-permission-chart) says what each action opens.
+
 **Additional Permissions** is a checklist of capabilities that don't fit a View/Add/Edit/Delete shape:
 
 * **Configure Asset Notifications**: choose which notifications a single Asset sends, and where.
@@ -148,8 +164,8 @@ Custom roles appear in every role dropdown, alongside the built-ins:
 
 | Where | How |
 | --- | --- |
-| **Global Role on a user** | The **Global Role** field on the user's form. Superusers only. See [Set a User's permissions](../set_user_permissions/). |
-| **Global Role on a group** | The **Global Role** field on the group's form. See [Share permissions: User Groups](../create_user_group/). |
+| **Global Role on a user** | The **Global Roles** field on the user's form; a user may hold several, and they add up. Superusers only. See [Set a User's permissions](../set_user_permissions/). |
+| **Global Role on a group** | The **Global Roles** field on the group's form. See [Share permissions: User Groups](../create_user_group/). |
 | **Organization or Asset membership** | The Permissions dialog on the Organization or Asset, for both users and groups. See [Set Permissions in Pro](../pro_permissions_overhaul/). |
 | **Default group role** | **Default group role** in System Settings, applied to newly created users. See [Manage default permissions](../about_perms_and_roles/#manage-default-permissions). |
 | **Role within a group** | The role dropdown on a group's member list. This dropdown only offers roles that grant at least one Group permission, so a role with no Group permissions will not appear there. |
@@ -169,6 +185,20 @@ Parts of the UI are gated on a minimum Global Role rather than on an individual 
 * **Owner can never be earned this way.** Role management, and everything else gated on the Owner Global Role, stays with superusers and the built-in Owner.
 
 Coverage has to be complete, which occasionally surprises people. A role cloned from Maintainer earns the Maintainer tier. Rebuild Maintainer's permissions by hand, miss one, and the role lands on the Writer tier instead. If a custom Global Role is missing UI you expected, compare it against the built-in tier in the [Action permission charts](../user_permission_chart/).
+
+## Configuration Permissions
+
+A user's Configuration Permissions are the union of what their own Global Roles carry and what the Global Roles of their Groups carry. The **Configuration Permissions** card on a User page or a Group page lists the result and is read-only. To grant a settings page to someone:
+
+1. Create a role for the settings pages (for example **Users Manager**), or open one that already carries them.
+2. Enable the rows you want in the **Configuration Permissions** table and save.
+3. Add the role under **Global Roles** on the **Edit User** form, beside the Global Role the user already holds, or under a Group's Global Roles on the **Edit Group** form, so every member holds it.
+
+Global Roles add up, so the role that opens the settings pages sits beside **Reader** or **Maintainer** rather than replacing it. One **Users Manager** role can serve every user who needs that page, whatever else they hold.
+
+Upgrading from a version where Configuration Permissions were set on the User and Group pages creates these roles for you: for every distinct set of Configuration Permissions someone held, one custom role carrying exactly that set, named after the areas it covers, such as **Users Manager** or **Configuration Viewer**, with a description listing them. Every user and every group that held the set gets that role added to their Global Roles; the Global Role they had before (Reader, Maintainer, Owner, or none) is left exactly as it was. The roles are ordinary custom roles: rename them, merge them, or give several holders one role, as you prefer. The old per-user and per-group permission forms no longer change anything and say so.
+
+An instance with its own authentication backend (a subclass of Django's `ModelBackend` named in `AUTHENTICATION_BACKENDS`) must give that class the `RoleAwarePermissionsMixin` from `pro.authorization.backends`, or `manage.py check` refuses to start: without it the backend would keep answering settings-page checks from the old per-user rows.
 
 ## Role history
 

@@ -58,11 +58,11 @@ The five roles below are DefectDojo Pro's **built-in roles**. They are locked pr
 
 Each Configuration Permission refers to a particular function in the software, and has an associated set of actions a user can perform related to this function.
 
-The majority of Configuration Permissions give users access to certain pages in the UI. 
+The majority of Configuration Permissions give users access to certain pages in the UI. They are granted on a Role, in the **Configuration Permissions** table of the role editor, and take effect when that Role is held as a Global Role (see [Custom Roles](../pro__custom_rbac_roles/#configuration-permissions)). Only a Superuser can grant them.
 
 | **Configuration Permission** | **View ☑️** | **Add ☑️** | **Edit ☑️** | **Delete ☑️** |
 | --- | --- | --- | --- | --- |
-| Credential Manager | Access the Credential Manager page | Add new entries to the Credential Manager | Edit Credential Manager entries | Delete Credential Manager entries |
+| Asset Platforms, Asset Lifecycles, Asset Origins | Access the **Settings > Configuration > Asset Attributes** pages | Add a new attribute option | Edit an existing attribute option | Delete an attribute option |
 | Development Environments | n/a | Add new Development Environments to the **Settings > Configuration > Environments** list | Edit Development Environments in the **Settings > Configuration > Environments** list | Delete Development Environments from the **Settings > Configuration > Environments** list |
 | Finding Templates¹ | Access the **Act > Explore > Findings > Templates** page | Add a Finding Template | Edit a Finding Template | Delete a Finding Template |
 | Groups | Access the **Settings > Users & Permissions > Groups** page | Add a new User Group | Superuser only | Superuser only |
