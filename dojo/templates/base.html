@@ -419,8 +419,12 @@
 
                     {% block support-tab %}
                     <a href="{% url 'support' %}" class="flex items-center gap-3 px-4 py-2 transition-colors">
-                        <i class="fa-solid fa-level-up w-5 text-center flex-shrink-0"></i>
-                        <span class="truncate">{% trans "Upgrade" %}</span>
+                        <i class="fa-solid fa-life-ring w-5 text-center flex-shrink-0"></i>
+                        <span class="truncate">{% trans "Support" %}</span>
+                    </a>
+                    <a href="{% url 'support' %}#sp-pro" class="flex items-center gap-3 px-4 py-2 transition-colors">
+                        <i class="fa-solid fa-rocket w-5 text-center flex-shrink-0"></i>
+                        <span class="truncate">{% trans "Upgrade to Pro" %}</span>
                     </a>
                     {% endblock %}
                 </nav>
