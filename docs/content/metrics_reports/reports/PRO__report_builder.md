@@ -227,7 +227,7 @@ A Generated Report moves through these statuses as it is built:
 | Completed | The report is ready to download. |
 | Failed | The report could not be generated. The Generated Reports list shows why, under the status, in the language of the person who requested the report. |
 
-A reason names what the report itself could not do: a variable it was not given, a finding that no longer exists or is no longer visible, a Block that could not be built (named, with its own reason). A failure the report cannot explain, such as a database or storage error, reads "An unexpected error occurred. The server log has the details." and the full error goes to the server log rather than to the page.
+A reason names what the report itself could not do: a variable it was not given, a finding that no longer exists or is no longer visible, a Block that could not be built (named, with its own reason), or a report that ran past the generation time limit (about nine minutes), which suggests a narrower filter or fewer Blocks and, for a PDF or HTML report, a data format (CSV, Excel or JSON) instead. A failure the report cannot explain, such as a database or storage error, reads "An unexpected error occurred. The server log has the details." and the full error goes to the server log rather than to the page.
 
 > **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC): users only ever see data they are authorized to view, even inside a report.
 
