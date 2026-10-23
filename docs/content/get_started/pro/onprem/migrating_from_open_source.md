@@ -240,7 +240,7 @@ Once the application is running against the restored database:
 
 ### Planning the cutover
 
-The dump is a point-in-time snapshot, so anything created in the open source instance after you take it will not be in the Pro deployment. To avoid losing data, turn on read-only mode in the open source instance before the final dump. Read-only mode is available in DefectDojo 3.4.300 and later.
+The dump is a point-in-time snapshot, so anything created in the open source instance after you take it will not be in the Pro deployment. To avoid losing data, turn on read-only mode in the open source instance before the final dump. Read-only mode is available in DefectDojo 3.5.0 and later.
 
 1. Go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**.
 2. Wait until **Configuration > Celery Status** shows no queued tasks. Then run `celery --app=dojo inspect active` in the Celery worker container, and wait until it reports `empty` for every worker. Tasks that started before the lock still write until they finish.
@@ -329,6 +329,8 @@ Compare the two instances once the first Sync ends:
 Run Sync on the schedule you set, or by hand. Each run updates what changed on the source. It makes no copies: a finding keeps its identity through its source id and its hash. A finding that the source deleted from a test closes in DefectDojo Pro: it is marked mitigated, not deleted. A run with no change on the source changes nothing in Pro.
 
 On cutover day, turn on read-only mode in the open source instance before the final Sync. The connector only reads, so it keeps working while the source is read-only.
+
+Read-only mode is available in DefectDojo 3.5.0 and later. On 3.4.300, stop all writes by hand before the final Sync: pause CI pipelines, scheduled imports, and anything else that pushes findings.
 
 1. Go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**.
 2. Wait until **Configuration > Celery Status** shows no queued tasks. Then run `celery --app=dojo inspect active` in the Celery worker container, and wait until it reports `empty` for every worker. Tasks that started before the lock still write until they finish.
