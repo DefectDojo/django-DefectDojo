@@ -425,7 +425,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         # The push goes out once the risk acceptance is committed. The view runs in autocommit, where that is
         # straight away; a test case never commits, so run each callback as it is registered, as autocommit does.
-        with patch("dojo.risk_acceptance.helper.transaction.on_commit", side_effect=lambda func, *args, **kwargs: func()):
+        with patch("dojo.risk_acceptance.helper.transaction.on_commit", side_effect=lambda func, *_args, **_kwargs: func()):
             response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
         self.assertEqual("/engagement/1", response.url)
 
