@@ -3,6 +3,7 @@ import logging
 import pghistory
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import PermissionDenied
+from django.db.models import Exists, OuterRef, Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -155,8 +156,38 @@ def expire_now(risk_acceptance, user=None, reason=None):
                          url=reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)))
 
 
+def findings_accepted_elsewhere(risk_acceptance):
+    """
+    The members of an expired risk acceptance that have been risk accepted some other way since it expired.
+
+    A finding is risk accepted by one acceptance at a time, through its single ``risk_accepted`` flag. When an
+    acceptance that reactivates its findings expires, it clears that flag but keeps the findings as members, so
+    one of them may be accepted again: in another risk acceptance, or with a simple risk acceptance. A member
+    that is risk accepted again belongs to that acceptance now. Without reactivation the members stay risk
+    accepted by this acceptance, so only one another unexpired acceptance also lists counts.
+    """
+    in_another = Risk_Acceptance.objects.filter(
+        accepted_findings=OuterRef("pk"),
+        expiration_date_handled__isnull=True,
+    ).exclude(pk=risk_acceptance.pk)
+    held = Q(Exists(in_another))
+    if risk_acceptance.reactivate_expired:
+        held |= Q(risk_accepted=True)
+    return risk_acceptance.accepted_findings.filter(risk_accepted=True).filter(held)
+
+
 def reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
     if risk_acceptance.expiration_date_handled:
+        # A member accepted elsewhere since the expiry stays where it is: reinstating would otherwise list it
+        # in two acceptances, and expiring or removing either one later would clear the flag the other relies on.
+        if accepted_elsewhere := list(findings_accepted_elsewhere(risk_acceptance)):
+            logger.info(
+                "Reinstating risk acceptance %i:%s leaves out %i findings accepted elsewhere since it expired",
+                risk_acceptance.id,
+                risk_acceptance,
+                len(accepted_elsewhere),
+            )
+            risk_acceptance.accepted_findings.remove(*accepted_elsewhere)
         logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
         # The "Reinstate" button has no date to offer and passes the expiration date
