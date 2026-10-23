@@ -4,12 +4,13 @@ from contextlib import suppress
 from datetime import datetime
 from itertools import batched
 from time import sleep, strftime
+from types import SimpleNamespace
 
 from django.conf import settings
-from django.db import OperationalError, transaction
+from django.db import OperationalError, router, transaction
 from django.db.models import Count
 from django.db.models.query_utils import Q
-from django.db.models.signals import post_delete, pre_delete
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
@@ -30,6 +31,7 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
+from dojo.importers.import_lock import lock_tests_of_findings_under_import, unlock_tests_under_import
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
@@ -387,56 +389,86 @@ def group_findings_by(finds, finding_group_by_option):
     return affected_groups, grouped, skipped, groups_created
 
 
-def get_or_create_auto_finding_group(test, name, creator):
+def _test_finding_ids_by_group_name(test_id, group_by, names):
+    """Ids of the test's findings per group name, for the given names only, read in one pass."""
+    fields = ("id", "title", "component_name", "component_version", "file_path", "vuln_id_from_tool")
+    by_name = {}
+    # Plain values, not Finding instances: get_group_by_group_name only reads these attributes, and
+    # building a model instance per row is what made a large test expensive to scan.
+    for row in Finding.objects.filter(test_id=test_id).order_by("id").values(*fields).iterator(chunk_size=2000):
+        group_name = get_group_by_group_name(SimpleNamespace(**row), group_by)
+        if group_name in names:
+            by_name.setdefault(group_name, []).append(row["id"])
+    return by_name
+
+
+def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
     """
-    Auto grouping keeps one group per (test, name), whoever created it. Reuse the oldest
-    existing group, so a test that already holds same-name duplicates (from a raced import,
-    or from the old creator-scoped lookup) resolves to one group instead of raising
-    MultipleObjectsReturned. The creator is only recorded on a newly created group.
+    Put the findings of one (re)import into their auto groups, all names at once.
+
+    For each name: reuse the oldest group of that (test, name), else create one (unless
+    create_finding_groups_for_all_findings is off and the name has a lone finding no other
+    finding of the test shares). A newly created group also takes the test's other findings
+    with the same name. The cost does not grow with the number of groups: existing groups
+    are read in one query, the test's findings once (and only when some name has no group
+    yet), and new groups and memberships are written in bulk.
+
+    bulk_create sends no post_save, so it is replayed once per new group with
+    ``bulk_created_instances`` set to the whole batch: a receiver keeps working one group at
+    a time, or can handle the batch in one go.
     """
-    name = name[:255]
-    finding_group = Finding_Group.objects.filter(test=test, name=name).order_by("id").first()
-    if finding_group is not None:
-        return finding_group, False
-    return Finding_Group.objects.create(test=test, creator=creator, name=name), True
+    group_names_to_findings = {name: findings for name, findings in group_names_to_findings.items() if name is not None and findings}
+    if not group_names_to_findings:
+        return
+    test_id = next(iter(group_names_to_findings.values()))[0].test_id
 
+    # Groups are one per (test, name[:255]); the oldest wins where duplicates exist.
+    groups = {}
+    for finding_group in Finding_Group.objects.filter(test_id=test_id, name__in={name[:255] for name in group_names_to_findings}).order_by("id"):
+        groups.setdefault(finding_group.name, finding_group)
+    # A name without a group needs the test's other findings of that name: they decide
+    # whether a lone finding forms a group, and a new group takes them in.
+    missing = {name for name in group_names_to_findings if name[:255] not in groups}
+    others = _test_finding_ids_by_group_name(test_id, group_by, missing) if missing else {}
 
-def add_findings_to_auto_group(name, findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
-    if name is not None and findings is not None and len(findings) > 0:
-        creator = get_current_user()
-        test = findings[0].test
+    creator = get_current_user()
+    new_groups = []
+    members = defaultdict(dict)  # stored name -> finding ids, dict for ordered de-duplication
+    for name, findings in group_names_to_findings.items():
+        key = name[:255]
+        finding_ids = [finding.id for finding in findings]
+        if key not in groups:
+            imported = set(finding_ids)
+            old_ids = [finding_id for finding_id in others.get(name, []) if finding_id not in imported]
+            if not (create_finding_groups_for_all_findings or len(findings) > 1 or old_ids):
+                # a lone finding nothing else in the test shares a name with stays ungrouped
+                continue
+            groups[key] = Finding_Group(test_id=test_id, creator=creator, name=key)
+            new_groups.append(groups[key])
+            members[key].update(dict.fromkeys(old_ids))
+        members[key].update(dict.fromkeys(finding_ids))
 
-        if create_finding_groups_for_all_findings or len(findings) > 1:
-            # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
-            finding_group, created = get_or_create_auto_finding_group(test, name, creator)
-            if created:
-                logger.debug("Created Finding Group %d:%s for test %d:%s", finding_group.id, finding_group, test.id, test)
-                # See if we have old findings in the same test that were created without a finding group
-                # that should be added to this new group
-                old_findings = Finding.objects.filter(test=test)
-                for f in old_findings:
-                    f_group_name = get_group_by_group_name(f, group_by)
-                    if f_group_name == name and f not in findings:
-                        finding_group.findings.add(f)
-
-            finding_group.findings.add(*findings)
-        else:
-            # Otherwise add to an existing finding group if it exists only
-            finding_group = Finding_Group.objects.filter(test=test, name=name[:255]).order_by("id").first()
-            if finding_group is not None:
-                finding_group.findings.add(*findings)
-            else:
-                # See if we have old findings in the same test that were created without a finding group
-                # that match this new finding - then we can create a finding group
-                old_findings = Finding.objects.filter(test=test)
-                created = False
-                for f in old_findings:
-                    f_group_name = get_group_by_group_name(f, group_by)
-                    if f_group_name == name and f not in findings:
-                        finding_group, created = get_or_create_auto_finding_group(test, name, creator)
-                        finding_group.findings.add(f)
-                if created:
-                    finding_group.findings.add(*findings)
+    with transaction.atomic():
+        if new_groups:
+            Finding_Group.objects.bulk_create(new_groups)
+            db = router.db_for_write(Finding_Group)
+            for finding_group in new_groups:
+                logger.debug("Created Finding Group %d:%s for test %d", finding_group.id, finding_group, test_id)
+                post_save.send(
+                    sender=Finding_Group, instance=finding_group, created=True, update_fields=None, raw=False, using=db,
+                    bulk_created_instances=new_groups,
+                )
+        through = Finding_Group.findings.through
+        # ignore_conflicts keeps findings.add()'s "already a member" no-op
+        through.objects.bulk_create(
+            [
+                through(finding_group_id=groups[key].id, finding_id=finding_id)
+                for key, finding_ids in members.items()
+                for finding_id in finding_ids
+            ],
+            ignore_conflicts=True,
+            batch_size=1000,
+        )
 
 
 @app.task
@@ -549,6 +581,33 @@ def post_process_findings_batch(
     if not finding_ids:
         return
 
+    # Deduplication may mark these findings duplicate, and everything below goes on writing them,
+    # so hold the import lock on their tests until it is done (see dojo.importers.import_lock).
+    locked_tests = lock_tests_of_findings_under_import(finding_ids)
+    try:
+        _post_process_findings_batch(
+            finding_ids,
+            dedupe_option=dedupe_option,
+            product_grading_option=product_grading_option,
+            issue_updater_option=issue_updater_option,
+            push_to_jira=push_to_jira,
+            jira_instance_id=jira_instance_id,
+            force_sync=force_sync,
+        )
+    finally:
+        unlock_tests_under_import(locked_tests)
+
+
+def _post_process_findings_batch(
+    finding_ids,
+    *,
+    dedupe_option,
+    product_grading_option,
+    issue_updater_option,
+    push_to_jira,
+    jira_instance_id,
+    force_sync,
+):
     system_settings = System_Settings.objects.get()
 
     # The status-changing dedup / false-positive-history writes below update dojo_finding

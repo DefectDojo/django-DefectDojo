@@ -103,6 +103,8 @@ The response is shaped like this (truncated):
 
 Use only the `path` values returned here for a block's `fields` list. Some paths are long-form or markdown and are intended for **detail** blocks rather than narrow tabular columns — `field_options` is the authoritative list, so confirm against it rather than hardcoding an exhaustive set.
 
+A block's `ordering` is one of that model's `ordering_fields` values, with a leading `-` for descending order, or blank for none. Any other value is refused with `400` under `tabular_configuration.ordering` (or `detail_configuration.ordering`). A `PATCH` that leaves `model_choice` out is checked against the block's saved model, and a block's `model_choice` cannot change after it is created.
+
 ### Filter names from the schema
 
 A block's filters live in `filter_entries`, where each entry is a `{field, value}` pair. The valid `field` names are the **GET query-parameter names** of the underlying entity's REST endpoint — *not* the labels you see in the UI. Discover them by reading the OpenAPI schema:

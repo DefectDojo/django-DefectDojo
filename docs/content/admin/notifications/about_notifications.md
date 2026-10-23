@@ -61,6 +61,34 @@ To remove one or more Alerts from the Alerts Page, check the empty box next to i
 * Removing an Alert only affects your own Alerts List \- it will not affect any other user’s Alerts.
 * Removing an Alert does not remove any import history or activity logs from DefectDojo.
 
+## Notification Inbox (Pro)
+
+In DefectDojo Pro, the bell in the sidebar footer opens a notification inbox instead of the Alerts List menu, and the number on the bell counts your **unread** alerts rather than every alert you have.
+
+* **Grouped by record.** Unread alerts about the same Finding, Test, Engagement, Asset, Organization or Risk Acceptance are shown together under that record's name, with the number of unread alerts it carries and its three newest alerts. Click the record's name to open it. An alert that is not about a record is shown on its own. The inbox shows the twenty newest groups; **Load Older**, under the last one, adds the next twenty.
+* **Kept current.** The number on the bell and on each tab refreshes every 30 seconds while DefectDojo is open in a visible browser tab, and as soon as you come back to the tab. The groups in an open inbox stay where they are until you open it again.
+* **Read one at a time.** Clicking an alert marks it read and opens the record it is about; the number on the bell drops by one straight away, and stays down after a reload. Reading an alert changes nothing else: the Finding or other record is untouched and no notification is sent.
+* **Tabs.** **All** shows every unread alert; **Mentions**, **Assigned**, **Watching** and **System** each show one kind. Mentions are notes that mention you; Assigned is work assigned to you, review requests and risk acceptance requests; System is connector health, Jira and SLA alerts; Watching is everything else about a record you can see. Each tab shows how many unread alerts it holds.
+* **Mark All Read** (the double check mark in the inbox header) marks every unread alert on the open tab read. **See All Alerts** (the arrow) opens the Alerts Page, which still lists every alert you have, read or not.
+* **The group menu** (the three dots beside a record's name) offers **Mark Group Read**, which reads that record's alerts on the open tab, and **Mute This Record**.
+* **Clear All Alerts** moves from the bell to the Alerts Page toolbar. It still deletes all of your alerts, after a confirmation.
+
+### Muting a record (Pro)
+
+**Mute This Record**, in the inbox's group menu or an alert's menu on the Alerts Page, marks that record's unread alerts read, and every later alert about it arrives already read: it is still recorded, and still listed on the Alerts Page with a **Muted** tag, but it never counts on the bell. Muting changes nothing but the inbox: email, Slack and Teams notifications about the record are sent as before.
+
+A mute never touches system alerts (connector health, Jira and SLA alerts): a muted record's system alerts still arrive unread and count on the bell. A record whose alerts are all system alerts offers no mute.
+
+Your muted records are listed on your **User Profile** under **Muted Records**, each with an **Unmute** action. After unmuting, new alerts about the record count as unread again.
+
+### The Alerts Page (Pro)
+
+With the inbox on, the Alerts Page shows whether each alert is read in a **Read** column (with a **Muted** tag on alerts about a muted record), and can be filtered to unread alerts. Each alert's menu offers **Mark Read** or **Mark Unread**, and **Mute This Record** (except on a system alert); an alert's title links to the record it is about. **Mark All Read** and **Clear All Alerts** sit on the toolbar.
+
+Alerts about a record you can no longer see (for example, after you lose access to its Asset) are left out of the inbox and the count.
+
+When the inbox is first turned on, every alert you already had counts as read, so the bell starts at zero.
+
 ## Narrowing Review Request Notifications (Pro)
 
 If a review is requested from all eligible reviewers, everyone eligible on that asset is notified. That is a lot of mail for a reviewer who only looks after part of your estate.
@@ -89,12 +117,13 @@ It is aggregated per person rather than per Finding: assigning a hundred Finding
 
 A Connector that stops working is quiet about it. Nothing in DefectDojo fails, and the only sign is on the **Upstream Connectors** page, which nobody is watching. The **Connector Health Warning** notification is the message that finds you instead.
 
-It covers the two ways a Connector goes quiet:
+It covers the three ways a Connector goes quiet:
 
 * **Its runs start failing.** A Discover or Sync ends in error or times out against your tool. The message names the Connector and carries the tool's own error, which is usually an expired or narrowed credential.
 * **Its tool stops returning data.** A run succeeds, but every record the Connector holds is now **Missing**. The run reports success, so this state raises no error anywhere. See [Managing Operations](/connectors/upstream/manage_operations/) for what that state means and how it clears.
+* **Its Syncs return zero results.** The records are still there and every Sync succeeds, but every actively mapped record has returned zero Findings for two Syncs in a row, after importing Findings in the previous 30 days. Records with nothing imported in that window are clean projects and do not count, and one record that still imports keeps the message from going out. See [Zero Results](/connectors/upstream/manage_operations/#zero-results).
 
-Both messages arrive once, not once per run. A Connector with a dead credential on an hourly schedule sends one message when it starts failing, then stays quiet until its runs succeed again. A Connector that lost visibility sends one message per day while it stays blind, and re-arms once the records come back.
+None of these messages arrives once per run. A Connector with a dead credential on an hourly schedule sends one message when it starts failing, then stays quiet until its runs succeed again. A Connector that lost visibility, or keeps returning zero results, sends one message per day while the condition lasts, and re-arms once a Sync imports data again.
 
 The notification is on **🔔 Alerts** by default. Set it to Email, Slack or Teams on your notification settings page, under **Connections**. A Connector that is set up correctly but has never seen any data is a separate case, and it warns you when you save it rather than later.
 

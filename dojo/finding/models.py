@@ -10,7 +10,7 @@ import dateutil
 from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -519,6 +519,14 @@ class Finding(BaseModel):
                 fields=["test", "numerical_severity", "id"],
                 name="idx_finding_test_numsev",
             ),
+            # Case-insensitive title filters (iexact, __in over upper-cased values,
+            # istartswith) compile to UPPER("title"::text), which neither the plain
+            # title index nor the trigram one can serve. text_pattern_ops also serves
+            # the LIKE 'prefix%' an istartswith renders.
+            models.Index(
+                OpClass(Upper("title"), name="text_pattern_ops"),
+                name="idx_finding_upper_title",
+            ),
             models.Index(
                 fields=["sla_expiration_date", "test"],
                 name="idx_finding_sla_open_cov",
@@ -749,9 +757,11 @@ class Finding(BaseModel):
         for files in old_files:
             copy.files.add(files.copy())
         if locations_enabled():
-            old_location_refs = self.locations.all()
-            for location_ref in old_location_refs:
-                location_ref.copy(copy)
+            # One row per location: a location several tests reported is copied once, onto the
+            # copy's own test (see copy_location_references).
+            from dojo.location.utils import copy_location_references  # noqa: PLC0415 -- circular import
+
+            copy_location_references(self, copy)
         else:
             # TODO: Delete this after the move to Locations
             # Copy the endpoint_status

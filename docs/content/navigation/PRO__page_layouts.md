@@ -85,6 +85,10 @@ When you open one of the six pages, DefectDojo picks the first of these that app
 3. The instance-wide shared default, if an administrator has set one.
 4. The layout shipped with DefectDojo.
 
+## Fields you can change in place
+
+On the Finding, Engagement and Asset pages, a field tile or a row of the details table can be changed where it sits when the field supports it and you can edit the record: a pencil appears beside the value. On a Finding that is Severity, Assignees, Planned Remediation Date and Description; on an Engagement, Status, Lead, Start Date, End Date and Description; on an Asset, Business Criticality, Platform, Lifecycle and Description. Moving or resizing the widget does not change this. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
+
 ## Widgets with nothing to show
 
 A widget is left out of the page when it has nothing to display, for example a tab for a feature that is turned off, or a table for a record that has no rows. The remaining widgets close the gap, so you do not get holes in the page.

@@ -1727,7 +1727,7 @@
                 }
               });
             $('a.merge').on('click', function (e) {
-              if (checkbox_count > 1)
+              if ($('input[type=checkbox].select_one:checked').length > 1)
               {
                 var hidden_input = $('<input type="hidden" value="merge_findings" name="merge_findings">')
                 $("form#bulk_change_form").attr("action", "{% url 'merge_finding_product' product_tab.product.id %}");

@@ -113,6 +113,15 @@ Changing the Organization field moves the Asset, along with its Engagements, Tes
 
 ![image](images/assets_ss2.png)
 
+### Change a Field in Place
+
+A few fields can also be changed on the Asset page itself, without opening Edit Asset: the **Name** and **Tags** in the page header, and **Business Criticality**, **Platform**, **Lifecycle** and **Description** wherever the page layout shows them. Hover over a value (or reach it with the keyboard) and click the pencil, or the value, to open its editor. **Enter** or **Save** saves the change and **Esc** or **Cancel** puts the value back; clicking elsewhere saves nothing (**Ctrl+Enter** or **Cmd+Enter** saves the Description, where Enter is a new line).
+
+* **Business Criticality**, **Platform** and **Lifecycle** can be cleared as well as changed. Platform and Lifecycle offer the options configured under [Editable Platform, Lifecycle and Origin Lists](/asset_modelling/pro__asset_attribute_options/).
+* If someone else changed the Asset after you opened the page, nothing is overwritten: DefectDojo shows **Asset Changed** and offers **Reload** or **Keep Editing**.
+
+Only users who can edit the Asset (a Maintainer or above on it, or its Organization) see the pencil. Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place) for the rules every page shares.
+
 ### Bulk Edit Assets
 
 Several Assets can be edited in one action from the All Assets list. Select the Assets using the checkboxes on the left of the list, then click **Bulk Edit** in the bar that appears above the table.
@@ -222,6 +231,38 @@ Asset's name at the top of the Asset page, and as an icon in front of each node'
 repository, the service built from it, or the host it runs on. The hierarchy view's field picker
 (the eye control, top left) can also show the type's label under each node's name.
 
+### Types Set by Connectors and Rules
+
+Connectors that know what an Asset is set its type for you, on mapping and on every Sync:
+
+| Connector | Type |
+|---|---|
+| CrowdStrike Falcon, Palo Alto Cortex XDR, Wazuh, Censys, Shodan | Host |
+| GitHub, GitHub Advanced Security, GitLab, Bitbucket, Azure DevOps | Repository |
+| NeuVector, Quay | Container Image |
+| Orca Security | Cloud Account |
+| Have I Been Pwned | Domain |
+| Qualys | Host, for the default one-record-per-host grouping (a record grouped by tag is left unclassified) |
+| runZero | From the asset's type: machines are hosts, network gear and IoT are devices, anything else is a host |
+| ServiceNow CMDB | From the CI class: servers and computers are hosts, applications and services are services, network gear is a device |
+| CyCognito | IPs are hosts, domains are domains, web apps are services |
+| Jit | Repositories, APIs (services) and cloud accounts |
+| JSM Assets | From the object type's name, for the common names (Server, Application, Business Service, ...) |
+| Backstage | From the Component's type: `service` and `website` are services, `library` is a package |
+| Deepfence ThreatMapper | Hosts, container images and cloud accounts |
+
+A connector never overwrites a type a person chose. It fills in an Asset that has no type, and
+it keeps the type it set up to date when the source system reclassifies the item. Once someone
+sets a different type (on the Asset form, through the API, in a bulk edit, or with a rule), the
+connector leaves that Asset's type alone. When records from several connectors, or several
+records from one connector, map onto the same Asset, the first one to classify it keeps it and
+the others leave it alone. If the record that classified an Asset is later removed, the type stays
+as it is; change it on the Asset form to reclassify. A vendor value DefectDojo has no type for (a
+CyCognito certificate, a custom CI class) leaves the Asset unclassified.
+
+To classify Assets no connector types, use the Triage Engine's **Set a Field** node on Assets
+with the **Type** field. It can set any type, including ones you added.
+
 Asset types are available through the API at `/api/v2/asset_types/` (read-only) and as the
 `asset_type` field on `/api/v2/assets/` and `/api/v2/products/`.
 
@@ -273,9 +314,25 @@ again — to stop a Connector claiming an Asset, change its mapping rather than 
 
 Adding and withdrawing an alias requires edit permission on the Asset.
 
-Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created, and the Asset
-Identity card and the **Type** field appear only when it is on; existing aliases stay readable
-whether it is on or off.
+### Turning Asset Identity on and off
+
+Aliases are controlled by the **Asset Identity** feature on the
+[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. While it is off, Connectors map
+Records by name alone, you cannot add or withdraw aliases, and the Asset Identity card and the
+**Type** field are hidden. Existing aliases stay readable through the API either way.
+
+Turning it on changes nothing about Records that are already mapped. Each Connector records its
+own identifier for a Record whenever that Record's Mapping is created or changed, whether the
+feature is on or not, so a Record you remapped by hand while it was off stays on the Asset you
+chose once it is on. A change takes effect without a restart.
+
+To go back to matching by name, turn **Asset Identity** off, or run
+`python manage.py set_feature asset_aliases False` in a DefectDojo container. The aliases are
+kept, so turning it on again later is just as safe.
+
+Earlier releases switched this with the `DD_V3_ASSET_ALIASES` deployment setting. An instance
+that had it set to `True` keeps the feature on; otherwise the setting has no effect, apart from
+standing in for the stored value when DefectDojo starts without its database.
 
 ### Container image repositories (the `oci` namespace)
 
@@ -348,8 +405,8 @@ Identity card shows them.
 
 `--connector-config <id>` limits the run to one Connector configuration, and `--json` prints
 the report as JSON. The command never merges Assets or moves Records, and running it again
-only records what is still missing. It works whether or not `DD_V3_ASSET_ALIASES` is on, so you
-can run it before turning identity on.
+only records what is still missing. It works whether or not **Asset Identity** is on, so you
+can run it before turning it on.
 
 ## Asset Versions
 
