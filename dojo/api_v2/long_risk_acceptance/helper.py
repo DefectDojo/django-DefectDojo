@@ -167,15 +167,17 @@ def _handle_expire(ra_engagement: RiskAcceptanceEngagement,
 
 
 def _handle_accept(ra_engagement: RiskAcceptanceEngagement, 
-                   user, finding_qs: QuerySet[Finding]):
+                   user, finding_qs: QuerySet[Finding],
+                   notification):
     """Handle accept event."""
     if ra_engagement.risk_status not in ["Risks Reviewed", "Risks Accepted"]:
         return False
     
     _update_ra_engagement(ra_engagement, {"risk_status": "Risks Accepted"})
     add_note("Long Risk Acceptance Accepted", ra_engagement, user)
-    _accept_findings(finding_qs, ra_engagement)
-    Notification.risk_acceptance_approved(long_risk_acceptance=ra_engagement)
+    _accept_findings(finding_qs, ra_engagement, notification)
+    if notification:
+        Notification.risk_acceptance_approved(long_risk_acceptance=ra_engagement)
     return True
 
 
@@ -205,7 +207,8 @@ EVENT_HANDLERS = {
 @app.task
 def async_apply_rule_long_risk_acceptance(ra_engagement_id: int, 
                                          user_id: int, 
-                                         event: str):
+                                         event: str,
+                                         notification: bool = True):
     """Apply rule for long risk acceptance based on event type.
     
     Args:
@@ -233,10 +236,10 @@ def async_apply_rule_long_risk_acceptance(ra_engagement_id: int,
     # Review event doesn't need finding_qs
     if event == "review":
         with transaction.atomic():
-            handler(ra_engagement, user)
+            handler(ra_engagement, user, notification)
     else:
         with transaction.atomic():
-            handler(ra_engagement, user, finding_qs)
+            handler(ra_engagement, user, finding_qs, notification)
 
 
 def get_expired_long_risk_acceptance_to_handle():
@@ -258,7 +261,7 @@ def automatic_acceptance(*args, **kwargs):
     for long_risk_acceptance in queryset.iterator(chunk_size=200):
         try:
             async_apply_rule_long_risk_acceptance.apply_async(
-                args=(long_risk_acceptance.id, system_user.id, "accept"))
+                args=(long_risk_acceptance.id, system_user.id, "accept", False))
         except Exception as e:
             logger.error(str(e))
             continue
