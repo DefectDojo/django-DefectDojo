@@ -217,8 +217,6 @@ A `widget` block takes a `widget_configuration` of `{"widget_type": ..., "config
 
 Two endpoints return render-ready data for a widget block, which is useful for checking a configuration without generating a report: `POST /report_blocks/widget_data/` for a configuration you have not saved, and `POST /report_blocks/{id}/widget_data/` for a saved block. Both accept an optional `runtime_filters` object and an optional `variables` object (the same shape a report takes), and echo back the effective configuration alongside the data. Without `variables`, a widget whose filters use one is not computed: the response carries `"data": null` and `needs_variables` naming the tokens it waits on.
 
-Creating or reconfiguring a `widget` block requires Customizable Dashboards to be enabled. Blocks saved earlier keep generating regardless.
-
 **A stock cover page.** Stock blocks hold fixed content. The `stock_type` is one of `cover_page`, `table_of_contents`, `page_break`, `image`, or `text_block`.
 
 ```bash

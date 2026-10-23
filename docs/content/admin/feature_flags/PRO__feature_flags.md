@@ -39,6 +39,7 @@ The page lists the features you can choose to adopt. Two kinds of feature are ab
 * **Smart Upload**: see [Smart Upload](/import_data/pro/specialized_import/smart_upload/)
 * **In-App Walkthroughs**: see [Walkthroughs](/navigation/pro__walkthroughs/)
 * **What's New Panel**: see [What's New](/navigation/pro__sidebar/#whats-new)
+* **Triage Engine** (formerly listed as **Triage Engine (formerly Rules Engine 2.0)**): see [About Triage Engine](/automation/triage_engine/about/). It starts no work until someone builds a rule.
 * **Messaging Connectors**: see [Messaging Connectors](/issue_tracking/pro_integration/messaging_connectors/)
 * **Celery Status**: see [Celery Status](/admin/pro__celery_status/)
 * **Location Map**: on wherever [Locations](#locations) is on. See [Location Map](/asset_modelling/locations/pro__location_map/)
@@ -176,7 +177,6 @@ Features under **MCP** appear on the Feature Flags page beneath the MCP server s
 | **Rules Engine** (BETA) | Automate Finding workflows with user-defined rules that react to imports and Finding changes. | Off | [Docs](/automation/rules_engine/about/) |
 | **Scan Cadence Assurance** (BETA) | Schedule hosted repository scans, monitor scan cadence, and export dated attestations. | Off | [Docs](/sensei/scan_cadence_policies/) |
 | **Support** | Open a support request, track its status, and vote on what other customers ask for. When off, the Support pages are hidden and this instance sends no support requests to DefectDojo. | On | [Docs](/navigation/pro__support/) |
-| **Triage Engine (formerly Rules Engine 2.0)** (BETA) | Build automation rules as visual node graphs that react to Finding events, with per-run traces and a delivery outbox. | Off | [Docs](/automation/triage_engine/about/) |
 | **Vulnerability Response Policies** (BETA) | Read the response-policy matrix, the unevaluated queue and the escalation queue, and export machine-readable response evidence. | Off | [Docs](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies) |
 
 ## Feature availability

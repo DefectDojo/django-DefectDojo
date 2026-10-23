@@ -108,7 +108,7 @@ The record catalogs these views route to (Organizations through Findings) are in
 
 ### Triage Engine
 
-One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs, Deliveries and Webhook Receivers. When both engines are turned on, the classic engine appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide; when only one is on, only its pages are listed and no badge appears.
+One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs, Deliveries and Webhook Receivers. When the original Rules Engine is also turned on, it appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide.
 
 ### Remediation Center
 
@@ -236,7 +236,7 @@ Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/
 | --- | --- |
 | **Calendar** | Calendar, from Overview |
 
-The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Triage Engine, the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
+The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
 
 The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 

@@ -1,6 +1,6 @@
 ---
 title: "About Triage Engine"
-description: "What Triage Engine is, how to turn it on, and the concepts it is built from"
+description: "What Triage Engine is, where to find it, and the concepts it is built from"
 weight: 1
 audience: pro
 aliases:
@@ -24,13 +24,13 @@ The original [Rules Engine](/automation/rules_engine/about/) applies an ordered 
 
 Rules are not limited to Findings. An Asset (Product) rule reacts to Assets being created, updated or tagged, or sweeps them on a schedule, and can set their fields, move them between Organizations, tag and untag them, and place them in the Asset hierarchy. That makes recurring inventory work self-service: instead of a one-off migration to regroup Assets, a rule expresses the grouping and keeps enforcing it as new Assets arrive.
 
-Both engines run side by side. Turning on Triage Engine does not disable or convert your existing rules, and there is a [converter](../converting_from_rules_engine/) for when you want to move them across.
+Both engines run side by side. Triage Engine does not disable or convert your existing rules, and there is a [converter](../converting_from_rules_engine/) for when you want to move them across.
 
-## Enabling Triage Engine
+## Where to find Triage Engine
 
-Triage Engine is in Beta and is off by default. A superuser turns it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Triage Engine is on for every DefectDojo Pro instance, Cloud and On-Premise, and there is nothing to enable. Being on starts no work by itself: a rule runs only once someone builds and enables it, and rules converted from the classic engine arrive disabled.
 
-Once the flag is on, a **Triage Engine** group appears under **Act** in the sidebar with four pages (the classic engine sits alongside them as **Classic Rules**):
+The **Triage Engine** group under **Act** in the sidebar has four pages (when the original Rules Engine is also turned on, it sits alongside them as **Classic Rules**):
 
 | Page | What it is for |
 |------|----------------|

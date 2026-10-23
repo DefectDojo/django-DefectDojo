@@ -58,7 +58,7 @@ A **Block** is a reusable unit of content. You build a Block once, configure wha
 | **Tabular** | A table of records drawn from a single entity. |
 | **Detail** | A per-record layout, best for long-form fields that render as markdown (for example, description, impact, mitigation, and references). |
 | **Chart** | A single chart, chosen from the same catalog of charts used on the Insights dashboards. |
-| **Widget** | A dashboard widget, rendered in the report. Requires Customizable Dashboards. |
+| **Widget** | A dashboard widget, rendered in the report. |
 
 A **Stock** block is configured by choosing one of five stock types, along with a title, subtitle, text content, or image as appropriate:
 

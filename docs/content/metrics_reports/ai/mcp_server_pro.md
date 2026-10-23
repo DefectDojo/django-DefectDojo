@@ -113,7 +113,7 @@ Toolsets are enabled under **Settings → Feature Flags**, nested below the **MC
 | `core` | none — always on with the MCP Server | — |
 | `hierarchy` | **MCP: Asset Hierarchy** | the **Asset Hierarchy** feature — see [Asset Hierarchy Toolset](#asset-hierarchy-toolset) |
 | `reporting` | **MCP: Reporting** | the **Reporting** feature (the Report Builder) — see [Reporting Toolset](#reporting-toolset) |
-| `dashboards` | **MCP: Dashboards 2.0** | the **Dashboards 2.0** feature ([Customizable Dashboards](../../dashboards/custom-dashboards/)) — see [Dashboards Toolset](#dashboards-toolset) |
+| `dashboards` | **MCP: Dashboards 2.0** | nothing else: [Customizable Dashboards](../../dashboards/custom-dashboards/) are on for every instance. See [Dashboards Toolset](#dashboards-toolset) |
 | `psirt` | **MCP: PSIRT** | the **PSIRT** feature (which itself requires **Locations**) and the **PSIRT Advisory Engine** licence entitlement ([PSIRT](../../../psirt/)) — see [PSIRT Toolset](#psirt-toolset) |
 
 More toolsets appear in the Feature Flags menu as they are released. A toolset's flag only controls what the MCP Server offers: it does not change the REST API, and every tool call still runs with the permissions of the API token that connects.
