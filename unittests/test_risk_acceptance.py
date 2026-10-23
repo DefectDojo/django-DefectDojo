@@ -1,10 +1,13 @@
 import copy
 import datetime
 import logging
+import re
 from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
+from django.db import connection
 from django.db.models import Q
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -398,6 +401,28 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         self.assertEqual(members, sorted(expired.accepted_findings.values_list("id", flat=True)))
         self.assert_all_inactive_risk_accepted(expired.accepted_findings.all())
+
+    def test_reinstate_locks_the_members_before_deciding_which_to_leave_out(self):
+        """
+        Reinstate reads its members under a lock, in its own transaction.
+
+        Another write accepting one of them at the same moment then waits for the reinstate (or the
+        reinstate for it), so the member is either left out or re-accepted, never both.
+        """
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        members = set(expired.accepted_findings.values_list("id", flat=True))
+
+        with CaptureQueriesContext(connection) as queries:
+            ra_helper.reinstate(expired, expired.expiration_date)
+
+        locked = set()
+        for query in queries.captured_queries:
+            sql = query["sql"]
+            if "FOR UPDATE" in sql and sql.startswith('SELECT "dojo_finding"'):
+                for ids in re.findall(r'"dojo_finding"\."id" IN \(([^)]*)\)', sql):
+                    locked.update(int(value) for value in ids.split(",") if value.strip())
+        self.assertEqual(members, locked)
 
     def test_audit_note_links_to_the_risk_acceptance(self):
         """The note written when a finding is accepted carries a usable link, not empty parens."""

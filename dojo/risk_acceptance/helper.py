@@ -3,6 +3,7 @@ import logging
 import pghistory
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Exists, OuterRef, Q
 from django.urls import reverse
 from django.utils import timezone
@@ -177,7 +178,18 @@ def findings_accepted_elsewhere(risk_acceptance):
 
 
 def reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
+    # One transaction, so the members' lock below holds until the reinstate is written.
+    with transaction.atomic():
+        _reinstate(risk_acceptance, old_expiration_date, user=user, reason=reason)
+
+
+def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
     if risk_acceptance.expiration_date_handled:
+        # The members are read under a lock, in id order: another write accepting one of them at the same
+        # moment waits for this reinstate (or this reinstate for it), so the member is either left out or
+        # re-accepted, never both.
+        member_ids = list(risk_acceptance.accepted_findings.values_list("id", flat=True))
+        list(Finding.objects.select_for_update().filter(id__in=member_ids).order_by("id").values_list("id", flat=True))
         # A member accepted elsewhere since the expiry stays where it is: reinstating would otherwise list it
         # in two acceptances, and expiring or removing either one later would clear the flag the other relies on.
         if accepted_elsewhere := list(findings_accepted_elsewhere(risk_acceptance)):
