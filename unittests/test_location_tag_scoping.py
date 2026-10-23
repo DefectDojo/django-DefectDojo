@@ -246,3 +246,50 @@ class LocationTagScopingTest(DojoTestCase):
                     ids = [row["id"] for row in body["results"]]
                     self.assertEqual(len(ids), len(set(ids)), ids)
                     self.assertEqual(body["count"], len(ids))
+
+    # Regression: the locations list annotated tag readability onto every row with an EXISTS that walks
+    # all of the row's finding references through finding, test and engagement. That ran before
+    # OFFSET/LIMIT, and for a caller who reads every product (a superuser) the anti-join can never stop
+    # early, so a page holding a few heavily shared locations took 5 to 25 s of SQL.
+    def _list_sql(self, url, token):
+        with CaptureQueriesContext(connection) as ctx:
+            body = self._get(url, token)
+        return body, [q["sql"] for q in ctx.captured_queries]
+
+    def test_location_list_skips_readability_for_a_caller_who_reads_every_product(self):
+        body, queries = self._list_sql("/api/v2/location/?limit=1000&ordering=id", self.admin_token)
+        self.assertTrue(body["results"])
+        for sql in queries:
+            self.assertNotIn("dojo_locationfindingreference", sql, sql)
+
+    def test_location_list_checks_readability_for_the_page_only(self):
+        body, queries = self._list_sql("/api/v2/location/?limit=2&offset=1&ordering=id", self.alice_token)
+        page_ids = sorted(row["id"] for row in body["results"])
+        self.assertEqual(len(page_ids), 2)
+        walks = [sql for sql in queries if "dojo_locationfindingreference" in sql]
+        # One readability query, bound to the page's ids, never the COUNT or the page query.
+        self.assertEqual(len(walks), 1, walks)
+        self.assertNotIn("COUNT(", walks[0].upper())
+        self.assertNotIn("OFFSET", walks[0].upper())
+        self.assertIn(f"IN ({page_ids[0]}, {page_ids[1]})", walks[0])
+
+    def test_location_list_readability_holds_on_every_page(self):
+        expected = {FOREIGN: [], INHERIT: [], OWN: [OWN_TAG], BOTH_MINE: [OWN_TAG]}
+        total = self._get("/api/v2/location/?limit=1", self.alice_token)["count"]
+        seen = {}
+        for offset in range(total):
+            row = self._get(f"/api/v2/location/?limit=1&offset={offset}&ordering=id", self.alice_token)["results"][0]
+            host = next((h for h in expected if h in row["location_value"]), None)
+            if host:
+                seen[host] = row["tags"]
+        self.assertEqual(seen, expected)
+
+    def test_location_detail_readability(self):
+        cases = (
+            (self.alice_token, self.foreign, []),
+            (self.alice_token, self.own, [OWN_TAG]),
+            (self.admin_token, self.foreign, [FOREIGN_TAG]),
+        )
+        for token, loc, tags in cases:
+            with self.subTest(location=loc.location_value, admin=token == self.admin_token):
+                self.assertEqual(self._get(f"/api/v2/location/{loc.id}/", token)["tags"], tags)
