@@ -6,7 +6,9 @@ audience: pro
 ---
 The Tenable Web App Scanning connector imports **web application (DAST) findings** from Tenable Web App Scanning. It is a separate connector from Tenable (Vulnerability Management): the two Assets cover different assets and are configured independently, so you can use either or both.
 
-DefectDojo creates a Record for each **scanned web application**. Applications are discovered from your Web App Scanning scan configurations; a configuration that has never run does not produce a Record until its first scan completes. When more than one configuration scans the same application, they share a single Record.
+By default, DefectDojo creates a Record for each **scanned web application**. Applications are discovered from your Web App Scanning scan configurations; a configuration that has never run does not produce a Record until its first scan completes. When more than one configuration scans the same application, they share a single Record.
+
+A scan configuration can target one URL, several URLs, or a Tenable tag. For a configuration that targets several URLs or a tag, DefectDojo reads the configuration's scan history and creates a Record for every web application it has scanned, named `<application> (<configuration name>)`. A web application added to a tag gets its Record after the configuration first scans it.
 
 #### Prerequisites
 
@@ -19,6 +21,11 @@ On\-premise Tenable connectors are not available at this time.
 1. Enter <https://cloud.tenable.com> in the **Location** field.
 2. Enter your **Access Key** and **Secret Key**.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+4. Optionally, set **Asset Grouping** (labeled **Product Grouping** under some naming settings):
+    - **Web Application (Default)**: one Record per scanned web application.
+    - **Scan Configuration**: one Record per scan configuration, holding the findings of every web application it scans, including those reached through a tag. A web application that two configurations scan appears in both Records.
+
+If you switch Asset Grouping on an existing connection, the next discovery lists the new Records to map. The Records from the previous setting are marked missing and keep the findings they already imported.
 
 Findings are imported with the severity Tenable reports for your account, including any severity your team has recast. Each finding carries the affected URL as an endpoint, the request parameter and payload that triggered it, and Tenable's proof and output as steps to reproduce, along with CWE, CVE, CVSS and EPSS values where the detecting plugin supplies them.
 
