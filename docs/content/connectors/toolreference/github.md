@@ -6,7 +6,9 @@ audience: pro
 ---
 ## Upstream Connector
 
-The GitHub connector is an **Asset Connector**: it enumerates the repositories your token can access and creates one Record per repository. Each Record can become a DefectDojo Asset, and its Organization defaults to the repository's GitHub owner (the organization name, or the user name for a personal repository). No findings are imported.
+The GitHub connector is an **Asset Connector**: it enumerates the repositories your token can access and creates one Record per repository. Each Record can become a DefectDojo Asset. No findings are imported.
+
+The Asset's Organization comes from the repository's GitHub owner. A repository owned by a GitHub organization goes in a DefectDojo Organization named after that organization's display name (the **Name** on its GitHub profile, not its login). A repository owned by a personal account, or by an organization with no display name set, goes in the default **GitHub Connector** Organization.
 
 > **🔑 Important: Assets only, not findings.** This connector discovers your repository **inventory** and nothing else. Connecting it will not bring in code scanning, Dependabot or secret scanning alerts, and the Assets it creates stay empty of findings. To get findings from GitHub, use the separate [GitHub Advanced Security](/connectors/toolreference/github_advanced_security/) connector, or import a scan file. The two connectors are independent and can be run together.
 
@@ -26,7 +28,7 @@ Only GitHub.com (including GitHub Enterprise Cloud) is supported. GitHub Enterpr
 1. Enter `https://api.github.com` in the **Location** field.
 2. Enter the personal access token in the **Secret** field.
 
-No organization or repository list needs to be entered — DefectDojo imports every repository the token can see. Each repository becomes a Record named after the repository, grouped by its GitHub **owner** (organization or user). If a repository is later deleted, or the token loses access to it, its mapped Record is flagged `MISSING` on the next Sync rather than removed — DefectDojo never silently deletes an Asset.
+No organization or repository list needs to be entered: DefectDojo imports every repository the token can see. Each repository becomes a Record named after the repository, and its Asset goes in an Organization as described above. If a repository is later deleted, or the token loses access to it, its mapped Record is flagged `MISSING` on the next Sync rather than removed. DefectDojo never silently deletes an Asset.
 
 #### Mapping repositories to existing Assets, and choosing which repositories to import
 
@@ -36,7 +38,7 @@ If you already have Assets for some of your repositories, or only want some repo
 - To attach a repository to an Asset you already have, go to **Connectors**, open the GitHub connection, find the repository under **Records**, and choose **Edit Record** from its **⋮** menu. Pick any existing Asset from the drop-down. The Asset's name does not have to match the repository's name, so an Asset called `payments-service` can be mapped to a repository called `pay-svc`.
 - Map only the repositories you want. The rest can stay **New**, or you can **Ignore** them so they drop out of your list of Records waiting to be mapped.
 
-Changing a Record's mapping later from the UI, to point a repository at a different Asset, requires DefectDojo Pro 3.2.400 or later. See [Manage Records](/connectors/upstream/manage_records/#edit-records-remap-ignore-or-delete) for the full set of Record actions, and [Auto-Mapping](/connectors/upstream/manage_records/#auto-mapping) for how Auto-Mapping picks an Asset when it is on.
+Mapping a Record to an Asset from **Edit Record** requires DefectDojo Pro 3.2.400 or later. That covers both attaching a New Record to an existing Asset and pointing a mapped Record at a different Asset. Earlier releases do not show the Asset drop-down for GitHub Records. See [Manage Records](/connectors/upstream/manage_records/#edit-records-remap-ignore-or-delete) for the full set of Record actions, and [Auto-Mapping](/connectors/upstream/manage_records/#auto-mapping) for how Auto-Mapping picks an Asset when it is on.
 
 #### Troubleshooting: a repository is missing
 
