@@ -58,6 +58,7 @@
 				<h4 style="color: #333; margin-top: 0; margin-bottom: 10px;">{% blocktranslate %}Engagements:{% endblocktranslate %}</h4>
 				{% if long_risk_acceptance.engagement_set.all %}
 					{% for engagement in long_risk_acceptance.engagement_set.all %}
+							<br/>
 						<p style="margin: 8px 0; padding-left: 10px; border-left: 2px solid #ffc107; color: #555;">
 							• <strong>{{ engagement.name }}</strong>
 						</p>

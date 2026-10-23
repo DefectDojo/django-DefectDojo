@@ -163,11 +163,7 @@ def _handle_expire(ra_engagement: RiskAcceptanceEngagement,
     add_note("Long Risk Acceptance Expired", ra_engagement, user)
     active_findings_long_risk_acceptance(finding_qs)
     if notification:
-        Notification.risk_acceptance_expiration(
-            event="long_risk_acceptance",
-            subject=f"⏳Long Risk Acceptance expired : {ra_engagement.id}🚨",
-            description="Long risk acceptance expired",
-            long_risk_acceptance=ra_engagement)
+        Notification.risk_acceptance_expiration(long_risk_acceptance=ra_engagement)
 
 
 def _handle_accept(ra_engagement: RiskAcceptanceEngagement, 

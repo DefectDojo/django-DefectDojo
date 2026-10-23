@@ -35,10 +35,6 @@
 				<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Accepted By:{% endblocktranslate %}</strong> <span style="color: #666;">{{ long_risk_acceptance.accepted_by.username }}</span></p>
 			{% endif %}
 			
-			{% if long_risk_acceptance.reactivate_expired %}
-				<p style="margin: 10px 0; background-color: #d4edda; padding: 10px; border-radius: 3px; border-left: 3px solid #28a745;"><strong style="color: #155724;">{% blocktranslate %}✓ Findings will be reactivated on expiration{% endblocktranslate %}</strong></p>
-			{% endif %}
-
 			<div style="background-color: #f0f0f0; padding: 15px; border-radius: 4px; border-left: 3px solid #ffc107; margin-top: 15px;">
 				<p style="margin: 0; color: #333;"><strong>{% blocktranslate %}Total Affected Findings:{% endblocktranslate %}</strong> <span style="color: #d9534f; font-size: 18px; font-weight: bold;">{{ findings_count|default:"0" }}</span></p>
 			</div>
@@ -48,7 +44,9 @@
 				{% if long_risk_acceptance.engagement_set.all %}
 					{% for engagement in long_risk_acceptance.engagement_set.all %}
 						<p style="margin: 8px 0; padding-left: 10px; border-left: 2px solid #ffc107; color: #555;">
+							<br/>
 							• <strong>{{ engagement.name }}</strong>
+							<br/>
 						</p>
 					{% endfor %}
 				{% else %}
