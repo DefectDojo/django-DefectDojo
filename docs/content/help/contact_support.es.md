@@ -14,7 +14,7 @@ aliases:
 
 Los usuarios de Código Abierto pueden recibir ayuda y asesoramiento a través de nuestros canales comunitarios.
 
-Para los usuarios de Código Abierto, la forma más rápida de obtener ayuda es a través del [Canal de Slack de OWASP](https://owasp.org/slack/invite).  Los miembros de nuestra comunidad están activos en el **canal # defectdojo** y pueden ayudarle con los problemas que enfrenta.
+Para los usuarios de Código Abierto, la forma más rápida de obtener ayuda es a través del [Slack de la comunidad de DefectDojo](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email).  Los miembros de nuestra comunidad y los mantenedores están activos en el canal **#02-help** y pueden ayudarle con los problemas que enfrenta.
 
 Para reportar un error, los problemas se pueden plantear en nuestro [GitHub](https://github.com/DefectDojo/django-DefectDojo).
 

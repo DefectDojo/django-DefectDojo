@@ -74,7 +74,7 @@ DefectDojoのOpen-Source版をインストールするには、いくつかの�
 
 Kubernetesは、Open-Sourceレベルでは完全にはサポートされていませんが、このガイドを参照し、DefectDojoをKubernetesアーキテクチャに統合するための出発点として利用できます。
 
-Open-Sourceのインストールで問題が発生した場合は、[OWASP Slack](https://owasp.org/slack/invite)で質問することを強くお勧めします。コミュニティメンバーが#defectdojoチャンネルで活動しており、直面している問題の解決を手伝ってくれます。
+Open-Sourceのインストールで問題が発生した場合は、[DefectDojo Community Slack](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email)で質問することを強くお勧めします。コミュニティメンバーとメンテナーが#02-helpチャンネルで活動しており、直面している問題の解決を手伝ってくれます。
 
 ## 🟧 DefectDojo Pro エディション
 

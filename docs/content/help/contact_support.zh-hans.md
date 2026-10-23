@@ -14,7 +14,7 @@ aliases:
 
 开源版用户可以通过我们的社区渠道获得帮助和建议。
 
-对于开源版用户,获取帮助最快捷的方式是通过 [OWASP Slack Channel](https://owasp.org/slack/invite)。我们的社区成员活跃在 **# defectdojo channel** 频道中,可以帮助您解决遇到的问题。
+对于开源版用户,获取帮助最快捷的方式是通过 [DefectDojo 社区 Slack](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email)。我们的社区成员和维护者活跃在 **#02-help** 频道中,可以帮助您解决遇到的问题。
 
 如需报告错误,可以在我们的 [GitHub](https://github.com/DefectDojo/django-DefectDojo) 上提交 issue。
 

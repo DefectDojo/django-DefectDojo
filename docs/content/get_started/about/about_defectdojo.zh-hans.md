@@ -74,7 +74,7 @@ DefectDojo 的核心功能可在 DefectDojo 开源版中使用。
 
 Kubernetes 在开源版层面尚未得到完全支持，但该指南可作为参考，作为将 DefectDojo 集成到 Kubernetes 架构中的起点。
 
-如果您在安装开源版时遇到问题，我们强烈建议您在 [OWASP Slack](https://owasp.org/slack/invite) 上提问。我们的社区成员活跃在 #defectdojo 频道，可以帮助您解决遇到的问题。
+如果您在安装开源版时遇到问题，我们强烈建议您在 [DefectDojo 社区 Slack](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email) 上提问。我们的社区成员和维护者活跃在 #02-help 频道，可以帮助您解决遇到的问题。
 
 ## 🟧 DefectDojo Pro 版
 
