@@ -437,6 +437,7 @@ class TestPostProcessFindingsBatchDeadlockRetry(DojoTestCase):
             enable_deduplication=True,
             false_positive_history=False,
             enable_product_grade=False,
+            delete_duplicates=False,
         )
 
     @patch("dojo.finding.helper.sleep", return_value=None)

@@ -23,6 +23,8 @@ For more information on Roles, please refer to our **Introduction To Roles** art
 
 From the sidebar, navigate to **Settings > Users & Permissions > Groups** to see a list of all active and inactive user groups. From here, you can create, delete or view your individual Group pages.
 
+Users with the **View Group** configuration permission see every Group. A Member of a Group sees the Groups they belong to and can open those Groups' pages without that permission; what they can change there depends on their Role in the Group.
+
 * You can filter this table by Group Name, Description, Email Address, Global Role, as well as the total number of Users, Organizations, and Assets associated with the Group.
 * You can also adjust a Group's Permissions or other settings by clicking the "⋮" button next to the Group you wish to edit.
 
@@ -35,6 +37,7 @@ Viewing a group displays all Group information, such as ID, name, description, g
 ![image](images/group_view_pro_ui.png)
 
 * All configuration permissions are displayed in a dropdown which is grouped into subcategories. If the selection of configuration permissions is different from their current value, an “Update Configuration Permissions” button is displayed.
+* A Group's history, opened from the ⚙️ menu, is shown only to Users with the **View Group** configuration permission, because it also lists the Group's past Asset and Organization Roles.
 
 ![image](images/groups_pro_configuration_permissions.png)
 
@@ -66,7 +69,7 @@ The Weekly Digest is a report on all Group-assigned Assets / Organizations. To h
 
 Group Membership is managed from the individual Group page, which you can select from the list in the **Settings > Users & Permissions > Groups** page. Click the highlighted Group Name to access the Group page that you wish to edit.
 
-In order to view or edit a Group's Membership, a User must have the appropriate Configuration permissions enabled as well as Membership in the Group (or Superuser status).
+Any Member of a Group can open its page and see its Members. Adding, changing and removing Members needs a Group Role that allows it, such as Maintainer or Owner (or Superuser status).
 
 Membership is managed from the Group's **Permissions** window:
 
@@ -94,7 +97,27 @@ Users are added to a Group **one at a time**. To add several Users, repeat the s
 
 ![image](images/group_pro_add_user.png)
 
-Note that adding a member to a Group will not allow them access to their own Group page by default. This is a separate Configuration permission which must be enabled first.
+A new Member can open the Group's page from **Settings > Users & Permissions > Groups**, which lists the Groups they belong to. Seeing every Group needs the **View Group** configuration permission.
+
+### Add a User to Groups from the User page
+
+You can also add one User to several Groups at once from that User's page, which is often quicker when onboarding someone.
+
+1. Navigate to **Settings > Users & Permissions > Users** and open the User.
+
+2. In the card listing the Groups the User can access, click **Add to Group**. The button is shown to Superusers and to Users who can manage the Members of at least one Group.
+
+3. In the **Add to Group** window, open the **Groups** drop\-down and choose one or more Groups. Only Groups whose Members you can manage are listed, and Groups the User already belongs to are left out.
+
+4. Open the **Role** drop\-down and choose the Group Role the User will hold in each selected Group. The **Owner** Role is offered only when you can grant it in every selected Group.
+
+5. Click **Submit**. The new Groups appear in the card straight away.
+
+If some Groups accept the User and others refuse (for example, because your Role in one of them does not allow adding Members), the accepted Memberships are saved, the window stays open, and a message lists each refused Group with the reason. Change the selection or the Role and submit again, or close the window.
+
+To take a User out of a Group from the same card, click the "⋮" button at the start of the Group's row, select **Remove**, and confirm. The User's access through that Group ends immediately. Removing a Membership with the **Owner** Role takes the same permission as granting it.
+
+### Add Users through the API
 
 If you need to add a large number of Users, you can also create Group Members through the API. Send one `POST` request per User to the `dojo_group_members` endpoint, with the `group`, `user` and `role` of the new Member. The `role` is the numeric ID of the Role, which you can look up on the `roles` endpoint.
 
@@ -102,7 +125,7 @@ If you need to add a large number of Users, you can also create Group Members th
 
 In the **Members** table of the **Permissions for Group** window:
 
-* **Change a Role:** click the Role shown next to the User's name and select a different Role from the menu (for example, from Reader to Maintainer or Owner). The change is saved as soon as you pick the new Role.
+* **Change a Role:** click the Role shown next to the User's name and select a different Role from the menu (for example, from Reader to Maintainer or Owner). The change is saved as soon as you pick the new Role. Changing or removing a Member who holds the **Owner** Role takes the same permission as making someone an Owner, which by default only Owners and Superusers hold.
 * **Remove a Member:** click the 🗑️ button at the end of the User's row. This removes a User's Membership altogether, and takes effect immediately, without a confirmation prompt. It will not remove any contributions or changes the User has made to the Asset or Organization.
 
 ## Manage a Group's Permissions

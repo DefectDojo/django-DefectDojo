@@ -1,15 +1,17 @@
 import base64
 import math
+from functools import cache
 
 import dateutil
 from django.core.files.base import ContentFile
+from django.db.models import CharField
 
 from dojo.finding.cwe import cwe_number
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
-from dojo.tools.utils import drop_repeated_unique_ids
+from dojo.tools.utils import mark_unique_ids_ambiguous_when_repeated
 
 # Accepted fields that map to a numeric column on Finding, and the type they hold.
 NUMERIC_FIELDS = {
@@ -37,6 +39,20 @@ def to_number(value, converter):
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) else None
+
+
+@cache
+def _finding_max_lengths() -> dict[str, int]:
+    """
+    Column widths of the Finding text fields, read from the model so a width change needs no parser change.
+
+    ``title`` is left out: the model truncates it itself on save.
+    """
+    return {
+        field.name: field.max_length
+        for field in Finding._meta.get_fields()
+        if isinstance(field, CharField) and field.max_length and field.name != "title"
+    }
 
 
 class GenericJSONParser:
@@ -154,6 +170,17 @@ class GenericJSONParser:
                 raise ValueError(msg)
 
             self._normalize_numeric_fields(item)
+            # A value wider than its column would only fail at INSERT time, deep in the
+            # importer, as a DataError the API reports as a 500. Reject it here instead: the
+            # importer turns the ValueError into a 400 naming the field and the limit.
+            too_long = [
+                f"{key} is {len(value)} characters, the maximum is {max_length}"
+                for key, max_length in _finding_max_lengths().items()
+                if isinstance(value := item.get(key), str) and len(value) > max_length
+            ]
+            if too_long:
+                msg = "Field values exceed the maximum length: " + "; ".join(too_long)
+                raise ValueError(msg)
             finding = Finding(**item)
 
             # manage endpoints
@@ -240,9 +267,9 @@ class GenericJSONParser:
         # The generic format hands unique_id_from_tool straight to callers' pipelines, and the
         # shipped algorithm is hash-only, so classic matching never reads it. It is still
         # recorded as a vendor identity by consumers that do (an operator-configured unique-id
-        # algorithm, Pro's identity ledger), so an id repeating inside one report is dropped
-        # rather than stored as if it named a single finding.
-        drop_repeated_unique_ids(test_internal.findings)
+        # algorithm, Pro's identity ledger), so the importer drops an id repeating inside one
+        # report rather than storing it as if it named a single finding.
+        mark_unique_ids_ambiguous_when_repeated(test_internal.findings)
         return test_internal
 
     def _normalize_numeric_fields(self, item):

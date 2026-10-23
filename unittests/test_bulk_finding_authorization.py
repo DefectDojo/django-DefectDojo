@@ -8,6 +8,7 @@ finding ids. The same scoping applies to the target finding group when adding
 findings to a group.
 """
 
+from django.test import override_settings
 from django.urls import reverse
 
 from dojo.authorization.authorization import user_has_permission
@@ -265,3 +266,29 @@ class TestMergeFindingDeleteRequiresStaff(DojoTestCase):
         )
         self._merge_as(staff, "delete")
         self.assertFalse(Finding.objects.filter(id=self.target.id).exists())
+
+    def test_merge_delete_promotes_a_new_original_for_the_duplicate_cluster(self):
+        staff = Dojo_User.objects.create(
+            username="merge_delete_cluster_staff", is_active=True, is_staff=True,
+        )
+        duplicate = Finding.objects.exclude(test=self.test).first()
+        Finding.objects.filter(id=duplicate.id).update(duplicate=True, duplicate_finding=self.target)
+        self._merge_as(staff, "delete")
+        duplicate.refresh_from_db()
+        self.assertFalse(
+            duplicate.duplicate,
+            msg=f"duplicate of the deleted finding was not promoted, persisted duplicate_finding_id={duplicate.duplicate_finding_id}",
+        )
+
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_merge_delete_keeps_a_target_that_is_a_duplicate_of_a_deleted_finding(self):
+        staff = Dojo_User.objects.create(
+            username="merge_delete_cascade_staff", is_active=True, is_staff=True,
+        )
+        Finding.objects.filter(id=self.anchor.id).update(duplicate=True, duplicate_finding=self.target)
+        self._merge_as(staff, "delete")
+        self.assertFalse(Finding.objects.filter(id=self.target.id).exists())
+        self.assertTrue(
+            Finding.objects.filter(id=self.anchor.id, duplicate=False).exists(),
+            msg="the cascade delete removed the merge target, or left it marked as a duplicate",
+        )

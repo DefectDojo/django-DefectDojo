@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 from dojo.importers.base_location_manager import BaseLocationManager
@@ -215,24 +216,26 @@ class LocationManager(BaseLocationManager):
             # Strictly speaking this returns more rows than we need (it's the cross of the location/finding lists rather
             # than scoped per-finding), but more straightforward than constructing a per-finding lookup. We won't create
             # any unwanted associations below anyway.
-            existing_finding_ref_keys: set[tuple[int, int]] = set(
+            existing_finding_ref_keys: set[tuple[int, int, int]] = set(
                 LocationFindingReference.objects.filter(
                     location_id__in=all_location_ids,
                     finding_id__in=all_finding_ids,
-                ).values_list("finding_id", "location_id"),
+                ).values_list("finding_id", "location_id", "test_id"),
             )
 
             for finding, cleaned_locations in self._locations_by_finding:
+                test_id = self.attribution_test_id(finding)
                 # Locations were already cleaned at record time — identity_hash is set, so we can
                 # look up the persisted location directly.
                 for location in cleaned_locations:
                     saved_loc = saved_by_key[type(location), location.identity_hash]
-                    finding_ref_key = (finding.id, saved_loc.location_id)
+                    finding_ref_key = (finding.id, saved_loc.location_id, test_id)
                     if finding_ref_key not in existing_finding_ref_keys:
                         assoc = saved_loc.get_association_data()
                         all_finding_refs.append(LocationFindingReference(
                             location_id=saved_loc.location_id,
                             finding=finding,
+                            test_id=test_id,
                             status=FindingLocationStatus.Active,
                             relationship=assoc.relationship_type,
                             relationship_data=assoc.relationship_data,
@@ -337,6 +340,9 @@ class LocationManager(BaseLocationManager):
 
         Finally, product associations are updated: if any location associated with a finding on this product is Active,
         the LocationProductReference object is set to Active; otherwise, it is set to Mitigated.
+
+        Every change is limited to the rows attributed to the test being (re)imported (see attribution_test_id), so a
+        reimport never mitigates a location that another test still reports on the same finding.
         """
         # Short-circuit if nothing to do
         if not (self._status_updates or self._refs_to_reactivate or self._refs_to_mitigate):
@@ -357,15 +363,18 @@ class LocationManager(BaseLocationManager):
         # Process status updates determined by comparing existing/new findings
         if self._status_updates:
             # Look up all the existing LocationFindingReference objects and store per-Finding
-            existing_finding_ids = {upd.existing_finding.id for upd in self._status_updates}
+            test_by_finding = {
+                upd.existing_finding.id: self.attribution_test_id(upd.existing_finding) for upd in self._status_updates
+            }
             refs_by_finding: dict[int, list[LocationFindingReference]] = {}
             for ref in (
                 LocationFindingReference.objects
-                .filter(finding_id__in=existing_finding_ids)
+                .filter(finding_id__in=test_by_finding.keys())
                 .exclude(status__in=special_statuses)
                 .select_related("location")
             ):
-                refs_by_finding.setdefault(ref.finding_id, []).append(ref)
+                if ref.test_id == test_by_finding[ref.finding_id]:
+                    refs_by_finding.setdefault(ref.finding_id, []).append(ref)
 
             # Next: for each StatusUpdateEntry, determine what we should do with the existing refs
             for existing_finding, new_finding, user in self._status_updates:
@@ -388,9 +397,11 @@ class LocationManager(BaseLocationManager):
         # Update the "reactivate set" with the IDs of existing LocationFindingReference objects we need to reactivate
         if self._refs_to_reactivate:
             ref_ids_to_reactivate.update(
-                LocationFindingReference.objects.filter(
-                    finding_id__in=self._refs_to_reactivate,
-                    status=FindingLocationStatus.Mitigated,
+                self._scope_to_attributed_test(
+                    LocationFindingReference.objects.filter(
+                        finding_id__in=self._refs_to_reactivate,
+                        status=FindingLocationStatus.Mitigated,
+                    ),
                 ).values_list("id", flat=True),
             )
 
@@ -399,8 +410,10 @@ class LocationManager(BaseLocationManager):
         if self._refs_to_mitigate:
             ref_ids_to_mitigate.update({
                 ref_id: self._refs_to_mitigate[finding_id]
-                for ref_id, finding_id in LocationFindingReference.objects.filter(
-                    finding_id__in=self._refs_to_mitigate.keys(),
+                for ref_id, finding_id in self._scope_to_attributed_test(
+                    LocationFindingReference.objects.filter(
+                        finding_id__in=self._refs_to_mitigate.keys(),
+                    ),
                 ).exclude(status__in=special_statuses).values_list("id", "finding_id")
             })
 
@@ -486,6 +499,12 @@ class LocationManager(BaseLocationManager):
         self._status_updates.clear()
         self._refs_to_reactivate.clear()
         self._refs_to_mitigate.clear()
+
+    def _scope_to_attributed_test(self, refs):
+        """Limit ``refs`` to the rows attributed to the test being imported (each finding's own test if unset)."""
+        if self._test_id is not None:
+            return refs.filter(test_id=self._test_id)
+        return refs.filter(test_id=F("finding__test_id"))
 
     # ------------------------------------------------------------------
     # Type registry

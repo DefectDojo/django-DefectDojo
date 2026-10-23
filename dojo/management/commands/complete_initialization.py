@@ -14,6 +14,7 @@ from django.db import connection, connections
 from django.db.utils import ProgrammingError
 
 from dojo.auditlog import configure_pghistory_triggers
+from dojo.management.commands.schema_snapshot import load_schema_snapshot_if_empty
 
 
 class Command(BaseCommand):
@@ -28,6 +29,10 @@ class Command(BaseCommand):
 
         self.check_enable_auditlog_consistency()
         self.warn_on_missing_migrations()
+
+        # A fresh install loads the schema the release built instead of applying every migration
+        # (see schema_snapshot). The migrate below then applies only what is newer than it.
+        self.load_schema_snapshot()
 
         self.stdout.write("Applying migrations")
         call_command("migrate", interactive=False)
@@ -81,6 +86,13 @@ class Command(BaseCommand):
         if not row.get("enable_auditlog", True) and settings.ENABLE_AUDITLOG:
             msg = "Auditlog disabled in DB but ENABLE_AUDITLOG=True. Set DD_ENABLE_AUDITLOG=False for all Django containers."
             raise CommandError(msg)
+
+    # ------------------------------------------------------------------
+    # Schema snapshot
+    # ------------------------------------------------------------------
+
+    def load_schema_snapshot(self) -> None:
+        load_schema_snapshot_if_empty(self)
 
     # ------------------------------------------------------------------
     # Migration checks (warning only)

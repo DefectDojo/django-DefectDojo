@@ -145,9 +145,11 @@ editor will say so before you continue.
 
 ### Review the impact, then save
 
-**Review Impact** classifies the change without applying it, and this is the step the screen
-exists for. It tells you whether the edit is presentation-only or identity-relevant, which
-fields are moving, and how many findings are already stored under this scan type.
+**Next** opens the **Review Impact** step, which classifies the change without applying it, and
+this is the step the screen exists for. It tells you whether the edit is presentation-only or
+identity-relevant, which fields are moving, and how many findings are already stored under this
+scan type. **Submit** on the mapping step opens the same review rather than saving, so a change
+is never saved without it; **Submit** on the review step saves.
 
 An identity-relevant edit cannot be saved until you tick the box confirming you understand it
 opens a transition window. A presentation-only edit saves without that step — the confirmation

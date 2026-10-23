@@ -125,10 +125,29 @@ those owners, and the `finding_meta` / `product_meta` / `asset_meta` fields on t
 Read and write custom field values through the **`/api/v2/custom_fields/values/`** endpoint instead, and
 manage the field definitions through **`/api/v2/custom_fields/definitions/`**. Both use standard API-token
 authentication (the same `Authorization: Token <key>` header as the rest of the API) and are listed in the
-v2 Swagger UI under the **Custom Fields** tag. Values are owner-scoped and can be filtered to one object
-(for example `?finding={id}`): you can read a value wherever you can view its object and write one wherever
-you can edit it, while managing definitions requires the global Custom Field management permission. Endpoint
-and Location metadata is unaffected and still lives on the metadata endpoints.
+v2 Swagger UI under the **Custom Fields** tag. You can read a value wherever you can view its object and
+write one wherever you can edit it, while managing definitions requires the global Custom Field management
+permission. Endpoint and Location metadata is unaffected and still lives on the metadata endpoints.
+
+To list the custom field values on one object, filter the values endpoint by that object's id:
+
+| Object | Query parameter |
+|--------|-----------------|
+| Asset | `?asset={id}` (or `?product={id}`) |
+| Organization | `?organization={id}` (or `?product_type={id}`) |
+| Finding | `?finding={id}` |
+| Engagement | `?engagement={id}` |
+| Test | `?test={id}` |
+| Risk Acceptance | `?risk_acceptance={id}` |
+
+For example, `GET /api/v2/custom_fields/values/?asset=12` returns the custom field values on asset 12. The
+response is paginated like the rest of the API, so follow `next` (or pass `limit` and `offset`) when an object
+has more values than one page holds. Filters combine, so a request only returns values that match all of them,
+and values on an object you cannot view are never returned. An id that is not a whole number returns a **400**.
+
+To list the fields that apply to one object type, filter the definitions endpoint by `entity_type` (`finding`,
+`asset`, `organization`, `engagement`, `test` or `risk_acceptance`; `product` and `product_type` also work),
+for example `/api/v2/custom_fields/definitions/?entity_type=asset`. An unknown type returns a **400**.
 
 Metadata on **Endpoints** and **Locations** is a separate feature and is unchanged: it stays as
 free-form key/value metadata and is not part of the typed custom fields subsystem.

@@ -10,7 +10,7 @@ Entries in the DefectDojo Pro sidebar can carry a small coloured tag. Each one a
 | Badge | Colour | Means | What it asks of you |
 | --- | --- | --- | --- |
 | `SOON` | Gold | Announced, not released yet | Nothing. The entry does not open a page |
-| `NEW` | Green | Recently released | Nothing — it is there so you notice the feature |
+| `NEW` | Green | Recently released | Nothing. It is there so you notice the feature, and the sidebar's [What's New](/navigation/pro__sidebar/#whats-new) panel lists every badged entry with the release's highlights |
 | `BETA` | Brand-colored | Working, still being finished; behaviour may change between releases | Try it, and expect rough edges |
 | `LOCKED` | Grey | Not included in your license | Selecting the entry explains what unlocks it |
 | `LEGACY` | Red | Superseded by a newer feature, with no announced removal date | Prefer the replacement for new work |

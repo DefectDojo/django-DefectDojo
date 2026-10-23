@@ -7,6 +7,8 @@ aliases:
 ---
 Findings are the main way that DefectDojo standardizes and guides the reporting and remediation process of your security tools. Regardless of whether a vulnerability was reported in SonarQube, Acunetix, or your team’s custom tool, Findings give you the ability to manage each vulnerability in the same way.
 
+This page covers what a Finding is made of, what each part of a Finding page shows, and common ways teams work with Findings. To mark Findings as Verified, False Positive, Risk Accepted or Mitigated, see [Triage Vulnerabilities using Finding Status](#triage-vulnerabilities-using-finding-status). To record a decision to accept a risk, see [Risk Acceptances](#ensure-team-wide-consensus-and-accountability-with-risk-acceptances). To add a Finding by hand instead of importing it, see [Creating Findings Manually](/triage_findings/findings_workflows/create_findings_manually/).
+
 ## What are Findings?
 
 Findings in DefectDojo are made up of the following components: 
@@ -64,6 +66,46 @@ The Finding Page contains various components. Each will be populated by the Impo
 	* **Found By:** This will list the scanner used to find this vulnerability.  
 	​
 
+## Example Finding Workflows
+
+How you work with Findings in DefectDojo depends on your team’s responsibilities within your organization. Here are some examples of these processes, and how DefectDojo can help:
+
+### Discover and Report vulnerabilities
+
+If you’re in charge of security reporting for many different contexts, software Assets or teams, DefectDojo can report on those vulnerabilities uncovered. Using the Asset Hierarchy, you can organize your Finding data into the appropriate context. For example:
+
+* Each Asset in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
+* You can create a report directly from a **Organization, Asset, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Assets** can contain multiple Engagements, **Organizations** can contain multiple Assets.
+
+For more information on creating a Report, see our guides to **[Custom Reporting](/metrics_reports/reports/)**.
+
+### Triage Vulnerabilities using Finding Status
+
+If your team needs to validate the Findings discovered, you can do so by manually applying the **Verified** status to Findings as you review them. You can also apply other statuses, such as:
+
+* **False Positive:** A tool detected the threat, but the threat is not active in the environment.
+* **Out Of Scope:** Active, but irrelevant to the current testing effort.
+* **Risk Accepted:** Active, but determined not to be a priority to address until the Risk Acceptance expires.
+* **Under Review:** may or may not be Active \- your team is still investigating.
+* **Mitigated:** This issue has been resolved since the Finding was created.
+
+If a tool reports a previously triaged Finding on a subsequent import, DefectDojo will remember the Finding’s previous status and update accordingly. Findings with **False Positive**, **Out Of Scope, Risk Accepted and Under Review** statuses will remain as they are, but any Finding that has been **Mitigated** will be **reactivated** to let you know that the Finding has returned to the Test environment.
+
+### Ensure Team\-wide Consensus and Accountability with Risk Acceptances
+
+Part of a security team’s responsibility is to collaborate with developers to prioritize and deprioritize security issue remediation. This is where Risk Acceptances come in. Adding a Risk Acceptance to a Finding allows you to:
+
+* Store records and ‘artifact’ files on DefectDojo \- these could be emails from colleagues acknowledging the Risk Acceptance, meeting notes, or simply a written justification for accepting the risk from your own security team.
+* Add an expiration date to the Risk Acceptance, so that the vulnerability can be re\-examined after a given period of time.
+
+Any Appsec team member understands that issue mitigation can’t be prioritized exclusively by developer teams, so Risk Acceptances help you log those sensitive decisions when they are made.
+
+### Monitor current vulnerabilities using CVEs and EPSS scores (Pro Feature)
+
+Sometimes, the exploitability and threat posed by a known vulnerability can change based on new data. To keep your work up to date, DefectDojo Pro has partnered with First.org to maintain a database of the latest EPSS scores related to Findings. Any Findings in DefectDojo Pro will be kept up to date automatically according to their EPSS, which is directly based on the CVE of the Finding.
+
+If a Finding’s EPSS score changes (i.e. the related Finding becomes more exploitable or less exploitable), the Severity of the Finding will adjust accordingly.
+
 ## Notes and @mentions
 
 The **Notes** page on a Finding is where your team records context that isn't part of the imported scan data — mitigation progress, triage decisions, or any other commentary. Notes are DefectDojo-only metadata and are never created at import time.
@@ -104,43 +146,3 @@ A few details worth knowing:
 You can @mention users from the UI in notes on **Findings**, **Tests**, **Engagements** and **Risk Acceptances**. Typing `@` opens a list of matching users; picking one from that list is the reliable way to mention someone, because it inserts the username exactly as the notification lookup expects it.
 
 The mention is delivered through the `user_mentioned` notification event. See [Notifications](/admin/notifications/about_notifications/) for how notifications are delivered and configured — in particular, `user_mentioned` is one of the events a system-level setting can still deliver even when a user has otherwise quieted their notifications (see [Specific overrides](/admin/notifications/about_notifications/#specific-overrides)).
-
-## Example Finding Workflows
-
-How you work with Findings in DefectDojo depends on your team’s responsibilities within your organization. Here are some examples of these processes, and how DefectDojo can help:
-
-### Discover and Report vulnerabilities
-
-If you’re in charge of security reporting for many different contexts, software Assets or teams, DefectDojo can report on those vulnerabilities uncovered. Using the Asset Hierarchy, you can organize your Finding data into the appropriate context. For example:
-
-* Each Asset in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
-* You can create a report directly from a **Organization, Asset, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Assets** can contain multiple Engagements, **Organizations** can contain multiple Assets.
-
-For more information on creating a Report, see our guides to **[Custom Reporting](/metrics_reports/reports/)**.
-
-### Triage Vulnerabilities using Finding Status
-
-If your team needs to validate the Findings discovered, you can do so by manually applying the **Verified** status to Findings as you review them. You can also apply other statuses, such as:
-
-* **False Positive:** A tool detected the threat, but the threat is not active in the environment.
-* **Out Of Scope:** Active, but irrelevant to the current testing effort.
-* **Risk Accepted:** Active, but determined not to be a priority to address until the Risk Acceptance expires.
-* **Under Review:** may or may not be Active \- your team is still investigating.
-* **Mitigated:** This issue has been resolved since the Finding was created.
-
-If a tool reports a previously triaged Finding on a subsequent import, DefectDojo will remember the Finding’s previous status and update accordingly. Findings with **False Positive**, **Out Of Scope, Risk Accepted and Under Review** statuses will remain as they are, but any Finding that has been **Mitigated** will be **reactivated** to let you know that the Finding has returned to the Test environment.
-
-### Ensure Team\-wide Consensus and Accountability with Risk Acceptances
-
-Part of a security team’s responsibility is to collaborate with developers to prioritize and deprioritize security issue remediation. This is where Risk Acceptances come in. Adding a Risk Acceptance to a Finding allows you to:
-
-* Store records and ‘artifact’ files on DefectDojo \- these could be emails from colleagues acknowledging the Risk Acceptance, meeting notes, or simply a written justification for accepting the risk from your own security team.
-* Add an expiration date to the Risk Acceptance, so that the vulnerability can be re\-examined after a given period of time.
-
-Any Appsec team member understands that issue mitigation can’t be prioritized exclusively by developer teams, so Risk Acceptances help you log those sensitive decisions when they are made.
-
-### Monitor current vulnerabilities using CVEs and EPSS scores (Pro Feature)
-
-Sometimes, the exploitability and threat posed by a known vulnerability can change based on new data. To keep your work up to date, DefectDojo Pro has partnered with First.org to maintain a database of the latest EPSS scores related to Findings. Any Findings in DefectDojo Pro will be kept up to date automatically according to their EPSS, which is directly based on the CVE of the Finding.
-
-If a Finding’s EPSS score changes (i.e. the related Finding becomes more exploitable or less exploitable), the Severity of the Finding will adjust accordingly.

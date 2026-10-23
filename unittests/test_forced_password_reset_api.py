@@ -1,4 +1,7 @@
 import base64
+import time
+from types import SimpleNamespace
+from unittest import mock
 
 from django.contrib.auth.tokens import default_token_generator
 from django.core.cache import cache
@@ -105,6 +108,12 @@ class BasicAuthAccountRulesTest(TestCase):
 
     def setUp(self):
         cache.clear()
+        # django-ratelimit counts in fixed windows, and the window is part of the cache key.
+        # Pin the clock it reads so a test cannot straddle a window edge and see its count reset.
+        now = time.time()
+        clock = mock.patch("django_ratelimit.core.time", SimpleNamespace(time=lambda: now))
+        clock.start()
+        self.addCleanup(clock.stop)
         self.user = User.objects.create_user(username="basic-auth-user", password=OLD_PASSWORD)
         self.contact_info = UserContactInfo.objects.create(user=self.user)
 

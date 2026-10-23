@@ -4,6 +4,8 @@ description: Rastreie informações de vulnerabilidades sem usar uma ferramenta 
 weight: 2
 aliases:
 - /pt-br/en/working_with_findings/findings_workflows/create_findings_manually
+- /pt-br/import_data/import_scan_files/os__create_findings_manually
+- /pt-br/import_data/import_scan_files/pro__create_findings_manually
 ---
 
 Normalmente, a maioria dos Achados no seu ambiente será importada de outras ferramentas de segurança. Se desejar, você também pode adicionar entradas de Achados manualmente, caso tenha vulnerabilidades ou trabalhos que queira gerenciar e que não tenham sido criados por uma ferramenta de scan.

@@ -69,7 +69,9 @@ All of these metadata fields can be set on the **Edit Asset** form for a given A
 
 * **Criticality** can be set to any value of None, Very Low, Low, Medium, High, or Very
 High. Criticality is a subjective field, so when assigning this field, consider how the
-Asset compares to other Assets in your organization.
+Asset compares to other Assets in your organization. If your CMDB already rates
+criticality, the [ServiceNow CMDB connector](/connectors/toolreference/servicenow_cmdb/#business-criticality)
+can keep this field in step with it, without overwriting a value somebody set by hand.
 * **User Records** is a numerical estimation of user records in a database (or a system
 that can access that database).
 * **Revenue** is a numerical estimation of annual revenue for the Asset. To calculate Priority, DefectDojo will calculate a percentage by comparing this Asset's revenue to the sum of all Assets within the Organization.

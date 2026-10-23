@@ -1,0 +1,421 @@
+subject: "Import and Reimport"
+questions:
+  - q: "What happens when you import a scan file into DefectDojo?"
+    options:
+      - "DefectDojo runs the scanner named in the file against your Asset"
+      - "The file is attached to the Asset, and someone creates Findings from it by hand"
+      - "It creates a Test under an Engagement, with a Finding for each vulnerability in the file"
+      - "It creates a separate Engagement for each vulnerability"
+    answer: 2
+    why: "The import creates a new Test nested under an Engagement, with one Finding per vulnerability. The Test is named after the scan type."
+    source: "/import_data/import_scan_files/pro__import_scan_ui/#completing-the-import-scan-form"
+    hints:
+      - note: "DefectDojo doesn't scan. To pull results from your tools automatically, connect them with Upstream Connectors."
+        link: "/connectors/upstream/about/"
+        label: "Upstream Connectors"
+      - note: "Findings are created automatically. If your tool's format isn't supported, the Universal Parser can map it."
+        link: "/import_data/pro/specialized_import/universal_parser/"
+        label: "Universal Parser"
+      - null
+      - note: "To bundle related Findings together, use the **Group By** option on import to create Finding Groups."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#optional-fields"
+        label: "Import options: Group By"
+
+  - q: "What is Reimport for?"
+    options:
+      - "Replacing everything in a Test with the contents of a new file"
+      - "Sending repeated scans of the same target into one Test, so DefectDojo can work out what's new, fixed, still there or back again"
+      - "Correcting a mistake in an earlier upload by overwriting its Findings"
+      - "Exporting Findings back to the scanner that found them"
+    answer: 1
+    why: "Reimport doesn't replace a Test's data. It compares the incoming file with what's there, then creates, leaves untouched, closes or reopens Findings."
+    source: "/import_data/import_intro/reimport/#reimport-process-summary"
+    hints:
+      - note: "Reimport compares rather than replaces. To keep each scan as its own Test, use Import instead."
+        link: "/import_data/import_scan_files/api_pipeline_modelling/#specific-notes-on-import-and-reimport-endpoints"
+        label: "Import vs. reimport endpoints"
+      - null
+      - note: "To fix Findings directly, edit them, or change many at once with bulk edit."
+        link: "/triage_findings/findings_workflows/editing_findings/"
+        label: "Editing Findings"
+      - note: "To get Findings out of DefectDojo, DefectDojo-CLI exports them to JSON or CSV."
+        link: "/import_data/pro/specialized_import/external_tools/#export"
+        label: "DefectDojo-CLI export"
+
+  - q: "When would you call the API's `/import` endpoint instead of `/reimport`?"
+    options:
+      - "Always first, because `/reimport` only works on a Test that `/import` already created"
+      - "When you want each scan result stored as its own Test, so you can inspect one pipeline run on its own"
+      - "When the file is very large, because `/import` is faster"
+      - "When you want old Findings closed automatically"
+    answer: 1
+    why: "`/reimport` handles almost everything, including the first upload. `/import` suits a pipeline that keeps every run as a separate Test."
+    source: "/import_data/import_scan_files/api_pipeline_modelling/#specific-notes-on-import-and-reimport-endpoints"
+    hints:
+      - note: "`/reimport` can create the Test itself, along with its Engagement, Asset and Organization, when Auto Create Context is on."
+        link: "/import_data/import_scan_files/api_pipeline_modelling/#specific-notes-on-import-and-reimport-endpoints"
+        label: "Import vs. reimport endpoints"
+      - null
+      - note: "For large files, keep **Process Findings Asynchronously** on so the work runs in the background."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#process-findings-asynchronously"
+        label: "Process Findings Asynchronously"
+      - note: "Both endpoints can close old Findings. Import can also close them across the whole Asset."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#close-old-findings"
+        label: "Close Old Findings"
+
+  - q: "Your team wants scan results to land in DefectDojo without anyone uploading files by hand. Which of these could do that?"
+    options:
+      - "Only the Import Scan form, opened on a schedule"
+      - "Emailing scan files to DefectDojo"
+      - "The Endpoint Meta Importer"
+      - "A CI/CD job calling the API, Universal Importer or DefectDojo-CLI, or a Connector"
+    answer: 3
+    why: "Besides the UI, scans can come in through the API, Universal Importer and DefectDojo-CLI, Connectors, and Smart Upload."
+    source: "/import_data/import_intro/comparison/#scan-upload-methods"
+    hints:
+      - note: "The form is manual. To script uploads from CI or a scheduled job, use Universal Importer or DefectDojo-CLI."
+        link: "/import_data/pro/specialized_import/external_tools/"
+        label: "Universal Importer & DefectDojo-CLI"
+      - note: "There's no email import. A CI job calling the API's `/reimport` endpoint does the same job."
+        link: "/import_data/import_scan_files/api_pipeline_modelling/"
+        label: "Import from API"
+      - note: "That one applies tags and custom fields to endpoints from a CSV, not scan results."
+        link: "/import_data/import_scan_files/endpoint_meta_importer/"
+        label: "Endpoint Meta Importer"
+      - null
+
+  - q: "What is Smart Upload for?"
+    options:
+      - "Splitting an infrastructure scan's Findings across the right Assets, based on the hosts they were found on"
+      - "Uploading several scan files in one go"
+      - "Detecting a file's scan type automatically"
+      - "Importing faster by skipping deduplication"
+    answer: 0
+    why: "Smart Upload routes Findings from infrastructure scans (Nexpose, NMap, OpenVas, Qualys, Tenable) to Assets by host, once a host has been assigned."
+    source: "/import_data/pro/specialized_import/smart_upload/"
+    hints:
+      - null
+      - note: "To upload many files from a script, use Universal Importer or DefectDojo-CLI."
+        link: "/import_data/pro/specialized_import/external_tools/"
+        label: "Universal Importer & DefectDojo-CLI"
+      - note: "You still pick the scan type. For a format with no parser, map it with the Universal Parser."
+        link: "/import_data/pro/specialized_import/universal_parser/"
+        label: "Universal Parser"
+      - note: "Deduplication isn't skipped, but you can choose whether an import waits for it with the deduplication execution mode."
+        link: "/triage_findings/finding_deduplication/about_deduplication/#importreimport-deduplication-execution-mode"
+        label: "Deduplication execution mode"
+
+  - q: "What does a Test's **Import History** show?"
+    options:
+      - "Who logged in and what they viewed"
+      - "Older copies of the Test that you can restore"
+      - "Each import or reimport into the Test, with how many Findings it created, closed, left untouched and reactivated"
+      - "The original scan files, ready to download again"
+    answer: 2
+    why: "Each import or reimport is one row, with a timestamp, any build, branch, commit and version details, and the created, closed, left untouched and reactivated counts."
+    source: "/import_data/import_intro/reimport/#working-with-import-history"
+    hints:
+      - note: "For a record of who did what, use Audit Logs."
+        link: "/admin/user_management/pro__audit_logging/"
+        label: "Audit Logs"
+      - note: "Import History records changes, not snapshots. For a record of how objects changed, use Audit Logs."
+        link: "/admin/user_management/pro__audit_logging/"
+        label: "Audit Logs"
+      - null
+      - note: "Import History doesn't keep files. To get Findings out, use DefectDojo-CLI's export."
+        link: "/import_data/pro/specialized_import/external_tools/#export"
+        label: "DefectDojo-CLI export"
+
+  - q: "What is the **Do Not Reactivate** option for?"
+    options:
+      - "Keeping risk-accepted Findings closed"
+      - "Scanners that report everything every time, so DefectDojo stays the source of truth for triage instead of reopening Findings your team already closed"
+      - "Stopping a Test from accepting any more reimports"
+      - "Preventing duplicate Findings"
+    answer: 1
+    why: "Triage-less scanners such as tfsec flag everything on every run. Do Not Reactivate stops each import from reopening Findings you've already closed."
+    source: "/import_data/import_scan_files/pro__import_scan_ui/#triage-less-scanners-do-not-reactivate-field"
+    hints:
+      - note: "Risk-accepted Findings already stay inactive on reimport. Manage them with Risk Acceptance."
+        link: "/triage_findings/findings_workflows/pro__risk_acceptance/"
+        label: "Risk Acceptance"
+      - null
+      - note: "Imports go wherever they're sent. To pause a Connector's automatic syncs, manage its operations."
+        link: "/connectors/upstream/manage_operations/"
+        label: "Connector operations"
+      - note: "Duplicates are handled by Deduplication, which you can tune per tool."
+        link: "/triage_findings/finding_deduplication/pro__deduplication_tuning/"
+        label: "Deduplication Tuning"
+
+  - q: "Do you need to create the Organization, Asset and Engagement before importing?"
+    options:
+      - "Yes, always"
+      - "No, but anything created at import time can't be moved later"
+      - "No, DefectDojo puts every import into one default Asset"
+      - "No. You can pick existing ones, or create new ones as you import, in the Add Findings form or through the API"
+    answer: 3
+    why: "Every upload method can create the hierarchy at import time. In the Add Findings form, just type the names of the Organization, Asset or Engagement you want created."
+    source: "/import_data/import_scan_files/pro__import_scan_ui/#form-options"
+    hints:
+      - note: "The Add Findings form can create them as you fill it in, and the API's Auto Create Context option does the same."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#form-options"
+        label: "Add Findings form options"
+      - note: "The hierarchy can be reorganized whenever you need."
+        link: "/asset_modelling/pro_hierarchy/reorganize_later/"
+        label: "You can reorganize later"
+      - note: "To send Findings to the right Asset automatically, use Smart Upload."
+        link: "/import_data/pro/specialized_import/smart_upload/"
+        label: "Smart Upload"
+      - null
+
+  - q: "You reimport a file that contains a vulnerability already open as a Finding in the Test. What happens?"
+    options:
+      - "A new Finding is created and marked as a duplicate"
+      - "The existing Finding is overwritten with the new data"
+      - "The incoming copy is discarded, and the existing Finding is counted as Left Untouched"
+      - "The reimport fails with a conflict"
+    answer: 2
+    why: "Matches are discarded rather than recorded as duplicates, and the Test page shows them as Left Untouched."
+    source: "/import_data/import_intro/reimport/#ignore-existing-findings"
+    hints:
+      - note: "That's what Same-Tool Deduplication does across separate Tests."
+        link: "/triage_findings/finding_deduplication/about_deduplication/#how-defectdojo-handles-duplicates"
+        label: "How duplicates work"
+      - note: "Only `fix_available` and `fix_version` are updated. To change other fields, edit the Finding."
+        link: "/triage_findings/findings_workflows/editing_findings/"
+        label: "Editing Findings"
+      - null
+      - note: "Reimport never fails on a match. Check what it did in Import History."
+        link: "/import_data/import_intro/reimport/#working-with-import-history"
+        label: "Import History"
+
+  - q: "Through the API, you reimport a file that no longer contains one of the Test's open Findings, without setting `close_old_findings`. What happens to that Finding?"
+    options:
+      - "It's closed (made inactive and mitigated), because `close_old_findings` defaults to true on reimport"
+      - "Nothing, because Findings are only closed when you ask"
+      - "It's deleted"
+      - "It's marked as a false positive"
+    answer: 0
+    why: "On the reimport endpoint `close_old_findings` is true by default, so Findings missing from the file are closed and shown as Closed."
+    source: "/import_data/import_intro/reimport/#close-findings"
+    hints:
+      - null
+      - note: "To keep Findings open on reimport, set `close_old_findings` to false."
+        link: "/import_data/import_intro/reimport/#close-findings"
+        label: "Close Findings"
+      - note: "Reimport never deletes Findings. To remove duplicates automatically, see Delete Deduplicate Findings."
+        link: "/triage_findings/finding_deduplication/about_deduplication/#delete-deduplicate-findings"
+        label: "Delete Deduplicate Findings"
+      - note: "To mark matching Findings as false positives automatically, use False Positive History."
+        link: "/triage_findings/finding_deduplication/false_positive_history/"
+        label: "False Positive History"
+
+  - q: "A Finding was closed, and the vulnerability shows up again in the next reimport. What happens by default?"
+    options:
+      - "It stays closed and a new Finding is created"
+      - "It's reopened and counted as Reactivated"
+      - "It's reopened as a new Finding in a new Test"
+      - "It's ignored"
+    answer: 1
+    why: "Reimport assumes the vulnerability came back despite the fix, reopens it, and counts it as Reactivated."
+    source: "/import_data/import_intro/reimport/#reopen-findings"
+    hints:
+      - note: "To keep closed Findings closed, turn on **Do Not Reactivate**."
+        link: "/import_data/import_intro/reimport/#reopen-findings"
+        label: "Reopen Findings"
+      - null
+      - note: "New Tests per run only happen with `/import`."
+        link: "/import_data/import_scan_files/api_pipeline_modelling/#specific-notes-on-import-and-reimport-endpoints"
+        label: "Import vs. reimport endpoints"
+      - note: "To ignore a recurring issue on purpose, accept the risk or mark it a false positive."
+        link: "/triage_findings/findings_workflows/pro__risk_acceptance/"
+        label: "Risk Acceptance"
+
+  - q: "You reimport with **Force Active** on. One matched Finding is Risk Accepted. What happens to it?"
+    options:
+      - "It becomes Active, and its Risk Acceptance is removed"
+      - "It becomes Active but stays Risk Accepted"
+      - "It's closed as mitigated"
+      - "It stays Risk Accepted and inactive"
+    answer: 3
+    why: "Force Active reopens mitigated Findings but never overrides an explicit decision: Risk Accepted, Duplicate, False Positive or Out of Scope."
+    source: "/import_data/import_intro/reimport/#force-active-and-force-verified-behavior"
+    hints:
+      - note: "Removing the Risk Acceptance is your call. Do that first, and the Finding can then be reactivated."
+        link: "/triage_findings/findings_workflows/pro__risk_acceptance/"
+        label: "Risk Acceptance"
+      - note: "Explicit triage decisions win over Force Active. The full list of statuses it won't override is in the reimport guide."
+        link: "/import_data/import_intro/reimport/#force-active-and-force-verified-behavior"
+        label: "Force Active behavior"
+      - note: "Closing only applies to Findings missing from the file."
+        link: "/import_data/import_intro/reimport/#close-findings"
+        label: "Close Findings"
+      - null
+
+  - q: "You reimport into Test A with Close Old Findings on. A Finding missing from the file exists only in Test B, in the same Engagement. What happens to it?"
+    options:
+      - "Nothing, because Reimport only ever closes Findings in its target Test"
+      - "It's closed, because Close Old Findings covers the whole Engagement"
+      - "It's marked as a duplicate"
+      - "It's closed only if Test B used the same scan type"
+    answer: 0
+    why: "Unlike Import, Reimport never looks at other Tests when deciding what to close."
+    source: "/import_data/import_intro/reimport/#close-findings"
+    hints:
+      - null
+      - note: "That's Import's scope. To close across the Engagement, use Import with Close Old Findings."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#close-old-findings"
+        label: "Close Old Findings"
+      - note: "Duplicates come from Deduplication, which runs on the Findings a reimport creates."
+        link: "/triage_findings/finding_deduplication/about_deduplication/#reimport-deduplication"
+        label: "Reimport Deduplication"
+      - note: "Scan type matters for Import's closing scope, which **Close Old Findings Within This Asset** widens to the whole Asset."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#scope-engagement-vs-asset"
+        label: "Close scope: Engagement vs. Asset"
+
+  - q: "Close Old Findings is on. A Finding missing from the file has a different `service` value from the one set on this import. Is it closed?"
+    options:
+      - "Yes, because the service value is ignored"
+      - "Only if it's older than 30 days"
+      - "No. Only Findings with the same service value, or none if none was set, are considered"
+      - "Only if Force Active is also on"
+    answer: 2
+    why: "Close Old Findings respects the service field, so separate services in one Test don't close each other's Findings."
+    source: "/import_data/import_intro/reimport/#close-findings"
+    hints:
+      - note: "Service matters to deduplication too, since it can change a Finding's hash."
+        link: "/triage_findings/finding_deduplication/about_deduplication/#service-field-and-its-impact"
+        label: "Service field and its impact"
+      - note: "For age-based closing, a Triage Engine rule can match on `older_than_days`."
+        link: "/automation/triage_engine/building_rules/#conditions"
+        label: "Triage Engine conditions"
+      - null
+      - note: "Force Active is about reopening matched Findings, not closing missing ones."
+        link: "/import_data/import_intro/reimport/#force-active-and-force-verified-behavior"
+        label: "Force Active behavior"
+
+  - q: "What does **Close Old Findings Within This Asset** change?"
+    options:
+      - "It closes Findings of any scan type in the Asset"
+      - "It works on its own, without Close Old Findings"
+      - "It widens closing from the Engagement to every Finding of the same scan type in the Asset, on Import only"
+      - "It applies to Reimport as well"
+    answer: 2
+    why: "`close_old_findings_product_scope` widens Import's closing to the whole Asset. It needs `close_old_findings` and has no effect on reimport."
+    source: "/import_data/import_scan_files/pro__import_scan_ui/#scope-engagement-vs-asset"
+    hints:
+      - note: "It still only matches the same scan type. To close Findings by other criteria, use a Triage Engine rule."
+        link: "/automation/triage_engine/"
+        label: "Triage Engine"
+      - note: "It needs Close Old Findings on as well; on its own it has no effect."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#scope-engagement-vs-asset"
+        label: "Close scope: Engagement vs. Asset"
+      - null
+      - note: "Reimport is always limited to its Test. To consolidate runs, reimport them into one Test."
+        link: "/import_data/import_intro/reimport/"
+        label: "Reimport"
+
+  - q: "The report sets its own dates, and you also set **Scan Date** when importing. Which date do the Findings get?"
+    options:
+      - "The date in the report"
+      - "The date of the import"
+      - "Whichever of the two is earlier"
+      - "The Scan Date you set"
+    answer: 3
+    why: "A Scan Date set at import always wins. Without one, the report's date is used, and failing that, the import date."
+    source: "/import_data/import_scan_files/pro__import_scan_ui/#using-the-scan-completion-date-api-scan_date-field"
+    hints:
+      - note: "To keep the report's dates, leave Scan Date empty."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#using-the-scan-completion-date-api-scan_date-field"
+        label: "Scan Date"
+      - note: "That's only when neither the report nor Scan Date sets one."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#using-the-scan-completion-date-api-scan_date-field"
+        label: "Scan Date"
+      - note: "Finding dates matter because SLAs are calculated from them."
+        link: "/asset_modelling/pro_hierarchy/priority_sla/"
+        label: "Priority, Risk and SLAs"
+      - null
+
+  - q: "You want to upload a file of a different scan type to an existing Test. What do you do?"
+    options:
+      - "Open **Re-Import Findings** and pick the new scan type"
+      - "Use the **Add Findings** form, which creates a new Test for it"
+      - "Change the Test's scan type first, then reimport"
+      - "Reimport through the API, which converts the Test"
+    answer: 1
+    why: "The Re-Import form won't let you change the scan type or destination. For either, use the Add Findings form."
+    source: "/import_data/import_intro/reimport/#opening-the-reimport-form"
+    hints:
+      - note: "The reimport form can't change the scan type or destination."
+        link: "/import_data/import_intro/reimport/#opening-the-reimport-form"
+        label: "The reimport form"
+      - null
+      - note: "Engagements hold Tests from many tools, so import the new type into the same Engagement."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/"
+        label: "Add Findings form"
+      - note: "Reimport never converts a Test. With Auto Create Context it creates a new one instead."
+        link: "/import_data/import_scan_files/api_pipeline_modelling/#specific-notes-on-import-and-reimport-endpoints"
+        label: "Import vs. reimport endpoints"
+
+  - q: "After every reimport, Findings are closed and recreated just because a line number moved. What fixes this?"
+    options:
+      - "Tune Reimport Deduplication for that tool to a stable identifier such as Unique ID From Tool, or turn on Location Drift Matching"
+      - "Turn on Do Not Reactivate"
+      - "Turn off Close Old Findings and delete the extra Findings by hand"
+      - "Switch to `/import` so each run gets its own Test"
+    answer: 0
+    why: "Reimport matching uses its own deduplication settings. Location Drift Matching recognizes a moved Finding as the same one."
+    source: "/import_data/import_intro/reimport/#reimport-deduplication"
+    hints:
+      - null
+      - note: "That stops closed Findings from reopening; it doesn't change how matches are found."
+        link: "/import_data/import_intro/reimport/#reopen-findings"
+        label: "Reopen Findings"
+      - note: "To clean up duplicates automatically, use Delete Deduplicate Findings."
+        link: "/triage_findings/finding_deduplication/about_deduplication/#delete-deduplicate-findings"
+        label: "Delete Deduplicate Findings"
+      - note: "Separate Tests rely on Same-Tool Deduplication instead, which you can tune per tool."
+        link: "/triage_findings/finding_deduplication/pro__deduplication_tuning/"
+        label: "Deduplication Tuning"
+
+  - q: "You import with **Minimum Severity** set to High. What happens to the Medium vulnerabilities in the file?"
+    options:
+      - "They're imported as inactive"
+      - "They're imported as High"
+      - "They're ignored, and no Findings are created for them"
+      - "They're grouped into one Finding"
+    answer: 2
+    why: "Anything below the minimum severity is ignored and never becomes a Finding."
+    source: "/import_data/import_scan_files/pro__import_scan_ui/#optional-fields"
+    hints:
+      - note: "To import everything but control its status, use the **Active** option instead."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#optional-fields"
+        label: "Import options"
+      - note: "To change severities automatically, use a Set Severity node in a Triage Engine rule."
+        link: "/automation/triage_engine/node_reference/#set-severity"
+        label: "Set Severity node"
+      - null
+      - note: "To group Findings, use **Group By** on import to create Finding Groups."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#optional-fields"
+        label: "Import options: Group By"
+
+  - q: "Through the API, you import with **Process Findings Asynchronously** turned off. When does the API respond?"
+    options:
+      - "Immediately, while Findings are created in the background"
+      - "Only after deduplication has finished as well"
+      - "Never, because the API requires asynchronous processing"
+      - "Only after all Findings have been created"
+    answer: 3
+    why: "With asynchronous processing off, DefectDojo doesn't return a successful response until every Finding exists."
+    source: "/import_data/import_scan_files/pro__import_scan_ui/#process-findings-asynchronously"
+    hints:
+      - note: "That's the default, with the option on."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#process-findings-asynchronously"
+        label: "Process Findings Asynchronously"
+      - note: "To wait for deduplication too, set `deduplication_execution_mode` to `async_wait` or `sync`."
+        link: "/triage_findings/finding_deduplication/about_deduplication/#importreimport-deduplication-execution-mode"
+        label: "Deduplication execution mode"
+      - note: "Both settings work through the API; asynchronous is just the default."
+        link: "/import_data/import_scan_files/pro__import_scan_ui/#process-findings-asynchronously"
+        label: "Process Findings Asynchronously"
+      - null

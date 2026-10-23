@@ -7,6 +7,8 @@ weight: 3
 
 In the DefectDojo Pro UI, Findings can be edited in bulk from any Finding List — the **All Findings** page (**Act > Explore > Findings > All** in the sidebar), or the Findings list within a Test.
 
+To decide Findings one at a time instead, with a single key each, see [Keyboard Triage](/triage_findings/findings_workflows/pro__keyboard_triage/).
+
 ## Selecting Findings for Bulk Edit
 
 In any Findings table, use the checkboxes next to Findings to select them. Selecting one or more Findings reveals a **bulk-action bar** with the following controls:
