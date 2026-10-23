@@ -49,7 +49,7 @@ By default, the first account created on a new DefectDojo instance will have Sup
 ​  
 For Superuser Status, check off the ☑️ Superuser Status box, located in the user's Default Information.  
 ​  
-To assign a Global Role, select one from the dropdown Global Role menu at the bottom of the page.  
+To assign Global Roles, pick them in the **Global Roles** field at the bottom of the page. A user may hold several, and they add up: a Maintainer who also holds a Role carrying Configuration Permissions keeps everything Maintainer grants and reaches the settings pages as well.  
 ​
 ![image](images/Set_a_User's_Permissions_3.png)
 ​
@@ -142,16 +142,16 @@ Configuration Permissions are not related to a specific Asset or Organization \-
 
 ### Add Configuration Permissions to a User
 
-**Only Superusers can grant Configuration Permissions.** They are granted on a Role, and the Role is then set as the user's Global Role (or as the Global Role of a Group the user belongs to).
+**Only Superusers can grant Configuration Permissions.** They are granted on a Role, and the Role is then added to the user's Global Roles (or to the Global Roles of a Group the user belongs to), beside whatever Global Role the user already holds.
 
-1. Navigate to **Settings > Users & Permissions > Roles** and clone the Role the user holds today (for example **Reader**), or create a new one. See [Custom Roles](../pro__custom_rbac_roles/).  
+1. Navigate to **Settings > Users & Permissions > Roles** and create a Role for the settings pages (for example **Users Manager**), or open one that already carries them. See [Custom Roles](../pro__custom_rbac_roles/).  
 ​
 2. In the role editor, enable the rows you want in the **Configuration Permissions** table (for example **Users: View** and **Users: Add**) and save the Role.  
 ​
-3. Navigate to **Settings > Users & Permissions > Users**, open the account you wish to edit, and set the new Role as the user's **Global Role** from the **Edit User** form.  
+3. Navigate to **Settings > Users & Permissions > Users**, open the account you wish to edit, and add the Role under **Global Roles** on the **Edit User** form. The user's other Global Roles stay as they are.  
 ​
 The **Configuration Permissions** card on the User page then lists what the user holds and where it comes from. It is read-only: to change it, edit the Role.
 
-To grant the same permissions to a whole team, set the Role as the Global Role of a Group instead; every member of the Group holds them.
+To grant the same permissions to a whole team, add the Role to the Global Roles of a Group instead; every member of the Group holds them.
 
 For a detailed breakdown of User Configuration Permissions, please refer to our [Permission Chart](../user_permission_chart/).

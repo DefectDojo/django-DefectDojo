@@ -164,8 +164,8 @@ Custom roles appear in every role dropdown, alongside the built-ins:
 
 | Where | How |
 | --- | --- |
-| **Global Role on a user** | The **Global Role** field on the user's form. Superusers only. See [Set a User's permissions](../set_user_permissions/). |
-| **Global Role on a group** | The **Global Role** field on the group's form. See [Share permissions: User Groups](../create_user_group/). |
+| **Global Role on a user** | The **Global Roles** field on the user's form; a user may hold several, and they add up. Superusers only. See [Set a User's permissions](../set_user_permissions/). |
+| **Global Role on a group** | The **Global Roles** field on the group's form. See [Share permissions: User Groups](../create_user_group/). |
 | **Organization or Asset membership** | The Permissions dialog on the Organization or Asset, for both users and groups. See [Set Permissions in Pro](../pro_permissions_overhaul/). |
 | **Default group role** | **Default group role** in System Settings, applied to newly created users. See [Manage default permissions](../about_perms_and_roles/#manage-default-permissions). |
 | **Role within a group** | The role dropdown on a group's member list. This dropdown only offers roles that grant at least one Group permission, so a role with no Group permissions will not appear there. |
@@ -188,13 +188,15 @@ Coverage has to be complete, which occasionally surprises people. A role cloned 
 
 ## Configuration Permissions
 
-A user's Configuration Permissions are the union of what their own Global Role carries and what the Global Roles of their Groups carry. The **Configuration Permissions** card on a User page or a Group page lists the result and is read-only. To grant a settings page to someone:
+A user's Configuration Permissions are the union of what their own Global Roles carry and what the Global Roles of their Groups carry. The **Configuration Permissions** card on a User page or a Group page lists the result and is read-only. To grant a settings page to someone:
 
-1. Clone the role they hold today (for example **Reader**), or create a new one.
+1. Create a role for the settings pages (for example **Users Manager**), or open one that already carries them.
 2. Enable the rows you want in the **Configuration Permissions** table and save.
-3. Set the role as the user's Global Role on the **Edit User** form, or as a Group's Global Role on the **Edit Group** form, so every member holds it.
+3. Add the role under **Global Roles** on the **Edit User** form, beside the Global Role the user already holds, or under a Group's Global Roles on the **Edit Group** form, so every member holds it.
 
-Upgrading from a version where Configuration Permissions were set on the User and Group pages creates these roles for you: every user and every group that held Configuration Permissions gets a custom role, cloned from its previous Global Role (when it had one) with the permissions it held added, named after the areas it covers, such as **Reader: Users Manager** or **Configuration Viewer**, with a description listing them. The roles are ordinary custom roles: rename them, merge them, or give several holders one role, as you prefer. A Global **Owner** keeps the Owner role instead (its Owner-only abilities belong to that one role) and gets a Group named **Configuration: ...** whose Global Role carries the set; members added to an Owner Group later join that Group too, or get a role of their own, and a member removed from the Owner Group keeps the set until they leave the **Configuration: ...** Group as well. The old per-user and per-group permission forms no longer change anything and say so.
+Global Roles add up, so the role that opens the settings pages sits beside **Reader** or **Maintainer** rather than replacing it. One **Users Manager** role can serve every user who needs that page, whatever else they hold.
+
+Upgrading from a version where Configuration Permissions were set on the User and Group pages creates these roles for you: for every distinct set of Configuration Permissions someone held, one custom role carrying exactly that set, named after the areas it covers, such as **Users Manager** or **Configuration Viewer**, with a description listing them. Every user and every group that held the set gets that role added to their Global Roles; the Global Role they had before (Reader, Maintainer, Owner, or none) is left exactly as it was. The roles are ordinary custom roles: rename them, merge them, or give several holders one role, as you prefer. The old per-user and per-group permission forms no longer change anything and say so.
 
 An instance with its own authentication backend (a subclass of Django's `ModelBackend` named in `AUTHENTICATION_BACKENDS`) must give that class the `RoleAwarePermissionsMixin` from `pro.authorization.backends`, or `manage.py check` refuses to start: without it the backend would keep answering settings-page checks from the old per-user rows.
 
