@@ -67,6 +67,52 @@ class TestOSVScannerParser(DojoTestCase):
         self.assertEqual(cvssv4, finding.cvssv4)
         self.assertEqual(9.2, finding.cvssv4_score)
 
+    def test_group_max_severity_matches_vulnerability_alias(self):
+        report = {
+            "results": [{
+                "packages": [{
+                    "package": {"name": "brotli", "version": "1.2.0", "ecosystem": "PyPI"},
+                    "vulnerabilities": [{
+                        "id": "PYSEC-2026-4322",
+                        "aliases": ["CVE-2026-111497"],
+                        "database_specific": {"severity": None},
+                    }],
+                    "groups": [{"ids": ["OTHER-ID"], "aliases": ["CVE-2026-111497"], "max_severity": "9.2"}],
+                }],
+            }],
+        }
+        finding = OSVScannerParser().get_findings(io.StringIO(json.dumps(report)), Test())[0]
+        self.assertEqual("Critical", finding.severity)
+
+    def test_database_specific_severity_takes_precedence_over_group_score(self):
+        report = {
+            "results": [{
+                "packages": [{
+                    "package": {"name": "brotli"},
+                    "vulnerabilities": [{"id": "CVE-2026-111497", "database_specific": {"severity": "LOW"}}],
+                    "groups": [{"ids": ["CVE-2026-111497"], "max_severity": "9.2"}],
+                }],
+            }],
+        }
+        finding = OSVScannerParser().get_findings(io.StringIO(json.dumps(report)), Test())[0]
+        self.assertEqual("Low", finding.severity)
+
+    def test_group_max_severity_uses_cvss_score_bands(self):
+        cases = (("0", "Info"), ("0.1", "Low"), ("4", "Medium"), ("7", "High"), ("9", "Critical"))
+        for score, severity in cases:
+            with self.subTest(score=score):
+                report = {
+                    "results": [{
+                        "packages": [{
+                            "package": {"name": "brotli"},
+                            "vulnerabilities": [{"id": "CVE-2026-111497"}],
+                            "groups": [{"ids": ["CVE-2026-111497"], "max_severity": score}],
+                        }],
+                    }],
+                }
+                finding = OSVScannerParser().get_findings(io.StringIO(json.dumps(report)), Test())[0]
+                self.assertEqual(severity, finding.severity)
+
     def test_invalid_cvss_vector_does_not_fail_import(self):
         finding = self.parse_vulnerability({
             "id": "PYSEC-2026-4322",

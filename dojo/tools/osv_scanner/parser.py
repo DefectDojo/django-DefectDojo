@@ -1,4 +1,5 @@
 import json
+import math
 
 from cvss.exceptions import CVSSError
 
@@ -92,6 +93,41 @@ class OSVScannerParser:
                 cvss_data_by_version[version] = cvss_data
         return cvss_data_by_version
 
+    def _get_group_severity(self, package, vulnerability):
+        aliases = vulnerability.get("aliases") or []
+        if not isinstance(aliases, list):
+            aliases = []
+        vulnerability_ids = {
+            identifier for identifier in [vulnerability.get("id"), *aliases]
+            if isinstance(identifier, str) and identifier
+        }
+        for group in package.get("groups") or []:
+            if not isinstance(group, dict):
+                continue
+            group_ids = set()
+            for field in ("ids", "aliases"):
+                identifiers = group.get(field)
+                if isinstance(identifiers, list):
+                    group_ids.update(identifier for identifier in identifiers if isinstance(identifier, str))
+            if not vulnerability_ids.intersection(group_ids):
+                continue
+            try:
+                score = float(group.get("max_severity"))
+            except (TypeError, ValueError):
+                continue
+            if not math.isfinite(score):
+                continue
+            if score <= 0:
+                return "Info"
+            if score < 4:
+                return "Low"
+            if score < 7:
+                return "Medium"
+            if score < 9:
+                return "High"
+            return "Critical"
+        return None
+
     def get_findings(self, file, test):
         try:
             data = json.load(file)
@@ -179,7 +215,8 @@ class OSVScannerParser:
                     if cvss_severity == "None":
                         cvss_severity = "Info"
                     database_specific = vulnerability.get("database_specific") or {}
-                    sev = database_specific.get("severity") or cvss_severity
+                    group_severity = self._get_group_severity(package, vulnerability)
+                    sev = database_specific.get("severity") or group_severity or cvss_severity
                     finding = Finding(
                         title=f"{vulnerabilityid}_{package_name}",
                         test=test,
