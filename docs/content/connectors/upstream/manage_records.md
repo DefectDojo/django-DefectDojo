@@ -131,13 +131,13 @@ Once a Record is Mapped, DefectDojo will be ready to import your tool’s scans 
 
 * Record Mappings are designed to be non-invasive. If you map an Asset to a Record which contains existing Engagements or Findings, those existing Engagements and Findings will not be affected or overwritten by the data sync process.  
 ​
-* Data created by a Connector is stored in an Engagement on the Asset named **Global Connectors - \<label\> - \<Vendor-Equivalent Product\>**, so each Connector mapped to the Asset gets its own Engagement. Mappings made before this naming was introduced may use an older Engagement named **Global Connectors - \<label\>**, and syncs keep using it.  
+* Data created by a Connector is stored in an Engagement on the Asset named **Global Connectors - \<label\> - \<Vendor-Equivalent Product\>**. Connectors with different labels keep their data in separate Engagements, and a Connector whose Records bring several Vendor-Equivalent Products to the same Asset gets one Engagement for each. Mappings made before this naming was introduced may use an older Engagement named **Global Connectors - \<label\>**, and syncs keep using it.  
 ​
-* The Record stays linked to its Engagement by ID, not by name. Renaming the Connector's label does not create a new Engagement: syncs keep landing in the existing one under its original name. A new Engagement, named with the current label, is created only when the Record is mapped to a different Asset or its Engagement was deleted.
+* The Record stays linked to its Engagement by ID, not by name. Renaming the Connector's label does not create a new Engagement: syncs keep landing in the existing one under its original name. A new Engagement, named with the current label, is created when the Record is mapped to a different Asset, when its Engagement was deleted, or when the **connectors** tag was removed from that Engagement.
 
 ![image](images/manage_records_2.jpg)
 
-This makes it possible to send scan data from multiple Connectors to the same Asset, with each Connector's data kept in its own Engagement.
+This makes it possible to send scan data from multiple Connectors to the same Asset, with each Connector's data kept in its own Engagement as long as the Connectors use different labels.
 
 To learn more about Assets, Engagements and Tests, see our [Asset Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/).
 
