@@ -96,4 +96,4 @@ The **Insights** group in Overview holds five dashboards. Each one can be filter
 - **Remediation Insights** shows how well your team remediates Findings.
 - **Tool Insights** shows how well your tools (and Upstream Connectors) detect and report vulnerabilities.
 
-For dashboards you build yourself, see [Customizable Dashboards](/metrics_reports/dashboards/custom-dashboards/). An administrator switches them on under Feature Flags.
+For dashboards you build yourself, see [Customizable Dashboards](/metrics_reports/dashboards/custom-dashboards/).

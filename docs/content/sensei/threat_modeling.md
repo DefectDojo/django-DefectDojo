@@ -16,7 +16,6 @@ This is Sensei's **pre-code** capability. Where [scan-and-fix](/sensei/about_sen
 ## What you need
 
 - The **Sensei** licensed feature. Threat modeling ships under the same entitlement as scan-and-fix.
-- The **AI Threat Modeling** feature flag, which is on by default. If your instance turned it off, a superuser can turn it back on from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
 - A global **Maintainer** or **Owner** role. Users without it do not see the page.
 - An Asset to attach the threat model to. Instances that have not enabled 3.0 naming see Assets called **products**; this page says *Asset* throughout, and the UI follows whichever naming your instance is set to.
 

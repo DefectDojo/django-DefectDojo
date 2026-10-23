@@ -63,7 +63,6 @@ Flags** and switch it on in the **Enabled** column:
 | **Regulatory Profile** | The **Regulatory** card on each Asset, the **CRA Article 14 Reports** page, and the Article 14 deadline checks and notifications |
 | **Compliance** | The **Compliance** tab on each Asset. It may already be on |
 | **EU Evidence Packs** | CRA assessments and evidence packs. Needs **Compliance** |
-| **Dashboards 2.0** | The **Regulatory Scope** and **CRA Article 14 Deadlines** dashboard widgets |
 | **Locations** | The component inventory that SBOM imports write. It may already be on. It cannot be switched off once on, and asks you to confirm |
 
 ![The EU Evidence Packs feature switched on](images/38-cra-feature-flag.png)
@@ -506,7 +505,7 @@ and keep the downloads with your technical documentation. See
 | --- | --- | --- |
 | No **Regulatory** card, or no **CRA Article 14 Reports** in the left menu | **Regulatory Profile** is off | Step 1 |
 | No **EU Evidence** tab | **EU Evidence Packs** or **Compliance** is off | Step 1 |
-| No **Dashboards** layouts or **Add Widget** button, or no **CRA Article 14 Deadlines** in **Add Widget** | **Dashboards 2.0** is off, or (for the deadlines widget) **Regulatory Profile** is off | Step 1 |
+| No **CRA Article 14 Deadlines** in **Add Widget** | **Regulatory Profile** is off | Step 1 |
 | No **Version** field in **Import SBOM** | Per-release SBOMs are not enabled | Step 2 |
 | The SLA form will not save | The day counts are placeholders, not values | Type a number in each box (Step 4) |
 | CRA is missing from the **Regulations** list | The list shows only the first few until you search | Type `CRA` in its search box (Step 7) |
