@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
@@ -117,7 +117,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        self.assertEqual(datetime.date(2015, 11, 7), findings[0].date)
+        self.assertEqual(dt.date(2015, 11, 7), findings[0].date)
         self.validate_locations(findings)
 
     def test_parsed_finding_has_title(self):
@@ -502,15 +502,15 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual(True, finding.active)
                 self.assertEqual(False, finding.duplicate)
                 self.assertEqual(True, finding.is_mitigated)
-                self.assertEqual(datetime.date(2021, 1, 16), finding.mitigated.date())
+                self.assertEqual(dt.date(2021, 1, 16), finding.mitigated.date())
             with self.subTest(i=3):
                 finding = findings[3]
                 self.assertEqual("test title mitigated ISO", finding.title)
                 self.assertEqual(True, finding.active)
                 self.assertEqual(False, finding.duplicate)
                 self.assertEqual(True, finding.is_mitigated)
-                self.assertEqual(datetime.date(2024, 1, 4), finding.date)
-                self.assertEqual(datetime.date(2024, 1, 24), finding.mitigated.date())
+                self.assertEqual(dt.date(2024, 1, 4), finding.date)
+                self.assertEqual(dt.date(2024, 1, 24), finding.mitigated.date())
 
     def test_parse_endpoints_and_vulnerability_ids_json(self):
         with (get_unit_tests_scans_path("generic") / "generic_report4.json").open(encoding="utf-8") as file:
@@ -623,16 +623,16 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             finding = findings[0]
             finding.clean()
             self.assertEqual("Mitigated_ISO_Finding", finding.title)
-            self.assertEqual(datetime.date(2024, 1, 24), finding.date)
+            self.assertEqual(dt.date(2024, 1, 24), finding.date)
             self.assertEqual(True, finding.is_mitigated)
-            self.assertEqual(datetime.date(2024, 2, 24), finding.mitigated.date())
+            self.assertEqual(dt.date(2024, 2, 24), finding.mitigated.date())
 
             finding = findings[1]
             finding.clean()
             self.assertEqual("Mitigated_Finding", finding.title)
-            self.assertEqual(datetime.date(2021, 2, 28), finding.date)
+            self.assertEqual(dt.date(2021, 2, 28), finding.date)
             self.assertEqual(True, finding.is_mitigated)
-            self.assertEqual(datetime.date(2021, 3, 28), finding.mitigated.date())
+            self.assertEqual(dt.date(2021, 3, 28), finding.mitigated.date())
 
     def test_parse_host_and_vulnerability_id_csv(self):
         with (get_unit_tests_scans_path("generic") / "generic_report4.csv").open(encoding="utf-8") as file:
@@ -914,8 +914,8 @@ class TestGenericCSVParserCellValues(DojoTestCase):
             ("epss_score", 0.5, None),
             ("epss_percentile", 0.9, None),
             ("cvssv4_score", 9.3, None),
-            ("mitigated", datetime.datetime(2024, 5, 20), None),
-            ("kev_date", datetime.datetime(2024, 3, 29), None),
+            ("mitigated", dt.datetime(2024, 5, 20), None),
+            ("kev_date", dt.datetime(2024, 3, 29), None),
         ]:
             with self.subTest(field=field):
                 self.assertEqual(filled_value, getattr(filled, field))

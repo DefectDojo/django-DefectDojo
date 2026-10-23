@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
@@ -42,11 +42,11 @@ class GuardDuty:
             is_Mitigated = True
             if finding.get("LastObservedAt"):
                 try:
-                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                    mitigated = dt.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:
-                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+                    mitigated = dt.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
-                mitigated = datetime.datetime.now(datetime.UTC)
+                mitigated = dt.datetime.now(dt.UTC)
         description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}" + "\n"
         description += f"**AWS Finding ARN:** {finding_id}\n"
         if finding.get("SourceUrl"):

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.horusec.parser import HorusecParser
@@ -30,21 +30,21 @@ class TestHorusecParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("docker/entrypoint.sh", finding.file_path)
                 self.assertEqual(20, finding.line)
-                self.assertEqual(datetime.date(2021, 10, 19), finding.date.date())
+                self.assertEqual(dt.date(2021, 10, 19), finding.date.date())
             with self.subTest(i=50):
                 finding = findings[50]
                 self.assertEqual("Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("dojo/tools/huskyci/parser.py", finding.file_path)
                 self.assertEqual(55, finding.line)
-                self.assertEqual(datetime.date(2021, 10, 19), finding.date.date())
+                self.assertEqual(dt.date(2021, 10, 19), finding.date.date())
             with self.subTest(i=266):
                 finding = findings[266]
                 self.assertEqual("Try, Except, Pass detected.", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("tests/base_test_class.py", finding.file_path)
                 self.assertEqual(191, finding.line)
-                self.assertEqual(datetime.date(2021, 10, 19), finding.date.date())
+                self.assertEqual(dt.date(2021, 10, 19), finding.date.date())
 
     def test_get_tests_ok(self):
         """Version 2.6.3 with big project in Python"""
@@ -95,7 +95,7 @@ class TestHorusecParser(DojoTestCase):
                 self.assertEqual(0, finding.line)
                 self.assertGreaterEqual(finding.scanner_confidence, 3)  # "Firm"
                 self.assertLessEqual(finding.scanner_confidence, 5)  # "Firm"
-                self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                self.assertEqual(dt.date(2022, 5, 6), finding.date.date())
             with self.subTest(i=10):
                 finding = findings[10]
                 self.assertEqual("Remote code injection Apache Log4j", finding.title)
@@ -104,7 +104,7 @@ class TestHorusecParser(DojoTestCase):
                 self.assertEqual(35, finding.line)
                 self.assertGreaterEqual(finding.scanner_confidence, 3)  # "Firm"
                 self.assertLessEqual(finding.scanner_confidence, 5)  # "Firm"
-                self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                self.assertEqual(dt.date(2022, 5, 6), finding.date.date())
             with self.subTest(i=13):
                 finding = findings[13]
                 self.assertEqual("Base64 Encode", finding.title)
@@ -112,7 +112,7 @@ class TestHorusecParser(DojoTestCase):
                 self.assertEqual("GetGestaoVisaoWeb/src/main/java/br/gov/dataprev/get/web/util/ErrorHandlingUtils.java", finding.file_path)
                 self.assertEqual(146, finding.line)
                 self.assertGreaterEqual(finding.scanner_confidence, 6)  # "Tentative"
-                self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                self.assertEqual(dt.date(2022, 5, 6), finding.date.date())
 
     def test_get_tests_pr_6563(self):
         """"""
@@ -131,7 +131,7 @@ class TestHorusecParser(DojoTestCase):
                 self.assertEqual(None, finding.line)
                 self.assertGreaterEqual(finding.scanner_confidence, 3)  # "Firm"
                 self.assertLessEqual(finding.scanner_confidence, 5)  # "Firm"
-                self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                self.assertEqual(dt.date(2022, 5, 6), finding.date.date())
 
     def test_issue_9939(self):
         """"""

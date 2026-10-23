@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.jfrog_xray_unified.parser import JFrogXrayUnifiedParser
@@ -42,7 +42,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertGreater(len(item.references), 0)
         self.assertEqual("Medium", item.impact)
         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 1, 15), item.date.date())
+        self.assertEqual(dt.date(2021, 1, 15), item.date.date())
         self.assertEqual("XRAY-139239", item.unique_id_from_tool)
 
     def test_parse_file_with_many_vulns(self):
@@ -195,7 +195,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertGreater(len(item.references), 0)
         self.assertEqual("Medium", item.impact)
         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 5, 4), item.date.date())
+        self.assertEqual(dt.date(2021, 5, 4), item.date.date())
         self.assertEqual("XRAY-100301", item.unique_id_from_tool)
 
         # debian
@@ -218,7 +218,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertGreater(len(item.references), 0)
         self.assertEqual("High", item.impact)
         self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 3, 9), item.date.date())
+        self.assertEqual(dt.date(2021, 3, 9), item.date.date())
         self.assertEqual("XRAY-137237", item.unique_id_from_tool)
 
         # go
@@ -242,7 +242,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertGreater(len(item.references), 0)
         self.assertEqual("Medium", item.impact)
         self.assertEqual("CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 2, 2), item.date.date())
+        self.assertEqual(dt.date(2021, 2, 2), item.date.date())
         self.assertEqual("XRAY-86054", item.unique_id_from_tool)
 
         # maven
@@ -264,7 +264,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertGreater(len(item.references), 0)
         self.assertEqual("High", item.impact)
         self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 1, 14), item.date.date())
+        self.assertEqual(dt.date(2021, 1, 14), item.date.date())
         self.assertEqual("XRAY-126663", item.unique_id_from_tool)
 
         # npm
@@ -288,7 +288,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertGreater(len(item.references), 0)
         self.assertEqual("Medium", item.impact)
         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 1, 15), item.date.date())
+        self.assertEqual(dt.date(2021, 1, 15), item.date.date())
         self.assertEqual("XRAY-97245", item.unique_id_from_tool)
 
         # pypi
@@ -312,7 +312,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertGreater(len(item.references), 0)
         self.assertEqual("Medium", item.impact)
         self.assertEqual("CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 2, 12), item.date.date())
+        self.assertEqual(dt.date(2021, 2, 12), item.date.date())
         self.assertEqual("XRAY-97724", item.unique_id_from_tool)
 
         # rpm
@@ -335,7 +335,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertEqual(len(item.references), 0)
         self.assertEqual("Medium", item.impact)
         self.assertEqual("CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H", item.cvssv3)
-        self.assertEqual(datetime.date(2021, 1, 14), item.date.date())
+        self.assertEqual(dt.date(2021, 1, 14), item.date.date())
         self.assertEqual("XRAY-106044", item.unique_id_from_tool)
         # **finished various packages**
 

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.scout_suite.parser import ScoutSuiteParser
@@ -28,7 +28,7 @@ class TestScoutSuiteParser(DojoTestCase):
                 self.assertEqual("Bucket with Versioning Disabled", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(1032, finding.cwe)
-                self.assertEqual(datetime.date(2021, 1, 8), finding.date)
+                self.assertEqual(dt.date(2021, 1, 8), finding.date)
                 self.assertEqual("gcp:cloudstorage-bucket-no-versioning", finding.vuln_id_from_tool)
 
     def test_get_findings(self):
@@ -72,7 +72,7 @@ class TestScoutSuiteParser(DojoTestCase):
                 self.assertEqual("CloudTrail Service Not Configured", finding.title)
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual(1032, finding.cwe)
-                self.assertEqual(datetime.date(2021, 10, 1), finding.date)
+                self.assertEqual(dt.date(2021, 10, 1), finding.date)
                 self.assertEqual("aws:cloudtrail-not-configured", finding.vuln_id_from_tool)
             with self.subTest(i=15):
                 finding = findings[15]

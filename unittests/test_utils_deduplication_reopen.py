@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 
 from dojo.finding.deduplication import set_duplicate
@@ -16,7 +16,7 @@ class TestDuplicationReopen(DojoTestCase):
     def setUp(self):
         self.finding_a = copy_model_util(Finding.objects.get(id=2), exclude_fields=["duplicate_finding"])
         self.finding_a.duplicate = False
-        self.finding_a.mitigated = datetime.datetime(1970, 1, 1, tzinfo=datetime.UTC)
+        self.finding_a.mitigated = dt.datetime(1970, 1, 1, tzinfo=dt.UTC)
         self.finding_a.is_mitigated = True
         self.finding_a.false_p = True
         self.finding_a.active = False

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Finding, Test
 from dojo.tools.stackhawk.parser import StackHawkParser
@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestStackHawkParser(DojoTestCase):
-    __test_datetime = datetime.datetime(2022, 2, 16, 23, 7, 19, 575000, datetime.UTC)
+    __test_datetime = dt.datetime(2022, 2, 16, 23, 7, 19, 575000, dt.UTC)
 
     def test_invalid_json_format(self):
         with (get_unit_tests_scans_path("stackhawk") / "invalid.json").open(encoding="utf-8") as testfile:
@@ -218,7 +218,7 @@ class TestStackHawkParser(DojoTestCase):
             self,
             actual_finding: Finding,
             title,
-            date: datetime.datetime,
+            date: dt.datetime,
             application_name,
             environment,
             severity,

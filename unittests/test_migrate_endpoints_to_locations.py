@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from io import StringIO
 from unittest.mock import patch
 
@@ -90,7 +90,7 @@ class MigrateEndpointsToLocationsTest(TestCase):
         status = Endpoint_Status.objects.create(
             endpoint=endpoint,
             finding=finding,
-            date=datetime.date(2024, 5, 17),
+            date=dt.date(2024, 5, 17),
             mitigated=not active,
         )
         return endpoint, finding, status
@@ -411,7 +411,7 @@ class MigrateEndpointsToLocationsTest(TestCase):
             Endpoint_Status.objects.create(
                 endpoint=endpoint,
                 finding=finding,
-                date=datetime.date(2024, 5, 17),
+                date=dt.date(2024, 5, 17),
                 mitigated=not active,
             )
 
@@ -712,7 +712,7 @@ class MigrateEndpointsToLocationsTest(TestCase):
         Endpoint_Status.objects.create(
             endpoint=other_endpoint,
             finding=other_finding,
-            date=datetime.date(2024, 5, 17),
+            date=dt.date(2024, 5, 17),
             mitigated=False,
         )
 
@@ -802,7 +802,7 @@ class MigrateEndpointsToLocationsMemoryTest(TestCase):
             Endpoint_Status.objects.create(
                 endpoint=endpoint,
                 finding=finding,
-                date=datetime.date(2024, 5, 17),
+                date=dt.date(2024, 5, 17),
                 mitigated=True,
                 mitigated_by=self.reporter,
                 mitigated_time=timezone.now(),

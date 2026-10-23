@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Finding, Test
 from dojo.tools.cyclonedx.parser import CycloneDXParser
@@ -104,7 +104,7 @@ class TestCyclonedxParser(DojoTestCase):
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("Django", finding.component_name)
                 self.assertEqual("2.2.18", finding.component_version)
-                self.assertEqual(datetime.date(2021, 4, 13), datetime.datetime.date(finding.date))
+                self.assertEqual(dt.date(2021, 4, 13), dt.datetime.date(finding.date))
             with self.subTest(i=200):
                 finding = findings[200]
                 self.assertEqual("Low", finding.severity)
@@ -113,7 +113,7 @@ class TestCyclonedxParser(DojoTestCase):
                 vulnerability_ids = finding.unsaved_vulnerability_ids
                 self.assertEqual(1, len(vulnerability_ids))
                 self.assertEqual("CVE-2019-6988", vulnerability_ids[0])
-                self.assertEqual(datetime.date(2021, 4, 13), datetime.datetime.date(finding.date))
+                self.assertEqual(dt.date(2021, 4, 13), dt.datetime.date(finding.date))
 
     def test_spec1_report(self):
         """Test a report from the spec itself"""
@@ -352,7 +352,7 @@ class TestCyclonedxParser(DojoTestCase):
                             "Django before 2.2.24, 3.x before 3.1.12, and 3.2.x before 3.2.4 has a potential directory traversal",
                             finding.description,
                         )
-                        self.assertEqual(datetime.date(2022, 1, 28), datetime.datetime.date(finding.date))
+                        self.assertEqual(dt.date(2022, 1, 28), dt.datetime.date(finding.date))
                 elif finding.vuln_id_from_tool == "c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0":
                     with self.subTest(i="CVE-2018-7536"):
                         self.assertEqual("Django:2.0 | c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0", finding.title)
@@ -367,7 +367,7 @@ class TestCyclonedxParser(DojoTestCase):
                             "An issue was discovered in Django 2.0 before 2.0.3, 1.11 before 1.11.11, and 1.8 before 1.8.19.",
                             finding.description,
                         )
-                        self.assertEqual(datetime.date(2022, 1, 28), datetime.datetime.date(finding.date))
+                        self.assertEqual(dt.date(2022, 1, 28), dt.datetime.date(finding.date))
                 elif finding.vuln_id_from_tool == "90cfba6a-ddc9-4708-b131-5d875e8c558d":
                     with self.subTest(i="CVE-2018-6188"):
                         self.assertEqual("High", finding.severity)
@@ -381,7 +381,7 @@ class TestCyclonedxParser(DojoTestCase):
                             "django.contrib.auth.forms.AuthenticationForm in Django 2.0 before 2.0.2, and 1.11.8 and 1.11.9, allows remote attackers to obtain potentially sensitive information",
                             finding.description,
                         )
-                        self.assertEqual(datetime.date(2022, 1, 28), datetime.datetime.date(finding.date))
+                        self.assertEqual(dt.date(2022, 1, 28), dt.datetime.date(finding.date))
 
     def test_cyclonedx_1_4_xml_cvssv31(self):
         """CycloneDX version 1.4 XML format"""

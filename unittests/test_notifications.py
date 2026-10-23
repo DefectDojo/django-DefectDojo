@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 from unittest import skip
 from unittest.mock import Mock, patch
@@ -852,7 +852,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.assertIn("Error when sending message to Webhooks 'My webhook endpoint' (status: 500)", cm.output[-1])
 
     def test_system_webhook_second_5xx_within_one_day(self):
-        ten_mins_ago = get_current_datetime() - datetime.timedelta(minutes=10)
+        ten_mins_ago = get_current_datetime() - dt.timedelta(minutes=10)
         self.sys_wh.url = f"{self.url_base}/status/500"
         self.sys_wh.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
         self.sys_wh.first_error = ten_mins_ago
@@ -872,8 +872,8 @@ class TestNotificationWebhooks(DojoTestCase):
 
     def test_system_webhook_third_5xx_after_more_then_day(self):
         now = get_current_datetime()
-        day_ago = now - datetime.timedelta(hours=24, minutes=10)
-        ten_minutes_ago = now - datetime.timedelta(minutes=10)
+        day_ago = now - dt.timedelta(hours=24, minutes=10)
+        ten_minutes_ago = now - dt.timedelta(minutes=10)
         self.sys_wh.url = f"{self.url_base}/status/500"
         self.sys_wh.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
         self.sys_wh.first_error = day_ago
@@ -951,7 +951,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(updated_wh.note, "Response status code: 503")
 
         with self.subTest("active_tmp_old"):
-            day_ago = get_current_datetime() - datetime.timedelta(hours=24, minutes=10)
+            day_ago = get_current_datetime() - dt.timedelta(hours=24, minutes=10)
             wh = Notification_Webhooks.objects.filter(owner=None).first()
             wh.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
             wh.first_error = day_ago
@@ -970,7 +970,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertIn("Webhook endpoint 'My webhook endpoint' reactivated from 'active_tmp' to 'active'", cm.output[-1])
 
         with self.subTest("inactive_tmp_new"):
-            minute_ago = get_current_datetime() - datetime.timedelta(minutes=1)
+            minute_ago = get_current_datetime() - dt.timedelta(minutes=1)
             wh = Notification_Webhooks.objects.filter(owner=None).first()
             wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
             wh.first_error = minute_ago
@@ -987,7 +987,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(updated_wh.note, "Response status code: 503")
 
         with self.subTest("inactive_tmp_old"):
-            ten_minutes_ago = get_current_datetime() - datetime.timedelta(minutes=10)
+            ten_minutes_ago = get_current_datetime() - dt.timedelta(minutes=10)
             wh = Notification_Webhooks.objects.filter(owner=None).first()
             wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
             wh.first_error = ten_minutes_ago

@@ -1,5 +1,5 @@
 import contextlib
-import datetime
+import datetime as dt
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
@@ -33,7 +33,7 @@ class NmapParser:
 
         report_date = None
         with contextlib.suppress(ValueError):
-            report_date = datetime.datetime.fromtimestamp(
+            report_date = dt.datetime.fromtimestamp(
                 int(root.attrib["start"]),
             )
 

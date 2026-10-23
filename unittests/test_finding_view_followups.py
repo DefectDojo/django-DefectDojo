@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest.mock import patch
 
 from django.core.exceptions import PermissionDenied
@@ -27,13 +27,13 @@ class FindingViewFollowupsTest(DojoTestCase):
         self.other_product = Product.objects.create(name="followups other product", prod_type=product_type, description="x")
         engagement = Engagement.objects.create(
             name="followups other engagement", product=self.other_product,
-            target_start=datetime.date(2026, 1, 1), target_end=datetime.date(2026, 2, 1),
+            target_start=dt.date(2026, 1, 1), target_end=dt.date(2026, 2, 1),
         )
         test = Test.objects.create(
             engagement=engagement,
             test_type=Test_Type.objects.get_or_create(name="ZAP Scan")[0],
-            target_start=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2026, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2026, 2, 1, tzinfo=dt.UTC),
         )
         self.other_finding = Finding.objects.create(
             title="followups other finding", test=test, severity="High", reporter=self.admin, active=True, verified=False,

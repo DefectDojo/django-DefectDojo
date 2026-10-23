@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
@@ -51,7 +51,7 @@ class TestBulkEditValidation(DojoTestCase):
         cls.engagement = Engagement.objects.create(
             product=cls.product,
             target_start=timezone.now(),
-            target_end=timezone.now() + datetime.timedelta(days=30),
+            target_end=timezone.now() + dt.timedelta(days=30),
         )
         cls.test_type = Test_Type.objects.create(
             name="Manual Test",
@@ -61,7 +61,7 @@ class TestBulkEditValidation(DojoTestCase):
             engagement=cls.engagement,
             test_type=cls.test_type,
             target_start=timezone.now(),
-            target_end=timezone.now() + datetime.timedelta(days=1),
+            target_end=timezone.now() + dt.timedelta(days=1),
         )
 
         # Create findings in various states

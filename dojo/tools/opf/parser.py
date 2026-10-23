@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import html
 import json
 import re
@@ -181,7 +181,7 @@ class OPFParser:
         if not match:
             return None
         try:
-            return datetime.date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+            return dt.date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
         except ValueError:
             return None
 

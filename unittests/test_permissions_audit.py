@@ -16,7 +16,7 @@ Tests verify:
 12. Jira Epic dispatch: the request body cannot set dispatcher control kwargs (H1 #3949034)
 13. manage_files does not delete FileUpload rows outside the object in the URL (H1 #3972387)
 """
-import datetime
+import datetime as dt
 import uuid
 from unittest import mock, skip
 
@@ -140,8 +140,8 @@ class TestRiskAcceptanceExposure(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement = Engagement.objects.create(
             name="RA Test Engagement",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         test_type, _ = Test_Type.objects.get_or_create(name="Manual Code Review")
         cls.test = Test.objects.create(
@@ -314,8 +314,8 @@ class TestNoteRelationshipVerification(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement = Engagement.objects.create(
             name="Note Test Engagement",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         test_type, _ = Test_Type.objects.get_or_create(name="Manual Code Review")
         cls.test = Test.objects.create(
@@ -657,14 +657,14 @@ class TestRiskAcceptanceCrossEngagementIDOR(LegacyAuthMirrorMixin, DojoTestCase)
         cls.engagement_a = Engagement.objects.create(
             name="RA IDOR Engagement A",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         cls.engagement_b = Engagement.objects.create(
             name="RA IDOR Engagement B",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
 
         # Create a risk acceptance on engagement A
@@ -825,8 +825,8 @@ class TestRiskAcceptanceRemoveFindingGuard(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement_a = Engagement.objects.create(
             name="RA Remove Guard Engagement A",
             product=cls.product_a,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         test_type, _ = Test_Type.objects.get_or_create(
             name="Manual Code Review",
@@ -871,8 +871,8 @@ class TestRiskAcceptanceRemoveFindingGuard(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement_b = Engagement.objects.create(
             name="RA Remove Guard Engagement B",
             product=cls.product_b,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         cls.test_b = Test.objects.create(
             engagement=cls.engagement_b,
@@ -1118,14 +1118,14 @@ class TestQuestionnaireCrossEngagementIDOR(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement_a = Engagement.objects.create(
             name="Survey IDOR Engagement A",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         cls.engagement_b = Engagement.objects.create(
             name="Survey IDOR Engagement B",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
 
         # Create a questionnaire (Engagement_Survey) and an Answered_Survey on engagement A
@@ -1222,8 +1222,8 @@ class TestFindingTemplatesGlobalPermission(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement = Engagement.objects.create(
             name="Template Test Engagement",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
         test_type, _ = Test_Type.objects.get_or_create(name="Manual Code Review")
         cls.test = Test.objects.create(
@@ -1303,8 +1303,8 @@ class TestJiraEpicBFLA(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement = Engagement.objects.create(
             name="Jira Epic BFLA Engagement",
             product=cls.product,
-            target_start=datetime.date(2024, 1, 1),
-            target_end=datetime.date(2024, 12, 31),
+            target_start=dt.date(2024, 1, 1),
+            target_end=dt.date(2024, 12, 31),
         )
 
     def _client_for_user(self, user):
@@ -1410,16 +1410,16 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement = Engagement.objects.create(
             name="RelObjPerm Engagement",
             product=cls.product,
-            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
-            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+            target_start=timezone.make_aware(dt.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(dt.datetime(2024, 12, 31)),
         )
 
         test_type, _ = Test_Type.objects.get_or_create(name="Semgrep JSON")
         cls.test = Test.objects.create(
             engagement=cls.engagement,
             test_type=test_type,
-            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
-            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+            target_start=timezone.make_aware(dt.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(dt.datetime(2024, 12, 31)),
         )
 
         cls.finding = Finding.objects.create(
@@ -1859,8 +1859,8 @@ class TestEngagementMovePermission(LegacyAuthMirrorMixin, DojoTestCase):
         self.engagement = Engagement.objects.create(
             name="Move Test Engagement",
             product=self.product_a,
-            target_start=datetime.date.today(),
-            target_end=datetime.date.today(),
+            target_start=dt.date.today(),
+            target_end=dt.date.today(),
         )
 
     def _api_client(self):
@@ -1917,8 +1917,8 @@ class TestEngagementMovePermission(LegacyAuthMirrorMixin, DojoTestCase):
         payload = {
             "name": "Move Test Engagement",
             "product": self.product_c.id,
-            "target_start": str(datetime.date.today()),
-            "target_end": str(datetime.date.today()),
+            "target_start": str(dt.date.today()),
+            "target_end": str(dt.date.today()),
             "engagement_type": "Interactive",
             "status": "Not Started",
         }
@@ -1934,8 +1934,8 @@ class TestEngagementMovePermission(LegacyAuthMirrorMixin, DojoTestCase):
         payload = {
             "name": "Move Test Engagement",
             "product": self.product_b.id,
-            "target_start": str(datetime.date.today()),
-            "target_end": str(datetime.date.today()),
+            "target_start": str(dt.date.today()),
+            "target_end": str(dt.date.today()),
             "engagement_type": "Interactive",
             "status": "Not Started",
         }
@@ -1961,8 +1961,8 @@ class TestEngagementMovePermission(LegacyAuthMirrorMixin, DojoTestCase):
         form_data = {
             "name": "Move Test Engagement",
             "product": self.product_c.id,
-            "target_start": datetime.date.today().strftime("%Y-%m-%d"),
-            "target_end": datetime.date.today().strftime("%Y-%m-%d"),
+            "target_start": dt.date.today().strftime("%Y-%m-%d"),
+            "target_end": dt.date.today().strftime("%Y-%m-%d"),
             "lead": self.user.id,
             "status": "Not Started",
             "engagement_type": "Interactive",
@@ -1985,8 +1985,8 @@ class TestEngagementMovePermission(LegacyAuthMirrorMixin, DojoTestCase):
         url = reverse("edit_engagement", args=(self.engagement.id,))
         form_data = {
             "product": self.product_b.id,
-            "target_start": datetime.date.today().strftime("%Y-%m-%d"),
-            "target_end": datetime.date.today().strftime("%Y-%m-%d"),
+            "target_start": dt.date.today().strftime("%Y-%m-%d"),
+            "target_end": dt.date.today().strftime("%Y-%m-%d"),
             "lead": self.user.id,
             "status": "Not Started",
         }
@@ -2027,15 +2027,15 @@ class TestManageFilesScopedCleanup(LegacyAuthMirrorMixin, DojoTestCase):
         cls.engagement = Engagement.objects.create(
             name="ManageFiles Engagement",
             product=cls.product,
-            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
-            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+            target_start=timezone.make_aware(dt.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(dt.datetime(2024, 12, 31)),
         )
         test_type, _ = Test_Type.objects.get_or_create(name="Semgrep JSON")
         cls.test = Test.objects.create(
             engagement=cls.engagement,
             test_type=test_type,
-            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
-            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+            target_start=timezone.make_aware(dt.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(dt.datetime(2024, 12, 31)),
         )
         cls.finding = Finding.objects.create(
             title="ManageFiles Finding",

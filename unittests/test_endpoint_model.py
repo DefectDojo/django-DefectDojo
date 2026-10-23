@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest import skip
 
 from django.apps import apps
@@ -214,13 +214,13 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
         self.product = Product.objects.create(prod_type=self.prod_type)
         self.engagement = Engagement.objects.create(
             product=self.product,
-            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            target_start=dt.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=dt.datetime(2022, 1, 1, tzinfo=timezone.utc),
         )
         self.test = Test.objects.create(
             engagement=self.engagement,
-            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            target_start=dt.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=dt.datetime(2022, 1, 1, tzinfo=timezone.utc),
             test_type_id=1,
         )
         user = get_user_model().objects.create().pk
@@ -230,22 +230,22 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
         self.another_endpoint = Endpoint.objects.create(protocol="http", host="bar.foo.eps").pk
         self.endpoint_status = {
             "standard": Endpoint_Status.objects.create(
-                date=datetime.datetime(2021, 3, 1, tzinfo=timezone.utc),
-                last_modified=datetime.datetime(2021, 4, 1, tzinfo=timezone.utc),
+                date=dt.datetime(2021, 3, 1, tzinfo=timezone.utc),
+                last_modified=dt.datetime(2021, 4, 1, tzinfo=timezone.utc),
                 mitigated=False,
                 finding_id=self.finding,
                 endpoint_id=self.endpoint,
             ).pk,
             "removed_endpoint": Endpoint_Status.objects.create(
-                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
-                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                date=dt.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=dt.datetime(2021, 5, 1, tzinfo=timezone.utc),
                 mitigated=True,
                 finding_id=self.another_finding,
                 endpoint_id=None,
             ).pk,
             "removed_finding": Endpoint_Status.objects.create(
-                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
-                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                date=dt.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=dt.datetime(2021, 5, 1, tzinfo=timezone.utc),
                 mitigated=True,
                 finding_id=None,
                 endpoint_id=self.another_endpoint,

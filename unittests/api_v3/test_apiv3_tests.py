@@ -1,7 +1,7 @@
 """Test (scan run) CRUD + RBAC + contract tests for API v3 (OS3b)."""
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from unittest import mock
 
 from django.db import connection
@@ -97,7 +97,7 @@ class TestApiV3TestsQueryCount(ApiV3TestCase):
     def _bulk(self, count: int, start: int) -> None:
         engagement = Engagement.objects.first()
         test_type = Test_Type.objects.first()
-        now = datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC)
+        now = dt.datetime(2024, 1, 1, tzinfo=dt.UTC)
         Test.objects.bulk_create([
             Test(engagement=engagement, test_type=test_type, target_start=now, target_end=now)
             for _ in range(count)
@@ -197,8 +197,8 @@ class TestApiV3TestsWrite(ApiV3TestCase):
         test_type = Test_Type.objects.first()
         test = Test.objects.create(
             engagement=engagement, test_type=test_type,
-            target_start=datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2024, 1, 2, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2024, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2024, 1, 2, tzinfo=dt.UTC),
         )
         response = self.client.delete(self.v3_url(f"tests/{test.id}"))
         self.assertEqual(204, response.status_code)
@@ -214,8 +214,8 @@ class TestApiV3TestsReplace(ApiV3TestCase):
         test_type = Test_Type.objects.first()
         defaults = {
             "engagement": engagement, "test_type": test_type,
-            "target_start": datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC),
-            "target_end": datetime.datetime(2024, 1, 2, tzinfo=datetime.UTC),
+            "target_start": dt.datetime(2024, 1, 1, tzinfo=dt.UTC),
+            "target_end": dt.datetime(2024, 1, 2, tzinfo=dt.UTC),
         }
         defaults.update(kwargs)
         return Test.objects.create(**defaults), test_type

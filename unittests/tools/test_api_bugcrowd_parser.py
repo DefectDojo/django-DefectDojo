@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Product_API_Scan_Configuration, Test
 from dojo.tools.api_bugcrowd.parser import ApiBugcrowdParser
@@ -33,7 +33,7 @@ class TestApiBugcrowdParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
             self.assertEqual(
-                datetime.datetime.date(finding.date), datetime.date(2002, 4, 1),
+                dt.datetime.date(finding.date), dt.date(2002, 4, 1),
             )
             self.assertEqual(str(self.get_unsaved_locations(finding)[0]), "https://example.com")
             self.assertEqual(finding.severity, "Info")
@@ -63,13 +63,13 @@ class TestApiBugcrowdParser(DojoTestCase):
             self.assertEqual(finding_3.title, "you did something wrong (returned)")
 
             self.assertEqual(
-                datetime.datetime.date(finding_1.date), datetime.date(2000, 1, 1),
+                dt.datetime.date(finding_1.date), dt.date(2000, 1, 1),
             )
             self.assertEqual(
-                datetime.datetime.date(finding_2.date), datetime.date(2000, 1, 2),
+                dt.datetime.date(finding_2.date), dt.date(2000, 1, 2),
             )
             self.assertEqual(
-                datetime.datetime.date(finding_3.date), datetime.date(2000, 1, 3),
+                dt.datetime.date(finding_3.date), dt.date(2000, 1, 3),
             )
 
             self.assertEqual(
@@ -128,7 +128,7 @@ class TestApiBugcrowdParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
             self.assertEqual(
-                datetime.datetime.date(finding.date), datetime.date(2002, 4, 1),
+                dt.datetime.date(finding.date), dt.date(2002, 4, 1),
             )
             self.assertEqual(str(self.get_unsaved_locations(finding)[0]), "https://example.com")
             self.assertEqual(finding.severity, "Info")

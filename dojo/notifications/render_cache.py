@@ -34,7 +34,7 @@ template uses it.
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import decimal
 import os
 import re
@@ -55,8 +55,8 @@ if TYPE_CHECKING:
 
 #: Values that steer a render and are compared exactly when a cached render is reused.
 _SCALAR_TYPES = frozenset({
-    int, float, bool, type(None), decimal.Decimal, datetime.date, datetime.datetime,
-    datetime.time, datetime.timedelta, uuid.UUID,
+    int, float, bool, type(None), decimal.Decimal, dt.date, dt.datetime,
+    dt.time, dt.timedelta, uuid.UUID,
 })
 
 #: Kinds of context value that identify the shared part of a notification by value.

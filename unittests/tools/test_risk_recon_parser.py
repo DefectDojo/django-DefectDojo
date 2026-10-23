@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest.mock import MagicMock, patch
 
 from dojo.models import Test
@@ -29,11 +29,11 @@ class TestRiskReconAPIParser(DojoTestCase):
             self.assertEqual(2, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual(datetime.date(2017, 3, 17), finding.date.date())
+                self.assertEqual(dt.date(2017, 3, 17), finding.date.date())
                 self.assertEqual("ff2bbdbfc2b6fddc061ed96b1fasfwefb", finding.unique_id_from_tool)
             with self.subTest(i=1):
                 finding = findings[1]
-                self.assertEqual(datetime.date(2017, 3, 17), finding.date.date())
+                self.assertEqual(dt.date(2017, 3, 17), finding.date.date())
                 self.assertEqual("ff2bbdbfc2b6gsrgwergwe6b1fasfwefb", finding.unique_id_from_tool)
 
     @patch("dojo.tools.risk_recon.api.validate_url_for_ssrf", side_effect=SSRFError("blocked: private address"))

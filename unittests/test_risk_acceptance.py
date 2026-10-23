@@ -1,5 +1,5 @@
 import copy
-import datetime
+import datetime as dt
 import logging
 import re
 from unittest.mock import patch
@@ -562,9 +562,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # ra1: expire in 9 days -> warn:yes, expire:no
         # ra2: expire in 11 days -> warn:no, expire:no
         # ra3: expire 5 days ago -> warn:no, expire:yes (expiration not handled yet, so expire)
-        ra1.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
-        ra2.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days + 1)
-        ra3.expiration_date = datetime.datetime.now(datetime.UTC) - relativedelta(days=5)
+        ra1.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days - 1)
+        ra2.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days + 1)
+        ra3.expiration_date = dt.datetime.now(dt.UTC) - relativedelta(days=5)
         ra1.save()
         ra2.save()
         ra3.save()
@@ -630,9 +630,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
 
         # both are inside the heads-up window, ra1 (created first, so handled first) has no engagement
-        ra1.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
-        ra2.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
-        ra3.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days + 1)
+        ra1.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days - 1)
+        ra2.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days - 1)
+        ra3.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days + 1)
         ra1.save()
         ra2.save()
         ra3.save()
@@ -674,16 +674,16 @@ class RiskAcceptanceTestUI(DojoTestCase):
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
 
         for ra in (ra1, ra2, ra3):
-            ra.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days + 1)
+            ra.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days + 1)
             ra.save()
 
         empty_ra = Risk_Acceptance.objects.create(
             name="Accept: no findings, no engagement",
             owner=self.get_test_admin(),
-            expiration_date=datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1),
+            expiration_date=dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days - 1),
         )
         attached_ra = ra1
-        attached_ra.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
+        attached_ra.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days - 1)
         attached_ra.save()
         self.assertIsNone(empty_ra.engagement, msg="setup failed: expected no engagement")
         self.assertFalse(empty_ra.accepted_findings.exists(), msg="setup failed: expected no accepted findings")
@@ -718,9 +718,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
 
         # ra3 is past its expiration date and has no engagement, ra1 is only due a heads-up
-        ra1.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
-        ra2.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days + 1)
-        ra3.expiration_date = datetime.datetime.now(datetime.UTC) - relativedelta(days=5)
+        ra1.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days - 1)
+        ra2.expiration_date = dt.datetime.now(dt.UTC) + relativedelta(days=heads_up_days + 1)
+        ra3.expiration_date = dt.datetime.now(dt.UTC) - relativedelta(days=5)
         ra1.save()
         ra2.save()
         ra3.save()

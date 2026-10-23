@@ -8,7 +8,7 @@ author could read a private note, rewrite it, clear its private flag, or delete
 it. Each route is exercised once per value of ``SUPPORTED_PAGES``.
 """
 
-import datetime
+import datetime as dt
 
 from django.urls import reverse
 from django.utils import timezone
@@ -34,8 +34,8 @@ SUPERSEDED = "INTERNAL: private note ui entry the author edited out"
 PUBLIC = "public note ui entry"
 REWRITE = "rewritten by someone who is not the author"
 
-START = datetime.date(2026, 1, 1)
-END = datetime.date(2026, 1, 2)
+START = dt.date(2026, 1, 1)
+END = dt.date(2026, 1, 2)
 
 PAGES = [("engagement",), ("test",), ("finding",)]
 
@@ -97,7 +97,7 @@ class NoteUIPrivateAuthzTest(DojoTestCase):
 
     @staticmethod
     def _aware(day):
-        return timezone.make_aware(datetime.datetime.combine(day, datetime.time()))
+        return timezone.make_aware(dt.datetime.combine(day, dt.time()))
 
     def _member(self, username):
         user, _ = Dojo_User.objects.get_or_create(

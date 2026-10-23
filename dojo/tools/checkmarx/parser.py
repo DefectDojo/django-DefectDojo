@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 import logging
 
@@ -446,7 +446,7 @@ class CheckmarxParser:
         if isinstance(value, str):
             return parser.parse(value).date()
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC).date()
+            return dt.datetime.fromtimestamp(value.get("seconds"), dt.UTC).date()
         return None
 
     def _get_findings_json(self, file, test):

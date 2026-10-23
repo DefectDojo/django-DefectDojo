@@ -14,7 +14,7 @@ the host) and echoed to stdout between markers as a fallback. Nothing is hand-wr
 """
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 import os
 from pathlib import Path
@@ -474,7 +474,7 @@ class TestApiV3Examples(ApiV3TestCase):
              "**real** in-process requests against the test fixture. Tokens are redacted; long lists "
              "are truncated to ~3 rows. Regenerate with the command in that file's docstring."),
             "",
-            f"Captured: {datetime.datetime.now(tz=datetime.UTC).isoformat()}",
+            f"Captured: {dt.datetime.now(tz=dt.UTC).isoformat()}",
             "",
             "## Conventions (see `API_V3_PLAN.md` §4)",
             "",

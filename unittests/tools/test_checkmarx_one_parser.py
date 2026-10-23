@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 
 from dojo.models import Test
@@ -85,7 +85,7 @@ class TestCheckmarxOneParser(DojoTestCase):
             self.assertEqual("Dockerfile: Healthcheck Instruction Missing", finding.title)
             self.assertEqual("Low", finding.severity)
             self.assertEqual("/Dockerfile", finding.file_path)
-            self.assertEqual(datetime.datetime(2024, 4, 16, 14, 36, 23), finding.date.replace(tzinfo=None))
+            self.assertEqual(dt.datetime(2024, 4, 16, 14, 36, 23), finding.date.replace(tzinfo=None))
             self.assertEqual((
                 "**Actual Value**: Dockerfile doesn't contain instruction 'HEALTHCHECK'\n"
                 "**Expected Value**: Dockerfile should contain instruction 'HEALTHCHECK'\n"
@@ -101,7 +101,7 @@ class TestCheckmarxOneParser(DojoTestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual("/scripts/export-csv-full-base/e.go", finding.file_path)
             self.assertEqual(9, finding.line)
-            self.assertEqual(datetime.datetime(2024, 4, 16, 14, 39, 59), finding.date.replace(tzinfo=None))
+            self.assertEqual(dt.datetime(2024, 4, 16, 14, 39, 59), finding.date.replace(tzinfo=None))
             self.assertEqual((
                 "*   Always prefer to use the most updated versions of libraries, packages, and other dependancies.\r\n"
                 "*   Do not use or reference any class, method, function, property, or other element that has been declared deprecated.\n\n"

@@ -1,5 +1,5 @@
 # Standard library imports
-import datetime
+import datetime as dt
 import json
 import logging
 import re
@@ -280,7 +280,7 @@ def check_for_and_create_comment(parsed_json):
         # Determine if the same note body was created by either DefectDojo or Jira
         existing_notes = finding.notes.filter(
             Q(entry__icontains=comment_text_without_defectdojo_user) | Q(entry__icontains=entry),
-            date__gte=(timezone.now() - datetime.timedelta(seconds=30)),
+            date__gte=(timezone.now() - dt.timedelta(seconds=30)),
         )
         # Check the query for any hits
         if existing_notes.count() == 0:

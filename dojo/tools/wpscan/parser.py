@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import hashlib
 import json
 
@@ -93,7 +93,7 @@ class WpscanParser:
 
         report_date = None
         if "start_time" in tree:
-            report_date = datetime.datetime.fromtimestamp(tree.get("start_time"), datetime.UTC)
+            report_date = dt.datetime.fromtimestamp(tree.get("start_time"), dt.UTC)
 
         dupes = {}
         # manage plugin findings

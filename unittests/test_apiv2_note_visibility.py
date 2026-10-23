@@ -7,7 +7,7 @@ Acceptance received every note attached to it, including notes another user had
 marked private. Every read path now goes through ``visible_notes``.
 """
 
-import datetime
+import datetime as dt
 from types import SimpleNamespace
 
 from django.test import Client
@@ -36,8 +36,8 @@ from .dojo_test_case import DojoAPITestCase
 PRIVATE = "INTERNAL: note visibility private entry"
 PUBLIC = "note visibility public entry"
 
-START = datetime.date(2026, 1, 1)
-END = datetime.date(2026, 1, 2)
+START = dt.date(2026, 1, 1)
+END = dt.date(2026, 1, 2)
 
 
 class NoteVisibilityTest(DojoAPITestCase):
@@ -82,7 +82,7 @@ class NoteVisibilityTest(DojoAPITestCase):
 
     @staticmethod
     def _aware(day):
-        return timezone.make_aware(datetime.datetime.combine(day, datetime.time()))
+        return timezone.make_aware(dt.datetime.combine(day, dt.time()))
 
     def _member(self, username):
         user, _ = Dojo_User.objects.get_or_create(
@@ -271,8 +271,8 @@ class MaterialisedNotesTest(DojoAPITestCase):
         test_type, _ = Test_Type.objects.get_or_create(name="materialised-notes-tt")
         test = Test.objects.create(
             engagement=engagement, test_type=test_type,
-            target_start=timezone.make_aware(datetime.datetime.combine(START, datetime.time())),
-            target_end=timezone.make_aware(datetime.datetime.combine(END, datetime.time())),
+            target_start=timezone.make_aware(dt.datetime.combine(START, dt.time())),
+            target_end=timezone.make_aware(dt.datetime.combine(END, dt.time())),
         )
         self.finding = Finding.objects.create(
             title="materialised notes finding", test=test, reporter=self.author,

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest.mock import Mock, patch
 
 from django.db import connection
@@ -94,7 +94,7 @@ class SlaNotifyTestBase(DojoTestCase):
         finding.save()
         # save() derives the expiration date from the SLA configuration; pin it so the test
         # controls exactly where each finding sits relative to the notify window.
-        expiration = timezone.now().date() + datetime.timedelta(days=days_remaining)
+        expiration = timezone.now().date() + dt.timedelta(days=days_remaining)
         Finding.objects.filter(pk=finding.pk).update(sla_expiration_date=expiration)
         return Finding.objects.get(pk=finding.pk)
 

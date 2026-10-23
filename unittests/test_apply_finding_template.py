@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from crum import impersonate
 from django.conf import settings
@@ -48,7 +48,7 @@ class FindingMother:
         e = Engagement()
         e.product = p
         e.target_start = timezone.now()
-        e.target_end = e.target_start + datetime.timedelta(days=5)
+        e.target_end = e.target_start + dt.timedelta(days=5)
         e.save()
 
         tt = Test_Type()
@@ -59,7 +59,7 @@ class FindingMother:
         t.engagement = e
         t.test_type = tt
         t.target_start = timezone.now()
-        t.target_end = t.target_start + datetime.timedelta(days=5)
+        t.target_end = t.target_start + dt.timedelta(days=5)
         t.save()
 
         user = FindingTemplateTestUtil.create_user(is_staff=True)

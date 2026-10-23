@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.test import override_settings
 from django.utils import timezone
@@ -21,8 +21,8 @@ from dojo.models import (
 )
 from dojo.risk_acceptance import helper as ra_helper
 
-START = datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC)
-END = datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC)
+START = dt.datetime(2000, 1, 1, tzinfo=dt.UTC)
+END = dt.datetime(2000, 2, 1, tzinfo=dt.UTC)
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
@@ -60,10 +60,10 @@ class RiskAcceptanceApiDefaultsBase(APITestCase):
         if days is None:
             self.assertIsNone(risk_acceptance.expiration_date, msg=f"persisted expiration_date={risk_acceptance.expiration_date}")
             return
-        expected = timezone.now() + datetime.timedelta(days=days)
+        expected = timezone.now() + dt.timedelta(days=days)
         self.assertIsNotNone(risk_acceptance.expiration_date, msg="persisted expiration_date=None")
         self.assertLess(
-            abs(risk_acceptance.expiration_date - expected), datetime.timedelta(minutes=5),
+            abs(risk_acceptance.expiration_date - expected), dt.timedelta(minutes=5),
             msg=f"expected about {expected}, persisted={risk_acceptance.expiration_date}",
         )
 
@@ -96,7 +96,7 @@ class TestAcceptRisksDefaultExpiration(RiskAcceptanceApiDefaultsBase):
 
     def test_an_explicit_date_and_an_explicit_null_are_kept(self):
         self.set_window(30)
-        chosen = (timezone.now() + datetime.timedelta(days=7)).replace(microsecond=0)
+        chosen = (timezone.now() + dt.timedelta(days=7)).replace(microsecond=0)
         for route, kind in self.ROUTES:
             with self.subTest(route=route):
                 dated = self.accept(route, kind, expiration_date=chosen.isoformat())

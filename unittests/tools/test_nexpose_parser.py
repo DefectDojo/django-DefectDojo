@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.test import override_settings
 
@@ -204,6 +204,6 @@ class TestNexposeParser(DojoTestCase):
 
             self.assertEqual(6, len(findings))
             finding = findings[2]
-            self.assertEqual(datetime.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)
+            self.assertEqual(dt.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)
             finding = findings[4]
-            self.assertEqual(datetime.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)
+            self.assertEqual(dt.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)

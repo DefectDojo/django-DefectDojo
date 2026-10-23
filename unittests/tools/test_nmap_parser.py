@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.models import Test
 from dojo.tools.nmap.parser import NmapParser
@@ -25,7 +25,7 @@ class TestNmapParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("Open port: 5432/tcp", finding.title)
-                self.assertEqual(datetime.datetime(2014, 3, 29, 14, 46, 56), finding.date)
+                self.assertEqual(dt.datetime(2014, 3, 29, 14, 46, 56), finding.date)
                 self.assertEqual(1, len(self.get_unsaved_locations(finding)))
                 location = self.get_unsaved_locations(finding)[0]
                 self.assertEqual("localhost.localdomain", location.host)
@@ -43,7 +43,7 @@ class TestNmapParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("Open port: 21/tcp", finding.title)
-                self.assertEqual(datetime.datetime(2016, 5, 16, 17, 56, 59), finding.date)
+                self.assertEqual(dt.datetime(2016, 5, 16, 17, 56, 59), finding.date)
                 self.assertEqual(1, len(self.get_unsaved_locations(finding)))
                 location = self.get_unsaved_locations(finding)[0]
                 self.assertEqual("mocha2005.mochahost.com", location.host)
@@ -62,17 +62,17 @@ class TestNmapParser(DojoTestCase):
             self.assertEqual("CVE-2018-15919", findings[0].unsaved_vulnerability_ids[0])
             self.assertEqual("openssh", findings[0].component_name)
             self.assertEqual("7.4", findings[0].component_version)
-            self.assertEqual(datetime.datetime(2020, 2, 17, 9, 7, 25), findings[0].date)
+            self.assertEqual(dt.datetime(2020, 2, 17, 9, 7, 25), findings[0].date)
 
             self.assertEqual("Medium", findings[1].severity)
             self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
             self.assertEqual("CVE-2017-15906", findings[1].unsaved_vulnerability_ids[0])
             self.assertEqual("openssh", findings[1].component_name)
             self.assertEqual("7.4", findings[1].component_version)
-            self.assertEqual(datetime.datetime(2020, 2, 17, 9, 7, 25), findings[1].date)
+            self.assertEqual(dt.datetime(2020, 2, 17, 9, 7, 25), findings[1].date)
 
             self.assertEqual("Info", findings[2].severity)
-            self.assertEqual(datetime.datetime(2020, 2, 17, 9, 7, 25), findings[2].date)
+            self.assertEqual(dt.datetime(2020, 2, 17, 9, 7, 25), findings[2].date)
 
     def test_parse_issue4406(self):
         with (get_unit_tests_scans_path("nmap") / "issue4406.xml").open(encoding="utf-8") as testfile:
@@ -85,7 +85,7 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("openssh", finding.component_name)
                 self.assertEqual("7.4", finding.component_version)
-                self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
+                self.assertEqual(dt.datetime(2021, 4, 29, 9, 26, 36), finding.date)
                 self.assertEqual("MSF:ILITIES/UBUNTU-CVE-2019-6111/", finding.vuln_id_from_tool)
             with self.subTest(i=22):
                 finding = findings[22]
@@ -94,18 +94,18 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual("CVE-2019-6111", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual("openssh", finding.component_name)
                 self.assertEqual("7.4", finding.component_version)
-                self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
+                self.assertEqual(dt.datetime(2021, 4, 29, 9, 26, 36), finding.date)
             with self.subTest(i=27):
                 finding = findings[27]
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("EXPLOITPACK:EBDBC5685E3276D648B4D14B75563283", finding.title)
-                self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
+                self.assertEqual(dt.datetime(2021, 4, 29, 9, 26, 36), finding.date)
                 self.assertEqual("EXPLOITPACK:EBDBC5685E3276D648B4D14B75563283", finding.vuln_id_from_tool)
             with self.subTest(i=48):
                 finding = findings[48]
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("Open port: 9100/tcp", finding.title)
-                self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
+                self.assertEqual(dt.datetime(2021, 4, 29, 9, 26, 36), finding.date)
                 self.assertEqual(1, len(self.get_unsaved_locations(finding)))
                 location = self.get_unsaved_locations(finding)[0]
                 self.assertEqual("ip-10-250-195-71.eu-west-1.compute.internal", location.host)
@@ -115,7 +115,7 @@ class TestNmapParser(DojoTestCase):
                 finding = findings[66]
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("Open port: 31641/tcp", finding.title)
-                self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
+                self.assertEqual(dt.datetime(2021, 4, 29, 9, 26, 36), finding.date)
                 self.assertEqual(1, len(self.get_unsaved_locations(finding)))
                 location = self.get_unsaved_locations(finding)[0]
                 self.assertEqual("ip-10-250-195-71.eu-west-1.compute.internal", location.host)

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest.mock import patch
 
 from rest_framework.authtoken.models import Token
@@ -61,22 +61,22 @@ class TestRiskAcceptanceApi(APITestCase):
         # Create engagements
         cls.engagement_a = Engagement.objects.create(
             product=cls.product_enabled,
-            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2000, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2000, 2, 1, tzinfo=dt.UTC),
             name="Engagement A",
         )
 
         cls.engagement_b = Engagement.objects.create(
             product=cls.product_enabled,
-            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2000, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2000, 2, 1, tzinfo=dt.UTC),
             name="Engagement B",
         )
 
         cls.engagement_disabled = Engagement.objects.create(
             product=cls.product_disabled,
-            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2000, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2000, 2, 1, tzinfo=dt.UTC),
             name="Engagement Disabled",
         )
 
@@ -86,22 +86,22 @@ class TestRiskAcceptanceApi(APITestCase):
         cls.test_a1 = Test.objects.create(
             engagement=cls.engagement_a,
             test_type=cls.test_type,
-            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2000, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2000, 2, 1, tzinfo=dt.UTC),
         )
 
         cls.test_b1 = Test.objects.create(
             engagement=cls.engagement_b,
             test_type=cls.test_type,
-            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2000, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2000, 2, 1, tzinfo=dt.UTC),
         )
 
         cls.test_disabled = Test.objects.create(
             engagement=cls.engagement_disabled,
             test_type=cls.test_type,
-            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
-            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+            target_start=dt.datetime(2000, 1, 1, tzinfo=dt.UTC),
+            target_end=dt.datetime(2000, 2, 1, tzinfo=dt.UTC),
         )
 
         # Create findings
@@ -386,7 +386,7 @@ class TestRiskAcceptanceApi(APITestCase):
         ra_helper.reinstate(): its accepted findings are set back to inactive/risk-accepted
         and expiration_date_handled is cleared so the Celery expiry task re-processes it.
         """
-        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=5)
+        past_date = dt.datetime.now(dt.UTC) - dt.timedelta(days=5)
         ra = Risk_Acceptance.objects.create(
             name="Expired RA",
             recommendation="A",
@@ -404,7 +404,7 @@ class TestRiskAcceptanceApi(APITestCase):
         self.finding_a1.risk_accepted = False
         self.finding_a1.save()
 
-        future_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+        future_date = dt.datetime.now(dt.UTC) + dt.timedelta(days=30)
         payload = {
             "expiration_date": future_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "accepted_findings": [self.finding_a1.id],
@@ -435,7 +435,7 @@ class TestRiskAcceptanceApi(APITestCase):
         Regression test companion: editing the expiration_date of a risk acceptance that
         never expired must not disturb its findings, and expiration_date_handled stays None.
         """
-        old_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+        old_date = dt.datetime.now(dt.UTC) + dt.timedelta(days=30)
         ra = Risk_Acceptance.objects.create(
             name="Active RA",
             recommendation="A",
@@ -452,7 +452,7 @@ class TestRiskAcceptanceApi(APITestCase):
         self.finding_a1.risk_accepted = True
         self.finding_a1.save()
 
-        new_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=60)
+        new_date = dt.datetime.now(dt.UTC) + dt.timedelta(days=60)
         payload = {
             "expiration_date": new_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "accepted_findings": [self.finding_a1.id],
@@ -486,14 +486,14 @@ class TestRiskAcceptanceApi(APITestCase):
 
     def make_risk_acceptance(self, *, expired=False):
         """Build a risk acceptance covering finding_a1, optionally in the post-expiry state."""
-        stamp = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=5)
+        stamp = dt.datetime.now(dt.UTC) - dt.timedelta(days=5)
         risk_acceptance = Risk_Acceptance.objects.create(
             name="RA under test",
             recommendation="A",
             decision="A",
             accepted_by="Test User",
             owner=self.user,
-            expiration_date=stamp if expired else datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30),
+            expiration_date=stamp if expired else dt.datetime.now(dt.UTC) + dt.timedelta(days=30),
             expiration_date_handled=stamp if expired else None,
         )
         risk_acceptance.accepted_findings.add(self.finding_a1)
@@ -527,7 +527,7 @@ class TestRiskAcceptanceApi(APITestCase):
 
     def test_reinstate_action_uses_the_requested_expiration_date(self):
         risk_acceptance = self.make_risk_acceptance(expired=True)
-        requested_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=45)
+        requested_date = dt.datetime.now(dt.UTC) + dt.timedelta(days=45)
 
         response = self.client.post(
             f"{self.url}{risk_acceptance.id}/reinstate/",
@@ -602,13 +602,13 @@ class TestRiskAcceptanceApi(APITestCase):
         risk_acceptance = self.create_risk_acceptance()
 
         # 2. Manually backdate the created date to test ranges
-        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=10)
+        past_date = dt.datetime.now(dt.UTC) - dt.timedelta(days=10)
         risk_acceptance.created = past_date
         risk_acceptance.save()
 
         # 3. Test `created__lt` (Less than / Before)
         # Should return the risk acceptance because it was created 10 days ago
-        future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        future_date = dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         response = self.client.get(reverse("risk_acceptance-list") + f"?created__lt={future_date}")
         self.assertEqual(response.status_code, 200)
         result_ids = {item["id"] for item in response.json()["results"]}
@@ -625,11 +625,11 @@ class TestRiskAcceptanceApi(APITestCase):
         risk_acceptance = self.create_risk_acceptance()
 
         # Manually backdate the updated date
-        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=10)
+        past_date = dt.datetime.now(dt.UTC) - dt.timedelta(days=10)
         # We use .update() to bypass the auto_now=True behavior on the updated field
         type(risk_acceptance).objects.filter(pk=risk_acceptance.id).update(updated=past_date)
 
-        future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        future_date = dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
         # Test updated__lt
         response = self.client.get(reverse("risk_acceptance-list") + f"?updated__lt={future_date}")

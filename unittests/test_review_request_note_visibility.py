@@ -11,7 +11,7 @@ public; the review-request form offers no private option.
 # Regression: the review-request note was saved private, so the assigned
 # reviewer could not read the instructions they were asked to act on.
 
-import datetime
+import datetime as dt
 import importlib
 
 from django.apps import apps
@@ -36,8 +36,8 @@ from .dojo_test_case import DojoTestCase
 
 ENTRY = "please downgrade to medium, compensating control is in place"
 
-START = datetime.date(2026, 1, 1)
-END = datetime.date(2026, 1, 2)
+START = dt.date(2026, 1, 1)
+END = dt.date(2026, 1, 2)
 
 READERS = [("requester",), ("reviewer",)]
 
@@ -75,7 +75,7 @@ class ReviewRequestNoteVisibilityTest(DojoTestCase):
 
     @staticmethod
     def _aware(day):
-        return timezone.make_aware(datetime.datetime.combine(day, datetime.time()))
+        return timezone.make_aware(dt.datetime.combine(day, dt.time()))
 
     def _member(self, username):
         user, _ = Dojo_User.objects.get_or_create(

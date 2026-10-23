@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ class CveInfoNode:
     cve: str
     comp_uuid: str
     dep_uuid: str | None
-    scan_date: datetime.date
+    scan_date: dt.date
     scan_tool: str
     scan_tool_version: str
     original_file: str

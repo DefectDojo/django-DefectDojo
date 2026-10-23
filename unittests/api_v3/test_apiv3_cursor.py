@@ -8,7 +8,7 @@ ordering-mismatch rejection, composition with filters/include/fields/expand, and
 """
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 from urllib.parse import unquote, urlsplit
 
@@ -72,10 +72,10 @@ class TestApiV3CursorFindingsWalk(_CursorWalkMixin, ApiV3TestCase):
         # Give the new rows distinct, deliberately shuffled created/updated (via .update() so the
         # auto_now/auto_now_add fields are bypassed) so ordering by created/updated is genuinely
         # different from ordering by id.
-        base = datetime.datetime(2020, 1, 1, tzinfo=datetime.UTC)
+        base = dt.datetime(2020, 1, 1, tzinfo=dt.UTC)
         for offset, pk in enumerate(self.new_ids):
-            created = base + datetime.timedelta(minutes=_FANOUT - offset)  # decreasing vs id
-            updated = base + datetime.timedelta(minutes=offset)            # increasing vs id
+            created = base + dt.timedelta(minutes=_FANOUT - offset)  # decreasing vs id
+            updated = base + dt.timedelta(minutes=offset)            # increasing vs id
             Finding.objects.filter(pk=pk).update(created=created, updated=updated)
 
     def _expected(self, *order: str) -> list[int]:

@@ -1,5 +1,5 @@
 import copy
-import datetime
+import datetime as dt
 import json
 import logging
 import sys
@@ -471,7 +471,7 @@ class RlJsonInfo:  # noqa: RUF067
         cve_info_node_instance.original_file = str(f_info.get("name", ""))
         cve_info_node_instance.original_file_sha256 = self._get_sha256(f_info)
 
-        cve_info_node_instance.scan_date = datetime.datetime.fromisoformat(self._rest["timestamp"]).date()
+        cve_info_node_instance.scan_date = dt.datetime.fromisoformat(self._rest["timestamp"]).date()
         cve_info_node_instance.scan_tool = self.SCAN_TOOL_NAME
         cve_info_node_instance.scan_tool_version = self._rest.get("version", "no_scan_tool_version_specified")
 
@@ -724,10 +724,10 @@ class RlJsonInfo:  # noqa: RUF067
             if type(o) is CveInfoNode:
                 return o.__dict__
 
-            if type(o) is datetime.date:
+            if type(o) is dt.date:
                 return o.isoformat()  # YYYY-MM-DD
 
-            if type(o) is datetime.datetime:
+            if type(o) is dt.datetime:
                 return o.isoformat()  # YYYY-MM-DD T hh:mm:ss <tz info>
 
             msg: str = f"unsupported type: {type(o)}"

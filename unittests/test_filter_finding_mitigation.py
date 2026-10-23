@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.test import TestCase
 from django.utils import timezone
@@ -22,13 +22,13 @@ def _make_finding(title, mitigation, product, reporter):
         name="Test Engagement",
         product=product,
         target_start=timezone.now().date(),
-        target_end=(timezone.now() + datetime.timedelta(days=1)).date(),
+        target_end=(timezone.now() + dt.timedelta(days=1)).date(),
     )
     test = Test.objects.create(
         engagement=engagement,
         test_type=test_type,
         target_start=timezone.now(),
-        target_end=timezone.now() + datetime.timedelta(hours=1),
+        target_end=timezone.now() + dt.timedelta(hours=1),
     )
     return Finding.objects.create(
         title=title,

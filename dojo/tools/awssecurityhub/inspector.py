@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
@@ -66,11 +66,11 @@ class Inspector:
             active = False
             if finding.get("LastObservedAt"):
                 try:
-                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                    mitigated = dt.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:
-                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+                    mitigated = dt.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
-                mitigated = datetime.datetime.now(datetime.UTC)
+                mitigated = dt.datetime.now(dt.UTC)
         title_suffix = ""
         locations = []
         for resource in finding.get("Resources", []):
