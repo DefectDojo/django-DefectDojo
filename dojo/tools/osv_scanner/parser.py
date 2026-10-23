@@ -1,8 +1,11 @@
 import json
 
+from cvss.exceptions import CVSSError
+
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
+from dojo.utils import parse_cvss_data
 
 OSV_ECOSYSTEM_TO_PURL = {
     "npm": "npm", "pypi": "pypi", "go": "golang", "maven": "maven",
@@ -11,6 +14,10 @@ OSV_ECOSYSTEM_TO_PURL = {
     "cocoapods": "cocoapods", "swifturl": "swift",
     "alpine": "apk", "debian": "deb",
 }
+CVSS_SEVERITY_TYPES = {"CVSS_V2", "CVSS_V3", "CVSS_V4"}
+CVSS_FIELDS = (
+    "cvssv2", "cvssv2_score", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score",
+)
 
 
 class OSVScannerParser:
@@ -68,6 +75,22 @@ class OSVScannerParser:
 
     def classify_severity(self, severity_input):
         return ("Medium" if severity_input == "MODERATE" else severity_input.lower().capitalize()) if severity_input else "Low"
+
+    def _parse_cvss_data(self, vulnerability):
+        cvss_data_by_version = {}
+        for severity_entry in vulnerability.get("severity") or []:
+            if not isinstance(severity_entry, dict) or severity_entry.get("type") not in CVSS_SEVERITY_TYPES:
+                continue
+            vector = severity_entry.get("score")
+            if not isinstance(vector, str) or not vector:
+                continue
+            try:
+                cvss_data = parse_cvss_data(vector)
+            except CVSSError:
+                continue
+            if version := cvss_data.get("major_version"):
+                cvss_data_by_version[version] = cvss_data
+        return cvss_data_by_version
 
     def get_findings(self, file, test):
         try:
@@ -138,12 +161,31 @@ class OSVScannerParser:
                     description += f"**Package ecosystem**: {package_ecosystem}\n"
                     description += f"**Vulnerability details**: {vulnerabilitydetails}\n"
                     description += f"**Vulnerability package purl**: {vulnerabilitypackagepurl}\n"
-                    sev = vulnerability.get("database_specific", {}).get("severity", "")
+                    cvss_data_by_version = self._parse_cvss_data(vulnerability)
+                    cvss_data = {
+                        field: version_data[field]
+                        for version_data in cvss_data_by_version.values()
+                        for field in CVSS_FIELDS
+                        if version_data.get(field) is not None
+                    }
+                    cvss_severity = next(
+                        (
+                            cvss_data_by_version[version]["severity"]
+                            for version in (4, 3, 2)
+                            if cvss_data_by_version.get(version, {}).get("severity")
+                        ),
+                        None,
+                    )
+                    if cvss_severity == "None":
+                        cvss_severity = "Info"
+                    database_specific = vulnerability.get("database_specific") or {}
+                    sev = database_specific.get("severity") or cvss_severity
                     finding = Finding(
                         title=f"{vulnerabilityid}_{package_name}",
                         test=test,
                         description=description,
                         severity=self.classify_severity(sev),
+                        **cvss_data,
                         static_finding=True,
                         dynamic_finding=False,
                         component_name=package_name,
