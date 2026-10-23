@@ -44,8 +44,8 @@ Once the flag is on, a **Triage Engine** group appears under **Act** in the side
 Access is governed by four global role permissions, shared with the original Rules Engine:
 
 * **Rule View** is required to see the Triage Engine group and everything under it.
-* **Rule Add** is required to create a rule, including converting one from the original Rules Engine.
-* **Rule Edit** is required to change, enable, schedule, run, replay, or take ownership of an existing rule.
+* **Rule Add** is required to create a rule, including converting one from the original Rules Engine or importing one from a file.
+* **Rule Edit** is required to change, enable, schedule, run, replay, restore a version of, or take ownership of an existing rule.
 * **Rule Delete** is required to delete a rule.
 
 Validating and previewing a rule are accepted with either authoring permission, Rule Add or Rule Edit.
@@ -129,4 +129,5 @@ Runs and deliveries are both kept for 180 days by default, then pruned. The prod
 * [Runs](../runs/) covers execution, traces, cascading and limits.
 * [Deliveries](../deliveries/) covers channels, statuses, retries and replay.
 * [Converting from Rules Engine](../converting_from_rules_engine/) covers moving existing rules across.
+* [Sharing and Versions](../sharing_and_versions/) covers exporting and importing rules between instances, restoring earlier versions, and the rules API.
 * [Configuration](../configuration/) covers the deployment level settings.

@@ -19,6 +19,7 @@ from datetime import date  # noqa: TC003 -- runtime import: ninja resolves the F
 from typing import TYPE_CHECKING
 
 from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError as DjangoValidationError
 from ninja import File, Form, Router, Schema
 from ninja.constants import NOT_SET
 from ninja.files import UploadedFile  # noqa: TC002 -- runtime import: ninja resolves the File() param type
@@ -241,6 +242,11 @@ def build_import_router(*, auth=NOT_SET) -> Router:
             raise
         except ProblemDetail:
             raise
+        except DjangoValidationError as exc:
+            # The importer turns a parser ValueError into a Django ValidationError
+            # (base_importer.parse_findings / parse_dynamic_test_type_tests); that is a bad
+            # report, so answer 400 as v2 does rather than letting it escape as a 500.
+            raise validation_problem({"non_field_errors": list(exc.messages)}) from exc
         except (ValueError, TypeError) as exc:
             msg = str(exc)
             raise validation_problem({"non_field_errors": [msg]}) from exc

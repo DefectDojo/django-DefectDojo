@@ -47,6 +47,20 @@ Locations are not directly attached to Assets or Findings. Instead, two **Refere
 - **Asset References** — relationships the Location has to Assets (e.g. `libFoo` is *owned by* Asset 6, *used by* Asset 9). Each reference carries a status (`Active` or `Mitigated`) and an optional **relationship** ("Used By" or "Owned By").
 - **Finding References** — relationships the Location has to Findings. Each reference carries a richer status (`Active`, `Mitigated`, `False Positive`, `Risk Accepted`, `Out of Scope`) plus the auditor and audit time.
 
+#### Which Test reported a Location
+
+A Finding Reference also records the Test that reported the Location. There is one reference for each Location, Finding and Test, and each has its own status. Usually all of a Finding's references come from the Finding's own Test. When more than one Test reports the same Location on one Finding, each Test gets its own reference.
+
+Reimport only changes references that belong to the Test being reimported. If Test B no longer reports a Location, Test B's reference to it is set to `Mitigated`, and a reference from Test A to the same Location stays as it is.
+
+To show one status for a Location on a Finding, DefectDojo combines its references:
+
+1. If any reference is `False Positive`, `Risk Accepted` or `Out of Scope` (checked in that order), the Location has that status. A status someone set by hand always wins over a scan result.
+2. Otherwise the Location is `Active` if any Test still reports it.
+3. Otherwise it is `Mitigated`.
+
+When you upgrade, every existing reference is assigned to its Finding's Test. A reference added through the API or the UI belongs to the Finding's own Test.
+
 This separation is what allows a library to exist on an Asset *without* needing a Finding — a missing capability in the old Components model.
 
 ### Auto-Association at Import Time

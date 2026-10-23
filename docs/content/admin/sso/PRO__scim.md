@@ -130,7 +130,7 @@ If you want your identity provider to manage superusers as well, enable **Allow 
 
 ## Troubleshooting
 
-**The connection test reports "not found".** SCIM is switched off, or the instance is not licensed for it. Check that **Enable SCIM Provisioning** is on and that your subscription includes SSO. The whole SCIM address behaves as though it does not exist until both are true.
+**The connection test reports "not found".** SCIM is switched off. Check that **Enable SCIM Provisioning** is on and saved. Until it is, the whole SCIM address behaves as though it does not exist.
 
 **The connection test reports an authentication failure.** The token is wrong, or it has been revoked. Generate a new one and update your identity provider. In Okta, check that the value begins with `Bearer ` and a space; in Entra, check that it does not.
 
