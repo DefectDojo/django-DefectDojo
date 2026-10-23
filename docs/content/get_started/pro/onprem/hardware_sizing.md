@@ -102,13 +102,13 @@ These four decide how many database connections the application holds open, so t
 
 Change either one with `dojo-compose-cli environment add` and restart, as above. A harakiri restart frees the process but does not remove the cause. If one shows up in the log, send the stack traces that come with it to support, since they show where the process was stuck.
 
-**Import memory and shutdown.** uWSGI also replaces a process whose memory grows too large. `DD_UWSGI_RELOAD_ON_RSS` (MB) replaces it after its requests finish, so it never fails one. `DD_UWSGI_EVIL_RELOAD_ON_RSS` (MB) is a safety limit: a process that passes it is killed within about a second, and every request it is serving fails with a 502. The log says `EVIL RELOAD`, and Docker shows no restart. Imports need far more memory than pages, so from 3.4.300 the import service can be set on its own:
+**Import memory and shutdown.** uWSGI also replaces a process whose memory grows too large. `DD_UWSGI_RELOAD_ON_RSS` (MB) replaces it after a request leaves it above the limit: it stops taking requests, and the ones still running on its other threads get `DD_UWSGI_WORKER_RELOAD_MERCY` seconds before uWSGI kills it, failing them with a 502 (the log says `NO MERCY`). `DD_UWSGI_EVIL_RELOAD_ON_RSS` (MB) is a safety limit: a process that passes it is killed within about a second, and every request it is serving fails with a 502. The log says `EVIL RELOAD`, and Docker shows no restart. Imports need far more memory than pages, so from 3.4.300 the import service can be set on its own:
 
 | Setting | Service | Default | Notes |
 | --- | --- | --- | --- |
-| `DD_UWSGI_IMPORT_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_RELOAD_ON_RSS`, else 800 | Replaces an import process once its imports finish. |
+| `DD_UWSGI_IMPORT_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_RELOAD_ON_RSS`, else 800 | Replaces an import process after an import leaves it above this; its other running imports get the mercy below. |
 | `DD_UWSGI_IMPORT_EVIL_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_EVIL_RELOAD_ON_RSS`, else 2560 | Raise it if large imports fail with a 502 and the log says `EVIL RELOAD`, keeping `DD_UWSGI_NUM_OF_PROCESSES` (the import service runs the same number of processes as the web service) x this value below the host's free memory. |
-| `DD_UWSGI_IMPORT_WORKER_RELOAD_MERCY` | `dojo-import-scan` | `DD_UWSGI_WORKER_RELOAD_MERCY`, else 120 | Seconds uWSGI waits for a process it is replacing. |
+| `DD_UWSGI_IMPORT_WORKER_RELOAD_MERCY` | `dojo-import-scan` | `DD_UWSGI_WORKER_RELOAD_MERCY`, else 120 | Seconds a process being replaced gets to finish its running imports before it is killed. If imports fail with a 502 and the log says `NO MERCY`, raise it toward 1770. It does not apply to the evil-reload limit. |
 | `DD_UWSGI_IMPORT_STOP_GRACE_PERIOD` | `dojo-import-scan` | 600s | When DefectDojo stops or upgrades, the import service finishes the imports it is running before it exits, for up to this long. An idle service stops at once. Imports can run for up to 30 minutes: if yours run longer than about 10, raise it toward `1800s`. |
 {{< /tab >}}
 {{< /tabs >}}

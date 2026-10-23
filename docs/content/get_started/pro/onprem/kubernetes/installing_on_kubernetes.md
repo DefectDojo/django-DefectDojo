@@ -1336,7 +1336,7 @@ django:
       threads: 4
       reloadOnRss: 800         # MB: replace a worker after a request leaves it above this
       evilReloadOnRss: 2560    # MB: kill a worker mid-request above this (see below)
-      workerReloadMercy: 120   # seconds uwsgi waits for a worker it is reloading
+      workerReloadMercy: 120   # seconds a reloading worker's running imports get
     resources:
       requests:
         cpu: "100m"
@@ -1373,9 +1373,14 @@ Operational notes:
   (up to `threads` of them) fails with a 502. Kubernetes shows no OOMKill or
   restart for it; the importer's log says `EVIL RELOAD`. If large imports fail
   this way, raise it, keeping `processes x evilReloadOnRss` below
-  `resources.limits.memory` with room to spare. `reloadOnRss` replaces a worker
-  only after its imports finish, so it never fails one. The web pool has the
-  same three settings under `django.uwsgi.performance`.
+  `resources.limits.memory` with room to spare.
+- `reloadOnRss` retires a worker after an import leaves it above the limit. The
+  worker stops taking imports, but the ones still running on its other threads
+  get only `workerReloadMercy` seconds (120 by default) before uwsgi kills it;
+  the log says `NO MERCY` and those imports fail with a 502. If your imports run
+  longer than that, raise `workerReloadMercy` toward 1770. It does not change
+  `evilReloadOnRss`, which kills at once. The web pool has the same three
+  settings under `django.uwsgi.performance`.
 - A PodDisruptionBudget (`podDisruptionBudget.djangoImport`) protects the
   importer pool during voluntary disruptions whenever more than one importer
   runs.
