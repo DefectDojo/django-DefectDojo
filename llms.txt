@@ -399,6 +399,7 @@ Key facts:
 - [CMMC Level 2 Assessments (Pro)](https://docs.defectdojo.com/federal_compliance/cmmc_assessments/): Score a self-assessment against NIST 800-171 Rev 2
 - [CRA and DORA Evidence Packs (Pro)](https://docs.defectdojo.com/federal_compliance/eu_evidence_packs/): Assess an Asset against authored EU regulatory catalogs and export its evidence
 - [Control Coverage (Pro)](https://docs.defectdojo.com/federal_compliance/control_coverage/): Which 800-53 controls your scanners test, and open weaknesses per control
+- [Setting Up EU CRA (Pro)](https://docs.defectdojo.com/federal_compliance/eu_cra_setup/): Configure DefectDojo Pro and your products for Cyber Resilience Act vulnerability handling, Article 14 reporting and evidence packs
 - [FDA Cyber Device Evidence Pack (Pro)](https://docs.defectdojo.com/federal_compliance/fda_cyber_device_pack/): Record a cyber device profile, track the section 524B lifecycle metrics, and export the evidence pack an assessor reviews
 - [PCI DSS Evidence Packs (Pro)](https://docs.defectdojo.com/federal_compliance/pci_evidence_packs/): Assess a cardholder data environment against the PCI DSS vulnerability management requirements and export the workbook an assessor reviews
 - [Certification Control Catalogs (Pro)](https://docs.defectdojo.com/federal_compliance/certification_catalogs/): Assess an Asset against ISO/IEC 27001:2022 Annex A, the SOC 2 Trust Services Criteria and the NIS2 technical requirements, and see one body of evidence answer all three
