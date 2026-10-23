@@ -6,10 +6,11 @@ from datetime import datetime, timedelta
 import django_tagulous as tagulous
 import six
 from django.apps import apps
-from django.db.models import Count, Exists, Min, OuterRef, Q
+from django.db.models import Count, Exists, ForeignObjectRel, Min, OuterRef, Q
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     DateFilter,
     FilterSet,
@@ -20,6 +21,7 @@ from django_filters import (
     RangeFilter,
 )
 from django_filters import rest_framework as filters
+from django_filters.constants import EMPTY_VALUES
 from django_filters.filters import ChoiceFilter
 
 # from tagulous.forms import TagWidget
@@ -101,6 +103,97 @@ class CharFieldFilterANDExpression(CharFieldInFilter):
             .annotate(object_count=Count(self.field_name))
             .filter(object_count=len(objects))
         )
+
+
+def tag_exists(model, field_name, lookup, value):
+    """
+    Exists() over a tags through table, for a filter on ``[<relation>__]tags__name``.
+
+    A JOIN-based lookup on ``tags__name`` emits one row per matching tag, so the filter
+    needed a query-wide DISTINCT over the whole wide finding row, and its exclude form
+    became a NOT EXISTS that re-joined the base table to itself. This tests membership
+    directly on ``<model>_tags`` instead: one indexed probe per outer row, and the
+    outer row count never changes, so no DISTINCT is needed.
+
+    For a related model's tags (``test__engagement__tags__name``) the subquery runs on
+    that model's through table and correlates on the relation's id.
+    """
+    *path, tags_field_name, name = field_name.split("__")
+    if name != "name":
+        msg = f"tag_exists expects a <path>__tags__name field, got {field_name}"
+        raise ValueError(msg)
+    tagged_model = model
+    for part in path:
+        tagged_model = tagged_model._meta.get_field(part).related_model
+    tags_field = tagged_model._meta.get_field(tags_field_name)
+    tag_lookup = f"{tags_field.m2m_reverse_field_name()}__name"
+    if lookup != "exact":
+        tag_lookup += f"__{lookup}"
+    outer = "__".join([*path, "pk"]) if path else "pk"
+    return Exists(tags_field.remote_field.through.objects.filter(
+        **{tags_field.m2m_field_name(): OuterRef(outer), tag_lookup: value},
+    ))
+
+
+class TagExistsFilterMixin:
+
+    """
+    Tag filter that matches through tag_exists() rather than a JOIN.
+
+    Same matches as the JOIN form (``exclude`` still means "has no tag that matches"),
+    but the base rows are never multiplied, so DojoFilter.filter_queryset skips its
+    DISTINCT for these filters (``multiplies_rows``).
+    """
+
+    multiplies_rows = False
+
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+        condition = tag_exists(qs.model, self.field_name, self.lookup_expr, value)
+        return qs.filter(~condition if self.exclude else condition)
+
+
+class TagNameFilter(TagExistsFilterMixin, CharFilter):
+    pass
+
+
+class TagNameInFilter(TagExistsFilterMixin, CharFieldInFilter):
+    pass
+
+
+class TagNameANDFilter(CharFieldFilterANDExpression):
+
+    """Every listed tag must be present: one Exists() per tag instead of GROUP BY ... HAVING COUNT."""
+
+    multiplies_rows = False
+
+    def filter(self, queryset, value):
+        if not value:
+            return queryset
+        for tag in set(value.split(",")):
+            queryset = queryset.filter(tag_exists(queryset.model, self.field_name, "exact", tag))
+        return queryset
+
+
+class HasTagsFilter(BooleanFilter):
+
+    """``has_tags=true|false`` as Exists() on the through table, not a self-joined ``tags IS NULL`` test."""
+
+    multiplies_rows = False
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("field_name", "tags")
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+        tags_field = qs.model._meta.get_field(self.field_name)
+        condition = Exists(tags_field.remote_field.through.objects.filter(
+            **{tags_field.m2m_field_name(): OuterRef("pk")},
+        ))
+        return qs.filter(condition if value else ~condition)
 
 
 class FindingStatusFilter(ChoiceFilter):
@@ -287,6 +380,48 @@ def cwe_options(queryset):
     return list(cwe.items())
 
 
+def query_has_multivalued_join(query):
+    """
+    Whether the outer query joins a to-many relation, so one base row can come back several times.
+
+    A reverse foreign key or a many-to-many hop is a Join whose ``join_field`` is the reverse
+    side of a non-unique field (Django's PathInfo marks the same hop ``m2m``). Subqueries such as
+    Exists() keep their joins in their own query, and a GROUP BY already returns one row per group.
+    """
+    if query.distinct or query.group_by is not None:
+        return False
+    for alias, join in query.alias_map.items():
+        join_field = getattr(join, "join_field", None)
+        if not query.alias_refcount.get(alias) or not isinstance(join_field, ForeignObjectRel):
+            continue
+        if not join_field.field.unique:
+            return True
+    return False
+
+
+def order_with_pk_tiebreak(queryset):
+    """
+    End a list queryset's ordering on the primary key (ascending) unless a term already is the pk.
+
+    LIMIT/OFFSET over a sort key that repeats (title, severity, date, an aggregated reviewer) leaves the
+    order of tied rows to Postgres. A plain ``ORDER BY ... LIMIT`` is a top-N sort, and two pages of it
+    can disagree on where the ties fall, so a row can appear on both or on neither; with no ORDER BY at
+    all (``o=`` clears the ordering) every page is a separate unordered scan. The pk makes every page
+    boundary stable, so an empty ordering becomes pk order.
+
+    Apply this where a list is paginated, not inside a filterset: filtersets also feed ``.values()``
+    aggregations, and an explicit ORDER BY column joins their GROUP BY.
+    """
+    query = queryset.query
+    ordering = list(query.order_by) or (list(queryset.model._meta.ordering or ()) if query.default_ordering else [])
+    pk_names = {"pk", queryset.model._meta.pk.name, queryset.model._meta.pk.attname}
+    for term in ordering:
+        name = term.lstrip("-") if isinstance(term, str) else getattr(getattr(term, "expression", term), "name", None)
+        if name in pk_names:
+            return queryset
+    return queryset.order_by(*ordering, "pk")
+
+
 class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -314,6 +449,14 @@ class DojoFilter(FilterSet):
         qs = super().filter_queryset(queryset)
         if hasattr(self, "form") and hasattr(self.form, "cleaned_data"):
             for name, f in self.filters.items():
+                if not getattr(f, "multiplies_rows", True):
+                    # Exists()-based tag filters (TagExistsFilterMixin) never duplicate base rows
+                    # themselves. They used to bring a DISTINCT along with them, though, and that
+                    # DISTINCT also covered any other to-many join in the query, so keep it in
+                    # exactly that case.
+                    if self.form.cleaned_data.get(name) not in EMPTY_VALUES and query_has_multivalued_join(qs.query):
+                        return qs.distinct()
+                    continue
                 field_name = getattr(f, "field_name", "") or ""
                 # Only apply distinct for tag lookups that can duplicate base rows
                 if "tags__name" in field_name:
@@ -1441,8 +1584,6 @@ import importlib  # noqa: E402
 # classes (DojoFilter, ...) at import time, so eagerly importing them back here
 # creates circular imports. Instead expose them lazily via PEP 562 __getattr__,
 # which only resolves the target module when the name is actually accessed.
-from django_filters import BooleanFilter  # noqa: E402, F401 -- backward compat re-export
-
 from dojo.auditlog.filters import LogEntryFilter, PgHistoryFilter  # noqa: E402, F401 -- backward compat
 from dojo.models import Product_API_Scan_Configuration  # noqa: E402, F401 -- backward compat re-export
 

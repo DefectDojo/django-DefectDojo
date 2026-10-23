@@ -1,0 +1,401 @@
+subject: "Locations"
+questions:
+  - q: "What are Locations for?"
+    options:
+      - "Recording which region or data center your DefectDojo instance is hosted in"
+      - "Grouping Assets into a hierarchy, the way Organizations group Assets"
+      - "Describing where a Finding lives, whether that's a URL, a software dependency, a line of source code, a container image or a cloud resource"
+      - "Tagging Findings with the office or team that owns them"
+    answer: 2
+    why: "A Location is one shared, typed object for *where* a Finding lives. Each kind of place (URL, Dependency, Source Code, Container Image, Cloud Resource) is a subtype of the same base Location."
+    source: "pro__locations_overview/"
+    hints:
+      - note: "Locations aren't about your instance. They describe the places your scanners report Findings in."
+        link: "pro__locations_overview/#key-concepts"
+        label: "Key Concepts"
+      - note: "Assets are grouped by the Asset Hierarchy. A Location is attached to Assets, not a container for them."
+        link: "/asset_modelling/pro_hierarchy/asset_hierarchy/"
+        label: "Asset Hierarchy"
+      - null
+      - note: "Locations carry tags, but they model the scanned place, not who owns the Finding."
+        link: "pro__working_with_urls/#in-the-pro-ui"
+        label: "In the Pro UI"
+
+  - q: "What do Locations replace?"
+    options:
+      - "The legacy Endpoints model, and the Components data that used to live only as fields on a Finding"
+      - "Assets and Engagements"
+      - "Only Endpoints. Libraries still live as component fields on each Finding"
+      - "Tests, so each scan creates Locations instead"
+    answer: 0
+    why: "URL Locations are the functional replacement for Endpoints, and Dependency Locations replace Components. With Dependencies, a library can exist on an Asset without any Finding."
+    source: "pro__locations_overview/#why-replace-endpoints"
+    hints:
+      - null
+      - note: "Assets and Engagements stay as they are. A Location is linked to an Asset through an Asset Reference."
+        link: "pro__locations_overview/#references"
+        label: "References"
+      - note: "Components became Dependency Locations, identified by a Package URL, so a library no longer depends on a Finding to exist."
+        link: "pro__working_with_sboms/"
+        label: "Working with SBOMs"
+      - note: "Tests are unchanged. An import still creates a Test; its Findings are then linked to Locations."
+        link: "pro__locations_overview/#auto-association-at-import-time"
+        label: "Auto-Association at Import Time"
+
+  - q: "How do you turn Locations on for your instance?"
+    options:
+      - "Open a request with DefectDojo Support"
+      - "Turn it on yourself from the Feature Flags page"
+      - "Set an environment variable and redeploy DefectDojo"
+      - "Nothing to do: Locations are on for every Pro instance"
+    answer: 1
+    why: "Locations are self-service: a superuser turns them on from **Settings > Feature Flags**. No Support request and no deployment setting is needed, though a restart brings the `/api/v2` routes in line with the toggle."
+    source: "/admin/feature_flags/pro__feature_flags/#locations"
+    hints:
+      - note: "No Support request is required for Locations."
+        link: "pro__locations_overview/"
+        label: "Locations Overview"
+      - null
+      - note: "No deployment setting needs to change. Asset Versions is the setting that's managed by deployment configuration."
+        link: "pro__working_with_sboms/#asset-versions-and-bom-snapshots"
+        label: "Asset Versions and BOM Snapshots"
+      - note: "Locations are off by default and must be enabled before you can use them."
+        link: "/admin/feature_flags/pro__feature_flags/#locations"
+        label: "Feature Flags: Locations"
+
+  - q: "How is a Location connected to the Assets and Findings it belongs to?"
+    options:
+      - "A Location stores a single Asset ID and a single Finding ID"
+      - "It isn't connected. Locations are a separate inventory with no links to Findings"
+      - "Each Finding stores a copy of the Location's fields"
+      - "Through Reference objects: Asset References link it to Assets, and Finding References link it to Findings"
+    answer: 3
+    why: "Locations aren't attached directly. Asset References and Finding References link them, each with its own status, so one Location can be shared by many Assets and many Findings."
+    source: "pro__locations_overview/#references"
+    hints:
+      - note: "A Location is shared. Two Assets with the same URL share one Location and reference it twice."
+        link: "pro__working_with_urls/#things-that-behave-differently"
+        label: "Things That Behave Differently"
+      - note: "Imports link Findings to Locations automatically with an Active Finding Reference."
+        link: "pro__locations_overview/#auto-association-at-import-time"
+        label: "Auto-Association at Import Time"
+      - note: "The Finding keeps its own fields (such as `file_path` and `line`), but the Location is a separate shared object it references."
+        link: "pro__source_code_locations/#relationship-to-finding-fields"
+        label: "Relationship to Finding Fields"
+      - null
+
+  - q: "You upload an SBOM to an Asset. What does that add?"
+    options:
+      - "One Finding for every component the SBOM lists"
+      - "A Container Image Location for every image the SBOM mentions"
+      - "Dependency Locations for the libraries it lists, linked to the Asset by Asset References, with no Findings needed"
+      - "Nothing until a scan reports a vulnerability in one of the components"
+    answer: 2
+    why: "An SBOM upload populates the Asset's Dependencies. Findings that later reference those libraries attach to the same Dependency objects, and Findings imported earlier show up in the SBOM view too."
+    source: "pro__working_with_sboms/#uploading-an-sbom"
+    hints:
+      - note: "Components aren't vulnerabilities. A library can sit on an Asset with no Finding at all."
+        link: "pro__locations_overview/#references"
+        label: "References"
+      - note: "An SBOM upload records libraries as Dependencies only. Container images come from scans and connectors."
+        link: "pro__working_with_sboms/#whats-not-in-the-mvp"
+        label: "What's Not in the MVP"
+      - null
+      - note: "The upload creates the Dependencies straight away. Findings attach to them as scans come in."
+        link: "pro__working_with_sboms/#findings-that-reference-libraries"
+        label: "Findings That Reference Libraries"
+
+  - q: "Which Location types can only be created by scans and connectors (not by hand)?"
+    options:
+      - "Source Code and Container Image Locations"
+      - "URL and Dependency Locations"
+      - "All of them. No Location can be created by hand"
+      - "None of them. Every type has a New action"
+    answer: 0
+    why: "Source Code and Container Image Locations are scan-managed: the scanner (or registry) is the source of truth, so there is no New action for them. URLs and Dependencies each have a New form."
+    source: "pro__source_code_locations/#what-they-model"
+    hints:
+      - null
+      - note: "Both have a New form: **New URL** on the URLs list and **New Dependency** on the Dependencies list."
+        link: "pro__working_with_urls/#in-the-pro-ui"
+        label: "In the Pro UI"
+      - note: "You can create URLs and Dependencies yourself, and **New Location** on an Asset's Locations tab."
+        link: "pro__working_with_urls/#in-the-pro-ui"
+        label: "In the Pro UI"
+      - note: "There is no New Source Code Location or New Image action."
+        link: "pro__container_image_locations/#identity-digests-first-tags-when-that-is-all-there-is"
+        label: "Container Image identity"
+
+  - q: "What does the Location Map show?"
+    options:
+      - "A geographic map of where your Assets' servers are located"
+      - "An Asset's Locations drawn as trees, one region per Location type, with active Finding counts on every node"
+      - "Every Location in the instance across all Assets"
+      - "The relationships between Assets in the Asset Hierarchy"
+    answer: 1
+    why: "The Location Map replaces the table on an Asset's Locations page. Locations are grouped by what they share (a host, a directory, a package, an account), and each node counts the active Findings on it or beneath it."
+    source: "pro__location_map/"
+    hints:
+      - note: "The map groups Locations by what they share, not by geography."
+        link: "pro__location_map/#groups-and-locations"
+        label: "Groups and Locations"
+      - null
+      - note: "**All Locations**, which isn't scoped to one Asset, keeps the table."
+        link: "pro__location_map/#where-the-map-appears"
+        label: "Where the Map Appears"
+      - note: "Relationships between Assets are drawn on the hierarchy page."
+        link: "/asset_modelling/pro_hierarchy/asset_hierarchy/"
+        label: "Asset Hierarchy"
+
+  - q: "You've just enabled Locations. What happens to the Endpoints and component data your Findings already had?"
+    options:
+      - "It's converted to Locations automatically the moment you save the flag"
+      - "It's deleted, so you have to re-import your scans"
+      - "Nothing yet: new imports use Locations right away, and existing data moves over when a superuser runs the data-migration suite"
+      - "It stays as Endpoints for good, and only new imports use Locations"
+    answer: 2
+    why: "Enabling Locations changes new imports only. The data-migration suite under the flag carries existing history forward. Enabling is one-way, so plan the switch before you turn it on."
+    source: "pro__migrating_from_endpoints/#running-the-migration-from-the-feature-flags-page"
+    hints:
+      - note: "The migration doesn't run on its own. Each item is run on demand by a superuser."
+        link: "pro__migrating_from_endpoints/#running-the-migration-from-the-feature-flags-page"
+        label: "Running the migration"
+      - note: "Nothing is deleted. Even after migration, the legacy Endpoint rows stay until you choose to remove them."
+        link: "pro__migrating_from_endpoints/#what-the-migration-does-not-do"
+        label: "What the Migration Does Not Do"
+      - null
+      - note: "The migration suite carries it forward. Endpoints are deprecated, and their pages go away in 3.6.0."
+        link: "pro__migrating_from_endpoints/"
+        label: "Migrating from Endpoints"
+
+
+  - q: "An Endpoint_Status has both `mitigated=True` and `false_positive=True`. What status does its Finding Reference get after migration?"
+    options:
+      - "Mitigated"
+      - "False Positive"
+      - "Both: the reference keeps the two flags"
+      - "Active, because the flags conflict"
+    answer: 1
+    why: "A Location reference has one status at a time. The migration checks the flags in order (Risk Accepted, False Positive, Out of Scope, Mitigated) and the first match wins."
+    source: "pro__migrating_from_endpoints/#what-the-endpoints-backfill-does"
+    hints:
+      - note: "Mitigated is checked last, so any of the other flags wins over it."
+        link: "pro__migrating_from_endpoints/#what-the-endpoints-backfill-does"
+        label: "What the Endpoints Backfill Does"
+      - null
+      - note: "Locations enforce a single status, so the old multi-flag combinations are collapsed."
+        link: "pro__working_with_urls/#status-model"
+        label: "Status Model"
+      - note: "Active is used only when none of the flags is set."
+        link: "pro__migrating_from_endpoints/#what-the-endpoints-backfill-does"
+        label: "What the Endpoints Backfill Does"
+
+  - q: "With Locations enabled, an automation sends `POST /api/v2/endpoints/`. What does it get back?"
+    options:
+      - "A new Endpoint, as before"
+      - "A `200` response, but the write is silently ignored"
+      - "`410 Gone`, with the replacement route in the body"
+      - "`403`, because writes to the legacy Endpoint API are deprecated. Writes go to `/api/v2/urls/`, `/api/v2/location_findings/` and `/api/v2/location_products/`"
+    answer: 3
+    why: "The legacy Endpoint API keeps serving reads through a compatibility shim, but every write (`POST`, `PUT`, `PATCH`, `DELETE`) returns `403`."
+    source: "pro__migrating_from_endpoints/#what-returns-403"
+    hints:
+      - note: "Only reads still work on `/api/v2/endpoints/`, and they're projected from URL Locations."
+        link: "pro__migrating_from_endpoints/#what-still-works"
+        label: "What still works"
+      - note: "Writes fail loudly, so automations know to move to the new endpoints."
+        link: "pro__working_with_urls/#rest-api"
+        label: "REST API"
+      - note: "`410` is for a route that still reaches the old Endpoint data, which DefectDojo treats as a bug to fix, not for writes."
+        link: "pro__migrating_from_endpoints/#if-a-route-returns-410"
+        label: "If a Route Returns 410"
+      - null
+
+  - q: "Two Assets both have Findings on `https://example.com/login`. How many URL Locations exist for it?"
+    options:
+      - "One, shared by both Assets through one Asset Reference each"
+      - "Two, one per Asset"
+      - "One per Finding"
+      - "One per Test that reported it"
+    answer: 0
+    why: "URL de-duplication is per canonical URL, not per Asset. Sharing one Location is what makes cross-Asset reporting possible."
+    source: "pro__working_with_urls/#things-that-behave-differently"
+    hints:
+      - null
+      - note: "Locations aren't copied per Asset. Each Asset gets its own Asset Reference to the same Location."
+        link: "pro__locations_overview/#references"
+        label: "References"
+      - note: "Findings link to the Location through Finding References; they don't each get their own."
+        link: "pro__working_with_urls/#importing-urls-from-scans"
+        label: "Importing URLs from Scans"
+      - note: "An import looks up an existing URL with matching fields before creating one."
+        link: "pro__working_with_urls/#importing-urls-from-scans"
+        label: "Importing URLs from Scans"
+
+  - q: "Which statuses can an Asset Reference have?"
+    options:
+      - "Active, Mitigated, False Positive, Risk Accepted or Out of Scope"
+      - "Owned By or Used By"
+      - "Active or Mitigated"
+      - "None. Only Finding References have a status"
+    answer: 2
+    why: "Asset References use a simpler status than Finding References, since Asset-level status doesn't need the auditing detail."
+    source: "pro__working_with_urls/#status-model"
+    hints:
+      - note: "Those five are the statuses of a Finding Reference, which also records the auditor and audit time."
+        link: "pro__locations_overview/#references"
+        label: "References"
+      - note: "Those are the relationship an Asset Reference can carry, which is separate from its status."
+        link: "pro__working_with_sboms/#owned-by-vs-used-by"
+        label: "Owned-By vs Used-By"
+      - null
+      - note: "Both kinds of reference carry a status."
+        link: "pro__locations_overview/#references"
+        label: "References"
+
+  - q: "Your team publishes a library that three other Assets consume. How should the Dependency's Asset References describe that?"
+    options:
+      - "Mark the library Active on your Asset and Mitigated on the others"
+      - "`owned_by` your Asset, and `used_by` each of the three consuming Assets"
+      - "Create a separate Dependency for each Asset"
+      - "`used_by` your Asset, and `owned_by` each of the three consuming Assets"
+    answer: 1
+    why: "`owned_by` is for a first-party library an Asset publishes or maintains, and `used_by` is for a third-party dependency it consumes. Together they answer \"who consumes the package my team publishes?\""
+    source: "pro__working_with_sboms/#owned-by-vs-used-by"
+    hints:
+      - note: "Status describes whether the library is still present, not how it belongs to the Asset. That's the relationship."
+        link: "pro__working_with_urls/#status-model"
+        label: "Status Model"
+      - null
+      - note: "A Dependency is identified by its Package URL, so one library is one shared Location."
+        link: "pro__working_with_sboms/#what-a-dependency-holds"
+        label: "What a Dependency Holds"
+      - note: "It's the other way round: the publisher owns it and the consumers use it."
+        link: "pro__working_with_sboms/#owned-by-vs-used-by"
+        label: "Owned-By vs Used-By"
+
+  - q: "You re-upload an SBOM with `replace_dependencies=true`, and it no longer lists a package that has an active Finding. What happens to that package on the Asset?"
+    options:
+      - "It's removed, along with its Finding"
+      - "It's removed, and the Finding is closed as mitigated"
+      - "The upload fails because the SBOM is missing a package"
+      - "It stays, because associations tied to active Findings are kept even in replace mode"
+    answer: 3
+    why: "Replace mode prunes Asset associations that aren't in the new SBOM **and** aren't referenced by an active Finding, so you don't lose vulnerability context when a new SBOM omits a package."
+    source: "pro__working_with_sboms/#replace-vs-append"
+    hints:
+      - note: "An SBOM upload never deletes Findings, and replace mode keeps packages that active Findings reference."
+        link: "pro__working_with_sboms/#replace-vs-append"
+        label: "Replace vs Append"
+      - note: "An SBOM upload doesn't close Findings. Scans and reimports change Finding status."
+        link: "pro__working_with_sboms/#findings-that-reference-libraries"
+        label: "Findings That Reference Libraries"
+      - note: "A missing package isn't an error. Without replace mode, uploads simply add."
+        link: "pro__working_with_sboms/#replace-vs-append"
+        label: "Replace vs Append"
+      - null
+
+  - q: "A scanner reports `acme/payments-api:latest` with no digest, and another reports the same repository with a digest. How does DefectDojo treat them?"
+    options:
+      - "As two different Container Image Locations on purpose, because tags move and digests don't"
+      - "As one image, merged by repository name"
+      - "It drops the tag-only image because it can't be identified"
+      - "It looks up the digest for the tag in the registry and merges them"
+    answer: 0
+    why: "An image's identity is its digest when known and its tag only when that's all there is. Collapsing them would make a Finding on last week's `:latest` read as one on this week's. Tag-only images are marked **Digest Unknown**."
+    source: "pro__container_image_locations/#identity-digests-first-tags-when-that-is-all-there-is"
+    hints:
+      - null
+      - note: "Images are identified by registry, repository and digest, not repository alone."
+        link: "pro__container_image_locations/#what-they-model"
+        label: "What They Model"
+      - note: "Tag-only images are kept and flagged rather than dropped."
+        link: "pro__container_image_locations/#identity-digests-first-tags-when-that-is-all-there-is"
+        label: "Container Image identity"
+      - note: "DefectDojo doesn't resolve tags to digests. A tag-only image stays a separate Location."
+        link: "pro__container_image_locations/#identity-digests-first-tags-when-that-is-all-there-is"
+        label: "Container Image identity"
+
+  - q: "With Location Drift Matching on, a SAST Finding moves from `auth.py:42` to `auth.py:57`. What happens to its Source Code Locations?"
+    options:
+      - "The old reference is deleted and replaced by the new one"
+      - "The Finding is closed and a new Finding is created at line 57"
+      - "The reference to the old Location is mitigated and stamped with where the Finding moved and why; a new Active reference points at line 57"
+      - "Nothing. Source Code Locations only change when you edit them by hand"
+    answer: 2
+    why: "The Finding keeps its identity, and the references record the trail. The finding page shows that trail as a location history timeline."
+    source: "pro__source_code_locations/#movement-history"
+    hints:
+      - note: "The old reference is kept so the movement history can be shown."
+        link: "pro__source_code_locations/#movement-history"
+        label: "Movement History"
+      - note: "Drift matching exists to stop that close-and-recreate churn."
+        link: "/triage_findings/finding_deduplication/pro__location_drift_matching/"
+        label: "Location Drift Matching"
+      - null
+      - note: "Source Code Locations are scan-managed. Imports and reimports keep them up to date."
+        link: "pro__source_code_locations/#status-correctness"
+        label: "Status Correctness"
+
+  - q: "Where does the metadata that was on an Endpoint end up after migration?"
+    options:
+      - "It's dropped, because Locations don't carry metadata"
+      - "In the **Custom Fields** card on the Location page, scoped to the Asset the Endpoint belonged to"
+      - "Only in Custom Fields, and only if the Custom Fields feature flag is on"
+      - "Copied onto every Finding that referenced the Endpoint"
+    answer: 1
+    why: "Each `DojoMeta` row is re-pointed at the new Location. Because a Location can be shared by several Assets, each field shows the Asset it belongs to."
+    source: "pro__migrating_from_endpoints/#tags-and-metadata"
+    hints:
+      - note: "Locations carry metadata (custom key/value pairs), just as Endpoints did."
+        link: "pro__locations_overview/#locations-and-subtypes"
+        label: "Locations and Subtypes"
+      - null
+      - note: "The Custom Fields feature flag doesn't change Location metadata. The card shows it whether the flag is on or off."
+        link: "pro__migrating_from_endpoints/#tags-and-metadata"
+        label: "Tags and Metadata"
+      - note: "The migration doesn't modify Findings."
+        link: "pro__migrating_from_endpoints/#what-the-migration-does-not-do"
+        label: "What the Migration Does Not Do"
+
+  - q: "Some of your Endpoints recorded AWS ARNs in the host field. What do they become after the Endpoints backfill?"
+    options:
+      - "Cloud Resource Locations, detected automatically"
+      - "Nothing. The backfill skips anything that isn't a web address"
+      - "Container Image Locations"
+      - "URL Locations, like every other Endpoint. A cloud connector creates proper Cloud Resource Locations"
+    answer: 3
+    why: "DefectDojo can't reliably tell a resource identifier in a host field from a real hostname, and guessing wrong could change a Finding's identity. A cloud connector reads the provider's own identifier instead."
+    source: "pro__migrating_from_endpoints/#what-the-migration-does-not-do"
+    hints:
+      - note: "The backfill doesn't guess. Cloud Resource Locations come from cloud posture scans and connectors."
+        link: "/connectors/upstream/location_inventory/"
+        label: "Location Inventory from Connectors"
+      - note: "Only Endpoints whose fields don't form a valid URL are skipped (shown as **Invalid URL**)."
+        link: "pro__migrating_from_endpoints/#removing-the-legacy-endpoint-rows"
+        label: "Removing the Legacy Endpoint Rows"
+      - note: "Container Image Locations are created by scans and connectors, not by the backfill."
+        link: "pro__container_image_locations/"
+        label: "Container Image Locations"
+      - null
+
+  - q: "With Asset Versions enabled, what is an Asset version?"
+    options:
+      - "Metadata about an Asset, so one Finding row can be recorded as found in or fixed in several releases"
+      - "A child Asset that holds a copy of every Finding in that release"
+      - "A version string DefectDojo sorts, so it can infer that 5.1 sits between 5.0 and 5.2"
+      - "A tag on the Asset's Dependencies"
+    answer: 0
+    why: "A version is metadata, not another Asset. Imports record `found_in` and `fixed_in` claims against it, and SBOM uploads record a BOM snapshot for it, without duplicating Findings."
+    source: "pro__working_with_sboms/#asset-versions-and-bom-snapshots"
+    hints:
+      - null
+      - note: "Modelling releases as child Assets copies every Finding into every release, which is exactly what versions avoid."
+        link: "pro__working_with_sboms/#asset-versions-and-bom-snapshots"
+        label: "Asset Versions and BOM Snapshots"
+      - note: "Versions carry no ordering. DefectDojo doesn't parse or compare version strings."
+        link: "pro__working_with_sboms/#binding-an-upload-to-a-version"
+        label: "Binding an upload to a version"
+      - note: "A version is bound to an upload with the `version` field, not with tags."
+        link: "pro__working_with_sboms/#binding-an-upload-to-a-version"
+        label: "Binding an upload to a version"
