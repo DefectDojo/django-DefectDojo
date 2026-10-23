@@ -4,7 +4,7 @@ description: "How to set up the Qualys Upstream Connector for DefectDojo"
 weight: 109
 audience: pro
 ---
-The Qualys connector imports **VMDR host vulnerability detections** — each joined with its Qualys KnowledgeBase (QID) metadata — from the Qualys Cloud Platform. DefectDojo creates a Record for each Qualys **host** in your subscription.
+The Qualys connector imports **VMDR host vulnerability detections**, each joined with its Qualys KnowledgeBase (QID) metadata, from the Qualys Cloud Platform. By default DefectDojo creates a Record for each Qualys **host** in your subscription. With **Asset Grouping** set to **Tag**, it creates one Record per Qualys tag instead (see below).
 
 #### Prerequisites
 
@@ -42,7 +42,7 @@ The example above discovers every host tagged `Prod` plus every host tagged `Bus
 
 Notes:
 
-* Tag names are matched **exactly**, and **wildcards are not supported**. Qualys offers no pattern matching on tag names, so `Prod-*` matches a tag literally named `Prod-*` and nothing else. This differs from the JFrog Xray **Repository Filter** described above, which does accept `*`.
+* Tag names are matched **exactly**, and **wildcards are not supported**. Qualys offers no pattern matching on tag names, so `Prod-*` matches a tag literally named `Prod-*` and nothing else.
 * A host is discovered if it carries **any** tag in the list, not all of them.
 * Spaces **around** the commas are ignored. Spaces **inside** a tag name are kept, so `Business Unit: Finance` works as written.
 * A tag name that itself contains a comma cannot be used here, because the comma separates entries.
@@ -74,6 +74,8 @@ the connector creates two Records, `Product: Web Portal` and `Product: Billing A
 * **Type each tag exactly as it appears in Qualys.** Hosts carrying none of the listed tags are not imported.
 * A host carrying more than one listed tag has its findings imported into **each** of those tag assets, so they count once per asset. Totals added up across tag assets can therefore be higher than the number of distinct detections.
 * A listed tag that no host carries creates no Record.
+* Each **Host Tags** entry can be at most 508 characters long. A longer entry stops the whole connection until it is shortened. DefectDojo Asset names are limited to 255 characters, so a Record named after a tag longer than that cannot be mapped to a new Asset of the same name.
+* If Qualys returns hosts but none of them carries a listed tag, the Sync **fails on purpose** instead of importing every tag Record empty, which would close all of their findings. Check the tag spelling against the Qualys UI. When only some returned hosts carry no listed tag, the Sync continues and those hosts are skipped.
 * Each Record is named with the tag **as Qualys spells it**. If an asset already exists with exactly that name, auto-mapping routes the tag's findings to it, so you can create or rename assets to match your Qualys tags ahead of time.
 * Every finding carries its **host as an endpoint**, whatever **Create Endpoints From Hosts** is set to. Without it, the same QID on two hosts would look like two identical findings on one asset.
 * Tag Records carry a **TAG_NAME** attribute (the tag) and a **HOST_COUNT** attribute (how many in-scope hosts carried the tag at discovery). Like other attributes, they are not refreshed once the Record is mapped.
