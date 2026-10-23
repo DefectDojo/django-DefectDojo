@@ -10,7 +10,9 @@ from collections import Counter
 from django.utils import timezone
 
 from dojo.models import (
+    Answered_Survey,
     Engagement,
+    Engagement_Survey,
     Finding,
     Product,
     Product_Type,
@@ -177,3 +179,99 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
             preview_models={"Test", "Finding"},
         )
         self.assertEqual(sum(counter.values()), 0)
+
+
+class TestCascadeDeleteHiddenRelations(DojoTestCase):
+
+    """
+    Cascade deletion must follow reverse relations whose accessor is suppressed
+    with ``related_name="...+"``.
+
+    Regression: deleting an engagement (or a product/product_type containing one)
+    that had an answered questionnaire raised
+    ``IntegrityError: ... still referenced from table "dojo_answered_survey"``,
+    because ``Answered_Survey.engagement`` uses ``related_name="engagement+"`` and
+    the cascade walker iterated ``_meta.related_objects``, which omits hidden
+    relations, so the ``Answered_Survey`` rows were never deleted.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.testuser = User.objects.create(
+            username="cascade_hidden_test_user",
+            is_staff=True,
+            is_superuser=True,
+        )
+        UserContactInfo.objects.create(user=self.testuser, block_execution=True)
+        self.system_settings(enable_deduplication=False)
+        self.system_settings(enable_product_grade=False)
+
+        self.product_type = Product_Type.objects.create(name="Cascade Hidden PT")
+        self.product = Product.objects.create(
+            name="Cascade Hidden Product",
+            description="Test",
+            prod_type=self.product_type,
+        )
+        self.engagement = Engagement.objects.create(
+            name="Cascade Hidden Engagement",
+            product=self.product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        self.survey = Engagement_Survey.objects.create(name="Cascade Hidden Survey")
+
+    def _answered_survey(self):
+        return Answered_Survey.objects.create(
+            engagement=self.engagement,
+            survey=self.survey,
+        )
+
+    def test_cascade_deletes_answered_survey_for_engagement(self):
+        """The hidden ``engagement+`` child is deleted along with the engagement's relations."""
+        answered = self._answered_survey()
+
+        cascade_delete_related_objects(
+            Engagement,
+            Engagement.objects.filter(pk=self.engagement.pk),
+        )
+
+        self.assertFalse(
+            Answered_Survey.objects.filter(pk=answered.pk).exists(),
+            msg="Answered_Survey tied via related_name='engagement+' must be cascade-deleted",
+        )
+
+    def test_product_delete_with_answered_survey_does_not_violate_fk(self):
+        """
+        Deleting a product whose nested engagement has an answered survey must not
+        raise a foreign-key IntegrityError (the engagement is deleted by raw SQL at a
+        deeper recursion level, so the hidden child must be cleared first).
+        """
+        answered = self._answered_survey()
+
+        # Before the fix this raised IntegrityError on the engagement's raw delete.
+        cascade_delete_related_objects(
+            Product,
+            Product.objects.filter(pk=self.product.pk),
+        )
+        self.product.delete()
+
+        self.assertFalse(Answered_Survey.objects.filter(pk=answered.pk).exists())
+        self.assertFalse(Engagement.objects.filter(pk=self.engagement.pk).exists())
+        self.assertFalse(Product.objects.filter(pk=self.product.pk).exists())
+
+    def test_preview_counts_hidden_relation(self):
+        """preview_only must also count the hidden ``Answered_Survey`` child."""
+        self._answered_survey()
+
+        counter = Counter()
+        cascade_delete_related_objects(
+            Engagement,
+            Engagement.objects.filter(pk=self.engagement.pk),
+            preview_only=True,
+            counter=counter,
+        )
+
+        self.assertEqual(
+            counter["Answered_Survey"], 1,
+            msg=f"expected Answered_Survey count 1, got counter={dict(counter)}",
+        )
