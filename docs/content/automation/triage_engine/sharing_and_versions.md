@@ -15,6 +15,7 @@ Open a rule's menu on **Act > Triage Engine > Rules** and choose **Export**. To 
 The file contains each rule's name, description, mode, graph and schedule. Two things are handled differently from the rule as you see it in the editor:
 
 - **Secrets are never exported.** Signing secrets, tokens, passwords and API keys in node settings are left out, so the file is safe to store and pass around. Whoever imports the rule enters them again.
+- **Webhook URLs typed into a node are left out too.** An incoming-webhook URL (Slack, Teams and many others) often carries its token in the address, so a **Call a Webhook** node's **URL** setting is exported empty. A node that uses a configured webhook endpoint is exported by the endpoint's name instead. After importing, enter the URL again, or overwrite the rule and its stored URL is kept.
 - **References are written by name.** A rule refers to Assets, Organizations, connections, SLA configurations, report templates and so on by internal ID, and the same object has a different ID on another instance. The export therefore writes a portable key beside each ID: a name, a username, or a connection's label and vendor. A reference you cannot see yourself is exported empty and noted in the file's `warnings`, so an export never reveals the name of an object you could not have picked in the editor.
 
 Exporting needs only permission to view rules.
