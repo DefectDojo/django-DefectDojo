@@ -62,7 +62,7 @@ It uses the tool's own matching configuration, so there is no second list of fie
 DefectDojo refuses a setting that would change nothing, with a message saying what to set:
 
 - **One finding per vulnerability on a tool with no Same Tool hash fields.** Without them the hash falls back to one that includes the file and line, so nothing would fold. Many tools ship without hash fields, so set them first; Title, CWE, File Path and Line is a common choice.
-- **Keep Severities Apart when Severity is not part of the identity.** Severity has to be one of the hash fields and must not be listed under **Fields Left Out of the Identity**. It is also refused for tools matched on **Unique ID From Tool** or **Unique ID From Tool or Hash Code**, because the tool's ID ignores severity.
+- **Keep Severities Apart when Severity is not part of the identity.** Severity has to be one of the hash fields and must not be listed under **Fields Left Out of the Identity**. It is also refused for tools matched on **Unique ID From Tool**, because the tool's ID ignores severity. With **Unique ID From Tool or Hash Code**, report entries without an ID fold on the hash, so the same rules apply to them as to hash code.
 
 A pool's grouping is checked against the instance's hash fields, because those are the ones its hash uses, and changing the instance's hash fields checks again every pool that relies on them. A grouping change that is still Pending is checked the same way. Settings saved before these checks existed are left as they are, but an edit to them is refused until they meet the checks.
 
