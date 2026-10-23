@@ -531,7 +531,7 @@ class HandleAcceptTestCase(DojoTestCase):
     def test_handle_accept_success(self, mock_notification):
         """Test successful handling of accept event."""
         result = helper_ra_engagement._handle_accept(
-            self.ra_engagement, self.user, self.finding_qs
+            self.ra_engagement, self.user, self.finding_qs, True
         )
         self.assertTrue(result)
 
@@ -549,7 +549,7 @@ class HandleAcceptTestCase(DojoTestCase):
         self.ra_engagement.save()
 
         result = helper_ra_engagement._handle_accept(
-            self.ra_engagement, self.user, self.finding_qs
+            self.ra_engagement, self.user, self.finding_qs, True
         )
         self.assertFalse(result)
 
