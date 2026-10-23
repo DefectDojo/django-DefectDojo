@@ -68,6 +68,8 @@ class LocationFindingReferenceSerializer(BaseModelSerializer):
 
         model = LocationFindingReference
         fields = "__all__"
+        # A reference written through the API belongs to its finding's own test (see the model's save()).
+        read_only_fields = ["test"]
 
 
 class LocationProductReferenceSerializer(BaseModelSerializer):

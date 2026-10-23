@@ -20,6 +20,30 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## October 2026: v3.4
 
+### October 22, 2026: v3.4.202
+
+New features:
+* **(Navigation)** Every Pro UI page that has documentation shows a **Documentation** button beside the breadcrumbs, which opens the matching docs page in a new tab. A page that belongs to a feature behind a flag links to that flag's documentation. See [The Documentation link](/navigation/pro__walkthroughs/#the-documentation-link).
+* **(Assets)** The VEX export offers OpenVEX next to CycloneDX, on the Asset page **Export** dialog and in the API, so an SPDX SBOM can be paired with a matching VEX document. See [Exporting SBOMs and VEX](/asset_modelling/locations/pro__exporting_sboms_and_vex/#openvex).
+
+Enhancements:
+* **(Findings)** With Locations on, the Findings export dialog offers a **Locations** field in place of Endpoints, and the Report Builder has a **Locations** column, both listing each Finding's Locations. Exports of lists whose filters are too long for a URL, such as a long pasted list, complete instead of failing.
+* **(Triage Engine)** Run Now is no longer offered for scan triggers, and asks for confirmation on a disabled rule. A rule's schedule is shown to everyone who can view the rule, saving a rule sends only the fields you changed, and rule templates are written in your language when you adopt them.
+* **(UI)** The sidebar wordmark no longer runs under the collapse button, a sidebar row with a LEGACY badge is the same height as the rest, a locked filter chip has even padding, the Command Center stat cards keep their deltas and severity chips inside the card, and a walkthrough card stays clear of an open picker.
+
+Bug fixes:
+* **(Importers)** With Locations on and location tracking off, a reimport keeps packages that share a CVE as separate Findings instead of merging them into one.
+* **(Dashboards)** Insights leaves Findings mitigated on or before their discovery date out of average time to remediation, matching the dashboard. Noise Reduction by Category counts each Finding once, so a reimported Finding is no longer counted as both Reimport Automation and Actionable Finding, in Insights and in Report Builder charts.
+* **(Findings)** Quick Export from a Test's Findings list works.
+* **(Assets)** The Asset user and reviewer pickers load instead of returning a server error.
+* **(Sensei)** When a new fix replaces an earlier one on the same pull request, the earlier fix is marked Superseded instead of PR Open, and impact counts include only the current fix.
+* **(API)** The users API accepts configuration permissions on writes and returns each user's stored configuration permissions. Sending an empty list removes only configuration permissions.
+* **(Licensing)** An instance over its license limit can still export, search lists, and load dashboards and report previews. Changes are refused as before.
+
+Behavior changes:
+* **(Findings)** In Keyboard Triage, no key changes a Finding by itself. The keys that set severity and toggled Verified, Under Review, False Positive, and Out of Scope are removed, and **n** opens the Add Note form. See [Keyboard Triage](/triage_findings/findings_workflows/pro__keyboard_triage/).
+* **(Settings)** **System Settings** no longer shows the **Enable Remediation Advice** checkbox, which had no effect.
+
 ### October 21, 2026: v3.4.201
 
 New features:

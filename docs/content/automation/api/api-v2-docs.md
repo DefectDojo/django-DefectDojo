@@ -44,6 +44,10 @@ For example:
 
     Authorization: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff
 
+### Service user tokens
+
+In DefectDojo Pro, a [service user](/admin/user_management/pro__service_users/) holds a token that starts with `ddsu_`. It is sent the same way, `Authorization: Token ddsu_<token>`, and can also be exchanged for a one-hour access token with the OAuth 2.0 client credentials grant at `POST /api/v2/oauth/token/`, sent as `Authorization: Bearer <access_token>`.
+
 ### Alternative authentication method
 
 If you use [an alternative authentication method](/admin/sso/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \

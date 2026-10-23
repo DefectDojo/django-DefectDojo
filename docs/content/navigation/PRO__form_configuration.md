@@ -53,6 +53,10 @@ You can reorder a field that is otherwise not configurable, because its position
 
 **Expand Optional Fields by Default** decides whether the Optional Fields section starts open or closed when someone opens one of these forms. Turn it on when most of your fields live in Optional Fields and you would rather people saw them without an extra click.
 
+## Fields changed in place
+
+The Finding, Engagement and Asset pages let some fields be changed where they are shown, without opening the Edit Finding, Edit Engagement or Edit Asset form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
+
 ## Saving
 
 **Save** applies your changes for everyone. **Reset to Defaults** returns the selected form to the configuration DefectDojo ships with, which is a good way back if a form has been narrowed too far.

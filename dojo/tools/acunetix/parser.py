@@ -6,6 +6,10 @@ class AcunetixParser:
 
     """Parser for Acunetix XML files and Acunetix 360 JSON files."""
 
+    # Merging repeated entries keeps every location, so the importer can split a merged finding
+    # back into one finding per location.
+    SPLITTABLE_PER_LOCATION = True
+
     def get_fields(self) -> list[str]:
         """
         Return the list of fields used in the Acunetix XML Parser.
