@@ -336,8 +336,8 @@ ENISA's Single Reporting Platform.
 
 **When DefectDojo prompts you.** When an Asset whose **CRA Product Class** is not **Not
 Applicable** has an open finding marked **Known Exploited**, the Regulatory card shows **CRA Article
-14 Early Warning Due**, listing each such finding with a **Start CRA Report** button. The finding
-itself shows a **CRA Early Warning Due** tag beside its title until a report names its CVE.
+14 Early Warning Check**, listing each such finding with a **Start CRA Report** button. The finding
+itself shows a **CRA Early Warning Check** tag beside its title until a report names its CVE.
 
 ![The early-warning prompt on an in-scope Asset: one finding already has a report, the other offers Start CRA Report](images/45-cra-early-warning-due.png)
 
