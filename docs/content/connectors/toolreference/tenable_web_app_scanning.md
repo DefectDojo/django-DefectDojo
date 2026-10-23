@@ -20,8 +20,9 @@ On\-premise Tenable connectors are not available at this time.
 
 1. Enter <https://cloud.tenable.com> in the **Location** field.
 2. Enter your **Access Key** and **Secret Key**.
-3. Optionally, set a **Minimum Severity** to limit which findings are imported.
-4. Optionally, set **Asset Grouping** (labeled **Product Grouping** under some naming settings):
+3. Optionally, set **Web Application Tags** to import only the web applications that carry any of the listed Tenable tags. Separate tags with commas. Write `Category:Value` to match that tag, or just `Value` to match that value in any category; matching ignores case. Leave the field blank to import every web application. Web applications without a matching tag get no Record, and their findings are not imported.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+5. Optionally, set **Asset Grouping** (labeled **Product Grouping** under some naming settings):
     - **Web Application (Default)**: one Record per scanned web application.
     - **Scan Configuration**: one Record per scan configuration, holding the findings of every web application it scans, including those reached through a tag. A web application that two configurations scan appears in both Records.
 
