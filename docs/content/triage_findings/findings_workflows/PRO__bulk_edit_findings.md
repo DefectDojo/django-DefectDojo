@@ -35,7 +35,7 @@ The **Bulk Edit** button opens one form containing all of the field-level bulk a
 * **Note** — add a note, with an optional note type, to every selected Finding.
 * **Review** — request or clear review on the selected Findings (see below).
 * **Push to Jira** — queue the selected Findings to push to Jira. Shown only when the Jira integration is enabled.
-* **Unlink from Jira** — remove the Jira link from the selected Findings and the Finding Groups they belong to. The issues are left as they are in Jira. Check **Push to Jira** as well to push the Findings to the Asset's current Jira project (see [Moving Findings to a new Jira project](/connectors/downstream/pro__jira_guide/#moving-findings-to-a-new-jira-project)). Shown only when the Jira integration is enabled.
+* **Unlink from Jira** — remove the Jira link from the selected Findings and the Finding Groups they belong to (Finding Groups you cannot edit stay linked). The issues are left as they are in Jira. Check **Push to Jira** as well to push the Findings to the Asset's current Jira project (see [Moving Findings to a new Jira project](/connectors/downstream/pro__jira_guide/#moving-findings-to-a-new-jira-project)). Shown only when the Jira integration is enabled.
 * **Push to Connector** — dispatch the selected Findings to your configured connector. Shown only when that feature is enabled.
 * **Move or Copy** — move the selected Findings to another Test, or copy them there and leave the originals in place (see below).
 
