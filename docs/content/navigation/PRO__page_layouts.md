@@ -87,7 +87,7 @@ When you open one of the six pages, DefectDojo picks the first of these that app
 
 ## Fields you can change in place
 
-On the Finding page, a field tile or a row of the details table can be changed where it sits when the field supports it (Severity, Assignees, Planned Remediation Date and Description) and you can edit the Finding: a pencil appears beside the value. Moving or resizing the widget does not change this. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
+On the Finding, Engagement and Asset pages, a field tile or a row of the details table can be changed where it sits when the field supports it and you can edit the record: a pencil appears beside the value. On a Finding that is Severity, Assignees, Planned Remediation Date and Description; on an Engagement, Status, Lead, Start Date, End Date and Description; on an Asset, Business Criticality, Platform, Lifecycle and Description. Moving or resizing the widget does not change this. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
 
 ## Widgets with nothing to show
 

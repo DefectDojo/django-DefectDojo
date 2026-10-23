@@ -440,3 +440,5 @@ The recommended order for a rule that sends anything:
 5. Switch the mode to **Live**.
 
 Simulate is not a partial run. Every Finding or Asset edit in the graph happens for real in simulate mode. Only the outbound sends are held back. **Preview** is the only way to run a graph without changing anything.
+
+To carry a tested rule to another instance, or to go back to an earlier version of a rule, see [Sharing and Versions](../sharing_and_versions/).

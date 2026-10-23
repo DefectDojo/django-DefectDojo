@@ -27,7 +27,7 @@ The list only ever holds walkthroughs for features you can use. A walkthrough fo
 
 A small dot on the lightbulb means a walkthrough in the list is one you have not seen yet. The lightbulb steps aside while a walkthrough is running, and it is not shown on phone-sized screens.
 
-To hide the lightbulb, open your **User Profile**, clear **Show the Walkthrough Lightbulb** under **Walkthroughs**, and save. Check it again to bring it back.
+To hide the lightbulb, open it and click **Hide Walkthroughs** at the bottom of the list. The lightbulb goes away at once, on every page, and a message links to your **User Profile**, where you can turn it back on. To hide or show it from the profile instead, clear or check **Show the Walkthrough Lightbulb** under **Walkthroughs**, and save. Hiding the lightbulb does not stop the first-visit offer; turn that off separately (see [Turning the offer back on](#turning-the-offer-back-on)).
 
 ## Turning walkthroughs on
 

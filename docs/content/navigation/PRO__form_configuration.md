@@ -55,7 +55,7 @@ You can reorder a field that is otherwise not configurable, because its position
 
 ## Fields changed in place
 
-The Finding page lets some fields be changed where they are shown, without opening the Edit Finding form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
+The Finding, Engagement and Asset pages let some fields be changed where they are shown, without opening the Edit Finding, Edit Engagement or Edit Asset form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
 
 ## Saving
 

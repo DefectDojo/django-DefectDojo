@@ -40,8 +40,6 @@ Two things are worth understanding before you set up a provider:
 - **Where settings live.** Almost every provider is configured under **Connect > Authorization > Providers** in the Pro UI (SAML, OIDC, the OAuth providers, LDAP, SCIM). Those values are saved in DefectDojo and take effect immediately — no restart. Two providers are the exception: [Remote User (Header) Authentication](/admin/sso/pro__remote_user/) is configured with environment variables only, and on-premise installs may *also* set any provider's boot-time defaults through environment variables. Where both exist, **the value saved in the DefectDojo UI wins at runtime** — the environment variable is only the starting default.
 - **Configured vs enabled.** Filling in a provider's form does not switch it on. Each provider has its own **Enable** checkbox; the login button (or, for LDAP, the credential check) only appears once the provider is both configured and enabled and the form is saved. [Authorization Connectors](/admin/sso/pro__authorization_connectors/) shows both states on one page.
 
-SSO, LDAP and SCIM are part of the DefectDojo Pro licensed feature set. If the provider tiles under **Connect > Authorization > Providers** are not visible, your subscription does not include them — contact DefectDojo Support.
-
 ## Seeing what is configured
 
 **[Authorization Connectors](/admin/sso/pro__authorization_connectors/)** lists every supported provider on one page — which are configured, which are enabled, and what protocol each speaks — and takes you straight to the settings form for any of them. Start there if you want to know the state of this instance rather than set up a specific provider.
