@@ -4,7 +4,7 @@ description: "How to set up the Source DefectDojo Upstream Connector, which pull
 weight: 48
 audience: pro
 ---
-The Source DefectDojo connector pulls the data of another DefectDojo instance into DefectDojo Pro. The source is usually an open source DefectDojo instance. It can also be another DefectDojo Pro instance. The connector reads the source over its [export API](/automation/api/product_export/). It changes nothing on the source.
+The Source DefectDojo connector pulls the data of another DefectDojo instance into DefectDojo Pro. The source is usually an open source DefectDojo instance. The source can also be a DefectDojo Pro instance on a release that serves the export API. The connector reads the source over its [export API](/automation/api/product_export/). It changes nothing on the source.
 
 Use it to move an open source estate into DefectDojo Pro, or to consolidate two instances. You set it up in the Connectors UI, like every other Upstream Connector. On **Connect > Upstream**, its tile is **Source DefectDojo**. You can run it again and again until you cut over. For the full migration procedure, and for the database dump path, see [Migrating from Open Source to Self-Hosted DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/).
 
@@ -49,7 +49,7 @@ When you submit, DefectDojo Pro checks the token and the version of the source. 
 
 #### Records
 
-Discover creates one Record per Product on the source. The Record carries the Product's name and Product Type. It also carries the tags, the business criticality, the SLA configuration and the owner emails.
+Discover creates one Record per Product on the source. The Record carries the Product's name and Product Type. It also carries the tags, the business criticality, the SLA configuration and the owner emails. Mapping applies them to the Product. The Records list does not show them.
 
 Use **Auto-Mapping**. With it on, each Record gets a Product of the same name, under a Product Type of the same name. If DefectDojo Pro already has a Product of that name, the Record maps to it. The [Managing Records](/connectors/upstream/manage_records/#how-auto-mapping-chooses-the-product) page explains the order.
 
@@ -59,16 +59,18 @@ A Record is keyed on the install id of the source and the id of the Product. If 
 
 #### The preflight report
 
-Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is in the **Migration Preflight** card. The card is on the connector's tile on **Connect > Upstream**, and on its **Manage Records & Operations** page. Before the first Discover, the card says "Run a discovery to see the preflight report."
+Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is in the **Migration Preflight** card. The card is on the connector's tile on **Connect > Upstream**, and on its **Manage Records and Operations** page. Before the first Discover, the card says "Run a discovery to see the preflight report."
+
+The card opens folded. It shows the warnings, the totals and the estimated duration. Click **View Details** to see the rest. The button then reads **Hide Details**. The rows of the table below that need **View Details** say so.
 
 | Section | What it shows |
 |---|---|
-| **Source** | The URL and the version of the source. **Mode** is **Verbatim**: the connector copies each record as it is on the source. **Locations** shows if the source has the Locations feature on. |
-| **Token** | The user of the API token, if that user is a superuser, and when the token expires. |
+| **Source** | Needs **View Details**. The URL and the version of the source. **Mode** is **Verbatim**: the connector copies each record as it is on the source. **Locations** shows if the source has the Locations feature on. |
+| **Token** | Needs **View Details**. The user of the API token, if that user is a superuser, and when the token expires. |
 | **Warnings** | **Unknown Scan Types** lists the source scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`. Other warnings say that the token expires soon, or how many files are over the size limit. |
-| **Counts** | The totals of the source, then the counts of each Product: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
-| **To Be Created** | The users and the reference data that DefectDojo Pro does not have yet: SLA configurations, environments, regulations and note types. A source user whose username already exists in DefectDojo Pro is reused. The card counts those users. |
-| **Not Migrated** | The settings that never cross: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords and system settings. |
+| **Counts** | The totals of the source. **View Details** adds the counts of each Product: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
+| **To Be Created** | Needs **View Details**. The users and the reference data that DefectDojo Pro does not have yet: SLA configurations, environments, regulations and note types. A source user whose username already exists in DefectDojo Pro is reused. The card counts those users. |
+| **Not Migrated** | Needs **View Details**. The settings that never cross: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords and system settings. |
 | **Estimated Duration** | How long a Sync of every finding takes. Before the first Sync, the estimate uses a default rate. Then it uses the rate of the last successful Sync. |
 
 The counts cover every Product on the source, also the Products you ignore.
@@ -86,7 +88,7 @@ Each Sync imports every mapped Record. For each Product the connector sends:
 * **Users.** Every user of the source crosses, also the users of a Product you ignore. A finding field that names a user, for example the reporter, points at these accounts.
 * **Reference data**: SLA configurations, development environments, regulations and note types.
 
-A new user arrives inactive, with no usable password. It is never a superuser, also when it was one on the source. It does not use a license seat until it is activated or it logs in. If DefectDojo Pro already has a user with that username, the connector uses it and changes nothing on it.
+A new user arrives inactive, with no usable password. It is never a superuser, also when it was one on the source. It does not use a license seat until it is activated or it logs in. If DefectDojo Pro already has a user with that username, the connector uses it and changes nothing on it. Users join no group, except the default group when their email matches its pattern.
 
 Each test keeps its scan type. If DefectDojo Pro has no parser for that scan type, the test gets the scan type `DefectDojo - Connectors Import`. A custom scan type is the usual case. A test with no scan type on the source gets it too. The deduplication hash of each finding stays equal to the hash on the source. Deduplication in DefectDojo Pro gives the same result as on the source.
 

@@ -23,7 +23,7 @@ Because you host the deployment, your data stays inside your own environment for
 | Who runs it | You, from a restore host with the PostgreSQL client tools | You, from the Connectors UI |
 | How often | Once per cutover, in a scheduled window | As often as you need, until you cut over |
 | Secrets, settings and history | Cross with the dump | Do not cross |
-| Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords, groups or roles |
+| Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords or roles. Users join no group, except the default group when their email matches its pattern. |
 | The source during the move | Frozen with read-only mode from the final dump | Keeps running until the final Sync, then frozen with read-only mode |
 
 Take the dump path if you want an exact copy, and you can schedule a window. Users, groups, settings and history come across as they are. The target must be empty.
@@ -299,12 +299,12 @@ The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page cover
 
 Run [Discover](/connectors/upstream/manage_operations/#discover-operations). The connector creates one Record per Product on the source. With Auto-Mapping on, every Record is mapped at once. Without it, you can map a Record by hand only to a Product that already exists in DefectDojo Pro. Ignore a Record on the [Records page](/connectors/upstream/manage_records/) to leave that Product on the source.
 
-Discover also fills the **Migration Preflight** card with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). Read it before the first Sync:
+Discover also fills the **Migration Preflight** card with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The card opens folded. Click **View Details** to see the rest, and **Hide Details** to fold it again. Read it before the first Sync:
 
 * **Warnings** lists the scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`.
-* **Counts** shows the totals, and the counts of each Product. Keep it to check the result of the Sync.
-* **To Be Created** lists the users and the reference data that the Sync creates.
-* **Not Migrated** lists the settings that you set up in DefectDojo Pro yourself.
+* **Counts** shows the totals. **View Details** adds the counts of each Product. Keep them to check the result of the Sync.
+* **To Be Created** (after **View Details**) lists the users and the reference data that the Sync creates.
+* **Not Migrated** (after **View Details**) lists the settings that you set up in DefectDojo Pro yourself.
 * **Estimated Duration** tells you how long the first Sync takes.
 
 ### Step 3: Sync
