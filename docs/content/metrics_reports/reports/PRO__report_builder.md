@@ -312,7 +312,7 @@ With your Blocks ready, build a Template. The Templates list shows your saved Te
 
 In the Template editor, you select a Theme and arrange the Blocks in the order they should appear. The example below sequences Cover Page → Executive Intro → Open Findings → KEV → Page Break → Asset Inventory. Use **Add Existing Block** to reuse a Block you already built, or **Add New Block** to create one on the spot, and use the drag handles to reorder. Remember that the same Block can appear more than once — a single page-break Block can be inserted between several sections.
 
-The trash icon on a Block's row takes it out of this Template only; the Block itself stays, and other Templates that use it are unchanged. It needs the permission that saves the Template: **Report Template Edit** for an existing Template, **Report Template Add** for a new one. Deleting a whole Template or Block needs **Report Template Delete**.
+The trash icon on a Block's row takes it out of this Template only; the Block itself stays, and other Templates that use it are unchanged. It needs the permission that saves the Template: **Report Template Edit** for an existing Template, **Report Template Add** for a new one. **Add Existing Block** needs the same permission. **Add New Block** also creates a Block, so it needs **Report Template Add** as well. Deleting a whole Template or Block needs **Report Template Delete**.
 
 ![Template editor](images/pro_report_template_new.png)
 
