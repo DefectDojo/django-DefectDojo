@@ -415,6 +415,30 @@ At minimum, set:
 >   enabled: false
 > ```
 
+> **TLS to the external Redis.** For a Redis or Valkey that requires TLS (for
+> example ElastiCache with in-transit encryption), set
+> `celery.broker.scheme: "rediss"`.
+
+> **Django's cache uses the same external Redis, on database 1.** With
+> `celery.broker.external: true` and a `redis` or `rediss` scheme, the chart
+> sets `DD_CACHE_URL` to the broker's scheme, host and port on database 1
+> (Celery uses database 0). Login and MFA rate limiting depend on this cache.
+> Give DefectDojo its own Redis, or at least its own database 1: the
+> initializer Job clears the cache with FLUSHDB on every install and upgrade,
+> which wipes anything else stored in that database.
+> Over `rediss`, the cache client verifies the Redis certificate against the
+> image's public root CAs. If your Redis certificate comes from a private CA,
+> or you want the cache on a different Redis, set the URL yourself; your value
+> replaces the chart's:
+>
+> ```yaml
+> config:
+>   extra:
+>     # With django.uwsgi.certificates enabled for that CA, the combined
+>     # bundle below is already mounted on every pod that reads DD_CACHE_URL.
+>     DD_CACHE_URL: "rediss://my-redis.example.com:6379/1?ssl_ca_certs=/etc/ssl/dojo/ca-bundle.crt"
+> ```
+
 > **WARNING — `dojo.secureCookies` must be `false` on OpenShift/ROSA.** When
 > using OpenShift Routes with edge TLS termination, `secureCookies: true`
 > (the default in `template.yaml`) causes redirect loops and broken login.
@@ -1824,8 +1848,8 @@ images:
     tag: "<version>"
   redis:
     registry: "my-registry.example.com"
-    repository: "defectdojo/redis"
-    tag: "7.2.4"
+    repository: "defectdojo/valkey"
+    tag: "7.2.11-alpine"
 ```
 
 ### Image pull secrets for private registries
