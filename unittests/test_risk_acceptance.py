@@ -1,10 +1,13 @@
 import copy
 import datetime
 import logging
+import re
 from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
+from django.db import connection
 from django.db.models import Q
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -398,6 +401,75 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         self.assertEqual(members, sorted(expired.accepted_findings.values_list("id", flat=True)))
         self.assert_all_inactive_risk_accepted(expired.accepted_findings.all())
+
+    def test_reinstate_locks_the_members_before_deciding_which_to_leave_out(self):
+        """
+        Reinstate reads its members under a lock, in its own transaction.
+
+        Another write accepting one of them at the same moment then waits for the reinstate (or the
+        reinstate for it), so the member is either left out or re-accepted, never both.
+        """
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        members = set(expired.accepted_findings.values_list("id", flat=True))
+
+        with CaptureQueriesContext(connection) as queries:
+            ra_helper.reinstate(expired, expired.expiration_date)
+
+        locked = set()
+        for query in queries.captured_queries:
+            sql = query["sql"]
+            if "FOR UPDATE" in sql and sql.startswith('SELECT "dojo_finding"'):
+                for ids in re.findall(r'"dojo_finding"\."id" IN \(([^)]*)\)', sql):
+                    locked.update(int(value) for value in ids.split(",") if value.strip())
+        self.assertEqual(members, locked)
+
+    @patch("dojo.risk_acceptance.helper.post_jira_comments")
+    @patch("dojo.risk_acceptance.helper.jira_services")
+    def test_jira_hears_about_an_added_finding_only_after_the_commit(self, jira, comments):
+        """
+        The push and the comment go out once the acceptance is committed, not from inside its transaction.
+
+        The push task re-reads the finding, so sent earlier it could sync the status from before the
+        acceptance; and a caller holding row locks would hold them for every JIRA call.
+        """
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        finding = Finding.objects.filter(active=True, risk_accepted=False, duplicate=False).exclude(
+            id__in=ra.accepted_findings.values_list("id", flat=True)).first()
+        jira.is_push_all_issues.return_value = True
+        jira.push.reset_mock()
+        comments.reset_mock()
+
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            ra_helper.add_findings_to_risk_acceptance(None, ra, [finding])
+            jira.push.assert_not_called()
+            comments.assert_not_called()
+        for callback in callbacks:
+            callback()
+
+        jira.push.assert_called_once_with(finding)
+        comments.assert_called_once()
+
+    @patch("dojo.risk_acceptance.helper.post_jira_comments")
+    @patch("dojo.risk_acceptance.helper.jira_services")
+    def test_jira_hears_about_a_reinstate_only_after_the_commit(self, jira, comments):
+        """Reinstating pushes the re-accepted members and comments once the reinstate is committed."""
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        jira.is_push_all_issues.return_value = True
+        jira.push.reset_mock()
+        comments.reset_mock()
+
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            ra_helper.reinstate(expired, expired.expiration_date)
+            jira.push.assert_not_called()
+            comments.assert_not_called()
+        for callback in callbacks:
+            callback()
+
+        self.assertEqual(jira.push.call_count, expired.accepted_findings.count())
+        comments.assert_called_once()
 
     def test_audit_note_links_to_the_risk_acceptance(self):
         """The note written when a finding is accepted carries a usable link, not empty parens."""
