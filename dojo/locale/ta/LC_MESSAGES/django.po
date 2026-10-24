@@ -10082,3 +10082,7 @@ msgstr "கோப்புகள் வெற்றிகரமாகப் ப�
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "படிவத் தரவைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub ஒருங்கிணைப்புகள்"
