@@ -797,7 +797,10 @@ class ImportScanSerializer(CommonImportScanSerializer):
 
 class ReImportScanSerializer(CommonImportScanSerializer):
 
-    help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
+    help_do_not_reactivate = _(
+        "Keep closed findings closed when they appear in the report again, instead of reactivating them. "
+        "New findings are still created, and open findings are processed as usual.",
+    )
     do_not_reactivate = serializers.BooleanField(
         default=False, required=False, help_text=help_do_not_reactivate,
     )
