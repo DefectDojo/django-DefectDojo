@@ -76,6 +76,7 @@ reachability simply leave their Findings at **Unknown**.
 | [Snyk](/connectors/toolreference/snyk/) connector | The reachability Snyk records on each issue | Reachable (static), Potentially reachable, Unreachable |
 | [Semgrep](/connectors/toolreference/semgrep/) connector | Semgrep Supply Chain reachability | Reachable (static), Potentially reachable, Unreachable |
 | [Aqua Supply Chain](/connectors/toolreference/aqua_supply_chain/) connector | Aqua's reachable-package flag | Reachable (static) |
+| [Wiz](/connectors/toolreference/wiz/) connector | Wiz's "validated in runtime" flag on each vulnerability finding | Reachable (runtime) |
 | [Sensei](/sensei/fixing_findings/#reachability-analysis) | govulncheck call paths for the Go code in an onboarded repository | Reachable (static), Potentially reachable |
 | Reachability API | Verdicts your own tooling posts to `POST /api/v2/reachability/verdicts/` | Any |
 
