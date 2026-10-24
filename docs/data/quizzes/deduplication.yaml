@@ -1,0 +1,526 @@
+subject: "Deduplication"
+questions:
+  - q: "What is deduplication for?"
+    options:
+      - "Deleting every Finding that a later scan reports again"
+      - "Recognizing that a newly created Finding is the same vulnerability as an existing one, and marking it a duplicate so your team works on one active original"
+      - "Merging two matching Findings into a single record that combines their notes and fields"
+      - "Stopping a scanner from reporting the same issue twice"
+    answer: 1
+    why: "Deduplication compares each new Finding with existing Findings in scope. A match is marked as a duplicate of the oldest Finding, so all the work on that vulnerability happens on one original."
+    source: "about_deduplication/#how-defectdojo-handles-duplicates"
+    hints:
+      - note: "Duplicates are kept by default. Deleting them is a separate, optional setting with a limit you choose."
+        link: "about_deduplication/#delete-deduplicate-findings"
+        label: "Delete Deduplicate Findings"
+      - null
+      - note: "A duplicate stays its own Finding. It's linked to its original rather than merged into it."
+        link: "deduplication_across_tools/#how-duplicates-are-displayed-and-linked"
+        label: "How duplicates are displayed and linked"
+      - note: "DefectDojo doesn't scan. Deduplication works on the Findings a parser creates from the tool's report."
+        link: "deduplication_across_tools/#what-happens-to-a-finding-on-import"
+        label: "What happens to a Finding on import"
+
+  - q: "What is the difference between reimport deduplication and deduplication?"
+    options:
+      - "Nothing. They are the same check, run twice to be safe"
+      - "Reimport deduplication compares across the whole Asset, while deduplication only looks inside one Test"
+      - "Reimport deduplication compares the incoming report with the Findings in one Test, and a match is never created at all. Deduplication then compares the Findings that were created with the rest of their scope and marks matches as duplicates"
+      - "Reimport deduplication only runs for API uploads, and deduplication only for uploads through the UI"
+    answer: 2
+    why: "Reimport matching happens first, inside one Test, and matched results never become Findings. Whatever is created then goes through Same Tool and Cross Tool deduplication, which marks duplicates instead of discarding them."
+    source: "deduplication_across_tools/#what-is-the-difference-between-reimport-and-deduplication"
+    hints:
+      - note: "They are separate checks with separate formulas. Each tool has its own Reimport, Same Tool and Cross Tool settings."
+        link: "pro__deduplication_tuning/#matching-configuration"
+        label: "Matching Configuration"
+      - note: "It's the other way round. A reimport only ever matches inside its own Test."
+        link: "about_deduplication/#reimport-deduplication"
+        label: "Reimport Deduplication"
+      - null
+      - note: "Both run for both kinds of upload. What differs is what each one compares against."
+        link: "/import_data/import_intro/reimport/"
+        label: "Reimport"
+
+  - q: "By default, which set of Findings are used for comparison during deduplication?"
+    options:
+      - "Every Finding in the DefectDojo instance"
+      - "Only the Findings in the same Test"
+      - "Findings in the same Organization"
+      - "Findings anywhere in the same Asset"
+    answer: 3
+    why: "Deduplication is scoped to the Asset by default. Findings in different Assets aren't compared unless you use a Dedupe Pool or one of the global algorithms."
+    source: "deduplication_across_tools/#deduplication-scope-asset-or-engagement"
+    hints:
+      - note: "Instance-wide matching comes only from the global algorithms, which are off by default and gated behind feature flags."
+        link: "pro__global_component_deduplication/"
+        label: "Global Component Deduplication"
+      - note: "That's how reimport matching works, not deduplication."
+        link: "about_deduplication/#reimport-deduplication"
+        label: "Reimport Deduplication"
+      - note: "An Organization isn't a deduplication scope. To make Findings in several Assets meet, group those Assets in a Dedupe Pool, which can even span Organizations."
+        link: "pro__dedupe_pools/"
+        label: "Dedupe Pools"
+      - null
+
+  - q: "What is a Dedupe Pool?"
+    options:
+      - "A queue of Findings that are waiting for deduplication to run"
+      - "A named group of Assets whose Findings deduplicate against each other"
+      - "A matching algorithm that compares Findings by component name and version"
+      - "A group of security tools whose Findings deduplicate against each other"
+    answer: 1
+    why: "A pool widens deduplication beyond one Asset to a group you choose. It suits services that share a base image, or a monorepo split into one Asset per component."
+    source: "pro__dedupe_pools/"
+    hints:
+      - note: "Deduplication runs in the background after import. You can choose whether an import waits for it."
+        link: "about_deduplication/#background-processing"
+        label: "Background processing"
+      - null
+      - note: "That's Global Component, an algorithm that matches across every Asset in the instance."
+        link: "pro__global_component_deduplication/"
+        label: "Global Component Deduplication"
+      - note: "Matching Findings from different tools is Cross Tool deduplication, configured per tool."
+        link: "pro__deduplication_tuning/#cross-tool-deduplication"
+        label: "Cross Tool Deduplication"
+
+  - q: "What does cross-tool deduplication do?"
+    options:
+      - "Copies Findings from one tool's Test into another tool's Test"
+      - "Converts one tool's report format into another tool's format"
+      - "Matches incoming results against existing Findings each time you reimport into a Test"
+      - "Marks a Finding from one tool as a duplicate of a Finding from a different tool when both describe the same issue"
+    answer: 3
+    why: "For example, two dependency scanners that both flag the same CVE in the same package can resolve to one original. The original's **Found by** field then lists every tool that reported it."
+    source: "deduplication_across_tools/#same-tool-and-cross-tool-deduplication"
+    hints:
+      - note: "Nothing is copied. Each tool's Findings stay in their own Test, and duplicates link to an original."
+        link: "deduplication_across_tools/#how-duplicates-are-displayed-and-linked"
+        label: "How duplicates are displayed and linked"
+      - note: "To bring in a format DefectDojo doesn't support, map it with the Universal Parser."
+        link: "/import_data/pro/specialized_import/universal_parser/"
+        label: "Universal Parser"
+      - note: "That's reimport matching, which only compares within a single Test and a single tool."
+        link: "about_deduplication/#reimport-deduplication"
+        label: "Reimport Deduplication"
+      - null
+
+  - q: "You import the same scan into Test 1, and later into a new Test 2 in the same Asset. Deduplication is on. What happens to the vulnerability reported in both?"
+    options:
+      - "Test 2's Finding is marked as a duplicate of Test 1's, set to inactive and unverified, and linked to it"
+      - "Test 2 replaces Test 1, and Test 1's Findings are removed"
+      - "Test 1's Finding becomes the duplicate, because Test 2 has the newer data"
+      - "Nothing. Deduplication only compares Findings inside one Test"
+    answer: 0
+    why: "The new Finding gets the Duplicate status and points to the original. Duplicates are inactive, so the team has one active Finding to remediate."
+    source: "deduplication_across_tools/#how-duplicates-are-displayed-and-linked"
+    hints:
+      - null
+      - note: "Import always creates a new Test. To keep sending a recurring scan into one Test, use Reimport."
+        link: "avoid_excess_duplicates/#using-reimport-for-continual-tests"
+        label: "Using Reimport for continual Tests"
+      - note: "The earliest-created Finding is always the original. An established original is never demoted."
+        link: "about_deduplication/#which-finding-becomes-the-original"
+        label: "Which Finding becomes the original"
+      - note: "Deduplication compares across the whole Asset by default."
+        link: "deduplication_across_tools/#deduplication-scope-asset-or-engagement"
+        label: "Deduplication scope"
+
+  - q: "During a reimport, an incoming result doesn't match any Finding already in the Test. What happens to it?"
+    options:
+      - "It's discarded, because reimport only keeps results that match"
+      - "It becomes a new Finding in the Test, and then goes through normal deduplication against the rest of its scope"
+      - "It's attached as a duplicate of the closest Finding in the Test"
+      - "The reimport stops and asks you to create a new Test"
+    answer: 1
+    why: "Only matched results are discarded. An unmatched result becomes a new Finding, and that Finding is subject to Same Tool and Cross Tool deduplication like any other."
+    source: "deduplication_across_tools/#reimport-and-closing-fixed-findings"
+    hints:
+      - note: "It's the other way round. Matched results are the ones that never become Findings."
+        link: "about_deduplication/#reimport-deduplication"
+        label: "Reimport Deduplication"
+      - null
+      - note: "Reimport doesn't create duplicates inside its Test. Duplicates come from deduplication, which runs afterwards."
+        link: "avoid_excess_duplicates/#reimport-in-action"
+        label: "Reimport in action"
+      - note: "Reimport handles new results itself by creating Findings for them."
+        link: "/import_data/import_intro/reimport/"
+        label: "Reimport"
+
+  - q: "A tool's Reimport formula hashes Title, CWE, Severity, Description and Line Number. Its Same Tool formula hashes the same fields without Line Number. A vulnerability's line number changes, and you reimport into the same Test. What happens?"
+    options:
+      - "Reimport matches the existing Finding and leaves it untouched"
+      - "Reimport discards the incoming result as a match"
+      - "Same Tool deduplication can't run, because the two formulas disagree"
+      - "Reimport creates a new Finding because the line number differs, and Same Tool deduplication then marks it as a duplicate"
+    answer: 3
+    why: "The two formulas run one after the other. Reimport sees a different line number and creates a Finding, then Same Tool deduplication ignores line number and marks it as a duplicate."
+    source: "about_deduplication/#example"
+    hints:
+      - note: "That needs a Reimport formula that tolerates the move. **Track Findings as Locations Change** keeps one Finding in place when its line shifts."
+        link: "pro__location_drift_matching/"
+        label: "Location Drift Matching"
+      - note: "Reimport only discards results that match, and the line number stopped this one matching."
+        link: "about_deduplication/#reimport-deduplication"
+        label: "Reimport Deduplication"
+      - note: "Each matching kind has its own formula, and they're meant to differ when that suits the tool."
+        link: "pro__deduplication_tuning/#matching-configuration"
+        label: "Matching Configuration"
+      - null
+
+  - q: "Why should a tool's Reimport formula be changed with particular care?"
+    options:
+      - "Reimport discards matched results before they are recorded, so a formula that matches too broadly can lose real Findings"
+      - "A Reimport change also rewrites the tool's Same Tool formula"
+      - "A Reimport formula can only be changed once per tool"
+      - "Changing it deletes the Tests already reimported with the old formula"
+    answer: 0
+    why: "A deduplication mistake leaves an inactive duplicate you can still find. A reimport match is never created at all, so an over-broad formula can drop Findings you needed."
+    source: "pro__deduplication_tuning/#reimport-deduplication"
+    hints:
+      - null
+      - note: "Same Tool, Cross Tool and Reimport each have their own column in Matching Configuration."
+        link: "pro__deduplication_tuning/#matching-configuration"
+        label: "Matching Configuration"
+      - note: "You can change it whenever you like. Each change goes through a review step first."
+        link: "pro__deduplication_tuning/#changing-a-tools-matching"
+        label: "Changing a tool's matching"
+      - note: "Nothing is deleted. A field change re-hashes the tool's Findings in the background."
+        link: "pro__deduplication_tuning/#running-deduplication-retroactively-on-existing-data"
+        label: "Running deduplication retroactively"
+
+  - q: "Two Engagements in one Asset scan different repositories, and each should keep its own Findings instead of deduplicating against the other. What do you turn on?"
+    options:
+      - "A Dedupe Pool containing both Engagements"
+      - "**Delete Deduplicate Findings** in System Settings"
+      - "**Isolate Deduplication From Other Engagements** on the Engagement"
+      - "**Close Old Findings** on each import"
+    answer: 2
+    why: "With isolation on, an Engagement's Findings only deduplicate against Findings in the same Engagement. If either of two Engagements has it enabled, their Findings are never compared."
+    source: "pro_enabling_product_deduplication/#deduplication-for-engagements"
+    hints:
+      - note: "Pools group Assets, not Engagements, and they widen the scope rather than narrowing it."
+        link: "pro__dedupe_pools/"
+        label: "Dedupe Pools"
+      - note: "That limits how many duplicates are kept. It doesn't change which Findings are compared."
+        link: "about_deduplication/#delete-deduplicate-findings"
+        label: "Delete Deduplicate Findings"
+      - null
+      - note: "That closes Findings missing from a new report. It has nothing to do with deduplication scope."
+        link: "deduplication_across_tools/#reimport-and-closing-fixed-findings"
+        label: "Reimport and closing fixed Findings"
+
+  - q: "The original Finding for a vulnerability was mitigated. The same vulnerability turns up again in a new Test. What does deduplication do with the new Finding?"
+    options:
+      - "Marks it as a duplicate of the mitigated original, so it's inactive too"
+      - "Leaves it active as its own original, so the returning vulnerability isn't hidden"
+      - "Reopens the mitigated original and discards the new Finding"
+      - "Rejects the import until the original is reopened by hand"
+    answer: 1
+    why: "DefectDojo doesn't attach an active Finding to a closed original, so a vulnerability that comes back stays visible."
+    source: "deduplication_across_tools/#how-duplicates-are-displayed-and-linked"
+    hints:
+      - note: "Doing that would hide a vulnerability that's back, so deduplication doesn't link to a closed original."
+        link: "deduplication_across_tools/#how-duplicates-are-displayed-and-linked"
+        label: "How duplicates are displayed and linked"
+      - null
+      - note: "Reopening a closed Finding is what a reimport into the same Test does, unless you set **Do Not Reactivate**."
+        link: "avoid_excess_duplicates/#reopen-findings"
+        label: "Reopen Findings"
+      - note: "Deduplication never blocks an import. It only decides how new Findings are linked."
+        link: "deduplication_across_tools/#what-happens-to-a-finding-on-import"
+        label: "What happens to a Finding on import"
+
+  - q: "Why can't the Unique ID From Tool algorithm match a Finding from one tool with a Finding from another?"
+    options:
+      - "It ignores endpoints, and cross-tool matching needs them"
+      - "Cross-tool matching only works inside a single Test"
+      - "It can, as long as both tools import into the same Asset"
+      - "One tool's identifiers mean nothing to another, so cross-tool matches always come from the hash code"
+    answer: 3
+    why: "Unique ID From Tool is the most stable choice within one tool, but it never crosses tools. Cross-tool matching relies on both tools producing the same hash code."
+    source: "deduplication_across_tools/#the-deduplication-algorithms"
+    hints:
+      - note: "It does ignore endpoints, but that isn't why. The identifier only means something to the tool that issued it."
+        link: "about_deduplication/#how-endpoints-are-assessed-per-algorithm"
+        label: "How endpoints are assessed per algorithm"
+      - note: "Cross-tool matching compares Findings across the Asset, or the Asset's Dedupe Pool."
+        link: "pro__deduplication_tuning/#cross-tool-deduplication"
+        label: "Cross Tool Deduplication"
+      - note: "Being in the same Asset doesn't help. Two tools never share identifiers."
+        link: "deduplication_across_tools/#same-tool-and-cross-tool-deduplication"
+        label: "Same-tool and cross-tool deduplication"
+      - null
+
+  - q: "You're turning on Cross Tool matching for two SCA tools. Which hash field setup is most likely to make their Findings match?"
+    options:
+      - "Title and Description on both tools"
+      - "Vulnerability IDs, component name and component version, selected identically on both tools"
+      - "A different field list on each tool, tuned to that tool's report format"
+      - "No hash fields, so that every Finding is compared"
+    answer: 1
+    why: "Pick fields whose values don't depend on the vendor, and select the same fields on every participating tool. Titles and descriptions rarely match, because each vendor writes its own."
+    source: "deduplication_across_tools/#same-tool-and-cross-tool-deduplication"
+    hints:
+      - note: "Each vendor words titles and descriptions differently, so these rarely line up across tools."
+        link: "deduplication_across_tools/#same-tool-and-cross-tool-deduplication"
+        label: "Same-tool and cross-tool deduplication"
+      - null
+      - note: "Every tool enabled for cross-tool deduplication must have the same fields selected, or the hash codes can't match."
+        link: "pro__deduplication_tuning/#deduplication-best-practices"
+        label: "Deduplication best practices"
+      - note: "The editor won't save Cross Tool Hash Code with no fields, because the hash is built from those fields alone."
+        link: "pro__deduplication_tuning/#cross-tool-deduplication"
+        label: "Cross Tool Deduplication"
+
+  - q: "Two tools have identical Cross Tool settings, but their Findings never deduplicate. One tool imports into Asset A and the other into Asset B. What's the most likely reason?"
+    options:
+      - "Cross Tool deduplication is scoped to the Asset, or to the Asset's Dedupe Pool, and these Assets share neither"
+      - "Cross Tool matching only works with the Unique ID From Tool algorithm"
+      - "Both tools need to import into the same Test"
+      - "Cross Tool deduplication only runs during reimport"
+    answer: 0
+    why: "Matching hash fields aren't enough on their own. The Findings must also be in the same scope, so keep cross-tool sources in one Asset, or pool the Assets for Cross Tool matching."
+    source: "pro__deduplication_tuning/#cross-tool-deduplication"
+    hints:
+      - null
+      - note: "Cross Tool uses Hash Code, because tools don't share unique IDs."
+        link: "deduplication_across_tools/#the-deduplication-algorithms"
+        label: "The deduplication algorithms"
+      - note: "A Test holds one tool's report. Cross-tool matching compares across the Asset."
+        link: "deduplication_across_tools/#deduplication-scope-asset-or-engagement"
+        label: "Deduplication scope"
+      - note: "Cross Tool deduplication runs on new Findings after every import and reimport."
+        link: "deduplication_across_tools/#what-happens-to-a-finding-on-import"
+        label: "What happens to a Finding on import"
+
+  - q: "What does adding Assets to a Dedupe Pool change?"
+    options:
+      - "The algorithm and hash fields that the pool's Assets use"
+      - "Nothing until each Asset's Findings are re-imported"
+      - "Which Findings are eligible to be compared, while how they're compared still comes from Matching Configuration"
+      - "It moves the pooled Assets' Findings into a single Asset"
+    answer: 2
+    why: "A pool changes which Findings can meet, not how two Findings are compared. Every member uses the instance's Matching Configuration for its tools."
+    source: "pro__dedupe_pools/#pools-vs-the-global-algorithms"
+    hints:
+      - note: "Matching Configuration is instance-wide, pooled Assets included. Per-pool overrides aren't available yet."
+        link: "pro__deduplication_tuning/#matching-configuration"
+        label: "Matching Configuration"
+      - note: "New imports pick up the pool straight away. For Findings already in DefectDojo, use **Apply to Existing Findings**."
+        link: "pro__dedupe_pools/#applying-a-pool-to-findings-that-already-exist"
+        label: "Applying a pool to existing Findings"
+      - null
+      - note: "Pooled Assets stay separate. Only the deduplication links cross between them."
+        link: "pro__dedupe_pools/"
+        label: "Dedupe Pools"
+
+  - q: "Which matching kinds can an Asset join a Dedupe Pool for?"
+    options:
+      - "Same Tool, Cross Tool and Reimport"
+      - "Only Same Tool"
+      - "Same Tool and Cross Tool, with any number of pools per kind"
+      - "Same Tool and Cross Tool, with at most one pool per kind"
+    answer: 3
+    why: "An Asset can share Same Tool matching with one group and Cross Tool matching with another. There's no Reimport kind, because a reimport only matches inside its own Test. The Findings a reimport creates are still deduplicated across the pool."
+    source: "pro__dedupe_pools/#membership-is-per-matching-kind"
+    hints:
+      - note: "There's deliberately no Reimport kind. Pooling couldn't widen a match that stays inside one Test."
+        link: "pro__dedupe_pools/#membership-is-per-matching-kind"
+        label: "Membership is per matching kind"
+      - note: "Cross Tool matching can be pooled too, and the pool can differ from the Same Tool one."
+        link: "pro__dedupe_pools/#membership-is-per-matching-kind"
+        label: "Membership is per matching kind"
+      - note: "An Asset can be in only one pool per kind. Adding it to a second one is refused, and the message names the pool that holds it."
+        link: "pro__dedupe_pools/#membership-is-per-matching-kind"
+        label: "Membership is per matching kind"
+      - null
+
+  - q: "An SCA tool uses Global Component for Same Tool matching, so its Findings match across the whole instance. You then add one of its Assets to a Same Tool Dedupe Pool. What happens to that Asset's matching?"
+    options:
+      - "Nothing changes, because pools and global algorithms are independent"
+      - "Its Findings now match only against the pool's other members, not the whole instance"
+      - "Matching widens to include Findings outside the instance"
+      - "DefectDojo refuses the change, because an Asset using a global algorithm can't be pooled"
+    answer: 1
+    why: "Pooling narrows a global algorithm to the pool for that matching kind. To keep a tool matching across every Asset, leave its Assets out of a pool for that kind."
+    source: "pro__dedupe_pools/#pools-vs-the-global-algorithms"
+    hints:
+      - note: "They interact. Once an Asset is pooled for a kind, the global algorithms for that kind are bounded to the pool."
+        link: "pro__dedupe_pools/#pools-vs-the-global-algorithms"
+        label: "Pools vs. the global algorithms"
+      - null
+      - note: "Deduplication never reaches outside the instance. The widest scope is every Asset in it."
+        link: "pro__global_component_deduplication/#how-matching-works"
+        label: "How Global Component matching works"
+      - note: "The change is allowed. It just narrows the scope, which is why it's worth checking before you pool."
+        link: "pro__global_component_deduplication/#configuring-global-component-deduplication"
+        label: "Configuring Global Component"
+
+  - q: "You've added three Assets to a Dedupe Pool, but the Findings already in them haven't been linked across the pool. How do you deduplicate those existing Findings?"
+    options:
+      - "Under **Apply to Existing Findings**, run **Preview Re-run**, then **Apply Now**"
+      - "Wait. Adding members reprocesses existing Findings in the background"
+      - "Change the tool's hash fields, which re-runs deduplication on every existing Finding"
+      - "Delete the Assets' Tests and import the scans again"
+    answer: 0
+    why: "Pool membership only affects future imports. Apply Now re-runs deduplication over the pool's Findings for one matching kind. It stays disabled until a preview has shown you what it would link."
+    source: "pro__dedupe_pools/#applying-a-pool-to-findings-that-already-exist"
+    hints:
+      - null
+      - note: "Adding members only affects future imports. Existing Findings are left alone until you ask."
+        link: "pro__dedupe_pools/#adding-assets-and-previewing-first"
+        label: "Adding Assets, and previewing first"
+      - note: "A field change re-hashes the tool's Findings, but doesn't revisit duplicate links that already exist."
+        link: "pro__deduplication_tuning/#running-deduplication-retroactively-on-existing-data"
+        label: "Running deduplication retroactively"
+      - note: "There's no need to throw away history. Apply Now re-runs deduplication in place."
+        link: "pro__dedupe_pools/#applying-a-pool-to-findings-that-already-exist"
+        label: "Applying a pool to existing Findings"
+
+  - q: "Your staging and production Assets share a Dedupe Pool. Staging is scanned first, but your team works Findings in production. How do you make new originals land in production?"
+    options:
+      - "Set **Original Placement** to Newest Finding Wins"
+      - "Use a Triage Engine **On Dedupe Match** rule set to **Keep Both Active**"
+      - "Use **Set as Original Finding** on each Finding from now on"
+      - "Set **Original Placement** to **Designated Asset, Then Oldest** and choose the production Asset"
+    answer: 3
+    why: "Duplicates then point at production's matching Finding when it's old enough to be the original, and at the oldest Finding otherwise. The change applies to new matches."
+    source: "pro__dedupe_pools/#where-originals-collect"
+    hints:
+      - note: "There's deliberately no newest-wins option. It would let an established original change hands."
+        link: "pro__dedupe_pools/#where-originals-collect"
+        label: "Where originals collect"
+      - note: "That keeps matching Findings active in both Assets and links them. It doesn't choose where originals land."
+        link: "pro__dedupe_pools/#keeping-matching-findings-active-in-each-asset"
+        label: "Keeping matching Findings active"
+      - note: "That works one Finding at a time from Similar Findings. Original Placement sets it for the whole pool."
+        link: "pro__similar_findings/#actions"
+        label: "Similar Findings actions"
+      - null
+
+  - q: "Which Finding data can a tool's hash code be built from?"
+    options:
+      - "Only the Finding's title"
+      - "The Test's name and the date it was imported"
+      - "Fields such as title, severity, CWE, vulnerability IDs, component name and version, file path, line and endpoints"
+      - "The Finding's notes and comments"
+    answer: 2
+    why: "Each tool hashes its own list of these fields. DefectDojo also adds the Finding's **service** value to every hash."
+    source: "deduplication_across_tools/#hash-code-fields-per-tool"
+    hints:
+      - note: "Title is one option, but each tool picks its own set of fields."
+        link: "deduplication_across_tools/#hash-code-fields-per-tool"
+        label: "Hash code fields per tool"
+      - note: "Tests and import dates set the scope and decide which Finding is oldest. They aren't hashed."
+        link: "about_deduplication/#which-finding-becomes-the-original"
+        label: "Which Finding becomes the original"
+      - null
+      - note: "Hash codes come from the data the scanner reported, not from your team's notes."
+        link: "deduplication_across_tools/#what-happens-to-a-finding-on-import"
+        label: "What happens to a Finding on import"
+
+  - q: "Two otherwise identical Findings in the same Asset don't deduplicate. One was imported with the Service `payments` and the other with `billing`. Why?"
+    options:
+      - "The Service value is added to every hash, so different services never match on hash code"
+      - "Findings with different services are stored in different Assets"
+      - "Service only matters to the Unique ID From Tool algorithm"
+      - "Service has no effect, so something else must differ"
+    answer: 0
+    why: "Service is included in every tool's hash by default. Setting the Service field on an import overrides the parser's value, so it can change deduplication results."
+    source: "about_deduplication/#service-field-and-its-impact"
+    hints:
+      - null
+      - note: "Service is a field on the Finding. It doesn't move Findings between Assets."
+        link: "about_deduplication/#service-field-and-its-impact"
+        label: "Service field and its impact"
+      - note: "It's the hash-based paths that Service affects."
+        link: "about_deduplication/#service-field-and-its-impact"
+        label: "Service field and its impact"
+      - note: "Service is part of the hash by default. That makes it a common reason for missed duplicates."
+        link: "about_deduplication/#service-field-and-its-impact"
+        label: "Service field and its impact"
+
+  - q: "With Locations enabled, the same CVE in the same package shows up in two different container images that are scanned into one Asset. What does Hash Code deduplication do?"
+    options:
+      - "Marks the second image's Finding as a duplicate of the first"
+      - "Merges them into one Finding that lists both images"
+      - "Keeps two Findings, one per image, because Findings in different container images aren't treated as duplicates"
+      - "Deduplicates them only if both images use the same tag"
+    answer: 2
+    why: "Under Locations, Hash Code and Unique ID From Tool or Hash Code don't mark Findings as duplicates when they sit in different container images, so each image keeps its own Findings. Different cloud resources are kept apart the same way."
+    source: "pro__location_drift_matching/#container-image-findings"
+    hints:
+      - note: "That was the behavior before images counted as part of a Finding's location."
+        link: "pro__location_drift_matching/#container-image-findings"
+        label: "Container image findings"
+      - note: "Deduplication links Findings. It never merges them."
+        link: "deduplication_across_tools/#how-duplicates-are-displayed-and-linked"
+        label: "How duplicates are displayed and linked"
+      - null
+      - note: "An image is identified by its digest when the scanner knows it, and by its tag only when it doesn't. Two different images stay separate either way."
+        link: "/asset_modelling/locations/pro__container_image_locations/"
+        label: "Container Image Locations"
+
+  - q: "Why won't Matching Configuration let a CWE field be a tool's only hash field?"
+    options:
+      - "CWEs are optional, so most Findings would have no hash"
+      - "A CWE is a weakness class rather than a specific vulnerability, so matching on it alone would merge unrelated Findings"
+      - "CWE fields can only be used for Cross Tool matching"
+      - "A CWE field must always be paired with Line Number"
+    answer: 1
+    why: "A vulnerability ID field can stand alone, because a CVE or GHSA identifies a specific vulnerability. Pair a CWE field with an identifying field such as title or file path."
+    source: "pro__deduplication_tuning/#set-based-hash-code-fields-vulnerability-ids-and-cwes"
+    hints:
+      - note: "Empty values are handled separately. The rule exists because a CWE is too broad to identify a Finding."
+        link: "pro__deduplication_tuning/#set-based-hash-code-fields-vulnerability-ids-and-cwes"
+        label: "Set-based hash code fields"
+      - null
+      - note: "CWE fields work for Same Tool and Cross Tool Hash Code."
+        link: "pro__deduplication_tuning/#set-based-hash-code-fields-vulnerability-ids-and-cwes"
+        label: "Set-based hash code fields"
+      - note: "Any identifying field will do, such as title or file path."
+        link: "pro__deduplication_tuning/#set-based-hash-code-fields-vulnerability-ids-and-cwes"
+        label: "Set-based hash code fields"
+
+  - q: "On Matching Configuration, you change a tool's hash fields and save. What happens to that tool's existing Findings?"
+    options:
+      - "Nothing. Only the next import uses the new fields"
+      - "Every existing duplicate link for the tool is recalculated"
+      - "The tool's existing Findings are deleted and must be imported again"
+      - "Their stored hashes are recomputed in the background, but existing duplicate links aren't revisited"
+    answer: 3
+    why: "Changing hash fields makes every stored hash for that tool stale, so a background re-hash runs. Until it finishes, the tool's Findings may not match each other. Changing only the algorithm recomputes nothing."
+    source: "pro__deduplication_tuning/#running-deduplication-retroactively-on-existing-data"
+    hints:
+      - note: "That's what changing the **algorithm** does. Changing the fields re-hashes the backlog."
+        link: "pro__deduplication_tuning/#changing-a-tools-matching"
+        label: "Changing a tool's matching"
+      - note: "Re-hashing changes what future comparisons produce. To re-link Findings that are already in DefectDojo, use a Dedupe Pool's Apply Now."
+        link: "pro__dedupe_pools/#applying-a-pool-to-findings-that-already-exist"
+        label: "Applying a pool to existing Findings"
+      - note: "Nothing is deleted. The re-hash only updates stored values."
+        link: "pro__deduplication_tuning/#running-deduplication-retroactively-on-existing-data"
+        label: "Running deduplication retroactively"
+      - null
+
+  - q: "**Delete Deduplicate Findings** is on, with **Maximum Duplicates** set to 1. Finding A is an original, and B is already its duplicate. A third import adds Finding C as another duplicate of A. What happens?"
+    options:
+      - "Finding A is deleted, and B becomes the original"
+      - "Finding C is deleted straight away"
+      - "Finding B, the oldest duplicate, is deleted. A is never deleted automatically"
+      - "Nothing. The setting only applies to Findings imported before it was enabled"
+    answer: 2
+    why: "Once the limit is crossed, the oldest duplicates are removed first. A background task does it, usually within a minute or two."
+    source: "about_deduplication/#which-duplicates-will-be-deleted"
+    hints:
+      - note: "The original is never deleted automatically."
+        link: "about_deduplication/#which-duplicates-will-be-deleted"
+        label: "Which duplicates will be deleted"
+      - note: "The newest duplicate is kept. Deletion starts with the oldest."
+        link: "about_deduplication/#which-duplicates-will-be-deleted"
+        label: "Which duplicates will be deleted"
+      - null
+      - note: "Turning the setting on starts deleting straight away, and it keeps running as duplicates build up."
+        link: "about_deduplication/#applying-this-setting"
+        label: "Applying this setting"

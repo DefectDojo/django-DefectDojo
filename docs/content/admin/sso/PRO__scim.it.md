@@ -131,7 +131,7 @@ Se vuoi che il tuo identity provider gestisca anche i superuser, abilita **Allow
 
 ## Risoluzione dei problemi
 
-**Il test di connessione segnala "not found".** SCIM è disattivato, oppure l'istanza non ne ha la licenza. Verifica che **Enable SCIM Provisioning** sia attivo e che il tuo abbonamento includa il SSO. L'intero indirizzo SCIM si comporta come se non esistesse finché entrambe le condizioni non sono vere.
+**Il test di connessione segnala "not found".** SCIM è disattivato. Verifica che **Enable SCIM Provisioning** sia attivo e salvato. Fino ad allora, l'intero indirizzo SCIM si comporta come se non esistesse.
 
 **Il test di connessione segnala un errore di autenticazione.** Il token è errato, oppure è stato revocato. Generane uno nuovo e aggiorna il tuo identity provider. In Okta, verifica che il valore inizi con `Bearer ` e uno spazio; in Entra, verifica che non sia così.
 

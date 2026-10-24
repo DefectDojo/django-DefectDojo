@@ -131,7 +131,7 @@ Se você quiser que seu identity provider também gerencie superusers, habilite 
 
 ## Solução de problemas
 
-**O teste de conexão reporta "not found".** O SCIM está desativado, ou a instância não tem licença para ele. Verifique se **Enable SCIM Provisioning** está ativado e se a sua assinatura inclui SSO. Todo o endereço do SCIM se comporta como se não existisse até que ambas as condições sejam verdadeiras.
+**O teste de conexão reporta "not found".** O SCIM está desativado. Verifique se **Enable SCIM Provisioning** está ativado e salvo. Até lá, todo o endereço do SCIM se comporta como se não existisse.
 
 **O teste de conexão reporta uma falha de autenticação.** O token está errado ou foi revogado. Gere um novo e atualize seu identity provider. No Okta, verifique se o valor começa com `Bearer ` e um espaço; no Entra, verifique se não começa.
 
