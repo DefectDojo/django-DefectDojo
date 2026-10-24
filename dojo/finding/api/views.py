@@ -229,6 +229,8 @@ class FindingViewSet(
                 "test__environment",
                 "test__engagement__product",
                 "test__engagement__product__prod_type",
+                # cwes is serialized on every row; unprefetched it costs a query per finding
+                "finding_cwe_set",
             )
         else:
             # TODO: Delete this after the move to Locations
@@ -253,6 +255,8 @@ class FindingViewSet(
                 "test__environment",
                 "test__engagement__product",
                 "test__engagement__product__prod_type",
+                # cwes is serialized on every row; unprefetched it costs a query per finding
+                "finding_cwe_set",
             )
 
         # No blanket .distinct(): get_authorized_findings filters by a scalar product-id IN (no row

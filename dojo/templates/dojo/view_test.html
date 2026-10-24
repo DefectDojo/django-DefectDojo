@@ -1216,8 +1216,8 @@
                                             data-content="{{ visible_notes.0.author }} at {{ visible_notes.0.date }}: {{ visible_notes.0 }}"></i>
                                             <a href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                 class="dojo-sup"
-                                                alt="{{ visible_notes.count }} note{{ visible_notes.count|pluralize }}">
-                                                    ({{ visible_notes.count }})
+                                                alt="{{ visible_notes|length }} note{{ visible_notes|length|pluralize }}">
+                                                    ({{ visible_notes|length }})
                                             </a>
                                         {% endif %}
                                         {% endwith %}

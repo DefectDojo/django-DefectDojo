@@ -453,6 +453,10 @@ class FindingSerializer(serializers.ModelSerializer):
         # an empty queryset instead of raising on the AnonymousUser instance.
         if user is not None and not user.is_authenticated:
             user = None
+        # A subclass may have dropped the field (e.g. a response-fields filter); adding it back would
+        # serialize, and query, a relation the response does not ask for.
+        if "endpoints" not in self.fields:
+            return
         if not locations_enabled():
             self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
                 many=True, required=False,
