@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 from rest_framework.exceptions import ParseError
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_409_CONFLICT,
@@ -82,22 +83,32 @@ def _log_server_error(exc, context, response):
     )
 
 
+# A message that does not end a sentence gets a period, so the next field's message does not run on from it.
+SENTENCE_ENDS = (".", "!", "?", "\u3002", "\uff01", "\uff1f")
+# Keys of an error map that hold messages rather than name a field: DRF's non-field key, and a "detail" a view
+# raised itself.
+UNNAMED_ERROR_KEYS = frozenset({"detail"})
+
+
 def _readable_validation_message(detail, path=()):
     """
     The messages of a serializer ``ValidationError`` as plain sentences.
 
-    Each field's messages follow its name (a nested field's dotted path); ``non_field_errors`` read
-    without one. ``str()`` of the error would be a Python repr of ``ErrorDetail`` objects instead.
+    Each field's messages follow its name (a nested field's dotted path); messages that name no field
+    (``non_field_errors``, ``detail``) read without one. ``str()`` of the error would be a Python repr of
+    ``ErrorDetail`` objects instead.
     """
     if isinstance(detail, dict):
-        return " ".join(
-            text
-            for key, value in detail.items()
-            if (text := _readable_validation_message(value, path if key == "non_field_errors" else (*path, str(key))))
-        )
+        unnamed = UNNAMED_ERROR_KEYS | {api_settings.NON_FIELD_ERRORS_KEY}
+        parts = (_readable_validation_message(value, path if key in unnamed else (*path, str(key))) for key, value in detail.items())
+        return " ".join(part for part in parts if part)
     if isinstance(detail, (list, tuple)):
-        return " ".join(text for value in detail if (text := _readable_validation_message(value, path)))
-    message = str(detail)
+        return " ".join(part for part in (_readable_validation_message(value, path) for value in detail) if part)
+    message = str(detail).strip()
+    if not message:
+        return ""
+    if not message.endswith(SENTENCE_ENDS):
+        message += "."
     return f"{'.'.join(path)}: {message}" if path else message
 
 
@@ -175,8 +186,11 @@ def custom_exception_handler(exc, context):
         # message, if it is different from the detail that is already
         # in the response.
         if isinstance(exc, DRFValidationError) and isinstance(response.data, dict):
-            # The field map says it already; the message repeats it as sentences callers can show.
-            response.data["message"] = _readable_validation_message(exc.detail)
+            # The field map says it already; the message repeats it as sentences callers can show. An error map
+            # that has its own "message" key keeps it, and an empty one gets no message.
+            if "message" not in response.data and (message := _readable_validation_message(exc.detail)):
+                response.data["message"] = message
+            ErrorPageProductAnnouncement(response=response)
         elif isinstance(response.data, dict) and str(
             exc,
         ) != response.data.get("detail", ""):
