@@ -103,3 +103,11 @@ register_deprecation(
         notice_url=_UPGRADING_3_2,
     ),
 )
+register_deprecation(
+    Deprecation(
+        key="github_integration",
+        title=_("GitHub Integrations"),
+        removal_version="3.6.0",
+        notice_url="https://docs.defectdojo.com/releases/os_upgrading/3.4.300/",
+    ),
+)

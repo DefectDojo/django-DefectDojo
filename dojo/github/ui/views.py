@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 
+from dojo.decorators import deprecated_view
 from dojo.github.models import GITHUB_Conf
 from dojo.github.services import validate_github_credentials
 from dojo.github.ui.forms import DeleteGITHUBConfForm, GITHUBForm
@@ -24,6 +25,7 @@ def webhook(request):
     return HttpResponse("")
 
 
+@deprecated_view("github_integration")
 def new_github(request):
     if request.method == "POST":
         gform = GITHUBForm(request.POST, instance=GITHUB_Conf())
@@ -54,6 +56,7 @@ def new_github(request):
                 {"gform": gform})
 
 
+@deprecated_view("github_integration")
 def github(request):
     confs = GITHUB_Conf.objects.all()
     add_breadcrumb(title="GitHub List", top_level=not len(request.GET), request=request)
@@ -63,6 +66,7 @@ def github(request):
                    })
 
 
+@deprecated_view("github_integration")
 def delete_github(request, tid):
     github_instance = get_object_or_404(GITHUB_Conf, pk=tid)
     # eng = test.engagement

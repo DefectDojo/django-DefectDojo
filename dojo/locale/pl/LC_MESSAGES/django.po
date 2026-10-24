@@ -9970,3 +9970,7 @@ msgstr "Pliki zaktualizowane pomyślnie."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Sprawdź dane formularza i spróbuj ponownie."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "Integracje z GitHub"

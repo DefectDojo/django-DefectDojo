@@ -9955,3 +9955,7 @@ msgstr "फ़ाइलें सफलतापूर्वक अपडेट 
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "कृपया फ़ॉर्म डेटा जाँचें और पुनः प्रयास करें।"
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub इंटीग्रेशन"

@@ -9966,3 +9966,7 @@ msgstr "ఫైల్‌లు విజయవంతంగా నవీకరి�
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "దయచేసి ఫారమ్ డేటాను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub ఇంటిగ్రేషన్‌లు"

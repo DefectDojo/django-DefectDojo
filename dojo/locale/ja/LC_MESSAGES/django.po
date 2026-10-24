@@ -9486,3 +9486,7 @@ msgstr "ファイルが正常に更新されました。"
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "フォームデータを確認してもう一度お試しください。"
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub 連携"

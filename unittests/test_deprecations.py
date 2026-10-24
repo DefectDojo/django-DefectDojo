@@ -25,6 +25,7 @@ from dojo.deprecations import (
     overdue_deprecations,
     register_deprecation,
 )
+from dojo.github.ui import views as github_views
 from dojo.product.ui import views as product_views
 from dojo.tool_config.ui import views as tool_config_views
 from dojo.tool_type.ui import views as tool_type_views
@@ -108,6 +109,20 @@ class TestOpenSourceDeclarations(SimpleTestCase):
                 self.assertEqual("3.5.0", entry.removal_version)
                 self.assertEqual(UPGRADING_3_2, entry.notice_url)
 
+    def test_the_github_integration_goes_in_3_6_0(self):
+        entry = get_deprecation("github_integration")
+        self.assertEqual("3.6.0", entry.removal_version)
+        self.assertEqual("https://docs.defectdojo.com/releases/os_upgrading/3.4.300/", entry.notice_url)
+        self.assertEqual(
+            "GitHub Integrations are deprecated and will be removed in DefectDojo 3.6.0 (December 2026). "
+            "Please plan to migrate away from this feature.",
+            entry.message(),
+        )
+
+    def test_the_github_webhook_stays_undecorated(self):
+        # A webhook answers GitHub, not a person, so a message there would only pile up in a session.
+        self.assertIsNone(getattr(github_views.webhook, "deprecation", None))
+
     def test_the_classic_message_uses_one_sentence_and_one_date_form(self):
         self.assertEqual(
             "Tool Types are deprecated and will be removed in DefectDojo 3.5.0 (November 2026). "
@@ -167,6 +182,9 @@ class TestDeprecatedView(SimpleTestCase):
             product_views.view_api_scan_configurations: "api_scan_configuration",
             product_views.edit_api_scan_configuration: "api_scan_configuration",
             product_views.delete_api_scan_configuration: "api_scan_configuration",
+            github_views.github: "github_integration",
+            github_views.new_github: "github_integration",
+            github_views.delete_github: "github_integration",
         }
         for view, key in expected.items():
             with self.subTest(view=view.__name__):

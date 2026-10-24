@@ -9688,3 +9688,7 @@ msgstr "הקבצים עודכנו בהצלחה."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "אנא בדוק את נתוני הטופס ונסה שוב."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "שילובי GitHub"
