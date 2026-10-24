@@ -110,6 +110,31 @@ Choose this when the old Findings no longer describe anything real, for example 
 
 Re-mapping a Record needs permission to edit the Connector, and edit permission on both the old and the new Asset, so a re-map can never move Findings out of, or close Findings in, an Asset you cannot edit. A first mapping of a new Record has nothing to carry and asks no question.
 
+## Pipelines that still use the old names
+
+CI pipelines and scripts import by name: `product_type_name` and `product_name` on `/api/v2/import-scan/`, `/api/v2/reimport-scan/` and `/api/v2/sbom-import/`, or `organization_name` and `asset_name` on `/api/v3/import`. After you move or rename an Asset, or rename an Organization, a pipeline that still sends the old names keeps working:
+
+* **A moved Asset.** When the pipeline sends the Organization the Asset was in before the move, or a former name of the Organization it is in now, the import goes into the Asset. Before, the import was refused because the Asset was no longer in that Organization.
+* **A renamed Asset.** When no Asset has the name the pipeline sends and exactly one Asset had it before a rename, the import goes into that Asset instead of creating a new Asset under the old name.
+* **A renamed Organization.** When an import creates a new Asset (`auto_create_context`) in an Organization that has since been renamed, the Asset is created in that Organization instead of in a second Organization under the old name.
+
+The response then includes `name_resolution`: the names the pipeline sent, the current names the import used, and a `message` saying what to change in the pipeline. Update the pipeline when you see it.
+
+Some things stay exactly as they were:
+
+* An Organization the Asset was never in is still refused, with the same error as before.
+* A former name stops working after 180 days, or as soon as another Asset or Organization takes that name. Expired former names are deleted every night.
+* A name that two Assets had at different times resolves to neither of them.
+* Names are matched exactly, including upper and lower case.
+* Only a user who can view the Asset gets this. Anyone else gets the answer the import gave before, so an import never tells someone where an Asset they cannot see has gone.
+
+Connectors, the Rules Engine, Smart Upload, cloud account onboarding and the GitLab project import also find an Asset or Organization by a former name, so a rename does not make them create a duplicate under the old name. Two exceptions keep that safe:
+
+* A Connector does not hand a former name to an Asset that another Record of the same Connector already maps. When the tool itself renamed that Record, a new Record that later takes the old name is a different thing, and it gets its own Asset.
+* The Rules Engine, Smart Upload, cloud account onboarding and the GitLab project import only use a former name of an Asset or Organization the person behind them can already see. For anyone else the name is free, as it was before.
+
+To go back to the strict behavior, turn off **Imports Follow Renames and Moves** on the Feature Flags page. Former names are still recorded while it is off, so turning it on again finds them.
+
 ## Before you start moving things
 
 * **Check who will gain or lose access.** Organization roles decide most visibility, so a move between Organizations is also an access change. Roles given on individual Assets travel with the Asset.
