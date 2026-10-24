@@ -317,7 +317,8 @@ Adding and withdrawing an alias requires edit permission on the Asset.
 ### Turning Asset Identity on and off
 
 Aliases are controlled by the **Asset Identity** feature on the
-[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. While it is off, Connectors map
+[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. It is on by default from release
+3.5.0. An instance that turned it off on that page before upgrading keeps it off. While it is off, Connectors map
 Records by name alone, you cannot add or withdraw aliases, and the Asset Identity card and the
 **Type** field are hidden. Existing aliases stay readable through the API either way.
 
