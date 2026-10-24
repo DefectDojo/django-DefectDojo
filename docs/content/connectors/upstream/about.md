@@ -144,6 +144,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **SonarQube**
 * **Sonatype IQ**
 * **SOOS**
+* **[Source DefectDojo](/connectors/toolreference/defectdojo/)**
 * **StackHawk**
 * **Sysdig Secure**
 * **Tenable.io**
