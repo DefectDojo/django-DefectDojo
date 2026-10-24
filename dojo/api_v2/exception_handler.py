@@ -6,6 +6,7 @@ from django.db.utils import IntegrityError
 from django.utils.log import log_response
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
@@ -81,6 +82,25 @@ def _log_server_error(exc, context, response):
     )
 
 
+def _readable_validation_message(detail, path=()):
+    """
+    The messages of a serializer ``ValidationError`` as plain sentences.
+
+    Each field's messages follow its name (a nested field's dotted path); ``non_field_errors`` read
+    without one. ``str()`` of the error would be a Python repr of ``ErrorDetail`` objects instead.
+    """
+    if isinstance(detail, dict):
+        return " ".join(
+            text
+            for key, value in detail.items()
+            if (text := _readable_validation_message(value, path if key == "non_field_errors" else (*path, str(key))))
+        )
+    if isinstance(detail, (list, tuple)):
+        return " ".join(text for value in detail if (text := _readable_validation_message(value, path)))
+    message = str(detail)
+    return f"{'.'.join(path)}: {message}" if path else message
+
+
 def custom_exception_handler(exc, context):
     # Call REST framework's default exception handler first,
     # to get the standard error response.
@@ -154,7 +174,10 @@ def custom_exception_handler(exc, context):
         # They need not to be logged and we provide the exception
         # message, if it is different from the detail that is already
         # in the response.
-        if isinstance(response.data, dict) and str(
+        if isinstance(exc, DRFValidationError) and isinstance(response.data, dict):
+            # The field map says it already; the message repeats it as sentences callers can show.
+            response.data["message"] = _readable_validation_message(exc.detail)
+        elif isinstance(response.data, dict) and str(
             exc,
         ) != response.data.get("detail", ""):
             response.data["message"] = str(exc)
