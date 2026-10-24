@@ -179,6 +179,32 @@ class TestApiV3ExpandRbacCrossProduct(_TwoProductWorld):
             self.assertEqual(stub, set(user))
             self.assertEqual(self.admin.id, user["id"])
 
+    def _expanded_organizations(self):
+        client = self.member_client()
+        paths = (
+            f"assets/{self.product_a.id}",
+            f"engagements/{self.test_a.engagement.id}",
+            f"tests/{self.test_a.id}",
+            f"findings/{self.findings_a[0].id}",
+        )
+        orgs = [self.get_json(path, client=client, data={"expand": "organization"})["organization"] for path in paths]
+        rows = self.get_json("findings", client=client, data={"expand": "organization"})["results"]
+        return orgs + [row["organization"] for row in rows]
+
+    def test_expand_organization_without_organization_access_returns_only_the_ref(self):
+        self.prod_type.description = "v3-rbac-pt-secret"
+        self.prod_type.save()
+        self.get_json(f"organizations/{self.prod_type.id}", client=self.member_client(), expected=404)
+        for org in self._expanded_organizations():
+            self.assertEqual({"id": self.prod_type.id, "name": self.prod_type.name}, org)
+
+    def test_expand_organization_with_organization_access_returns_the_slim(self):
+        self.prod_type.description = "v3-rbac-pt-secret"
+        self.prod_type.save()
+        self.prod_type.authorized_users.add(self.member)
+        for org in self._expanded_organizations():
+            self.assertEqual("v3-rbac-pt-secret", org["description"])
+
     def test_include_counts_never_counts_other_product(self):
         body = self.get_json("findings", client=self.member_client(), data={"include": "counts"})
         counts = body["meta"]["counts"]

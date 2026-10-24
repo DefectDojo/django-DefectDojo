@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 
 from dojo.api_v3.errors import expand_problem, fields_problem
+from dojo.api_v3.refs import to_ref
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -165,10 +166,14 @@ def serialize(obj: object, schema: type, expand_tree: dict) -> dict:
             data[key] = rel.special(obj)
             continue
         related = _resolve_attr(obj, rel.attr)
+        authorized_ids = getattr(rel.schema, "AUTHORIZED_IDS", None)
         if related is None:
             data[key] = None
         elif rel.to_many:
             data[key] = [serialize(item, rel.schema, subtree) for item in related.all()]
+        elif authorized_ids is not None and related.pk not in authorized_ids():
+            # Visible child, hidden parent: the caller already sees the parent's ref, nothing more.
+            data[key] = to_ref(related)
         else:
             data[key] = serialize(related, rel.schema, subtree)
     return data
