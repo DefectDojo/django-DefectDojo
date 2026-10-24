@@ -43,6 +43,14 @@ NAME                      	CHART VERSION	APP VERSION	DESCRIPTION
 defectdojo/defectdojo   1.6.153         2.39.0          A Helm chart for Kubernetes to install DefectDojo
 ```
 
+The chart is also published as an OCI artifact to GitHub Container Registry. With Helm 3.8 or later, install a released version directly:
+
+```bash
+helm install defectdojo oci://ghcr.io/defectdojo/defectdojo --version <chart-version>
+```
+
+An unversioned install selects the latest stable chart only after one has been published. It does not select nightly `-dev` charts.
+
 ## Kubernetes Local Quickstart
 
 Requirements:
