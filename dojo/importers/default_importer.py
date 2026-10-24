@@ -353,14 +353,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # No chord: tasks are dispatched immediately above per batch
 
-        for (group_name, findings) in group_names_to_findings_dict.items():
-            finding_helper.add_findings_to_auto_group(
-                group_name,
-                findings,
-                self.group_by,
-                create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
-                **kwargs,
-            )
+        finding_helper.add_findings_to_auto_groups(
+            group_names_to_findings_dict,
+            self.group_by,
+            create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
+            **kwargs,
+        )
+        for findings in group_names_to_findings_dict.values():
             if self.push_to_jira:
                 if findings[0].finding_group is not None:
                     jira_services.push(findings[0].finding_group)

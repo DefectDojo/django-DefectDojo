@@ -5,7 +5,7 @@ audience: pro
 weight: 1
 ---
 
-This page describes the recommended onboarding workflow for adding new users to a DefectDojo instance.  DefectDojo users can be used as both standard, human-operated accounts and as service accounts.
+This page describes the recommended onboarding workflow for adding new users to a DefectDojo instance.  For automation (pipelines, scanners), use a [service user](../pro__service_users/) instead: it needs no email address or password and its API token is shown when it is created.
 
 The admin who creates the account is responsible for delivering the initial credentials (username and password) to the new user.
 
