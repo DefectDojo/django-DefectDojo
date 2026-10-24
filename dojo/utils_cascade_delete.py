@@ -38,6 +38,12 @@ def get_cascade_candidate_relations(from_model):
     ``cascade_delete_related_objects``); the non-hidden reverse relations and M2M fields
     continue to come from ``_meta.related_objects`` so ordering and behavior are
     otherwise unchanged.
+
+    Note that the hidden relations include the ``dojo.authorization`` membership
+    tables on User / Dojo_User / Role / Dojo_Group. The async-delete roots (Product_Type,
+    Product, Engagement, Test) only reach the product and product-type memberships, but
+    a caller rooting a cascade at one of those models would delete its memberships by
+    raw SQL, without ``post_delete`` signals.
     """
     relations = list(from_model._meta.related_objects)
     seen = {id(relation) for relation in relations}
@@ -151,7 +157,12 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
             logger.debug("cascade_delete: skipping %s", related_model.__name__)
             continue
 
-        on_delete = relation.on_delete
+        # django-polymorphic wraps the on_delete handler of relations to and from
+        # polymorphic models (e.g. Answered_Survey -> Answer, Answer -> TextAnswer via
+        # answer_ptr) in a PolymorphicGuard callable instance. The guard keeps the real
+        # handler (CASCADE, SET_NULL, ...) on ``.action``; unwrap it so those relations
+        # are handled like any other instead of being skipped.
+        on_delete = getattr(relation.on_delete, "action", relation.on_delete)
         if on_delete is None:
             logger.debug(
                 "cascade_delete: no on_delete for %s -> %s, skipping",
@@ -159,11 +170,10 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
             )
             continue
 
-        # on_delete is normally a module-level function (CASCADE, SET_NULL, ...), but a
-        # relation may carry a callable *instance* instead (e.g. django-polymorphic's
-        # PolymorphicGuard on the hidden parent-link relations of polymorphic models),
-        # which has no __name__. Fall back to the type name so such handlers simply hit
-        # the "unhandled" branch below and are skipped, rather than raising AttributeError.
+        # on_delete is normally a module-level function (CASCADE, SET_NULL, ...). Any
+        # other callable instance (no __name__) falls back to its type name, hits the
+        # "unhandled" branch below and is logged and skipped instead of raising
+        # AttributeError.
         on_delete_name = getattr(on_delete, "__name__", None) or type(on_delete).__name__
         fk_column = relation.remote_field.column
         filterspec = {f"{fk_column}__in": models.Subquery(instance_pk_query)}
