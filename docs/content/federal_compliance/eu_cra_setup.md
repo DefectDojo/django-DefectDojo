@@ -336,14 +336,15 @@ ENISA's Single Reporting Platform.
 
 **When DefectDojo prompts you.** When an Asset whose **CRA Product Class** is not **Not
 Applicable** has an open finding marked **Known Exploited**, the Regulatory card shows **CRA Article
-14 Early Warning Due**, listing each such finding with a **Start CRA Report** button. The finding
-itself shows a **CRA Early Warning Due** tag beside its title until a report names its CVE.
+14 Early Warning Check**, listing each such finding with a **Start CRA Report** button. The finding
+itself shows a **CRA Early Warning Check** tag beside its title until a report names its CVE.
 
 ![The early-warning prompt on an in-scope Asset: one finding already has a report, the other offers Start CRA Report](images/45-cra-early-warning-due.png)
 
-The prompt says *Exploitation confirmed*, but it appears for any finding on the CISA KEV list. It
-is a prompt to decide whether you are aware of active exploitation affecting this product, not a
-determination. DefectDojo records when the prompt first appeared, because a regulator may ask.
+The prompt appears for any finding on the CISA KEV list, so it says a known exploited
+vulnerability affects the product, and that the early warning is due only if it is actively
+exploited in this product. It is a prompt to decide whether you are aware of active exploitation
+affecting this product, not a determination. DefectDojo records when the prompt first appeared, because a regulator may ask.
 
 **Start a report only for a real awareness event.** A report cannot be deleted, its clocks cannot
 be paused, and it stays even if its Asset is deleted. Practise on a test instance.
@@ -453,7 +454,7 @@ record. To set its state by hand:
 | Requirement | Evidence to record |
 | --- | --- |
 | **VH-4** Disclose fixed vulnerabilities | Your published security advisories, release notes or changelog entries for the vulnerabilities fixed in the period. The computed facts list the vulnerability IDs of findings mitigated in the period, under `fixed_vulnerability_ids` |
-| **SP-1**, **SP-2** Support period | The **Support Period End** from Step 6, and your published support policy as a file. For a product covered by Article 69(2) (Step 9), set them **Not Applicable** with that reasoning |
+| **SP-1**, **SP-2** Support period | SP-1 reads the **Support Period End** from Step 6 and is **Partially Satisfied** once it is set; attach your published support policy as a file, with the justification if the period is shorter than five years. For a product covered by Article 69(2) (Step 9), set them **Not Applicable** with that reasoning |
 | **RP-1** to **RP-6**, when Unknown | That no Article 14 event occurred in the period, if that is your determination |
 | **RP-7** Inform impacted users | How you informed users of the vulnerability and the corrective measures |
 | **PI** requirements | How each is implemented. A narrative is required before one can be set Satisfied or Partially Satisfied |
@@ -537,6 +538,6 @@ So nobody spends time hunting for these:
   **JSON** download.
 * **No dashboard widget or report reads assessment states or CRA classes.** They are on the EU
   Evidence tab and in the evidence pack.
-* **SP-1, SP-2, VH-4 and RP-7 are not computed.** SP-1 does not read **Support Period End** from
-  the Regulatory card; the assessor records it.
+* **SP-2, VH-4 and RP-7 are not computed.** SP-1 reads **Support Period End** from the
+  Regulatory card, but the published support policy is still attached by the assessor.
 * **No PDF evidence pack.** The workbook and the OSCAL file are the pack.
