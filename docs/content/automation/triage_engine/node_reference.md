@@ -720,6 +720,52 @@ Makes the Asset deduplicate together with the rest of a [dedupe pool](/triage_fi
 | **Pool** | none | Shown for `Assign to Pool`. The pool these Assets should deduplicate within. Required. |
 | **Matching** | `Same tool` | Which kind of matching this membership governs: `Same tool` or `Cross tool`. Reimport matching is not offered, because a pool has no effect on it. |
 
+### Give a Group Access
+
+`asset.grant_group_access`
+
+Gives a group a role on the Asset, exactly as adding the group on the Asset's members page does.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Group** | none | The group that gets access to these Assets. Required. |
+| **Role** | none | What the group can do on these Assets. Required. |
+
+What it will and will not touch:
+
+* It only adds. A group that already holds a role on the Asset keeps that role, whatever it is, and the Asset counts as unchanged. To take access away, remove the group on the Asset's members page.
+* The rule owner must be able to see the group: be a member of it, or have the permission to view groups. A group the owner cannot see fails the run with an error naming it.
+* On each Asset, the owner needs the same permissions as adding the group by hand: edit on the Asset and permission to manage its members. Granting an Owner role also needs the permission to add owners. Assets the owner cannot manage are counted on the node trace as skipped, and the rest still get the grant.
+
+A group given a role on the Organization already reaches every Asset in it, present and future, so access for a whole Organization is usually better granted there. Use this node when the access should belong to the Asset itself: a grant made here stays with the Asset if it later moves to another Organization.
+
+### Assign an Issue Tracker Mapping
+
+`asset.assign_issue_tracker`
+
+Assigns the Asset to a [Downstream Connectors](/connectors/downstream/about/) issue tracker mapping, so its Findings can be ticketed there. This is the assignment that **Create a Downstream Ticket** reads when its **Issue Trackers** setting is `auto`, and that the mapping's own automatic push follows.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Issue Tracker Mapping** | none | The mapping these Assets are assigned to. Required. |
+| **Automatic Push** | `Only Explicitly Publish Changes to Target` | How Findings on these Assets reach the tracker without a rule pushing them: `Only Explicitly Publish Changes to Target`, `Automatically Link New Finding to Target`, `Automatically Update Existing Link on Finding Edit`, or `Automatically Link New and Update Existing Link on Finding Edit`. |
+
+What it will and will not touch:
+
+* It only adds. An Asset already assigned to the mapping keeps its existing push settings and counts as unchanged. An assignment to a different mapping does not block it: the Asset ends up assigned to both. To remove an assignment, do it from the Asset's issue tracker settings.
+* The rule owner needs the Integration Edit permission and must be able to see the mapping, or the run fails before anything is assigned. On each Asset the owner also needs edit permission; Assets they cannot edit are counted on the node trace as skipped.
+
+### Example: set up every new Asset in an Organization
+
+Every Asset created under one Organization should get the same access and the same ticketing, without anyone remembering to set it up by hand.
+
+1. Add an **On Asset Event** trigger with **Event** `created`, and scope it to that Organization.
+2. Add **Give a Group Access**, choosing the team's group and the role it should have.
+3. Add **Assign an Issue Tracker Mapping**, choosing the team's issue tracker mapping and the **Automatic Push** behavior it should use.
+4. **Preview**, then set the rule live.
+
+Each new Asset in the Organization then arrives with the group's access and its tracker assignment already in place. Assets that already had either are left as they were, so **Run Now** can also bring the Organization's existing Assets in line: it replays the rule over the Assets in the trigger's scope (see [Running a rule by hand](../runs/#running-a-rule-by-hand)).
+
 ### Computed destinations
 
 **Set Organization**, **Add Organization Membership**, **Set Parent** and **Set SLA Configuration** can work their destination out from each Asset instead of taking one fixed choice. "Assets tagged `team:payments` go to the Payments Organization" then becomes one rule, rather than one rule per team or a move per Asset.
