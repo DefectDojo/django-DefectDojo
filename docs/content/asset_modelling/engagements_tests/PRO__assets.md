@@ -275,7 +275,7 @@ recognise the Asset from whichever name a source happens to use.
 
 Each alias has three parts:
 
-- a **namespace**, naming the system that issued the identifier — `dns`, `oci`, `purl`, `git`, `hw`, `cloud`,
+- a **namespace**, naming the system that issued the identifier: `dns`, `oci`, `purl`, `git`, `hw`, `cloud`,
 or a specific Connector configuration;
 - a **type**, saying what kind of identifier it is — `external_id`, `hostname`, `image_digest`,
 and so on;
@@ -332,8 +332,7 @@ Connectors that report one machine per Record (for example CrowdStrike Falcon, Q
 Wazuh and ServiceNow CMDB) also record the IP addresses and host names they see for each
 machine. These are kept as observations, with when each source first and last saw them, rather
 than as aliases: an IP address can move to another machine, so it is evidence for matching two
-Assets, never an identifier on its own. A MAC address such a Connector reports is added as a
-Hardware alias when no other Asset already holds it.
+Assets, never an identifier on its own.
 
 ### Turning Asset Identity on and off
 
