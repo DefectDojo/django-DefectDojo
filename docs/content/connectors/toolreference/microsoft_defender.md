@@ -32,6 +32,7 @@ The connector authenticates as a Microsoft Entra ID **app registration** using t
 5. Optionally, set **Device Groups** to a comma\-separated list of Defender RBAC device group names to import only those groups (see [Importing in phases with device groups](#importing-in-phases-with-device-groups)). Leave it blank to import every device group. Use `Unassigned` for devices that are not in any RBAC group.
 6. Optionally, enable **Consolidate Findings by Vulnerability** to import one finding per CVE and software version per device group, with the affected devices attached as endpoints, instead of one finding per device (see [Consolidating findings by vulnerability](#consolidating-findings-by-vulnerability)).
 7. Optionally, set a **Minimum Severity** to limit which findings are imported.
+8. Optionally, turn on **Report Unmanaged Devices** to also send the machines Defender for Endpoint discovered that are not onboarded (see [Unmanaged Devices](#unmanaged-devices)).
 
 Each Defender device group becomes a Record. Microsoft regenerates the vulnerability snapshot the connector reads roughly every 6 hours, and newly onboarded devices can take up to \~24 hours to produce their first vulnerability data — a brand\-new tenant will legitimately Sync zero findings until devices are onboarded and assessed. License activation itself can also take \~20 minutes or more to reach the API ("No active license found" errors during that window resolve on their own).
 
@@ -60,3 +61,9 @@ Switching the setting on an existing connector changes the identity of the impor
 #### Setting a minimum severity per device group
 
 The connector\-level **Minimum Severity** applies to every group. To use a different threshold for one device group, set a **severity override** on that group's Record after it has been discovered. The override applies only to that Record, so you can, for example, import everything from a production group while limiting a lab group to High and Critical.
+
+#### Unmanaged Devices
+
+With [Unmanaged Devices](/asset_modelling/pro__unmanaged_devices/) turned on and **Report Unmanaged Devices** enabled on the connection, each sync also reads the machines Defender for Endpoint discovered on your network whose onboarding status is not **Onboarded**. They are listed under **Unmanaged Devices** with their name, addresses, OS and Defender's onboarding status (**Can Be Onboarded**, **Unsupported** or **Insufficient Info**). Machines Defender has merged into another record are skipped.
+
+This needs the **Machine.Read.All** application permission on the app registration, with admin consent granted, in addition to **Vulnerability.Read.All**. Without it the connection logs a warning and syncs everything else normally.
