@@ -32,7 +32,7 @@ If the source refuses the request (a missing permission or subscription), the co
 
 ## Dismissing a device
 
-A device you have looked at and do not need to act on can be dismissed from its row menu. Dismissed devices stay dismissed across syncs and can be restored at any time. Dismissing and restoring needs the **Connector Edit** permission; seeing the list needs **Connector View**.
+A device you have looked at and do not need to act on can be dismissed from its row menu. Dismissed devices are hidden from the list until you select **Show Dismissed**, stay dismissed across syncs, and can be restored from the same menu. Dismissing and restoring needs the **Connector Edit** permission; seeing the list needs **Connector View**.
 
 ## What unmanaged devices are not
 
