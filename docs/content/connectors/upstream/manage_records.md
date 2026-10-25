@@ -62,7 +62,7 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Asset even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Assets rather than moving its Findings.
 
-Steps 1 and 2 require the **Asset Identity** feature, which is on by default from release 3.5.0 (see
+Steps 1 and 2 require the **Asset Identity** feature, which is off by default (see
 [Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off)).
 While it is off, Auto-Mapping resolves by name alone, which is the historical behaviour. The
 tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
@@ -100,7 +100,7 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Product even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Products rather than moving its Findings.
 
-Steps 1 and 2 require the **Asset Identity** feature, which is on by default from release 3.5.0 (see
+Steps 1 and 2 require the **Asset Identity** feature, which is off by default (see
 [Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off)).
 While it is off, Auto-Mapping resolves by name alone, which is the historical behaviour. The
 tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
