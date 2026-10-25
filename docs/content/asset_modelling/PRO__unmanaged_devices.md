@@ -27,8 +27,9 @@ If the source refuses the request (a missing permission or subscription), the co
 - **OS, device type and manufacturer**, as the source classifies them.
 - **How found**: **Passive** when the source learned about the device by listening, **Active** when it probed for it.
 - **Confidence**: CrowdStrike's confidence score for the device, when it gives one.
-- **Onboarding status**: Defender's own answer to whether the device could take its agent: **Can be onboarded**, **Unsupported**, or **Insufficient info**. CrowdStrike devices show **Unmanaged**.
+- **Onboarding status**: Defender's own answer to whether the device could take its agent: **Can Be Onboarded**, **Unsupported**, or **Insufficient Info**. CrowdStrike devices show **Unmanaged**.
 - **First and last seen**, as the source reports them.
+- **Internet exposed**, **model**, **serial number**, **FQDN**, **seen by** (the source's agents that observed the device) and **stale since**, as optional columns.
 
 ## Dismissing a device
 

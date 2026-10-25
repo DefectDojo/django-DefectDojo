@@ -64,6 +64,6 @@ The connector\-level **Minimum Severity** applies to every group. To use a diffe
 
 #### Unmanaged Devices
 
-With [Unmanaged Devices](/asset_modelling/pro__unmanaged_devices/) turned on and **Report Unmanaged Devices** enabled on the connection, each sync also reads the machines Defender for Endpoint discovered on your network whose onboarding status is not **Onboarded**. They are listed under **Unmanaged Devices** with their name, addresses, OS and Defender's onboarding status (**Can be onboarded**, **Unsupported** or **Insufficient info**). Machines Defender has merged into another record are skipped.
+With [Unmanaged Devices](/asset_modelling/pro__unmanaged_devices/) turned on and **Report Unmanaged Devices** enabled on the connection, each sync also reads the machines Defender for Endpoint discovered on your network whose onboarding status is not **Onboarded**. They are listed under **Unmanaged Devices** with their name, addresses, OS and Defender's onboarding status (**Can Be Onboarded**, **Unsupported** or **Insufficient Info**). Machines Defender has merged into another record are skipped.
 
 This needs the **Machine.Read.All** application permission on the app registration, with admin consent granted, in addition to **Vulnerability.Read.All**. Without it the connection logs a warning and syncs everything else normally.
