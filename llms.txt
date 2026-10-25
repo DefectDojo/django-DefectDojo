@@ -169,6 +169,7 @@ Key facts:
 - [Services](https://docs.defectdojo.com/asset_modelling/components/services/): Tracking Microservices
 - [Custom Fields (Pro)](https://docs.defectdojo.com/asset_modelling/pro__custom_fields/): Define typed custom fields per record type, fill them in on the forms and on each record, and turn them on as typed table columns
 - [Editable Platform, Lifecycle and Origin Lists (Pro)](https://docs.defectdojo.com/asset_modelling/pro__asset_attribute_options/): Customize the Platform, Lifecycle and Origin dropdown options on your assets
+- [Unmanaged Devices (Pro)](https://docs.defectdojo.com/asset_modelling/pro__unmanaged_devices/): Devices your EDR sees on the network that have no agent of its own, reported by the CrowdStrike Falcon and Microsoft Defender connectors
 
 ## Connectors
 
