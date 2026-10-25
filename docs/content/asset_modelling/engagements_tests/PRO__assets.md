@@ -275,7 +275,7 @@ recognise the Asset from whichever name a source happens to use.
 
 Each alias has three parts:
 
-- a **namespace**, naming the system that issued the identifier — `dns`, `oci`, `purl`, `git`,
+- a **namespace**, naming the system that issued the identifier — `dns`, `oci`, `purl`, `git`, `hw`, `cloud`,
 or a specific Connector configuration;
 - a **type**, saying what kind of identifier it is — `external_id`, `hostname`, `image_digest`,
 and so on;
@@ -313,6 +313,27 @@ one a Connector asserted only lasts until that Connector's next sync, which will
 again — to stop a Connector claiming an Asset, change its mapping rather than its aliases.
 
 Adding and withdrawing an alias requires edit permission on the Asset.
+
+### Device identifiers
+
+Two namespaces identify a machine rather than software:
+
+- **Hardware** (`hw`): a **MAC Address**, a **Hardware UUID** (the SMBIOS UUID) or a **Serial
+  Number**. These stay with one machine for its life.
+- **Cloud** (`cloud`): a **Cloud Instance ID**, written with its provider, for example
+  `aws:i-0abc1234def567890`, `azure:<VM id>` or `gcp:<instance id>`.
+
+DefectDojo stores each in one spelling, so `00-1B-A9-12-34-56` and `00:1b:a9:12:34:56` are the
+same address. It refuses values that cannot identify one machine: randomized and locally
+administered MAC addresses, the MAC addresses of virtual machines and of USB or dock network
+adapters, and the placeholder UUIDs and serial numbers firmware leaves when nobody set one.
+
+Connectors that report one machine per Record (for example CrowdStrike Falcon, Qualys, runZero,
+Wazuh and ServiceNow CMDB) also record the IP addresses and host names they see for each
+machine. These are kept as observations, with when each source first and last saw them, rather
+than as aliases: an IP address can move to another machine, so it is evidence for matching two
+Assets, never an identifier on its own. A MAC address such a Connector reports is added as a
+Hardware alias when no other Asset already holds it.
 
 ### Turning Asset Identity on and off
 
