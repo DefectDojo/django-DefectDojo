@@ -5,6 +5,7 @@ from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
 from django.utils.log import log_response
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from rest_framework.exceptions import ParseError
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
@@ -122,11 +123,20 @@ def custom_exception_handler(exc, context):
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {"message": _("JSON request content is malformed")}
     elif isinstance(exc, RestrictedError):
-        # An object cannot be deleted because it has dependent objects.
+        # An object cannot be deleted because it has dependent objects. str() of the error is a tuple repr that
+        # names every one of them, so the message counts them instead.
         response = Response()
         response.status_code = HTTP_409_CONFLICT
         response.data = {}
-        response.data["message"] = str(exc)
+        count = len(exc.restricted_objects or ())
+        if count:
+            response.data["message"] = ngettext(
+                "It cannot be deleted while %(count)s other record still refers to it.",
+                "It cannot be deleted while %(count)s other records still refer to it.",
+                count,
+            ) % {"count": count}
+        else:
+            response.data["message"] = _("It cannot be deleted while other records still refer to it.")
     elif isinstance(exc, ValidationError):
         response = Response()
         response.status_code = HTTP_400_BAD_REQUEST
