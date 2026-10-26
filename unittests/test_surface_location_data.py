@@ -60,3 +60,6 @@ class TestSurfaceLocationData(DojoTestCase):
         sans.append("later.example.com")
         self.assertEqual(["example.com"], location.data["sans"])
         self.assertEqual([], LocationData.cert(sha256="ab" * 32).data["sans"])
+
+    def test_cert_factory_reads_one_name_as_one_name(self):
+        self.assertEqual(["example.com"], LocationData.cert(sha256="ab" * 32, sans="example.com").data["sans"])
