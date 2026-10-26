@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0302_locationfindingreference_test_required"),
+        ("dojo", "0303_system_settings_install_id"),
     ]
 
     operations = [

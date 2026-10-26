@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("dojo", "0303_archive_columns"),
+        ("dojo", "0304_archive_columns"),
     ]
 
     operations = [
