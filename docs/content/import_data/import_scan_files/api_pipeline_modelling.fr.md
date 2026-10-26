@@ -12,6 +12,8 @@ L'API de DefectDojo permet de mettre en place des solutions de pipeline robustes
 
 Ces pipelines peuvent être créés en appelant directement le point de terminaison **/reimport** de notre API avec un fichier de scan joint, d'une manière qui ressemble beaucoup à notre **formulaire d'importation de scan**. 
 
+Dans les workflows GitHub Actions, l'action DefectDojo officielle appelle ce point de terminaison pour vous. Consultez [Importer depuis GitHub Actions](/import_data/import_scan_files/github_actions/).
+
 ## L'API de DefectDojo
 
 L'API de DefectDojo est documentée directement dans l'application à l'aide du framework OpenAPI. Vous pouvez accéder à cette documentation depuis le Menu utilisateur, dans le coin supérieur droit, sous **« API v2 OpenAPI3 »**.
