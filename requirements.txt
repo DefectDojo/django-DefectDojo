@@ -115,7 +115,7 @@ opentelemetry-util-http==0.66b1
 orjson==3.13.0
 packageurl-python==0.17.6
 packaging==26.3
-pandas==3.0.6
+pandas==3.1.0
 parameterized==0.9.0
 pikepdf==10.17.0
 pilkit==3.0
