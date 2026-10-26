@@ -77,6 +77,8 @@ DefectDojo treats any value other than **Not Applicable** as in scope for the CR
   [CRA Article 14 Reporting](../cra_article14_reporting/).
 - **Regulatory Scope dashboard widget.** The widget can count, per regulation, the in-scope
   Assets whose **Support Period End** has passed or falls within the next 90 days.
+- **CRA evidence pack.** The SP-1 support period obligation reads **Support Period End**. See
+  [CRA and DORA Evidence Packs](../eu_evidence_packs/).
 - **Criticality SLA mappings.** A mapping that moves Assets in a business-criticality band onto
   an SLA configuration skips any Asset with **SLA Locked** set.
 - **FDA cyber device evidence pack.** The disclosure route obligation reads **Security Contact**

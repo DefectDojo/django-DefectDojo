@@ -415,6 +415,30 @@ At minimum, set:
 >   enabled: false
 > ```
 
+> **TLS to the external Redis.** For a Redis or Valkey that requires TLS (for
+> example ElastiCache with in-transit encryption), set
+> `celery.broker.scheme: "rediss"`.
+
+> **Django's cache uses the same external Redis, on database 1.** With
+> `celery.broker.external: true` and a `redis` or `rediss` scheme, the chart
+> sets `DD_CACHE_URL` to the broker's scheme, host and port on database 1
+> (Celery uses database 0). Login and MFA rate limiting depend on this cache.
+> Give DefectDojo its own Redis, or at least its own database 1: the
+> initializer Job clears the cache with FLUSHDB on every install and upgrade,
+> which wipes anything else stored in that database.
+> Over `rediss`, the cache client verifies the Redis certificate against the
+> image's public root CAs. If your Redis certificate comes from a private CA,
+> or you want the cache on a different Redis, set the URL yourself; your value
+> replaces the chart's:
+>
+> ```yaml
+> config:
+>   extra:
+>     # With django.uwsgi.certificates enabled for that CA, the combined
+>     # bundle below is already mounted on every pod that reads DD_CACHE_URL.
+>     DD_CACHE_URL: "rediss://my-redis.example.com:6379/1?ssl_ca_certs=/etc/ssl/dojo/ca-bundle.crt"
+> ```
+
 > **WARNING — `dojo.secureCookies` must be `false` on OpenShift/ROSA.** When
 > using OpenShift Routes with edge TLS termination, `secureCookies: true`
 > (the default in `template.yaml`) causes redirect loops and broken login.
@@ -1332,16 +1356,19 @@ django:
                            # overhead), so raising scanMaxFileSize just works.
                            # Set an integer to override.
     performance:
-      processes: 2         # concurrent imports per pod = processes x threads
+      processes: 2             # concurrent imports per pod = processes x threads
       threads: 4
+      reloadOnRss: 800         # MB: replace a worker after a request leaves it above this
+      evilReloadOnRss: 2560    # MB: kill a worker mid-request above this (see below)
+      workerReloadMercy: 120   # seconds a reloading worker's running imports get
     resources:
       requests:
         cpu: "100m"
         memory: "512Mi"
       limits:
         memory: "4Gi"
-    terminationGracePeriodSeconds: 60   # raise toward 1800 to let in-flight
-                                        # imports finish on rollouts/drains
+    terminationGracePeriodSeconds: 600  # how long running imports get to finish
+                                        # when the pod stops
     autoscaling:
       enabled: false       # scale importers on their own CPU signal
     horizontalpodautoscaler:
@@ -1356,9 +1383,28 @@ Operational notes:
   ReadWriteMany-capable storage to schedule freely across nodes. The chart's
   storage backends (`efs`, `filestore`, `gcsfuse`, `nfs`, and the default RWX
   media PVC) all qualify; a ReadWriteOnce PVC does not.
-- Importer autoscaling is off by default because a scale-down evicts whatever
-  import that pod is running once `terminationGracePeriodSeconds` expires.
-  If you enable it, raise the grace period so in-flight imports can finish.
+- When an importer pod stops (a rollout, a scale-in, a node drain), it stops
+  taking new imports and lets the ones it is running finish, for up to
+  `terminationGracePeriodSeconds`. The count includes the 20-second preStop
+  wait. An idle pod still stops right away. Imports can run for up to 30
+  minutes; raise the value toward 1800 if yours run longer than about 10
+  minutes. A cluster autoscaler scale-down waits at most 10 minutes whatever
+  the value. Before 3.4.300 a stopping pod cut off its running imports at once.
+- Importer autoscaling is off by default. If you enable it, a scale-down stops
+  an importer the same way, so keep the grace period above your longest import.
+- `evilReloadOnRss` is a safety limit: when one uwsgi worker's memory passes it,
+  uwsgi kills that worker within about a second, and every import it is running
+  (up to `threads` of them) fails with a 502. Kubernetes shows no OOMKill or
+  restart for it; the importer's log says `EVIL RELOAD`. If large imports fail
+  this way, raise it, keeping `processes x evilReloadOnRss` below
+  `resources.limits.memory` with room to spare.
+- `reloadOnRss` retires a worker after an import leaves it above the limit. The
+  worker stops taking imports, but the ones still running on its other threads
+  get only `workerReloadMercy` seconds (120 by default) before uwsgi kills it;
+  the log says `NO MERCY` and those imports fail with a 502. If your imports run
+  longer than that, raise `workerReloadMercy` toward 1770. It does not change
+  `evilReloadOnRss`, which kills at once. The web pool has the same three
+  settings under `django.uwsgi.performance`.
 - A PodDisruptionBudget (`podDisruptionBudget.djangoImport`) protects the
   importer pool during voluntary disruptions whenever more than one importer
   runs.
@@ -1802,8 +1848,8 @@ images:
     tag: "<version>"
   redis:
     registry: "my-registry.example.com"
-    repository: "defectdojo/redis"
-    tag: "7.2.4"
+    repository: "defectdojo/valkey"
+    tag: "7.2.11-alpine"
 ```
 
 ### Image pull secrets for private registries

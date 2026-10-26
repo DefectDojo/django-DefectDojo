@@ -53,6 +53,22 @@ Editing can be turned on with the `DD_EDITABLE_MITIGATED_DATA` server setting. W
 * **Applying the setting:** `DD_EDITABLE_MITIGATED_DATA` is a server-level environment variable (see [Configuration](/get_started/open_source/configuration/)). Changing it requires a service restart to take effect.
 * **DefectDojo Cloud / Pro:** this setting cannot be changed from the UI. Contact DefectDojo Support to have it enabled for your instance.
 
+## Change a Field in Place
+
+In DefectDojo Pro, a few fields can be changed on the Finding page itself, without opening the Edit Finding form: the **Title** and **Tags** in the page header, and **Severity**, **Assignees**, **Planned Remediation Date** and **Description** wherever the page layout shows them (a field tile or a row of the details table).
+
+* An editable value is highlighted when you hover over it. Click the value (or Tab to it and press **Enter**) to open a small editor under it, with the value already in it.
+* **Enter**, or clicking anywhere else, keeps the change and closes the editor. **Esc** puts the value back. In the Description, **Enter** starts a new line, and **Ctrl+Enter** (**Cmd+Enter** on a Mac) keeps the change. A value that breaks a rule (such as an empty Title) keeps the editor open with the reason.
+* A kept change is not saved yet: the field shows the new value marked **Unsaved**, and you can change several fields this way.
+* A card at the bottom of the page names every changed field. **Save Changes** saves them all in one go, and **Discard** drops them. Leaving the page with unsaved changes asks first.
+* A saved change updates the rest of the page with it, such as the SLA and Risk that follow from a new Severity.
+* If someone else changed the Finding after you opened the page, nothing is overwritten. DefectDojo shows **Finding Changed**, naming who made the change and when, and offers **Reload** (load the current Finding and discard your changes) or **Keep Editing** (keep them to save later).
+* A refused save (for example, a value the server rejects, or a permission removed while the page was open) shows one message with the reason and keeps your changes.
+
+Status is never changed in place. Closing a Finding as Mitigated, False Positive or Out of Scope stays in **Close Finding**, which asks for a note, and the other status changes keep their own forms.
+
+Only users who can edit the Finding can open a value. A field hidden by [Form Configuration](/navigation/pro__form_configuration/) cannot be edited in place either, and a field Form Configuration makes required keeps that rule. Inline editing is controlled by the **Inline Editing** feature flag.
+
 In DefectDojo Pro, a Findings list can also be worked through one Finding at a time from the keyboard: see [Keyboard Triage](/triage_findings/findings_workflows/pro__keyboard_triage/).
 
 ## Bulk Edit Findings

@@ -120,6 +120,26 @@ def get_npm_cwe(item_node):
     return 1035
 
 
+#: Set on a parsed finding whose ``unique_id_from_tool`` cannot identify it once another finding
+#: in the same report carries the same value. The importer drops such repeats (see
+#: ``drop_ambiguous_repeated_unique_ids``) after its grouping step, where parsers used to drop them.
+AMBIGUOUS_WHEN_REPEATED = "unique_id_ambiguous_when_repeated"
+
+
+def mark_unique_ids_ambiguous_when_repeated(items):
+    """Mark every finding in ``items`` so the importer drops a tool id that repeats in the report. Returns ``items``."""
+    for item in items:
+        setattr(item, AMBIGUOUS_WHEN_REPEATED, True)
+    return items
+
+
+def drop_ambiguous_repeated_unique_ids(items):
+    """``drop_repeated_unique_ids`` over ``items`` when the parser marked them; otherwise leave them alone."""
+    if any(getattr(item, AMBIGUOUS_WHEN_REPEATED, False) for item in items):
+        drop_repeated_unique_ids(items)
+    return items
+
+
 def drop_repeated_unique_ids(items):
     """
     Drop a `unique_id_from_tool` that more than one finding in the same report carries.

@@ -165,7 +165,7 @@ Single-glance metrics — counts, KPIs, and gauges.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. |
+| **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. For findings, the **Measure** option can count unique CWEs or unique vulnerability IDs instead of rows. |
 | **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. |
 | **Gauge** | A ratio drawn as an arc gauge — a "universe" filter as the denominator and a "pass" filter as the numerator. Use for SLA compliance, mitigation rate, or scan coverage, with configurable warning/OK thresholds. |
 | **License Usage** | Your account's license-usage status with a per-signal breakdown (database size, weekly finding volume, and so on). *Requires the Maintainer role.* |
@@ -177,7 +177,7 @@ Time-series and distribution visualizations.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Graph** | A general-purpose chart over any model and group-by dimension — bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. |
+| **Graph** | A general-purpose chart over any model and group-by dimension — bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. |
 | **Sankey** | A flow diagram from a source dimension to a target dimension — e.g. Severity → Status. |
 | **Sunburst** | A one- or two-level radial breakdown — e.g. Severity, then Test Type within each severity. |
 | **Risk Matrix** | An EPSS-probability × risk heatmap of findings — bottom-left safe, top-right dangerous. |

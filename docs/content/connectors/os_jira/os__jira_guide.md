@@ -444,6 +444,12 @@ Additionally, you have the option to push Finding Groups to Jira instead of indi
 
 4. Clicking the Arrow again will push all changes made to an issue to Jira, and update the Jira Issue accordingly. If '**Push All Issues**' setting is enabled on the Finding's associated Asset, this process will happen automatically.
 
+### Unlinking Findings from Jira
+
+To remove the link between many Findings and their Jira Issues at once, select them in a Findings list, open **Bulk Edit** and check **Unlink from Jira**. The Finding Groups the selected Findings belong to are unlinked as well. The issues are left as they are in Jira.
+
+Check **Push to Jira** in the same edit to push the Findings to the Jira project the Asset is configured with now. This is how Findings move to a new Jira project: point the Asset at the new project, then unlink and push them together. The issues in the old project are not closed or changed.
+
 ### Jira Comments
 
 * If a comment is added to a Jira Issue, the same comment will be added to the Finding, under the **Notes** section.

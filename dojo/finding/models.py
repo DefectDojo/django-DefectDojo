@@ -757,9 +757,11 @@ class Finding(BaseModel):
         for files in old_files:
             copy.files.add(files.copy())
         if locations_enabled():
-            old_location_refs = self.locations.all()
-            for location_ref in old_location_refs:
-                location_ref.copy(copy)
+            # One row per location: a location several tests reported is copied once, onto the
+            # copy's own test (see copy_location_references).
+            from dojo.location.utils import copy_location_references  # noqa: PLC0415 -- circular import
+
+            copy_location_references(self, copy)
         else:
             # TODO: Delete this after the move to Locations
             # Copy the endpoint_status
