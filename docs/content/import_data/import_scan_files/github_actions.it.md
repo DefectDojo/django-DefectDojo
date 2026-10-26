@@ -5,7 +5,7 @@ description: Importare i risultati delle scansioni da un workflow di GitHub Acti
 weight: 3
 ---
 
-L'[azione DefectDojo](https://github.com/marketplace/actions/defectdojo) ufficiale importa un report di scansione in DefectDojo da un workflow di GitHub Actions. Funziona con DefectDojo Pro e con l'edizione Open Source e legge tutti i formati di report supportati da DefectDojo, incluso SARIF.
+L'[azione DefectDojo](https://github.com/DefectDojo/defectdojo-action) ufficiale importa un report di scansione in DefectDojo da un workflow di GitHub Actions. Funziona con DefectDojo Pro e con l'edizione Open Source e legge tutti i formati di report supportati da DefectDojo, incluso SARIF.
 
 Ogni esecuzione effettua un Reimport nello stesso Test: i Riscontri che lo scanner non segnala più vengono chiusi e ciascun Riscontro conserva la propria cronologia. L'azione registra build, branch, commit e repository sul Test e può far fallire il passaggio del workflow quando restano attivi Riscontri a una severità prestabilita.
 
