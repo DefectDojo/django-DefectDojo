@@ -1,6 +1,6 @@
 import logging
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
 from django.utils.log import log_response
@@ -85,18 +85,18 @@ def _log_server_error(exc, context, response):
 
 # A message that does not end a sentence gets a period, so the next field's message does not run on from it.
 SENTENCE_ENDS = (".", "!", "?", "\u3002", "\uff01", "\uff1f")
-# Keys of an error map that hold messages rather than name a field: DRF's non-field key, and a "detail" a view
-# raised itself.
-UNNAMED_ERROR_KEYS = frozenset({"detail"})
+# Keys of an error map that hold messages rather than name a field: DRF's non-field key, Django's ("__all__"),
+# and a "detail" a view raised itself.
+UNNAMED_ERROR_KEYS = frozenset({"detail", NON_FIELD_ERRORS})
 
 
 def _readable_validation_message(detail, path=()):
     """
-    The messages of a serializer ``ValidationError`` as plain sentences.
+    The messages of a serializer or Django ``ValidationError`` as plain sentences.
 
     Each field's messages follow its name (a nested field's dotted path); messages that name no field
-    (``non_field_errors``, ``detail``) read without one. ``str()`` of the error would be a Python repr of
-    ``ErrorDetail`` objects instead.
+    (``non_field_errors``, Django's ``__all__``, ``detail``) read without one. ``str()`` of the error would be a
+    Python repr instead.
     """
     if isinstance(detail, dict):
         unnamed = UNNAMED_ERROR_KEYS | {api_settings.NON_FIELD_ERRORS_KEY}
@@ -131,7 +131,11 @@ def custom_exception_handler(exc, context):
         response = Response()
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {}
-        response.data["message"] = str(exc)
+        # Its messages as sentences, each field's after its name; str() of the error is a list or dict repr.
+        # An error with no message text gets no "message", as an empty serializer error map does.
+        messages = exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+        if message := _readable_validation_message(messages):
+            response.data["message"] = message
         ErrorPageProductAnnouncement(response=response)
     elif isinstance(exc, IntegrityError) and _is_unique_violation(exc):
         # The row the caller wanted to create already exists. Serializers built
