@@ -21,6 +21,7 @@ The action applies to the users you have explicitly checked. You **cannot includ
 
 * The new token values are **not** shown to you as the admin. Each affected user receives an **"API Token Reset"** notification telling them to retrieve their new token from the UI (delivered according to that user's notification settings).
 * [Service users](../pro__service_users/) are skipped and listed in the result. Their tokens are rotated from the Service Users page or the API, where the new token is shown once.
+* The action is offered only while API tokens are enabled on the instance (`DD_API_TOKENS_ENABLED`). The same goes for **Force Token Reset** in a single user's menu.
 
 ## Force Password Reset
 

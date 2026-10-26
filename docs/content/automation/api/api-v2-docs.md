@@ -23,6 +23,7 @@ interactive. On the top of API v2 docs is a link that generates an OpenAPI v3 sp
 To interact with the documentation, a valid Authorization header value
 is needed. Open **API v2 Token** from the same menu (**API v2 Key** in the Open Source UI), or go to `/api/key-v2`,
 to see your API Key (`Token <api_key>`), and copy the header value provided.
+In DefectDojo Pro the page reads the key again whenever its browser tab comes back into view, so a key replaced in another tab or by an administrator shows up there with an **API Key Changed** notice, rather than a key that no longer works.
 
 ![image](images/api_v2_2.png)
 
@@ -54,7 +55,8 @@ If you use [an alternative authentication method](/admin/sso/) for users, you ma
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
-With API tokens disabled, the DefectDojo Pro **API v2 Token** page shows the reason, "API tokens are disabled.", instead of a key.
+With API tokens disabled, DefectDojo Pro hides the token controls: **API v2 Token** leaves the account menu (an old link to the page shows Not Found), **Force Token Reset** leaves each user's menu, **Reset API Tokens** leaves the Users list's bulk actions, the API Access walkthrough cannot be started, and the **MCP Service** page says that an AI provider cannot connect, because the MCP server signs in with an API token.
+With only the `api/v2/api-token-auth/` endpoint disabled, the **API v2 Token** page leaves out the instructions for that endpoint and keeps everything else.
 
 ### Token management
 
