@@ -23,7 +23,7 @@ A control is disabled when the action can't apply to your current selection — 
 
 ## Bulk Edit
 
-The **Bulk Edit** button opens one form containing all of the field-level bulk actions. Set only the fields you want to change and leave the rest untouched, then click **Update Selected Findings** to apply. The available actions are:
+The **Bulk Edit** button opens one form containing all of the field-level bulk actions. Set only the fields you want to change and leave the rest untouched, then click **Submit** to apply. The available actions are:
 
 * **Severity** — set the severity (Critical, High, Medium, Low, or Info).
 * **Status** — apply one of Active, Verified, False Positive, Out of Scope, Mitigated, or Under Defect Review.
