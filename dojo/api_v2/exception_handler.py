@@ -132,8 +132,10 @@ def custom_exception_handler(exc, context):
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {}
         # Its messages as sentences, each field's after its name; str() of the error is a list or dict repr.
+        # An error with no message text gets no "message", as an empty serializer error map does.
         messages = exc.message_dict if hasattr(exc, "error_dict") else exc.messages
-        response.data["message"] = _readable_validation_message(messages) or str(exc)
+        if message := _readable_validation_message(messages):
+            response.data["message"] = message
         ErrorPageProductAnnouncement(response=response)
     elif isinstance(exc, IntegrityError) and _is_unique_violation(exc):
         # The row the caller wanted to create already exists. Serializers built
