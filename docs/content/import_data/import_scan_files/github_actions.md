@@ -10,7 +10,7 @@ Each run reimports into the same Test, so Findings the scanner no longer reports
 
 ## Before you start
 
-1. Create an API v2 key for a user that can import into the Asset (and create it, if you let the action create Assets). The key is under **API v2 Token** in the user menu.
+1. Create an API v2 key for a user that can import into the Asset (and create it, if you let the action create Assets). The key is under **API v2 Token** in the user menu (**API v2 Key** in the Open Source UI).
 2. In the GitHub repository, add the key as a secret named `DEFECTDOJO_API_TOKEN` under **Settings > Secrets and variables > Actions**.
 
 ## Add the action to a workflow
@@ -18,6 +18,12 @@ Each run reimports into the same Test, so Findings the scanner no longer reports
 Run your scanner, then pass its report to the action:
 
 ```yaml
+name: Security scan
+on:
+  push:
+    branches: [main]
+  pull_request:
+
 permissions:
   contents: read
 
@@ -61,7 +67,7 @@ When one Engagement gets several reports of the same scan type, give each its ow
 
 Each branch gets its own Engagement, so a pull request's scan never closes or reopens Findings on the default branch. Pull requests use their source branch, tags use the tag name, and the merge queue uses one Engagement per base branch.
 
-Engagements the action creates for anything other than the default branch deduplicate only within themselves (**Deduplication within this engagement only**). Without that, a Finding first seen on a branch would mark the default branch's copy as a duplicate. Branch Engagements stay in DefectDojo after the branch is merged, so run the import only on the default branch if you want to keep them out of the Asset's counts.
+Engagements the action creates for anything other than the default branch deduplicate only within themselves (**Deduplication within this engagement only**). Without that, a Finding first seen on a branch would mark the default branch's copy as a duplicate. Setting `engagement-name` or `deduplication-on-engagement` yourself turns this off, so an Engagement you name deduplicates across the Asset as usual. Branch Engagements stay in DefectDojo after the branch is merged, so run the import only on the default branch if you want to keep them out of the Asset's counts.
 
 ## Fail the build
 
@@ -75,11 +81,19 @@ On DefectDojo Pro, the action can also:
 - Import large reports in the background (`background-import: true`). The action waits until the Test finishes processing before it reports counts or applies `fail-on`.
 - Warn when an Asset was renamed or moved, so you can update the names in the workflow.
 
-On the Open Source edition, these inputs are skipped with a warning, and the import still runs. Set `strict: true` to fail the step instead.
+On the Open Source edition, `push-to-connector` and `background-import` are skipped with a warning, and the import still runs. Set `strict: true` to fail the step instead.
 
 ## Pull requests from forks
 
-GitHub doesn't give secrets to workflows that run on pull requests from forks, so the action can't authenticate there. Run the import on `push`, or on pull requests from branches in the same repository. Don't use `pull_request_target` to get around this: it runs with your secrets while checking out code you don't control.
+GitHub doesn't give secrets to workflows that run on pull requests from forks, so the action can't authenticate there and the step fails. Run the import on `push`, or skip it for pull requests from forks:
+
+```yaml
+      - name: Import into DefectDojo
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: DefectDojo/defectdojo-action@v1
+```
+
+Don't use `pull_request_target` to get around this: it runs with your secrets while checking out code you don't control.
 
 ## All inputs and outputs
 
