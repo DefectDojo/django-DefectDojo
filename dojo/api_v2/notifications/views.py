@@ -67,17 +67,17 @@ class NotificationEmailApiView(GenericAPIView):
         ia_remediation_result = data.get("ia_remediation_result")
 
         if event == "ia_remediation_result":
-            notifications_helper.send_ia_remediation_notification_email(
-                event=event,
-                subject=subject,
-                title=title,
-                description=description,
-                url=url,
-                emails=emails,
-                icon=icon,
-                color_icon=color_icon,
-                ia_remediation_result=ia_remediation_result,
-            )
+            notifications_helper.send_ia_remediation_notification_email.apply_async(args=(
+                event,
+                subject,
+                title,
+                description,
+                url,
+                emails,
+                icon,
+                color_icon,
+                ia_remediation_result,
+            ))
             return http_response.ok(
                         message="Report finding email sent successfully"
                 )

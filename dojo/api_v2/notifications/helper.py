@@ -171,7 +171,7 @@ def send_report_notification_email(
         logger.exception("Error sending report download notification")
         return http_response.bad_request(message=f"Error sending notification: {exc}")
 
-
+@app.task
 def send_ia_remediation_notification_email(
         event,
         subject,
