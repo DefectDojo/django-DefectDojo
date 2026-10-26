@@ -809,6 +809,11 @@ html:not([data-dd-version='pro']) .version-pro {
   }
 
   .highlight pre {
+    // Base ink for un-tokenized text (e.g. ```text fences). The theme's
+    // `.expressive-code :not(path) { all: revert }` outranks a bare
+    // `.chroma` rule, which left plain text inheriting the charcoal body
+    // color — invisible on the navy card in light mode.
+    color: var(--dd-code-ink);
     margin: 0;
     padding: 0.9375rem 1.125rem;
     font-size: 0.875rem;
@@ -914,7 +919,8 @@ html:not([data-dd-version='pro']) .version-pro {
   // Names
   .na { color: #b7e3d4; }
   .nb, .bp { color: #b7e3d4; }
-  .nc, .nn { color: #e8c07a; }
+  .nc, .nn, .no { color: #e8c07a; }
+  .ni { color: #b7e3d4; }
   .nd { color: #c3b1f7; }
   .ne { color: #f2938c; }
   .nf, .fm { color: #c3b1f7; }
@@ -931,8 +937,8 @@ html:not([data-dd-version='pro']) .version-pro {
   .gh, .gu { color: #b7e3d4; font-weight: 600; }
   .ge { font-style: italic; }
   .gs { font-weight: 600; }
-  .gp { color: #7fa9a0; }
-  .err { color: #f2938c; }
+  .gp, .go { color: #7fa9a0; }
+  .err, .gr, .gt { color: #f2938c; }
   .w { color: inherit; }
   // Highlighted lines
   .hl { display: block; background-color: rgba(255, 107, 53, 0.16); }
