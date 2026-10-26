@@ -930,6 +930,12 @@ $dd-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg
 .docs-content td > .highlight {
   position: relative;
 
+  // Start the text below the button (a header-height band, as on framed
+  // blocks) so long first lines that scroll horizontally never run under it
+  > pre {
+    padding-top: 2.75rem;
+  }
+
   > .copy {
     position: absolute;
     top: 0.5rem;
@@ -963,6 +969,8 @@ $dd-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg
       margin: 0.4rem;
       pointer-events: none;
       background-color: #e8f2ee;
+      // Prefixed too: Sass only, no autoprefixer (older Safari/Chrome)
+      -webkit-mask: $dd-icon-copy no-repeat center / contain;
       mask: $dd-icon-copy no-repeat center / contain;
     }
 
@@ -972,6 +980,7 @@ $dd-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg
 
     &:focus::after,
     &:active::after {
+      -webkit-mask-image: $dd-icon-check;
       mask-image: $dd-icon-check;
     }
   }
