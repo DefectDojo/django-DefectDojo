@@ -59,7 +59,7 @@ django-tagulous==2.2.3
 django-test-migrations==1.7.0
 django-watson==1.6.3
 django_celery_results==2.6.0
-djangorestframework==3.17.2
+djangorestframework==3.18.2
 djangosaml2==1.12.0
 drf-spectacular==0.30.0
 drf-spectacular-sidecar==2026.9.1
