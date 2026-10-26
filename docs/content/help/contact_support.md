@@ -27,6 +27,8 @@ DefectDojo Pro subscriptions come with full support from the DefectDojo, Inc. te
 
 Customers/Pro Users can always email our team directly at [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.
 
+For self-hosted deployments, [Releases and Support Lifecycle](/get_started/pro/onprem/support_lifecycle/) explains which release is supported, where to send scan results for DefectDojo images, and how to report a vulnerability in DefectDojo itself.
+
 ### Within DefectDojo
 
 Open **Settings > Support** from the left sidebar. In the reorganized settings menu, open **Settings > License & Support > Support**. You can also go to **{your-instance}/ui/cloud/support**.

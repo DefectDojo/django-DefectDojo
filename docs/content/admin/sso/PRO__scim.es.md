@@ -131,7 +131,7 @@ Si desea que su proveedor de identidad también gestione superusuarios, habilite
 
 ## Solución de problemas
 
-**La prueba de conexión reporta "not found".** SCIM está desactivado, o la instancia no tiene licencia para él. Verifique que **Enable SCIM Provisioning** esté activado y que su suscripción incluya SSO. Toda la dirección de SCIM se comporta como si no existiera hasta que ambas condiciones se cumplan.
+**La prueba de conexión reporta "not found".** SCIM está desactivado. Verifique que **Enable SCIM Provisioning** esté activado y guardado. Hasta entonces, toda la dirección de SCIM se comporta como si no existiera.
 
 **La prueba de conexión reporta un error de autenticación.** El token es incorrecto, o se ha revocado. Genere uno nuevo y actualice su proveedor de identidad. En Okta, verifique que el valor comience con `Bearer ` y un espacio; en Entra, verifique que no sea así.
 

@@ -113,6 +113,15 @@ Changing the Organization field moves the Asset, along with its Engagements, Tes
 
 ![image](images/assets_ss2.png)
 
+### Change a Field in Place
+
+A few fields can also be changed on the Asset page itself, without opening Edit Asset: the **Name** and **Tags** in the page header, and **Business Criticality**, **Platform**, **Lifecycle** and **Description** wherever the page layout shows them. Click a highlighted value to open a small editor under it. **Enter**, or clicking anywhere else, keeps the change (marked **Unsaved**) and **Esc** puts the value back; change as many fields as you like, then **Save Changes** in the card at the bottom of the page saves them all at once.
+
+* **Business Criticality**, **Platform** and **Lifecycle** can be cleared as well as changed. Platform and Lifecycle offer the options configured under [Editable Platform, Lifecycle and Origin Lists](/asset_modelling/pro__asset_attribute_options/).
+* If someone else changed the Asset after you opened the page, nothing is overwritten: DefectDojo shows **Asset Changed** and offers **Reload** or **Keep Editing**.
+
+Only users who can edit the Asset (a Maintainer or above on it, or its Organization) can open a value. Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place) for the rules every page shares.
+
 ### Bulk Edit Assets
 
 Several Assets can be edited in one action from the All Assets list. Select the Assets using the checkboxes on the left of the list, then click **Bulk Edit** in the bar that appears above the table.
@@ -308,7 +317,9 @@ Adding and withdrawing an alias requires edit permission on the Asset.
 ### Turning Asset Identity on and off
 
 Aliases are controlled by the **Asset Identity** feature on the
-[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. While it is off, Connectors map
+[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. It is off by default. A self-hosted
+install can turn it on by default by setting `DD_ASSET_IDENTITY_DEFAULT_ON=True`, and a choice made on
+the Feature Flags page still wins. While it is off, Connectors map
 Records by name alone, you cannot add or withdraw aliases, and the Asset Identity card and the
 **Type** field are hidden. Existing aliases stay readable through the API either way.
 
