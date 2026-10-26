@@ -8,6 +8,7 @@ Regression tests: the ``message`` beside a 400's field map reads as sentences, n
 rest of the body (the field map and the ``pro`` announcement) is what it was.
 """
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
 from rest_framework import serializers
@@ -84,6 +85,35 @@ class ValidationErrorMessageTest(SimpleTestCase):
         response = custom_exception_handler(NotFound("No such thing."), {})
         self.assertEqual(404, response.status_code)
         self.assertEqual({"detail": "No such thing."}, response.data)
+
+
+class DjangoValidationErrorMessageTest(SimpleTestCase):
+
+    """A model or form ``ValidationError`` raised in a v2 view: ``str()`` of it was a list or dict repr."""
+
+    def _body(self, exc):
+        response = custom_exception_handler(exc, {})
+        self.assertEqual(400, response.status_code)
+        self.assertNotIn("['", response.data["message"], response.data)
+        self.assertNotIn("{'", response.data["message"], response.data)
+        return response.data
+
+    def test_a_message_reads_as_itself(self):
+        body = self._body(DjangoValidationError("Schema of Trivy json report is not supported"))
+        self.assertEqual("Schema of Trivy json report is not supported.", body["message"])
+        self.assertIn("pro", body)
+
+    def test_several_messages_read_in_order(self):
+        body = self._body(DjangoValidationError(["The file is empty.", "Pick a scan type."]))
+        self.assertEqual("The file is empty. Pick a scan type.", body["message"])
+
+    def test_a_field_error_names_its_field(self):
+        body = self._body(DjangoValidationError({"scan_date": ["Enter a valid date."], "__all__": ["The test is closed."]}))
+        self.assertEqual("scan_date: Enter a valid date. The test is closed.", body["message"])
+
+    def test_a_message_with_params_is_formatted(self):
+        body = self._body(DjangoValidationError("%(value)s is not allowed", params={"value": "x"}))
+        self.assertEqual("x is not allowed.", body["message"])
 
 
 @versioned_fixtures
