@@ -80,6 +80,13 @@ For more information on user roles, see our [Introduction To Roles](/admin/user_
 
 Asset views contain a variety of tables and charts to interpret an Asset’s status at a glance. This includes: 
 
+- **Count cards**
+    - A row of cards at the top of the page for Engagements, Tests, Findings, and Endpoints (or Locations, when Locations are enabled). Each card shows its total, and its menu opens the matching list or import. Under each total, a footer shows what makes up that count, with one figure for what needs attention. Hover over or focus a figure to see what it counts. The figure that needs attention turns amber or red when it is above zero.
+    - **Engagements**: open, closed, and overdue (open with an end date that has passed).
+    - **Tests**: when the Asset was last scanned (the most recent update to any of its Tests), the imports and reimports in the last 30 days, and the Findings created in the last 30 days.
+    - **Findings**: direct and indirect Findings (see [Direct and indirect vulnerabilities](/asset_modelling/pro_hierarchy/asset_hierarchy/#direct-and-indirect-vulnerabilities)), and the active Findings past their SLA.
+    - **Endpoints**: vulnerable (an open Finding still affects it), not vulnerable (everything else, including Endpoints no Finding has touched), and those still affected by an active Critical Finding. With Locations enabled, the card counts active, mitigated, and critical Locations instead.
+    - Every figure counts only what you have permission to view.
 - **Open Finding Severity**
     - A list of open Findings within the Asset, grouped by severity
 - **Asset Overview**
