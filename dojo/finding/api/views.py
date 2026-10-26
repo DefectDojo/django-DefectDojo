@@ -20,7 +20,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -41,6 +41,7 @@ from dojo.api_v2.views import (
 )
 from dojo.authorization import api_permissions as permissions
 from dojo.db_utils import is_foreign_key_conflict
+from dojo.file_uploads.api.views import related_file_detail_response
 from dojo.filters import order_with_pk_tiebreak
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
@@ -570,6 +571,26 @@ class FindingViewSet(
             )
         # send file
         return generate_file_response(file_object)
+
+    @extend_schema(
+        methods=["PATCH"],
+        request=api_v2_serializers.FileSerializer,
+        responses={status.HTTP_200_OK: api_v2_serializers.FileSerializer},
+    )
+    @extend_schema(
+        methods=["DELETE"],
+        responses={status.HTTP_204_NO_CONTENT: None},
+    )
+    @action(
+        detail=True,
+        methods=["patch", "delete"],
+        url_path=r"files/(?P<file_id>\d+)",
+        parser_classes=(MultiPartParser, JSONParser),
+        permission_classes=(IsAuthenticated, permissions.UserHasFindingFilePermission),
+    )
+    def file_detail(self, request, file_id, pk=None):
+        finding = self.get_object()
+        return related_file_detail_response(request, finding, file_id, "Finding")
 
     @extend_schema(
         request=FindingNoteSerializer,

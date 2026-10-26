@@ -390,6 +390,30 @@ CSV and Excel are returned as file attachments with a `Content-Disposition` head
 * Report generation requires **view** permission on the objects involved, and a report only ever contains findings you are authorized to see.
 * **Standard query\-parameter filters are not applied to this action.** Unlike `GET /api/v2/findings/`, the `generate_report/` action does not apply the finding filters, so a request such as `POST /api/v2/findings/generate_report/?severity=High` still reports on every finding you can view. To narrow a report, generate it from a specific Asset, engagement, or test instead.
 
+## Attached Files
+
+Engagements, Tests and Findings can carry attached files. Each object type has the same set of file endpoints, shown here for Findings (use `engagements` or `tests` in place of `findings` for the others):
+
+| Request | Action | Permission needed on the object |
+|---|---|---|
+| `GET /api/v2/findings/{id}/files/` | List the attached files | View files |
+| `POST /api/v2/findings/{id}/files/` | Attach a file (`multipart/form-data` with `title` and `file`) | Add files |
+| `GET /api/v2/findings/{id}/files/download/{file_id}/` | Download one file | View files |
+| `PATCH /api/v2/findings/{id}/files/{file_id}/` | Change the `title`, replace the `file`, or both | Edit files |
+| `DELETE /api/v2/findings/{id}/files/{file_id}/` | Delete the file | Delete files |
+
+A `file_id` that is not attached to the object in the URL returns `404 Not Found`. Deleting a file, or replacing it with `PATCH`, removes the stored file straight away; unlike deleting an Engagement or Test, it does not wait for a background task.
+
+Rename a file attached to a Test:
+
+```bash
+curl -X PATCH \
+  -H "Authorization: Token <your-api-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Signed-off scope"}' \
+  https://<your-instance>/api/v2/tests/42/files/7/
+```
+
 ## Asynchronous Deletion Behavior
 
 Deletions in DefectDojo (via both the API and UI) are processed **asynchronously** by Celery background workers. When you delete an Engagement, Test, or other object, the API or UI returns a success response immediately, but the actual deletion runs in the background.
