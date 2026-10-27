@@ -124,7 +124,7 @@ prometheus_client==0.26.0
 prompt_toolkit==3.0.53
 propcache==0.5.4
 protobuf==7.36.2
-psycopg==3.3.5
+psycopg-c==3.3.5
 psycopg==3.3.5
 psycopg-pool==3.3.3
 py==1.11.0
