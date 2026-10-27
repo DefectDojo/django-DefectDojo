@@ -4,7 +4,7 @@ description: 使用官方 DefectDojo Action 从 GitHub Actions 工作流导入�
 weight: 3
 ---
 
-官方 [DefectDojo Action](https://github.com/DefectDojo/defectdojo-action) 可在 GitHub Actions 工作流中将扫描报告导入 DefectDojo。它同时适用于 DefectDojo Pro 和开源版，并可读取 DefectDojo 支持的所有报告格式，包括 SARIF。
+官方 [DefectDojo Action](https://github.com/marketplace/actions/defectdojo) 可在 GitHub Actions 工作流中将扫描报告导入 DefectDojo。它同时适用于 DefectDojo Pro 和开源版，并可读取 DefectDojo 支持的所有报告格式，包括 SARIF。
 
 每次运行都会重新导入到同一个测试中，因此扫描器不再报告的发现项会被关闭，且每个发现项都会保留其历史记录。该 Action 会在测试上记录构建、分支、提交和仓库信息，并且当所选严重程度的发现项仍处于活动状态时，可以让工作流步骤失败。
 

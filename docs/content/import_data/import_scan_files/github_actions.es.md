@@ -5,7 +5,7 @@ description: Importe los resultados de un escaneo desde un flujo de trabajo de G
 weight: 3
 ---
 
-La [acción de DefectDojo](https://github.com/DefectDojo/defectdojo-action) oficial importa un informe de escaneo en DefectDojo desde un flujo de trabajo de GitHub Actions. Funciona con DefectDojo Pro y con la edición Open Source, y lee todos los formatos de informe que DefectDojo admite, incluido SARIF.
+La [acción de DefectDojo](https://github.com/marketplace/actions/defectdojo) oficial importa un informe de escaneo en DefectDojo desde un flujo de trabajo de GitHub Actions. Funciona con DefectDojo Pro y con la edición Open Source, y lee todos los formatos de informe que DefectDojo admite, incluido SARIF.
 
 Cada ejecución reimporta en el mismo Test, de modo que los Hallazgos que el escáner ya no informa se cierran y cada Hallazgo conserva su historial. La acción registra la compilación, la rama, el commit y el repositorio en el Test, y puede hacer fallar el paso del flujo de trabajo cuando siguen activos Hallazgos con una severidad determinada.
 
