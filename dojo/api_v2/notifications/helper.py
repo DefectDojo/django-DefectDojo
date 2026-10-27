@@ -39,8 +39,10 @@ def send_risk_acceptance_email_task(
     try:
 
         product_type=None
+        description=None
         product = None
         risk_pending = None
+        risks_evaluation = None
         permission_keys = None
         title = ""
         if risk_acceptance_id:
@@ -98,7 +100,7 @@ def send_risk_acceptance_email_task(
         create_notification(
             event=template,
             title=title,
-            risk_acceptance=risk_pending,
+            long_risk_acceptance=risk_pending,
             subject=subject,
             description=description,
             permission_keys=permission_keys,

@@ -59,7 +59,7 @@ django-tagulous==2.2.3
 django-test-migrations==1.7.0
 django-watson==1.6.3
 django_celery_results==2.6.0
-djangorestframework==3.18.2
+djangorestframework==3.18.3
 djangosaml2==1.12.0
 drf-spectacular==0.30.0
 drf-spectacular-sidecar==2026.9.1
@@ -124,8 +124,8 @@ prometheus_client==0.26.0
 prompt_toolkit==3.0.53
 propcache==0.5.4
 protobuf==7.36.2
-psycopg==3.3.5
 psycopg-c==3.3.5
+psycopg==3.3.5
 psycopg-pool==3.3.3
 py==1.11.0
 pyarrow==26.0.0
