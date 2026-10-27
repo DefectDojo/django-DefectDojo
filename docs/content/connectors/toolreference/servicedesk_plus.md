@@ -62,8 +62,30 @@ This maps to the request **Status** field by name.  The defaults use the built-i
 - **False Positive Mapping**: `Closed`
 - **Risk Accepted Mapping**: `On Hold`
 
+### Custom Fields (optional)
+
+Use the mapping's **Custom Fields** step to send fields beyond the subject, description, priority, status and group. This is how you set a **Requester** when your ServiceDesk Plus account makes it mandatory. Each custom-field mapping has a **Source** (an attribute of the Finding, Test, Engagement or Asset being pushed, or a **Static value**), a **Value**, and a **Vendor Field**, which is the ServiceDesk Plus field name.
+
+DefectDojo sends each value in the shape the ServiceDesk Plus API expects for that field:
+
+| Vendor Field | Sent as | Example |
+|---|---|---|
+| `requester`, `technician`, `category`, `subcategory`, `item`, `site`, `impact`, `urgency`, `level`, `mode`, `request_type`, `service_category`, `template` | a reference by name | `requester` with the static value `Security Bot` |
+| `<field>.<attribute>` | a reference by that attribute | `requester.email_id` with the static value `security-bot@example.com` |
+| a name starting with `udf_` | a user-defined field | `udf_sline_301` |
+| anything else | plain text | `email_ids_to_notify` |
+
+A user-defined field's name (such as `udf_sline_301`) is the key ServiceDesk Plus shows for it under `udf_fields` when you read a request through its API.
+
+**Apply On** decides when a mapping is sent: **Creation** (the default) or **Update**. ServiceDesk Plus does not use the transition options; status changes travel with the update. The fields DefectDojo already sends always take precedence: a custom mapping cannot replace the subject or description, or a priority, status or group set by the other mapping steps.
+
+### Ticket Template (optional)
+
+Attach a **Ticket Template** in the mapping's **Ticket Template** step to replace the built-in request description, for Findings, Finding Groups or both. ServiceDesk Plus uses the template's description pieces only; the request subject is always the Finding title or the Finding Group name. If a template fails to render, the request is sent with the built-in description instead.
+
 A few ServiceDesk Plus-specific behaviors to be aware of:
 
 - Updates sync the full request content - unlike most trackers, ServiceDesk Plus allows the subject and description to be edited after creation.
 - Requests are closed rather than deleted when a Finding is removed; requests already Closed or Resolved are left untouched.
 - If your account makes fields mandatory on closure (for example a resolution), a close pushed from DefectDojo may be rejected by those rules and will appear in the Integration errors table.
+- If ServiceDesk Plus rejects a request because a mandatory field is missing, the Integration errors table names the field, for example `Please fill the mandatory fields (fields requester)`. Add that field under **Custom Fields**.
