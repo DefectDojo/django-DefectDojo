@@ -39,6 +39,10 @@ Every archive has a purge date. A daily task permanently deletes archives whose 
 
 Because of this, DefectDojo asks you to confirm the retention period every time you archive.
 
+## Archived data and your license
+
+Archived data counts toward your license until its purge date. Archived Findings, Endpoints and Assets are included in license usage exactly like live ones, and archived rows still take up database storage. Archiving does not free license capacity. To free it, delete the data or wait until it is purged.
+
 ## Archiving an object
 
 You need permission to delete an object to archive it.
