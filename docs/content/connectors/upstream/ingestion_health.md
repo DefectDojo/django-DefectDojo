@@ -32,15 +32,17 @@ The baseline is the median number of Findings the Connector returned per Sync ov
 
 Users who can edit Connectors see an **Acknowledge** button beside the line. It opens a form with one required field, **Reason**: why the quiet period is expected or already handled, such as a project that was retired or a scanner that was paused.
 
-After you submit, the tile shows a gray **Acknowledged** tag. Hover it to see who acknowledged the anomaly, when, and the reason. Acknowledgments are kept in the audit history, so they can be reviewed after the anomaly resolves.
+After you submit, the tile shows a gray **Acknowledged** tag. Hover it to see who acknowledged the anomaly, when, and the start of the reason. Acknowledgments are kept in full in the audit history, so they can be reviewed after the anomaly resolves.
+
+If someone else acknowledged the anomaly first, or a Sync resolved it while the form was open, nothing is saved: a message says so, the first reason is kept, and the tile updates to show the anomaly as it stands.
 
 Users who can only view Connectors see the line and the tag, but not the button.
 
 ## How an anomaly resolves
 
-The next Sync that imports any Findings resolves the anomaly, whether or not it was acknowledged. The tile goes back to its usual lines. If the Connector goes quiet again later, a new anomaly is raised; each quiet period is recorded on its own.
+The next Sync that imports any Findings, from any record of the Connector, resolves the anomaly, whether or not it was acknowledged. The tile goes back to its usual lines. If the Connector goes quiet again later, a new anomaly is raised; each quiet period is recorded on its own.
 
-An anomaly also resolves when the Connector's quiet period ends for another reason, such as a quiet record being ignored or unmapped, on the Connector's next Sync of any record.
+Nothing else resolves an anomaly. Mapping a new record, or setting a quiet record to Ignored, changes which records are counted but imports nothing, so an anomaly, and an acknowledgment on it, stays until Findings arrive.
 
 ## Notifications
 
