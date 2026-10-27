@@ -59,7 +59,7 @@ from dojo.utils import (
     get_page_items,
     get_setting,
     get_system_setting,
-    restricted_delete_message,
+    restricted_delete_reason,
 )
 
 logger = logging.getLogger(__name__)
@@ -503,7 +503,7 @@ def delete_user(request, uid):
                     except RestrictedError as err:
                         messages.add_message(request,
                                             messages.WARNING,
-                                            _("User cannot be deleted: %(error)s") % {"error": restricted_delete_message(err)},
+                                            _("User cannot be deleted: %(error)s") % {"error": restricted_delete_reason(err)},
                                             extra_tags="alert-warning")
                     return HttpResponseRedirect(reverse("users"))
 

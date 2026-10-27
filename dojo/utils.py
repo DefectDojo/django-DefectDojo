@@ -232,6 +232,10 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         a_stuff.append(a_counts)
 
 
+def _restricted_kinds(restricted):
+    return ", ".join(sorted({str(obj._meta.verbose_name) for obj in restricted}))
+
+
 def restricted_delete_message(err):
     """
     A sentence saying why a delete was blocked by dependent rows, for a person to read.
@@ -247,8 +251,24 @@ def restricted_delete_message(err):
         "It cannot be deleted while %(count)s other records still refer to it.",
         len(restricted),
     ) % {"count": len(restricted)}
-    kinds = sorted({str(obj._meta.verbose_name) for obj in restricted})
-    return message + " " + _("Records that refer to it: %(kinds)s.") % {"kinds": ", ".join(kinds)}
+    return message + " " + _("Records that refer to it: %(kinds)s.") % {"kinds": _restricted_kinds(restricted)}
+
+
+def restricted_delete_reason(err):
+    """
+    The reason alone, for a warning that already says what cannot be deleted ("User cannot be deleted: ...").
+
+    Counts the referencing rows and names their kinds, as :func:`restricted_delete_message` does.
+    """
+    restricted = list(err.restricted_objects or ())
+    if not restricted:
+        return _("other records still refer to it.")
+    reason = ngettext(
+        "%(count)s other record still refers to it.",
+        "%(count)s other records still refer to it.",
+        len(restricted),
+    ) % {"count": len(restricted)}
+    return reason + " " + _("Records that refer to it: %(kinds)s.") % {"kinds": _restricted_kinds(restricted)}
 
 
 def add_breadcrumb(parent=None,
