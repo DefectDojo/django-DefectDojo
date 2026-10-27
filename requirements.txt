@@ -185,5 +185,5 @@ whitenoise==5.2.0
 wrapt==2.5.1
 xmlschema==2.5.1
 yarl==1.25.1
-zipp==4.1.1
+zipp==4.1.2
 zstandard==0.25.0
