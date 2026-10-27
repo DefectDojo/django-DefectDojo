@@ -35,6 +35,9 @@ class RiskAcceptanceEngagement(models.Model):
 
     @property
     def economic_impact(self):
+        if not self.pk:
+            return 0
+
         sumary = 0
         for ec in self.riskacceptanceengagementeconomicimpact_set.all():
             if ec.economic_impact is not None:

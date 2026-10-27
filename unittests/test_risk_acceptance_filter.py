@@ -1,8 +1,11 @@
 import logging
 from django.test import TestCase
-from dojo.api_v2.long_risk_acceptance.models import RiskAcceptanceEngagement
+from dojo.api_v2.long_risk_acceptance.models import (
+    RiskAcceptanceEngagement,
+    RiskAcceptanceEngagementEconomicImpact,
+)
 from dojo.api_v2.long_risk_acceptance.views import RiskAcceptanceEngagementFilter
-from dojo.models import Product, Dojo_User
+from dojo.models import GeneralSettings, Product, Dojo_User
 from django.utils import timezone
 from datetime import timedelta
 
@@ -53,6 +56,52 @@ class TestRiskAcceptanceEngagementFilterNormalization(TestCase):
         filter_obj = RiskAcceptanceEngagementFilter()
         result = filter_obj._normalize_value("")
         self.assertEqual(result, "")
+
+
+class TestRiskAcceptanceEngagementEconomicImpact(TestCase):
+    """Test economic_impact property behavior"""
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.admin_user, _ = Dojo_User.objects.get_or_create(username="admin")
+        GeneralSettings.objects.get_or_create(
+            name_key="RULE_RISK_LEVEL",
+            defaults={
+                "value": "{'TOLERABLE': 1500, 'MODERATE': 2, 'CRITICAL': 3700, 'VERY CRITICAL': 8800}",
+                "data_type": "DICT",
+                "description": "Risk level thresholds",
+                "status": True,
+            },
+        )
+        self.product = Product.objects.first() or Product.objects.create(
+            name="Test Product",
+            prod_type_id=1,
+            sla_configuration_id=1,
+        )
+
+    def test_economic_impact_returns_zero_for_unsaved_instance(self):
+        ra = RiskAcceptanceEngagement()
+        self.assertEqual(ra.economic_impact, 0)
+
+    def test_economic_impact_sums_related_impact_entries(self):
+        ra = RiskAcceptanceEngagement.objects.create(
+            owner=self.admin_user,
+            product=self.product,
+            description="Test engagement",
+            risk_status="Risks Pending",
+            expiration_date=timezone.now() + timedelta(days=30),
+        )
+
+        RiskAcceptanceEngagementEconomicImpact.objects.create(
+            risk_acceptance_engagement=ra,
+            economic_impact=150,
+        )
+        RiskAcceptanceEngagementEconomicImpact.objects.create(
+            risk_acceptance_engagement=ra,
+            economic_impact=200,
+        )
+
+        self.assertEqual(ra.economic_impact, 350)
 
 
 class TestRiskAcceptanceEngagementFilterOwner(TestCase):
