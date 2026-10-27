@@ -17,7 +17,7 @@ from dojo.location.api.serializers import (
 )
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.models import Endpoint, FileUpload, Finding, Notes
+from dojo.models import Endpoint, FileUpload, Finding, Notes, Test
 
 # Related objects that a prefetched model's serializer reads, so they are fetched in the same query
 _PREFETCH_SELECT_RELATED = {
@@ -29,6 +29,8 @@ _PREFETCH_SELECT_RELATED = {
 _PREFETCH_PREFETCH_RELATED = {
     Endpoint: ("endpoint_params", "findings", "tags"),
     Notes: ("history__current_editor", "history__note_type"),
+    # TestSerializer nests every finding group in the test with its JIRA issue and that issue's url
+    Test: ("finding_group_set__jira_issue__jira_project__jira_instance",),
 }
 
 # Reduce the scope of search for serializers.
@@ -295,6 +297,10 @@ class _Prefetcher:
     def _prefetch_single(self, field_to_fetch, field_values, authorized_qs, extra_serializer, serializer_kwargs):
         # Only a single related item per entry; keep the ones in the set of authorized objects
         authorized_ids = set(authorized_qs.filter(pk__in={value.pk for value in field_values}).values_list("pk", flat=True))
+        # The entries' own instances are serialized, not authorized_qs rows, so its prefetch_related never reaches
+        # them: load the relations the serializer reads onto the instances, once for all of them
+        if prefetch_related := _PREFETCH_PREFETCH_RELATED.get(type(field_values[0])):
+            prefetch_related_objects([value for value in field_values if value.pk in authorized_ids], *prefetch_related)
         serialized = set()
         for field_value in field_values:
             if field_value.pk not in authorized_ids or field_value.pk in serialized:
